@@ -10,7 +10,7 @@ import androidx.compose.ui.graphics.Color
 
 @Composable
 fun PresenterScreen(
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     content: @Composable BoxScope.() -> Unit
 ) {
     Box(
