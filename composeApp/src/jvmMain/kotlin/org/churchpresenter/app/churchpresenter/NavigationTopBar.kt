@@ -5,6 +5,24 @@ import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyShortcut
 import androidx.compose.ui.window.FrameWindowScope
 import androidx.compose.ui.window.MenuBar
+import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.menu_about
+import churchpresenter.composeapp.generated.resources.menu_add_to_schedule
+import churchpresenter.composeapp.generated.resources.menu_clear_schedule
+import churchpresenter.composeapp.generated.resources.menu_close_schedule
+import churchpresenter.composeapp.generated.resources.menu_edit
+import churchpresenter.composeapp.generated.resources.menu_exit
+import churchpresenter.composeapp.generated.resources.menu_file
+import churchpresenter.composeapp.generated.resources.menu_help
+import churchpresenter.composeapp.generated.resources.menu_help_item
+import churchpresenter.composeapp.generated.resources.menu_new_schedule
+import churchpresenter.composeapp.generated.resources.menu_open_schedule
+import churchpresenter.composeapp.generated.resources.menu_remove_from_schedule
+import churchpresenter.composeapp.generated.resources.menu_save_schedule
+import churchpresenter.composeapp.generated.resources.menu_save_schedule_as
+import churchpresenter.composeapp.generated.resources.menu_schedule
+import churchpresenter.composeapp.generated.resources.menu_settings
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun FrameWindowScope.NavigationTopBar(
@@ -21,52 +39,64 @@ fun FrameWindowScope.NavigationTopBar(
     onAbout: () -> Unit = {},
     onHelp: () -> Unit = {}
 ) {
+    val fileLabel = stringResource(Res.string.menu_file)
+    val fileMnemonic = fileLabel.firstOrNull() ?: 'F'
+
+    val scheduleLabel = stringResource(Res.string.menu_schedule)
+    val scheduleMnemonic = scheduleLabel.firstOrNull() ?: 'S'
+
+    val editLabel = stringResource(Res.string.menu_edit)
+    val editMnemonic = editLabel.firstOrNull() ?: 'E'
+
+    val helpLabel = stringResource(Res.string.menu_help)
+    val helpMnemonic = helpLabel.firstOrNull() ?: 'H'
+
     MenuBar {
-        Menu("File", mnemonic = 'F') {
+        Menu(fileLabel, mnemonic = fileMnemonic) {
             Item(
-                "New Schedule",
+                stringResource(Res.string.menu_new_schedule),
                 onClick = onNewSchedule,
                 shortcut = KeyShortcut(ctrl = true, shift = true, key = Key.N)
             )
             Item(
-                "Open Schedule",
+                stringResource(Res.string.menu_open_schedule),
                 onClick = onOpenSchedule,
                 shortcut = KeyShortcut(ctrl = true, key = Key.O)
             )
             Item(
-                "Save Schedule",
+                stringResource(Res.string.menu_save_schedule),
                 onClick = onSaveSchedule,
                 shortcut = KeyShortcut(ctrl = true, key = Key.S)
             )
             Item(
-                "Save Schedule As...",
+                stringResource(Res.string.menu_save_schedule_as),
                 onClick = onSaveScheduleAs
             )
             Item(
-                "Close Schedule",
+                stringResource(Res.string.menu_close_schedule),
                 onClick = onCloseSchedule,
                 shortcut = KeyShortcut(ctrl = true, key = Key.W)
             )
             Item(
-                "Exit",
+                stringResource(Res.string.menu_exit),
                 onClick = onExit,
                 shortcut = KeyShortcut(ctrl = true, key = Key.Q)
             )
         }
 
-        Menu("Schedule", mnemonic = 'S') {
-            Item("Add to Schedule", onClick = onAddToSchedule, shortcut = KeyShortcut(key = Key.F2))
-            Item("Remove from Schedule", onClick = onRemoveFromSchedule, shortcut = KeyShortcut(key = Key.Delete))
-            Item("Clear Schedule", onClick = onClearSchedule)
+        Menu(scheduleLabel, mnemonic = scheduleMnemonic) {
+            Item(stringResource(Res.string.menu_add_to_schedule), onClick = onAddToSchedule, shortcut = KeyShortcut(key = Key.F2))
+            Item(stringResource(Res.string.menu_remove_from_schedule), onClick = onRemoveFromSchedule, shortcut = KeyShortcut(key = Key.Delete))
+            Item(stringResource(Res.string.menu_clear_schedule), onClick = onClearSchedule)
         }
 
-        Menu("Edit", mnemonic = 'E') {
-            Item("Settings", onClick = onSettings, shortcut = KeyShortcut(ctrl = true, key = Key.T))
+        Menu(editLabel, mnemonic = editMnemonic) {
+            Item(stringResource(Res.string.menu_settings), onClick = onSettings, shortcut = KeyShortcut(ctrl = true, key = Key.T))
         }
 
-        Menu("Help", mnemonic = 'H') {
-            Item("About", onClick = onAbout)
-            Item("Help", onClick = onHelp, shortcut = KeyShortcut(key = Key.F1))
+        Menu(helpLabel, mnemonic = helpMnemonic) {
+            Item(stringResource(Res.string.menu_about), onClick = onAbout)
+            Item(stringResource(Res.string.menu_help_item), onClick = onHelp, shortcut = KeyShortcut(key = Key.F1))
         }
     }
 }
