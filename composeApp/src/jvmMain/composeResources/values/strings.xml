@@ -1,4 +1,11 @@
 <resources>
+    <string name="service_schedule">Service Schedule:</string>
+    <string name="songs">Songs</string>
+    <string name="bible">Bible</string>
+    <string name="pictures">Pictures</string>
+    <string name="media">Media</string>
+    <string name="notes">Notes</string>
+    <string name="announcements">Announcements</string>
     <string name="menu_file">File</string>
     <string name="menu_new_schedule">New Schedule</string>
     <string name="menu_open_schedule">Open Schedule</string>

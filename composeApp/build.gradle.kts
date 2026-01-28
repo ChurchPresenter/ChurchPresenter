@@ -13,6 +13,7 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             implementation(libs.compose.runtime)
+            implementation(compose.desktop.currentOs)
             implementation("org.jetbrains.compose.components:components-resources:1.5.0")
             implementation(libs.compose.foundation)
             implementation(libs.compose.material3)
@@ -26,7 +27,6 @@ kotlin {
             implementation(libs.kotlin.test)
         }
         jvmMain.dependencies {
-            implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutinesSwing)
         }
     }
