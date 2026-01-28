@@ -40,12 +40,13 @@ fun SelectionList(
                 text = item,
                 modifier = Modifier
                     .fillMaxWidth()
+                    .background(if (isSelected) Color.Cyan else Color.White)
                     .clickable {
                         selectedItem = item
                         onItemSelected.invoke(item)
                     }
                     .padding(6.dp),
-                color = if (isSelected) Color.Blue else Color.Black
+                color = Color.Black
             )
         }
     }
