@@ -25,6 +25,8 @@ import androidx.compose.ui.window.WindowPlacement
 import androidx.compose.ui.window.WindowPosition
 import java.awt.GraphicsEnvironment
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.WindowSize
+import androidx.compose.ui.window.rememberWindowState
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.app_name
 import churchpresenter.composeapp.generated.resources.book
@@ -42,13 +44,17 @@ fun main() = application {
     // Get bounds of the second screen if present
     val screens = GraphicsEnvironment.getLocalGraphicsEnvironment().screenDevices
     val secondScreenBounds = if (screens.size > 1) screens[1].defaultConfiguration.bounds else null
-
+    val state = rememberWindowState(
+        placement = WindowPlacement.Maximized
+    )
     var showPicker by remember { mutableStateOf(false) }
     Window(
         onCloseRequest = ::exitApplication,
         title = stringResource(Res.string.app_name),
+        state = state
     ) {
         NavigationTopBar(
+            onAbout = { openBlackWindow = true},
             onExit = { exitApplication() },
         )
         MainDesktop()
@@ -80,10 +86,4 @@ fun main() = application {
             }
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun MainPreview() {
-
 }
