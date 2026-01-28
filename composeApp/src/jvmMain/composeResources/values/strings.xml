@@ -1,10 +1,14 @@
 <resources>
+    <string name="app_name">Church Presenter</string>
     <string name="service_schedule">Service Schedule:</string>
     <string name="songs">Songs</string>
     <string name="bible">Bible</string>
     <string name="pictures">Pictures</string>
     <string name="media">Media</string>
     <string name="notes">Notes</string>
+    <string name="book">Book</string>
+    <string name="chapter">Chapter</string>
+    <string name="verse">Verse</string>
     <string name="announcements">Announcements</string>
     <string name="menu_file">File</string>
     <string name="menu_new_schedule">New Schedule</string>
