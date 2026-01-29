@@ -7,10 +7,15 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -25,11 +30,14 @@ fun SelectionList(
     selectedIndex: Int = 0,
     onItemSelected: (String) -> Unit
 ) {
+    val listState = rememberLazyListState()
     var selectedItem by rememberSaveable { mutableStateOf(list.getOrNull(selectedIndex)) }
     val height = 450.dp
     LazyColumn(
+        state = listState,
         modifier = modifier
             .fillMaxWidth()
+            .padding(top = 8.dp)
             .height(height)
             .background(Color.White)
             .padding(4.dp)

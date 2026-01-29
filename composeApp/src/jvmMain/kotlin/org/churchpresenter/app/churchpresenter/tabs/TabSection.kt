@@ -1,6 +1,7 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
 import androidx.compose.material.Tab
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -27,7 +28,9 @@ fun TabSection(
     var selectedDestination by rememberSaveable { mutableIntStateOf(startDestination.ordinal) }
 
     PrimaryTabRow(
-        selectedTabIndex = selectedDestination, modifier = modifier
+        selectedTabIndex = selectedDestination,
+        modifier = modifier,
+        containerColor = MaterialTheme.colorScheme.background,
     ) {
         Tabs.entries.forEachIndexed { index, tab ->
             Tab(

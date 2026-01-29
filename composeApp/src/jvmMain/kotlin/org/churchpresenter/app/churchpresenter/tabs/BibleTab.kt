@@ -3,7 +3,9 @@ package org.churchpresenter.app.churchpresenter.tabs
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -11,14 +13,20 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -100,6 +108,7 @@ import churchpresenter.composeapp.generated.resources.scope
 import churchpresenter.composeapp.generated.resources.search
 import churchpresenter.composeapp.generated.resources.verse
 import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
+import org.churchpresenter.app.churchpresenter.composables.SearchTextField
 import org.churchpresenter.app.churchpresenter.composables.SelectionList
 import org.jetbrains.compose.resources.stringResource
 
@@ -157,15 +166,16 @@ fun BibleTab() {
     var selectedBook by rememberSaveable { mutableStateOf(books.first()) }
     var selectedChapter by rememberSaveable { mutableStateOf("1") }
     var selectedVerseIndex by rememberSaveable { mutableStateOf(0) }
+    var searchBook by rememberSaveable { mutableStateOf("") }
+    var searchChapter by rememberSaveable { mutableStateOf("") }
+    var searchVerse by rememberSaveable { mutableStateOf("") }
 
-    // helper to get chapter/verse lists
     fun chaptersFor(book: String): List<String> {
         val count = bookChapterCounts[book] ?: 1
         return (1..count).map { it.toString() }
     }
 
     fun versesFor(book: String, chapter: Int): List<String> {
-        // Demo: use fixed 30 verses per chapter; replace with real data if available
         return (1..30).map { verseNum -> "$verseNum. Example verse text for $book $chapter:$verseNum" }
     }
 
@@ -178,6 +188,10 @@ fun BibleTab() {
             label = {
                 Text(text = stringResource(Res.string.search))
             },
+            colors = OutlinedTextFieldDefaults.colors().copy(
+                unfocusedContainerColor = Color.White,
+                focusedContainerColor = Color.White
+            )
         )
 
         DropdownSelector(
@@ -208,23 +222,34 @@ fun BibleTab() {
         var chapterList = chaptersFor(selectedBook)
         var verses = versesFor(selectedBook, selectedChapter.toIntOrNull() ?: 1)
         Column(modifier = Modifier.width(200.dp).padding(end = 8.dp)) {
-            Text(
-                text = stringResource(Res.string.book),
-                modifier = Modifier.padding(bottom = 4.dp)
-            )
-            SelectionList(list = books) { book ->
+            SearchTextField(label = stringResource(Res.string.book)) { newValue ->
+                searchBook = newValue
+            }
+            SelectionList(
+                list = if (searchBook.isNotBlank()) {
+                    books.filter { it.contains(searchBook, true) }
+                } else {
+                    books
+                },
+                selectedIndex = books.lastIndexOf(selectedBook)
+            ) { book ->
                 chapterList = chaptersFor(book)
                 selectedBook = book
-                verses = versesFor(book,  1)
+                verses = versesFor(book, 1)
             }
         }
 
-        Column(modifier = Modifier.width(100.dp).padding(end = 8.dp)) {
-            Text(
-                text = stringResource(Res.string.chapter),
-                modifier = Modifier.padding(bottom = 4.dp)
-            )
-            SelectionList(list = chapterList) { chapter ->
+        Column(modifier = Modifier.width(120.dp).padding(end = 8.dp)) {
+            SearchTextField(label = stringResource(Res.string.chapter)) { newValue ->
+                searchChapter = newValue
+            }
+            SelectionList(
+                list = if (searchChapter.isNotBlank()) {
+                    chapterList.filter { it.contains(searchChapter, true) }
+                } else {
+                    chapterList
+                }
+            ) { chapter ->
                 selectedChapter = chapter
                 verses = versesFor(selectedBook, 1)
             }
@@ -232,12 +257,20 @@ fun BibleTab() {
 
         // Verses view
         Column(modifier = Modifier.fillMaxWidth()) {
-            Text(
-                text = stringResource(Res.string.verse),
-                modifier = Modifier.padding(bottom = 4.dp)
-            )
-            SelectionList(list = verses) {
-
+            SearchTextField(
+                modifier = Modifier.width(120.dp),
+                label = stringResource(Res.string.verse),
+            ) { newValue ->
+                searchVerse = newValue
+            }
+            SelectionList(
+                list = if (searchVerse.isNotBlank()) {
+                    verses.filter { it.contains(searchVerse, true) }
+                } else {
+                    verses
+                }
+            ) { verse ->
+                //selectedVerseIndex = verse
             }
         }
     }
