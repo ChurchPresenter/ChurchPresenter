@@ -29,10 +29,12 @@ import org.churchpresenter.app.churchpresenter.tabs.TabSection
 import org.churchpresenter.app.churchpresenter.tabs.Tabs
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.app.churchpresenter.data.Bible
+import org.churchpresenter.app.churchpresenter.models.SelectedVerse
 
 @Composable
 fun MainDesktop(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onVerseSelected: (SelectedVerse) -> Unit = {}
 ) {
     Box(
         modifier = modifier.fillMaxSize()
@@ -63,7 +65,7 @@ fun MainDesktop(
                 }
 
                 when (Tabs.entries[selectedTabIndex]) {
-                    Tabs.BIBLE -> BibleTab(bible)
+                    Tabs.BIBLE -> BibleTab(bible, onVerseSelected)
                     Tabs.SONGS -> SongsTab()
                     Tabs.PICTURES -> PicturesTab()
                     Tabs.MEDIA -> MediaTab()

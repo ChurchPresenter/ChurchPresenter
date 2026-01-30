@@ -341,6 +341,19 @@ class Bible {
         return b.chapterCount
     }
 
+    // Get verse details for presenter screen
+    fun getVerseDetails(book: Int, chapter: Int, verseNumber: Int): Triple<String, String, String>? {
+        // Find the verse
+        val bibleVerse = operatorBible.firstOrNull {
+            it.book == book && it.chapter == chapter && it.verseNumber == verseNumber
+        } ?: return null
+
+        // Get book name
+        val bookName = books.firstOrNull { it.bookId == book.toString() }?.book ?: "Book $book"
+
+        return Triple(bookName, bibleVerse.verseText, bibleVerse.verseId)
+    }
+
     // Diagnostic helper: number of parsed verses from SPB
     fun getVerseCount(): Int {
         return operatorBible.size

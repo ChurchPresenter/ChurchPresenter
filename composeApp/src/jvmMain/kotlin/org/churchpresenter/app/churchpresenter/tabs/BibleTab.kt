@@ -38,10 +38,11 @@ import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
 import org.churchpresenter.app.churchpresenter.composables.SearchTextField
 import org.churchpresenter.app.churchpresenter.composables.SelectionList
 import org.churchpresenter.app.churchpresenter.data.Bible
+import org.churchpresenter.app.churchpresenter.models.SelectedVerse
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
-fun BibleTab(bible: Bible) {
+fun BibleTab(bible: Bible, onVerseSelected: (SelectedVerse) -> Unit = {}) {
     val books = bible.getBooks()
     val bookCount = bible.getBookCount()
     val verseCount = bible.getVerseCount()
@@ -181,6 +182,20 @@ fun BibleTab(bible: Bible) {
                 selectedIndex = selectedVerseIndex
             ) { verse ->
                 selectedVerseIndex = verses.indexOf(verse)
+
+                // Extract verse number from the formatted text (e.g., "1. In the beginning..." -> 1)
+                val verseNumber = verse.substringBefore(". ").toIntOrNull() ?: 1
+
+                // Get verse details and send to presenter
+                val bookId = selectedBookIndex + 1
+                bible.getVerseDetails(bookId, selectedChapter, verseNumber)?.let { (bookName, verseText, _) ->
+                    onVerseSelected(SelectedVerse(
+                        bookName = bookName,
+                        chapter = selectedChapter,
+                        verseNumber = verseNumber,
+                        verseText = verseText
+                    ))
+                }
             }
         }
     }
