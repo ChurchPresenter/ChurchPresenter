@@ -55,6 +55,10 @@ fun SongsTab(
     var filterType by rememberSaveable { mutableStateOf("Contains") }
     var selectedSongIndex by rememberSaveable { mutableStateOf(2) } // Default to third song
 
+    // Sorting state
+    var sortColumn by rememberSaveable { mutableStateOf("") }
+    var sortAscending by rememberSaveable { mutableStateOf(true) }
+
     val songbooks = listOf(allSongBooksText, "Песнь Возрождения", "Гимны Веры", "Песни Радости")
     val categories = listOf(allSongCategoriesText, "Прославление", "Поклонение", "Евангелизация")
     val filterTypes = listOf(
@@ -67,9 +71,8 @@ fun SongsTab(
     val allSongs = songsData.getSongs()
 
     val allSongsText = stringResource(Res.string.all_song_books)
-    val allSongsCategoriesText = stringResource(Res.string.all_song_categories)
     // Filter songs based on search criteria
-    val filteredSongs = remember(allSongs, searchQuery, selectedSongbook, selectedCategory, filterType) {
+    val filteredSongs = remember(allSongs, searchQuery, selectedSongbook, selectedCategory, filterType, sortColumn, sortAscending) {
         var filtered = allSongs
 
         // Apply search filter
@@ -83,11 +86,55 @@ fun SongsTab(
         }
 
         // Apply category filter (placeholder - categories not clearly defined in SPS format)
-        if (selectedCategory != allSongsCategoriesText) {
-            // For now, return all filtered songs since categories aren't clearly defined
+        // TODO: Implement category filtering when category data is available
+        // For now, category filtering is not implemented as categories aren't defined in SPS format
+        // Category filtering would check: if (selectedCategory != allSongCategoriesText)
+
+        // Apply sorting
+        if (sortColumn.isNotEmpty()) {
+            filtered = when (sortColumn) {
+                "number" -> if (sortAscending) {
+                    filtered.sortedBy { it.number.toIntOrNull() ?: Int.MAX_VALUE }
+                } else {
+                    filtered.sortedByDescending { it.number.toIntOrNull() ?: Int.MIN_VALUE }
+                }
+                "title" -> if (sortAscending) {
+                    filtered.sortedBy { it.title.lowercase() }
+                } else {
+                    filtered.sortedByDescending { it.title.lowercase() }
+                }
+                "songbook" -> if (sortAscending) {
+                    filtered.sortedBy { it.songbook.lowercase() }
+                } else {
+                    filtered.sortedByDescending { it.songbook.lowercase() }
+                }
+                "tune" -> if (sortAscending) {
+                    filtered.sortedBy { it.tune.lowercase() }
+                } else {
+                    filtered.sortedByDescending { it.tune.lowercase() }
+                }
+                else -> filtered
+            }
         }
 
         filtered
+    }
+
+    // Helper function to handle column sorting
+    val onColumnClick: (String) -> Unit = { column ->
+        if (sortColumn == column) {
+            sortAscending = !sortAscending
+        } else {
+            sortColumn = column
+            sortAscending = true
+        }
+    }
+
+    // Helper function to get sort indicator
+    val getSortIndicator: (String) -> String = { column ->
+        if (sortColumn == column) {
+            if (sortAscending) " ↑" else " ↓"
+        } else ""
     }
 
     // Ensure selectedSongIndex is within bounds
@@ -96,6 +143,7 @@ fun SongsTab(
             selectedSongIndex = if (filteredSongs.isNotEmpty()) 0 else -1
         }
     }
+
 
     Row(modifier = modifier.fillMaxSize()) {
         // Left panel - Search and song list
@@ -171,27 +219,27 @@ fun SongsTab(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Text(
-                    stringResource(Res.string.number),
+                    text = stringResource(Res.string.number) + getSortIndicator("number"),
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier.width(60.dp),
+                    modifier = Modifier.width(70.dp).clickable { onColumnClick("number") },
                     fontSize = 12.sp
                 )
                 Text(
-                    stringResource(Res.string.title),
+                    text = stringResource(Res.string.title) + getSortIndicator("title"),
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.weight(1f).clickable { onColumnClick("title") },
                     fontSize = 12.sp
                 )
                 Text(
-                    stringResource(Res.string.song_book),
+                    text = stringResource(Res.string.song_book) + getSortIndicator("songbook"),
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier.width(100.dp),
+                    modifier = Modifier.width(100.dp).clickable { onColumnClick("songbook") },
                     fontSize = 12.sp
                 )
                 Text(
-                    stringResource(Res.string.tune),
+                    text = stringResource(Res.string.tune) + getSortIndicator("tune"),
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier.width(60.dp),
+                    modifier = Modifier.width(60.dp).clickable { onColumnClick("tune") },
                     fontSize = 12.sp
                 )
             }
@@ -219,7 +267,7 @@ fun SongsTab(
                     ) {
                         Text(
                             text = song.number,
-                            modifier = Modifier.width(60.dp),
+                            modifier = Modifier.width(70.dp),
                             fontSize = 12.sp,
                             color = if (index == selectedSongIndex) Color.White else Color.Black
                         )

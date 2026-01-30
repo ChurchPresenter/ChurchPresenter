@@ -248,7 +248,7 @@ fun BibleTab(bible: Bible, onVerseSelected: (SelectedVerse) -> Unit = {}) {
                 ) { bookName ->
                     selectedBookIndex = books.indexOf(bookName)
                     selectedChapter = 1
-                    selectedVerseIndex = 0
+                    selectedVerseIndex = 1
                 }
             }
 
