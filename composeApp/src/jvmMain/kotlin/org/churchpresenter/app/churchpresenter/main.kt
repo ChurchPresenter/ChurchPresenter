@@ -28,7 +28,7 @@ import org.jetbrains.compose.resources.stringResource
 
 
 fun main() = application {
-    var openBlackWindow by remember { mutableStateOf(true) }
+    var openBlackWindow by remember { mutableStateOf(false) }
     var selectedVerse by remember { mutableStateOf(SelectedVerse()) }
 
     // Get bounds of the second screen if present
