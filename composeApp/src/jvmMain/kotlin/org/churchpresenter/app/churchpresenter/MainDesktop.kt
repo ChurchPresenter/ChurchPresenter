@@ -11,6 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -27,6 +28,7 @@ import org.churchpresenter.app.churchpresenter.tabs.SongsTab
 import org.churchpresenter.app.churchpresenter.tabs.TabSection
 import org.churchpresenter.app.churchpresenter.tabs.Tabs
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.app.churchpresenter.data.Bible
 
 @Composable
 fun MainDesktop(
@@ -35,6 +37,14 @@ fun MainDesktop(
     Box(
         modifier = modifier.fillMaxSize()
     ) {
+        // Create Bible instance and load the bundled ru_RST77.spb resource (placed under resources/)
+        val bible = remember {
+            Bible().apply {
+                // loadFromSpb accepts either a classpath resource name or an absolute path
+                loadFromSpb("ru_RST77.spb")
+            }
+        }
+
         Row {
             Column(modifier = Modifier.fillMaxWidth(0.20f)) {
                 Text(
@@ -53,7 +63,7 @@ fun MainDesktop(
                 }
 
                 when (Tabs.entries[selectedTabIndex]) {
-                    Tabs.BIBLE -> BibleTab()
+                    Tabs.BIBLE -> BibleTab(bible)
                     Tabs.SONGS -> SongsTab()
                     Tabs.PICTURES -> PicturesTab()
                     Tabs.MEDIA -> MediaTab()

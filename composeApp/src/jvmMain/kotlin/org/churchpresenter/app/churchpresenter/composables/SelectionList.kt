@@ -6,22 +6,16 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import java.awt.print.Book
+import java.util.logging.Logger
+
+private val logger = Logger.getLogger("SelectionList")
 
 @Composable
 fun SelectionList(
@@ -31,8 +25,8 @@ fun SelectionList(
     onItemSelected: (String) -> Unit
 ) {
     val listState = rememberLazyListState()
-    var selectedItem by rememberSaveable { mutableStateOf(list.getOrNull(selectedIndex)) }
     val height = 450.dp
+
     LazyColumn(
         state = listState,
         modifier = modifier
@@ -42,15 +36,18 @@ fun SelectionList(
             .background(Color.White)
             .padding(4.dp)
     ) {
-        items(list) { item ->
-            val isSelected = item == selectedItem
+        itemsIndexed(
+            items = list,
+            key = { index, _ -> "$index-${list.hashCode()}" }
+        ) { index, item ->
+            val isSelected = index == selectedIndex
             Text(
                 text = item,
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(if (isSelected) Color.Cyan else Color.White)
                     .clickable {
-                        selectedItem = item
+                        logger.info("SelectionList: item clicked - index=$index, item=$item")
                         onItemSelected.invoke(item)
                     }
                     .padding(6.dp),
