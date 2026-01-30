@@ -6,6 +6,7 @@ import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Box
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
@@ -47,12 +48,12 @@ fun DropdownSelector(
             trailingIcon = { Text("▾") },
             singleLine = true,
             colors = OutlinedTextFieldDefaults.colors().copy(
-                unfocusedContainerColor = Color.White,
-                focusedContainerColor = Color.White,
+                unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                focusedContainerColor = MaterialTheme.colorScheme.surface,
             )
         )
         DropdownMenu(
-            containerColor = Color.White,
+            containerColor = MaterialTheme.colorScheme.surface,
             expanded = expanded.value,
             onDismissRequest = { expanded.value = false }
         ) {

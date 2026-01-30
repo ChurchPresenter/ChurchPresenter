@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -15,7 +16,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
@@ -29,15 +29,19 @@ import org.churchpresenter.app.churchpresenter.tabs.TabSection
 import org.churchpresenter.app.churchpresenter.tabs.Tabs
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.app.churchpresenter.data.Bible
+import org.churchpresenter.app.churchpresenter.models.LyricSection
 import org.churchpresenter.app.churchpresenter.models.SelectedVerse
+import org.churchpresenter.app.churchpresenter.ui.theme.ThemeManager
 
 @Composable
 fun MainDesktop(
     modifier: Modifier = Modifier,
-    onVerseSelected: (SelectedVerse) -> Unit = {}
+    onVerseSelected: (SelectedVerse) -> Unit,
+    onSongItemSelected: (LyricSection) -> Unit
 ) {
+
     Box(
-        modifier = modifier.fillMaxSize()
+        modifier = modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)
     ) {
         // Create Bible instance and load the bundled ru_RST77.spb resource (placed under resources/)
         val bible = remember {
@@ -51,10 +55,17 @@ fun MainDesktop(
             Column(modifier = Modifier.fillMaxWidth(0.20f)) {
                 Text(
                     text = stringResource(Res.string.service_schedule),
-                    modifier = Modifier.padding(8.dp)
+                    modifier = Modifier.padding(8.dp),
+                    color = MaterialTheme.colorScheme.primary
                 )
-                Box(modifier = Modifier.fillMaxWidth().background(Color.White).padding(8.dp)) {
-                    Text("Service schedule (empty)")
+                Box(
+                    modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surface)
+                        .padding(8.dp)
+                ) {
+                    Text(
+                        "Service schedule (empty)",
+                        color = MaterialTheme.colorScheme.primary
+                    )
                 }
             }
 
@@ -65,8 +76,15 @@ fun MainDesktop(
                 }
 
                 when (Tabs.entries[selectedTabIndex]) {
-                    Tabs.BIBLE -> BibleTab(bible, onVerseSelected)
-                    Tabs.SONGS -> SongsTab()
+                    Tabs.BIBLE -> BibleTab(
+                        bible = bible,
+                        onVerseSelected = onVerseSelected
+                    )
+
+                    Tabs.SONGS -> SongsTab(
+                        onSongItemSelected = onSongItemSelected
+                    )
+
                     Tabs.PICTURES -> PicturesTab()
                     Tabs.MEDIA -> MediaTab()
                     Tabs.ANNOUNCEMENTS -> AnnouncementsTab()
@@ -79,5 +97,5 @@ fun MainDesktop(
 @Preview
 @Composable
 fun MainDesktopPreview() {
-    MainDesktop()
+    MainDesktop(modifier = Modifier.fillMaxSize(), onVerseSelected = {}, {})
 }

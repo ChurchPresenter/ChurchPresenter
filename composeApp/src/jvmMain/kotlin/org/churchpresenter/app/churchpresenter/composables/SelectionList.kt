@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -38,7 +39,7 @@ fun SelectionList(
             .fillMaxWidth()
             .padding(top = 8.dp)
             .height(height)
-            .background(Color.White)
+            .background(MaterialTheme.colorScheme.surface)
             .padding(4.dp)
     ) {
         itemsIndexed(
@@ -50,12 +51,12 @@ fun SelectionList(
                 text = item,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(if (isSelected) Color.Cyan else Color.White)
+                    .background(if (isSelected) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.surface)
                     .clickable {
                         onItemSelected.invoke(item)
                     }
                     .padding(6.dp),
-                color = Color.Black
+                color = MaterialTheme.colorScheme.onSurface,
             )
         }
     }

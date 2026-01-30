@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
@@ -47,7 +48,11 @@ import org.churchpresenter.app.churchpresenter.models.SelectedVerse
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
-fun BibleTab(bible: Bible, onVerseSelected: (SelectedVerse) -> Unit = {}) {
+fun BibleTab(
+    modifier: Modifier = Modifier,
+    bible: Bible,
+    onVerseSelected: (SelectedVerse) -> Unit = {}
+) {
     val books = bible.getBooks()
     val bookCount = bible.getBookCount()
     val verseCount = bible.getVerseCount()
@@ -188,7 +193,7 @@ fun BibleTab(bible: Bible, onVerseSelected: (SelectedVerse) -> Unit = {}) {
     }
 
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .focusRequester(focusRequester)
             .focusable()
@@ -208,8 +213,8 @@ fun BibleTab(bible: Bible, onVerseSelected: (SelectedVerse) -> Unit = {}) {
                     Text(text = stringResource(Res.string.search))
                 },
                 colors = OutlinedTextFieldDefaults.colors().copy(
-                    unfocusedContainerColor = Color.White,
-                    focusedContainerColor = Color.White,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                    focusedContainerColor = MaterialTheme.colorScheme.surface,
                 )
             )
 
@@ -301,7 +306,7 @@ fun BibleTab(bible: Bible, onVerseSelected: (SelectedVerse) -> Unit = {}) {
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(Color.White)
+                        .background(MaterialTheme.colorScheme.surface)
                         .padding(4.dp)
                 ) {
                     items(verses) { v ->

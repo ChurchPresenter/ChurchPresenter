@@ -34,11 +34,13 @@ import churchpresenter.composeapp.generated.resources.title
 import churchpresenter.composeapp.generated.resources.tune
 import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
 import org.churchpresenter.app.churchpresenter.data.Songs
+import org.churchpresenter.app.churchpresenter.models.LyricSection
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun SongsTab(
     modifier: Modifier = Modifier,
+    onSongItemSelected: (LyricSection) -> Unit
 ) {
     // Create Songs instance and load the bundled pv3300.sps resource
     val songsData = remember {
@@ -54,6 +56,9 @@ fun SongsTab(
     var selectedCategory by rememberSaveable { mutableStateOf(allSongCategoriesText) }
     var filterType by rememberSaveable { mutableStateOf("Contains") }
     var selectedSongIndex by rememberSaveable { mutableStateOf(2) } // Default to third song
+
+    // State for selected verse/chorus section
+    var selectedSectionIndex by rememberSaveable { mutableStateOf(-1) }
 
     // Sorting state
     var sortColumn by rememberSaveable { mutableStateOf("") }
@@ -72,53 +77,58 @@ fun SongsTab(
 
     val allSongsText = stringResource(Res.string.all_song_books)
     // Filter songs based on search criteria
-    val filteredSongs = remember(allSongs, searchQuery, selectedSongbook, selectedCategory, filterType, sortColumn, sortAscending) {
-        var filtered = allSongs
+    val filteredSongs =
+        remember(allSongs, searchQuery, selectedSongbook, selectedCategory, filterType, sortColumn, sortAscending) {
+            var filtered = allSongs
 
-        // Apply search filter
-        if (searchQuery.isNotBlank()) {
-            filtered = songsData.findSongs(searchQuery, filterType)
-        }
-
-        // Apply songbook filter
-        if (selectedSongbook != allSongsText) {
-            filtered = filtered.filter { it.songbook.contains(selectedSongbook, ignoreCase = true) }
-        }
-
-        // Apply category filter (placeholder - categories not clearly defined in SPS format)
-        // TODO: Implement category filtering when category data is available
-        // For now, category filtering is not implemented as categories aren't defined in SPS format
-        // Category filtering would check: if (selectedCategory != allSongCategoriesText)
-
-        // Apply sorting
-        if (sortColumn.isNotEmpty()) {
-            filtered = when (sortColumn) {
-                "number" -> if (sortAscending) {
-                    filtered.sortedBy { it.number.toIntOrNull() ?: Int.MAX_VALUE }
-                } else {
-                    filtered.sortedByDescending { it.number.toIntOrNull() ?: Int.MIN_VALUE }
-                }
-                "title" -> if (sortAscending) {
-                    filtered.sortedBy { it.title.lowercase() }
-                } else {
-                    filtered.sortedByDescending { it.title.lowercase() }
-                }
-                "songbook" -> if (sortAscending) {
-                    filtered.sortedBy { it.songbook.lowercase() }
-                } else {
-                    filtered.sortedByDescending { it.songbook.lowercase() }
-                }
-                "tune" -> if (sortAscending) {
-                    filtered.sortedBy { it.tune.lowercase() }
-                } else {
-                    filtered.sortedByDescending { it.tune.lowercase() }
-                }
-                else -> filtered
+            // Apply search filter
+            if (searchQuery.isNotBlank()) {
+                filtered = songsData.findSongs(searchQuery, filterType)
             }
-        }
 
-        filtered
-    }
+            // Apply songbook filter
+            if (selectedSongbook != allSongsText) {
+                filtered = filtered.filter { it.songbook.contains(selectedSongbook, ignoreCase = true) }
+            }
+
+            // Apply category filter (placeholder - categories not clearly defined in SPS format)
+            // TODO: Implement category filtering when category data is available
+            // For now, category filtering is not implemented as categories aren't defined in SPS format
+            // Category filtering would check: if (selectedCategory != allSongCategoriesText)
+
+            // Apply sorting
+            if (sortColumn.isNotEmpty()) {
+                filtered = when (sortColumn) {
+                    "number" -> if (sortAscending) {
+                        filtered.sortedBy { it.number.toIntOrNull() ?: Int.MAX_VALUE }
+                    } else {
+                        filtered.sortedByDescending { it.number.toIntOrNull() ?: Int.MIN_VALUE }
+                    }
+
+                    "title" -> if (sortAscending) {
+                        filtered.sortedBy { it.title.lowercase() }
+                    } else {
+                        filtered.sortedByDescending { it.title.lowercase() }
+                    }
+
+                    "songbook" -> if (sortAscending) {
+                        filtered.sortedBy { it.songbook.lowercase() }
+                    } else {
+                        filtered.sortedByDescending { it.songbook.lowercase() }
+                    }
+
+                    "tune" -> if (sortAscending) {
+                        filtered.sortedBy { it.tune.lowercase() }
+                    } else {
+                        filtered.sortedByDescending { it.tune.lowercase() }
+                    }
+
+                    else -> filtered
+                }
+            }
+
+            filtered
+        }
 
     // Helper function to handle column sorting
     val onColumnClick: (String) -> Unit = { column ->
@@ -142,6 +152,12 @@ fun SongsTab(
         if (selectedSongIndex >= filteredSongs.size) {
             selectedSongIndex = if (filteredSongs.isNotEmpty()) 0 else -1
         }
+        selectedSectionIndex = -1 // Reset section selection when songs change
+    }
+
+    // Reset section selection when song changes
+    LaunchedEffect(selectedSongIndex) {
+        selectedSectionIndex = -1
     }
 
 
@@ -204,8 +220,8 @@ fun SongsTab(
                     modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
                     singleLine = true,
                     colors = OutlinedTextFieldDefaults.colors().copy(
-                        unfocusedContainerColor = Color.White,
-                        focusedContainerColor = Color.White,
+                        unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                        focusedContainerColor = MaterialTheme.colorScheme.surface,
                     )
                 )
             }
@@ -221,24 +237,28 @@ fun SongsTab(
                 Text(
                     text = stringResource(Res.string.number) + getSortIndicator("number"),
                     fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.secondary,
                     modifier = Modifier.width(70.dp).clickable { onColumnClick("number") },
                     fontSize = 12.sp
                 )
                 Text(
                     text = stringResource(Res.string.title) + getSortIndicator("title"),
                     fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.secondary,
                     modifier = Modifier.weight(1f).clickable { onColumnClick("title") },
                     fontSize = 12.sp
                 )
                 Text(
                     text = stringResource(Res.string.song_book) + getSortIndicator("songbook"),
                     fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.secondary,
                     modifier = Modifier.width(100.dp).clickable { onColumnClick("songbook") },
                     fontSize = 12.sp
                 )
                 Text(
                     text = stringResource(Res.string.tune) + getSortIndicator("tune"),
                     fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.secondary,
                     modifier = Modifier.width(60.dp).clickable { onColumnClick("tune") },
                     fontSize = 12.sp
                 )
@@ -247,7 +267,7 @@ fun SongsTab(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f)
-                    .background(Color.White)
+                    .background(MaterialTheme.colorScheme.surface)
                     .padding(horizontal = 8.dp)
             ) {
                 itemsIndexed(filteredSongs) { index, song ->
@@ -256,8 +276,8 @@ fun SongsTab(
                             .fillMaxWidth()
                             .background(
                                 if (index == selectedSongIndex && index < filteredSongs.size)
-                                    Color.Blue.copy(alpha = 0.3f)
-                                else Color.White
+                                    MaterialTheme.colorScheme.surfaceVariant
+                                else MaterialTheme.colorScheme.surface
                             )
                             .clickable {
                                 selectedSongIndex = index
@@ -269,7 +289,10 @@ fun SongsTab(
                             text = song.number,
                             modifier = Modifier.width(70.dp),
                             fontSize = 12.sp,
-                            color = if (index == selectedSongIndex) Color.White else Color.Black
+                            color = if (index == selectedSongIndex)
+                                MaterialTheme.colorScheme.onSurfaceVariant
+                            else
+                                MaterialTheme.colorScheme.onSurface
                         )
                         Text(
                             text = song.title,
@@ -277,7 +300,10 @@ fun SongsTab(
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                             fontSize = 12.sp,
-                            color = if (index == selectedSongIndex) Color.White else Color.Black
+                            color = if (index == selectedSongIndex)
+                                MaterialTheme.colorScheme.onSurfaceVariant
+                            else
+                                MaterialTheme.colorScheme.onSurface
                         )
                         Text(
                             text = song.songbook,
@@ -285,16 +311,22 @@ fun SongsTab(
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                             fontSize = 12.sp,
-                            color = if (index == selectedSongIndex) Color.White else Color.Black
+                            color = if (index == selectedSongIndex)
+                                MaterialTheme.colorScheme.surfaceVariant
+                            else
+                                MaterialTheme.colorScheme.onSurface
                         )
                         Text(
                             text = song.tune,
                             modifier = Modifier.width(60.dp),
                             fontSize = 12.sp,
-                            color = if (index == selectedSongIndex) Color.White else Color.Black
+                            color = if (index == selectedSongIndex)
+                                MaterialTheme.colorScheme.onSurfaceVariant
+                            else
+                                MaterialTheme.colorScheme.onSurface
                         )
                     }
-                    HorizontalDivider(thickness = 1.dp, color = Color.Gray.copy(alpha = 0.3f))
+                    HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
                 }
             }
         }
@@ -304,7 +336,7 @@ fun SongsTab(
             modifier = Modifier
                 .weight(0.4f)
                 .fillMaxHeight()
-                .background(Color.Gray.copy(alpha = 0.1f))
+                .background(MaterialTheme.colorScheme.surfaceVariant)
                 .padding(8.dp)
         ) {
             // Header
@@ -321,16 +353,19 @@ fun SongsTab(
                     fontWeight = FontWeight.Bold,
                     fontSize = 14.sp,
                     maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Button(
                     modifier = Modifier.wrapContentSize(),
                     onClick = { /* Go Live action */ },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.Blue)
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary
+                    )
                 ) {
                     Text(
                         text = stringResource(Res.string.go_live),
-                        color = Color.White,
+                        color = MaterialTheme.colorScheme.onPrimary,
                         fontSize = 12.sp,
                         maxLines = 2
                     )
@@ -341,26 +376,75 @@ fun SongsTab(
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(Color.White)
+                    .background(MaterialTheme.colorScheme.surface)
                     .padding(12.dp)
             ) {
                 if (selectedSongIndex >= 0 && selectedSongIndex < filteredSongs.size && filteredSongs[selectedSongIndex].lyrics.isNotEmpty()) {
-                    items(filteredSongs[selectedSongIndex].lyrics.size) { index ->
-                        val lyricLine = filteredSongs[selectedSongIndex].lyrics[index]
-                        if (lyricLine.startsWith("Куплет") || lyricLine.startsWith("Припев")) {
-                            Text(
-                                text = lyricLine,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 14.sp,
-                                modifier = Modifier.padding(vertical = 8.dp)
-                            )
+                    val lyrics = filteredSongs[selectedSongIndex].lyrics
+                    val sections = mutableListOf<LyricSection>()
+                    var currentSection = mutableListOf<String>()
+                    var currentSectionType = ""
+
+                    // Group lyrics into sections
+                    for (line in lyrics) {
+                        if (line.startsWith("Куплет") || line.startsWith("Припев")) {
+                            // Save previous section if it exists
+                            if (currentSection.isNotEmpty()) {
+                                sections.add(LyricSection(currentSectionType, currentSection.toList()))
+                            }
+                            // Start new section
+                            currentSection = mutableListOf(line)
+                            currentSectionType = if (line.startsWith("Куплет")) "verse" else "chorus"
                         } else {
-                            Text(
-                                text = lyricLine,
-                                fontSize = 13.sp,
-                                lineHeight = 18.sp,
-                                modifier = Modifier.padding(vertical = 2.dp)
-                            )
+                            currentSection.add(line)
+                        }
+                    }
+                    // Add the last section
+                    if (currentSection.isNotEmpty()) {
+                        sections.add(LyricSection(currentSectionType, currentSection.toList()))
+                    }
+
+                    // Display sections
+                    itemsIndexed(sections) { sectionIndex, section ->
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(
+                                    if (sectionIndex == selectedSectionIndex)
+                                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
+                                    else Color.Transparent
+                                )
+                                .clickable {
+                                    selectedSectionIndex = if (selectedSectionIndex == sectionIndex) -1 else sectionIndex
+                                    onSongItemSelected.invoke(section)
+                                }
+                                .padding(8.dp)
+                        ) {
+                            section.lines.forEachIndexed { lineIndex, line ->
+                                if (lineIndex == 0 && (line.startsWith("Куплет") || line.startsWith("Припев"))) {
+                                    Text(
+                                        text = line,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 14.sp,
+                                        color = if (sectionIndex == selectedSectionIndex)
+                                            MaterialTheme.colorScheme.onSurfaceVariant
+                                        else
+                                            MaterialTheme.colorScheme.onSurface,
+                                        modifier = Modifier.padding(vertical = 4.dp)
+                                    )
+                                } else {
+                                    Text(
+                                        text = line,
+                                        fontSize = 13.sp,
+                                        lineHeight = 18.sp,
+                                        color = if (sectionIndex == selectedSectionIndex)
+                                            MaterialTheme.colorScheme.onSurfaceVariant
+                                        else
+                                            MaterialTheme.colorScheme.onSurface,
+                                        modifier = Modifier.padding(vertical = 2.dp)
+                                    )
+                                }
+                            }
                         }
                     }
                 } else {
@@ -368,7 +452,7 @@ fun SongsTab(
                         Text(
                             text = stringResource(Res.string.no_lyrics_available),
                             fontSize = 13.sp,
-                            color = Color.Gray
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }

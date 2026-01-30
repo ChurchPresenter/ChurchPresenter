@@ -22,6 +22,8 @@ import churchpresenter.composeapp.generated.resources.menu_save_schedule
 import churchpresenter.composeapp.generated.resources.menu_save_schedule_as
 import churchpresenter.composeapp.generated.resources.menu_schedule
 import churchpresenter.composeapp.generated.resources.menu_settings
+import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
+import org.churchpresenter.app.churchpresenter.ui.theme.rememberThemeManager
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -39,6 +41,8 @@ fun FrameWindowScope.NavigationTopBar(
     onAbout: () -> Unit = {},
     onHelp: () -> Unit = {}
 ) {
+    val themeManager = rememberThemeManager()
+
     val fileLabel = stringResource(Res.string.menu_file)
     val fileMnemonic = fileLabel.firstOrNull() ?: 'F'
 
@@ -92,6 +96,21 @@ fun FrameWindowScope.NavigationTopBar(
 
         Menu(editLabel, mnemonic = editMnemonic) {
             Item(stringResource(Res.string.menu_settings), onClick = onSettings, shortcut = KeyShortcut(ctrl = true, key = Key.T))
+        }
+
+        Menu("View", mnemonic = 'V') {
+            Item(
+                text = "Light Theme",
+                onClick = { themeManager.setThemeMode(ThemeMode.LIGHT) }
+            )
+            Item(
+                text = "Dark Theme",
+                onClick = { themeManager.setThemeMode(ThemeMode.DARK) }
+            )
+            Item(
+                text = "System Theme",
+                onClick = { themeManager.setThemeMode(ThemeMode.SYSTEM) }
+            )
         }
 
         Menu(helpLabel, mnemonic = helpMnemonic) {

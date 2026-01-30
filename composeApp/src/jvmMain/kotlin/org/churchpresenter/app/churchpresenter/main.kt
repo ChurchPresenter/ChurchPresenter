@@ -23,13 +23,25 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.rememberWindowState
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.app_name
+import org.churchpresenter.app.churchpresenter.models.LyricSection
 import org.churchpresenter.app.churchpresenter.models.SelectedVerse
+import org.churchpresenter.app.churchpresenter.presenter.BiblePresenter
+import org.churchpresenter.app.churchpresenter.presenter.SongPresenter
+import org.churchpresenter.app.churchpresenter.ui.theme.ChurchPresenterTheme
+import org.churchpresenter.app.churchpresenter.ui.theme.ProvideThemeManager
+import org.churchpresenter.app.churchpresenter.ui.theme.ThemeManager
+import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
+import androidx.compose.foundation.isSystemInDarkTheme
 import org.jetbrains.compose.resources.stringResource
 
 
 fun main() = application {
     var openBlackWindow by remember { mutableStateOf(false) }
     var selectedVerse by remember { mutableStateOf(SelectedVerse()) }
+    //var lyricSection by remember { mutableStateOf<LyricSection>("") }
+
+    // Theme management
+    val themeManager = remember { ThemeManager() }
 
     // Get bounds of the second screen if present
     val screens = GraphicsEnvironment.getLocalGraphicsEnvironment().screenDevices
@@ -38,20 +50,35 @@ fun main() = application {
         placement = WindowPlacement.Maximized
     )
     var showPicker by remember { mutableStateOf(false) }
-    Window(
-        onCloseRequest = ::exitApplication,
-        title = stringResource(Res.string.app_name),
-        state = state
-    ) {
-        NavigationTopBar(
-            onAbout = { openBlackWindow = true},
-            onExit = { exitApplication() },
-        )
-        MainDesktop(
-            onVerseSelected = { verse ->
-                selectedVerse = verse
+
+    ProvideThemeManager(themeManager = themeManager) {
+        val currentTheme by themeManager.themeMode
+        val isDarkTheme = when (currentTheme) {
+            ThemeMode.LIGHT -> false
+            ThemeMode.DARK -> true
+            ThemeMode.SYSTEM -> isSystemInDarkTheme()
+        }
+
+        ChurchPresenterTheme(darkTheme = isDarkTheme) {
+            Window(
+                onCloseRequest = ::exitApplication,
+                title = stringResource(Res.string.app_name),
+                state = state
+            ) {
+                NavigationTopBar(
+                    onAbout = { openBlackWindow = true },
+                    onExit = { exitApplication() },
+                )
+                MainDesktop(
+                    onVerseSelected = {
+                        selectedVerse = it
+                    },
+                    onSongItemSelected = { lyrics ->
+                       // lyricSection = it
+                    }
+                )
             }
-        )
+        }
     }
 
     if (showPicker) {
@@ -78,30 +105,7 @@ fun main() = application {
             PresenterScreen(modifier = Modifier.fillMaxSize()) {
                 Column {
                     if (selectedVerse.bookName.isNotEmpty()) {
-                        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            Column {
-                                Row(
-                                    Modifier.fillMaxWidth().padding(16.dp),
-                                    horizontalArrangement = Arrangement.Center
-                                ) {
-                                    Text(
-                                        style = MaterialTheme.typography.titleLarge,
-                                        text = selectedVerse.verseText,
-                                        color = Color.White
-                                    )
-                                }
-                                Row(
-                                    Modifier.fillMaxWidth().padding(16.dp),
-                                    horizontalArrangement = Arrangement.End
-                                ) {
-                                    Text(
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        text = "${selectedVerse.bookName} ${selectedVerse.chapter}:${selectedVerse.verseNumber}",
-                                        color = Color.White
-                                    )
-                                }
-                            }
-                        }
+                        BiblePresenter(selectedVerse)
                     }
                 }
             }

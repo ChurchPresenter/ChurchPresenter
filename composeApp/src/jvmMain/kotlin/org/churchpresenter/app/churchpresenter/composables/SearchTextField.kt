@@ -40,8 +40,8 @@ fun SearchTextField(
             onValueChange.invoke(it)
         },
         colors = OutlinedTextFieldDefaults.colors().copy(
-            unfocusedContainerColor = Color.White,
-            focusedContainerColor = Color.White,
+            unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+            focusedContainerColor = MaterialTheme.colorScheme.surface,
         )
     )
 }

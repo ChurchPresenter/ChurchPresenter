@@ -49,7 +49,7 @@ class Songs {
                     if (parts.size >= 6) {
                         val number = parts[0]
                         val title = parts[1]
-                        val category = parts[2]
+                        // parts[2] is category (not currently used)
                         val key = parts[3]
                         val author = parts[4]
                         val composer = parts[5]
@@ -84,26 +84,69 @@ class Songs {
         if (lyricsText.isBlank()) return emptyList()
 
         val lyrics = mutableListOf<String>()
+        val sections = mutableListOf<LyricSection>()
+        var chorusSection: LyricSection? = null
 
         // Split by verse markers (@$)
         val verses = lyricsText.split("@\$")
 
+        // First pass: parse all sections
         for (verse in verses) {
             if (verse.isBlank()) continue
 
             // Split lines by @%
             val lines = verse.split("@%")
+            val sectionLines = mutableListOf<String>()
 
             for (line in lines) {
                 val cleanLine = line.trim()
                 if (cleanLine.isNotEmpty()) {
-                    lyrics.add(cleanLine)
+                    sectionLines.add(cleanLine)
                 }
             }
 
-            // Add empty line between verses
-            if (lyrics.isNotEmpty() && !lyrics.last().isBlank()) {
-                lyrics.add("")
+            if (sectionLines.isNotEmpty()) {
+                val firstLine = sectionLines[0]
+                val section = LyricSection(
+                    type = when {
+                        firstLine.startsWith("Куплет") -> "verse"
+                        firstLine.startsWith("Припев") -> "chorus"
+                        else -> "other"
+                    },
+                    lines = sectionLines
+                )
+
+                sections.add(section)
+
+                // Store chorus for later use
+                if (section.type == "chorus") {
+                    chorusSection = section
+                }
+            }
+        }
+
+        // Second pass: build final lyrics with chorus repeating after verses
+        for (i in sections.indices) {
+            val section = sections[i]
+
+            // Skip the original chorus section - we'll add it after each verse instead
+            if (section.type == "chorus") {
+                continue
+            }
+
+            // Add the current section (verse or other)
+            lyrics.addAll(section.lines)
+
+            // If this is a verse and we have a chorus, add the chorus after it
+            if (section.type == "verse" && chorusSection != null) {
+                lyrics.add("") // Empty line separator before chorus
+                lyrics.addAll(chorusSection.lines)
+            }
+
+            // Add empty line after current section if there are more non-chorus sections coming
+            val hasMoreSections = sections.subList(i + 1, sections.size).any { it.type != "chorus" }
+            if (hasMoreSections) {
+                lyrics.add("") // Empty line separator after section
             }
         }
 
@@ -114,6 +157,11 @@ class Songs {
 
         return lyrics
     }
+
+    private data class LyricSection(
+        val type: String, // "verse", "chorus", "other"
+        val lines: List<String>
+    )
 
     fun getSongs(): List<SongItem> {
         return songs.toList()
