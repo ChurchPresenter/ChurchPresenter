@@ -10,6 +10,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -107,7 +108,11 @@ fun BibleTab(bible: Bible) {
             onValueChange = { searchQuery = it },
             label = {
                 Text(text = stringResource(Res.string.search))
-            }
+            },
+            colors = OutlinedTextFieldDefaults.colors().copy(
+                unfocusedContainerColor = Color.White,
+                focusedContainerColor = Color.White,
+            )
         )
 
         DropdownSelector(
@@ -176,7 +181,6 @@ fun BibleTab(bible: Bible) {
                 selectedIndex = selectedVerseIndex
             ) { verse ->
                 selectedVerseIndex = verses.indexOf(verse)
-                logger.info("Selected verse: $verse")
             }
         }
     }

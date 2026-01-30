@@ -10,12 +10,10 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import java.util.logging.Logger
-
-private val logger = Logger.getLogger("SelectionList")
 
 @Composable
 fun SelectionList(
@@ -26,6 +24,13 @@ fun SelectionList(
 ) {
     val listState = rememberLazyListState()
     val height = 450.dp
+
+    // Scroll to selected item when selection changes
+    LaunchedEffect(selectedIndex, list.size) {
+        if (selectedIndex >= 0 && selectedIndex < list.size) {
+            listState.animateScrollToItem(selectedIndex)
+        }
+    }
 
     LazyColumn(
         state = listState,
@@ -47,7 +52,6 @@ fun SelectionList(
                     .fillMaxWidth()
                     .background(if (isSelected) Color.Cyan else Color.White)
                     .clickable {
-                        logger.info("SelectionList: item clicked - index=$index, item=$item")
                         onItemSelected.invoke(item)
                     }
                     .padding(6.dp),
