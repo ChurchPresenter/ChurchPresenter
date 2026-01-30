@@ -13,28 +13,6 @@ private val bibleLogger: Logger = Logger.getLogger("org.churchpresenter.Bible")
 // You may need to adapt the SQL queries based on your specific database framework
 // (e.g., Room, Exposed, JDBC, etc.)
 
-
-data class BibleBook(
-    var book: String = "",
-    var bookId: String = "",
-    var chapterCount: Int = 0
-)
-
-data class BibleVerse(
-    var verseId: String = "",
-    var book: Int = 0,
-    var chapter: Int = 0,
-    var verseNumber: Int = 0,
-    var verseText: String = ""
-)
-
-data class BibleSearch(
-    var book: String = "",
-    var chapter: String = "",
-    var verse: String = "",
-    var verseText: String = ""
-)
-
 class Bible {
     private var bibleId: String = ""
     private val books = mutableStateListOf<BibleBook>()
@@ -358,15 +336,4 @@ class Bible {
     fun getVerseCount(): Int {
         return operatorBible.size
     }
-}
-
-// Placeholder interface for database results
-// You'll need to implement this based on your database framework
-interface DatabaseResult : Iterable<DatabaseRow> {
-    fun firstOrNull(): DatabaseRow?
-}
-
-interface DatabaseRow {
-    fun getString(index: Int): String
-    fun getInt(index: Int): Int
 }
