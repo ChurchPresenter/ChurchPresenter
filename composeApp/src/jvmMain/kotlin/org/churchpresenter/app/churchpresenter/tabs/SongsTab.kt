@@ -5,7 +5,10 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.VerticalScrollbar
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -282,72 +285,83 @@ fun SongsTab(
                     modifier = Modifier.width(60.dp).clickable { onColumnClick("tune") }
                 )
             }
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
-                    .background(MaterialTheme.colorScheme.surface)
-                    .padding(horizontal = 8.dp)
+            Box(
+                modifier = Modifier.weight(1f)
             ) {
-                itemsIndexed(filteredSongs) { index, song ->
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(
-                                if (index == selectedSongIndex && index < filteredSongs.size)
-                                    MaterialTheme.colorScheme.surfaceVariant
-                                else MaterialTheme.colorScheme.surface
+                val lazyListState = androidx.compose.foundation.lazy.rememberLazyListState()
+                LazyColumn(
+                    state = lazyListState,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .fillMaxHeight()
+                        .background(MaterialTheme.colorScheme.surface)
+                        .padding(horizontal = 8.dp)
+                ) {
+                    // ...existing itemsIndexed content...
+                    itemsIndexed(filteredSongs) { index, song ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(
+                                    if (index == selectedSongIndex && index < filteredSongs.size)
+                                        MaterialTheme.colorScheme.surfaceVariant
+                                    else MaterialTheme.colorScheme.surface
+                                )
+                                .clickable {
+                                    selectedSongIndex = index
+                                }
+                                .padding(8.dp),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Text(
+                                text = song.number,
+                                style = MaterialTheme.typography.bodySmall,
+                                modifier = Modifier.width(70.dp),
+                                color = if (index == selectedSongIndex)
+                                    MaterialTheme.colorScheme.onSurfaceVariant
+                                else
+                                    MaterialTheme.colorScheme.onSurface
                             )
-                            .clickable {
-                                selectedSongIndex = index
-                            }
-                            .padding(8.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Text(
-                            text = song.number,
-                            style = MaterialTheme.typography.bodySmall,
-                            modifier = Modifier.width(70.dp),
-                            color = if (index == selectedSongIndex)
-                                MaterialTheme.colorScheme.onSurfaceVariant
-                            else
-                                MaterialTheme.colorScheme.onSurface
-                        )
-                        Text(
-                            text = song.title,
-                            style = MaterialTheme.typography.bodySmall,
-                            modifier = Modifier.weight(1f),
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            color = if (index == selectedSongIndex)
-                                MaterialTheme.colorScheme.onSurfaceVariant
-                            else
-                                MaterialTheme.colorScheme.onSurface
-                        )
-                        Text(
-                            text = song.songbook,
-                            style = MaterialTheme.typography.bodySmall,
-                            modifier = Modifier.width(100.dp),
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            color = if (index == selectedSongIndex)
-                                MaterialTheme.colorScheme.onSurfaceVariant
-                            else
-                                MaterialTheme.colorScheme.onSurface
-                        )
-                        Text(
-                            text = song.tune,
-                            style = MaterialTheme.typography.bodySmall,
-                            modifier = Modifier.width(60.dp),
-                            maxLines = 1,
-                            color = if (index == selectedSongIndex)
-                                MaterialTheme.colorScheme.onSurfaceVariant
-                            else
-                                MaterialTheme.colorScheme.onSurface
-                        )
+                            Text(
+                                text = song.title,
+                                style = MaterialTheme.typography.bodySmall,
+                                modifier = Modifier.weight(1f),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                color = if (index == selectedSongIndex)
+                                    MaterialTheme.colorScheme.onSurfaceVariant
+                                else
+                                    MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                text = song.songbook,
+                                style = MaterialTheme.typography.bodySmall,
+                                modifier = Modifier.width(100.dp),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                color = if (index == selectedSongIndex)
+                                    MaterialTheme.colorScheme.onSurfaceVariant
+                                else
+                                    MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                text = song.tune,
+                                style = MaterialTheme.typography.bodySmall,
+                                modifier = Modifier.width(60.dp),
+                                maxLines = 1,
+                                color = if (index == selectedSongIndex)
+                                    MaterialTheme.colorScheme.onSurfaceVariant
+                                else
+                                    MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                        HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
                     }
-                    HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
                 }
+                VerticalScrollbar(
+                    modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
+                    adapter = rememberScrollbarAdapter(scrollState = lazyListState)
+                )
             }
         }
 
@@ -393,88 +407,97 @@ fun SongsTab(
             }
 
             // Lyrics content
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.surface)
-                    .padding(12.dp)
-            ) {
-                if (selectedSongIndex >= 0 && selectedSongIndex < filteredSongs.size && filteredSongs[selectedSongIndex].lyrics.isNotEmpty()) {
-                    val lyrics = filteredSongs[selectedSongIndex].lyrics
-                    val sections = mutableListOf<LyricSection>()
-                    var currentSection = mutableListOf<String>()
-                    var currentSectionType = ""
+            Box {
+                val lyricsListState = androidx.compose.foundation.lazy.rememberLazyListState()
+                LazyColumn(
+                    state = lyricsListState,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.surface)
+                        .padding(12.dp)
+                ) {
+                    // ...existing lyrics content...
+                    if (selectedSongIndex >= 0 && selectedSongIndex < filteredSongs.size && filteredSongs[selectedSongIndex].lyrics.isNotEmpty()) {
+                        val lyrics = filteredSongs[selectedSongIndex].lyrics
+                        val sections = mutableListOf<LyricSection>()
+                        var currentSection = mutableListOf<String>()
+                        var currentSectionType = ""
 
-                    // Group lyrics into sections
-                    for (line in lyrics) {
-                        if (line.startsWith("Куплет") || line.startsWith("Припев")) {
-                            // Save previous section if it exists
-                            if (currentSection.isNotEmpty()) {
-                                sections.add(LyricSection(currentSectionType, currentSection.toList()))
-                            }
-                            // Start new section
-                            currentSection = mutableListOf(line)
-                            currentSectionType = if (line.startsWith("Куплет")) "verse" else "chorus"
-                        } else {
-                            currentSection.add(line)
-                        }
-                    }
-                    // Add the last section
-                    if (currentSection.isNotEmpty()) {
-                        sections.add(LyricSection(currentSectionType, currentSection.toList()))
-                    }
-
-                    // Display sections
-                    itemsIndexed(sections) { sectionIndex, section ->
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .background(
-                                    if (sectionIndex == selectedSectionIndex)
-                                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
-                                    else Color.Transparent
-                                )
-                                .clickable {
-                                    selectedSectionIndex = if (selectedSectionIndex == sectionIndex) -1 else sectionIndex
-                                    onSongItemSelected.invoke(section)
+                        // Group lyrics into sections
+                        for (line in lyrics) {
+                            if (line.startsWith("Куплет") || line.startsWith("Припев")) {
+                                // Save previous section if it exists
+                                if (currentSection.isNotEmpty()) {
+                                    sections.add(LyricSection(currentSectionType, currentSection.toList()))
                                 }
-                                .padding(8.dp)
-                        ) {
-                            section.lines.forEachIndexed { lineIndex, line ->
-                                if (lineIndex == 0 && (line.startsWith("Куплет") || line.startsWith("Припев"))) {
-                                    Text(
-                                        text = line,
-                                        style = MaterialTheme.typography.titleSmall,
-                                        fontWeight = FontWeight.Bold,
-                                        color = if (sectionIndex == selectedSectionIndex)
-                                            MaterialTheme.colorScheme.onSurfaceVariant
-                                        else
-                                            MaterialTheme.colorScheme.onSurface,
-                                        modifier = Modifier.padding(vertical = 4.dp)
-                                    )
-                                } else {
-                                    Text(
-                                        text = line,
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        color = if (sectionIndex == selectedSectionIndex)
-                                            MaterialTheme.colorScheme.onSurfaceVariant
-                                        else
-                                            MaterialTheme.colorScheme.onSurface,
-                                        modifier = Modifier.padding(vertical = 2.dp)
-                                    )
-                                }
+                                // Start new section
+                                currentSection = mutableListOf(line)
+                                currentSectionType = if (line.startsWith("Куплет")) "verse" else "chorus"
+                            } else {
+                                currentSection.add(line)
                             }
                         }
-                    }
-                } else {
-                    item {
-                        Text(
-                            text = stringResource(Res.string.no_lyrics_available),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                        // Add the last section
+                        if (currentSection.isNotEmpty()) {
+                            sections.add(LyricSection(currentSectionType, currentSection.toList()))
+                        }
+
+                        // Display sections
+                        itemsIndexed(sections) { sectionIndex, section ->
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .background(
+                                        if (sectionIndex == selectedSectionIndex)
+                                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
+                                        else Color.Transparent
+                                    )
+                                    .clickable {
+                                        selectedSectionIndex = if (selectedSectionIndex == sectionIndex) -1 else sectionIndex
+                                        onSongItemSelected.invoke(section)
+                                    }
+                                    .padding(8.dp)
+                            ) {
+                                section.lines.forEachIndexed { lineIndex, line ->
+                                    if (lineIndex == 0 && (line.startsWith("Куплет") || line.startsWith("Припев"))) {
+                                        Text(
+                                            text = line,
+                                            style = MaterialTheme.typography.titleSmall,
+                                            fontWeight = FontWeight.Bold,
+                                            color = if (sectionIndex == selectedSectionIndex)
+                                                MaterialTheme.colorScheme.onSurfaceVariant
+                                            else
+                                                MaterialTheme.colorScheme.onSurface,
+                                            modifier = Modifier.padding(vertical = 4.dp)
+                                        )
+                                    } else {
+                                        Text(
+                                            text = line,
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            color = if (sectionIndex == selectedSectionIndex)
+                                                MaterialTheme.colorScheme.onSurfaceVariant
+                                            else
+                                                MaterialTheme.colorScheme.onSurface,
+                                            modifier = Modifier.padding(vertical = 2.dp)
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        item {
+                            Text(
+                                text = stringResource(Res.string.no_lyrics_available),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
                 }
+                VerticalScrollbar(
+                    modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
+                    adapter = rememberScrollbarAdapter(scrollState = lyricsListState)
+                )
             }
         }
     }

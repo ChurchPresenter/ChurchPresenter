@@ -1,14 +1,19 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.focusable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -259,7 +264,7 @@ fun BibleTab(
             }
 
             Column(modifier = Modifier.width(120.dp).padding(end = 8.dp)) {
-                SearchTextField(label = stringResource(Res.string.chapter)) { newValue ->
+                SearchTextField(label = stringResource(Res.string.chapter)) { _ ->
                     // chapter filter input
                 }
                 SelectionList(
@@ -276,7 +281,7 @@ fun BibleTab(
                 SearchTextField(
                     modifier = Modifier.width(120.dp),
                     label = stringResource(Res.string.verse),
-                ) { newValue ->
+                ) { _ ->
                     // verse search
                 }
                 SelectionList(
@@ -304,18 +309,26 @@ fun BibleTab(
 
         Row(modifier = Modifier.fillMaxWidth().padding(top = 8.dp)) {
             Column {
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(MaterialTheme.colorScheme.surface)
-                        .padding(4.dp)
-                ) {
-                    items(verses) { v ->
-                        Text(text = v,
-                            modifier = Modifier.padding(4.dp),
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
+                Box {
+                    val versesListState = rememberLazyListState()
+                    LazyColumn(
+                        state = versesListState,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(MaterialTheme.colorScheme.surface)
+                            .padding(4.dp)
+                    ) {
+                        items(verses) { v ->
+                            Text(text = v,
+                                modifier = Modifier.padding(4.dp),
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
                     }
+                    VerticalScrollbar(
+                        modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
+                        adapter = rememberScrollbarAdapter(scrollState = versesListState)
+                    )
                 }
             }
         }

@@ -18,8 +18,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.window.MenuBar
-import androidx.compose.ui.window.Window
 import org.jetbrains.compose.resources.painterResource
 
 import churchpresenter.composeapp.generated.resources.Res
