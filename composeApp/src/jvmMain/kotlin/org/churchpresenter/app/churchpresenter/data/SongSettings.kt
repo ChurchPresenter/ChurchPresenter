@@ -1,6 +1,9 @@
 package org.churchpresenter.app.churchpresenter.data
 
 data class SongSettings(
+    // Song file management
+    val songFiles: List<String> = emptyList(),
+
     // Title settings
     val titleDisplay: String = "First Page",
     val titleFontSize: Int = 32,

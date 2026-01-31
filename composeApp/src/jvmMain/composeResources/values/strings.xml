@@ -82,8 +82,12 @@
     <string name="left">Left</string>
     <string name="center">Center</string>
     <string name="right">Right</string>
-    <string name="title_horizontal_alignment">Horizontal alignment:</string>
-    <string name="lyrics_horizontal_alignment">Horizontal alignment:</string>
+    <string name="horizontal_alignment">horizontal alignment:</string>
+    <string name="song_files">Song Files</string>
+    <string name="import_song_file">Import Song File</string>
+    <string name="remove_song_file">Remove Song File</string>
+    <string name="select_song_file">Select Song File...</string>
+    <string name="no_song_files">No song files loaded</string>
     <string name="word_wrap">Word Wrap</string>
     <string name="show_on_first_page_only">Show on first page only</string>
     <string name="position_on_screen">Position on screen:</string>

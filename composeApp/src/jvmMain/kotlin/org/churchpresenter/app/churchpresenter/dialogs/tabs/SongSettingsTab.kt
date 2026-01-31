@@ -42,19 +42,97 @@ fun createNativeSongSettingsPanel(
     // Get available fonts
     val availableFonts = GraphicsEnvironment.getLocalGraphicsEnvironment().availableFontFamilyNames
 
-    // LEFT COLUMN - Title Section
+    // LEFT COLUMN - Song Files and Title Section
     val leftPanel = JPanel(GridBagLayout())
     val leftGbc = GridBagConstraints()
     leftGbc.anchor = GridBagConstraints.WEST
     leftGbc.insets = Insets(2, 5, 2, 5)
 
-    // Title Section
+    // Song Files Section
     leftGbc.gridx = 0; leftGbc.gridy = 0; leftGbc.gridwidth = 2
     leftGbc.insets = Insets(5, 5, 5, 5)
+    leftPanel.add(JLabel("<html><b>${getStringResource(Res.string.song_files)}</b></html>"), leftGbc)
+
+    // Song files list
+    leftGbc.gridx = 0; leftGbc.gridy = 1; leftGbc.gridwidth = 2
+    leftGbc.insets = Insets(2, 15, 2, 5)
+    leftGbc.fill = GridBagConstraints.BOTH
+    leftGbc.weightx = 1.0
+    leftGbc.weighty = 0.3 // Give some height to the list
+
+    val songFilesList = JList(settings.songFiles.toTypedArray()).apply {
+        selectionMode = ListSelectionModel.SINGLE_SELECTION
+        visibleRowCount = 3
+        if (settings.songFiles.isEmpty()) {
+            setListData(arrayOf(getStringResource(Res.string.no_song_files)))
+        }
+    }
+    val scrollPane = JScrollPane(songFilesList)
+    scrollPane.preferredSize = Dimension(300, 80)
+    leftPanel.add(scrollPane, leftGbc)
+
+    // Import/Remove buttons panel
+    leftGbc.gridx = 0; leftGbc.gridy = 2; leftGbc.gridwidth = 2
+    leftGbc.fill = GridBagConstraints.HORIZONTAL
+    leftGbc.weighty = 0.0
+    leftGbc.insets = Insets(5, 15, 10, 5)
+
+    val buttonPanel = JPanel(FlowLayout(FlowLayout.LEFT, 5, 0))
+
+    val importButton = JButton(getStringResource(Res.string.import_song_file)).apply {
+        addActionListener {
+            val fileChooser = JFileChooser().apply {
+                fileSelectionMode = JFileChooser.FILES_ONLY
+                isMultiSelectionEnabled = true
+                fileFilter = javax.swing.filechooser.FileNameExtensionFilter(
+                    "Song Files (*.spb, *.sps)", "spb", "sps"
+                )
+            }
+
+            val result = fileChooser.showOpenDialog(this@apply)
+            if (result == JFileChooser.APPROVE_OPTION) {
+                val selectedFiles = fileChooser.selectedFiles
+                val newFiles = selectedFiles.map { it.absolutePath }
+                val updatedFiles = (settings.songFiles + newFiles).distinct()
+                onSettingsChange(settings.copy(songFiles = updatedFiles))
+
+                // Update the list display
+                songFilesList.setListData(updatedFiles.toTypedArray())
+            }
+        }
+    }
+    buttonPanel.add(importButton)
+
+    val removeButton = JButton(getStringResource(Res.string.remove_song_file)).apply {
+        addActionListener {
+            val selectedIndex = songFilesList.selectedIndex
+            if (selectedIndex >= 0 && settings.songFiles.isNotEmpty()) {
+                val updatedFiles = settings.songFiles.toMutableList()
+                updatedFiles.removeAt(selectedIndex)
+                onSettingsChange(settings.copy(songFiles = updatedFiles))
+
+                // Update the list display
+                if (updatedFiles.isEmpty()) {
+                    songFilesList.setListData(arrayOf(getStringResource(Res.string.no_song_files)))
+                } else {
+                    songFilesList.setListData(updatedFiles.toTypedArray())
+                }
+            }
+        }
+    }
+    buttonPanel.add(removeButton)
+
+    leftPanel.add(buttonPanel, leftGbc)
+
+    // Title Section
+    leftGbc.gridx = 0; leftGbc.gridy = 3; leftGbc.gridwidth = 2
+    leftGbc.insets = Insets(15, 5, 5, 5)
+    leftGbc.weighty = 0.0
+    leftGbc.fill = GridBagConstraints.NONE
     leftPanel.add(JLabel("<html><b>${getStringResource(Res.string.title)}</b></html>"), leftGbc)
 
     // Show title
-    leftGbc.gridx = 0; leftGbc.gridy = 1; leftGbc.gridwidth = 1
+    leftGbc.gridx = 0; leftGbc.gridy = 4; leftGbc.gridwidth = 1
     leftGbc.insets = Insets(2, 15, 2, 5)
     val showTitleLabel = JLabel(getStringResource(Res.string.show_title))
     showTitleLabel.preferredSize = Dimension(120, showTitleLabel.preferredSize.height)
@@ -85,7 +163,7 @@ fun createNativeSongSettingsPanel(
     leftPanel.add(titleDisplayCombo, leftGbc)
 
     // Title font size
-    leftGbc.gridx = 0; leftGbc.gridy = 2
+    leftGbc.gridx = 0; leftGbc.gridy = 5
     val fontSizeLabel = JLabel(getStringResource(Res.string.font_size))
     fontSizeLabel.preferredSize = Dimension(120, fontSizeLabel.preferredSize.height)
     leftPanel.add(fontSizeLabel, leftGbc)
@@ -99,7 +177,7 @@ fun createNativeSongSettingsPanel(
     leftPanel.add(titleFontSizeSpinner, leftGbc)
 
     // Title font type
-    leftGbc.gridx = 0; leftGbc.gridy = 3
+    leftGbc.gridx = 0; leftGbc.gridy = 6
     val fontTypeLabel = JLabel(getStringResource(Res.string.font_type))
     fontTypeLabel.preferredSize = Dimension(120, fontTypeLabel.preferredSize.height)
     leftPanel.add(fontTypeLabel, leftGbc)
@@ -114,7 +192,7 @@ fun createNativeSongSettingsPanel(
     leftPanel.add(titleFontCombo, leftGbc)
 
     // Title font min/max on same row
-    leftGbc.gridx = 0; leftGbc.gridy = 4; leftGbc.gridwidth = 1
+    leftGbc.gridx = 0; leftGbc.gridy = 7; leftGbc.gridwidth = 1
     val minLabel = JLabel(getStringResource(Res.string.min))
     minLabel.preferredSize = Dimension(120, minLabel.preferredSize.height)
     leftPanel.add(minLabel, leftGbc)
@@ -141,7 +219,7 @@ fun createNativeSongSettingsPanel(
     leftPanel.add(titleMinMaxPanel, leftGbc)
 
     // Title alpha
-    leftGbc.gridx = 0; leftGbc.gridy = 5
+    leftGbc.gridx = 0; leftGbc.gridy = 8
     val alphaLabel = JLabel("Font Alpha:")
     alphaLabel.preferredSize = Dimension(120, alphaLabel.preferredSize.height)
     leftPanel.add(alphaLabel, leftGbc)
@@ -158,7 +236,7 @@ fun createNativeSongSettingsPanel(
     leftPanel.add(titleAlphaSlider, leftGbc)
 
     // Title alignment
-    leftGbc.gridx = 0; leftGbc.gridy = 6; leftGbc.fill = GridBagConstraints.NONE
+    leftGbc.gridx = 0; leftGbc.gridy = 9; leftGbc.fill = GridBagConstraints.NONE
     val titleAlignmentLabel = JLabel(getStringResource(Res.string.vertical_alignment))
     titleAlignmentLabel.preferredSize = Dimension(120, titleAlignmentLabel.preferredSize.height)
     leftPanel.add(titleAlignmentLabel, leftGbc)
@@ -188,8 +266,8 @@ fun createNativeSongSettingsPanel(
     leftPanel.add(titleAlignmentCombo, leftGbc)
 
     // Title horizontal alignment
-    leftGbc.gridx = 0; leftGbc.gridy = 7
-    val titleHorizontalAlignmentLabel = JLabel(getStringResource(Res.string.title_horizontal_alignment))
+    leftGbc.gridx = 0; leftGbc.gridy = 10
+    val titleHorizontalAlignmentLabel = JLabel(getStringResource(Res.string.horizontal_alignment))
     titleHorizontalAlignmentLabel.preferredSize = Dimension(120, titleHorizontalAlignmentLabel.preferredSize.height)
     leftPanel.add(titleHorizontalAlignmentLabel, leftGbc)
 
@@ -343,7 +421,7 @@ fun createNativeSongSettingsPanel(
 
     // Lyrics horizontal alignment
     rightGbc.gridx = 0; rightGbc.gridy = 7; rightGbc.gridwidth = 1
-    val lyricsHorizontalAlignmentLabel = JLabel(getStringResource(Res.string.lyrics_horizontal_alignment))
+    val lyricsHorizontalAlignmentLabel = JLabel(getStringResource(Res.string.horizontal_alignment))
     lyricsHorizontalAlignmentLabel.preferredSize = Dimension(120, lyricsHorizontalAlignmentLabel.preferredSize.height)
     rightPanel.add(lyricsHorizontalAlignmentLabel, rightGbc)
 
