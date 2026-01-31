@@ -2,11 +2,31 @@ package org.churchpresenter.app.churchpresenter.tabs
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -14,7 +34,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.all_song_books
 import churchpresenter.composeapp.generated.resources.all_song_categories
@@ -187,8 +206,8 @@ fun SongsTab(
                 // Filter section
                 Text(
                     stringResource(Res.string.filter_colon),
-                    modifier = Modifier.padding(vertical = 4.dp),
-                    fontSize = 12.sp
+                    style = MaterialTheme.typography.labelMedium,
+                    modifier = Modifier.padding(vertical = 4.dp)
                 )
 
                 Row(
@@ -196,7 +215,7 @@ fun SongsTab(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(stringResource(Res.string.filter_type_colon), fontSize = 12.sp)
+                    Text(stringResource(Res.string.filter_type_colon), style = MaterialTheme.typography.labelMedium)
                     DropdownSelector(
                         modifier = Modifier.weight(1f),
                         label = "",
@@ -208,7 +227,7 @@ fun SongsTab(
                         onClick = { /* Search action */ },
                         modifier = Modifier.height(40.dp)
                     ) {
-                        Text(stringResource(Res.string.search), fontSize = 12.sp)
+                        Text(stringResource(Res.string.search), style = MaterialTheme.typography.labelMedium)
                     }
                 }
 
@@ -216,7 +235,7 @@ fun SongsTab(
                 OutlinedTextField(
                     value = searchQuery,
                     onValueChange = { searchQuery = it },
-                    label = { Text(stringResource(Res.string.search_songs), fontSize = 12.sp) },
+                    label = { Text(stringResource(Res.string.search_songs), style = MaterialTheme.typography.labelMedium) },
                     modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
                     singleLine = true,
                     colors = OutlinedTextFieldDefaults.colors().copy(
@@ -236,31 +255,31 @@ fun SongsTab(
             ) {
                 Text(
                     text = stringResource(Res.string.number) + getSortIndicator("number"),
+                    style = MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.secondary,
-                    modifier = Modifier.width(70.dp).clickable { onColumnClick("number") },
-                    fontSize = 12.sp
+                    modifier = Modifier.width(70.dp).clickable { onColumnClick("number") }
                 )
                 Text(
                     text = stringResource(Res.string.title) + getSortIndicator("title"),
+                    style = MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.secondary,
-                    modifier = Modifier.weight(1f).clickable { onColumnClick("title") },
-                    fontSize = 12.sp
+                    modifier = Modifier.weight(1f).clickable { onColumnClick("title") }
                 )
                 Text(
                     text = stringResource(Res.string.song_book) + getSortIndicator("songbook"),
+                    style = MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.secondary,
-                    modifier = Modifier.width(100.dp).clickable { onColumnClick("songbook") },
-                    fontSize = 12.sp
+                    modifier = Modifier.width(100.dp).clickable { onColumnClick("songbook") }
                 )
                 Text(
                     text = stringResource(Res.string.tune) + getSortIndicator("tune"),
+                    style = MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.secondary,
-                    modifier = Modifier.width(60.dp).clickable { onColumnClick("tune") },
-                    fontSize = 12.sp
+                    modifier = Modifier.width(60.dp).clickable { onColumnClick("tune") }
                 )
             }
             LazyColumn(
@@ -287,8 +306,8 @@ fun SongsTab(
                     ) {
                         Text(
                             text = song.number,
+                            style = MaterialTheme.typography.bodySmall,
                             modifier = Modifier.width(70.dp),
-                            fontSize = 12.sp,
                             color = if (index == selectedSongIndex)
                                 MaterialTheme.colorScheme.onSurfaceVariant
                             else
@@ -296,10 +315,10 @@ fun SongsTab(
                         )
                         Text(
                             text = song.title,
+                            style = MaterialTheme.typography.bodySmall,
                             modifier = Modifier.weight(1f),
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
-                            fontSize = 12.sp,
                             color = if (index == selectedSongIndex)
                                 MaterialTheme.colorScheme.onSurfaceVariant
                             else
@@ -307,19 +326,19 @@ fun SongsTab(
                         )
                         Text(
                             text = song.songbook,
+                            style = MaterialTheme.typography.bodySmall,
                             modifier = Modifier.width(100.dp),
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
-                            fontSize = 12.sp,
                             color = if (index == selectedSongIndex)
-                                MaterialTheme.colorScheme.surfaceVariant
+                                MaterialTheme.colorScheme.onSurfaceVariant
                             else
                                 MaterialTheme.colorScheme.onSurface
                         )
                         Text(
                             text = song.tune,
+                            style = MaterialTheme.typography.bodySmall,
                             modifier = Modifier.width(60.dp),
-                            fontSize = 12.sp,
                             maxLines = 1,
                             color = if (index == selectedSongIndex)
                                 MaterialTheme.colorScheme.onSurfaceVariant
@@ -351,8 +370,8 @@ fun SongsTab(
                     text = if (selectedSongIndex >= 0 && selectedSongIndex < filteredSongs.size)
                         filteredSongs[selectedSongIndex].title
                     else stringResource(Res.string.no_song_selected),
+                    style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 14.sp,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -366,8 +385,8 @@ fun SongsTab(
                 ) {
                     Text(
                         text = stringResource(Res.string.go_live),
+                        style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onPrimary,
-                        fontSize = 12.sp,
                         maxLines = 2
                     )
                 }
@@ -425,8 +444,8 @@ fun SongsTab(
                                 if (lineIndex == 0 && (line.startsWith("Куплет") || line.startsWith("Припев"))) {
                                     Text(
                                         text = line,
+                                        style = MaterialTheme.typography.titleSmall,
                                         fontWeight = FontWeight.Bold,
-                                        fontSize = 14.sp,
                                         color = if (sectionIndex == selectedSectionIndex)
                                             MaterialTheme.colorScheme.onSurfaceVariant
                                         else
@@ -436,8 +455,7 @@ fun SongsTab(
                                 } else {
                                     Text(
                                         text = line,
-                                        fontSize = 13.sp,
-                                        lineHeight = 18.sp,
+                                        style = MaterialTheme.typography.bodyMedium,
                                         color = if (sectionIndex == selectedSectionIndex)
                                             MaterialTheme.colorScheme.onSurfaceVariant
                                         else
@@ -452,7 +470,7 @@ fun SongsTab(
                     item {
                         Text(
                             text = stringResource(Res.string.no_lyrics_available),
-                            fontSize = 13.sp,
+                            style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }

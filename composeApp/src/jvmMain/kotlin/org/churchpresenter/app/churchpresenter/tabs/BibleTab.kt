@@ -25,9 +25,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.key.*
-import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEvent
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.book
@@ -55,7 +58,6 @@ fun BibleTab(
 ) {
     val books = bible.getBooks()
     val bookCount = bible.getBookCount()
-    val verseCount = bible.getVerseCount()
 
     var searchQuery by rememberSaveable { mutableStateOf("") }
     val scopeOptions = listOf(
@@ -78,7 +80,6 @@ fun BibleTab(
 
     // Focus management for keyboard navigation
     val focusRequester = remember { FocusRequester() }
-    val focusManager = LocalFocusManager.current
 
     // When book data arrives, set initial selection to first book
     LaunchedEffect(bookCount) {
@@ -119,7 +120,7 @@ fun BibleTab(
                     }
                 }
             }
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             verses = emptyList()
         }
     }
@@ -244,7 +245,7 @@ fun BibleTab(
             val chapterList = chaptersFor(selectedBookIndex)
 
             Column(modifier = Modifier.width(200.dp).padding(end = 8.dp)) {
-                SearchTextField(label = stringResource(Res.string.book)) { newValue ->
+                SearchTextField(label = stringResource(Res.string.book)) { _ ->
                     // simple local filtering
                 }
                 SelectionList(
