@@ -1,7 +1,6 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.awt.SwingPanel
 import churchpresenter.composeapp.generated.resources.*
 import org.churchpresenter.app.churchpresenter.data.SongSettings
@@ -23,16 +22,14 @@ fun SongSettingsTab(
     settings: SongSettings = SongSettings(),
     onSettingsChange: (SongSettings) -> Unit = {}
 ) {
-    val currentSettings = remember { settings }
-
     SwingPanel(
         factory = {
-            createNativeSongSettingsPanel(currentSettings, onSettingsChange)
+            createNativeSongSettingsPanel(settings, onSettingsChange)
         }
     )
 }
 
-private fun createNativeSongSettingsPanel(
+fun createNativeSongSettingsPanel(
     settings: SongSettings,
     onSettingsChange: (SongSettings) -> Unit
 ): JPanel {
@@ -49,16 +46,19 @@ private fun createNativeSongSettingsPanel(
     val leftPanel = JPanel(GridBagLayout())
     val leftGbc = GridBagConstraints()
     leftGbc.anchor = GridBagConstraints.WEST
-    leftGbc.insets = Insets(5, 10, 5, 5)
+    leftGbc.insets = Insets(2, 5, 2, 5)
 
     // Title Section
     leftGbc.gridx = 0; leftGbc.gridy = 0; leftGbc.gridwidth = 2
-    leftPanel.add(JLabel("<html><b>${getStringResource(Res.string.title_section)}</b></html>"), leftGbc)
+    leftGbc.insets = Insets(5, 5, 5, 5)
+    leftPanel.add(JLabel("<html><b>${getStringResource(Res.string.title)}</b></html>"), leftGbc)
 
     // Show title
     leftGbc.gridx = 0; leftGbc.gridy = 1; leftGbc.gridwidth = 1
-    leftGbc.insets = Insets(5, 20, 5, 5)
-    leftPanel.add(JLabel(getStringResource(Res.string.show_title)), leftGbc)
+    leftGbc.insets = Insets(2, 15, 2, 5)
+    val showTitleLabel = JLabel(getStringResource(Res.string.show_title))
+    showTitleLabel.preferredSize = Dimension(120, showTitleLabel.preferredSize.height)
+    leftPanel.add(showTitleLabel, leftGbc)
 
     val titleDisplayCombo = JComboBox(arrayOf(
         getStringResource(Res.string.none),
@@ -86,7 +86,9 @@ private fun createNativeSongSettingsPanel(
 
     // Title font size
     leftGbc.gridx = 0; leftGbc.gridy = 2
-    leftPanel.add(JLabel(getStringResource(Res.string.font_size)), leftGbc)
+    val fontSizeLabel = JLabel(getStringResource(Res.string.font_size))
+    fontSizeLabel.preferredSize = Dimension(120, fontSizeLabel.preferredSize.height)
+    leftPanel.add(fontSizeLabel, leftGbc)
 
     val titleFontSizeSpinner = JSpinner(SpinnerNumberModel(settings.titleFontSize, 8, 72, 1)).apply {
         addChangeListener {
@@ -98,7 +100,9 @@ private fun createNativeSongSettingsPanel(
 
     // Title font type
     leftGbc.gridx = 0; leftGbc.gridy = 3
-    leftPanel.add(JLabel(getStringResource(Res.string.font_type)), leftGbc)
+    val fontTypeLabel = JLabel(getStringResource(Res.string.font_type))
+    fontTypeLabel.preferredSize = Dimension(120, fontTypeLabel.preferredSize.height)
+    leftPanel.add(fontTypeLabel, leftGbc)
 
     val titleFontCombo = JComboBox(availableFonts).apply {
         selectedItem = settings.titleFontType
@@ -109,33 +113,38 @@ private fun createNativeSongSettingsPanel(
     leftGbc.gridx = 1
     leftPanel.add(titleFontCombo, leftGbc)
 
-    // Title font min
-    leftGbc.gridx = 0; leftGbc.gridy = 4
-    leftPanel.add(JLabel(getStringResource(Res.string.min)), leftGbc)
+    // Title font min/max on same row
+    leftGbc.gridx = 0; leftGbc.gridy = 4; leftGbc.gridwidth = 1
+    val minLabel = JLabel(getStringResource(Res.string.min))
+    minLabel.preferredSize = Dimension(120, minLabel.preferredSize.height)
+    leftPanel.add(minLabel, leftGbc)
 
+    val titleMinMaxPanel = JPanel(FlowLayout(FlowLayout.LEFT, 5, 0))
     val titleMinFontSpinner = JSpinner(SpinnerNumberModel(settings.titleMinFontSize, 8, 72, 1)).apply {
         addChangeListener {
             onSettingsChange(settings.copy(titleMinFontSize = value as Int))
         }
+        preferredSize = Dimension(60, preferredSize.height)
     }
-    leftGbc.gridx = 1
-    leftPanel.add(titleMinFontSpinner, leftGbc)
+    titleMinMaxPanel.add(titleMinFontSpinner)
 
-    // Title font max
-    leftGbc.gridx = 0; leftGbc.gridy = 5
-    leftPanel.add(JLabel(getStringResource(Res.string.max)), leftGbc)
-
+    titleMinMaxPanel.add(JLabel(getStringResource(Res.string.max)))
     val titleMaxFontSpinner = JSpinner(SpinnerNumberModel(settings.titleMaxFontSize, 8, 72, 1)).apply {
         addChangeListener {
             onSettingsChange(settings.copy(titleMaxFontSize = value as Int))
         }
+        preferredSize = Dimension(60, preferredSize.height)
     }
+    titleMinMaxPanel.add(titleMaxFontSpinner)
+
     leftGbc.gridx = 1
-    leftPanel.add(titleMaxFontSpinner, leftGbc)
+    leftPanel.add(titleMinMaxPanel, leftGbc)
 
     // Title alpha
-    leftGbc.gridx = 0; leftGbc.gridy = 6
-    leftPanel.add(JLabel("Font Alpha:"), leftGbc)
+    leftGbc.gridx = 0; leftGbc.gridy = 5
+    val alphaLabel = JLabel("Font Alpha:")
+    alphaLabel.preferredSize = Dimension(120, alphaLabel.preferredSize.height)
+    leftPanel.add(alphaLabel, leftGbc)
 
     val titleAlphaSlider = JSlider(0, 100, settings.titleAlpha.toInt()).apply {
         addChangeListener {
@@ -149,8 +158,10 @@ private fun createNativeSongSettingsPanel(
     leftPanel.add(titleAlphaSlider, leftGbc)
 
     // Title alignment
-    leftGbc.gridx = 0; leftGbc.gridy = 7; leftGbc.fill = GridBagConstraints.NONE
-    leftPanel.add(JLabel(getStringResource(Res.string.title_alignment)), leftGbc)
+    leftGbc.gridx = 0; leftGbc.gridy = 6; leftGbc.fill = GridBagConstraints.NONE
+    val titleAlignmentLabel = JLabel(getStringResource(Res.string.vertical_alignment))
+    titleAlignmentLabel.preferredSize = Dimension(120, titleAlignmentLabel.preferredSize.height)
+    leftPanel.add(titleAlignmentLabel, leftGbc)
 
     val titleAlignmentCombo = JComboBox(arrayOf(
         getStringResource(Res.string.top),
@@ -176,20 +187,53 @@ private fun createNativeSongSettingsPanel(
     leftGbc.gridx = 1
     leftPanel.add(titleAlignmentCombo, leftGbc)
 
+    // Title horizontal alignment
+    leftGbc.gridx = 0; leftGbc.gridy = 7
+    val titleHorizontalAlignmentLabel = JLabel(getStringResource(Res.string.title_horizontal_alignment))
+    titleHorizontalAlignmentLabel.preferredSize = Dimension(120, titleHorizontalAlignmentLabel.preferredSize.height)
+    leftPanel.add(titleHorizontalAlignmentLabel, leftGbc)
+
+    val titleHorizontalAlignmentCombo = JComboBox(arrayOf(
+        getStringResource(Res.string.left),
+        getStringResource(Res.string.center),
+        getStringResource(Res.string.right)
+    )).apply {
+        selectedItem = when (settings.titleHorizontalAlignment) {
+            "Left" -> getStringResource(Res.string.left)
+            "Center" -> getStringResource(Res.string.center)
+            "Right" -> getStringResource(Res.string.right)
+            else -> getStringResource(Res.string.center)
+        }
+        addActionListener {
+            val value = when (selectedItem as String) {
+                getStringResource(Res.string.left) -> "Left"
+                getStringResource(Res.string.center) -> "Center"
+                getStringResource(Res.string.right) -> "Right"
+                else -> "Center"
+            }
+            onSettingsChange(settings.copy(titleHorizontalAlignment = value))
+        }
+    }
+    leftGbc.gridx = 1
+    leftPanel.add(titleHorizontalAlignmentCombo, leftGbc)
+
     // RIGHT COLUMN - Lyrics Section and Song Number Section
     val rightPanel = JPanel(GridBagLayout())
     val rightGbc = GridBagConstraints()
     rightGbc.anchor = GridBagConstraints.WEST
-    rightGbc.insets = Insets(5, 10, 5, 5)
+    rightGbc.insets = Insets(2, 5, 2, 5)
 
     // Lyrics Section
     rightGbc.gridx = 0; rightGbc.gridy = 0; rightGbc.gridwidth = 2
-    rightPanel.add(JLabel("<html><b>${getStringResource(Res.string.lyrics_section)}</b></html>"), rightGbc)
+    rightGbc.insets = Insets(5, 5, 5, 5)
+    rightPanel.add(JLabel("<html><b>${getStringResource(Res.string.lyrics)}</b></html>"), rightGbc)
 
     // Lyrics font size
     rightGbc.gridx = 0; rightGbc.gridy = 1; rightGbc.gridwidth = 1
-    rightGbc.insets = Insets(5, 20, 5, 5)
-    rightPanel.add(JLabel(getStringResource(Res.string.font_size)), rightGbc)
+    rightGbc.insets = Insets(2, 15, 2, 5)
+    val lyricsFontSizeLabel = JLabel(getStringResource(Res.string.font_size))
+    lyricsFontSizeLabel.preferredSize = Dimension(120, lyricsFontSizeLabel.preferredSize.height)
+    rightPanel.add(lyricsFontSizeLabel, rightGbc)
 
     val lyricsFontSizeSpinner = JSpinner(SpinnerNumberModel(settings.lyricsFontSize, 8, 72, 1)).apply {
         addChangeListener {
@@ -201,7 +245,9 @@ private fun createNativeSongSettingsPanel(
 
     // Lyrics font type
     rightGbc.gridx = 0; rightGbc.gridy = 2
-    rightPanel.add(JLabel(getStringResource(Res.string.font_type)), rightGbc)
+    val lyricsFontTypeLabel = JLabel(getStringResource(Res.string.font_type))
+    lyricsFontTypeLabel.preferredSize = Dimension(120, lyricsFontTypeLabel.preferredSize.height)
+    rightPanel.add(lyricsFontTypeLabel, rightGbc)
 
     val lyricsFontCombo = JComboBox(availableFonts).apply {
         selectedItem = settings.lyricsFontType
@@ -212,8 +258,52 @@ private fun createNativeSongSettingsPanel(
     rightGbc.gridx = 1
     rightPanel.add(lyricsFontCombo, rightGbc)
 
+    // Lyrics font min/max on same row
+    rightGbc.gridx = 0; rightGbc.gridy = 3; rightGbc.gridwidth = 1
+    val lyricsMinLabel = JLabel(getStringResource(Res.string.min))
+    lyricsMinLabel.preferredSize = Dimension(120, lyricsMinLabel.preferredSize.height)
+    rightPanel.add(lyricsMinLabel, rightGbc)
+
+    val lyricsMinMaxPanel = JPanel(FlowLayout(FlowLayout.LEFT, 5, 0))
+    val lyricsMinFontSpinner = JSpinner(SpinnerNumberModel(settings.lyricsMinFontSize, 8, 72, 1)).apply {
+        addChangeListener {
+            onSettingsChange(settings.copy(lyricsMinFontSize = value as Int))
+        }
+        preferredSize = Dimension(60, preferredSize.height)
+    }
+    lyricsMinMaxPanel.add(lyricsMinFontSpinner)
+
+    lyricsMinMaxPanel.add(JLabel(getStringResource(Res.string.max)))
+    val lyricsMaxFontSpinner = JSpinner(SpinnerNumberModel(settings.lyricsMaxFontSize, 8, 72, 1)).apply {
+        addChangeListener {
+            onSettingsChange(settings.copy(lyricsMaxFontSize = value as Int))
+        }
+        preferredSize = Dimension(60, preferredSize.height)
+    }
+    lyricsMinMaxPanel.add(lyricsMaxFontSpinner)
+
+    rightGbc.gridx = 1
+    rightPanel.add(lyricsMinMaxPanel, rightGbc)
+
+    // Lyrics alpha
+    rightGbc.gridx = 0; rightGbc.gridy = 4; rightGbc.gridwidth = 1
+    val lyricsAlphaLabel = JLabel(getStringResource(Res.string.font_alpha))
+    lyricsAlphaLabel.preferredSize = Dimension(120, lyricsAlphaLabel.preferredSize.height)
+    rightPanel.add(lyricsAlphaLabel, rightGbc)
+
+    val lyricsAlphaSlider = JSlider(0, 100, settings.lyricsAlpha.toInt()).apply {
+        addChangeListener {
+            onSettingsChange(settings.copy(lyricsAlpha = value.toFloat()))
+        }
+        majorTickSpacing = 25
+        paintTicks = true
+        paintLabels = true
+    }
+    rightGbc.gridx = 1; rightGbc.fill = GridBagConstraints.HORIZONTAL
+    rightPanel.add(lyricsAlphaSlider, rightGbc)
+
     // Word wrap
-    rightGbc.gridx = 0; rightGbc.gridy = 3; rightGbc.gridwidth = 2
+    rightGbc.gridx = 0; rightGbc.gridy = 5; rightGbc.gridwidth = 2; rightGbc.fill = GridBagConstraints.NONE
     val wordWrapCheckBox = JCheckBox(getStringResource(Res.string.word_wrap), settings.wordWrap).apply {
         addActionListener {
             onSettingsChange(settings.copy(wordWrap = isSelected))
@@ -222,8 +312,10 @@ private fun createNativeSongSettingsPanel(
     rightPanel.add(wordWrapCheckBox, rightGbc)
 
     // Lyrics alignment
-    rightGbc.gridx = 0; rightGbc.gridy = 4; rightGbc.gridwidth = 1
-    rightPanel.add(JLabel(getStringResource(Res.string.lyrics_alignment)), rightGbc)
+    rightGbc.gridx = 0; rightGbc.gridy = 6; rightGbc.gridwidth = 1
+    val lyricsAlignmentLabel = JLabel(getStringResource(Res.string.vertical_alignment))
+    lyricsAlignmentLabel.preferredSize = Dimension(120, lyricsAlignmentLabel.preferredSize.height)
+    rightPanel.add(lyricsAlignmentLabel, rightGbc)
 
     val lyricsAlignmentCombo = JComboBox(arrayOf(
         getStringResource(Res.string.top),
@@ -249,15 +341,47 @@ private fun createNativeSongSettingsPanel(
     rightGbc.gridx = 1
     rightPanel.add(lyricsAlignmentCombo, rightGbc)
 
+    // Lyrics horizontal alignment
+    rightGbc.gridx = 0; rightGbc.gridy = 7; rightGbc.gridwidth = 1
+    val lyricsHorizontalAlignmentLabel = JLabel(getStringResource(Res.string.lyrics_horizontal_alignment))
+    lyricsHorizontalAlignmentLabel.preferredSize = Dimension(120, lyricsHorizontalAlignmentLabel.preferredSize.height)
+    rightPanel.add(lyricsHorizontalAlignmentLabel, rightGbc)
+
+    val lyricsHorizontalAlignmentCombo = JComboBox(arrayOf(
+        getStringResource(Res.string.left),
+        getStringResource(Res.string.center),
+        getStringResource(Res.string.right)
+    )).apply {
+        selectedItem = when (settings.lyricsHorizontalAlignment) {
+            "Left" -> getStringResource(Res.string.left)
+            "Center" -> getStringResource(Res.string.center)
+            "Right" -> getStringResource(Res.string.right)
+            else -> getStringResource(Res.string.center)
+        }
+        addActionListener {
+            val value = when (selectedItem as String) {
+                getStringResource(Res.string.left) -> "Left"
+                getStringResource(Res.string.center) -> "Center"
+                getStringResource(Res.string.right) -> "Right"
+                else -> "Center"
+            }
+            onSettingsChange(settings.copy(lyricsHorizontalAlignment = value))
+        }
+    }
+    rightGbc.gridx = 1
+    rightPanel.add(lyricsHorizontalAlignmentCombo, rightGbc)
+
     // Song Number Section
-    rightGbc.gridx = 0; rightGbc.gridy = 5; rightGbc.gridwidth = 2
-    rightGbc.insets = Insets(20, 10, 5, 10)
+    rightGbc.gridx = 0; rightGbc.gridy = 8; rightGbc.gridwidth = 2
+    rightGbc.insets = Insets(15, 5, 5, 5)
     rightPanel.add(JLabel("<html><b>${getStringResource(Res.string.song_number)}</b></html>"), rightGbc)
 
     // Song number font size
-    rightGbc.gridx = 0; rightGbc.gridy = 6; rightGbc.gridwidth = 1
-    rightGbc.insets = Insets(5, 20, 5, 5)
-    rightPanel.add(JLabel(getStringResource(Res.string.font_size)), rightGbc)
+    rightGbc.gridx = 0; rightGbc.gridy = 9; rightGbc.gridwidth = 1
+    rightGbc.insets = Insets(2, 15, 2, 5)
+    val songNumberFontSizeLabel = JLabel(getStringResource(Res.string.font_size))
+    songNumberFontSizeLabel.preferredSize = Dimension(120, songNumberFontSizeLabel.preferredSize.height)
+    rightPanel.add(songNumberFontSizeLabel, rightGbc)
 
     val songNumberFontSizeSpinner = JSpinner(SpinnerNumberModel(settings.songNumberFontSize, 8, 48, 1)).apply {
         addChangeListener {
@@ -268,7 +392,7 @@ private fun createNativeSongSettingsPanel(
     rightPanel.add(songNumberFontSizeSpinner, rightGbc)
 
     // First page only
-    rightGbc.gridx = 0; rightGbc.gridy = 7; rightGbc.gridwidth = 2
+    rightGbc.gridx = 0; rightGbc.gridy = 10; rightGbc.gridwidth = 2
     val firstPageOnlyCheckBox = JCheckBox(getStringResource(Res.string.show_on_first_page_only), settings.songNumberFirstPageOnly).apply {
         addActionListener {
             onSettingsChange(settings.copy(songNumberFirstPageOnly = isSelected))
@@ -277,8 +401,10 @@ private fun createNativeSongSettingsPanel(
     rightPanel.add(firstPageOnlyCheckBox, rightGbc)
 
     // Position
-    rightGbc.gridx = 0; rightGbc.gridy = 8; rightGbc.gridwidth = 1
-    rightPanel.add(JLabel(getStringResource(Res.string.position_on_screen)), rightGbc)
+    rightGbc.gridx = 0; rightGbc.gridy = 11; rightGbc.gridwidth = 1
+    val positionLabel = JLabel(getStringResource(Res.string.position_on_screen))
+    positionLabel.preferredSize = Dimension(120, positionLabel.preferredSize.height)
+    rightPanel.add(positionLabel, rightGbc)
 
     val positionCombo = JComboBox(arrayOf(
         getStringResource(Res.string.top_left),
@@ -318,3 +444,4 @@ private fun createNativeSongSettingsPanel(
     panel.add(contentPanel, BorderLayout.CENTER)
     return panel
 }
+

@@ -1,11 +1,9 @@
 package org.churchpresenter.app.churchpresenter.dialogs
 
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.awt.ComposePanel
 import churchpresenter.composeapp.generated.resources.*
 import org.churchpresenter.app.churchpresenter.data.SettingsManager
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.SongSettingsTab
-import org.churchpresenter.app.churchpresenter.ui.theme.AppThemeWrapper
+import org.churchpresenter.app.churchpresenter.dialogs.tabs.createNativeSongSettingsPanel
 import java.awt.BorderLayout
 import java.awt.FlowLayout
 import java.awt.Frame
@@ -39,19 +37,13 @@ fun showOptionsDialog(
 
             val tabbedPane = JTabbedPane()
 
-            // Song Settings Tab - Using Compose SongSettingsTab
-            val songPanel = ComposePanel().apply {
-                setContent {
-                    AppThemeWrapper {
-                        SongSettingsTab(
-                            settings = currentSettings.songSettings,
-                            onSettingsChange = { newSongSettings ->
-                                currentSettings = currentSettings.copy(songSettings = newSongSettings)
-                            }
-                        )
-                    }
+            // Song Settings Tab - Using native Swing components directly
+            val songPanel = createNativeSongSettingsPanel(
+                settings = currentSettings.songSettings,
+                onSettingsChange = { newSongSettings ->
+                    currentSettings = currentSettings.copy(songSettings = newSongSettings)
                 }
-            }
+            )
             tabbedPane.addTab(getStringResource(Res.string.song), songPanel)
 
             // Placeholder tabs

@@ -9,6 +9,7 @@ data class SongSettings(
     val titleMaxFontSize: Int = 72,
     val titleAlpha: Float = 100f,
     val titleAlignment: String = "Middle",
+    val titleHorizontalAlignment: String = "Center",
 
     // Lyrics settings
     val lyricsFontSize: Int = 24,
@@ -18,6 +19,7 @@ data class SongSettings(
     val lyricsAlpha: Float = 100f,
     val wordWrap: Boolean = true,
     val lyricsAlignment: String = "Middle",
+    val lyricsHorizontalAlignment: String = "Center",
 
     // Song number settings
     val songNumberFontSize: Int = 16,
