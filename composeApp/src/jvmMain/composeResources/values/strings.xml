@@ -70,8 +70,7 @@
     <string name="other">Other</string>
 
     <!-- Song Settings Strings -->
-    <string name="title_section">Title Section</string>
-    <string name="lyrics_section">Lyrics Section</string>
+    <string name="lyrics">Lyrics</string>
     <string name="song_number">Song Number</string>
     <string name="min">Min:</string>
     <string name="max">Max:</string>
