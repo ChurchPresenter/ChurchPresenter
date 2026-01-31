@@ -141,7 +141,10 @@ private val LightColorScheme = lightColorScheme(
     surfaceVariant = Color(0xFFE7E0EC),
     onSurfaceVariant = Color(0xFF49454F),
     outline = Color(0xFF79747E),
-    outlineVariant = Color(0xFFCAC4D0)
+    outlineVariant = Color(0xFFCAC4D0),
+    // Custom colors for buttons
+    inverseSurface = Color(0xFF4CAF50), // Success button background
+    inverseOnSurface = Color.White, // Success button text
 )
 
 // Dark theme colors
@@ -156,10 +159,10 @@ private val DarkColorScheme = darkColorScheme(
     onSecondaryContainer = Color(0xFF70F0DD),
     tertiary = Color(0xFFE1BEE7),
     onTertiary = Color(0xFF4A148C),
-    error = Color(0xFFCF6679),
-    onError = Color(0xFF690005),
-    errorContainer = Color(0xFF93000A),
-    onErrorContainer = Color(0xFFFFDAD6),
+    error = Color(0xFFF44336),
+    onError = Color.White,
+    errorContainer = Color(0xFFD32F2F),
+    onErrorContainer = Color.White,
     background = Color(0xFF10131A),
     onBackground = Color(0xFFE6E1E5),
     surface = Color(0xFF1E1E1E),
@@ -167,7 +170,10 @@ private val DarkColorScheme = darkColorScheme(
     surfaceVariant = Color(0xFF49454F),
     onSurfaceVariant = Color(0xFFCAC4D0),
     outline = Color(0xFF938F99),
-    outlineVariant = Color(0xFF49454F)
+    outlineVariant = Color(0xFF49454F),
+    // Custom colors for buttons
+    inverseSurface = Color(0xFF66BB6A), // Success button background (lighter for dark theme)
+    inverseOnSurface = Color.Black, // Success button text (black on light green)
 )
 
 @Composable
