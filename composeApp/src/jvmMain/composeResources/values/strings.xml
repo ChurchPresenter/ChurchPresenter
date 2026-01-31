@@ -34,6 +34,12 @@
     <string name="options">Options</string>
     <string name="cancel">Cancel</string>
     <string name="ok">OK</string>
+    <string name="none">None</string>
+    <string name="first_page">First Page</string>
+    <string name="every_page">Every Page</string>
+    <string name="show_title">Show Title:</string>
+    <string name="font_size">Font Size:</string>
+    <string name="font_type">Font Type:</string>
     <string name="announcements">Announcements</string>
     <string name="menu_file">File</string>
     <string name="menu_new_schedule">New Schedule</string>
@@ -54,6 +60,43 @@
     <string name="menu_help">Help</string>
     <string name="menu_about">About</string>
     <string name="menu_help_item">Help</string>
+
+    <!-- Options Dialog Strings -->
+    <string name="text_settings_and_colors">Text Settings and Colors</string>
+    <string name="background">Background</string>
+    <string name="background_images">Background Images</string>
+    <string name="folders">Folders</string>
+    <string name="projection">Projection</string>
+    <string name="other">Other</string>
+
+    <!-- Song Settings Strings -->
+    <string name="title_section">Title Section</string>
+    <string name="lyrics_section">Lyrics Section</string>
+    <string name="song_number">Song Number</string>
+    <string name="min">Min:</string>
+    <string name="max">Max:</string>
+    <string name="font_alpha">Font Alpha: %d</string>
+    <string name="title_alignment">Title alignment:</string>
+    <string name="lyrics_alignment">Lyrics alignment:</string>
+    <string name="top">Top</string>
+    <string name="middle">Middle</string>
+    <string name="bottom">Bottom</string>
+    <string name="word_wrap">Word Wrap</string>
+    <string name="show_on_first_page_only">Show on first page only</string>
+    <string name="position_on_screen">Position on screen:</string>
+    <string name="top_left">Top Left</string>
+    <string name="top_right">Top Right</string>
+    <string name="bottom_left">Bottom Left</string>
+    <string name="bottom_right">Bottom Right</string>
+
+    <!-- Placeholder strings for other tabs -->
+    <string name="bible_tab_content">Bible tab content will be implemented</string>
+    <string name="text_settings_tab_content">Text Settings and Colors tab content will be implemented</string>
+    <string name="background_tab_content">Background tab content will be implemented</string>
+    <string name="background_images_tab_content">Background Images tab content will be implemented</string>
+    <string name="folders_tab_content">Folders tab content will be implemented</string>
+    <string name="projection_tab_content">Projection tab content will be implemented</string>
+    <string name="other_tab_content">Other tab content will be implemented</string>
 
     <string name="bible_book_1">Genesis</string>
     <string name="bible_book_2">Exodus</string>

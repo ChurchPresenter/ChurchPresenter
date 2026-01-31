@@ -8,9 +8,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun BackgroundImagesTab() {
+fun ProjectionSettingsTab() {
     Text(
-        text = "Background images settings will be implemented here",
+        text = "Projection settings will be implemented here",
         style = MaterialTheme.typography.bodyLarge,
         modifier = Modifier.padding(16.dp)
     )

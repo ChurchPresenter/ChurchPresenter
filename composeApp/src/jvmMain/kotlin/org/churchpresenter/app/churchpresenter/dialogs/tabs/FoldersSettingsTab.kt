@@ -8,9 +8,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun BackgroundTab() {
+fun FoldersSettingsTab() {
     Text(
-        text = "Background settings will be implemented here",
+        text = "Folders settings will be implemented here",
         style = MaterialTheme.typography.bodyLarge,
         modifier = Modifier.padding(16.dp)
     )

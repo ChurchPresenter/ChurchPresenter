@@ -17,7 +17,7 @@ import churchpresenter.composeapp.generated.resources.app_name
 import org.churchpresenter.app.churchpresenter.models.SelectedVerse
 import org.churchpresenter.app.churchpresenter.presenter.BiblePresenter
 import org.churchpresenter.app.churchpresenter.ui.theme.AppThemeWrapper
-import org.churchpresenter.app.churchpresenter.dialogs.OptionsDialog
+import org.churchpresenter.app.churchpresenter.dialogs.showOptionsDialog
 import org.churchpresenter.app.churchpresenter.models.LyricSection
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.presenter.SongPresenter
@@ -25,8 +25,7 @@ import org.jetbrains.compose.resources.stringResource
 
 
 fun main() = application {
-    var openBlackWindow by remember { mutableStateOf(true) }
-    var showOptionsDialog by remember { mutableStateOf(false) }
+    var openBlackWindow by remember { mutableStateOf(false) }
     var selectedVerse by remember { mutableStateOf(SelectedVerse()) }
     var presenting by remember { mutableStateOf(Presenting.NONE) }
     var lyricSection by remember { mutableStateOf(LyricSection()) }
@@ -38,7 +37,6 @@ fun main() = application {
     val state = rememberWindowState(
         placement = WindowPlacement.Maximized
     )
-    var showPicker by remember { mutableStateOf(false) }
 
     AppThemeWrapper {
         Window(
@@ -48,7 +46,15 @@ fun main() = application {
         ) {
             NavigationTopBar(
                 onAbout = { openBlackWindow = true },
-                onSettings = { showOptionsDialog = true },
+                onSettings = {
+                    // Use JDialog for better desktop integration
+                    showOptionsDialog(
+                        parent = null, // ComposeWindow doesn't easily provide Frame access
+                        onSave = {
+                            // Settings are automatically saved in the dialog
+                        }
+                    )
+                },
                 onExit = { exitApplication() },
             )
             MainDesktop(
@@ -61,10 +67,6 @@ fun main() = application {
                 presenting = { presenting = it }
             )
         }
-    }
-
-    if (showPicker) {
-        showSwingFontChooser()
     }
 
     if (openBlackWindow) {
@@ -95,17 +97,5 @@ fun main() = application {
                 }
             }
         }
-    }
-
-    if (showOptionsDialog) {
-        // Options Dialog
-        OptionsDialog(
-            isVisible = true,
-            onDismiss = { showOptionsDialog = false },
-            onSave = {
-                // TODO: Save settings
-                showOptionsDialog = false
-            }
-        )
     }
 }

@@ -8,9 +8,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun TextTab() {
+fun BackgroundSettingsImagesTab() {
     Text(
-        text = "Text settings and colors will be implemented here",
+        text = "Background images settings will be implemented here",
         style = MaterialTheme.typography.bodyLarge,
         modifier = Modifier.padding(16.dp)
     )

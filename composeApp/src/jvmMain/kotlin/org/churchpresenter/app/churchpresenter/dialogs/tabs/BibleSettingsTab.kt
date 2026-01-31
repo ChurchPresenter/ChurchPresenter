@@ -26,7 +26,7 @@ import androidx.compose.ui.unit.dp
 import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
 
 @Composable
-fun BibleTab() {
+fun BibleSettingsTab() {
     var showVerseNumbers by remember { mutableStateOf(true) }
     var showBookNames by remember { mutableStateOf(true) }
     var verseNumberPosition by remember { mutableStateOf("Before text") }

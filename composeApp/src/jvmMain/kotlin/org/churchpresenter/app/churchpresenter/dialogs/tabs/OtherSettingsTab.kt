@@ -8,7 +8,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun OtherTab() {
+fun OtherSettingsTab() {
     Text(
         text = "Other settings will be implemented here",
         style = MaterialTheme.typography.bodyLarge,
