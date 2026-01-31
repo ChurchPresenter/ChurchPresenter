@@ -30,7 +30,7 @@ fun TabSection(
     PrimaryTabRow(
         selectedTabIndex = selectedDestination,
         modifier = modifier,
-        containerColor = MaterialTheme.colorScheme.background,
+        containerColor = MaterialTheme.colorScheme.surface,
     ) {
         Tabs.entries.forEachIndexed { index, tab ->
             Tab(
@@ -41,7 +41,8 @@ fun TabSection(
                 },
                 text = {
                     Text(
-                        style = androidx.compose.material3.MaterialTheme.typography.titleSmall,
+                        style = MaterialTheme.typography.titleSmall,
+                        color = MaterialTheme.colorScheme.onSurface,
                         text = getStringName(tab),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis

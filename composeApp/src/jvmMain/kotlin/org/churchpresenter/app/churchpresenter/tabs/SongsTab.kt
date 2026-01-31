@@ -320,6 +320,7 @@ fun SongsTab(
                             text = song.tune,
                             modifier = Modifier.width(60.dp),
                             fontSize = 12.sp,
+                            maxLines = 1,
                             color = if (index == selectedSongIndex)
                                 MaterialTheme.colorScheme.onSurfaceVariant
                             else

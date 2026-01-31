@@ -310,7 +310,10 @@ fun BibleTab(
                         .padding(4.dp)
                 ) {
                     items(verses) { v ->
-                        Text(text = v, modifier = Modifier.padding(4.dp))
+                        Text(text = v,
+                            modifier = Modifier.padding(4.dp),
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
                     }
                 }
             }

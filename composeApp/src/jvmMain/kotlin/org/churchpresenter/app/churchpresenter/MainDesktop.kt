@@ -31,7 +31,6 @@ import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.app.churchpresenter.data.Bible
 import org.churchpresenter.app.churchpresenter.models.LyricSection
 import org.churchpresenter.app.churchpresenter.models.SelectedVerse
-import org.churchpresenter.app.churchpresenter.ui.theme.ThemeManager
 
 @Composable
 fun MainDesktop(
@@ -56,15 +55,17 @@ fun MainDesktop(
                 Text(
                     text = stringResource(Res.string.service_schedule),
                     modifier = Modifier.padding(8.dp),
-                    color = MaterialTheme.colorScheme.primary
+                    color = MaterialTheme.colorScheme.onBackground,
                 )
                 Box(
-                    modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surface)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(MaterialTheme.colorScheme.surface)
                         .padding(8.dp)
                 ) {
                     Text(
                         "Service schedule (empty)",
-                        color = MaterialTheme.colorScheme.primary
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                 }
             }
