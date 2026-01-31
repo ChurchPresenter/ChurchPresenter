@@ -10,11 +10,13 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -44,6 +46,7 @@ import churchpresenter.composeapp.generated.resources.contains_phrase
 import churchpresenter.composeapp.generated.resources.current_book
 import churchpresenter.composeapp.generated.resources.entire_bible
 import churchpresenter.composeapp.generated.resources.exact_match
+import churchpresenter.composeapp.generated.resources.go_live
 import churchpresenter.composeapp.generated.resources.mode
 import churchpresenter.composeapp.generated.resources.scope
 import churchpresenter.composeapp.generated.resources.search
@@ -53,13 +56,15 @@ import org.churchpresenter.app.churchpresenter.composables.SearchTextField
 import org.churchpresenter.app.churchpresenter.composables.SelectionList
 import org.churchpresenter.app.churchpresenter.data.Bible
 import org.churchpresenter.app.churchpresenter.models.SelectedVerse
+import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun BibleTab(
     modifier: Modifier = Modifier,
     bible: Bible,
-    onVerseSelected: (SelectedVerse) -> Unit = {}
+    onVerseSelected: (SelectedVerse) -> Unit = {},
+    presenting: (Presenting) -> Unit = { Presenting.NONE }
 ) {
     val books = bible.getBooks()
     val bookCount = bible.getBookCount()
@@ -116,12 +121,14 @@ fun BibleTab(
                 if (verses.isNotEmpty()) {
                     val verseNumber = verses[0].substringBefore(". ").toIntOrNull() ?: 1
                     bible.getVerseDetails(bookId, selectedChapter, verseNumber)?.let { (bookName, verseText, _) ->
-                        onVerseSelected(SelectedVerse(
-                            bookName = bookName,
-                            chapter = selectedChapter,
-                            verseNumber = verseNumber,
-                            verseText = verseText
-                        ))
+                        onVerseSelected(
+                            SelectedVerse(
+                                bookName = bookName,
+                                chapter = selectedChapter,
+                                verseNumber = verseNumber,
+                                verseText = verseText
+                            )
+                        )
                     }
                 }
             }
@@ -143,16 +150,19 @@ fun BibleTab(
                     val verseNumber = verse.substringBefore(". ").toIntOrNull() ?: 1
                     val bookId = selectedBookIndex + 1
                     bible.getVerseDetails(bookId, selectedChapter, verseNumber)?.let { (bookName, verseText, _) ->
-                        onVerseSelected(SelectedVerse(
-                            bookName = bookName,
-                            chapter = selectedChapter,
-                            verseNumber = verseNumber,
-                            verseText = verseText
-                        ))
+                        onVerseSelected(
+                            SelectedVerse(
+                                bookName = bookName,
+                                chapter = selectedChapter,
+                                verseNumber = verseNumber,
+                                verseText = verseText
+                            )
+                        )
                     }
                     return true
                 }
             }
+
             Key.DirectionDown -> {
                 // Next verse
                 if (selectedVerseIndex < verses.size - 1) {
@@ -161,16 +171,19 @@ fun BibleTab(
                     val verseNumber = verse.substringBefore(". ").toIntOrNull() ?: 1
                     val bookId = selectedBookIndex + 1
                     bible.getVerseDetails(bookId, selectedChapter, verseNumber)?.let { (bookName, verseText, _) ->
-                        onVerseSelected(SelectedVerse(
-                            bookName = bookName,
-                            chapter = selectedChapter,
-                            verseNumber = verseNumber,
-                            verseText = verseText
-                        ))
+                        onVerseSelected(
+                            SelectedVerse(
+                                bookName = bookName,
+                                chapter = selectedChapter,
+                                verseNumber = verseNumber,
+                                verseText = verseText
+                            )
+                        )
                     }
                     return true
                 }
             }
+
             Key.DirectionLeft -> {
                 // Previous chapter
                 if (selectedChapter > 1) {
@@ -179,6 +192,7 @@ fun BibleTab(
                     return true
                 }
             }
+
             Key.DirectionRight -> {
                 // Next chapter
                 val maxChapter = bible.getChapterCount(selectedBookIndex)
@@ -278,11 +292,27 @@ fun BibleTab(
 
             // Verses view
             Column(modifier = Modifier.fillMaxWidth()) {
-                SearchTextField(
-                    modifier = Modifier.width(120.dp),
-                    label = stringResource(Res.string.verse),
-                ) { _ ->
-                    // verse search
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    SearchTextField(
+                        modifier = Modifier.width(120.dp),
+                        label = stringResource(Res.string.verse),
+                    ) { _ ->
+                        // verse search
+                    }
+                    Button(
+                        modifier = Modifier.wrapContentSize(),
+                        onClick = { presenting.invoke(Presenting.BIBLE) },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primary
+                        )
+                    ) {
+                        Text(
+                            text = stringResource(Res.string.go_live),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onPrimary,
+                            maxLines = 2
+                        )
+                    }
                 }
                 SelectionList(
                     list = verses,
@@ -296,12 +326,14 @@ fun BibleTab(
                     // Get verse details and send to presenter
                     val bookId = selectedBookIndex + 1
                     bible.getVerseDetails(bookId, selectedChapter, verseNumber)?.let { (bookName, verseText, _) ->
-                        onVerseSelected(SelectedVerse(
-                            bookName = bookName,
-                            chapter = selectedChapter,
-                            verseNumber = verseNumber,
-                            verseText = verseText
-                        ))
+                        onVerseSelected(
+                            SelectedVerse(
+                                bookName = bookName,
+                                chapter = selectedChapter,
+                                verseNumber = verseNumber,
+                                verseText = verseText
+                            )
+                        )
                     }
                 }
             }
@@ -319,7 +351,8 @@ fun BibleTab(
                             .padding(4.dp)
                     ) {
                         items(verses) { v ->
-                            Text(text = v,
+                            Text(
+                                text = v,
                                 modifier = Modifier.padding(4.dp),
                                 color = MaterialTheme.colorScheme.onSurface
                             )

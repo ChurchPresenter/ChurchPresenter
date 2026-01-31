@@ -3,11 +3,7 @@ package org.churchpresenter.app.churchpresenter.data
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.charset.StandardCharsets
-import java.util.logging.Level
-import java.util.logging.Logger
 import androidx.compose.runtime.mutableStateListOf
-
-private val bibleLogger: Logger = Logger.getLogger("org.churchpresenter.Bible")
 
 // Note: This conversion assumes you're using a Kotlin database library
 // You may need to adapt the SQL queries based on your specific database framework
@@ -34,21 +30,17 @@ class Bible {
         operatorBible.clear()
         books.clear()
 
-        bibleLogger.info("loadFromSpb: start loading resourcePath='$resourcePath'")
 
         try {
             val inputStream = Thread.currentThread().contextClassLoader.getResourceAsStream(resourcePath)
             val reader = if (inputStream != null) {
-                bibleLogger.info("loadFromSpb: loaded resource from classpath: $resourcePath")
                 inputStream.bufferedReader(StandardCharsets.UTF_8)
             } else {
                 val path = Paths.get(resourcePath)
                 if (Files.exists(path)) {
-                    bibleLogger.info("loadFromSpb: loaded resource from filesystem: ${path.toAbsolutePath()}")
                     Files.newBufferedReader(path, StandardCharsets.UTF_8)
                 } else {
                     val msg = "loadFromSpb: resource not found on classpath or filesystem: $resourcePath"
-                    bibleLogger.severe(msg)
                     throw IllegalArgumentException(msg)
                 }
             }
@@ -80,7 +72,6 @@ class Bible {
                             val bookName = headerMatch.groupValues[2].trim()
                             val chapterCount = headerMatch.groupValues[3].toInt()
                             parsedBookNames[bookId] = bookName
-                            bibleLogger.info("loadFromSpb: parsed book header - $bookId: $bookName ($chapterCount chapters)")
                             return@forEachLine
                         }
 
@@ -184,9 +175,7 @@ class Bible {
                 books.add(BibleBook(book = name, bookId = b.toString(), chapterCount = chapterCount))
             }
 
-            bibleLogger.info("loadFromSpb: parsed operatorBible.size=${operatorBible.size}, books.size=${books.size}, bookNames=${parsedBookNames.size}")
         } catch (e: Exception) {
-            bibleLogger.log(Level.SEVERE, "loadFromSpb failed for resourcePath=$resourcePath", e)
             throw e
         }
     }

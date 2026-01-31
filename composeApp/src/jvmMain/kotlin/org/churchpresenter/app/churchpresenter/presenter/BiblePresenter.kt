@@ -17,8 +17,11 @@ import androidx.compose.ui.unit.dp
 import org.churchpresenter.app.churchpresenter.models.SelectedVerse
 
 @Composable
-fun BiblePresenter(selectedVerse: SelectedVerse) {
-    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+fun BiblePresenter(
+    modifier: Modifier = Modifier,
+    selectedVerse: SelectedVerse
+) {
+    Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Column {
             Row(
                 Modifier.fillMaxWidth().padding(16.dp),

@@ -31,10 +31,12 @@ import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.app.churchpresenter.data.Bible
 import org.churchpresenter.app.churchpresenter.models.LyricSection
 import org.churchpresenter.app.churchpresenter.models.SelectedVerse
+import org.churchpresenter.app.churchpresenter.presenter.Presenting
 
 @Composable
 fun MainDesktop(
     modifier: Modifier = Modifier,
+    presenting: (Presenting) -> Unit,
     onVerseSelected: (SelectedVerse) -> Unit,
     onSongItemSelected: (LyricSection) -> Unit
 ) {
@@ -79,11 +81,13 @@ fun MainDesktop(
                 when (Tabs.entries[selectedTabIndex]) {
                     Tabs.BIBLE -> BibleTab(
                         bible = bible,
-                        onVerseSelected = onVerseSelected
+                        onVerseSelected = onVerseSelected,
+                        presenting = presenting
                     )
 
                     Tabs.SONGS -> SongsTab(
-                        onSongItemSelected = onSongItemSelected
+                        onSongItemSelected = onSongItemSelected,
+                        presenting = presenting
                     )
 
                     Tabs.PICTURES -> PicturesTab()
@@ -98,5 +102,5 @@ fun MainDesktop(
 @Preview
 @Composable
 fun MainDesktopPreview() {
-    MainDesktop(modifier = Modifier.fillMaxSize(), onVerseSelected = {}, {})
+    MainDesktop(modifier = Modifier.fillMaxSize(), onVerseSelected = {}, presenting = {}, onSongItemSelected = {})
 }

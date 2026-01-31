@@ -57,12 +57,14 @@ import churchpresenter.composeapp.generated.resources.tune
 import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
 import org.churchpresenter.app.churchpresenter.data.Songs
 import org.churchpresenter.app.churchpresenter.models.LyricSection
+import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun SongsTab(
     modifier: Modifier = Modifier,
-    onSongItemSelected: (LyricSection) -> Unit
+    onSongItemSelected: (LyricSection) -> Unit,
+    presenting: (Presenting) -> Unit = { Presenting.NONE }
 ) {
     // Create Songs instance and load the bundled pv3300.sps resource
     val songsData = remember {
@@ -218,7 +220,10 @@ fun SongsTab(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(stringResource(Res.string.filter_type_colon), style = MaterialTheme.typography.labelMedium)
+                    Text(
+                        stringResource(Res.string.filter_type_colon),
+                        style = MaterialTheme.typography.labelMedium
+                    )
                     DropdownSelector(
                         modifier = Modifier.weight(1f),
                         label = "",
@@ -230,7 +235,10 @@ fun SongsTab(
                         onClick = { /* Search action */ },
                         modifier = Modifier.height(40.dp)
                     ) {
-                        Text(stringResource(Res.string.search), style = MaterialTheme.typography.labelMedium)
+                        Text(
+                            stringResource(Res.string.search),
+                            style = MaterialTheme.typography.labelMedium
+                        )
                     }
                 }
 
@@ -238,7 +246,12 @@ fun SongsTab(
                 OutlinedTextField(
                     value = searchQuery,
                     onValueChange = { searchQuery = it },
-                    label = { Text(stringResource(Res.string.search_songs), style = MaterialTheme.typography.labelMedium) },
+                    label = {
+                        Text(
+                            stringResource(Res.string.search_songs),
+                            style = MaterialTheme.typography.labelMedium
+                        )
+                    },
                     modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
                     singleLine = true,
                     colors = OutlinedTextFieldDefaults.colors().copy(
@@ -355,7 +368,10 @@ fun SongsTab(
                                     MaterialTheme.colorScheme.onSurface
                             )
                         }
-                        HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
+                        HorizontalDivider(
+                            thickness = 1.dp,
+                            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+                        )
                     }
                 }
                 VerticalScrollbar(
@@ -392,7 +408,7 @@ fun SongsTab(
                 )
                 Button(
                     modifier = Modifier.wrapContentSize(),
-                    onClick = { /* Go Live action */ },
+                    onClick = { presenting.invoke(Presenting.LYRICS) },
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.primary
                     )
@@ -453,7 +469,8 @@ fun SongsTab(
                                         else Color.Transparent
                                     )
                                     .clickable {
-                                        selectedSectionIndex = if (selectedSectionIndex == sectionIndex) -1 else sectionIndex
+                                        selectedSectionIndex =
+                                            if (selectedSectionIndex == sectionIndex) -1 else sectionIndex
                                         onSongItemSelected.invoke(section)
                                     }
                                     .padding(8.dp)

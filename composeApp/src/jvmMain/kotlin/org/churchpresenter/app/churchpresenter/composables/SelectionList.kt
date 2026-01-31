@@ -59,7 +59,12 @@ fun SelectionList(
                     text = item,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(if (isSelected) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.surface)
+                        .background(
+                            if (isSelected)
+                                MaterialTheme.colorScheme.surfaceVariant
+                            else
+                                MaterialTheme.colorScheme.surface
+                        )
                         .clickable {
                             onItemSelected.invoke(item)
                         }
