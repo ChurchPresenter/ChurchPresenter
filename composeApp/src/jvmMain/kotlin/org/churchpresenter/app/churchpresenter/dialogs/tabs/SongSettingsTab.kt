@@ -438,10 +438,13 @@ private fun RightColumn(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Checkbox(
-            checked = settings.songSettings.wordWrap,
+            checked = initialWordWrapValue,
             onCheckedChange = {
+                initialWordWrapValue = it
                 onSettingsChange.invoke(
-                    settings.copy(songSettings = settings.songSettings.copy(wordWrap = it))
+                    settings.copy(
+                        songSettings = settings.songSettings.copy(wordWrap = it)
+                    )
                 )
             }
         )
@@ -524,12 +527,14 @@ private fun RightColumn(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        var rememberValue by remember { mutableStateOf(settings.songSettings.songNumberFirstPageOnly) }
         Checkbox(
-            checked = settings.songSettings.songNumberFirstPageOnly,
+            checked = rememberValue,
             onCheckedChange = {
-                onSettingsChange.invoke(
-                    settings.copy(songSettings = settings.songSettings.copy(songNumberFirstPageOnly = it))
-                )
+                rememberValue = it
+                    onSettingsChange.invoke(
+                        settings.copy(songSettings = settings.songSettings.copy(songNumberFirstPageOnly = it))
+                    )
             }
         )
         Text(
@@ -634,7 +639,6 @@ private fun ModernButton(
         Text(text = text, fontSize = 12.sp, fontWeight = FontWeight.Bold)
     }
 }
-
 
 
 @Composable

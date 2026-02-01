@@ -13,6 +13,7 @@ import java.awt.event.WindowAdapter
 import java.awt.event.WindowEvent
 import javax.swing.*
 import kotlinx.coroutines.runBlocking
+import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 
 // Helper function to get string resources in Swing context
@@ -30,7 +31,6 @@ fun showOptionsDialog(
     SwingUtilities.invokeLater {
         val settingsManager = SettingsManager()
         var currentSettings = settingsManager.loadSettings()
-
         val dialog = JDialog(parent, getStringResource(Res.string.options), true).apply {
             defaultCloseOperation = JDialog.DISPOSE_ON_CLOSE
             setSize(1000, 700)
@@ -43,13 +43,13 @@ fun showOptionsDialog(
             // Song Settings Tab - Using Compose
             val songPanel = ComposePanel().apply {
                 setContent {
-                    // Create Compose-aware state that can trigger recomposition
-                    var songSettings by remember { mutableStateOf(currentSettings.songSettings) }
+                    var appSettings by remember { mutableStateOf(currentSettings) }
 
                     SongSettingsTab(
-                        settings = currentSettings,
-                        onSettingsChange = { newSongSettings ->
-                            currentSettings = newSongSettings
+                        settings = appSettings,
+                        onSettingsChange = { updateFn ->
+                            appSettings = AppSettings(updateFn.songSettings)
+                            currentSettings = appSettings
                         }
                     )
                 }

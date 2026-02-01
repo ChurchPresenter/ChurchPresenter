@@ -1,5 +1,8 @@
 package org.churchpresenter.app.churchpresenter.data
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class SongSettings(
     // Song file management
     val storageDirectory: String = "",
@@ -31,6 +34,7 @@ data class SongSettings(
     val songNumberPosition: String = "Bottom Right"
 )
 
+@Serializable
 data class AppSettings(
     val songSettings: SongSettings = SongSettings(),
     // Add other tab settings here as needed
