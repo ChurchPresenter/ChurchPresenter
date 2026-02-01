@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
@@ -47,7 +48,7 @@ fun DropdownSettingsField(
         OutlinedButton(
             interactionSource = interactionSource,
             onClick = { expanded = true },
-            modifier = Modifier.fillMaxWidth().height(32.dp),
+            modifier = Modifier.wrapContentWidth().height(32.dp),
             shape = RoundedCornerShape(2.dp),
             contentPadding = PaddingValues(horizontal = 8.dp),
             border = BorderStroke(borderWidth, borderColor),

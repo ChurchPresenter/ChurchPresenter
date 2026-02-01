@@ -60,6 +60,10 @@ import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
 import org.churchpresenter.app.churchpresenter.data.Songs
 import org.churchpresenter.app.churchpresenter.models.LyricSection
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.app.churchpresenter.utils.Constants.CHORUS
+import org.churchpresenter.app.churchpresenter.utils.Constants.CHORUS_RUS
+import org.churchpresenter.app.churchpresenter.utils.Constants.VERSE
+import org.churchpresenter.app.churchpresenter.utils.Constants.VERSE_RUS
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -192,7 +196,7 @@ fun SongsTab(
             val lyrics = filteredSongs[selectedSongIndex].lyrics
             var count = 0
             for (line in lyrics) {
-                if (line.startsWith("Куплет") || line.startsWith("Припев")) {
+                if (line.startsWith(VERSE_RUS) || line.startsWith(CHORUS)) {
                     count++
                 }
             }
@@ -249,19 +253,19 @@ fun SongsTab(
                                     var currentSectionType = ""
 
                                     for (line in lyrics) {
-                                        if (line.startsWith("Куплет") || line.startsWith("Припев")) {
+                                        if (line.startsWith(VERSE_RUS) || line.startsWith(CHORUS)) {
                                             if (currentSection.isNotEmpty()) {
                                                 sections.add(
                                                     LyricSection(
                                                         title = title,
                                                         type = currentSectionType,
                                                         lines = currentSection.toList(),
-                                                        songNumber = songNumber,
+                                                        songNumber = songNumber
                                                     )
                                                 )
                                             }
                                             currentSection = mutableListOf(line)
-                                            currentSectionType = if (line.startsWith("Куплет")) "verse" else "chorus"
+                                            currentSectionType = if (line.startsWith(VERSE_RUS)) VERSE else CHORUS
                                         } else {
                                             currentSection.add(line)
                                         }
@@ -294,7 +298,7 @@ fun SongsTab(
                                     var currentSectionType = ""
 
                                     for (line in lyrics) {
-                                        if (line.startsWith("Куплет") || line.startsWith("Припев")) {
+                                        if (line.startsWith(VERSE_RUS) || line.startsWith(CHORUS)) {
                                             if (currentSection.isNotEmpty()) {
                                                 sections.add(
                                                     LyricSection(
@@ -306,7 +310,7 @@ fun SongsTab(
                                                 )
                                             }
                                             currentSection = mutableListOf(line)
-                                            currentSectionType = if (line.startsWith("Куплет")) "verse" else "chorus"
+                                            currentSectionType = if (line.startsWith(VERSE_RUS)) VERSE else CHORUS
                                         } else {
                                             currentSection.add(line)
                                         }
@@ -594,8 +598,8 @@ fun SongsTab(
                         var currentSectionType = ""
 
                         // Group lyrics into sections
-                        for (line in lyrics) {
-                            if (line.startsWith("Куплет") || line.startsWith("Припев")) {
+                        lyrics.forEachIndexed { index, line ->
+                            if (line.startsWith(VERSE_RUS) || line.startsWith(CHORUS_RUS)) {
                                 // Save previous section if it exists
                                 if (currentSection.isNotEmpty()) {
                                     sections.add(
@@ -609,7 +613,7 @@ fun SongsTab(
                                 }
                                 // Start new section
                                 currentSection = mutableListOf(line)
-                                currentSectionType = if (line.startsWith("Куплет")) "verse" else "chorus"
+                                currentSectionType = if (line.startsWith(CHORUS_RUS)) VERSE else CHORUS
                             } else {
                                 currentSection.add(line)
                             }
@@ -644,7 +648,7 @@ fun SongsTab(
                                     .padding(8.dp)
                             ) {
                                 section.lines.forEachIndexed { lineIndex, line ->
-                                    if (lineIndex == 0 && (line.startsWith("Куплет") || line.startsWith("Припев"))) {
+                                    if (lineIndex == 0 && (line.startsWith(VERSE_RUS) || line.startsWith(CHORUS_RUS))) {
                                         Text(
                                             text = line,
                                             style = MaterialTheme.typography.titleSmall,

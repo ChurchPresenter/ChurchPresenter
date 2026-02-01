@@ -38,6 +38,7 @@
     <string name="first_page">First Page</string>
     <string name="every_page">Every Page</string>
     <string name="show_title">Show Title:</string>
+    <string name="show_number">Show Number:</string>
     <string name="font_size">Font Size:</string>
     <string name="font_type">Font Type:</string>
     <string name="announcements">Announcements</string>
@@ -78,6 +79,8 @@
     <string name="vertical_alignment">Vertical alignment:</string>
     <string name="horizontal_alignment">Horizontal alignment:</string>
     <string name="top">Top</string>
+    <string name="above_verse">Above Verse</string>
+    <string name="below_verse">Below Verse</string>
     <string name="middle">Middle</string>
     <string name="bottom">Bottom</string>
     <string name="left">Left</string>
@@ -99,6 +102,7 @@
     <string name="top_right">Top Right</string>
     <string name="bottom_left">Bottom Left</string>
     <string name="bottom_right">Bottom Right</string>
+    <string name="color">Color:</string>
 
     <!-- Placeholder strings for other tabs -->
     <string name="bible_tab_content">Bible tab content will be implemented</string>

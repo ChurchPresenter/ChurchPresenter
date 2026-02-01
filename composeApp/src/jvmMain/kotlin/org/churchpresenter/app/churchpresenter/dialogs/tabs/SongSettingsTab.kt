@@ -8,46 +8,29 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.ExperimentalTextApi
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import churchpresenter.composeapp.generated.resources.*
+import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
 import org.churchpresenter.app.churchpresenter.composables.DropdownSettingsField
 import org.churchpresenter.app.churchpresenter.composables.FontSettingsDropdown
 import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
 import org.churchpresenter.app.churchpresenter.data.AppSettings
+import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.Utils
 import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDefault
 import org.jetbrains.compose.resources.stringResource
-import java.awt.*
 import java.io.File
 import javax.swing.*
 
 // Constants for dropdown values that can't be localized
-object DropdownValues {
-    const val NONE = "None"
-    const val FIRST_PAGE = "First Page"
-    const val EVERY_PAGE = "Every Page"
-    const val TOP = "Top"
-    const val MIDDLE = "Middle"
-    const val BOTTOM = "Bottom"
-    const val LEFT = "Left"
-    const val CENTER = "Center"
-    const val RIGHT = "Right"
-    const val TOP_LEFT = "Top Left"
-    const val TOP_RIGHT = "Top Right"
-    const val BOTTOM_LEFT = "Bottom Left"
-    const val BOTTOM_RIGHT = "Bottom Right"
-}
 
 
 @Composable
@@ -66,7 +49,7 @@ fun SongSettingsTab(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState()),
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             // Left Column
             Column(
@@ -107,9 +90,8 @@ private fun LeftColumn(
     val noneStr = stringResource(Res.string.none)
     val firstPageStr = stringResource(Res.string.first_page)
     val everyPageStr = stringResource(Res.string.every_page)
-    val topStr = stringResource(Res.string.top)
-    val middleStr = stringResource(Res.string.middle)
-    val bottomStr = stringResource(Res.string.bottom)
+    val aboveVerseStr = stringResource(Res.string.above_verse)
+    val belowVerseStr = stringResource(Res.string.below_verse)
     val leftStr = stringResource(Res.string.left)
     val centerStr = stringResource(Res.string.center)
     val rightStr = stringResource(Res.string.right)
@@ -254,18 +236,18 @@ private fun LeftColumn(
     SettingRow(stringResource(Res.string.show_title)) {
         DropdownSettingsField(
             value = when (settings.songSettings.titleDisplay) {
-                DropdownValues.NONE -> noneStr
-                DropdownValues.FIRST_PAGE -> firstPageStr
-                DropdownValues.EVERY_PAGE -> everyPageStr
+                Constants.NONE -> noneStr
+                Constants.FIRST_PAGE -> firstPageStr
+                Constants.EVERY_PAGE -> everyPageStr
                 else -> firstPageStr
             },
             options = listOf(noneStr, firstPageStr, everyPageStr),
             onValueChange = { displayValue ->
                 val storedValue = when (displayValue) {
-                    noneStr -> DropdownValues.NONE
-                    firstPageStr -> DropdownValues.FIRST_PAGE
-                    everyPageStr -> DropdownValues.EVERY_PAGE
-                    else -> DropdownValues.FIRST_PAGE
+                    noneStr -> Constants.NONE
+                    firstPageStr -> Constants.FIRST_PAGE
+                    everyPageStr -> Constants.EVERY_PAGE
+                    else -> Constants.FIRST_PAGE
                 }
                 onSettingsChange.invoke(settings.copy(songSettings = settings.songSettings.copy(titleDisplay = storedValue)))
             }
@@ -308,48 +290,46 @@ private fun LeftColumn(
         }
     }
 
-    MinMaxRow(
-        minValue = settings.songSettings.titleMinFontSize,
-        maxValue = settings.songSettings.titleMaxFontSize,
-        onMinChange = {
-            onSettingsChange.invoke(
-                settings.copy(songSettings = settings.songSettings.copy(titleMinFontSize = it))
-            )
-        },
-        onMaxChange = {
-            onSettingsChange.invoke(
-                settings.copy(songSettings = settings.songSettings.copy(titleMaxFontSize = it))
-            )
-        }
-    )
+//    MinMaxRow(
+//        minValue = settings.songSettings.titleMinFontSize,
+//        maxValue = settings.songSettings.titleMaxFontSize,
+//        onMinChange = {
+//            onSettingsChange.invoke(
+//                settings.copy(songSettings = settings.songSettings.copy(titleMinFontSize = it))
+//            )
+//        },
+//        onMaxChange = {
+//            onSettingsChange.invoke(
+//                settings.copy(songSettings = settings.songSettings.copy(titleMaxFontSize = it))
+//            )
+//        }
+//    )
 
-    AlphaSlider(
-        value = settings.songSettings.titleAlpha,
-        onValueChange = {
-            onSettingsChange.invoke(
-                settings.copy(songSettings = settings.songSettings.copy(titleAlpha = it))
-            )
-        }
-    )
+    SettingRow(stringResource(Res.string.color)) {
+        ColorPickerField(
+            color = settings.songSettings.titleColor,
+            onColorChange = {
+                onSettingsChange.invoke(
+                    settings.copy(songSettings = settings.songSettings.copy(titleColor = it))
+                )
+            }
+        )
+    }
 
     SettingRow(stringResource(Res.string.vertical_alignment), width = 200.dp) {
         DropdownSettingsField(
-            value = when (settings.songSettings.titleAlignment) {
-                DropdownValues.TOP -> topStr
-                DropdownValues.MIDDLE -> middleStr
-                DropdownValues.BOTTOM -> bottomStr
-                else -> middleStr
+            value = when (settings.songSettings.titlePosition) {
+                Constants.BELOW_VERSE -> belowVerseStr
+                else -> aboveVerseStr
             },
-            options = listOf(topStr, middleStr, bottomStr),
+            options = listOf(belowVerseStr, aboveVerseStr),
             onValueChange = { displayValue ->
                 val storedValue = when (displayValue) {
-                    topStr -> DropdownValues.TOP
-                    middleStr -> DropdownValues.MIDDLE
-                    bottomStr -> DropdownValues.BOTTOM
-                    else -> DropdownValues.MIDDLE
+                    belowVerseStr -> Constants.BELOW_VERSE
+                    else -> Constants.ABOVE_VERSE
                 }
                 onSettingsChange.invoke(
-                    settings.copy(songSettings = settings.songSettings.copy(titleAlignment = storedValue))
+                    settings.copy(songSettings = settings.songSettings.copy(titlePosition = storedValue))
                 )
             }
         )
@@ -358,18 +338,18 @@ private fun LeftColumn(
     SettingRow(stringResource(Res.string.horizontal_alignment), width = 200.dp) {
         DropdownSettingsField(
             value = when (settings.songSettings.titleHorizontalAlignment) {
-                DropdownValues.LEFT -> leftStr
-                DropdownValues.CENTER -> centerStr
-                DropdownValues.RIGHT -> rightStr
+                Constants.LEFT -> leftStr
+                Constants.CENTER -> centerStr
+                Constants.RIGHT -> rightStr
                 else -> centerStr
             },
             options = listOf(leftStr, centerStr, rightStr),
             onValueChange = { displayValue ->
                 val storedValue = when (displayValue) {
-                    leftStr -> DropdownValues.LEFT
-                    centerStr -> DropdownValues.CENTER
-                    rightStr -> DropdownValues.RIGHT
-                    else -> DropdownValues.CENTER
+                    leftStr -> Constants.LEFT
+                    centerStr -> Constants.CENTER
+                    rightStr -> Constants.RIGHT
+                    else -> Constants.CENTER
                 }
                 onSettingsChange.invoke(
                     settings.copy(songSettings = settings.songSettings.copy(titleHorizontalAlignment = storedValue))
@@ -396,6 +376,9 @@ private fun RightColumn(
     val topRightStr = stringResource(Res.string.top_right)
     val bottomLeftStr = stringResource(Res.string.bottom_left)
     val bottomRightStr = stringResource(Res.string.bottom_right)
+    val noneStr = stringResource(Res.string.none)
+    val firstPageStr = stringResource(Res.string.first_page)
+    val everyPageStr = stringResource(Res.string.every_page)
 
     // Lyrics Section
     SectionHeader(stringResource(Res.string.lyrics))
@@ -436,29 +419,31 @@ private fun RightColumn(
         }
     }
 
-    MinMaxRow(
-        minValue = settings.songSettings.lyricsMinFontSize,
-        maxValue = settings.songSettings.lyricsMaxFontSize,
-        onMinChange = {
-            onSettingsChange.invoke(
-                settings.copy(songSettings = settings.songSettings.copy(lyricsMinFontSize = it))
-            )
-        },
-        onMaxChange = {
-            onSettingsChange.invoke(
-                settings.copy(songSettings = settings.songSettings.copy(lyricsMaxFontSize = it))
-            )
-        }
-    )
+//    MinMaxRow(
+//        minValue = settings.songSettings.lyricsMinFontSize,
+//        maxValue = settings.songSettings.lyricsMaxFontSize,
+//        onMinChange = {
+//            onSettingsChange.invoke(
+//                settings.copy(songSettings = settings.songSettings.copy(lyricsMinFontSize = it))
+//            )
+//        },
+//        onMaxChange = {
+//            onSettingsChange.invoke(
+//                settings.copy(songSettings = settings.songSettings.copy(lyricsMaxFontSize = it))
+//            )
+//        }
+//    )
 
-    AlphaSlider(
-        value = settings.songSettings.lyricsAlpha,
-        onValueChange = {
-            onSettingsChange.invoke(
-                settings.copy(songSettings = settings.songSettings.copy(lyricsAlpha = it))
-            )
-        }
-    )
+    SettingRow(stringResource(Res.string.color)) {
+        ColorPickerField(
+            color = settings.songSettings.lyricsColor,
+            onColorChange = {
+                onSettingsChange.invoke(
+                    settings.copy(songSettings = settings.songSettings.copy(lyricsColor = it))
+                )
+            }
+        )
+    }
 
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -488,18 +473,18 @@ private fun RightColumn(
     SettingRow(stringResource(Res.string.vertical_alignment), width = 200.dp) {
         DropdownSettingsField(
             value = when (settings.songSettings.lyricsAlignment) {
-                DropdownValues.TOP -> topStr
-                DropdownValues.MIDDLE -> middleStr
-                DropdownValues.BOTTOM -> bottomStr
+                Constants.TOP -> topStr
+                Constants.MIDDLE -> middleStr
+                Constants.BOTTOM -> bottomStr
                 else -> middleStr
             },
             options = listOf(topStr, middleStr, bottomStr),
             onValueChange = { displayValue ->
                 val storedValue = when (displayValue) {
-                    topStr -> DropdownValues.TOP
-                    middleStr -> DropdownValues.MIDDLE
-                    bottomStr -> DropdownValues.BOTTOM
-                    else -> DropdownValues.MIDDLE
+                    topStr -> Constants.TOP
+                    middleStr -> Constants.MIDDLE
+                    bottomStr -> Constants.BOTTOM
+                    else -> Constants.MIDDLE
                 }
                 onSettingsChange.invoke(
                     settings.copy(songSettings = settings.songSettings.copy(lyricsAlignment = storedValue))
@@ -511,18 +496,18 @@ private fun RightColumn(
     SettingRow(stringResource(Res.string.horizontal_alignment), width = 200.dp) {
         DropdownSettingsField(
             value = when (settings.songSettings.lyricsHorizontalAlignment) {
-                DropdownValues.LEFT -> leftStr
-                DropdownValues.CENTER -> centerStr
-                DropdownValues.RIGHT -> rightStr
+                Constants.LEFT -> leftStr
+                Constants.CENTER -> centerStr
+                Constants.RIGHT -> rightStr
                 else -> centerStr
             },
             options = listOf(leftStr, centerStr, rightStr),
             onValueChange = { displayValue ->
                 val storedValue = when (displayValue) {
-                    leftStr -> DropdownValues.LEFT
-                    centerStr -> DropdownValues.CENTER
-                    rightStr -> DropdownValues.RIGHT
-                    else -> DropdownValues.CENTER
+                    leftStr -> Constants.LEFT
+                    centerStr -> Constants.CENTER
+                    rightStr -> Constants.RIGHT
+                    else -> Constants.CENTER
                 }
                 onSettingsChange.invoke(
                     settings.copy(songSettings = settings.songSettings.copy(lyricsHorizontalAlignment = storedValue))
@@ -551,34 +536,34 @@ private fun RightColumn(
         )
     }
 
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        var rememberValue by remember { mutableStateOf(settings.songSettings.songNumberFirstPageOnly) }
-        Checkbox(
-            checked = rememberValue,
-            onCheckedChange = {
-                rememberValue = it
-                    onSettingsChange.invoke(
-                        settings.copy(songSettings = settings.songSettings.copy(songNumberFirstPageOnly = it))
-                    )
+    SettingRow(stringResource(Res.string.show_number)) {
+        DropdownSettingsField(
+            value = when (settings.songSettings.titleDisplay) {
+                Constants.NONE -> noneStr
+                Constants.FIRST_PAGE -> firstPageStr
+                Constants.EVERY_PAGE -> everyPageStr
+                else -> firstPageStr
+            },
+            options = listOf(noneStr, firstPageStr, everyPageStr),
+            onValueChange = { displayValue ->
+                val storedValue = when (displayValue) {
+                    noneStr -> Constants.NONE
+                    firstPageStr -> Constants.FIRST_PAGE
+                    everyPageStr -> Constants.EVERY_PAGE
+                    else -> Constants.FIRST_PAGE
+                }
+                onSettingsChange.invoke(settings.copy(songSettings = settings.songSettings.copy(showNumber = storedValue)))
             }
-        )
-        Text(
-            text = stringResource(Res.string.show_on_first_page_only),
-            style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.padding(start = 4.dp)
         )
     }
 
     Spacer(modifier = Modifier.height(5.dp))
 
     val pos = when (settings.songSettings.songNumberPosition) {
-        DropdownValues.TOP_LEFT -> topLeftStr
-        DropdownValues.TOP_RIGHT -> topRightStr
-        DropdownValues.BOTTOM_LEFT -> bottomLeftStr
-        DropdownValues.BOTTOM_RIGHT -> bottomRightStr
+        Constants.TOP_LEFT -> topLeftStr
+        Constants.TOP_RIGHT -> topRightStr
+        Constants.BOTTOM_LEFT -> bottomLeftStr
+        Constants.BOTTOM_RIGHT -> bottomRightStr
         else -> bottomRightStr
     }
 
@@ -589,15 +574,26 @@ private fun RightColumn(
             options = listOf(topLeftStr, topRightStr, bottomLeftStr, bottomRightStr),
             onValueChange = { displayValue ->
                 val storedValue = when (displayValue) {
-                    topLeftStr -> DropdownValues.TOP_LEFT
-                    topRightStr -> DropdownValues.TOP_RIGHT
-                    bottomLeftStr -> DropdownValues.BOTTOM_LEFT
-                    bottomRightStr -> DropdownValues.BOTTOM_RIGHT
-                    else -> DropdownValues.BOTTOM_RIGHT
+                    topLeftStr -> Constants.TOP_LEFT
+                    topRightStr -> Constants.TOP_RIGHT
+                    bottomLeftStr -> Constants.BOTTOM_LEFT
+                    bottomRightStr -> Constants.BOTTOM_RIGHT
+                    else -> Constants.BOTTOM_RIGHT
                 }
                 initialPosition = storedValue
                 onSettingsChange.invoke(
                     settings.copy(songSettings = settings.songSettings.copy(songNumberPosition = storedValue))
+                )
+            }
+        )
+    }
+
+    SettingRow(stringResource(Res.string.color)) {
+        ColorPickerField(
+            color = settings.songSettings.songNumberColor,
+            onColorChange = {
+                onSettingsChange.invoke(
+                    settings.copy(songSettings = settings.songSettings.copy(songNumberColor = it))
                 )
             }
         )
@@ -707,52 +703,5 @@ private fun MinMaxRow(
             onValueChange = onMaxChange,
             range = 8..72
         )
-    }
-}
-
-@Composable
-private fun AlphaSlider(
-    value: Float,
-    onValueChange: (Float) -> Unit
-) {
-    var mutableValue by remember { mutableStateOf(value) }
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 5.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = stringResource(Res.string.alpha),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.width(120.dp)
-        )
-
-        Column(modifier = Modifier.weight(1f)) {
-            Slider(
-                value = mutableValue,
-                onValueChange = {
-                    mutableValue = it
-                    onValueChange.invoke(it)
-                },
-                steps = 20,
-                valueRange = 0f..100f,
-                modifier = Modifier.fillMaxWidth()
-            )
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                listOf(0, 25, 50, 75, 100).forEach { tick ->
-                    Text(
-                        text = tick.toString(),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
-        }
     }
 }
