@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun FontSettingsDropdown(
+    modifier: Modifier = Modifier,
     value: String,
     fonts: List<String>,
     onValueChange: (String) -> Unit
@@ -47,7 +48,7 @@ fun FontSettingsDropdown(
         OutlinedButton(
             interactionSource = interactionSource,
             onClick = { expanded = true },
-            modifier = Modifier
+            modifier = modifier
                 .fillMaxWidth()
                 .height(32.dp),
             shape = RoundedCornerShape(2.dp),

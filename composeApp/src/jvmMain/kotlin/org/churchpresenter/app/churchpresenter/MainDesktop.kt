@@ -40,7 +40,6 @@ fun MainDesktop(
     onVerseSelected: (SelectedVerse) -> Unit,
     onSongItemSelected: (LyricSection) -> Unit
 ) {
-
     Box(
         modifier = modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)
     ) {

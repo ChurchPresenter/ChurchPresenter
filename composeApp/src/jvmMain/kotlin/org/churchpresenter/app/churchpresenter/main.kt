@@ -14,6 +14,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.rememberWindowState
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.app_name
+import org.churchpresenter.app.churchpresenter.data.SettingsManager
 import org.churchpresenter.app.churchpresenter.models.SelectedVerse
 import org.churchpresenter.app.churchpresenter.presenter.BiblePresenter
 import org.churchpresenter.app.churchpresenter.ui.theme.AppThemeWrapper
@@ -25,7 +26,7 @@ import org.jetbrains.compose.resources.stringResource
 
 
 fun main() = application {
-    var openBlackWindow by remember { mutableStateOf(false) }
+    var openBlackWindow by remember { mutableStateOf(true) }
     var selectedVerse by remember { mutableStateOf(SelectedVerse()) }
     var presenting by remember { mutableStateOf(Presenting.NONE) }
     var lyricSection by remember { mutableStateOf(LyricSection()) }
@@ -37,6 +38,8 @@ fun main() = application {
     val state = rememberWindowState(
         placement = WindowPlacement.Maximized
     )
+    val settingsManager = SettingsManager()
+    var appSettings by remember { mutableStateOf(settingsManager.loadSettings()) }
 
     AppThemeWrapper {
         Window(
@@ -47,12 +50,10 @@ fun main() = application {
             NavigationTopBar(
                 onAbout = { openBlackWindow = true },
                 onSettings = {
-                    // Use JDialog for better desktop integration
                     showOptionsDialog(
-                        parent = null, // ComposeWindow doesn't easily provide Frame access
-                        onSave = {
-                            // Settings are automatically saved in the dialog
-                        }
+                        parent = null,
+                        settingsManager = settingsManager,
+                        onSave = { appSettings = it }
                     )
                 },
                 onExit = { exitApplication() },
@@ -92,7 +93,7 @@ fun main() = application {
                     if (presenting == Presenting.BIBLE) {
                         BiblePresenter(selectedVerse = selectedVerse)
                     } else if (presenting == Presenting.LYRICS) {
-                        SongPresenter(lyricSection = lyricSection)
+                        SongPresenter(lyricSection = lyricSection, appSettings = appSettings)
                     }
                 }
             }

@@ -20,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import org.churchpresenter.app.churchpresenter.extensions.errorShake
 
 @Composable
 fun NumberSettingsTextField(
@@ -31,12 +32,17 @@ fun NumberSettingsTextField(
     var value by rememberSaveable { mutableStateOf(initialText) }
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
-    val borderColor = if (isFocused) {
+    var isError by remember { mutableStateOf(false) }
+    var shakeTrigger by remember { mutableStateOf(false) }
+    val borderColor = if (isError) {
+        MaterialTheme.colorScheme.error
+    } else if (isFocused) {
         MaterialTheme.colorScheme.onPrimaryContainer
     } else {
         MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
     }
-    val borderWidth = if (isFocused) {
+
+    val borderWidth = if (isFocused || isError) {
         2.dp
     } else {
         1.dp
@@ -49,6 +55,13 @@ fun NumberSettingsTextField(
             .width(80.dp)
             .height(32.dp)
             .border(borderWidth, borderColor, RoundedCornerShape(2.dp))
+            .errorShake(
+                trigger = shakeTrigger,
+                onAnimationFinish = {
+                    // Reset the trigger after animation so it can be re-triggered
+                    shakeTrigger = false
+                }
+            )
         ,
         singleLine = true,
         value = value.toString(),
@@ -63,6 +76,10 @@ fun NumberSettingsTextField(
             value = intValue
              if (intValue in range) {
                  onValueChange.invoke(intValue)
+                 isError = false
+             } else {
+                 shakeTrigger = true
+                 isError = true
              }
         },
     )

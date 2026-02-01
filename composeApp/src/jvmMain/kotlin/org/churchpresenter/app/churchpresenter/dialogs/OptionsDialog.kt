@@ -26,10 +26,10 @@ private fun getStringResource(resource: org.jetbrains.compose.resources.StringRe
 
 fun showOptionsDialog(
     parent: Frame? = null,
-    onSave: () -> Unit = {}
+    settingsManager: SettingsManager,
+    onSave: (AppSettings) -> Unit = {}
 ) {
     SwingUtilities.invokeLater {
-        val settingsManager = SettingsManager()
         var currentSettings = settingsManager.loadSettings()
         val dialog = JDialog(parent, getStringResource(Res.string.options), true).apply {
             defaultCloseOperation = JDialog.DISPOSE_ON_CLOSE
@@ -70,7 +70,7 @@ fun showOptionsDialog(
                 val okButton = JButton("✓ ${getStringResource(Res.string.ok)}").apply {
                     addActionListener {
                         settingsManager.saveSettings(currentSettings)
-                        onSave()
+                        onSave(currentSettings)
                         dispose()
                     }
                 }
@@ -95,24 +95,5 @@ fun showOptionsDialog(
         }
 
         dialog.isVisible = true
-    }
-}
-
-
-@Composable
-fun OptionsDialog(
-    isVisible: Boolean,
-    onDismiss: () -> Unit,
-    onSave: () -> Unit
-) {
-    // Legacy compatibility - now triggers JDialog
-    if (isVisible) {
-        showOptionsDialog(
-            parent = null,
-            onSave = {
-                onSave()
-                onDismiss()
-            }
-        )
     }
 }
