@@ -2,6 +2,7 @@ package org.churchpresenter.app.churchpresenter.tabs
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -34,6 +35,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.key.*
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -184,8 +186,158 @@ fun SongsTab(
         selectedSectionIndex = -1
     }
 
+    // Calculate total sections for current song
+    val totalSections = remember(selectedSongIndex, filteredSongs) {
+        if (selectedSongIndex >= 0 && selectedSongIndex < filteredSongs.size && filteredSongs[selectedSongIndex].lyrics.isNotEmpty()) {
+            val lyrics = filteredSongs[selectedSongIndex].lyrics
+            var count = 0
+            for (line in lyrics) {
+                if (line.startsWith("Куплет") || line.startsWith("Припев")) {
+                    count++
+                }
+            }
+            count
+        } else {
+            0
+        }
+    }
 
-    Row(modifier = modifier.fillMaxSize()) {
+    Row(
+        modifier = modifier
+            .fillMaxSize()
+            .onKeyEvent { keyEvent ->
+                if (keyEvent.type == KeyEventType.KeyDown) {
+                    when (keyEvent.key) {
+                        Key.DirectionLeft -> {
+                            // Previous song
+                            if (selectedSongIndex > 0) {
+                                selectedSongIndex--
+                                true
+                            } else false
+                        }
+
+                        Key.DirectionRight -> {
+                            // Next song
+                            if (selectedSongIndex < filteredSongs.size - 1) {
+                                selectedSongIndex++
+                                true
+                            } else false
+                        }
+
+                        Key.DirectionUp -> {
+                            // Previous lyric section
+                            if (selectedSectionIndex > 0) {
+                                selectedSectionIndex--
+                                true
+                            } else if (selectedSectionIndex == -1 && totalSections > 0) {
+                                selectedSectionIndex = totalSections - 1
+                                true
+                            } else false
+                        }
+
+                        Key.DirectionDown -> {
+                            // Next lyric section
+                            if (selectedSectionIndex < totalSections - 1) {
+                                selectedSectionIndex++
+                                // Get the current section and invoke callback
+                                if (selectedSongIndex >= 0 && selectedSongIndex < filteredSongs.size) {
+                                    val lyrics = filteredSongs[selectedSongIndex].lyrics
+                                    val title = filteredSongs[selectedSongIndex].title
+                                    val songNumber = filteredSongs[selectedSongIndex].number.toInt()
+                                    val sections = mutableListOf<LyricSection>()
+                                    var currentSection = mutableListOf<String>()
+                                    var currentSectionType = ""
+
+                                    for (line in lyrics) {
+                                        if (line.startsWith("Куплет") || line.startsWith("Припев")) {
+                                            if (currentSection.isNotEmpty()) {
+                                                sections.add(
+                                                    LyricSection(
+                                                        title = title,
+                                                        type = currentSectionType,
+                                                        lines = currentSection.toList(),
+                                                        songNumber = songNumber,
+                                                    )
+                                                )
+                                            }
+                                            currentSection = mutableListOf(line)
+                                            currentSectionType = if (line.startsWith("Куплет")) "verse" else "chorus"
+                                        } else {
+                                            currentSection.add(line)
+                                        }
+                                    }
+                                    if (currentSection.isNotEmpty()) {
+                                        sections.add(
+                                            LyricSection(
+                                                title = title,
+                                                type = currentSectionType,
+                                                lines = currentSection.toList(),
+                                                songNumber = songNumber,
+                                            )
+                                        )
+                                    }
+
+                                    if (selectedSectionIndex in sections.indices) {
+                                        onSongItemSelected.invoke(sections[selectedSectionIndex])
+                                    }
+                                }
+                                true
+                            } else if (selectedSectionIndex == -1 && totalSections > 0) {
+                                selectedSectionIndex = 0
+                                // Get the first section and invoke callback
+                                if (selectedSongIndex >= 0 && selectedSongIndex < filteredSongs.size) {
+                                    val lyrics = filteredSongs[selectedSongIndex].lyrics
+                                    val title = filteredSongs[selectedSongIndex].title
+                                    val songNumber = filteredSongs[selectedSongIndex].number.toInt()
+                                    val sections = mutableListOf<LyricSection>()
+                                    var currentSection = mutableListOf<String>()
+                                    var currentSectionType = ""
+
+                                    for (line in lyrics) {
+                                        if (line.startsWith("Куплет") || line.startsWith("Припев")) {
+                                            if (currentSection.isNotEmpty()) {
+                                                sections.add(
+                                                    LyricSection(
+                                                        title = title,
+                                                        type = currentSectionType,
+                                                        lines = currentSection.toList(),
+                                                        songNumber = songNumber,
+                                                    )
+                                                )
+                                            }
+                                            currentSection = mutableListOf(line)
+                                            currentSectionType = if (line.startsWith("Куплет")) "verse" else "chorus"
+                                        } else {
+                                            currentSection.add(line)
+                                        }
+                                    }
+                                    if (currentSection.isNotEmpty()) {
+                                        sections.add(
+                                            LyricSection(
+                                                title = title,
+                                                type = currentSectionType,
+                                                lines = currentSection.toList(),
+                                                songNumber = songNumber,
+                                            )
+                                        )
+                                    }
+
+                                    if (sections.isNotEmpty()) {
+                                        onSongItemSelected.invoke(sections[0])
+                                    }
+                                }
+                                true
+                            } else false
+                        }
+
+                        else -> false
+                    }
+                } else {
+                    false
+                }
+            }
+            .focusable()
+    ) {
         // Left panel - Search and song list
         Column(modifier = Modifier.weight(0.6f).fillMaxHeight()) {
             // Search controls
@@ -435,6 +587,8 @@ fun SongsTab(
                     // ...existing lyrics content...
                     if (selectedSongIndex >= 0 && selectedSongIndex < filteredSongs.size && filteredSongs[selectedSongIndex].lyrics.isNotEmpty()) {
                         val lyrics = filteredSongs[selectedSongIndex].lyrics
+                        val title = filteredSongs[selectedSongIndex].title
+                        val songNumber = filteredSongs[selectedSongIndex].number.toInt()
                         val sections = mutableListOf<LyricSection>()
                         var currentSection = mutableListOf<String>()
                         var currentSectionType = ""
@@ -444,7 +598,14 @@ fun SongsTab(
                             if (line.startsWith("Куплет") || line.startsWith("Припев")) {
                                 // Save previous section if it exists
                                 if (currentSection.isNotEmpty()) {
-                                    sections.add(LyricSection(currentSectionType, currentSection.toList()))
+                                    sections.add(
+                                        LyricSection(
+                                            title = title,
+                                            type = currentSectionType,
+                                            lines = currentSection.toList(),
+                                            songNumber = songNumber,
+                                        )
+                                    )
                                 }
                                 // Start new section
                                 currentSection = mutableListOf(line)
@@ -455,7 +616,14 @@ fun SongsTab(
                         }
                         // Add the last section
                         if (currentSection.isNotEmpty()) {
-                            sections.add(LyricSection(currentSectionType, currentSection.toList()))
+                            sections.add(
+                                LyricSection(
+                                    title = title,
+                                    type = currentSectionType,
+                                    lines = currentSection.toList(),
+                                    songNumber = songNumber,
+                                )
+                            )
                         }
 
                         // Display sections
