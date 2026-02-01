@@ -29,6 +29,7 @@ import org.churchpresenter.app.churchpresenter.tabs.TabSection
 import org.churchpresenter.app.churchpresenter.tabs.Tabs
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.app.churchpresenter.data.Bible
+import org.churchpresenter.app.churchpresenter.data.SettingsManager
 import org.churchpresenter.app.churchpresenter.models.LyricSection
 import org.churchpresenter.app.churchpresenter.models.SelectedVerse
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
@@ -40,6 +41,10 @@ fun MainDesktop(
     onVerseSelected: (SelectedVerse) -> Unit,
     onSongItemSelected: (LyricSection) -> Unit
 ) {
+    // Load settings
+    val settingsManager = remember { SettingsManager() }
+    val appSettings = remember { settingsManager.loadSettings() }
+
     Box(
         modifier = modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)
     ) {
@@ -85,6 +90,7 @@ fun MainDesktop(
                     )
 
                     Tabs.SONGS -> SongsTab(
+                        appSettings = appSettings,
                         onSongItemSelected = onSongItemSelected,
                         presenting = presenting
                     )

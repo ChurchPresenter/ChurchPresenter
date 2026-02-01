@@ -16,7 +16,14 @@ class Songs {
 
     fun loadFromSps(resourcePath: String) {
         songs.clear()
+        loadFromSpsAppend(resourcePath)
+    }
+
+    fun loadFromSpsAppend(resourcePath: String) {
         try {
+            // Extract database name from the file path (without extension) as fallback
+            val fileBaseName = resourcePath.substringAfterLast('/').substringAfterLast('\\').substringBeforeLast('.')
+
             val inputStream = Thread.currentThread().contextClassLoader.getResourceAsStream(resourcePath)
             val reader = if (inputStream != null) {
                 inputStream.bufferedReader(StandardCharsets.UTF_8)
@@ -25,18 +32,36 @@ class Songs {
                 if (Files.exists(path)) {
                     Files.newBufferedReader(path, StandardCharsets.UTF_8)
                 } else {
-                    val msg = "loadFromSps: resource not found on classpath or filesystem: $resourcePath"
+                    val msg = "loadFromSpsAppend: resource not found on classpath or filesystem: $resourcePath"
                     songsLogger.severe(msg)
                     throw IllegalArgumentException(msg)
                 }
             }
 
+            var databaseName = fileBaseName // Default to filename
+            val categoryToSongbookMap = mutableMapOf<String, String>()
+            var headerLineCount = 0 // Track which header line we're on
+
             reader.use { r ->
                 r.forEachLine { rawLine ->
                     val line = rawLine.trimEnd('\r', '\n')
 
-                    // Skip header lines and empty lines
-                    if (line.startsWith("##") || line.isBlank()) {
+                    // Parse header lines for songbook mappings
+                    if (line.startsWith("##")) {
+                        headerLineCount++
+                        val headerContent = line.substring(2).trim()
+
+                        // The second header line contains the actual songbook name
+                        if (headerLineCount == 2) {
+                            databaseName = headerContent
+                            println("DEBUG: Found songbook name in header line $headerLineCount: '$databaseName'")
+                            songsLogger.info("Found database name in header: $databaseName")
+                        }
+                        return@forEachLine
+                    }
+
+                    // Skip empty lines
+                    if (line.isBlank()) {
                         return@forEachLine
                     }
 
@@ -45,11 +70,14 @@ class Songs {
                     if (parts.size >= 6) {
                         val number = parts[0]
                         val title = parts[1]
-                        // parts[2] is category (not currently used)
+                        val categoryId = parts[2].trim() // This is the category/songbook ID
                         val key = parts[3]
                         val author = parts[4]
                         val composer = parts[5]
                         val lyricsText = if (parts.size > 6) parts[6] else ""
+
+                        // Map category ID to actual songbook name, or use database name as fallback
+                        val songbookName = categoryToSongbookMap[categoryId] ?: databaseName
 
                         // Parse lyrics
                         val lyrics = parseLyrics(lyricsText)
@@ -58,7 +86,7 @@ class Songs {
                             SongItem(
                                 number = number,
                                 title = title,
-                                songbook = "Песнь Во...",
+                                songbook = songbookName,
                                 tune = key,
                                 author = author,
                                 composer = composer,
@@ -69,9 +97,9 @@ class Songs {
                 }
             }
 
-            songsLogger.info("loadFromSps: parsed songs.size=${songs.size}")
+            songsLogger.info("loadFromSpsAppend: parsed songs.size=${songs.size}")
         } catch (e: Exception) {
-            songsLogger.log(Level.SEVERE, "loadFromSps failed for resourcePath=$resourcePath", e)
+            songsLogger.log(Level.SEVERE, "loadFromSpsAppend failed for resourcePath=$resourcePath", e)
             throw e
         }
     }

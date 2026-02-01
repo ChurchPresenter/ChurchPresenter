@@ -57,6 +57,7 @@ import churchpresenter.composeapp.generated.resources.starts_with
 import churchpresenter.composeapp.generated.resources.title
 import churchpresenter.composeapp.generated.resources.tune
 import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
+import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.data.Songs
 import org.churchpresenter.app.churchpresenter.models.LyricSection
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
@@ -65,18 +66,52 @@ import org.churchpresenter.app.churchpresenter.utils.Constants.CHORUS_RUS
 import org.churchpresenter.app.churchpresenter.utils.Constants.VERSE
 import org.churchpresenter.app.churchpresenter.utils.Constants.VERSE_RUS
 import org.jetbrains.compose.resources.stringResource
+import java.io.File
 
 @Composable
 fun SongsTab(
     modifier: Modifier = Modifier,
+    appSettings: AppSettings,
     onSongItemSelected: (LyricSection) -> Unit,
     presenting: (Presenting) -> Unit = { Presenting.NONE }
 ) {
-    // Create Songs instance and load the bundled pv3300.sps resource
-    val songsData = remember {
-        Songs().apply {
-            loadFromSps("pv3300.sps")
+    // Load songs from configured files in the storage directory
+    val songsData = remember(appSettings.songSettings.storageDirectory) {
+        val songs = Songs()
+
+        if (appSettings.songSettings.storageDirectory.isNotEmpty()) {
+            val dir = File(appSettings.songSettings.storageDirectory)
+            if (dir.exists() && dir.isDirectory) {
+                // Get all .sps files from the directory
+                val spsFiles: Array<File> = dir.listFiles { file ->
+                    file.extension.lowercase() == "sps"
+                } ?: emptyArray()
+
+                // Load each .sps file using append to combine all databases
+                spsFiles.sortedBy { it.name }.forEach { file ->
+                    try {
+                        println("Loading song database: ${file.name}")
+                        songs.loadFromSpsAppend(file.absolutePath)
+                        println("Total songs loaded so far: ${songs.getSongCount()}")
+                    } catch (e: Exception) {
+                        println("Error loading ${file.name}: ${e.message}")
+                    }
+                }
+            }
         }
+
+        // If no files were loaded, try to load the bundled resource as fallback
+        if (songs.getSongCount() == 0) {
+            try {
+                println("No song files found in directory, loading bundled resource")
+                songs.loadFromSps("pv3300.sps")
+            } catch (e: Exception) {
+                println("Error loading bundled resource: ${e.message}")
+            }
+        }
+
+        println("Total songs in database: ${songs.getSongCount()}")
+        songs
     }
 
     val allSongBooksText = stringResource(Res.string.all_song_books)
@@ -90,11 +125,18 @@ fun SongsTab(
     // State for selected verse/chorus section
     var selectedSectionIndex by rememberSaveable { mutableStateOf(-1) }
 
-    // Sorting state
+    // Extract unique songbook names from loaded songs
+    val songbooks = remember(songsData) {
+        val uniqueSongbooks = songsData.getSongs()
+            .map { it.songbook }
+            .filter { it.isNotBlank() }
+            .distinct()
+            .sorted()
+        listOf(allSongBooksText) + uniqueSongbooks
+    }
     var sortColumn by rememberSaveable { mutableStateOf("") }
     var sortAscending by rememberSaveable { mutableStateOf(true) }
 
-    val songbooks = listOf(allSongBooksText, "Песнь Возрождения", "Гимны Веры", "Песни Радости")
     val categories = listOf(allSongCategoriesText, "Прославление", "Поклонение", "Евангелизация")
     val filterTypes = listOf(
         stringResource(Res.string.contains),
