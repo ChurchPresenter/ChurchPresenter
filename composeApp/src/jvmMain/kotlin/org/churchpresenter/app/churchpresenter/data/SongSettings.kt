@@ -2,6 +2,7 @@ package org.churchpresenter.app.churchpresenter.data
 
 data class SongSettings(
     // Song file management
+    val storageDirectory: String = "",
     val songFiles: List<String> = emptyList(),
 
     // Title settings

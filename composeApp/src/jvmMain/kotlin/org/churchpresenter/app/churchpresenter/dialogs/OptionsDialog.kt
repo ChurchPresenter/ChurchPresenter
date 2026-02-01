@@ -1,10 +1,12 @@
 package org.churchpresenter.app.churchpresenter.dialogs
 
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
+import androidx.compose.ui.awt.ComposePanel
 import churchpresenter.composeapp.generated.resources.*
 import org.churchpresenter.app.churchpresenter.data.SettingsManager
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.createNativeSongSettingsPanel
+import org.churchpresenter.app.churchpresenter.dialogs.tabs.SongSettingsTab
 import java.awt.BorderLayout
+import java.awt.Dimension
 import java.awt.FlowLayout
 import java.awt.Frame
 import java.awt.event.WindowAdapter
@@ -31,19 +33,27 @@ fun showOptionsDialog(
 
         val dialog = JDialog(parent, getStringResource(Res.string.options), true).apply {
             defaultCloseOperation = JDialog.DISPOSE_ON_CLOSE
-            setSize(800, 600)
+            setSize(1000, 700)
             setLocationRelativeTo(parent)
-            isResizable = false
+            isResizable = true
+            minimumSize = Dimension(900, 650)
 
             val tabbedPane = JTabbedPane()
 
-            // Song Settings Tab - Using native Swing components directly
-            val songPanel = createNativeSongSettingsPanel(
-                settings = currentSettings.songSettings,
-                onSettingsChange = { newSongSettings ->
-                    currentSettings = currentSettings.copy(songSettings = newSongSettings)
+            // Song Settings Tab - Using Compose
+            val songPanel = ComposePanel().apply {
+                setContent {
+                    // Create Compose-aware state that can trigger recomposition
+                    var songSettings by remember { mutableStateOf(currentSettings.songSettings) }
+
+                    SongSettingsTab(
+                        settings = currentSettings,
+                        onSettingsChange = { newSongSettings ->
+                            currentSettings = newSongSettings
+                        }
+                    )
                 }
-            )
+            }
             tabbedPane.addTab(getStringResource(Res.string.song), songPanel)
 
             // Placeholder tabs
@@ -106,4 +116,3 @@ fun OptionsDialog(
         )
     }
 }
-

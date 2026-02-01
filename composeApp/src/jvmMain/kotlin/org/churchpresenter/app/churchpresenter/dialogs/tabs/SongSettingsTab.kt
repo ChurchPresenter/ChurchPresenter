@@ -1,525 +1,728 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.awt.SwingPanel
+import androidx.compose.foundation.*
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Slider
+import androidx.compose.material3.Text
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import churchpresenter.composeapp.generated.resources.*
-import org.churchpresenter.app.churchpresenter.data.SongSettings
-import org.jetbrains.compose.resources.ExperimentalResourceApi
+import org.churchpresenter.app.churchpresenter.composables.DropdownSettingsField
+import org.churchpresenter.app.churchpresenter.composables.FontSettingsDropdown
+import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
+import org.churchpresenter.app.churchpresenter.data.AppSettings
+import org.jetbrains.compose.resources.stringResource
 import java.awt.*
+import java.io.File
 import javax.swing.*
-import kotlinx.coroutines.runBlocking
 
-// Helper function to get string resources in Swing context
-@OptIn(ExperimentalResourceApi::class)
-private fun getStringResource(resource: org.jetbrains.compose.resources.StringResource): String {
-    return runBlocking {
-        org.jetbrains.compose.resources.getString(resource)
-    }
+// Constants for dropdown values that can't be localized
+private object DropdownValues {
+    const val NONE = "None"
+    const val FIRST_PAGE = "First Page"
+    const val EVERY_PAGE = "Every Page"
+    const val TOP = "Top"
+    const val MIDDLE = "Middle"
+    const val BOTTOM = "Bottom"
+    const val LEFT = "Left"
+    const val CENTER = "Center"
+    const val RIGHT = "Right"
+    const val TOP_LEFT = "Top Left"
+    const val TOP_RIGHT = "Top Right"
+    const val BOTTOM_LEFT = "Bottom Left"
+    const val BOTTOM_RIGHT = "Bottom Right"
 }
 
 @Composable
 fun SongSettingsTab(
-    settings: SongSettings = SongSettings(),
-    onSettingsChange: (SongSettings) -> Unit = {}
+    settings: AppSettings,
+    onSettingsChange: (AppSettings) -> Unit = {}
 ) {
-    SwingPanel(
-        factory = {
-            createNativeSongSettingsPanel(settings, onSettingsChange)
+    val availableFonts =
+        remember { GraphicsEnvironment.getLocalGraphicsEnvironment().availableFontFamilyNames.toList() }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.surfaceVariant)
+            .padding(5.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            // Left Column
+            Column(
+                modifier = Modifier
+                    .weight(0.48f)
+                    .widthIn(min = 400.dp, max = 450.dp)
+                    .heightIn(min = 600.dp)
+                    .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(4.dp))
+                    .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f), RoundedCornerShape(4.dp))
+                    .padding(start = 15.dp, end = 15.dp, top = 8.dp, bottom = 15.dp)
+            ) {
+                LeftColumn(settings, onSettingsChange, availableFonts)
+            }
+
+            // Right Column
+            Column(
+                modifier = Modifier
+                    .weight(0.48f)
+                    .widthIn(min = 400.dp, max = 450.dp)
+                    .heightIn(min = 600.dp)
+                    .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(4.dp))
+                    .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f), RoundedCornerShape(4.dp))
+                    .padding(start = 15.dp, end = 15.dp, top = 8.dp, bottom = 15.dp)
+            ) {
+                RightColumn(settings, onSettingsChange, availableFonts)
+            }
         }
-    )
+    }
 }
 
-fun createNativeSongSettingsPanel(
-    settings: SongSettings,
-    onSettingsChange: (SongSettings) -> Unit
-): JPanel {
-    val panel = JPanel(BorderLayout())
+@Composable
+private fun LeftColumn(
+    settings: AppSettings,
+    onSettingsChange: (AppSettings) -> Unit,
+    availableFonts: List<String>
+) {
+    // Store string resources to avoid calling stringResource in callbacks
+    val noneStr = stringResource(Res.string.none)
+    val firstPageStr = stringResource(Res.string.first_page)
+    val everyPageStr = stringResource(Res.string.every_page)
+    val topStr = stringResource(Res.string.top)
+    val middleStr = stringResource(Res.string.middle)
+    val bottomStr = stringResource(Res.string.bottom)
+    val leftStr = stringResource(Res.string.left)
+    val centerStr = stringResource(Res.string.center)
+    val rightStr = stringResource(Res.string.right)
 
-    // Create main content panel with 2 columns
-    val contentPanel = JPanel(GridBagLayout())
-    val gbc = GridBagConstraints()
+    // Storage Directory Section
+    SectionHeader(stringResource(Res.string.storage_directory))
 
-    // Get available fonts
-    val availableFonts = GraphicsEnvironment.getLocalGraphicsEnvironment().availableFontFamilyNames
+    Spacer(modifier = Modifier.height(8.dp))
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
 
-    // LEFT COLUMN - Song Files and Title Section
-    val leftPanel = JPanel(GridBagLayout())
-    val leftGbc = GridBagConstraints()
-    leftGbc.anchor = GridBagConstraints.WEST
-    leftGbc.insets = Insets(2, 5, 2, 5)
+        Text(
+            text = if (settings.songSettings.storageDirectory.isNotEmpty()) settings.songSettings.storageDirectory
+            else stringResource(Res.string.no_directory_selected),
+            modifier = Modifier
+                .weight(1f)
+                .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(2.dp))
+                .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f), RoundedCornerShape(2.dp))
+                .padding(horizontal = 8.dp, vertical = 6.dp),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+
+        ModernButton(
+            text = stringResource(Res.string.browse_directory),
+            backgroundColor = Color(0xFF3498DB),
+            onClick = {
+                SwingUtilities.invokeLater {
+                    val dirChooser = JFileChooser().apply {
+                        fileSelectionMode = JFileChooser.DIRECTORIES_ONLY
+                        if (settings.songSettings.storageDirectory.isNotEmpty()) {
+                            currentDirectory = File(settings.songSettings.storageDirectory)
+                        }
+                    }
+                    val result = dirChooser.showOpenDialog(null)
+                    if (result == JFileChooser.APPROVE_OPTION) {
+                        onSettingsChange.invoke(
+                            settings.copy(songSettings = settings.songSettings.copy(storageDirectory = dirChooser.selectedFile.absolutePath))
+                        )
+                    }
+                }
+            }
+        )
+    }
+
+    Spacer(modifier = Modifier.height(15.dp))
 
     // Song Files Section
-    leftGbc.gridx = 0; leftGbc.gridy = 0; leftGbc.gridwidth = 2
-    leftGbc.insets = Insets(5, 5, 5, 5)
-    leftPanel.add(JLabel("<html><b>${getStringResource(Res.string.song_files)}</b></html>"), leftGbc)
+    SectionHeader(stringResource(Res.string.song_files))
 
-    // Song files list
-    leftGbc.gridx = 0; leftGbc.gridy = 1; leftGbc.gridwidth = 2
-    leftGbc.insets = Insets(2, 15, 2, 5)
-    leftGbc.fill = GridBagConstraints.BOTH
-    leftGbc.weightx = 1.0
-    leftGbc.weighty = 0.3 // Give some height to the list
+    Spacer(modifier = Modifier.height(8.dp))
 
-    val songFilesList = JList(settings.songFiles.toTypedArray()).apply {
-        selectionMode = ListSelectionModel.SINGLE_SELECTION
-        visibleRowCount = 3
-        if (settings.songFiles.isEmpty()) {
-            setListData(arrayOf(getStringResource(Res.string.no_song_files)))
-        }
-    }
-    val scrollPane = JScrollPane(songFilesList)
-    scrollPane.preferredSize = Dimension(300, 80)
-    leftPanel.add(scrollPane, leftGbc)
-
-    // Import/Remove buttons panel
-    leftGbc.gridx = 0; leftGbc.gridy = 2; leftGbc.gridwidth = 2
-    leftGbc.fill = GridBagConstraints.HORIZONTAL
-    leftGbc.weighty = 0.0
-    leftGbc.insets = Insets(5, 15, 10, 5)
-
-    val buttonPanel = JPanel(FlowLayout(FlowLayout.LEFT, 5, 0))
-
-    val importButton = JButton(getStringResource(Res.string.import_song_file)).apply {
-        addActionListener {
-            val fileChooser = JFileChooser().apply {
-                fileSelectionMode = JFileChooser.FILES_ONLY
-                isMultiSelectionEnabled = true
-                fileFilter = javax.swing.filechooser.FileNameExtensionFilter(
-                    "Song Files (*.spb, *.sps)", "spb", "sps"
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(120.dp)
+            .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f), RoundedCornerShape(2.dp))
+    ) {
+        val scrollState = rememberScrollState()
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(scrollState)
+                .background(MaterialTheme.colorScheme.surface)
+                .padding(8.dp)
+        ) {
+            if (settings.songSettings.songFiles.isEmpty()) {
+                Text(
+                    text = stringResource(Res.string.no_song_files),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-            }
-
-            val result = fileChooser.showOpenDialog(this@apply)
-            if (result == JFileChooser.APPROVE_OPTION) {
-                val selectedFiles = fileChooser.selectedFiles
-                val newFiles = selectedFiles.map { it.absolutePath }
-                val updatedFiles = (settings.songFiles + newFiles).distinct()
-                onSettingsChange(settings.copy(songFiles = updatedFiles))
-
-                // Update the list display
-                songFilesList.setListData(updatedFiles.toTypedArray())
-            }
-        }
-    }
-    buttonPanel.add(importButton)
-
-    val removeButton = JButton(getStringResource(Res.string.remove_song_file)).apply {
-        addActionListener {
-            val selectedIndex = songFilesList.selectedIndex
-            if (selectedIndex >= 0 && settings.songFiles.isNotEmpty()) {
-                val updatedFiles = settings.songFiles.toMutableList()
-                updatedFiles.removeAt(selectedIndex)
-                onSettingsChange(settings.copy(songFiles = updatedFiles))
-
-                // Update the list display
-                if (updatedFiles.isEmpty()) {
-                    songFilesList.setListData(arrayOf(getStringResource(Res.string.no_song_files)))
-                } else {
-                    songFilesList.setListData(updatedFiles.toTypedArray())
+            } else {
+                settings.songSettings.songFiles.forEach { file ->
+                    Text(
+                        text = file,
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 4.dp, horizontal = 8.dp)
+                    )
                 }
             }
         }
     }
-    buttonPanel.add(removeButton)
 
-    leftPanel.add(buttonPanel, leftGbc)
+    Spacer(modifier = Modifier.height(8.dp))
+
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        ModernButton(
+            text = stringResource(Res.string.import_song_file),
+            backgroundColor = Color(0xFF2ECC71),
+            onClick = {
+                SwingUtilities.invokeLater {
+                    val fileChooser = JFileChooser().apply {
+                        fileSelectionMode = JFileChooser.FILES_ONLY
+                        isMultiSelectionEnabled = true
+                        fileFilter = javax.swing.filechooser.FileNameExtensionFilter(
+                            "Song Files (*.spb, *.sps)", "spb", "sps"
+                        )
+                    }
+                    val result = fileChooser.showOpenDialog(null)
+                    if (result == JFileChooser.APPROVE_OPTION) {
+                        val newFiles = fileChooser.selectedFiles.map { it.absolutePath }
+                        val updatedFiles = (settings.songSettings.songFiles + newFiles).distinct()
+                        onSettingsChange.invoke(
+                            settings.copy(
+                                songSettings = settings.songSettings.copy(songFiles = updatedFiles)
+                            )
+                        )
+                    }
+                }
+            }
+        )
+
+        ModernButton(
+            text = stringResource(Res.string.remove_song_file),
+            backgroundColor = Color(0xFFE74C3C),
+            onClick = {
+                if (settings.songSettings.songFiles.isNotEmpty()) {
+                    val updatedFiles = settings.songSettings.songFiles.drop(1)
+                    onSettingsChange.invoke(
+                        settings.copy(songSettings = settings.songSettings.copy(songFiles = updatedFiles))
+                    )
+                }
+            }
+        )
+    }
+
+    Spacer(modifier = Modifier.height(20.dp))
 
     // Title Section
-    leftGbc.gridx = 0; leftGbc.gridy = 3; leftGbc.gridwidth = 2
-    leftGbc.insets = Insets(15, 5, 5, 5)
-    leftGbc.weighty = 0.0
-    leftGbc.fill = GridBagConstraints.NONE
-    leftPanel.add(JLabel("<html><b>${getStringResource(Res.string.title)}</b></html>"), leftGbc)
+    SectionHeader(stringResource(Res.string.title))
 
-    // Show title
-    leftGbc.gridx = 0; leftGbc.gridy = 4; leftGbc.gridwidth = 1
-    leftGbc.insets = Insets(2, 15, 2, 5)
-    val showTitleLabel = JLabel(getStringResource(Res.string.show_title))
-    showTitleLabel.preferredSize = Dimension(120, showTitleLabel.preferredSize.height)
-    leftPanel.add(showTitleLabel, leftGbc)
+    Spacer(modifier = Modifier.height(8.dp))
 
-    val titleDisplayCombo = JComboBox(arrayOf(
-        getStringResource(Res.string.none),
-        getStringResource(Res.string.first_page),
-        getStringResource(Res.string.every_page)
-    )).apply {
-        selectedItem = when (settings.titleDisplay) {
-            "None" -> getStringResource(Res.string.none)
-            "First Page" -> getStringResource(Res.string.first_page)
-            "Every Page" -> getStringResource(Res.string.every_page)
-            else -> getStringResource(Res.string.first_page)
-        }
-        addActionListener {
-            val value = when (selectedItem as String) {
-                getStringResource(Res.string.none) -> "None"
-                getStringResource(Res.string.first_page) -> "First Page"
-                getStringResource(Res.string.every_page) -> "Every Page"
-                else -> "First Page"
+    SettingRow(stringResource(Res.string.show_title)) {
+        DropdownSettingsField(
+            value = when (settings.songSettings.titleDisplay) {
+                DropdownValues.NONE -> noneStr
+                DropdownValues.FIRST_PAGE -> firstPageStr
+                DropdownValues.EVERY_PAGE -> everyPageStr
+                else -> firstPageStr
+            },
+            options = listOf(noneStr, firstPageStr, everyPageStr),
+            onValueChange = { displayValue ->
+                val storedValue = when (displayValue) {
+                    noneStr -> DropdownValues.NONE
+                    firstPageStr -> DropdownValues.FIRST_PAGE
+                    everyPageStr -> DropdownValues.EVERY_PAGE
+                    else -> DropdownValues.FIRST_PAGE
+                }
+                onSettingsChange.invoke(settings.copy(songSettings = settings.songSettings.copy(titleDisplay = storedValue)))
             }
-            onSettingsChange(settings.copy(titleDisplay = value))
-        }
+        )
     }
-    leftGbc.gridx = 1
-    leftPanel.add(titleDisplayCombo, leftGbc)
 
-    // Title font size
-    leftGbc.gridx = 0; leftGbc.gridy = 5
-    val fontSizeLabel = JLabel(getStringResource(Res.string.font_size))
-    fontSizeLabel.preferredSize = Dimension(120, fontSizeLabel.preferredSize.height)
-    leftPanel.add(fontSizeLabel, leftGbc)
-
-    val titleFontSizeSpinner = JSpinner(SpinnerNumberModel(settings.titleFontSize, 8, 72, 1)).apply {
-        addChangeListener {
-            onSettingsChange(settings.copy(titleFontSize = value as Int))
-        }
+    SettingRow(stringResource(Res.string.font_size)) {
+        NumberSettingsTextField(
+            initialText = settings.songSettings.titleFontSize,
+            onValueChange = {
+                onSettingsChange.invoke(
+                    settings.copy(songSettings = settings.songSettings.copy(titleFontSize = it))
+                )
+            },
+            range = 8..72
+        )
     }
-    leftGbc.gridx = 1
-    leftPanel.add(titleFontSizeSpinner, leftGbc)
 
-    // Title font type
-    leftGbc.gridx = 0; leftGbc.gridy = 6
-    val fontTypeLabel = JLabel(getStringResource(Res.string.font_type))
-    fontTypeLabel.preferredSize = Dimension(120, fontTypeLabel.preferredSize.height)
-    leftPanel.add(fontTypeLabel, leftGbc)
-
-    val titleFontCombo = JComboBox(availableFonts).apply {
-        selectedItem = settings.titleFontType
-        addActionListener {
-            onSettingsChange(settings.copy(titleFontType = selectedItem as String))
-        }
-    }
-    leftGbc.gridx = 1
-    leftPanel.add(titleFontCombo, leftGbc)
-
-    // Title font min/max on same row
-    leftGbc.gridx = 0; leftGbc.gridy = 7; leftGbc.gridwidth = 1
-    val minLabel = JLabel(getStringResource(Res.string.min))
-    minLabel.preferredSize = Dimension(120, minLabel.preferredSize.height)
-    leftPanel.add(minLabel, leftGbc)
-
-    val titleMinMaxPanel = JPanel(FlowLayout(FlowLayout.LEFT, 5, 0))
-    val titleMinFontSpinner = JSpinner(SpinnerNumberModel(settings.titleMinFontSize, 8, 72, 1)).apply {
-        addChangeListener {
-            onSettingsChange(settings.copy(titleMinFontSize = value as Int))
-        }
-        preferredSize = Dimension(60, preferredSize.height)
-    }
-    titleMinMaxPanel.add(titleMinFontSpinner)
-
-    titleMinMaxPanel.add(JLabel(getStringResource(Res.string.max)))
-    val titleMaxFontSpinner = JSpinner(SpinnerNumberModel(settings.titleMaxFontSize, 8, 72, 1)).apply {
-        addChangeListener {
-            onSettingsChange(settings.copy(titleMaxFontSize = value as Int))
-        }
-        preferredSize = Dimension(60, preferredSize.height)
-    }
-    titleMinMaxPanel.add(titleMaxFontSpinner)
-
-    leftGbc.gridx = 1
-    leftPanel.add(titleMinMaxPanel, leftGbc)
-
-    // Title alpha
-    leftGbc.gridx = 0; leftGbc.gridy = 8
-    val alphaLabel = JLabel("Font Alpha:")
-    alphaLabel.preferredSize = Dimension(120, alphaLabel.preferredSize.height)
-    leftPanel.add(alphaLabel, leftGbc)
-
-    val titleAlphaSlider = JSlider(0, 100, settings.titleAlpha.toInt()).apply {
-        addChangeListener {
-            onSettingsChange(settings.copy(titleAlpha = value.toFloat()))
-        }
-        majorTickSpacing = 25
-        paintTicks = true
-        paintLabels = true
-    }
-    leftGbc.gridx = 1; leftGbc.fill = GridBagConstraints.HORIZONTAL
-    leftPanel.add(titleAlphaSlider, leftGbc)
-
-    // Title alignment
-    leftGbc.gridx = 0; leftGbc.gridy = 9; leftGbc.fill = GridBagConstraints.NONE
-    val titleAlignmentLabel = JLabel(getStringResource(Res.string.vertical_alignment))
-    titleAlignmentLabel.preferredSize = Dimension(120, titleAlignmentLabel.preferredSize.height)
-    leftPanel.add(titleAlignmentLabel, leftGbc)
-
-    val titleAlignmentCombo = JComboBox(arrayOf(
-        getStringResource(Res.string.top),
-        getStringResource(Res.string.middle),
-        getStringResource(Res.string.bottom)
-    )).apply {
-        selectedItem = when (settings.titleAlignment) {
-            "Top" -> getStringResource(Res.string.top)
-            "Middle" -> getStringResource(Res.string.middle)
-            "Bottom" -> getStringResource(Res.string.bottom)
-            else -> getStringResource(Res.string.middle)
-        }
-        addActionListener {
-            val value = when (selectedItem as String) {
-                getStringResource(Res.string.top) -> "Top"
-                getStringResource(Res.string.middle) -> "Middle"
-                getStringResource(Res.string.bottom) -> "Bottom"
-                else -> "Middle"
+    SettingRow(stringResource(Res.string.font_type)) {
+        FontSettingsDropdown(
+            value = settings.songSettings.titleFontType,
+            fonts = availableFonts,
+            onValueChange = {
+                onSettingsChange.invoke(
+                    settings.copy(songSettings = settings.songSettings.copy(titleFontType = it))
+                )
             }
-            onSettingsChange(settings.copy(titleAlignment = value))
-        }
+        )
     }
-    leftGbc.gridx = 1
-    leftPanel.add(titleAlignmentCombo, leftGbc)
 
-    // Title horizontal alignment
-    leftGbc.gridx = 0; leftGbc.gridy = 10
-    val titleHorizontalAlignmentLabel = JLabel(getStringResource(Res.string.horizontal_alignment))
-    titleHorizontalAlignmentLabel.preferredSize = Dimension(120, titleHorizontalAlignmentLabel.preferredSize.height)
-    leftPanel.add(titleHorizontalAlignmentLabel, leftGbc)
-
-    val titleHorizontalAlignmentCombo = JComboBox(arrayOf(
-        getStringResource(Res.string.left),
-        getStringResource(Res.string.center),
-        getStringResource(Res.string.right)
-    )).apply {
-        selectedItem = when (settings.titleHorizontalAlignment) {
-            "Left" -> getStringResource(Res.string.left)
-            "Center" -> getStringResource(Res.string.center)
-            "Right" -> getStringResource(Res.string.right)
-            else -> getStringResource(Res.string.center)
+    MinMaxRow(
+        minValue = settings.songSettings.titleMinFontSize,
+        maxValue = settings.songSettings.titleMaxFontSize,
+        onMinChange = {
+            onSettingsChange.invoke(
+                settings.copy(songSettings = settings.songSettings.copy(titleMinFontSize = it))
+            )
+        },
+        onMaxChange = {
+            onSettingsChange.invoke(
+                settings.copy(songSettings = settings.songSettings.copy(titleMaxFontSize = it))
+            )
         }
-        addActionListener {
-            val value = when (selectedItem as String) {
-                getStringResource(Res.string.left) -> "Left"
-                getStringResource(Res.string.center) -> "Center"
-                getStringResource(Res.string.right) -> "Right"
-                else -> "Center"
+    )
+
+    AlphaSlider(
+        value = settings.songSettings.titleAlpha,
+        onValueChange = {
+            onSettingsChange.invoke(
+                settings.copy(songSettings = settings.songSettings.copy(titleAlpha = it))
+            )
+        }
+    )
+
+    SettingRow(stringResource(Res.string.vertical_alignment), width = 200.dp) {
+        DropdownSettingsField(
+            value = when (settings.songSettings.titleAlignment) {
+                DropdownValues.TOP -> topStr
+                DropdownValues.MIDDLE -> middleStr
+                DropdownValues.BOTTOM -> bottomStr
+                else -> middleStr
+            },
+            options = listOf(topStr, middleStr, bottomStr),
+            onValueChange = { displayValue ->
+                val storedValue = when (displayValue) {
+                    topStr -> DropdownValues.TOP
+                    middleStr -> DropdownValues.MIDDLE
+                    bottomStr -> DropdownValues.BOTTOM
+                    else -> DropdownValues.MIDDLE
+                }
+                onSettingsChange.invoke(
+                    settings.copy(songSettings = settings.songSettings.copy(titleAlignment = storedValue))
+                )
             }
-            onSettingsChange(settings.copy(titleHorizontalAlignment = value))
-        }
+        )
     }
-    leftGbc.gridx = 1
-    leftPanel.add(titleHorizontalAlignmentCombo, leftGbc)
 
-    // RIGHT COLUMN - Lyrics Section and Song Number Section
-    val rightPanel = JPanel(GridBagLayout())
-    val rightGbc = GridBagConstraints()
-    rightGbc.anchor = GridBagConstraints.WEST
-    rightGbc.insets = Insets(2, 5, 2, 5)
-
-    // Lyrics Section
-    rightGbc.gridx = 0; rightGbc.gridy = 0; rightGbc.gridwidth = 2
-    rightGbc.insets = Insets(5, 5, 5, 5)
-    rightPanel.add(JLabel("<html><b>${getStringResource(Res.string.lyrics)}</b></html>"), rightGbc)
-
-    // Lyrics font size
-    rightGbc.gridx = 0; rightGbc.gridy = 1; rightGbc.gridwidth = 1
-    rightGbc.insets = Insets(2, 15, 2, 5)
-    val lyricsFontSizeLabel = JLabel(getStringResource(Res.string.font_size))
-    lyricsFontSizeLabel.preferredSize = Dimension(120, lyricsFontSizeLabel.preferredSize.height)
-    rightPanel.add(lyricsFontSizeLabel, rightGbc)
-
-    val lyricsFontSizeSpinner = JSpinner(SpinnerNumberModel(settings.lyricsFontSize, 8, 72, 1)).apply {
-        addChangeListener {
-            onSettingsChange(settings.copy(lyricsFontSize = value as Int))
-        }
-    }
-    rightGbc.gridx = 1
-    rightPanel.add(lyricsFontSizeSpinner, rightGbc)
-
-    // Lyrics font type
-    rightGbc.gridx = 0; rightGbc.gridy = 2
-    val lyricsFontTypeLabel = JLabel(getStringResource(Res.string.font_type))
-    lyricsFontTypeLabel.preferredSize = Dimension(120, lyricsFontTypeLabel.preferredSize.height)
-    rightPanel.add(lyricsFontTypeLabel, rightGbc)
-
-    val lyricsFontCombo = JComboBox(availableFonts).apply {
-        selectedItem = settings.lyricsFontType
-        addActionListener {
-            onSettingsChange(settings.copy(lyricsFontType = selectedItem as String))
-        }
-    }
-    rightGbc.gridx = 1
-    rightPanel.add(lyricsFontCombo, rightGbc)
-
-    // Lyrics font min/max on same row
-    rightGbc.gridx = 0; rightGbc.gridy = 3; rightGbc.gridwidth = 1
-    val lyricsMinLabel = JLabel(getStringResource(Res.string.min))
-    lyricsMinLabel.preferredSize = Dimension(120, lyricsMinLabel.preferredSize.height)
-    rightPanel.add(lyricsMinLabel, rightGbc)
-
-    val lyricsMinMaxPanel = JPanel(FlowLayout(FlowLayout.LEFT, 5, 0))
-    val lyricsMinFontSpinner = JSpinner(SpinnerNumberModel(settings.lyricsMinFontSize, 8, 72, 1)).apply {
-        addChangeListener {
-            onSettingsChange(settings.copy(lyricsMinFontSize = value as Int))
-        }
-        preferredSize = Dimension(60, preferredSize.height)
-    }
-    lyricsMinMaxPanel.add(lyricsMinFontSpinner)
-
-    lyricsMinMaxPanel.add(JLabel(getStringResource(Res.string.max)))
-    val lyricsMaxFontSpinner = JSpinner(SpinnerNumberModel(settings.lyricsMaxFontSize, 8, 72, 1)).apply {
-        addChangeListener {
-            onSettingsChange(settings.copy(lyricsMaxFontSize = value as Int))
-        }
-        preferredSize = Dimension(60, preferredSize.height)
-    }
-    lyricsMinMaxPanel.add(lyricsMaxFontSpinner)
-
-    rightGbc.gridx = 1
-    rightPanel.add(lyricsMinMaxPanel, rightGbc)
-
-    // Lyrics alpha
-    rightGbc.gridx = 0; rightGbc.gridy = 4; rightGbc.gridwidth = 1
-    val lyricsAlphaLabel = JLabel(getStringResource(Res.string.font_alpha))
-    lyricsAlphaLabel.preferredSize = Dimension(120, lyricsAlphaLabel.preferredSize.height)
-    rightPanel.add(lyricsAlphaLabel, rightGbc)
-
-    val lyricsAlphaSlider = JSlider(0, 100, settings.lyricsAlpha.toInt()).apply {
-        addChangeListener {
-            onSettingsChange(settings.copy(lyricsAlpha = value.toFloat()))
-        }
-        majorTickSpacing = 25
-        paintTicks = true
-        paintLabels = true
-    }
-    rightGbc.gridx = 1; rightGbc.fill = GridBagConstraints.HORIZONTAL
-    rightPanel.add(lyricsAlphaSlider, rightGbc)
-
-    // Word wrap
-    rightGbc.gridx = 0; rightGbc.gridy = 5; rightGbc.gridwidth = 2; rightGbc.fill = GridBagConstraints.NONE
-    val wordWrapCheckBox = JCheckBox(getStringResource(Res.string.word_wrap), settings.wordWrap).apply {
-        addActionListener {
-            onSettingsChange(settings.copy(wordWrap = isSelected))
-        }
-    }
-    rightPanel.add(wordWrapCheckBox, rightGbc)
-
-    // Lyrics alignment
-    rightGbc.gridx = 0; rightGbc.gridy = 6; rightGbc.gridwidth = 1
-    val lyricsAlignmentLabel = JLabel(getStringResource(Res.string.vertical_alignment))
-    lyricsAlignmentLabel.preferredSize = Dimension(120, lyricsAlignmentLabel.preferredSize.height)
-    rightPanel.add(lyricsAlignmentLabel, rightGbc)
-
-    val lyricsAlignmentCombo = JComboBox(arrayOf(
-        getStringResource(Res.string.top),
-        getStringResource(Res.string.middle),
-        getStringResource(Res.string.bottom)
-    )).apply {
-        selectedItem = when (settings.lyricsAlignment) {
-            "Top" -> getStringResource(Res.string.top)
-            "Middle" -> getStringResource(Res.string.middle)
-            "Bottom" -> getStringResource(Res.string.bottom)
-            else -> getStringResource(Res.string.middle)
-        }
-        addActionListener {
-            val value = when (selectedItem as String) {
-                getStringResource(Res.string.top) -> "Top"
-                getStringResource(Res.string.middle) -> "Middle"
-                getStringResource(Res.string.bottom) -> "Bottom"
-                else -> "Middle"
+    SettingRow(stringResource(Res.string.horizontal_alignment), width = 200.dp) {
+        DropdownSettingsField(
+            value = when (settings.songSettings.titleHorizontalAlignment) {
+                DropdownValues.LEFT -> leftStr
+                DropdownValues.CENTER -> centerStr
+                DropdownValues.RIGHT -> rightStr
+                else -> centerStr
+            },
+            options = listOf(leftStr, centerStr, rightStr),
+            onValueChange = { displayValue ->
+                val storedValue = when (displayValue) {
+                    leftStr -> DropdownValues.LEFT
+                    centerStr -> DropdownValues.CENTER
+                    rightStr -> DropdownValues.RIGHT
+                    else -> DropdownValues.CENTER
+                }
+                onSettingsChange.invoke(
+                    settings.copy(songSettings = settings.songSettings.copy(titleHorizontalAlignment = storedValue))
+                )
             }
-            onSettingsChange(settings.copy(lyricsAlignment = value))
-        }
+        )
     }
-    rightGbc.gridx = 1
-    rightPanel.add(lyricsAlignmentCombo, rightGbc)
-
-    // Lyrics horizontal alignment
-    rightGbc.gridx = 0; rightGbc.gridy = 7; rightGbc.gridwidth = 1
-    val lyricsHorizontalAlignmentLabel = JLabel(getStringResource(Res.string.horizontal_alignment))
-    lyricsHorizontalAlignmentLabel.preferredSize = Dimension(120, lyricsHorizontalAlignmentLabel.preferredSize.height)
-    rightPanel.add(lyricsHorizontalAlignmentLabel, rightGbc)
-
-    val lyricsHorizontalAlignmentCombo = JComboBox(arrayOf(
-        getStringResource(Res.string.left),
-        getStringResource(Res.string.center),
-        getStringResource(Res.string.right)
-    )).apply {
-        selectedItem = when (settings.lyricsHorizontalAlignment) {
-            "Left" -> getStringResource(Res.string.left)
-            "Center" -> getStringResource(Res.string.center)
-            "Right" -> getStringResource(Res.string.right)
-            else -> getStringResource(Res.string.center)
-        }
-        addActionListener {
-            val value = when (selectedItem as String) {
-                getStringResource(Res.string.left) -> "Left"
-                getStringResource(Res.string.center) -> "Center"
-                getStringResource(Res.string.right) -> "Right"
-                else -> "Center"
-            }
-            onSettingsChange(settings.copy(lyricsHorizontalAlignment = value))
-        }
-    }
-    rightGbc.gridx = 1
-    rightPanel.add(lyricsHorizontalAlignmentCombo, rightGbc)
-
-    // Song Number Section
-    rightGbc.gridx = 0; rightGbc.gridy = 8; rightGbc.gridwidth = 2
-    rightGbc.insets = Insets(15, 5, 5, 5)
-    rightPanel.add(JLabel("<html><b>${getStringResource(Res.string.song_number)}</b></html>"), rightGbc)
-
-    // Song number font size
-    rightGbc.gridx = 0; rightGbc.gridy = 9; rightGbc.gridwidth = 1
-    rightGbc.insets = Insets(2, 15, 2, 5)
-    val songNumberFontSizeLabel = JLabel(getStringResource(Res.string.font_size))
-    songNumberFontSizeLabel.preferredSize = Dimension(120, songNumberFontSizeLabel.preferredSize.height)
-    rightPanel.add(songNumberFontSizeLabel, rightGbc)
-
-    val songNumberFontSizeSpinner = JSpinner(SpinnerNumberModel(settings.songNumberFontSize, 8, 48, 1)).apply {
-        addChangeListener {
-            onSettingsChange(settings.copy(songNumberFontSize = value as Int))
-        }
-    }
-    rightGbc.gridx = 1
-    rightPanel.add(songNumberFontSizeSpinner, rightGbc)
-
-    // First page only
-    rightGbc.gridx = 0; rightGbc.gridy = 10; rightGbc.gridwidth = 2
-    val firstPageOnlyCheckBox = JCheckBox(getStringResource(Res.string.show_on_first_page_only), settings.songNumberFirstPageOnly).apply {
-        addActionListener {
-            onSettingsChange(settings.copy(songNumberFirstPageOnly = isSelected))
-        }
-    }
-    rightPanel.add(firstPageOnlyCheckBox, rightGbc)
-
-    // Position
-    rightGbc.gridx = 0; rightGbc.gridy = 11; rightGbc.gridwidth = 1
-    val positionLabel = JLabel(getStringResource(Res.string.position_on_screen))
-    positionLabel.preferredSize = Dimension(120, positionLabel.preferredSize.height)
-    rightPanel.add(positionLabel, rightGbc)
-
-    val positionCombo = JComboBox(arrayOf(
-        getStringResource(Res.string.top_left),
-        getStringResource(Res.string.top_right),
-        getStringResource(Res.string.bottom_left),
-        getStringResource(Res.string.bottom_right)
-    )).apply {
-        selectedItem = when (settings.songNumberPosition) {
-            "Top Left" -> getStringResource(Res.string.top_left)
-            "Top Right" -> getStringResource(Res.string.top_right)
-            "Bottom Left" -> getStringResource(Res.string.bottom_left)
-            "Bottom Right" -> getStringResource(Res.string.bottom_right)
-            else -> getStringResource(Res.string.bottom_right)
-        }
-        addActionListener {
-            val value = when (selectedItem as String) {
-                getStringResource(Res.string.top_left) -> "Top Left"
-                getStringResource(Res.string.top_right) -> "Top Right"
-                getStringResource(Res.string.bottom_left) -> "Bottom Left"
-                getStringResource(Res.string.bottom_right) -> "Bottom Right"
-                else -> "Bottom Right"
-            }
-            onSettingsChange(settings.copy(songNumberPosition = value))
-        }
-    }
-    rightGbc.gridx = 1
-    rightPanel.add(positionCombo, rightGbc)
-
-    // Add left and right panels to main content panel
-    gbc.gridx = 0; gbc.gridy = 0; gbc.weightx = 0.5; gbc.fill = GridBagConstraints.BOTH
-    gbc.anchor = GridBagConstraints.NORTHWEST
-    contentPanel.add(leftPanel, gbc)
-
-    gbc.gridx = 1; gbc.gridy = 0; gbc.weightx = 0.5
-    contentPanel.add(rightPanel, gbc)
-
-    panel.add(contentPanel, BorderLayout.CENTER)
-    return panel
 }
 
+@Composable
+private fun RightColumn(
+    settings: AppSettings,
+    onSettingsChange: (AppSettings) -> Unit,
+    availableFonts: List<String>
+) {
+    // Store string resources to avoid calling stringResource in callbacks
+    val topStr = stringResource(Res.string.top)
+    val middleStr = stringResource(Res.string.middle)
+    val bottomStr = stringResource(Res.string.bottom)
+    val leftStr = stringResource(Res.string.left)
+    val centerStr = stringResource(Res.string.center)
+    val rightStr = stringResource(Res.string.right)
+    val topLeftStr = stringResource(Res.string.top_left)
+    val topRightStr = stringResource(Res.string.top_right)
+    val bottomLeftStr = stringResource(Res.string.bottom_left)
+    val bottomRightStr = stringResource(Res.string.bottom_right)
+
+    // Lyrics Section
+    SectionHeader(stringResource(Res.string.lyrics))
+
+    Spacer(modifier = Modifier.height(8.dp))
+
+    SettingRow(stringResource(Res.string.font_size)) {
+        NumberSettingsTextField(
+            initialText = settings.songSettings.lyricsFontSize,
+            onValueChange = {
+                onSettingsChange.invoke(settings.copy(songSettings = settings.songSettings.copy(lyricsFontSize = it)))
+            },
+            range = 8..72
+        )
+    }
+
+    SettingRow(stringResource(Res.string.font_type)) {
+        FontSettingsDropdown(
+            value = settings.songSettings.lyricsFontType,
+            fonts = availableFonts,
+            onValueChange = {
+                onSettingsChange.invoke(
+                    settings.copy(songSettings = settings.songSettings.copy(lyricsFontType = it))
+                )
+            }
+        )
+    }
+
+    MinMaxRow(
+        minValue = settings.songSettings.lyricsMinFontSize,
+        maxValue = settings.songSettings.lyricsMaxFontSize,
+        onMinChange = {
+            onSettingsChange.invoke(
+                settings.copy(songSettings = settings.songSettings.copy(lyricsMinFontSize = it))
+            )
+        },
+        onMaxChange = {
+            onSettingsChange.invoke(
+                settings.copy(songSettings = settings.songSettings.copy(lyricsMaxFontSize = it))
+            )
+        }
+    )
+
+    AlphaSlider(
+        value = settings.songSettings.lyricsAlpha,
+        onValueChange = {
+            onSettingsChange.invoke(
+                settings.copy(songSettings = settings.songSettings.copy(lyricsAlpha = it))
+            )
+        }
+    )
+
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Checkbox(
+            checked = settings.songSettings.wordWrap,
+            onCheckedChange = {
+                onSettingsChange.invoke(
+                    settings.copy(songSettings = settings.songSettings.copy(wordWrap = it))
+                )
+            }
+        )
+        Text(
+            text = stringResource(Res.string.word_wrap),
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier.padding(start = 4.dp)
+        )
+    }
+
+    Spacer(modifier = Modifier.height(5.dp))
+
+    SettingRow(stringResource(Res.string.vertical_alignment), width = 200.dp) {
+        DropdownSettingsField(
+            value = when (settings.songSettings.lyricsAlignment) {
+                DropdownValues.TOP -> topStr
+                DropdownValues.MIDDLE -> middleStr
+                DropdownValues.BOTTOM -> bottomStr
+                else -> middleStr
+            },
+            options = listOf(topStr, middleStr, bottomStr),
+            onValueChange = { displayValue ->
+                val storedValue = when (displayValue) {
+                    topStr -> DropdownValues.TOP
+                    middleStr -> DropdownValues.MIDDLE
+                    bottomStr -> DropdownValues.BOTTOM
+                    else -> DropdownValues.MIDDLE
+                }
+                onSettingsChange.invoke(
+                    settings.copy(songSettings = settings.songSettings.copy(lyricsAlignment = storedValue))
+                )
+            }
+        )
+    }
+
+    SettingRow(stringResource(Res.string.horizontal_alignment), width = 200.dp) {
+        DropdownSettingsField(
+            value = when (settings.songSettings.lyricsHorizontalAlignment) {
+                DropdownValues.LEFT -> leftStr
+                DropdownValues.CENTER -> centerStr
+                DropdownValues.RIGHT -> rightStr
+                else -> centerStr
+            },
+            options = listOf(leftStr, centerStr, rightStr),
+            onValueChange = { displayValue ->
+                val storedValue = when (displayValue) {
+                    leftStr -> DropdownValues.LEFT
+                    centerStr -> DropdownValues.CENTER
+                    rightStr -> DropdownValues.RIGHT
+                    else -> DropdownValues.CENTER
+                }
+                onSettingsChange.invoke(
+                    settings.copy(songSettings = settings.songSettings.copy(lyricsHorizontalAlignment = storedValue))
+                )
+            }
+        )
+    }
+
+    Spacer(modifier = Modifier.height(20.dp))
+
+    // Song Number Section
+    SectionHeader(stringResource(Res.string.song_number))
+
+    Spacer(modifier = Modifier.height(8.dp))
+
+    println("Andrei: ${settings.songSettings.songNumberFontSize}")
+    SettingRow(stringResource(Res.string.font_size)) {
+        NumberSettingsTextField(
+            initialText = settings.songSettings.songNumberFontSize,
+            onValueChange = {
+                onSettingsChange.invoke(
+                    settings.copy(songSettings = settings.songSettings.copy(songNumberFontSize = it))
+                )
+            },
+            range = 8..48
+        )
+    }
+
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Checkbox(
+            checked = settings.songSettings.songNumberFirstPageOnly,
+            onCheckedChange = {
+                onSettingsChange.invoke(
+                    settings.copy(songSettings = settings.songSettings.copy(songNumberFirstPageOnly = it))
+                )
+            }
+        )
+        Text(
+            text = stringResource(Res.string.show_on_first_page_only),
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier.padding(start = 4.dp)
+        )
+    }
+
+    Spacer(modifier = Modifier.height(5.dp))
+
+    val pos = when (settings.songSettings.songNumberPosition) {
+        DropdownValues.TOP_LEFT -> topLeftStr
+        DropdownValues.TOP_RIGHT -> topRightStr
+        DropdownValues.BOTTOM_LEFT -> bottomLeftStr
+        DropdownValues.BOTTOM_RIGHT -> bottomRightStr
+        else -> bottomRightStr
+    }
+
+    var initialPosition by remember { mutableStateOf(pos) }
+    SettingRow(stringResource(Res.string.position_on_screen), width = 200.dp) {
+        DropdownSettingsField(
+            value = initialPosition,
+            options = listOf(topLeftStr, topRightStr, bottomLeftStr, bottomRightStr),
+            onValueChange = { displayValue ->
+                val storedValue = when (displayValue) {
+                    topLeftStr -> DropdownValues.TOP_LEFT
+                    topRightStr -> DropdownValues.TOP_RIGHT
+                    bottomLeftStr -> DropdownValues.BOTTOM_LEFT
+                    bottomRightStr -> DropdownValues.BOTTOM_RIGHT
+                    else -> DropdownValues.BOTTOM_RIGHT
+                }
+                initialPosition = storedValue
+                onSettingsChange.invoke(
+                    settings.copy(songSettings = settings.songSettings.copy(songNumberPosition = storedValue))
+                )
+            }
+        )
+    }
+}
+
+@Composable
+private fun SectionHeader(text: String) {
+    Column {
+        Text(
+            text = text,
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.padding(top = 2.dp, bottom = 8.dp)
+        )
+        HorizontalDivider(
+            color = MaterialTheme.colorScheme.outlineVariant,
+            thickness = 1.dp,
+            modifier = Modifier.fillMaxWidth()
+        )
+    }
+}
+
+@Composable
+private fun SettingRow(
+    label: String,
+    width: Dp = 120.dp,
+    content: @Composable () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 5.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.width(width)
+        )
+        Box(modifier = Modifier.weight(1f)) {
+            content()
+        }
+    }
+}
+
+@Composable
+private fun ModernButton(
+    text: String,
+    backgroundColor: Color,
+    onClick: () -> Unit
+) {
+    var isHovered by remember { mutableStateOf(false) }
+
+    Button(
+        onClick = onClick,
+        colors = ButtonDefaults.buttonColors(
+            containerColor = if (isHovered) backgroundColor.copy(alpha = 0.8f) else backgroundColor,
+            contentColor = Color.White
+        ),
+        shape = RoundedCornerShape(4.dp),
+        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+        modifier = Modifier
+    ) {
+        Text(text = text, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+    }
+}
+
+
+
+@Composable
+private fun MinMaxRow(
+    minValue: Int,
+    maxValue: Int,
+    onMinChange: (Int) -> Unit,
+    onMaxChange: (Int) -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 5.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = stringResource(Res.string.min),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.width(120.dp)
+        )
+
+        NumberSettingsTextField(
+            initialText = minValue,
+            onValueChange = onMinChange,
+            range = 8..72
+        )
+
+        Spacer(modifier = Modifier.width(5.dp))
+
+        Text(
+            text = stringResource(Res.string.max),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+
+        NumberSettingsTextField(
+            initialText = maxValue,
+            onValueChange = onMaxChange,
+            range = 8..72
+        )
+    }
+}
+
+@Composable
+private fun AlphaSlider(
+    value: Float,
+    onValueChange: (Float) -> Unit
+) {
+    var mutableValue by remember { mutableStateOf(value) }
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 5.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = stringResource(Res.string.alpha),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.width(120.dp)
+        )
+
+        Column(modifier = Modifier.weight(1f)) {
+            Slider(
+                value = mutableValue,
+                onValueChange = {
+                    mutableValue = it
+                    onValueChange.invoke(it)
+                },
+                steps = 20,
+                valueRange = 0f..100f,
+                modifier = Modifier.fillMaxWidth()
+            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                listOf(0, 25, 50, 75, 100).forEach { tick ->
+                    Text(
+                        text = tick.toString(),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        }
+    }
+}
