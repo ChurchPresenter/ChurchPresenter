@@ -85,6 +85,12 @@ private fun LeftColumn(
     onSettingsChange: (AppSettings) -> Unit,
     availableFonts: List<String>
 ) {
+    // State to trigger refresh of file list
+    var refreshTrigger by remember { mutableStateOf(0) }
+
+    // State for selected file
+    var selectedFile by remember { mutableStateOf<String?>(null) }
+
     // Store string resources to avoid calling stringResource in callbacks
     val noneStr = stringResource(Res.string.none)
     val firstPageStr = stringResource(Res.string.first_page)
@@ -148,6 +154,22 @@ private fun LeftColumn(
 
     Spacer(modifier = Modifier.height(8.dp))
 
+    // Automatically load song files from the storage directory
+    val songFilesInDirectory = remember(settings.songSettings.storageDirectory, refreshTrigger) {
+        if (settings.songSettings.storageDirectory.isNotEmpty()) {
+            val dir = File(settings.songSettings.storageDirectory)
+            if (dir.exists() && dir.isDirectory) {
+                dir.listFiles { file ->
+                    file.extension.lowercase() in listOf("spb", "sps")
+                }?.map { it.name }?.sorted() ?: emptyList()
+            } else {
+                emptyList()
+            }
+        } else {
+            emptyList()
+        }
+    }
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -162,20 +184,32 @@ private fun LeftColumn(
                 .background(MaterialTheme.colorScheme.surface)
                 .padding(8.dp)
         ) {
-            if (settings.songSettings.songFiles.isEmpty()) {
+            if (songFilesInDirectory.isEmpty()) {
                 Text(
-                    text = stringResource(Res.string.no_song_files),
+                    text = if (settings.songSettings.storageDirectory.isEmpty()) {
+                        stringResource(Res.string.no_directory_selected)
+                    } else {
+                        stringResource(Res.string.no_song_files)
+                    },
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             } else {
-                settings.songSettings.songFiles.forEach { file ->
+                songFilesInDirectory.forEach { fileName ->
+                    val isSelected = fileName == selectedFile
                     Text(
-                        text = file,
+                        text = fileName,
                         style = MaterialTheme.typography.bodySmall,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 4.dp, horizontal = 8.dp)
+                            .background(
+                                if (isSelected) MaterialTheme.colorScheme.primaryContainer
+                                else Color.Transparent
+                            )
+                            .clickable { selectedFile = fileName }
+                            .padding(vertical = 4.dp, horizontal = 8.dp),
+                        color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer
+                                else MaterialTheme.colorScheme.onSurface
                     )
                 }
             }
@@ -192,8 +226,17 @@ private fun LeftColumn(
             backgroundColor = MaterialTheme.colorScheme.inverseSurface,
             onClick = {
                 SwingUtilities.invokeLater {
-                    // Get the parent window to ensure dialog appears on top
                     val parentWindow = Window.getWindows().firstOrNull { it.isActive }
+                    if (settings.songSettings.storageDirectory.isEmpty()) {
+                        JOptionPane.showMessageDialog(
+                            parentWindow,
+                            "Please select a storage directory first.",
+                            "No Directory Selected",
+                            JOptionPane.WARNING_MESSAGE
+                        )
+                        return@invokeLater
+                    }
+
                     val fileChooser = JFileChooser().apply {
                         fileSelectionMode = JFileChooser.FILES_ONLY
                         isMultiSelectionEnabled = true
@@ -203,13 +246,22 @@ private fun LeftColumn(
                     }
                     val result = fileChooser.showOpenDialog(parentWindow)
                     if (result == JFileChooser.APPROVE_OPTION) {
-                        val newFiles = fileChooser.selectedFiles.map { it.absolutePath }
-                        val updatedFiles = (settings.songSettings.songFiles + newFiles).distinct()
-                        onSettingsChange.invoke(
-                            settings.copy(
-                                songSettings = settings.songSettings.copy(songFiles = updatedFiles)
-                            )
-                        )
+                        val targetDir = File(settings.songSettings.storageDirectory)
+                        fileChooser.selectedFiles.forEach { sourceFile ->
+                            val targetFile = File(targetDir, sourceFile.name)
+                            try {
+                                sourceFile.copyTo(targetFile, overwrite = true)
+                            } catch (e: Exception) {
+                                JOptionPane.showMessageDialog(
+                                    parentWindow,
+                                    "Error copying ${sourceFile.name}: ${e.message}",
+                                    "Copy Error",
+                                    JOptionPane.ERROR_MESSAGE
+                                )
+                            }
+                        }
+                        // Trigger a refresh by incrementing the trigger
+                        refreshTrigger++
                     }
                 }
             }
@@ -219,15 +271,47 @@ private fun LeftColumn(
             text = stringResource(Res.string.remove_song_file),
             backgroundColor = MaterialTheme.colorScheme.errorContainer,
             onClick = {
-                if (settings.songSettings.songFiles.isNotEmpty()) {
-                    val updatedFiles = settings.songSettings.songFiles.drop(1)
-                    onSettingsChange.invoke(
-                        settings.copy(songSettings = settings.songSettings.copy(songFiles = updatedFiles))
+                SwingUtilities.invokeLater {
+                    val parentWindow = Window.getWindows().firstOrNull { it.isActive }
+
+                    if (selectedFile == null) {
+                        JOptionPane.showMessageDialog(
+                            parentWindow,
+                            "Please select a file from the list first.",
+                            "No File Selected",
+                            JOptionPane.WARNING_MESSAGE
+                        )
+                        return@invokeLater
+                    }
+
+                    val fileToDelete = File(settings.songSettings.storageDirectory, selectedFile!!)
+                    val confirm = JOptionPane.showConfirmDialog(
+                        parentWindow,
+                        "Are you sure you want to delete '$selectedFile'?",
+                        "Confirm Delete",
+                        JOptionPane.YES_NO_OPTION,
+                        JOptionPane.WARNING_MESSAGE
                     )
+                    if (confirm == JOptionPane.YES_OPTION) {
+                        try {
+                            fileToDelete.delete()
+                            selectedFile = null // Clear selection after deletion
+                            // Trigger a refresh by incrementing the trigger
+                            refreshTrigger++
+                        } catch (e: Exception) {
+                            JOptionPane.showMessageDialog(
+                                parentWindow,
+                                "Error deleting file: ${e.message}",
+                                "Delete Error",
+                                JOptionPane.ERROR_MESSAGE
+                            )
+                        }
+                    }
                 }
             }
         )
     }
+
 
     Spacer(modifier = Modifier.height(20.dp))
 
