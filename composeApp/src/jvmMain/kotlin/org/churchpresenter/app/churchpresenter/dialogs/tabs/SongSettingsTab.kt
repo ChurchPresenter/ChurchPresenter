@@ -14,6 +14,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.ExperimentalTextApi
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -23,13 +25,15 @@ import org.churchpresenter.app.churchpresenter.composables.DropdownSettingsField
 import org.churchpresenter.app.churchpresenter.composables.FontSettingsDropdown
 import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
 import org.churchpresenter.app.churchpresenter.data.AppSettings
+import org.churchpresenter.app.churchpresenter.utils.Utils
+import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDefault
 import org.jetbrains.compose.resources.stringResource
 import java.awt.*
 import java.io.File
 import javax.swing.*
 
 // Constants for dropdown values that can't be localized
-private object DropdownValues {
+object DropdownValues {
     const val NONE = "None"
     const val FIRST_PAGE = "First Page"
     const val EVERY_PAGE = "Every Page"
@@ -45,14 +49,13 @@ private object DropdownValues {
     const val BOTTOM_RIGHT = "Bottom Right"
 }
 
+
 @Composable
 fun SongSettingsTab(
     settings: AppSettings,
     onSettingsChange: (AppSettings) -> Unit = {}
 ) {
-    val availableFonts =
-        remember { GraphicsEnvironment.getLocalGraphicsEnvironment().availableFontFamilyNames.toList() }
-
+    val availableFonts = remember { Utils.getAvailableSystemFonts() }
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -282,15 +285,27 @@ private fun LeftColumn(
     }
 
     SettingRow(stringResource(Res.string.font_type)) {
-        FontSettingsDropdown(
-            value = settings.songSettings.titleFontType,
-            fonts = availableFonts,
-            onValueChange = {
-                onSettingsChange.invoke(
-                    settings.copy(songSettings = settings.songSettings.copy(titleFontType = it))
-                )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            FontSettingsDropdown(
+                modifier = Modifier.width(200.dp),
+                value = settings.songSettings.titleFontType,
+                fonts = availableFonts,
+                onValueChange = {
+                    onSettingsChange.invoke(
+                        settings.copy(songSettings = settings.songSettings.copy(titleFontType = it))
+                    )
+                }
+            )
+            val previewFontFamily = remember(settings.songSettings.titleFontType) {
+                systemFontFamilyOrDefault(settings.songSettings.titleFontType)
             }
-        )
+            Text(
+                text = "ABCDabcd1234",
+                fontFamily = previewFontFamily,
+                fontSize = MaterialTheme.typography.bodySmall.fontSize,
+                modifier = Modifier.padding(start = 10.dp, top = 4.dp)
+            )
+        }
     }
 
     MinMaxRow(
@@ -398,15 +413,27 @@ private fun RightColumn(
     }
 
     SettingRow(stringResource(Res.string.font_type)) {
-        FontSettingsDropdown(
-            value = settings.songSettings.lyricsFontType,
-            fonts = availableFonts,
-            onValueChange = {
-                onSettingsChange.invoke(
-                    settings.copy(songSettings = settings.songSettings.copy(lyricsFontType = it))
-                )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            FontSettingsDropdown(
+                modifier = Modifier.width(200.dp),
+                value = settings.songSettings.lyricsFontType,
+                fonts = availableFonts,
+                onValueChange = {
+                    onSettingsChange.invoke(
+                        settings.copy(songSettings = settings.songSettings.copy(lyricsFontType = it))
+                    )
+                }
+            )
+            val previewFontFamily = remember(settings.songSettings.lyricsFontType) {
+                systemFontFamilyOrDefault(settings.songSettings.lyricsFontType)
             }
-        )
+            Text(
+                text = "ABCDabcd1234",
+                fontFamily = previewFontFamily,
+                fontSize = 14.sp,
+                modifier = Modifier.padding(start = 10.dp, top = 4.dp)
+            )
+        }
     }
 
     MinMaxRow(
@@ -437,6 +464,7 @@ private fun RightColumn(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        var initialWordWrapValue by remember { mutableStateOf(settings.songSettings.wordWrap) }
         Checkbox(
             checked = initialWordWrapValue,
             onCheckedChange = {
@@ -612,9 +640,7 @@ private fun SettingRow(
             color = MaterialTheme.colorScheme.onSurface,
             modifier = Modifier.width(width)
         )
-        Box(modifier = Modifier.weight(1f)) {
-            content()
-        }
+        content()
     }
 }
 
