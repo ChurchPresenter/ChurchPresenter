@@ -30,4 +30,11 @@ object Constants {
     const val CHORUS = "Chorus"
 
     const val CHORUS_RUS = "Припев"
+    const val OTHER = "Other"
+
+    const val CONTAINS = "Contains"
+
+    const val STARTS_WITH = "Starts with"
+
+    const val EXACT_MATCH = "Exact match"
 }

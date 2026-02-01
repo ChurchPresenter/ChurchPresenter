@@ -12,6 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
+import java.awt.Window
 import javax.swing.JColorChooser
 import javax.swing.SwingUtilities
 
@@ -28,13 +29,15 @@ fun ColorPickerField(
             .height(32.dp)
             .clickable {
                 SwingUtilities.invokeLater {
+                    // Get the parent window to ensure dialog appears on top
+                    val parentWindow = Window.getWindows().firstOrNull { it.isActive }
                     val initialColor = java.awt.Color(
                         currentColor.red.toInt(),
                         currentColor.green.toInt(),
                         currentColor.blue.toInt()
                     )
                     val selectedColor = JColorChooser.showDialog(
-                        null,
+                        parentWindow,
                         "Choose Color",
                         initialColor
                     )

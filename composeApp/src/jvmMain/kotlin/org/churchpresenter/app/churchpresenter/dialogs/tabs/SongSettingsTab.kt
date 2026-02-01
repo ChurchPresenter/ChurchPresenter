@@ -28,9 +28,8 @@ import org.churchpresenter.app.churchpresenter.utils.Utils
 import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDefault
 import org.jetbrains.compose.resources.stringResource
 import java.io.File
+import java.awt.Window
 import javax.swing.*
-
-// Constants for dropdown values that can't be localized
 
 
 @Composable
@@ -120,16 +119,18 @@ private fun LeftColumn(
 
         ModernButton(
             text = stringResource(Res.string.browse_directory),
-            backgroundColor = Color(0xFF3498DB),
+            backgroundColor = MaterialTheme.colorScheme.primaryContainer,
             onClick = {
                 SwingUtilities.invokeLater {
+                    // Get the parent window to ensure dialog appears on top
+                    val parentWindow = Window.getWindows().firstOrNull { it.isActive }
                     val dirChooser = JFileChooser().apply {
                         fileSelectionMode = JFileChooser.DIRECTORIES_ONLY
                         if (settings.songSettings.storageDirectory.isNotEmpty()) {
                             currentDirectory = File(settings.songSettings.storageDirectory)
                         }
                     }
-                    val result = dirChooser.showOpenDialog(null)
+                    val result = dirChooser.showOpenDialog(parentWindow)
                     if (result == JFileChooser.APPROVE_OPTION) {
                         onSettingsChange.invoke(
                             settings.copy(songSettings = settings.songSettings.copy(storageDirectory = dirChooser.selectedFile.absolutePath))
@@ -188,9 +189,11 @@ private fun LeftColumn(
     ) {
         ModernButton(
             text = stringResource(Res.string.import_song_file),
-            backgroundColor = Color(0xFF2ECC71),
+            backgroundColor = MaterialTheme.colorScheme.inverseSurface,
             onClick = {
                 SwingUtilities.invokeLater {
+                    // Get the parent window to ensure dialog appears on top
+                    val parentWindow = Window.getWindows().firstOrNull { it.isActive }
                     val fileChooser = JFileChooser().apply {
                         fileSelectionMode = JFileChooser.FILES_ONLY
                         isMultiSelectionEnabled = true
@@ -198,7 +201,7 @@ private fun LeftColumn(
                             "Song Files (*.spb, *.sps)", "spb", "sps"
                         )
                     }
-                    val result = fileChooser.showOpenDialog(null)
+                    val result = fileChooser.showOpenDialog(parentWindow)
                     if (result == JFileChooser.APPROVE_OPTION) {
                         val newFiles = fileChooser.selectedFiles.map { it.absolutePath }
                         val updatedFiles = (settings.songSettings.songFiles + newFiles).distinct()
@@ -214,7 +217,7 @@ private fun LeftColumn(
 
         ModernButton(
             text = stringResource(Res.string.remove_song_file),
-            backgroundColor = Color(0xFFE74C3C),
+            backgroundColor = MaterialTheme.colorScheme.errorContainer,
             onClick = {
                 if (settings.songSettings.songFiles.isNotEmpty()) {
                     val updatedFiles = settings.songSettings.songFiles.drop(1)
@@ -523,7 +526,6 @@ private fun RightColumn(
 
     Spacer(modifier = Modifier.height(8.dp))
 
-    println("Andrei: ${settings.songSettings.songNumberFontSize}")
     SettingRow(stringResource(Res.string.font_size)) {
         NumberSettingsTextField(
             initialText = settings.songSettings.songNumberFontSize,

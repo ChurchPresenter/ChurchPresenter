@@ -1,6 +1,7 @@
 package org.churchpresenter.app.churchpresenter.data
 
 import androidx.compose.runtime.mutableStateListOf
+import org.churchpresenter.app.churchpresenter.utils.Constants
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.nio.file.Paths
@@ -15,18 +16,13 @@ class Songs {
 
     fun loadFromSps(resourcePath: String) {
         songs.clear()
-
-        songsLogger.info("loadFromSps: start loading resourcePath='$resourcePath'")
-
         try {
             val inputStream = Thread.currentThread().contextClassLoader.getResourceAsStream(resourcePath)
             val reader = if (inputStream != null) {
-                songsLogger.info("loadFromSps: loaded resource from classpath: $resourcePath")
                 inputStream.bufferedReader(StandardCharsets.UTF_8)
             } else {
                 val path = Paths.get(resourcePath)
                 if (Files.exists(path)) {
-                    songsLogger.info("loadFromSps: loaded resource from filesystem: ${path.toAbsolutePath()}")
                     Files.newBufferedReader(path, StandardCharsets.UTF_8)
                 } else {
                     val msg = "loadFromSps: resource not found on classpath or filesystem: $resourcePath"
@@ -109,9 +105,9 @@ class Songs {
                 val firstLine = sectionLines[0]
                 val section = LyricSection(
                     type = when {
-                        firstLine.startsWith("Куплет") -> "verse"
-                        firstLine.startsWith("Припев") -> "chorus"
-                        else -> "other"
+                        firstLine.startsWith(Constants.VERSE_RUS) -> Constants.VERSE_RUS
+                        firstLine.startsWith(Constants.CHORUS_RUS) -> Constants.CHORUS
+                        else -> Constants.OTHER
                     },
                     lines = sectionLines
                 )
@@ -119,7 +115,7 @@ class Songs {
                 sections.add(section)
 
                 // Store chorus for later use
-                if (section.type == "chorus") {
+                if (section.type == Constants.CHORUS) {
                     chorusSection = section
                 }
             }
@@ -130,7 +126,7 @@ class Songs {
             val section = sections[i]
 
             // Skip the original chorus section - we'll add it after each verse instead
-            if (section.type == "chorus") {
+            if (section.type == Constants.CHORUS) {
                 continue
             }
 
@@ -144,7 +140,7 @@ class Songs {
             }
 
             // Add empty line after current section if there are more non-chorus sections coming
-            val hasMoreSections = sections.subList(i + 1, sections.size).any { it.type != "chorus" }
+            val hasMoreSections = sections.subList(i + 1, sections.size).any { it.type != Constants.CHORUS }
             if (hasMoreSections) {
                 lyrics.add("") // Empty line separator after section
             }
@@ -176,11 +172,11 @@ class Songs {
 
         return songs.filter { song ->
             when (filterType) {
-                "Contains" -> song.title.contains(query, ignoreCase = true) ||
+                Constants.CONTAINS -> song.title.contains(query, ignoreCase = true) ||
                             song.number.contains(query, ignoreCase = true)
-                "Starts with" -> song.title.startsWith(query, ignoreCase = true) ||
+                Constants.STARTS_WITH -> song.title.startsWith(query, ignoreCase = true) ||
                                song.number.startsWith(query, ignoreCase = true)
-                "Exact match" -> song.title.equals(query, ignoreCase = true) ||
+                Constants.EXACT_MATCH -> song.title.equals(query, ignoreCase = true) ||
                                song.number.equals(query, ignoreCase = true)
                 else -> song.title.contains(query, ignoreCase = true)
             }

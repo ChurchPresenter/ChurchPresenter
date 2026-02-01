@@ -34,7 +34,6 @@ class SettingsManager {
                     AppSettings()
                 }
             } else {
-                println("defaulted settings:")
                 AppSettings() // Return default settings
             }
         } catch (e: Exception) {
