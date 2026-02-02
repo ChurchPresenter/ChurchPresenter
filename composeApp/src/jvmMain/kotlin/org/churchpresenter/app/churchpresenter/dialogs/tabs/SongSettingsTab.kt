@@ -371,6 +371,7 @@ private fun LeftColumn(
             Text(
                 text = "ABCDabcd1234",
                 fontFamily = previewFontFamily,
+                color = MaterialTheme.colorScheme.onBackground,
                 fontSize = MaterialTheme.typography.bodySmall.fontSize,
                 modifier = Modifier.padding(start = 10.dp, top = 4.dp)
             )
@@ -501,6 +502,7 @@ private fun RightColumn(
                 text = "ABCDabcd1234",
                 fontFamily = previewFontFamily,
                 fontSize = 14.sp,
+                color = MaterialTheme.colorScheme.onBackground,
                 modifier = Modifier.padding(start = 10.dp, top = 4.dp)
             )
         }
@@ -550,6 +552,7 @@ private fun RightColumn(
         )
         Text(
             text = stringResource(Res.string.word_wrap),
+            color = MaterialTheme.colorScheme.onSurface,
             style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier.padding(start = 4.dp)
         )

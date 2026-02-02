@@ -6,6 +6,8 @@ import androidx.compose.ui.input.key.KeyShortcut
 import androidx.compose.ui.window.FrameWindowScope
 import androidx.compose.ui.window.MenuBar
 import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.dark_theme
+import churchpresenter.composeapp.generated.resources.light_theme
 import churchpresenter.composeapp.generated.resources.menu_about
 import churchpresenter.composeapp.generated.resources.menu_add_to_schedule
 import churchpresenter.composeapp.generated.resources.menu_clear_schedule
@@ -22,12 +24,18 @@ import churchpresenter.composeapp.generated.resources.menu_save_schedule
 import churchpresenter.composeapp.generated.resources.menu_save_schedule_as
 import churchpresenter.composeapp.generated.resources.menu_schedule
 import churchpresenter.composeapp.generated.resources.menu_settings
+import churchpresenter.composeapp.generated.resources.system_theme
+import org.churchpresenter.app.churchpresenter.data.AppSettings
+import org.churchpresenter.app.churchpresenter.data.SettingsManager
 import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
 import org.churchpresenter.app.churchpresenter.ui.theme.rememberThemeManager
+import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun FrameWindowScope.NavigationTopBar(
+    appSettings: AppSettings,
+    updatedSettings: (AppSettings) -> Unit,
     onNewSchedule: () -> Unit = {},
     onOpenSchedule: () -> Unit = {},
     onSaveSchedule: () -> Unit = {},
@@ -41,7 +49,6 @@ fun FrameWindowScope.NavigationTopBar(
     onAbout: () -> Unit = {},
     onHelp: () -> Unit = {}
 ) {
-    val themeManager = rememberThemeManager()
 
     val fileLabel = stringResource(Res.string.menu_file)
     val fileMnemonic = fileLabel.firstOrNull() ?: 'F'
@@ -89,27 +96,45 @@ fun FrameWindowScope.NavigationTopBar(
         }
 
         Menu(scheduleLabel, mnemonic = scheduleMnemonic) {
-            Item(stringResource(Res.string.menu_add_to_schedule), onClick = onAddToSchedule, shortcut = KeyShortcut(key = Key.F2))
-            Item(stringResource(Res.string.menu_remove_from_schedule), onClick = onRemoveFromSchedule, shortcut = KeyShortcut(key = Key.Delete))
+            Item(
+                stringResource(Res.string.menu_add_to_schedule),
+                onClick = onAddToSchedule,
+                shortcut = KeyShortcut(key = Key.F2)
+            )
+            Item(
+                stringResource(Res.string.menu_remove_from_schedule),
+                onClick = onRemoveFromSchedule,
+                shortcut = KeyShortcut(key = Key.Delete)
+            )
             Item(stringResource(Res.string.menu_clear_schedule), onClick = onClearSchedule)
         }
 
         Menu(editLabel, mnemonic = editMnemonic) {
-            Item(stringResource(Res.string.menu_settings), onClick = onSettings, shortcut = KeyShortcut(ctrl = true, key = Key.T))
+            Item(
+                stringResource(Res.string.menu_settings),
+                onClick = onSettings,
+                shortcut = KeyShortcut(ctrl = true, key = Key.T)
+            )
         }
 
         Menu("View", mnemonic = 'V') {
             Item(
-                text = "Light Theme",
-                onClick = { themeManager.setThemeMode(ThemeMode.LIGHT) }
+                text = stringResource(Res.string.light_theme),
+                onClick = {
+                    updatedSettings.invoke(appSettings.copy(theme = Constants.LIGHT))
+                }
             )
             Item(
-                text = "Dark Theme",
-                onClick = { themeManager.setThemeMode(ThemeMode.DARK) }
+                text = stringResource(Res.string.dark_theme),
+                onClick = {
+                    updatedSettings.invoke(appSettings.copy(theme = Constants.DARK))
+                }
             )
             Item(
-                text = "System Theme",
-                onClick = { themeManager.setThemeMode(ThemeMode.SYSTEM) }
+                text = stringResource(Res.string.system_theme),
+                onClick = {
+                    updatedSettings.invoke(appSettings.copy(theme = Constants.SYSTEM))
+                }
             )
         }
 

@@ -54,8 +54,6 @@ class Songs {
                         // The second header line contains the actual songbook name
                         if (headerLineCount == 2) {
                             databaseName = headerContent
-                            println("DEBUG: Found songbook name in header line $headerLineCount: '$databaseName'")
-                            songsLogger.info("Found database name in header: $databaseName")
                         }
                         return@forEachLine
                     }
@@ -96,8 +94,6 @@ class Songs {
                     }
                 }
             }
-
-            songsLogger.info("loadFromSpsAppend: parsed songs.size=${songs.size}")
         } catch (e: Exception) {
             songsLogger.log(Level.SEVERE, "loadFromSpsAppend failed for resourcePath=$resourcePath", e)
             throw e

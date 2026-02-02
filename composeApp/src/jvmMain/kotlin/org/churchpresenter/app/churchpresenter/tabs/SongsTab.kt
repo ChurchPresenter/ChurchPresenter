@@ -397,21 +397,25 @@ fun SongsTab(
                     onSelectedChange = { selectedSongbook = it }
                 )
 
-                // Categories dropdown
-                DropdownSelector(
-                    modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp),
-                    label = "",
-                    items = categories,
-                    selected = selectedCategory,
-                    onSelectedChange = { selectedCategory = it }
-                )
-
-                // Filter section
-                Text(
-                    stringResource(Res.string.filter_colon),
-                    style = MaterialTheme.typography.labelMedium,
-                    modifier = Modifier.padding(vertical = 4.dp)
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        stringResource(Res.string.filter_colon),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(vertical = 4.dp)
+                    )
+                    DropdownSelector(
+                        modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp),
+                        label = "",
+                        items = categories,
+                        selected = selectedCategory,
+                        onSelectedChange = { selectedCategory = it }
+                    )
+                }
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -420,6 +424,7 @@ fun SongsTab(
                 ) {
                     Text(
                         stringResource(Res.string.filter_type_colon),
+                        color = MaterialTheme.colorScheme.primary,
                         style = MaterialTheme.typography.labelMedium
                     )
                     DropdownSelector(

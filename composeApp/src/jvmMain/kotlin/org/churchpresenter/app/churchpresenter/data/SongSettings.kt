@@ -5,7 +5,6 @@ import org.churchpresenter.app.churchpresenter.utils.Constants
 
 @Serializable
 data class SongSettings(
-    val theme: String = Constants.LIGHT,
     // Song file management
     val storageDirectory: String = "",
     val songFiles: List<String> = emptyList(),
@@ -40,5 +39,6 @@ data class SongSettings(
 @Serializable
 data class AppSettings(
     val songSettings: SongSettings = SongSettings(),
+    val theme: String = Constants.LIGHT,
     // Add other tab settings here as needed
 )

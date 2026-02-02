@@ -7,6 +7,7 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.offset
 import androidx.compose.material3.FloatingToolbarDefaults.animationSpec
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -42,3 +43,7 @@ fun Modifier.errorShake(
         IntOffset(x = shake.value.roundToInt(), y = 0)
     }
 }
+
+@Composable
+fun Modifier.conditional(condition: Boolean, modifier: @Composable Modifier.() -> Modifier) =
+    then(if (condition) modifier.invoke(this) else this)

@@ -14,6 +14,8 @@ import java.awt.event.WindowEvent
 import javax.swing.*
 import kotlinx.coroutines.runBlocking
 import org.churchpresenter.app.churchpresenter.data.AppSettings
+import org.churchpresenter.app.churchpresenter.ui.theme.AppThemeWrapper
+import org.churchpresenter.app.churchpresenter.ui.theme.setTheme
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 
 // Helper function to get string resources in Swing context
@@ -26,6 +28,7 @@ private fun getStringResource(resource: org.jetbrains.compose.resources.StringRe
 
 fun showOptionsDialog(
     parent: Frame? = null,
+    theme: String,
     settingsManager: SettingsManager,
     onSave: (AppSettings) -> Unit = {}
 ) {
@@ -43,27 +46,50 @@ fun showOptionsDialog(
             // Song Settings Tab - Using Compose
             val songPanel = ComposePanel().apply {
                 setContent {
-                    var appSettings by remember { mutableStateOf(currentSettings) }
-
-                    SongSettingsTab(
-                        settings = appSettings,
-                        onSettingsChange = { updateFn ->
-                            appSettings = AppSettings(updateFn.songSettings)
-                            currentSettings = appSettings
-                        }
-                    )
+                    AppThemeWrapper {
+                        var appSettings by remember { mutableStateOf(currentSettings) }
+                        setTheme(theme)
+                        SongSettingsTab(
+                            settings = appSettings,
+                            onSettingsChange = { updateFn ->
+                                appSettings = AppSettings(updateFn.songSettings)
+                                currentSettings = appSettings
+                            }
+                        )
+                    }
                 }
             }
             tabbedPane.addTab(getStringResource(Res.string.song), songPanel)
 
             // Placeholder tabs
-            tabbedPane.addTab(getStringResource(Res.string.bible), JLabel(getStringResource(Res.string.bible_tab_content)))
-            tabbedPane.addTab(getStringResource(Res.string.text_settings_and_colors), JLabel(getStringResource(Res.string.text_settings_tab_content)))
-            tabbedPane.addTab(getStringResource(Res.string.background), JLabel(getStringResource(Res.string.background_tab_content)))
-            tabbedPane.addTab(getStringResource(Res.string.background_images), JLabel(getStringResource(Res.string.background_images_tab_content)))
-            tabbedPane.addTab(getStringResource(Res.string.folders), JLabel(getStringResource(Res.string.folders_tab_content)))
-            tabbedPane.addTab(getStringResource(Res.string.projection), JLabel(getStringResource(Res.string.projection_tab_content)))
-            tabbedPane.addTab(getStringResource(Res.string.other), JLabel(getStringResource(Res.string.other_tab_content)))
+            tabbedPane.addTab(
+                getStringResource(Res.string.bible),
+                JLabel(getStringResource(Res.string.bible_tab_content))
+            )
+            tabbedPane.addTab(
+                getStringResource(Res.string.text_settings_and_colors),
+                JLabel(getStringResource(Res.string.text_settings_tab_content))
+            )
+            tabbedPane.addTab(
+                getStringResource(Res.string.background),
+                JLabel(getStringResource(Res.string.background_tab_content))
+            )
+            tabbedPane.addTab(
+                getStringResource(Res.string.background_images),
+                JLabel(getStringResource(Res.string.background_images_tab_content))
+            )
+            tabbedPane.addTab(
+                getStringResource(Res.string.folders),
+                JLabel(getStringResource(Res.string.folders_tab_content))
+            )
+            tabbedPane.addTab(
+                getStringResource(Res.string.projection),
+                JLabel(getStringResource(Res.string.projection_tab_content))
+            )
+            tabbedPane.addTab(
+                getStringResource(Res.string.other),
+                JLabel(getStringResource(Res.string.other_tab_content))
+            )
 
             // Button panel
             val buttonPanel = JPanel(FlowLayout(FlowLayout.RIGHT)).apply {

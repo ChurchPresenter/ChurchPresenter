@@ -50,7 +50,7 @@ fun NumberSettingsTextField(
     BasicTextField(
         interactionSource = interactionSource,
         maxLines = 1,
-        textStyle = MaterialTheme.typography.bodySmall.copy(textAlign = TextAlign.Center),
+        textStyle = MaterialTheme.typography.bodySmall.copy(textAlign = TextAlign.Center, color = MaterialTheme.colorScheme.onSurface),
         modifier = modifier
             .width(80.dp)
             .height(32.dp)

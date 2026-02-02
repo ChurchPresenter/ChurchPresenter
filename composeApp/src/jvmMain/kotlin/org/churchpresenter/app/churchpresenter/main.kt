@@ -22,6 +22,10 @@ import org.churchpresenter.app.churchpresenter.dialogs.showOptionsDialog
 import org.churchpresenter.app.churchpresenter.models.LyricSection
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.presenter.SongPresenter
+import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
+import org.churchpresenter.app.churchpresenter.ui.theme.rememberThemeManager
+import org.churchpresenter.app.churchpresenter.ui.theme.setTheme
+import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.jetbrains.compose.resources.stringResource
 
 
@@ -31,7 +35,6 @@ fun main() = application {
     var presenting by remember { mutableStateOf(Presenting.NONE) }
     var lyricSection by remember { mutableStateOf(LyricSection()) }
 
-
     // Get bounds of the second screen if present
     val screens = GraphicsEnvironment.getLocalGraphicsEnvironment().screenDevices
     val secondScreenBounds = if (screens.size > 1) screens[1].defaultConfiguration.bounds else null
@@ -40,20 +43,29 @@ fun main() = application {
     )
     val settingsManager = SettingsManager()
     var appSettings by remember { mutableStateOf(settingsManager.loadSettings()) }
+    var theme by remember { mutableStateOf(appSettings.theme) }
 
     AppThemeWrapper {
+        setTheme(theme)
         Window(
             onCloseRequest = ::exitApplication,
             title = stringResource(Res.string.app_name),
             state = state
         ) {
             NavigationTopBar(
+                appSettings = appSettings,
                 onAbout = { openBlackWindow = true },
+                updatedSettings = {
+                    appSettings = it
+                    theme = appSettings.theme
+                    settingsManager.saveSettings(appSettings)
+                },
                 onSettings = {
                     showOptionsDialog(
                         parent = null,
                         settingsManager = settingsManager,
-                        onSave = { appSettings = it }
+                        onSave = { appSettings = it },
+                        theme = theme,
                     )
                 },
                 onExit = { exitApplication() },
@@ -65,6 +77,7 @@ fun main() = application {
                 onSongItemSelected = {
                     lyricSection = it
                 },
+                appSettings = appSettings,
                 presenting = { presenting = it }
             )
         }

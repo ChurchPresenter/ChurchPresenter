@@ -20,6 +20,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.service_schedule
+import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.tabs.AnnouncementsTab
 import org.churchpresenter.app.churchpresenter.tabs.BibleTab
 import org.churchpresenter.app.churchpresenter.tabs.MediaTab
@@ -29,7 +30,6 @@ import org.churchpresenter.app.churchpresenter.tabs.TabSection
 import org.churchpresenter.app.churchpresenter.tabs.Tabs
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.app.churchpresenter.data.Bible
-import org.churchpresenter.app.churchpresenter.data.SettingsManager
 import org.churchpresenter.app.churchpresenter.models.LyricSection
 import org.churchpresenter.app.churchpresenter.models.SelectedVerse
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
@@ -37,14 +37,11 @@ import org.churchpresenter.app.churchpresenter.presenter.Presenting
 @Composable
 fun MainDesktop(
     modifier: Modifier = Modifier,
+    appSettings: AppSettings,
     presenting: (Presenting) -> Unit,
     onVerseSelected: (SelectedVerse) -> Unit,
     onSongItemSelected: (LyricSection) -> Unit
 ) {
-    // Load settings
-    val settingsManager = remember { SettingsManager() }
-    val appSettings = remember { settingsManager.loadSettings() }
-
     Box(
         modifier = modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)
     ) {
@@ -107,5 +104,11 @@ fun MainDesktop(
 @Preview
 @Composable
 fun MainDesktopPreview() {
-    MainDesktop(modifier = Modifier.fillMaxSize(), onVerseSelected = {}, presenting = {}, onSongItemSelected = {})
+    MainDesktop(
+        modifier = Modifier.fillMaxSize(),
+        onVerseSelected = {},
+        presenting = {},
+        onSongItemSelected = {},
+        appSettings = AppSettings()
+    )
 }
