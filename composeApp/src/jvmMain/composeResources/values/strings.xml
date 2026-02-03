@@ -181,4 +181,26 @@
     <string name="bible_book_64">3 John</string>
     <string name="bible_book_65">Jude</string>
     <string name="bible_book_66">Revelation</string>
+
+    <!-- Bible Settings -->
+    <string name="bible_files">Bible Files</string>
+    <string name="position">Position</string>
+    <string name="no_bible_files">No Bible files loaded</string>
+    <string name="import_bible_file">Import Bible File</string>
+    <string name="remove_bible_file">Remove Bible File</string>
+    <string name="bible_selection">Bible Selection</string>
+    <string name="primary_bible">Primary Bible:</string>
+    <string name="secondary_bible">Secondary Bible:</string>
+    <string name="background_type">Background Type:</string>
+    <string name="background_color">Background Color:</string>
+    <string name="background_image">Background Image:</string>
+    <string name="select_image">Select Image</string>
+    <string name="primary_bible_text">Primary Bible Text</string>
+    <string name="primary_bible_reference">Primary Bible Book Reference</string>
+    <string name="secondary_bible_text">Secondary Bible Text</string>
+    <string name="secondary_bible_reference">Secondary Bible Book Reference</string>
+    <string name="show_abbreviation">Show book abbreviation</string>
+    <string name="caption_language">Caption Language</string>
+    <string name="language_source">Language Source:</string>
+
 </resources>

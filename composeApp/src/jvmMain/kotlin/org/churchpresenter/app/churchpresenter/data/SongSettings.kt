@@ -37,8 +37,52 @@ data class SongSettings(
 )
 
 @Serializable
+data class BibleSettings(
+    // Bible file management
+    val storageDirectory: String = "",
+    val bibleFiles: List<String> = emptyList(),
+
+    // Bible selection
+    val primaryBible: String = "",
+    val secondaryBible: String = "",
+
+    // Background
+    val backgroundType: String = "Default", // "Default", "Color", "Image"
+    val backgroundColor: String = "#000000", // Black
+    val backgroundImage: String = "",
+
+    // Primary Bible text
+    val primaryBibleColor: String = "#FFFFFF",
+    val primaryBibleFontType: String = "Arial",
+    val primaryBibleFontSize: Int = 24,
+
+    // Primary Bible book reference
+    val primaryReferenceColor: String = "#FFFFFF",
+    val primaryReferenceFontType: String = "Arial",
+    val primaryReferenceFontSize: Int = 20,
+    val primaryReferencePosition: String = "Above", // "Above" or "Below"
+    val primaryShowAbbreviation: Boolean = false,
+
+    // Secondary Bible text
+    val secondaryBibleColor: String = "#CCCCCC",
+    val secondaryBibleFontType: String = "Arial",
+    val secondaryBibleFontSize: Int = 18,
+
+    // Secondary Bible book reference
+    val secondaryReferenceColor: String = "#CCCCCC",
+    val secondaryReferenceFontType: String = "Arial",
+    val secondaryReferenceFontSize: Int = 16,
+    val secondaryReferencePosition: String = "Above", // "Above" or "Below"
+    val secondaryShowAbbreviation: Boolean = false,
+
+    // Language for captions
+    val captionLanguage: String = "Interface" // "Interface" or "Database"
+)
+
+@Serializable
 data class AppSettings(
     val songSettings: SongSettings = SongSettings(),
+    val bibleSettings: BibleSettings = BibleSettings(),
     val theme: String = Constants.LIGHT,
     // Add other tab settings here as needed
 )

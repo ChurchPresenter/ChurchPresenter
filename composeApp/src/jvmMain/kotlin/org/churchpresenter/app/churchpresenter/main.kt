@@ -15,19 +15,15 @@ import androidx.compose.ui.window.rememberWindowState
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.app_name
 import org.churchpresenter.app.churchpresenter.data.SettingsManager
+import org.churchpresenter.app.churchpresenter.dialogs.OptionsDialog
 import org.churchpresenter.app.churchpresenter.models.SelectedVerse
 import org.churchpresenter.app.churchpresenter.presenter.BiblePresenter
 import org.churchpresenter.app.churchpresenter.ui.theme.AppThemeWrapper
-import org.churchpresenter.app.churchpresenter.dialogs.showOptionsDialog
 import org.churchpresenter.app.churchpresenter.models.LyricSection
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.presenter.SongPresenter
-import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
-import org.churchpresenter.app.churchpresenter.ui.theme.rememberThemeManager
 import org.churchpresenter.app.churchpresenter.ui.theme.setTheme
-import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.jetbrains.compose.resources.stringResource
-
 
 fun main() = application {
     var openBlackWindow by remember { mutableStateOf(true) }
@@ -44,29 +40,25 @@ fun main() = application {
     val settingsManager = SettingsManager()
     var appSettings by remember { mutableStateOf(settingsManager.loadSettings()) }
     var theme by remember { mutableStateOf(appSettings.theme) }
+    var showOptionsDialog by remember { mutableStateOf(false) }
 
-    AppThemeWrapper {
-        setTheme(theme)
-        Window(
-            onCloseRequest = ::exitApplication,
-            title = stringResource(Res.string.app_name),
-            state = state
-        ) {
+    Window(
+        onCloseRequest = ::exitApplication,
+        title = stringResource(Res.string.app_name),
+        state = state
+    ) {
+        AppThemeWrapper {
+            setTheme(theme)
+
             NavigationTopBar(
-                appSettings = appSettings,
                 onAbout = { openBlackWindow = true },
-                updatedSettings = {
-                    appSettings = it
-                    theme = appSettings.theme
+                theme = {
+                    appSettings = appSettings.copy(theme = it)
+                    theme = it
                     settingsManager.saveSettings(appSettings)
                 },
                 onSettings = {
-                    showOptionsDialog(
-                        parent = null,
-                        settingsManager = settingsManager,
-                        onSave = { appSettings = it },
-                        theme = theme,
-                    )
+                    showOptionsDialog = true
                 },
                 onExit = { exitApplication() },
             )
@@ -79,6 +71,18 @@ fun main() = application {
                 },
                 appSettings = appSettings,
                 presenting = { presenting = it }
+            )
+
+            // Options Dialog
+            OptionsDialog(
+                isVisible = showOptionsDialog,
+                theme = theme,
+                settingsManager = settingsManager,
+                onDismiss = { showOptionsDialog = false },
+                onSave = {
+                    appSettings = it
+                    theme = it.theme
+                }
             )
         }
     }
