@@ -8,7 +8,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogState
 import androidx.compose.ui.window.rememberDialogState
 import churchpresenter.composeapp.generated.resources.*
 import org.churchpresenter.app.churchpresenter.data.AppSettings
@@ -16,13 +15,14 @@ import org.churchpresenter.app.churchpresenter.data.SettingsManager
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.BibleSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.SongSettingsTab
 import org.churchpresenter.app.churchpresenter.ui.theme.AppThemeWrapper
+import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
 import org.churchpresenter.app.churchpresenter.ui.theme.setTheme
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun OptionsDialog(
     isVisible: Boolean,
-    theme: String,
+    theme: ThemeMode,
     settingsManager: SettingsManager,
     onDismiss: () -> Unit,
     onSave: (AppSettings) -> Unit = {}
@@ -37,8 +37,7 @@ fun OptionsDialog(
         title = stringResource(Res.string.options),
         resizable = true
     ) {
-        AppThemeWrapper {
-            setTheme(theme)
+        AppThemeWrapper(theme = theme) {
             Surface(
                 modifier = Modifier.fillMaxSize(),
                 color = MaterialTheme.colorScheme.background

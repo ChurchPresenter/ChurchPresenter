@@ -34,7 +34,7 @@ import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun FrameWindowScope.NavigationTopBar(
-    theme: (String) -> Unit,
+    theme: (ThemeMode) -> Unit,
     onNewSchedule: () -> Unit = {},
     onOpenSchedule: () -> Unit = {},
     onSaveSchedule: () -> Unit = {},
@@ -120,19 +120,19 @@ fun FrameWindowScope.NavigationTopBar(
             Item(
                 text = stringResource(Res.string.light_theme),
                 onClick = {
-                    theme.invoke(Constants.LIGHT)
+                    theme.invoke(ThemeMode.LIGHT)
                 }
             )
             Item(
                 text = stringResource(Res.string.dark_theme),
                 onClick = {
-                    theme.invoke(Constants.DARK)
+                    theme.invoke(ThemeMode.DARK)
                 }
             )
             Item(
                 text = stringResource(Res.string.system_theme),
                 onClick = {
-                    theme.invoke(Constants.SYSTEM)
+                    theme.invoke(ThemeMode.SYSTEM)
                 }
             )
         }

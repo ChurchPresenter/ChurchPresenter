@@ -22,6 +22,7 @@ import org.churchpresenter.app.churchpresenter.ui.theme.AppThemeWrapper
 import org.churchpresenter.app.churchpresenter.models.LyricSection
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.presenter.SongPresenter
+import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
 import org.churchpresenter.app.churchpresenter.ui.theme.setTheme
 import org.jetbrains.compose.resources.stringResource
 
@@ -39,7 +40,7 @@ fun main() = application {
     )
     val settingsManager = SettingsManager()
     var appSettings by remember { mutableStateOf(settingsManager.loadSettings()) }
-    var theme by remember { mutableStateOf(appSettings.theme) }
+    var theme by remember { mutableStateOf(ThemeMode.SYSTEM) }
     var showOptionsDialog by remember { mutableStateOf(false) }
 
     Window(
@@ -47,13 +48,13 @@ fun main() = application {
         title = stringResource(Res.string.app_name),
         state = state
     ) {
-        AppThemeWrapper {
-            setTheme(theme)
+        AppThemeWrapper(theme = theme) {
 
             NavigationTopBar(
                 onAbout = { openBlackWindow = true },
                 theme = {
-                    appSettings = appSettings.copy(theme = it)
+                    println(it)
+                    appSettings = appSettings.copy(theme = it.toString())
                     theme = it
                     settingsManager.saveSettings(appSettings)
                 },
@@ -81,7 +82,6 @@ fun main() = application {
                 onDismiss = { showOptionsDialog = false },
                 onSave = {
                     appSettings = it
-                    theme = it.theme
                 }
             )
         }

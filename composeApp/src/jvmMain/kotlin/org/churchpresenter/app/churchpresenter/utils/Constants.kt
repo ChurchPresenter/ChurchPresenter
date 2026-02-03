@@ -17,11 +17,11 @@ object Constants {
     const val TOP_RIGHT = "Top Right"
     const val BOTTOM_LEFT = "Bottom Left"
     const val BOTTOM_RIGHT = "Bottom Right"
-    const val LIGHT = "Light"
+    const val LIGHT = "LIGHT"
 
-    const val DARK = "Dark"
+    const val DARK = "DARK"
 
-    const val SYSTEM = "System"
+    const val SYSTEM = "SYSTEM"
 
     const val VERSE_RUS = "Куплет"
 
