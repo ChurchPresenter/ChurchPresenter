@@ -53,7 +53,6 @@ import churchpresenter.composeapp.generated.resources.search
 import churchpresenter.composeapp.generated.resources.verse
 import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
 import org.churchpresenter.app.churchpresenter.composables.SearchTextField
-import org.churchpresenter.app.churchpresenter.composables.SelectionList
 import org.churchpresenter.app.churchpresenter.composables.SelectionListWithIndex
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.viewmodel.BibleViewModel
@@ -72,6 +71,19 @@ fun BibleTab(
     val selectedVerseIndex by viewModel.selectedVerseIndex
     val verses by viewModel.verses
     val searchQuery by viewModel.searchQuery
+    val searchResults by viewModel.searchResults
+    val isSearchMode by viewModel.isSearchMode
+
+    // Get filtered lists from ViewModel
+    val filteredBooks = remember(books, viewModel.bookSearchQuery.value) {
+        viewModel.getFilteredBooks()
+    }
+    val filteredChapters = remember(selectedBookIndex, viewModel.chapterSearchQuery.value) {
+        viewModel.getFilteredChapters()
+    }
+    val filteredVerses = remember(verses, viewModel.verseSearchQuery.value) {
+        viewModel.getFilteredVerses()
+    }
 
     // String resources for scope and mode options
     val scopeOptions = listOf(
@@ -147,6 +159,7 @@ fun BibleTab(
                 label = {
                     Text(text = stringResource(Res.string.search))
                 },
+                maxLines = 1,
                 colors = OutlinedTextFieldDefaults.colors().copy(
                     unfocusedContainerColor = MaterialTheme.colorScheme.surface,
                     focusedContainerColor = MaterialTheme.colorScheme.surface,
@@ -178,33 +191,89 @@ fun BibleTab(
             Button(onClick = { viewModel.performSearch() }) {
                 Text(text = stringResource(Res.string.search))
             }
+
+            if (isSearchMode) {
+                Button(
+                    onClick = { viewModel.clearSearch() },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.secondary
+                    )
+                ) {
+                    Text("Clear")
+                }
+            }
         }
 
-        // Book / Chapter / Verse columns
+        // Show search results or normal view
+        if (isSearchMode && searchResults.isNotEmpty()) {
+            // Display search results
+            Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
+                Text(
+                    text = "Found ${searchResults.size} result(s)",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+
+                SelectionListWithIndex(
+                    list = searchResults.map { "${it.book} ${it.chapter}:${it.verse} - ${it.verseText}" },
+                    selectedIndex = -1
+                ) { index, _ ->
+                    searchResults.getOrNull(index)?.let { result ->
+                        viewModel.selectSearchResult(result)
+                        viewModel.clearSearch()
+                    }
+                }
+            }
+        } else if (isSearchMode && searchResults.isEmpty() && searchQuery.isNotEmpty()) {
+            // Show "no results" message
+            Column(
+                modifier = Modifier.fillMaxWidth().padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "No results found for \"$searchQuery\"",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        } else {
+            // Normal book/chapter/verse view
         Row(modifier = Modifier.fillMaxWidth()) {
             val chapterList = viewModel.getChaptersForCurrentBook()
 
             Column(modifier = Modifier.width(200.dp).padding(end = 8.dp)) {
-                SearchTextField(label = stringResource(Res.string.book)) { _ ->
-                    // simple local filtering
+                SearchTextField(label = stringResource(Res.string.book)) { query ->
+                    viewModel.updateBookSearchQuery(query)
                 }
-                SelectionList(
-                    list = books,
-                    selectedIndex = selectedBookIndex
-                ) { bookName ->
-                    viewModel.selectBook(books.indexOf(bookName))
+                SelectionListWithIndex(
+                    list = filteredBooks,
+                    selectedIndex = filteredBooks.indexOf(books.getOrNull(selectedBookIndex) ?: "").coerceAtLeast(0)
+                ) { index, _ ->
+                    // Find the real index in the original books list
+                    val bookName = filteredBooks.getOrNull(index)
+                    bookName?.let {
+                        val realIndex = books.indexOf(it)
+                        if (realIndex >= 0) {
+                            viewModel.selectBook(realIndex)
+                        }
+                    }
                 }
             }
 
             Column(modifier = Modifier.width(120.dp).padding(end = 8.dp)) {
-                SearchTextField(label = stringResource(Res.string.chapter)) { _ ->
-                    // chapter filter input
+                SearchTextField(label = stringResource(Res.string.chapter)) { query ->
+                    viewModel.updateChapterSearchQuery(query)
                 }
-                SelectionList(
-                    list = chapterList,
-                    selectedIndex = selectedChapter - 1  // Convert to 0-based index
-                ) { chapter ->
-                    viewModel.selectChapter(chapter.toIntOrNull() ?: 1)
+                SelectionListWithIndex(
+                    list = filteredChapters,
+                    selectedIndex = filteredChapters.indexOf(selectedChapter.toString()).coerceAtLeast(0)
+                ) { index, _ ->
+                    // Find the real chapter number from the filtered list
+                    val chapterStr = filteredChapters.getOrNull(index)
+                    chapterStr?.toIntOrNull()?.let { chapter ->
+                        viewModel.selectChapter(chapter)
+                    }
                 }
             }
 
@@ -214,8 +283,8 @@ fun BibleTab(
                     SearchTextField(
                         modifier = Modifier.width(120.dp),
                         label = stringResource(Res.string.verse),
-                    ) { _ ->
-                        // verse search
+                    ) { query ->
+                        viewModel.updateVerseSearchQuery(query)
                     }
                     Button(
                         modifier = Modifier.wrapContentSize(),
@@ -234,41 +303,24 @@ fun BibleTab(
                 }
                 Box {
                     SelectionListWithIndex(
-                        list = verses,
-                        selectedIndex = selectedVerseIndex
+                        list = filteredVerses,
+                        selectedIndex = if (filteredVerses.isEmpty()) -1 else {
+                            val currentVerse = verses.getOrNull(selectedVerseIndex)
+                            filteredVerses.indexOf(currentVerse).coerceAtLeast(0)
+                        }
                     ) { index, _ ->
-                        // Use the index directly from the list
-                        viewModel.selectVerse(index)
+                        // Find the real index in the original verses list
+                        val verseText = filteredVerses.getOrNull(index)
+                        verseText?.let {
+                            val realIndex = verses.indexOf(it)
+                            if (realIndex >= 0) {
+                                viewModel.selectVerse(realIndex)
+                            }
+                        }
                     }
                 }
             }
         }
-
-        Row(modifier = Modifier.fillMaxWidth().padding(top = 8.dp)) {
-            Column {
-                Box {
-                    val versesListState = rememberLazyListState()
-                    LazyColumn(
-                        state = versesListState,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(MaterialTheme.colorScheme.surface)
-                            .padding(4.dp)
-                    ) {
-                        items(verses) { v ->
-                            Text(
-                                text = v,
-                                modifier = Modifier.padding(4.dp),
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                        }
-                    }
-                    VerticalScrollbar(
-                        modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
-                        adapter = rememberScrollbarAdapter(scrollState = versesListState)
-                    )
-                }
-            }
         }
     }
 }

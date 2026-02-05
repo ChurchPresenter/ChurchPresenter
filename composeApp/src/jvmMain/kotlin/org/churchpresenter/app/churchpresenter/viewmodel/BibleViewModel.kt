@@ -40,7 +40,26 @@ class BibleViewModel(
     private val _selectedMode = mutableStateOf("")
     val selectedMode: State<String> = _selectedMode
 
+    private val _bookSearchQuery = mutableStateOf("")
+    val bookSearchQuery: State<String> = _bookSearchQuery
+
+    private val _chapterSearchQuery = mutableStateOf("")
+    val chapterSearchQuery: State<String> = _chapterSearchQuery
+
+    private val _verseSearchQuery = mutableStateOf("")
+    val verseSearchQuery: State<String> = _verseSearchQuery
+
+    private val _searchResults = mutableStateOf<List<org.churchpresenter.app.churchpresenter.data.BibleSearch>>(emptyList())
+    val searchResults: State<List<org.churchpresenter.app.churchpresenter.data.BibleSearch>> = _searchResults
+
+    private val _isSearchMode = mutableStateOf(false)
+    val isSearchMode: State<Boolean> = _isSearchMode
+
     init {
+        // Initialize default search scope and mode
+        _selectedScope.value = "Entire Bible"
+        _selectedMode.value = "Contains"
+
         loadBibles()
     }
 
@@ -139,11 +158,37 @@ class BibleViewModel(
 
     fun getChaptersForCurrentBook(): List<String> {
         _primaryBible.value?.let { bible ->
-            val chapterCount = bible.getChapterCount(_selectedBookIndex.value)
+            val bookId = _selectedBookIndex.value + 1  // Convert 0-based index to 1-based book ID
+            val chapterCount = bible.getChapterCount(bookId)
             val count = if (chapterCount > 0) chapterCount else 1
             return (1..count).map { it.toString() }
         }
         return emptyList()
+    }
+
+    fun getFilteredBooks(): List<String> {
+        val query = _bookSearchQuery.value
+        if (query.isEmpty()) {
+            return _books.value
+        }
+        return _books.value.filter { it.contains(query, ignoreCase = true) }
+    }
+
+    fun getFilteredChapters(): List<String> {
+        val chapters = getChaptersForCurrentBook()
+        val query = _chapterSearchQuery.value
+        if (query.isEmpty()) {
+            return chapters
+        }
+        return chapters.filter { it.contains(query, ignoreCase = true) }
+    }
+
+    fun getFilteredVerses(): List<String> {
+        val query = _verseSearchQuery.value
+        if (query.isEmpty()) {
+            return _verses.value
+        }
+        return _verses.value.filter { it.contains(query, ignoreCase = true) }
     }
 
     fun getSelectedVerses(): List<SelectedVerse> {
@@ -219,7 +264,8 @@ class BibleViewModel(
 
     fun navigateNextChapter(): Boolean {
         _primaryBible.value?.let { bible ->
-            val maxChapter = bible.getChapterCount(_selectedBookIndex.value)
+            val bookId = _selectedBookIndex.value + 1  // Convert 0-based index to 1-based book ID
+            val maxChapter = bible.getChapterCount(bookId)
             if (_selectedChapter.value < maxChapter) {
                 selectChapter(_selectedChapter.value + 1)
                 return true
@@ -240,7 +286,91 @@ class BibleViewModel(
         _selectedMode.value = mode
     }
 
+    fun updateBookSearchQuery(query: String) {
+        _bookSearchQuery.value = query
+    }
+
+    fun updateChapterSearchQuery(query: String) {
+        _chapterSearchQuery.value = query
+    }
+
+    fun updateVerseSearchQuery(query: String) {
+        _verseSearchQuery.value = query
+    }
+
     fun performSearch() {
-        // TODO: Implement search logic
+        val query = _searchQuery.value.trim()
+        if (query.isEmpty()) {
+            // Clear search results
+            _searchResults.value = emptyList()
+            _isSearchMode.value = false
+            return
+        }
+
+        println("DEBUG: Performing search with query='$query', scope='${_selectedScope.value}', mode='${_selectedMode.value}'")
+
+        _primaryBible.value?.let { bible ->
+            try {
+                // Determine search mode based on selectedMode
+                val isExactMatch = _selectedMode.value.contains("Exact", ignoreCase = true)
+
+                // Build regex pattern
+                val pattern = if (isExactMatch) {
+                    "\\b${Regex.escape(query)}\\b"
+                } else {
+                    Regex.escape(query)
+                }
+                val searchRegex = Regex(pattern, RegexOption.IGNORE_CASE)
+
+                // Determine scope
+                val results = when {
+                    _selectedScope.value.contains("Current Book", ignoreCase = true) -> {
+                        // Search in current book only
+                        val bookId = _selectedBookIndex.value + 1
+                        bible.searchBible(allWords = false, searchExp = searchRegex, book = bookId)
+                    }
+                    else -> {
+                        // Search entire Bible
+                        bible.searchBible(allWords = false, searchExp = searchRegex)
+                    }
+                }
+
+                _searchResults.value = results
+                _isSearchMode.value = true
+
+                println("Search completed: found ${results.size} results for '$query'")
+            } catch (e: Exception) {
+                println("Error performing search: ${e.message}")
+                e.printStackTrace()
+                _searchResults.value = emptyList()
+                _isSearchMode.value = false
+            }
+        }
+    }
+
+    fun clearSearch() {
+        _searchQuery.value = ""
+        _searchResults.value = emptyList()
+        _isSearchMode.value = false
+    }
+
+    fun selectSearchResult(result: org.churchpresenter.app.churchpresenter.data.BibleSearch) {
+        // Find the book index
+        val bookName = result.book
+        val bookIndex = _books.value.indexOf(bookName)
+        if (bookIndex >= 0) {
+            val chapter = result.chapter.toIntOrNull() ?: 1
+            val verse = result.verse.toIntOrNull() ?: 1
+
+            // Select the book and chapter
+            selectBook(bookIndex)
+            selectChapter(chapter)
+
+            // Find and select the verse
+            val verseIndex = _verses.value.indexOfFirst { it.startsWith("$verse.") }
+            if (verseIndex >= 0) {
+                selectVerse(verseIndex)
+            }
+        }
     }
 }
