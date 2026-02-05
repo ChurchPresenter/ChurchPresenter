@@ -28,30 +28,26 @@ import org.churchpresenter.app.churchpresenter.tabs.PicturesTab
 import org.churchpresenter.app.churchpresenter.tabs.SongsTab
 import org.churchpresenter.app.churchpresenter.tabs.TabSection
 import org.churchpresenter.app.churchpresenter.tabs.Tabs
-import org.jetbrains.compose.resources.stringResource
-import org.churchpresenter.app.churchpresenter.data.Bible
 import org.churchpresenter.app.churchpresenter.models.LyricSection
 import org.churchpresenter.app.churchpresenter.models.SelectedVerse
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.app.churchpresenter.viewmodel.BibleViewModel
+import org.churchpresenter.app.churchpresenter.viewmodel.SongsViewModel
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun MainDesktop(
     modifier: Modifier = Modifier,
     appSettings: AppSettings,
+    bibleViewModel: BibleViewModel,
+    songsViewModel: SongsViewModel,
     presenting: (Presenting) -> Unit,
-    onVerseSelected: (SelectedVerse) -> Unit,
+    onVerseSelected: (List<SelectedVerse>) -> Unit,
     onSongItemSelected: (LyricSection) -> Unit
 ) {
     Box(
         modifier = modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)
     ) {
-        // Create Bible instance and load the bundled ru_RST77.spb resource (placed under resources/)
-        val bible = remember {
-            Bible().apply {
-                // loadFromSpb accepts either a classpath resource name or an absolute path
-                loadFromSpb("ru_RST77.spb")
-            }
-        }
 
         Row {
             Column(modifier = Modifier.fillMaxWidth(0.20f)) {
@@ -81,15 +77,15 @@ fun MainDesktop(
 
                 when (Tabs.entries[selectedTabIndex]) {
                     Tabs.BIBLE -> BibleTab(
-                        bible = bible,
+                        viewModel = bibleViewModel,
                         onVerseSelected = onVerseSelected,
-                        presenting = presenting
+                        onPresenting = presenting
                     )
 
                     Tabs.SONGS -> SongsTab(
-                        appSettings = appSettings,
+                        viewModel = songsViewModel,
                         onSongItemSelected = onSongItemSelected,
-                        presenting = presenting
+                        onPresenting = presenting
                     )
 
                     Tabs.PICTURES -> PicturesTab()
@@ -99,16 +95,4 @@ fun MainDesktop(
             }
         }
     }
-}
-
-@Preview
-@Composable
-fun MainDesktopPreview() {
-    MainDesktop(
-        modifier = Modifier.fillMaxSize(),
-        onVerseSelected = {},
-        presenting = {},
-        onSongItemSelected = {},
-        appSettings = AppSettings()
-    )
 }

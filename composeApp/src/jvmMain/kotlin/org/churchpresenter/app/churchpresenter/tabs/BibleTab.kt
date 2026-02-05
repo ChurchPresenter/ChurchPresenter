@@ -54,86 +54,54 @@ import churchpresenter.composeapp.generated.resources.verse
 import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
 import org.churchpresenter.app.churchpresenter.composables.SearchTextField
 import org.churchpresenter.app.churchpresenter.composables.SelectionList
-import org.churchpresenter.app.churchpresenter.data.Bible
-import org.churchpresenter.app.churchpresenter.models.SelectedVerse
+import org.churchpresenter.app.churchpresenter.composables.SelectionListWithIndex
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.app.churchpresenter.viewmodel.BibleViewModel
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun BibleTab(
     modifier: Modifier = Modifier,
-    bible: Bible,
-    onVerseSelected: (SelectedVerse) -> Unit = {},
-    presenting: (Presenting) -> Unit = { Presenting.NONE }
+    viewModel: BibleViewModel,
+    onVerseSelected: (List<org.churchpresenter.app.churchpresenter.models.SelectedVerse>) -> Unit = {},
+    onPresenting: (Presenting) -> Unit = { Presenting.NONE }
 ) {
-    val books = bible.getBooks()
-    val bookCount = bible.getBookCount()
+    val books by viewModel.books
+    val selectedBookIndex by viewModel.selectedBookIndex
+    val selectedChapter by viewModel.selectedChapter
+    val selectedVerseIndex by viewModel.selectedVerseIndex
+    val verses by viewModel.verses
+    val searchQuery by viewModel.searchQuery
 
-    var searchQuery by rememberSaveable { mutableStateOf("") }
+    // String resources for scope and mode options
     val scopeOptions = listOf(
         stringResource(Res.string.entire_bible),
         stringResource(Res.string.current_book),
     )
+    var selectedScope by rememberSaveable { mutableStateOf(scopeOptions.firstOrNull() ?: "") }
 
-    var selectedScope by rememberSaveable { mutableStateOf(scopeOptions.first()) }
     val modeOptions = listOf(
         stringResource(Res.string.contains_phrase),
         stringResource(Res.string.exact_match),
     )
-
-    var selectedMode by rememberSaveable { mutableStateOf(modeOptions.first()) }
-
-    var selectedBookIndex by rememberSaveable { mutableStateOf(0) }
-    var selectedChapter by rememberSaveable { mutableStateOf(1) }
-    var selectedVerseIndex by rememberSaveable { mutableStateOf(0) }
-    var verses by remember { mutableStateOf(listOf<String>()) }
+    var selectedMode by rememberSaveable { mutableStateOf(modeOptions.firstOrNull() ?: "") }
 
     // Focus management for keyboard navigation
     val focusRequester = remember { FocusRequester() }
-
-    // When book data arrives, set initial selection to first book
-    LaunchedEffect(bookCount) {
-        if (bookCount > 0) {
-            selectedBookIndex = 0
-            selectedChapter = 1
-        }
-    }
 
     // Request focus when component is first composed
     LaunchedEffect(Unit) {
         focusRequester.requestFocus()
     }
 
-    LaunchedEffect(selectedBookIndex, selectedChapter, bookCount) {
-        try {
-            if (bookCount == 0) {
-                verses = emptyList()
-            } else {
-                val clampedIndex = selectedBookIndex.coerceIn(0, bookCount - 1)
-                if (clampedIndex != selectedBookIndex) {
-                    selectedBookIndex = clampedIndex
-                }
-                val bookId = clampedIndex + 1
-                verses = bible.getChapter(bookId, selectedChapter)
-                selectedVerseIndex = 0
-
-                // Send initial verse selection
-                if (verses.isNotEmpty()) {
-                    val verseNumber = verses[0].substringBefore(". ").toIntOrNull() ?: 1
-                    bible.getVerseDetails(bookId, selectedChapter, verseNumber)?.let { (bookName, verseText, _) ->
-                        onVerseSelected(
-                            SelectedVerse(
-                                bookName = bookName,
-                                chapter = selectedChapter,
-                                verseNumber = verseNumber,
-                                verseText = verseText
-                            )
-                        )
-                    }
-                }
+    // Send verse selection when it changes
+    LaunchedEffect(selectedVerseIndex, verses.size) {
+        // Only get verses if we have a valid index
+        if (verses.isNotEmpty() && selectedVerseIndex >= 0 && selectedVerseIndex < verses.size) {
+            val selectedVerses = viewModel.getSelectedVerses()
+            if (selectedVerses.isNotEmpty()) {
+                onVerseSelected(selectedVerses)
             }
-        } catch (_: Exception) {
-            verses = emptyList()
         }
     }
 
@@ -143,74 +111,21 @@ fun BibleTab(
 
         when (event.key) {
             Key.DirectionUp -> {
-                // Previous verse
-                if (selectedVerseIndex > 0) {
-                    selectedVerseIndex--
-                    val verse = verses[selectedVerseIndex]
-                    val verseNumber = verse.substringBefore(". ").toIntOrNull() ?: 1
-                    val bookId = selectedBookIndex + 1
-                    bible.getVerseDetails(bookId, selectedChapter, verseNumber)?.let { (bookName, verseText, _) ->
-                        onVerseSelected(
-                            SelectedVerse(
-                                bookName = bookName,
-                                chapter = selectedChapter,
-                                verseNumber = verseNumber,
-                                verseText = verseText
-                            )
-                        )
-                    }
-                    return true
-                }
+                return viewModel.navigatePreviousVerse()
             }
-
             Key.DirectionDown -> {
-                // Next verse
-                if (selectedVerseIndex < verses.size - 1) {
-                    selectedVerseIndex++
-                    val verse = verses[selectedVerseIndex]
-                    val verseNumber = verse.substringBefore(". ").toIntOrNull() ?: 1
-                    val bookId = selectedBookIndex + 1
-                    bible.getVerseDetails(bookId, selectedChapter, verseNumber)?.let { (bookName, verseText, _) ->
-                        onVerseSelected(
-                            SelectedVerse(
-                                bookName = bookName,
-                                chapter = selectedChapter,
-                                verseNumber = verseNumber,
-                                verseText = verseText
-                            )
-                        )
-                    }
-                    return true
-                }
+                return viewModel.navigateNextVerse()
             }
-
             Key.DirectionLeft -> {
-                // Previous chapter
-                if (selectedChapter > 1) {
-                    selectedChapter--
-                    // LaunchedEffect will handle verse loading and selection
-                    return true
-                }
+                return viewModel.navigatePreviousChapter()
             }
-
             Key.DirectionRight -> {
-                // Next chapter
-                val maxChapter = bible.getChapterCount(selectedBookIndex)
-                if (selectedChapter < maxChapter) {
-                    selectedChapter++
-                    // LaunchedEffect will handle verse loading and selection
-                    return true
-                }
+                return viewModel.navigateNextChapter()
             }
         }
         return false
     }
 
-    fun chaptersFor(bookIndex: Int): List<String> {
-        val chapterCount = bible.getChapterCount(bookIndex)
-        val count = if (chapterCount > 0) chapterCount else 1
-        return (1..count).map { it.toString() }
-    }
 
     Column(
         modifier = modifier
@@ -228,7 +143,7 @@ fun BibleTab(
             OutlinedTextField(
                 modifier = Modifier.width(400.dp).padding(end = 8.dp),
                 value = searchQuery,
-                onValueChange = { searchQuery = it },
+                onValueChange = { viewModel.updateSearchQuery(it) },
                 label = {
                     Text(text = stringResource(Res.string.search))
                 },
@@ -243,7 +158,10 @@ fun BibleTab(
                 label = stringResource(Res.string.scope),
                 items = scopeOptions,
                 selected = selectedScope,
-                onSelectedChange = { selectedScope = it }
+                onSelectedChange = {
+                    selectedScope = it
+                    viewModel.updateSelectedScope(it)
+                }
             )
 
             DropdownSelector(
@@ -251,17 +169,20 @@ fun BibleTab(
                 label = stringResource(Res.string.mode),
                 items = modeOptions,
                 selected = selectedMode,
-                onSelectedChange = { selectedMode = it }
+                onSelectedChange = {
+                    selectedMode = it
+                    viewModel.updateSelectedMode(it)
+                }
             )
 
-            Button(onClick = {}) {
+            Button(onClick = { viewModel.performSearch() }) {
                 Text(text = stringResource(Res.string.search))
             }
         }
 
         // Book / Chapter / Verse columns
         Row(modifier = Modifier.fillMaxWidth()) {
-            val chapterList = chaptersFor(selectedBookIndex)
+            val chapterList = viewModel.getChaptersForCurrentBook()
 
             Column(modifier = Modifier.width(200.dp).padding(end = 8.dp)) {
                 SearchTextField(label = stringResource(Res.string.book)) { _ ->
@@ -271,9 +192,7 @@ fun BibleTab(
                     list = books,
                     selectedIndex = selectedBookIndex
                 ) { bookName ->
-                    selectedBookIndex = books.indexOf(bookName)
-                    selectedChapter = 1
-                    selectedVerseIndex = 1
+                    viewModel.selectBook(books.indexOf(bookName))
                 }
             }
 
@@ -285,8 +204,7 @@ fun BibleTab(
                     list = chapterList,
                     selectedIndex = selectedChapter - 1  // Convert to 0-based index
                 ) { chapter ->
-                    selectedChapter = chapter.toIntOrNull() ?: 1
-                    selectedVerseIndex = 1
+                    viewModel.selectChapter(chapter.toIntOrNull() ?: 1)
                 }
             }
 
@@ -301,7 +219,7 @@ fun BibleTab(
                     }
                     Button(
                         modifier = Modifier.wrapContentSize(),
-                        onClick = { presenting.invoke(Presenting.BIBLE) },
+                        onClick = { onPresenting(Presenting.BIBLE) },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = MaterialTheme.colorScheme.primary
                         )
@@ -314,26 +232,13 @@ fun BibleTab(
                         )
                     }
                 }
-                SelectionList(
-                    list = verses,
-                    selectedIndex = selectedVerseIndex
-                ) { verse ->
-                    selectedVerseIndex = verses.indexOf(verse)
-
-                    // Extract verse number from the formatted text (e.g., "1. In the beginning..." -> 1)
-                    val verseNumber = verse.substringBefore(". ").toIntOrNull() ?: 1
-
-                    // Get verse details and send to presenter
-                    val bookId = selectedBookIndex + 1
-                    bible.getVerseDetails(bookId, selectedChapter, verseNumber)?.let { (bookName, verseText, _) ->
-                        onVerseSelected(
-                            SelectedVerse(
-                                bookName = bookName,
-                                chapter = selectedChapter,
-                                verseNumber = verseNumber,
-                                verseText = verseText
-                            )
-                        )
+                Box {
+                    SelectionListWithIndex(
+                        list = verses,
+                        selectedIndex = selectedVerseIndex
+                    ) { index, _ ->
+                        // Use the index directly from the list
+                        viewModel.selectVerse(index)
                     }
                 }
             }

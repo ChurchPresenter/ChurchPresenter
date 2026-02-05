@@ -20,12 +20,30 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
+// Original version that passes the item
 @Composable
 fun SelectionList(
     modifier: Modifier = Modifier,
     list: List<String>,
     selectedIndex: Int = 0,
     onItemSelected: (String) -> Unit
+) {
+    SelectionListWithIndex(
+        modifier = modifier,
+        list = list,
+        selectedIndex = selectedIndex
+    ) { index, item ->
+        onItemSelected(item)
+    }
+}
+
+// New version that passes both index and item
+@Composable
+fun SelectionListWithIndex(
+    modifier: Modifier = Modifier,
+    list: List<String>,
+    selectedIndex: Int = 0,
+    onItemSelected: (Int, String) -> Unit
 ) {
     val listState = rememberLazyListState()
     val height = 450.dp
@@ -66,7 +84,10 @@ fun SelectionList(
                                 MaterialTheme.colorScheme.surface
                         )
                         .clickable {
-                            onItemSelected.invoke(item)
+                            // Only invoke callback if index is valid
+                            if (index >= 0 && index < list.size) {
+                                onItemSelected(index, item)
+                            }
                         }
                         .padding(6.dp),
                     color = MaterialTheme.colorScheme.onSurface,

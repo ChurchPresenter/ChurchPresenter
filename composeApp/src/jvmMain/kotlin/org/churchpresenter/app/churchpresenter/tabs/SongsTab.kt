@@ -57,83 +57,41 @@ import churchpresenter.composeapp.generated.resources.starts_with
 import churchpresenter.composeapp.generated.resources.title
 import churchpresenter.composeapp.generated.resources.tune
 import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
-import org.churchpresenter.app.churchpresenter.data.AppSettings
-import org.churchpresenter.app.churchpresenter.data.Songs
 import org.churchpresenter.app.churchpresenter.models.LyricSection
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.utils.Constants.CHORUS
 import org.churchpresenter.app.churchpresenter.utils.Constants.CHORUS_RUS
 import org.churchpresenter.app.churchpresenter.utils.Constants.VERSE
 import org.churchpresenter.app.churchpresenter.utils.Constants.VERSE_RUS
+import org.churchpresenter.app.churchpresenter.viewmodel.SongsViewModel
 import org.jetbrains.compose.resources.stringResource
-import java.io.File
 
 @Composable
 fun SongsTab(
     modifier: Modifier = Modifier,
-    appSettings: AppSettings,
+    viewModel: SongsViewModel,
     onSongItemSelected: (LyricSection) -> Unit,
-    presenting: (Presenting) -> Unit = { Presenting.NONE }
+    onPresenting: (Presenting) -> Unit = { Presenting.NONE }
 ) {
-    // Load songs from configured files in the storage directory
-    val songsData = remember(appSettings.songSettings.storageDirectory) {
-        val songs = Songs()
+    // Get state from ViewModel
+    val songbooks by viewModel.songbooks
+    val searchQuery by viewModel.searchQuery
+    val selectedSongbook by viewModel.selectedSongbook
+    val filterType by viewModel.filterType
+    val selectedSongIndex by viewModel.selectedSongIndex
+    val selectedSectionIndex by viewModel.selectedSectionIndex
 
-        if (appSettings.songSettings.storageDirectory.isNotEmpty()) {
-            val dir = File(appSettings.songSettings.storageDirectory)
-            if (dir.exists() && dir.isDirectory) {
-                // Get all .sps files from the directory
-                val spsFiles: Array<File> = dir.listFiles { file ->
-                    file.extension.lowercase() == "sps"
-                } ?: emptyArray()
-
-                // Load each .sps file using append to combine all databases
-                spsFiles.sortedBy { it.name }.forEach { file ->
-                    try {
-                        println("Loading song database: ${file.name}")
-                        songs.loadFromSpsAppend(file.absolutePath)
-                        println("Total songs loaded so far: ${songs.getSongCount()}")
-                    } catch (e: Exception) {
-                        println("Error loading ${file.name}: ${e.message}")
-                    }
-                }
-            }
-        }
-
-        // If no files were loaded, try to load the bundled resource as fallback
-        if (songs.getSongCount() == 0) {
-            try {
-                println("No song files found in directory, loading bundled resource")
-                songs.loadFromSps("pv3300.sps")
-            } catch (e: Exception) {
-                println("Error loading bundled resource: ${e.message}")
-            }
-        }
-
-        println("Total songs in database: ${songs.getSongCount()}")
-        songs
-    }
-
+    // String resources
     val allSongBooksText = stringResource(Res.string.all_song_books)
     val allSongCategoriesText = stringResource(Res.string.all_song_categories)
-    var searchQuery by rememberSaveable { mutableStateOf("") }
-    var selectedSongbook by rememberSaveable { mutableStateOf(allSongBooksText) }
+
+    // Local category state (not yet in ViewModel)
     var selectedCategory by rememberSaveable { mutableStateOf(allSongCategoriesText) }
-    var filterType by rememberSaveable { mutableStateOf("Contains") }
-    var selectedSongIndex by rememberSaveable { mutableStateOf(2) } // Default to third song
 
-    // State for selected verse/chorus section
-    var selectedSectionIndex by rememberSaveable { mutableStateOf(-1) }
+    // Prepend "All" option to songbooks
+    val songbookOptions = remember(songbooks) { listOf(allSongBooksText) + songbooks }
 
-    // Extract unique songbook names from loaded songs
-    val songbooks = remember(songsData) {
-        val uniqueSongbooks = songsData.getSongs()
-            .map { it.songbook }
-            .filter { it.isNotBlank() }
-            .distinct()
-            .sorted()
-        listOf(allSongBooksText) + uniqueSongbooks
-    }
+    // Local state for sorting
     var sortColumn by rememberSaveable { mutableStateOf("") }
     var sortAscending by rememberSaveable { mutableStateOf(true) }
 
@@ -144,18 +102,18 @@ fun SongsTab(
         stringResource(Res.string.exact_match)
     )
 
-    // Get all songs from data source
-    val allSongs = songsData.getSongs()
+    // Get all songs from ViewModel
+    val allSongs = viewModel.songsData.value.getSongs()
 
     val allSongsText = stringResource(Res.string.all_song_books)
     // Filter songs based on search criteria
     val filteredSongs =
-        remember(allSongs, searchQuery, selectedSongbook, selectedCategory, filterType, sortColumn, sortAscending) {
+        remember(allSongs, searchQuery, selectedSongbook, filterType, sortColumn, sortAscending) {
             var filtered = allSongs
 
             // Apply search filter
             if (searchQuery.isNotBlank()) {
-                filtered = songsData.findSongs(searchQuery, filterType)
+                filtered = viewModel.songsData.value.findSongs(searchQuery, filterType)
             }
 
             // Apply songbook filter
@@ -163,10 +121,6 @@ fun SongsTab(
                 filtered = filtered.filter { it.songbook.contains(selectedSongbook, ignoreCase = true) }
             }
 
-            // Apply category filter (placeholder - categories not clearly defined in SPS format)
-            // TODO: Implement category filtering when category data is available
-            // For now, category filtering is not implemented as categories aren't defined in SPS format
-            // Category filtering would check: if (selectedCategory != allSongCategoriesText)
 
             // Apply sorting
             if (sortColumn.isNotEmpty()) {
@@ -219,34 +173,6 @@ fun SongsTab(
         } else ""
     }
 
-    // Ensure selectedSongIndex is within bounds
-    LaunchedEffect(filteredSongs.size) {
-        if (selectedSongIndex >= filteredSongs.size) {
-            selectedSongIndex = if (filteredSongs.isNotEmpty()) 0 else -1
-        }
-        selectedSectionIndex = -1 // Reset section selection when songs change
-    }
-
-    // Reset section selection when song changes
-    LaunchedEffect(selectedSongIndex) {
-        selectedSectionIndex = -1
-    }
-
-    // Calculate total sections for current song
-    val totalSections = remember(selectedSongIndex, filteredSongs) {
-        if (selectedSongIndex >= 0 && selectedSongIndex < filteredSongs.size && filteredSongs[selectedSongIndex].lyrics.isNotEmpty()) {
-            val lyrics = filteredSongs[selectedSongIndex].lyrics
-            var count = 0
-            for (line in lyrics) {
-                if (line.startsWith(VERSE_RUS) || line.startsWith(CHORUS)) {
-                    count++
-                }
-            }
-            count
-        } else {
-            0
-        }
-    }
 
     Row(
         modifier = modifier
@@ -256,124 +182,28 @@ fun SongsTab(
                     when (keyEvent.key) {
                         Key.DirectionLeft -> {
                             // Previous song
-                            if (selectedSongIndex > 0) {
-                                selectedSongIndex--
-                                true
-                            } else false
+                            viewModel.navigatePreviousSong()
                         }
 
                         Key.DirectionRight -> {
                             // Next song
-                            if (selectedSongIndex < filteredSongs.size - 1) {
-                                selectedSongIndex++
-                                true
-                            } else false
+                            viewModel.navigateNextSong()
                         }
 
                         Key.DirectionUp -> {
                             // Previous lyric section
-                            if (selectedSectionIndex > 0) {
-                                selectedSectionIndex--
-                                true
-                            } else if (selectedSectionIndex == -1 && totalSections > 0) {
-                                selectedSectionIndex = totalSections - 1
-                                true
-                            } else false
+                            viewModel.navigatePreviousSection()
                         }
 
                         Key.DirectionDown -> {
                             // Next lyric section
-                            if (selectedSectionIndex < totalSections - 1) {
-                                selectedSectionIndex++
-                                // Get the current section and invoke callback
-                                if (selectedSongIndex >= 0 && selectedSongIndex < filteredSongs.size) {
-                                    val lyrics = filteredSongs[selectedSongIndex].lyrics
-                                    val title = filteredSongs[selectedSongIndex].title
-                                    val songNumber = filteredSongs[selectedSongIndex].number.toInt()
-                                    val sections = mutableListOf<LyricSection>()
-                                    var currentSection = mutableListOf<String>()
-                                    var currentSectionType = ""
-
-                                    for (line in lyrics) {
-                                        if (line.startsWith(VERSE_RUS) || line.startsWith(CHORUS)) {
-                                            if (currentSection.isNotEmpty()) {
-                                                sections.add(
-                                                    LyricSection(
-                                                        title = title,
-                                                        type = currentSectionType,
-                                                        lines = currentSection.toList(),
-                                                        songNumber = songNumber
-                                                    )
-                                                )
-                                            }
-                                            currentSection = mutableListOf(line)
-                                            currentSectionType = if (line.startsWith(VERSE_RUS)) VERSE else CHORUS
-                                        } else {
-                                            currentSection.add(line)
-                                        }
-                                    }
-                                    if (currentSection.isNotEmpty()) {
-                                        sections.add(
-                                            LyricSection(
-                                                title = title,
-                                                type = currentSectionType,
-                                                lines = currentSection.toList(),
-                                                songNumber = songNumber,
-                                            )
-                                        )
-                                    }
-
-                                    if (selectedSectionIndex in sections.indices) {
-                                        onSongItemSelected.invoke(sections[selectedSectionIndex])
-                                    }
+                            val navigated = viewModel.navigateNextSection()
+                            if (navigated) {
+                                viewModel.getSelectedLyricSection()?.let { section ->
+                                    onSongItemSelected(section)
                                 }
-                                true
-                            } else if (selectedSectionIndex == -1 && totalSections > 0) {
-                                selectedSectionIndex = 0
-                                // Get the first section and invoke callback
-                                if (selectedSongIndex >= 0 && selectedSongIndex < filteredSongs.size) {
-                                    val lyrics = filteredSongs[selectedSongIndex].lyrics
-                                    val title = filteredSongs[selectedSongIndex].title
-                                    val songNumber = filteredSongs[selectedSongIndex].number.toInt()
-                                    val sections = mutableListOf<LyricSection>()
-                                    var currentSection = mutableListOf<String>()
-                                    var currentSectionType = ""
-
-                                    for (line in lyrics) {
-                                        if (line.startsWith(VERSE_RUS) || line.startsWith(CHORUS)) {
-                                            if (currentSection.isNotEmpty()) {
-                                                sections.add(
-                                                    LyricSection(
-                                                        title = title,
-                                                        type = currentSectionType,
-                                                        lines = currentSection.toList(),
-                                                        songNumber = songNumber,
-                                                    )
-                                                )
-                                            }
-                                            currentSection = mutableListOf(line)
-                                            currentSectionType = if (line.startsWith(VERSE_RUS)) VERSE else CHORUS
-                                        } else {
-                                            currentSection.add(line)
-                                        }
-                                    }
-                                    if (currentSection.isNotEmpty()) {
-                                        sections.add(
-                                            LyricSection(
-                                                title = title,
-                                                type = currentSectionType,
-                                                lines = currentSection.toList(),
-                                                songNumber = songNumber,
-                                            )
-                                        )
-                                    }
-
-                                    if (sections.isNotEmpty()) {
-                                        onSongItemSelected.invoke(sections[0])
-                                    }
-                                }
-                                true
-                            } else false
+                            }
+                            navigated
                         }
 
                         else -> false
@@ -392,9 +222,9 @@ fun SongsTab(
                 DropdownSelector(
                     modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp),
                     label = "",
-                    items = songbooks,
-                    selected = selectedSongbook,
-                    onSelectedChange = { selectedSongbook = it }
+                    items = songbookOptions,
+                    selected = selectedSongbook.ifEmpty { allSongBooksText },
+                    onSelectedChange = { viewModel.updateSelectedSongbook(it) }
                 )
 
                 Row(
@@ -432,7 +262,7 @@ fun SongsTab(
                         label = "",
                         items = filterTypes,
                         selected = filterType,
-                        onSelectedChange = { filterType = it }
+                        onSelectedChange = { viewModel.updateFilterType(it) }
                     )
                     Button(
                         onClick = { /* Search action */ },
@@ -448,7 +278,7 @@ fun SongsTab(
                 // Search input
                 OutlinedTextField(
                     value = searchQuery,
-                    onValueChange = { searchQuery = it },
+                    onValueChange = { viewModel.updateSearchQuery(it) },
                     label = {
                         Text(
                             stringResource(Res.string.search_songs),
@@ -524,7 +354,7 @@ fun SongsTab(
                                     else MaterialTheme.colorScheme.surface
                                 )
                                 .clickable {
-                                    selectedSongIndex = index
+                                    viewModel.selectSong(index)
                                 }
                                 .padding(8.dp),
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -611,7 +441,7 @@ fun SongsTab(
                 )
                 Button(
                     modifier = Modifier.wrapContentSize(),
-                    onClick = { presenting.invoke(Presenting.LYRICS) },
+                    onClick = { onPresenting(Presenting.LYRICS) },
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.primary
                     )
@@ -688,8 +518,9 @@ fun SongsTab(
                                         else Color.Transparent
                                     )
                                     .clickable {
-                                        selectedSectionIndex =
+                                        viewModel.selectSection(
                                             if (selectedSectionIndex == sectionIndex) -1 else sectionIndex
+                                        )
                                         onSongItemSelected.invoke(section)
                                     }
                                     .padding(8.dp)

@@ -14,23 +14,47 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.rememberWindowState
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.app_name
+import org.churchpresenter.app.churchpresenter.data.Bible
 import org.churchpresenter.app.churchpresenter.data.SettingsManager
 import org.churchpresenter.app.churchpresenter.dialogs.OptionsDialog
+import org.churchpresenter.app.churchpresenter.models.LyricSection
 import org.churchpresenter.app.churchpresenter.models.SelectedVerse
 import org.churchpresenter.app.churchpresenter.presenter.BiblePresenter
-import org.churchpresenter.app.churchpresenter.ui.theme.AppThemeWrapper
-import org.churchpresenter.app.churchpresenter.models.LyricSection
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.presenter.SongPresenter
+import org.churchpresenter.app.churchpresenter.ui.theme.AppThemeWrapper
 import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
-import org.churchpresenter.app.churchpresenter.ui.theme.setTheme
+import org.churchpresenter.app.churchpresenter.viewmodel.BibleViewModel
+import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
+import org.churchpresenter.app.churchpresenter.viewmodel.SongsViewModel
 import org.jetbrains.compose.resources.stringResource
 
 fun main() = application {
-    var openBlackWindow by remember { mutableStateOf(true) }
-    var selectedVerse by remember { mutableStateOf(SelectedVerse()) }
-    var presenting by remember { mutableStateOf(Presenting.NONE) }
-    var lyricSection by remember { mutableStateOf(LyricSection()) }
+    // Business logic layer
+    val settingsManager = SettingsManager()
+    var appSettings by remember { mutableStateOf(settingsManager.loadSettings()) }
+    val presenterManager = remember { PresenterManager() }
+
+    // Create fallback Bible (from resources)
+    val fallbackBible = remember {
+        Bible().apply {
+            loadFromSpb("ru_RST77.spb")
+        }
+    }
+
+    // Create BibleViewModel with settings
+    val bibleViewModel = remember(appSettings) {
+        BibleViewModel(fallbackBible, appSettings)
+    }
+
+    // Create SongsViewModel with settings
+    val songsViewModel = remember(appSettings) {
+        SongsViewModel(appSettings)
+    }
+
+    // UI state
+    var theme by remember { mutableStateOf(ThemeMode.SYSTEM) }
+    var showOptionsDialog by remember { mutableStateOf(false) }
 
     // Get bounds of the second screen if present
     val screens = GraphicsEnvironment.getLocalGraphicsEnvironment().screenDevices
@@ -38,10 +62,11 @@ fun main() = application {
     val state = rememberWindowState(
         placement = WindowPlacement.Maximized
     )
-    val settingsManager = SettingsManager()
-    var appSettings by remember { mutableStateOf(settingsManager.loadSettings()) }
-    var theme by remember { mutableStateOf(ThemeMode.SYSTEM) }
-    var showOptionsDialog by remember { mutableStateOf(false) }
+
+    val showPresenterWindow by presenterManager.showPresenterWindow
+    val presentingMode by presenterManager.presentingMode
+    val selectedVerse by presenterManager.selectedVerse
+    val lyricSection by presenterManager.lyricSection
 
     Window(
         onCloseRequest = ::exitApplication,
@@ -51,9 +76,8 @@ fun main() = application {
         AppThemeWrapper(theme = theme) {
 
             NavigationTopBar(
-                onAbout = { openBlackWindow = true },
+                onAbout = { presenterManager.setShowPresenterWindow(true) },
                 theme = {
-                    println(it)
                     appSettings = appSettings.copy(theme = it.toString())
                     theme = it
                     settingsManager.saveSettings(appSettings)
@@ -64,14 +88,16 @@ fun main() = application {
                 onExit = { exitApplication() },
             )
             MainDesktop(
-                onVerseSelected = {
-                    selectedVerse = it
+                onVerseSelected = { verses ->
+                    presenterManager.setSelectedVerses(verses)
                 },
                 onSongItemSelected = {
-                    lyricSection = it
+                    presenterManager.setLyricSection(it)
                 },
                 appSettings = appSettings,
-                presenting = { presenting = it }
+                bibleViewModel = bibleViewModel,
+                songsViewModel = songsViewModel,
+                presenting = { presenterManager.setPresentingMode(it) }
             )
 
             // Options Dialog
@@ -82,12 +108,15 @@ fun main() = application {
                 onDismiss = { showOptionsDialog = false },
                 onSave = {
                     appSettings = it
+                    // Reload ViewModels with new settings
+                    bibleViewModel.loadBibles()
+                    songsViewModel.loadSongs()
                 }
             )
         }
     }
 
-    if (openBlackWindow) {
+    if (showPresenterWindow) {
         val windowState = remember {
             if (secondScreenBounds != null) {
                 WindowState(
@@ -102,14 +131,14 @@ fun main() = application {
             }
         }
         Window(
-            onCloseRequest = { openBlackWindow = false },
+            onCloseRequest = { presenterManager.setShowPresenterWindow(false) },
             state = windowState,
         ) {
             PresenterScreen(modifier = Modifier.fillMaxSize()) {
                 Column {
-                    if (presenting == Presenting.BIBLE) {
+                    if (presentingMode == Presenting.BIBLE) {
                         BiblePresenter(selectedVerse = selectedVerse)
-                    } else if (presenting == Presenting.LYRICS) {
+                    } else if (presentingMode == Presenting.LYRICS) {
                         SongPresenter(lyricSection = lyricSection, appSettings = appSettings)
                     }
                 }
