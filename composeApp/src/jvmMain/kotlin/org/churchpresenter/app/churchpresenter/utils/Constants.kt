@@ -68,4 +68,8 @@ object Constants {
     const val SORT_TITLE = "title"
     const val SORT_SONGBOOK = "songbook"
     const val SORT_TUNE = "tune"
+
+    const val CURRENT_BOOK = "Current Book"
+
+    const val ENTIRE_BIBLE = "Entire Bible"
 }

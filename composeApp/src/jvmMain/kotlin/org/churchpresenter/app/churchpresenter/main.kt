@@ -14,11 +14,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.rememberWindowState
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.app_name
-import org.churchpresenter.app.churchpresenter.data.Bible
 import org.churchpresenter.app.churchpresenter.data.SettingsManager
 import org.churchpresenter.app.churchpresenter.dialogs.OptionsDialog
-import org.churchpresenter.app.churchpresenter.models.LyricSection
-import org.churchpresenter.app.churchpresenter.models.SelectedVerse
 import org.churchpresenter.app.churchpresenter.presenter.BiblePresenter
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.presenter.SongPresenter
@@ -35,16 +32,9 @@ fun main() = application {
     var appSettings by remember { mutableStateOf(settingsManager.loadSettings()) }
     val presenterManager = remember { PresenterManager() }
 
-    // Create fallback Bible (from resources)
-    val fallbackBible = remember {
-        Bible().apply {
-            loadFromSpb("ru_RST77.spb")
-        }
-    }
-
-    // Create BibleViewModel with settings
+    // Create BibleViewModel with settings (no fallback Bible needed)
     val bibleViewModel = remember(appSettings) {
-        BibleViewModel(fallbackBible, appSettings)
+        BibleViewModel(appSettings)
     }
 
     // Create SongsViewModel with settings
@@ -65,7 +55,7 @@ fun main() = application {
 
     val showPresenterWindow by presenterManager.showPresenterWindow
     val presentingMode by presenterManager.presentingMode
-    val selectedVerse by presenterManager.selectedVerse
+    val selectedVerses by presenterManager.selectedVerses
     val lyricSection by presenterManager.lyricSection
 
     Window(
@@ -137,7 +127,7 @@ fun main() = application {
             PresenterScreen(modifier = Modifier.fillMaxSize()) {
                 Column {
                     if (presentingMode == Presenting.BIBLE) {
-                        BiblePresenter(selectedVerse = selectedVerse)
+                        BiblePresenter(selectedVerses = selectedVerses)
                     } else if (presentingMode == Presenting.LYRICS) {
                         SongPresenter(lyricSection = lyricSection, appSettings = appSettings)
                     }

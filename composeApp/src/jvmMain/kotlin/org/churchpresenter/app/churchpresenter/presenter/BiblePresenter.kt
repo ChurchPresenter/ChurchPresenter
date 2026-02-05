@@ -19,29 +19,32 @@ import org.churchpresenter.app.churchpresenter.models.SelectedVerse
 @Composable
 fun BiblePresenter(
     modifier: Modifier = Modifier,
-    selectedVerse: SelectedVerse
+    selectedVerses: List<SelectedVerse>
 ) {
     Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Column {
-            Row(
-                Modifier.fillMaxWidth().padding(16.dp),
-                horizontalArrangement = Arrangement.Center
-            ) {
-                Text(
-                    style = MaterialTheme.typography.titleLarge,
-                    text = selectedVerse.verseText,
-                    color = Color.White
-                )
-            }
-            Row(
-                Modifier.fillMaxWidth().padding(16.dp),
-                horizontalArrangement = Arrangement.End
-            ) {
-                Text(
-                    style = MaterialTheme.typography.bodyMedium,
-                    text = "${selectedVerse.bookName} ${selectedVerse.chapter}:${selectedVerse.verseNumber}",
-                    color = Color.White
-                )
+            // Display each verse (primary and secondary if available)
+            selectedVerses.forEach { verse ->
+                Row(
+                    Modifier.fillMaxWidth().padding(16.dp),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        style = MaterialTheme.typography.titleLarge,
+                        text = verse.verseText,
+                        color = Color.White
+                    )
+                }
+                Row(
+                    Modifier.fillMaxWidth().padding(16.dp),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    Text(
+                        style = MaterialTheme.typography.bodyMedium,
+                        text = "${verse.bookName} ${verse.chapter}:${verse.verseNumber}",
+                        color = Color.White
+                    )
+                }
             }
         }
     }

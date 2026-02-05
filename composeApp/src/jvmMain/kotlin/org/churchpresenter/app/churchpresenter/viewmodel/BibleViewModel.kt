@@ -4,10 +4,12 @@ import androidx.compose.runtime.*
 import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.data.Bible
 import org.churchpresenter.app.churchpresenter.models.SelectedVerse
+import org.churchpresenter.app.churchpresenter.utils.Constants.CONTAINS
+import org.churchpresenter.app.churchpresenter.utils.Constants.CURRENT_BOOK
+import org.churchpresenter.app.churchpresenter.utils.Constants.ENTIRE_BIBLE
 import java.io.File
 
 class BibleViewModel(
-    private val fallbackBible: Bible,
     private val appSettings: AppSettings
 ) {
     private val _primaryBible = mutableStateOf<Bible?>(null)
@@ -57,8 +59,8 @@ class BibleViewModel(
 
     init {
         // Initialize default search scope and mode
-        _selectedScope.value = "Entire Bible"
-        _selectedMode.value = "Contains"
+        _selectedScope.value = ENTIRE_BIBLE
+        _selectedMode.value = CONTAINS
 
         loadBibles()
     }
@@ -76,15 +78,15 @@ class BibleViewModel(
                 } catch (e: Exception) {
                     println("Error loading primary Bible from settings: ${e.message}")
                     e.printStackTrace()
-                    fallbackBible
+                    null
                 }
             } else {
-                println("Primary Bible file not found: ${bibleFile.absolutePath}, using fallback")
-                fallbackBible
+                println("Primary Bible file not found: ${bibleFile.absolutePath}")
+                null
             }
         } else {
-            println("No primary Bible configured in settings, using fallback")
-            fallbackBible
+            println("No primary Bible configured in settings")
+            null
         }
 
         // Load secondary Bible from settings
@@ -115,6 +117,11 @@ class BibleViewModel(
             if (bible.getBookCount() > 0) {
                 loadChapter(_selectedBookIndex.value, _selectedChapter.value)
             }
+        } ?: run {
+            // No primary Bible loaded - clear books and verses
+            _books.value = emptyList()
+            _verses.value = emptyList()
+            println("Warning: No primary Bible loaded. Please configure Bible settings.")
         }
     }
 
@@ -324,7 +331,7 @@ class BibleViewModel(
 
                 // Determine scope
                 val results = when {
-                    _selectedScope.value.contains("Current Book", ignoreCase = true) -> {
+                    _selectedScope.value.contains(CURRENT_BOOK, ignoreCase = true) -> {
                         // Search in current book only
                         val bookId = _selectedBookIndex.value + 1
                         bible.searchBible(allWords = false, searchExp = searchRegex, book = bookId)
