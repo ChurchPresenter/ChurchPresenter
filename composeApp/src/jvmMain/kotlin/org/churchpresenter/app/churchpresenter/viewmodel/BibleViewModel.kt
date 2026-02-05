@@ -76,16 +76,13 @@ class BibleViewModel(
                         loadFromSpb(bibleFile.absolutePath)
                     }
                 } catch (e: Exception) {
-                    println("Error loading primary Bible from settings: ${e.message}")
                     e.printStackTrace()
                     null
                 }
             } else {
-                println("Primary Bible file not found: ${bibleFile.absolutePath}")
                 null
             }
         } else {
-            println("No primary Bible configured in settings")
             null
         }
 
@@ -99,19 +96,17 @@ class BibleViewModel(
                         loadFromSpb(bibleFile.absolutePath)
                     }
                 } catch (e: Exception) {
-                    println("Error loading secondary Bible from settings: ${e.message}")
                     e.printStackTrace()
                     null
                 }
             } else {
-                println("Secondary Bible file not found: ${bibleFile.absolutePath}")
                 null
             }
         } else {
             null
         }
 
-        // Load books from primary Bible
+        // Load books from primary Bible only
         _primaryBible.value?.let { bible ->
             _books.value = bible.getBooks()
             if (bible.getBookCount() > 0) {
@@ -121,7 +116,6 @@ class BibleViewModel(
             // No primary Bible loaded - clear books and verses
             _books.value = emptyList()
             _verses.value = emptyList()
-            println("Warning: No primary Bible loaded. Please configure Bible settings.")
         }
     }
 
@@ -173,12 +167,105 @@ class BibleViewModel(
         return emptyList()
     }
 
+    // Map of common English book name searches to their Russian equivalents
+    private val englishToRussianBookMap = mapOf(
+        "genesis" to "бытие",
+        "exodus" to "исход",
+        "leviticus" to "левит",
+        "numbers" to "числа",
+        "deuteronomy" to "второзаконие",
+        "joshua" to "иисус навин",
+        "judges" to "судей",
+        "ruth" to "руфь",
+        "samuel" to "царств",
+        "kings" to "царств",
+        "chronicles" to "паралипоменон",
+        "ezra" to "ездра",
+        "nehemiah" to "неемия",
+        "esther" to "есфирь",
+        "job" to "иов",
+        "psalm" to "псалтирь",
+        "proverbs" to "притчи",
+        "ecclesiastes" to "екклесиаст",
+        "song" to "песн",
+        "isaiah" to "исаия",
+        "jeremiah" to "иеремия",
+        "lamentations" to "плач",
+        "ezekiel" to "иезекииль",
+        "daniel" to "даниил",
+        "hosea" to "осия",
+        "joel" to "иоиль",
+        "amos" to "амос",
+        "obadiah" to "авдий",
+        "jonah" to "иона",
+        "micah" to "михей",
+        "nahum" to "наум",
+        "habakkuk" to "аввакум",
+        "zephaniah" to "софония",
+        "haggai" to "аггей",
+        "zechariah" to "захария",
+        "malachi" to "малахия",
+        "matthew" to "матфея",
+        "mark" to "марка",
+        "luke" to "луки",
+        "john" to "иоанн",
+        "acts" to "деяния",
+        "romans" to "римлянам",
+        "corinthians" to "коринфянам",
+        "galatians" to "галатам",
+        "ephesians" to "ефесянам",
+        "philippians" to "филиппийцам",
+        "colossians" to "колоссянам",
+        "thessalonians" to "фессалоникийцам",
+        "timothy" to "тимофею",
+        "titus" to "титу",
+        "philemon" to "филимону",
+        "hebrews" to "евреям",
+        "james" to "иакова",
+        "peter" to "петра",
+        "jude" to "иуды",
+        "revelation" to "откровение"
+    )
+
     fun getFilteredBooks(): List<String> {
         val query = _bookSearchQuery.value
+
         if (query.isEmpty()) {
             return _books.value
         }
-        return _books.value.filter { it.contains(query, ignoreCase = true) }
+
+        // First try direct match
+        val directMatch = _books.value.filter { it.contains(query, ignoreCase = true) }
+
+        // If no direct match and query is Latin characters, try English-to-Russian mapping
+        val filtered = if (directMatch.isEmpty() && query.all { it.isLetter() && it.code < 128 }) {
+
+            // Find ALL English book names that match the query
+            val matchedEntries = englishToRussianBookMap.entries.filter {
+                val keyContainsQuery = it.key.contains(query, ignoreCase = true)
+                val queryContainsKey = query.contains(it.key, ignoreCase = true)
+                keyContainsQuery || queryContainsKey
+            }
+
+            if (matchedEntries.isNotEmpty()) {
+
+                // Search for books using ALL the Russian equivalents
+                val allRussianEquivalents = matchedEntries.map { it.value }
+                val result = _books.value.filter { bookName ->
+                    val matches = allRussianEquivalents.any { russianName ->
+                        bookName.contains(russianName, ignoreCase = true)
+                    }
+                    matches
+                }
+                result
+            } else {
+                directMatch
+            }
+        } else {
+            directMatch
+        }
+
+        return filtered
     }
 
     fun getFilteredChapters(): List<String> {
@@ -314,8 +401,6 @@ class BibleViewModel(
             return
         }
 
-        println("DEBUG: Performing search with query='$query', scope='${_selectedScope.value}', mode='${_selectedMode.value}'")
-
         _primaryBible.value?.let { bible ->
             try {
                 // Determine search mode based on selectedMode
@@ -345,9 +430,7 @@ class BibleViewModel(
                 _searchResults.value = results
                 _isSearchMode.value = true
 
-                println("Search completed: found ${results.size} results for '$query'")
             } catch (e: Exception) {
-                println("Error performing search: ${e.message}")
                 e.printStackTrace()
                 _searchResults.value = emptyList()
                 _isSearchMode.value = false

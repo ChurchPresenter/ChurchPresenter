@@ -225,6 +225,11 @@
     <string name="language_interface">Interface</string>
     <string name="language_database">Database</string>
 
+    <!-- Search Results -->
+    <string name="found_results">Found %d result(s)</string>
+    <string name="no_results_found">No results found for \"%s\"</string>
+    <string name="clear">Clear</string>
+
     <!-- File Manager Error Messages -->
     <string name="error_target_directory_not_exist">Target directory does not exist: %s</string>
     <string name="error_copying_file">Error copying %s: %s</string>

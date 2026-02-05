@@ -36,12 +36,15 @@ import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.book
 import churchpresenter.composeapp.generated.resources.chapter
+import churchpresenter.composeapp.generated.resources.clear
 import churchpresenter.composeapp.generated.resources.contains_phrase
 import churchpresenter.composeapp.generated.resources.current_book
 import churchpresenter.composeapp.generated.resources.entire_bible
 import churchpresenter.composeapp.generated.resources.exact_match
+import churchpresenter.composeapp.generated.resources.found_results
 import churchpresenter.composeapp.generated.resources.go_live
 import churchpresenter.composeapp.generated.resources.mode
+import churchpresenter.composeapp.generated.resources.no_results_found
 import churchpresenter.composeapp.generated.resources.scope
 import churchpresenter.composeapp.generated.resources.search
 import churchpresenter.composeapp.generated.resources.verse
@@ -70,8 +73,12 @@ fun BibleTab(
     val isSearchMode by viewModel.isSearchMode
 
     // Get filtered lists from ViewModel
+    // Use bookSearchQuery from ViewModel for filtering books (independent of verse search)
     val filteredBooks = remember(books, viewModel.bookSearchQuery.value) {
-        viewModel.getFilteredBooks()
+        println("DEBUG BibleTab: filteredBooks recalculating, books.size=${books.size}, bookSearchQuery='${viewModel.bookSearchQuery.value}'")
+        val result = viewModel.getFilteredBooks()
+        println("DEBUG BibleTab: filteredBooks result size=${result.size}")
+        result
     }
     val filteredChapters = remember(selectedBookIndex, viewModel.chapterSearchQuery.value) {
         viewModel.getFilteredChapters()
@@ -194,7 +201,7 @@ fun BibleTab(
                         containerColor = MaterialTheme.colorScheme.secondary
                     )
                 ) {
-                    Text("Clear")
+                    Text(stringResource(Res.string.clear))
                 }
             }
         }
@@ -204,7 +211,7 @@ fun BibleTab(
             // Display search results
             Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
                 Text(
-                    text = "Found ${searchResults.size} result(s)",
+                    text = stringResource(Res.string.found_results, searchResults.size),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.padding(bottom = 8.dp)
@@ -227,7 +234,7 @@ fun BibleTab(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "No results found for \"$searchQuery\"",
+                    text = stringResource(Res.string.no_results_found, searchQuery),
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -239,6 +246,7 @@ fun BibleTab(
 
             Column(modifier = Modifier.width(200.dp).padding(end = 8.dp)) {
                 SearchTextField(label = stringResource(Res.string.book)) { query ->
+                    println("DEBUG BibleTab: SearchTextField callback called with query='$query'")
                     viewModel.updateBookSearchQuery(query)
                 }
                 SelectionListWithIndex(
