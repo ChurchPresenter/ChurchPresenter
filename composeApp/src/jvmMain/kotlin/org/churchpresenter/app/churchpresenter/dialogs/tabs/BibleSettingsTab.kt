@@ -20,7 +20,32 @@ import org.churchpresenter.app.churchpresenter.viewmodel.FileManager
 import org.jetbrains.compose.resources.stringResource
 import java.awt.GraphicsEnvironment
 import java.awt.Window
+import java.io.File
+import java.nio.charset.StandardCharsets
 import javax.swing.SwingUtilities
+
+/**
+ * Extract Bible title from SPB file
+ * Reads the header lines to find the title (usually line starting with ##Title:)
+ */
+private fun extractBibleTitle(filePath: String): String {
+    return try {
+        File(filePath).bufferedReader(StandardCharsets.UTF_8).use { reader ->
+            // Read first few lines to find title
+            var title: String? = null
+            for (i in 0..10) {
+                val line = reader.readLine() ?: break
+                if (line.startsWith("##Title:")) {
+                    title = line.substring(8).trim()
+                    break
+                }
+            }
+            title ?: File(filePath).nameWithoutExtension
+        }
+    } catch (e: Exception) {
+        File(filePath).nameWithoutExtension
+    }
+}
 
 @Composable
 fun BibleSettingsTab(
@@ -40,6 +65,18 @@ fun BibleSettingsTab(
         fileManager.getBibleFilesInDirectory(settings.bibleSettings.storageDirectory)
     }
 
+    // Create mapping from filename to display name (Bible title)
+    val bibleFileDisplayNames = remember(settings.bibleSettings.storageDirectory, bibleFilesInDirectory) {
+        if (settings.bibleSettings.storageDirectory.isNotEmpty()) {
+            bibleFilesInDirectory.associateWith { fileName ->
+                val filePath = File(settings.bibleSettings.storageDirectory, fileName).absolutePath
+                extractBibleTitle(filePath)
+            }
+        } else {
+            emptyMap()
+        }
+    }
+
     Box(
         modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surfaceVariant).padding(5.dp)
     ) {
@@ -54,7 +91,17 @@ fun BibleSettingsTab(
                     .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f), RoundedCornerShape(4.dp))
                     .padding(start = 15.dp, end = 15.dp, top = 8.dp, bottom = 15.dp)
             ) {
-                LeftColumn(settings, onSettingsChange, availableFonts, bibleFilesInDirectory, selectedFile, { selectedFile = it }, { refreshTrigger++ }, fileManager)
+                LeftColumn(
+                    settings,
+                    onSettingsChange,
+                    availableFonts,
+                    bibleFilesInDirectory,
+                    bibleFileDisplayNames,
+                    selectedFile,
+                    { selectedFile = it },
+                    { refreshTrigger++ },
+                    fileManager
+                )
             }
 
             // Right Column
@@ -76,6 +123,7 @@ private fun LeftColumn(
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
     availableFonts: List<String>,
     bibleFilesInDirectory: List<String>,
+    bibleFileDisplayNames: Map<String, String>,
     selectedFile: String?,
     onFileSelected: (String?) -> Unit,
     onRefresh: () -> Unit,
@@ -107,7 +155,11 @@ private fun LeftColumn(
     // Storage Directory
     SectionHeader(stringResource(Res.string.storage_directory))
     Spacer(modifier = Modifier.height(8.dp))
-    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
         Text(
             text = if (settings.bibleSettings.storageDirectory.isNotEmpty()) settings.bibleSettings.storageDirectory
             else stringResource(Res.string.no_directory_selected),
@@ -273,24 +325,47 @@ private fun LeftColumn(
     // Bible Selection
     SectionHeader(stringResource(Res.string.bible_selection))
     Spacer(modifier = Modifier.height(8.dp))
-    SettingRow(stringResource(Res.string.primary_bible)) {
 
+    // Create list of display names for dropdown
+    val bibleDisplayOptions = listOf(noneStr) + bibleFilesInDirectory.map { fileName ->
+        bibleFileDisplayNames[fileName] ?: fileName
+    }
+
+    SettingRow(stringResource(Res.string.primary_bible)) {
         DropdownSettingsField(
-            value = settings.bibleSettings.primaryBible.ifEmpty { noneStr },
-            options = listOf(stringResource(Res.string.none)) + bibleFilesInDirectory,
-            onValueChange = {
-                val value = if (it == noneStr) "" else it
-                onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(primaryBible = value)) }
+            value = if (settings.bibleSettings.primaryBible.isEmpty()) {
+                noneStr
+            } else {
+                bibleFileDisplayNames[settings.bibleSettings.primaryBible] ?: settings.bibleSettings.primaryBible
+            },
+            options = bibleDisplayOptions,
+            onValueChange = { displayName ->
+                // Find the filename that matches this display name
+                val fileName = if (displayName == noneStr) {
+                    ""
+                } else {
+                    bibleFileDisplayNames.entries.find { it.value == displayName }?.key ?: displayName
+                }
+                onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(primaryBible = fileName)) }
             }
         )
     }
     SettingRow(stringResource(Res.string.secondary_bible)) {
         DropdownSettingsField(
-            value = settings.bibleSettings.secondaryBible.ifEmpty { noneStr },
-            options = listOf(noneStr) + bibleFilesInDirectory,
-            onValueChange = {
-                val value = if (it == noneStr) "" else it
-                onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(secondaryBible = value)) }
+            value = if (settings.bibleSettings.secondaryBible.isEmpty()) {
+                noneStr
+            } else {
+                bibleFileDisplayNames[settings.bibleSettings.secondaryBible] ?: settings.bibleSettings.secondaryBible
+            },
+            options = bibleDisplayOptions,
+            onValueChange = { displayName ->
+                // Find the filename that matches this display name
+                val fileName = if (displayName == noneStr) {
+                    ""
+                } else {
+                    bibleFileDisplayNames.entries.find { it.value == displayName }?.key ?: displayName
+                }
+                onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(secondaryBible = fileName)) }
             }
         )
     }
