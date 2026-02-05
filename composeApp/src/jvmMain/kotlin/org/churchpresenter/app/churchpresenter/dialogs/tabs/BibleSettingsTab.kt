@@ -15,12 +15,11 @@ import org.churchpresenter.app.churchpresenter.composables.DropdownSettingsField
 import org.churchpresenter.app.churchpresenter.composables.FontSettingsDropdown
 import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
 import org.churchpresenter.app.churchpresenter.data.AppSettings
+import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.app.churchpresenter.viewmodel.FileManager
 import org.jetbrains.compose.resources.stringResource
 import java.awt.GraphicsEnvironment
 import java.awt.Window
-import java.io.File
-import javax.swing.JFileChooser
-import javax.swing.JOptionPane
 import javax.swing.SwingUtilities
 
 @Composable
@@ -31,18 +30,14 @@ fun BibleSettingsTab(
     val availableFonts = remember {
         GraphicsEnvironment.getLocalGraphicsEnvironment().availableFontFamilyNames.toList()
     }
+    val fileManager = remember { FileManager() }
 
     var refreshTrigger by remember { mutableStateOf(0) }
     var selectedFile by remember { mutableStateOf<String?>(null) }
 
-    // Automatically load Bible files
+    // Use FileManager to load Bible files
     val bibleFilesInDirectory = remember(settings.bibleSettings.storageDirectory, refreshTrigger) {
-        if (settings.bibleSettings.storageDirectory.isNotEmpty()) {
-            val dir = File(settings.bibleSettings.storageDirectory)
-            if (dir.exists() && dir.isDirectory) {
-                dir.listFiles { file -> file.extension.lowercase() == "spb" }?.map { it.name }?.sorted() ?: emptyList()
-            } else emptyList()
-        } else emptyList()
+        fileManager.getBibleFilesInDirectory(settings.bibleSettings.storageDirectory)
     }
 
     Box(
@@ -59,7 +54,7 @@ fun BibleSettingsTab(
                     .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f), RoundedCornerShape(4.dp))
                     .padding(start = 15.dp, end = 15.dp, top = 8.dp, bottom = 15.dp)
             ) {
-                LeftColumn(settings, onSettingsChange, availableFonts, bibleFilesInDirectory, selectedFile, { selectedFile = it }, { refreshTrigger++ })
+                LeftColumn(settings, onSettingsChange, availableFonts, bibleFilesInDirectory, selectedFile, { selectedFile = it }, { refreshTrigger++ }, fileManager)
             }
 
             // Right Column
@@ -83,9 +78,32 @@ private fun LeftColumn(
     bibleFilesInDirectory: List<String>,
     selectedFile: String?,
     onFileSelected: (String?) -> Unit,
-    onRefresh: () -> Unit
+    onRefresh: () -> Unit,
+    fileManager: FileManager
 ) {
     val noneStr = stringResource(Res.string.none)
+    val pleaseSelectDirectoryStr = stringResource(Res.string.please_select_directory_first)
+    val noDirectorySelectedStr = stringResource(Res.string.no_directory_selected)
+    val pleaseSelectFileStr = stringResource(Res.string.please_select_file_first)
+    val noFileSelectedStr = stringResource(Res.string.no_file_selected_title)
+    val confirmDeleteStr = stringResource(Res.string.confirm_delete)
+    val confirmDeleteFileTemplate = stringResource(Res.string.confirm_delete_file)
+    val importErrorStr = stringResource(Res.string.import_error)
+    val deleteErrorStr = stringResource(Res.string.delete_error)
+
+    // Background type options
+    val backgroundDefaultStr = stringResource(Res.string.background_default)
+    val backgroundColorStr = stringResource(Res.string.background_color_option)
+    val backgroundImageStr = stringResource(Res.string.background_image_option)
+
+    // Position options
+    val positionAboveStr = stringResource(Res.string.position_above)
+    val positionBelowStr = stringResource(Res.string.position_below)
+
+    // Language options
+    val languageInterfaceStr = stringResource(Res.string.language_interface)
+    val languageDatabaseStr = stringResource(Res.string.language_database)
+
     // Storage Directory
     SectionHeader(stringResource(Res.string.storage_directory))
     Spacer(modifier = Modifier.height(8.dp))
@@ -107,14 +125,12 @@ private fun LeftColumn(
             onClick = {
                 SwingUtilities.invokeLater {
                     val parentWindow = Window.getWindows().firstOrNull { it.isActive }
-                    val dirChooser = JFileChooser().apply {
-                        fileSelectionMode = JFileChooser.DIRECTORIES_ONLY
-                        if (settings.bibleSettings.storageDirectory.isNotEmpty()) {
-                            currentDirectory = File(settings.bibleSettings.storageDirectory)
-                        }
-                    }
-                    if (dirChooser.showOpenDialog(parentWindow) == JFileChooser.APPROVE_OPTION) {
-                        onSettingsChange { it.copy(bibleSettings = it.bibleSettings.copy(storageDirectory = dirChooser.selectedFile.absolutePath)) }
+                    val selectedDir = fileManager.chooseDirectory(
+                        currentDirectory = settings.bibleSettings.storageDirectory,
+                        parentWindow = parentWindow
+                    )
+                    selectedDir?.let { dir ->
+                        onSettingsChange { it.copy(bibleSettings = it.bibleSettings.copy(storageDirectory = dir)) }
                     }
                 }
             }
@@ -168,24 +184,36 @@ private fun LeftColumn(
             onClick = {
                 SwingUtilities.invokeLater {
                     val parentWindow = Window.getWindows().firstOrNull { it.isActive }
+
+                    // Check if directory is selected
                     if (settings.bibleSettings.storageDirectory.isEmpty()) {
-                        JOptionPane.showMessageDialog(parentWindow, "Please select a storage directory first.", "No Directory Selected", JOptionPane.WARNING_MESSAGE)
+                        fileManager.showWarning(
+                            message = pleaseSelectDirectoryStr,
+                            title = noDirectorySelectedStr,
+                            parentWindow = parentWindow
+                        )
                         return@invokeLater
                     }
-                    val fileChooser = JFileChooser().apply {
-                        fileSelectionMode = JFileChooser.FILES_ONLY
-                        isMultiSelectionEnabled = true
-                        fileFilter = javax.swing.filechooser.FileNameExtensionFilter("Bible Files (*.spb)", "spb")
-                    }
-                    if (fileChooser.showOpenDialog(parentWindow) == JFileChooser.APPROVE_OPTION) {
-                        val targetDir = File(settings.bibleSettings.storageDirectory)
-                        fileChooser.selectedFiles.forEach { sourceFile ->
-                            try {
-                                sourceFile.copyTo(File(targetDir, sourceFile.name), overwrite = true)
-                            } catch (e: Exception) {
-                                JOptionPane.showMessageDialog(parentWindow, "Error copying ${sourceFile.name}: ${e.message}", "Copy Error", JOptionPane.ERROR_MESSAGE)
-                            }
+
+                    // Choose files to import
+                    val selectedFiles = fileManager.chooseBibleFile(parentWindow)
+                    selectedFiles?.let { file ->
+                        // Import files
+                        val errors = fileManager.importFiles(
+                            sourceFiles = listOf(file),
+                            targetDirectory = settings.bibleSettings.storageDirectory
+                        )
+
+                        // Show errors if any
+                        if (errors.isNotEmpty()) {
+                            fileManager.showError(
+                                message = errors.joinToString("\n"),
+                                title = importErrorStr,
+                                parentWindow = parentWindow
+                            )
                         }
+
+                        // Trigger refresh
                         onRefresh()
                     }
                 }
@@ -198,18 +226,41 @@ private fun LeftColumn(
             onClick = {
                 SwingUtilities.invokeLater {
                     val parentWindow = Window.getWindows().firstOrNull { it.isActive }
+
+                    // Check if file is selected
                     if (selectedFile == null) {
-                        JOptionPane.showMessageDialog(parentWindow, "Please select a file from the list first.", "No File Selected", JOptionPane.WARNING_MESSAGE)
+                        fileManager.showWarning(
+                            message = pleaseSelectFileStr,
+                            title = noFileSelectedStr,
+                            parentWindow = parentWindow
+                        )
                         return@invokeLater
                     }
-                    val fileToDelete = File(settings.bibleSettings.storageDirectory, selectedFile!!)
-                    if (JOptionPane.showConfirmDialog(parentWindow, "Are you sure you want to delete '$selectedFile'?", "Confirm Delete", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION) {
-                        try {
-                            fileToDelete.delete()
+
+                    // Confirm deletion
+                    val confirmed = fileManager.showConfirmDialog(
+                        message = String.format(confirmDeleteFileTemplate, selectedFile),
+                        title = confirmDeleteStr,
+                        parentWindow = parentWindow
+                    )
+
+                    if (confirmed) {
+                        // Delete file
+                        val error = fileManager.deleteFile(
+                            directory = settings.bibleSettings.storageDirectory,
+                            fileName = selectedFile!!
+                        )
+
+                        if (error != null) {
+                            fileManager.showError(
+                                message = error,
+                                title = deleteErrorStr,
+                                parentWindow = parentWindow
+                            )
+                        } else {
+                            // Success - clear selection and refresh
                             onFileSelected(null)
                             onRefresh()
-                        } catch (e: Exception) {
-                            JOptionPane.showMessageDialog(parentWindow, "Error deleting file: ${e.message}", "Delete Error", JOptionPane.ERROR_MESSAGE)
                         }
                     }
                 }
@@ -251,15 +302,26 @@ private fun LeftColumn(
     Spacer(modifier = Modifier.height(8.dp))
     SettingRow(stringResource(Res.string.background_type)) {
         DropdownSettingsField(
-            value = settings.bibleSettings.backgroundType,
-            options = listOf("Default", "Color", "Image"),
-            onValueChange = {
-                onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(backgroundType = it)) }
+            value = when (settings.bibleSettings.backgroundType) {
+                Constants.BACKGROUND_DEFAULT -> backgroundDefaultStr
+                Constants.BACKGROUND_COLOR -> backgroundColorStr
+                Constants.BACKGROUND_IMAGE -> backgroundImageStr
+                else -> backgroundDefaultStr
+            },
+            options = listOf(backgroundDefaultStr, backgroundColorStr, backgroundImageStr),
+            onValueChange = { displayValue ->
+                val value = when (displayValue) {
+                    backgroundDefaultStr -> Constants.BACKGROUND_DEFAULT
+                    backgroundColorStr -> Constants.BACKGROUND_COLOR
+                    backgroundImageStr -> Constants.BACKGROUND_IMAGE
+                    else -> Constants.BACKGROUND_DEFAULT
+                }
+                onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(backgroundType = value)) }
             }
         )
     }
 
-    if (settings.bibleSettings.backgroundType == "Color") {
+    if (settings.bibleSettings.backgroundType == Constants.BACKGROUND_COLOR) {
         SettingRow(stringResource(Res.string.background_color)) {
             ColorPickerField(
                 color = settings.bibleSettings.backgroundColor,
@@ -277,6 +339,14 @@ private fun RightColumn(
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
     availableFonts: List<String>
 ) {
+    // Position options
+    val positionAboveStr = stringResource(Res.string.position_above)
+    val positionBelowStr = stringResource(Res.string.position_below)
+
+    // Language options
+    val languageInterfaceStr = stringResource(Res.string.language_interface)
+    val languageDatabaseStr = stringResource(Res.string.language_database)
+
     // Primary Bible Text
     SectionHeader(stringResource(Res.string.primary_bible_text))
     Spacer(modifier = Modifier.height(8.dp))
@@ -340,10 +410,19 @@ private fun RightColumn(
     }
     SettingRow(stringResource(Res.string.position)) {
         DropdownSettingsField(
-            value = settings.bibleSettings.primaryReferencePosition,
-            options = listOf("Above", "Below"),
-            onValueChange = {
-                onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(primaryReferencePosition = it)) }
+            value = when (settings.bibleSettings.primaryReferencePosition) {
+                Constants.POSITION_ABOVE -> positionAboveStr
+                Constants.POSITION_BELOW -> positionBelowStr
+                else -> positionAboveStr
+            },
+            options = listOf(positionAboveStr, positionBelowStr),
+            onValueChange = { displayValue ->
+                val value = when (displayValue) {
+                    positionAboveStr -> Constants.POSITION_ABOVE
+                    positionBelowStr -> Constants.POSITION_BELOW
+                    else -> Constants.POSITION_ABOVE
+                }
+                onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(primaryReferencePosition = value)) }
             }
         )
     }
@@ -426,10 +505,19 @@ private fun RightColumn(
     }
     SettingRow(stringResource(Res.string.position)) {
         DropdownSettingsField(
-            value = settings.bibleSettings.secondaryReferencePosition,
-            options = listOf("Above", "Below"),
-            onValueChange = {
-                onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(secondaryReferencePosition = it)) }
+            value = when (settings.bibleSettings.secondaryReferencePosition) {
+                Constants.POSITION_ABOVE -> positionAboveStr
+                Constants.POSITION_BELOW -> positionBelowStr
+                else -> positionAboveStr
+            },
+            options = listOf(positionAboveStr, positionBelowStr),
+            onValueChange = { displayValue ->
+                val value = when (displayValue) {
+                    positionAboveStr -> Constants.POSITION_ABOVE
+                    positionBelowStr -> Constants.POSITION_BELOW
+                    else -> Constants.POSITION_ABOVE
+                }
+                onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(secondaryReferencePosition = value)) }
             }
         )
     }
@@ -454,10 +542,19 @@ private fun RightColumn(
     Spacer(modifier = Modifier.height(8.dp))
     SettingRow(stringResource(Res.string.language_source)) {
         DropdownSettingsField(
-            value = settings.bibleSettings.captionLanguage,
-            options = listOf("Interface", "Database"),
-            onValueChange = {
-                onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(captionLanguage = it)) }
+            value = when (settings.bibleSettings.captionLanguage) {
+                Constants.LANGUAGE_INTERFACE -> languageInterfaceStr
+                Constants.LANGUAGE_DATABASE -> languageDatabaseStr
+                else -> languageInterfaceStr
+            },
+            options = listOf(languageInterfaceStr, languageDatabaseStr),
+            onValueChange = { displayValue ->
+                val value = when (displayValue) {
+                    languageInterfaceStr -> Constants.LANGUAGE_INTERFACE
+                    languageDatabaseStr -> Constants.LANGUAGE_DATABASE
+                    else -> Constants.LANGUAGE_INTERFACE
+                }
+                onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(captionLanguage = value)) }
             }
         )
     }

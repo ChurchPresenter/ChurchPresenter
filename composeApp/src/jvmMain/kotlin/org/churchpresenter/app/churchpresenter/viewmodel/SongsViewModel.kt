@@ -4,6 +4,7 @@ import androidx.compose.runtime.*
 import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.data.Songs
 import org.churchpresenter.app.churchpresenter.models.LyricSection
+import org.churchpresenter.app.churchpresenter.utils.Constants
 import java.io.File
 
 class SongsViewModel(
@@ -26,7 +27,7 @@ class SongsViewModel(
     val selectedSongbook: State<String> = _selectedSongbook
 
 
-    private val _filterType = mutableStateOf("Contains")
+    private val _filterType = mutableStateOf(Constants.CONTAINS)
     val filterType: State<String> = _filterType
 
     private val _selectedSongIndex = mutableStateOf(2)
@@ -50,7 +51,7 @@ class SongsViewModel(
             if (dir.exists() && dir.isDirectory) {
                 // Get all .sps files from the directory
                 val spsFiles: Array<File> = dir.listFiles { file ->
-                    file.extension.lowercase() == "sps"
+                    file.extension.lowercase() == Constants.EXTENSION_SPS
                 } ?: emptyArray()
 
                 // Load each .sps file (sorted alphabetically) - using append to combine all databases
@@ -70,7 +71,7 @@ class SongsViewModel(
         if (songs.getSongCount() == 0) {
             try {
                 println("No song files found in directory, loading bundled resource")
-                songs.loadFromSps("pv3300.sps")
+                songs.loadFromSps(Constants.FALLBACK_SONG_RESOURCE)
             } catch (e: Exception) {
                 println("Error loading bundled resource: ${e.message}")
             }
@@ -130,7 +131,7 @@ class SongsViewModel(
             title = song.title,
             songNumber = song.number.toIntOrNull() ?: 0,
             lines = song.lyrics,
-            type = "song"
+            type = Constants.SECTION_TYPE_SONG
         )
     }
 
@@ -147,12 +148,12 @@ class SongsViewModel(
         // Split lyrics into sections (verses and choruses)
         val sections = mutableListOf<LyricSection>()
         val currentSection = mutableListOf<String>()
-        var sectionType = "verse"
+        var sectionType = Constants.SECTION_TYPE_VERSE
         var sectionNumber = 0
 
         song.lyrics.forEach { line ->
             when {
-                line.contains("Куплет", ignoreCase = true) || line.contains("verse", ignoreCase = true) -> {
+                line.contains(Constants.VERSE_RUS, ignoreCase = true) || line.contains(Constants.VERSE, ignoreCase = true) -> {
                     if (currentSection.isNotEmpty()) {
                         sections.add(LyricSection(
                             title = song.title,
@@ -162,11 +163,11 @@ class SongsViewModel(
                         ))
                         currentSection.clear()
                     }
-                    sectionType = "verse"
+                    sectionType = Constants.SECTION_TYPE_VERSE
                     sectionNumber++
                     currentSection.add(line)
                 }
-                line.contains("Припев", ignoreCase = true) || line.contains("chorus", ignoreCase = true) -> {
+                line.contains(Constants.CHORUS_RUS, ignoreCase = true) || line.contains(Constants.CHORUS, ignoreCase = true) -> {
                     if (currentSection.isNotEmpty()) {
                         sections.add(LyricSection(
                             title = song.title,
@@ -176,7 +177,7 @@ class SongsViewModel(
                         ))
                         currentSection.clear()
                     }
-                    sectionType = "chorus"
+                    sectionType = Constants.SECTION_TYPE_CHORUS
                     currentSection.add(line)
                 }
                 else -> {
@@ -245,8 +246,8 @@ class SongsViewModel(
     private fun applyFilters() {
         var filtered = _allSongs.value
 
-        // Filter by songbook
-        if (_selectedSongbook.value.isNotEmpty() && _selectedSongbook.value != "All Song Books") {
+        // Filter by songbook - only apply if a real songbook is selected (not "All Song Books")
+        if (_selectedSongbook.value.isNotEmpty() && _songbooks.value.contains(_selectedSongbook.value)) {
             filtered = filtered.filter { songText ->
                 val songNumber = songText.substringBefore(".").trim()
                 val song = _songsData.value.getSongs().find { it.number == songNumber }
@@ -258,9 +259,9 @@ class SongsViewModel(
         // Filter by search query
         if (_searchQuery.value.isNotEmpty()) {
             filtered = when (_filterType.value) {
-                "Contains" -> filtered.filter { it.contains(_searchQuery.value, ignoreCase = true) }
-                "Starts with" -> filtered.filter { it.substringAfter(". ").startsWith(_searchQuery.value, ignoreCase = true) }
-                "Ends with" -> filtered.filter { it.endsWith(_searchQuery.value, ignoreCase = true) }
+                Constants.CONTAINS -> filtered.filter { it.contains(_searchQuery.value, ignoreCase = true) }
+                Constants.STARTS_WITH -> filtered.filter { it.substringAfter(". ").startsWith(_searchQuery.value, ignoreCase = true) }
+                Constants.EXACT_MATCH -> filtered.filter { it.endsWith(_searchQuery.value, ignoreCase = true) }
                 else -> filtered
             }
         }

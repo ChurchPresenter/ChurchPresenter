@@ -1,20 +1,14 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.VerticalScrollbar
+
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -54,6 +48,7 @@ import churchpresenter.composeapp.generated.resources.verse
 import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
 import org.churchpresenter.app.churchpresenter.composables.SearchTextField
 import org.churchpresenter.app.churchpresenter.composables.SelectionListWithIndex
+import org.churchpresenter.app.churchpresenter.models.SelectedVerse
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.viewmodel.BibleViewModel
 import org.jetbrains.compose.resources.stringResource
@@ -62,7 +57,7 @@ import org.jetbrains.compose.resources.stringResource
 fun BibleTab(
     modifier: Modifier = Modifier,
     viewModel: BibleViewModel,
-    onVerseSelected: (List<org.churchpresenter.app.churchpresenter.models.SelectedVerse>) -> Unit = {},
+    onVerseSelected: (List<SelectedVerse>) -> Unit = {},
     onPresenting: (Presenting) -> Unit = { Presenting.NONE }
 ) {
     val books by viewModel.books

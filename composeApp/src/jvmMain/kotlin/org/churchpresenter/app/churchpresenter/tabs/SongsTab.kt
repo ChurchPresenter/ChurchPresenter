@@ -59,6 +59,7 @@ import churchpresenter.composeapp.generated.resources.tune
 import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
 import org.churchpresenter.app.churchpresenter.models.LyricSection
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.Constants.CHORUS
 import org.churchpresenter.app.churchpresenter.utils.Constants.CHORUS_RUS
 import org.churchpresenter.app.churchpresenter.utils.Constants.VERSE
@@ -95,11 +96,28 @@ fun SongsTab(
     var sortColumn by rememberSaveable { mutableStateOf("") }
     var sortAscending by rememberSaveable { mutableStateOf(true) }
 
-    val categories = listOf(allSongCategoriesText, "Прославление", "Поклонение", "Евангелизация")
-    val filterTypes = listOf(
-        stringResource(Res.string.contains),
-        stringResource(Res.string.starts_with),
-        stringResource(Res.string.exact_match)
+    // TODO: Categories should come from database or configuration
+    // val categories = listOf(allSongCategoriesText, "Прославление", "Поклонение", "Евангелизация")
+
+    // String resources for filter types
+    val containsText = stringResource(Res.string.contains)
+    val startsWithText = stringResource(Res.string.starts_with)
+    val exactMatchText = stringResource(Res.string.exact_match)
+
+    val filterTypes = listOf(containsText, startsWithText, exactMatchText)
+
+    // Map filter type display text to internal key
+    val filterTypeMap = mapOf(
+        containsText to Constants.CONTAINS,
+        startsWithText to Constants.STARTS_WITH,
+        exactMatchText to Constants.EXACT_MATCH
+    )
+
+    // Map internal key to display text
+    val filterTypeDisplayMap = mapOf(
+        Constants.CONTAINS to containsText,
+        Constants.STARTS_WITH to startsWithText,
+        Constants.EXACT_MATCH to exactMatchText
     )
 
     // Get all songs from ViewModel
@@ -125,25 +143,25 @@ fun SongsTab(
             // Apply sorting
             if (sortColumn.isNotEmpty()) {
                 filtered = when (sortColumn) {
-                    "number" -> if (sortAscending) {
+                    Constants.SORT_NUMBER -> if (sortAscending) {
                         filtered.sortedBy { it.number.toIntOrNull() ?: Int.MAX_VALUE }
                     } else {
                         filtered.sortedByDescending { it.number.toIntOrNull() ?: Int.MIN_VALUE }
                     }
 
-                    "title" -> if (sortAscending) {
+                    Constants.SORT_TITLE -> if (sortAscending) {
                         filtered.sortedBy { it.title.lowercase() }
                     } else {
                         filtered.sortedByDescending { it.title.lowercase() }
                     }
 
-                    "songbook" -> if (sortAscending) {
+                    Constants.SORT_SONGBOOK -> if (sortAscending) {
                         filtered.sortedBy { it.songbook.lowercase() }
                     } else {
                         filtered.sortedByDescending { it.songbook.lowercase() }
                     }
 
-                    "tune" -> if (sortAscending) {
+                    Constants.SORT_TUNE -> if (sortAscending) {
                         filtered.sortedBy { it.tune.lowercase() }
                     } else {
                         filtered.sortedByDescending { it.tune.lowercase() }
@@ -183,27 +201,37 @@ fun SongsTab(
                         Key.DirectionLeft -> {
                             // Previous song
                             viewModel.navigatePreviousSong()
+                            true
                         }
 
                         Key.DirectionRight -> {
                             // Next song
                             viewModel.navigateNextSong()
+                            true
                         }
 
                         Key.DirectionUp -> {
-                            // Previous lyric section
-                            viewModel.navigatePreviousSection()
+                            // Navigate up: Try previous section first, if at top, go to previous song
+                            val sectionNavigated = viewModel.navigatePreviousSection()
+                            if (!sectionNavigated) {
+                                // If we can't go to previous section, go to previous song
+                                viewModel.navigatePreviousSong()
+                            }
+                            true
                         }
 
                         Key.DirectionDown -> {
-                            // Next lyric section
+                            // Navigate down: Try next section first, if at bottom, go to next song
                             val navigated = viewModel.navigateNextSection()
                             if (navigated) {
                                 viewModel.getSelectedLyricSection()?.let { section ->
                                     onSongItemSelected(section)
                                 }
+                            } else {
+                                // If we can't go to next section, go to next song
+                                viewModel.navigateNextSong()
                             }
-                            navigated
+                            true
                         }
 
                         else -> false
@@ -227,25 +255,25 @@ fun SongsTab(
                     onSelectedChange = { viewModel.updateSelectedSongbook(it) }
                 )
 
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        stringResource(Res.string.filter_colon),
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.padding(vertical = 4.dp)
-                    )
-                    DropdownSelector(
-                        modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp),
-                        label = "",
-                        items = categories,
-                        selected = selectedCategory,
-                        onSelectedChange = { selectedCategory = it }
-                    )
-                }
+//                Row(
+//                    modifier = Modifier.fillMaxWidth(),
+//                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+//                    verticalAlignment = Alignment.CenterVertically
+//                ) {
+//                    Text(
+//                        stringResource(Res.string.filter_colon),
+//                        style = MaterialTheme.typography.labelMedium,
+//                        color = MaterialTheme.colorScheme.primary,
+//                        modifier = Modifier.padding(vertical = 4.dp)
+//                    )
+//                    DropdownSelector(
+//                        modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp),
+//                        label = "",
+//                        items = categories,
+//                        selected = selectedCategory,
+//                        onSelectedChange = { selectedCategory = it }
+//                    )
+//                }
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -261,8 +289,11 @@ fun SongsTab(
                         modifier = Modifier.weight(1f),
                         label = "",
                         items = filterTypes,
-                        selected = filterType,
-                        onSelectedChange = { viewModel.updateFilterType(it) }
+                        selected = filterTypeDisplayMap[filterType] ?: containsText,
+                        onSelectedChange = { displayText ->
+                            val internalKey = filterTypeMap[displayText] ?: Constants.CONTAINS
+                            viewModel.updateFilterType(internalKey)
+                        }
                     )
                     Button(
                         onClick = { /* Search action */ },
@@ -303,32 +334,32 @@ fun SongsTab(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Text(
-                    text = stringResource(Res.string.number) + getSortIndicator("number"),
+                    text = stringResource(Res.string.number) + getSortIndicator(Constants.SORT_NUMBER),
                     style = MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.secondary,
-                    modifier = Modifier.width(70.dp).clickable { onColumnClick("number") }
+                    modifier = Modifier.width(70.dp).clickable { onColumnClick(Constants.SORT_NUMBER) }
                 )
                 Text(
-                    text = stringResource(Res.string.title) + getSortIndicator("title"),
+                    text = stringResource(Res.string.title) + getSortIndicator(Constants.SORT_TITLE),
                     style = MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.secondary,
-                    modifier = Modifier.weight(1f).clickable { onColumnClick("title") }
+                    modifier = Modifier.weight(1f).clickable { onColumnClick(Constants.SORT_TITLE) }
                 )
                 Text(
-                    text = stringResource(Res.string.song_book) + getSortIndicator("songbook"),
+                    text = stringResource(Res.string.song_book) + getSortIndicator(Constants.SORT_SONGBOOK),
                     style = MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.secondary,
-                    modifier = Modifier.width(100.dp).clickable { onColumnClick("songbook") }
+                    modifier = Modifier.width(100.dp).clickable { onColumnClick(Constants.SORT_SONGBOOK) }
                 )
                 Text(
-                    text = stringResource(Res.string.tune) + getSortIndicator("tune"),
+                    text = stringResource(Res.string.tune) + getSortIndicator(Constants.SORT_TUNE),
                     style = MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.secondary,
-                    modifier = Modifier.width(60.dp).clickable { onColumnClick("tune") }
+                    modifier = Modifier.width(60.dp).clickable { onColumnClick(Constants.SORT_TUNE) }
                 )
             }
             Box(

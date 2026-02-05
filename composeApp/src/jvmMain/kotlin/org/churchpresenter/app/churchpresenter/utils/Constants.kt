@@ -37,4 +37,35 @@ object Constants {
     const val STARTS_WITH = "Starts with"
 
     const val EXACT_MATCH = "Exact match"
+
+    // Background Types
+    const val BACKGROUND_DEFAULT = "Default"
+    const val BACKGROUND_COLOR = "Color"
+    const val BACKGROUND_IMAGE = "Image"
+
+    // Position Options
+    const val POSITION_ABOVE = "Above"
+    const val POSITION_BELOW = "Below"
+
+    // Language Options
+    const val LANGUAGE_INTERFACE = "Interface"
+    const val LANGUAGE_DATABASE = "Database"
+
+    // File Extensions
+    const val EXTENSION_SPS = "sps"
+    const val EXTENSION_SPB = "spb"
+
+    // Section Types
+    const val SECTION_TYPE_SONG = "song"
+    const val SECTION_TYPE_VERSE = "verse"
+    const val SECTION_TYPE_CHORUS = "chorus"
+
+    // Fallback Resource
+    const val FALLBACK_SONG_RESOURCE = "pv3300.sps"
+
+    // Sort Columns
+    const val SORT_NUMBER = "number"
+    const val SORT_TITLE = "title"
+    const val SORT_SONGBOOK = "songbook"
+    const val SORT_TUNE = "tune"
 }

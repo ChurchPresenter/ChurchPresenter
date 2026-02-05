@@ -26,10 +26,10 @@ import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.Utils
 import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDefault
+import org.churchpresenter.app.churchpresenter.viewmodel.FileManager
 import org.jetbrains.compose.resources.stringResource
-import java.io.File
 import java.awt.Window
-import javax.swing.*
+import javax.swing.SwingUtilities
 
 
 @Composable
@@ -38,6 +38,7 @@ fun SongSettingsTab(
     onSettingsChange: (AppSettings) -> Unit = {}
 ) {
     val availableFonts = remember { Utils.getAvailableSystemFonts() }
+    val fileManager = remember { FileManager() }
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -60,7 +61,7 @@ fun SongSettingsTab(
                     .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f), RoundedCornerShape(4.dp))
                     .padding(start = 15.dp, end = 15.dp, top = 8.dp, bottom = 15.dp)
             ) {
-                LeftColumn(settings, onSettingsChange, availableFonts)
+                LeftColumn(settings, onSettingsChange, availableFonts, fileManager)
             }
 
             // Right Column
@@ -83,7 +84,8 @@ fun SongSettingsTab(
 private fun LeftColumn(
     settings: AppSettings,
     onSettingsChange: (AppSettings) -> Unit,
-    availableFonts: List<String>
+    availableFonts: List<String>,
+    fileManager: FileManager
 ) {
     // State to trigger refresh of file list
     var refreshTrigger by remember { mutableStateOf(0) }
@@ -100,6 +102,16 @@ private fun LeftColumn(
     val leftStr = stringResource(Res.string.left)
     val centerStr = stringResource(Res.string.center)
     val rightStr = stringResource(Res.string.right)
+
+    // Dialog message strings
+    val pleaseSelectDirectoryStr = stringResource(Res.string.please_select_directory_first)
+    val noDirectorySelectedStr = stringResource(Res.string.no_directory_selected)
+    val pleaseSelectFileStr = stringResource(Res.string.please_select_file_first)
+    val noFileSelectedStr = stringResource(Res.string.no_file_selected_title)
+    val confirmDeleteStr = stringResource(Res.string.confirm_delete)
+    val confirmDeleteFileTemplate = stringResource(Res.string.confirm_delete_file)
+    val importErrorStr = stringResource(Res.string.import_error)
+    val deleteErrorStr = stringResource(Res.string.delete_error)
 
     // Storage Directory Section
     SectionHeader(stringResource(Res.string.storage_directory))
@@ -128,18 +140,14 @@ private fun LeftColumn(
             backgroundColor = MaterialTheme.colorScheme.primaryContainer,
             onClick = {
                 SwingUtilities.invokeLater {
-                    // Get the parent window to ensure dialog appears on top
                     val parentWindow = Window.getWindows().firstOrNull { it.isActive }
-                    val dirChooser = JFileChooser().apply {
-                        fileSelectionMode = JFileChooser.DIRECTORIES_ONLY
-                        if (settings.songSettings.storageDirectory.isNotEmpty()) {
-                            currentDirectory = File(settings.songSettings.storageDirectory)
-                        }
-                    }
-                    val result = dirChooser.showOpenDialog(parentWindow)
-                    if (result == JFileChooser.APPROVE_OPTION) {
+                    val selectedDir = fileManager.chooseDirectory(
+                        currentDirectory = settings.songSettings.storageDirectory,
+                        parentWindow = parentWindow
+                    )
+                    selectedDir?.let { dir ->
                         onSettingsChange.invoke(
-                            settings.copy(songSettings = settings.songSettings.copy(storageDirectory = dirChooser.selectedFile.absolutePath))
+                            settings.copy(songSettings = settings.songSettings.copy(storageDirectory = dir))
                         )
                     }
                 }
@@ -154,21 +162,13 @@ private fun LeftColumn(
 
     Spacer(modifier = Modifier.height(8.dp))
 
-    // Automatically load song files from the storage directory
+    // Use FileManager to get song files
     val songFilesInDirectory = remember(settings.songSettings.storageDirectory, refreshTrigger) {
-        if (settings.songSettings.storageDirectory.isNotEmpty()) {
-            val dir = File(settings.songSettings.storageDirectory)
-            if (dir.exists() && dir.isDirectory) {
-                dir.listFiles { file ->
-                    file.extension.lowercase() in listOf("spb", "sps")
-                }?.map { it.name }?.sorted() ?: emptyList()
-            } else {
-                emptyList()
-            }
-        } else {
-            emptyList()
-        }
+        fileManager.getSongFilesInDirectory(settings.songSettings.storageDirectory)
     }
+
+    Spacer(modifier = Modifier.height(8.dp))
+
 
     Box(
         modifier = Modifier
@@ -227,40 +227,36 @@ private fun LeftColumn(
             onClick = {
                 SwingUtilities.invokeLater {
                     val parentWindow = Window.getWindows().firstOrNull { it.isActive }
+
+                    // Check if directory is selected
                     if (settings.songSettings.storageDirectory.isEmpty()) {
-                        JOptionPane.showMessageDialog(
-                            parentWindow,
-                            "Please select a storage directory first.",
-                            "No Directory Selected",
-                            JOptionPane.WARNING_MESSAGE
+                        fileManager.showWarning(
+                            message = pleaseSelectDirectoryStr,
+                            title = noDirectorySelectedStr,
+                            parentWindow = parentWindow
                         )
                         return@invokeLater
                     }
 
-                    val fileChooser = JFileChooser().apply {
-                        fileSelectionMode = JFileChooser.FILES_ONLY
-                        isMultiSelectionEnabled = true
-                        fileFilter = javax.swing.filechooser.FileNameExtensionFilter(
-                            "Song Files (*.spb, *.sps)", "spb", "sps"
+                    // Choose files to import
+                    val selectedFiles = fileManager.chooseSongFiles(parentWindow)
+                    selectedFiles?.let { files ->
+                        // Import files
+                        val errors = fileManager.importFiles(
+                            sourceFiles = files,
+                            targetDirectory = settings.songSettings.storageDirectory
                         )
-                    }
-                    val result = fileChooser.showOpenDialog(parentWindow)
-                    if (result == JFileChooser.APPROVE_OPTION) {
-                        val targetDir = File(settings.songSettings.storageDirectory)
-                        fileChooser.selectedFiles.forEach { sourceFile ->
-                            val targetFile = File(targetDir, sourceFile.name)
-                            try {
-                                sourceFile.copyTo(targetFile, overwrite = true)
-                            } catch (e: Exception) {
-                                JOptionPane.showMessageDialog(
-                                    parentWindow,
-                                    "Error copying ${sourceFile.name}: ${e.message}",
-                                    "Copy Error",
-                                    JOptionPane.ERROR_MESSAGE
-                                )
-                            }
+
+                        // Show errors if any
+                        if (errors.isNotEmpty()) {
+                            fileManager.showError(
+                                message = errors.joinToString("\n"),
+                                title = importErrorStr,
+                                parentWindow = parentWindow
+                            )
                         }
-                        // Trigger a refresh by incrementing the trigger
+
+                        // Trigger refresh
                         refreshTrigger++
                     }
                 }
@@ -274,37 +270,40 @@ private fun LeftColumn(
                 SwingUtilities.invokeLater {
                     val parentWindow = Window.getWindows().firstOrNull { it.isActive }
 
+                    // Check if file is selected
                     if (selectedFile == null) {
-                        JOptionPane.showMessageDialog(
-                            parentWindow,
-                            "Please select a file from the list first.",
-                            "No File Selected",
-                            JOptionPane.WARNING_MESSAGE
+                        fileManager.showWarning(
+                            message = pleaseSelectFileStr,
+                            title = noFileSelectedStr,
+                            parentWindow = parentWindow
                         )
                         return@invokeLater
                     }
 
-                    val fileToDelete = File(settings.songSettings.storageDirectory, selectedFile!!)
-                    val confirm = JOptionPane.showConfirmDialog(
-                        parentWindow,
-                        "Are you sure you want to delete '$selectedFile'?",
-                        "Confirm Delete",
-                        JOptionPane.YES_NO_OPTION,
-                        JOptionPane.WARNING_MESSAGE
+                    // Confirm deletion
+                    val confirmed = fileManager.showConfirmDialog(
+                        message = String.format(confirmDeleteFileTemplate, selectedFile),
+                        title = confirmDeleteStr,
+                        parentWindow = parentWindow
                     )
-                    if (confirm == JOptionPane.YES_OPTION) {
-                        try {
-                            fileToDelete.delete()
-                            selectedFile = null // Clear selection after deletion
-                            // Trigger a refresh by incrementing the trigger
-                            refreshTrigger++
-                        } catch (e: Exception) {
-                            JOptionPane.showMessageDialog(
-                                parentWindow,
-                                "Error deleting file: ${e.message}",
-                                "Delete Error",
-                                JOptionPane.ERROR_MESSAGE
+
+                    if (confirmed) {
+                        // Delete file
+                        val error = fileManager.deleteFile(
+                            directory = settings.songSettings.storageDirectory,
+                            fileName = selectedFile!!
+                        )
+
+                        if (error != null) {
+                            fileManager.showError(
+                                message = error,
+                                title = deleteErrorStr,
+                                parentWindow = parentWindow
                             )
+                        } else {
+                            // Success - clear selection and refresh
+                            selectedFile = null
+                            refreshTrigger++
                         }
                     }
                 }
