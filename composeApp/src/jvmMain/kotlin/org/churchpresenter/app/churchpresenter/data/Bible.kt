@@ -305,8 +305,9 @@ class Bible {
 
     fun getChapterCount(bookIndex: Int): Int {
         // bookIndex is zero-based in the UI; our books list is 0-based
-        val b = books.getOrNull(bookIndex) ?: return 0
-        return b.chapterCount
+        val b = books.getOrNull(bookIndex)
+        println("DEBUG Bible.getChapterCount: bookIndex=$bookIndex, bookName='${b?.book}', chapterCount=${b?.chapterCount ?: 0}")
+        return b?.chapterCount ?: 0
     }
 
     // Get verse details for presenter screen

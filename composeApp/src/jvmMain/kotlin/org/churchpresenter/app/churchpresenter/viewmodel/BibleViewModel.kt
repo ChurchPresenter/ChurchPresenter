@@ -160,8 +160,10 @@ class BibleViewModel(
 
     fun getChaptersForCurrentBook(): List<String> {
         _primaryBible.value?.let { bible ->
-            val bookId = _selectedBookIndex.value + 1  // Convert 0-based index to 1-based book ID
-            val chapterCount = bible.getChapterCount(bookId)
+            // getChapterCount expects 0-based book index
+            val bookIndex = _selectedBookIndex.value
+            val chapterCount = bible.getChapterCount(bookIndex)
+            println("DEBUG BibleViewModel: getChaptersForCurrentBook - bookIndex=$bookIndex, chapterCount=$chapterCount")
             val count = if (chapterCount > 0) chapterCount else 1
             return (1..count).map { it.toString() }
         }
@@ -359,8 +361,8 @@ class BibleViewModel(
 
     fun navigateNextChapter(): Boolean {
         _primaryBible.value?.let { bible ->
-            val bookId = _selectedBookIndex.value + 1  // Convert 0-based index to 1-based book ID
-            val maxChapter = bible.getChapterCount(bookId)
+            // getChapterCount expects 0-based book index
+            val maxChapter = bible.getChapterCount(_selectedBookIndex.value)
             if (_selectedChapter.value < maxChapter) {
                 selectChapter(_selectedChapter.value + 1)
                 return true
