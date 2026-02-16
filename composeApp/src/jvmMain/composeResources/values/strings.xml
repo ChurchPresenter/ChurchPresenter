@@ -105,7 +105,7 @@
     <string name="bottom_right">Bottom Right</string>
     <string name="color">Color:</string>
     <string name="dark_theme">Dark Theme</string>
-    <string name="light_theme">Light Them</string>
+    <string name="light_theme">Light Theme</string>
     <string name="system_theme">System Theme</string>
     <!-- Placeholder strings for other tabs -->
     <string name="bible_tab_content">Bible tab content will be implemented</string>
