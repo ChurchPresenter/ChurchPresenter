@@ -163,7 +163,6 @@ class BibleViewModel(
             // getChapterCount expects 0-based book index
             val bookIndex = _selectedBookIndex.value
             val chapterCount = bible.getChapterCount(bookIndex)
-            println("DEBUG BibleViewModel: getChaptersForCurrentBook - bookIndex=$bookIndex, chapterCount=$chapterCount")
             val count = if (chapterCount > 0) chapterCount else 1
             return (1..count).map { it.toString() }
         }
