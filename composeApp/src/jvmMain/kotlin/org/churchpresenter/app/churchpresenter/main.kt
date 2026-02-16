@@ -128,7 +128,7 @@ fun main() = application {
             PresenterScreen(modifier = Modifier.fillMaxSize()) {
                 Column {
                     if (presentingMode == Presenting.BIBLE) {
-                        BiblePresenter(selectedVerses = selectedVerses)
+                        BiblePresenter(selectedVerses = selectedVerses, appSettings = appSettings)
                     } else if (presentingMode == Presenting.LYRICS) {
                         SongPresenter(lyricSection = lyricSection, appSettings = appSettings)
                     }

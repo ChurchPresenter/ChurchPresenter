@@ -2,6 +2,7 @@ package org.churchpresenter.app.churchpresenter.presenter
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -10,40 +11,155 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.models.SelectedVerse
+import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.app.churchpresenter.utils.Constants.TOP
+import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
+import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDefault
+import kotlin.math.min
 
 @Composable
 fun BiblePresenter(
     modifier: Modifier = Modifier,
-    selectedVerses: List<SelectedVerse>
+    selectedVerses: List<SelectedVerse>,
+    appSettings: AppSettings,
 ) {
-    Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Column {
-            // Display each verse (primary and secondary if available)
-            selectedVerses.forEach { verse ->
+    val primaryBibleFontStyle = remember(appSettings.bibleSettings.primaryBibleFontType) {
+        systemFontFamilyOrDefault(appSettings.bibleSettings.primaryBibleFontType)
+    }
+    val primaryBibleReferenceFontStyle = remember(appSettings.bibleSettings.primaryReferenceFontType) {
+        systemFontFamilyOrDefault(appSettings.bibleSettings.primaryReferenceFontType)
+    }
+
+    val secondaryBibleFontStyle = remember(appSettings.bibleSettings.secondaryBibleFontType) {
+        systemFontFamilyOrDefault(appSettings.bibleSettings.secondaryBibleFontType)
+    }
+    val secondaryBibleReferenceFontStyle = remember(appSettings.bibleSettings.secondaryReferenceFontType) {
+        systemFontFamilyOrDefault(appSettings.bibleSettings.secondaryReferenceFontType)
+    }
+
+    val primaryBible = selectedVerses.first()
+    val secondaryBible = selectedVerses.getOrNull(1)
+
+    val primaryBibleTextColor = remember(appSettings.bibleSettings.primaryBibleColor) {
+        parseHexColor(appSettings.bibleSettings.primaryBibleColor)
+    }
+
+    val primaryBibleReferenceTextColor = remember(appSettings.bibleSettings.primaryReferenceColor) {
+        parseHexColor(appSettings.bibleSettings.primaryReferenceColor)
+    }
+
+    val secondaryBibleTextColor = remember(appSettings.bibleSettings.secondaryBibleColor) {
+        parseHexColor(appSettings.bibleSettings.secondaryBibleColor)
+    }
+
+    val primaryBibleReferencePosition = appSettings.bibleSettings.primaryReferencePosition
+    val secondaryBibleReferencePosition = appSettings.bibleSettings.secondaryReferencePosition
+
+    BoxWithConstraints(modifier.fillMaxSize()) {
+        val density = LocalDensity.current
+
+        // Calculate scale factor based on available width and height
+        // Using a reference size of 1920x1080 as base
+        val widthScale = with(density) { maxWidth.toPx() / 1920f }
+        val heightScale = with(density) { maxHeight.toPx() / 1080f }
+        val scaleFactor = min(widthScale, heightScale).coerceIn(0.5f, 3.0f)
+
+        // Scale font sizes based on window size
+        val scaledPrimaryBibleSize = (appSettings.bibleSettings.primaryBibleFontSize * scaleFactor).sp
+        val scaledPrimaryReferenceSize = (appSettings.bibleSettings.primaryReferenceFontSize * scaleFactor).sp
+        val scaledSecondaryBibleSize = (appSettings.bibleSettings.secondaryBibleFontSize * scaleFactor).sp
+        val scaledSecondaryReferenceSize = (appSettings.bibleSettings.secondaryReferenceFontSize * scaleFactor).sp
+
+        Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Column {
+                // Primary Bible
+                if (primaryBibleReferencePosition == Constants.POSITION_ABOVE) {
+                    Row(
+                        Modifier.fillMaxWidth().padding(16.dp),
+                        horizontalArrangement = Arrangement.End
+                    ) {
+                        Text(
+                            fontFamily = primaryBibleReferenceFontStyle,
+                            fontSize = scaledPrimaryReferenceSize,
+                            text = "${primaryBible.bookName} ${primaryBible.chapter}:${primaryBible.verseNumber}",
+                            color = primaryBibleReferenceTextColor
+                        )
+                    }
+                }
                 Row(
                     Modifier.fillMaxWidth().padding(16.dp),
                     horizontalArrangement = Arrangement.Center
                 ) {
                     Text(
-                        style = MaterialTheme.typography.titleLarge,
-                        text = verse.verseText,
-                        color = Color.White
+                        fontFamily = primaryBibleFontStyle,
+                        fontSize = scaledPrimaryBibleSize,
+                        text = primaryBible.verseText,
+                        color = primaryBibleTextColor
                     )
                 }
-                Row(
-                    Modifier.fillMaxWidth().padding(16.dp),
-                    horizontalArrangement = Arrangement.End
-                ) {
-                    Text(
-                        style = MaterialTheme.typography.bodyMedium,
-                        text = "${verse.bookName} ${verse.chapter}:${verse.verseNumber}",
-                        color = Color.White
-                    )
+                if (primaryBibleReferencePosition == Constants.POSITION_BELOW) {
+                    Row(
+                        Modifier.fillMaxWidth().padding(16.dp),
+                        horizontalArrangement = Arrangement.End
+                    ) {
+                        Text(
+                            fontFamily = primaryBibleReferenceFontStyle,
+                            fontSize = scaledPrimaryReferenceSize,
+                            text = "${primaryBible.bookName} ${primaryBible.chapter}:${primaryBible.verseNumber}",
+                            color = primaryBibleReferenceTextColor
+                        )
+                    }
+                }
+
+                // Secondary Bible
+                if (secondaryBible != null) {
+                    if (secondaryBibleReferencePosition == Constants.POSITION_ABOVE) {
+                        Row(
+                            Modifier.fillMaxWidth().padding(16.dp),
+                            horizontalArrangement = Arrangement.End
+                        ) {
+                            Text(
+                                fontFamily = secondaryBibleReferenceFontStyle,
+                                fontSize = scaledPrimaryReferenceSize,
+                                text = "${secondaryBible.bookName} ${secondaryBible.chapter}:${secondaryBible.verseNumber}",
+                                color = secondaryBibleTextColor
+                            )
+                        }
+                    }
+                    Row(
+                        Modifier.fillMaxWidth().padding(16.dp),
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Text(
+                            fontFamily = secondaryBibleFontStyle,
+                            fontSize = scaledSecondaryBibleSize,
+                            text = secondaryBible.verseText,
+                            color = secondaryBibleTextColor
+                        )
+                    }
+                    if (secondaryBibleReferencePosition == Constants.POSITION_BELOW) {
+                        Row(
+                            Modifier.fillMaxWidth().padding(16.dp),
+                            horizontalArrangement = Arrangement.End
+                        ) {
+                            Text(
+                                fontFamily = secondaryBibleReferenceFontStyle,
+                                fontSize = scaledPrimaryReferenceSize,
+                                text = "${secondaryBible.bookName} ${secondaryBible.chapter}:${secondaryBible.verseNumber}",
+                                color = secondaryBibleTextColor
+                            )
+                        }
+                    }
                 }
             }
         }

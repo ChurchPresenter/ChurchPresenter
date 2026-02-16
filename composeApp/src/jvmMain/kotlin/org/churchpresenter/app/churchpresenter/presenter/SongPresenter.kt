@@ -32,7 +32,9 @@ fun SongPresenter(
     lyricSection: LyricSection,
     appSettings: AppSettings,
 ) {
-    val titleFontFamily = systemFontFamilyOrDefault(appSettings.songSettings.titleFontType)
+    val titleFontFamily = remember(appSettings.songSettings.titleFontType) {
+        systemFontFamilyOrDefault(appSettings.songSettings.titleFontType)
+    }
     val lyricsFontFamily = remember(appSettings.songSettings.lyricsFontType) {
         systemFontFamilyOrDefault(appSettings.songSettings.lyricsFontType)
     }

@@ -52,12 +52,12 @@ fun OptionsDialog(
                         Tab(
                             selected = selectedTabIndex == 0,
                             onClick = { selectedTabIndex = 0 },
-                            text = { Text(stringResource(Res.string.song)) }
+                            text = { Text(stringResource(Res.string.bible)) }
                         )
                         Tab(
                             selected = selectedTabIndex == 1,
                             onClick = { selectedTabIndex = 1 },
-                            text = { Text(stringResource(Res.string.bible)) }
+                            text = { Text(stringResource(Res.string.song)) }
                         )
                         Tab(
                             selected = selectedTabIndex == 2,
@@ -99,19 +99,20 @@ fun OptionsDialog(
                             .background(MaterialTheme.colorScheme.background)
                     ) {
                         when (selectedTabIndex) {
-                            0 -> SongSettingsTab(
+                            0 -> BibleSettingsTab(
+                                settings = currentSettings,
+                                onSettingsChange = { updateFn ->
+                                    currentSettings = updateFn(currentSettings)
+                                }
+                            )
+
+                            1 -> SongSettingsTab(
                                 settings = currentSettings,
                                 onSettingsChange = { updateFn ->
                                     currentSettings = AppSettings(updateFn.songSettings)
                                 }
                             )
 
-                            1 -> BibleSettingsTab(
-                                settings = currentSettings,
-                                onSettingsChange = { updateFn ->
-                                    currentSettings = updateFn(currentSettings)
-                                }
-                            )
                             2 -> PlaceholderTab(stringResource(Res.string.text_settings_tab_content))
                             3 -> PlaceholderTab(stringResource(Res.string.background_tab_content))
                             4 -> PlaceholderTab(stringResource(Res.string.background_images_tab_content))

@@ -80,22 +80,13 @@ fun BibleTab(
     val verseSearchQuery by viewModel.verseSearchQuery
 
     val filteredBooks = remember(books, bookSearchQuery) {
-        println("DEBUG BibleTab: Recalculating filteredBooks, books.size=${books.size}, bookSearchQuery='$bookSearchQuery'")
-        val result = viewModel.getFilteredBooks()
-        println("DEBUG BibleTab: filteredBooks result size=${result.size}")
-        result
+        viewModel.getFilteredBooks()
     }
     val filteredChapters = remember(selectedBookIndex, chapterSearchQuery) {
-        println("DEBUG BibleTab: Recalculating filteredChapters, selectedBookIndex=$selectedBookIndex, chapterSearchQuery='$chapterSearchQuery'")
-        val result = viewModel.getFilteredChapters()
-        println("DEBUG BibleTab: filteredChapters result size=${result.size}")
-        result
+        viewModel.getFilteredChapters()
     }
     val filteredVerses = remember(verses, verseSearchQuery) {
-        println("DEBUG BibleTab: Recalculating filteredVerses, verses.size=${verses.size}, verseSearchQuery='$verseSearchQuery'")
-        val result = viewModel.getFilteredVerses()
-        println("DEBUG BibleTab: filteredVerses result size=${result.size}")
-        result
+        viewModel.getFilteredVerses()
     }
 
     // String resources for scope and mode options

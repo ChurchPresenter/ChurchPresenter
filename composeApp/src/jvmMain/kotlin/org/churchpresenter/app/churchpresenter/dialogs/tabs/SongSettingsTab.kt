@@ -124,8 +124,7 @@ private fun LeftColumn(
     ) {
 
         Text(
-            text = if (settings.songSettings.storageDirectory.isNotEmpty()) settings.songSettings.storageDirectory
-            else stringResource(Res.string.no_directory_selected),
+            text = settings.songSettings.storageDirectory.ifEmpty { stringResource(Res.string.no_directory_selected) },
             modifier = Modifier
                 .weight(1f)
                 .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(2.dp))

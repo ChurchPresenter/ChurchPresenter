@@ -9,6 +9,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import churchpresenter.composeapp.generated.resources.*
 import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
 import org.churchpresenter.app.churchpresenter.composables.DropdownSettingsField
@@ -16,6 +17,7 @@ import org.churchpresenter.app.churchpresenter.composables.FontSettingsDropdown
 import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
 import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDefault
 import org.churchpresenter.app.churchpresenter.viewmodel.FileManager
 import org.jetbrains.compose.resources.stringResource
 import java.awt.GraphicsEnvironment
@@ -434,13 +436,26 @@ private fun RightColumn(
         )
     }
     SettingRow(stringResource(Res.string.font_type)) {
-        FontSettingsDropdown(
-            value = settings.bibleSettings.primaryBibleFontType,
-            fonts = availableFonts,
-            onValueChange = {
-                onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(primaryBibleFontType = it)) }
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            FontSettingsDropdown(
+                modifier = Modifier.width(200.dp),
+                value = settings.bibleSettings.primaryBibleFontType,
+                fonts = availableFonts,
+                onValueChange = {
+                    onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(primaryBibleFontType = it)) }
+                }
+            )
+            val previewFontFamily = remember(settings.bibleSettings.primaryBibleFontType) {
+                systemFontFamilyOrDefault(settings.bibleSettings.primaryBibleFontType)
             }
-        )
+            Text(
+                text = "ABCDabcd1234",
+                fontFamily = previewFontFamily,
+                fontSize = 14.sp,
+                color = MaterialTheme.colorScheme.onBackground,
+                modifier = Modifier.padding(start = 10.dp, top = 4.dp)
+            )
+        }
     }
     SettingRow(stringResource(Res.string.font_size)) {
         NumberSettingsTextField(
@@ -466,13 +481,26 @@ private fun RightColumn(
         )
     }
     SettingRow(stringResource(Res.string.font_type)) {
-        FontSettingsDropdown(
-            value = settings.bibleSettings.primaryReferenceFontType,
-            fonts = availableFonts,
-            onValueChange = {
-                onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(primaryReferenceFontType = it)) }
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            FontSettingsDropdown(
+                modifier = Modifier.width(200.dp),
+                value = settings.bibleSettings.primaryReferenceFontType,
+                fonts = availableFonts,
+                onValueChange = {
+                    onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(primaryReferenceFontType = it)) }
+                }
+            )
+            val previewFontFamily = remember(settings.bibleSettings.primaryReferenceFontType) {
+                systemFontFamilyOrDefault(settings.bibleSettings.primaryReferenceFontType)
             }
-        )
+            Text(
+                text = "ABCDabcd1234",
+                fontFamily = previewFontFamily,
+                fontSize = 14.sp,
+                color = MaterialTheme.colorScheme.onBackground,
+                modifier = Modifier.padding(start = 10.dp, top = 4.dp)
+            )
+        }
     }
     SettingRow(stringResource(Res.string.font_size)) {
         NumberSettingsTextField(
@@ -529,13 +557,26 @@ private fun RightColumn(
         )
     }
     SettingRow(stringResource(Res.string.font_type)) {
-        FontSettingsDropdown(
-            value = settings.bibleSettings.secondaryBibleFontType,
-            fonts = availableFonts,
-            onValueChange = {
-                onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(secondaryBibleFontType = it)) }
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            FontSettingsDropdown(
+                modifier = Modifier.width(200.dp),
+                value = settings.bibleSettings.secondaryBibleFontType,
+                fonts = availableFonts,
+                onValueChange = {
+                    onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(secondaryBibleFontType = it)) }
+                }
+            )
+            val previewFontFamily = remember(settings.bibleSettings.secondaryBibleFontType) {
+                systemFontFamilyOrDefault(settings.bibleSettings.secondaryBibleFontType)
             }
-        )
+            Text(
+                text = "ABCDabcd1234",
+                fontFamily = previewFontFamily,
+                fontSize = 14.sp,
+                color = MaterialTheme.colorScheme.onBackground,
+                modifier = Modifier.padding(start = 10.dp, top = 4.dp)
+            )
+        }
     }
     SettingRow(stringResource(Res.string.font_size)) {
         NumberSettingsTextField(
@@ -561,13 +602,26 @@ private fun RightColumn(
         )
     }
     SettingRow(stringResource(Res.string.font_type)) {
-        FontSettingsDropdown(
-            value = settings.bibleSettings.secondaryReferenceFontType,
-            fonts = availableFonts,
-            onValueChange = {
-                onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(secondaryReferenceFontType = it)) }
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            FontSettingsDropdown(
+                modifier = Modifier.width(200.dp),
+                value = settings.bibleSettings.secondaryReferenceFontType,
+                fonts = availableFonts,
+                onValueChange = {
+                    onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(secondaryReferenceFontType = it)) }
+                }
+            )
+            val previewFontFamily = remember(settings.bibleSettings.secondaryReferenceFontType) {
+                systemFontFamilyOrDefault(settings.bibleSettings.secondaryReferenceFontType)
             }
-        )
+            Text(
+                text = "ABCDabcd1234",
+                fontFamily = previewFontFamily,
+                fontSize = 14.sp,
+                color = MaterialTheme.colorScheme.onBackground,
+                modifier = Modifier.padding(start = 10.dp, top = 4.dp)
+            )
+        }
     }
     SettingRow(stringResource(Res.string.font_size)) {
         NumberSettingsTextField(
