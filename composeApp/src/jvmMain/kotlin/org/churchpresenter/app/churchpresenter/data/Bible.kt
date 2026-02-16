@@ -235,7 +235,8 @@ class Bible {
                 verseOld = verse
             }
 
-        return verseList
+        // Return a new list instance so Compose can detect changes
+        return verseList.toList()
     }
 
     fun searchBible(allWords: Boolean, searchExp: Regex): List<BibleSearch> {

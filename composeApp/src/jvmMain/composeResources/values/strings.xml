@@ -6,6 +6,7 @@
     <string name="number">Number</string>
     <string name="no_song_selected">No song selected</string>
     <string name="go_live">Go Live</string>
+    <string name="add_to_schedule">Add to Schedule</string>
     <string name="no_lyrics_available">No lyrics available for this song</string>
     <string name="tune">Tune</string>
     <string name="search">Search</string>

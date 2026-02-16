@@ -120,31 +120,42 @@ class BibleViewModel(
     }
 
     fun loadChapter(bookIndex: Int, chapter: Int) {
+        println("DEBUG BibleViewModel: loadChapter called with bookIndex=$bookIndex, chapter=$chapter")
         _primaryBible.value?.let { bible ->
             val bookCount = bible.getBookCount()
+            println("DEBUG BibleViewModel: bookCount=$bookCount")
             if (bookCount > 0) {
                 val clampedIndex = bookIndex.coerceIn(0, bookCount - 1)
                 _selectedBookIndex.value = clampedIndex
                 _selectedChapter.value = chapter
 
                 val bookId = clampedIndex + 1
-                _verses.value = bible.getChapter(bookId, chapter)
+                println("DEBUG BibleViewModel: Getting chapter for bookId=$bookId, chapter=$chapter")
+                val chapterVerses = bible.getChapter(bookId, chapter)
+                println("DEBUG BibleViewModel: Got ${chapterVerses.size} verses")
+                _verses.value = chapterVerses
                 _selectedVerseIndex.value = 0
             }
-        }
+        } ?: println("DEBUG BibleViewModel: _primaryBible.value is null")
     }
 
     fun selectBook(bookIndex: Int) {
+        println("DEBUG BibleViewModel: selectBook called with bookIndex=$bookIndex")
         _selectedBookIndex.value = bookIndex
         _selectedChapter.value = 1
         _selectedVerseIndex.value = 0
+        println("DEBUG BibleViewModel: Before loadChapter - _verses.value.size=${_verses.value.size}")
         loadChapter(bookIndex, 1)
+        println("DEBUG BibleViewModel: After loadChapter - _verses.value.size=${_verses.value.size}")
     }
 
     fun selectChapter(chapter: Int) {
+        println("DEBUG BibleViewModel: selectChapter called with chapter=$chapter")
         _selectedChapter.value = chapter
         _selectedVerseIndex.value = 0
+        println("DEBUG BibleViewModel: Before loadChapter - _verses.value.size=${_verses.value.size}")
         loadChapter(_selectedBookIndex.value, chapter)
+        println("DEBUG BibleViewModel: After loadChapter - _verses.value.size=${_verses.value.size}")
     }
 
     fun selectVerse(verseIndex: Int) {
@@ -159,8 +170,8 @@ class BibleViewModel(
 
     fun getChaptersForCurrentBook(): List<String> {
         _primaryBible.value?.let { bible ->
-            val bookId = _selectedBookIndex.value + 1  // Convert 0-based index to 1-based book ID
-            val chapterCount = bible.getChapterCount(bookId)
+            // getChapterCount expects 0-based book index
+            val chapterCount = bible.getChapterCount(_selectedBookIndex.value)
             val count = if (chapterCount > 0) chapterCount else 1
             return (1..count).map { it.toString() }
         }
@@ -358,8 +369,8 @@ class BibleViewModel(
 
     fun navigateNextChapter(): Boolean {
         _primaryBible.value?.let { bible ->
-            val bookId = _selectedBookIndex.value + 1  // Convert 0-based index to 1-based book ID
-            val maxChapter = bible.getChapterCount(bookId)
+            // getChapterCount expects 0-based book index
+            val maxChapter = bible.getChapterCount(_selectedBookIndex.value)
             if (_selectedChapter.value < maxChapter) {
                 selectChapter(_selectedChapter.value + 1)
                 return true

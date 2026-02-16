@@ -34,6 +34,7 @@ import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.add_to_schedule
 import churchpresenter.composeapp.generated.resources.book
 import churchpresenter.composeapp.generated.resources.chapter
 import churchpresenter.composeapp.generated.resources.clear
@@ -74,17 +75,27 @@ fun BibleTab(
 
     // Get filtered lists from ViewModel
     // Use bookSearchQuery from ViewModel for filtering books (independent of verse search)
-    val filteredBooks = remember(books, viewModel.bookSearchQuery.value) {
-        println("DEBUG BibleTab: filteredBooks recalculating, books.size=${books.size}, bookSearchQuery='${viewModel.bookSearchQuery.value}'")
+    val bookSearchQuery by viewModel.bookSearchQuery
+    val chapterSearchQuery by viewModel.chapterSearchQuery
+    val verseSearchQuery by viewModel.verseSearchQuery
+
+    val filteredBooks = remember(books, bookSearchQuery) {
+        println("DEBUG BibleTab: Recalculating filteredBooks, books.size=${books.size}, bookSearchQuery='$bookSearchQuery'")
         val result = viewModel.getFilteredBooks()
         println("DEBUG BibleTab: filteredBooks result size=${result.size}")
         result
     }
-    val filteredChapters = remember(selectedBookIndex, viewModel.chapterSearchQuery.value) {
-        viewModel.getFilteredChapters()
+    val filteredChapters = remember(selectedBookIndex, chapterSearchQuery) {
+        println("DEBUG BibleTab: Recalculating filteredChapters, selectedBookIndex=$selectedBookIndex, chapterSearchQuery='$chapterSearchQuery'")
+        val result = viewModel.getFilteredChapters()
+        println("DEBUG BibleTab: filteredChapters result size=${result.size}")
+        result
     }
-    val filteredVerses = remember(verses, viewModel.verseSearchQuery.value) {
-        viewModel.getFilteredVerses()
+    val filteredVerses = remember(verses, verseSearchQuery) {
+        println("DEBUG BibleTab: Recalculating filteredVerses, verses.size=${verses.size}, verseSearchQuery='$verseSearchQuery'")
+        val result = viewModel.getFilteredVerses()
+        println("DEBUG BibleTab: filteredVerses result size=${result.size}")
+        result
     }
 
     // String resources for scope and mode options
@@ -127,12 +138,15 @@ fun BibleTab(
             Key.DirectionUp -> {
                 return viewModel.navigatePreviousVerse()
             }
+
             Key.DirectionDown -> {
                 return viewModel.navigateNextVerse()
             }
+
             Key.DirectionLeft -> {
                 return viewModel.navigatePreviousChapter()
             }
+
             Key.DirectionRight -> {
                 return viewModel.navigateNextChapter()
             }
@@ -227,7 +241,7 @@ fun BibleTab(
                     }
                 }
             }
-        } else if (isSearchMode && searchResults.isEmpty() && searchQuery.isNotEmpty()) {
+        } else if (isSearchMode && searchQuery.isNotEmpty()) {
             // Show "no results" message
             Column(
                 modifier = Modifier.fillMaxWidth().padding(16.dp),
@@ -241,89 +255,108 @@ fun BibleTab(
             }
         } else {
             // Normal book/chapter/verse view
-        Row(modifier = Modifier.fillMaxWidth()) {
-            val chapterList = viewModel.getChaptersForCurrentBook()
-
-            Column(modifier = Modifier.width(200.dp).padding(end = 8.dp)) {
-                SearchTextField(label = stringResource(Res.string.book)) { query ->
-                    println("DEBUG BibleTab: SearchTextField callback called with query='$query'")
-                    viewModel.updateBookSearchQuery(query)
-                }
-                SelectionListWithIndex(
-                    list = filteredBooks,
-                    selectedIndex = filteredBooks.indexOf(books.getOrNull(selectedBookIndex) ?: "").coerceAtLeast(0)
-                ) { index, _ ->
-                    // Find the real index in the original books list
-                    val bookName = filteredBooks.getOrNull(index)
-                    bookName?.let {
-                        val realIndex = books.indexOf(it)
-                        if (realIndex >= 0) {
-                            viewModel.selectBook(realIndex)
-                        }
+            Row(modifier = Modifier.fillMaxWidth()) {
+                Column(modifier = Modifier.width(200.dp).padding(end = 8.dp)) {
+                    SearchTextField(label = stringResource(Res.string.book)) { query ->
+                        viewModel.updateBookSearchQuery(query)
                     }
-                }
-            }
-
-            Column(modifier = Modifier.width(120.dp).padding(end = 8.dp)) {
-                SearchTextField(label = stringResource(Res.string.chapter)) { query ->
-                    viewModel.updateChapterSearchQuery(query)
-                }
-                SelectionListWithIndex(
-                    list = filteredChapters,
-                    selectedIndex = filteredChapters.indexOf(selectedChapter.toString()).coerceAtLeast(0)
-                ) { index, _ ->
-                    // Find the real chapter number from the filtered list
-                    val chapterStr = filteredChapters.getOrNull(index)
-                    chapterStr?.toIntOrNull()?.let { chapter ->
-                        viewModel.selectChapter(chapter)
-                    }
-                }
-            }
-
-            // Verses view
-            Column(modifier = Modifier.fillMaxWidth()) {
-                Row(modifier = Modifier.fillMaxWidth()) {
-                    SearchTextField(
-                        modifier = Modifier.width(120.dp),
-                        label = stringResource(Res.string.verse),
-                    ) { query ->
-                        viewModel.updateVerseSearchQuery(query)
-                    }
-                    Button(
-                        modifier = Modifier.wrapContentSize(),
-                        onClick = { onPresenting(Presenting.BIBLE) },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.primary
-                        )
-                    ) {
-                        Text(
-                            text = stringResource(Res.string.go_live),
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onPrimary,
-                            maxLines = 2
-                        )
-                    }
-                }
-                Box {
                     SelectionListWithIndex(
-                        list = filteredVerses,
-                        selectedIndex = if (filteredVerses.isEmpty()) -1 else {
-                            val currentVerse = verses.getOrNull(selectedVerseIndex)
-                            filteredVerses.indexOf(currentVerse).coerceAtLeast(0)
-                        }
+                        list = filteredBooks,
+                        selectedIndex = filteredBooks.indexOf(books.getOrNull(selectedBookIndex) ?: "").coerceAtLeast(0)
                     ) { index, _ ->
-                        // Find the real index in the original verses list
-                        val verseText = filteredVerses.getOrNull(index)
-                        verseText?.let {
-                            val realIndex = verses.indexOf(it)
+                        println("DEBUG BibleTab: Book selected at filteredIndex=$index")
+                        // Find the real index in the original books list
+                        val bookName = filteredBooks.getOrNull(index)
+                        println("DEBUG BibleTab: Book name='$bookName'")
+                        bookName?.let {
+                            val realIndex = books.indexOf(it)
+                            println("DEBUG BibleTab: Real book index=$realIndex")
                             if (realIndex >= 0) {
-                                viewModel.selectVerse(realIndex)
+                                viewModel.selectBook(realIndex)
+                            }
+                        }
+                    }
+                }
+
+                Column(modifier = Modifier.width(120.dp).padding(end = 8.dp)) {
+                    SearchTextField(label = stringResource(Res.string.chapter)) { query ->
+                        viewModel.updateChapterSearchQuery(query)
+                    }
+                    SelectionListWithIndex(
+                        list = filteredChapters,
+                        selectedIndex = filteredChapters.indexOf(selectedChapter.toString()).coerceAtLeast(0)
+                    ) { index, _ ->
+                        println("DEBUG BibleTab: Chapter selected at filteredIndex=$index")
+                        // Find the real chapter number from the filtered list
+                        val chapterStr = filteredChapters.getOrNull(index)
+                        println("DEBUG BibleTab: Chapter string='$chapterStr'")
+                        chapterStr?.toIntOrNull()?.let { chapter ->
+                            println("DEBUG BibleTab: Calling selectChapter with chapter=$chapter")
+                            viewModel.selectChapter(chapter)
+                        }
+                    }
+                }
+
+                // Verses view
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                        SearchTextField(
+                            modifier = Modifier.width(120.dp),
+                            label = stringResource(Res.string.verse),
+                        ) { query ->
+                            viewModel.updateVerseSearchQuery(query)
+                        }
+                        Button(
+                            modifier = Modifier.wrapContentSize().padding(start = 8.dp),
+                            onClick = { onPresenting(Presenting.BIBLE) },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.primary
+                            )
+                        ) {
+                            Text(
+                                text = stringResource(Res.string.go_live),
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.onPrimary,
+                                maxLines = 1
+                            )
+                        }
+                        Button(
+                            modifier = Modifier.wrapContentSize().padding(start = 8.dp),
+                            onClick = {
+                                // TOOD
+                            },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.primary
+                            )
+                        ) {
+                            Text(
+                                text = stringResource(Res.string.add_to_schedule),
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.onPrimary,
+                                maxLines = 1
+                            )
+                        }
+                    }
+                    Box {
+                        SelectionListWithIndex(
+                            list = filteredVerses,
+                            selectedIndex = if (filteredVerses.isEmpty()) -1 else {
+                                val currentVerse = verses.getOrNull(selectedVerseIndex)
+                                filteredVerses.indexOf(currentVerse).coerceAtLeast(0)
+                            }
+                        ) { index, _ ->
+                            // Find the real index in the original verses list
+                            val verseText = filteredVerses.getOrNull(index)
+                            verseText?.let {
+                                val realIndex = verses.indexOf(it)
+                                if (realIndex >= 0) {
+                                    viewModel.selectVerse(realIndex)
+                                }
                             }
                         }
                     }
                 }
             }
-        }
         }
     }
 }

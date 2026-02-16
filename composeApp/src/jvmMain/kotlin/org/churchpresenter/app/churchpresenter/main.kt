@@ -121,6 +121,7 @@ fun main() = application {
             }
         }
         Window(
+            title = "Presenter View",
             onCloseRequest = { presenterManager.setShowPresenterWindow(false) },
             state = windowState,
         ) {
