@@ -158,6 +158,32 @@ class BibleViewModel(
         }
     }
 
+    fun selectVerseByDetails(bookName: String, chapter: Int, verseNumber: Int): Boolean {
+        // Find the book by name
+        val books = _books.value
+        val bookIndex = books.indexOfFirst { it.equals(bookName, ignoreCase = true) }
+
+        if (bookIndex >= 0) {
+            // Select the book
+            selectBook(bookIndex)
+
+            // Select the chapter
+            selectChapter(chapter)
+
+            // Find and select the verse
+            val verses = _verses.value
+            val verseIndex = verses.indexOfFirst {
+                it.startsWith("$verseNumber.")
+            }
+
+            if (verseIndex >= 0) {
+                selectVerse(verseIndex)
+                return true
+            }
+        }
+        return false
+    }
+
     fun getChaptersForCurrentBook(): List<String> {
         _primaryBible.value?.let { bible ->
             // getChapterCount expects 0-based book index

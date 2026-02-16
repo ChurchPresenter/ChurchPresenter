@@ -113,6 +113,37 @@ class SongsViewModel(
         _selectedSectionIndex.value = -1
     }
 
+    fun selectSongByDetails(songNumber: Int, title: String, songbook: String): Boolean {
+        // Find the song in the filtered list
+        val index = _filteredSongs.value.indexOfFirst { song ->
+            song.contains("$songNumber.") && song.contains(title, ignoreCase = true)
+        }
+
+        if (index >= 0) {
+            _selectedSongIndex.value = index
+            _selectedSectionIndex.value = 0  // Select first section instead of -1
+
+            // Also update the songbook filter if it's different
+            val songData = _songsData.value.getSongs().find {
+                it.number == songNumber.toString() && it.title.equals(title, ignoreCase = true)
+            }
+            if (songData != null && songData.songbook != _selectedSongbook.value) {
+                _selectedSongbook.value = songData.songbook
+                applyFilters()
+                // Reselect after filter update
+                val newIndex = _filteredSongs.value.indexOfFirst { song ->
+                    song.contains("$songNumber.") && song.contains(title, ignoreCase = true)
+                }
+                if (newIndex >= 0) {
+                    _selectedSongIndex.value = newIndex
+                    _selectedSectionIndex.value = 0  // Select first section after refilter too
+                }
+            }
+            return true
+        }
+        return false
+    }
+
     fun selectSection(index: Int) {
         _selectedSectionIndex.value = index
     }

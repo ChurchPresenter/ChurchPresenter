@@ -61,6 +61,7 @@ import org.jetbrains.compose.resources.stringResource
 fun BibleTab(
     modifier: Modifier = Modifier,
     viewModel: BibleViewModel,
+    scheduleViewModel: org.churchpresenter.app.churchpresenter.viewmodel.ScheduleViewModel? = null,
     onVerseSelected: (List<SelectedVerse>) -> Unit = {},
     onPresenting: (Presenting) -> Unit = { Presenting.NONE }
 ) {
@@ -314,16 +315,31 @@ fun BibleTab(
                         Button(
                             modifier = Modifier.wrapContentSize().padding(start = 8.dp),
                             onClick = {
-                                // TOOD
+                                if (scheduleViewModel != null &&
+                                    verses.isNotEmpty() &&
+                                    selectedVerseIndex >= 0 &&
+                                    selectedVerseIndex < verses.size) {
+
+                                    val selectedVerses = viewModel.getSelectedVerses()
+                                    if (selectedVerses.isNotEmpty()) {
+                                        val verse = selectedVerses[0] // Get primary Bible verse
+                                        scheduleViewModel.addBibleVerse(
+                                            bookName = verse.bookName,
+                                            chapter = verse.chapter,
+                                            verseNumber = verse.verseNumber,
+                                            verseText = verse.verseText
+                                        )
+                                    }
+                                }
                             },
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.primary
+                                containerColor = MaterialTheme.colorScheme.secondary
                             )
                         ) {
                             Text(
                                 text = stringResource(Res.string.add_to_schedule),
                                 style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.onPrimary,
+                                color = MaterialTheme.colorScheme.onSecondary,
                                 maxLines = 1
                             )
                         }

@@ -28,6 +28,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -40,6 +41,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.add_to_schedule
 import churchpresenter.composeapp.generated.resources.all_song_books
 import churchpresenter.composeapp.generated.resources.all_song_categories
 import churchpresenter.composeapp.generated.resources.contains
@@ -71,6 +73,7 @@ import org.jetbrains.compose.resources.stringResource
 fun SongsTab(
     modifier: Modifier = Modifier,
     viewModel: SongsViewModel,
+    scheduleViewModel: org.churchpresenter.app.churchpresenter.viewmodel.ScheduleViewModel? = null,
     onSongItemSelected: (LyricSection) -> Unit,
     onPresenting: (Presenting) -> Unit = { Presenting.NONE }
 ) {
@@ -366,6 +369,14 @@ fun SongsTab(
                 modifier = Modifier.weight(1f)
             ) {
                 val lazyListState = androidx.compose.foundation.lazy.rememberLazyListState()
+
+                // Auto-scroll to selected song when selection changes
+                LaunchedEffect(selectedSongIndex, filteredSongs.size) {
+                    if (selectedSongIndex >= 0 && selectedSongIndex < filteredSongs.size) {
+                        lazyListState.animateScrollToItem(selectedSongIndex)
+                    }
+                }
+
                 LazyColumn(
                     state = lazyListState,
                     modifier = Modifier
@@ -484,11 +495,44 @@ fun SongsTab(
                         maxLines = 2
                     )
                 }
+
+                // Add to Schedule button
+                if (scheduleViewModel != null && selectedSongIndex >= 0 && selectedSongIndex < filteredSongs.size) {
+                    Button(
+                        modifier = Modifier.wrapContentSize().padding(start = 4.dp),
+                        onClick = {
+                            val song = filteredSongs[selectedSongIndex]
+                            scheduleViewModel.addSong(
+                                songNumber = song.number.toIntOrNull() ?: 0,
+                                title = song.title,
+                                songbook = song.songbook
+                            )
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.secondary
+                        )
+                    ) {
+                        Text(
+                            text = stringResource(Res.string.add_to_schedule),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSecondary,
+                            maxLines = 2
+                        )
+                    }
+                }
             }
 
             // Lyrics content
             Box {
                 val lyricsListState = androidx.compose.foundation.lazy.rememberLazyListState()
+
+                // Auto-scroll to selected section when selection changes
+                LaunchedEffect(selectedSectionIndex) {
+                    if (selectedSectionIndex >= 0) {
+                        lyricsListState.animateScrollToItem(selectedSectionIndex)
+                    }
+                }
+
                 LazyColumn(
                     state = lyricsListState,
                     modifier = Modifier

@@ -56,6 +56,11 @@
     <string name="menu_remove_from_schedule">Remove from Schedule</string>
     <string name="menu_clear_schedule">Clear Schedule</string>
 
+    <!-- Schedule Tab Strings -->
+    <string name="schedule">Schedule</string>
+    <string name="quick_selection">Quick Selection</string>
+    <string name="clear_schedule">Clear Schedule</string>
+
     <string name="menu_edit">Edit</string>
     <string name="menu_settings">Settings</string>
 

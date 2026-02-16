@@ -5,10 +5,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import churchpresenter.composeapp.generated.resources.Res
@@ -22,21 +18,18 @@ import org.jetbrains.compose.resources.stringResource
 @Composable
 fun TabSection(
     modifier: Modifier = Modifier,
+    selectedTabIndex: Int = Tabs.BIBLE.ordinal,
     onTabSelected: (Int) -> Unit,
 ) {
-    val startDestination = Tabs.BIBLE
-    var selectedDestination by rememberSaveable { mutableIntStateOf(startDestination.ordinal) }
-
     PrimaryTabRow(
-        selectedTabIndex = selectedDestination,
+        selectedTabIndex = selectedTabIndex,
         modifier = modifier,
         containerColor = MaterialTheme.colorScheme.surface,
     ) {
         Tabs.entries.forEachIndexed { index, tab ->
             Tab(
-                selected = selectedDestination == index,
+                selected = selectedTabIndex == index,
                 onClick = {
-                    selectedDestination = index
                     onTabSelected.invoke(index)
                 },
                 text = {

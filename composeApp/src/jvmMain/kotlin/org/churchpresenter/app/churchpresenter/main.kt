@@ -23,6 +23,7 @@ import org.churchpresenter.app.churchpresenter.ui.theme.AppThemeWrapper
 import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
 import org.churchpresenter.app.churchpresenter.viewmodel.BibleViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
+import org.churchpresenter.app.churchpresenter.viewmodel.ScheduleViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.SongsViewModel
 import org.jetbrains.compose.resources.stringResource
 
@@ -41,6 +42,9 @@ fun main() = application {
     val songsViewModel = remember(appSettings) {
         SongsViewModel(appSettings)
     }
+
+    // Create ScheduleViewModel
+    val scheduleViewModel = remember { ScheduleViewModel() }
 
     // UI state
     var theme by remember { mutableStateOf(ThemeMode.SYSTEM) }
@@ -87,6 +91,7 @@ fun main() = application {
                 appSettings = appSettings,
                 bibleViewModel = bibleViewModel,
                 songsViewModel = songsViewModel,
+                scheduleViewModel = scheduleViewModel,
                 presenting = { presenterManager.setPresentingMode(it) }
             )
 
