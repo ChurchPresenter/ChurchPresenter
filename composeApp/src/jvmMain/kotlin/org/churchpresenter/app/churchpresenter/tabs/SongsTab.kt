@@ -123,59 +123,51 @@ fun SongsTab(
         Constants.EXACT_MATCH to exactMatchText
     )
 
-    // Get all songs from ViewModel
+    // Get filtered songs from ViewModel (not recalculating locally to ensure consistency)
+    val filteredSongsFromViewModel by viewModel.filteredSongs
+
+    // Convert from List<String> to List<Song> for display
     val allSongs = viewModel.songsData.value.getSongs()
-
-    val allSongsText = stringResource(Res.string.all_song_books)
-    // Filter songs based on search criteria
-    val filteredSongs =
-        remember(allSongs, searchQuery, selectedSongbook, filterType, sortColumn, sortAscending) {
-            var filtered = allSongs
-
-            // Apply search filter
-            if (searchQuery.isNotBlank()) {
-                filtered = viewModel.songsData.value.findSongs(searchQuery, filterType)
-            }
-
-            // Apply songbook filter
-            if (selectedSongbook != allSongsText) {
-                filtered = filtered.filter { it.songbook.contains(selectedSongbook, ignoreCase = true) }
-            }
-
-
-            // Apply sorting
-            if (sortColumn.isNotEmpty()) {
-                filtered = when (sortColumn) {
-                    Constants.SORT_NUMBER -> if (sortAscending) {
-                        filtered.sortedBy { it.number.toIntOrNull() ?: Int.MAX_VALUE }
-                    } else {
-                        filtered.sortedByDescending { it.number.toIntOrNull() ?: Int.MIN_VALUE }
-                    }
-
-                    Constants.SORT_TITLE -> if (sortAscending) {
-                        filtered.sortedBy { it.title.lowercase() }
-                    } else {
-                        filtered.sortedByDescending { it.title.lowercase() }
-                    }
-
-                    Constants.SORT_SONGBOOK -> if (sortAscending) {
-                        filtered.sortedBy { it.songbook.lowercase() }
-                    } else {
-                        filtered.sortedByDescending { it.songbook.lowercase() }
-                    }
-
-                    Constants.SORT_TUNE -> if (sortAscending) {
-                        filtered.sortedBy { it.tune.lowercase() }
-                    } else {
-                        filtered.sortedByDescending { it.tune.lowercase() }
-                    }
-
-                    else -> filtered
-                }
-            }
-
-            filtered
+    val filteredSongs = remember(filteredSongsFromViewModel, sortColumn, sortAscending) {
+        // Map the string list back to Song objects
+        val songsMap = allSongs.associateBy { "${it.number}. ${it.title}" }
+        var filtered = filteredSongsFromViewModel.mapNotNull { songText ->
+            songsMap[songText]
         }
+
+        // Apply sorting (only sorting is done in UI, filtering is in ViewModel)
+        if (sortColumn.isNotEmpty()) {
+            filtered = when (sortColumn) {
+                Constants.SORT_NUMBER -> if (sortAscending) {
+                    filtered.sortedBy { it.number.toIntOrNull() ?: Int.MAX_VALUE }
+                } else {
+                    filtered.sortedByDescending { it.number.toIntOrNull() ?: Int.MIN_VALUE }
+                }
+
+                Constants.SORT_TITLE -> if (sortAscending) {
+                    filtered.sortedBy { it.title.lowercase() }
+                } else {
+                    filtered.sortedByDescending { it.title.lowercase() }
+                }
+
+                Constants.SORT_SONGBOOK -> if (sortAscending) {
+                    filtered.sortedBy { it.songbook.lowercase() }
+                } else {
+                    filtered.sortedByDescending { it.songbook.lowercase() }
+                }
+
+                Constants.SORT_TUNE -> if (sortAscending) {
+                    filtered.sortedBy { it.tune.lowercase() }
+                } else {
+                    filtered.sortedByDescending { it.tune.lowercase() }
+                }
+
+                else -> filtered
+            }
+        }
+
+        filtered
+    }
 
     // Helper function to handle column sorting
     val onColumnClick: (String) -> Unit = { column ->
@@ -372,8 +364,15 @@ fun SongsTab(
 
                 // Auto-scroll to selected song when selection changes
                 LaunchedEffect(selectedSongIndex, filteredSongs.size) {
+                    println("DEBUG SongsTab: LaunchedEffect triggered - selectedSongIndex=$selectedSongIndex, filteredSongs.size=${filteredSongs.size}")
                     if (selectedSongIndex >= 0 && selectedSongIndex < filteredSongs.size) {
+                        println("DEBUG SongsTab: Scrolling to item at index $selectedSongIndex")
+                        // Small delay to ensure the list is fully composed
+                        kotlinx.coroutines.delay(100)
                         lazyListState.animateScrollToItem(selectedSongIndex)
+                        println("DEBUG SongsTab: Scroll animation complete")
+                    } else {
+                        println("DEBUG SongsTab: Skipping scroll - index out of bounds")
                     }
                 }
 

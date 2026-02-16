@@ -114,33 +114,44 @@ class SongsViewModel(
     }
 
     fun selectSongByDetails(songNumber: Int, title: String, songbook: String): Boolean {
-        // Find the song in the filtered list
+        println("DEBUG selectSongByDetails: Looking for song #$songNumber - $title in $songbook")
+
+        // First, check if we need to update the songbook filter
+        val songData = _songsData.value.getSongs().find {
+            it.number == songNumber.toString() && it.title.equals(title, ignoreCase = true)
+        }
+
+        if (songData == null) {
+            println("DEBUG selectSongByDetails: Song not found in database")
+            return false  // Song not found in database
+        }
+
+        println("DEBUG selectSongByDetails: Song found in database, actual songbook=${songData.songbook}")
+        println("DEBUG selectSongByDetails: Current filter songbook=${_selectedSongbook.value}")
+
+        // Update the songbook filter if needed
+        if (songData.songbook != _selectedSongbook.value) {
+            println("DEBUG selectSongByDetails: Updating songbook filter to ${songData.songbook}")
+            _selectedSongbook.value = songData.songbook
+            applyFilters()
+            println("DEBUG selectSongByDetails: After filter, filtered songs count=${_filteredSongs.value.size}")
+        }
+
+        // Now find the song in the filtered list
         val index = _filteredSongs.value.indexOfFirst { song ->
             song.contains("$songNumber.") && song.contains(title, ignoreCase = true)
         }
 
+        println("DEBUG selectSongByDetails: Song index in filtered list=$index")
+
         if (index >= 0) {
             _selectedSongIndex.value = index
-            _selectedSectionIndex.value = 0  // Select first section instead of -1
-
-            // Also update the songbook filter if it's different
-            val songData = _songsData.value.getSongs().find {
-                it.number == songNumber.toString() && it.title.equals(title, ignoreCase = true)
-            }
-            if (songData != null && songData.songbook != _selectedSongbook.value) {
-                _selectedSongbook.value = songData.songbook
-                applyFilters()
-                // Reselect after filter update
-                val newIndex = _filteredSongs.value.indexOfFirst { song ->
-                    song.contains("$songNumber.") && song.contains(title, ignoreCase = true)
-                }
-                if (newIndex >= 0) {
-                    _selectedSongIndex.value = newIndex
-                    _selectedSectionIndex.value = 0  // Select first section after refilter too
-                }
-            }
+            _selectedSectionIndex.value = 0  // Select first section
+            println("DEBUG selectSongByDetails: Selected song at index $index, section set to 0")
             return true
         }
+
+        println("DEBUG selectSongByDetails: Song not found in filtered list")
         return false
     }
 
