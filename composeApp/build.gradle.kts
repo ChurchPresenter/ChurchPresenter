@@ -39,6 +39,10 @@ compose.desktop {
     application {
         mainClass = "org.churchpresenter.app.churchpresenter.MainKt"
 
+        buildTypes.release.proguard {
+            isEnabled.set(false)
+        }
+
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Exe, TargetFormat.Deb)
             packageName = "ChurchPresenter"
