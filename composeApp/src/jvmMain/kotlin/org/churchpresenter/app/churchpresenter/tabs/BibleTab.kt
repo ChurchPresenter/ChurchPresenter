@@ -1,14 +1,26 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollbarAdapter
+import androidx.compose.foundation.VerticalScrollbar
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.Button
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -26,12 +38,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.add_to_schedule
@@ -65,6 +83,7 @@ fun BibleTab(
     onVerseSelected: (List<SelectedVerse>) -> Unit = {},
     onPresenting: (Presenting) -> Unit = { Presenting.NONE }
 ) {
+
     val books by viewModel.books
     val selectedBookIndex by viewModel.selectedBookIndex
     val selectedChapter by viewModel.selectedChapter
@@ -196,12 +215,15 @@ fun BibleTab(
                 }
             )
 
-            Button(onClick = { viewModel.performSearch() }) {
+            Button(onClick = {
+                viewModel.performSearch()
+            }) {
                 Text(text = stringResource(Res.string.search))
             }
 
             if (isSearchMode) {
                 Button(
+                    modifier = Modifier.padding(start = 8.dp),
                     onClick = { viewModel.clearSearch() },
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.secondary
@@ -223,14 +245,66 @@ fun BibleTab(
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
 
-                SelectionListWithIndex(
-                    list = searchResults.map { "${it.book} ${it.chapter}:${it.verse} - ${it.verseText}" },
-                    selectedIndex = -1
-                ) { index, _ ->
-                    searchResults.getOrNull(index)?.let { result ->
-                        viewModel.selectSearchResult(result)
-                        viewModel.clearSearch()
+                Box(modifier = Modifier.fillMaxWidth().fillMaxHeight()) {
+                    val listState = rememberLazyListState()
+
+                    LazyColumn(
+                        state = listState,
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        itemsIndexed(searchResults) { _, result ->
+                            val resultText = "${result.book} ${result.chapter}:${result.verse} - ${result.verseText}"
+                            val highlightedText = buildAnnotatedString {
+                                var lastIndex = 0
+                                val lowerText = resultText.lowercase()
+                                val lowerQuery = searchQuery.lowercase()
+
+                                var startIndex = lowerText.indexOf(lowerQuery, lastIndex)
+                                while (startIndex != -1) {
+                                    // Add text before match
+                                    append(resultText.substring(lastIndex, startIndex))
+
+                                    // Add highlighted match
+                                    withStyle(
+                                        style = SpanStyle(
+                                            background = MaterialTheme.colorScheme.primaryContainer,
+                                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    ) {
+                                        append(resultText.substring(startIndex, startIndex + searchQuery.length))
+                                    }
+
+                                    lastIndex = startIndex + searchQuery.length
+                                    startIndex = lowerText.indexOf(lowerQuery, lastIndex)
+                                }
+
+                                // Add remaining text
+                                if (lastIndex < resultText.length) {
+                                    append(resultText.substring(lastIndex))
+                                }
+                            }
+
+                            Text(
+                                text = highlightedText,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        viewModel.selectSearchResult(result)
+                                        viewModel.clearSearch()
+                                    }
+                                    .background(MaterialTheme.colorScheme.surface)
+                                    .padding(8.dp),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
                     }
+
+                    VerticalScrollbar(
+                        modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
+                        adapter = rememberScrollbarAdapter(scrollState = listState)
+                    )
                 }
             }
         } else if (isSearchMode && searchQuery.isNotEmpty()) {

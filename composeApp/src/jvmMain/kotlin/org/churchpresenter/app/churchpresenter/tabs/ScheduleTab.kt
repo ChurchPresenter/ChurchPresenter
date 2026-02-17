@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.max
 import androidx.compose.ui.unit.sp
 import churchpresenter.composeapp.generated.resources.*
 import org.churchpresenter.app.churchpresenter.models.ScheduleItem
@@ -57,10 +58,15 @@ fun ScheduleTab(
             Button(
                 onClick = { scheduleViewModel.clearSchedule() },
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.error
+                    containerColor = MaterialTheme.colorScheme.secondary
                 )
             ) {
-                Text(stringResource(Res.string.clear_schedule))
+                Text(
+                    text = stringResource(Res.string.clear_schedule),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSecondary,
+                    maxLines = 1
+                )
             }
         }
 
@@ -175,6 +181,7 @@ private fun ScheduleItemRow(
         // Item content
         Column(modifier = Modifier.weight(1f)) {
             Text(
+                maxLines = 1,
                 text = item.displayText,
                 style = MaterialTheme.typography.bodyLarge,
                 fontWeight = FontWeight.Medium,
@@ -187,6 +194,7 @@ private fun ScheduleItemRow(
             when (item) {
                 is ScheduleItem.SongItem -> {
                     Text(
+                        maxLines = 1,
                         text = item.songbook,
                         style = MaterialTheme.typography.bodySmall,
                         color = if (isSelected)
@@ -197,6 +205,7 @@ private fun ScheduleItemRow(
                 }
                 is ScheduleItem.BibleVerseItem -> {
                     Text(
+                        maxLines = 1,
                         text = item.verseText.take(100) + if (item.verseText.length > 100) "..." else "",
                         style = MaterialTheme.typography.bodySmall,
                         color = if (isSelected)
