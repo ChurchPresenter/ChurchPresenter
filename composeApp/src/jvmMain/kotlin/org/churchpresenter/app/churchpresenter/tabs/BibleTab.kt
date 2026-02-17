@@ -38,14 +38,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -321,7 +319,7 @@ fun BibleTab(
             }
         } else {
             // Normal book/chapter/verse view
-            Row(modifier = Modifier.fillMaxWidth()) {
+            Row(modifier = Modifier.fillMaxWidth().fillMaxHeight()) {
                 Column(modifier = Modifier.width(200.dp).padding(end = 8.dp)) {
                     SearchTextField(label = stringResource(Res.string.book)) { query ->
                         viewModel.updateBookSearchQuery(query)
@@ -330,13 +328,10 @@ fun BibleTab(
                         list = filteredBooks,
                         selectedIndex = filteredBooks.indexOf(books.getOrNull(selectedBookIndex) ?: "").coerceAtLeast(0)
                     ) { index, _ ->
-                        println("DEBUG BibleTab: Book selected at filteredIndex=$index")
                         // Find the real index in the original books list
                         val bookName = filteredBooks.getOrNull(index)
-                        println("DEBUG BibleTab: Book name='$bookName'")
                         bookName?.let {
                             val realIndex = books.indexOf(it)
-                            println("DEBUG BibleTab: Real book index=$realIndex")
                             if (realIndex >= 0) {
                                 viewModel.selectBook(realIndex)
                             }
@@ -352,12 +347,9 @@ fun BibleTab(
                         list = filteredChapters,
                         selectedIndex = filteredChapters.indexOf(selectedChapter.toString()).coerceAtLeast(0)
                     ) { index, _ ->
-                        println("DEBUG BibleTab: Chapter selected at filteredIndex=$index")
                         // Find the real chapter number from the filtered list
                         val chapterStr = filteredChapters.getOrNull(index)
-                        println("DEBUG BibleTab: Chapter string='$chapterStr'")
                         chapterStr?.toIntOrNull()?.let { chapter ->
-                            println("DEBUG BibleTab: Calling selectChapter with chapter=$chapter")
                             viewModel.selectChapter(chapter)
                         }
                     }

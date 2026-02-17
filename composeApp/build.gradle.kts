@@ -40,10 +40,32 @@ compose.desktop {
         mainClass = "org.churchpresenter.app.churchpresenter.MainKt"
 
         nativeDistributions {
-            targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
-            packageName = "org.churchpresenter.app.churchpresenter"
+            targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Exe, TargetFormat.Deb)
+            packageName = "ChurchPresenter"
             packageVersion = "1.0.0"
+            description = "Church Presenter - Presentation software for worship services"
+            copyright = "© 2025 Church Presenter. All rights reserved."
+            vendor = "Church Presenter"
+
+            macOS {
+                bundleID = "org.churchpresenter.app"
+                // Uncomment when you have an icon file
+                // iconFile.set(project.file("src/jvmMain/resources/icon.icns"))
+            }
+
+            windows {
+                // Uncomment when you have an icon file
+                // iconFile.set(project.file("src/jvmMain/resources/icon.ico"))
+                menuGroup = "ChurchPresenter"
+                perUserInstall = true
+                dirChooser = true
+                upgradeUuid = "A1B2C3D4-E5F6-4789-A012-3456789ABCDE"
+            }
+
+            linux {
+                // Uncomment when you have an icon file
+                // iconFile.set(project.file("src/jvmMain/resources/icon.png"))
+            }
         }
     }
 }
-

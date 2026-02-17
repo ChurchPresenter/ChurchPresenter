@@ -46,7 +46,6 @@ fun SelectionListWithIndex(
     onItemSelected: (Int, String) -> Unit
 ) {
     val listState = rememberLazyListState()
-    val height = 450.dp
 
     // Scroll to selected item when selection changes
     LaunchedEffect(selectedIndex, list.size) {
@@ -59,7 +58,7 @@ fun SelectionListWithIndex(
         modifier = modifier
             .fillMaxWidth()
             .padding(top = 8.dp)
-            .height(height)
+            .fillMaxHeight()
     ) {
         LazyColumn(
             state = listState,
