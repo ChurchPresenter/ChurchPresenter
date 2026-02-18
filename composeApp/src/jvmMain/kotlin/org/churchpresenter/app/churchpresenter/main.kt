@@ -2,7 +2,10 @@ package org.churchpresenter.app.churchpresenter
 
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
-import androidx.compose.runtime.*
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
@@ -149,6 +152,9 @@ fun main() = application {
                 },
                 onScheduleItemSelected = { itemId ->
                     selectedScheduleItemId = itemId
+                },
+                onShowSettings = {
+                    showOptionsDialog = true
                 },
                 theme = theme
             )

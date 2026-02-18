@@ -12,7 +12,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.unit.dp
-import churchpresenter.composeapp.generated.resources.*
+import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.ic_align_bottom
+import churchpresenter.composeapp.generated.resources.ic_align_center
+import churchpresenter.composeapp.generated.resources.ic_align_left
+import churchpresenter.composeapp.generated.resources.ic_align_middle
+import churchpresenter.composeapp.generated.resources.ic_align_right
+import churchpresenter.composeapp.generated.resources.ic_align_top
 import org.jetbrains.compose.resources.painterResource
 
 /**

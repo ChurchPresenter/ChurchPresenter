@@ -25,4 +25,22 @@ in your IDE’s toolbar or run it directly from the terminal:
 
 ---
 
+## 📚 Documentation
+
+**For developers working on this project:**
+- 📘 **[DEVELOPMENT_GUIDE.md](DEVELOPMENT_GUIDE.md)** - Complete coding standards, style rules, and workflow
+- 📋 **[DOCS_README.md](DOCS_README.md)** - Quick reference guide
+
+**Build & deployment guides:**
+- 🔨 **[BUILD_INSTALLERS.md](BUILD_INSTALLERS.md)** - How to build installers
+- ⚡ **[QUICK_START_INSTALLERS.md](QUICK_START_INSTALLERS.md)** - Quick start guide
+- 💻 **[MEMORY_CONFIGURATION.md](MEMORY_CONFIGURATION.md)** - Memory settings
+
+**Before committing code:**
+```bash
+./cleanup_check.sh  # Run code quality checks
+```
+
+---
+
 Learn more about [Kotlin Multiplatform](https://www.jetbrains.com/help/kotlin-multiplatform-dev/get-started.html)…

@@ -1,6 +1,7 @@
 package org.churchpresenter.app.churchpresenter.viewmodel
 
-import androidx.compose.runtime.*
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
 import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.data.Songs
 import org.churchpresenter.app.churchpresenter.models.LyricSection

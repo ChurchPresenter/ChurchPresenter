@@ -52,6 +52,22 @@ class ScheduleViewModel {
         }
     }
 
+    fun moveItemToTop(id: String) {
+        val index = _scheduleItems.indexOfFirst { it.id == id }
+        if (index > 0) {
+            val item = _scheduleItems.removeAt(index)
+            _scheduleItems.add(0, item)
+        }
+    }
+
+    fun moveItemToBottom(id: String) {
+        val index = _scheduleItems.indexOfFirst { it.id == id }
+        if (index >= 0 && index < _scheduleItems.size - 1) {
+            val item = _scheduleItems.removeAt(index)
+            _scheduleItems.add(item)
+        }
+    }
+
     fun clearSchedule() {
         _scheduleItems.clear()
     }

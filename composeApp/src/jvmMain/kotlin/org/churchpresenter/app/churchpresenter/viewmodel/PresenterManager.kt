@@ -1,9 +1,10 @@
 package org.churchpresenter.app.churchpresenter.viewmodel
 
-import androidx.compose.runtime.*
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
 import org.churchpresenter.app.churchpresenter.models.LyricSection
-import org.churchpresenter.app.churchpresenter.models.SelectedVerse
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.app.churchpresenter.models.SelectedVerse
 
 class PresenterManager {
     private val _presentingMode = mutableStateOf(Presenting.NONE)

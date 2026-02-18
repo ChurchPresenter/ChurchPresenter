@@ -1,16 +1,77 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
-import androidx.compose.foundation.*
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import churchpresenter.composeapp.generated.resources.*
+import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.background
+import churchpresenter.composeapp.generated.resources.background_color
+import churchpresenter.composeapp.generated.resources.background_color_option
+import churchpresenter.composeapp.generated.resources.background_default
+import churchpresenter.composeapp.generated.resources.background_image_option
+import churchpresenter.composeapp.generated.resources.background_type
+import churchpresenter.composeapp.generated.resources.bible_files
+import churchpresenter.composeapp.generated.resources.bible_selection
+import churchpresenter.composeapp.generated.resources.browse_directory
+import churchpresenter.composeapp.generated.resources.color
+import churchpresenter.composeapp.generated.resources.confirm_delete
+import churchpresenter.composeapp.generated.resources.confirm_delete_file
+import churchpresenter.composeapp.generated.resources.delete_error
+import churchpresenter.composeapp.generated.resources.font_size
+import churchpresenter.composeapp.generated.resources.font_type
+import churchpresenter.composeapp.generated.resources.horizontal_alignment
+import churchpresenter.composeapp.generated.resources.import_bible_file
+import churchpresenter.composeapp.generated.resources.import_error
+import churchpresenter.composeapp.generated.resources.no_bible_files
+import churchpresenter.composeapp.generated.resources.no_directory_selected
+import churchpresenter.composeapp.generated.resources.no_file_selected_title
+import churchpresenter.composeapp.generated.resources.none
+import churchpresenter.composeapp.generated.resources.please_select_directory_first
+import churchpresenter.composeapp.generated.resources.please_select_file_first
+import churchpresenter.composeapp.generated.resources.position
+import churchpresenter.composeapp.generated.resources.primary_bible
+import churchpresenter.composeapp.generated.resources.primary_bible_reference
+import churchpresenter.composeapp.generated.resources.primary_bible_text
+import churchpresenter.composeapp.generated.resources.remove_bible_file
+import churchpresenter.composeapp.generated.resources.secondary_bible
+import churchpresenter.composeapp.generated.resources.secondary_bible_reference
+import churchpresenter.composeapp.generated.resources.secondary_bible_text
+import churchpresenter.composeapp.generated.resources.show_abbreviation
+import churchpresenter.composeapp.generated.resources.storage_directory
+import churchpresenter.composeapp.generated.resources.vertical_alignment
 import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
 import org.churchpresenter.app.churchpresenter.composables.DropdownSettingsField
 import org.churchpresenter.app.churchpresenter.composables.FontSettingsDropdown
@@ -38,16 +99,16 @@ private fun extractBibleTitle(filePath: String): String {
         File(filePath).bufferedReader(StandardCharsets.UTF_8).use { reader ->
             // Read first few lines to find title
             var title: String? = null
-            for (i in 0..10) {
-                val line = reader.readLine() ?: break
+            repeat(10) {
+                val line = reader.readLine() ?: return@use (title ?: File(filePath).nameWithoutExtension)
                 if (line.startsWith("##Title:")) {
                     title = line.substring(8).trim()
-                    break
+                    return@use title!!
                 }
             }
             title ?: File(filePath).nameWithoutExtension
         }
-    } catch (e: Exception) {
+    } catch (_: Exception) {
         File(filePath).nameWithoutExtension
     }
 }
@@ -297,7 +358,7 @@ private fun LeftColumn(
                         // Delete file
                         val error = fileManager.deleteFile(
                             directory = settings.bibleSettings.storageDirectory,
-                            fileName = selectedFile!!
+                            fileName = selectedFile
                         )
 
                         if (error != null) {
@@ -432,9 +493,6 @@ private fun RightColumn(
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
     availableFonts: List<String>
 ) {
-    // Language options
-    val languageInterfaceStr = stringResource(Res.string.language_interface)
-    val languageDatabaseStr = stringResource(Res.string.language_database)
 
     // Primary Bible Text
     SectionHeader(stringResource(Res.string.primary_bible_text))
@@ -749,7 +807,7 @@ private fun SectionHeader(text: String) {
 @Composable
 private fun SettingRow(
     label: String,
-    width: androidx.compose.ui.unit.Dp = 120.dp,
+    width: Dp = 120.dp,
     content: @Composable () -> Unit
 ) {
     Row(

@@ -1,8 +1,8 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
-import androidx.compose.material.Tab
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PrimaryTabRow
+import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -49,10 +49,10 @@ fun TabSection(
 @Composable
 private fun getStringName(tabs: Tabs): String {
     return when (tabs) {
-        Tabs.BIBLE -> stringResource(Res.string.bible)
-        Tabs.SONGS -> stringResource(Res.string.songs)
-        Tabs.PICTURES -> stringResource(Res.string.pictures)
-        Tabs.MEDIA -> stringResource(Res.string.media)
-        Tabs.ANNOUNCEMENTS -> stringResource(Res.string.announcements)
+        Tabs.BIBLE -> "${stringResource(Res.string.bible)} (F6)"
+        Tabs.SONGS -> "${stringResource(Res.string.songs)} (F7)"
+        Tabs.PICTURES -> "${stringResource(Res.string.pictures)} (F8)"
+        Tabs.MEDIA -> "${stringResource(Res.string.media)} (F9)"
+        Tabs.ANNOUNCEMENTS -> "${stringResource(Res.string.announcements)} (F10)"
     }
 }

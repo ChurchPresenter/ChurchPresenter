@@ -1,24 +1,53 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollbarAdapter
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.max
-import androidx.compose.ui.unit.sp
-import churchpresenter.composeapp.generated.resources.*
+import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.clear_schedule
+import churchpresenter.composeapp.generated.resources.ic_arrow_down
+import churchpresenter.composeapp.generated.resources.ic_arrow_up
+import churchpresenter.composeapp.generated.resources.ic_close
+import churchpresenter.composeapp.generated.resources.ic_play
+import churchpresenter.composeapp.generated.resources.schedule
+import churchpresenter.composeapp.generated.resources.service_schedule
+import churchpresenter.composeapp.generated.resources.tooltip_go_live
+import churchpresenter.composeapp.generated.resources.tooltip_move_down
+import churchpresenter.composeapp.generated.resources.tooltip_move_up
+import churchpresenter.composeapp.generated.resources.tooltip_remove
+import org.churchpresenter.app.churchpresenter.composables.TooltipIconButton
 import org.churchpresenter.app.churchpresenter.models.ScheduleItem
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.viewmodel.ScheduleViewModel
@@ -36,7 +65,7 @@ fun ScheduleTab(
     onPresenting: (Presenting) -> Unit = { Presenting.NONE },
     onItemClick: (ScheduleItem) -> Unit = {}
 ) {
-    var selectedItemIndex by remember { mutableStateOf(-1) }
+    var selectedItemId by remember { mutableStateOf<String?>(null) }
 
     // Get schedule items
     val scheduleItems = scheduleViewModel.scheduleItems
@@ -83,12 +112,24 @@ fun ScheduleTab(
                 itemsIndexed(scheduleItems) { index, item ->
                     ScheduleItemRow(
                         item = item,
-                        isSelected = index == selectedItemIndex,
-                        onSelect = { selectedItemIndex = if (selectedItemIndex == index) -1 else index },
+                        isSelected = item.id == selectedItemId,
+                        onSelect = {
+                            selectedItemId = if (selectedItemId == item.id) null else item.id
+                            onItemClick(item)
+                        },
                         onClick = { onItemClick(item) },
-                        onMoveUp = { scheduleViewModel.moveItemUp(item.id) },
-                        onMoveDown = { scheduleViewModel.moveItemDown(item.id) },
-                        onRemove = { scheduleViewModel.removeItem(item.id) },
+                        onMoveUp = {
+                            scheduleViewModel.moveItemUp(item.id)
+                        },
+                        onMoveDown = {
+                            scheduleViewModel.moveItemDown(item.id)
+                        },
+                        onRemove = {
+                            scheduleViewModel.removeItem(item.id)
+                            if (selectedItemId == item.id) {
+                                selectedItemId = null
+                            }
+                        },
                         onPresent = {
                             when (item) {
                                 is ScheduleItem.SongItem -> {
@@ -223,60 +264,45 @@ private fun ScheduleItemRow(
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Move up button
-            IconButton(
+            TooltipIconButton(
+                painter = painterResource(Res.drawable.ic_arrow_up),
+                text = stringResource(Res.string.tooltip_move_up),
                 onClick = onMoveUp,
-                modifier = Modifier.size(32.dp)
-            ) {
-                Image(
-                    painter = painterResource(Res.drawable.ic_arrow_up),
-                    contentDescription = "Move up",
-                    colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface),
-                    modifier = Modifier.size(20.dp)
-                )
-            }
+                buttonSize = 32.dp,
+                iconTint = MaterialTheme.colorScheme.onSurface
+            )
 
             // Move down button
-            IconButton(
+            TooltipIconButton(
+                painter = painterResource(Res.drawable.ic_arrow_down),
+                text = stringResource(Res.string.tooltip_move_down),
                 onClick = onMoveDown,
-                modifier = Modifier.size(32.dp)
-            ) {
-                Image(
-                    painter = painterResource(Res.drawable.ic_arrow_down),
-                    contentDescription = "Move down",
-                    colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface),
-                    modifier = Modifier.size(20.dp)
-                )
-            }
+                buttonSize = 32.dp,
+                iconTint = MaterialTheme.colorScheme.onSurface
+            )
 
             // Go Live button
-            IconButton(
+            TooltipIconButton(
+                painter = painterResource(Res.drawable.ic_play),
+                text = stringResource(Res.string.tooltip_go_live),
                 onClick = onPresent,
-                modifier = Modifier.size(32.dp),
+                buttonSize = 32.dp,
+                iconSize = 18.dp,
                 colors = IconButtonDefaults.iconButtonColors(
                     containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = MaterialTheme.colorScheme.onPrimary
-                )
-            ) {
-                Image(
-                    painter = painterResource(Res.drawable.ic_play),
-                    contentDescription = "Go Live",
-                    colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onPrimary),
-                    modifier = Modifier.size(18.dp)
-                )
-            }
+                ),
+                iconTint = MaterialTheme.colorScheme.onPrimary
+            )
 
             // Remove button
-            IconButton(
+            TooltipIconButton(
+                painter = painterResource(Res.drawable.ic_close),
+                text = stringResource(Res.string.tooltip_remove),
                 onClick = onRemove,
-                modifier = Modifier.size(32.dp)
-            ) {
-                Image(
-                    painter = painterResource(Res.drawable.ic_close),
-                    contentDescription = "Remove",
-                    colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.error),
-                    modifier = Modifier.size(20.dp)
-                )
-            }
+                buttonSize = 32.dp,
+                iconTint = MaterialTheme.colorScheme.error
+            )
         }
     }
 }
