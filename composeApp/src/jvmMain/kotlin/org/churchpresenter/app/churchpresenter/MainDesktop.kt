@@ -9,8 +9,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -39,12 +41,25 @@ fun MainDesktop(
     scheduleViewModel: ScheduleViewModel,
     presenting: (Presenting) -> Unit,
     onVerseSelected: (List<SelectedVerse>) -> Unit,
-    onSongItemSelected: (LyricSection) -> Unit
+    onSongItemSelected: (LyricSection) -> Unit,
+    onTabChange: (Int) -> Unit = {},
+    onScheduleItemSelected: (String?) -> Unit = {}
 ) {
     Box(
         modifier = modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)
     ) {
         var selectedTabIndex by rememberSaveable { mutableStateOf(0) }
+        var selectedScheduleItemId by remember { mutableStateOf<String?>(null) }
+
+        // Notify parent when tab changes
+        LaunchedEffect(selectedTabIndex) {
+            onTabChange(selectedTabIndex)
+        }
+
+        // Notify parent when schedule item selection changes
+        LaunchedEffect(selectedScheduleItemId) {
+            onScheduleItemSelected(selectedScheduleItemId)
+        }
 
         Row(modifier = Modifier.fillMaxSize()) {
             Column(modifier = Modifier.fillMaxWidth(0.30f).fillMaxHeight()) {
@@ -56,6 +71,7 @@ fun MainDesktop(
                     onVerseSelected = onVerseSelected,
                     onPresenting = presenting,
                     onItemClick = { item ->
+                        selectedScheduleItemId = if (selectedScheduleItemId == item.id) null else item.id
                         when (item) {
                             is org.churchpresenter.app.churchpresenter.models.ScheduleItem.SongItem -> {
                                 // Switch to Songs tab (index 1)

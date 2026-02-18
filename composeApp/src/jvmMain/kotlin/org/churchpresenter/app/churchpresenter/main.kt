@@ -49,6 +49,8 @@ fun main() = application {
     // UI state
     var theme by remember { mutableStateOf(ThemeMode.SYSTEM) }
     var showOptionsDialog by remember { mutableStateOf(false) }
+    var currentTab by remember { mutableStateOf(0) } // Track which tab is selected
+    var selectedScheduleItemId by remember { mutableStateOf<String?>(null) } // Track selected schedule item
 
     // Get bounds of the second screen if present
     val screens = GraphicsEnvironment.getLocalGraphicsEnvironment().screenDevices
@@ -80,6 +82,55 @@ fun main() = application {
                     showOptionsDialog = true
                 },
                 onExit = { exitApplication() },
+                onAddToSchedule = {
+                    // Add currently selected song or verse to schedule
+                    when (currentTab) {
+                        0 -> { // Bible tab
+                            // Use getSelectedVerses which already has the right logic
+                            val verses = bibleViewModel.getSelectedVerses()
+                            verses.firstOrNull()?.let { verse ->
+                                scheduleViewModel.addBibleVerse(
+                                    bookName = verse.bookName,
+                                    chapter = verse.chapter,
+                                    verseNumber = verse.verseNumber,
+                                    verseText = verse.verseText
+                                )
+                            }
+                        }
+                        1 -> { // Songs tab
+                            // Access the filtered songs and get the selected song
+                            val selectedIndex = songsViewModel.selectedSongIndex.value
+                            val filteredSongs = songsViewModel.filteredSongs.value
+                            val allSongs = songsViewModel.songsData.value.getSongs()
+
+                            if (selectedIndex >= 0 && selectedIndex < filteredSongs.size) {
+                                // Map back to Song objects
+                                val songText = filteredSongs[selectedIndex]
+                                val song = allSongs.find { "${it.number}. ${it.title}" == songText }
+
+                                song?.let {
+                                    scheduleViewModel.addSong(
+                                        songNumber = it.number.toIntOrNull() ?: 0,
+                                        title = it.title,
+                                        songbook = it.songbook
+                                    )
+                                }
+                            }
+                        }
+                    }
+                },
+                onRemoveFromSchedule = {
+                    // Remove selected item from schedule
+                    selectedScheduleItemId?.let { id ->
+                        scheduleViewModel.removeItem(id)
+                        selectedScheduleItemId = null
+                    }
+                },
+                onClearSchedule = {
+                    // Clear all schedule items
+                    scheduleViewModel.clearSchedule()
+                    selectedScheduleItemId = null
+                },
             )
             MainDesktop(
                 onVerseSelected = { verses ->
@@ -92,7 +143,13 @@ fun main() = application {
                 bibleViewModel = bibleViewModel,
                 songsViewModel = songsViewModel,
                 scheduleViewModel = scheduleViewModel,
-                presenting = { presenterManager.setPresentingMode(it) }
+                presenting = { presenterManager.setPresentingMode(it) },
+                onTabChange = { tabIndex ->
+                    currentTab = tabIndex
+                },
+                onScheduleItemSelected = { itemId ->
+                    selectedScheduleItemId = itemId
+                }
             )
 
             // Options Dialog
