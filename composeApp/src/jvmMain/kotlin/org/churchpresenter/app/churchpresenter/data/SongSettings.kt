@@ -51,6 +51,9 @@ data class BibleSettings(
     val backgroundColor: String = "#000000", // Black
     val backgroundImage: String = "",
 
+    // Global vertical alignment (affects all 4 sections)
+    val verticalAlignment: String = Constants.MIDDLE,
+
     // Primary Bible text
     val primaryBibleColor: String = "#FFFFFF",
     val primaryBibleFontType: String = "Arial",

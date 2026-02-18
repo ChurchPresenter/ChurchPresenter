@@ -87,6 +87,7 @@
     <string name="alpha">Alpha:</string>
     <string name="vertical_alignment">Vertical alignment:</string>
     <string name="horizontal_alignment">Horizontal alignment:</string>
+    <string name="text_alignment">Text Alignment:</string>
     <string name="top">Top</string>
     <string name="above_verse">Above Verse</string>
     <string name="below_verse">Below Verse</string>

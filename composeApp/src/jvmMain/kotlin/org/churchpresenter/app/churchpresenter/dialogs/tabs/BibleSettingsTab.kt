@@ -17,6 +17,7 @@ import org.churchpresenter.app.churchpresenter.composables.FontSettingsDropdown
 import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
 import org.churchpresenter.app.churchpresenter.composables.PositionButtons
 import org.churchpresenter.app.churchpresenter.composables.HorizontalAlignmentButtons
+import org.churchpresenter.app.churchpresenter.composables.VerticalAlignmentButtons
 import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDefault
@@ -368,6 +369,27 @@ private fun LeftColumn(
 
     Spacer(modifier = Modifier.height(20.dp))
 
+    // Global Vertical Alignment
+    SectionHeader(stringResource(Res.string.vertical_alignment))
+    Spacer(modifier = Modifier.height(8.dp))
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(vertical = 5.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        VerticalAlignmentButtons(
+            selectedAlignment = settings.bibleSettings.verticalAlignment,
+            onAlignmentChange = { value ->
+                onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(verticalAlignment = value)) }
+            },
+            topValue = Constants.TOP,
+            middleValue = Constants.MIDDLE,
+            bottomValue = Constants.BOTTOM
+        )
+    }
+
+    Spacer(modifier = Modifier.height(20.dp))
+
     // Background
     SectionHeader(stringResource(Res.string.background))
     Spacer(modifier = Modifier.height(8.dp))
@@ -685,26 +707,26 @@ private fun RightColumn(
     Spacer(modifier = Modifier.height(20.dp))
 
     // Language
-    SectionHeader(stringResource(Res.string.caption_language))
-    Spacer(modifier = Modifier.height(8.dp))
-    SettingRow(stringResource(Res.string.language_source)) {
-        DropdownSettingsField(
-            value = when (settings.bibleSettings.captionLanguage) {
-                Constants.LANGUAGE_INTERFACE -> languageInterfaceStr
-                Constants.LANGUAGE_DATABASE -> languageDatabaseStr
-                else -> languageInterfaceStr
-            },
-            options = listOf(languageInterfaceStr, languageDatabaseStr),
-            onValueChange = { displayValue ->
-                val value = when (displayValue) {
-                    languageInterfaceStr -> Constants.LANGUAGE_INTERFACE
-                    languageDatabaseStr -> Constants.LANGUAGE_DATABASE
-                    else -> Constants.LANGUAGE_INTERFACE
-                }
-                onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(captionLanguage = value)) }
-            }
-        )
-    }
+//    SectionHeader(stringResource(Res.string.caption_language))
+//    Spacer(modifier = Modifier.height(8.dp))
+//    SettingRow(stringResource(Res.string.language_source)) {
+//        DropdownSettingsField(
+//            value = when (settings.bibleSettings.captionLanguage) {
+//                Constants.LANGUAGE_INTERFACE -> languageInterfaceStr
+//                Constants.LANGUAGE_DATABASE -> languageDatabaseStr
+//                else -> languageInterfaceStr
+//            },
+//            options = listOf(languageInterfaceStr, languageDatabaseStr),
+//            onValueChange = { displayValue ->
+//                val value = when (displayValue) {
+//                    languageInterfaceStr -> Constants.LANGUAGE_INTERFACE
+//                    languageDatabaseStr -> Constants.LANGUAGE_DATABASE
+//                    else -> Constants.LANGUAGE_INTERFACE
+//                }
+//                onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(captionLanguage = value)) }
+//            }
+//        )
+//    }
 }
 
 @Composable

@@ -89,6 +89,13 @@ fun BiblePresenter(
     val primaryBibleReferencePosition = appSettings.bibleSettings.primaryReferencePosition
     val secondaryBibleReferencePosition = appSettings.bibleSettings.secondaryReferencePosition
 
+    // Combine vertical alignment with horizontal center
+    val contentAlignment = when (appSettings.bibleSettings.verticalAlignment) {
+        Constants.TOP -> Alignment.TopCenter
+        Constants.BOTTOM -> Alignment.BottomCenter
+        else -> Alignment.Center  // MIDDLE or default
+    }
+
     BoxWithConstraints(modifier.fillMaxSize()) {
         val density = LocalDensity.current
 
@@ -104,7 +111,7 @@ fun BiblePresenter(
         val scaledSecondaryBibleSize = (appSettings.bibleSettings.secondaryBibleFontSize * scaleFactor).sp
         val scaledSecondaryReferenceSize = (appSettings.bibleSettings.secondaryReferenceFontSize * scaleFactor).sp
 
-        Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Box(modifier.fillMaxSize(), contentAlignment = contentAlignment) {
             Column {
                 // Primary Bible
                 if (primaryBibleReferencePosition == Constants.POSITION_ABOVE) {
