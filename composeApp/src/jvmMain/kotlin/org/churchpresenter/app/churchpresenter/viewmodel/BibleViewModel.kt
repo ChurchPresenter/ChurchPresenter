@@ -335,8 +335,10 @@ class BibleViewModel(
 
         // Add primary Bible verse
         _primaryBible.value?.getVerseDetails(bookId, _selectedChapter.value, verseNumber)?.let { (bookName, verseText, _) ->
+            val abbreviation = _primaryBible.value?.getBibleAbbreviation() ?: ""
             verseList.add(
                 SelectedVerse(
+                    bibleAbbreviation = abbreviation,
                     bookName = bookName,
                     chapter = _selectedChapter.value,
                     verseNumber = verseNumber,
@@ -347,8 +349,10 @@ class BibleViewModel(
 
         // Add secondary Bible verse if available
         _secondaryBible.value?.getVerseDetails(bookId, _selectedChapter.value, verseNumber)?.let { (bookName, verseText, _) ->
+            val abbreviation = _secondaryBible.value?.getBibleAbbreviation() ?: ""
             verseList.add(
                 SelectedVerse(
+                    bibleAbbreviation = abbreviation,
                     bookName = bookName,
                     chapter = _selectedChapter.value,
                     verseNumber = verseNumber,

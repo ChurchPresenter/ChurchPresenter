@@ -38,7 +38,7 @@ import javax.swing.SwingUtilities
 @Composable
 fun SongSettingsTab(
     settings: AppSettings,
-    onSettingsChange: (AppSettings) -> Unit = {}
+    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit
 ) {
     val availableFonts = remember { Utils.getAvailableSystemFonts() }
     val fileManager = remember { FileManager() }
@@ -86,7 +86,7 @@ fun SongSettingsTab(
 @Composable
 private fun LeftColumn(
     settings: AppSettings,
-    onSettingsChange: (AppSettings) -> Unit,
+    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
     availableFonts: List<String>,
     fileManager: FileManager
 ) {
@@ -143,9 +143,9 @@ private fun LeftColumn(
                         parentWindow = parentWindow
                     )
                     selectedDir?.let { dir ->
-                        onSettingsChange.invoke(
-                            settings.copy(songSettings = settings.songSettings.copy(storageDirectory = dir))
-                        )
+                        onSettingsChange { s ->
+                            s.copy(songSettings = s.songSettings.copy(storageDirectory = dir))
+                        }
                     }
                 }
             }
@@ -332,7 +332,9 @@ private fun LeftColumn(
                     everyPageStr -> Constants.EVERY_PAGE
                     else -> Constants.FIRST_PAGE
                 }
-                onSettingsChange.invoke(settings.copy(songSettings = settings.songSettings.copy(titleDisplay = storedValue)))
+                onSettingsChange { s ->
+                    s.copy(songSettings = s.songSettings.copy(titleDisplay = storedValue))
+                }
             }
         )
     }
@@ -341,9 +343,9 @@ private fun LeftColumn(
         NumberSettingsTextField(
             initialText = settings.songSettings.titleFontSize,
             onValueChange = {
-                onSettingsChange.invoke(
-                    settings.copy(songSettings = settings.songSettings.copy(titleFontSize = it))
-                )
+                onSettingsChange { s ->
+                    s.copy(songSettings = s.songSettings.copy(titleFontSize = it))
+                }
             },
             range = 8..72
         )
@@ -356,9 +358,9 @@ private fun LeftColumn(
                 value = settings.songSettings.titleFontType,
                 fonts = availableFonts,
                 onValueChange = {
-                    onSettingsChange.invoke(
-                        settings.copy(songSettings = settings.songSettings.copy(titleFontType = it))
-                    )
+                    onSettingsChange { s ->
+                        s.copy(songSettings = s.songSettings.copy(titleFontType = it))
+                    }
                 }
             )
             val previewFontFamily = remember(settings.songSettings.titleFontType) {
@@ -378,9 +380,9 @@ private fun LeftColumn(
         ColorPickerField(
             color = settings.songSettings.titleColor,
             onColorChange = {
-                onSettingsChange.invoke(
-                    settings.copy(songSettings = settings.songSettings.copy(titleColor = it))
-                )
+                onSettingsChange { s ->
+                    s.copy(songSettings = s.songSettings.copy(titleColor = it))
+                }
             }
         )
     }
@@ -389,9 +391,9 @@ private fun LeftColumn(
         PositionButtons(
             selectedPosition = settings.songSettings.titlePosition,
             onPositionChange = { storedValue ->
-                onSettingsChange.invoke(
-                    settings.copy(songSettings = settings.songSettings.copy(titlePosition = storedValue))
-                )
+                onSettingsChange { s ->
+                    s.copy(songSettings = s.songSettings.copy(titlePosition = storedValue))
+                }
             },
             aboveValue = Constants.ABOVE_VERSE,
             belowValue = Constants.BELOW_VERSE
@@ -402,9 +404,9 @@ private fun LeftColumn(
         HorizontalAlignmentButtons(
             selectedAlignment = settings.songSettings.titleHorizontalAlignment,
             onAlignmentChange = { storedValue ->
-                onSettingsChange.invoke(
-                    settings.copy(songSettings = settings.songSettings.copy(titleHorizontalAlignment = storedValue))
-                )
+                onSettingsChange { s ->
+                    s.copy(songSettings = s.songSettings.copy(titleHorizontalAlignment = storedValue))
+                }
             },
             leftValue = Constants.LEFT,
             centerValue = Constants.CENTER,
@@ -416,7 +418,7 @@ private fun LeftColumn(
 @Composable
 private fun RightColumn(
     settings: AppSettings,
-    onSettingsChange: (AppSettings) -> Unit,
+    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
     availableFonts: List<String>
 ) {
     // Store string resources to avoid calling stringResource in callbacks
@@ -437,7 +439,9 @@ private fun RightColumn(
         NumberSettingsTextField(
             initialText = settings.songSettings.lyricsFontSize,
             onValueChange = {
-                onSettingsChange.invoke(settings.copy(songSettings = settings.songSettings.copy(lyricsFontSize = it)))
+                onSettingsChange { s ->
+                    s.copy(songSettings = s.songSettings.copy(lyricsFontSize = it))
+                }
             },
             range = 8..72
         )
@@ -450,9 +454,9 @@ private fun RightColumn(
                 value = settings.songSettings.lyricsFontType,
                 fonts = availableFonts,
                 onValueChange = {
-                    onSettingsChange.invoke(
-                        settings.copy(songSettings = settings.songSettings.copy(lyricsFontType = it))
-                    )
+                    onSettingsChange { s ->
+                        s.copy(songSettings = s.songSettings.copy(lyricsFontType = it))
+                    }
                 }
             )
             val previewFontFamily = remember(settings.songSettings.lyricsFontType) {
@@ -487,9 +491,9 @@ private fun RightColumn(
         ColorPickerField(
             color = settings.songSettings.lyricsColor,
             onColorChange = {
-                onSettingsChange.invoke(
-                    settings.copy(songSettings = settings.songSettings.copy(lyricsColor = it))
-                )
+                onSettingsChange { s ->
+                    s.copy(songSettings = s.songSettings.copy(lyricsColor = it))
+                }
             }
         )
     }
@@ -503,11 +507,9 @@ private fun RightColumn(
             checked = initialWordWrapValue,
             onCheckedChange = {
                 initialWordWrapValue = it
-                onSettingsChange.invoke(
-                    settings.copy(
-                        songSettings = settings.songSettings.copy(wordWrap = it)
-                    )
-                )
+                onSettingsChange { s ->
+                    s.copy(songSettings = s.songSettings.copy(wordWrap = it))
+                }
             }
         )
         Text(
@@ -524,9 +526,9 @@ private fun RightColumn(
         VerticalAlignmentButtons(
             selectedAlignment = settings.songSettings.lyricsAlignment,
             onAlignmentChange = { storedValue ->
-                onSettingsChange.invoke(
-                    settings.copy(songSettings = settings.songSettings.copy(lyricsAlignment = storedValue))
-                )
+                onSettingsChange { s ->
+                    s.copy(songSettings = s.songSettings.copy(lyricsAlignment = storedValue))
+                }
             },
             topValue = Constants.TOP,
             middleValue = Constants.MIDDLE,
@@ -538,9 +540,9 @@ private fun RightColumn(
         HorizontalAlignmentButtons(
             selectedAlignment = settings.songSettings.lyricsHorizontalAlignment,
             onAlignmentChange = { storedValue ->
-                onSettingsChange.invoke(
-                    settings.copy(songSettings = settings.songSettings.copy(lyricsHorizontalAlignment = storedValue))
-                )
+                onSettingsChange { s ->
+                    s.copy(songSettings = s.songSettings.copy(lyricsHorizontalAlignment = storedValue))
+                }
             },
             leftValue = Constants.LEFT,
             centerValue = Constants.CENTER,
@@ -559,9 +561,9 @@ private fun RightColumn(
         NumberSettingsTextField(
             initialText = settings.songSettings.songNumberFontSize,
             onValueChange = {
-                onSettingsChange.invoke(
-                    settings.copy(songSettings = settings.songSettings.copy(songNumberFontSize = it))
-                )
+                onSettingsChange { s ->
+                    s.copy(songSettings = s.songSettings.copy(songNumberFontSize = it))
+                }
             },
             range = 8..48
         )
@@ -583,7 +585,9 @@ private fun RightColumn(
                     everyPageStr -> Constants.EVERY_PAGE
                     else -> Constants.FIRST_PAGE
                 }
-                onSettingsChange.invoke(settings.copy(songSettings = settings.songSettings.copy(showNumber = storedValue)))
+                onSettingsChange { s ->
+                    s.copy(songSettings = s.songSettings.copy(showNumber = storedValue))
+                }
             }
         )
     }
@@ -612,9 +616,9 @@ private fun RightColumn(
                     else -> Constants.BOTTOM_RIGHT
                 }
                 initialPosition = storedValue
-                onSettingsChange.invoke(
-                    settings.copy(songSettings = settings.songSettings.copy(songNumberPosition = storedValue))
-                )
+                onSettingsChange { s ->
+                    s.copy(songSettings = s.songSettings.copy(songNumberPosition = storedValue))
+                }
             }
         )
     }
@@ -623,9 +627,9 @@ private fun RightColumn(
         ColorPickerField(
             color = settings.songSettings.songNumberColor,
             onColorChange = {
-                onSettingsChange.invoke(
-                    settings.copy(songSettings = settings.songSettings.copy(songNumberColor = it))
-                )
+                onSettingsChange { s ->
+                    s.copy(songSettings = s.songSettings.copy(songNumberColor = it))
+                }
             }
         )
     }

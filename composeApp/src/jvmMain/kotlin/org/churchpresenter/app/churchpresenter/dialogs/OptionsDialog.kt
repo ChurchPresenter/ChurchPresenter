@@ -109,7 +109,7 @@ fun OptionsDialog(
                             1 -> SongSettingsTab(
                                 settings = currentSettings,
                                 onSettingsChange = { updateFn ->
-                                    currentSettings = AppSettings(updateFn.songSettings)
+                                    currentSettings = updateFn(currentSettings)
                                 }
                             )
 

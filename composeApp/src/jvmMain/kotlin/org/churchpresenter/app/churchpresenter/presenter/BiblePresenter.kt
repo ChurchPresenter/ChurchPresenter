@@ -112,10 +112,15 @@ fun BiblePresenter(
                         Modifier.fillMaxWidth().padding(16.dp),
                         horizontalArrangement = primaryBibleReferenceHorizontalAlignment
                     ) {
+                        val bookNameOrAbbr = if (appSettings.bibleSettings.primaryShowAbbreviation && primaryBible.bibleAbbreviation.isNotEmpty()) {
+                            primaryBible.bibleAbbreviation
+                        } else {
+                            ""
+                        }
                         Text(
                             fontFamily = primaryBibleReferenceFontStyle,
                             fontSize = scaledPrimaryReferenceSize,
-                            text = "${primaryBible.bookName} ${primaryBible.chapter}:${primaryBible.verseNumber}",
+                            text = "$bookNameOrAbbr ${primaryBible.bookName} ${primaryBible.chapter}:${primaryBible.verseNumber}",
                             color = primaryBibleReferenceTextColor
                         )
                     }
@@ -136,10 +141,15 @@ fun BiblePresenter(
                         Modifier.fillMaxWidth().padding(16.dp),
                         horizontalArrangement = primaryBibleReferenceHorizontalAlignment
                     ) {
+                        val bookNameOrAbbr = if (appSettings.bibleSettings.primaryShowAbbreviation && primaryBible.bibleAbbreviation.isNotEmpty()) {
+                            primaryBible.bibleAbbreviation
+                        } else {
+                            ""
+                        }
                         Text(
                             fontFamily = primaryBibleReferenceFontStyle,
                             fontSize = scaledPrimaryReferenceSize,
-                            text = "${primaryBible.bookName} ${primaryBible.chapter}:${primaryBible.verseNumber}",
+                            text = "$bookNameOrAbbr ${primaryBible.bookName} ${primaryBible.chapter}:${primaryBible.verseNumber}",
                             color = primaryBibleReferenceTextColor
                         )
                     }
@@ -152,10 +162,15 @@ fun BiblePresenter(
                             Modifier.fillMaxWidth().padding(16.dp),
                             horizontalArrangement = secondaryBibleReferenceHorizontalAlignment
                         ) {
+                            val bookNameOrAbbr = if (appSettings.bibleSettings.secondaryShowAbbreviation && secondaryBible.bibleAbbreviation.isNotEmpty()) {
+                                secondaryBible.bibleAbbreviation
+                            } else {
+                                ""
+                            }
                             Text(
                                 fontFamily = secondaryBibleReferenceFontStyle,
                                 fontSize = scaledSecondaryReferenceSize,
-                                text = "${secondaryBible.bookName} ${secondaryBible.chapter}:${secondaryBible.verseNumber}",
+                                text = "$bookNameOrAbbr ${secondaryBible.bookName} ${secondaryBible.chapter}:${secondaryBible.verseNumber}",
                                 color = secondaryBibleTextColor
                             )
                         }
@@ -176,10 +191,15 @@ fun BiblePresenter(
                             Modifier.fillMaxWidth().padding(16.dp),
                             horizontalArrangement = secondaryBibleReferenceHorizontalAlignment
                         ) {
+                            val bookNameOrAbbr = if (appSettings.bibleSettings.secondaryShowAbbreviation && secondaryBible.bibleAbbreviation.isNotEmpty()) {
+                                secondaryBible.bibleAbbreviation
+                            } else {
+                                ""
+                            }
                             Text(
                                 fontFamily = secondaryBibleReferenceFontStyle,
                                 fontSize = scaledSecondaryReferenceSize,
-                                text = "${secondaryBible.bookName} ${secondaryBible.chapter}:${secondaryBible.verseNumber}",
+                                text = "$bookNameOrAbbr ${secondaryBible.bookName} ${secondaryBible.chapter}:${secondaryBible.verseNumber}",
                                 color = secondaryBibleTextColor
                             )
                         }

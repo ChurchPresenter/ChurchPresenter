@@ -11,6 +11,7 @@ import androidx.compose.runtime.mutableStateListOf
 
 class Bible {
     private var bibleId: String = ""
+    private var bibleAbbreviation: String = "" // Store Bible translation abbreviation (e.g., "RSV", "KJV")
     private val books = mutableStateListOf<BibleBook>()
     private val operatorBible = mutableStateListOf<BibleVerse>()
     val previewIdList = mutableListOf<String>()
@@ -22,6 +23,56 @@ class Bible {
     private fun executeQuery(sql: String): DatabaseResult {
         val c = conn ?: throw IllegalStateException("Database connection not set")
         return JdbcDatabase.executeQuery(c, sql)
+    }
+
+    /**
+     * Generate abbreviation for a book name
+     * Takes first 3 letters or first letter of each word for compound names
+     */
+    private fun generateAbbreviation(bookName: String): String {
+        if (bookName.isBlank()) return ""
+
+        val words = bookName.trim().split(Regex("\\s+"))
+        return when {
+            // Single word: take first 3-4 characters
+            words.size == 1 -> {
+                val word = words[0]
+                when {
+                    word.length <= 3 -> word
+                    word.length == 4 -> word.take(4)
+                    else -> word.take(3)
+                }
+            }
+            // Multiple words: take first letter of each word (up to 4 letters)
+            else -> {
+                words.take(4).map { it.first().uppercase() }.joinToString("")
+            }
+        }
+    }
+
+    /**
+     * Extract Bible version abbreviation from title or filename
+     * Examples: "Russian Synodal Translation" -> "RST"
+     *           "King James Version" -> "KJV"
+     *           "ru_RST77.spb" -> "RST77"
+     */
+    private fun extractBibleAbbreviation(title: String?, filename: String): String {
+        // First try to extract from title if available
+        if (!title.isNullOrBlank()) {
+            // Look for common patterns: "Version", "Translation", etc.
+            val words = title.trim().split(Regex("\\s+"))
+
+            // If title is short (like "RSV" or "KJV"), use it as-is
+            if (words.size == 1 && words[0].length <= 5) {
+                return words[0]
+            }
+
+            // Generate abbreviation from title words
+            return words.take(4).map { it.first().uppercase() }.joinToString("")
+        }
+
+        // Fallback to filename without extension
+        return filename.substringBeforeLast(".").substringAfterLast("/").substringAfterLast("\\")
     }
 
     // New: load from a BibleQuote .spb plain text module
@@ -50,6 +101,7 @@ class Bible {
             val bookHeaderRegex = Regex("^(\\d+)\\s+(.+?)\\s+(\\d+)$")
             val bookChapterMap = mutableMapOf<Int, MutableSet<Int>>()
             val parsedBookNames = mutableMapOf<Int, String>()
+            var bibleTitle: String? = null
 
             var currentCode: String? = null
             val sb = StringBuilder()
@@ -59,7 +111,13 @@ class Bible {
                 r.forEachLine { rawLine ->
                     val line = rawLine.trimEnd('\r', '\n')
 
-                    // Skip metadata lines
+                    // Extract Bible title from ##Title: line
+                    if (line.startsWith("##Title:")) {
+                        bibleTitle = line.substring(8).trim()
+                        return@forEachLine
+                    }
+
+                    // Skip other metadata lines
                     if (line.startsWith("##")) {
                         return@forEachLine
                     }
@@ -172,8 +230,17 @@ class Bible {
                     bookNames.size >= b -> bookNames[b - 1]
                     else -> "Book $b"
                 }
-                books.add(BibleBook(book = name, bookId = b.toString(), chapterCount = chapterCount))
+                val abbreviation = generateAbbreviation(name)
+                books.add(BibleBook(
+                    book = name,
+                    bookId = b.toString(),
+                    chapterCount = chapterCount,
+                    abbreviation = abbreviation
+                ))
             }
+
+            // Extract and store Bible abbreviation from title or filename
+            bibleAbbreviation = extractBibleAbbreviation(bibleTitle, resourcePath)
 
         } catch (e: Exception) {
             throw e
@@ -185,10 +252,12 @@ class Bible {
         val result = executeQuery("SELECT book_name, id, chapter_count FROM BibleBooks WHERE bible_id = $bibleId")
 
         result.forEach { row ->
+            val bookName = row.getString(0).trim()
             val book = BibleBook(
-                book = row.getString(0).trim(),
+                book = bookName,
                 bookId = row.getString(1),
-                chapterCount = row.getInt(2)
+                chapterCount = row.getInt(2),
+                abbreviation = generateAbbreviation(bookName)
             )
             books.add(book)
         }
@@ -326,5 +395,12 @@ class Bible {
     // Diagnostic helper: number of parsed verses from SPB
     fun getVerseCount(): Int {
         return operatorBible.size
+    }
+
+    /**
+     * Get Bible translation abbreviation (e.g., "RSV", "KJV")
+     */
+    fun getBibleAbbreviation(): String {
+        return bibleAbbreviation
     }
 }
