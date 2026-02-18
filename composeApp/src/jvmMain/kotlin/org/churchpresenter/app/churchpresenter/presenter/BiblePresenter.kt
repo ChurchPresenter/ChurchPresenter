@@ -62,6 +62,30 @@ fun BiblePresenter(
         parseHexColor(appSettings.bibleSettings.secondaryBibleColor)
     }
 
+    val primaryBibleHorizontalAlignment = when (appSettings.bibleSettings.primaryBibleHorizontalAlignment) {
+        Constants.LEFT -> Arrangement.Start
+        Constants.RIGHT -> Arrangement.End
+        else -> Arrangement.Center
+    }
+
+    val primaryBibleReferenceHorizontalAlignment = when (appSettings.bibleSettings.primaryReferenceHorizontalAlignment) {
+        Constants.LEFT -> Arrangement.Start
+        Constants.RIGHT -> Arrangement.End
+        else -> Arrangement.Center
+    }
+
+    val secondaryBibleHorizontalAlignment = when (appSettings.bibleSettings.secondaryBibleHorizontalAlignment) {
+        Constants.LEFT -> Arrangement.Start
+        Constants.RIGHT -> Arrangement.End
+        else -> Arrangement.Center
+    }
+
+    val secondaryBibleReferenceHorizontalAlignment = when (appSettings.bibleSettings.secondaryReferenceHorizontalAlignment) {
+        Constants.LEFT -> Arrangement.Start
+        Constants.RIGHT -> Arrangement.End
+        else -> Arrangement.Center
+    }
+
     val primaryBibleReferencePosition = appSettings.bibleSettings.primaryReferencePosition
     val secondaryBibleReferencePosition = appSettings.bibleSettings.secondaryReferencePosition
 
@@ -86,7 +110,7 @@ fun BiblePresenter(
                 if (primaryBibleReferencePosition == Constants.POSITION_ABOVE) {
                     Row(
                         Modifier.fillMaxWidth().padding(16.dp),
-                        horizontalArrangement = Arrangement.End
+                        horizontalArrangement = primaryBibleReferenceHorizontalAlignment
                     ) {
                         Text(
                             fontFamily = primaryBibleReferenceFontStyle,
@@ -98,7 +122,7 @@ fun BiblePresenter(
                 }
                 Row(
                     Modifier.fillMaxWidth().padding(16.dp),
-                    horizontalArrangement = Arrangement.Center
+                    horizontalArrangement = primaryBibleHorizontalAlignment
                 ) {
                     Text(
                         fontFamily = primaryBibleFontStyle,
@@ -110,7 +134,7 @@ fun BiblePresenter(
                 if (primaryBibleReferencePosition == Constants.POSITION_BELOW) {
                     Row(
                         Modifier.fillMaxWidth().padding(16.dp),
-                        horizontalArrangement = Arrangement.End
+                        horizontalArrangement = primaryBibleReferenceHorizontalAlignment
                     ) {
                         Text(
                             fontFamily = primaryBibleReferenceFontStyle,
@@ -126,11 +150,11 @@ fun BiblePresenter(
                     if (secondaryBibleReferencePosition == Constants.POSITION_ABOVE) {
                         Row(
                             Modifier.fillMaxWidth().padding(16.dp),
-                            horizontalArrangement = Arrangement.End
+                            horizontalArrangement = secondaryBibleReferenceHorizontalAlignment
                         ) {
                             Text(
                                 fontFamily = secondaryBibleReferenceFontStyle,
-                                fontSize = scaledPrimaryReferenceSize,
+                                fontSize = scaledSecondaryReferenceSize,
                                 text = "${secondaryBible.bookName} ${secondaryBible.chapter}:${secondaryBible.verseNumber}",
                                 color = secondaryBibleTextColor
                             )
@@ -138,7 +162,7 @@ fun BiblePresenter(
                     }
                     Row(
                         Modifier.fillMaxWidth().padding(16.dp),
-                        horizontalArrangement = Arrangement.Center
+                        horizontalArrangement = secondaryBibleHorizontalAlignment
                     ) {
                         Text(
                             fontFamily = secondaryBibleFontStyle,
@@ -150,11 +174,11 @@ fun BiblePresenter(
                     if (secondaryBibleReferencePosition == Constants.POSITION_BELOW) {
                         Row(
                             Modifier.fillMaxWidth().padding(16.dp),
-                            horizontalArrangement = Arrangement.End
+                            horizontalArrangement = secondaryBibleReferenceHorizontalAlignment
                         ) {
                             Text(
                                 fontFamily = secondaryBibleReferenceFontStyle,
-                                fontSize = scaledPrimaryReferenceSize,
+                                fontSize = scaledSecondaryReferenceSize,
                                 text = "${secondaryBible.bookName} ${secondaryBible.chapter}:${secondaryBible.verseNumber}",
                                 color = secondaryBibleTextColor
                             )

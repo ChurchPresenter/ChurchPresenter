@@ -15,6 +15,8 @@ import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
 import org.churchpresenter.app.churchpresenter.composables.DropdownSettingsField
 import org.churchpresenter.app.churchpresenter.composables.FontSettingsDropdown
 import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
+import org.churchpresenter.app.churchpresenter.composables.PositionButtons
+import org.churchpresenter.app.churchpresenter.composables.HorizontalAlignmentButtons
 import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDefault
@@ -146,13 +148,6 @@ private fun LeftColumn(
     val backgroundColorStr = stringResource(Res.string.background_color_option)
     val backgroundImageStr = stringResource(Res.string.background_image_option)
 
-    // Position options
-    val positionAboveStr = stringResource(Res.string.position_above)
-    val positionBelowStr = stringResource(Res.string.position_below)
-
-    // Language options
-    val languageInterfaceStr = stringResource(Res.string.language_interface)
-    val languageDatabaseStr = stringResource(Res.string.language_database)
 
     // Storage Directory
     SectionHeader(stringResource(Res.string.storage_directory))
@@ -163,8 +158,7 @@ private fun LeftColumn(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text = if (settings.bibleSettings.storageDirectory.isNotEmpty()) settings.bibleSettings.storageDirectory
-            else stringResource(Res.string.no_directory_selected),
+            text = settings.bibleSettings.storageDirectory.ifEmpty { stringResource(Res.string.no_directory_selected) },
             modifier = Modifier.weight(1f)
                 .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(2.dp))
                 .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f), RoundedCornerShape(2.dp))
@@ -416,10 +410,6 @@ private fun RightColumn(
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
     availableFonts: List<String>
 ) {
-    // Position options
-    val positionAboveStr = stringResource(Res.string.position_above)
-    val positionBelowStr = stringResource(Res.string.position_below)
-
     // Language options
     val languageInterfaceStr = stringResource(Res.string.language_interface)
     val languageDatabaseStr = stringResource(Res.string.language_database)
@@ -464,6 +454,17 @@ private fun RightColumn(
                 onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(primaryBibleFontSize = it)) }
             },
             range = 8..72
+        )
+    }
+    SettingRow(stringResource(Res.string.horizontal_alignment), width = 200.dp) {
+        HorizontalAlignmentButtons(
+            selectedAlignment = settings.bibleSettings.primaryBibleHorizontalAlignment,
+            onAlignmentChange = { value ->
+                onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(primaryBibleHorizontalAlignment = value)) }
+            },
+            leftValue = Constants.LEFT,
+            centerValue = Constants.CENTER,
+            rightValue = Constants.RIGHT
         )
     }
 
@@ -512,21 +513,24 @@ private fun RightColumn(
         )
     }
     SettingRow(stringResource(Res.string.position)) {
-        DropdownSettingsField(
-            value = when (settings.bibleSettings.primaryReferencePosition) {
-                Constants.POSITION_ABOVE -> positionAboveStr
-                Constants.POSITION_BELOW -> positionBelowStr
-                else -> positionAboveStr
-            },
-            options = listOf(positionAboveStr, positionBelowStr),
-            onValueChange = { displayValue ->
-                val value = when (displayValue) {
-                    positionAboveStr -> Constants.POSITION_ABOVE
-                    positionBelowStr -> Constants.POSITION_BELOW
-                    else -> Constants.POSITION_ABOVE
-                }
+        PositionButtons(
+            selectedPosition = settings.bibleSettings.primaryReferencePosition,
+            onPositionChange = { value ->
                 onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(primaryReferencePosition = value)) }
-            }
+            },
+            aboveValue = Constants.POSITION_ABOVE,
+            belowValue = Constants.POSITION_BELOW
+        )
+    }
+    SettingRow(stringResource(Res.string.horizontal_alignment), width = 200.dp) {
+        HorizontalAlignmentButtons(
+            selectedAlignment = settings.bibleSettings.primaryReferenceHorizontalAlignment,
+            onAlignmentChange = { value ->
+                onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(primaryReferenceHorizontalAlignment = value)) }
+            },
+            leftValue = Constants.LEFT,
+            centerValue = Constants.CENTER,
+            rightValue = Constants.RIGHT
         )
     }
     Row(modifier = Modifier.fillMaxWidth().padding(vertical = 5.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -587,6 +591,17 @@ private fun RightColumn(
             range = 8..72
         )
     }
+    SettingRow(stringResource(Res.string.horizontal_alignment), width = 200.dp) {
+        HorizontalAlignmentButtons(
+            selectedAlignment = settings.bibleSettings.secondaryBibleHorizontalAlignment,
+            onAlignmentChange = { value ->
+                onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(secondaryBibleHorizontalAlignment = value)) }
+            },
+            leftValue = Constants.LEFT,
+            centerValue = Constants.CENTER,
+            rightValue = Constants.RIGHT
+        )
+    }
 
     Spacer(modifier = Modifier.height(20.dp))
 
@@ -633,21 +648,24 @@ private fun RightColumn(
         )
     }
     SettingRow(stringResource(Res.string.position)) {
-        DropdownSettingsField(
-            value = when (settings.bibleSettings.secondaryReferencePosition) {
-                Constants.POSITION_ABOVE -> positionAboveStr
-                Constants.POSITION_BELOW -> positionBelowStr
-                else -> positionAboveStr
-            },
-            options = listOf(positionAboveStr, positionBelowStr),
-            onValueChange = { displayValue ->
-                val value = when (displayValue) {
-                    positionAboveStr -> Constants.POSITION_ABOVE
-                    positionBelowStr -> Constants.POSITION_BELOW
-                    else -> Constants.POSITION_ABOVE
-                }
+        PositionButtons(
+            selectedPosition = settings.bibleSettings.secondaryReferencePosition,
+            onPositionChange = { value ->
                 onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(secondaryReferencePosition = value)) }
-            }
+            },
+            aboveValue = Constants.POSITION_ABOVE,
+            belowValue = Constants.POSITION_BELOW
+        )
+    }
+    SettingRow(stringResource(Res.string.horizontal_alignment), width = 200.dp) {
+        HorizontalAlignmentButtons(
+            selectedAlignment = settings.bibleSettings.secondaryReferenceHorizontalAlignment,
+            onAlignmentChange = { value ->
+                onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(secondaryReferenceHorizontalAlignment = value)) }
+            },
+            leftValue = Constants.LEFT,
+            centerValue = Constants.CENTER,
+            rightValue = Constants.RIGHT
         )
     }
     Row(modifier = Modifier.fillMaxWidth().padding(vertical = 5.dp), verticalAlignment = Alignment.CenterVertically) {

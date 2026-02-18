@@ -22,6 +22,9 @@ import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
 import org.churchpresenter.app.churchpresenter.composables.DropdownSettingsField
 import org.churchpresenter.app.churchpresenter.composables.FontSettingsDropdown
 import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
+import org.churchpresenter.app.churchpresenter.composables.HorizontalAlignmentButtons
+import org.churchpresenter.app.churchpresenter.composables.VerticalAlignmentButtons
+import org.churchpresenter.app.churchpresenter.composables.PositionButtons
 import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.Utils
@@ -97,11 +100,6 @@ private fun LeftColumn(
     val noneStr = stringResource(Res.string.none)
     val firstPageStr = stringResource(Res.string.first_page)
     val everyPageStr = stringResource(Res.string.every_page)
-    val aboveVerseStr = stringResource(Res.string.above_verse)
-    val belowVerseStr = stringResource(Res.string.below_verse)
-    val leftStr = stringResource(Res.string.left)
-    val centerStr = stringResource(Res.string.center)
-    val rightStr = stringResource(Res.string.right)
 
     // Dialog message strings
     val pleaseSelectDirectoryStr = stringResource(Res.string.please_select_directory_first)
@@ -376,21 +374,6 @@ private fun LeftColumn(
         }
     }
 
-//    MinMaxRow(
-//        minValue = settings.songSettings.titleMinFontSize,
-//        maxValue = settings.songSettings.titleMaxFontSize,
-//        onMinChange = {
-//            onSettingsChange.invoke(
-//                settings.copy(songSettings = settings.songSettings.copy(titleMinFontSize = it))
-//            )
-//        },
-//        onMaxChange = {
-//            onSettingsChange.invoke(
-//                settings.copy(songSettings = settings.songSettings.copy(titleMaxFontSize = it))
-//            )
-//        }
-//    )
-
     SettingRow(stringResource(Res.string.color)) {
         ColorPickerField(
             color = settings.songSettings.titleColor,
@@ -403,44 +386,29 @@ private fun LeftColumn(
     }
 
     SettingRow(stringResource(Res.string.vertical_alignment), width = 200.dp) {
-        DropdownSettingsField(
-            value = when (settings.songSettings.titlePosition) {
-                Constants.BELOW_VERSE -> belowVerseStr
-                else -> aboveVerseStr
-            },
-            options = listOf(belowVerseStr, aboveVerseStr),
-            onValueChange = { displayValue ->
-                val storedValue = when (displayValue) {
-                    belowVerseStr -> Constants.BELOW_VERSE
-                    else -> Constants.ABOVE_VERSE
-                }
+        PositionButtons(
+            selectedPosition = settings.songSettings.titlePosition,
+            onPositionChange = { storedValue ->
                 onSettingsChange.invoke(
                     settings.copy(songSettings = settings.songSettings.copy(titlePosition = storedValue))
                 )
-            }
+            },
+            aboveValue = Constants.ABOVE_VERSE,
+            belowValue = Constants.BELOW_VERSE
         )
     }
 
     SettingRow(stringResource(Res.string.horizontal_alignment), width = 200.dp) {
-        DropdownSettingsField(
-            value = when (settings.songSettings.titleHorizontalAlignment) {
-                Constants.LEFT -> leftStr
-                Constants.CENTER -> centerStr
-                Constants.RIGHT -> rightStr
-                else -> centerStr
-            },
-            options = listOf(leftStr, centerStr, rightStr),
-            onValueChange = { displayValue ->
-                val storedValue = when (displayValue) {
-                    leftStr -> Constants.LEFT
-                    centerStr -> Constants.CENTER
-                    rightStr -> Constants.RIGHT
-                    else -> Constants.CENTER
-                }
+        HorizontalAlignmentButtons(
+            selectedAlignment = settings.songSettings.titleHorizontalAlignment,
+            onAlignmentChange = { storedValue ->
                 onSettingsChange.invoke(
                     settings.copy(songSettings = settings.songSettings.copy(titleHorizontalAlignment = storedValue))
                 )
-            }
+            },
+            leftValue = Constants.LEFT,
+            centerValue = Constants.CENTER,
+            rightValue = Constants.RIGHT
         )
     }
 }
@@ -452,12 +420,6 @@ private fun RightColumn(
     availableFonts: List<String>
 ) {
     // Store string resources to avoid calling stringResource in callbacks
-    val topStr = stringResource(Res.string.top)
-    val middleStr = stringResource(Res.string.middle)
-    val bottomStr = stringResource(Res.string.bottom)
-    val leftStr = stringResource(Res.string.left)
-    val centerStr = stringResource(Res.string.center)
-    val rightStr = stringResource(Res.string.right)
     val topLeftStr = stringResource(Res.string.top_left)
     val topRightStr = stringResource(Res.string.top_right)
     val bottomLeftStr = stringResource(Res.string.bottom_left)
@@ -559,48 +521,30 @@ private fun RightColumn(
     Spacer(modifier = Modifier.height(5.dp))
 
     SettingRow(stringResource(Res.string.vertical_alignment), width = 200.dp) {
-        DropdownSettingsField(
-            value = when (settings.songSettings.lyricsAlignment) {
-                Constants.TOP -> topStr
-                Constants.MIDDLE -> middleStr
-                Constants.BOTTOM -> bottomStr
-                else -> middleStr
-            },
-            options = listOf(topStr, middleStr, bottomStr),
-            onValueChange = { displayValue ->
-                val storedValue = when (displayValue) {
-                    topStr -> Constants.TOP
-                    middleStr -> Constants.MIDDLE
-                    bottomStr -> Constants.BOTTOM
-                    else -> Constants.MIDDLE
-                }
+        VerticalAlignmentButtons(
+            selectedAlignment = settings.songSettings.lyricsAlignment,
+            onAlignmentChange = { storedValue ->
                 onSettingsChange.invoke(
                     settings.copy(songSettings = settings.songSettings.copy(lyricsAlignment = storedValue))
                 )
-            }
+            },
+            topValue = Constants.TOP,
+            middleValue = Constants.MIDDLE,
+            bottomValue = Constants.BOTTOM
         )
     }
 
     SettingRow(stringResource(Res.string.horizontal_alignment), width = 200.dp) {
-        DropdownSettingsField(
-            value = when (settings.songSettings.lyricsHorizontalAlignment) {
-                Constants.LEFT -> leftStr
-                Constants.CENTER -> centerStr
-                Constants.RIGHT -> rightStr
-                else -> centerStr
-            },
-            options = listOf(leftStr, centerStr, rightStr),
-            onValueChange = { displayValue ->
-                val storedValue = when (displayValue) {
-                    leftStr -> Constants.LEFT
-                    centerStr -> Constants.CENTER
-                    rightStr -> Constants.RIGHT
-                    else -> Constants.CENTER
-                }
+        HorizontalAlignmentButtons(
+            selectedAlignment = settings.songSettings.lyricsHorizontalAlignment,
+            onAlignmentChange = { storedValue ->
                 onSettingsChange.invoke(
                     settings.copy(songSettings = settings.songSettings.copy(lyricsHorizontalAlignment = storedValue))
                 )
-            }
+            },
+            leftValue = Constants.LEFT,
+            centerValue = Constants.CENTER,
+            rightValue = Constants.RIGHT
         )
     }
 
