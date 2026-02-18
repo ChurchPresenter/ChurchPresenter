@@ -30,14 +30,12 @@ class SettingsManager {
                 try {
                     jsonFormat.decodeFromString<AppSettings>(json)
                 } catch (e: Exception) {
-                    println("Error parsing settings: ${e.message}")
                     AppSettings()
                 }
             } else {
                 AppSettings() // Return default settings
             }
         } catch (e: Exception) {
-            println("Error loading settings: ${e.message}")
             AppSettings() // Return default settings on error
         }
     }
@@ -46,9 +44,8 @@ class SettingsManager {
         try {
             val json = jsonFormat.encodeToString(settings)
             settingsFile.writeText(json)
-            println("Settings saved to: ${settingsFile.absolutePath}")
         } catch (e: Exception) {
-            println("Error saving settings: ${e.message}")
+            // Silently handle error
         }
     }
 }

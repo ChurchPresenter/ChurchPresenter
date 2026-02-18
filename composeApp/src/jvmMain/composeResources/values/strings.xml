@@ -244,4 +244,13 @@
     <string name="error_failed_delete">Failed to delete file</string>
     <string name="error_deleting_file">Error deleting file: %s</string>
     <string name="warning">Warning</string>
+
+    <!-- Edit Song Dialog -->
+    <string name="edit_song">Edit Song</string>
+    <string name="song_title">Song Title</string>
+    <string name="author">Author</string>
+    <string name="composer">Composer</string>
+    <string name="enter_lyrics_here">Enter lyrics here...</string>
+    <string name="lyrics_format_help">Format: Use line breaks to separate verses. Start verse lines with "Куплет" or "Припев".</string>
+    <string name="save">Save</string>
 </resources>

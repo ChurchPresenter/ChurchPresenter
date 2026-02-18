@@ -45,6 +45,7 @@ import churchpresenter.composeapp.generated.resources.add_to_schedule
 import churchpresenter.composeapp.generated.resources.all_song_books
 import churchpresenter.composeapp.generated.resources.all_song_categories
 import churchpresenter.composeapp.generated.resources.contains
+import churchpresenter.composeapp.generated.resources.edit_song
 import churchpresenter.composeapp.generated.resources.exact_match
 import churchpresenter.composeapp.generated.resources.filter_colon
 import churchpresenter.composeapp.generated.resources.filter_type_colon
@@ -59,13 +60,17 @@ import churchpresenter.composeapp.generated.resources.starts_with
 import churchpresenter.composeapp.generated.resources.title
 import churchpresenter.composeapp.generated.resources.tune
 import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
+import org.churchpresenter.app.churchpresenter.data.SongItem
+import org.churchpresenter.app.churchpresenter.dialogs.EditSongDialog
 import org.churchpresenter.app.churchpresenter.models.LyricSection
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.Constants.CHORUS
 import org.churchpresenter.app.churchpresenter.utils.Constants.CHORUS_RUS
 import org.churchpresenter.app.churchpresenter.utils.Constants.VERSE
 import org.churchpresenter.app.churchpresenter.utils.Constants.VERSE_RUS
+import org.churchpresenter.app.churchpresenter.viewmodel.ScheduleViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.SongsViewModel
 import org.jetbrains.compose.resources.stringResource
 
@@ -73,9 +78,10 @@ import org.jetbrains.compose.resources.stringResource
 fun SongsTab(
     modifier: Modifier = Modifier,
     viewModel: SongsViewModel,
-    scheduleViewModel: org.churchpresenter.app.churchpresenter.viewmodel.ScheduleViewModel? = null,
+    scheduleViewModel: ScheduleViewModel? = null,
     onSongItemSelected: (LyricSection) -> Unit,
-    onPresenting: (Presenting) -> Unit = { Presenting.NONE }
+    onPresenting: (Presenting) -> Unit = { Presenting.NONE },
+    theme: ThemeMode = ThemeMode.SYSTEM
 ) {
     // Get state from ViewModel
     val songbooks by viewModel.songbooks
@@ -84,6 +90,10 @@ fun SongsTab(
     val filterType by viewModel.filterType
     val selectedSongIndex by viewModel.selectedSongIndex
     val selectedSectionIndex by viewModel.selectedSectionIndex
+
+    // Edit Song Dialog state
+    var showEditDialog by remember { mutableStateOf(false) }
+    var songToEdit by remember { mutableStateOf<SongItem?>(null) }
 
     // String resources
     val allSongBooksText = stringResource(Res.string.all_song_books)
@@ -364,15 +374,10 @@ fun SongsTab(
 
                 // Auto-scroll to selected song when selection changes
                 LaunchedEffect(selectedSongIndex, filteredSongs.size) {
-                    println("DEBUG SongsTab: LaunchedEffect triggered - selectedSongIndex=$selectedSongIndex, filteredSongs.size=${filteredSongs.size}")
                     if (selectedSongIndex >= 0 && selectedSongIndex < filteredSongs.size) {
-                        println("DEBUG SongsTab: Scrolling to item at index $selectedSongIndex")
                         // Small delay to ensure the list is fully composed
                         kotlinx.coroutines.delay(100)
                         lazyListState.animateScrollToItem(selectedSongIndex)
-                        println("DEBUG SongsTab: Scroll animation complete")
-                    } else {
-                        println("DEBUG SongsTab: Skipping scroll - index out of bounds")
                     }
                 }
 
@@ -480,6 +485,28 @@ fun SongsTab(
                     overflow = TextOverflow.Ellipsis,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
+
+                // Edit Button
+                if (selectedSongIndex >= 0 && selectedSongIndex < filteredSongs.size) {
+                    Button(
+                        modifier = Modifier.wrapContentSize().padding(end = 4.dp),
+                        onClick = {
+                            songToEdit = filteredSongs[selectedSongIndex]
+                            showEditDialog = true
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.tertiary
+                        )
+                    ) {
+                        Text(
+                            text = stringResource(Res.string.edit_song),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onTertiary,
+                            maxLines = 1
+                        )
+                    }
+                }
+
                 Button(
                     modifier = Modifier.wrapContentSize(),
                     onClick = { onPresenting(Presenting.LYRICS) },
@@ -642,4 +669,19 @@ fun SongsTab(
             }
         }
     }
+
+    // Edit Song Dialog
+    EditSongDialog(
+        isVisible = showEditDialog,
+        song = songToEdit,
+        theme = theme,
+        onDismiss = { showEditDialog = false },
+        onSave = { updatedSong ->
+            // Save the song to database
+            songToEdit?.let { oldSong ->
+                viewModel.updateSong(oldSong, updatedSong)
+            }
+        }
+    )
 }
+

@@ -43,7 +43,8 @@ fun MainDesktop(
     onVerseSelected: (List<SelectedVerse>) -> Unit,
     onSongItemSelected: (LyricSection) -> Unit,
     onTabChange: (Int) -> Unit = {},
-    onScheduleItemSelected: (String?) -> Unit = {}
+    onScheduleItemSelected: (String?) -> Unit = {},
+    theme: org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode = org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode.SYSTEM
 ) {
     Box(
         modifier = modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)
@@ -120,7 +121,8 @@ fun MainDesktop(
                         viewModel = songsViewModel,
                         scheduleViewModel = scheduleViewModel,
                         onSongItemSelected = onSongItemSelected,
-                        onPresenting = presenting
+                        onPresenting = presenting,
+                        theme = theme
                     )
 
                     Tabs.PICTURES -> PicturesTab()

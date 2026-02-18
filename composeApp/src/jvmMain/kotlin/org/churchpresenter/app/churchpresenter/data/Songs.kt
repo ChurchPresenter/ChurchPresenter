@@ -5,10 +5,6 @@ import org.churchpresenter.app.churchpresenter.utils.Constants
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.nio.file.Paths
-import java.util.logging.Level
-import java.util.logging.Logger
-
-private val songsLogger: Logger = Logger.getLogger("org.churchpresenter.Songs")
 
 
 class Songs {
@@ -32,9 +28,7 @@ class Songs {
                 if (Files.exists(path)) {
                     Files.newBufferedReader(path, StandardCharsets.UTF_8)
                 } else {
-                    val msg = "loadFromSpsAppend: resource not found on classpath or filesystem: $resourcePath"
-                    songsLogger.severe(msg)
-                    throw IllegalArgumentException(msg)
+                    throw IllegalArgumentException("loadFromSpsAppend: resource not found on classpath or filesystem: $resourcePath")
                 }
             }
 
@@ -95,7 +89,6 @@ class Songs {
                 }
             }
         } catch (e: Exception) {
-            songsLogger.log(Level.SEVERE, "loadFromSpsAppend failed for resourcePath=$resourcePath", e)
             throw e
         }
     }
@@ -219,4 +212,148 @@ class Songs {
 
         return songs.filter { it.songbook.contains(songbook, ignoreCase = true) }
     }
+
+    /**
+     * Update a song in the in-memory list
+     */
+    fun updateSong(oldSong: SongItem, newSong: SongItem) {
+        val index = songs.indexOfFirst { it.number == oldSong.number && it.songbook == oldSong.songbook }
+        if (index >= 0) {
+            songs[index] = newSong
+        }
+    }
+
+    /**
+     * Save updated song back to the .sps file
+     * This finds the correct file based on songbook and updates the song entry
+     */
+    fun saveSongToFile(originalSong: SongItem, updatedSong: SongItem, storageDirectory: String): Boolean {
+        try {
+            if (storageDirectory.isEmpty()) {
+                return false
+            }
+
+            val dir = java.io.File(storageDirectory)
+            if (!dir.exists() || !dir.isDirectory) {
+                return false
+            }
+
+            // Find the .sps file that contains this song
+            val spsFiles = dir.listFiles { file ->
+                file.extension.lowercase() == Constants.EXTENSION_SPS
+            } ?: emptyArray()
+
+            var fileSaved = false
+            for (file in spsFiles) {
+                if (updateSongInFile(file.absolutePath, originalSong, updatedSong)) {
+                    fileSaved = true
+                    break
+                }
+            }
+
+            return fileSaved
+        } catch (e: Exception) {
+            return false
+        }
+    }
+
+    /**
+     * Update a song in a specific .sps file
+     */
+    private fun updateSongInFile(filePath: String, originalSong: SongItem, updatedSong: SongItem): Boolean {
+        try {
+            val path = Paths.get(filePath)
+            if (!Files.exists(path)) {
+                return false
+            }
+
+            // Read all lines
+            val lines = Files.readAllLines(path, StandardCharsets.UTF_8).toMutableList()
+            var songFound = false
+            var songUpdated = false
+
+            for (i in lines.indices) {
+                val line = lines[i]
+
+                // Skip header and empty lines
+                if (line.startsWith("##") || line.isBlank()) continue
+
+                // Parse song entry
+                val parts = line.split("#\$#")
+                if (parts.size >= 6) {
+                    val number = parts[0]
+                    val title = parts[1]
+
+                    // Check if this is the song we want to update (using ORIGINAL song data)
+                    if (number == originalSong.number && title == originalSong.title) {
+                        songFound = true
+
+                        // Format lyrics back to SPS format
+                        val lyricsText = formatLyricsForSps(updatedSong.lyrics)
+
+                        // Reconstruct the line with updated values
+                        val categoryId = if (parts.size >= 3) parts[2] else ""
+
+                        val updatedLine = "${updatedSong.number}#\$#${updatedSong.title}#\$#$categoryId#\$#${updatedSong.tune}#\$#${updatedSong.author}#\$#${updatedSong.composer}#\$#$lyricsText"
+
+                        lines[i] = updatedLine
+                        songUpdated = true
+                        break
+                    }
+                }
+            }
+
+            if (songUpdated) {
+                // Write back to file
+                Files.write(path, lines, StandardCharsets.UTF_8)
+                return true
+            }
+
+            return songFound
+        } catch (e: Exception) {
+            return false
+        }
+    }
+
+    /**
+     * Format lyrics list back to SPS format
+     * Converts List<String> back to the @$ and @% delimited format
+     */
+    private fun formatLyricsForSps(lyrics: List<String>): String {
+        if (lyrics.isEmpty()) return ""
+
+        val result = StringBuilder()
+        var currentSection = StringBuilder()
+
+        for (line in lyrics) {
+            val trimmedLine = line.trim()
+
+            // Check if this is a section marker (Куплет, Припев, etc.)
+            if (trimmedLine.matches(Regex("^(Куплет|Припев|Verse|Chorus|Bridge).*", RegexOption.IGNORE_CASE))) {
+                // If we have accumulated lines, save them as a section
+                if (currentSection.isNotEmpty()) {
+                    if (result.isNotEmpty()) result.append("@\$")
+                    result.append(currentSection)
+                    currentSection = StringBuilder()
+                }
+                // Start new section with the marker
+                currentSection.append(trimmedLine)
+            } else if (trimmedLine.isNotEmpty()) {
+                // Add line to current section
+                if (currentSection.isNotEmpty()) {
+                    currentSection.append("@%")
+                }
+                currentSection.append(trimmedLine)
+            }
+        }
+
+        // Add last section
+        if (currentSection.isNotEmpty()) {
+            if (result.isNotEmpty()) result.append("@\$")
+            result.append(currentSection)
+        }
+
+        return result.toString()
+    }
 }
+

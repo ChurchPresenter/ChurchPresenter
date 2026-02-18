@@ -149,7 +149,8 @@ fun main() = application {
                 },
                 onScheduleItemSelected = { itemId ->
                     selectedScheduleItemId = itemId
-                }
+                },
+                theme = theme
             )
 
             // Options Dialog

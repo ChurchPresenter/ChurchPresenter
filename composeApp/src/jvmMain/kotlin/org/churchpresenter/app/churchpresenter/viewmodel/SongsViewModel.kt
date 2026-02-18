@@ -57,11 +57,9 @@ class SongsViewModel(
                 // Load each .sps file (sorted alphabetically) - using append to combine all databases
                 spsFiles.sortedBy { it.name }.forEach { file ->
                     try {
-                        println("Loading song database: ${file.name}")
                         songs.loadFromSpsAppend(file.absolutePath)
-                        println("Total songs loaded so far: ${songs.getSongCount()}")
                     } catch (e: Exception) {
-                        println("Error loading ${file.name}: ${e.message}")
+                        // Silently handle error
                     }
                 }
             }
@@ -70,14 +68,11 @@ class SongsViewModel(
         // If no files were loaded, try to load the bundled resource as fallback
         if (songs.getSongCount() == 0) {
             try {
-                println("No song files found in directory, loading bundled resource")
                 songs.loadFromSps(Constants.FALLBACK_SONG_RESOURCE)
             } catch (e: Exception) {
-                println("Error loading bundled resource: ${e.message}")
+                // Silently handle error
             }
         }
-
-        println("Total songs in database: ${songs.getSongCount()}")
         _songsData.value = songs
 
         // Extract unique songbook names
@@ -114,27 +109,19 @@ class SongsViewModel(
     }
 
     fun selectSongByDetails(songNumber: Int, title: String, songbook: String): Boolean {
-        println("DEBUG selectSongByDetails: Looking for song #$songNumber - $title in $songbook")
-
         // First, check if we need to update the songbook filter
         val songData = _songsData.value.getSongs().find {
             it.number == songNumber.toString() && it.title.equals(title, ignoreCase = true)
         }
 
         if (songData == null) {
-            println("DEBUG selectSongByDetails: Song not found in database")
             return false  // Song not found in database
         }
 
-        println("DEBUG selectSongByDetails: Song found in database, actual songbook=${songData.songbook}")
-        println("DEBUG selectSongByDetails: Current filter songbook=${_selectedSongbook.value}")
-
         // Update the songbook filter if needed
         if (songData.songbook != _selectedSongbook.value) {
-            println("DEBUG selectSongByDetails: Updating songbook filter to ${songData.songbook}")
             _selectedSongbook.value = songData.songbook
             applyFilters()
-            println("DEBUG selectSongByDetails: After filter, filtered songs count=${_filteredSongs.value.size}")
         }
 
         // Now find the song in the filtered list
@@ -142,16 +129,12 @@ class SongsViewModel(
             song.contains("$songNumber.") && song.contains(title, ignoreCase = true)
         }
 
-        println("DEBUG selectSongByDetails: Song index in filtered list=$index")
-
         if (index >= 0) {
             _selectedSongIndex.value = index
             _selectedSectionIndex.value = 0  // Select first section
-            println("DEBUG selectSongByDetails: Selected song at index $index, section set to 0")
             return true
         }
 
-        println("DEBUG selectSongByDetails: Song not found in filtered list")
         return false
     }
 
@@ -313,6 +296,30 @@ class SongsViewModel(
         // Adjust selected index if needed
         if (_selectedSongIndex.value >= filtered.size && filtered.isNotEmpty()) {
             _selectedSongIndex.value = 0
+        }
+    }
+
+    /**
+     * Update a song in the database and reload songs
+     */
+    fun updateSong(oldSong: org.churchpresenter.app.churchpresenter.data.SongItem, newSong: org.churchpresenter.app.churchpresenter.data.SongItem): Boolean {
+        try {
+            // Update in memory
+            _songsData.value.updateSong(oldSong, newSong)
+
+            // Save to file (pass BOTH old and new song)
+            val saved = _songsData.value.saveSongToFile(oldSong, newSong, appSettings.songSettings.storageDirectory)
+
+            if (saved) {
+                // Reload songs to reflect changes
+                loadSongs()
+                return true
+            }
+
+            return false
+        } catch (e: Exception) {
+            e.printStackTrace()
+            return false
         }
     }
 }
