@@ -456,7 +456,7 @@ private fun LeftColumn(
     Spacer(modifier = Modifier.height(8.dp))
     SettingRow(stringResource(Res.string.background_type)) {
         DropdownSettingsField(
-            value = when (settings.bibleSettings.backgroundType) {
+            value = when (settings.backgroundSettings.bibleBackground.backgroundType) {
                 Constants.BACKGROUND_DEFAULT -> backgroundDefaultStr
                 Constants.BACKGROUND_COLOR -> backgroundColorStr
                 Constants.BACKGROUND_IMAGE -> backgroundImageStr
@@ -470,17 +470,25 @@ private fun LeftColumn(
                     backgroundImageStr -> Constants.BACKGROUND_IMAGE
                     else -> Constants.BACKGROUND_DEFAULT
                 }
-                onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(backgroundType = value)) }
+                onSettingsChange { s ->
+                    s.copy(backgroundSettings = s.backgroundSettings.copy(
+                        bibleBackground = s.backgroundSettings.bibleBackground.copy(backgroundType = value)
+                    ))
+                }
             }
         )
     }
 
-    if (settings.bibleSettings.backgroundType == Constants.BACKGROUND_COLOR) {
+    if (settings.backgroundSettings.bibleBackground.backgroundType == Constants.BACKGROUND_COLOR) {
         SettingRow(stringResource(Res.string.background_color)) {
             ColorPickerField(
-                color = settings.bibleSettings.backgroundColor,
+                color = settings.backgroundSettings.bibleBackground.backgroundColor,
                 onColorChange = {
-                    onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(backgroundColor = it)) }
+                    onSettingsChange { s ->
+                        s.copy(backgroundSettings = s.backgroundSettings.copy(
+                            bibleBackground = s.backgroundSettings.bibleBackground.copy(backgroundColor = it)
+                        ))
+                    }
                 }
             )
         }

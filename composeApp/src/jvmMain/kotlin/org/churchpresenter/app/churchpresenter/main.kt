@@ -87,114 +87,115 @@ fun main() = application {
             AppThemeWrapper(theme = theme) {
 
                 NavigationTopBar(
-                onAbout = { presenterManager.setShowPresenterWindow(true) },
-                theme = {
-                    appSettings = appSettings.copy(theme = it.toString())
-                    theme = it
-                    settingsManager.saveSettings(appSettings)
-                },
-                onLanguageChange = { language ->
-                    currentLanguage = language
-                    appSettings = appSettings.copy(language = language.code)
-                    settingsManager.saveSettings(appSettings)
-                    Locale.setDefault(Locale.forLanguageTag(language.code))
-                },
-                onSettings = {
-                    showOptionsDialog = true
-                },
-                onExit = { exitApplication() },
-                onAddToSchedule = {
-                    // Add currently selected song or verse to schedule
-                    when (currentTab) {
-                        0 -> { // Bible tab
-                            // Use getSelectedVerses which already has the right logic
-                            val verses = bibleViewModel.getSelectedVerses()
-                            verses.firstOrNull()?.let { verse ->
-                                scheduleViewModel.addBibleVerse(
-                                    bookName = verse.bookName,
-                                    chapter = verse.chapter,
-                                    verseNumber = verse.verseNumber,
-                                    verseText = verse.verseText
-                                )
-                            }
-                        }
-                        1 -> { // Songs tab
-                            // Access the filtered songs and get the selected song
-                            val selectedIndex = songsViewModel.selectedSongIndex.value
-                            val filteredSongs = songsViewModel.filteredSongs.value
-                            val allSongs = songsViewModel.songsData.value.getSongs()
-
-                            if (selectedIndex >= 0 && selectedIndex < filteredSongs.size) {
-                                // Map back to Song objects
-                                val songText = filteredSongs[selectedIndex]
-                                val song = allSongs.find { "${it.number}. ${it.title}" == songText }
-
-                                song?.let {
-                                    scheduleViewModel.addSong(
-                                        songNumber = it.number.toIntOrNull() ?: 0,
-                                        title = it.title,
-                                        songbook = it.songbook
+                    onAbout = { presenterManager.setShowPresenterWindow(true) },
+                    theme = {
+                        appSettings = appSettings.copy(theme = it.toString())
+                        theme = it
+                        settingsManager.saveSettings(appSettings)
+                    },
+                    onLanguageChange = { language ->
+                        currentLanguage = language
+                        appSettings = appSettings.copy(language = language.code)
+                        settingsManager.saveSettings(appSettings)
+                        Locale.setDefault(Locale.forLanguageTag(language.code))
+                    },
+                    onSettings = {
+                        showOptionsDialog = true
+                    },
+                    onExit = { exitApplication() },
+                    onAddToSchedule = {
+                        // Add currently selected song or verse to schedule
+                        when (currentTab) {
+                            0 -> { // Bible tab
+                                // Use getSelectedVerses which already has the right logic
+                                val verses = bibleViewModel.getSelectedVerses()
+                                verses.firstOrNull()?.let { verse ->
+                                    scheduleViewModel.addBibleVerse(
+                                        bookName = verse.bookName,
+                                        chapter = verse.chapter,
+                                        verseNumber = verse.verseNumber,
+                                        verseText = verse.verseText
                                     )
                                 }
                             }
-                        }
-                    }
-                },
-                onRemoveFromSchedule = {
-                    // Remove selected item from schedule
-                    selectedScheduleItemId?.let { id ->
-                        scheduleViewModel.removeItem(id)
-                        selectedScheduleItemId = null
-                    }
-                },
-                onClearSchedule = {
-                    // Clear all schedule items
-                    scheduleViewModel.clearSchedule()
-                    selectedScheduleItemId = null
-                },
-            )
-            MainDesktop(
-                onVerseSelected = { verses ->
-                    presenterManager.setSelectedVerses(verses)
-                },
-                onSongItemSelected = {
-                    presenterManager.setLyricSection(it)
-                },
-                appSettings = appSettings,
-                bibleViewModel = bibleViewModel,
-                songsViewModel = songsViewModel,
-                scheduleViewModel = scheduleViewModel,
-                presenting = { presenterManager.setPresentingMode(it) },
-                onTabChange = { tabIndex ->
-                    currentTab = tabIndex
-                },
-                onScheduleItemSelected = { itemId ->
-                    selectedScheduleItemId = itemId
-                },
-                onShowSettings = {
-                    showOptionsDialog = true
-                },
-                onThemeChange = { newTheme ->
-                    appSettings = appSettings.copy(theme = newTheme.toString())
-                    theme = newTheme
-                    settingsManager.saveSettings(appSettings)
-                },
-                theme = theme
-            )
 
-            // Options Dialog
-            OptionsDialog(
-                isVisible = showOptionsDialog,
-                theme = theme,
-                settingsManager = settingsManager,
-                onDismiss = { showOptionsDialog = false },
-                onSave = {
-                    appSettings = it
-                    // Reload ViewModels with new settings
-                    bibleViewModel.loadBibles()
-                    songsViewModel.loadSongs()
-                }
-            )
+                            1 -> { // Songs tab
+                                // Access the filtered songs and get the selected song
+                                val selectedIndex = songsViewModel.selectedSongIndex.value
+                                val filteredSongs = songsViewModel.filteredSongs.value
+                                val allSongs = songsViewModel.songsData.value.getSongs()
+
+                                if (selectedIndex >= 0 && selectedIndex < filteredSongs.size) {
+                                    // Map back to Song objects
+                                    val songText = filteredSongs[selectedIndex]
+                                    val song = allSongs.find { "${it.number}. ${it.title}" == songText }
+
+                                    song?.let {
+                                        scheduleViewModel.addSong(
+                                            songNumber = it.number.toIntOrNull() ?: 0,
+                                            title = it.title,
+                                            songbook = it.songbook
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    onRemoveFromSchedule = {
+                        // Remove selected item from schedule
+                        selectedScheduleItemId?.let { id ->
+                            scheduleViewModel.removeItem(id)
+                            selectedScheduleItemId = null
+                        }
+                    },
+                    onClearSchedule = {
+                        // Clear all schedule items
+                        scheduleViewModel.clearSchedule()
+                        selectedScheduleItemId = null
+                    },
+                )
+                MainDesktop(
+                    onVerseSelected = { verses ->
+                        presenterManager.setSelectedVerses(verses)
+                    },
+                    onSongItemSelected = {
+                        presenterManager.setLyricSection(it)
+                    },
+                    appSettings = appSettings,
+                    bibleViewModel = bibleViewModel,
+                    songsViewModel = songsViewModel,
+                    scheduleViewModel = scheduleViewModel,
+                    presenting = { presenterManager.setPresentingMode(it) },
+                    onTabChange = { tabIndex ->
+                        currentTab = tabIndex
+                    },
+                    onScheduleItemSelected = { itemId ->
+                        selectedScheduleItemId = itemId
+                    },
+                    onShowSettings = {
+                        showOptionsDialog = true
+                    },
+                    onThemeChange = { newTheme ->
+                        appSettings = appSettings.copy(theme = newTheme.toString())
+                        theme = newTheme
+                        settingsManager.saveSettings(appSettings)
+                    },
+                    theme = theme
+                )
+
+                // Options Dialog
+                OptionsDialog(
+                    isVisible = showOptionsDialog,
+                    theme = theme,
+                    settingsManager = settingsManager,
+                    onDismiss = { showOptionsDialog = false },
+                    onSave = {
+                        appSettings = it
+                        // Reload ViewModels with new settings
+                        bibleViewModel.loadBibles()
+                        songsViewModel.loadSongs()
+                    }
+                )
             }
         }
     }
@@ -218,7 +219,7 @@ fun main() = application {
             onCloseRequest = { presenterManager.setShowPresenterWindow(false) },
             state = windowState,
         ) {
-            PresenterScreen(modifier = Modifier.fillMaxSize()) {
+            PresenterScreen(modifier = Modifier.fillMaxSize(), appSettings = appSettings) {
                 Column {
                     if (presentingMode == Presenting.BIBLE) {
                         BiblePresenter(selectedVerses = selectedVerses, appSettings = appSettings)

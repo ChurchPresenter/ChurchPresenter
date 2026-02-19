@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.presenter
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -15,16 +16,24 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.paint
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.BitmapPainter
+import androidx.compose.ui.graphics.toComposeImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlin.math.min
 import org.churchpresenter.app.churchpresenter.data.AppSettings
+import org.churchpresenter.app.churchpresenter.extensions.conditional
 import org.churchpresenter.app.churchpresenter.models.LyricSection
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.Constants.VERSE_1_RUS
 import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
 import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDefault
+import org.jetbrains.skia.Image
+import java.io.File
 
 @Composable
 fun SongPresenter(
@@ -62,7 +71,50 @@ fun SongPresenter(
         appSettings.songSettings.titleHorizontalAlignment
     )
 
-    BoxWithConstraints(modifier.fillMaxSize()) {
+    // Background settings
+    var backgroundColor: Color = parseHexColor(appSettings.backgroundSettings.songBackground.backgroundColor)
+    val backgroundType = appSettings.backgroundSettings.songBackground.backgroundType
+    val backgroundImagePath = appSettings.backgroundSettings.songBackground.backgroundImage
+
+    if (backgroundType == Constants.BACKGROUND_DEFAULT) {
+        backgroundColor = parseHexColor(appSettings.backgroundSettings.defaultBackgroundColor)
+    }
+
+    // Load background image if type is IMAGE and path is not empty
+    val backgroundImageBitmap = remember(backgroundImagePath) {
+        if (backgroundType == Constants.BACKGROUND_IMAGE && backgroundImagePath.isNotEmpty()) {
+            try {
+                val file = File(backgroundImagePath)
+                if (file.exists()) {
+                    val bytes = file.readBytes()
+                    Image.makeFromEncoded(bytes).toComposeImageBitmap()
+                } else {
+                    null
+                }
+            } catch (e: Exception) {
+                null
+            }
+        } else {
+            null
+        }
+    }
+
+    BoxWithConstraints(
+        modifier
+            .fillMaxSize()
+            .conditional(backgroundType == Constants.BACKGROUND_DEFAULT || backgroundType == Constants.BACKGROUND_COLOR) {
+                background(color = backgroundColor)
+            }
+            .conditional(backgroundType == Constants.BACKGROUND_IMAGE && backgroundImageBitmap != null) {
+                paint(
+                    painter = BitmapPainter(backgroundImageBitmap!!),
+                    contentScale = ContentScale.Crop
+                )
+            }
+            .conditional(backgroundType == Constants.BACKGROUND_IMAGE && backgroundImageBitmap == null) {
+                background(color = Color.Black) // Fallback if image fails to load
+            }
+    ) {
         val density = LocalDensity.current
 
         // Calculate scale factor based on available width and height

@@ -4,6 +4,20 @@ import kotlinx.serialization.Serializable
 import org.churchpresenter.app.churchpresenter.utils.Constants
 
 @Serializable
+data class BackgroundConfig(
+    val backgroundType: String = Constants.BACKGROUND_COLOR, // "Default", "Color", "Image"
+    val backgroundColor: String = "#000000", // Black
+    val backgroundImage: String = ""
+)
+
+@Serializable
+data class BackgroundSettings(
+    val defaultBackgroundColor: String = "#000000", // Black - used when backgroundType is "Default"
+    val bibleBackground: BackgroundConfig = BackgroundConfig(),
+    val songBackground: BackgroundConfig = BackgroundConfig()
+)
+
+@Serializable
 data class SongSettings(
     // Song file management
     val storageDirectory: String = "",
@@ -46,11 +60,6 @@ data class BibleSettings(
     val primaryBible: String = "",
     val secondaryBible: String = "",
 
-    // Background
-    val backgroundType: String = "Default", // "Default", "Color", "Image"
-    val backgroundColor: String = "#000000", // Black
-    val backgroundImage: String = "",
-
     // Global vertical alignment (affects all 4 sections)
     val verticalAlignment: String = Constants.MIDDLE,
 
@@ -90,6 +99,7 @@ data class BibleSettings(
 data class AppSettings(
     val songSettings: SongSettings = SongSettings(),
     val bibleSettings: BibleSettings = BibleSettings(),
+    val backgroundSettings: BackgroundSettings = BackgroundSettings(),
     val theme: String = Constants.LIGHT,
     val language: String = "en" // Default to English
 )

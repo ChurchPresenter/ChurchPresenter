@@ -6,27 +6,20 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -51,16 +44,15 @@ import churchpresenter.composeapp.generated.resources.other_tab_content
 import churchpresenter.composeapp.generated.resources.projection
 import churchpresenter.composeapp.generated.resources.projection_tab_content
 import churchpresenter.composeapp.generated.resources.song
-import churchpresenter.composeapp.generated.resources.songs
 import churchpresenter.composeapp.generated.resources.text_settings_and_colors
 import churchpresenter.composeapp.generated.resources.text_settings_tab_content
 import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.data.SettingsManager
+import org.churchpresenter.app.churchpresenter.dialogs.tabs.BackgroundSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.BibleSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.SongSettingsTab
 import org.churchpresenter.app.churchpresenter.ui.theme.AppThemeWrapper
 import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
-import org.churchpresenter.app.churchpresenter.ui.theme.setTheme
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -106,31 +98,16 @@ fun OptionsDialog(
                         Tab(
                             selected = selectedTabIndex == 2,
                             onClick = { selectedTabIndex = 2 },
-                            text = { Text(stringResource(Res.string.text_settings_and_colors)) }
+                            text = { Text(stringResource(Res.string.background)) }
                         )
                         Tab(
                             selected = selectedTabIndex == 3,
                             onClick = { selectedTabIndex = 3 },
-                            text = { Text(stringResource(Res.string.background)) }
+                            text = { Text(stringResource(Res.string.projection)) }
                         )
                         Tab(
                             selected = selectedTabIndex == 4,
                             onClick = { selectedTabIndex = 4 },
-                            text = { Text(stringResource(Res.string.background_images)) }
-                        )
-                        Tab(
-                            selected = selectedTabIndex == 5,
-                            onClick = { selectedTabIndex = 5 },
-                            text = { Text(stringResource(Res.string.folders)) }
-                        )
-                        Tab(
-                            selected = selectedTabIndex == 6,
-                            onClick = { selectedTabIndex = 6 },
-                            text = { Text(stringResource(Res.string.projection)) }
-                        )
-                        Tab(
-                            selected = selectedTabIndex == 7,
-                            onClick = { selectedTabIndex = 7 },
                             text = { Text(stringResource(Res.string.other)) }
                         )
                     }
@@ -156,13 +133,14 @@ fun OptionsDialog(
                                     currentSettings = updateFn(currentSettings)
                                 }
                             )
-
-                            2 -> PlaceholderTab(stringResource(Res.string.text_settings_tab_content))
-                            3 -> PlaceholderTab(stringResource(Res.string.background_tab_content))
-                            4 -> PlaceholderTab(stringResource(Res.string.background_images_tab_content))
-                            5 -> PlaceholderTab(stringResource(Res.string.folders_tab_content))
-                            6 -> PlaceholderTab(stringResource(Res.string.projection_tab_content))
-                            7 -> PlaceholderTab(stringResource(Res.string.other_tab_content))
+                            2 -> BackgroundSettingsTab(
+                                settings = currentSettings,
+                                onSettingsChange = { updateFn ->
+                                    currentSettings = updateFn(currentSettings)
+                                }
+                            )
+                            3 -> PlaceholderTab(stringResource(Res.string.projection_tab_content))
+                            4 -> PlaceholderTab(stringResource(Res.string.other_tab_content))
                         }
                     }
 
