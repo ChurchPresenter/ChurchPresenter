@@ -232,5 +232,137 @@
     <!-- Presenter Window -->
     <string name="presenter">Prezenter</string>
     <string name="no_content">Žádný obsah k zobrazení</string>
+
+    <!-- Label Strings -->
+    <string name="add_label">Přidat štítek</string>
+    <string name="edit_label">Upravit štítek</string>
+    <string name="label_text">Text štítku</string>
+    <string name="enter_label_text">Zadejte text štítku</string>
+    <string name="text_color">Barva textu</string>
+    <string name="background_color_label">Barva pozadí</string>
+    <string name="tooltip_edit_label">Upravit štítek</string>
+    <string name="tooltip_add_label">Přidat štítek</string>
+    <string name="tooltip_remove">Odebrat</string>
+    <string name="tooltip_go_live">Zobrazit</string>
+
+    <!-- Bible Books (full list) -->
+    <string name="bible_book_1">Genesis</string>
+    <string name="bible_book_2">Exodus</string>
+    <string name="bible_book_3">Leviticus</string>
+    <string name="bible_book_4">Numeri</string>
+    <string name="bible_book_5">Deuteronomium</string>
+    <string name="bible_book_6">Jozue</string>
+    <string name="bible_book_7">Soudců</string>
+    <string name="bible_book_8">Rút</string>
+    <string name="bible_book_9">1 Samuelova</string>
+    <string name="bible_book_10">2 Samuelova</string>
+    <string name="bible_book_11">1 Královská</string>
+    <string name="bible_book_12">2 Královská</string>
+    <string name="bible_book_13">1 Paralipomenon</string>
+    <string name="bible_book_14">2 Paralipomenon</string>
+    <string name="bible_book_15">Ezdráš</string>
+    <string name="bible_book_16">Nehemiáš</string>
+    <string name="bible_book_17">Ester</string>
+    <string name="bible_book_18">Jób</string>
+    <string name="bible_book_19">Žalmy</string>
+    <string name="bible_book_20">Přísloví</string>
+    <string name="bible_book_21">Kazatel</string>
+    <string name="bible_book_22">Píseň písní</string>
+    <string name="bible_book_23">Izaiáš</string>
+    <string name="bible_book_24">Jeremiáš</string>
+    <string name="bible_book_25">Pláč Jeremiášův</string>
+    <string name="bible_book_26">Ezechiel</string>
+    <string name="bible_book_27">Daniel</string>
+    <string name="bible_book_28">Ozeáš</string>
+    <string name="bible_book_29">Joel</string>
+    <string name="bible_book_30">Ámos</string>
+    <string name="bible_book_31">Abdiáš</string>
+    <string name="bible_book_32">Jonáš</string>
+    <string name="bible_book_33">Micheáš</string>
+    <string name="bible_book_34">Nahum</string>
+    <string name="bible_book_35">Abakuk</string>
+    <string name="bible_book_36">Sofoniáš</string>
+    <string name="bible_book_37">Aggeus</string>
+    <string name="bible_book_38">Zachariáš</string>
+    <string name="bible_book_39">Malachiáš</string>
+    <string name="bible_book_40">Matouš</string>
+    <string name="bible_book_41">Marek</string>
+    <string name="bible_book_42">Lukáš</string>
+    <string name="bible_book_43">Jan</string>
+    <string name="bible_book_44">Skutky apoštolů</string>
+    <string name="bible_book_45">Římanům</string>
+    <string name="bible_book_46">1 Korintským</string>
+    <string name="bible_book_47">2 Korintským</string>
+    <string name="bible_book_48">Galatským</string>
+    <string name="bible_book_49">Efezským</string>
+    <string name="bible_book_50">Filipským</string>
+    <string name="bible_book_51">Koloským</string>
+    <string name="bible_book_52">1 Tesalonickým</string>
+    <string name="bible_book_53">2 Tesalonickým</string>
+    <string name="bible_book_54">1 Timoteovi</string>
+    <string name="bible_book_55">2 Timoteovi</string>
+    <string name="bible_book_56">Titovi</string>
+    <string name="bible_book_57">Filemonovi</string>
+    <string name="bible_book_58">Židům</string>
+    <string name="bible_book_59">Jakub</string>
+    <string name="bible_book_60">1 Petrův</string>
+    <string name="bible_book_61">2 Petrův</string>
+    <string name="bible_book_62">1 Janův</string>
+    <string name="bible_book_63">2 Janův</string>
+    <string name="bible_book_64">3 Janův</string>
+    <string name="bible_book_65">Judův</string>
+    <string name="bible_book_66">Zjevení</string>
+
+    <!-- File Manager -->
+    <string name="browse_directory">Procházet...</string>
+    <string name="no_directory_selected">Není vybrán adresář</string>
+    <string name="files_in_directory">Soubory v adresáři</string>
+    <string name="select_song_file">Vybrat soubor písně...</string>
+    <string name="no_song_files">Nejsou načteny žádné soubory písní</string>
+    <string name="no_bible_files">Nejsou načteny žádné soubory Bible</string>
+    <string name="bible_files">Soubory Bible</string>
+    <string name="import_bible_file">Importovat soubor Bible</string>
+    <string name="remove_bible_file">Odebrat soubor Bible</string>
+    <string name="bible_selection">Výběr Bible</string>
+
+    <!-- Dialog Messages -->
+    <string name="please_select_directory_first">Nejprve vyberte adresář úložiště.</string>
+    <string name="please_select_file_first">Nejprve vyberte soubor ze seznamu.</string>
+    <string name="no_file_selected_title">Není vybrán žádný soubor</string>
+    <string name="confirm_delete">Potvrdit smazání</string>
+    <string name="confirm_delete_file">Opravdu chcete smazat \'%s\'?</string>
+    <string name="import_error">Chyba importu</string>
+    <string name="delete_error">Chyba smazání</string>
+
+    <!-- Background Type Options -->
+    <string name="background_default">Výchozí</string>
+    <string name="background_color_option">Barva</string>
+    <string name="background_image_option">Obrázek</string>
+
+    <!-- Position Options -->
+    <string name="position_above">Nahoře</string>
+    <string name="position_below">Dole</string>
+
+    <!-- Error Messages -->
+    <string name="error_target_directory_not_exist">Cílový adresář neexistuje: %s</string>
+    <string name="error_copying_file">Chyba kopírování %s: %s</string>
+    <string name="error_failed_delete">Nepodařilo se smazat soubor</string>
+    <string name="error_deleting_file">Chyba mazání souboru: %s</string>
+    <string name="warning">Varování</string>
+
+    <!-- Additional Strings -->
+    <string name="show_on_first_page_only">Zobrazit pouze na první straně</string>
+    <string name="position_on_screen">Pozice na obrazovce:</string>
+    <string name="top_left">Vlevo nahoře</string>
+    <string name="top_right">Vpravo nahoře</string>
+    <string name="bottom_left">Vlevo dole</string>
+    <string name="bottom_right">Vpravo dole</string>
+    <string name="enter_lyrics_here">Zadejte text písně zde...</string>
+    <string name="lyrics_format_help">Formát: Použijte zalomení řádků k oddělení slok. Začněte řádky sloky s "Куплет" nebo "Припев".</string>
+    <string name="select_image">Vybrat obrázek</string>
+    <string name="background_type">Typ pozadí:</string>
+    <string name="background_color">Barva pozadí:</string>
+    <string name="background_image">Obrázek pozadí:</string>
+    <string name="show_abbreviation">Zobrazit zkratku knihy</string>
 </resources>
 

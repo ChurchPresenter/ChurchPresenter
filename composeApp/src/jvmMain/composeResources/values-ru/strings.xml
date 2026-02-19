@@ -279,5 +279,16 @@
     <string name="tooltip_settings">Настройки</string>
     <string name="tooltip_go_live">В эфир</string>
     <string name="tooltip_remove">Удалить</string>
+    <string name="tooltip_edit">Редактировать</string>
+    <string name="tooltip_edit_label">Редактировать ярлык</string>
+    <string name="tooltip_add_label">Добавить ярлык</string>
+
+    <!-- Label Strings -->
+    <string name="add_label">Добавить ярлык</string>
+    <string name="edit_label">Редактировать ярлык</string>
+    <string name="label_text">Текст ярлыка</string>
+    <string name="enter_label_text">Введите текст ярлыка</string>
+    <string name="text_color">Цвет текста</string>
+    <string name="background_color_label">Цвет фона</string>
 </resources>
 

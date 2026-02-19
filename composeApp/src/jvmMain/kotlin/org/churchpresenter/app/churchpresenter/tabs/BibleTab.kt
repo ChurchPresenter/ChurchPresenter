@@ -111,30 +111,22 @@ fun BibleTab(
         stringResource(Res.string.current_book),
     )
 
-    // Track selected index instead of selected value to handle language changes
-    var selectedScopeIndex by rememberSaveable { mutableStateOf(0) }
-    var selectedScope by remember { mutableStateOf("") }
+    // Get selected scope index from ViewModel
+    val selectedScopeIndex by viewModel.selectedScopeIndex
 
-    // Update selectedScope when scopeOptions change (e.g., language change)
-    LaunchedEffect(scopeOptions, selectedScopeIndex) {
-        selectedScope = scopeOptions.getOrNull(selectedScopeIndex) ?: scopeOptions.firstOrNull() ?: ""
-        viewModel.updateSelectedScope(selectedScope)
-    }
+    // Derive selected scope string from index
+    val selectedScope = scopeOptions.getOrElse(selectedScopeIndex) { scopeOptions.first() }
 
     val modeOptions = listOf(
         stringResource(Res.string.contains_phrase),
         stringResource(Res.string.exact_match),
     )
 
-    // Track selected index instead of selected value to handle language changes
-    var selectedModeIndex by rememberSaveable { mutableStateOf(0) }
-    var selectedMode by remember { mutableStateOf("") }
+    // Get selected mode index from ViewModel
+    val selectedModeIndex by viewModel.selectedModeIndex
 
-    // Update selectedMode when modeOptions change (e.g., language change)
-    LaunchedEffect(modeOptions, selectedModeIndex) {
-        selectedMode = modeOptions.getOrNull(selectedModeIndex) ?: modeOptions.firstOrNull() ?: ""
-        viewModel.updateSelectedMode(selectedMode)
-    }
+    // Derive selected mode string from index
+    val selectedMode = modeOptions.getOrElse(selectedModeIndex) { modeOptions.first() }
 
     // Focus management for keyboard navigation
     val focusRequester = remember { FocusRequester() }
@@ -213,9 +205,8 @@ fun BibleTab(
                 items = scopeOptions,
                 selected = selectedScope,
                 onSelectedChange = { newValue ->
-                    selectedScope = newValue
-                    selectedScopeIndex = scopeOptions.indexOf(newValue).coerceAtLeast(0)
-                    viewModel.updateSelectedScope(newValue)
+                    val newIndex = scopeOptions.indexOf(newValue).coerceAtLeast(0)
+                    viewModel.updateSelectedScopeIndex(newIndex)
                 }
             )
 
@@ -225,9 +216,8 @@ fun BibleTab(
                 items = modeOptions,
                 selected = selectedMode,
                 onSelectedChange = { newValue ->
-                    selectedMode = newValue
-                    selectedModeIndex = modeOptions.indexOf(newValue).coerceAtLeast(0)
-                    viewModel.updateSelectedMode(newValue)
+                    val newIndex = modeOptions.indexOf(newValue).coerceAtLeast(0)
+                    viewModel.updateSelectedModeIndex(newIndex)
                 }
             )
 

@@ -279,5 +279,16 @@
     <string name="tooltip_settings">Параметрлер</string>
     <string name="tooltip_go_live">Эфирге</string>
     <string name="tooltip_remove">Жою</string>
+    <string name="tooltip_edit">Өңдеу</string>
+    <string name="tooltip_edit_label">Белгіні өңдеу</string>
+    <string name="tooltip_add_label">Белгі қосу</string>
+
+    <!-- Label Strings -->
+    <string name="add_label">Белгі қосу</string>
+    <string name="edit_label">Белгіні өңдеу</string>
+    <string name="label_text">Белгі мәтіні</string>
+    <string name="enter_label_text">Белгі мәтінін енгізіңіз...</string>
+    <string name="text_color">Мәтін түсі</string>
+    <string name="background_color_label">Фон түсі</string>
 </resources>
 

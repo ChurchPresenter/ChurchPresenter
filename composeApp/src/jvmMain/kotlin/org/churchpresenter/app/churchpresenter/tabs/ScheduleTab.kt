@@ -7,11 +7,9 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -20,8 +18,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -40,17 +36,22 @@ import churchpresenter.composeapp.generated.resources.clear_schedule
 import churchpresenter.composeapp.generated.resources.ic_arrow_down
 import churchpresenter.composeapp.generated.resources.ic_arrow_up
 import churchpresenter.composeapp.generated.resources.ic_close
+import churchpresenter.composeapp.generated.resources.ic_edit
 import churchpresenter.composeapp.generated.resources.ic_play
 import churchpresenter.composeapp.generated.resources.schedule
-import churchpresenter.composeapp.generated.resources.service_schedule
+import churchpresenter.composeapp.generated.resources.tooltip_edit_label
 import churchpresenter.composeapp.generated.resources.tooltip_go_live
 import churchpresenter.composeapp.generated.resources.tooltip_move_down
 import churchpresenter.composeapp.generated.resources.tooltip_move_up
 import churchpresenter.composeapp.generated.resources.tooltip_remove
 import org.churchpresenter.app.churchpresenter.composables.TooltipIconButton
+import org.churchpresenter.app.churchpresenter.models.LyricSection
 import org.churchpresenter.app.churchpresenter.models.ScheduleItem
+import org.churchpresenter.app.churchpresenter.models.SelectedVerse
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.app.churchpresenter.viewmodel.BibleViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.ScheduleViewModel
+import org.churchpresenter.app.churchpresenter.viewmodel.SongsViewModel
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
@@ -58,12 +59,13 @@ import org.jetbrains.compose.resources.stringResource
 fun ScheduleTab(
     modifier: Modifier = Modifier,
     scheduleViewModel: ScheduleViewModel,
-    songsViewModel: org.churchpresenter.app.churchpresenter.viewmodel.SongsViewModel,
-    bibleViewModel: org.churchpresenter.app.churchpresenter.viewmodel.BibleViewModel,
-    onSongItemSelected: (org.churchpresenter.app.churchpresenter.models.LyricSection) -> Unit,
-    onVerseSelected: (List<org.churchpresenter.app.churchpresenter.models.SelectedVerse>) -> Unit,
+    songsViewModel: SongsViewModel,
+    bibleViewModel: BibleViewModel,
+    onSongItemSelected: (LyricSection) -> Unit,
+    onVerseSelected: (List<SelectedVerse>) -> Unit,
     onPresenting: (Presenting) -> Unit = { Presenting.NONE },
-    onItemClick: (ScheduleItem) -> Unit = {}
+    onItemClick: (ScheduleItem) -> Unit = {},
+    onEditLabel: (ScheduleItem.LabelItem) -> Unit = {}
 ) {
     var selectedItemId by remember { mutableStateOf<String?>(null) }
 
@@ -159,6 +161,14 @@ fun ScheduleTab(
                                     // Present it
                                     onPresenting(Presenting.BIBLE)
                                 }
+                                is ScheduleItem.LabelItem -> {
+                                    // Labels are not presentable, do nothing
+                                }
+                            }
+                        },
+                        onEditLabel = {
+                            if (item is ScheduleItem.LabelItem) {
+                                onEditLabel(item)
                             }
                         }
                     )
@@ -189,21 +199,34 @@ private fun ScheduleItemRow(
     onMoveUp: () -> Unit,
     onMoveDown: () -> Unit,
     onRemove: () -> Unit,
-    onPresent: () -> Unit
+    onPresent: () -> Unit,
+    onEditLabel: () -> Unit = {}
 ) {
+    // For labels, use the label's background color, otherwise use default row background
+    val rowBackgroundColor = if (item is ScheduleItem.LabelItem) {
+        org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor(item.backgroundColor)
+    } else {
+        if (isSelected)
+            MaterialTheme.colorScheme.surfaceVariant
+        else
+            MaterialTheme.colorScheme.surface
+    }
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(
-                if (isSelected)
-                    MaterialTheme.colorScheme.surfaceVariant
-                else
-                    MaterialTheme.colorScheme.surface
+            .background(rowBackgroundColor)
+            .then(
+                // Only make non-label items clickable
+                if (item !is ScheduleItem.LabelItem) {
+                    Modifier.clickable {
+                        onSelect()
+                        onClick()
+                    }
+                } else {
+                    Modifier
+                }
             )
-            .clickable {
-                onSelect()
-                onClick()
-            }
             .padding(12.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -213,6 +236,7 @@ private fun ScheduleItemRow(
             text = when (item) {
                 is ScheduleItem.SongItem -> "♪"
                 is ScheduleItem.BibleVerseItem -> "✝"
+                is ScheduleItem.LabelItem -> "🏷"
             },
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.primary,
@@ -221,16 +245,30 @@ private fun ScheduleItemRow(
 
         // Item content
         Column(modifier = Modifier.weight(1f)) {
-            Text(
-                maxLines = 1,
-                text = item.displayText,
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.Medium,
-                color = if (isSelected)
-                    MaterialTheme.colorScheme.onSurfaceVariant
-                else
-                    MaterialTheme.colorScheme.onSurface
-            )
+            when (item) {
+                is ScheduleItem.LabelItem -> {
+                    // Display label text with custom text color
+                    Text(
+                        text = item.text,
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.Medium,
+                        color = org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor(item.textColor),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+                else -> {
+                    Text(
+                        maxLines = 1,
+                        text = item.displayText,
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.Medium,
+                        color = if (isSelected)
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        else
+                            MaterialTheme.colorScheme.onSurface
+                    )
+                }
+            }
 
             when (item) {
                 is ScheduleItem.SongItem -> {
@@ -254,6 +292,9 @@ private fun ScheduleItemRow(
                         else
                             MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                     )
+                }
+                is ScheduleItem.LabelItem -> {
+                    // Labels don't have secondary text
                 }
             }
         }
@@ -281,19 +322,34 @@ private fun ScheduleItemRow(
                 iconTint = MaterialTheme.colorScheme.onSurface
             )
 
-            // Go Live button
-            TooltipIconButton(
-                painter = painterResource(Res.drawable.ic_play),
-                text = stringResource(Res.string.tooltip_go_live),
-                onClick = onPresent,
-                buttonSize = 32.dp,
-                iconSize = 18.dp,
-                colors = IconButtonDefaults.iconButtonColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary
-                ),
-                iconTint = MaterialTheme.colorScheme.onPrimary
-            )
+            // Show Edit button for labels, Go Live button for other items
+            if (item is ScheduleItem.LabelItem) {
+                TooltipIconButton(
+                    painter = painterResource(Res.drawable.ic_edit),
+                    text = stringResource(Res.string.tooltip_edit_label),
+                    onClick = onEditLabel,
+                    buttonSize = 32.dp,
+                    iconSize = 18.dp,
+                    colors = IconButtonDefaults.iconButtonColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary
+                    ),
+                    iconTint = MaterialTheme.colorScheme.onPrimary
+                )
+            } else {
+                TooltipIconButton(
+                    painter = painterResource(Res.drawable.ic_play),
+                    text = stringResource(Res.string.tooltip_go_live),
+                    onClick = onPresent,
+                    buttonSize = 32.dp,
+                    iconSize = 18.dp,
+                    colors = IconButtonDefaults.iconButtonColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary
+                    ),
+                    iconTint = MaterialTheme.colorScheme.onPrimary
+                )
+            }
 
             // Remove button
             TooltipIconButton(

@@ -41,11 +41,11 @@ class BibleViewModel(
     private val _searchQuery = mutableStateOf("")
     val searchQuery: State<String> = _searchQuery
 
-    private val _selectedScope = mutableStateOf("")
-    val selectedScope: State<String> = _selectedScope
+    private val _selectedScopeIndex = mutableStateOf(0)  // 0 = Entire Bible, 1 = Current Book
+    val selectedScopeIndex: State<Int> = _selectedScopeIndex
 
-    private val _selectedMode = mutableStateOf("")
-    val selectedMode: State<String> = _selectedMode
+    private val _selectedModeIndex = mutableStateOf(0)  // 0 = Contains, 1 = Exact Match
+    val selectedModeIndex: State<Int> = _selectedModeIndex
 
     private val _bookSearchQuery = mutableStateOf("")
     val bookSearchQuery: State<String> = _bookSearchQuery
@@ -71,9 +71,9 @@ class BibleViewModel(
     private val viewModelScope = CoroutineScope(Dispatchers.Main)
 
     init {
-        // Initialize default search scope and mode
-        _selectedScope.value = ENTIRE_BIBLE
-        _selectedMode.value = CONTAINS
+        // Initialize default search scope and mode indices
+        _selectedScopeIndex.value = 0  // Entire Bible
+        _selectedModeIndex.value = 0   // Contains
 
         // Load localized book name mapping and English book names
         viewModelScope.launch {
@@ -246,6 +246,7 @@ class BibleViewModel(
         }
 
         // Create a list of standard English book order (hardcoded for reliability)
+        // This must match the order of books in Bible files (66 books in standard order)
         val standardEnglishBooks = listOf(
             "genesis", "exodus", "leviticus", "numbers", "deuteronomy", "joshua", "judges", "ruth",
             "1 samuel", "2 samuel", "1 kings", "2 kings", "1 chronicles", "2 chronicles",
@@ -272,6 +273,7 @@ class BibleViewModel(
         }
 
         // Get books from the actual Bible by these indices
+        // This works because Bible files are in standard book order
         val mappedResults = matchingIndices.mapNotNull { index ->
             _books.value.getOrNull(index)
         }
@@ -387,12 +389,12 @@ class BibleViewModel(
         _searchQuery.value = query
     }
 
-    fun updateSelectedScope(scope: String) {
-        _selectedScope.value = scope
+    fun updateSelectedScopeIndex(index: Int) {
+        _selectedScopeIndex.value = index
     }
 
-    fun updateSelectedMode(mode: String) {
-        _selectedMode.value = mode
+    fun updateSelectedModeIndex(index: Int) {
+        _selectedModeIndex.value = index
     }
 
     fun updateBookSearchQuery(query: String) {
@@ -418,8 +420,9 @@ class BibleViewModel(
 
         _primaryBible.value?.let { bible ->
             try {
-                // Determine search mode based on selectedMode
-                val isExactMatch = _selectedMode.value.contains("Exact", ignoreCase = true)
+                // Determine search mode based on selectedModeIndex
+                // 0 = Contains, 1 = Exact Match
+                val isExactMatch = _selectedModeIndex.value == 1
 
                 // Build regex pattern
                 val pattern = if (isExactMatch) {
@@ -429,9 +432,10 @@ class BibleViewModel(
                 }
                 val searchRegex = Regex(pattern, RegexOption.IGNORE_CASE)
 
-                // Determine scope
-                val results = when {
-                    _selectedScope.value.contains(CURRENT_BOOK, ignoreCase = true) -> {
+                // Determine scope based on selectedScopeIndex
+                // 0 = Entire Bible, 1 = Current Book
+                val results = when (_selectedScopeIndex.value) {
+                    1 -> {
                         // Search in current book only
                         val bookId = _selectedBookIndex.value + 1
                         bible.searchBible(allWords = false, searchExp = searchRegex, book = bookId)

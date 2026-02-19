@@ -24,6 +24,8 @@ import androidx.compose.ui.input.key.type
 import androidx.compose.ui.focus.focusTarget
 import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.components.Toolbar
+import org.churchpresenter.app.churchpresenter.data.SongItem
+import org.churchpresenter.app.churchpresenter.dialogs.AddLabelDialog
 import org.churchpresenter.app.churchpresenter.tabs.AnnouncementsTab
 import org.churchpresenter.app.churchpresenter.tabs.BibleTab
 import org.churchpresenter.app.churchpresenter.tabs.MediaTab
@@ -33,6 +35,7 @@ import org.churchpresenter.app.churchpresenter.tabs.SongsTab
 import org.churchpresenter.app.churchpresenter.tabs.TabSection
 import org.churchpresenter.app.churchpresenter.tabs.Tabs
 import org.churchpresenter.app.churchpresenter.models.LyricSection
+import org.churchpresenter.app.churchpresenter.models.ScheduleItem
 import org.churchpresenter.app.churchpresenter.models.SelectedVerse
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
@@ -58,6 +61,8 @@ fun MainDesktop(
 ) {
     var selectedTabIndex by rememberSaveable { mutableStateOf(0) }
     var selectedScheduleItemId by remember { mutableStateOf<String?>(null) }
+    var showAddLabelDialog by remember { mutableStateOf(false) }
+    var editingLabelItem by remember { mutableStateOf<ScheduleItem.LabelItem?>(null) }
 
     // Notify parent when tab changes
     LaunchedEffect(selectedTabIndex) {
@@ -172,6 +177,9 @@ fun MainDesktop(
                     scheduleViewModel.clearSchedule()
                     selectedScheduleItemId = null
                 },
+                onAddLabel = {
+                    showAddLabelDialog = true
+                },
                 onOpenSettings = onShowSettings
             )
 
@@ -188,7 +196,7 @@ fun MainDesktop(
                     onItemClick = { item ->
                         selectedScheduleItemId = if (selectedScheduleItemId == item.id) null else item.id
                         when (item) {
-                            is org.churchpresenter.app.churchpresenter.models.ScheduleItem.SongItem -> {
+                            is ScheduleItem.SongItem -> {
                                 // Switch to Songs tab (index 1)
                                 selectedTabIndex = 1
                                 // Select the song
@@ -198,7 +206,7 @@ fun MainDesktop(
                                     songbook = item.songbook
                                 )
                             }
-                            is org.churchpresenter.app.churchpresenter.models.ScheduleItem.BibleVerseItem -> {
+                            is ScheduleItem.BibleVerseItem -> {
                                 // Switch to Bible tab (index 0)
                                 selectedTabIndex = 0
                                 // Select the verse
@@ -208,7 +216,16 @@ fun MainDesktop(
                                     verseNumber = item.verseNumber
                                 )
                             }
+                            is ScheduleItem.LabelItem -> {
+                                // Labels are editable - show edit dialog
+                                editingLabelItem = item
+                                showAddLabelDialog = true
+                            }
                         }
+                    },
+                    onEditLabel = { labelItem ->
+                        editingLabelItem = labelItem
+                        showAddLabelDialog = true
                     }
                 )
             }
@@ -246,5 +263,33 @@ fun MainDesktop(
             }
         }
         }
+    }
+
+    // Add/Edit Label Dialog
+    if (showAddLabelDialog) {
+        AddLabelDialog(
+            onDismiss = {
+                showAddLabelDialog = false
+                editingLabelItem = null
+            },
+            onConfirm = { text, textColor, backgroundColor ->
+                if (editingLabelItem != null) {
+                    // Update existing label
+                    scheduleViewModel.updateLabel(
+                        id = editingLabelItem!!.id,
+                        text = text,
+                        textColor = textColor,
+                        backgroundColor = backgroundColor
+                    )
+                } else {
+                    // Add new label
+                    scheduleViewModel.addLabel(text, textColor, backgroundColor)
+                }
+            },
+            existingText = editingLabelItem?.text ?: "",
+            existingTextColor = editingLabelItem?.textColor ?: "#FFFFFF",
+            existingBackgroundColor = editingLabelItem?.backgroundColor ?: "#2196F3",
+            isEdit = editingLabelItem != null
+        )
     }
 }

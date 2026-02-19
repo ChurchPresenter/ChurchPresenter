@@ -279,5 +279,16 @@
     <string name="tooltip_settings">Ustawienia</string>
     <string name="tooltip_go_live">Na żywo</string>
     <string name="tooltip_remove">Usuń</string>
+    <string name="tooltip_edit">Edytuj</string>
+    <string name="tooltip_edit_label">Edytuj etykietę</string>
+    <string name="tooltip_add_label">Dodaj etykietę</string>
+
+    <!-- Label Strings -->
+    <string name="add_label">Dodaj etykietę</string>
+    <string name="edit_label">Edytuj etykietę</string>
+    <string name="label_text">Tekst etykiety</string>
+    <string name="enter_label_text">Wprowadź tekst etykiety...</string>
+    <string name="text_color">Kolor tekstu</string>
+    <string name="background_color_label">Kolor tła</string>
 </resources>
 

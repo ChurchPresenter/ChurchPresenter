@@ -25,5 +25,14 @@ sealed class ScheduleItem {
         val verseText: String,
         override val displayText: String = "$bookName $chapter:$verseNumber"
     ) : ScheduleItem()
+
+    @Serializable
+    data class LabelItem(
+        override val id: String,
+        val text: String,
+        val textColor: String,
+        val backgroundColor: String,
+        override val displayText: String = text
+    ) : ScheduleItem()
 }
 

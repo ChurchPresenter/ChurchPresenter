@@ -32,6 +32,30 @@ class ScheduleViewModel {
         _scheduleItems.add(item)
     }
 
+    fun addLabel(text: String, textColor: String, backgroundColor: String) {
+        val id = UUID.randomUUID().toString()
+        val item = ScheduleItem.LabelItem(
+            id = id,
+            text = text,
+            textColor = textColor,
+            backgroundColor = backgroundColor
+        )
+        _scheduleItems.add(item)
+    }
+
+    fun updateLabel(id: String, text: String, textColor: String, backgroundColor: String) {
+        val index = _scheduleItems.indexOfFirst { it.id == id }
+        if (index >= 0 && _scheduleItems[index] is ScheduleItem.LabelItem) {
+            val updatedItem = ScheduleItem.LabelItem(
+                id = id,
+                text = text,
+                textColor = textColor,
+                backgroundColor = backgroundColor
+            )
+            _scheduleItems[index] = updatedItem
+        }
+    }
+
     fun removeItem(id: String) {
         _scheduleItems.removeAll { it.id == id }
     }

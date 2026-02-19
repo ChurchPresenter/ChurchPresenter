@@ -279,5 +279,16 @@
     <string name="tooltip_settings">Налаштування</string>
     <string name="tooltip_go_live">В ефір</string>
     <string name="tooltip_remove">Видалити</string>
+    <string name="tooltip_edit">Редагувати</string>
+    <string name="tooltip_edit_label">Редагувати мітку</string>
+    <string name="tooltip_add_label">Додати мітку</string>
+
+    <!-- Label Strings -->
+    <string name="add_label">Додати мітку</string>
+    <string name="edit_label">Редагувати мітку</string>
+    <string name="label_text">Текст мітки</string>
+    <string name="enter_label_text">Введіть текст мітки...</string>
+    <string name="text_color">Колір тексту</string>
+    <string name="background_color_label">Колір фону</string>
 </resources>
 

@@ -24,9 +24,11 @@ import churchpresenter.composeapp.generated.resources.ic_arrow_up_double
 import churchpresenter.composeapp.generated.resources.ic_close
 import churchpresenter.composeapp.generated.resources.ic_delete
 import churchpresenter.composeapp.generated.resources.ic_folder
+import churchpresenter.composeapp.generated.resources.ic_label
 import churchpresenter.composeapp.generated.resources.ic_playlist_add
 import churchpresenter.composeapp.generated.resources.ic_save
 import churchpresenter.composeapp.generated.resources.ic_settings
+import churchpresenter.composeapp.generated.resources.tooltip_add_label
 import churchpresenter.composeapp.generated.resources.tooltip_add_to_schedule
 import churchpresenter.composeapp.generated.resources.tooltip_clear_schedule
 import churchpresenter.composeapp.generated.resources.tooltip_move_down
@@ -59,6 +61,7 @@ fun Toolbar(
     onAddToSchedule: () -> Unit = {},
     onRemoveFromSchedule: () -> Unit = {},
     onClearSchedule: () -> Unit = {},
+    onAddLabel: () -> Unit = {},
     onOpenSettings: () -> Unit = {}
 ) {
     Surface(
@@ -120,6 +123,18 @@ fun Toolbar(
                 painter = painterResource(Res.drawable.ic_arrow_down_double),
                 text = stringResource(Res.string.tooltip_move_to_bottom),
                 onClick = onMoveToBottom,
+                iconTint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            Spacer(modifier = Modifier.width(4.dp))
+            ToolbarDivider()
+            Spacer(modifier = Modifier.width(4.dp))
+
+            // Label button
+            TooltipIconButton(
+                painter = painterResource(Res.drawable.ic_label),
+                text = stringResource(Res.string.tooltip_add_label),
+                onClick = onAddLabel,
                 iconTint = MaterialTheme.colorScheme.onSurfaceVariant
             )
 

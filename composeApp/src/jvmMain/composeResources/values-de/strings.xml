@@ -279,5 +279,16 @@
     <string name="tooltip_settings">Einstellungen</string>
     <string name="tooltip_go_live">Live gehen</string>
     <string name="tooltip_remove">Entfernen</string>
+    <string name="tooltip_edit">Bearbeiten</string>
+    <string name="tooltip_edit_label">Label bearbeiten</string>
+    <string name="tooltip_add_label">Label hinzufügen</string>
+
+    <!-- Label Strings -->
+    <string name="add_label">Label hinzufügen</string>
+    <string name="edit_label">Label bearbeiten</string>
+    <string name="label_text">Label-Text</string>
+    <string name="enter_label_text">Label-Text eingeben...</string>
+    <string name="text_color">Textfarbe</string>
+    <string name="background_color_label">Hintergrundfarbe</string>
 </resources>
 
