@@ -213,9 +213,6 @@ class Songs {
         return songs.filter { it.songbook.contains(songbook, ignoreCase = true) }
     }
 
-    /**
-     * Update a song in the in-memory list
-     */
     fun updateSong(oldSong: SongItem, newSong: SongItem) {
         val index = songs.indexOfFirst { it.number == oldSong.number && it.songbook == oldSong.songbook }
         if (index >= 0) {
@@ -223,10 +220,6 @@ class Songs {
         }
     }
 
-    /**
-     * Save updated song back to the .sps file
-     * This finds the correct file based on songbook and updates the song entry
-     */
     fun saveSongToFile(originalSong: SongItem, updatedSong: SongItem, storageDirectory: String): Boolean {
         try {
             if (storageDirectory.isEmpty()) {
@@ -238,20 +231,17 @@ class Songs {
                 return false
             }
 
-            // Find the .sps file that contains this song
             val spsFiles = dir.listFiles { file ->
                 file.extension.lowercase() == Constants.EXTENSION_SPS
             } ?: emptyArray()
 
-            var fileSaved = false
             for (file in spsFiles) {
                 if (updateSongInFile(file.absolutePath, originalSong, updatedSong)) {
-                    fileSaved = true
-                    break
+                    return true
                 }
             }
 
-            return fileSaved
+            return false
         } catch (e: Exception) {
             return false
         }
@@ -267,31 +257,21 @@ class Songs {
                 return false
             }
 
-            // Read all lines
             val lines = Files.readAllLines(path, StandardCharsets.UTF_8).toMutableList()
-            var songFound = false
             var songUpdated = false
 
             for (i in lines.indices) {
                 val line = lines[i]
 
-                // Skip header and empty lines
                 if (line.startsWith("##") || line.isBlank()) continue
 
-                // Parse song entry
                 val parts = line.split("#\$#")
                 if (parts.size >= 6) {
                     val number = parts[0]
                     val title = parts[1]
 
-                    // Check if this is the song we want to update (using ORIGINAL song data)
                     if (number == originalSong.number && title == originalSong.title) {
-                        songFound = true
-
-                        // Format lyrics back to SPS format
                         val lyricsText = formatLyricsForSps(updatedSong.lyrics)
-
-                        // Reconstruct the line with updated values
                         val categoryId = if (parts.size >= 3) parts[2] else ""
 
                         val updatedLine = "${updatedSong.number}#\$#${updatedSong.title}#\$#$categoryId#\$#${updatedSong.tune}#\$#${updatedSong.author}#\$#${updatedSong.composer}#\$#$lyricsText"
@@ -304,12 +284,11 @@ class Songs {
             }
 
             if (songUpdated) {
-                // Write back to file
                 Files.write(path, lines, StandardCharsets.UTF_8)
                 return true
             }
 
-            return songFound
+            return false
         } catch (e: Exception) {
             return false
         }

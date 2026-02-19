@@ -300,9 +300,6 @@ class SongsViewModel(
         }
     }
 
-    /**
-     * Update a song in the database and reload songs
-     */
     fun updateSong(oldSong: org.churchpresenter.app.churchpresenter.data.SongItem, newSong: org.churchpresenter.app.churchpresenter.data.SongItem): Boolean {
         try {
             // Update in memory
@@ -314,12 +311,13 @@ class SongsViewModel(
             if (saved) {
                 // Reload songs to reflect changes
                 loadSongs()
+                // Re-apply current filters to update the filtered list
+                applyFilters()
                 return true
             }
 
             return false
         } catch (e: Exception) {
-            e.printStackTrace()
             return false
         }
     }

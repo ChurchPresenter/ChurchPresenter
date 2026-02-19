@@ -28,7 +28,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -113,8 +112,6 @@ fun SongsTab(
     var sortColumn by rememberSaveable { mutableStateOf("") }
     var sortAscending by rememberSaveable { mutableStateOf(true) }
 
-    // TODO: Categories should come from database or configuration
-    // val categories = listOf(allSongCategoriesText, "Прославление", "Поклонение", "Евангелизация")
 
     // String resources for filter types
     val containsText = stringResource(Res.string.contains)
@@ -139,10 +136,11 @@ fun SongsTab(
 
     // Get filtered songs from ViewModel (not recalculating locally to ensure consistency)
     val filteredSongsFromViewModel by viewModel.filteredSongs
+    val songsData by viewModel.songsData
 
     // Convert from List<String> to List<Song> for display
-    val allSongs = viewModel.songsData.value.getSongs()
-    val filteredSongs = remember(filteredSongsFromViewModel, sortColumn, sortAscending) {
+    val allSongs = songsData.getSongs()
+    val filteredSongs = remember(filteredSongsFromViewModel, sortColumn, sortAscending, allSongs) {
         // Map the string list back to Song objects
         val songsMap = allSongs.associateBy { "${it.number}. ${it.title}" }
         var filtered = filteredSongsFromViewModel.mapNotNull { songText ->
@@ -483,6 +481,7 @@ fun SongsTab(
                     Button(
                         modifier = Modifier.wrapContentSize().padding(end = 4.dp),
                         onClick = {
+                            // Always get fresh data from filtered songs
                             songToEdit = filteredSongs[selectedSongIndex]
                             showEditDialog = true
                         },
@@ -669,9 +668,14 @@ fun SongsTab(
         theme = theme,
         onDismiss = { showEditDialog = false },
         onSave = { updatedSong ->
-            // Save the song to database
             songToEdit?.let { oldSong ->
-                viewModel.updateSong(oldSong, updatedSong)
+                val success = viewModel.updateSong(oldSong, updatedSong)
+
+                if (success) {
+                    // Reset to null so next edit gets fresh data from filteredSongs
+                    songToEdit = null
+                    showEditDialog = false
+                }
             }
         }
     )

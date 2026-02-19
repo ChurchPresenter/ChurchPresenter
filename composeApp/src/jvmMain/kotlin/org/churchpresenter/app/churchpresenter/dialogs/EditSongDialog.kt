@@ -61,13 +61,13 @@ fun EditSongDialog(
     if (!isVisible || song == null) return
 
     // Filter out non-digits from song number (handles cases like "3.1" -> "3" or "31")
-    var editedNumber by remember(song) { mutableStateOf(song.number.filter { it.isDigit() }) }
-    var editedTitle by remember(song) { mutableStateOf(song.title) }
-    var editedSongbook by remember(song) { mutableStateOf(song.songbook) }
-    var editedTune by remember(song) { mutableStateOf(song.tune) }
-    var editedAuthor by remember(song) { mutableStateOf(song.author) }
-    var editedComposer by remember(song) { mutableStateOf(song.composer) }
-    var editedLyrics by remember(song) { mutableStateOf(song.lyrics.joinToString("\n")) }
+    var editedNumber by remember(isVisible, song) { mutableStateOf(song.number.filter { it.isDigit() }) }
+    var editedTitle by remember(isVisible, song) { mutableStateOf(song.title) }
+    var editedSongbook by remember(isVisible, song) { mutableStateOf(song.songbook) }
+    var editedTune by remember(isVisible, song) { mutableStateOf(song.tune) }
+    var editedAuthor by remember(isVisible, song) { mutableStateOf(song.author) }
+    var editedComposer by remember(isVisible, song) { mutableStateOf(song.composer) }
+    var editedLyrics by remember(isVisible, song) { mutableStateOf(song.lyrics.joinToString("\n")) }
 
     Dialog(
         onCloseRequest = onDismiss,
@@ -215,7 +215,6 @@ fun EditSongDialog(
                                     lyrics = editedLyrics.split("\n")
                                 )
                                 onSave(updatedSong)
-                                onDismiss()
                             },
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = MaterialTheme.colorScheme.primary

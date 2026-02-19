@@ -60,36 +60,44 @@ class ScheduleViewModel {
         _scheduleItems.removeAll { it.id == id }
     }
 
-    fun moveItemUp(id: String) {
+    fun moveItemUp(id: String): Int {
         val index = _scheduleItems.indexOfFirst { it.id == id }
         if (index > 0) {
             val item = _scheduleItems.removeAt(index)
             _scheduleItems.add(index - 1, item)
+            return index - 1
         }
+        return index
     }
 
-    fun moveItemDown(id: String) {
+    fun moveItemDown(id: String): Int {
         val index = _scheduleItems.indexOfFirst { it.id == id }
         if (index >= 0 && index < _scheduleItems.size - 1) {
             val item = _scheduleItems.removeAt(index)
             _scheduleItems.add(index + 1, item)
+            return index + 1
         }
+        return index
     }
 
-    fun moveItemToTop(id: String) {
+    fun moveItemToTop(id: String): Int {
         val index = _scheduleItems.indexOfFirst { it.id == id }
         if (index > 0) {
             val item = _scheduleItems.removeAt(index)
             _scheduleItems.add(0, item)
+            return 0
         }
+        return index
     }
 
-    fun moveItemToBottom(id: String) {
+    fun moveItemToBottom(id: String): Int {
         val index = _scheduleItems.indexOfFirst { it.id == id }
         if (index >= 0 && index < _scheduleItems.size - 1) {
             val item = _scheduleItems.removeAt(index)
             _scheduleItems.add(item)
+            return _scheduleItems.size - 1
         }
+        return index
     }
 
     fun clearSchedule() {
