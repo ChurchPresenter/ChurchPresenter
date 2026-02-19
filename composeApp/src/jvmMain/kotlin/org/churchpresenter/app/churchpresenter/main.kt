@@ -17,24 +17,35 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.rememberWindowState
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.app_name
+import org.churchpresenter.app.churchpresenter.data.Language
 import org.churchpresenter.app.churchpresenter.data.SettingsManager
 import org.churchpresenter.app.churchpresenter.dialogs.OptionsDialog
 import org.churchpresenter.app.churchpresenter.presenter.BiblePresenter
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.presenter.SongPresenter
 import org.churchpresenter.app.churchpresenter.ui.theme.AppThemeWrapper
+import org.churchpresenter.app.churchpresenter.ui.theme.LanguageProvider
 import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
 import org.churchpresenter.app.churchpresenter.viewmodel.BibleViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.app.churchpresenter.viewmodel.ScheduleViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.SongsViewModel
 import org.jetbrains.compose.resources.stringResource
+import java.util.Locale
 
 fun main() = application {
     // Business logic layer
     val settingsManager = SettingsManager()
     var appSettings by remember { mutableStateOf(settingsManager.loadSettings()) }
     val presenterManager = remember { PresenterManager() }
+
+    // Load saved language and set locale
+    var currentLanguage by remember {
+        val savedLanguageCode = appSettings.language
+        val language = Language.entries.find { it.code == savedLanguageCode } ?: Language.ENGLISH
+        Locale.setDefault(Locale.forLanguageTag(language.code))
+        mutableStateOf(language)
+    }
 
     // Create BibleViewModel with settings (no fallback Bible needed)
     val bibleViewModel = remember(appSettings) {
@@ -72,14 +83,21 @@ fun main() = application {
         title = stringResource(Res.string.app_name),
         state = state
     ) {
-        AppThemeWrapper(theme = theme) {
+        LanguageProvider(language = currentLanguage) {
+            AppThemeWrapper(theme = theme) {
 
-            NavigationTopBar(
+                NavigationTopBar(
                 onAbout = { presenterManager.setShowPresenterWindow(true) },
                 theme = {
                     appSettings = appSettings.copy(theme = it.toString())
                     theme = it
                     settingsManager.saveSettings(appSettings)
+                },
+                onLanguageChange = { language ->
+                    currentLanguage = language
+                    appSettings = appSettings.copy(language = language.code)
+                    settingsManager.saveSettings(appSettings)
+                    Locale.setDefault(Locale.forLanguageTag(language.code))
                 },
                 onSettings = {
                     showOptionsDialog = true
@@ -172,6 +190,7 @@ fun main() = application {
                     songsViewModel.loadSongs()
                 }
             )
+            }
         }
     }
 

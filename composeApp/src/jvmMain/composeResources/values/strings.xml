@@ -235,6 +235,17 @@
     <string name="language_interface">Interface</string>
     <string name="language_database">Database</string>
 
+    <!-- Language Menu -->
+    <string name="menu_language">Language</string>
+    <string name="language_russian">Russian</string>
+    <string name="language_english">English</string>
+    <string name="language_ukrainian">Ukrainian</string>
+    <string name="language_kazakh">Kazakh</string>
+    <string name="language_german">German</string>
+    <string name="language_polish">Polish</string>
+    <string name="language_belarusian">Belarusian</string>
+    <string name="language_czech">Czech</string>
+
     <!-- Search Results -->
     <string name="no_results_found">No results found for "%1$s"</string>
 

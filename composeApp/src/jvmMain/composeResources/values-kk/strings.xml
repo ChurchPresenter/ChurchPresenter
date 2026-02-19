@@ -1,0 +1,283 @@
+<resources>
+    <string name="app_name">Church Presenter</string>
+    <string name="mode">Режим</string>
+    <string name="scope">Аймақ</string>
+    <string name="title">Атауы</string>
+    <string name="number">Нөмір</string>
+    <string name="no_song_selected">Әнұран таңдалмаған</string>
+    <string name="go_live">Эфирге</string>
+    <string name="add_to_schedule">Бағдарламаға қосу</string>
+    <string name="no_lyrics_available">Әнұран мәтіні қолжетімді емес</string>
+    <string name="tune">Әуен</string>
+    <string name="search">Іздеу</string>
+    <string name="search_songs">Әнұрандарды іздеу...</string>
+    <string name="song_book">Әнұрандар жинағы</string>
+    <string name="all_song_books">Барлық жинақтар</string>
+    <string name="entire_bible">Бүкіл Киелі Кітап</string>
+    <string name="current_book">Ағымдағы кітап</string>
+    <string name="contains_phrase">Сөз тіркесін қамтиды</string>
+    <string name="contains">Қамтиды</string>
+    <string name="starts_with">Басталады</string>
+    <string name="exact_match">Дәл сәйкестік</string>
+    <string name="all_song_categories">Барлық санаттар</string>
+    <string name="filter_colon">Сүзгі:</string>
+    <string name="filter_type_colon">Сүзгі түрі:</string>
+    <string name="service_schedule">Қызмет бағдарламасы:</string>
+    <string name="songs">Әнұрандар</string>
+    <string name="song">Әнұран</string>
+    <string name="bible">Киелі Кітап</string>
+    <string name="pictures">Суреттер</string>
+    <string name="media">Медиа</string>
+    <string name="notes">Жазбалар</string>
+    <string name="book">Кітап</string>
+    <string name="chapter">Тарау</string>
+    <string name="verse">Аят</string>
+    <string name="options">Параметрлер</string>
+    <string name="cancel">Болдырмау</string>
+    <string name="ok">Жарайды</string>
+    <string name="none">Жоқ</string>
+    <string name="first_page">Бірінші бет</string>
+    <string name="every_page">Әрбір бет</string>
+    <string name="show_title">Атауын көрсету:</string>
+    <string name="show_number">Нөмірді көрсету:</string>
+    <string name="font_size">Қаріп өлшемі:</string>
+    <string name="font_type">Қаріп түрі:</string>
+    <string name="announcements">Хабарландырулар</string>
+    <string name="menu_file">Файл</string>
+    <string name="menu_new_schedule">Жаңа бағдарлама</string>
+    <string name="menu_open_schedule">Бағдарламаны ашу</string>
+    <string name="menu_save_schedule">Бағдарламаны сақтау</string>
+    <string name="menu_save_schedule_as">Басқа атпен сақтау...</string>
+    <string name="menu_close_schedule">Бағдарламаны жабу</string>
+    <string name="menu_exit">Шығу</string>
+
+    <string name="menu_schedule">Бағдарлама</string>
+    <string name="menu_add_to_schedule">Бағдарламаға қосу</string>
+    <string name="menu_remove_from_schedule">Бағдарламадан жою</string>
+    <string name="menu_clear_schedule">Бағдарламаны тазалау</string>
+
+    <!-- Schedule Tab Strings -->
+    <string name="schedule">Бағдарлама</string>
+    <string name="quick_selection">Жылдам таңдау</string>
+    <string name="clear_schedule">Бағдарламаны тазалау</string>
+    <string name="search_results">Іздеу нәтижелері</string>
+    <string name="clear">Тазалау</string>
+    <string name="found_results">%1$d нәтиже табылды</string>
+
+    <string name="menu_edit">Өңдеу</string>
+    <string name="menu_settings">Параметрлер</string>
+
+    <string name="menu_help">Анықтама</string>
+    <string name="menu_about">Бағдарлама туралы</string>
+    <string name="menu_help_item">Анықтама</string>
+
+    <!-- Options Dialog Strings -->
+    <string name="text_settings_and_colors">Мәтін параметрлері мен түстер</string>
+    <string name="background">Фон</string>
+    <string name="background_images">Фон суреттері</string>
+    <string name="folders">Қалталар</string>
+    <string name="projection">Проекция</string>
+    <string name="other">Басқа</string>
+
+    <!-- Song Settings Strings -->
+    <string name="lyrics">Мәтін</string>
+    <string name="song_number">Әнұран нөмірі</string>
+    <string name="min">Мин:</string>
+    <string name="max">Макс:</string>
+    <string name="alpha">Мөлдірлік:</string>
+    <string name="vertical_alignment">Тік туралау:</string>
+    <string name="horizontal_alignment">Көлденең туралау:</string>
+    <string name="text_alignment">Мәтінді туралау:</string>
+    <string name="top">Жоғарыда</string>
+    <string name="above_verse">Аяттың үстінде</string>
+    <string name="below_verse">Аяттың астында</string>
+    <string name="middle">Ортада</string>
+    <string name="bottom">Төменде</string>
+    <string name="left">Сол жақта</string>
+    <string name="center">Ортада</string>
+    <string name="right">Оң жақта</string>
+    <string name="song_files">Әнұран файлдары</string>
+    <string name="storage_directory">Сақтау қалтасы</string>
+    <string name="browse_directory">Шолу...</string>
+    <string name="no_directory_selected">Қалта таңдалмаған</string>
+    <string name="files_in_directory">Қалтадағы файлдар</string>
+    <string name="import_song_file">Әнұран файлын импорттау</string>
+    <string name="remove_song_file">Әнұран файлын жою</string>
+    <string name="select_song_file">Әнұран файлын таңдау...</string>
+    <string name="no_song_files">Әнұран файлдары жүктелмеген</string>
+    <string name="word_wrap">Сөзді тасымалдау</string>
+    <string name="show_on_first_page_only">Тек бірінші бетте көрсету</string>
+    <string name="position_on_screen">Экрандағы орны:</string>
+    <string name="top_left">Жоғары сол жақта</string>
+    <string name="top_right">Жоғары оң жақта</string>
+    <string name="bottom_left">Төмен сол жақта</string>
+    <string name="bottom_right">Төмен оң жақта</string>
+    <string name="color">Түс:</string>
+    <string name="dark_theme">Қараңғы тақырып</string>
+    <string name="light_theme">Ашық тақырып</string>
+    <string name="system_theme">Жүйелік тақырып</string>
+    <!-- Placeholder strings for other tabs -->
+    <string name="bible_tab_content">Киелі Кітап қойындысының мазмұны енгізілетін болады</string>
+    <string name="text_settings_tab_content">Мәтін параметрлері қойындысының мазмұны енгізілетін болады</string>
+    <string name="background_tab_content">Фон қойындысының мазмұны енгізілетін болады</string>
+    <string name="background_images_tab_content">Фон суреттері қойындысының мазмұны енгізілетін болады</string>
+    <string name="folders_tab_content">Қалталар қойындысының мазмұны енгізілетін болады</string>
+    <string name="projection_tab_content">Проекция қойындысының мазмұны енгізілетін болады</string>
+    <string name="other_tab_content">Басқа қойындысының мазмұны енгізілетін болады</string>
+
+    <string name="bible_book_1">Жаратылыс</string>
+    <string name="bible_book_2">Шығу</string>
+    <string name="bible_book_3">Леуілік</string>
+    <string name="bible_book_4">Сандар</string>
+    <string name="bible_book_5">Заң қайталау</string>
+    <string name="bible_book_6">Ешуа</string>
+    <string name="bible_book_7">Қазылар</string>
+    <string name="bible_book_8">Руфь</string>
+    <string name="bible_book_9">1 Самуел</string>
+    <string name="bible_book_10">2 Самуел</string>
+    <string name="bible_book_11">1 Патшалар</string>
+    <string name="bible_book_12">2 Патшалар</string>
+    <string name="bible_book_13">1 Жылнамалар</string>
+    <string name="bible_book_14">2 Жылнамалар</string>
+    <string name="bible_book_15">Езра</string>
+    <string name="bible_book_16">Нехемия</string>
+    <string name="bible_book_17">Естер</string>
+    <string name="bible_book_18">Ияп</string>
+    <string name="bible_book_19">Забур</string>
+    <string name="bible_book_20">Мақал-мәтелдер</string>
+    <string name="bible_book_21">Уағыздаушы</string>
+    <string name="bible_book_22">Сүлеймен жыры</string>
+    <string name="bible_book_23">Ишая</string>
+    <string name="bible_book_24">Еремия</string>
+    <string name="bible_book_25">Еремияның жоқтауы</string>
+    <string name="bible_book_26">Езекиел</string>
+    <string name="bible_book_27">Даниел</string>
+    <string name="bible_book_28">Осия</string>
+    <string name="bible_book_29">Иоел</string>
+    <string name="bible_book_30">Амос</string>
+    <string name="bible_book_31">Авдия</string>
+    <string name="bible_book_32">Иона</string>
+    <string name="bible_book_33">Михей</string>
+    <string name="bible_book_34">Наум</string>
+    <string name="bible_book_35">Аввакум</string>
+    <string name="bible_book_36">Софония</string>
+    <string name="bible_book_37">Аггей</string>
+    <string name="bible_book_38">Закария</string>
+    <string name="bible_book_39">Малахия</string>
+    <string name="bible_book_40">Матай</string>
+    <string name="bible_book_41">Марк</string>
+    <string name="bible_book_42">Лұқа</string>
+    <string name="bible_book_43">Иохан</string>
+    <string name="bible_book_44">Елшілердің істері</string>
+    <string name="bible_book_45">Рим</string>
+    <string name="bible_book_46">1 Коринф</string>
+    <string name="bible_book_47">2 Коринф</string>
+    <string name="bible_book_48">Галатия</string>
+    <string name="bible_book_49">Ефес</string>
+    <string name="bible_book_50">Филиппи</string>
+    <string name="bible_book_51">Колоссе</string>
+    <string name="bible_book_52">1 Фессалоника</string>
+    <string name="bible_book_53">2 Фессалоника</string>
+    <string name="bible_book_54">1 Тимотей</string>
+    <string name="bible_book_55">2 Тимотей</string>
+    <string name="bible_book_56">Тит</string>
+    <string name="bible_book_57">Филемон</string>
+    <string name="bible_book_58">Еврейлер</string>
+    <string name="bible_book_59">Жақып</string>
+    <string name="bible_book_60">1 Петір</string>
+    <string name="bible_book_61">2 Петір</string>
+    <string name="bible_book_62">1 Иохан</string>
+    <string name="bible_book_63">2 Иохан</string>
+    <string name="bible_book_64">3 Иохан</string>
+    <string name="bible_book_65">Яһуда</string>
+    <string name="bible_book_66">Аян</string>
+
+    <!-- Bible Settings -->
+    <string name="bible_files">Киелі Кітап файлдары</string>
+    <string name="position">Орны</string>
+    <string name="no_bible_files">Киелі Кітап файлдары жүктелмеген</string>
+    <string name="import_bible_file">Киелі Кітап файлын импорттау</string>
+    <string name="remove_bible_file">Киелі Кітап файлын жою</string>
+    <string name="bible_selection">Киелі Кітапты таңдау</string>
+    <string name="primary_bible">Негізгі Киелі Кітап:</string>
+    <string name="secondary_bible">Қосымша Киелі Кітап:</string>
+    <string name="background_type">Фон түрі:</string>
+    <string name="background_color">Фон түсі:</string>
+    <string name="background_image">Фон суреті:</string>
+    <string name="select_image">Сурет таңдау</string>
+    <string name="primary_bible_text">Негізгі Киелі Кітап мәтіні</string>
+    <string name="primary_bible_reference">Негізгі Киелі Кітап кітабына сілтеме</string>
+    <string name="secondary_bible_text">Қосымша Киелі Кітап мәтіні</string>
+    <string name="secondary_bible_reference">Қосымша Киелі Кітап кітабына сілтеме</string>
+    <string name="show_abbreviation">Кітап қысқартуын көрсету</string>
+    <string name="caption_language">Жазба тілі</string>
+    <string name="language_source">Тіл көзі:</string>
+
+    <!-- Dialog Messages -->
+    <string name="please_select_directory_first">Алдымен қалтаны таңдаңыз.</string>
+    <string name="please_select_file_first">Алдымен тізімнен файлды таңдаңыз.</string>
+    <string name="no_file_selected_title">Файл таңдалмаған</string>
+    <string name="confirm_delete">Жоюды растау</string>
+    <string name="confirm_delete_file">\'%s\' жоюға сенімдісіз бе?</string>
+    <string name="import_error">Импорттау қатесі</string>
+    <string name="delete_error">Жою қатесі</string>
+
+    <!-- Background Type Options -->
+    <string name="background_default">Әдепкі</string>
+    <string name="background_color_option">Түс</string>
+    <string name="background_image_option">Сурет</string>
+
+    <!-- Position Options -->
+    <string name="position_above">Жоғарыда</string>
+    <string name="position_below">Төменде</string>
+
+    <!-- Language Options -->
+    <string name="language_interface">Интерфейс</string>
+    <string name="language_database">Дерекқор</string>
+
+    <!-- Language Menu -->
+    <string name="menu_language">Тіл</string>
+    <string name="language_russian">Орыс</string>
+    <string name="language_english">Ағылшын</string>
+    <string name="language_ukrainian">Украин</string>
+    <string name="language_kazakh">Қазақ</string>
+    <string name="language_german">Неміс</string>
+    <string name="language_polish">Поляк</string>
+    <string name="language_belarusian">Беларус</string>
+    <string name="language_czech">Чех</string>
+
+    <!-- Search Results -->
+    <string name="no_results_found">"%1$s" үшін нәтижелер табылмады</string>
+
+    <!-- File Manager Error Messages -->
+    <string name="error_target_directory_not_exist">Мақсатты қалта жоқ: %s</string>
+    <string name="error_copying_file">%s көшіру қатесі: %s</string>
+    <string name="error_failed_delete">Файлды жою мүмкін болмады</string>
+    <string name="error_deleting_file">Файлды жою қатесі: %s</string>
+    <string name="warning">Ескерту</string>
+
+    <!-- Edit Song Dialog -->
+    <string name="edit_song">Әнұранды өңдеу</string>
+    <string name="song_title">Әнұран атауы</string>
+    <string name="author">Автор</string>
+    <string name="composer">Композитор</string>
+    <string name="enter_lyrics_here">Мәтінді мұнда енгізіңіз...</string>
+    <string name="lyrics_format_help">Пішім: Шумақтарды бөлу үшін жол бөлгіштерін пайдаланыңыз. Шумақ жолдарын "Куплет" немесе "Припев" деп бастаңыз.</string>
+    <string name="save">Сақтау</string>
+
+    <!-- Tooltips -->
+    <string name="tooltip_new_schedule">Жаңа бағдарлама</string>
+    <string name="tooltip_open_schedule">Бағдарламаны ашу</string>
+    <string name="tooltip_save_schedule">Бағдарламаны сақтау</string>
+    <string name="tooltip_move_to_top">Жоғарыға жылжыту</string>
+    <string name="tooltip_move_up">Жоғары жылжыту</string>
+    <string name="tooltip_move_down">Төмен жылжыту</string>
+    <string name="tooltip_move_to_bottom">Төменге жылжыту</string>
+    <string name="tooltip_add_to_schedule">Бағдарламаға қосу</string>
+    <string name="tooltip_remove_from_schedule">Бағдарламадан жою</string>
+    <string name="tooltip_clear_schedule">Бағдарламаны тазалау</string>
+    <string name="tooltip_settings">Параметрлер</string>
+    <string name="tooltip_go_live">Эфирге</string>
+    <string name="tooltip_remove">Жою</string>
+</resources>
+

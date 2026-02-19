@@ -1,0 +1,236 @@
+<resources>
+    <string name="app_name">Church Presenter</string>
+    <string name="mode">Režim</string>
+    <string name="scope">Rozsah</string>
+    <string name="title">Název</string>
+    <string name="number">Číslo</string>
+    <string name="no_song_selected">Není vybrána žádná píseň</string>
+    <string name="go_live">Zobrazit</string>
+    <string name="add_to_schedule">Přidat do programu</string>
+    <string name="no_lyrics_available">Pro tuto píseň nejsou k dispozici texty</string>
+    <string name="tune">Melodie</string>
+    <string name="search">Hledat</string>
+    <string name="search_songs">Hledat písně...</string>
+    <string name="song_book">Zpěvník</string>
+    <string name="all_song_books">Všechny zpěvníky</string>
+    <string name="entire_bible">Celá Bible</string>
+    <string name="current_book">Aktuální kniha</string>
+    <string name="contains_phrase">Obsahuje frázi</string>
+    <string name="contains">Obsahuje</string>
+    <string name="starts_with">Začína na</string>
+    <string name="exact_match">Přesná shoda</string>
+    <string name="all_song_categories">Všechny kategorie</string>
+    <string name="filter_colon">Filtr:</string>
+    <string name="filter_type_colon">Typ filtru:</string>
+    <string name="service_schedule">Plán bohoslužby:</string>
+    <string name="songs">Písně</string>
+    <string name="song">Píseň</string>
+    <string name="bible">Bible</string>
+    <string name="pictures">Obrázky</string>
+    <string name="media">Média</string>
+    <string name="notes">Poznámky</string>
+    <string name="book">Kniha</string>
+    <string name="chapter">Kapitola</string>
+    <string name="verse">Verš</string>
+    <string name="options">Možnosti</string>
+    <string name="cancel">Zrušit</string>
+    <string name="ok">OK</string>
+    <string name="none">Žádný</string>
+    <string name="first_page">První strana</string>
+    <string name="every_page">Každá strana</string>
+    <string name="show_title">Zobrazit název:</string>
+    <string name="show_number">Zobrazit číslo:</string>
+    <string name="font_size">Velikost písma:</string>
+    <string name="font_type">Typ písma:</string>
+    <string name="announcements">Oznámení</string>
+    <string name="menu_file">Soubor</string>
+    <string name="menu_new_schedule">Nový program</string>
+    <string name="menu_open_schedule">Otevřít program</string>
+    <string name="menu_save_schedule">Uložit program</string>
+    <string name="menu_save_schedule_as">Uložit jako...</string>
+    <string name="menu_close_schedule">Zavřít program</string>
+    <string name="menu_exit">Ukončit</string>
+
+    <string name="menu_schedule">Program</string>
+    <string name="menu_add_to_schedule">Přidat do programu</string>
+    <string name="menu_remove_from_schedule">Odebrat z programu</string>
+    <string name="menu_clear_schedule">Vymazat program</string>
+
+    <!-- Schedule Tab Strings -->
+    <string name="schedule">Program</string>
+    <string name="quick_selection">Rychlý výběr</string>
+    <string name="clear_schedule">Vymazat program</string>
+    <string name="search_results">Výsledky vyhledávání</string>
+    <string name="clear">Vymazat</string>
+    <string name="found_results">Nalezeno %1$d výsledků</string>
+
+    <string name="menu_edit">Upravit</string>
+    <string name="menu_settings">Nastavení</string>
+
+    <string name="menu_help">Nápověda</string>
+    <string name="menu_about">O programu</string>
+    <string name="menu_help_item">Nápověda</string>
+
+    <!-- Options Dialog Strings -->
+    <string name="text_settings_and_colors">Nastavení textu a barvy</string>
+    <string name="background">Pozadí</string>
+    <string name="background_images">Obrázky pozadí</string>
+    <string name="folders">Složky</string>
+    <string name="projection">Projekce</string>
+    <string name="other">Ostatní</string>
+
+    <!-- Song Settings Strings -->
+    <string name="lyrics">Text</string>
+    <string name="song_number">Číslo písně</string>
+    <string name="min">Min:</string>
+    <string name="max">Max:</string>
+    <string name="alpha">Průhlednost:</string>
+    <string name="vertical_alignment">Svislé zarovnání:</string>
+    <string name="horizontal_alignment">Vodorovné zarovnání:</string>
+    <string name="text_alignment">Zarovnání textu:</string>
+    <string name="top">Nahoře</string>
+    <string name="above_verse">Nad veršem</string>
+    <string name="below_verse">Pod veršem</string>
+    <string name="middle">Uprostřed</string>
+    <string name="bottom">Dole</string>
+    <string name="left">Vlevo</string>
+    <string name="center">Na střed</string>
+    <string name="right">Vpravo</string>
+    <string name="song_files">Soubory písní</string>
+    <string name="storage_directory">Adresář úložiště</string>
+    <string name="browse">Procházet</string>
+    <string name="import_song_file">Importovat soubor písně</string>
+    <string name="remove_song_file">Odebrat soubor písně</string>
+    <string name="word_wrap">Zalamování řádků</string>
+    <string name="position">Pozice:</string>
+    <string name="color">Barva</string>
+    <string name="show_on_first_page">Zobrazit pouze na první straně</string>
+
+    <!-- Bible Settings Strings -->
+    <string name="bible_book_directory">Adresář biblických knih</string>
+    <string name="primary_bible">Primární Bible</string>
+    <string name="secondary_bible">Sekundární Bible</string>
+    <string name="primary_bible_reference">Primární biblický odkaz</string>
+    <string name="secondary_bible_reference">Sekundární biblický odkaz</string>
+    <string name="show_book_abbreviation">Zobrazit zkratku knihy</string>
+    <string name="caption_language">Jazyk titulků</string>
+    <string name="language_source">Zdroj jazyka:</string>
+
+    <!-- Bible Books -->
+    <string name="genesis">Genesis</string>
+    <string name="exodus">Exodus</string>
+    <string name="leviticus">Leviticus</string>
+    <string name="numbers">Numeri</string>
+    <string name="deuteronomy">Deuteronomium</string>
+    <string name="joshua">Jozue</string>
+    <string name="judges">Soudců</string>
+    <string name="ruth">Rút</string>
+    <string name="1_samuel">1. Samuelova</string>
+    <string name="2_samuel">2. Samuelova</string>
+    <string name="1_kings">1. Královská</string>
+    <string name="2_kings">2. Královská</string>
+    <string name="1_chronicles">1. Paralipomenon</string>
+    <string name="2_chronicles">2. Paralipomenon</string>
+    <string name="ezra">Ezdráš</string>
+    <string name="nehemiah">Nehemiáš</string>
+    <string name="esther">Ester</string>
+    <string name="job">Jób</string>
+    <string name="psalms">Žalmy</string>
+    <string name="proverbs">Přísloví</string>
+    <string name="ecclesiastes">Kazatel</string>
+    <string name="song_of_solomon">Píseň písní</string>
+    <string name="isaiah">Izaiáš</string>
+    <string name="jeremiah">Jeremiáš</string>
+    <string name="lamentations">Pláč Jeremiášův</string>
+    <string name="ezekiel">Ezechiel</string>
+    <string name="daniel">Daniel</string>
+    <string name="hosea">Ozeáš</string>
+    <string name="joel">Joel</string>
+    <string name="amos">Ámos</string>
+    <string name="obadiah">Abdiáš</string>
+    <string name="jonah">Jonáš</string>
+    <string name="micah">Micheáš</string>
+    <string name="nahum">Nahum</string>
+    <string name="habakkuk">Abakuk</string>
+    <string name="zephaniah">Sofoniáš</string>
+    <string name="haggai">Aggeus</string>
+    <string name="zechariah">Zachariáš</string>
+    <string name="malachi">Malachiáš</string>
+    <string name="matthew">Matouš</string>
+    <string name="mark">Marek</string>
+    <string name="luke">Lukáš</string>
+    <string name="john">Jan</string>
+    <string name="acts">Skutky apoštolů</string>
+    <string name="romans">Římanům</string>
+    <string name="1_corinthians">1. Korintským</string>
+    <string name="2_corinthians">2. Korintským</string>
+    <string name="galatians">Galatským</string>
+    <string name="ephesians">Efezským</string>
+    <string name="philippians">Filipským</string>
+    <string name="colossians">Koloským</string>
+    <string name="1_thessalonians">1. Tesalonickým</string>
+    <string name="2_thessalonians">2. Tesalonickým</string>
+    <string name="1_timothy">1. Timoteovi</string>
+    <string name="2_timothy">2. Timoteovi</string>
+    <string name="titus">Titovi</string>
+    <string name="philemon">Filemonovi</string>
+    <string name="hebrews">Židům</string>
+    <string name="james">Jakub</string>
+    <string name="1_peter">1. Petrův</string>
+    <string name="2_peter">2. Petrův</string>
+    <string name="1_john">1. Janův</string>
+    <string name="2_john">2. Janův</string>
+    <string name="3_john">3. Janův</string>
+    <string name="jude">Judův</string>
+    <string name="revelation">Zjevení</string>
+
+    <string name="light_theme">Světlý motiv</string>
+    <string name="dark_theme">Tmavý motiv</string>
+    <string name="system_theme">Systémový motiv</string>
+
+    <string name="menu_language">Jazyk</string>
+
+    <!-- Theme Manager Strings -->
+    <string name="language_interface">Rozhraní</string>
+    <string name="language_database">Databáze</string>
+
+    <!-- Menu -->
+    <string name="language_russian">Ruština</string>
+    <string name="language_english">Angličtina</string>
+    <string name="language_ukrainian">Ukrajinština</string>
+    <string name="language_kazakh">Kazaština</string>
+    <string name="language_german">Němčina</string>
+    <string name="language_polish">Polština</string>
+    <string name="language_belarusian">Běloruština</string>
+    <string name="language_czech">Čeština</string>
+
+    <!-- Search Results -->
+    <string name="no_results_found">Pro "%1$s" nebyly nalezeny žádné výsledky</string>
+
+    <!-- Toolbar Icons -->
+    <string name="tooltip_new_schedule">Nový program</string>
+    <string name="tooltip_open_schedule">Otevřít program</string>
+    <string name="tooltip_save_schedule">Uložit program</string>
+    <string name="tooltip_save_as_schedule">Uložit program jako</string>
+    <string name="tooltip_move_to_top">Přesunout nahoru</string>
+    <string name="tooltip_move_up">Posunout nahoru</string>
+    <string name="tooltip_move_down">Posunout dolů</string>
+    <string name="tooltip_move_to_bottom">Přesunout dolů</string>
+    <string name="tooltip_add_to_schedule">Přidat do programu</string>
+    <string name="tooltip_remove_from_schedule">Odebrat z programu</string>
+    <string name="tooltip_clear_schedule">Vymazat program</string>
+    <string name="tooltip_settings">Nastavení</string>
+
+    <!-- Edit Song Dialog -->
+    <string name="edit_song">Upravit píseň</string>
+    <string name="save">Uložit</string>
+    <string name="song_title">Název písně</string>
+    <string name="song_lyrics">Text písně</string>
+    <string name="author">Autor</string>
+    <string name="composer">Skladatel</string>
+
+    <!-- Presenter Window -->
+    <string name="presenter">Prezenter</string>
+    <string name="no_content">Žádný obsah k zobrazení</string>
+</resources>
+

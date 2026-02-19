@@ -1,0 +1,283 @@
+<resources>
+    <string name="app_name">Church Presenter</string>
+    <string name="mode">Рэжым</string>
+    <string name="scope">Вобласць</string>
+    <string name="title">Назва</string>
+    <string name="number">Нумар</string>
+    <string name="no_song_selected">Песня не абрана</string>
+    <string name="go_live">У эфір</string>
+    <string name="add_to_schedule">Дадаць у праграму</string>
+    <string name="no_lyrics_available">Тэкст песні недаступны</string>
+    <string name="tune">Мелодыя</string>
+    <string name="search">Пошук</string>
+    <string name="search_songs">Шукаць песні...</string>
+    <string name="song_book">Зборнік песень</string>
+    <string name="all_song_books">Усе зборнікі</string>
+    <string name="entire_bible">Уся Біблія</string>
+    <string name="current_book">Бягучая кніга</string>
+    <string name="contains_phrase">Утрымлівае фразу</string>
+    <string name="contains">Утрымлівае</string>
+    <string name="starts_with">Пачынаецца з</string>
+    <string name="exact_match">Дакладнае супадзенне</string>
+    <string name="all_song_categories">Усе катэгорыі</string>
+    <string name="filter_colon">Фільтр:</string>
+    <string name="filter_type_colon">Тып фільтра:</string>
+    <string name="service_schedule">Праграма служэння:</string>
+    <string name="songs">Песні</string>
+    <string name="song">Песня</string>
+    <string name="bible">Біблія</string>
+    <string name="pictures">Выявы</string>
+    <string name="media">Медыя</string>
+    <string name="notes">Нататкі</string>
+    <string name="book">Кніга</string>
+    <string name="chapter">Раздзел</string>
+    <string name="verse">Верш</string>
+    <string name="options">Налады</string>
+    <string name="cancel">Адмяніць</string>
+    <string name="ok">OK</string>
+    <string name="none">Няма</string>
+    <string name="first_page">Першая старонка</string>
+    <string name="every_page">Кожная старонка</string>
+    <string name="show_title">Паказаць назву:</string>
+    <string name="show_number">Паказаць нумар:</string>
+    <string name="font_size">Памер шрыфту:</string>
+    <string name="font_type">Тып шрыфту:</string>
+    <string name="announcements">Аб'явы</string>
+    <string name="menu_file">Файл</string>
+    <string name="menu_new_schedule">Новая праграма</string>
+    <string name="menu_open_schedule">Адкрыць праграму</string>
+    <string name="menu_save_schedule">Захаваць праграму</string>
+    <string name="menu_save_schedule_as">Захаваць як...</string>
+    <string name="menu_close_schedule">Закрыць праграму</string>
+    <string name="menu_exit">Выхад</string>
+
+    <string name="menu_schedule">Праграма</string>
+    <string name="menu_add_to_schedule">Дадаць у праграму</string>
+    <string name="menu_remove_from_schedule">Выдаліць з праграмы</string>
+    <string name="menu_clear_schedule">Ачысціць праграму</string>
+
+    <!-- Schedule Tab Strings -->
+    <string name="schedule">Праграма</string>
+    <string name="quick_selection">Хуткі выбар</string>
+    <string name="clear_schedule">Ачысціць праграму</string>
+    <string name="search_results">Вынікі пошуку</string>
+    <string name="clear">Ачысціць</string>
+    <string name="found_results">Знойдзена %1$d вынік(аў)</string>
+
+    <string name="menu_edit">Праўка</string>
+    <string name="menu_settings">Налады</string>
+
+    <string name="menu_help">Даведка</string>
+    <string name="menu_about">Аб праграме</string>
+    <string name="menu_help_item">Даведка</string>
+
+    <!-- Options Dialog Strings -->
+    <string name="text_settings_and_colors">Налады тэксту і колеру</string>
+    <string name="background">Фон</string>
+    <string name="background_images">Фонавыя выявы</string>
+    <string name="folders">Папкі</string>
+    <string name="projection">Праекцыя</string>
+    <string name="other">Іншае</string>
+
+    <!-- Song Settings Strings -->
+    <string name="lyrics">Тэкст</string>
+    <string name="song_number">Нумар песні</string>
+    <string name="min">Мін:</string>
+    <string name="max">Макс:</string>
+    <string name="alpha">Празрыстасць:</string>
+    <string name="vertical_alignment">Вертыкальнае выраўноўванне:</string>
+    <string name="horizontal_alignment">Гарызантальнае выраўноўванне:</string>
+    <string name="text_alignment">Выраўноўванне тэксту:</string>
+    <string name="top">Зверху</string>
+    <string name="above_verse">Над вершам</string>
+    <string name="below_verse">Пад вершам</string>
+    <string name="middle">Па цэнтры</string>
+    <string name="bottom">Знізу</string>
+    <string name="left">Злева</string>
+    <string name="center">Па цэнтры</string>
+    <string name="right">Справа</string>
+    <string name="song_files">Файлы песень</string>
+    <string name="storage_directory">Папка захавання</string>
+    <string name="browse_directory">Агляд...</string>
+    <string name="no_directory_selected">Папка не абрана</string>
+    <string name="files_in_directory">Файлы ў папцы</string>
+    <string name="import_song_file">Імпарт файла песень</string>
+    <string name="remove_song_file">Выдаліць файл песень</string>
+    <string name="select_song_file">Выбраць файл песень...</string>
+    <string name="no_song_files">Файлы песень не загружаны</string>
+    <string name="word_wrap">Перанос слоў</string>
+    <string name="show_on_first_page_only">Паказваць толькі на першай старонцы</string>
+    <string name="position_on_screen">Становішча на экране:</string>
+    <string name="top_left">Зверху злева</string>
+    <string name="top_right">Зверху справа</string>
+    <string name="bottom_left">Знізу злева</string>
+    <string name="bottom_right">Знізу справа</string>
+    <string name="color">Колер:</string>
+    <string name="dark_theme">Цёмная тэма</string>
+    <string name="light_theme">Светлая тэма</string>
+    <string name="system_theme">Сістэмная тэма</string>
+    <!-- Placeholder strings for other tabs -->
+    <string name="bible_tab_content">Змест укладкі Біблія будзе рэалізаваны</string>
+    <string name="text_settings_tab_content">Змест укладкі налад тэксту будзе рэалізаваны</string>
+    <string name="background_tab_content">Змест укладкі фону будзе рэалізаваны</string>
+    <string name="background_images_tab_content">Змест укладкі фонавых выяў будзе рэалізаваны</string>
+    <string name="folders_tab_content">Змест укладкі папак будзе рэалізаваны</string>
+    <string name="projection_tab_content">Змест укладкі праекцыі будзе рэалізаваны</string>
+    <string name="other_tab_content">Змест укладкі іншае будзе рэалізаваны</string>
+
+    <string name="bible_book_1">Быццё</string>
+    <string name="bible_book_2">Выхад</string>
+    <string name="bible_book_3">Левіт</string>
+    <string name="bible_book_4">Лічбы</string>
+    <string name="bible_book_5">Паўтарэнне Закону</string>
+    <string name="bible_book_6">Ісус Навін</string>
+    <string name="bible_book_7">Суддзяў</string>
+    <string name="bible_book_8">Руфь</string>
+    <string name="bible_book_9">1 Самуіла</string>
+    <string name="bible_book_10">2 Самуіла</string>
+    <string name="bible_book_11">1 Цароў</string>
+    <string name="bible_book_12">2 Цароў</string>
+    <string name="bible_book_13">1 Хронікі</string>
+    <string name="bible_book_14">2 Хронікі</string>
+    <string name="bible_book_15">Эздра</string>
+    <string name="bible_book_16">Нээмія</string>
+    <string name="bible_book_17">Эстэр</string>
+    <string name="bible_book_18">Іоў</string>
+    <string name="bible_book_19">Псалмы</string>
+    <string name="bible_book_20">Прыказкі</string>
+    <string name="bible_book_21">Экклезіяст</string>
+    <string name="bible_book_22">Песня Песняў</string>
+    <string name="bible_book_23">Ісая</string>
+    <string name="bible_book_24">Ерэмія</string>
+    <string name="bible_book_25">Плач Ерэміі</string>
+    <string name="bible_book_26">Езэкііль</string>
+    <string name="bible_book_27">Даніл</string>
+    <string name="bible_book_28">Асія</string>
+    <string name="bible_book_29">Іоіль</string>
+    <string name="bible_book_30">Амос</string>
+    <string name="bible_book_31">Авдзій</string>
+    <string name="bible_book_32">Іона</string>
+    <string name="bible_book_33">Міхей</string>
+    <string name="bible_book_34">Наум</string>
+    <string name="bible_book_35">Аввакум</string>
+    <string name="bible_book_36">Сафонія</string>
+    <string name="bible_book_37">Агей</string>
+    <string name="bible_book_38">Захарыя</string>
+    <string name="bible_book_39">Малахія</string>
+    <string name="bible_book_40">Мацвея</string>
+    <string name="bible_book_41">Марка</string>
+    <string name="bible_book_42">Лукі</string>
+    <string name="bible_book_43">Іаана</string>
+    <string name="bible_book_44">Дзеянні</string>
+    <string name="bible_book_45">Рымлянаў</string>
+    <string name="bible_book_46">1 Карынфянаў</string>
+    <string name="bible_book_47">2 Карынфянаў</string>
+    <string name="bible_book_48">Галатаў</string>
+    <string name="bible_book_49">Эфесянаў</string>
+    <string name="bible_book_50">Філіпійцаў</string>
+    <string name="bible_book_51">Каласянаў</string>
+    <string name="bible_book_52">1 Фесаланікійцаў</string>
+    <string name="bible_book_53">2 Фесаланікійцаў</string>
+    <string name="bible_book_54">1 Цімафея</string>
+    <string name="bible_book_55">2 Цімафея</string>
+    <string name="bible_book_56">Ціта</string>
+    <string name="bible_book_57">Філімона</string>
+    <string name="bible_book_58">Яўрэяў</string>
+    <string name="bible_book_59">Якава</string>
+    <string name="bible_book_60">1 Пятра</string>
+    <string name="bible_book_61">2 Пятра</string>
+    <string name="bible_book_62">1 Іаана</string>
+    <string name="bible_book_63">2 Іаана</string>
+    <string name="bible_book_64">3 Іаана</string>
+    <string name="bible_book_65">Юды</string>
+    <string name="bible_book_66">Адкрыццё</string>
+
+    <!-- Bible Settings -->
+    <string name="bible_files">Файлы Бібліі</string>
+    <string name="position">Становішча</string>
+    <string name="no_bible_files">Файлы Бібліі не загружаны</string>
+    <string name="import_bible_file">Імпарт файла Бібліі</string>
+    <string name="remove_bible_file">Выдаліць файл Бібліі</string>
+    <string name="bible_selection">Выбар Бібліі</string>
+    <string name="primary_bible">Асноўная Біблія:</string>
+    <string name="secondary_bible">Дадатковая Біблія:</string>
+    <string name="background_type">Тып фону:</string>
+    <string name="background_color">Колер фону:</string>
+    <string name="background_image">Фонавая выява:</string>
+    <string name="select_image">Выбраць выяву</string>
+    <string name="primary_bible_text">Тэкст асноўнай Бібліі</string>
+    <string name="primary_bible_reference">Спасылка на кнігу асноўнай Бібліі</string>
+    <string name="secondary_bible_text">Тэкст дадатковай Бібліі</string>
+    <string name="secondary_bible_reference">Спасылка на кнігу дадатковай Бібліі</string>
+    <string name="show_abbreviation">Паказаць скарачэнне кнігі</string>
+    <string name="caption_language">Мова подпісаў</string>
+    <string name="language_source">Крыніца мовы:</string>
+
+    <!-- Dialog Messages -->
+    <string name="please_select_directory_first">Калі ласка, спачатку выберыце папку.</string>
+    <string name="please_select_file_first">Калі ласка, спачатку выберыце файл са спіса.</string>
+    <string name="no_file_selected_title">Файл не абраны</string>
+    <string name="confirm_delete">Пацвердзіце выдаленне</string>
+    <string name="confirm_delete_file">Вы ўпэўненыя, што хочаце выдаліць \'%s\'?</string>
+    <string name="import_error">Памылка імпарту</string>
+    <string name="delete_error">Памылка выдалення</string>
+
+    <!-- Background Type Options -->
+    <string name="background_default">Па змаўчанні</string>
+    <string name="background_color_option">Колер</string>
+    <string name="background_image_option">Выява</string>
+
+    <!-- Position Options -->
+    <string name="position_above">Зверху</string>
+    <string name="position_below">Знізу</string>
+
+    <!-- Language Options -->
+    <string name="language_interface">Інтэрфейс</string>
+    <string name="language_database">База даных</string>
+
+    <!-- Language Menu -->
+    <string name="menu_language">Мова</string>
+    <string name="language_russian">Руская</string>
+    <string name="language_english">Англійская</string>
+    <string name="language_ukrainian">Украінская</string>
+    <string name="language_kazakh">Казахская</string>
+    <string name="language_german">Нямецкая</string>
+    <string name="language_polish">Польская</string>
+    <string name="language_belarusian">Беларуская</string>
+    <string name="language_czech">Чэшская</string>
+
+    <!-- Search Results -->
+    <string name="no_results_found">Вынікі не знойдзены для "%1$s"</string>
+
+    <!-- File Manager Error Messages -->
+    <string name="error_target_directory_not_exist">Мэтавая папка не існуе: %s</string>
+    <string name="error_copying_file">Памылка капіявання %s: %s</string>
+    <string name="error_failed_delete">Не атрымалася выдаліць файл</string>
+    <string name="error_deleting_file">Памылка выдалення файла: %s</string>
+    <string name="warning">Папярэджанне</string>
+
+    <!-- Edit Song Dialog -->
+    <string name="edit_song">Рэдагаваць песню</string>
+    <string name="song_title">Назва песні</string>
+    <string name="author">Аўтар</string>
+    <string name="composer">Кампазітар</string>
+    <string name="enter_lyrics_here">Увядзіце тэкст тут...</string>
+    <string name="lyrics_format_help">Фармат: Выкарыстоўвайце разрывы радкоў для падзелу куплетаў. Пачынайце радкі куплетаў з "Куплет" або "Прыпеў".</string>
+    <string name="save">Захаваць</string>
+
+    <!-- Tooltips -->
+    <string name="tooltip_new_schedule">Новая праграма</string>
+    <string name="tooltip_open_schedule">Адкрыць праграму</string>
+    <string name="tooltip_save_schedule">Захаваць праграму</string>
+    <string name="tooltip_move_to_top">Перамясціць наверх</string>
+    <string name="tooltip_move_up">Перамясціць уверх</string>
+    <string name="tooltip_move_down">Перамясціць уніз</string>
+    <string name="tooltip_move_to_bottom">Перамясціць уніз</string>
+    <string name="tooltip_add_to_schedule">Дадаць у праграму</string>
+    <string name="tooltip_remove_from_schedule">Выдаліць з праграмы</string>
+    <string name="tooltip_clear_schedule">Ачысціць праграму</string>
+    <string name="tooltip_settings">Налады</string>
+    <string name="tooltip_go_live">У эфір</string>
+    <string name="tooltip_remove">Выдаліць</string>
+</resources>
+

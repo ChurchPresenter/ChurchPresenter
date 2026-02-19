@@ -1,0 +1,283 @@
+<resources>
+    <string name="app_name">Church Presenter</string>
+    <string name="mode">Modus</string>
+    <string name="scope">Bereich</string>
+    <string name="title">Titel</string>
+    <string name="number">Nummer</string>
+    <string name="no_song_selected">Kein Lied ausgewählt</string>
+    <string name="go_live">Live gehen</string>
+    <string name="add_to_schedule">Zum Programm hinzufügen</string>
+    <string name="no_lyrics_available">Kein Liedtext verfügbar</string>
+    <string name="tune">Melodie</string>
+    <string name="search">Suchen</string>
+    <string name="search_songs">Lieder suchen...</string>
+    <string name="song_book">Liederbuch</string>
+    <string name="all_song_books">Alle Liederbücher</string>
+    <string name="entire_bible">Gesamte Bibel</string>
+    <string name="current_book">Aktuelles Buch</string>
+    <string name="contains_phrase">Enthält Phrase</string>
+    <string name="contains">Enthält</string>
+    <string name="starts_with">Beginnt mit</string>
+    <string name="exact_match">Exakte Übereinstimmung</string>
+    <string name="all_song_categories">Alle Kategorien</string>
+    <string name="filter_colon">Filter:</string>
+    <string name="filter_type_colon">Filtertyp:</string>
+    <string name="service_schedule">Gottesdienstprogramm:</string>
+    <string name="songs">Lieder</string>
+    <string name="song">Lied</string>
+    <string name="bible">Bibel</string>
+    <string name="pictures">Bilder</string>
+    <string name="media">Medien</string>
+    <string name="notes">Notizen</string>
+    <string name="book">Buch</string>
+    <string name="chapter">Kapitel</string>
+    <string name="verse">Vers</string>
+    <string name="options">Einstellungen</string>
+    <string name="cancel">Abbrechen</string>
+    <string name="ok">OK</string>
+    <string name="none">Keine</string>
+    <string name="first_page">Erste Seite</string>
+    <string name="every_page">Jede Seite</string>
+    <string name="show_title">Titel anzeigen:</string>
+    <string name="show_number">Nummer anzeigen:</string>
+    <string name="font_size">Schriftgröße:</string>
+    <string name="font_type">Schriftart:</string>
+    <string name="announcements">Ankündigungen</string>
+    <string name="menu_file">Datei</string>
+    <string name="menu_new_schedule">Neues Programm</string>
+    <string name="menu_open_schedule">Programm öffnen</string>
+    <string name="menu_save_schedule">Programm speichern</string>
+    <string name="menu_save_schedule_as">Speichern unter...</string>
+    <string name="menu_close_schedule">Programm schließen</string>
+    <string name="menu_exit">Beenden</string>
+
+    <string name="menu_schedule">Programm</string>
+    <string name="menu_add_to_schedule">Zum Programm hinzufügen</string>
+    <string name="menu_remove_from_schedule">Aus Programm entfernen</string>
+    <string name="menu_clear_schedule">Programm löschen</string>
+
+    <!-- Schedule Tab Strings -->
+    <string name="schedule">Programm</string>
+    <string name="quick_selection">Schnellauswahl</string>
+    <string name="clear_schedule">Programm löschen</string>
+    <string name="search_results">Suchergebnisse</string>
+    <string name="clear">Löschen</string>
+    <string name="found_results">%1$d Ergebnis(se) gefunden</string>
+
+    <string name="menu_edit">Bearbeiten</string>
+    <string name="menu_settings">Einstellungen</string>
+
+    <string name="menu_help">Hilfe</string>
+    <string name="menu_about">Über</string>
+    <string name="menu_help_item">Hilfe</string>
+
+    <!-- Options Dialog Strings -->
+    <string name="text_settings_and_colors">Texteinstellungen und Farben</string>
+    <string name="background">Hintergrund</string>
+    <string name="background_images">Hintergrundbilder</string>
+    <string name="folders">Ordner</string>
+    <string name="projection">Projektion</string>
+    <string name="other">Sonstiges</string>
+
+    <!-- Song Settings Strings -->
+    <string name="lyrics">Text</string>
+    <string name="song_number">Liedernummer</string>
+    <string name="min">Min:</string>
+    <string name="max">Max:</string>
+    <string name="alpha">Transparenz:</string>
+    <string name="vertical_alignment">Vertikale Ausrichtung:</string>
+    <string name="horizontal_alignment">Horizontale Ausrichtung:</string>
+    <string name="text_alignment">Textausrichtung:</string>
+    <string name="top">Oben</string>
+    <string name="above_verse">Über Vers</string>
+    <string name="below_verse">Unter Vers</string>
+    <string name="middle">Mitte</string>
+    <string name="bottom">Unten</string>
+    <string name="left">Links</string>
+    <string name="center">Zentriert</string>
+    <string name="right">Rechts</string>
+    <string name="song_files">Liederdateien</string>
+    <string name="storage_directory">Speicherverzeichnis</string>
+    <string name="browse_directory">Durchsuchen...</string>
+    <string name="no_directory_selected">Kein Verzeichnis ausgewählt</string>
+    <string name="files_in_directory">Dateien im Verzeichnis</string>
+    <string name="import_song_file">Liederdatei importieren</string>
+    <string name="remove_song_file">Liederdatei entfernen</string>
+    <string name="select_song_file">Liederdatei auswählen...</string>
+    <string name="no_song_files">Keine Liederdateien geladen</string>
+    <string name="word_wrap">Wortumbruch</string>
+    <string name="show_on_first_page_only">Nur auf erster Seite anzeigen</string>
+    <string name="position_on_screen">Position auf dem Bildschirm:</string>
+    <string name="top_left">Oben links</string>
+    <string name="top_right">Oben rechts</string>
+    <string name="bottom_left">Unten links</string>
+    <string name="bottom_right">Unten rechts</string>
+    <string name="color">Farbe:</string>
+    <string name="dark_theme">Dunkles Design</string>
+    <string name="light_theme">Helles Design</string>
+    <string name="system_theme">Systemdesign</string>
+    <!-- Placeholder strings for other tabs -->
+    <string name="bible_tab_content">Bibelregister-Inhalt wird implementiert</string>
+    <string name="text_settings_tab_content">Texteinstellungs-Inhalt wird implementiert</string>
+    <string name="background_tab_content">Hintergrund-Inhalt wird implementiert</string>
+    <string name="background_images_tab_content">Hintergrundbilder-Inhalt wird implementiert</string>
+    <string name="folders_tab_content">Ordner-Inhalt wird implementiert</string>
+    <string name="projection_tab_content">Projektions-Inhalt wird implementiert</string>
+    <string name="other_tab_content">Sonstiges-Inhalt wird implementiert</string>
+
+    <string name="bible_book_1">1. Mose</string>
+    <string name="bible_book_2">2. Mose</string>
+    <string name="bible_book_3">3. Mose</string>
+    <string name="bible_book_4">4. Mose</string>
+    <string name="bible_book_5">5. Mose</string>
+    <string name="bible_book_6">Josua</string>
+    <string name="bible_book_7">Richter</string>
+    <string name="bible_book_8">Rut</string>
+    <string name="bible_book_9">1. Samuel</string>
+    <string name="bible_book_10">2. Samuel</string>
+    <string name="bible_book_11">1. Könige</string>
+    <string name="bible_book_12">2. Könige</string>
+    <string name="bible_book_13">1. Chronik</string>
+    <string name="bible_book_14">2. Chronik</string>
+    <string name="bible_book_15">Esra</string>
+    <string name="bible_book_16">Nehemia</string>
+    <string name="bible_book_17">Ester</string>
+    <string name="bible_book_18">Hiob</string>
+    <string name="bible_book_19">Psalmen</string>
+    <string name="bible_book_20">Sprüche</string>
+    <string name="bible_book_21">Prediger</string>
+    <string name="bible_book_22">Hohelied</string>
+    <string name="bible_book_23">Jesaja</string>
+    <string name="bible_book_24">Jeremia</string>
+    <string name="bible_book_25">Klagelieder</string>
+    <string name="bible_book_26">Hesekiel</string>
+    <string name="bible_book_27">Daniel</string>
+    <string name="bible_book_28">Hosea</string>
+    <string name="bible_book_29">Joel</string>
+    <string name="bible_book_30">Amos</string>
+    <string name="bible_book_31">Obadja</string>
+    <string name="bible_book_32">Jona</string>
+    <string name="bible_book_33">Micha</string>
+    <string name="bible_book_34">Nahum</string>
+    <string name="bible_book_35">Habakuk</string>
+    <string name="bible_book_36">Zefanja</string>
+    <string name="bible_book_37">Haggai</string>
+    <string name="bible_book_38">Sacharja</string>
+    <string name="bible_book_39">Maleachi</string>
+    <string name="bible_book_40">Matthäus</string>
+    <string name="bible_book_41">Markus</string>
+    <string name="bible_book_42">Lukas</string>
+    <string name="bible_book_43">Johannes</string>
+    <string name="bible_book_44">Apostelgeschichte</string>
+    <string name="bible_book_45">Römer</string>
+    <string name="bible_book_46">1. Korinther</string>
+    <string name="bible_book_47">2. Korinther</string>
+    <string name="bible_book_48">Galater</string>
+    <string name="bible_book_49">Epheser</string>
+    <string name="bible_book_50">Philipper</string>
+    <string name="bible_book_51">Kolosser</string>
+    <string name="bible_book_52">1. Thessalonicher</string>
+    <string name="bible_book_53">2. Thessalonicher</string>
+    <string name="bible_book_54">1. Timotheus</string>
+    <string name="bible_book_55">2. Timotheus</string>
+    <string name="bible_book_56">Titus</string>
+    <string name="bible_book_57">Philemon</string>
+    <string name="bible_book_58">Hebräer</string>
+    <string name="bible_book_59">Jakobus</string>
+    <string name="bible_book_60">1. Petrus</string>
+    <string name="bible_book_61">2. Petrus</string>
+    <string name="bible_book_62">1. Johannes</string>
+    <string name="bible_book_63">2. Johannes</string>
+    <string name="bible_book_64">3. Johannes</string>
+    <string name="bible_book_65">Judas</string>
+    <string name="bible_book_66">Offenbarung</string>
+
+    <!-- Bible Settings -->
+    <string name="bible_files">Bibeldateien</string>
+    <string name="position">Position</string>
+    <string name="no_bible_files">Keine Bibeldateien geladen</string>
+    <string name="import_bible_file">Bibeldatei importieren</string>
+    <string name="remove_bible_file">Bibeldatei entfernen</string>
+    <string name="bible_selection">Bibelauswahl</string>
+    <string name="primary_bible">Hauptbibel:</string>
+    <string name="secondary_bible">Sekundärbibel:</string>
+    <string name="background_type">Hintergrundtyp:</string>
+    <string name="background_color">Hintergrundfarbe:</string>
+    <string name="background_image">Hintergrundbild:</string>
+    <string name="select_image">Bild auswählen</string>
+    <string name="primary_bible_text">Hauptbibeltext</string>
+    <string name="primary_bible_reference">Hauptbibel-Buchreferenz</string>
+    <string name="secondary_bible_text">Sekundärbibeltext</string>
+    <string name="secondary_bible_reference">Sekundärbibel-Buchreferenz</string>
+    <string name="show_abbreviation">Buchkürzel anzeigen</string>
+    <string name="caption_language">Untertitelsprache</string>
+    <string name="language_source">Sprachquelle:</string>
+
+    <!-- Dialog Messages -->
+    <string name="please_select_directory_first">Bitte wählen Sie zuerst ein Verzeichnis aus.</string>
+    <string name="please_select_file_first">Bitte wählen Sie zuerst eine Datei aus der Liste aus.</string>
+    <string name="no_file_selected_title">Keine Datei ausgewählt</string>
+    <string name="confirm_delete">Löschen bestätigen</string>
+    <string name="confirm_delete_file">Sind Sie sicher, dass Sie \'%s\' löschen möchten?</string>
+    <string name="import_error">Importfehler</string>
+    <string name="delete_error">Löschfehler</string>
+
+    <!-- Background Type Options -->
+    <string name="background_default">Standard</string>
+    <string name="background_color_option">Farbe</string>
+    <string name="background_image_option">Bild</string>
+
+    <!-- Position Options -->
+    <string name="position_above">Oben</string>
+    <string name="position_below">Unten</string>
+
+    <!-- Language Options -->
+    <string name="language_interface">Benutzeroberfläche</string>
+    <string name="language_database">Datenbank</string>
+
+    <!-- Language Menu -->
+    <string name="menu_language">Sprache</string>
+    <string name="language_russian">Russisch</string>
+    <string name="language_english">Englisch</string>
+    <string name="language_ukrainian">Ukrainisch</string>
+    <string name="language_kazakh">Kasachisch</string>
+    <string name="language_german">Deutsch</string>
+    <string name="language_polish">Polnisch</string>
+    <string name="language_belarusian">Weißrussisch</string>
+    <string name="language_czech">Tschechisch</string>
+
+    <!-- Search Results -->
+    <string name="no_results_found">Keine Ergebnisse gefunden für "%1$s"</string>
+
+    <!-- File Manager Error Messages -->
+    <string name="error_target_directory_not_exist">Zielverzeichnis existiert nicht: %s</string>
+    <string name="error_copying_file">Fehler beim Kopieren von %s: %s</string>
+    <string name="error_failed_delete">Datei konnte nicht gelöscht werden</string>
+    <string name="error_deleting_file">Fehler beim Löschen der Datei: %s</string>
+    <string name="warning">Warnung</string>
+
+    <!-- Edit Song Dialog -->
+    <string name="edit_song">Lied bearbeiten</string>
+    <string name="song_title">Liedtitel</string>
+    <string name="author">Autor</string>
+    <string name="composer">Komponist</string>
+    <string name="enter_lyrics_here">Liedtext hier eingeben...</string>
+    <string name="lyrics_format_help">Format: Verwenden Sie Zeilenumbrüche zum Trennen von Versen. Beginnen Sie Verszeilen mit "Куплет" oder "Припев".</string>
+    <string name="save">Speichern</string>
+
+    <!-- Tooltips -->
+    <string name="tooltip_new_schedule">Neues Programm</string>
+    <string name="tooltip_open_schedule">Programm öffnen</string>
+    <string name="tooltip_save_schedule">Programm speichern</string>
+    <string name="tooltip_move_to_top">Nach oben verschieben</string>
+    <string name="tooltip_move_up">Nach oben</string>
+    <string name="tooltip_move_down">Nach unten</string>
+    <string name="tooltip_move_to_bottom">Nach unten verschieben</string>
+    <string name="tooltip_add_to_schedule">Zum Programm hinzufügen</string>
+    <string name="tooltip_remove_from_schedule">Aus Programm entfernen</string>
+    <string name="tooltip_clear_schedule">Programm löschen</string>
+    <string name="tooltip_settings">Einstellungen</string>
+    <string name="tooltip_go_live">Live gehen</string>
+    <string name="tooltip_remove">Entfernen</string>
+</resources>
+

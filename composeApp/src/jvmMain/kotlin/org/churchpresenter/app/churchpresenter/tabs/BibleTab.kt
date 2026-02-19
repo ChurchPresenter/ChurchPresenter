@@ -96,8 +96,9 @@ fun BibleTab(
     val bookSearchQuery by viewModel.bookSearchQuery
     val chapterSearchQuery by viewModel.chapterSearchQuery
     val verseSearchQuery by viewModel.verseSearchQuery
+    val bookNameMapping by viewModel.bookNameMapping
 
-    val filteredBooks = remember(books, bookSearchQuery) {
+    val filteredBooks = remember(books, bookSearchQuery, bookNameMapping) {
         viewModel.getFilteredBooks()
     }
     val filteredChapters = remember(selectedBookIndex, chapterSearchQuery) {

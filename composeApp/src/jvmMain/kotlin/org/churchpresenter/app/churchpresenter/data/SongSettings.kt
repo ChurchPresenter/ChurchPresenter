@@ -91,5 +91,5 @@ data class AppSettings(
     val songSettings: SongSettings = SongSettings(),
     val bibleSettings: BibleSettings = BibleSettings(),
     val theme: String = Constants.LIGHT,
-    // Add other tab settings here as needed
+    val language: String = "en" // Default to English
 )

@@ -8,6 +8,14 @@ import androidx.compose.ui.window.MenuBar
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.dark_theme
 import churchpresenter.composeapp.generated.resources.light_theme
+import churchpresenter.composeapp.generated.resources.language_belarusian
+import churchpresenter.composeapp.generated.resources.language_czech
+import churchpresenter.composeapp.generated.resources.language_english
+import churchpresenter.composeapp.generated.resources.language_german
+import churchpresenter.composeapp.generated.resources.language_kazakh
+import churchpresenter.composeapp.generated.resources.language_polish
+import churchpresenter.composeapp.generated.resources.language_russian
+import churchpresenter.composeapp.generated.resources.language_ukrainian
 import churchpresenter.composeapp.generated.resources.menu_about
 import churchpresenter.composeapp.generated.resources.menu_add_to_schedule
 import churchpresenter.composeapp.generated.resources.menu_clear_schedule
@@ -17,6 +25,7 @@ import churchpresenter.composeapp.generated.resources.menu_exit
 import churchpresenter.composeapp.generated.resources.menu_file
 import churchpresenter.composeapp.generated.resources.menu_help
 import churchpresenter.composeapp.generated.resources.menu_help_item
+import churchpresenter.composeapp.generated.resources.menu_language
 import churchpresenter.composeapp.generated.resources.menu_new_schedule
 import churchpresenter.composeapp.generated.resources.menu_open_schedule
 import churchpresenter.composeapp.generated.resources.menu_remove_from_schedule
@@ -25,16 +34,14 @@ import churchpresenter.composeapp.generated.resources.menu_save_schedule_as
 import churchpresenter.composeapp.generated.resources.menu_schedule
 import churchpresenter.composeapp.generated.resources.menu_settings
 import churchpresenter.composeapp.generated.resources.system_theme
-import org.churchpresenter.app.churchpresenter.data.AppSettings
-import org.churchpresenter.app.churchpresenter.data.SettingsManager
+import org.churchpresenter.app.churchpresenter.data.Language
 import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
-import org.churchpresenter.app.churchpresenter.ui.theme.rememberThemeManager
-import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun FrameWindowScope.NavigationTopBar(
     theme: (ThemeMode) -> Unit,
+    onLanguageChange: (Language) -> Unit = {},
     onNewSchedule: () -> Unit = {},
     onOpenSchedule: () -> Unit = {},
     onSaveSchedule: () -> Unit = {},
@@ -134,6 +141,41 @@ fun FrameWindowScope.NavigationTopBar(
                 onClick = {
                     theme.invoke(ThemeMode.SYSTEM)
                 }
+            )
+        }
+
+        Menu(stringResource(Res.string.menu_language), mnemonic = 'L') {
+            Item(
+                text = "🇷🇺 ${stringResource(Res.string.language_russian)}",
+                onClick = { onLanguageChange(Language.RUSSIAN) }
+            )
+            Item(
+                text = "🇺🇸 ${stringResource(Res.string.language_english)}",
+                onClick = { onLanguageChange(Language.ENGLISH) }
+            )
+            Item(
+                text = "🇺🇦 ${stringResource(Res.string.language_ukrainian)}",
+                onClick = { onLanguageChange(Language.UKRAINIAN) }
+            )
+            Item(
+                text = "🇰🇿 ${stringResource(Res.string.language_kazakh)}",
+                onClick = { onLanguageChange(Language.KAZAKH) }
+            )
+            Item(
+                text = "🇩🇪 ${stringResource(Res.string.language_german)}",
+                onClick = { onLanguageChange(Language.GERMAN) }
+            )
+            Item(
+                text = "🇵🇱 ${stringResource(Res.string.language_polish)}",
+                onClick = { onLanguageChange(Language.POLISH) }
+            )
+            Item(
+                text = "🇧🇾 ${stringResource(Res.string.language_belarusian)}",
+                onClick = { onLanguageChange(Language.BELARUSIAN) }
+            )
+            Item(
+                text = "🇨🇿 ${stringResource(Res.string.language_czech)}",
+                onClick = { onLanguageChange(Language.CZECH) }
             )
         }
 

@@ -2,8 +2,12 @@ package org.churchpresenter.app.churchpresenter.viewmodel
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.data.Bible
+import org.churchpresenter.app.churchpresenter.data.BibleBookNames
 import org.churchpresenter.app.churchpresenter.models.SelectedVerse
 import org.churchpresenter.app.churchpresenter.utils.Constants.CONTAINS
 import org.churchpresenter.app.churchpresenter.utils.Constants.CURRENT_BOOK
@@ -58,10 +62,30 @@ class BibleViewModel(
     private val _isSearchMode = mutableStateOf(false)
     val isSearchMode: State<Boolean> = _isSearchMode
 
+    // Dynamic book name mapping for cross-language search
+    private val _bookNameMapping = mutableStateOf<Map<String, String>>(emptyMap())
+    val bookNameMapping: State<Map<String, String>> = _bookNameMapping
+
+    private val _englishBookNames = mutableStateOf<List<String>>(emptyList())
+
+    private val viewModelScope = CoroutineScope(Dispatchers.Main)
+
     init {
         // Initialize default search scope and mode
         _selectedScope.value = ENTIRE_BIBLE
         _selectedMode.value = CONTAINS
+
+        // Load localized book name mapping and English book names
+        viewModelScope.launch {
+            try {
+                _bookNameMapping.value = BibleBookNames.getBookNameMapping()
+                _englishBookNames.value = BibleBookNames.getEnglishBookNames()
+            } catch (e: Exception) {
+                e.printStackTrace()
+                _bookNameMapping.value = emptyMap()
+                _englishBookNames.value = emptyList()
+            }
+        }
 
         loadBibles()
     }
@@ -71,6 +95,7 @@ class BibleViewModel(
         _primaryBible.value = if (appSettings.bibleSettings.primaryBible.isNotEmpty() &&
             appSettings.bibleSettings.storageDirectory.isNotEmpty()) {
             val bibleFile = File(appSettings.bibleSettings.storageDirectory, appSettings.bibleSettings.primaryBible)
+
             if (bibleFile.exists()) {
                 try {
                     Bible().apply {
@@ -91,6 +116,7 @@ class BibleViewModel(
         _secondaryBible.value = if (appSettings.bibleSettings.secondaryBible.isNotEmpty() &&
             appSettings.bibleSettings.storageDirectory.isNotEmpty()) {
             val bibleFile = File(appSettings.bibleSettings.storageDirectory, appSettings.bibleSettings.secondaryBible)
+
             if (bibleFile.exists()) {
                 try {
                     Bible().apply {
@@ -196,66 +222,6 @@ class BibleViewModel(
         return emptyList()
     }
 
-    // Map of common English book name searches to their Russian equivalents
-    private val englishToRussianBookMap = mapOf(
-        "genesis" to "бытие",
-        "exodus" to "исход",
-        "leviticus" to "левит",
-        "numbers" to "числа",
-        "deuteronomy" to "второзаконие",
-        "joshua" to "иисус навин",
-        "judges" to "судей",
-        "ruth" to "руфь",
-        "samuel" to "царств",
-        "kings" to "царств",
-        "chronicles" to "паралипоменон",
-        "ezra" to "ездра",
-        "nehemiah" to "неемия",
-        "esther" to "есфирь",
-        "job" to "иов",
-        "psalm" to "псалтирь",
-        "proverbs" to "притчи",
-        "ecclesiastes" to "екклесиаст",
-        "song" to "песн",
-        "isaiah" to "исаия",
-        "jeremiah" to "иеремия",
-        "lamentations" to "плач",
-        "ezekiel" to "иезекииль",
-        "daniel" to "даниил",
-        "hosea" to "осия",
-        "joel" to "иоиль",
-        "amos" to "амос",
-        "obadiah" to "авдий",
-        "jonah" to "иона",
-        "micah" to "михей",
-        "nahum" to "наум",
-        "habakkuk" to "аввакум",
-        "zephaniah" to "софония",
-        "haggai" to "аггей",
-        "zechariah" to "захария",
-        "malachi" to "малахия",
-        "matthew" to "матфея",
-        "mark" to "марка",
-        "luke" to "луки",
-        "john" to "иоанн",
-        "acts" to "деяния",
-        "romans" to "римлянам",
-        "corinthians" to "коринфянам",
-        "galatians" to "галатам",
-        "ephesians" to "ефесянам",
-        "philippians" to "филиппийцам",
-        "colossians" to "колоссянам",
-        "thessalonians" to "фессалоникийцам",
-        "timothy" to "тимофею",
-        "titus" to "титу",
-        "philemon" to "филимону",
-        "hebrews" to "евреям",
-        "james" to "иакова",
-        "peter" to "петра",
-        "jude" to "иуды",
-        "revelation" to "откровение"
-    )
-
     fun getFilteredBooks(): List<String> {
         val query = _bookSearchQuery.value
 
@@ -263,38 +229,54 @@ class BibleViewModel(
             return _books.value
         }
 
-        // First try direct match
-        val directMatch = _books.value.filter { it.contains(query, ignoreCase = true) }
-
-        // If no direct match and query is Latin characters, try English-to-Russian mapping
-        val filtered = if (directMatch.isEmpty() && query.all { it.isLetter() && it.code < 128 }) {
-
-            // Find ALL English book names that match the query
-            val matchedEntries = englishToRussianBookMap.entries.filter {
-                val keyContainsQuery = it.key.contains(query, ignoreCase = true)
-                val queryContainsKey = query.contains(it.key, ignoreCase = true)
-                keyContainsQuery || queryContainsKey
-            }
-
-            if (matchedEntries.isNotEmpty()) {
-
-                // Search for books using ALL the Russian equivalents
-                val allRussianEquivalents = matchedEntries.map { it.value }
-                val result = _books.value.filter { bookName ->
-                    val matches = allRussianEquivalents.any { russianName ->
-                        bookName.contains(russianName, ignoreCase = true)
-                    }
-                    matches
-                }
-                result
-            } else {
-                directMatch
-            }
-        } else {
-            directMatch
+        // STEP 1: Try direct match (case-insensitive) against actual book names
+        val directMatch = _books.value.filter {
+            it.contains(query, ignoreCase = true)
         }
 
-        return filtered
+        if (directMatch.isNotEmpty()) {
+            return directMatch
+        }
+
+        // STEP 2: Try cross-language search using English book names
+        val isLatin = query.all { it.isLetter() && it.code < 128 }
+
+        if (!isLatin) {
+            return emptyList()
+        }
+
+        // Create a list of standard English book order (hardcoded for reliability)
+        val standardEnglishBooks = listOf(
+            "genesis", "exodus", "leviticus", "numbers", "deuteronomy", "joshua", "judges", "ruth",
+            "1 samuel", "2 samuel", "1 kings", "2 kings", "1 chronicles", "2 chronicles",
+            "ezra", "nehemiah", "esther", "job", "psalms", "proverbs", "ecclesiastes", "song of solomon",
+            "isaiah", "jeremiah", "lamentations", "ezekiel", "daniel", "hosea", "joel", "amos",
+            "obadiah", "jonah", "micah", "nahum", "habakkuk", "zephaniah", "haggai", "zechariah", "malachi",
+            "matthew", "mark", "luke", "john", "acts", "romans",
+            "1 corinthians", "2 corinthians", "galatians", "ephesians", "philippians", "colossians",
+            "1 thessalonians", "2 thessalonians", "1 timothy", "2 timothy", "titus", "philemon",
+            "hebrews", "james", "1 peter", "2 peter", "1 john", "2 john", "3 john", "jude", "revelation"
+        )
+
+        // Find indices of matching English books
+        val matchingIndices = standardEnglishBooks.mapIndexedNotNull { index, englishName ->
+            if (englishName.contains(query, ignoreCase = true)) {
+                index
+            } else {
+                null
+            }
+        }
+
+        if (matchingIndices.isEmpty()) {
+            return emptyList()
+        }
+
+        // Get books from the actual Bible by these indices
+        val mappedResults = matchingIndices.mapNotNull { index ->
+            _books.value.getOrNull(index)
+        }
+
+        return mappedResults
     }
 
     fun getFilteredChapters(): List<String> {
