@@ -478,18 +478,6 @@ fun SongsTab(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(
-                    modifier = Modifier.weight(1f).padding(end = 8.dp),
-                    text = if (selectedSongIndex >= 0 && selectedSongIndex < filteredSongs.size)
-                        filteredSongs[selectedSongIndex].title
-                    else stringResource(Res.string.no_song_selected),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-
                 // Edit Button
                 if (selectedSongIndex >= 0 && selectedSongIndex < filteredSongs.size) {
                     Button(

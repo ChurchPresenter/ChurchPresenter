@@ -49,10 +49,10 @@ fun TabSection(
 @Composable
 private fun getStringName(tabs: Tabs): String {
     return when (tabs) {
-        Tabs.BIBLE -> "${stringResource(Res.string.bible)} (F6)"
-        Tabs.SONGS -> "${stringResource(Res.string.songs)} (F7)"
-        Tabs.PICTURES -> "${stringResource(Res.string.pictures)} (F8)"
-        Tabs.MEDIA -> "${stringResource(Res.string.media)} (F9)"
-        Tabs.ANNOUNCEMENTS -> "${stringResource(Res.string.announcements)} (F10)"
+        Tabs.BIBLE -> stringResource(Res.string.bible)
+        Tabs.SONGS -> stringResource(Res.string.songs)
+        Tabs.PICTURES -> stringResource(Res.string.pictures)
+        Tabs.MEDIA -> stringResource(Res.string.media)
+        Tabs.ANNOUNCEMENTS -> stringResource(Res.string.announcements)
     }
 }

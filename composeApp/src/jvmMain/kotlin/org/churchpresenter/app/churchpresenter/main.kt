@@ -174,6 +174,11 @@ fun main() = application {
                 onShowSettings = {
                     showOptionsDialog = true
                 },
+                onThemeChange = { newTheme ->
+                    appSettings = appSettings.copy(theme = newTheme.toString())
+                    theme = newTheme
+                    settingsManager.saveSettings(appSettings)
+                },
                 theme = theme
             )
 

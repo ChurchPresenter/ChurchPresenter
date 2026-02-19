@@ -38,13 +38,17 @@ import churchpresenter.composeapp.generated.resources.tooltip_open_schedule
 import churchpresenter.composeapp.generated.resources.tooltip_remove_from_schedule
 import churchpresenter.composeapp.generated.resources.tooltip_save_schedule
 import churchpresenter.composeapp.generated.resources.tooltip_settings
+import org.churchpresenter.app.churchpresenter.composables.ThemeSegmentedButton
 import org.churchpresenter.app.churchpresenter.composables.TooltipIconButton
+import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun Toolbar(
     modifier: Modifier = Modifier,
+    currentTheme: ThemeMode = ThemeMode.SYSTEM,
+    onThemeChange: (ThemeMode) -> Unit = {},
     onNewSchedule: () -> Unit = {},
     onOpenSchedule: () -> Unit = {},
     onSaveSchedule: () -> Unit = {},
@@ -145,12 +149,19 @@ fun Toolbar(
 
             Spacer(modifier = Modifier.weight(1f))
 
+
             // Settings
             TooltipIconButton(
                 painter = painterResource(Res.drawable.ic_settings),
                 text = stringResource(Res.string.tooltip_settings),
                 onClick = onOpenSettings,
                 iconTint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            // Theme switcher
+            ThemeSegmentedButton(
+                selectedTheme = currentTheme,
+                onThemeChange = onThemeChange
             )
         }
     }
@@ -165,4 +176,5 @@ private fun ToolbarDivider() {
             .background(MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
     )
 }
+
 

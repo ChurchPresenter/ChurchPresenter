@@ -1,6 +1,7 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
 
+import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
@@ -10,17 +11,13 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollbarAdapter
-import androidx.compose.foundation.VerticalScrollbar
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.Button
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -113,13 +110,31 @@ fun BibleTab(
         stringResource(Res.string.entire_bible),
         stringResource(Res.string.current_book),
     )
-    var selectedScope by rememberSaveable { mutableStateOf(scopeOptions.firstOrNull() ?: "") }
+
+    // Track selected index instead of selected value to handle language changes
+    var selectedScopeIndex by rememberSaveable { mutableStateOf(0) }
+    var selectedScope by remember { mutableStateOf("") }
+
+    // Update selectedScope when scopeOptions change (e.g., language change)
+    LaunchedEffect(scopeOptions, selectedScopeIndex) {
+        selectedScope = scopeOptions.getOrNull(selectedScopeIndex) ?: scopeOptions.firstOrNull() ?: ""
+        viewModel.updateSelectedScope(selectedScope)
+    }
 
     val modeOptions = listOf(
         stringResource(Res.string.contains_phrase),
         stringResource(Res.string.exact_match),
     )
-    var selectedMode by rememberSaveable { mutableStateOf(modeOptions.firstOrNull() ?: "") }
+
+    // Track selected index instead of selected value to handle language changes
+    var selectedModeIndex by rememberSaveable { mutableStateOf(0) }
+    var selectedMode by remember { mutableStateOf("") }
+
+    // Update selectedMode when modeOptions change (e.g., language change)
+    LaunchedEffect(modeOptions, selectedModeIndex) {
+        selectedMode = modeOptions.getOrNull(selectedModeIndex) ?: modeOptions.firstOrNull() ?: ""
+        viewModel.updateSelectedMode(selectedMode)
+    }
 
     // Focus management for keyboard navigation
     val focusRequester = remember { FocusRequester() }
@@ -197,9 +212,10 @@ fun BibleTab(
                 label = stringResource(Res.string.scope),
                 items = scopeOptions,
                 selected = selectedScope,
-                onSelectedChange = {
-                    selectedScope = it
-                    viewModel.updateSelectedScope(it)
+                onSelectedChange = { newValue ->
+                    selectedScope = newValue
+                    selectedScopeIndex = scopeOptions.indexOf(newValue).coerceAtLeast(0)
+                    viewModel.updateSelectedScope(newValue)
                 }
             )
 
@@ -208,9 +224,10 @@ fun BibleTab(
                 label = stringResource(Res.string.mode),
                 items = modeOptions,
                 selected = selectedMode,
-                onSelectedChange = {
-                    selectedMode = it
-                    viewModel.updateSelectedMode(it)
+                onSelectedChange = { newValue ->
+                    selectedMode = newValue
+                    selectedModeIndex = modeOptions.indexOf(newValue).coerceAtLeast(0)
+                    viewModel.updateSelectedMode(newValue)
                 }
             )
 

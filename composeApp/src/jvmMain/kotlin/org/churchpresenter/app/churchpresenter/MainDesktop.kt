@@ -53,6 +53,7 @@ fun MainDesktop(
     onTabChange: (Int) -> Unit = {},
     onScheduleItemSelected: (String?) -> Unit = {},
     onShowSettings: () -> Unit = {},
+    onThemeChange: (ThemeMode) -> Unit = {},
     theme: ThemeMode = ThemeMode.SYSTEM
 ) {
     var selectedTabIndex by rememberSaveable { mutableStateOf(0) }
@@ -106,6 +107,8 @@ fun MainDesktop(
         Column(modifier = Modifier.fillMaxSize()) {
             // Toolbar
             Toolbar(
+                currentTheme = theme,
+                onThemeChange = onThemeChange,
                 onNewSchedule = {
                     scheduleViewModel.clearSchedule()
                 },
