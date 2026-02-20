@@ -315,4 +315,9 @@
     <string name="animation_slide_right">Slide Right</string>
     <string name="animation_none">None</string>
     <string name="milliseconds_suffix">ms</string>
+    <string name="settings">Settings</string>
+    <string name="images_suffix">images</string>
+    <string name="slideshow_settings">Slideshow Settings</string>
+    <string name="transition_settings">Transition Settings</string>
+    <string name="failed_to_load_image">Failed to load image</string>
 </resources>

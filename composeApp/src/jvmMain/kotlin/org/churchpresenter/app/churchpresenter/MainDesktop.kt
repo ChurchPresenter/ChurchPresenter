@@ -194,6 +194,8 @@ fun MainDesktop(
                     scheduleViewModel = scheduleViewModel,
                     songsViewModel = songsViewModel,
                     bibleViewModel = bibleViewModel,
+                    picturesViewModel = picturesViewModel,
+                    presenterManager = presenterManager,
                     onSongItemSelected = onSongItemSelected,
                     onVerseSelected = onVerseSelected,
                     onPresenting = presenting,

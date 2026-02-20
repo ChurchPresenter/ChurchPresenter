@@ -9,13 +9,15 @@ import androidx.compose.ui.graphics.toComposeImageBitmap
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.models.AnimationType
+import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.jetbrains.skia.Image
 import java.io.ByteArrayOutputStream
 import java.io.File
 import javax.imageio.ImageIO
 
-class PicturesViewModel {
+class PicturesViewModel(appSettings: AppSettings? = null) {
     // State
     private val _selectedFolder = mutableStateOf<File?>(null)
     val selectedFolder: File? get() = _selectedFolder.value
@@ -36,22 +38,30 @@ class PicturesViewModel {
         get() = _isPlaying.value
         set(value) { _isPlaying.value = value }
 
-    private val _autoScrollInterval = mutableStateOf(5f)
+    private val _autoScrollInterval = mutableStateOf(appSettings?.pictureSettings?.autoScrollInterval ?: 5f)
     var autoScrollInterval: Float
         get() = _autoScrollInterval.value
         set(value) { _autoScrollInterval.value = value }
 
-    private val _isLooping = mutableStateOf(true)
+    private val _isLooping = mutableStateOf(appSettings?.pictureSettings?.isLooping ?: true)
     var isLooping: Boolean
         get() = _isLooping.value
         set(value) { _isLooping.value = value }
 
-    private val _transitionDuration = mutableStateOf(500f) // milliseconds
+    private val _transitionDuration = mutableStateOf(appSettings?.pictureSettings?.transitionDuration ?: 500f)
     var transitionDuration: Float
         get() = _transitionDuration.value
         set(value) { _transitionDuration.value = value }
 
-    private val _animationType = mutableStateOf(AnimationType.CROSSFADE)
+    private val _animationType = mutableStateOf(
+        when (appSettings?.pictureSettings?.animationType) {
+            Constants.ANIMATION_FADE -> AnimationType.FADE
+            Constants.ANIMATION_SLIDE_LEFT -> AnimationType.SLIDE_LEFT
+            Constants.ANIMATION_SLIDE_RIGHT -> AnimationType.SLIDE_RIGHT
+            Constants.ANIMATION_NONE -> AnimationType.NONE
+            else -> AnimationType.CROSSFADE
+        }
+    )
     var animationType: AnimationType
         get() = _animationType.value
         set(value) { _animationType.value = value }

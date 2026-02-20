@@ -105,11 +105,20 @@ data class ProjectionSettings(
 )
 
 @Serializable
+data class PictureSettings(
+    val autoScrollInterval: Float = 5f, // seconds
+    val isLooping: Boolean = true,
+    val transitionDuration: Float = 500f, // milliseconds
+    val animationType: String = Constants.ANIMATION_CROSSFADE
+)
+
+@Serializable
 data class AppSettings(
     val songSettings: SongSettings = SongSettings(),
     val bibleSettings: BibleSettings = BibleSettings(),
     val backgroundSettings: BackgroundSettings = BackgroundSettings(),
     val projectionSettings: ProjectionSettings = ProjectionSettings(),
+    val pictureSettings: PictureSettings = PictureSettings(),
     val theme: String = Constants.LIGHT,
     val language: String = "en" // Default to English
 )

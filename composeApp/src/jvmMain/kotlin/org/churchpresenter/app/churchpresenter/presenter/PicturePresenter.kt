@@ -22,7 +22,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.toComposeImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.failed_to_load_image
+import churchpresenter.composeapp.generated.resources.no_images
 import org.churchpresenter.app.churchpresenter.models.AnimationType
+import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.skia.Image
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -120,14 +124,14 @@ private fun ImageContent(currentImagePath: String?) {
             )
         } else {
             Text(
-                text = "Failed to load image",
+                text = stringResource(Res.string.failed_to_load_image),
                 style = MaterialTheme.typography.headlineMedium,
                 color = Color.White
             )
         }
     } else {
         Text(
-            text = "No image selected",
+            text = stringResource(Res.string.no_images),
             style = MaterialTheme.typography.headlineMedium,
             color = Color.White
         )

@@ -41,6 +41,7 @@ import churchpresenter.composeapp.generated.resources.ok
 import churchpresenter.composeapp.generated.resources.options
 import churchpresenter.composeapp.generated.resources.other
 import churchpresenter.composeapp.generated.resources.other_tab_content
+import churchpresenter.composeapp.generated.resources.pictures
 import churchpresenter.composeapp.generated.resources.projection
 import churchpresenter.composeapp.generated.resources.projection_tab_content
 import churchpresenter.composeapp.generated.resources.song
@@ -50,6 +51,7 @@ import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.data.SettingsManager
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.BackgroundSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.BibleSettingsTab
+import org.churchpresenter.app.churchpresenter.dialogs.tabs.PictureSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.ProjectionSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.SongSettingsTab
 import org.churchpresenter.app.churchpresenter.ui.theme.AppThemeWrapper
@@ -104,11 +106,16 @@ fun OptionsDialog(
                         Tab(
                             selected = selectedTabIndex == 3,
                             onClick = { selectedTabIndex = 3 },
-                            text = { Text(stringResource(Res.string.projection)) }
+                            text = { Text(stringResource(Res.string.pictures)) }
                         )
                         Tab(
                             selected = selectedTabIndex == 4,
                             onClick = { selectedTabIndex = 4 },
+                            text = { Text(stringResource(Res.string.projection)) }
+                        )
+                        Tab(
+                            selected = selectedTabIndex == 5,
+                            onClick = { selectedTabIndex = 5 },
                             text = { Text(stringResource(Res.string.other)) }
                         )
                     }
@@ -140,13 +147,19 @@ fun OptionsDialog(
                                     currentSettings = updateFn(currentSettings)
                                 }
                             )
-                            3 -> ProjectionSettingsTab(
+                            3 -> PictureSettingsTab(
                                 settings = currentSettings,
                                 onSettingsChange = { updateFn ->
                                     currentSettings = updateFn(currentSettings)
                                 }
                             )
-                            4 -> PlaceholderTab(stringResource(Res.string.other_tab_content))
+                            4 -> ProjectionSettingsTab(
+                                settings = currentSettings,
+                                onSettingsChange = { updateFn ->
+                                    currentSettings = updateFn(currentSettings)
+                                }
+                            )
+                            5 -> PlaceholderTab(stringResource(Res.string.other_tab_content))
                         }
                     }
 

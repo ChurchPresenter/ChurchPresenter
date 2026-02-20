@@ -72,4 +72,11 @@ object Constants {
     const val CURRENT_BOOK = "Current Book"
 
     const val ENTIRE_BIBLE = "Entire Bible"
+
+    // Animation Types
+    const val ANIMATION_CROSSFADE = "CROSSFADE"
+    const val ANIMATION_FADE = "FADE"
+    const val ANIMATION_SLIDE_LEFT = "SLIDE_LEFT"
+    const val ANIMATION_SLIDE_RIGHT = "SLIDE_RIGHT"
+    const val ANIMATION_NONE = "NONE"
 }

@@ -63,7 +63,9 @@ fun main() = application {
     val scheduleViewModel = remember { ScheduleViewModel() }
 
     // Create PicturesViewModel
-    val picturesViewModel = remember { PicturesViewModel() }
+    val picturesViewModel = remember(appSettings) {
+        PicturesViewModel(appSettings)
+    }
 
     // UI state
     var theme by remember { mutableStateOf(ThemeMode.SYSTEM) }

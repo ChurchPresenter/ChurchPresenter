@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -23,11 +22,9 @@ import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -44,35 +41,23 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.add_to_schedule
-import churchpresenter.composeapp.generated.resources.animation_crossfade
-import churchpresenter.composeapp.generated.resources.animation_fade
-import churchpresenter.composeapp.generated.resources.animation_none
-import churchpresenter.composeapp.generated.resources.animation_slide_left
-import churchpresenter.composeapp.generated.resources.animation_slide_right
-import churchpresenter.composeapp.generated.resources.animation_type
-import churchpresenter.composeapp.generated.resources.auto_scroll_interval
 import churchpresenter.composeapp.generated.resources.go_live
 import churchpresenter.composeapp.generated.resources.ic_pause
 import churchpresenter.composeapp.generated.resources.ic_play
 import churchpresenter.composeapp.generated.resources.ic_skip_next
 import churchpresenter.composeapp.generated.resources.ic_skip_previous
 import churchpresenter.composeapp.generated.resources.image_counter
+import churchpresenter.composeapp.generated.resources.images_suffix
 import churchpresenter.composeapp.generated.resources.loading
-import churchpresenter.composeapp.generated.resources.loop
-import churchpresenter.composeapp.generated.resources.milliseconds_suffix
 import churchpresenter.composeapp.generated.resources.next_image
 import churchpresenter.composeapp.generated.resources.no_folder_selected
 import churchpresenter.composeapp.generated.resources.pause
 import churchpresenter.composeapp.generated.resources.play
 import churchpresenter.composeapp.generated.resources.previous_image
-import churchpresenter.composeapp.generated.resources.seconds_suffix
 import churchpresenter.composeapp.generated.resources.select_folder
 import churchpresenter.composeapp.generated.resources.select_folder_to_view
 import churchpresenter.composeapp.generated.resources.select_image_folder_dialog
-import churchpresenter.composeapp.generated.resources.transition_duration
 import kotlinx.coroutines.delay
-import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
-import org.churchpresenter.app.churchpresenter.models.AnimationType
 import org.churchpresenter.app.churchpresenter.models.ScheduleItem
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.viewmodel.PicturesViewModel
@@ -179,7 +164,7 @@ fun PicturesTab(
             )
 
             Text(
-                text = "${viewModel.images.size} images",
+                text = "${viewModel.images.size} ${stringResource(Res.string.images_suffix)}",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.primary
             )
@@ -189,67 +174,57 @@ fun PicturesTab(
         Spacer(modifier = Modifier.height(16.dp))
 
         if (viewModel.images.isNotEmpty()) {
-            // Two-column layout: Playback controls (left) and Settings (right)
+            // Single row with all playback controls
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                // Left Column: Playback Controls
-                Column(
-                    modifier = Modifier.weight(1f),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                // Left side: Playback buttons
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Control Buttons
-                    Row(
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically
+                    IconButton(
+                        onClick = { viewModel.previousImage() },
+                        enabled = viewModel.images.isNotEmpty()
                     ) {
-                        IconButton(
-                            onClick = { viewModel.previousImage() },
-                            enabled = viewModel.images.isNotEmpty()
-                        ) {
-                            Icon(
-                                painter = painterResource(Res.drawable.ic_skip_previous),
-                                contentDescription = stringResource(Res.string.previous_image),
-                                modifier = Modifier.size(32.dp),
-                                tint = if (viewModel.images.isNotEmpty()) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                        Icon(
+                            painter = painterResource(Res.drawable.ic_skip_previous),
+                            contentDescription = stringResource(Res.string.previous_image),
+                            modifier = Modifier.size(32.dp),
+                            tint = if (viewModel.images.isNotEmpty()) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                        )
+                    }
+
+                    IconButton(
+                        onClick = { viewModel.togglePlayPause() },
+                        enabled = viewModel.images.isNotEmpty(),
+                        modifier = Modifier
+                            .size(48.dp)
+                            .background(
+                                if (viewModel.isPlaying) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
+                                RoundedCornerShape(24.dp)
                             )
-                        }
+                    ) {
+                        Icon(
+                            painter = painterResource(if (viewModel.isPlaying) Res.drawable.ic_pause else Res.drawable.ic_play),
+                            contentDescription = stringResource(if (viewModel.isPlaying) Res.string.pause else Res.string.play),
+                            modifier = Modifier.size(28.dp),
+                            tint = Color.White
+                        )
+                    }
 
-                        Spacer(modifier = Modifier.width(12.dp))
-
-                        IconButton(
-                            onClick = { viewModel.togglePlayPause() },
-                            enabled = viewModel.images.isNotEmpty(),
-                            modifier = Modifier
-                                .size(48.dp)
-                                .background(
-                                    if (viewModel.isPlaying) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
-                                    RoundedCornerShape(24.dp)
-                                )
-                        ) {
-                            Icon(
-                                painter = painterResource(if (viewModel.isPlaying) Res.drawable.ic_pause else Res.drawable.ic_play),
-                                contentDescription = stringResource(if (viewModel.isPlaying) Res.string.pause else Res.string.play),
-                                modifier = Modifier.size(28.dp),
-                                tint = Color.White
-                            )
-                        }
-
-                        Spacer(modifier = Modifier.width(12.dp))
-
-                        IconButton(
-                            onClick = { viewModel.nextImage() },
-                            enabled = viewModel.images.isNotEmpty()
-                        ) {
-                            Icon(
-                                painter = painterResource(Res.drawable.ic_skip_next),
-                                contentDescription = stringResource(Res.string.next_image),
-                                modifier = Modifier.size(32.dp),
-                                tint = if (viewModel.images.isNotEmpty()) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                            )
-                        }
+                    IconButton(
+                        onClick = { viewModel.nextImage() },
+                        enabled = viewModel.images.isNotEmpty()
+                    ) {
+                        Icon(
+                            painter = painterResource(Res.drawable.ic_skip_next),
+                            contentDescription = stringResource(Res.string.next_image),
+                            modifier = Modifier.size(32.dp),
+                            tint = if (viewModel.images.isNotEmpty()) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                        )
                     }
 
                     // Image counter
@@ -258,7 +233,13 @@ fun PicturesTab(
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
+                }
 
+                // Right side: Action buttons
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     // Go Live button
                     if (presenterManager != null) {
                         Button(
@@ -272,8 +253,7 @@ fun PicturesTab(
                             },
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = MaterialTheme.colorScheme.primary
-                            ),
-                            modifier = Modifier.fillMaxWidth()
+                            )
                         ) {
                             Text(
                                 text = stringResource(Res.string.go_live),
@@ -295,8 +275,7 @@ fun PicturesTab(
                             },
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = MaterialTheme.colorScheme.secondary
-                            ),
-                            modifier = Modifier.fillMaxWidth()
+                            )
                         ) {
                             Text(
                                 text = stringResource(Res.string.add_to_schedule),
@@ -305,126 +284,8 @@ fun PicturesTab(
                         }
                     }
                 }
-
-                // Right Column: Settings
-                Column(
-                    modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    // Auto-scroll interval with Loop checkbox
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = stringResource(Res.string.auto_scroll_interval),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.width(90.dp)
-                        )
-                        Slider(
-                            value = viewModel.autoScrollInterval,
-                            onValueChange = { viewModel.autoScrollInterval = it },
-                            valueRange = 1f..30f,
-                            modifier = Modifier.weight(1f)
-                        )
-                        Text(
-                            text = "${viewModel.autoScrollInterval.toInt()}${stringResource(Res.string.seconds_suffix)}",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.width(30.dp)
-                        )
-                        Checkbox(
-                            checked = viewModel.isLooping,
-                            onCheckedChange = { viewModel.isLooping = it },
-                            modifier = Modifier.size(18.dp)
-                        )
-                        Text(
-                            text = stringResource(Res.string.loop),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-
-                    // Transition duration slider
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = stringResource(Res.string.transition_duration),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.width(90.dp)
-                        )
-                        Slider(
-                            value = viewModel.transitionDuration,
-                            onValueChange = { rawValue ->
-                                val snappedValue = (rawValue / 50f).toInt() * 50f
-                                viewModel.transitionDuration = snappedValue
-                                presenterManager?.setTransitionDuration(snappedValue.toInt())
-                            },
-                            valueRange = 100f..2000f,
-                            steps = 37,
-                            modifier = Modifier.weight(1f)
-                        )
-                        Text(
-                            text = "${viewModel.transitionDuration.toInt()}${stringResource(Res.string.milliseconds_suffix)}",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.width(55.dp)
-                        )
-                    }
-
-                    // Animation type DropdownSelector
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        val crossfadeText = stringResource(Res.string.animation_crossfade)
-                        val fadeText = stringResource(Res.string.animation_fade)
-                        val slideLeftText = stringResource(Res.string.animation_slide_left)
-                        val slideRightText = stringResource(Res.string.animation_slide_right)
-                        val noneText = stringResource(Res.string.animation_none)
-
-                        Text(
-                            text = stringResource(Res.string.animation_type),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.width(90.dp)
-                        )
-                        DropdownSelector(
-                            modifier = Modifier.weight(1f),
-                            label = "",
-                            items = listOf(
-                                crossfadeText,
-                                fadeText,
-                                slideLeftText,
-                                slideRightText,
-                                noneText
-                            ),
-                            selected = when (viewModel.animationType) {
-                                AnimationType.CROSSFADE -> crossfadeText
-                                AnimationType.FADE -> fadeText
-                                AnimationType.SLIDE_LEFT -> slideLeftText
-                                AnimationType.SLIDE_RIGHT -> slideRightText
-                                AnimationType.NONE -> noneText
-                            },
-                            onSelectedChange = { selected ->
-                                val newType = when (selected) {
-                                    fadeText -> AnimationType.FADE
-                                    slideLeftText -> AnimationType.SLIDE_LEFT
-                                    slideRightText -> AnimationType.SLIDE_RIGHT
-                                    noneText -> AnimationType.NONE
-                                    else -> AnimationType.CROSSFADE
-                                }
-                                viewModel.animationType = newType
-                                presenterManager?.setAnimationType(newType)
-                            }
-                        )
-                    }
-                }
             }
+
 
             Spacer(modifier = Modifier.height(16.dp))
 

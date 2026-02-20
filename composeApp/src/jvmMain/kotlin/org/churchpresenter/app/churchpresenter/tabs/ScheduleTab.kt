@@ -50,10 +50,13 @@ import org.churchpresenter.app.churchpresenter.models.ScheduleItem
 import org.churchpresenter.app.churchpresenter.models.SelectedVerse
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.viewmodel.BibleViewModel
+import org.churchpresenter.app.churchpresenter.viewmodel.PicturesViewModel
+import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.app.churchpresenter.viewmodel.ScheduleViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.SongsViewModel
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import java.io.File
 
 @Composable
 fun ScheduleTab(
@@ -61,6 +64,8 @@ fun ScheduleTab(
     scheduleViewModel: ScheduleViewModel,
     songsViewModel: SongsViewModel,
     bibleViewModel: BibleViewModel,
+    picturesViewModel: PicturesViewModel? = null,
+    presenterManager: PresenterManager? = null,
     onSongItemSelected: (LyricSection) -> Unit,
     onVerseSelected: (List<SelectedVerse>) -> Unit,
     onPresenting: (Presenting) -> Unit = { Presenting.NONE },
@@ -165,7 +170,22 @@ fun ScheduleTab(
                                     // Labels are not presentable, do nothing
                                 }
                                 is ScheduleItem.PictureItem -> {
-                                    // Pictures are handled by switching tabs, not direct presentation
+                                    // Load the folder and present the first image
+                                    if (picturesViewModel != null && presenterManager != null) {
+                                        val folder = File(item.folderPath)
+                                        if (folder.exists() && folder.isDirectory) {
+                                            // Load the folder into the pictures view model
+                                            picturesViewModel.selectFolder(folder)
+
+                                            // Get the first image
+                                            val firstImage = picturesViewModel.getCurrentImageFile()
+                                            if (firstImage != null) {
+                                                presenterManager.setSelectedImagePath(firstImage.absolutePath)
+                                                presenterManager.setPresentingMode(Presenting.PICTURES)
+                                                presenterManager.setShowPresenterWindow(true)
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         },
