@@ -68,7 +68,6 @@ fun main() = application {
 
     // Get bounds of the second screen if present
     val screens = GraphicsEnvironment.getLocalGraphicsEnvironment().screenDevices
-    val secondScreenBounds = if (screens.size > 1) screens[1].defaultConfiguration.bounds else null
     val state = rememberWindowState(
         placement = WindowPlacement.Maximized
     )
@@ -199,32 +198,39 @@ fun main() = application {
             }
         }
     }
+    val windowCount = appSettings.projectionSettings.numberOfWindows
+    for (i in 0 until windowCount) {
+        if (showPresenterWindow) {
+            val windowState = remember(i) {
+                val targetScreenIndex = i + 1
 
-    if (showPresenterWindow) {
-        val windowState = remember {
-            if (secondScreenBounds != null) {
-                WindowState(
-                    placement = WindowPlacement.Floating,
-                    position = WindowPosition(
-                        secondScreenBounds.x.dp, secondScreenBounds.y.dp
+                if (targetScreenIndex < screens.size) {
+                    val screenBounds = screens[targetScreenIndex].defaultConfiguration.bounds
+                    WindowState(
+                        placement = WindowPlacement.Floating,
+                        position = WindowPosition(
+                            (screenBounds.x + appSettings.projectionSettings.windowLeft).dp,
+                            (screenBounds.y + appSettings.projectionSettings.windowTop).dp
+                        ),
+                        width = (screenBounds.width - appSettings.projectionSettings.windowLeft - appSettings.projectionSettings.windowRight).dp,
+                        height = (screenBounds.height - appSettings.projectionSettings.windowTop - appSettings.projectionSettings.windowBottom).dp
                     )
-                )
-            } else {
-                //WindowState(placement = WindowPlacement.Fullscreen)
-                WindowState(placement = WindowPlacement.Floating)
+                } else {
+                    WindowState(placement = WindowPlacement.Fullscreen)
+                }
             }
-        }
-        Window(
-            title = "Presenter View",
-            onCloseRequest = { presenterManager.setShowPresenterWindow(false) },
-            state = windowState,
-        ) {
-            PresenterScreen(modifier = Modifier.fillMaxSize(), appSettings = appSettings) {
-                Column {
-                    if (presentingMode == Presenting.BIBLE) {
-                        BiblePresenter(selectedVerses = selectedVerses, appSettings = appSettings)
-                    } else if (presentingMode == Presenting.LYRICS) {
-                        SongPresenter(lyricSection = lyricSection, appSettings = appSettings)
+            Window(
+                title = "Presenter View ${i + 1}",
+                onCloseRequest = { presenterManager.setShowPresenterWindow(false) },
+                state = windowState,
+            ) {
+                PresenterScreen(modifier = Modifier.fillMaxSize(), appSettings = appSettings) {
+                    Column {
+                        if (presentingMode == Presenting.BIBLE) {
+                            BiblePresenter(selectedVerses = selectedVerses, appSettings = appSettings)
+                        } else if (presentingMode == Presenting.LYRICS) {
+                            SongPresenter(lyricSection = lyricSection, appSettings = appSettings)
+                        }
                     }
                 }
             }
