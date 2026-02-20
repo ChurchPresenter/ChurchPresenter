@@ -128,8 +128,15 @@ fun SongPresenter(
         val scaledLyricsFontSize = (appSettings.songSettings.lyricsFontSize * scaleFactor).sp
         val scaledSongNumberFontSize = (appSettings.songSettings.songNumberFontSize * scaleFactor).sp
 
+        val leftOffSet = (appSettings.projectionSettings.windowLeft * scaleFactor).dp
+        val rightOffSet = (appSettings.projectionSettings.windowRight * scaleFactor).dp
+        val topOffSet = (appSettings.projectionSettings.windowTop * scaleFactor).dp
+        val bottomOffSet = (appSettings.projectionSettings.windowBottom * scaleFactor).dp
+
         Box(
-            Modifier.fillMaxSize().padding(16.dp),
+            Modifier
+                .fillMaxSize()
+                .padding(start = leftOffSet, end = rightOffSet, top = topOffSet, bottom = bottomOffSet),
             contentAlignment = contentAlignment
         ) {
             // ...existing code...

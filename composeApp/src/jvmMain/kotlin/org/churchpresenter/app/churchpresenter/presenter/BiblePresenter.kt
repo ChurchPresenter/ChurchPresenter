@@ -104,7 +104,7 @@ fun BiblePresenter(
         Constants.BOTTOM -> Alignment.BottomCenter
         else -> Alignment.Center  // MIDDLE or default
     }
-    
+
     var backgroundColor: Color = parseHexColor(appSettings.backgroundSettings.bibleBackground.backgroundColor)
     val backgroundType = appSettings.backgroundSettings.bibleBackground.backgroundType
     val backgroundImagePath = appSettings.backgroundSettings.bibleBackground.backgroundImage
@@ -161,13 +161,22 @@ fun BiblePresenter(
         val scaledPrimaryReferenceSize = (appSettings.bibleSettings.primaryReferenceFontSize * scaleFactor).sp
         val scaledSecondaryBibleSize = (appSettings.bibleSettings.secondaryBibleFontSize * scaleFactor).sp
         val scaledSecondaryReferenceSize = (appSettings.bibleSettings.secondaryReferenceFontSize * scaleFactor).sp
+        val leftOffSet = (appSettings.projectionSettings.windowLeft * scaleFactor).dp
+        val rightOffSet = (appSettings.projectionSettings.windowRight * scaleFactor).dp
+        val topOffSet = (appSettings.projectionSettings.windowTop * scaleFactor).dp
+        val bottomOffSet = (appSettings.projectionSettings.windowBottom * scaleFactor).dp
 
-        Box(modifier.fillMaxSize(), contentAlignment = contentAlignment) {
+        Box(
+            modifier
+                .fillMaxSize()
+                .padding(start = leftOffSet, end = rightOffSet, top = topOffSet, bottom = bottomOffSet),
+            contentAlignment = contentAlignment
+        ) {
             Column {
                 // Primary Bible
                 if (primaryBibleReferencePosition == Constants.POSITION_ABOVE) {
                     Row(
-                        Modifier.fillMaxWidth().padding(16.dp),
+                        Modifier.fillMaxWidth(),
                         horizontalArrangement = primaryBibleReferenceHorizontalAlignment
                     ) {
                         val bookNameOrAbbr =
@@ -185,7 +194,7 @@ fun BiblePresenter(
                     }
                 }
                 Row(
-                    Modifier.fillMaxWidth().padding(16.dp),
+                    Modifier.fillMaxWidth(),
                     horizontalArrangement = primaryBibleHorizontalAlignment
                 ) {
                     Text(
@@ -197,7 +206,7 @@ fun BiblePresenter(
                 }
                 if (primaryBibleReferencePosition == Constants.POSITION_BELOW) {
                     Row(
-                        Modifier.fillMaxWidth().padding(16.dp),
+                        Modifier.fillMaxWidth(),
                         horizontalArrangement = primaryBibleReferenceHorizontalAlignment
                     ) {
                         val bookNameOrAbbr =
@@ -219,7 +228,7 @@ fun BiblePresenter(
                 if (secondaryBible != null) {
                     if (secondaryBibleReferencePosition == Constants.POSITION_ABOVE) {
                         Row(
-                            Modifier.fillMaxWidth().padding(16.dp),
+                            Modifier.fillMaxWidth(),
                             horizontalArrangement = secondaryBibleReferenceHorizontalAlignment
                         ) {
                             val bookNameOrAbbr =
@@ -237,7 +246,7 @@ fun BiblePresenter(
                         }
                     }
                     Row(
-                        Modifier.fillMaxWidth().padding(16.dp),
+                        Modifier.fillMaxWidth(),
                         horizontalArrangement = secondaryBibleHorizontalAlignment
                     ) {
                         Text(
@@ -249,7 +258,7 @@ fun BiblePresenter(
                     }
                     if (secondaryBibleReferencePosition == Constants.POSITION_BELOW) {
                         Row(
-                            Modifier.fillMaxWidth().padding(16.dp),
+                            Modifier.fillMaxWidth(),
                             horizontalArrangement = secondaryBibleReferenceHorizontalAlignment
                         ) {
                             val bookNameOrAbbr =

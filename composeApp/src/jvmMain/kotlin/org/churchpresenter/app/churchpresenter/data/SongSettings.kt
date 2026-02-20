@@ -96,10 +96,20 @@ data class BibleSettings(
 )
 
 @Serializable
+data class ProjectionSettings(
+    val numberOfWindows: Int = 1, // 1-3 projection windows
+    val windowTop: Int = 0,
+    val windowLeft: Int = 0,
+    val windowRight: Int = 0,
+    val windowBottom: Int = 0
+)
+
+@Serializable
 data class AppSettings(
     val songSettings: SongSettings = SongSettings(),
     val bibleSettings: BibleSettings = BibleSettings(),
     val backgroundSettings: BackgroundSettings = BackgroundSettings(),
+    val projectionSettings: ProjectionSettings = ProjectionSettings(),
     val theme: String = Constants.LIGHT,
     val language: String = "en" // Default to English
 )
