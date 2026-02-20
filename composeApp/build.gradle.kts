@@ -30,6 +30,8 @@ kotlin {
         }
         jvmMain.dependencies {
             implementation(libs.kotlinx.coroutinesSwing)
+            implementation("com.twelvemonkeys.imageio:imageio-core:3.10.1")
+            implementation("com.twelvemonkeys.imageio:imageio-jpeg:3.10.1")
         }
     }
 }

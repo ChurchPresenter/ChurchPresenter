@@ -25,6 +25,22 @@ This document tracks coding standards, common mistakes, and debugging notes for 
 - 📌 **TODO**: Clean up unused code and imports
 - 📌 **TODO**: Remove redundant code where possible
 
+### 6. UI Icons and Buttons
+- ❌ **NEVER** use text-based icon emojis like:
+  ```kotlin
+  Text(
+      text = if (isPlaying) "⏸" else "▶",
+      style = MaterialTheme.typography.headlineLarge,
+      color = Color.White
+  )
+  ```
+- ✅ **ALWAYS** use proper image buttons with actual icon resources:
+  - Use `painterResource()` for bundled icons
+  - Use custom icon files in resources
+  - Use icon libraries if available
+- **Reason**: Text-based emojis are inconsistent across platforms, not scalable, and look unprofessional
+- **Example location**: See `PicturesTab.kt` lines 186-190 for what NOT to do
+
 ## Debugging Guidelines
 
 ### When Adding Debug Logs

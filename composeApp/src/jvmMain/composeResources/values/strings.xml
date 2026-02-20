@@ -290,4 +290,29 @@
     <string name="text_color">Text Color</string>
     <string name="background_color_label">Background Color</string>
     <string name="enter_label_text">Enter label text...</string>
+
+    <!-- Pictures Tab Strings -->
+    <string name="select_folder">Select Folder</string>
+    <string name="no_folder_selected">No folder selected</string>
+    <string name="images_count">%1$d images</string>
+    <string name="previous_image">Previous Image</string>
+    <string name="pause">Pause</string>
+    <string name="play">Play</string>
+    <string name="next_image">Next Image</string>
+    <string name="image_counter">Image %1$d of %2$d</string>
+    <string name="no_images">No images</string>
+    <string name="auto_scroll_interval">Auto-scroll interval:</string>
+    <string name="seconds_suffix">s</string>
+    <string name="loading">Loading...</string>
+    <string name="select_folder_to_view">Select a folder to view images</string>
+    <string name="select_image_folder_dialog">Select Image Folder</string>
+    <string name="loop">Loop</string>
+    <string name="transition_duration">Transition Duration:</string>
+    <string name="animation_type">Animation Type:</string>
+    <string name="animation_crossfade">Crossfade</string>
+    <string name="animation_fade">Fade</string>
+    <string name="animation_slide_left">Slide Left</string>
+    <string name="animation_slide_right">Slide Right</string>
+    <string name="animation_none">None</string>
+    <string name="milliseconds_suffix">ms</string>
 </resources>

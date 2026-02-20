@@ -40,6 +40,8 @@ import org.churchpresenter.app.churchpresenter.models.SelectedVerse
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
 import org.churchpresenter.app.churchpresenter.viewmodel.BibleViewModel
+import org.churchpresenter.app.churchpresenter.viewmodel.PicturesViewModel
+import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.app.churchpresenter.viewmodel.ScheduleViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.SongsViewModel
 
@@ -50,6 +52,8 @@ fun MainDesktop(
     bibleViewModel: BibleViewModel,
     songsViewModel: SongsViewModel,
     scheduleViewModel: ScheduleViewModel,
+    picturesViewModel: PicturesViewModel,
+    presenterManager: PresenterManager,
     presenting: (Presenting) -> Unit,
     onVerseSelected: (List<SelectedVerse>) -> Unit,
     onSongItemSelected: (LyricSection) -> Unit,
@@ -194,12 +198,16 @@ fun MainDesktop(
                     onVerseSelected = onVerseSelected,
                     onPresenting = presenting,
                     onItemClick = { item ->
-                        selectedScheduleItemId = if (selectedScheduleItemId == item.id) null else item.id
+                        // For PictureItem, always select (don't toggle) to ensure it loads
+                        if (item is ScheduleItem.PictureItem) {
+                            selectedScheduleItemId = item.id
+                        } else {
+                            selectedScheduleItemId = if (selectedScheduleItemId == item.id) null else item.id
+                        }
+
                         when (item) {
                             is ScheduleItem.SongItem -> {
-                                // Switch to Songs tab (index 1)
                                 selectedTabIndex = 1
-                                // Select the song
                                 songsViewModel.selectSongByDetails(
                                     songNumber = item.songNumber,
                                     title = item.title,
@@ -207,9 +215,7 @@ fun MainDesktop(
                                 )
                             }
                             is ScheduleItem.BibleVerseItem -> {
-                                // Switch to Bible tab (index 0)
                                 selectedTabIndex = 0
-                                // Select the verse
                                 bibleViewModel.selectVerseByDetails(
                                     bookName = item.bookName,
                                     chapter = item.chapter,
@@ -217,9 +223,11 @@ fun MainDesktop(
                                 )
                             }
                             is ScheduleItem.LabelItem -> {
-                                // Labels are editable - show edit dialog
                                 editingLabelItem = item
                                 showAddLabelDialog = true
+                            }
+                            is ScheduleItem.PictureItem -> {
+                                selectedTabIndex = 2
                             }
                         }
                     },
@@ -256,7 +264,15 @@ fun MainDesktop(
                         theme = theme
                     )
 
-                    Tabs.PICTURES -> PicturesTab()
+                    Tabs.PICTURES -> PicturesTab(
+                        modifier = Modifier.fillMaxSize(),
+                        viewModel = picturesViewModel,
+                        scheduleViewModel = scheduleViewModel,
+                        selectedPictureItem = selectedScheduleItemId?.let { id ->
+                            scheduleViewModel.scheduleItems.find { it.id == id } as? ScheduleItem.PictureItem
+                        },
+                        presenterManager = presenterManager
+                    )
                     Tabs.MEDIA -> MediaTab()
                     Tabs.ANNOUNCEMENTS -> AnnouncementsTab()
                 }

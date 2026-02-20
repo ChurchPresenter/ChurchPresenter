@@ -34,5 +34,14 @@ sealed class ScheduleItem {
         val backgroundColor: String,
         override val displayText: String = text
     ) : ScheduleItem()
+
+    @Serializable
+    data class PictureItem(
+        override val id: String,
+        val folderPath: String,
+        val folderName: String,
+        val imageCount: Int,
+        override val displayText: String = "$folderName ($imageCount images)"
+    ) : ScheduleItem()
 }
 

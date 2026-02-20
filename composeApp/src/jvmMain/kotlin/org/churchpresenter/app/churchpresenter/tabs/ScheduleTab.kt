@@ -164,6 +164,9 @@ fun ScheduleTab(
                                 is ScheduleItem.LabelItem -> {
                                     // Labels are not presentable, do nothing
                                 }
+                                is ScheduleItem.PictureItem -> {
+                                    // Pictures are handled by switching tabs, not direct presentation
+                                }
                             }
                         },
                         onEditLabel = {
@@ -237,6 +240,7 @@ private fun ScheduleItemRow(
                 is ScheduleItem.SongItem -> "♪"
                 is ScheduleItem.BibleVerseItem -> "✝"
                 is ScheduleItem.LabelItem -> "🏷"
+                is ScheduleItem.PictureItem -> "📷"
             },
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.primary,
@@ -295,6 +299,17 @@ private fun ScheduleItemRow(
                 }
                 is ScheduleItem.LabelItem -> {
                     // Labels don't have secondary text
+                }
+                is ScheduleItem.PictureItem -> {
+                    Text(
+                        maxLines = 1,
+                        text = item.folderPath,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = if (isSelected)
+                            MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                        else
+                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                    )
                 }
             }
         }

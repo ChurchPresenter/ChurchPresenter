@@ -43,6 +43,17 @@ class ScheduleViewModel {
         _scheduleItems.add(item)
     }
 
+    fun addPicture(folderPath: String, folderName: String, imageCount: Int) {
+        val id = UUID.randomUUID().toString()
+        val item = ScheduleItem.PictureItem(
+            id = id,
+            folderPath = folderPath,
+            folderName = folderName,
+            imageCount = imageCount
+        )
+        _scheduleItems.add(item)
+    }
+
     fun updateLabel(id: String, text: String, textColor: String, backgroundColor: String) {
         val index = _scheduleItems.indexOfFirst { it.id == id }
         if (index >= 0 && _scheduleItems[index] is ScheduleItem.LabelItem) {

@@ -2,6 +2,7 @@ package org.churchpresenter.app.churchpresenter.viewmodel
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import org.churchpresenter.app.churchpresenter.models.AnimationType
 import org.churchpresenter.app.churchpresenter.models.LyricSection
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.models.SelectedVerse
@@ -18,6 +19,15 @@ class PresenterManager {
 
     private val _lyricSection = mutableStateOf(LyricSection())
     val lyricSection: State<LyricSection> = _lyricSection
+
+    private val _selectedImagePath = mutableStateOf<String?>(null)
+    val selectedImagePath: State<String?> = _selectedImagePath
+
+    private val _animationType = mutableStateOf(AnimationType.CROSSFADE)
+    val animationType: State<AnimationType> = _animationType
+
+    private val _transitionDuration = mutableStateOf(500)
+    val transitionDuration: State<Int> = _transitionDuration
 
     private val _showPresenterWindow = mutableStateOf(true)
     val showPresenterWindow: State<Boolean> = _showPresenterWindow
@@ -39,6 +49,18 @@ class PresenterManager {
 
     fun setLyricSection(section: LyricSection) {
         _lyricSection.value = section
+    }
+
+    fun setSelectedImagePath(imagePath: String?) {
+        _selectedImagePath.value = imagePath
+    }
+
+    fun setAnimationType(type: AnimationType) {
+        _animationType.value = type
+    }
+
+    fun setTransitionDuration(duration: Int) {
+        _transitionDuration.value = duration
     }
 
     fun togglePresenterWindow() {

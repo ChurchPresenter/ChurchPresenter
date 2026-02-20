@@ -1,10 +1,530 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.input.key.type
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.unit.dp
+import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.add_to_schedule
+import churchpresenter.composeapp.generated.resources.animation_crossfade
+import churchpresenter.composeapp.generated.resources.animation_fade
+import churchpresenter.composeapp.generated.resources.animation_none
+import churchpresenter.composeapp.generated.resources.animation_slide_left
+import churchpresenter.composeapp.generated.resources.animation_slide_right
+import churchpresenter.composeapp.generated.resources.animation_type
+import churchpresenter.composeapp.generated.resources.auto_scroll_interval
+import churchpresenter.composeapp.generated.resources.go_live
+import churchpresenter.composeapp.generated.resources.ic_pause
+import churchpresenter.composeapp.generated.resources.ic_play
+import churchpresenter.composeapp.generated.resources.ic_skip_next
+import churchpresenter.composeapp.generated.resources.ic_skip_previous
+import churchpresenter.composeapp.generated.resources.image_counter
+import churchpresenter.composeapp.generated.resources.loading
+import churchpresenter.composeapp.generated.resources.loop
+import churchpresenter.composeapp.generated.resources.milliseconds_suffix
+import churchpresenter.composeapp.generated.resources.next_image
+import churchpresenter.composeapp.generated.resources.no_folder_selected
+import churchpresenter.composeapp.generated.resources.pause
+import churchpresenter.composeapp.generated.resources.play
+import churchpresenter.composeapp.generated.resources.previous_image
+import churchpresenter.composeapp.generated.resources.seconds_suffix
+import churchpresenter.composeapp.generated.resources.select_folder
+import churchpresenter.composeapp.generated.resources.select_folder_to_view
+import churchpresenter.composeapp.generated.resources.select_image_folder_dialog
+import churchpresenter.composeapp.generated.resources.transition_duration
+import kotlinx.coroutines.delay
+import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
+import org.churchpresenter.app.churchpresenter.models.AnimationType
+import org.churchpresenter.app.churchpresenter.models.ScheduleItem
+import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.app.churchpresenter.viewmodel.PicturesViewModel
+import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
+import org.churchpresenter.app.churchpresenter.viewmodel.ScheduleViewModel
+import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
+import java.io.File
+import javax.swing.JFileChooser
+import javax.swing.SwingUtilities
 
 @Composable
-fun PicturesTab(modifier: Modifier = Modifier) {
-    Text("Pictures Tab - to be implemented")
+fun PicturesTab(
+    modifier: Modifier = Modifier,
+    viewModel: PicturesViewModel = remember { PicturesViewModel() },
+    scheduleViewModel: ScheduleViewModel? = null,
+    selectedPictureItem: ScheduleItem.PictureItem? = null,
+    presenterManager: PresenterManager? = null
+) {
+    // Auto-scroll effect
+    LaunchedEffect(viewModel.isPlaying, viewModel.selectedImageIndex, viewModel.autoScrollInterval) {
+        if (viewModel.isPlaying && viewModel.images.isNotEmpty()) {
+            delay((viewModel.autoScrollInterval * 1000).toLong())
+            viewModel.nextImage()
+        }
+    }
+
+    // Load folder when selectedPictureItem changes (from schedule)
+    LaunchedEffect(selectedPictureItem) {
+        selectedPictureItem?.let { pictureItem ->
+            val folder = File(pictureItem.folderPath)
+            if (folder.exists() && folder.isDirectory) {
+                viewModel.selectFolder(folder)
+            }
+        }
+    }
+
+    // Update presenter image when selection changes (if presenting)
+    LaunchedEffect(viewModel.selectedImageIndex, presenterManager?.presentingMode) {
+        if (presenterManager?.presentingMode?.value == Presenting.PICTURES && viewModel.images.isNotEmpty()) {
+            val currentImage = viewModel.getCurrentImageFile()
+            if (currentImage != null) {
+                presenterManager.setSelectedImagePath(currentImage.absolutePath)
+            }
+        }
+    }
+
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(16.dp)
+            .onPreviewKeyEvent { keyEvent ->
+                if (keyEvent.type == KeyEventType.KeyDown && viewModel.images.isNotEmpty()) {
+                    when (keyEvent.key) {
+                        Key.DirectionLeft, Key.DirectionUp -> {
+                            viewModel.previousImage()
+                            true
+                        }
+                        Key.DirectionRight, Key.DirectionDown -> {
+                            viewModel.nextImage()
+                            true
+                        }
+                        Key.Spacebar -> {
+                            viewModel.togglePlayPause()
+                            true
+                        }
+                        else -> false
+                    }
+                } else {
+                    false
+                }
+            }
+    ) {
+        // Folder Selection Row
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            val folderDialogTitle = stringResource(Res.string.select_image_folder_dialog)
+
+            Button(
+                onClick = {
+                    SwingUtilities.invokeLater {
+                        val chooser = JFileChooser().apply {
+                            fileSelectionMode = JFileChooser.DIRECTORIES_ONLY
+                            dialogTitle = folderDialogTitle
+                        }
+                        val result = chooser.showOpenDialog(null)
+                        if (result == JFileChooser.APPROVE_OPTION) {
+                            viewModel.selectFolder(chooser.selectedFile)
+                        }
+                    }
+                }
+            ) {
+                Text("📁 ${stringResource(Res.string.select_folder)}")
+            }
+
+            Text(
+                text = viewModel.selectedFolder?.absolutePath ?: stringResource(Res.string.no_folder_selected),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                modifier = Modifier.weight(1f)
+            )
+
+            Text(
+                text = "${viewModel.images.size} images",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.primary
+            )
+        }
+
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        if (viewModel.images.isNotEmpty()) {
+            // Two-column layout: Playback controls (left) and Settings (right)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                // Left Column: Playback Controls
+                Column(
+                    modifier = Modifier.weight(1f),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    // Control Buttons
+                    Row(
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        IconButton(
+                            onClick = { viewModel.previousImage() },
+                            enabled = viewModel.images.isNotEmpty()
+                        ) {
+                            Icon(
+                                painter = painterResource(Res.drawable.ic_skip_previous),
+                                contentDescription = stringResource(Res.string.previous_image),
+                                modifier = Modifier.size(32.dp),
+                                tint = if (viewModel.images.isNotEmpty()) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.width(12.dp))
+
+                        IconButton(
+                            onClick = { viewModel.togglePlayPause() },
+                            enabled = viewModel.images.isNotEmpty(),
+                            modifier = Modifier
+                                .size(48.dp)
+                                .background(
+                                    if (viewModel.isPlaying) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
+                                    RoundedCornerShape(24.dp)
+                                )
+                        ) {
+                            Icon(
+                                painter = painterResource(if (viewModel.isPlaying) Res.drawable.ic_pause else Res.drawable.ic_play),
+                                contentDescription = stringResource(if (viewModel.isPlaying) Res.string.pause else Res.string.play),
+                                modifier = Modifier.size(28.dp),
+                                tint = Color.White
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.width(12.dp))
+
+                        IconButton(
+                            onClick = { viewModel.nextImage() },
+                            enabled = viewModel.images.isNotEmpty()
+                        ) {
+                            Icon(
+                                painter = painterResource(Res.drawable.ic_skip_next),
+                                contentDescription = stringResource(Res.string.next_image),
+                                modifier = Modifier.size(32.dp),
+                                tint = if (viewModel.images.isNotEmpty()) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                            )
+                        }
+                    }
+
+                    // Image counter
+                    Text(
+                        text = stringResource(Res.string.image_counter, viewModel.selectedImageIndex + 1, viewModel.images.size),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+
+                    // Go Live button
+                    if (presenterManager != null) {
+                        Button(
+                            onClick = {
+                                val currentImage = viewModel.getCurrentImageFile()
+                                if (currentImage != null) {
+                                    presenterManager.setSelectedImagePath(currentImage.absolutePath)
+                                    presenterManager.setPresentingMode(Presenting.PICTURES)
+                                    presenterManager.setShowPresenterWindow(true)
+                                }
+                            },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.primary
+                            ),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(
+                                text = stringResource(Res.string.go_live),
+                                style = MaterialTheme.typography.labelSmall
+                            )
+                        }
+                    }
+
+                    // Add to Schedule button
+                    if (scheduleViewModel != null && viewModel.selectedFolder != null) {
+                        Button(
+                            onClick = {
+                                val folder = viewModel.selectedFolder!!
+                                scheduleViewModel.addPicture(
+                                    folderPath = folder.absolutePath,
+                                    folderName = folder.name,
+                                    imageCount = viewModel.images.size
+                                )
+                            },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.secondary
+                            ),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(
+                                text = stringResource(Res.string.add_to_schedule),
+                                style = MaterialTheme.typography.labelSmall
+                            )
+                        }
+                    }
+                }
+
+                // Right Column: Settings
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    // Auto-scroll interval with Loop checkbox
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = stringResource(Res.string.auto_scroll_interval),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.width(90.dp)
+                        )
+                        Slider(
+                            value = viewModel.autoScrollInterval,
+                            onValueChange = { viewModel.autoScrollInterval = it },
+                            valueRange = 1f..30f,
+                            modifier = Modifier.weight(1f)
+                        )
+                        Text(
+                            text = "${viewModel.autoScrollInterval.toInt()}${stringResource(Res.string.seconds_suffix)}",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.width(30.dp)
+                        )
+                        Checkbox(
+                            checked = viewModel.isLooping,
+                            onCheckedChange = { viewModel.isLooping = it },
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Text(
+                            text = stringResource(Res.string.loop),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+
+                    // Transition duration slider
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = stringResource(Res.string.transition_duration),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.width(90.dp)
+                        )
+                        Slider(
+                            value = viewModel.transitionDuration,
+                            onValueChange = { rawValue ->
+                                val snappedValue = (rawValue / 50f).toInt() * 50f
+                                viewModel.transitionDuration = snappedValue
+                                presenterManager?.setTransitionDuration(snappedValue.toInt())
+                            },
+                            valueRange = 100f..2000f,
+                            steps = 37,
+                            modifier = Modifier.weight(1f)
+                        )
+                        Text(
+                            text = "${viewModel.transitionDuration.toInt()}${stringResource(Res.string.milliseconds_suffix)}",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.width(55.dp)
+                        )
+                    }
+
+                    // Animation type DropdownSelector
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        val crossfadeText = stringResource(Res.string.animation_crossfade)
+                        val fadeText = stringResource(Res.string.animation_fade)
+                        val slideLeftText = stringResource(Res.string.animation_slide_left)
+                        val slideRightText = stringResource(Res.string.animation_slide_right)
+                        val noneText = stringResource(Res.string.animation_none)
+
+                        Text(
+                            text = stringResource(Res.string.animation_type),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.width(90.dp)
+                        )
+                        DropdownSelector(
+                            modifier = Modifier.weight(1f),
+                            label = "",
+                            items = listOf(
+                                crossfadeText,
+                                fadeText,
+                                slideLeftText,
+                                slideRightText,
+                                noneText
+                            ),
+                            selected = when (viewModel.animationType) {
+                                AnimationType.CROSSFADE -> crossfadeText
+                                AnimationType.FADE -> fadeText
+                                AnimationType.SLIDE_LEFT -> slideLeftText
+                                AnimationType.SLIDE_RIGHT -> slideRightText
+                                AnimationType.NONE -> noneText
+                            },
+                            onSelectedChange = { selected ->
+                                val newType = when (selected) {
+                                    fadeText -> AnimationType.FADE
+                                    slideLeftText -> AnimationType.SLIDE_LEFT
+                                    slideRightText -> AnimationType.SLIDE_RIGHT
+                                    noneText -> AnimationType.NONE
+                                    else -> AnimationType.CROSSFADE
+                                }
+                                viewModel.animationType = newType
+                                presenterManager?.setAnimationType(newType)
+                            }
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Image Grid
+            val gridState = rememberLazyGridState()
+
+            LazyVerticalGrid(
+                columns = GridCells.Adaptive(150.dp),
+                state = gridState,
+                modifier = Modifier.fillMaxSize(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(viewModel.images) { imageFile ->
+                    val isSelected = viewModel.images.indexOf(imageFile) == viewModel.selectedImageIndex
+
+                    Box(
+                        modifier = Modifier
+                            .aspectRatio(1f)
+                            .background(
+                                MaterialTheme.colorScheme.surfaceVariant,
+                                RoundedCornerShape(8.dp)
+                            )
+                            .border(
+                                width = if (isSelected) 3.dp else 1.dp,
+                                color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline,
+                                shape = RoundedCornerShape(8.dp)
+                            )
+                            .clickable {
+                                viewModel.selectImage(viewModel.images.indexOf(imageFile))
+                            }
+                            .padding(4.dp)
+                    ) {
+                        viewModel.thumbnails[imageFile]?.let { bitmap ->
+                            Image(
+                                bitmap = bitmap,
+                                contentDescription = imageFile.name,
+                                modifier = Modifier.fillMaxSize(),
+                                contentScale = ContentScale.Crop
+                            )
+                        } ?: run {
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = stringResource(Res.string.loading),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+
+                        // File name overlay
+                        Box(
+                            modifier = Modifier
+                                .align(Alignment.BottomCenter)
+                                .fillMaxWidth()
+                                .background(Color.Black.copy(alpha = 0.7f))
+                                .padding(4.dp)
+                        ) {
+                            Text(
+                                text = imageFile.nameWithoutExtension,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = Color.White,
+                                maxLines = 1,
+                                modifier = Modifier.align(Alignment.Center)
+                            )
+                        }
+                    }
+                }
+            }
+
+            // Auto-scroll to selected item
+            LaunchedEffect(viewModel.selectedImageIndex) {
+                if (viewModel.selectedImageIndex in viewModel.images.indices) {
+                    gridState.animateScrollToItem(viewModel.selectedImageIndex)
+                }
+            }
+        } else {
+            // Empty state
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
+                        text = "📷",
+                        style = MaterialTheme.typography.displayLarge
+                    )
+                    Text(
+                        text = stringResource(Res.string.select_folder_to_view),
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                    )
+                }
+            }
+        }
+    }
 }
