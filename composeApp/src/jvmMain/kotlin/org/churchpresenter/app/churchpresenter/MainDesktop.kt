@@ -30,6 +30,7 @@ import org.churchpresenter.app.churchpresenter.tabs.AnnouncementsTab
 import org.churchpresenter.app.churchpresenter.tabs.BibleTab
 import org.churchpresenter.app.churchpresenter.tabs.MediaTab
 import org.churchpresenter.app.churchpresenter.tabs.PicturesTab
+import org.churchpresenter.app.churchpresenter.tabs.PresentationTab
 import org.churchpresenter.app.churchpresenter.tabs.ScheduleTab
 import org.churchpresenter.app.churchpresenter.tabs.SongsTab
 import org.churchpresenter.app.churchpresenter.tabs.TabSection
@@ -41,6 +42,7 @@ import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
 import org.churchpresenter.app.churchpresenter.viewmodel.BibleViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PicturesViewModel
+import org.churchpresenter.app.churchpresenter.viewmodel.PresentationViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.app.churchpresenter.viewmodel.ScheduleViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.SongsViewModel
@@ -53,6 +55,7 @@ fun MainDesktop(
     songsViewModel: SongsViewModel,
     scheduleViewModel: ScheduleViewModel,
     picturesViewModel: PicturesViewModel,
+    presentationViewModel: PresentationViewModel,
     presenterManager: PresenterManager,
     presenting: (Presenting) -> Unit,
     onVerseSelected: (List<SelectedVerse>) -> Unit,
@@ -98,10 +101,14 @@ fun MainDesktop(
                             true
                         }
                         Key.F9 -> {
-                            selectedTabIndex = Tabs.MEDIA.ordinal
+                            selectedTabIndex = Tabs.PRESENTATION.ordinal
                             true
                         }
                         Key.F10 -> {
+                            selectedTabIndex = Tabs.MEDIA.ordinal
+                            true
+                        }
+                        Key.F11 -> {
                             selectedTabIndex = Tabs.ANNOUNCEMENTS.ordinal
                             true
                         }
@@ -195,6 +202,7 @@ fun MainDesktop(
                     songsViewModel = songsViewModel,
                     bibleViewModel = bibleViewModel,
                     picturesViewModel = picturesViewModel,
+                    presentationViewModel = presentationViewModel,
                     presenterManager = presenterManager,
                     onSongItemSelected = onSongItemSelected,
                     onVerseSelected = onVerseSelected,
@@ -230,6 +238,10 @@ fun MainDesktop(
                             }
                             is ScheduleItem.PictureItem -> {
                                 selectedTabIndex = 2
+                            }
+                            is ScheduleItem.PresentationItem -> {
+                                selectedTabIndex = 3
+                                presentationViewModel.loadPresentationByPath(item.filePath)
                             }
                         }
                     },
@@ -273,6 +285,12 @@ fun MainDesktop(
                         selectedPictureItem = selectedScheduleItemId?.let { id ->
                             scheduleViewModel.scheduleItems.find { it.id == id } as? ScheduleItem.PictureItem
                         },
+                        presenterManager = presenterManager
+                    )
+                    Tabs.PRESENTATION -> PresentationTab(
+                        modifier = Modifier.fillMaxSize(),
+                        viewModel = presentationViewModel,
+                        scheduleViewModel = scheduleViewModel,
                         presenterManager = presenterManager
                     )
                     Tabs.MEDIA -> MediaTab()

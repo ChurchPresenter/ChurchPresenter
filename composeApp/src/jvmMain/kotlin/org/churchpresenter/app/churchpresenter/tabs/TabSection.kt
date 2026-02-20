@@ -12,6 +12,7 @@ import churchpresenter.composeapp.generated.resources.announcements
 import churchpresenter.composeapp.generated.resources.bible
 import churchpresenter.composeapp.generated.resources.media
 import churchpresenter.composeapp.generated.resources.pictures
+import churchpresenter.composeapp.generated.resources.presentation
 import churchpresenter.composeapp.generated.resources.songs
 import org.jetbrains.compose.resources.stringResource
 
@@ -52,6 +53,7 @@ private fun getStringName(tabs: Tabs): String {
         Tabs.BIBLE -> stringResource(Res.string.bible)
         Tabs.SONGS -> stringResource(Res.string.songs)
         Tabs.PICTURES -> stringResource(Res.string.pictures)
+        Tabs.PRESENTATION -> stringResource(Res.string.presentation)
         Tabs.MEDIA -> stringResource(Res.string.media)
         Tabs.ANNOUNCEMENTS -> stringResource(Res.string.announcements)
     }

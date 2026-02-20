@@ -43,5 +43,15 @@ sealed class ScheduleItem {
         val imageCount: Int,
         override val displayText: String = "$folderName ($imageCount images)"
     ) : ScheduleItem()
+
+    @Serializable
+    data class PresentationItem(
+        override val id: String,
+        val filePath: String,
+        val fileName: String,
+        val slideCount: Int,
+        val fileType: String, // "ppt", "pptx", "key", "pdf"
+        override val displayText: String = "$fileName ($slideCount slides)"
+    ) : ScheduleItem()
 }
 

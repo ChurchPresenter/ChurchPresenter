@@ -2,6 +2,7 @@ package org.churchpresenter.app.churchpresenter.viewmodel
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.graphics.ImageBitmap
 import org.churchpresenter.app.churchpresenter.models.AnimationType
 import org.churchpresenter.app.churchpresenter.models.LyricSection
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
@@ -31,6 +32,9 @@ class PresenterManager {
 
     private val _showPresenterWindow = mutableStateOf(true)
     val showPresenterWindow: State<Boolean> = _showPresenterWindow
+
+    private val _selectedSlide = mutableStateOf<ImageBitmap?>(null)
+    val selectedSlide: State<ImageBitmap?> = _selectedSlide
 
     fun setPresentingMode(mode: Presenting) {
         _presentingMode.value = mode
@@ -69,5 +73,9 @@ class PresenterManager {
 
     fun setShowPresenterWindow(show: Boolean) {
         _showPresenterWindow.value = show
+    }
+
+    fun setSelectedSlide(slide: ImageBitmap?) {
+        _selectedSlide.value = slide
     }
 }

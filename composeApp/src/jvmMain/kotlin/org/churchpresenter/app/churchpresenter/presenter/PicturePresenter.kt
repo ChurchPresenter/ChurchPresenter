@@ -210,3 +210,84 @@ private fun loadAndDownscaleImage(imagePath: String): ImageBitmap? {
     }
 }
 
+@Composable
+fun SlidePresenter(
+    modifier: Modifier = Modifier,
+    slide: ImageBitmap?,
+    animationType: AnimationType = AnimationType.CROSSFADE,
+    transitionDuration: Int = 500
+) {
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .background(Color.Black),
+        contentAlignment = Alignment.Center
+    ) {
+        when (animationType) {
+            AnimationType.CROSSFADE -> {
+                Crossfade(
+                    targetState = slide,
+                    animationSpec = tween(durationMillis = transitionDuration),
+                    label = "Slide Crossfade"
+                ) { currentSlide -> SlideBitmapContent(currentSlide) }
+            }
+            AnimationType.FADE -> {
+                AnimatedContent(
+                    targetState = slide,
+                    transitionSpec = {
+                        fadeIn(animationSpec = tween(transitionDuration)) togetherWith
+                                fadeOut(animationSpec = tween(transitionDuration))
+                    },
+                    label = "Slide Fade"
+                ) { currentSlide -> SlideBitmapContent(currentSlide) }
+            }
+            AnimationType.SLIDE_LEFT -> {
+                AnimatedContent(
+                    targetState = slide,
+                    transitionSpec = {
+                        slideInHorizontally(
+                            animationSpec = tween(transitionDuration),
+                            initialOffsetX = { fullWidth -> fullWidth }
+                        ) togetherWith slideOutHorizontally(
+                            animationSpec = tween(transitionDuration),
+                            targetOffsetX = { fullWidth -> -fullWidth }
+                        )
+                    },
+                    label = "Slide Slide Left"
+                ) { currentSlide -> SlideBitmapContent(currentSlide) }
+            }
+            AnimationType.SLIDE_RIGHT -> {
+                AnimatedContent(
+                    targetState = slide,
+                    transitionSpec = {
+                        slideInHorizontally(
+                            animationSpec = tween(transitionDuration),
+                            initialOffsetX = { fullWidth -> -fullWidth }
+                        ) togetherWith slideOutHorizontally(
+                            animationSpec = tween(transitionDuration),
+                            targetOffsetX = { fullWidth -> fullWidth }
+                        )
+                    },
+                    label = "Slide Slide Right"
+                ) { currentSlide -> SlideBitmapContent(currentSlide) }
+            }
+            AnimationType.NONE -> {
+                SlideBitmapContent(slide)
+            }
+        }
+    }
+}
+
+@Composable
+private fun SlideBitmapContent(slide: ImageBitmap?) {
+    if (slide != null) {
+        Image(
+            bitmap = slide,
+            contentDescription = "Presented Slide",
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Fit
+        )
+    } else {
+        Box(modifier = Modifier.fillMaxSize().background(Color.Black))
+    }
+}

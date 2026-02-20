@@ -30,28 +30,20 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.rememberDialogState
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.background
-import churchpresenter.composeapp.generated.resources.background_images
-import churchpresenter.composeapp.generated.resources.background_images_tab_content
-import churchpresenter.composeapp.generated.resources.background_tab_content
 import churchpresenter.composeapp.generated.resources.bible
 import churchpresenter.composeapp.generated.resources.cancel
-import churchpresenter.composeapp.generated.resources.folders
-import churchpresenter.composeapp.generated.resources.folders_tab_content
+import churchpresenter.composeapp.generated.resources.media
 import churchpresenter.composeapp.generated.resources.ok
 import churchpresenter.composeapp.generated.resources.options
 import churchpresenter.composeapp.generated.resources.other
 import churchpresenter.composeapp.generated.resources.other_tab_content
-import churchpresenter.composeapp.generated.resources.pictures
 import churchpresenter.composeapp.generated.resources.projection
-import churchpresenter.composeapp.generated.resources.projection_tab_content
 import churchpresenter.composeapp.generated.resources.song
-import churchpresenter.composeapp.generated.resources.text_settings_and_colors
-import churchpresenter.composeapp.generated.resources.text_settings_tab_content
 import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.data.SettingsManager
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.BackgroundSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.BibleSettingsTab
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.PictureSettingsTab
+import org.churchpresenter.app.churchpresenter.dialogs.tabs.MediaSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.ProjectionSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.SongSettingsTab
 import org.churchpresenter.app.churchpresenter.ui.theme.AppThemeWrapper
@@ -106,7 +98,7 @@ fun OptionsDialog(
                         Tab(
                             selected = selectedTabIndex == 3,
                             onClick = { selectedTabIndex = 3 },
-                            text = { Text(stringResource(Res.string.pictures)) }
+                            text = { Text(stringResource(Res.string.media)) }
                         )
                         Tab(
                             selected = selectedTabIndex == 4,
@@ -147,7 +139,7 @@ fun OptionsDialog(
                                     currentSettings = updateFn(currentSettings)
                                 }
                             )
-                            3 -> PictureSettingsTab(
+                            3 -> MediaSettingsTab(
                                 settings = currentSettings,
                                 onSettingsChange = { updateFn ->
                                     currentSettings = updateFn(currentSettings)

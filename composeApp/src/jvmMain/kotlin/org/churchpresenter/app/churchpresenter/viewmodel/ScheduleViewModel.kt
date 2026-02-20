@@ -54,6 +54,18 @@ class ScheduleViewModel {
         _scheduleItems.add(item)
     }
 
+    fun addPresentation(filePath: String, fileName: String, slideCount: Int, fileType: String) {
+        val id = UUID.randomUUID().toString()
+        val item = ScheduleItem.PresentationItem(
+            id = id,
+            filePath = filePath,
+            fileName = fileName,
+            slideCount = slideCount,
+            fileType = fileType
+        )
+        _scheduleItems.add(item)
+    }
+
     fun updateLabel(id: String, text: String, textColor: String, backgroundColor: String) {
         val index = _scheduleItems.indexOfFirst { it.id == id }
         if (index >= 0 && _scheduleItems[index] is ScheduleItem.LabelItem) {

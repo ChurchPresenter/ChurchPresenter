@@ -41,7 +41,7 @@ import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
-fun PictureSettingsTab(
+fun MediaSettingsTab(
     settings: AppSettings,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit
 ) {

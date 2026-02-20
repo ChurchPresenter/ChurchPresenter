@@ -22,6 +22,7 @@ import org.churchpresenter.app.churchpresenter.data.SettingsManager
 import org.churchpresenter.app.churchpresenter.dialogs.OptionsDialog
 import org.churchpresenter.app.churchpresenter.presenter.BiblePresenter
 import org.churchpresenter.app.churchpresenter.presenter.PicturePresenter
+import org.churchpresenter.app.churchpresenter.presenter.SlidePresenter
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.presenter.SongPresenter
 import org.churchpresenter.app.churchpresenter.ui.theme.AppThemeWrapper
@@ -29,6 +30,7 @@ import org.churchpresenter.app.churchpresenter.ui.theme.LanguageProvider
 import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
 import org.churchpresenter.app.churchpresenter.viewmodel.BibleViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PicturesViewModel
+import org.churchpresenter.app.churchpresenter.viewmodel.PresentationViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.app.churchpresenter.viewmodel.ScheduleViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.SongsViewModel
@@ -67,6 +69,11 @@ fun main() = application {
         PicturesViewModel(appSettings)
     }
 
+    // Create PresentationViewModel
+    val presentationViewModel = remember(appSettings) {
+        PresentationViewModel(appSettings)
+    }
+
     // UI state
     var theme by remember { mutableStateOf(ThemeMode.SYSTEM) }
     var showOptionsDialog by remember { mutableStateOf(false) }
@@ -84,6 +91,7 @@ fun main() = application {
     val selectedVerses by presenterManager.selectedVerses
     val lyricSection by presenterManager.lyricSection
     val selectedImagePath by presenterManager.selectedImagePath
+    val selectedSlide by presenterManager.selectedSlide
     val animationType by presenterManager.animationType
     val transitionDuration by presenterManager.transitionDuration
 
@@ -175,6 +183,7 @@ fun main() = application {
                     songsViewModel = songsViewModel,
                     scheduleViewModel = scheduleViewModel,
                     picturesViewModel = picturesViewModel,
+                    presentationViewModel = presentationViewModel,
                     presenterManager = presenterManager,
                     presenting = { presenterManager.setPresentingMode(it) },
                     onTabChange = { tabIndex ->
@@ -245,6 +254,12 @@ fun main() = application {
                         } else if (presentingMode == Presenting.PICTURES) {
                             PicturePresenter(
                                 imagePath = selectedImagePath,
+                                animationType = animationType,
+                                transitionDuration = transitionDuration
+                            )
+                        } else if (presentingMode == Presenting.PRESENTATION) {
+                            SlidePresenter(
+                                slide = selectedSlide,
                                 animationType = animationType,
                                 transitionDuration = transitionDuration
                             )

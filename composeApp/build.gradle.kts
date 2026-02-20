@@ -32,6 +32,12 @@ kotlin {
             implementation(libs.kotlinx.coroutinesSwing)
             implementation("com.twelvemonkeys.imageio:imageio-core:3.10.1")
             implementation("com.twelvemonkeys.imageio:imageio-jpeg:3.10.1")
+            // Apache PDFBox for PDF slide extraction
+            implementation("org.apache.pdfbox:pdfbox:2.0.30")
+            // Apache POI for PowerPoint slide extraction
+            implementation("org.apache.poi:poi:5.2.5")
+            implementation("org.apache.poi:poi-ooxml:5.2.5")
+            implementation("org.apache.poi:poi-scratchpad:5.2.5")
         }
     }
 }
