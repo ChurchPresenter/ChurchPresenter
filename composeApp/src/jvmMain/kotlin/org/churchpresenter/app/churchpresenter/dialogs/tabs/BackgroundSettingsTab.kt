@@ -28,6 +28,9 @@ import churchpresenter.composeapp.generated.resources.background_image
 import churchpresenter.composeapp.generated.resources.background_image_option
 import churchpresenter.composeapp.generated.resources.background_type
 import churchpresenter.composeapp.generated.resources.bible
+import churchpresenter.composeapp.generated.resources.color
+import churchpresenter.composeapp.generated.resources.default_background_color
+import churchpresenter.composeapp.generated.resources.default_background_color_help
 import churchpresenter.composeapp.generated.resources.songs
 import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
 import org.churchpresenter.app.churchpresenter.composables.FileImagePicker
@@ -50,7 +53,7 @@ fun BackgroundSettingsTab(
         // Default Background Color Section
         Column {
             Text(
-                text = "Default Background Color",
+                text = stringResource(Res.string.default_background_color),
                 style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.padding(bottom = 8.dp)
@@ -62,12 +65,12 @@ fun BackgroundSettingsTab(
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "This color is used when 'Default' background type is selected for Bible or Songs",
+                text = stringResource(Res.string.default_background_color_help),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
             )
             Spacer(modifier = Modifier.height(8.dp))
-            SettingRow("Color") {
+            SettingRow(stringResource(Res.string.color)) {
                 ColorPickerField(
                     color = settings.backgroundSettings.defaultBackgroundColor,
                     onColorChange = {

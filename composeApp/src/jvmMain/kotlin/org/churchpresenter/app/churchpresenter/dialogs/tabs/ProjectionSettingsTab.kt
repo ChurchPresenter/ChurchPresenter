@@ -24,8 +24,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.bottom
+import churchpresenter.composeapp.generated.resources.left
+import churchpresenter.composeapp.generated.resources.number_of_projection_windows
+import churchpresenter.composeapp.generated.resources.projection_position_help
+import churchpresenter.composeapp.generated.resources.right
+import churchpresenter.composeapp.generated.resources.screen
+import churchpresenter.composeapp.generated.resources.top
+import churchpresenter.composeapp.generated.resources.window_position
+import churchpresenter.composeapp.generated.resources.windows_count_label
 import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
 import org.churchpresenter.app.churchpresenter.data.AppSettings
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun ProjectionSettingsTab(
@@ -40,9 +51,9 @@ fun ProjectionSettingsTab(
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         // Number of Projection Windows
-        SectionHeader("Number of Projection Windows")
+        SectionHeader(stringResource(Res.string.number_of_projection_windows))
         Spacer(modifier = Modifier.height(4.dp))
-        SettingRow("Windows (1-3)") {
+        SettingRow(stringResource(Res.string.windows_count_label)) {
             NumberSettingsTextField(
                 initialText = settings.projectionSettings.numberOfWindows,
                 onValueChange = { value ->
@@ -57,7 +68,7 @@ fun ProjectionSettingsTab(
         Spacer(modifier = Modifier.height(8.dp))
 
         // Window Position Settings
-        SectionHeader("Window Position")
+        SectionHeader(stringResource(Res.string.window_position))
         Spacer(modifier = Modifier.height(8.dp))
 
         // Visual representation box with position fields
@@ -78,7 +89,7 @@ fun ProjectionSettingsTab(
                 // Top position
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
-                        text = "Top",
+                        text = stringResource(Res.string.top),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -103,7 +114,7 @@ fun ProjectionSettingsTab(
                     // Left position
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
-                            text = "Left",
+                            text = stringResource(Res.string.left),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -128,7 +139,7 @@ fun ProjectionSettingsTab(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = "Screen",
+                            text = stringResource(Res.string.screen),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onPrimaryContainer
                         )
@@ -137,7 +148,7 @@ fun ProjectionSettingsTab(
                     // Right position
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
-                            text = "Right",
+                            text = stringResource(Res.string.right),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -157,7 +168,7 @@ fun ProjectionSettingsTab(
                 // Bottom position
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
-                        text = "Bottom",
+                        text = stringResource(Res.string.bottom),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -179,7 +190,7 @@ fun ProjectionSettingsTab(
 
         // Help text
         Text(
-            text = "Position values represent pixel offsets from screen edges. Use these to adjust projection window placement on secondary displays.",
+            text = stringResource(Res.string.projection_position_help),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
             modifier = Modifier.fillMaxWidth()
