@@ -290,5 +290,47 @@
     <string name="enter_label_text">Wprowadź tekst etykiety...</string>
     <string name="text_color">Kolor tekstu</string>
     <string name="background_color_label">Kolor tła</string>
+
+    <!-- Pictures Tab Strings -->
+    <string name="select_folder">Wybierz folder</string>
+    <string name="no_folder_selected">Nie wybrano folderu</string>
+    <string name="images_count">%1$d obrazów</string>
+    <string name="previous_image">Poprzedni obraz</string>
+    <string name="pause">Pauza</string>
+    <string name="play">Odtwórz</string>
+    <string name="next_image">Następny obraz</string>
+    <string name="image_counter">Obraz %1$d z %2$d</string>
+    <string name="no_images">Brak obrazów</string>
+    <string name="auto_scroll_interval">Interwał autoprzewijania:</string>
+    <string name="seconds_suffix">s</string>
+    <string name="loading">Ładowanie...</string>
+    <string name="select_folder_to_view">Wybierz folder, aby wyświetlić obrazy</string>
+    <string name="select_image_folder_dialog">Wybierz folder z obrazami</string>
+    <string name="loop">Zapętlenie</string>
+    <string name="transition_duration">Czas przejścia:</string>
+    <string name="animation_type">Typ animacji:</string>
+    <string name="animation_crossfade">Przenikanie</string>
+    <string name="animation_fade">Zanikanie</string>
+    <string name="animation_slide_left">Przesunięcie w lewo</string>
+    <string name="animation_slide_right">Przesunięcie w prawo</string>
+    <string name="animation_none">Bez animacji</string>
+    <string name="milliseconds_suffix">ms</string>
+    <string name="settings">Ustawienia</string>
+    <string name="images_suffix">obrazów</string>
+    <string name="slideshow_settings">Ustawienia pokazu slajdów</string>
+    <string name="transition_settings">Ustawienia przejścia</string>
+    <string name="failed_to_load_image">Nie udało się załadować obrazu</string>
+    <string name="presentation">Prezentacja</string>
+
+    <!-- Presentation Tab Strings -->
+    <string name="no_file_selected_presentation">Nie wybrano pliku</string>
+    <string name="slide_count">%1$d slajdów</string>
+    <string name="slide_counter">Slajd %1$d z %2$d</string>
+    <string name="loading_slides">Ładowanie slajdów...</string>
+    <string name="select_presentation_file">Wybierz plik prezentacji, aby wyświetlić slajdy</string>
+    <string name="supported_formats">Obsługiwane: PowerPoint (.ppt, .pptx), Keynote (.key), PDF (.pdf)</string>
+    <string name="slide_number">Slajd %1$d</string>
+    <string name="remove">Usuń</string>
+    <string name="select_presentation_file_button">📄 Wybierz plik</string>
 </resources>
 

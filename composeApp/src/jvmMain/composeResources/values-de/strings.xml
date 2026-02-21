@@ -290,5 +290,47 @@
     <string name="enter_label_text">Label-Text eingeben...</string>
     <string name="text_color">Textfarbe</string>
     <string name="background_color_label">Hintergrundfarbe</string>
+
+    <!-- Pictures Tab Strings -->
+    <string name="select_folder">Ordner auswählen</string>
+    <string name="no_folder_selected">Kein Ordner ausgewählt</string>
+    <string name="images_count">%1$d Bilder</string>
+    <string name="previous_image">Vorheriges Bild</string>
+    <string name="pause">Pause</string>
+    <string name="play">Abspielen</string>
+    <string name="next_image">Nächstes Bild</string>
+    <string name="image_counter">Bild %1$d von %2$d</string>
+    <string name="no_images">Keine Bilder</string>
+    <string name="auto_scroll_interval">Automatischer Scroll-Intervall:</string>
+    <string name="seconds_suffix">s</string>
+    <string name="loading">Wird geladen...</string>
+    <string name="select_folder_to_view">Wählen Sie einen Ordner zum Anzeigen von Bildern</string>
+    <string name="select_image_folder_dialog">Bildordner auswählen</string>
+    <string name="loop">Wiederholen</string>
+    <string name="transition_duration">Übergangszeit:</string>
+    <string name="animation_type">Animationstyp:</string>
+    <string name="animation_crossfade">Überblendung</string>
+    <string name="animation_fade">Einblenden</string>
+    <string name="animation_slide_left">Nach links schieben</string>
+    <string name="animation_slide_right">Nach rechts schieben</string>
+    <string name="animation_none">Keine Animation</string>
+    <string name="milliseconds_suffix">ms</string>
+    <string name="settings">Einstellungen</string>
+    <string name="images_suffix">Bilder</string>
+    <string name="slideshow_settings">Diashow-Einstellungen</string>
+    <string name="transition_settings">Übergangseinstellungen</string>
+    <string name="failed_to_load_image">Bild konnte nicht geladen werden</string>
+    <string name="presentation">Präsentation</string>
+
+    <!-- Presentation Tab Strings -->
+    <string name="no_file_selected_presentation">Keine Datei ausgewählt</string>
+    <string name="slide_count">%1$d Folien</string>
+    <string name="slide_counter">Folie %1$d von %2$d</string>
+    <string name="loading_slides">Folien werden geladen...</string>
+    <string name="select_presentation_file">Wählen Sie eine Präsentationsdatei aus, um Folien anzuzeigen</string>
+    <string name="supported_formats">Unterstützt: PowerPoint (.ppt, .pptx), Keynote (.key), PDF (.pdf)</string>
+    <string name="slide_number">Folie %1$d</string>
+    <string name="remove">Entfernen</string>
+    <string name="select_presentation_file_button">📄 Datei auswählen</string>
 </resources>
 

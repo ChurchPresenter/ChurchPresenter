@@ -364,5 +364,59 @@
     <string name="background_color">Barva pozadí:</string>
     <string name="background_image">Obrázek pozadí:</string>
     <string name="show_abbreviation">Zobrazit zkratku knihy</string>
+
+    <!-- Placeholder strings -->
+    <string name="bible_tab_content">Obsah karty Bible bude implementován</string>
+    <string name="text_settings_tab_content">Obsah karty Nastavení textu bude implementován</string>
+    <string name="background_tab_content">Obsah karty Pozadí bude implementován</string>
+    <string name="background_images_tab_content">Obsah karty Obrázky pozadí bude implementován</string>
+    <string name="folders_tab_content">Obsah karty Složky bude implementován</string>
+    <string name="projection_tab_content">Obsah karty Projekce bude implementován</string>
+    <string name="other_tab_content">Obsah karty Ostatní bude implementován</string>
+    <string name="primary_bible_text">Text primární Bible</string>
+    <string name="secondary_bible_text">Text sekundární Bible</string>
+    <string name="tooltip_edit">Upravit</string>
+
+    <!-- Pictures Tab Strings -->
+    <string name="select_folder">Vybrat složku</string>
+    <string name="no_folder_selected">Žádná složka nevybrána</string>
+    <string name="images_count">%1$d obrázků</string>
+    <string name="previous_image">Předchozí obrázek</string>
+    <string name="pause">Pozastavit</string>
+    <string name="play">Přehrát</string>
+    <string name="next_image">Další obrázek</string>
+    <string name="image_counter">Obrázek %1$d z %2$d</string>
+    <string name="no_images">Žádné obrázky</string>
+    <string name="auto_scroll_interval">Interval automatického posouvání:</string>
+    <string name="seconds_suffix">s</string>
+    <string name="loading">Načítání...</string>
+    <string name="select_folder_to_view">Vyberte složku pro zobrazení obrázků</string>
+    <string name="select_image_folder_dialog">Vybrat složku s obrázky</string>
+    <string name="loop">Smyčka</string>
+    <string name="transition_duration">Doba přechodu:</string>
+    <string name="animation_type">Typ animace:</string>
+    <string name="animation_crossfade">Prolínání</string>
+    <string name="animation_fade">Zeslabení</string>
+    <string name="animation_slide_left">Posun doleva</string>
+    <string name="animation_slide_right">Posun doprava</string>
+    <string name="animation_none">Bez animace</string>
+    <string name="milliseconds_suffix">ms</string>
+    <string name="settings">Nastavení</string>
+    <string name="images_suffix">obrázků</string>
+    <string name="slideshow_settings">Nastavení prezentace</string>
+    <string name="transition_settings">Nastavení přechodu</string>
+    <string name="failed_to_load_image">Obrázek se nepodařilo načíst</string>
+    <string name="presentation">Prezentace</string>
+
+    <!-- Presentation Tab Strings -->
+    <string name="no_file_selected_presentation">Žádný soubor nevybrán</string>
+    <string name="slide_count">%1$d snímků</string>
+    <string name="slide_counter">Snímek %1$d z %2$d</string>
+    <string name="loading_slides">Načítání snímků...</string>
+    <string name="select_presentation_file">Vyberte soubor prezentace pro zobrazení snímků</string>
+    <string name="supported_formats">Podporováno: PowerPoint (.ppt, .pptx), Keynote (.key), PDF (.pdf)</string>
+    <string name="slide_number">Snímek %1$d</string>
+    <string name="remove">Odstranit</string>
+    <string name="select_presentation_file_button">📄 Vybrat soubor</string>
 </resources>
 

@@ -290,5 +290,47 @@
     <string name="enter_label_text">Белгі мәтінін енгізіңіз...</string>
     <string name="text_color">Мәтін түсі</string>
     <string name="background_color_label">Фон түсі</string>
+
+    <!-- Pictures Tab Strings -->
+    <string name="select_folder">Қалтаны таңдау</string>
+    <string name="no_folder_selected">Қалта таңдалмаған</string>
+    <string name="images_count">%1$d сурет</string>
+    <string name="previous_image">Алдыңғы сурет</string>
+    <string name="pause">Тоқтату</string>
+    <string name="play">Ойнату</string>
+    <string name="next_image">Келесі сурет</string>
+    <string name="image_counter">Сурет %1$d / %2$d</string>
+    <string name="no_images">Суреттер жоқ</string>
+    <string name="auto_scroll_interval">Автоайналдыру аралығы:</string>
+    <string name="seconds_suffix">с</string>
+    <string name="loading">Жүктелуде...</string>
+    <string name="select_folder_to_view">Суреттерді қарау үшін қалтаны таңдаңыз</string>
+    <string name="select_image_folder_dialog">Суреттер қалтасын таңдау</string>
+    <string name="loop">Қайталау</string>
+    <string name="transition_duration">Өту ұзақтығы:</string>
+    <string name="animation_type">Анимация түрі:</string>
+    <string name="animation_crossfade">Біртіндеп өту</string>
+    <string name="animation_fade">Жоғалу</string>
+    <string name="animation_slide_left">Солға жылжу</string>
+    <string name="animation_slide_right">Оңға жылжу</string>
+    <string name="animation_none">Анимациясыз</string>
+    <string name="milliseconds_suffix">мс</string>
+    <string name="settings">Параметрлер</string>
+    <string name="images_suffix">сурет</string>
+    <string name="slideshow_settings">Слайдшоу параметрлері</string>
+    <string name="transition_settings">Өту параметрлері</string>
+    <string name="failed_to_load_image">Суретті жүктеу мүмкін болмады</string>
+    <string name="presentation">Презентация</string>
+
+    <!-- Presentation Tab Strings -->
+    <string name="no_file_selected_presentation">Файл таңдалмаған</string>
+    <string name="slide_count">%1$d слайд</string>
+    <string name="slide_counter">%1$d / %2$d слайд</string>
+    <string name="loading_slides">Слайдтар жүктелуде...</string>
+    <string name="select_presentation_file">Слайдтарды көру үшін презентация файлын таңдаңыз</string>
+    <string name="supported_formats">Қолдау көрсетілетін форматтар: PowerPoint (.ppt, .pptx), Keynote (.key), PDF (.pdf)</string>
+    <string name="slide_number">Слайд %1$d</string>
+    <string name="remove">Жою</string>
+    <string name="select_presentation_file_button">📄 Файл таңдау</string>
 </resources>
 

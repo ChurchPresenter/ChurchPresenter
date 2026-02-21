@@ -290,5 +290,47 @@
     <string name="enter_label_text">Увядзіце тэкст меткі...</string>
     <string name="text_color">Колер тэксту</string>
     <string name="background_color_label">Колер фону</string>
+
+    <!-- Pictures Tab Strings -->
+    <string name="select_folder">Выбраць папку</string>
+    <string name="no_folder_selected">Папка не выбрана</string>
+    <string name="images_count">%1$d малюнкаў</string>
+    <string name="previous_image">Папярэдні малюнак</string>
+    <string name="pause">Паўза</string>
+    <string name="play">Прайграць</string>
+    <string name="next_image">Наступны малюнак</string>
+    <string name="image_counter">Малюнак %1$d з %2$d</string>
+    <string name="no_images">Няма малюнкаў</string>
+    <string name="auto_scroll_interval">Інтэрвал аўтапракруткі:</string>
+    <string name="seconds_suffix">с</string>
+    <string name="loading">Загрузка...</string>
+    <string name="select_folder_to_view">Выберыце папку для прагляду малюнкаў</string>
+    <string name="select_image_folder_dialog">Выбраць папку з малюнкамі</string>
+    <string name="loop">Па коле</string>
+    <string name="transition_duration">Працягласць пераходу:</string>
+    <string name="animation_type">Тып анімацыі:</string>
+    <string name="animation_crossfade">Плаўны пераход</string>
+    <string name="animation_fade">Згасанне</string>
+    <string name="animation_slide_left">Зрух улева</string>
+    <string name="animation_slide_right">Зрух управа</string>
+    <string name="animation_none">Без анімацыі</string>
+    <string name="milliseconds_suffix">мс</string>
+    <string name="settings">Настройкі</string>
+    <string name="images_suffix">малюнкаў</string>
+    <string name="slideshow_settings">Настройкі слайдшоу</string>
+    <string name="transition_settings">Настройкі пераходу</string>
+    <string name="failed_to_load_image">Не ўдалося загрузіць малюнак</string>
+    <string name="presentation">Прэзентацыя</string>
+
+    <!-- Presentation Tab Strings -->
+    <string name="no_file_selected_presentation">Файл не абраны</string>
+    <string name="slide_count">%1$d слайдаў</string>
+    <string name="slide_counter">Слайд %1$d з %2$d</string>
+    <string name="loading_slides">Загрузка слайдаў...</string>
+    <string name="select_presentation_file">Выберыце файл прэзентацыі для прагляду слайдаў</string>
+    <string name="supported_formats">Падтрымліваецца: PowerPoint (.ppt, .pptx), Keynote (.key), PDF (.pdf)</string>
+    <string name="slide_number">Слайд %1$d</string>
+    <string name="remove">Выдаліць</string>
+    <string name="select_presentation_file_button">📄 Выбраць файл</string>
 </resources>
 

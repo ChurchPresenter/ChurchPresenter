@@ -45,11 +45,19 @@ import churchpresenter.composeapp.generated.resources.ic_pause
 import churchpresenter.composeapp.generated.resources.ic_play
 import churchpresenter.composeapp.generated.resources.ic_skip_next
 import churchpresenter.composeapp.generated.resources.ic_skip_previous
+import churchpresenter.composeapp.generated.resources.loading_slides
 import churchpresenter.composeapp.generated.resources.next_image
+import churchpresenter.composeapp.generated.resources.no_file_selected_presentation
 import churchpresenter.composeapp.generated.resources.pause
 import churchpresenter.composeapp.generated.resources.play
 import churchpresenter.composeapp.generated.resources.previous_image
-import churchpresenter.composeapp.generated.resources.select_folder
+import churchpresenter.composeapp.generated.resources.remove
+import churchpresenter.composeapp.generated.resources.select_presentation_file
+import churchpresenter.composeapp.generated.resources.select_presentation_file_button
+import churchpresenter.composeapp.generated.resources.slide_count
+import churchpresenter.composeapp.generated.resources.slide_counter
+import churchpresenter.composeapp.generated.resources.slide_number
+import churchpresenter.composeapp.generated.resources.supported_formats
 import kotlinx.coroutines.delay
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.viewmodel.PresentationViewModel
@@ -153,18 +161,18 @@ fun PresentationTab(
                     }
                 }
             ) {
-                Text("📄 ${stringResource(Res.string.select_folder)}")
+                Text(stringResource(Res.string.select_presentation_file_button))
             }
 
             Text(
-                text = viewModel.selectedPresentation?.name ?: "No file selected",
+                text = viewModel.selectedPresentation?.name ?: stringResource(Res.string.no_file_selected_presentation),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
                 modifier = Modifier.weight(1f)
             )
 
             Text(
-                text = "${viewModel.slides.size} slides",
+                text = stringResource(Res.string.slide_count, viewModel.slides.size),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.primary
             )
@@ -236,7 +244,7 @@ fun PresentationTab(
                     }
 
                     Text(
-                        text = "Slide ${viewModel.selectedSlideIndex + 1} of ${viewModel.slides.size}",
+                        text = stringResource(Res.string.slide_counter, viewModel.selectedSlideIndex + 1, viewModel.slides.size),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -327,7 +335,7 @@ fun PresentationTab(
                         style = MaterialTheme.typography.displayLarge
                     )
                     Text(
-                        text = "Loading slides...",
+                        text = stringResource(Res.string.loading_slides),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                     )
@@ -348,12 +356,12 @@ fun PresentationTab(
                         style = MaterialTheme.typography.displayLarge
                     )
                     Text(
-                        text = "Select a presentation file to view slides",
+                        text = stringResource(Res.string.select_presentation_file),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                     )
                     Text(
-                        text = "Supported: PowerPoint (.ppt, .pptx), Keynote (.key), PDF (.pdf)",
+                        text = stringResource(Res.string.supported_formats),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                     )
@@ -413,7 +421,7 @@ private fun SlideThumbnail(
         ) {
             Image(
                 bitmap = slide,
-                contentDescription = "Slide $slideNumber",
+                contentDescription = stringResource(Res.string.slide_number, slideNumber),
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Fit
             )
@@ -422,7 +430,7 @@ private fun SlideThumbnail(
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
-            text = "Slide $slideNumber",
+            text = stringResource(Res.string.slide_number, slideNumber),
             style = MaterialTheme.typography.bodySmall,
             color = if (isSelected) MaterialTheme.colorScheme.primary
                     else MaterialTheme.colorScheme.onSurface
@@ -462,7 +470,7 @@ private fun PresentationChip(
         ) {
             Icon(
                 painter = painterResource(Res.drawable.ic_close),
-                contentDescription = "Remove",
+                contentDescription = stringResource(Res.string.remove),
                 modifier = Modifier.size(16.dp),
                 tint = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer
                        else MaterialTheme.colorScheme.onSurface

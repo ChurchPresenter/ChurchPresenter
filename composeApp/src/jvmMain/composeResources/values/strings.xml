@@ -321,4 +321,15 @@
     <string name="slideshow_settings">Media Slideshow Settings</string>
     <string name="transition_settings">Transition Settings</string>
     <string name="failed_to_load_image">Failed to load image</string>
+
+    <!-- Presentation Tab Strings -->
+    <string name="no_file_selected_presentation">No file selected</string>
+    <string name="slide_count">%1$d slides</string>
+    <string name="slide_counter">Slide %1$d of %2$d</string>
+    <string name="loading_slides">Loading slides...</string>
+    <string name="select_presentation_file">Select a presentation file to view slides</string>
+    <string name="supported_formats">Supported: PowerPoint (.ppt, .pptx), Keynote (.key), PDF (.pdf)</string>
+    <string name="slide_number">Slide %1$d</string>
+    <string name="remove">Remove</string>
+    <string name="select_presentation_file_button">📄 Select File</string>
 </resources>
