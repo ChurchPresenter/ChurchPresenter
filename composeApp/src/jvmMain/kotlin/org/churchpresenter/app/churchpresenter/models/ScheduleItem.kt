@@ -53,5 +53,14 @@ sealed class ScheduleItem {
         val fileType: String, // "ppt", "pptx", "key", "pdf"
         override val displayText: String = "$fileName ($slideCount slides)"
     ) : ScheduleItem()
+
+    @Serializable
+    data class MediaItem(
+        override val id: String,
+        val mediaUrl: String,       // local path or URL
+        val mediaTitle: String,
+        val mediaType: String,      // "local", "youtube", "vimeo"
+        override val displayText: String = "🎬 $mediaTitle"
+    ) : ScheduleItem()
 }
 

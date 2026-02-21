@@ -343,5 +343,28 @@
     <!-- Background Settings Tab -->
     <string name="default_background_color">Domyślny kolor tła</string>
     <string name="default_background_color_help">Ten kolor jest używany, gdy typ tła „Domyślny" jest wybrany dla Biblii lub Pieśni</string>
+
+    <!-- Media Tab Strings -->
+    <string name="media_tab_title">Media</string>
+    <string name="media_source">Źródło mediów</string>
+    <string name="media_local_file">Plik lokalny</string>
+    <string name="media_youtube">YouTube</string>
+    <string name="media_vimeo">Vimeo</string>
+    <string name="media_url_hint">Wprowadź URL YouTube lub Vimeo...</string>
+    <string name="media_load">Załaduj</string>
+    <string name="media_select_file">Wybierz plik wideo</string>
+    <string name="media_no_source">Nie załadowano mediów</string>
+    <string name="media_select_to_begin">Wybierz lokalny plik wideo lub wprowadź URL YouTube / Vimeo</string>
+    <string name="media_now_playing">Teraz odtwarzane:</string>
+    <string name="media_now_presenting">Teraz wyświetlane na ekranie</string>
+    <string name="media_seek_backward">Cofnij 10 sek</string>
+    <string name="media_seek_forward">Przewiń 10 sek</string>
+    <string name="media_preview">Podgląd</string>
+    <string name="media_volume">Głośność</string>
+    <string name="media_mute">Wycisz</string>
+    <string name="media_unmute">Wyłącz wyciszenie</string>
+    <string name="media_open_in_browser">Otwórz w przeglądarce</string>
+    <string name="media_web_preview_note">Wideo sieciowe — sterowanie odtwarzaniem przez przeglądarkę.</string>
+    <string name="media_local_preview_note">Wideo lokalne — użyj elementów sterowania powyżej.</string>
 </resources>
 

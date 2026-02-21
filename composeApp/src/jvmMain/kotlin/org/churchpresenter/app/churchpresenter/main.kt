@@ -6,9 +6,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.window.WindowState
 import androidx.compose.ui.window.WindowPlacement
 import androidx.compose.ui.window.WindowPosition
@@ -21,6 +27,7 @@ import org.churchpresenter.app.churchpresenter.data.Language
 import org.churchpresenter.app.churchpresenter.data.SettingsManager
 import org.churchpresenter.app.churchpresenter.dialogs.OptionsDialog
 import org.churchpresenter.app.churchpresenter.presenter.BiblePresenter
+import org.churchpresenter.app.churchpresenter.presenter.MediaPresenter
 import org.churchpresenter.app.churchpresenter.presenter.PicturePresenter
 import org.churchpresenter.app.churchpresenter.presenter.SlidePresenter
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
@@ -29,8 +36,7 @@ import org.churchpresenter.app.churchpresenter.ui.theme.AppThemeWrapper
 import org.churchpresenter.app.churchpresenter.ui.theme.LanguageProvider
 import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
 import org.churchpresenter.app.churchpresenter.viewmodel.BibleViewModel
-import org.churchpresenter.app.churchpresenter.viewmodel.PicturesViewModel
-import org.churchpresenter.app.churchpresenter.viewmodel.PresentationViewModel
+import org.churchpresenter.app.churchpresenter.viewmodel.MediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.app.churchpresenter.viewmodel.ScheduleViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.SongsViewModel
@@ -64,15 +70,9 @@ fun main() = application {
     // Create ScheduleViewModel
     val scheduleViewModel = remember { ScheduleViewModel() }
 
-    // Create PicturesViewModel
-    val picturesViewModel = remember(appSettings) {
-        PicturesViewModel(appSettings)
-    }
+    // Create MediaViewModel — shared between MediaTab and MediaPresenter
+    val mediaViewModel = remember { MediaViewModel() }
 
-    // Create PresentationViewModel
-    val presentationViewModel = remember(appSettings) {
-        PresentationViewModel(appSettings)
-    }
 
     // UI state
     var theme by remember { mutableStateOf(ThemeMode.SYSTEM) }
@@ -94,6 +94,7 @@ fun main() = application {
     val selectedSlide by presenterManager.selectedSlide
     val animationType by presenterManager.animationType
     val transitionDuration by presenterManager.transitionDuration
+
 
     Window(
         onCloseRequest = ::exitApplication,
@@ -182,9 +183,8 @@ fun main() = application {
                     bibleViewModel = bibleViewModel,
                     songsViewModel = songsViewModel,
                     scheduleViewModel = scheduleViewModel,
-                    picturesViewModel = picturesViewModel,
-                    presentationViewModel = presentationViewModel,
                     presenterManager = presenterManager,
+                    mediaViewModel = mediaViewModel,
                     presenting = { presenterManager.setPresentingMode(it) },
                     onTabChange = { tabIndex ->
                         currentTab = tabIndex
@@ -246,23 +246,51 @@ fun main() = application {
                 state = windowState,
             ) {
                 PresenterScreen(modifier = Modifier.fillMaxSize(), appSettings = appSettings) {
-                    Column {
-                        if (presentingMode == Presenting.BIBLE) {
-                            BiblePresenter(selectedVerses = selectedVerses, appSettings = appSettings)
-                        } else if (presentingMode == Presenting.LYRICS) {
-                            SongPresenter(lyricSection = lyricSection, appSettings = appSettings)
-                        } else if (presentingMode == Presenting.PICTURES) {
-                            PicturePresenter(
+                    // MediaPresenter must stay permanently in composition so its
+                    // VideoPlayer (SwingPanel/JFXPanel) is never torn down.
+                    // All other presenters sit on top in a Box.
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .onPreviewKeyEvent { keyEvent ->
+                                if (keyEvent.type == KeyEventType.KeyDown && keyEvent.key == Key.Escape) {
+                                    mediaViewModel.pause()
+                                    presenterManager.setPresentingMode(Presenting.NONE)
+                                    true
+                                } else false
+                            }
+                    ) {
+                        // Always present, hidden when another mode is active
+                        MediaPresenter(
+                            viewModel = mediaViewModel,
+                            isVisible = presentingMode == Presenting.MEDIA,
+                            modifier = Modifier.fillMaxSize().then(
+                                if (presentingMode == Presenting.MEDIA) Modifier
+                                else Modifier.requiredSize(0.dp)
+                            )
+                        )
+
+                        when (presentingMode) {
+                            Presenting.BIBLE -> BiblePresenter(
+                                selectedVerses = selectedVerses,
+                                appSettings = appSettings
+                            )
+                            Presenting.LYRICS -> SongPresenter(
+                                lyricSection = lyricSection,
+                                appSettings = appSettings
+                            )
+                            Presenting.PICTURES -> PicturePresenter(
                                 imagePath = selectedImagePath,
                                 animationType = animationType,
                                 transitionDuration = transitionDuration
                             )
-                        } else if (presentingMode == Presenting.PRESENTATION) {
-                            SlidePresenter(
+                            Presenting.PRESENTATION -> SlidePresenter(
                                 slide = selectedSlide,
                                 animationType = animationType,
                                 transitionDuration = transitionDuration
                             )
+                            Presenting.MEDIA -> { /* rendered above, always in composition */ }
+                            Presenting.NONE -> { /* nothing */ }
                         }
                     }
                 }

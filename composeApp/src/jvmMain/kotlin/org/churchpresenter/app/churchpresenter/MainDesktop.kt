@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.requiredSize
+import androidx.compose.ui.unit.dp
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -24,7 +26,6 @@ import androidx.compose.ui.input.key.type
 import androidx.compose.ui.focus.focusTarget
 import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.components.Toolbar
-import org.churchpresenter.app.churchpresenter.data.SongItem
 import org.churchpresenter.app.churchpresenter.dialogs.AddLabelDialog
 import org.churchpresenter.app.churchpresenter.tabs.AnnouncementsTab
 import org.churchpresenter.app.churchpresenter.tabs.BibleTab
@@ -41,6 +42,7 @@ import org.churchpresenter.app.churchpresenter.models.SelectedVerse
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
 import org.churchpresenter.app.churchpresenter.viewmodel.BibleViewModel
+import org.churchpresenter.app.churchpresenter.viewmodel.MediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PicturesViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresentationViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
@@ -54,9 +56,8 @@ fun MainDesktop(
     bibleViewModel: BibleViewModel,
     songsViewModel: SongsViewModel,
     scheduleViewModel: ScheduleViewModel,
-    picturesViewModel: PicturesViewModel,
-    presentationViewModel: PresentationViewModel,
     presenterManager: PresenterManager,
+    mediaViewModel: MediaViewModel,
     presenting: (Presenting) -> Unit,
     onVerseSelected: (List<SelectedVerse>) -> Unit,
     onSongItemSelected: (LyricSection) -> Unit,
@@ -66,6 +67,10 @@ fun MainDesktop(
     onThemeChange: (ThemeMode) -> Unit = {},
     theme: ThemeMode = ThemeMode.SYSTEM
 ) {
+    // Tab-specific ViewModels — owned here, not in main.kt
+    val picturesViewModel = remember(appSettings) { PicturesViewModel(appSettings) }
+    val presentationViewModel = remember(appSettings) { PresentationViewModel(appSettings) }
+
     var selectedTabIndex by rememberSaveable { mutableStateOf(0) }
     var selectedScheduleItemId by remember { mutableStateOf<String?>(null) }
     var showAddLabelDialog by remember { mutableStateOf(false) }
@@ -88,6 +93,11 @@ fun MainDesktop(
             .onPreviewKeyEvent { keyEvent ->
                 if (keyEvent.type == KeyEventType.KeyDown) {
                     when (keyEvent.key) {
+                        Key.Escape -> {
+                            mediaViewModel.pause()
+                            presenterManager.setPresentingMode(Presenting.NONE)
+                            true
+                        }
                         Key.F6 -> {
                             selectedTabIndex = Tabs.BIBLE.ordinal
                             true
@@ -203,6 +213,7 @@ fun MainDesktop(
                     bibleViewModel = bibleViewModel,
                     picturesViewModel = picturesViewModel,
                     presentationViewModel = presentationViewModel,
+                    mediaViewModel = mediaViewModel,
                     presenterManager = presenterManager,
                     onSongItemSelected = onSongItemSelected,
                     onVerseSelected = onVerseSelected,
@@ -243,6 +254,14 @@ fun MainDesktop(
                                 selectedTabIndex = 3
                                 presentationViewModel.loadPresentationByPath(item.filePath)
                             }
+                            is ScheduleItem.MediaItem -> {
+                                selectedTabIndex = Tabs.MEDIA.ordinal
+                                mediaViewModel.loadMediaFromSchedule(
+                                    url = item.mediaUrl,
+                                    title = item.mediaTitle,
+                                    type = item.mediaType
+                                )
+                            }
                         }
                     },
                     onEditLabel = { labelItem ->
@@ -260,41 +279,61 @@ fun MainDesktop(
                     }
                 )
 
-                when (Tabs.entries[selectedTabIndex]) {
-                    Tabs.BIBLE -> BibleTab(
-                        modifier = Modifier.fillMaxSize(),
-                        viewModel = bibleViewModel,
-                        scheduleViewModel = scheduleViewModel,
-                        onVerseSelected = onVerseSelected,
-                        onPresenting = presenting
-                    )
+                // Keep MediaTab permanently in composition so VideoPlayer (SwingPanel)
+                // is never destroyed on tab switch — just hidden when another tab is active.
+                val currentTab = Tabs.entries[selectedTabIndex]
 
-                    Tabs.SONGS -> SongsTab(
-                        modifier = Modifier.fillMaxSize(),
-                        viewModel = songsViewModel,
-                        scheduleViewModel = scheduleViewModel,
-                        onSongItemSelected = onSongItemSelected,
-                        onPresenting = presenting,
-                        theme = theme
-                    )
-
-                    Tabs.PICTURES -> PicturesTab(
-                        modifier = Modifier.fillMaxSize(),
-                        viewModel = picturesViewModel,
-                        scheduleViewModel = scheduleViewModel,
-                        selectedPictureItem = selectedScheduleItemId?.let { id ->
-                            scheduleViewModel.scheduleItems.find { it.id == id } as? ScheduleItem.PictureItem
-                        },
-                        presenterManager = presenterManager
-                    )
-                    Tabs.PRESENTATION -> PresentationTab(
-                        modifier = Modifier.fillMaxSize(),
-                        viewModel = presentationViewModel,
+                Box(modifier = Modifier.fillMaxSize()) {
+                    // Always-present MediaTab, hidden when not selected
+                    MediaTab(
+                        modifier = Modifier.fillMaxSize().then(
+                            if (currentTab == Tabs.MEDIA) Modifier else Modifier.requiredSize(0.dp)
+                        ),
+                        viewModel = mediaViewModel,
                         scheduleViewModel = scheduleViewModel,
                         presenterManager = presenterManager
                     )
-                    Tabs.MEDIA -> MediaTab()
-                    Tabs.ANNOUNCEMENTS -> AnnouncementsTab()
+
+                    // All other tabs rendered on top when selected
+                    when (currentTab) {
+                        Tabs.BIBLE -> BibleTab(
+                            modifier = Modifier.fillMaxSize(),
+                            viewModel = bibleViewModel,
+                            scheduleViewModel = scheduleViewModel,
+                            onVerseSelected = onVerseSelected,
+                            onPresenting = presenting
+                        )
+
+                        Tabs.SONGS -> SongsTab(
+                            modifier = Modifier.fillMaxSize(),
+                            viewModel = songsViewModel,
+                            scheduleViewModel = scheduleViewModel,
+                            onSongItemSelected = onSongItemSelected,
+                            onPresenting = presenting,
+                            theme = theme
+                        )
+
+                        Tabs.PICTURES -> PicturesTab(
+                            modifier = Modifier.fillMaxSize(),
+                            viewModel = picturesViewModel,
+                            scheduleViewModel = scheduleViewModel,
+                            selectedPictureItem = selectedScheduleItemId?.let { id ->
+                                scheduleViewModel.scheduleItems.find { it.id == id } as? ScheduleItem.PictureItem
+                            },
+                            presenterManager = presenterManager
+                        )
+
+                        Tabs.PRESENTATION -> PresentationTab(
+                            modifier = Modifier.fillMaxSize(),
+                            viewModel = presentationViewModel,
+                            scheduleViewModel = scheduleViewModel,
+                            presenterManager = presenterManager
+                        )
+
+                        Tabs.MEDIA -> { /* rendered above, always in composition */ }
+
+                        Tabs.ANNOUNCEMENTS -> AnnouncementsTab()
+                    }
                 }
             }
         }

@@ -343,5 +343,28 @@
     <!-- Background Settings Tab -->
     <string name="default_background_color">Әдепкі фон түсі</string>
     <string name="default_background_color_help">Бұл түс Библия немесе Әндер үшін «Әдепкі» фон түрі таңдалған кезде қолданылады</string>
+
+    <!-- Media Tab Strings -->
+    <string name="media_tab_title">Медиа</string>
+    <string name="media_source">Медиа көзі</string>
+    <string name="media_local_file">Жергілікті файл</string>
+    <string name="media_youtube">YouTube</string>
+    <string name="media_vimeo">Vimeo</string>
+    <string name="media_url_hint">YouTube немесе Vimeo URL енгізіңіз...</string>
+    <string name="media_load">Жүктеу</string>
+    <string name="media_select_file">Бейне файлды таңдау</string>
+    <string name="media_no_source">Медиа жүктелмеген</string>
+    <string name="media_select_to_begin">Жергілікті бейне файлды таңдаңыз немесе YouTube / Vimeo URL енгізіңіз</string>
+    <string name="media_now_playing">Ойнатылуда:</string>
+    <string name="media_now_presenting">Қазір экранда көрсетілуде</string>
+    <string name="media_seek_backward">10 сек артқа</string>
+    <string name="media_seek_forward">10 сек алға</string>
+    <string name="media_preview">Алдын ала қарау</string>
+    <string name="media_volume">Дыбыс деңгейі</string>
+    <string name="media_mute">Үнсіз режим</string>
+    <string name="media_unmute">Үнді қосу</string>
+    <string name="media_open_in_browser">Браузерде ашу</string>
+    <string name="media_web_preview_note">Веб-бейне — ойнатуды браузер арқылы басқарыңыз.</string>
+    <string name="media_local_preview_note">Жергілікті бейне — жоғарыдағы басқару элементтерін пайдаланыңыз.</string>
 </resources>
 

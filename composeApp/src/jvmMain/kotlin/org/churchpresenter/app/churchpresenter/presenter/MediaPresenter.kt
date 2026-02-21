@@ -1,0 +1,39 @@
+package org.churchpresenter.app.churchpresenter.presenter
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import org.churchpresenter.app.churchpresenter.composables.VideoPlayer
+import org.churchpresenter.app.churchpresenter.viewmodel.MediaViewModel
+
+@Composable
+fun MediaPresenter(
+    modifier: Modifier = Modifier,
+    viewModel: MediaViewModel,
+    isVisible: Boolean = true
+) {
+    // Pause playback when this presenter is hidden (another mode is active)
+    // so audio does not bleed through other presenter screens.
+    LaunchedEffect(isVisible) {
+        if (!isVisible) {
+            viewModel.pause()
+        }
+    }
+
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .background(Color.Black)
+    ) {
+        if (viewModel.isLoaded && isVisible) {
+            VideoPlayer(
+                viewModel = viewModel,
+                modifier = Modifier.fillMaxSize()
+            )
+        }
+    }
+}

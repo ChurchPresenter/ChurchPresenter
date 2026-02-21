@@ -66,6 +66,17 @@ class ScheduleViewModel {
         _scheduleItems.add(item)
     }
 
+    fun addMedia(mediaUrl: String, mediaTitle: String, mediaType: String) {
+        val id = UUID.randomUUID().toString()
+        val item = ScheduleItem.MediaItem(
+            id = id,
+            mediaUrl = mediaUrl,
+            mediaTitle = mediaTitle,
+            mediaType = mediaType
+        )
+        _scheduleItems.add(item)
+    }
+
     fun updateLabel(id: String, text: String, textColor: String, backgroundColor: String) {
         val index = _scheduleItems.indexOfFirst { it.id == id }
         if (index >= 0 && _scheduleItems[index] is ScheduleItem.LabelItem) {
@@ -125,14 +136,6 @@ class ScheduleViewModel {
 
     fun clearSchedule() {
         _scheduleItems.clear()
-    }
-
-    fun getSongItems(): List<ScheduleItem.SongItem> {
-        return _scheduleItems.filterIsInstance<ScheduleItem.SongItem>()
-    }
-
-    fun getBibleVerseItems(): List<ScheduleItem.BibleVerseItem> {
-        return _scheduleItems.filterIsInstance<ScheduleItem.BibleVerseItem>()
     }
 }
 

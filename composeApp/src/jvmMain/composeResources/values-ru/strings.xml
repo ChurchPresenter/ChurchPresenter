@@ -343,5 +343,28 @@
     <!-- Background Settings Tab -->
     <string name="default_background_color">Цвет фона по умолчанию</string>
     <string name="default_background_color_help">Этот цвет используется, когда для Библии или Песнопений выбран тип фона «По умолчанию»</string>
+
+    <!-- Media Tab Strings -->
+    <string name="media_tab_title">Медиа</string>
+    <string name="media_source">Источник медиа</string>
+    <string name="media_local_file">Локальный файл</string>
+    <string name="media_youtube">YouTube</string>
+    <string name="media_vimeo">Vimeo</string>
+    <string name="media_url_hint">Введите URL YouTube или Vimeo...</string>
+    <string name="media_load">Загрузить</string>
+    <string name="media_select_file">Выбрать видеофайл</string>
+    <string name="media_no_source">Медиа не загружено</string>
+    <string name="media_select_to_begin">Выберите локальный видеофайл или введите URL YouTube / Vimeo</string>
+    <string name="media_now_playing">Воспроизводится:</string>
+    <string name="media_now_presenting">Сейчас показывается на экране</string>
+    <string name="media_seek_backward">Назад на 10 сек</string>
+    <string name="media_seek_forward">Вперёд на 10 сек</string>
+    <string name="media_preview">Предпросмотр</string>
+    <string name="media_volume">Громкость</string>
+    <string name="media_mute">Выключить звук</string>
+    <string name="media_unmute">Включить звук</string>
+    <string name="media_open_in_browser">Открыть в браузере</string>
+    <string name="media_web_preview_note">Веб-видео — управление воспроизведением через браузер.</string>
+    <string name="media_local_preview_note">Локальное видео — используйте элементы управления выше.</string>
 </resources>
 

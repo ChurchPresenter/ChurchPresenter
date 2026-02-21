@@ -343,5 +343,28 @@
     <!-- Background Settings Tab -->
     <string name="default_background_color">Колір фону за замовчуванням</string>
     <string name="default_background_color_help">Цей колір використовується, коли для Біблії або Пісень вибрано тип фону «За замовчуванням»</string>
+
+    <!-- Media Tab Strings -->
+    <string name="media_tab_title">Медіа</string>
+    <string name="media_source">Джерело медіа</string>
+    <string name="media_local_file">Локальний файл</string>
+    <string name="media_youtube">YouTube</string>
+    <string name="media_vimeo">Vimeo</string>
+    <string name="media_url_hint">Введіть URL YouTube або Vimeo...</string>
+    <string name="media_load">Завантажити</string>
+    <string name="media_select_file">Вибрати відеофайл</string>
+    <string name="media_no_source">Медіа не завантажено</string>
+    <string name="media_select_to_begin">Виберіть локальний відеофайл або введіть URL YouTube / Vimeo</string>
+    <string name="media_now_playing">Відтворюється:</string>
+    <string name="media_now_presenting">Зараз показується на екрані</string>
+    <string name="media_seek_backward">Назад на 10 сек</string>
+    <string name="media_seek_forward">Вперед на 10 сек</string>
+    <string name="media_preview">Перегляд</string>
+    <string name="media_volume">Гучність</string>
+    <string name="media_mute">Вимкнути звук</string>
+    <string name="media_unmute">Увімкнути звук</string>
+    <string name="media_open_in_browser">Відкрити у браузері</string>
+    <string name="media_web_preview_note">Веб-відео — керування відтворенням через браузер.</string>
+    <string name="media_local_preview_note">Локальне відео — використовуйте елементи керування вище.</string>
 </resources>
 

@@ -79,4 +79,10 @@ object Constants {
     const val ANIMATION_SLIDE_LEFT = "SLIDE_LEFT"
     const val ANIMATION_SLIDE_RIGHT = "SLIDE_RIGHT"
     const val ANIMATION_NONE = "NONE"
+
+    // Media Types
+    const val MEDIA_TYPE_LOCAL = "local"
+
+    // Seek amount in ms
+    const val MEDIA_SEEK_MS = 10_000L
 }

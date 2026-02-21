@@ -108,6 +108,10 @@ fun PresentationTab(
                             viewModel.nextSlide()
                             true
                         }
+                        Key.Spacebar -> {
+                            viewModel.togglePlayPause()
+                            true
+                        }
                         else -> false
                     }
                 } else {

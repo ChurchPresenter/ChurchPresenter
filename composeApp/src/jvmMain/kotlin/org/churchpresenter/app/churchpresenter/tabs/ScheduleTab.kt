@@ -50,6 +50,7 @@ import org.churchpresenter.app.churchpresenter.models.ScheduleItem
 import org.churchpresenter.app.churchpresenter.models.SelectedVerse
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.viewmodel.BibleViewModel
+import org.churchpresenter.app.churchpresenter.viewmodel.MediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PicturesViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresentationViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
@@ -67,6 +68,7 @@ fun ScheduleTab(
     bibleViewModel: BibleViewModel,
     picturesViewModel: PicturesViewModel? = null,
     presentationViewModel: PresentationViewModel? = null,
+    mediaViewModel: MediaViewModel? = null,
     presenterManager: PresenterManager? = null,
     onSongItemSelected: (LyricSection) -> Unit,
     onVerseSelected: (List<SelectedVerse>) -> Unit,
@@ -190,19 +192,24 @@ fun ScheduleTab(
                                     }
                                 }
                                 is ScheduleItem.PresentationItem -> {
-                                    // Load the presentation and present the first slide
                                     if (presentationViewModel != null && presenterManager != null) {
                                         val file = File(item.filePath)
                                         if (file.exists()) {
-                                            // Load the presentation into the view model
                                             presentationViewModel.loadPresentationByPath(item.filePath)
-
-                                            // TODO: Present the first slide
-                                            // For now, just switch to presentation mode
-                                            // This will be implemented when presentation display is ready
-                                            presenterManager.setPresentingMode(Presenting.NONE)
-                                            presenterManager.setShowPresenterWindow(false)
+                                            presenterManager.setPresentingMode(Presenting.PRESENTATION)
+                                            presenterManager.setShowPresenterWindow(true)
                                         }
+                                    }
+                                }
+                                is ScheduleItem.MediaItem -> {
+                                    if (mediaViewModel != null && presenterManager != null) {
+                                        mediaViewModel.loadMediaFromSchedule(
+                                            url = item.mediaUrl,
+                                            title = item.mediaTitle,
+                                            type = item.mediaType
+                                        )
+                                        presenterManager.setPresentingMode(Presenting.MEDIA)
+                                        presenterManager.setShowPresenterWindow(true)
                                     }
                                 }
                             }
@@ -280,6 +287,7 @@ private fun ScheduleItemRow(
                 is ScheduleItem.LabelItem -> "🏷"
                 is ScheduleItem.PictureItem -> "📷"
                 is ScheduleItem.PresentationItem -> "📊"
+                is ScheduleItem.MediaItem -> "🎬"
             },
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.primary,
@@ -354,6 +362,17 @@ private fun ScheduleItemRow(
                     Text(
                         maxLines = 1,
                         text = "${item.fileType.uppercase()} - ${item.filePath}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = if (isSelected)
+                            MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                        else
+                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                    )
+                }
+                is ScheduleItem.MediaItem -> {
+                    Text(
+                        maxLines = 1,
+                        text = item.mediaType.uppercase() + " - " + item.mediaUrl,
                         style = MaterialTheme.typography.bodySmall,
                         color = if (isSelected)
                             MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)

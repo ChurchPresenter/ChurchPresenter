@@ -343,5 +343,28 @@
     <!-- Background Settings Tab -->
     <string name="default_background_color">Standard-Hintergrundfarbe</string>
     <string name="default_background_color_help">Diese Farbe wird verwendet, wenn der Hintergrundtyp „Standard" für Bibel oder Lieder ausgewählt ist</string>
+
+    <!-- Media Tab Strings -->
+    <string name="media_tab_title">Medien</string>
+    <string name="media_source">Medienquelle</string>
+    <string name="media_local_file">Lokale Datei</string>
+    <string name="media_youtube">YouTube</string>
+    <string name="media_vimeo">Vimeo</string>
+    <string name="media_url_hint">YouTube- oder Vimeo-URL eingeben...</string>
+    <string name="media_load">Laden</string>
+    <string name="media_select_file">Videodatei auswählen</string>
+    <string name="media_no_source">Keine Medien geladen</string>
+    <string name="media_select_to_begin">Wählen Sie eine lokale Videodatei oder geben Sie eine YouTube- / Vimeo-URL ein</string>
+    <string name="media_now_playing">Wird abgespielt:</string>
+    <string name="media_now_presenting">Wird jetzt auf dem Bildschirm präsentiert</string>
+    <string name="media_seek_backward">10 Sek. zurück</string>
+    <string name="media_seek_forward">10 Sek. vor</string>
+    <string name="media_preview">Vorschau</string>
+    <string name="media_volume">Lautstärke</string>
+    <string name="media_mute">Stumm</string>
+    <string name="media_unmute">Ton an</string>
+    <string name="media_open_in_browser">Im Browser öffnen</string>
+    <string name="media_web_preview_note">Web-Video — Wiedergabesteuerung über den Browser.</string>
+    <string name="media_local_preview_note">Lokales Video — Steuerelemente oben verwenden.</string>
 </resources>
 

@@ -8,6 +8,17 @@ plugins {
     alias(libs.plugins.kotlinx.serialization)
 }
 
+// Detect current OS classifier for JavaFX native binaries
+fun currentOsClassifier(): String {
+    val os = System.getProperty("os.name").lowercase()
+    val arch = System.getProperty("os.arch").lowercase()
+    return when {
+        os.contains("mac") -> if (arch.contains("aarch64")) "mac-aarch64" else "mac"
+        os.contains("win") -> "win"
+        else -> "linux"
+    }
+}
+
 kotlin {
     jvm()
 
@@ -38,6 +49,13 @@ kotlin {
             implementation("org.apache.poi:poi:5.2.5")
             implementation("org.apache.poi:poi-ooxml:5.2.5")
             implementation("org.apache.poi:poi-scratchpad:5.2.5")
+            // JavaFX for video playback (platform-native binaries)
+            val jfxClassifier = currentOsClassifier()
+            implementation("org.openjfx:javafx-base:21:$jfxClassifier")
+            implementation("org.openjfx:javafx-graphics:21:$jfxClassifier")
+            implementation("org.openjfx:javafx-media:21:$jfxClassifier")
+            implementation("org.openjfx:javafx-swing:21:$jfxClassifier")
+            implementation("org.openjfx:javafx-controls:21:$jfxClassifier")
         }
     }
 }

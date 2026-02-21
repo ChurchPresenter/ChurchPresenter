@@ -343,5 +343,28 @@
     <!-- Background Settings Tab -->
     <string name="default_background_color">Колер фону па змаўчанні</string>
     <string name="default_background_color_help">Гэты колер выкарыстоўваецца, калі для Бібліі або Песнапенняў абраны тып фону «Па змаўчанні»</string>
+
+    <!-- Media Tab Strings -->
+    <string name="media_tab_title">Медыя</string>
+    <string name="media_source">Крыніца медыя</string>
+    <string name="media_local_file">Лакальны файл</string>
+    <string name="media_youtube">YouTube</string>
+    <string name="media_vimeo">Vimeo</string>
+    <string name="media_url_hint">Увядзіце URL YouTube або Vimeo...</string>
+    <string name="media_load">Загрузіць</string>
+    <string name="media_select_file">Выбраць відэафайл</string>
+    <string name="media_no_source">Медыя не загружана</string>
+    <string name="media_select_to_begin">Выберыце лакальны відэафайл або ўвядзіце URL YouTube / Vimeo</string>
+    <string name="media_now_playing">Прайграецца:</string>
+    <string name="media_now_presenting">Зараз паказваецца на экране</string>
+    <string name="media_seek_backward">Назад на 10 сек</string>
+    <string name="media_seek_forward">Наперад на 10 сек</string>
+    <string name="media_preview">Папярэдні прагляд</string>
+    <string name="media_volume">Гучнасць</string>
+    <string name="media_mute">Выключыць гук</string>
+    <string name="media_unmute">Уключыць гук</string>
+    <string name="media_open_in_browser">Адкрыць у браўзеры</string>
+    <string name="media_web_preview_note">Вэб-відэа — кіраванне прайграваннем праз браўзер.</string>
+    <string name="media_local_preview_note">Лакальнае відэа — выкарыстоўвайце элементы кіравання вышэй.</string>
 </resources>
 

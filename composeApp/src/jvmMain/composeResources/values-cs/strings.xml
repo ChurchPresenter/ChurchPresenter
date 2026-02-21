@@ -429,5 +429,28 @@
     <!-- Background Settings Tab -->
     <string name="default_background_color">Výchozí barva pozadí</string>
     <string name="default_background_color_help">Tato barva se používá, když je pro Bibli nebo Písně vybrán typ pozadí „Výchozí"</string>
+
+    <!-- Media Tab Strings -->
+    <string name="media_tab_title">Média</string>
+    <string name="media_source">Zdroj médií</string>
+    <string name="media_local_file">Místní soubor</string>
+    <string name="media_youtube">YouTube</string>
+    <string name="media_vimeo">Vimeo</string>
+    <string name="media_url_hint">Zadejte URL YouTube nebo Vimeo...</string>
+    <string name="media_load">Načíst</string>
+    <string name="media_select_file">Vybrat videosoubor</string>
+    <string name="media_no_source">Žádná média nenačtena</string>
+    <string name="media_select_to_begin">Vyberte místní videosoubor nebo zadejte URL YouTube / Vimeo</string>
+    <string name="media_now_playing">Nyní přehrávám:</string>
+    <string name="media_now_presenting">Nyní prezentováno na obrazovce</string>
+    <string name="media_seek_backward">Zpět o 10 sek</string>
+    <string name="media_seek_forward">Vpřed o 10 sek</string>
+    <string name="media_preview">Náhled</string>
+    <string name="media_volume">Hlasitost</string>
+    <string name="media_mute">Ztlumit</string>
+    <string name="media_unmute">Zrušit ztlumení</string>
+    <string name="media_open_in_browser">Otevřít v prohlížeči</string>
+    <string name="media_web_preview_note">Webové video — přehrávání ovládáno přes prohlížeč.</string>
+    <string name="media_local_preview_note">Místní video — použijte ovládací prvky výše.</string>
 </resources>
 
