@@ -221,19 +221,12 @@ fun main() {
                                         } else false
                                     }
                             ) {
-                                MediaPresenter(
-                                    isVisible = presentingMode == Presenting.MEDIA,
-                                    modifier = Modifier.fillMaxSize().then(
-                                        if (presentingMode == Presenting.MEDIA) Modifier
-                                        else Modifier.requiredSize(0.dp)
-                                    )
-                                )
                                 when (presentingMode) {
                                     Presenting.BIBLE -> BiblePresenter(selectedVerses = selectedVerses, appSettings = appSettings)
                                     Presenting.LYRICS -> SongPresenter(lyricSection = lyricSection, appSettings = appSettings)
                                     Presenting.PICTURES -> PicturePresenter(imagePath = selectedImagePath, animationType = animationType, transitionDuration = transitionDuration)
                                     Presenting.PRESENTATION -> SlidePresenter(slide = selectedSlide, animationType = animationType, transitionDuration = transitionDuration)
-                                    Presenting.MEDIA -> { /* rendered above */ }
+                                    Presenting.MEDIA -> MediaPresenter(modifier = Modifier.fillMaxSize())
                                     Presenting.NONE -> { /* nothing */ }
                                 }
                             }
