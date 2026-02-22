@@ -1,11 +1,16 @@
 package org.churchpresenter.app.churchpresenter.viewmodel
 
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
+import org.churchpresenter.app.churchpresenter.models.LyricSection
 import org.churchpresenter.app.churchpresenter.models.ScheduleItem
+import org.churchpresenter.app.churchpresenter.models.SelectedVerse
+import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.utils.createFileChooser
+import java.io.File
 import java.util.UUID
 import javax.swing.JFileChooser
 import javax.swing.filechooser.FileNameExtensionFilter
@@ -13,6 +18,9 @@ import javax.swing.filechooser.FileNameExtensionFilter
 class ScheduleViewModel {
     private val _scheduleItems: SnapshotStateList<ScheduleItem> = mutableStateListOf()
     val scheduleItems: List<ScheduleItem> get() = _scheduleItems
+
+    private val _selectedItemId = mutableStateOf<String?>(null)
+    val selectedItemId get() = _selectedItemId.value
 
     private val json = Json { prettyPrint = true; encodeDefaults = true }
     private var currentFilePath: String? = null
@@ -26,7 +34,7 @@ class ScheduleViewModel {
     ) {
         val existing = currentFilePath
         if (existing != null) {
-            val file = java.io.File(existing)
+            val file = File(existing)
             val serialized = json.encodeToString(ListSerializer(ScheduleItem.serializer()), _scheduleItems.toList())
             file.writeText(serialized)
         } else {
@@ -211,6 +219,90 @@ class ScheduleViewModel {
 
     fun clearSchedule() {
         _scheduleItems.clear()
+    }
+
+    fun selectItem(id: String) {
+        _selectedItemId.value = if (_selectedItemId.value == id) null else id
+    }
+
+    fun clearSelection() {
+        _selectedItemId.value = null
+    }
+
+    /**
+     * Presents a schedule item by coordinating all relevant ViewModels.
+     * Triggers the appropriate callbacks for tab switching and presenting mode.
+     */
+    fun presentItem(
+        item: ScheduleItem,
+        songsViewModel: SongsViewModel,
+        bibleViewModel: BibleViewModel,
+        picturesViewModel: PicturesViewModel?,
+        presentationViewModel: PresentationViewModel?,
+        mediaViewModel: MediaViewModel?,
+        presenterManager: PresenterManager?,
+        onSongItemSelected: (LyricSection) -> Unit,
+        onVerseSelected: (List<SelectedVerse>) -> Unit,
+        onPresenting: (Presenting) -> Unit
+    ) {
+        when (item) {
+            is ScheduleItem.SongItem -> {
+                songsViewModel.selectSongByDetails(
+                    songNumber = item.songNumber,
+                    title = item.title,
+                    songbook = item.songbook
+                )
+                songsViewModel.getSelectedLyricSection()?.let { onSongItemSelected(it) }
+                onPresenting(Presenting.LYRICS)
+            }
+            is ScheduleItem.BibleVerseItem -> {
+                bibleViewModel.selectVerseByDetails(
+                    bookName = item.bookName,
+                    chapter = item.chapter,
+                    verseNumber = item.verseNumber
+                )
+                onVerseSelected(bibleViewModel.getSelectedVerses())
+                onPresenting(Presenting.BIBLE)
+            }
+            is ScheduleItem.LabelItem -> {
+                // Labels are not presentable
+            }
+            is ScheduleItem.PictureItem -> {
+                if (picturesViewModel != null && presenterManager != null) {
+                    val folder = File(item.folderPath)
+                    if (folder.exists() && folder.isDirectory) {
+                        picturesViewModel.selectFolder(folder)
+                        val firstImage = picturesViewModel.getCurrentImageFile()
+                        if (firstImage != null) {
+                            presenterManager.setSelectedImagePath(firstImage.absolutePath)
+                            presenterManager.setPresentingMode(Presenting.PICTURES)
+                            presenterManager.setShowPresenterWindow(true)
+                        }
+                    }
+                }
+            }
+            is ScheduleItem.PresentationItem -> {
+                if (presentationViewModel != null && presenterManager != null) {
+                    val file = File(item.filePath)
+                    if (file.exists()) {
+                        presentationViewModel.loadPresentationByPath(item.filePath)
+                        presenterManager.setPresentingMode(Presenting.PRESENTATION)
+                        presenterManager.setShowPresenterWindow(true)
+                    }
+                }
+            }
+            is ScheduleItem.MediaItem -> {
+                if (mediaViewModel != null && presenterManager != null) {
+                    mediaViewModel.loadMediaFromSchedule(
+                        url = item.mediaUrl,
+                        title = item.mediaTitle,
+                        type = item.mediaType
+                    )
+                    presenterManager.setPresentingMode(Presenting.MEDIA)
+                    presenterManager.setShowPresenterWindow(true)
+                }
+            }
+        }
     }
 }
 

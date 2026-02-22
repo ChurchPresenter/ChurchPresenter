@@ -23,10 +23,6 @@ import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -49,6 +45,7 @@ import org.churchpresenter.app.churchpresenter.models.LyricSection
 import org.churchpresenter.app.churchpresenter.models.ScheduleItem
 import org.churchpresenter.app.churchpresenter.models.SelectedVerse
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.app.churchpresenter.utils.Utils
 import org.churchpresenter.app.churchpresenter.viewmodel.BibleViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.MediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PicturesViewModel
@@ -58,7 +55,6 @@ import org.churchpresenter.app.churchpresenter.viewmodel.ScheduleViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.SongsViewModel
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import java.io.File
 
 @Composable
 fun ScheduleTab(
@@ -76,10 +72,8 @@ fun ScheduleTab(
     onItemClick: (ScheduleItem) -> Unit = {},
     onEditLabel: (ScheduleItem.LabelItem) -> Unit = {}
 ) {
-    var selectedItemId by remember { mutableStateOf<String?>(null) }
-
-    // Get schedule items
     val scheduleItems = scheduleViewModel.scheduleItems
+    val selectedItemId = scheduleViewModel.selectedItemId
 
     Column(modifier = modifier.fillMaxSize().padding(8.dp)) {
         // Schedule list header
@@ -125,99 +119,31 @@ fun ScheduleTab(
                         item = item,
                         isSelected = item.id == selectedItemId,
                         onSelect = {
-                            selectedItemId = if (selectedItemId == item.id) null else item.id
+                            scheduleViewModel.selectItem(item.id)
                             onItemClick(item)
                         },
-                        onClick = { onItemClick(item) },
-                        onMoveUp = {
-                            scheduleViewModel.moveItemUp(item.id)
-                        },
-                        onMoveDown = {
-                            scheduleViewModel.moveItemDown(item.id)
-                        },
+                        onMoveUp = { scheduleViewModel.moveItemUp(item.id) },
+                        onMoveDown = { scheduleViewModel.moveItemDown(item.id) },
                         onRemove = {
                             scheduleViewModel.removeItem(item.id)
-                            if (selectedItemId == item.id) {
-                                selectedItemId = null
-                            }
+                            if (selectedItemId == item.id) scheduleViewModel.clearSelection()
                         },
                         onPresent = {
-                            when (item) {
-                                is ScheduleItem.SongItem -> {
-                                    // Select the song in ViewModel
-                                    songsViewModel.selectSongByDetails(
-                                        songNumber = item.songNumber,
-                                        title = item.title,
-                                        songbook = item.songbook
-                                    )
-                                    // Get the selected song section
-                                    songsViewModel.getSelectedLyricSection()?.let { section ->
-                                        onSongItemSelected(section)
-                                    }
-                                    // Present it
-                                    onPresenting(Presenting.LYRICS)
-                                }
-                                is ScheduleItem.BibleVerseItem -> {
-                                    // Select the verse in ViewModel
-                                    bibleViewModel.selectVerseByDetails(
-                                        bookName = item.bookName,
-                                        chapter = item.chapter,
-                                        verseNumber = item.verseNumber
-                                    )
-                                    // Get the selected verses
-                                    val verses = bibleViewModel.getSelectedVerses()
-                                    onVerseSelected(verses)
-                                    // Present it
-                                    onPresenting(Presenting.BIBLE)
-                                }
-                                is ScheduleItem.LabelItem -> {
-                                    // Labels are not presentable, do nothing
-                                }
-                                is ScheduleItem.PictureItem -> {
-                                    // Load the folder and present the first image
-                                    if (picturesViewModel != null && presenterManager != null) {
-                                        val folder = File(item.folderPath)
-                                        if (folder.exists() && folder.isDirectory) {
-                                            // Load the folder into the pictures view model
-                                            picturesViewModel.selectFolder(folder)
-
-                                            // Get the first image
-                                            val firstImage = picturesViewModel.getCurrentImageFile()
-                                            if (firstImage != null) {
-                                                presenterManager.setSelectedImagePath(firstImage.absolutePath)
-                                                presenterManager.setPresentingMode(Presenting.PICTURES)
-                                                presenterManager.setShowPresenterWindow(true)
-                                            }
-                                        }
-                                    }
-                                }
-                                is ScheduleItem.PresentationItem -> {
-                                    if (presentationViewModel != null && presenterManager != null) {
-                                        val file = File(item.filePath)
-                                        if (file.exists()) {
-                                            presentationViewModel.loadPresentationByPath(item.filePath)
-                                            presenterManager.setPresentingMode(Presenting.PRESENTATION)
-                                            presenterManager.setShowPresenterWindow(true)
-                                        }
-                                    }
-                                }
-                                is ScheduleItem.MediaItem -> {
-                                    if (mediaViewModel != null && presenterManager != null) {
-                                        mediaViewModel.loadMediaFromSchedule(
-                                            url = item.mediaUrl,
-                                            title = item.mediaTitle,
-                                            type = item.mediaType
-                                        )
-                                        presenterManager.setPresentingMode(Presenting.MEDIA)
-                                        presenterManager.setShowPresenterWindow(true)
-                                    }
-                                }
-                            }
+                            scheduleViewModel.presentItem(
+                                item = item,
+                                songsViewModel = songsViewModel,
+                                bibleViewModel = bibleViewModel,
+                                picturesViewModel = picturesViewModel,
+                                presentationViewModel = presentationViewModel,
+                                mediaViewModel = mediaViewModel,
+                                presenterManager = presenterManager,
+                                onSongItemSelected = onSongItemSelected,
+                                onVerseSelected = onVerseSelected,
+                                onPresenting = onPresenting
+                            )
                         },
                         onEditLabel = {
-                            if (item is ScheduleItem.LabelItem) {
-                                onEditLabel(item)
-                            }
+                            if (item is ScheduleItem.LabelItem) onEditLabel(item)
                         }
                     )
 
@@ -243,21 +169,17 @@ private fun ScheduleItemRow(
     item: ScheduleItem,
     isSelected: Boolean,
     onSelect: () -> Unit,
-    onClick: () -> Unit,
     onMoveUp: () -> Unit,
     onMoveDown: () -> Unit,
     onRemove: () -> Unit,
     onPresent: () -> Unit,
     onEditLabel: () -> Unit = {}
 ) {
-    // For labels, use the label's background color, otherwise use default row background
     val rowBackgroundColor = if (item is ScheduleItem.LabelItem) {
-        org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor(item.backgroundColor)
+        Utils.parseHexColor(item.backgroundColor)
     } else {
-        if (isSelected)
-            MaterialTheme.colorScheme.surfaceVariant
-        else
-            MaterialTheme.colorScheme.surface
+        if (isSelected) MaterialTheme.colorScheme.surfaceVariant
+        else MaterialTheme.colorScheme.surface
     }
 
     Row(
@@ -265,15 +187,8 @@ private fun ScheduleItemRow(
             .fillMaxWidth()
             .background(rowBackgroundColor)
             .then(
-                // Only make non-label items clickable
-                if (item !is ScheduleItem.LabelItem) {
-                    Modifier.clickable {
-                        onSelect()
-                        onClick()
-                    }
-                } else {
-                    Modifier
-                }
+                if (item !is ScheduleItem.LabelItem) Modifier.clickable { onSelect() }
+                else Modifier
             )
             .padding(12.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -303,7 +218,7 @@ private fun ScheduleItemRow(
                         text = item.text,
                         style = MaterialTheme.typography.bodyLarge,
                         fontWeight = FontWeight.Medium,
-                        color = org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor(item.textColor),
+                        color = Utils.parseHexColor(item.textColor),
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
@@ -313,73 +228,49 @@ private fun ScheduleItemRow(
                         text = item.displayText,
                         style = MaterialTheme.typography.bodyLarge,
                         fontWeight = FontWeight.Medium,
-                        color = if (isSelected)
-                            MaterialTheme.colorScheme.onSurfaceVariant
-                        else
-                            MaterialTheme.colorScheme.onSurface
+                        color = if (isSelected) MaterialTheme.colorScheme.onSurfaceVariant
+                                else MaterialTheme.colorScheme.onSurface
                     )
                 }
             }
 
             when (item) {
-                is ScheduleItem.SongItem -> {
-                    Text(
-                        maxLines = 1,
-                        text = item.songbook,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = if (isSelected)
-                            MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-                        else
-                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                    )
-                }
-                is ScheduleItem.BibleVerseItem -> {
-                    Text(
-                        maxLines = 1,
-                        text = item.verseText.take(100) + if (item.verseText.length > 100) "..." else "",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = if (isSelected)
-                            MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-                        else
-                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                    )
-                }
-                is ScheduleItem.LabelItem -> {
-                    // Labels don't have secondary text
-                }
-                is ScheduleItem.PictureItem -> {
-                    Text(
-                        maxLines = 1,
-                        text = item.folderPath,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = if (isSelected)
-                            MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-                        else
-                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                    )
-                }
-                is ScheduleItem.PresentationItem -> {
-                    Text(
-                        maxLines = 1,
-                        text = "${item.fileType.uppercase()} - ${item.filePath}",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = if (isSelected)
-                            MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-                        else
-                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                    )
-                }
-                is ScheduleItem.MediaItem -> {
-                    Text(
-                        maxLines = 1,
-                        text = item.mediaType.uppercase() + " - " + item.mediaUrl,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = if (isSelected)
-                            MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-                        else
-                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                    )
-                }
+                is ScheduleItem.SongItem -> Text(
+                    maxLines = 1,
+                    text = item.songbook,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = if (isSelected) MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                            else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                )
+                is ScheduleItem.BibleVerseItem -> Text(
+                    maxLines = 1,
+                    text = item.verseText.take(100) + if (item.verseText.length > 100) "..." else "",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = if (isSelected) MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                            else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                )
+                is ScheduleItem.PictureItem -> Text(
+                    maxLines = 1,
+                    text = item.folderPath,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = if (isSelected) MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                            else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                )
+                is ScheduleItem.PresentationItem -> Text(
+                    maxLines = 1,
+                    text = "${item.fileType.uppercase()} - ${item.filePath}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = if (isSelected) MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                            else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                )
+                is ScheduleItem.MediaItem -> Text(
+                    maxLines = 1,
+                    text = "${item.mediaType.uppercase()} - ${item.mediaUrl}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = if (isSelected) MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                            else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                )
+                is ScheduleItem.LabelItem -> { /* no secondary text */ }
             }
         }
 
@@ -446,4 +337,3 @@ private fun ScheduleItemRow(
         }
     }
 }
-

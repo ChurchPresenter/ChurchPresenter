@@ -138,7 +138,7 @@ class SongsViewModel(
         _selectedSectionIndex.value = -1
     }
 
-    fun selectSongByDetails(songNumber: Int, title: String, songbook: String): Boolean {
+    fun selectSongByDetails(songNumber: Int, title: String, @Suppress("UNUSED_PARAMETER") songbook: String): Boolean {
         // First, check if we need to update the songbook filter
         val songData = _songsData.value.getSongs().find {
             it.number == songNumber.toString() && it.title.equals(title, ignoreCase = true)
@@ -295,7 +295,6 @@ class SongsViewModel(
     }
 
     fun navigatePreviousSection(): Boolean {
-        val sections = getLyricSections()
         if (_selectedSectionIndex.value > 0) {
             _selectedSectionIndex.value--
             return true
@@ -400,7 +399,7 @@ class SongsViewModel(
             }
 
             return false
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             return false
         }
     }
