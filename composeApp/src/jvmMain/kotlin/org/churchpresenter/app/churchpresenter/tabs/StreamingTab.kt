@@ -49,7 +49,6 @@ import churchpresenter.composeapp.generated.resources.play
 import churchpresenter.composeapp.generated.resources.replace
 import churchpresenter.composeapp.generated.resources.save_string
 import churchpresenter.composeapp.generated.resources.search
-import io.github.alexzhirkevich.compottie.Compottie
 import io.github.alexzhirkevich.compottie.LottieCompositionSpec
 import io.github.alexzhirkevich.compottie.animateLottieCompositionAsState
 import io.github.alexzhirkevich.compottie.rememberLottieComposition
@@ -77,12 +76,14 @@ fun StreamingTab(
         else File(folder)
             .takeIf { it.exists() && it.isDirectory }
             ?.listFiles { f -> f.extension.lowercase() == "json" }
-            ?.sortedBy { it.name }
+            ?.sortedBy { it.nameWithoutExtension.lowercase() }
             ?: emptyList()
     }
 
     var selectedFile by remember(jsonFiles) { mutableStateOf(jsonFiles.firstOrNull()) }
     var isPlaying by remember { mutableStateOf(false) }
+    var frozenProgress by remember { mutableStateOf(0f) }
+    var isFrozen by remember { mutableStateOf(false) }
 
     // Dynamic list of search/replace pairs — starts with one empty row
     var pairs by remember { mutableStateOf(listOf(SearchReplacePairState())) }
@@ -112,15 +113,26 @@ fun StreamingTab(
     val progress by animateLottieCompositionAsState(
         composition = composition,
         isPlaying = isPlaying,
-        iterations = Compottie.IterateForever
+        iterations = 1
     )
 
-    // Stop when animation ends (if not looping — handled by iterations above)
+    // When animation reaches the end, stop playing and freeze on last frame
     LaunchedEffect(progress) {
         if (progress >= 1f && isPlaying) {
             isPlaying = false
+            frozenProgress = 1f
+            isFrozen = true
         }
     }
+
+    // Reset frozen state when composition changes (new file / new replacements)
+    LaunchedEffect(composition) {
+        frozenProgress = 0f
+        isFrozen = false
+        isPlaying = false
+    }
+
+    val displayProgress = if (isFrozen) frozenProgress else progress
 
     val searchLabel  = stringResource(Res.string.search)
     val replaceLabel = stringResource(Res.string.replace)
@@ -161,7 +173,13 @@ fun StreamingTab(
                 )
             }
             ImageIconButton(
-                onClick = { if (composition != null) isPlaying = !isPlaying },
+                onClick = {
+                    if (composition != null) {
+                        frozenProgress = 0f
+                        isFrozen = false
+                        isPlaying = true
+                    }
+                },
                 size = 36.dp,
                 modifier = Modifier.background(
                     color = if (composition != null) MaterialTheme.colorScheme.primary
@@ -236,24 +254,29 @@ fun StreamingTab(
 
         HorizontalDivider()
 
-        // Preview — black 16:9
+        // Preview — black 16:9 at 50% width
         Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .aspectRatio(16f / 9f)
-                .background(Color.Black, RoundedCornerShape(8.dp))
-                .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(8.dp)),
-            contentAlignment = Alignment.Center
+            modifier = Modifier.fillMaxWidth(),
+            contentAlignment = Alignment.CenterStart
         ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(0.5f)
+                    .aspectRatio(16f / 9f)
+                    .background(Color.Black, RoundedCornerShape(8.dp))
+                    .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(8.dp)),
+                contentAlignment = Alignment.Center
+            ) {
             if (composition != null) {
                 Image(
-                    painter = rememberLottiePainter(composition = composition, progress = { progress }),
+                    painter = rememberLottiePainter(composition = composition, progress = { displayProgress }),
                     contentDescription = null,
                     contentScale = ContentScale.Fit,
                     modifier = Modifier.fillMaxSize()
                 )
             } else {
-                Text("📽️", style = MaterialTheme.typography.displayLarge, color = Color.White.copy(alpha = 0.3f))
+                    Text("📽️", style = MaterialTheme.typography.displayLarge, color = Color.White.copy(alpha = 0.3f))
+                }
             }
         }
     }
@@ -345,92 +368,90 @@ private fun SaveableTextField(
     val noSavedLabel = stringResource(Res.string.no_saved_strings)
     val deleteLabel  = stringResource(Res.string.delete_saved_string)
 
-    Row(
-        modifier = modifier,
-        horizontalArrangement = Arrangement.spacedBy(2.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        // Dropdown toggle — left of field
-        Box {
-            ImageIconButton(
-                onClick = { dropdownExpanded = true },
-                enabled = savedValues.isNotEmpty(),
-                size = 40.dp
-            ) {
-                Icon(
-                    painter = painterResource(Res.drawable.ic_arrow_down),
-                    contentDescription = null,
-                    modifier = Modifier.size(32.dp),
-                    tint = if (savedValues.isNotEmpty()) MaterialTheme.colorScheme.onSurface
-                           else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f)
-                )
-            }
-
-            DropdownMenu(
-                expanded = dropdownExpanded,
-                onDismissRequest = { dropdownExpanded = false },
-                containerColor = MaterialTheme.colorScheme.surface
-            ) {
-                if (savedValues.isEmpty()) {
-                    DropdownMenuItem(
-                        text = { Text(noSavedLabel, style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)) },
-                        onClick = { dropdownExpanded = false }
-                    )
-                } else {
-                    savedValues.forEach { saved ->
-                        DropdownMenuItem(
-                            text = {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(6.dp)
-                                ) {
-                                    Text(saved, style = MaterialTheme.typography.bodySmall, modifier = Modifier.weight(1f))
-                                    ImageIconButton(
-                                        onClick = { onDelete(saved); dropdownExpanded = false },
-                                        size = 32.dp
-                                    ) {
-                                        Icon(
-                                            painter = painterResource(Res.drawable.ic_close),
-                                            contentDescription = deleteLabel,
-                                            modifier = Modifier.size(10.dp),
-                                            tint = MaterialTheme.colorScheme.error
-                                        )
-                                    }
-                                }
-                            },
-                            onClick = { onValueChange(saved); dropdownExpanded = false }
-                        )
-                    }
-                }
-            }
-        }
-
-        // Text field
+    Box(modifier = modifier) {
         OutlinedTextField(
             value = value,
             onValueChange = onValueChange,
             label = { Text(label, style = MaterialTheme.typography.labelSmall) },
             singleLine = true,
             textStyle = MaterialTheme.typography.bodySmall,
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.fillMaxWidth(),
+            leadingIcon = {
+                ImageIconButton(
+                    onClick = { dropdownExpanded = true },
+                    enabled = savedValues.isNotEmpty(),
+                    size = 36.dp
+                ) {
+                    Icon(
+                        painter = painterResource(Res.drawable.ic_arrow_down),
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp),
+                        tint = if (savedValues.isNotEmpty()) MaterialTheme.colorScheme.onSurface
+                               else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f)
+                    )
+                }
+            },
+            trailingIcon = {
+                ImageIconButton(
+                    onClick = { onSave(value) },
+                    enabled = value.isNotBlank() && !savedValues.contains(value),
+                    size = 36.dp
+                ) {
+                    Icon(
+                        painter = painterResource(Res.drawable.ic_save),
+                        contentDescription = saveLabel,
+                        modifier = Modifier.size(18.dp),
+                        tint = if (value.isNotBlank() && !savedValues.contains(value))
+                            MaterialTheme.colorScheme.primary
+                        else
+                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f)
+                    )
+                }
+            }
         )
 
-        // Save icon
-        ImageIconButton(
-            onClick = { onSave(value) },
-            enabled = value.isNotBlank() && !savedValues.contains(value),
-            size = 40.dp
+        DropdownMenu(
+            expanded = dropdownExpanded,
+            onDismissRequest = { dropdownExpanded = false },
+            containerColor = MaterialTheme.colorScheme.surface
         ) {
-            Icon(
-                painter = painterResource(Res.drawable.ic_save),
-                contentDescription = saveLabel,
-                modifier = Modifier.size(32.dp),
-                tint = if (value.isNotBlank() && !savedValues.contains(value))
-                    MaterialTheme.colorScheme.primary
-                else
-                    MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f)
-            )
+            if (savedValues.isEmpty()) {
+                DropdownMenuItem(
+                    text = {
+                        Text(
+                            noSavedLabel,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                        )
+                    },
+                    onClick = { dropdownExpanded = false }
+                )
+            } else {
+                savedValues.sortedBy { it.lowercase() }.forEach { saved ->
+                    DropdownMenuItem(
+                        text = {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                Text(saved, style = MaterialTheme.typography.bodySmall, modifier = Modifier.weight(1f))
+                                ImageIconButton(
+                                    onClick = { onDelete(saved); dropdownExpanded = false },
+                                    size = 18.dp
+                                ) {
+                                    Icon(
+                                        painter = painterResource(Res.drawable.ic_close),
+                                        contentDescription = deleteLabel,
+                                        modifier = Modifier.size(10.dp),
+                                        tint = MaterialTheme.colorScheme.error
+                                    )
+                                }
+                            }
+                        },
+                        onClick = { onValueChange(saved); dropdownExpanded = false }
+                    )
+                }
+            }
         }
     }
 }
