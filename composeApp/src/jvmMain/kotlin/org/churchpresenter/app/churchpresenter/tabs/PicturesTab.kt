@@ -72,27 +72,11 @@ fun PicturesTab(
     appSettings: AppSettings? = null,
     onAddToSchedule: ((folderPath: String, folderName: String, imageCount: Int) -> Unit)? = null,
     selectedPictureItem: ScheduleItem.PictureItem? = null,
-    presenterManager: PresenterManager? = null,
-    onSelectFolderRequest: ((folderPath: String) -> Unit) -> Unit = {},
-    onPresentPicturesRequest: ((folderPath: String) -> Unit) -> Unit = {}
+    presenterManager: PresenterManager? = null
 ) {
     val viewModel = remember { PicturesViewModel(appSettings) }
     val folderDialogTitle = stringResource(Res.string.select_image_folder_dialog)
 
-    // Expose actions to parent — no ViewModel reference leaves this composable
-    LaunchedEffect(Unit) {
-        onSelectFolderRequest { folderPath ->
-            val folder = File(folderPath)
-            if (folder.exists() && folder.isDirectory) viewModel.selectFolder(folder)
-        }
-        onPresentPicturesRequest { folderPath ->
-            val folder = File(folderPath)
-            if (folder.exists() && folder.isDirectory) {
-                viewModel.selectFolder(folder)
-                presenterManager?.let { viewModel.goLive(it) }
-            }
-        }
-    }
 
     // Auto-scroll effect
     LaunchedEffect(viewModel.isPlaying, viewModel.selectedImageIndex, viewModel.autoScrollInterval) {

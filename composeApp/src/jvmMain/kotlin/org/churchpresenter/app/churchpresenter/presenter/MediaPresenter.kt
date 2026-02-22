@@ -8,14 +8,15 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import org.churchpresenter.app.churchpresenter.composables.VideoPlayer
-import org.churchpresenter.app.churchpresenter.viewmodel.MediaViewModel
+import org.churchpresenter.app.churchpresenter.viewmodel.LocalMediaViewModel
 
 @Composable
 fun MediaPresenter(
     modifier: Modifier = Modifier,
-    viewModel: MediaViewModel,
     isVisible: Boolean = true
 ) {
+    val viewModel = LocalMediaViewModel.current ?: return
+
     // Pause playback when this presenter is hidden (another mode is active)
     // so audio does not bleed through other presenter screens.
     LaunchedEffect(isVisible) {

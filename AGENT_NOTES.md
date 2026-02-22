@@ -29,24 +29,32 @@ This document tracks coding standards, common mistakes, and debugging notes for 
   class PicturesViewModel(scheduleViewModel: ScheduleViewModel)
   fun ScheduleTab(songsViewModel: SongsViewModel, ...)
   ```
+- ❌ **NEVER** pass a ViewModel OUT of the class it is defined in via callbacks, return values, or any other mechanism:
+  ```kotlin
+  // WRONG — ViewModel must not leave the composable that owns it
+  onViewModelReady: (SongsViewModel) -> Unit   // exposing the VM itself
+  fun getViewModel(): SongsViewModel            // returning the VM
+  var externalRef = songsViewModel              // storing reference outside
+  ```
 - ✅ **ViewModels must ONLY be created and used inside the class/composable they manage**:
   ```kotlin
-  // CORRECT — SongsTab owns its own ViewModel
+  // CORRECT — SongsTab owns its own ViewModel, nothing leaves
   @Composable
   fun SongsTab(...) {
       val viewModel = remember { SongsViewModel(appSettings) }
   }
   ```
-- ✅ **Pass data OUT via callbacks, lambdas, or coroutine Flows — never the ViewModel itself**:
+- ✅ **Pass data OUT via typed callbacks or state parameters — never the ViewModel itself**:
   ```kotlin
-  // CORRECT — expose data via callback
-  fun SongsTab(onViewModelReady: (SongsViewModel) -> Unit = {})
-  // CORRECT — expose data via Flow/StateFlow
-  val currentSong: StateFlow<Song?> = _currentSong.asStateFlow()
-  // CORRECT — use lambda to pass actions up
+  // CORRECT — expose actions via typed callbacks
   fun SongsTab(onAddToSchedule: (songNumber: Int, title: String, songbook: String) -> Unit)
+  // CORRECT — receive selected item as state, react with LaunchedEffect
+  fun SongsTab(selectedSongItem: ScheduleItem.SongItem? = null)
+  // CORRECT — expose data via Flow/StateFlow on the ViewModel (consumed internally)
+  val currentSong: StateFlow<Song?> = _currentSong.asStateFlow()
   ```
-- **Reason**: ViewModels passed around create tight coupling between unrelated components, make testing impossible, and violate single-responsibility. Each composable/class should only know about its own ViewModel.
+- **The only acceptable exception**: a technical rendering bridge like `MediaPresenter`/`VideoPlayer` where the JFX/Swing panel lifecycle is tightly coupled to the ViewModel. Even then, document it explicitly.
+- **Reason**: ViewModels passed around create tight coupling between unrelated components, make testing impossible, cause memory leaks, and violate single-responsibility. Each composable/class should only know about its own ViewModel.
 
 ### 7. Fully-Qualified Type Names — **NEVER DO THIS**
 - ❌ **NEVER EVER** use fully-qualified type names when the type can be imported:

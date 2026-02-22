@@ -63,6 +63,7 @@ import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
 import org.churchpresenter.app.churchpresenter.composables.SearchTextField
 import org.churchpresenter.app.churchpresenter.composables.SelectionListWithIndex
 import org.churchpresenter.app.churchpresenter.data.AppSettings
+import org.churchpresenter.app.churchpresenter.models.ScheduleItem
 import org.churchpresenter.app.churchpresenter.models.SelectedVerse
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.viewmodel.BibleViewModel
@@ -73,25 +74,17 @@ fun BibleTab(
     modifier: Modifier = Modifier,
     appSettings: AppSettings,
     onAddToSchedule: ((bookName: String, chapter: Int, verseNumber: Int, verseText: String) -> Unit)? = null,
+    selectedVerseItem: ScheduleItem.BibleVerseItem? = null,
     onVerseSelected: (List<SelectedVerse>) -> Unit = {},
-    onPresenting: (Presenting) -> Unit = { Presenting.NONE },
-    onAddToScheduleRegistration: (() -> Unit) -> Unit = {},
-    onSelectVerseRequest: ((bookName: String, chapter: Int, verseNumber: Int) -> Unit) -> Unit = {}
+    onPresenting: (Presenting) -> Unit = { Presenting.NONE }
 ) {
     val viewModel = remember { BibleViewModel(appSettings) }
 
-    LaunchedEffect(Unit) {
-        onAddToScheduleRegistration {
-            viewModel.addCurrentVerseToSchedule { bookName, chapter, verseNumber, verseText ->
-                onAddToSchedule?.invoke(bookName, chapter, verseNumber, verseText)
-            }
-        }
-    }
 
-    // Register the select-verse action with the parent once
-    LaunchedEffect(Unit) {
-        onSelectVerseRequest { bookName, chapter, verseNumber ->
-            viewModel.selectVerseByDetails(bookName, chapter, verseNumber)
+    // React to schedule item selection — fires whenever selectedVerseItem changes
+    LaunchedEffect(selectedVerseItem) {
+        selectedVerseItem?.let {
+            viewModel.selectVerseByDetails(it.bookName, it.chapter, it.verseNumber)
         }
     }
 

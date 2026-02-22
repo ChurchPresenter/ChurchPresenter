@@ -23,12 +23,17 @@ import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.clear_schedule
+import churchpresenter.composeapp.generated.resources.file_chooser_open_schedule
+import churchpresenter.composeapp.generated.resources.file_chooser_save_schedule
+import churchpresenter.composeapp.generated.resources.file_filter_schedule
 import churchpresenter.composeapp.generated.resources.ic_arrow_down
 import churchpresenter.composeapp.generated.resources.ic_arrow_up
 import churchpresenter.composeapp.generated.resources.ic_close
@@ -48,10 +53,33 @@ import org.churchpresenter.app.churchpresenter.viewmodel.ScheduleViewModel
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
+/**
+ * Actions exposed to the parent composable so toolbar/menu can drive the schedule
+ * without holding a reference to [ScheduleViewModel].
+ */
+data class ScheduleTabActions(
+    val newSchedule: () -> Unit = {},
+    val openSchedule: () -> Unit = {},
+    val saveSchedule: () -> Unit = {},
+    val saveScheduleAs: () -> Unit = {},
+    val removeSelected: () -> Unit = {},
+    val clearSchedule: () -> Unit = {},
+    val moveSelectedToTop: () -> Unit = {},
+    val moveSelectedUp: () -> Unit = {},
+    val moveSelectedDown: () -> Unit = {},
+    val moveSelectedToBottom: () -> Unit = {},
+    val addLabel: (text: String, textColor: String, backgroundColor: String) -> Unit = { _, _, _ -> },
+    val updateLabel: (id: String, text: String, textColor: String, backgroundColor: String) -> Unit = { _, _, _, _ -> },
+    val addBibleVerse: (bookName: String, chapter: Int, verseNumber: Int, verseText: String) -> Unit = { _, _, _, _ -> },
+    val addSong: (songNumber: Int, title: String, songbook: String) -> Unit = { _, _, _ -> },
+    val addPicture: (folderPath: String, folderName: String, imageCount: Int) -> Unit = { _, _, _ -> },
+    val addPresentation: (filePath: String, fileName: String, slideCount: Int, fileType: String) -> Unit = { _, _, _, _ -> },
+    val addMedia: (mediaUrl: String, mediaTitle: String, mediaType: String) -> Unit = { _, _, _ -> }
+)
+
 @Composable
 fun ScheduleTab(
     modifier: Modifier = Modifier,
-    scheduleViewModel: ScheduleViewModel,
     onPresenting: (Presenting) -> Unit = { Presenting.NONE },
     onItemClick: (ScheduleItem) -> Unit = {},
     onEditLabel: (ScheduleItem.LabelItem) -> Unit = {},
@@ -59,10 +87,50 @@ fun ScheduleTab(
     onPresentBible: ((ScheduleItem.BibleVerseItem) -> Unit)? = null,
     onPresentPresentation: ((ScheduleItem.PresentationItem) -> Unit)? = null,
     onPresentPictures: ((ScheduleItem.PictureItem) -> Unit)? = null,
-    onPresentMedia: ((ScheduleItem.MediaItem) -> Unit)? = null
+    onPresentMedia: ((ScheduleItem.MediaItem) -> Unit)? = null,
+    // Called once so MainDesktop can wire toolbar/menu buttons without holding the VM
+    onActionsReady: (ScheduleTabActions) -> Unit = {},
+    // Called whenever the selected item id changes (null = deselected)
+    onSelectedItemChanged: (String?) -> Unit = {}
 ) {
-    val scheduleItems = scheduleViewModel.scheduleItems
-    val selectedItemId = scheduleViewModel.selectedItemId
+    val viewModel = remember { ScheduleViewModel() }
+
+    val strSaveScheduleAs = stringResource(Res.string.file_chooser_save_schedule)
+    val strOpenSchedule   = stringResource(Res.string.file_chooser_open_schedule)
+    val strFileFilter     = stringResource(Res.string.file_filter_schedule)
+
+    // Register actions with parent once string resources are available
+    LaunchedEffect(strSaveScheduleAs, strOpenSchedule, strFileFilter) {
+        onActionsReady(
+            ScheduleTabActions(
+                newSchedule      = { viewModel.newSchedule() },
+                openSchedule     = { viewModel.loadSchedule(strOpenSchedule, strFileFilter) },
+                saveSchedule     = { viewModel.saveSchedule(strSaveScheduleAs, strFileFilter) },
+                saveScheduleAs   = { viewModel.saveScheduleAs(strSaveScheduleAs, strFileFilter) },
+                removeSelected   = { viewModel.selectedItemId?.let { viewModel.removeItem(it) } },
+                clearSchedule    = { viewModel.clearSchedule() },
+                moveSelectedToTop    = { viewModel.selectedItemId?.let { viewModel.moveItemToTop(it) } },
+                moveSelectedUp       = { viewModel.selectedItemId?.let { viewModel.moveItemUp(it) } },
+                moveSelectedDown     = { viewModel.selectedItemId?.let { viewModel.moveItemDown(it) } },
+                moveSelectedToBottom = { viewModel.selectedItemId?.let { viewModel.moveItemToBottom(it) } },
+                addLabel    = { text, textColor, bg -> viewModel.addLabel(text, textColor, bg) },
+                updateLabel = { id, text, textColor, bg -> viewModel.updateLabel(id, text, textColor, bg) },
+                addBibleVerse    = { bookName, chapter, verseNumber, verseText -> viewModel.addBibleVerse(bookName, chapter, verseNumber, verseText) },
+                addSong          = { songNumber, title, songbook -> viewModel.addSong(songNumber, title, songbook) },
+                addPicture       = { folderPath, folderName, imageCount -> viewModel.addPicture(folderPath, folderName, imageCount) },
+                addPresentation  = { filePath, fileName, slideCount, fileType -> viewModel.addPresentation(filePath, fileName, slideCount, fileType) },
+                addMedia         = { mediaUrl, mediaTitle, mediaType -> viewModel.addMedia(mediaUrl, mediaTitle, mediaType) }
+            )
+        )
+    }
+
+    // Notify parent when selection changes
+    LaunchedEffect(viewModel.selectedItemId) {
+        onSelectedItemChanged(viewModel.selectedItemId)
+    }
+
+    val scheduleItems = viewModel.scheduleItems
+    val selectedItemId = viewModel.selectedItemId
 
     Column(modifier = modifier.fillMaxSize().padding(8.dp)) {
         // Schedule list header
@@ -79,7 +147,7 @@ fun ScheduleTab(
             )
 
             Button(
-                onClick = { scheduleViewModel.clearSchedule() },
+                onClick = { viewModel.clearSchedule() },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.secondary
                 )
@@ -108,17 +176,17 @@ fun ScheduleTab(
                         item = item,
                         isSelected = item.id == selectedItemId,
                         onSelect = {
-                            scheduleViewModel.selectItem(item.id)
+                            viewModel.selectItem(item.id)
                             onItemClick(item)
                         },
-                        onMoveUp = { scheduleViewModel.moveItemUp(item.id) },
-                        onMoveDown = { scheduleViewModel.moveItemDown(item.id) },
+                        onMoveUp   = { viewModel.moveItemUp(item.id) },
+                        onMoveDown = { viewModel.moveItemDown(item.id) },
                         onRemove = {
-                            scheduleViewModel.removeItem(item.id)
-                            if (selectedItemId == item.id) scheduleViewModel.clearSelection()
+                            viewModel.removeItem(item.id)
+                            if (selectedItemId == item.id) viewModel.clearSelection()
                         },
                         onPresent = {
-                            scheduleViewModel.presentItem(
+                            viewModel.presentItem(
                                 item = item,
                                 onPresenting = onPresenting,
                                 onPresentSong = onPresentSong,

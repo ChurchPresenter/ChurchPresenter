@@ -2,6 +2,7 @@ package org.churchpresenter.app.churchpresenter
 
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -35,6 +36,7 @@ import org.churchpresenter.app.churchpresenter.presenter.SongPresenter
 import org.churchpresenter.app.churchpresenter.ui.theme.AppThemeWrapper
 import org.churchpresenter.app.churchpresenter.ui.theme.LanguageProvider
 import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
+import org.churchpresenter.app.churchpresenter.viewmodel.LocalMediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.MediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.app.churchpresenter.composables.preWarmJavaFX
@@ -46,211 +48,190 @@ fun main() {
     preWarmJavaFX()
 
     application {
-    // Business logic layer
-    val settingsManager = remember { SettingsManager() }
-    var appSettings by remember { mutableStateOf(settingsManager.loadSettings()) }
-    val presenterManager = remember { PresenterManager() }
+        // Business logic layer
+        val settingsManager = remember { SettingsManager() }
+        var appSettings by remember { mutableStateOf(settingsManager.loadSettings()) }
+        val presenterManager = remember { PresenterManager() }
 
-    // Load saved language and set locale
-    var currentLanguage by remember {
-        val savedLanguageCode = appSettings.language
-        val language = Language.entries.find { it.code == savedLanguageCode } ?: Language.ENGLISH
-        Locale.setDefault(Locale.forLanguageTag(language.code))
-        mutableStateOf(language)
-    }
-
-
-    // Schedule actions are registered by MainDesktop — no ScheduleViewModel reference held here
-    var scheduleActions by remember { mutableStateOf(ScheduleActions()) }
-
-    // MediaViewModel is owned by MediaTab; we hold a reference here only for MediaPresenter
-    var mediaViewModel by remember { mutableStateOf<MediaViewModel?>(null) }
-
-
-    // UI state — restore saved theme so toolbar/icons have the correct colors on first frame
-    var theme by remember {
-        val savedTheme = when (appSettings.theme.uppercase()) {
-            "LIGHT" -> ThemeMode.LIGHT
-            "DARK" -> ThemeMode.DARK
-            else -> ThemeMode.SYSTEM
+        // Load saved language and set locale
+        var currentLanguage by remember {
+            val savedLanguageCode = appSettings.language
+            val language = Language.entries.find { it.code == savedLanguageCode } ?: Language.ENGLISH
+            Locale.setDefault(Locale.forLanguageTag(language.code))
+            mutableStateOf(language)
         }
-        mutableStateOf(savedTheme)
-    }
-    var showOptionsDialog by remember { mutableStateOf(false) }
-    var selectedScheduleItemId by remember { mutableStateOf<String?>(null) }
-
-    // Get bounds of the second screen if present
-    val screens = GraphicsEnvironment.getLocalGraphicsEnvironment().screenDevices
-    val state = rememberWindowState(
-        placement = WindowPlacement.Maximized
-    )
-
-    val showPresenterWindow by presenterManager.showPresenterWindow
-    val presentingMode by presenterManager.presentingMode
-    val selectedVerses by presenterManager.selectedVerses
-    val lyricSection by presenterManager.lyricSection
-    val selectedImagePath by presenterManager.selectedImagePath
-    val selectedSlide by presenterManager.selectedSlide
-    val animationType by presenterManager.animationType
-    val transitionDuration by presenterManager.transitionDuration
 
 
-    Window(
-        onCloseRequest = ::exitApplication,
-        title = stringResource(Res.string.app_name),
-        state = state
-    ) {
-        LanguageProvider(language = currentLanguage) {
-            AppThemeWrapper(theme = theme) {
+        // Schedule actions are registered by MainDesktop — no ScheduleViewModel reference held here
+        var scheduleActions by remember { mutableStateOf(ScheduleActions()) }
 
+        // MediaViewModel lives at application scope — shared between MediaTab (controls)
+        // and the presenter Window via LocalMediaViewModel CompositionLocal.
+        // Documented legitimate exception: cross-Window JFX/Swing bridge.
+        val mediaViewModel = remember { MediaViewModel() }
 
-                NavigationTopBar(
-                    onAbout = { presenterManager.setShowPresenterWindow(true) },
-                    theme = {
-                        appSettings = appSettings.copy(theme = it.toString())
-                        theme = it
-                        settingsManager.saveSettings(appSettings)
-                    },
-                    onLanguageChange = { language ->
-                        currentLanguage = language
-                        appSettings = appSettings.copy(language = language.code)
-                        settingsManager.saveSettings(appSettings)
-                        Locale.setDefault(Locale.forLanguageTag(language.code))
-                    },
-                    onSettings = {
-                        showOptionsDialog = true
-                    },
-                    onExit = { exitApplication() },
-                    onAddToSchedule = {
-                        // Handled by MainDesktop via BibleTab/SongsTab callbacks
-                    },
-                    onNewSchedule = { scheduleActions.newSchedule() },
-                    onOpenSchedule = { scheduleActions.openSchedule() },
-                    onSaveSchedule = { scheduleActions.saveSchedule() },
-                    onSaveScheduleAs = { scheduleActions.saveScheduleAs() },
-                    onCloseSchedule = { scheduleActions.newSchedule() },
-                    onRemoveFromSchedule = {
-                        selectedScheduleItemId?.let { scheduleActions.removeSelected(); selectedScheduleItemId = null }
-                    },
-                    onClearSchedule = {
-                        scheduleActions.clearSchedule()
-                        selectedScheduleItemId = null
-                    },
-                )
-                MainDesktop(
-                    onVerseSelected = { verses -> presenterManager.setSelectedVerses(verses) },
-                    onSongItemSelected = { presenterManager.setLyricSection(it) },
-                    appSettings = appSettings,
-                    presenterManager = presenterManager,
-                    onMediaViewModelReady = { mediaViewModel = it },
-                    onScheduleActionsReady = { scheduleActions = it },
-                    presenting = { presenterManager.setPresentingMode(it) },
-                    onScheduleItemSelected = { itemId ->
-                        selectedScheduleItemId = itemId
-                    },
-                    onShowSettings = {
-                        showOptionsDialog = true
-                    },
-                    onThemeChange = { newTheme ->
-                        appSettings = appSettings.copy(theme = newTheme.toString())
-                        theme = newTheme
-                        settingsManager.saveSettings(appSettings)
-                    },
-                    onSettingsChange = { updateFn ->
-                        appSettings = updateFn(appSettings)
-                        settingsManager.saveSettings(appSettings)
-                    },
-                    theme = theme
-                )
-
-                // Options Dialog
-                OptionsDialog(
-                    isVisible = showOptionsDialog,
-                    theme = theme,
-                    settingsManager = settingsManager,
-                    onDismiss = { showOptionsDialog = false },
-                    onSave = { appSettings = it }
-                )
+        // UI state — restore saved theme so toolbar/icons have the correct colors on first frame
+        var theme by remember {
+            val savedTheme = when (appSettings.theme.uppercase()) {
+                "LIGHT" -> ThemeMode.LIGHT
+                "DARK" -> ThemeMode.DARK
+                else -> ThemeMode.SYSTEM
             }
+            mutableStateOf(savedTheme)
         }
-    }
-    val windowCount = appSettings.projectionSettings.numberOfWindows
-    for (i in 0 until windowCount) {
-        if (showPresenterWindow) {
-            val windowState = remember(i) {
-                val targetScreenIndex = i + 1
+        var showOptionsDialog by remember { mutableStateOf(false) }
+        var selectedScheduleItemId by remember { mutableStateOf<String?>(null) }
 
-                if (targetScreenIndex < screens.size) {
-                    val screenBounds = screens[targetScreenIndex].defaultConfiguration.bounds
-                    WindowState(
-                        placement = WindowPlacement.Floating,
-                        position = WindowPosition(
-                            (screenBounds.x + appSettings.projectionSettings.windowLeft).dp,
-                            (screenBounds.y + appSettings.projectionSettings.windowTop).dp
-                        ),
-                        width = (screenBounds.width - appSettings.projectionSettings.windowLeft - appSettings.projectionSettings.windowRight).dp,
-                        height = (screenBounds.height - appSettings.projectionSettings.windowTop - appSettings.projectionSettings.windowBottom).dp
-                    )
-                } else {
-                    WindowState(placement = WindowPlacement.Fullscreen)
+        // Get bounds of the second screen if present
+        val screens = GraphicsEnvironment.getLocalGraphicsEnvironment().screenDevices
+        val state = rememberWindowState(
+            placement = WindowPlacement.Maximized
+        )
+
+        val showPresenterWindow by presenterManager.showPresenterWindow
+        val presentingMode by presenterManager.presentingMode
+        val selectedVerses by presenterManager.selectedVerses
+        val lyricSection by presenterManager.lyricSection
+        val selectedImagePath by presenterManager.selectedImagePath
+        val selectedSlide by presenterManager.selectedSlide
+        val animationType by presenterManager.animationType
+        val transitionDuration by presenterManager.transitionDuration
+
+
+        Window(
+            onCloseRequest = ::exitApplication,
+            title = stringResource(Res.string.app_name),
+            state = state
+        ) {
+            LanguageProvider(language = currentLanguage) {
+                AppThemeWrapper(theme = theme) {
+                    CompositionLocalProvider(LocalMediaViewModel provides mediaViewModel) {
+
+                        NavigationTopBar(
+                            onAbout = { presenterManager.setShowPresenterWindow(true) },
+                            theme = {
+                                appSettings = appSettings.copy(theme = it.toString())
+                                theme = it
+                                settingsManager.saveSettings(appSettings)
+                            },
+                            onLanguageChange = { language ->
+                                currentLanguage = language
+                                appSettings = appSettings.copy(language = language.code)
+                                settingsManager.saveSettings(appSettings)
+                                Locale.setDefault(Locale.forLanguageTag(language.code))
+                            },
+                            onSettings = {
+                                showOptionsDialog = true
+                            },
+                            onExit = { exitApplication() },
+                            onAddToSchedule = {
+                                // Handled by MainDesktop via BibleTab/SongsTab callbacks
+                            },
+                            onNewSchedule = { scheduleActions.newSchedule() },
+                            onOpenSchedule = { scheduleActions.openSchedule() },
+                            onSaveSchedule = { scheduleActions.saveSchedule() },
+                            onSaveScheduleAs = { scheduleActions.saveScheduleAs() },
+                            onCloseSchedule = { scheduleActions.newSchedule() },
+                            onRemoveFromSchedule = {
+                                selectedScheduleItemId?.let { scheduleActions.removeSelected(); selectedScheduleItemId = null }
+                            },
+                            onClearSchedule = {
+                                scheduleActions.clearSchedule()
+                                selectedScheduleItemId = null
+                            },
+                        )
+                        MainDesktop(
+                            onVerseSelected = { verses -> presenterManager.setSelectedVerses(verses) },
+                            onSongItemSelected = { presenterManager.setLyricSection(it) },
+                            appSettings = appSettings,
+                            presenterManager = presenterManager,
+                            onScheduleActionsReady = { scheduleActions = it },
+                            presenting = { presenterManager.setPresentingMode(it) },
+                            onScheduleItemSelected = { itemId -> selectedScheduleItemId = itemId },
+                            onShowSettings = { showOptionsDialog = true },
+                            onThemeChange = { newTheme ->
+                                appSettings = appSettings.copy(theme = newTheme.toString())
+                                theme = newTheme
+                                settingsManager.saveSettings(appSettings)
+                            },
+                            onSettingsChange = { updateFn ->
+                                appSettings = updateFn(appSettings)
+                                settingsManager.saveSettings(appSettings)
+                            },
+                            theme = theme
+                        )
+                        OptionsDialog(
+                            isVisible = showOptionsDialog,
+                            theme = theme,
+                            settingsManager = settingsManager,
+                            onDismiss = { showOptionsDialog = false },
+                            onSave = { appSettings = it }
+                        )
+                    } // end CompositionLocalProvider
                 }
             }
-            Window(
-                title = "Presenter View ${i + 1}",
-                onCloseRequest = { presenterManager.setShowPresenterWindow(false) },
-                state = windowState,
-            ) {
-                PresenterScreen(modifier = Modifier.fillMaxSize(), appSettings = appSettings) {
-                    // MediaPresenter must stay permanently in composition so its
-                    // VideoPlayer (SwingPanel/JFXPanel) is never torn down.
-                    // All other presenters sit on top in a Box.
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .onPreviewKeyEvent { keyEvent ->
-                                if (keyEvent.type == KeyEventType.KeyDown && keyEvent.key == Key.Escape) {
-                                    mediaViewModel?.pause()
-                                    presenterManager.setPresentingMode(Presenting.NONE)
-                                    true
-                                } else false
-                            }
-                    ) {
-                        // Always present, hidden when another mode is active
-                        MediaPresenter(
-                            viewModel = mediaViewModel ?: return@Box,
-                            isVisible = presentingMode == Presenting.MEDIA,
-                            modifier = Modifier.fillMaxSize().then(
-                                if (presentingMode == Presenting.MEDIA) Modifier
-                                else Modifier.requiredSize(0.dp)
-                            )
-                        )
+        }
 
-                        when (presentingMode) {
-                            Presenting.BIBLE -> BiblePresenter(
-                                selectedVerses = selectedVerses,
-                                appSettings = appSettings
-                            )
-                            Presenting.LYRICS -> SongPresenter(
-                                lyricSection = lyricSection,
-                                appSettings = appSettings
-                            )
-                            Presenting.PICTURES -> PicturePresenter(
-                                imagePath = selectedImagePath,
-                                animationType = animationType,
-                                transitionDuration = transitionDuration
-                            )
-                            Presenting.PRESENTATION -> SlidePresenter(
-                                slide = selectedSlide,
-                                animationType = animationType,
-                                transitionDuration = transitionDuration
-                            )
-                            Presenting.MEDIA -> { /* rendered above, always in composition */ }
-                            Presenting.NONE -> { /* nothing */ }
+        val windowCount = appSettings.projectionSettings.numberOfWindows
+        for (i in 0 until windowCount) {
+            if (showPresenterWindow) {
+                val windowState = remember(i) {
+                    val targetScreenIndex = i + 1
+
+                    if (targetScreenIndex < screens.size) {
+                        val screenBounds = screens[targetScreenIndex].defaultConfiguration.bounds
+                        WindowState(
+                            placement = WindowPlacement.Floating,
+                            position = WindowPosition(
+                                (screenBounds.x + appSettings.projectionSettings.windowLeft).dp,
+                                (screenBounds.y + appSettings.projectionSettings.windowTop).dp
+                            ),
+                            width = (screenBounds.width - appSettings.projectionSettings.windowLeft - appSettings.projectionSettings.windowRight).dp,
+                            height = (screenBounds.height - appSettings.projectionSettings.windowTop - appSettings.projectionSettings.windowBottom).dp
+                        )
+                    } else {
+                        WindowState(placement = WindowPlacement.Fullscreen)
+                    }
+                }
+                Window(
+                    title = "Presenter View ${i + 1}",
+                    onCloseRequest = { presenterManager.setShowPresenterWindow(false) },
+                    state = windowState,
+                ) {
+                    // Provide the same MediaViewModel instance to the presenter window
+                    CompositionLocalProvider(LocalMediaViewModel provides mediaViewModel) {
+                        PresenterScreen(modifier = Modifier.fillMaxSize(), appSettings = appSettings) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .onPreviewKeyEvent { keyEvent ->
+                                        if (keyEvent.type == KeyEventType.KeyDown && keyEvent.key == Key.Escape) {
+                                            mediaViewModel.pause()
+                                            presenterManager.setPresentingMode(Presenting.NONE)
+                                            true
+                                        } else false
+                                    }
+                            ) {
+                                MediaPresenter(
+                                    isVisible = presentingMode == Presenting.MEDIA,
+                                    modifier = Modifier.fillMaxSize().then(
+                                        if (presentingMode == Presenting.MEDIA) Modifier
+                                        else Modifier.requiredSize(0.dp)
+                                    )
+                                )
+                                when (presentingMode) {
+                                    Presenting.BIBLE -> BiblePresenter(selectedVerses = selectedVerses, appSettings = appSettings)
+                                    Presenting.LYRICS -> SongPresenter(lyricSection = lyricSection, appSettings = appSettings)
+                                    Presenting.PICTURES -> PicturePresenter(imagePath = selectedImagePath, animationType = animationType, transitionDuration = transitionDuration)
+                                    Presenting.PRESENTATION -> SlidePresenter(slide = selectedSlide, animationType = animationType, transitionDuration = transitionDuration)
+                                    Presenting.MEDIA -> { /* rendered above */ }
+                                    Presenting.NONE -> { /* nothing */ }
+                                }
+                            }
                         }
                     }
                 }
             }
         }
-    }
     } // end application
 }

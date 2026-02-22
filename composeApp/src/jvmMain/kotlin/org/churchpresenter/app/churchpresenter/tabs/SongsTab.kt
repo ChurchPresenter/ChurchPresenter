@@ -63,6 +63,7 @@ import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.data.SongItem
 import org.churchpresenter.app.churchpresenter.dialogs.EditSongDialog
 import org.churchpresenter.app.churchpresenter.models.LyricSection
+import org.churchpresenter.app.churchpresenter.models.ScheduleItem
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
 import org.churchpresenter.app.churchpresenter.utils.Constants
@@ -73,16 +74,23 @@ import org.jetbrains.compose.resources.stringResource
 fun SongsTab(
     modifier: Modifier = Modifier,
     appSettings: AppSettings,
-    onAddToSchedule: (() -> Unit)? = null,
+    onAddToSchedule: ((songNumber: Int, title: String, songbook: String) -> Unit)? = null,
+    selectedSongItem: ScheduleItem.SongItem? = null,
     onSongItemSelected: (LyricSection) -> Unit,
     onPresenting: (Presenting) -> Unit = { Presenting.NONE },
-    onViewModelReady: (SongsViewModel) -> Unit = {},
     theme: ThemeMode = ThemeMode.SYSTEM
 ) {
     val viewModel = remember { SongsViewModel(appSettings) }
 
-    // Expose the ViewModel to the caller on first composition
-    LaunchedEffect(Unit) { onViewModelReady(viewModel) }
+    // React to schedule item selection — select song then notify presenter
+    LaunchedEffect(selectedSongItem) {
+        selectedSongItem?.let {
+            val found = viewModel.selectSongByDetails(it.songNumber, it.title, it.songbook)
+            if (found) {
+                viewModel.getSelectedLyricSection()?.let { section -> onSongItemSelected(section) }
+            }
+        }
+    }
     // Observe ViewModel state
     val songbooks by viewModel.songbooks
     val searchQuery by viewModel.searchQuery
@@ -327,7 +335,12 @@ fun SongsTab(
                 if (onAddToSchedule != null && selectedSongIndex >= 0 && selectedSongIndex < filteredSongs.size) {
                     Button(
                         modifier = Modifier.wrapContentSize().padding(start = 4.dp),
-                        onClick = { onAddToSchedule() },
+                        onClick = {
+                            val item = filteredSongs.getOrNull(selectedSongIndex)
+                            if (item != null) {
+                                onAddToSchedule(item.number.toIntOrNull() ?: 0, item.title, item.songbook)
+                            }
+                        },
                         colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
                     ) {
                         Text(stringResource(Res.string.add_to_schedule), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSecondary, maxLines = 2)

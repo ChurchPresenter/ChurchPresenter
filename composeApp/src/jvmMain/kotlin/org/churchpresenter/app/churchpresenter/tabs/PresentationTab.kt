@@ -60,6 +60,7 @@ import churchpresenter.composeapp.generated.resources.slide_number
 import churchpresenter.composeapp.generated.resources.supported_formats
 import kotlinx.coroutines.delay
 import org.churchpresenter.app.churchpresenter.data.AppSettings
+import org.churchpresenter.app.churchpresenter.models.ScheduleItem
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.app.churchpresenter.viewmodel.PresentationViewModel
@@ -76,14 +77,14 @@ fun PresentationTab(
     modifier: Modifier = Modifier,
     appSettings: AppSettings,
     onAddToSchedule: ((filePath: String, fileName: String, slideCount: Int, fileType: String) -> Unit)? = null,
-    presenterManager: PresenterManager? = null,
-    onLoadPresentationRequest: ((filePath: String) -> Unit) -> Unit = {}
+    selectedPresentationItem: ScheduleItem.PresentationItem? = null,
+    presenterManager: PresenterManager? = null
 ) {
     val viewModel = remember { PresentationViewModel(appSettings) }
 
-    // Expose load-by-path action to parent — no ViewModel reference leaves this composable
-    LaunchedEffect(Unit) {
-        onLoadPresentationRequest { filePath -> viewModel.loadPresentationByPath(filePath) }
+    // React to schedule item selection
+    LaunchedEffect(selectedPresentationItem) {
+        selectedPresentationItem?.let { viewModel.loadPresentationByPath(it.filePath) }
     }
     val presentationFileDialogTitle = stringResource(Res.string.select_presentation_file)
 

@@ -24,6 +24,7 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -68,8 +69,10 @@ import churchpresenter.composeapp.generated.resources.media_unmute
 import churchpresenter.composeapp.generated.resources.pause
 import churchpresenter.composeapp.generated.resources.play
 import org.churchpresenter.app.churchpresenter.composables.VideoPlayer
+import org.churchpresenter.app.churchpresenter.models.ScheduleItem
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.app.churchpresenter.viewmodel.LocalMediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.MediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.jetbrains.compose.resources.painterResource
@@ -83,24 +86,23 @@ import javax.swing.filechooser.FileNameExtensionFilter
 fun MediaTab(
     modifier: Modifier = Modifier,
     onAddToSchedule: ((mediaUrl: String, mediaTitle: String, mediaType: String) -> Unit)? = null,
-    presenterManager: PresenterManager? = null,
-    onViewModelReady: (MediaViewModel) -> Unit = {},
-    onPauseRequest: (() -> Unit) -> Unit = {},
-    onLoadMediaRequest: ((url: String, title: String, type: String) -> Unit) -> Unit = {}
+    selectedMediaItem: ScheduleItem.MediaItem? = null,
+    presenterManager: PresenterManager? = null
 ) {
     val viewModel = remember { MediaViewModel() }
     val focusRequester = remember { FocusRequester() }
     var volumeExpanded by remember { mutableStateOf(false) }
 
-    // Register actions with parent — no ViewModel reference leaves this composable
-    LaunchedEffect(Unit) {
-        onViewModelReady(viewModel)
-        onPauseRequest { viewModel.pause() }
-        onLoadMediaRequest { url, title, type ->
-            viewModel.loadMediaFromSchedule(url = url, title = title, type = type)
+    // React to schedule item selection
+    LaunchedEffect(selectedMediaItem) {
+        selectedMediaItem?.let {
+            viewModel.loadMediaFromSchedule(url = it.mediaUrl, title = it.mediaTitle, type = it.mediaType)
         }
     }
 
+    // Provide viewModel via CompositionLocal so MediaPresenter in the presenter
+    // window can consume it without it being passed as a parameter.
+    CompositionLocalProvider(LocalMediaViewModel provides viewModel) {
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -459,4 +461,5 @@ fun MediaTab(
             }
         }
     }
+    } // end CompositionLocalProvider
 }

@@ -16,40 +16,36 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.focusTarget
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
-import androidx.compose.ui.focus.focusTarget
-import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.components.Toolbar
+import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.dialogs.AddLabelDialog
+import org.churchpresenter.app.churchpresenter.models.LyricSection
+import org.churchpresenter.app.churchpresenter.models.ScheduleItem
+import org.churchpresenter.app.churchpresenter.models.SelectedVerse
+import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.tabs.AnnouncementsTab
 import org.churchpresenter.app.churchpresenter.tabs.BibleTab
 import org.churchpresenter.app.churchpresenter.tabs.MediaTab
 import org.churchpresenter.app.churchpresenter.tabs.PicturesTab
 import org.churchpresenter.app.churchpresenter.tabs.PresentationTab
 import org.churchpresenter.app.churchpresenter.tabs.ScheduleTab
+import org.churchpresenter.app.churchpresenter.tabs.ScheduleTabActions
 import org.churchpresenter.app.churchpresenter.tabs.SongsTab
 import org.churchpresenter.app.churchpresenter.tabs.StreamingTab
 import org.churchpresenter.app.churchpresenter.tabs.TabSection
 import org.churchpresenter.app.churchpresenter.tabs.Tabs
-import org.churchpresenter.app.churchpresenter.models.LyricSection
-import org.churchpresenter.app.churchpresenter.models.ScheduleItem
-import org.churchpresenter.app.churchpresenter.models.SelectedVerse
-import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
-import org.churchpresenter.app.churchpresenter.viewmodel.MediaViewModel
+import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.app.churchpresenter.viewmodel.LocalMediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
-import org.churchpresenter.app.churchpresenter.viewmodel.ScheduleViewModel
-import org.churchpresenter.app.churchpresenter.viewmodel.SongsViewModel
-import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.file_chooser_open_schedule
-import churchpresenter.composeapp.generated.resources.file_chooser_save_schedule
-import churchpresenter.composeapp.generated.resources.file_filter_schedule
-import org.jetbrains.compose.resources.stringResource
 
+// Kept for NavigationTopBar / menu — wraps ScheduleTabActions
 data class ScheduleActions(
     val newSchedule: () -> Unit = {},
     val openSchedule: () -> Unit = {},
@@ -72,51 +68,40 @@ fun MainDesktop(
     onShowSettings: () -> Unit = {},
     onThemeChange: (ThemeMode) -> Unit = {},
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit = {},
-    onMediaViewModelReady: (MediaViewModel) -> Unit = {},
-    // Registers schedule actions with the parent (for NavigationTopBar)
     onScheduleActionsReady: (ScheduleActions) -> Unit = {},
     theme: ThemeMode = ThemeMode.SYSTEM
 ) {
-    val scheduleViewModel = remember { ScheduleViewModel() }
+    // ScheduleViewModel lives inside ScheduleTab — MainDesktop drives it via callbacks
+    var scheduleActions by remember { mutableStateOf(ScheduleTabActions()) }
 
-    var songsViewModel by remember { mutableStateOf<SongsViewModel?>(null) }
-    var addBibleVerseToSchedule by remember { mutableStateOf<(() -> Unit)?>(null) }
-    var selectBibleVerse by remember { mutableStateOf<((String, Int, Int) -> Unit)?>(null) }
-    var loadPresentation by remember { mutableStateOf<((String) -> Unit)?>(null) }
-    var selectPictureFolder by remember { mutableStateOf<((String) -> Unit)?>(null) }
-    var presentPictures by remember { mutableStateOf<((String) -> Unit)?>(null) }
-    var pauseMedia by remember { mutableStateOf<(() -> Unit)?>(null) }
-    var loadMedia by remember { mutableStateOf<((String, String, String) -> Unit)?>(null) }
-
-    val strSaveScheduleAs = stringResource(Res.string.file_chooser_save_schedule)
-    val strOpenSchedule   = stringResource(Res.string.file_chooser_open_schedule)
-    val strFileFilter     = stringResource(Res.string.file_filter_schedule)
+    // Selected schedule items — passed directly into each tab; tab reacts via LaunchedEffect
+    var selectedBibleVerseItem by remember { mutableStateOf<ScheduleItem.BibleVerseItem?>(null) }
+    var selectedSongItem       by remember { mutableStateOf<ScheduleItem.SongItem?>(null) }
+    var selectedPictureItem    by remember { mutableStateOf<ScheduleItem.PictureItem?>(null) }
+    var selectedPresentationItem by remember { mutableStateOf<ScheduleItem.PresentationItem?>(null) }
+    var selectedMediaItem      by remember { mutableStateOf<ScheduleItem.MediaItem?>(null) }
 
     var selectedTabIndex by rememberSaveable { mutableStateOf(0) }
-    var selectedScheduleItemId by remember { mutableStateOf<String?>(null) }
     var showAddLabelDialog by remember { mutableStateOf(false) }
-    var editingLabelItem by remember { mutableStateOf<ScheduleItem.LabelItem?>(null) }
+    var editingLabelItem   by remember { mutableStateOf<ScheduleItem.LabelItem?>(null) }
 
-    // Register schedule actions with parent once string resources are ready
-    LaunchedEffect(strSaveScheduleAs, strOpenSchedule, strFileFilter) {
-        onScheduleActionsReady(ScheduleActions(
-            newSchedule = { scheduleViewModel.newSchedule() },
-            openSchedule = { scheduleViewModel.loadSchedule(strOpenSchedule, strFileFilter) },
-            saveSchedule = { scheduleViewModel.saveSchedule(strSaveScheduleAs, strFileFilter) },
-            saveScheduleAs = { scheduleViewModel.saveScheduleAs(strSaveScheduleAs, strFileFilter) },
-            removeSelected = { selectedScheduleItemId?.let { scheduleViewModel.removeItem(it) } },
-            clearSchedule = { scheduleViewModel.clearSchedule() }
-        ))
+    LaunchedEffect(selectedTabIndex) { onTabChange(selectedTabIndex) }
+
+    // Forward ScheduleTabActions to parent (NavigationTopBar / menu) as ScheduleActions
+    LaunchedEffect(scheduleActions) {
+        onScheduleActionsReady(
+            ScheduleActions(
+                newSchedule    = scheduleActions.newSchedule,
+                openSchedule   = scheduleActions.openSchedule,
+                saveSchedule   = scheduleActions.saveSchedule,
+                saveScheduleAs = scheduleActions.saveScheduleAs,
+                removeSelected = scheduleActions.removeSelected,
+                clearSchedule  = scheduleActions.clearSchedule
+            )
+        )
     }
 
-    LaunchedEffect(selectedTabIndex) {
-        onTabChange(selectedTabIndex)
-    }
-
-    // Notify parent when schedule item selection changes
-    LaunchedEffect(selectedScheduleItemId) {
-        onScheduleItemSelected(selectedScheduleItemId)
-    }
+    val mediaViewModel = LocalMediaViewModel.current
 
     Box(
         modifier = modifier
@@ -125,259 +110,178 @@ fun MainDesktop(
             .onPreviewKeyEvent { keyEvent ->
                 if (keyEvent.type == KeyEventType.KeyDown) {
                     when (keyEvent.key) {
-                        Key.Escape -> {
-                            pauseMedia?.invoke()
-                            presenterManager.setPresentingMode(Presenting.NONE)
-                            true
-                        }
-                        Key.F6 -> {
-                            selectedTabIndex = Tabs.BIBLE.ordinal
-                            true
-                        }
-                        Key.F7 -> {
-                            selectedTabIndex = Tabs.SONGS.ordinal
-                            true
-                        }
-                        Key.F8 -> {
-                            selectedTabIndex = Tabs.PICTURES.ordinal
-                            true
-                        }
-                        Key.F9 -> {
-                            selectedTabIndex = Tabs.PRESENTATION.ordinal
-                            true
-                        }
-                        Key.F10 -> {
-                            selectedTabIndex = Tabs.MEDIA.ordinal
-                            true
-                        }
-                        Key.F11 -> {
-                            selectedTabIndex = Tabs.STREAMING.ordinal
-                            true
-                        }
-                        Key.F12 -> {
-                            selectedTabIndex = Tabs.ANNOUNCEMENTS.ordinal
-                            true
-                        }
+                        Key.Escape -> { mediaViewModel?.pause(); presenterManager.setPresentingMode(Presenting.NONE); true }
+                        Key.F6  -> { selectedTabIndex = Tabs.BIBLE.ordinal;          true }
+                        Key.F7  -> { selectedTabIndex = Tabs.SONGS.ordinal;          true }
+                        Key.F8  -> { selectedTabIndex = Tabs.PICTURES.ordinal;       true }
+                        Key.F9  -> { selectedTabIndex = Tabs.PRESENTATION.ordinal;   true }
+                        Key.F10 -> { selectedTabIndex = Tabs.MEDIA.ordinal;          true }
+                        Key.F11 -> { selectedTabIndex = Tabs.STREAMING.ordinal;      true }
+                        Key.F12 -> { selectedTabIndex = Tabs.ANNOUNCEMENTS.ordinal;  true }
                         else -> false
                     }
-                } else {
-                    false
-                }
+                } else false
             }
             .focusTarget()
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
-            // Toolbar
             Toolbar(
                 currentTheme = theme,
                 onThemeChange = onThemeChange,
-                onNewSchedule = {
-                    scheduleViewModel.newSchedule()
-                },
-                onOpenSchedule = {
-                    scheduleViewModel.loadSchedule(strOpenSchedule, strFileFilter)
-                },
-                onSaveSchedule = {
-                    scheduleViewModel.saveSchedule(strSaveScheduleAs, strFileFilter)
-                },
-                onMoveToTop = {
-                    selectedScheduleItemId?.let { scheduleViewModel.moveItemToTop(it) }
-                },
-                onMoveUp = {
-                    selectedScheduleItemId?.let { scheduleViewModel.moveItemUp(it) }
-                },
-                onMoveDown = {
-                    selectedScheduleItemId?.let { scheduleViewModel.moveItemDown(it) }
-                },
-                onMoveToBottom = {
-                    selectedScheduleItemId?.let { scheduleViewModel.moveItemToBottom(it) }
-                },
-                onAddToSchedule = {
-                    // Add current tab selection to schedule
-                    when (Tabs.entries[selectedTabIndex]) {
-                        Tabs.BIBLE -> {
-                            addBibleVerseToSchedule?.invoke()
-                        }
-                        Tabs.SONGS -> {
-                            songsViewModel?.addCurrentSongToSchedule(scheduleViewModel)
-                        }
-                        else -> {
-                            // Other tabs not implemented yet
-                        }
-                    }
-                },
-                onRemoveFromSchedule = {
-                    selectedScheduleItemId?.let { scheduleViewModel.removeItem(it) }
-                },
-                onClearSchedule = {
-                    scheduleViewModel.clearSchedule()
-                    selectedScheduleItemId = null
-                },
-                onAddLabel = {
-                    showAddLabelDialog = true
-                },
-                onOpenSettings = onShowSettings
+                onNewSchedule    = { scheduleActions.newSchedule() },
+                onOpenSchedule   = { scheduleActions.openSchedule() },
+                onSaveSchedule   = { scheduleActions.saveSchedule() },
+                onMoveToTop      = { scheduleActions.moveSelectedToTop() },
+                onMoveUp         = { scheduleActions.moveSelectedUp() },
+                onMoveDown       = { scheduleActions.moveSelectedDown() },
+                onMoveToBottom   = { scheduleActions.moveSelectedToBottom() },
+                onAddToSchedule  = { /* handled per-tab via onAddToSchedule callbacks */ },
+                onRemoveFromSchedule = { scheduleActions.removeSelected() },
+                onClearSchedule  = { scheduleActions.clearSchedule() },
+                onAddLabel       = { showAddLabelDialog = true },
+                onOpenSettings   = onShowSettings
             )
 
-            // Main content
             Row(modifier = Modifier.fillMaxSize()) {
-            Column(modifier = Modifier.fillMaxWidth(0.30f).fillMaxHeight()) {
-                ScheduleTab(
-                    scheduleViewModel = scheduleViewModel,
-                    onPresenting = presenting,
-                    onPresentBible = { item ->
-                        selectBibleVerse?.invoke(item.bookName, item.chapter, item.verseNumber)
-                        presenting(Presenting.BIBLE)
-                    },
-                    onPresentSong = { songItem ->
-                        songsViewModel?.selectSongByDetails(songItem.songNumber, songItem.title, songItem.songbook)
-                        songsViewModel?.getSelectedLyricSection()?.let { onSongItemSelected(it) }
-                        presenting(Presenting.LYRICS)
-                    },
-                    onPresentPresentation = { item ->
-                        loadPresentation?.invoke(item.filePath)
-                        presenting(Presenting.PRESENTATION)
-                    },
-                    onPresentPictures = { item: ScheduleItem.PictureItem ->
-                        presentPictures?.invoke(item.folderPath)
-                    },
-                    onPresentMedia = { item: ScheduleItem.MediaItem ->
-                        loadMedia?.invoke(item.mediaUrl, item.mediaTitle, item.mediaType)
-                        presenting(Presenting.MEDIA)
-                    },
-                    onItemClick = { item ->
-                        selectedScheduleItemId = if (item is ScheduleItem.PictureItem) {
-                            item.id
-                        } else {
-                            if (selectedScheduleItemId == item.id) null else item.id
-                        }
-
-                        when (item) {
-                            is ScheduleItem.SongItem -> {
-                                selectedTabIndex = Tabs.SONGS.ordinal
-                                songsViewModel?.selectSongByDetails(
-                                    songNumber = item.songNumber,
+                Column(modifier = Modifier.fillMaxWidth(0.30f).fillMaxHeight()) {
+                    ScheduleTab(
+                        onPresenting = presenting,
+                        onPresentBible = { item ->
+                            selectedBibleVerseItem = item
+                            presenting(Presenting.BIBLE)
+                        },
+                        onPresentSong = { item ->
+                            selectedSongItem = item
+                            onSongItemSelected(
+                                LyricSection(
                                     title = item.title,
-                                    songbook = item.songbook
+                                    songNumber = item.songNumber,
+                                    lines = emptyList(),
+                                    type = Constants.SECTION_TYPE_SONG
                                 )
+                            )
+                            presenting(Presenting.LYRICS)
+                        },
+                        onPresentPresentation = { item ->
+                            selectedPresentationItem = item
+                            presenting(Presenting.PRESENTATION)
+                        },
+                        onPresentPictures = { item -> selectedPictureItem = item },
+                        onPresentMedia = { item ->
+                            selectedMediaItem = item
+                            presenting(Presenting.MEDIA)
+                        },
+                        onItemClick = { item ->
+                            when (item) {
+                                is ScheduleItem.SongItem -> {
+                                    selectedTabIndex = Tabs.SONGS.ordinal
+                                    selectedSongItem = item
+                                }
+                                is ScheduleItem.BibleVerseItem -> {
+                                    selectedTabIndex = Tabs.BIBLE.ordinal
+                                    selectedBibleVerseItem = item
+                                }
+                                is ScheduleItem.LabelItem -> {
+                                    editingLabelItem = item
+                                    showAddLabelDialog = true
+                                }
+                                is ScheduleItem.PictureItem -> {
+                                    selectedTabIndex = Tabs.PICTURES.ordinal
+                                    selectedPictureItem = item
+                                }
+                                is ScheduleItem.PresentationItem -> {
+                                    selectedTabIndex = Tabs.PRESENTATION.ordinal
+                                    selectedPresentationItem = item
+                                }
+                                is ScheduleItem.MediaItem -> {
+                                    selectedTabIndex = Tabs.MEDIA.ordinal
+                                    selectedMediaItem = item
+                                }
                             }
-                            is ScheduleItem.BibleVerseItem -> {
-                                selectedTabIndex = Tabs.BIBLE.ordinal
-                                selectBibleVerse?.invoke(item.bookName, item.chapter, item.verseNumber)
-                            }
-                            is ScheduleItem.LabelItem -> {
-                                editingLabelItem = item
-                                showAddLabelDialog = true
-                            }
-                            is ScheduleItem.PictureItem -> {
-                                selectedTabIndex = Tabs.PICTURES.ordinal
-                                selectPictureFolder?.invoke(item.folderPath)
-                            }
-                            is ScheduleItem.PresentationItem -> {
-                                selectedTabIndex = Tabs.PRESENTATION.ordinal
-                                loadPresentation?.invoke(item.filePath)
-                            }
-                            is ScheduleItem.MediaItem -> {
-                                selectedTabIndex = Tabs.MEDIA.ordinal
-                                loadMedia?.invoke(item.mediaUrl, item.mediaTitle, item.mediaType)
-                            }
+                        },
+                        onEditLabel = { labelItem ->
+                            editingLabelItem = labelItem
+                            showAddLabelDialog = true
+                        },
+                        onActionsReady = { actions ->
+                            scheduleActions = actions
+                        },
+                        onSelectedItemChanged = { id ->
+                            onScheduleItemSelected(id)
                         }
-                    },
-                    onEditLabel = { labelItem ->
-                        editingLabelItem = labelItem
-                        showAddLabelDialog = true
-                    }
-                )
-            }
+                    )
+                }
 
-            Column(modifier = Modifier.fillMaxWidth().fillMaxHeight()) {
-                TabSection(
-                    selectedTabIndex = selectedTabIndex,
-                    onTabSelected = { tabIndex ->
-                        selectedTabIndex = tabIndex
-                    }
-                )
+                Column(modifier = Modifier.fillMaxWidth().fillMaxHeight()) {
+                    TabSection(
+                        selectedTabIndex = selectedTabIndex,
+                        onTabSelected = { selectedTabIndex = it }
+                    )
 
-                // Keep MediaTab permanently in composition so VideoPlayer (SwingPanel)
-                // is never destroyed on tab switch — just hidden when another tab is active.
-                val currentTab = Tabs.entries[selectedTabIndex]
+                    val currentTab = Tabs.entries[selectedTabIndex]
 
-                Box(modifier = Modifier.fillMaxSize()) {
-                    when (currentTab) {
-                        Tabs.BIBLE -> BibleTab(
-                            modifier = Modifier.fillMaxSize(),
-                            appSettings = appSettings,
-                            onAddToSchedule = { bookName, chapter, verseNumber, verseText ->
-                                scheduleViewModel.addBibleVerse(bookName, chapter, verseNumber, verseText)
-                            },
-                            onVerseSelected = onVerseSelected,
-                            onPresenting = presenting,
-                            onAddToScheduleRegistration = { action -> addBibleVerseToSchedule = action },
-                            onSelectVerseRequest = { action -> selectBibleVerse = action }
-                        )
-
-                        Tabs.SONGS -> SongsTab(
-                            modifier = Modifier.fillMaxSize(),
-                            appSettings = appSettings,
-                            onAddToSchedule = {
-                                songsViewModel?.addCurrentSongToSchedule(scheduleViewModel)
-                            },
-                            onSongItemSelected = onSongItemSelected,
-                            onPresenting = presenting,
-                            onViewModelReady = { songsViewModel = it },
-                            theme = theme
-                        )
-
-                        Tabs.PICTURES -> PicturesTab(
-                            modifier = Modifier.fillMaxSize(),
-                            appSettings = appSettings,
-                            onAddToSchedule = { folderPath, folderName, imageCount ->
-                                scheduleViewModel.addPicture(folderPath, folderName, imageCount)
-                            },
-                            selectedPictureItem = selectedScheduleItemId?.let { id ->
-                                scheduleViewModel.scheduleItems.find { it.id == id } as? ScheduleItem.PictureItem
-                            },
-                            presenterManager = presenterManager,
-                            onSelectFolderRequest = { action -> selectPictureFolder = action },
-                            onPresentPicturesRequest = { action -> presentPictures = action }
-                        )
-
-                        Tabs.PRESENTATION -> PresentationTab(
-                            modifier = Modifier.fillMaxSize(),
-                            appSettings = appSettings,
-                            onAddToSchedule = { filePath, fileName, slideCount, fileType ->
-                                scheduleViewModel.addPresentation(filePath, fileName, slideCount, fileType)
-                            },
-                            presenterManager = presenterManager,
-                            onLoadPresentationRequest = { action -> loadPresentation = action }
-                        )
-
-                        Tabs.MEDIA -> MediaTab(
-                            modifier = Modifier.fillMaxSize(),
-                            onAddToSchedule = { mediaUrl, mediaTitle, mediaType ->
-                                scheduleViewModel.addMedia(mediaUrl, mediaTitle, mediaType)
-                            },
-                            presenterManager = presenterManager,
-                            onViewModelReady = { onMediaViewModelReady(it) },
-                            onPauseRequest = { action -> pauseMedia = action },
-                            onLoadMediaRequest = { action -> loadMedia = action }
-                        )
-
-                        Tabs.STREAMING -> StreamingTab(
-                            modifier = Modifier.fillMaxSize(),
-                            appSettings = appSettings,
-                            onSettingsChange = onSettingsChange
-                        )
-
-                        Tabs.ANNOUNCEMENTS -> AnnouncementsTab()
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        when (currentTab) {
+                            Tabs.BIBLE -> BibleTab(
+                                modifier = Modifier.fillMaxSize(),
+                                appSettings = appSettings,
+                                onAddToSchedule = { bookName, chapter, verseNumber, verseText ->
+                                    scheduleActions.addBibleVerse(bookName, chapter, verseNumber, verseText)
+                                },
+                                selectedVerseItem = selectedBibleVerseItem,
+                                onVerseSelected = onVerseSelected,
+                                onPresenting = presenting
+                            )
+                            Tabs.SONGS -> SongsTab(
+                                modifier = Modifier.fillMaxSize(),
+                                appSettings = appSettings,
+                                onAddToSchedule = { songNumber, title, songbook ->
+                                    scheduleActions.addSong(songNumber, title, songbook)
+                                },
+                                selectedSongItem = selectedSongItem,
+                                onSongItemSelected = onSongItemSelected,
+                                onPresenting = presenting,
+                                theme = theme
+                            )
+                            Tabs.PICTURES -> PicturesTab(
+                                modifier = Modifier.fillMaxSize(),
+                                appSettings = appSettings,
+                                onAddToSchedule = { folderPath, folderName, imageCount ->
+                                    scheduleActions.addPicture(folderPath, folderName, imageCount)
+                                },
+                                selectedPictureItem = selectedPictureItem,
+                                presenterManager = presenterManager
+                            )
+                            Tabs.PRESENTATION -> PresentationTab(
+                                modifier = Modifier.fillMaxSize(),
+                                appSettings = appSettings,
+                                onAddToSchedule = { filePath, fileName, slideCount, fileType ->
+                                    scheduleActions.addPresentation(filePath, fileName, slideCount, fileType)
+                                },
+                                selectedPresentationItem = selectedPresentationItem,
+                                presenterManager = presenterManager
+                            )
+                            Tabs.MEDIA -> MediaTab(
+                                modifier = Modifier.fillMaxSize(),
+                                onAddToSchedule = { mediaUrl, mediaTitle, mediaType ->
+                                    scheduleActions.addMedia(mediaUrl, mediaTitle, mediaType)
+                                },
+                                selectedMediaItem = selectedMediaItem,
+                                presenterManager = presenterManager
+                            )
+                            Tabs.STREAMING -> StreamingTab(
+                                modifier = Modifier.fillMaxSize(),
+                                appSettings = appSettings,
+                                onSettingsChange = onSettingsChange
+                            )
+                            Tabs.ANNOUNCEMENTS -> AnnouncementsTab()
+                        }
                     }
                 }
             }
         }
-        }
     }
 
-    // Add/Edit Label Dialog
     if (showAddLabelDialog) {
         AddLabelDialog(
             onDismiss = {
@@ -386,17 +290,12 @@ fun MainDesktop(
             },
             onConfirm = { text, textColor, backgroundColor ->
                 if (editingLabelItem != null) {
-                    // Update existing label
-                    scheduleViewModel.updateLabel(
-                        id = editingLabelItem!!.id,
-                        text = text,
-                        textColor = textColor,
-                        backgroundColor = backgroundColor
-                    )
+                    scheduleActions.updateLabel(editingLabelItem!!.id, text, textColor, backgroundColor)
                 } else {
-                    // Add new label
-                    scheduleViewModel.addLabel(text, textColor, backgroundColor)
+                    scheduleActions.addLabel(text, textColor, backgroundColor)
                 }
+                showAddLabelDialog = false
+                editingLabelItem = null
             },
             existingText = editingLabelItem?.text ?: "",
             existingTextColor = editingLabelItem?.textColor ?: "#FFFFFF",
