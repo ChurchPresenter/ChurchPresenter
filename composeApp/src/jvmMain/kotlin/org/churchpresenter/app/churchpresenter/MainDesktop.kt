@@ -75,8 +75,8 @@ fun MainDesktop(
     theme: ThemeMode = ThemeMode.SYSTEM
 ) {
     // Tab-specific ViewModels — owned here, not in main.kt
-    val picturesViewModel = remember(appSettings) { PicturesViewModel(appSettings) }
-    val presentationViewModel = remember(appSettings) { PresentationViewModel(appSettings) }
+    val picturesViewModel = remember { PicturesViewModel(appSettings) }
+    val presentationViewModel = remember { PresentationViewModel(appSettings) }
 
     val strSaveScheduleAs = stringResource(Res.string.file_chooser_save_schedule)
     val strOpenSchedule   = stringResource(Res.string.file_chooser_open_schedule)

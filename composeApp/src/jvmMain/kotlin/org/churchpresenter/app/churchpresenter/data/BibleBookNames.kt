@@ -30,14 +30,22 @@ object BibleBookNames {
         Res.string.bible_book_64, Res.string.bible_book_65, Res.string.bible_book_66
     )
 
+    // Cache results so we only pay the cost of 132 getString calls once per run
+    @Volatile private var cachedEnglishNames: List<String>? = null
+    @Volatile private var cachedMappingLocale: String? = null
+    @Volatile private var cachedMapping: Map<String, String>? = null
+
     /**
      * Returns English book names in standard Bible order
      */
     suspend fun getEnglishBookNames(): List<String> {
+        cachedEnglishNames?.let { return it }
         val englishLocale = Locale.ENGLISH
-        return bookResourceIds.map { resource ->
+        val names = bookResourceIds.map { resource ->
             org.jetbrains.compose.resources.getString(resource, englishLocale)
         }
+        cachedEnglishNames = names
+        return names
     }
 
     /**
@@ -45,26 +53,24 @@ object BibleBookNames {
      * for cross-language book search support.
      */
     suspend fun getBookNameMapping(): Map<String, String> {
-        val currentLocale = Locale.getDefault()
-        val mapping = mutableMapOf<String, String>()
+        val currentLocale = Locale.getDefault().toLanguageTag()
+        cachedMapping?.takeIf { cachedMappingLocale == currentLocale }?.let { return it }
 
-        // Get English book names
-        val englishLocale = Locale.ENGLISH
-        val englishNames = bookResourceIds.map { resource ->
-            org.jetbrains.compose.resources.getString(resource, englishLocale)
-        }
+        val englishNames = getEnglishBookNames()
 
         // Get localized book names for current locale
+        val locale = Locale.getDefault()
         val localizedNames = bookResourceIds.map { resource ->
-            org.jetbrains.compose.resources.getString(resource, currentLocale)
+            org.jetbrains.compose.resources.getString(resource, locale)
         }
 
-        // Create mapping: english_name_lowercase -> localized_name
+        val mapping = mutableMapOf<String, String>()
         englishNames.forEachIndexed { index, englishName ->
-            val localizedName = localizedNames[index]
-            mapping[englishName.lowercase()] = localizedName
+            mapping[englishName.lowercase()] = localizedNames[index]
         }
 
+        cachedMappingLocale = currentLocale
+        cachedMapping = mapping
         return mapping
     }
 

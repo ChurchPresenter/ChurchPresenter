@@ -68,9 +68,12 @@ compose.desktop {
         mainClass = "org.churchpresenter.app.churchpresenter.MainKt"
 
         jvmArgs(
-            "-Xms256m",
-            "-Xmx1g",
+            "-Xms512m",
+            "-Xmx1536m",
             "-XX:+UseG1GC",
+            "-XX:G1NewSizePercent=20",
+            "-XX:G1ReservePercent=20",
+            "-XX:MaxGCPauseMillis=50",
             "-XX:+UseStringDeduplication",
             "-Dskiko.renderApi=OPENGL",         // use OpenGL on Windows for smoother rendering
             "-Dawt.useSystemAAFontSettings=on",
@@ -110,4 +113,20 @@ compose.desktop {
             }
         }
     }
+}
+
+// Workaround: avoid Gradle incremental state tracking on Compose resource generation tasks
+// These tasks sometimes fail snapshotting when build outputs are OneDrive placeholders. This
+// marks them as untracked (preferred) or falls back to disabling up-to-date checking.
+
+val problematicTasks = setOf(
+    "generateResourceAccessorsForJvmMain",
+    "generateComposeResClass",
+    "generateExpectResourceCollectorsForCommonMain"
+)
+
+tasks.matching { it.name in problematicTasks }.configureEach {
+    // Mark the task as untracked so Gradle does not snapshot inputs/outputs
+    // Workaround for OneDrive placeholder snapshot errors
+    doNotTrackState("Temporary workaround: OneDrive placeholder snapshot errors")
 }

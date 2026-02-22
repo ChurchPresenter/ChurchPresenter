@@ -568,7 +568,9 @@ fun SongsTab(
 
                         // Group lyrics into sections
                         lyrics.forEachIndexed { index, line ->
-                            if (line.startsWith(VERSE_RUS) || line.startsWith(CHORUS_RUS)) {
+                            val isSectionHeader = line.startsWith(VERSE_RUS) || line.startsWith(CHORUS_RUS)
+                                    || line.startsWith(VERSE) || line.startsWith(CHORUS)
+                            if (isSectionHeader) {
                                 // Save previous section if it exists
                                 if (currentSection.isNotEmpty()) {
                                     sections.add(
@@ -580,9 +582,9 @@ fun SongsTab(
                                         )
                                     )
                                 }
-                                // Start new section
+                                // Start new section — assign type correctly
                                 currentSection = mutableListOf(line)
-                                currentSectionType = if (line.startsWith(CHORUS_RUS)) VERSE else CHORUS
+                                currentSectionType = if (line.startsWith(CHORUS_RUS) || line.startsWith(CHORUS)) CHORUS else VERSE
                             } else {
                                 currentSection.add(line)
                             }
@@ -618,7 +620,7 @@ fun SongsTab(
                                     .padding(8.dp)
                             ) {
                                 section.lines.forEachIndexed { lineIndex, line ->
-                                    if (lineIndex == 0 && (line.startsWith(VERSE_RUS) || line.startsWith(CHORUS_RUS))) {
+                                    if (lineIndex == 0 && (line.startsWith(VERSE_RUS) || line.startsWith(CHORUS_RUS) || line.startsWith(VERSE) || line.startsWith(CHORUS))) {
                                         Text(
                                             text = line,
                                             style = MaterialTheme.typography.titleSmall,

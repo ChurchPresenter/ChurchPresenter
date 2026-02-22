@@ -2,6 +2,10 @@ package org.churchpresenter.app.churchpresenter.viewmodel
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.data.Songs
 import org.churchpresenter.app.churchpresenter.models.LyricSection
@@ -9,11 +13,15 @@ import org.churchpresenter.app.churchpresenter.utils.Constants
 import java.io.File
 
 class SongsViewModel(
-    private val appSettings: AppSettings
+    private var appSettings: AppSettings
 ) {
     private val _songsData = mutableStateOf(Songs())
     val songsData: State<Songs> = _songsData
 
+    private val _isLoading = mutableStateOf(false)
+    val isLoading: State<Boolean> = _isLoading
+
+    private val viewModelScope = CoroutineScope(Dispatchers.Main)
     private val _allSongs = mutableStateOf<List<String>>(emptyList())
     val allSongs: State<List<String>> = _allSongs
 
@@ -44,49 +52,53 @@ class SongsViewModel(
         loadSongs()
     }
 
+    fun updateSettings(newSettings: AppSettings) {
+        appSettings = newSettings
+        loadSongs()
+    }
+
     fun loadSongs() {
-        val songs = Songs()
-
-        if (appSettings.songSettings.storageDirectory.isNotEmpty()) {
-            val dir = File(appSettings.songSettings.storageDirectory)
-            if (dir.exists() && dir.isDirectory) {
-                // Get all .sps files from the directory
-                val spsFiles: Array<File> = dir.listFiles { file ->
-                    file.extension.lowercase() == Constants.EXTENSION_SPS
-                } ?: emptyArray()
-
-                // Load each .sps file (sorted alphabetically) - using append to combine all databases
-                spsFiles.sortedBy { it.name }.forEach { file ->
-                    try {
-                        songs.loadFromSpsAppend(file.absolutePath)
-                    } catch (e: Exception) {
-                        // Silently handle error
-                    }
-                }
-            }
-        }
-
-        // If no files were loaded, try to load the bundled resource as fallback
-        if (songs.getSongCount() == 0) {
+        viewModelScope.launch {
+            _isLoading.value = true
             try {
-                songs.loadFromSps(Constants.FALLBACK_SONG_RESOURCE)
-            } catch (e: Exception) {
-                // Silently handle error
+                val songs = withContext(Dispatchers.IO) {
+                    val s = Songs()
+                    if (appSettings.songSettings.storageDirectory.isNotEmpty()) {
+                        val dir = File(appSettings.songSettings.storageDirectory)
+                        if (dir.exists() && dir.isDirectory) {
+                            val spsFiles: Array<File> = dir.listFiles { file ->
+                                file.extension.lowercase() == Constants.EXTENSION_SPS
+                            } ?: emptyArray()
+
+                            spsFiles.sortedBy { it.name }.forEach { file ->
+                                try {
+                                    s.loadFromSpsAppend(file.absolutePath)
+                                } catch (_: Exception) {}
+                            }
+                        }
+                    }
+                    if (s.getSongCount() == 0) {
+                        try { s.loadFromSps(Constants.FALLBACK_SONG_RESOURCE) } catch (_: Exception) {}
+                    }
+                    s
+                }
+
+                // Update state on Main thread
+                _songsData.value = songs
+
+                val uniqueSongbooks = songs.getSongs()
+                    .map { it.songbook }
+                    .filter { it.isNotBlank() }
+                    .distinct()
+                    .sorted()
+                _songbooks.value = uniqueSongbooks
+
+                _allSongs.value = songs.getSongs().map { "${it.number}. ${it.title}" }
+                _filteredSongs.value = _allSongs.value
+            } finally {
+                _isLoading.value = false
             }
         }
-        _songsData.value = songs
-
-        // Extract unique songbook names
-        val uniqueSongbooks = songs.getSongs()
-            .map { it.songbook }
-            .filter { it.isNotBlank() }
-            .distinct()
-            .sorted()
-        _songbooks.value = uniqueSongbooks
-
-        // Initialize all songs
-        _allSongs.value = songs.getSongs().map { "${it.number}. ${it.title}" }
-        _filteredSongs.value = _allSongs.value
     }
 
     fun updateSearchQuery(query: String) {

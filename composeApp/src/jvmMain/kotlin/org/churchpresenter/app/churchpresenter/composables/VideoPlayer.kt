@@ -21,6 +21,7 @@ import javax.swing.JPanel
 
 /**
  * Initialises the JavaFX toolkit exactly once for the lifetime of the process.
+ * Call [initAsync] early (e.g. from main) to pre-warm on a background thread.
  */
 private object JfxInit {
     @Volatile private var initialised = false
@@ -34,7 +35,15 @@ private object JfxInit {
             }
         }
     }
+    /** Pre-warms JavaFX on a daemon thread so the Media tab opens instantly. */
+    fun initAsync() {
+        if (initialised) return
+        Thread(::ensureInit, "jfx-prewarm").apply { isDaemon = true; start() }
+    }
 }
+
+/** Call once from main() to pre-warm JavaFX on a background thread. */
+fun preWarmJavaFX() = JfxInit.initAsync()
 
 /**
  * Embeds a JavaFX MediaPlayer for local video files.

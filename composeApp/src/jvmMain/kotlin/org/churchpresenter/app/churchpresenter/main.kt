@@ -43,12 +43,17 @@ import org.churchpresenter.app.churchpresenter.viewmodel.MediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.app.churchpresenter.viewmodel.ScheduleViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.SongsViewModel
+import org.churchpresenter.app.churchpresenter.composables.preWarmJavaFX
 import org.jetbrains.compose.resources.stringResource
 import java.util.Locale
 
-fun main() = application {
+fun main() {
+    // Pre-warm JavaFX on a background thread before UI starts
+    preWarmJavaFX()
+
+    application {
     // Business logic layer
-    val settingsManager = SettingsManager()
+    val settingsManager = remember { SettingsManager() }
     var appSettings by remember { mutableStateOf(settingsManager.loadSettings()) }
     val presenterManager = remember { PresenterManager() }
 
@@ -61,12 +66,12 @@ fun main() = application {
     }
 
     // Create BibleViewModel with settings (no fallback Bible needed)
-    val bibleViewModel = remember(appSettings) {
+    val bibleViewModel = remember {
         BibleViewModel(appSettings)
     }
 
     // Create SongsViewModel with settings
-    val songsViewModel = remember(appSettings) {
+    val songsViewModel = remember {
         SongsViewModel(appSettings)
     }
 
@@ -77,8 +82,15 @@ fun main() = application {
     val mediaViewModel = remember { MediaViewModel() }
 
 
-    // UI state
-    var theme by remember { mutableStateOf(ThemeMode.SYSTEM) }
+    // UI state — restore saved theme so toolbar/icons have the correct colors on first frame
+    var theme by remember {
+        val savedTheme = when (appSettings.theme.uppercase()) {
+            "LIGHT" -> ThemeMode.LIGHT
+            "DARK" -> ThemeMode.DARK
+            else -> ThemeMode.SYSTEM
+        }
+        mutableStateOf(savedTheme)
+    }
     var showOptionsDialog by remember { mutableStateOf(false) }
     var currentTab by remember { mutableStateOf(0) } // Track which tab is selected
     var selectedScheduleItemId by remember { mutableStateOf<String?>(null) } // Track selected schedule item
@@ -238,8 +250,8 @@ fun main() = application {
                     onSave = {
                         appSettings = it
                         // Reload ViewModels with new settings
-                        bibleViewModel.loadBibles()
-                        songsViewModel.loadSongs()
+                        bibleViewModel.updateSettings(it)
+                        songsViewModel.updateSettings(it)
                     }
                 )
             }
@@ -323,4 +335,5 @@ fun main() = application {
             }
         }
     }
+    } // end application
 }

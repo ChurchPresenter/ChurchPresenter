@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.data.Bible
 import org.churchpresenter.app.churchpresenter.data.BibleBookNames
@@ -15,7 +16,7 @@ import org.churchpresenter.app.churchpresenter.utils.Constants.ENTIRE_BIBLE
 import java.io.File
 
 class BibleViewModel(
-    private val appSettings: AppSettings
+    private var appSettings: AppSettings
 ) {
     private val _primaryBible = mutableStateOf<Bible?>(null)
     val primaryBible: State<Bible?> = _primaryBible
@@ -68,6 +69,9 @@ class BibleViewModel(
 
     private val _englishBookNames = mutableStateOf<List<String>>(emptyList())
 
+    private val _isLoading = mutableStateOf(false)
+    val isLoading: State<Boolean> = _isLoading
+
     private val viewModelScope = CoroutineScope(Dispatchers.Main)
 
     init {
@@ -90,59 +94,68 @@ class BibleViewModel(
         loadBibles()
     }
 
+    fun updateSettings(newSettings: AppSettings) {
+        appSettings = newSettings
+        loadBibles()
+    }
+
     fun loadBibles() {
-        // Load primary Bible from settings
-        _primaryBible.value = if (appSettings.bibleSettings.primaryBible.isNotEmpty() &&
-            appSettings.bibleSettings.storageDirectory.isNotEmpty()) {
-            val bibleFile = File(appSettings.bibleSettings.storageDirectory, appSettings.bibleSettings.primaryBible)
-
-            if (bibleFile.exists()) {
-                try {
-                    Bible().apply {
-                        loadFromSpb(bibleFile.absolutePath)
-                    }
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    null
+        viewModelScope.launch {
+            _isLoading.value = true
+            try {
+                // Parse Bible files on IO thread so the UI stays responsive
+                val primary = withContext(Dispatchers.IO) {
+                    if (appSettings.bibleSettings.primaryBible.isNotEmpty() &&
+                        appSettings.bibleSettings.storageDirectory.isNotEmpty()
+                    ) {
+                        val bibleFile = File(
+                            appSettings.bibleSettings.storageDirectory,
+                            appSettings.bibleSettings.primaryBible
+                        )
+                        if (bibleFile.exists()) {
+                            try {
+                                Bible().apply { loadFromSpb(bibleFile.absolutePath) }
+                            } catch (e: Exception) {
+                                e.printStackTrace(); null
+                            }
+                        } else null
+                    } else null
                 }
-            } else {
-                null
-            }
-        } else {
-            null
-        }
 
-        // Load secondary Bible from settings
-        _secondaryBible.value = if (appSettings.bibleSettings.secondaryBible.isNotEmpty() &&
-            appSettings.bibleSettings.storageDirectory.isNotEmpty()) {
-            val bibleFile = File(appSettings.bibleSettings.storageDirectory, appSettings.bibleSettings.secondaryBible)
-
-            if (bibleFile.exists()) {
-                try {
-                    Bible().apply {
-                        loadFromSpb(bibleFile.absolutePath)
-                    }
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    null
+                val secondary = withContext(Dispatchers.IO) {
+                    if (appSettings.bibleSettings.secondaryBible.isNotEmpty() &&
+                        appSettings.bibleSettings.storageDirectory.isNotEmpty()
+                    ) {
+                        val bibleFile = File(
+                            appSettings.bibleSettings.storageDirectory,
+                            appSettings.bibleSettings.secondaryBible
+                        )
+                        if (bibleFile.exists()) {
+                            try {
+                                Bible().apply { loadFromSpb(bibleFile.absolutePath) }
+                            } catch (e: Exception) {
+                                e.printStackTrace(); null
+                            }
+                        } else null
+                    } else null
                 }
-            } else {
-                null
-            }
-        } else {
-            null
-        }
 
-        // Load books from primary Bible only
-        _primaryBible.value?.let { bible ->
-            _books.value = bible.getBooks()
-            if (bible.getBookCount() > 0) {
-                loadChapter(_selectedBookIndex.value, _selectedChapter.value)
+                // Update state back on the Main thread
+                _primaryBible.value = primary
+                _secondaryBible.value = secondary
+
+                primary?.let { bible ->
+                    _books.value = bible.getBooks()
+                    if (bible.getBookCount() > 0) {
+                        loadChapter(_selectedBookIndex.value, _selectedChapter.value)
+                    }
+                } ?: run {
+                    _books.value = emptyList()
+                    _verses.value = emptyList()
+                }
+            } finally {
+                _isLoading.value = false
             }
-        } ?: run {
-            // No primary Bible loaded - clear books and verses
-            _books.value = emptyList()
-            _verses.value = emptyList()
         }
     }
 
