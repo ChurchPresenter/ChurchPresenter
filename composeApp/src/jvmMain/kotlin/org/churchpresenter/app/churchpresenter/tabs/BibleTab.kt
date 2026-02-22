@@ -27,10 +27,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -88,22 +85,10 @@ fun BibleTab(
     val searchResults by viewModel.searchResults
     val isSearchMode by viewModel.isSearchMode
 
-    // Get filtered lists from ViewModel
-    // Use bookSearchQuery from ViewModel for filtering books (independent of verse search)
-    val bookSearchQuery by viewModel.bookSearchQuery
-    val chapterSearchQuery by viewModel.chapterSearchQuery
-    val verseSearchQuery by viewModel.verseSearchQuery
-    val bookNameMapping by viewModel.bookNameMapping
-
-    val filteredBooks = remember(books, bookSearchQuery, bookNameMapping) {
-        viewModel.getFilteredBooks()
-    }
-    val filteredChapters = remember(selectedBookIndex, chapterSearchQuery) {
-        viewModel.getFilteredChapters()
-    }
-    val filteredVerses = remember(verses, verseSearchQuery) {
-        viewModel.getFilteredVerses()
-    }
+    // Filtered lists are managed entirely by ViewModel
+    val filteredBooks by viewModel.filteredBooks
+    val filteredChapters by viewModel.filteredChapters
+    val filteredVerses by viewModel.filteredVerses
 
     // String resources for scope and mode options
     val scopeOptions = listOf(
@@ -111,10 +96,7 @@ fun BibleTab(
         stringResource(Res.string.current_book),
     )
 
-    // Get selected scope index from ViewModel
     val selectedScopeIndex by viewModel.selectedScopeIndex
-
-    // Derive selected scope string from index
     val selectedScope = scopeOptions.getOrElse(selectedScopeIndex) { scopeOptions.first() }
 
     val modeOptions = listOf(
@@ -122,23 +104,18 @@ fun BibleTab(
         stringResource(Res.string.exact_match),
     )
 
-    // Get selected mode index from ViewModel
     val selectedModeIndex by viewModel.selectedModeIndex
-
-    // Derive selected mode string from index
     val selectedMode = modeOptions.getOrElse(selectedModeIndex) { modeOptions.first() }
 
     // Focus management for keyboard navigation
     val focusRequester = remember { FocusRequester() }
 
-    // Request focus when component is first composed
     LaunchedEffect(Unit) {
         focusRequester.requestFocus()
     }
 
-    // Send verse selection when it changes
+    // Notify parent when selected verse changes
     LaunchedEffect(selectedVerseIndex, verses.size) {
-        // Only get verses if we have a valid index
         if (verses.isNotEmpty() && selectedVerseIndex >= 0 && selectedVerseIndex < verses.size) {
             val selectedVerses = viewModel.getSelectedVerses()
             if (selectedVerses.isNotEmpty()) {
@@ -147,30 +124,17 @@ fun BibleTab(
         }
     }
 
-    // Handle keyboard navigation
+    // Handle keyboard navigation — thin UI delegation to ViewModel
     fun handleKeyEvent(event: KeyEvent): Boolean {
         if (event.type != KeyEventType.KeyDown) return false
-
-        when (event.key) {
-            Key.DirectionUp -> {
-                return viewModel.navigatePreviousVerse()
-            }
-
-            Key.DirectionDown -> {
-                return viewModel.navigateNextVerse()
-            }
-
-            Key.DirectionLeft -> {
-                return viewModel.navigatePreviousChapter()
-            }
-
-            Key.DirectionRight -> {
-                return viewModel.navigateNextChapter()
-            }
+        return when (event.key) {
+            Key.DirectionUp -> viewModel.navigatePreviousVerse()
+            Key.DirectionDown -> viewModel.navigateNextVerse()
+            Key.DirectionLeft -> viewModel.navigatePreviousChapter()
+            Key.DirectionRight -> viewModel.navigateNextChapter()
+            else -> false
         }
-        return false
     }
-
 
     Column(
         modifier = modifier
@@ -189,9 +153,7 @@ fun BibleTab(
                 modifier = Modifier.width(400.dp).padding(end = 8.dp),
                 value = searchQuery,
                 onValueChange = { viewModel.updateSearchQuery(it) },
-                label = {
-                    Text(text = stringResource(Res.string.search))
-                },
+                label = { Text(text = stringResource(Res.string.search)) },
                 maxLines = 1,
                 colors = OutlinedTextFieldDefaults.colors().copy(
                     unfocusedContainerColor = MaterialTheme.colorScheme.surface,
@@ -221,9 +183,7 @@ fun BibleTab(
                 }
             )
 
-            Button(onClick = {
-                viewModel.performSearch()
-            }) {
+            Button(onClick = { viewModel.performSearch() }) {
                 Text(text = stringResource(Res.string.search))
             }
 
@@ -254,23 +214,16 @@ fun BibleTab(
                 Box(modifier = Modifier.fillMaxWidth().fillMaxHeight()) {
                     val listState = rememberLazyListState()
 
-                    LazyColumn(
-                        state = listState,
-                        modifier = Modifier.fillMaxSize()
-                    ) {
+                    LazyColumn(state = listState, modifier = Modifier.fillMaxSize()) {
                         itemsIndexed(searchResults) { _, result ->
                             val resultText = "${result.book} ${result.chapter}:${result.verse} - ${result.verseText}"
                             val highlightedText = buildAnnotatedString {
                                 var lastIndex = 0
                                 val lowerText = resultText.lowercase()
                                 val lowerQuery = searchQuery.lowercase()
-
                                 var startIndex = lowerText.indexOf(lowerQuery, lastIndex)
                                 while (startIndex != -1) {
-                                    // Add text before match
                                     append(resultText.substring(lastIndex, startIndex))
-
-                                    // Add highlighted match
                                     withStyle(
                                         style = SpanStyle(
                                             background = MaterialTheme.colorScheme.primaryContainer,
@@ -280,12 +233,9 @@ fun BibleTab(
                                     ) {
                                         append(resultText.substring(startIndex, startIndex + searchQuery.length))
                                     }
-
                                     lastIndex = startIndex + searchQuery.length
                                     startIndex = lowerText.indexOf(lowerQuery, lastIndex)
                                 }
-
-                                // Add remaining text
                                 if (lastIndex < resultText.length) {
                                     append(resultText.substring(lastIndex))
                                 }
@@ -336,13 +286,10 @@ fun BibleTab(
                         list = filteredBooks,
                         selectedIndex = filteredBooks.indexOf(books.getOrNull(selectedBookIndex) ?: "").coerceAtLeast(0)
                     ) { index, _ ->
-                        // Find the real index in the original books list
                         val bookName = filteredBooks.getOrNull(index)
                         bookName?.let {
                             val realIndex = books.indexOf(it)
-                            if (realIndex >= 0) {
-                                viewModel.selectBook(realIndex)
-                            }
+                            if (realIndex >= 0) viewModel.selectBook(realIndex)
                         }
                     }
                 }
@@ -355,15 +302,12 @@ fun BibleTab(
                         list = filteredChapters,
                         selectedIndex = filteredChapters.indexOf(selectedChapter.toString()).coerceAtLeast(0)
                     ) { index, _ ->
-                        // Find the real chapter number from the filtered list
                         val chapterStr = filteredChapters.getOrNull(index)
-                        chapterStr?.toIntOrNull()?.let { chapter ->
-                            viewModel.selectChapter(chapter)
-                        }
+                        chapterStr?.toIntOrNull()?.let { chapter -> viewModel.selectChapter(chapter) }
                     }
                 }
 
-                // Verses view
+                // Verses column
                 Column(modifier = Modifier.fillMaxWidth()) {
                     Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                         SearchTextField(
@@ -389,22 +333,7 @@ fun BibleTab(
                         Button(
                             modifier = Modifier.wrapContentSize().padding(start = 8.dp),
                             onClick = {
-                                if (scheduleViewModel != null &&
-                                    verses.isNotEmpty() &&
-                                    selectedVerseIndex >= 0 &&
-                                    selectedVerseIndex < verses.size) {
-
-                                    val selectedVerses = viewModel.getSelectedVerses()
-                                    if (selectedVerses.isNotEmpty()) {
-                                        val verse = selectedVerses[0] // Get primary Bible verse
-                                        scheduleViewModel.addBibleVerse(
-                                            bookName = verse.bookName,
-                                            chapter = verse.chapter,
-                                            verseNumber = verse.verseNumber,
-                                            verseText = verse.verseText
-                                        )
-                                    }
-                                }
+                                scheduleViewModel?.let { viewModel.addCurrentVerseToSchedule(it) }
                             },
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = MaterialTheme.colorScheme.secondary
@@ -426,13 +355,10 @@ fun BibleTab(
                                 filteredVerses.indexOf(currentVerse).coerceAtLeast(0)
                             }
                         ) { index, _ ->
-                            // Find the real index in the original verses list
                             val verseText = filteredVerses.getOrNull(index)
                             verseText?.let {
                                 val realIndex = verses.indexOf(it)
-                                if (realIndex >= 0) {
-                                    viewModel.selectVerse(realIndex)
-                                }
+                                if (realIndex >= 0) viewModel.selectVerse(realIndex)
                             }
                         }
                     }

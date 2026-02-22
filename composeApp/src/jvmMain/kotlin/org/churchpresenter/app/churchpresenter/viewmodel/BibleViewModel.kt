@@ -10,9 +10,6 @@ import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.data.Bible
 import org.churchpresenter.app.churchpresenter.data.BibleBookNames
 import org.churchpresenter.app.churchpresenter.models.SelectedVerse
-import org.churchpresenter.app.churchpresenter.utils.Constants.CONTAINS
-import org.churchpresenter.app.churchpresenter.utils.Constants.CURRENT_BOOK
-import org.churchpresenter.app.churchpresenter.utils.Constants.ENTIRE_BIBLE
 import java.io.File
 
 class BibleViewModel(
@@ -56,6 +53,16 @@ class BibleViewModel(
 
     private val _verseSearchQuery = mutableStateOf("")
     val verseSearchQuery: State<String> = _verseSearchQuery
+
+    // Filtered list states — updated whenever underlying data or queries change
+    private val _filteredBooks = mutableStateOf<List<String>>(emptyList())
+    val filteredBooks: State<List<String>> = _filteredBooks
+
+    private val _filteredChapters = mutableStateOf<List<String>>(emptyList())
+    val filteredChapters: State<List<String>> = _filteredChapters
+
+    private val _filteredVerses = mutableStateOf<List<String>>(emptyList())
+    val filteredVerses: State<List<String>> = _filteredVerses
 
     private val _searchResults = mutableStateOf<List<org.churchpresenter.app.churchpresenter.data.BibleSearch>>(emptyList())
     val searchResults: State<List<org.churchpresenter.app.churchpresenter.data.BibleSearch>> = _searchResults
@@ -146,12 +153,14 @@ class BibleViewModel(
 
                 primary?.let { bible ->
                     _books.value = bible.getBooks()
+                    refreshFilteredLists()
                     if (bible.getBookCount() > 0) {
                         loadChapter(_selectedBookIndex.value, _selectedChapter.value)
                     }
                 } ?: run {
                     _books.value = emptyList()
                     _verses.value = emptyList()
+                    refreshFilteredLists()
                 }
             } finally {
                 _isLoading.value = false
@@ -171,6 +180,7 @@ class BibleViewModel(
                 val chapterVerses = bible.getChapter(bookId, chapter)
                 _verses.value = chapterVerses
                 _selectedVerseIndex.value = 0
+                refreshFilteredLists()
             }
         }
     }
@@ -398,6 +408,32 @@ class BibleViewModel(
         return false
     }
 
+    private fun refreshFilteredLists() {
+        _filteredBooks.value = getFilteredBooks()
+        _filteredChapters.value = getFilteredChapters()
+        _filteredVerses.value = getFilteredVerses()
+    }
+
+    /**
+     * Adds the currently selected Bible verse to the given schedule.
+     * Returns true if the verse was successfully added, false otherwise.
+     */
+    fun addCurrentVerseToSchedule(scheduleViewModel: ScheduleViewModel): Boolean {
+        if (_verses.value.isEmpty()) return false
+        val idx = _selectedVerseIndex.value
+        if (idx < 0 || idx >= _verses.value.size) return false
+        val selectedVerses = getSelectedVerses()
+        if (selectedVerses.isEmpty()) return false
+        val verse = selectedVerses[0]
+        scheduleViewModel.addBibleVerse(
+            bookName = verse.bookName,
+            chapter = verse.chapter,
+            verseNumber = verse.verseNumber,
+            verseText = verse.verseText
+        )
+        return true
+    }
+
     fun updateSearchQuery(query: String) {
         _searchQuery.value = query
     }
@@ -412,14 +448,17 @@ class BibleViewModel(
 
     fun updateBookSearchQuery(query: String) {
         _bookSearchQuery.value = query
+        refreshFilteredLists()
     }
 
     fun updateChapterSearchQuery(query: String) {
         _chapterSearchQuery.value = query
+        refreshFilteredLists()
     }
 
     fun updateVerseSearchQuery(query: String) {
         _verseSearchQuery.value = query
+        refreshFilteredLists()
     }
 
     fun performSearch() {
