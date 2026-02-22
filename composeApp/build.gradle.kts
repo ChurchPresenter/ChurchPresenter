@@ -51,13 +51,17 @@ kotlin {
             implementation("org.apache.poi:poi:5.2.5")
             implementation("org.apache.poi:poi-ooxml:5.2.5")
             implementation("org.apache.poi:poi-scratchpad:5.2.5")
-            // JavaFX for video playback (platform-native binaries)
+            // JavaFX for video playback — bundle all platforms so the installer works on any OS
             val jfxClassifier = currentOsClassifier()
-            implementation("org.openjfx:javafx-base:21:$jfxClassifier")
-            implementation("org.openjfx:javafx-graphics:21:$jfxClassifier")
-            implementation("org.openjfx:javafx-media:21:$jfxClassifier")
-            implementation("org.openjfx:javafx-swing:21:$jfxClassifier")
-            implementation("org.openjfx:javafx-controls:21:$jfxClassifier")
+            listOf("javafx-base", "javafx-graphics", "javafx-media", "javafx-swing", "javafx-controls").forEach { module ->
+                implementation("org.openjfx:$module:21:$jfxClassifier")
+            }
+            // Windows-specific: also pull win-x86_64 natives when building on Windows
+            if (jfxClassifier == "win") {
+                listOf("javafx-base", "javafx-graphics", "javafx-media", "javafx-swing", "javafx-controls").forEach { module ->
+                    runtimeOnly("org.openjfx:$module:21:win")
+                }
+            }
         }
     }
 }
@@ -68,16 +72,31 @@ compose.desktop {
         mainClass = "org.churchpresenter.app.churchpresenter.MainKt"
 
         jvmArgs(
+            // Memory
             "-Xms512m",
             "-Xmx1536m",
+            // GC
             "-XX:+UseG1GC",
             "-XX:G1NewSizePercent=20",
             "-XX:G1ReservePercent=20",
             "-XX:MaxGCPauseMillis=50",
             "-XX:+UseStringDeduplication",
-            "-Dskiko.renderApi=OPENGL",         // use OpenGL on Windows for smoother rendering
+            // Rendering
+            "-Dskiko.renderApi=OPENGL",
             "-Dawt.useSystemAAFontSettings=on",
-            "-Dswing.aatext=true"
+            "-Dswing.aatext=true",
+            // JavaFX modules required at runtime
+            "--add-modules=javafx.base,javafx.graphics,javafx.media,javafx.swing,javafx.controls",
+            // Reflective access needed by Apache POI, PDFBox, and JavaFX internals
+            "--add-opens=java.base/java.lang=ALL-UNNAMED",
+            "--add-opens=java.base/java.lang.reflect=ALL-UNNAMED",
+            "--add-opens=java.base/java.util=ALL-UNNAMED",
+            "--add-opens=java.base/java.util.concurrent=ALL-UNNAMED",
+            "--add-opens=java.base/java.io=ALL-UNNAMED",
+            "--add-opens=java.base/java.nio=ALL-UNNAMED",
+            "--add-opens=java.base/sun.nio.ch=ALL-UNNAMED",
+            "--add-opens=javafx.graphics/com.sun.javafx.application=ALL-UNNAMED",
+            "--add-opens=javafx.graphics/com.sun.glass.ui=ALL-UNNAMED"
         )
 
         buildTypes.release.proguard {
@@ -92,24 +111,47 @@ compose.desktop {
             copyright = "© 2025 Church Presenter. All rights reserved."
             vendor = "Church Presenter"
 
+            // Bundle ALL dependency JARs into the distribution — critical for standalone mode
+            includeAllModules = true
+
             macOS {
                 bundleID = "org.churchpresenter.app"
-                // Uncomment when you have an icon file
-                // iconFile.set(project.file("src/jvmMain/resources/icon.icns"))
+                jvmArgs(
+                    "--add-modules=javafx.base,javafx.graphics,javafx.media,javafx.swing,javafx.controls",
+                    "--add-opens=java.base/java.lang=ALL-UNNAMED",
+                    "--add-opens=java.base/java.io=ALL-UNNAMED",
+                    "--add-opens=java.base/java.nio=ALL-UNNAMED",
+                    "--add-opens=javafx.graphics/com.sun.javafx.application=ALL-UNNAMED"
+                )
             }
 
             windows {
-                // Uncomment when you have an icon file
-                // iconFile.set(project.file("src/jvmMain/resources/icon.ico"))
                 menuGroup = "ChurchPresenter"
                 perUserInstall = true
                 dirChooser = true
                 upgradeUuid = "A1B2C3D4-E5F6-4789-A012-3456789ABCDE"
+                // Windows-specific JVM args added to the launcher script
+                jvmArgs(
+                    "--add-modules=javafx.base,javafx.graphics,javafx.media,javafx.swing,javafx.controls",
+                    "--add-opens=java.base/java.lang=ALL-UNNAMED",
+                    "--add-opens=java.base/java.lang.reflect=ALL-UNNAMED",
+                    "--add-opens=java.base/java.util=ALL-UNNAMED",
+                    "--add-opens=java.base/java.io=ALL-UNNAMED",
+                    "--add-opens=java.base/java.nio=ALL-UNNAMED",
+                    "--add-opens=java.base/sun.nio.ch=ALL-UNNAMED",
+                    "--add-opens=javafx.graphics/com.sun.javafx.application=ALL-UNNAMED",
+                    "--add-opens=javafx.graphics/com.sun.glass.ui=ALL-UNNAMED"
+                )
             }
 
             linux {
-                // Uncomment when you have an icon file
-                // iconFile.set(project.file("src/jvmMain/resources/icon.png"))
+                jvmArgs(
+                    "--add-modules=javafx.base,javafx.graphics,javafx.media,javafx.swing,javafx.controls",
+                    "--add-opens=java.base/java.lang=ALL-UNNAMED",
+                    "--add-opens=java.base/java.io=ALL-UNNAMED",
+                    "--add-opens=java.base/java.nio=ALL-UNNAMED",
+                    "--add-opens=javafx.graphics/com.sun.javafx.application=ALL-UNNAMED"
+                )
             }
         }
     }
@@ -126,7 +168,6 @@ val problematicTasks = setOf(
 )
 
 tasks.matching { it.name in problematicTasks }.configureEach {
-    // Mark the task as untracked so Gradle does not snapshot inputs/outputs
-    // Workaround for OneDrive placeholder snapshot errors
     doNotTrackState("Temporary workaround: OneDrive placeholder snapshot errors")
 }
+
