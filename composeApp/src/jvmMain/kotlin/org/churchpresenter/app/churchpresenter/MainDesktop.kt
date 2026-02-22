@@ -300,14 +300,6 @@ fun MainDesktop(
 
                 Box(modifier = Modifier.fillMaxSize()) {
                     // Always-present MediaTab, hidden when not selected
-                    MediaTab(
-                        modifier = Modifier.fillMaxSize().then(
-                            if (currentTab == Tabs.MEDIA) Modifier else Modifier.requiredSize(0.dp)
-                        ),
-                        viewModel = mediaViewModel,
-                        scheduleViewModel = scheduleViewModel,
-                        presenterManager = presenterManager
-                    )
 
                     // All other tabs rendered on top when selected
                     when (currentTab) {
@@ -345,7 +337,12 @@ fun MainDesktop(
                             presenterManager = presenterManager
                         )
 
-                        Tabs.MEDIA -> { /* rendered above, always in composition */ }
+                        Tabs.MEDIA -> MediaTab(
+                                modifier = Modifier.fillMaxSize(),
+                                viewModel = mediaViewModel,
+                                scheduleViewModel = scheduleViewModel,
+                                presenterManager = presenterManager
+                            )
 
                         Tabs.STREAMING -> StreamingTab(
                             modifier = Modifier.fillMaxSize(),
