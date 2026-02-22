@@ -8,6 +8,8 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.toComposeImageBitmap
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.models.AnimationType
@@ -72,7 +74,7 @@ class PicturesViewModel(
         get() = _animationType.value
         set(value) { _animationType.value = value }
 
-    private val scope = CoroutineScope(Dispatchers.IO)
+    private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
     // Business Logic Methods
 
@@ -275,6 +277,10 @@ class PicturesViewModel(
             // Image is already small enough, use as-is
             originalImage.toComposeImageBitmap()
         }
+    }
+
+    fun dispose() {
+        scope.cancel()
     }
 }
 

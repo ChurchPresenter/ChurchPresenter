@@ -24,7 +24,6 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -73,7 +72,6 @@ import org.churchpresenter.app.churchpresenter.models.ScheduleItem
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.viewmodel.LocalMediaViewModel
-import org.churchpresenter.app.churchpresenter.viewmodel.MediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -89,7 +87,9 @@ fun MediaTab(
     selectedMediaItem: ScheduleItem.MediaItem? = null,
     presenterManager: PresenterManager? = null
 ) {
-    val viewModel = remember { MediaViewModel() }
+    // Consume the app-scope MediaViewModel provided by main.kt via CompositionLocalProvider.
+    // Do NOT create a local instance — that would disconnect MediaTab controls from MediaPresenter.
+    val viewModel = LocalMediaViewModel.current ?: return
     val focusRequester = remember { FocusRequester() }
     var volumeExpanded by remember { mutableStateOf(false) }
 
@@ -100,9 +100,6 @@ fun MediaTab(
         }
     }
 
-    // Provide viewModel via CompositionLocal so MediaPresenter in the presenter
-    // window can consume it without it being passed as a parameter.
-    CompositionLocalProvider(LocalMediaViewModel provides viewModel) {
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -461,5 +458,4 @@ fun MediaTab(
             }
         }
     }
-    } // end CompositionLocalProvider
 }

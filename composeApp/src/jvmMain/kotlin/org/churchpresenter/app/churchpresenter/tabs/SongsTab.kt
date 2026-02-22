@@ -26,11 +26,14 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
+import kotlinx.coroutines.flow.first
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -82,10 +85,21 @@ fun SongsTab(
 ) {
     val viewModel = remember { SongsViewModel(appSettings) }
 
-    // React to schedule item selection — select song then notify presenter
+    DisposableEffect(Unit) {
+        onDispose { viewModel.dispose() }
+    }
+
+    // React to schedule item selection.
+    // If data is still loading when the item arrives, wait for loading to finish
+    // then retry — no fixed delay, no polling, no race condition.
     LaunchedEffect(selectedSongItem) {
-        selectedSongItem?.let {
-            val found = viewModel.selectSongByDetails(it.songNumber, it.title, it.songbook)
+        selectedSongItem?.let { item ->
+            // Wait until data is ready if currently loading
+            if (viewModel.isLoading.value) {
+                snapshotFlow { viewModel.isLoading.value }
+                    .first { !it }
+            }
+            val found = viewModel.selectSongByDetails(item.songNumber, item.title, item.songbook)
             if (found) {
                 viewModel.getSelectedLyricSection()?.let { section -> onSongItemSelected(section) }
             }

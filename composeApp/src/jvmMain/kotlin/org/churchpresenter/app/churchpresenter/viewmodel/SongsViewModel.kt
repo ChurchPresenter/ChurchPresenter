@@ -4,6 +4,8 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.churchpresenter.app.churchpresenter.data.AppSettings
@@ -22,7 +24,7 @@ class SongsViewModel(
     private val _isLoading = mutableStateOf(false)
     val isLoading: State<Boolean> = _isLoading
 
-    private val viewModelScope = CoroutineScope(Dispatchers.Main)
+    private val viewModelScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     private val _allSongs = mutableStateOf<List<String>>(emptyList())
     val allSongs: State<List<String>> = _allSongs
 
@@ -435,5 +437,9 @@ class SongsViewModel(
             songbook = song.songbook
         )
         return true
+    }
+
+    fun dispose() {
+        viewModelScope.cancel()
     }
 }

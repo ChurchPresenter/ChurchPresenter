@@ -6,6 +6,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -62,8 +63,11 @@ fun main() {
         }
 
 
-        // Schedule actions are registered by MainDesktop — no ScheduleViewModel reference held here
+        // Schedule actions are registered by MainDesktop — no ScheduleViewModel reference held here.
+        // rememberUpdatedState ensures NavigationTopBar lambdas always read the latest actions
+        // without being recreated on every scheduleActions update.
         var scheduleActions by remember { mutableStateOf(ScheduleActions()) }
+        val currentScheduleActions by rememberUpdatedState(scheduleActions)
 
         // MediaViewModel lives at application scope — shared between MediaTab (controls)
         // and the presenter Window via LocalMediaViewModel CompositionLocal.
@@ -82,8 +86,8 @@ fun main() {
         var showOptionsDialog by remember { mutableStateOf(false) }
         var selectedScheduleItemId by remember { mutableStateOf<String?>(null) }
 
-        // Get bounds of the second screen if present
-        val screens = GraphicsEnvironment.getLocalGraphicsEnvironment().screenDevices
+        // Queried once — screen layout doesn't change at runtime.
+        val screens = remember { GraphicsEnvironment.getLocalGraphicsEnvironment().screenDevices }
         val state = rememberWindowState(
             placement = WindowPlacement.Maximized
         )
@@ -127,16 +131,16 @@ fun main() {
                             onAddToSchedule = {
                                 // Handled by MainDesktop via BibleTab/SongsTab callbacks
                             },
-                            onNewSchedule = { scheduleActions.newSchedule() },
-                            onOpenSchedule = { scheduleActions.openSchedule() },
-                            onSaveSchedule = { scheduleActions.saveSchedule() },
-                            onSaveScheduleAs = { scheduleActions.saveScheduleAs() },
-                            onCloseSchedule = { scheduleActions.newSchedule() },
+                            onNewSchedule = { currentScheduleActions.newSchedule() },
+                            onOpenSchedule = { currentScheduleActions.openSchedule() },
+                            onSaveSchedule = { currentScheduleActions.saveSchedule() },
+                            onSaveScheduleAs = { currentScheduleActions.saveScheduleAs() },
+                            onCloseSchedule = { currentScheduleActions.newSchedule() },
                             onRemoveFromSchedule = {
-                                selectedScheduleItemId?.let { scheduleActions.removeSelected(); selectedScheduleItemId = null }
+                                selectedScheduleItemId?.let { currentScheduleActions.removeSelected(); selectedScheduleItemId = null }
                             },
                             onClearSchedule = {
-                                scheduleActions.clearSchedule()
+                                currentScheduleActions.clearSchedule()
                                 selectedScheduleItemId = null
                             },
                         )
@@ -172,27 +176,32 @@ fun main() {
             }
         }
 
+        // Presenter windows — windowCount is read from settings (max 3).
+        // remember() must be called unconditionally and in stable order, so
+        // windowState is created BEFORE the if(showPresenterWindow) gate.
         val windowCount = appSettings.projectionSettings.numberOfWindows
         for (i in 0 until windowCount) {
-            if (showPresenterWindow) {
-                val windowState = remember(i) {
-                    val targetScreenIndex = i + 1
-
-                    if (targetScreenIndex < screens.size) {
-                        val screenBounds = screens[targetScreenIndex].defaultConfiguration.bounds
-                        WindowState(
-                            placement = WindowPlacement.Floating,
-                            position = WindowPosition(
-                                (screenBounds.x + appSettings.projectionSettings.windowLeft).dp,
-                                (screenBounds.y + appSettings.projectionSettings.windowTop).dp
-                            ),
-                            width = (screenBounds.width - appSettings.projectionSettings.windowLeft - appSettings.projectionSettings.windowRight).dp,
-                            height = (screenBounds.height - appSettings.projectionSettings.windowTop - appSettings.projectionSettings.windowBottom).dp
-                        )
-                    } else {
-                        WindowState(placement = WindowPlacement.Fullscreen)
-                    }
+            // Always call remember at this position regardless of showPresenterWindow,
+            // so the slot table stays stable and no memory corruption occurs.
+            val windowState = remember(i, appSettings.projectionSettings) {
+                val targetScreenIndex = i + 1
+                if (targetScreenIndex < screens.size) {
+                    val screenBounds = screens[targetScreenIndex].defaultConfiguration.bounds
+                    WindowState(
+                        placement = WindowPlacement.Floating,
+                        position = WindowPosition(
+                            (screenBounds.x + appSettings.projectionSettings.windowLeft).dp,
+                            (screenBounds.y + appSettings.projectionSettings.windowTop).dp
+                        ),
+                        width = (screenBounds.width - appSettings.projectionSettings.windowLeft - appSettings.projectionSettings.windowRight).dp,
+                        height = (screenBounds.height - appSettings.projectionSettings.windowTop - appSettings.projectionSettings.windowBottom).dp
+                    )
+                } else {
+                    WindowState(placement = WindowPlacement.Fullscreen)
                 }
+            }
+
+            if (showPresenterWindow) {
                 Window(
                     title = "Presenter View ${i + 1}",
                     onCloseRequest = { presenterManager.setShowPresenterWindow(false) },

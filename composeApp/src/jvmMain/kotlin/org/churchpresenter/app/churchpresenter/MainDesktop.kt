@@ -13,6 +13,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -71,10 +72,15 @@ fun MainDesktop(
     onScheduleActionsReady: (ScheduleActions) -> Unit = {},
     theme: ThemeMode = ThemeMode.SYSTEM
 ) {
-    // ScheduleViewModel lives inside ScheduleTab — MainDesktop drives it via callbacks
+    // ScheduleViewModel lives inside ScheduleTab — MainDesktop drives it via callbacks.
+    // rememberUpdatedState ensures toolbar lambdas always read the latest actions without
+    // needing to be recreated on every scheduleActions update.
     var scheduleActions by remember { mutableStateOf(ScheduleTabActions()) }
+    val currentScheduleActions by rememberUpdatedState(scheduleActions)
 
-    // Selected schedule items — passed directly into each tab; tab reacts via LaunchedEffect
+    // Keep a stable reference to onScheduleActionsReady so the onActionsReady lambda
+    // below doesn't capture a stale instance across recompositions.
+    val currentOnScheduleActionsReady by rememberUpdatedState(onScheduleActionsReady)
     var selectedBibleVerseItem by remember { mutableStateOf<ScheduleItem.BibleVerseItem?>(null) }
     var selectedSongItem       by remember { mutableStateOf<ScheduleItem.SongItem?>(null) }
     var selectedPictureItem    by remember { mutableStateOf<ScheduleItem.PictureItem?>(null) }
@@ -87,19 +93,6 @@ fun MainDesktop(
 
     LaunchedEffect(selectedTabIndex) { onTabChange(selectedTabIndex) }
 
-    // Forward ScheduleTabActions to parent (NavigationTopBar / menu) as ScheduleActions
-    LaunchedEffect(scheduleActions) {
-        onScheduleActionsReady(
-            ScheduleActions(
-                newSchedule    = scheduleActions.newSchedule,
-                openSchedule   = scheduleActions.openSchedule,
-                saveSchedule   = scheduleActions.saveSchedule,
-                saveScheduleAs = scheduleActions.saveScheduleAs,
-                removeSelected = scheduleActions.removeSelected,
-                clearSchedule  = scheduleActions.clearSchedule
-            )
-        )
-    }
 
     val mediaViewModel = LocalMediaViewModel.current
 
@@ -128,16 +121,16 @@ fun MainDesktop(
             Toolbar(
                 currentTheme = theme,
                 onThemeChange = onThemeChange,
-                onNewSchedule    = { scheduleActions.newSchedule() },
-                onOpenSchedule   = { scheduleActions.openSchedule() },
-                onSaveSchedule   = { scheduleActions.saveSchedule() },
-                onMoveToTop      = { scheduleActions.moveSelectedToTop() },
-                onMoveUp         = { scheduleActions.moveSelectedUp() },
-                onMoveDown       = { scheduleActions.moveSelectedDown() },
-                onMoveToBottom   = { scheduleActions.moveSelectedToBottom() },
+                onNewSchedule    = { currentScheduleActions.newSchedule() },
+                onOpenSchedule   = { currentScheduleActions.openSchedule() },
+                onSaveSchedule   = { currentScheduleActions.saveSchedule() },
+                onMoveToTop      = { currentScheduleActions.moveSelectedToTop() },
+                onMoveUp         = { currentScheduleActions.moveSelectedUp() },
+                onMoveDown       = { currentScheduleActions.moveSelectedDown() },
+                onMoveToBottom   = { currentScheduleActions.moveSelectedToBottom() },
                 onAddToSchedule  = { /* handled per-tab via onAddToSchedule callbacks */ },
-                onRemoveFromSchedule = { scheduleActions.removeSelected() },
-                onClearSchedule  = { scheduleActions.clearSchedule() },
+                onRemoveFromSchedule = { currentScheduleActions.removeSelected() },
+                onClearSchedule  = { currentScheduleActions.clearSchedule() },
                 onAddLabel       = { showAddLabelDialog = true },
                 onOpenSettings   = onShowSettings
             )
@@ -205,6 +198,16 @@ fun MainDesktop(
                         },
                         onActionsReady = { actions ->
                             scheduleActions = actions
+                            currentOnScheduleActionsReady(
+                                ScheduleActions(
+                                    newSchedule    = actions.newSchedule,
+                                    openSchedule   = actions.openSchedule,
+                                    saveSchedule   = actions.saveSchedule,
+                                    saveScheduleAs = actions.saveScheduleAs,
+                                    removeSelected = actions.removeSelected,
+                                    clearSchedule  = actions.clearSchedule
+                                )
+                            )
                         },
                         onSelectedItemChanged = { id ->
                             onScheduleItemSelected(id)
@@ -226,7 +229,7 @@ fun MainDesktop(
                                 modifier = Modifier.fillMaxSize(),
                                 appSettings = appSettings,
                                 onAddToSchedule = { bookName, chapter, verseNumber, verseText ->
-                                    scheduleActions.addBibleVerse(bookName, chapter, verseNumber, verseText)
+                                    currentScheduleActions.addBibleVerse(bookName, chapter, verseNumber, verseText)
                                 },
                                 selectedVerseItem = selectedBibleVerseItem,
                                 onVerseSelected = onVerseSelected,
@@ -236,7 +239,7 @@ fun MainDesktop(
                                 modifier = Modifier.fillMaxSize(),
                                 appSettings = appSettings,
                                 onAddToSchedule = { songNumber, title, songbook ->
-                                    scheduleActions.addSong(songNumber, title, songbook)
+                                    currentScheduleActions.addSong(songNumber, title, songbook)
                                 },
                                 selectedSongItem = selectedSongItem,
                                 onSongItemSelected = onSongItemSelected,
@@ -247,7 +250,7 @@ fun MainDesktop(
                                 modifier = Modifier.fillMaxSize(),
                                 appSettings = appSettings,
                                 onAddToSchedule = { folderPath, folderName, imageCount ->
-                                    scheduleActions.addPicture(folderPath, folderName, imageCount)
+                                    currentScheduleActions.addPicture(folderPath, folderName, imageCount)
                                 },
                                 selectedPictureItem = selectedPictureItem,
                                 presenterManager = presenterManager
@@ -256,7 +259,7 @@ fun MainDesktop(
                                 modifier = Modifier.fillMaxSize(),
                                 appSettings = appSettings,
                                 onAddToSchedule = { filePath, fileName, slideCount, fileType ->
-                                    scheduleActions.addPresentation(filePath, fileName, slideCount, fileType)
+                                    currentScheduleActions.addPresentation(filePath, fileName, slideCount, fileType)
                                 },
                                 selectedPresentationItem = selectedPresentationItem,
                                 presenterManager = presenterManager
@@ -264,7 +267,7 @@ fun MainDesktop(
                             Tabs.MEDIA -> MediaTab(
                                 modifier = Modifier.fillMaxSize(),
                                 onAddToSchedule = { mediaUrl, mediaTitle, mediaType ->
-                                    scheduleActions.addMedia(mediaUrl, mediaTitle, mediaType)
+                                    currentScheduleActions.addMedia(mediaUrl, mediaTitle, mediaType)
                                 },
                                 selectedMediaItem = selectedMediaItem,
                                 presenterManager = presenterManager
@@ -290,9 +293,9 @@ fun MainDesktop(
             },
             onConfirm = { text, textColor, backgroundColor ->
                 if (editingLabelItem != null) {
-                    scheduleActions.updateLabel(editingLabelItem!!.id, text, textColor, backgroundColor)
+                    currentScheduleActions.updateLabel(editingLabelItem!!.id, text, textColor, backgroundColor)
                 } else {
-                    scheduleActions.addLabel(text, textColor, backgroundColor)
+                    currentScheduleActions.addLabel(text, textColor, backgroundColor)
                 }
                 showAddLabelDialog = false
                 editingLabelItem = null

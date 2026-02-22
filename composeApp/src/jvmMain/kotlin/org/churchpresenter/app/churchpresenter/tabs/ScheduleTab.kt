@@ -25,6 +25,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -95,18 +96,20 @@ fun ScheduleTab(
 ) {
     val viewModel = remember { ScheduleViewModel() }
 
-    val strSaveScheduleAs = stringResource(Res.string.file_chooser_save_schedule)
-    val strOpenSchedule   = stringResource(Res.string.file_chooser_open_schedule)
-    val strFileFilter     = stringResource(Res.string.file_filter_schedule)
+    // State holders — lambdas capture the State object, not the string value,
+    // so they always read the latest value via .value without re-registering.
+    val strSaveScheduleAs = rememberUpdatedState(stringResource(Res.string.file_chooser_save_schedule))
+    val strOpenSchedule   = rememberUpdatedState(stringResource(Res.string.file_chooser_open_schedule))
+    val strFileFilter     = rememberUpdatedState(stringResource(Res.string.file_filter_schedule))
 
-    // Register actions with parent once string resources are available
-    LaunchedEffect(strSaveScheduleAs, strOpenSchedule, strFileFilter) {
+    // Register actions once — no recomposition cycle.
+    LaunchedEffect(Unit) {
         onActionsReady(
             ScheduleTabActions(
                 newSchedule      = { viewModel.newSchedule() },
-                openSchedule     = { viewModel.loadSchedule(strOpenSchedule, strFileFilter) },
-                saveSchedule     = { viewModel.saveSchedule(strSaveScheduleAs, strFileFilter) },
-                saveScheduleAs   = { viewModel.saveScheduleAs(strSaveScheduleAs, strFileFilter) },
+                openSchedule     = { viewModel.loadSchedule(strOpenSchedule.value, strFileFilter.value) },
+                saveSchedule     = { viewModel.saveSchedule(strSaveScheduleAs.value, strFileFilter.value) },
+                saveScheduleAs   = { viewModel.saveScheduleAs(strSaveScheduleAs.value, strFileFilter.value) },
                 removeSelected   = { viewModel.selectedItemId?.let { viewModel.removeItem(it) } },
                 clearSchedule    = { viewModel.clearSchedule() },
                 moveSelectedToTop    = { viewModel.selectedItemId?.let { viewModel.moveItemToTop(it) } },

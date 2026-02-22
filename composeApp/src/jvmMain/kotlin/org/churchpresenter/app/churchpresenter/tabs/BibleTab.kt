@@ -25,9 +25,12 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshotFlow
+import kotlinx.coroutines.flow.first
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -80,11 +83,21 @@ fun BibleTab(
 ) {
     val viewModel = remember { BibleViewModel(appSettings) }
 
+    DisposableEffect(Unit) {
+        onDispose { viewModel.dispose() }
+    }
 
-    // React to schedule item selection — fires whenever selectedVerseItem changes
+    // React to schedule item selection.
+    // If data is still loading when the item arrives, wait for loading to finish
+    // then retry — no fixed delay, no polling, no race condition.
     LaunchedEffect(selectedVerseItem) {
-        selectedVerseItem?.let {
-            viewModel.selectVerseByDetails(it.bookName, it.chapter, it.verseNumber)
+        selectedVerseItem?.let { item ->
+            // Wait until data is ready if currently loading
+            if (viewModel.isLoading.value) {
+                snapshotFlow { viewModel.isLoading.value }
+                    .first { !it }
+            }
+            viewModel.selectVerseByDetails(item.bookName, item.chapter, item.verseNumber)
         }
     }
 

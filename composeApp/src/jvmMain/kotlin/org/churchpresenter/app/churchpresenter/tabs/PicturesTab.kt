@@ -27,6 +27,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -76,6 +77,10 @@ fun PicturesTab(
 ) {
     val viewModel = remember { PicturesViewModel(appSettings) }
     val folderDialogTitle = stringResource(Res.string.select_image_folder_dialog)
+
+    DisposableEffect(Unit) {
+        onDispose { viewModel.dispose() }
+    }
 
 
     // Auto-scroll effect
