@@ -25,7 +25,7 @@ data class SongSettings(
 
     // Title settings
     val titleDisplay: String = Constants.FIRST_PAGE,
-    val titleFontSize: Int = 32,
+    val titleFontSize: Int = 70,
     val titleFontType: String = "Arial",
     val titleMinFontSize: Int = 16,
     val titleMaxFontSize: Int = 72,
@@ -66,13 +66,13 @@ data class BibleSettings(
     // Primary Bible text
     val primaryBibleColor: String = "#FFFFFF",
     val primaryBibleFontType: String = "Arial",
-    val primaryBibleFontSize: Int = 24,
+    val primaryBibleFontSize: Int = 70,
     val primaryBibleHorizontalAlignment: String = Constants.CENTER,
 
     // Primary Bible book reference
     val primaryReferenceColor: String = "#FFFFFF",
     val primaryReferenceFontType: String = "Arial",
-    val primaryReferenceFontSize: Int = 20,
+    val primaryReferenceFontSize: Int = 70,
     val primaryReferencePosition: String = "Above", // "Above" or "Below"
     val primaryReferenceHorizontalAlignment: String = Constants.CENTER,
     val primaryShowAbbreviation: Boolean = false,
@@ -80,13 +80,13 @@ data class BibleSettings(
     // Secondary Bible text
     val secondaryBibleColor: String = "#CCCCCC",
     val secondaryBibleFontType: String = "Arial",
-    val secondaryBibleFontSize: Int = 18,
+    val secondaryBibleFontSize: Int = 70,
     val secondaryBibleHorizontalAlignment: String = Constants.CENTER,
 
     // Secondary Bible book reference
     val secondaryReferenceColor: String = "#CCCCCC",
     val secondaryReferenceFontType: String = "Arial",
-    val secondaryReferenceFontSize: Int = 16,
+    val secondaryReferenceFontSize: Int = 70,
     val secondaryReferencePosition: String = "Above", // "Above" or "Below"
     val secondaryReferenceHorizontalAlignment: String = Constants.CENTER,
     val secondaryShowAbbreviation: Boolean = false,
@@ -98,10 +98,10 @@ data class BibleSettings(
 @Serializable
 data class ProjectionSettings(
     val numberOfWindows: Int = 1, // 1-3 projection windows
-    val windowTop: Int = 0,
-    val windowLeft: Int = 0,
-    val windowRight: Int = 0,
-    val windowBottom: Int = 0
+    val windowTop: Int = 32,
+    val windowLeft: Int = 32,
+    val windowRight: Int = 32,
+    val windowBottom: Int = 32
 )
 
 @Serializable

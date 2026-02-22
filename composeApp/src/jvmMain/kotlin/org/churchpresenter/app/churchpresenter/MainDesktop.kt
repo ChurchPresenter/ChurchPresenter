@@ -95,6 +95,7 @@ fun MainDesktop(
 
 
     val mediaViewModel = LocalMediaViewModel.current
+    val presentingMode by presenterManager.presentingMode
 
     Box(
         modifier = modifier
@@ -244,6 +245,7 @@ fun MainDesktop(
                                 selectedSongItem = selectedSongItem,
                                 onSongItemSelected = onSongItemSelected,
                                 onPresenting = presenting,
+                                isPresenting = presentingMode == Presenting.LYRICS,
                                 theme = theme
                             )
                             Tabs.PICTURES -> PicturesTab(

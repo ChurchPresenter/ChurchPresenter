@@ -21,6 +21,12 @@ class PresenterManager {
     private val _lyricSection = mutableStateOf(LyricSection())
     val lyricSection: State<LyricSection> = _lyricSection
 
+    // Monotonic counter incremented on every setLyricSection call.
+    // Ensures Compose always sees a state change even when the LyricSection
+    // content is structurally identical (same song/section clicked twice).
+    private val _lyricSectionVersion = mutableStateOf(0)
+    val lyricSectionVersion: State<Int> = _lyricSectionVersion
+
     private val _selectedImagePath = mutableStateOf<String?>(null)
     val selectedImagePath: State<String?> = _selectedImagePath
 
@@ -53,6 +59,7 @@ class PresenterManager {
 
     fun setLyricSection(section: LyricSection) {
         _lyricSection.value = section
+        _lyricSectionVersion.value++
     }
 
     fun setSelectedImagePath(imagePath: String?) {

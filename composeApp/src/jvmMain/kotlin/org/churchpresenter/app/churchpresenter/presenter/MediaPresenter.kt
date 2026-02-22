@@ -13,12 +13,11 @@ import org.churchpresenter.app.churchpresenter.viewmodel.LocalMediaViewModel
 @Composable
 fun MediaPresenter(
     modifier: Modifier = Modifier,
-    isVisible: Boolean = true
+    isVisible: Boolean = true,
+    audioEnabled: Boolean = true
 ) {
     val viewModel = LocalMediaViewModel.current ?: return
 
-    // Pause playback when this presenter is hidden (another mode is active)
-    // so audio does not bleed through other presenter screens.
     LaunchedEffect(isVisible) {
         if (!isVisible) {
             viewModel.pause()
@@ -33,7 +32,8 @@ fun MediaPresenter(
         if (viewModel.isLoaded && isVisible) {
             VideoPlayer(
                 viewModel = viewModel,
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier.fillMaxSize(),
+                audioEnabled = audioEnabled
             )
         }
     }

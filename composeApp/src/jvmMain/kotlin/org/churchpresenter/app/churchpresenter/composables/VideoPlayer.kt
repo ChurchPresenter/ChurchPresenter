@@ -53,7 +53,8 @@ fun preWarmJavaFX() = JfxInit.initAsync()
 @Composable
 fun VideoPlayer(
     viewModel: MediaViewModel,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    audioEnabled: Boolean = true
 ) {
     JfxInit.ensureInit()
 
@@ -61,7 +62,6 @@ fun VideoPlayer(
     val jfxPanel       = remember { JFXPanel() }
     val playerHolder   = remember { PlayerHolder() }
 
-    // Attach JFXPanel on entry; tear down player on exit
     DisposableEffect(Unit) {
         swingContainer.add(jfxPanel, BorderLayout.CENTER)
         onDispose {
@@ -82,7 +82,7 @@ fun VideoPlayer(
                 jfxPanel.scene = null
                 return@runLater
             }
-            buildPlayer(url, jfxPanel, playerHolder, viewModel)
+            buildPlayer(url, jfxPanel, playerHolder, viewModel, audioEnabled)
         }
     }
 
@@ -93,9 +93,12 @@ fun VideoPlayer(
         }
     }
 
+    // Only update volume if audio is enabled — muted windows stay at 0.0 permanently.
     LaunchedEffect(viewModel.effectiveVolume) {
-        Platform.runLater {
-            playerHolder.player?.volume = viewModel.effectiveVolume.toDouble()
+        if (audioEnabled) {
+            Platform.runLater {
+                playerHolder.player?.volume = viewModel.effectiveVolume.toDouble()
+            }
         }
     }
 
@@ -113,7 +116,8 @@ private fun buildPlayer(
     url: String,
     jfxPanel: JFXPanel,
     holder: PlayerHolder,
-    viewModel: MediaViewModel
+    viewModel: MediaViewModel,
+    audioEnabled: Boolean
 ) {
     val uri = try {
         val f = File(url)
@@ -136,16 +140,20 @@ private fun buildPlayer(
         player.setOnReady {
             viewModel.setDuration(player.totalDuration.toMillis().toLong())
         }
-        player.currentTimeProperty().addListener { _, _, v: Duration ->
-            viewModel.setCurrentPosition(v.toMillis().toLong())
+        // Only the primary (audioEnabled) player reports position to avoid double-updates
+        if (audioEnabled) {
+            player.currentTimeProperty().addListener { _, _, v: Duration ->
+                viewModel.setCurrentPosition(v.toMillis().toLong())
+            }
         }
         player.setOnEndOfMedia {
-            viewModel.pause()
+            if (audioEnabled) viewModel.pause()
             player.seek(Duration.ZERO)
         }
 
         holder.player = player
-        player.volume = viewModel.effectiveVolume.toDouble()
+        // Muted windows always play at volume 0 — never read effectiveVolume
+        player.volume = if (audioEnabled) viewModel.effectiveVolume.toDouble() else 0.0
         if (viewModel.isPlaying) player.play()
 
     } catch (_: Exception) {

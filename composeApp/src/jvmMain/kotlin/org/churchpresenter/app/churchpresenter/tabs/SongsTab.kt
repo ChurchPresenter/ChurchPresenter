@@ -81,6 +81,7 @@ fun SongsTab(
     selectedSongItem: ScheduleItem.SongItem? = null,
     onSongItemSelected: (LyricSection) -> Unit,
     onPresenting: (Presenting) -> Unit = { Presenting.NONE },
+    isPresenting: Boolean = false,
     theme: ThemeMode = ThemeMode.SYSTEM
 ) {
     val viewModel = remember { SongsViewModel(appSettings) }
@@ -148,19 +149,28 @@ fun SongsTab(
             .onKeyEvent { keyEvent ->
                 if (keyEvent.type == KeyEventType.KeyDown) {
                     when (keyEvent.key) {
-                        Key.DirectionLeft -> { viewModel.navigatePreviousSong(); true }
-                        Key.DirectionRight -> { viewModel.navigateNextSong(); true }
+                        Key.DirectionLeft -> {
+                            if (!isPresenting) {
+                                viewModel.navigatePreviousSong()
+                                viewModel.getSelectedLyricSection()?.let { onSongItemSelected(it) }
+                            }
+                            true
+                        }
+                        Key.DirectionRight -> {
+                            if (!isPresenting) {
+                                viewModel.navigateNextSong()
+                                viewModel.getSelectedLyricSection()?.let { onSongItemSelected(it) }
+                            }
+                            true
+                        }
                         Key.DirectionUp -> {
-                            if (!viewModel.navigatePreviousSection()) viewModel.navigatePreviousSong()
+                            if (!viewModel.navigatePreviousSection() && !isPresenting) viewModel.navigatePreviousSong()
+                            viewModel.getSelectedLyricSection()?.let { onSongItemSelected(it) }
                             true
                         }
                         Key.DirectionDown -> {
-                            val navigated = viewModel.navigateNextSection()
-                            if (navigated) {
-                                viewModel.getSelectedLyricSection()?.let { onSongItemSelected(it) }
-                            } else {
-                                viewModel.navigateNextSong()
-                            }
+                            if (!viewModel.navigateNextSection() && !isPresenting) viewModel.navigateNextSong()
+                            viewModel.getSelectedLyricSection()?.let { onSongItemSelected(it) }
                             true
                         }
                         else -> false
@@ -395,9 +405,7 @@ fun SongsTab(
                                         else Color.Transparent
                                     )
                                     .clickable {
-                                        viewModel.selectSection(
-                                            if (selectedSectionIndex == sectionIndex) -1 else sectionIndex
-                                        )
+                                        viewModel.selectSection(sectionIndex)
                                         onSongItemSelected(section)
                                     }
                                     .padding(8.dp)
