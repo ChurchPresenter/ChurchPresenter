@@ -9,6 +9,7 @@ import kotlinx.coroutines.withContext
 import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.data.Bible
 import org.churchpresenter.app.churchpresenter.data.BibleBookNames
+import org.churchpresenter.app.churchpresenter.data.BibleSearch
 import org.churchpresenter.app.churchpresenter.models.SelectedVerse
 import java.io.File
 
@@ -64,8 +65,8 @@ class BibleViewModel(
     private val _filteredVerses = mutableStateOf<List<String>>(emptyList())
     val filteredVerses: State<List<String>> = _filteredVerses
 
-    private val _searchResults = mutableStateOf<List<org.churchpresenter.app.churchpresenter.data.BibleSearch>>(emptyList())
-    val searchResults: State<List<org.churchpresenter.app.churchpresenter.data.BibleSearch>> = _searchResults
+    private val _searchResults = mutableStateOf<List<BibleSearch>>(emptyList())
+    val searchResults: State<List<BibleSearch>> = _searchResults
 
     private val _isSearchMode = mutableStateOf(false)
     val isSearchMode: State<Boolean> = _isSearchMode
@@ -515,7 +516,7 @@ class BibleViewModel(
         _isSearchMode.value = false
     }
 
-    fun selectSearchResult(result: org.churchpresenter.app.churchpresenter.data.BibleSearch) {
+    fun selectSearchResult(result: BibleSearch) {
         // Find the book index
         val bookName = result.book
         val bookIndex = _books.value.indexOf(bookName)

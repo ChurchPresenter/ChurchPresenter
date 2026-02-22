@@ -7,6 +7,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.churchpresenter.app.churchpresenter.data.AppSettings
+import org.churchpresenter.app.churchpresenter.data.SongItem
 import org.churchpresenter.app.churchpresenter.data.Songs
 import org.churchpresenter.app.churchpresenter.models.LyricSection
 import org.churchpresenter.app.churchpresenter.utils.Constants
@@ -48,6 +49,17 @@ class SongsViewModel(
     private val _filteredSongs = mutableStateOf<List<String>>(emptyList())
     val filteredSongs: State<List<String>> = _filteredSongs
 
+    // Sort state — managed by ViewModel so it survives recomposition
+    private val _sortColumn = mutableStateOf("")
+    val sortColumn: State<String> = _sortColumn
+
+    private val _sortAscending = mutableStateOf(true)
+    val sortAscending: State<Boolean> = _sortAscending
+
+    // Sorted + filtered song items — ready for the UI to display directly
+    private val _filteredSongItems = mutableStateOf<List<SongItem>>(emptyList())
+    val filteredSongItems: State<List<SongItem>> = _filteredSongItems
+
     init {
         loadSongs()
     }
@@ -73,12 +85,16 @@ class SongsViewModel(
                             spsFiles.sortedBy { it.name }.forEach { file ->
                                 try {
                                     s.loadFromSpsAppend(file.absolutePath)
-                                } catch (_: Exception) {}
+                                } catch (_: Exception) {
+                                }
                             }
                         }
                     }
                     if (s.getSongCount() == 0) {
-                        try { s.loadFromSps(Constants.FALLBACK_SONG_RESOURCE) } catch (_: Exception) {}
+                        try {
+                            s.loadFromSps(Constants.FALLBACK_SONG_RESOURCE)
+                        } catch (_: Exception) {
+                        }
                     }
                     s
                 }
@@ -95,6 +111,7 @@ class SongsViewModel(
 
                 _allSongs.value = songs.getSongs().map { "${it.number}. ${it.title}" }
                 _filteredSongs.value = _allSongs.value
+                refreshFilteredSongItems()
             } finally {
                 _isLoading.value = false
             }
@@ -191,33 +208,45 @@ class SongsViewModel(
 
         song.lyrics.forEach { line ->
             when {
-                line.contains(Constants.VERSE_RUS, ignoreCase = true) || line.contains(Constants.VERSE, ignoreCase = true) -> {
+                line.contains(Constants.VERSE_RUS, ignoreCase = true) || line.contains(
+                    Constants.VERSE,
+                    ignoreCase = true
+                ) -> {
                     if (currentSection.isNotEmpty()) {
-                        sections.add(LyricSection(
-                            title = song.title,
-                            songNumber = song.number.toIntOrNull() ?: 0,
-                            lines = currentSection.toList(),
-                            type = sectionType
-                        ))
+                        sections.add(
+                            LyricSection(
+                                title = song.title,
+                                songNumber = song.number.toIntOrNull() ?: 0,
+                                lines = currentSection.toList(),
+                                type = sectionType
+                            )
+                        )
                         currentSection.clear()
                     }
                     sectionType = Constants.SECTION_TYPE_VERSE
                     sectionNumber++
                     currentSection.add(line)
                 }
-                line.contains(Constants.CHORUS_RUS, ignoreCase = true) || line.contains(Constants.CHORUS, ignoreCase = true) -> {
+
+                line.contains(Constants.CHORUS_RUS, ignoreCase = true) || line.contains(
+                    Constants.CHORUS,
+                    ignoreCase = true
+                ) -> {
                     if (currentSection.isNotEmpty()) {
-                        sections.add(LyricSection(
-                            title = song.title,
-                            songNumber = song.number.toIntOrNull() ?: 0,
-                            lines = currentSection.toList(),
-                            type = sectionType
-                        ))
+                        sections.add(
+                            LyricSection(
+                                title = song.title,
+                                songNumber = song.number.toIntOrNull() ?: 0,
+                                lines = currentSection.toList(),
+                                type = sectionType
+                            )
+                        )
                         currentSection.clear()
                     }
                     sectionType = Constants.SECTION_TYPE_CHORUS
                     currentSection.add(line)
                 }
+
                 else -> {
                     currentSection.add(line)
                 }
@@ -226,12 +255,14 @@ class SongsViewModel(
 
         // Add the last section
         if (currentSection.isNotEmpty()) {
-            sections.add(LyricSection(
-                title = song.title,
-                songNumber = song.number.toIntOrNull() ?: 0,
-                lines = currentSection.toList(),
-                type = sectionType
-            ))
+            sections.add(
+                LyricSection(
+                    title = song.title,
+                    songNumber = song.number.toIntOrNull() ?: 0,
+                    lines = currentSection.toList(),
+                    type = sectionType
+                )
+            )
         }
 
         return sections
@@ -293,12 +324,14 @@ class SongsViewModel(
             }
         }
 
-
         // Filter by search query
         if (_searchQuery.value.isNotEmpty()) {
             filtered = when (_filterType.value) {
                 Constants.CONTAINS -> filtered.filter { it.contains(_searchQuery.value, ignoreCase = true) }
-                Constants.STARTS_WITH -> filtered.filter { it.substringAfter(". ").startsWith(_searchQuery.value, ignoreCase = true) }
+                Constants.STARTS_WITH -> filtered.filter {
+                    it.substringAfter(". ").startsWith(_searchQuery.value, ignoreCase = true)
+                }
+
                 Constants.EXACT_MATCH -> filtered.filter { it.endsWith(_searchQuery.value, ignoreCase = true) }
                 else -> filtered
             }
@@ -310,9 +343,47 @@ class SongsViewModel(
         if (_selectedSongIndex.value >= filtered.size && filtered.isNotEmpty()) {
             _selectedSongIndex.value = 0
         }
+
+        refreshFilteredSongItems()
     }
 
-    fun updateSong(oldSong: org.churchpresenter.app.churchpresenter.data.SongItem, newSong: org.churchpresenter.app.churchpresenter.data.SongItem): Boolean {
+    private fun refreshFilteredSongItems() {
+        val songsMap = _songsData.value.getSongs().associateBy { "${it.number}. ${it.title}" }
+        var items = _filteredSongs.value.mapNotNull { songsMap[it] }
+
+        if (_sortColumn.value.isNotEmpty()) {
+            items = when (_sortColumn.value) {
+                Constants.SORT_NUMBER -> if (_sortAscending.value)
+                    items.sortedBy { it.number.toIntOrNull() ?: Int.MAX_VALUE }
+                else
+                    items.sortedByDescending { it.number.toIntOrNull() ?: Int.MIN_VALUE }
+
+                Constants.SORT_TITLE -> if (_sortAscending.value)
+                    items.sortedBy { it.title.lowercase() }
+                else
+                    items.sortedByDescending { it.title.lowercase() }
+
+                Constants.SORT_SONGBOOK -> if (_sortAscending.value)
+                    items.sortedBy { it.songbook.lowercase() }
+                else
+                    items.sortedByDescending { it.songbook.lowercase() }
+
+                Constants.SORT_TUNE -> if (_sortAscending.value)
+                    items.sortedBy { it.tune.lowercase() }
+                else
+                    items.sortedByDescending { it.tune.lowercase() }
+
+                else -> items
+            }
+        }
+
+        _filteredSongItems.value = items
+    }
+
+    fun updateSong(
+        oldSong: SongItem,
+        newSong: SongItem
+    ): Boolean {
         try {
             // Update in memory
             _songsData.value.updateSong(oldSong, newSong)
@@ -332,5 +403,38 @@ class SongsViewModel(
         } catch (e: Exception) {
             return false
         }
+    }
+
+    fun updateSort(column: String) {
+        if (_sortColumn.value == column) {
+            _sortAscending.value = !_sortAscending.value
+        } else {
+            _sortColumn.value = column
+            _sortAscending.value = true
+        }
+        refreshFilteredSongItems()
+    }
+
+    fun getSortIndicator(column: String): String {
+        return if (_sortColumn.value == column) {
+            if (_sortAscending.value) " ↑" else " ↓"
+        } else ""
+    }
+
+    /**
+     * Adds the currently selected song to the schedule.
+     * Returns true if successfully added, false otherwise.
+     */
+    fun addCurrentSongToSchedule(scheduleViewModel: ScheduleViewModel): Boolean {
+        val items = _filteredSongItems.value
+        val idx = _selectedSongIndex.value
+        if (idx < 0 || idx >= items.size) return false
+        val song = items[idx]
+        scheduleViewModel.addSong(
+            songNumber = song.number.toIntOrNull() ?: 0,
+            title = song.title,
+            songbook = song.songbook
+        )
+        return true
     }
 }

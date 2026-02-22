@@ -1,15 +1,14 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
+import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.VerticalScrollbar
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -18,6 +17,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -31,7 +31,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -46,15 +45,12 @@ import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.add_to_schedule
 import churchpresenter.composeapp.generated.resources.all_song_books
-import churchpresenter.composeapp.generated.resources.all_song_categories
 import churchpresenter.composeapp.generated.resources.contains
 import churchpresenter.composeapp.generated.resources.edit_song
 import churchpresenter.composeapp.generated.resources.exact_match
-import churchpresenter.composeapp.generated.resources.filter_colon
 import churchpresenter.composeapp.generated.resources.filter_type_colon
 import churchpresenter.composeapp.generated.resources.go_live
 import churchpresenter.composeapp.generated.resources.no_lyrics_available
-import churchpresenter.composeapp.generated.resources.no_song_selected
 import churchpresenter.composeapp.generated.resources.number
 import churchpresenter.composeapp.generated.resources.search
 import churchpresenter.composeapp.generated.resources.search_songs
@@ -69,10 +65,6 @@ import org.churchpresenter.app.churchpresenter.models.LyricSection
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
 import org.churchpresenter.app.churchpresenter.utils.Constants
-import org.churchpresenter.app.churchpresenter.utils.Constants.CHORUS
-import org.churchpresenter.app.churchpresenter.utils.Constants.CHORUS_RUS
-import org.churchpresenter.app.churchpresenter.utils.Constants.VERSE
-import org.churchpresenter.app.churchpresenter.utils.Constants.VERSE_RUS
 import org.churchpresenter.app.churchpresenter.viewmodel.ScheduleViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.SongsViewModel
 import org.jetbrains.compose.resources.stringResource
@@ -86,32 +78,24 @@ fun SongsTab(
     onPresenting: (Presenting) -> Unit = { Presenting.NONE },
     theme: ThemeMode = ThemeMode.SYSTEM
 ) {
-    // Get state from ViewModel
+    // Observe ViewModel state
     val songbooks by viewModel.songbooks
     val searchQuery by viewModel.searchQuery
     val selectedSongbook by viewModel.selectedSongbook
     val filterType by viewModel.filterType
     val selectedSongIndex by viewModel.selectedSongIndex
     val selectedSectionIndex by viewModel.selectedSectionIndex
+    val filteredSongs by viewModel.filteredSongItems
 
-    // Edit Song Dialog state
+    // Edit Song Dialog state (pure UI state — fine to keep here)
     var showEditDialog by remember { mutableStateOf(false) }
     var songToEdit by remember { mutableStateOf<SongItem?>(null) }
 
     // String resources
     val allSongBooksText = stringResource(Res.string.all_song_books)
-    val allSongCategoriesText = stringResource(Res.string.all_song_categories)
-
-    // Local category state (not yet in ViewModel)
-    var selectedCategory by rememberSaveable { mutableStateOf(allSongCategoriesText) }
 
     // Prepend "All" option to songbooks
     val songbookOptions = remember(songbooks) { listOf(allSongBooksText) + songbooks }
-
-    // Local state for sorting
-    var sortColumn by rememberSaveable { mutableStateOf("") }
-    var sortAscending by rememberSaveable { mutableStateOf(true) }
-
 
     // String resources for filter types
     val containsText = stringResource(Res.string.contains)
@@ -120,84 +104,16 @@ fun SongsTab(
 
     val filterTypes = listOf(containsText, startsWithText, exactMatchText)
 
-    // Map filter type display text to internal key
     val filterTypeMap = mapOf(
         containsText to Constants.CONTAINS,
         startsWithText to Constants.STARTS_WITH,
         exactMatchText to Constants.EXACT_MATCH
     )
-
-    // Map internal key to display text
     val filterTypeDisplayMap = mapOf(
         Constants.CONTAINS to containsText,
         Constants.STARTS_WITH to startsWithText,
         Constants.EXACT_MATCH to exactMatchText
     )
-
-    // Get filtered songs from ViewModel (not recalculating locally to ensure consistency)
-    val filteredSongsFromViewModel by viewModel.filteredSongs
-    val songsData by viewModel.songsData
-
-    // Convert from List<String> to List<Song> for display
-    val allSongs = songsData.getSongs()
-    val filteredSongs = remember(filteredSongsFromViewModel, sortColumn, sortAscending, allSongs) {
-        // Map the string list back to Song objects
-        val songsMap = allSongs.associateBy { "${it.number}. ${it.title}" }
-        var filtered = filteredSongsFromViewModel.mapNotNull { songText ->
-            songsMap[songText]
-        }
-
-        // Apply sorting (only sorting is done in UI, filtering is in ViewModel)
-        if (sortColumn.isNotEmpty()) {
-            filtered = when (sortColumn) {
-                Constants.SORT_NUMBER -> if (sortAscending) {
-                    filtered.sortedBy { it.number.toIntOrNull() ?: Int.MAX_VALUE }
-                } else {
-                    filtered.sortedByDescending { it.number.toIntOrNull() ?: Int.MIN_VALUE }
-                }
-
-                Constants.SORT_TITLE -> if (sortAscending) {
-                    filtered.sortedBy { it.title.lowercase() }
-                } else {
-                    filtered.sortedByDescending { it.title.lowercase() }
-                }
-
-                Constants.SORT_SONGBOOK -> if (sortAscending) {
-                    filtered.sortedBy { it.songbook.lowercase() }
-                } else {
-                    filtered.sortedByDescending { it.songbook.lowercase() }
-                }
-
-                Constants.SORT_TUNE -> if (sortAscending) {
-                    filtered.sortedBy { it.tune.lowercase() }
-                } else {
-                    filtered.sortedByDescending { it.tune.lowercase() }
-                }
-
-                else -> filtered
-            }
-        }
-
-        filtered
-    }
-
-    // Helper function to handle column sorting
-    val onColumnClick: (String) -> Unit = { column ->
-        if (sortColumn == column) {
-            sortAscending = !sortAscending
-        } else {
-            sortColumn = column
-            sortAscending = true
-        }
-    }
-
-    // Helper function to get sort indicator
-    val getSortIndicator: (String) -> String = { column ->
-        if (sortColumn == column) {
-            if (sortAscending) " ↑" else " ↓"
-        } else ""
-    }
-
 
     Row(
         modifier = modifier
@@ -205,55 +121,31 @@ fun SongsTab(
             .onKeyEvent { keyEvent ->
                 if (keyEvent.type == KeyEventType.KeyDown) {
                     when (keyEvent.key) {
-                        Key.DirectionLeft -> {
-                            // Previous song
-                            viewModel.navigatePreviousSong()
-                            true
-                        }
-
-                        Key.DirectionRight -> {
-                            // Next song
-                            viewModel.navigateNextSong()
-                            true
-                        }
-
+                        Key.DirectionLeft -> { viewModel.navigatePreviousSong(); true }
+                        Key.DirectionRight -> { viewModel.navigateNextSong(); true }
                         Key.DirectionUp -> {
-                            // Navigate up: Try previous section first, if at top, go to previous song
-                            val sectionNavigated = viewModel.navigatePreviousSection()
-                            if (!sectionNavigated) {
-                                // If we can't go to previous section, go to previous song
-                                viewModel.navigatePreviousSong()
-                            }
+                            if (!viewModel.navigatePreviousSection()) viewModel.navigatePreviousSong()
                             true
                         }
-
                         Key.DirectionDown -> {
-                            // Navigate down: Try next section first, if at bottom, go to next song
                             val navigated = viewModel.navigateNextSection()
                             if (navigated) {
-                                viewModel.getSelectedLyricSection()?.let { section ->
-                                    onSongItemSelected(section)
-                                }
+                                viewModel.getSelectedLyricSection()?.let { onSongItemSelected(it) }
                             } else {
-                                // If we can't go to next section, go to next song
                                 viewModel.navigateNextSong()
                             }
                             true
                         }
-
                         else -> false
                     }
-                } else {
-                    false
-                }
+                } else false
             }
             .focusable()
     ) {
-        // Left panel - Search and song list
+        // Left panel — Search and song list
         Column(modifier = Modifier.weight(0.6f).fillMaxHeight()) {
             // Search controls
             Column(modifier = Modifier.padding(8.dp)) {
-                // Songbooks dropdown
                 DropdownSelector(
                     modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp),
                     label = "",
@@ -261,26 +153,6 @@ fun SongsTab(
                     selected = selectedSongbook.ifEmpty { allSongBooksText },
                     onSelectedChange = { viewModel.updateSelectedSongbook(it) }
                 )
-
-//                Row(
-//                    modifier = Modifier.fillMaxWidth(),
-//                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-//                    verticalAlignment = Alignment.CenterVertically
-//                ) {
-//                    Text(
-//                        stringResource(Res.string.filter_colon),
-//                        style = MaterialTheme.typography.labelMedium,
-//                        color = MaterialTheme.colorScheme.primary,
-//                        modifier = Modifier.padding(vertical = 4.dp)
-//                    )
-//                    DropdownSelector(
-//                        modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp),
-//                        label = "",
-//                        items = categories,
-//                        selected = selectedCategory,
-//                        onSelectedChange = { selectedCategory = it }
-//                    )
-//                }
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -306,22 +178,15 @@ fun SongsTab(
                         onClick = { /* Search action */ },
                         modifier = Modifier.height(40.dp)
                     ) {
-                        Text(
-                            stringResource(Res.string.search),
-                            style = MaterialTheme.typography.labelMedium
-                        )
+                        Text(stringResource(Res.string.search), style = MaterialTheme.typography.labelMedium)
                     }
                 }
 
-                // Search input
                 OutlinedTextField(
                     value = searchQuery,
                     onValueChange = { viewModel.updateSearchQuery(it) },
                     label = {
-                        Text(
-                            stringResource(Res.string.search_songs),
-                            style = MaterialTheme.typography.labelMedium
-                        )
+                        Text(stringResource(Res.string.search_songs), style = MaterialTheme.typography.labelMedium)
                     },
                     modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
                     singleLine = true,
@@ -332,7 +197,7 @@ fun SongsTab(
                 )
             }
 
-            // Song list
+            // Column header row
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -341,43 +206,40 @@ fun SongsTab(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Text(
-                    text = stringResource(Res.string.number) + getSortIndicator(Constants.SORT_NUMBER),
+                    text = stringResource(Res.string.number) + viewModel.getSortIndicator(Constants.SORT_NUMBER),
                     style = MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.secondary,
-                    modifier = Modifier.width(70.dp).clickable { onColumnClick(Constants.SORT_NUMBER) }
+                    modifier = Modifier.width(70.dp).clickable { viewModel.updateSort(Constants.SORT_NUMBER) }
                 )
                 Text(
-                    text = stringResource(Res.string.title) + getSortIndicator(Constants.SORT_TITLE),
+                    text = stringResource(Res.string.title) + viewModel.getSortIndicator(Constants.SORT_TITLE),
                     style = MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.secondary,
-                    modifier = Modifier.weight(1f).clickable { onColumnClick(Constants.SORT_TITLE) }
+                    modifier = Modifier.weight(1f).clickable { viewModel.updateSort(Constants.SORT_TITLE) }
                 )
                 Text(
-                    text = stringResource(Res.string.song_book) + getSortIndicator(Constants.SORT_SONGBOOK),
+                    text = stringResource(Res.string.song_book) + viewModel.getSortIndicator(Constants.SORT_SONGBOOK),
                     style = MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.secondary,
-                    modifier = Modifier.width(100.dp).clickable { onColumnClick(Constants.SORT_SONGBOOK) }
+                    modifier = Modifier.width(100.dp).clickable { viewModel.updateSort(Constants.SORT_SONGBOOK) }
                 )
                 Text(
-                    text = stringResource(Res.string.tune) + getSortIndicator(Constants.SORT_TUNE),
+                    text = stringResource(Res.string.tune) + viewModel.getSortIndicator(Constants.SORT_TUNE),
                     style = MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.secondary,
-                    modifier = Modifier.width(60.dp).clickable { onColumnClick(Constants.SORT_TUNE) }
+                    modifier = Modifier.width(60.dp).clickable { viewModel.updateSort(Constants.SORT_TUNE) }
                 )
             }
-            Box(
-                modifier = Modifier.weight(1f)
-            ) {
+
+            Box(modifier = Modifier.weight(1f)) {
                 val lazyListState = androidx.compose.foundation.lazy.rememberLazyListState()
 
-                // Auto-scroll to selected song when selection changes
                 LaunchedEffect(selectedSongIndex, filteredSongs.size) {
                     if (selectedSongIndex >= 0 && selectedSongIndex < filteredSongs.size) {
-                        // Small delay to ensure the list is fully composed
                         kotlinx.coroutines.delay(100)
                         lazyListState.animateScrollToItem(selectedSongIndex)
                     }
@@ -391,68 +253,28 @@ fun SongsTab(
                         .background(MaterialTheme.colorScheme.surface)
                         .padding(horizontal = 8.dp)
                 ) {
-                    // ...existing itemsIndexed content...
                     itemsIndexed(filteredSongs) { index, song ->
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .background(
-                                    if (index == selectedSongIndex && index < filteredSongs.size)
-                                        MaterialTheme.colorScheme.surfaceVariant
+                                    if (index == selectedSongIndex) MaterialTheme.colorScheme.surfaceVariant
                                     else MaterialTheme.colorScheme.surface
                                 )
-                                .clickable {
-                                    viewModel.selectSong(index)
-                                }
+                                .clickable { viewModel.selectSong(index) }
                                 .padding(8.dp),
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            Text(
-                                text = song.number,
-                                style = MaterialTheme.typography.bodySmall,
-                                modifier = Modifier.width(70.dp),
-                                color = if (index == selectedSongIndex)
-                                    MaterialTheme.colorScheme.onSurfaceVariant
-                                else
-                                    MaterialTheme.colorScheme.onSurface
-                            )
-                            Text(
-                                text = song.title,
-                                style = MaterialTheme.typography.bodySmall,
-                                modifier = Modifier.weight(1f),
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                                color = if (index == selectedSongIndex)
-                                    MaterialTheme.colorScheme.onSurfaceVariant
-                                else
-                                    MaterialTheme.colorScheme.onSurface
-                            )
-                            Text(
-                                text = song.songbook,
-                                style = MaterialTheme.typography.bodySmall,
-                                modifier = Modifier.width(100.dp),
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                                color = if (index == selectedSongIndex)
-                                    MaterialTheme.colorScheme.onSurfaceVariant
-                                else
-                                    MaterialTheme.colorScheme.onSurface
-                            )
-                            Text(
-                                text = song.tune,
-                                style = MaterialTheme.typography.bodySmall,
-                                modifier = Modifier.width(60.dp),
-                                maxLines = 1,
-                                color = if (index == selectedSongIndex)
-                                    MaterialTheme.colorScheme.onSurfaceVariant
-                                else
-                                    MaterialTheme.colorScheme.onSurface
-                            )
+                            val textColor = if (index == selectedSongIndex)
+                                MaterialTheme.colorScheme.onSurfaceVariant
+                            else
+                                MaterialTheme.colorScheme.onSurface
+                            Text(song.number, style = MaterialTheme.typography.bodySmall, modifier = Modifier.width(70.dp), color = textColor)
+                            Text(song.title, style = MaterialTheme.typography.bodySmall, modifier = Modifier.weight(1f), maxLines = 1, overflow = TextOverflow.Ellipsis, color = textColor)
+                            Text(song.songbook, style = MaterialTheme.typography.bodySmall, modifier = Modifier.width(100.dp), maxLines = 1, overflow = TextOverflow.Ellipsis, color = textColor)
+                            Text(song.tune, style = MaterialTheme.typography.bodySmall, modifier = Modifier.width(60.dp), maxLines = 1, color = textColor)
                         }
-                        HorizontalDivider(
-                            thickness = 1.dp,
-                            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
-                        )
+                        HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
                     }
                 }
                 VerticalScrollbar(
@@ -462,7 +284,7 @@ fun SongsTab(
             }
         }
 
-        // Right panel - Lyrics display
+        // Right panel — Lyrics display
         Column(
             modifier = Modifier
                 .weight(0.4f)
@@ -470,71 +292,40 @@ fun SongsTab(
                 .background(MaterialTheme.colorScheme.surfaceVariant)
                 .padding(8.dp)
         ) {
-            // Header
+            // Header row with action buttons
             Row(
                 modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                // Edit Button
                 if (selectedSongIndex >= 0 && selectedSongIndex < filteredSongs.size) {
                     Button(
                         modifier = Modifier.wrapContentSize().padding(end = 4.dp),
                         onClick = {
-                            // Always get fresh data from filtered songs
                             songToEdit = filteredSongs[selectedSongIndex]
                             showEditDialog = true
                         },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.tertiary
-                        )
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary)
                     ) {
-                        Text(
-                            text = stringResource(Res.string.edit_song),
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onTertiary,
-                            maxLines = 1
-                        )
+                        Text(stringResource(Res.string.edit_song), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onTertiary, maxLines = 1)
                     }
                 }
 
                 Button(
                     modifier = Modifier.wrapContentSize(),
                     onClick = { onPresenting(Presenting.LYRICS) },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary
-                    )
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
                 ) {
-                    Text(
-                        text = stringResource(Res.string.go_live),
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onPrimary,
-                        maxLines = 2
-                    )
+                    Text(stringResource(Res.string.go_live), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onPrimary, maxLines = 2)
                 }
 
-                // Add to Schedule button
                 if (scheduleViewModel != null && selectedSongIndex >= 0 && selectedSongIndex < filteredSongs.size) {
                     Button(
                         modifier = Modifier.wrapContentSize().padding(start = 4.dp),
-                        onClick = {
-                            val song = filteredSongs[selectedSongIndex]
-                            scheduleViewModel.addSong(
-                                songNumber = song.number.toIntOrNull() ?: 0,
-                                title = song.title,
-                                songbook = song.songbook
-                            )
-                        },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.secondary
-                        )
+                        onClick = { scheduleViewModel.let { viewModel.addCurrentSongToSchedule(it) } },
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
                     ) {
-                        Text(
-                            text = stringResource(Res.string.add_to_schedule),
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onSecondary,
-                            maxLines = 2
-                        )
+                        Text(stringResource(Res.string.add_to_schedule), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSecondary, maxLines = 2)
                     }
                 }
             }
@@ -543,12 +334,16 @@ fun SongsTab(
             Box {
                 val lyricsListState = androidx.compose.foundation.lazy.rememberLazyListState()
 
-                // Auto-scroll to selected section when selection changes
                 LaunchedEffect(selectedSectionIndex) {
                     if (selectedSectionIndex >= 0) {
                         lyricsListState.animateScrollToItem(selectedSectionIndex)
                     }
                 }
+
+                // Get lyric sections from ViewModel — no parsing in UI
+                val sections = if (selectedSongIndex >= 0 && selectedSongIndex < filteredSongs.size) {
+                    viewModel.getLyricSections()
+                } else emptyList()
 
                 LazyColumn(
                     state = lyricsListState,
@@ -557,51 +352,7 @@ fun SongsTab(
                         .background(MaterialTheme.colorScheme.surface)
                         .padding(12.dp)
                 ) {
-                    // ...existing lyrics content...
-                    if (selectedSongIndex >= 0 && selectedSongIndex < filteredSongs.size && filteredSongs[selectedSongIndex].lyrics.isNotEmpty()) {
-                        val lyrics = filteredSongs[selectedSongIndex].lyrics
-                        val title = filteredSongs[selectedSongIndex].title
-                        val songNumber = filteredSongs[selectedSongIndex].number.toInt()
-                        val sections = mutableListOf<LyricSection>()
-                        var currentSection = mutableListOf<String>()
-                        var currentSectionType = ""
-
-                        // Group lyrics into sections
-                        lyrics.forEachIndexed { index, line ->
-                            val isSectionHeader = line.startsWith(VERSE_RUS) || line.startsWith(CHORUS_RUS)
-                                    || line.startsWith(VERSE) || line.startsWith(CHORUS)
-                            if (isSectionHeader) {
-                                // Save previous section if it exists
-                                if (currentSection.isNotEmpty()) {
-                                    sections.add(
-                                        LyricSection(
-                                            title = title,
-                                            type = currentSectionType,
-                                            lines = currentSection.toList(),
-                                            songNumber = songNumber,
-                                        )
-                                    )
-                                }
-                                // Start new section — assign type correctly
-                                currentSection = mutableListOf(line)
-                                currentSectionType = if (line.startsWith(CHORUS_RUS) || line.startsWith(CHORUS)) CHORUS else VERSE
-                            } else {
-                                currentSection.add(line)
-                            }
-                        }
-                        // Add the last section
-                        if (currentSection.isNotEmpty()) {
-                            sections.add(
-                                LyricSection(
-                                    title = title,
-                                    type = currentSectionType,
-                                    lines = currentSection.toList(),
-                                    songNumber = songNumber,
-                                )
-                            )
-                        }
-
-                        // Display sections
+                    if (sections.isNotEmpty()) {
                         itemsIndexed(sections) { sectionIndex, section ->
                             Column(
                                 modifier = Modifier
@@ -615,30 +366,32 @@ fun SongsTab(
                                         viewModel.selectSection(
                                             if (selectedSectionIndex == sectionIndex) -1 else sectionIndex
                                         )
-                                        onSongItemSelected.invoke(section)
+                                        onSongItemSelected(section)
                                     }
                                     .padding(8.dp)
                             ) {
                                 section.lines.forEachIndexed { lineIndex, line ->
-                                    if (lineIndex == 0 && (line.startsWith(VERSE_RUS) || line.startsWith(CHORUS_RUS) || line.startsWith(VERSE) || line.startsWith(CHORUS))) {
+                                    val isHeader = lineIndex == 0 && (
+                                        line.startsWith(Constants.VERSE_RUS) || line.startsWith(Constants.CHORUS_RUS) ||
+                                        line.startsWith(Constants.VERSE) || line.startsWith(Constants.CHORUS)
+                                    )
+                                    val textColor = if (sectionIndex == selectedSectionIndex)
+                                        MaterialTheme.colorScheme.onSurfaceVariant
+                                    else
+                                        MaterialTheme.colorScheme.onSurface
+                                    if (isHeader) {
                                         Text(
                                             text = line,
                                             style = MaterialTheme.typography.titleSmall,
                                             fontWeight = FontWeight.Bold,
-                                            color = if (sectionIndex == selectedSectionIndex)
-                                                MaterialTheme.colorScheme.onSurfaceVariant
-                                            else
-                                                MaterialTheme.colorScheme.onSurface,
+                                            color = textColor,
                                             modifier = Modifier.padding(vertical = 4.dp)
                                         )
                                     } else {
                                         Text(
                                             text = line,
                                             style = MaterialTheme.typography.bodyMedium,
-                                            color = if (sectionIndex == selectedSectionIndex)
-                                                MaterialTheme.colorScheme.onSurfaceVariant
-                                            else
-                                                MaterialTheme.colorScheme.onSurface,
+                                            color = textColor,
                                             modifier = Modifier.padding(vertical = 2.dp)
                                         )
                                     }
@@ -663,7 +416,7 @@ fun SongsTab(
         }
     }
 
-    // Edit Song Dialog
+    // Edit Song Dialog — pure UI dialog state is fine here
     EditSongDialog(
         isVisible = showEditDialog,
         song = songToEdit,
@@ -672,9 +425,7 @@ fun SongsTab(
         onSave = { updatedSong ->
             songToEdit?.let { oldSong ->
                 val success = viewModel.updateSong(oldSong, updatedSong)
-
                 if (success) {
-                    // Reset to null so next edit gets fresh data from filteredSongs
                     songToEdit = null
                     showEditDialog = false
                 }

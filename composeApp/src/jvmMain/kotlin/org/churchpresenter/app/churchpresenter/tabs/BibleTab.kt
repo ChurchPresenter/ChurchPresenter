@@ -65,13 +65,14 @@ import org.churchpresenter.app.churchpresenter.composables.SelectionListWithInde
 import org.churchpresenter.app.churchpresenter.models.SelectedVerse
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.viewmodel.BibleViewModel
+import org.churchpresenter.app.churchpresenter.viewmodel.ScheduleViewModel
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun BibleTab(
     modifier: Modifier = Modifier,
     viewModel: BibleViewModel,
-    scheduleViewModel: org.churchpresenter.app.churchpresenter.viewmodel.ScheduleViewModel? = null,
+    scheduleViewModel: ScheduleViewModel? = null,
     onVerseSelected: (List<SelectedVerse>) -> Unit = {},
     onPresenting: (Presenting) -> Unit = { Presenting.NONE }
 ) {

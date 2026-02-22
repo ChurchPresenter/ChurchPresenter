@@ -21,6 +21,20 @@ This document tracks coding standards, common mistakes, and debugging notes for 
 - ❌ **AVOID**: `width: androidx.compose.ui.unit.Dp = 120.dp`
 - ✅ **PREFER**: `width: Dp = 120.dp`
 
+### 7. Fully-Qualified Type Names — **NEVER DO THIS**
+- ❌ **NEVER EVER** use fully-qualified type names when the type can be imported:
+  ```kotlin
+  // WRONG — never do this
+  fun updateSong(oldSong: org.churchpresenter.app.churchpresenter.data.SongItem): Boolean
+  ```
+- ✅ **ALWAYS** add an import at the top of the file and use the short name:
+  ```kotlin
+  // CORRECT
+  import org.churchpresenter.app.churchpresenter.data.SongItem
+  fun updateSong(oldSong: SongItem): Boolean
+  ```
+- **This applies everywhere**: function parameters, return types, variable declarations, generic type arguments — no exceptions.
+
 ### 5. Code Cleanup
 - 📌 **TODO**: Clean up unused code and imports
 - 📌 **TODO**: Remove redundant code where possible
