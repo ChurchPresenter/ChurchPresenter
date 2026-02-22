@@ -49,6 +49,9 @@
     <string name="menu_open_schedule">Бағдарламаны ашу</string>
     <string name="menu_save_schedule">Бағдарламаны сақтау</string>
     <string name="menu_save_schedule_as">Басқа атпен сақтау...</string>
+    <string name="file_chooser_save_schedule">Бағдарламаны басқа атпен сақтау</string>
+    <string name="file_chooser_open_schedule">Бағдарламаны ашу</string>
+    <string name="file_filter_schedule">Church Presenter бағдарламасы (*.cps)</string>
     <string name="menu_close_schedule">Бағдарламаны жабу</string>
     <string name="menu_exit">Шығу</string>
 

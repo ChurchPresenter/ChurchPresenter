@@ -49,6 +49,9 @@
     <string name="menu_open_schedule">Адкрыць праграму</string>
     <string name="menu_save_schedule">Захаваць праграму</string>
     <string name="menu_save_schedule_as">Захаваць як...</string>
+    <string name="file_chooser_save_schedule">Захаваць праграму як</string>
+    <string name="file_chooser_open_schedule">Адкрыць праграму</string>
+    <string name="file_filter_schedule">Праграма Church Presenter (*.cps)</string>
     <string name="menu_close_schedule">Закрыць праграму</string>
     <string name="menu_exit">Выхад</string>
 

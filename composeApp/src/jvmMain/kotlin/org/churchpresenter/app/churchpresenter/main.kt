@@ -23,6 +23,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.rememberWindowState
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.app_name
+import churchpresenter.composeapp.generated.resources.file_chooser_open_schedule
+import churchpresenter.composeapp.generated.resources.file_chooser_save_schedule
+import churchpresenter.composeapp.generated.resources.file_filter_schedule
 import org.churchpresenter.app.churchpresenter.data.Language
 import org.churchpresenter.app.churchpresenter.data.SettingsManager
 import org.churchpresenter.app.churchpresenter.dialogs.OptionsDialog
@@ -104,6 +107,10 @@ fun main() = application {
         LanguageProvider(language = currentLanguage) {
             AppThemeWrapper(theme = theme) {
 
+                val strSaveScheduleAs = stringResource(Res.string.file_chooser_save_schedule)
+                val strOpenSchedule   = stringResource(Res.string.file_chooser_open_schedule)
+                val strFileFilter     = stringResource(Res.string.file_filter_schedule)
+
                 NavigationTopBar(
                     onAbout = { presenterManager.setShowPresenterWindow(true) },
                     theme = {
@@ -158,6 +165,21 @@ fun main() = application {
                                 }
                             }
                         }
+                    },
+                    onNewSchedule = {
+                        scheduleViewModel.newSchedule()
+                    },
+                    onOpenSchedule = {
+                        scheduleViewModel.loadSchedule(strOpenSchedule, strFileFilter)
+                    },
+                    onSaveSchedule = {
+                        scheduleViewModel.saveSchedule(strSaveScheduleAs, strFileFilter)
+                    },
+                    onSaveScheduleAs = {
+                        scheduleViewModel.saveScheduleAs(strSaveScheduleAs, strFileFilter)
+                    },
+                    onCloseSchedule = {
+                        scheduleViewModel.newSchedule()
                     },
                     onRemoveFromSchedule = {
                         // Remove selected item from schedule

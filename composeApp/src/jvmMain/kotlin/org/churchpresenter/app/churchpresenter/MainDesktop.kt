@@ -49,6 +49,11 @@ import org.churchpresenter.app.churchpresenter.viewmodel.PresentationViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.app.churchpresenter.viewmodel.ScheduleViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.SongsViewModel
+import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.file_chooser_open_schedule
+import churchpresenter.composeapp.generated.resources.file_chooser_save_schedule
+import churchpresenter.composeapp.generated.resources.file_filter_schedule
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun MainDesktop(
@@ -72,6 +77,10 @@ fun MainDesktop(
     // Tab-specific ViewModels — owned here, not in main.kt
     val picturesViewModel = remember(appSettings) { PicturesViewModel(appSettings) }
     val presentationViewModel = remember(appSettings) { PresentationViewModel(appSettings) }
+
+    val strSaveScheduleAs = stringResource(Res.string.file_chooser_save_schedule)
+    val strOpenSchedule   = stringResource(Res.string.file_chooser_open_schedule)
+    val strFileFilter     = stringResource(Res.string.file_filter_schedule)
 
     var selectedTabIndex by rememberSaveable { mutableStateOf(0) }
     var selectedScheduleItemId by remember { mutableStateOf<String?>(null) }
@@ -142,13 +151,13 @@ fun MainDesktop(
                 currentTheme = theme,
                 onThemeChange = onThemeChange,
                 onNewSchedule = {
-                    scheduleViewModel.clearSchedule()
+                    scheduleViewModel.newSchedule()
                 },
                 onOpenSchedule = {
-                    // TODO: Implement open schedule from file
+                    scheduleViewModel.loadSchedule(strOpenSchedule, strFileFilter)
                 },
                 onSaveSchedule = {
-                    // TODO: Implement save schedule to file
+                    scheduleViewModel.saveSchedule(strSaveScheduleAs, strFileFilter)
                 },
                 onMoveToTop = {
                     selectedScheduleItemId?.let { scheduleViewModel.moveItemToTop(it) }

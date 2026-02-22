@@ -2,12 +2,86 @@ package org.churchpresenter.app.churchpresenter.viewmodel
 
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
+import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.json.Json
 import org.churchpresenter.app.churchpresenter.models.ScheduleItem
 import java.util.UUID
+import javax.swing.JFileChooser
+import javax.swing.filechooser.FileNameExtensionFilter
 
 class ScheduleViewModel {
     private val _scheduleItems: SnapshotStateList<ScheduleItem> = mutableStateListOf()
     val scheduleItems: List<ScheduleItem> get() = _scheduleItems
+
+    private val json = Json { prettyPrint = true; encodeDefaults = true }
+    private var currentFilePath: String? = null
+
+    // ── File I/O ──────────────────────────────────────────────────────────────
+
+    /** Saves to the current file if known, otherwise prompts like Save As. */
+    fun saveSchedule(
+        dialogTitle: String = "Save Schedule As",
+        fileFilterDescription: String = "Church Presenter Schedule (*.cps)"
+    ) {
+        val existing = currentFilePath
+        if (existing != null) {
+            val file = java.io.File(existing)
+            val serialized = json.encodeToString(ListSerializer(ScheduleItem.serializer()), _scheduleItems.toList())
+            file.writeText(serialized)
+        } else {
+            saveScheduleAs(dialogTitle, fileFilterDescription)
+        }
+    }
+
+    /** Always opens a save-file dialog and serializes the schedule to a .cps file. */
+    fun saveScheduleAs(
+        dialogTitle: String = "Save Schedule As",
+        fileFilterDescription: String = "Church Presenter Schedule (*.cps)"
+    ) {
+        val chooser = JFileChooser().apply {
+            this.dialogTitle = dialogTitle
+            fileFilter = FileNameExtensionFilter(fileFilterDescription, "cps")
+            isAcceptAllFileFilterUsed = false
+        }
+        if (chooser.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
+            var file = chooser.selectedFile
+            if (!file.name.endsWith(".cps", ignoreCase = true)) {
+                file = file.resolveSibling("${file.name}.cps")
+            }
+            val serialized = json.encodeToString(ListSerializer(ScheduleItem.serializer()), _scheduleItems.toList())
+            file.writeText(serialized)
+            currentFilePath = file.absolutePath
+        }
+    }
+
+    /** Opens an open-file dialog and loads a schedule from a .cps file. */
+    fun loadSchedule(
+        dialogTitle: String = "Open Schedule",
+        fileFilterDescription: String = "Church Presenter Schedule (*.cps)"
+    ) {
+        val chooser = JFileChooser().apply {
+            this.dialogTitle = dialogTitle
+            fileFilter = FileNameExtensionFilter(fileFilterDescription, "cps")
+            isAcceptAllFileFilterUsed = false
+        }
+        if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+            val file = chooser.selectedFile
+            if (file.exists()) {
+                val items = json.decodeFromString(ListSerializer(ScheduleItem.serializer()), file.readText())
+                _scheduleItems.clear()
+                _scheduleItems.addAll(items)
+                currentFilePath = file.absolutePath
+            }
+        }
+    }
+
+    /** Clears the schedule and forgets the current file path. */
+    fun newSchedule() {
+        _scheduleItems.clear()
+        currentFilePath = null
+    }
+
+    // ── Existing methods ──────────────────────────────────────────────────────
 
     fun addSong(songNumber: Int, title: String, songbook: String) {
         val id = UUID.randomUUID().toString()

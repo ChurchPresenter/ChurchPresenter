@@ -49,6 +49,9 @@
     <string name="menu_open_schedule">Otevřít program</string>
     <string name="menu_save_schedule">Uložit program</string>
     <string name="menu_save_schedule_as">Uložit jako...</string>
+    <string name="file_chooser_save_schedule">Uložit program jako</string>
+    <string name="file_chooser_open_schedule">Otevřít program</string>
+    <string name="file_filter_schedule">Program Church Presenter (*.cps)</string>
     <string name="menu_close_schedule">Zavřít program</string>
     <string name="menu_exit">Ukončit</string>
 
