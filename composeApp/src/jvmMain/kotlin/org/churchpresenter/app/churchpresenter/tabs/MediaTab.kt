@@ -74,6 +74,7 @@ import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.app.churchpresenter.viewmodel.ScheduleViewModel
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.app.churchpresenter.utils.createFileChooser
 import javax.swing.JFileChooser
 import javax.swing.SwingUtilities
 import javax.swing.filechooser.FileNameExtensionFilter
@@ -135,7 +136,7 @@ fun MediaTab(
             Button(
                 onClick = {
                     SwingUtilities.invokeLater {
-                        val chooser = JFileChooser().apply {
+                        val chooser = createFileChooser {
                             fileSelectionMode = JFileChooser.FILES_ONLY
                             dialogTitle = "Select Video File"
                             fileFilter = FileNameExtensionFilter(

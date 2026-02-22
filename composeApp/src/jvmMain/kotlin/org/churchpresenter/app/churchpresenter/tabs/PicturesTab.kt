@@ -65,6 +65,7 @@ import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.app.churchpresenter.viewmodel.ScheduleViewModel
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.app.churchpresenter.utils.createFileChooser
 import java.io.File
 import javax.swing.JFileChooser
 import javax.swing.SwingUtilities
@@ -142,7 +143,7 @@ fun PicturesTab(
             Button(
                 onClick = {
                     SwingUtilities.invokeLater {
-                        val chooser = JFileChooser().apply {
+                        val chooser = createFileChooser {
                             fileSelectionMode = JFileChooser.DIRECTORIES_ONLY
                             dialogTitle = folderDialogTitle
                         }

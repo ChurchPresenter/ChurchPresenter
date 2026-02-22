@@ -66,6 +66,7 @@ import org.churchpresenter.app.churchpresenter.viewmodel.ScheduleViewModel
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import java.io.File
+import org.churchpresenter.app.churchpresenter.utils.createFileChooser
 import javax.swing.JFileChooser
 import javax.swing.SwingUtilities
 import javax.swing.filechooser.FileNameExtensionFilter
@@ -128,7 +129,7 @@ fun PresentationTab(
             Button(
                 onClick = {
                     SwingUtilities.invokeLater {
-                        val chooser = JFileChooser().apply {
+                        val chooser = createFileChooser {
                             fileSelectionMode = JFileChooser.FILES_ONLY
                             dialogTitle = "Select Presentation File"
                             isMultiSelectionEnabled = true

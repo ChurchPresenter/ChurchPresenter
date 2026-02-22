@@ -19,6 +19,7 @@ import java.awt.Window
 import javax.swing.JFileChooser
 import javax.swing.SwingUtilities
 import javax.swing.filechooser.FileNameExtensionFilter
+import org.churchpresenter.app.churchpresenter.utils.createFileChooser
 
 @Composable
 fun FileImagePicker(
@@ -33,7 +34,7 @@ fun FileImagePicker(
                 SwingUtilities.invokeLater {
                     // Get the parent window to ensure dialog appears on top
                     val parentWindow = Window.getWindows().firstOrNull { it.isActive }
-                    val fileChooser = JFileChooser().apply {
+                    val fileChooser = createFileChooser {
                         fileSelectionMode = JFileChooser.FILES_ONLY
                         isMultiSelectionEnabled = false
                         fileFilter = FileNameExtensionFilter(

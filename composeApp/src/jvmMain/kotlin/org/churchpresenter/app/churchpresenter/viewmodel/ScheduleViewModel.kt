@@ -5,6 +5,7 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 import org.churchpresenter.app.churchpresenter.models.ScheduleItem
+import org.churchpresenter.app.churchpresenter.utils.createFileChooser
 import java.util.UUID
 import javax.swing.JFileChooser
 import javax.swing.filechooser.FileNameExtensionFilter
@@ -38,7 +39,7 @@ class ScheduleViewModel {
         dialogTitle: String = "Save Schedule As",
         fileFilterDescription: String = "Church Presenter Schedule (*.cps)"
     ) {
-        val chooser = JFileChooser().apply {
+        val chooser = createFileChooser {
             this.dialogTitle = dialogTitle
             fileFilter = FileNameExtensionFilter(fileFilterDescription, "cps")
             isAcceptAllFileFilterUsed = false
@@ -59,7 +60,7 @@ class ScheduleViewModel {
         dialogTitle: String = "Open Schedule",
         fileFilterDescription: String = "Church Presenter Schedule (*.cps)"
     ) {
-        val chooser = JFileChooser().apply {
+        val chooser = createFileChooser {
             this.dialogTitle = dialogTitle
             fileFilter = FileNameExtensionFilter(fileFilterDescription, "cps")
             isAcceptAllFileFilterUsed = false

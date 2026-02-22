@@ -1,6 +1,7 @@
 package org.churchpresenter.app.churchpresenter.viewmodel
 
 import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.app.churchpresenter.utils.createFileChooser
 import java.io.File
 import javax.swing.JFileChooser
 import javax.swing.JOptionPane
@@ -44,7 +45,7 @@ class FileManager {
      * Show directory chooser dialog and return selected directory path
      */
     fun chooseDirectory(currentDirectory: String = "", parentWindow: Window? = null): String? {
-        val dirChooser = JFileChooser().apply {
+        val dirChooser = createFileChooser {
             fileSelectionMode = JFileChooser.DIRECTORIES_ONLY
             if (currentDirectory.isNotEmpty()) {
                 this.currentDirectory = File(currentDirectory)
@@ -62,7 +63,7 @@ class FileManager {
      * Show file chooser dialog for song files and return selected files
      */
     fun chooseSongFiles(parentWindow: Window? = null): List<File>? {
-        val fileChooser = JFileChooser().apply {
+        val fileChooser = createFileChooser {
             fileSelectionMode = JFileChooser.FILES_ONLY
             isMultiSelectionEnabled = true
             fileFilter = javax.swing.filechooser.FileNameExtensionFilter(
@@ -81,7 +82,7 @@ class FileManager {
      * Show file chooser dialog for Bible files and return selected file
      */
     fun chooseBibleFile(parentWindow: Window? = null): File? {
-        val fileChooser = JFileChooser().apply {
+        val fileChooser = createFileChooser {
             fileSelectionMode = JFileChooser.FILES_ONLY
             isMultiSelectionEnabled = false
             fileFilter = javax.swing.filechooser.FileNameExtensionFilter(

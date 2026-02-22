@@ -67,6 +67,16 @@ compose.desktop {
     application {
         mainClass = "org.churchpresenter.app.churchpresenter.MainKt"
 
+        jvmArgs(
+            "-Xms256m",
+            "-Xmx1g",
+            "-XX:+UseG1GC",
+            "-XX:+UseStringDeduplication",
+            "-Dskiko.renderApi=OPENGL",         // use OpenGL on Windows for smoother rendering
+            "-Dawt.useSystemAAFontSettings=on",
+            "-Dswing.aatext=true"
+        )
+
         buildTypes.release.proguard {
             isEnabled.set(false)
         }

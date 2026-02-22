@@ -33,6 +33,7 @@ import churchpresenter.composeapp.generated.resources.select_folder
 import churchpresenter.composeapp.generated.resources.streaming_settings
 import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.app.churchpresenter.utils.createFileChooser
 import java.io.File
 import javax.swing.JFileChooser
 import javax.swing.SwingUtilities
@@ -93,7 +94,7 @@ fun StreamingSettingsTab(
             Button(
                 onClick = {
                     SwingUtilities.invokeLater {
-                        val chooser = JFileChooser().apply {
+                        val chooser = createFileChooser {
                             fileSelectionMode = JFileChooser.DIRECTORIES_ONLY
                             dialogTitle = "Select Lower Third Animations Folder"
                             if (lowerThirdFolder.isNotBlank()) {
