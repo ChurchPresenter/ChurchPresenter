@@ -114,7 +114,9 @@ data class PictureSettings(
 
 @Serializable
 data class StreamingSettings(
-    val lowerThirdFolder: String = ""
+    val lowerThirdFolder: String = "",
+    val savedSearchStrings: List<String> = emptyList(),
+    val savedReplaceStrings: List<String> = emptyList()
 )
 
 @Serializable

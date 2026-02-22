@@ -200,6 +200,10 @@ fun main() = application {
                         theme = newTheme
                         settingsManager.saveSettings(appSettings)
                     },
+                    onSettingsChange = { updateFn ->
+                        appSettings = updateFn(appSettings)
+                        settingsManager.saveSettings(appSettings)
+                    },
                     theme = theme
                 )
 

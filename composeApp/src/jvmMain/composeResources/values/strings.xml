@@ -377,4 +377,8 @@
     <string name="clear_folder">Clear</string>
     <string name="lower_third_files_found">%1$d animation file(s) found</string>
     <string name="lower_third_no_files">No .json files found in selected folder</string>
+    <string name="save_string">Save</string>
+    <string name="saved_strings">Saved values</string>
+    <string name="no_saved_strings">No saved values</string>
+    <string name="delete_saved_string">Delete</string>
 </resources>

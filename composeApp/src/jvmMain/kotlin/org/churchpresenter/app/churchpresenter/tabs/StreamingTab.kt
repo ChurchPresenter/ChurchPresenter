@@ -16,9 +16,12 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -34,32 +37,41 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.delete_saved_string
+import churchpresenter.composeapp.generated.resources.ic_arrow_down
+import churchpresenter.composeapp.generated.resources.ic_close
 import churchpresenter.composeapp.generated.resources.ic_play
+import churchpresenter.composeapp.generated.resources.ic_save
 import churchpresenter.composeapp.generated.resources.lower_third_folder_hint
 import churchpresenter.composeapp.generated.resources.lower_third_no_files
+import churchpresenter.composeapp.generated.resources.no_saved_strings
 import churchpresenter.composeapp.generated.resources.play
 import churchpresenter.composeapp.generated.resources.replace
+import churchpresenter.composeapp.generated.resources.save_string
 import churchpresenter.composeapp.generated.resources.search
-import churchpresenter.composeapp.generated.resources.streaming_settings
 import io.github.alexzhirkevich.compottie.Compottie
 import io.github.alexzhirkevich.compottie.LottieCompositionSpec
 import io.github.alexzhirkevich.compottie.animateLottieCompositionAsState
 import io.github.alexzhirkevich.compottie.rememberLottieComposition
 import io.github.alexzhirkevich.compottie.rememberLottiePainter
 import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
+import org.churchpresenter.app.churchpresenter.composables.ImageIconButton
 import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import java.io.File
 
+// One search→replace pair
+private data class SearchReplacePairState(val search: String = "", val replace: String = "")
+
 @Composable
 fun StreamingTab(
     modifier: Modifier = Modifier,
-    appSettings: AppSettings
+    appSettings: AppSettings,
+    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit = {}
 ) {
     val folder = appSettings.streamingSettings.lowerThirdFolder
 
-    // Scan folder for .json files
     val jsonFiles = remember(folder) {
         if (folder.isBlank()) emptyList()
         else File(folder)
@@ -69,47 +81,27 @@ fun StreamingTab(
             ?: emptyList()
     }
 
-    var selectedFile by remember(jsonFiles) {
-        mutableStateOf(jsonFiles.firstOrNull())
-    }
-
-    // Whether the animation is actively playing
+    var selectedFile by remember(jsonFiles) { mutableStateOf(jsonFiles.firstOrNull()) }
     var isPlaying by remember { mutableStateOf(false) }
 
-    // Search / replace pairs applied to the JSON before parsing
-    var search1 by remember { mutableStateOf("") }
-    var replace1 by remember { mutableStateOf("") }
-    var search2 by remember { mutableStateOf("") }
-    var replace2 by remember { mutableStateOf("") }
+    // Dynamic list of search/replace pairs — starts with one empty row
+    var pairs by remember { mutableStateOf(listOf(SearchReplacePairState())) }
 
-    // Load the Lottie composition from selected file content, with substitutions applied
     val rawJson = remember(selectedFile) { selectedFile?.readText() ?: "" }
-
-    // Detect whether the file uses editable text layers ("t" key with string value)
-    // or pre-rendered glyph paths ("ch" key per character — cannot be text-replaced)
     val hasEditableText = remember(rawJson) { lottieHasEditableText(rawJson) }
 
-    // Debounced values — only recompute JSON 400ms after user stops typing
-    var debouncedSearch1 by remember { mutableStateOf("") }
-    var debouncedReplace1 by remember { mutableStateOf("") }
-    var debouncedSearch2 by remember { mutableStateOf("") }
-    var debouncedReplace2 by remember { mutableStateOf("") }
-
-    LaunchedEffect(search1, replace1) {
+    // Debounced pairs for preview
+    var debouncedPairs by remember { mutableStateOf(pairs) }
+    LaunchedEffect(pairs) {
         delay(400)
-        debouncedSearch1 = search1
-        debouncedReplace1 = replace1
-    }
-    LaunchedEffect(search2, replace2) {
-        delay(400)
-        debouncedSearch2 = search2
-        debouncedReplace2 = replace2
+        debouncedPairs = pairs
     }
 
-    val jsonContent = remember(rawJson, debouncedSearch1, debouncedReplace1, debouncedSearch2, debouncedReplace2) {
+    val jsonContent = remember(rawJson, debouncedPairs) {
         var result = rawJson
-        if (debouncedSearch1.isNotBlank()) result = replaceLottieText(result, debouncedSearch1, debouncedReplace1)
-        if (debouncedSearch2.isNotBlank()) result = replaceLottieText(result, debouncedSearch2, debouncedReplace2)
+        for (p in debouncedPairs) {
+            if (p.search.isNotBlank()) result = replaceLottieText(result, p.search, p.replace)
+        }
         result
     }
 
@@ -130,33 +122,29 @@ fun StreamingTab(
         }
     }
 
+    val searchLabel  = stringResource(Res.string.search)
+    val replaceLabel = stringResource(Res.string.replace)
+    val savedSearch  = appSettings.streamingSettings.savedSearchStrings
+    val savedReplace = appSettings.streamingSettings.savedReplaceStrings
+
     Column(
         modifier = modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+            .padding(horizontal = 12.dp, vertical = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(6.dp)
     ) {
-        // Header
-        Text(
-            text = stringResource(Res.string.streaming_settings),
-            style = MaterialTheme.typography.titleLarge,
-            color = MaterialTheme.colorScheme.primary
-        )
-
-        // Controls row: dropdown + play button
+        // File selector + play button
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             if (jsonFiles.isEmpty()) {
                 Text(
-                    text = if (folder.isBlank())
-                        stringResource(Res.string.lower_third_folder_hint)
-                    else
-                        stringResource(Res.string.lower_third_no_files),
-                    style = MaterialTheme.typography.bodyMedium,
+                    text = if (folder.isBlank()) stringResource(Res.string.lower_third_folder_hint)
+                           else stringResource(Res.string.lower_third_no_files),
+                    style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
                     modifier = Modifier.weight(1f)
                 )
@@ -172,57 +160,81 @@ fun StreamingTab(
                     }
                 )
             }
-
-            // Play / Pause toggle
-            IconButton(
+            ImageIconButton(
                 onClick = { if (composition != null) isPlaying = !isPlaying },
-                modifier = Modifier
-                    .size(40.dp)
-                    .background(
-                        color = if (composition != null) MaterialTheme.colorScheme.primary
-                        else MaterialTheme.colorScheme.surfaceVariant,
-                        shape = CircleShape
-                    )
+                size = 36.dp,
+                modifier = Modifier.background(
+                    color = if (composition != null) MaterialTheme.colorScheme.primary
+                            else MaterialTheme.colorScheme.surfaceVariant,
+                    shape = CircleShape
+                )
             ) {
                 Icon(
                     painter = painterResource(Res.drawable.ic_play),
                     contentDescription = stringResource(Res.string.play),
-                    modifier = Modifier.size(22.dp),
+                    modifier = Modifier.size(18.dp),
                     tint = if (composition != null) Color.White
-                    else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                           else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
                 )
             }
         }
 
-        // Search / replace rows — always editable
-        SearchReplaceRow(
-            search = search1,
-            replace = replace1,
-            onSearchChange = { search1 = it },
-            onReplaceChange = { replace1 = it }
-        )
-        SearchReplaceRow(
-            search = search2,
-            replace = replace2,
-            onSearchChange = { search2 = it },
-            onReplaceChange = { replace2 = it }
-        )
+        HorizontalDivider()
 
-        // Info warning only if truly no editable text found at all
+        // Dynamic search→replace rows
+        pairs.forEachIndexed { index, pair ->
+            SearchReplaceRow(
+                search = pair.search,
+                replace = pair.replace,
+                searchLabel = searchLabel,
+                replaceLabel = replaceLabel,
+                savedSearch = savedSearch,
+                savedReplace = savedReplace,
+                canRemove = pairs.size > 1,
+                onSearchChange = { v -> pairs = pairs.toMutableList().also { it[index] = it[index].copy(search = v) } },
+                onReplaceChange = { v -> pairs = pairs.toMutableList().also { it[index] = it[index].copy(replace = v) } },
+                onRemove = { pairs = pairs.toMutableList().also { it.removeAt(index) } },
+                onSaveSearch = { v ->
+                    if (v.isNotBlank() && !savedSearch.contains(v))
+                        onSettingsChange { s -> s.copy(streamingSettings = s.streamingSettings.copy(savedSearchStrings = savedSearch + v)) }
+                },
+                onDeleteSearch = { v ->
+                    onSettingsChange { s -> s.copy(streamingSettings = s.streamingSettings.copy(savedSearchStrings = savedSearch - v)) }
+                },
+                onSaveReplace = { v ->
+                    if (v.isNotBlank() && !savedReplace.contains(v))
+                        onSettingsChange { s -> s.copy(streamingSettings = s.streamingSettings.copy(savedReplaceStrings = savedReplace + v)) }
+                },
+                onDeleteReplace = { v ->
+                    onSettingsChange { s -> s.copy(streamingSettings = s.streamingSettings.copy(savedReplaceStrings = savedReplace - v)) }
+                }
+            )
+        }
+
+        // Add row button
+        OutlinedButton(
+            onClick = { pairs = pairs + SearchReplacePairState() },
+            modifier = Modifier.align(Alignment.End)
+        ) {
+            Text("+ ${stringResource(Res.string.search)}", style = MaterialTheme.typography.labelSmall)
+        }
+
         if (selectedFile != null && !hasEditableText) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(MaterialTheme.colorScheme.errorContainer, RoundedCornerShape(6.dp))
-                    .padding(horizontal = 12.dp, vertical = 8.dp)
+                    .padding(horizontal = 10.dp, vertical = 6.dp)
             ) {
                 Text(
-                    text = "⚠️ No editable text found in this Lottie file. Text replacement will have no effect.",
+                    text = "⚠️ No editable text found in this Lottie file.",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onErrorContainer
                 )
             }
         }
+
+        HorizontalDivider()
 
         // Preview — black 16:9
         Box(
@@ -235,58 +247,191 @@ fun StreamingTab(
         ) {
             if (composition != null) {
                 Image(
-                    painter = rememberLottiePainter(
-                        composition = composition,
-                        progress = { progress }
-                    ),
+                    painter = rememberLottiePainter(composition = composition, progress = { progress }),
                     contentDescription = null,
                     contentScale = ContentScale.Fit,
                     modifier = Modifier.fillMaxSize()
                 )
             } else {
-                Text(
-                    text = "📽️",
-                    style = MaterialTheme.typography.displayLarge,
-                    color = Color.White.copy(alpha = 0.3f)
-                )
+                Text("📽️", style = MaterialTheme.typography.displayLarge, color = Color.White.copy(alpha = 0.3f))
             }
         }
     }
 }
 
+/** One row: [Search field 💾 ▾] → [Replace field 💾 ▾] [×] */
 @Composable
 private fun SearchReplaceRow(
     search: String,
     replace: String,
+    searchLabel: String,
+    replaceLabel: String,
+    savedSearch: List<String>,
+    savedReplace: List<String>,
+    canRemove: Boolean,
     onSearchChange: (String) -> Unit,
-    onReplaceChange: (String) -> Unit
+    onReplaceChange: (String) -> Unit,
+    onRemove: () -> Unit,
+    onSaveSearch: (String) -> Unit,
+    onDeleteSearch: (String) -> Unit,
+    onSaveReplace: (String) -> Unit,
+    onDeleteReplace: (String) -> Unit,
 ) {
-    val searchLabel = stringResource(Res.string.search)
-    val replaceLabel = stringResource(Res.string.replace)
+    val deleteLabel = stringResource(Res.string.delete_saved_string)
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        OutlinedTextField(
+        // Search field + its save/dropdown
+        SaveableTextField(
             value = search,
             onValueChange = onSearchChange,
-            label = { Text(searchLabel, style = MaterialTheme.typography.labelSmall) },
-            singleLine = true,
+            label = searchLabel,
+            savedValues = savedSearch,
+            onSave = onSaveSearch,
+            onDelete = onDeleteSearch,
             modifier = Modifier.weight(1f)
         )
+
+        // Arrow separator
         Text(
             text = "→",
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
         )
-        OutlinedTextField(
+
+        // Replace field + its save/dropdown
+        SaveableTextField(
             value = replace,
             onValueChange = onReplaceChange,
-            label = { Text(replaceLabel, style = MaterialTheme.typography.labelSmall) },
-            singleLine = true,
+            label = replaceLabel,
+            savedValues = savedReplace,
+            onSave = onSaveReplace,
+            onDelete = onDeleteReplace,
             modifier = Modifier.weight(1f)
         )
+
+        // Remove-row button (hidden when only 1 row)
+        ImageIconButton(
+            onClick = onRemove,
+            enabled = canRemove,
+            size = 40.dp
+        ) {
+            Icon(
+                painter = painterResource(Res.drawable.ic_close),
+                contentDescription = deleteLabel,
+                modifier = Modifier.size(32.dp),
+                tint = if (canRemove) MaterialTheme.colorScheme.error
+                       else Color.Transparent
+            )
+        }
+    }
+}
+
+/** Text field with inline 💾 save icon and ▾ saved-values dropdown */
+@Composable
+private fun SaveableTextField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    label: String,
+    savedValues: List<String>,
+    onSave: (String) -> Unit,
+    onDelete: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var dropdownExpanded by remember { mutableStateOf(false) }
+    val saveLabel    = stringResource(Res.string.save_string)
+    val noSavedLabel = stringResource(Res.string.no_saved_strings)
+    val deleteLabel  = stringResource(Res.string.delete_saved_string)
+
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(2.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        // Dropdown toggle — left of field
+        Box {
+            ImageIconButton(
+                onClick = { dropdownExpanded = true },
+                enabled = savedValues.isNotEmpty(),
+                size = 40.dp
+            ) {
+                Icon(
+                    painter = painterResource(Res.drawable.ic_arrow_down),
+                    contentDescription = null,
+                    modifier = Modifier.size(32.dp),
+                    tint = if (savedValues.isNotEmpty()) MaterialTheme.colorScheme.onSurface
+                           else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f)
+                )
+            }
+
+            DropdownMenu(
+                expanded = dropdownExpanded,
+                onDismissRequest = { dropdownExpanded = false },
+                containerColor = MaterialTheme.colorScheme.surface
+            ) {
+                if (savedValues.isEmpty()) {
+                    DropdownMenuItem(
+                        text = { Text(noSavedLabel, style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)) },
+                        onClick = { dropdownExpanded = false }
+                    )
+                } else {
+                    savedValues.forEach { saved ->
+                        DropdownMenuItem(
+                            text = {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                ) {
+                                    Text(saved, style = MaterialTheme.typography.bodySmall, modifier = Modifier.weight(1f))
+                                    ImageIconButton(
+                                        onClick = { onDelete(saved); dropdownExpanded = false },
+                                        size = 32.dp
+                                    ) {
+                                        Icon(
+                                            painter = painterResource(Res.drawable.ic_close),
+                                            contentDescription = deleteLabel,
+                                            modifier = Modifier.size(10.dp),
+                                            tint = MaterialTheme.colorScheme.error
+                                        )
+                                    }
+                                }
+                            },
+                            onClick = { onValueChange(saved); dropdownExpanded = false }
+                        )
+                    }
+                }
+            }
+        }
+
+        // Text field
+        OutlinedTextField(
+            value = value,
+            onValueChange = onValueChange,
+            label = { Text(label, style = MaterialTheme.typography.labelSmall) },
+            singleLine = true,
+            textStyle = MaterialTheme.typography.bodySmall,
+            modifier = Modifier.weight(1f)
+        )
+
+        // Save icon
+        ImageIconButton(
+            onClick = { onSave(value) },
+            enabled = value.isNotBlank() && !savedValues.contains(value),
+            size = 40.dp
+        ) {
+            Icon(
+                painter = painterResource(Res.drawable.ic_save),
+                contentDescription = saveLabel,
+                modifier = Modifier.size(32.dp),
+                tint = if (value.isNotBlank() && !savedValues.contains(value))
+                    MaterialTheme.colorScheme.primary
+                else
+                    MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f)
+            )
+        }
     }
 }
 
@@ -303,9 +448,7 @@ private fun replaceLottieText(json: String, search: String, replacement: String)
     val escaped = Regex.escape(search)
 
     // Step 1: replace the keyframe text value
-    var result = json.replace(Regex(""""t"\s*:\s*"$escaped"""")) {
-        """"t":"$replacement""""
-    }
+    var result = json.replace(Regex(""""t"\s*:\s*"$escaped"""")) { """"t":"$replacement"""" }
 
     // Step 2: clear the chars atlas entirely so Lottie falls back to system font rendering.
     // The embedded chars array is a font subset — cloning glyph paths for missing chars

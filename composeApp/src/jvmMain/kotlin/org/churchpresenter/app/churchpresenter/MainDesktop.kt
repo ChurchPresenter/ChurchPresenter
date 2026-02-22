@@ -66,6 +66,7 @@ fun MainDesktop(
     onScheduleItemSelected: (String?) -> Unit = {},
     onShowSettings: () -> Unit = {},
     onThemeChange: (ThemeMode) -> Unit = {},
+    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit = {},
     theme: ThemeMode = ThemeMode.SYSTEM
 ) {
     // Tab-specific ViewModels — owned here, not in main.kt
@@ -339,7 +340,8 @@ fun MainDesktop(
 
                         Tabs.STREAMING -> StreamingTab(
                             modifier = Modifier.fillMaxSize(),
-                            appSettings = appSettings
+                            appSettings = appSettings,
+                            onSettingsChange = onSettingsChange
                         )
 
                         Tabs.ANNOUNCEMENTS -> AnnouncementsTab()
