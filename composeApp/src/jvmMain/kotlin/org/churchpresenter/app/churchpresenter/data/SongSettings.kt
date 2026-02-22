@@ -113,12 +113,18 @@ data class PictureSettings(
 )
 
 @Serializable
+data class StreamingSettings(
+    val lowerThirdFolder: String = ""
+)
+
+@Serializable
 data class AppSettings(
     val songSettings: SongSettings = SongSettings(),
     val bibleSettings: BibleSettings = BibleSettings(),
     val backgroundSettings: BackgroundSettings = BackgroundSettings(),
     val projectionSettings: ProjectionSettings = ProjectionSettings(),
     val pictureSettings: PictureSettings = PictureSettings(),
+    val streamingSettings: StreamingSettings = StreamingSettings(),
     val theme: String = Constants.LIGHT,
-    val language: String = "en" // Default to English
+    val language: String = "en"
 )

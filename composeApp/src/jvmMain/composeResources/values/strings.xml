@@ -10,6 +10,7 @@
     <string name="no_lyrics_available">No lyrics available for this song</string>
     <string name="tune">Tune</string>
     <string name="search">Search</string>
+    <string name="replace">Replace with</string>
     <string name="search_songs">Search songs...</string>
     <string name="song_book">Song Book</string>
     <string name="all_song_books">All Song Books</string>
@@ -366,4 +367,14 @@
     <string name="media_open_in_browser">Open in Browser</string>
     <string name="media_web_preview_note">Web video preview — playback controlled via browser.</string>
     <string name="media_local_preview_note">Local video — use controls above to manage playback.</string>
+
+    <!-- Streaming Settings Tab -->
+    <string name="streaming">Streaming</string>
+    <string name="streaming_settings">Streaming Settings</string>
+    <string name="lower_third_folder">Lower Third Animations Folder</string>
+    <string name="lower_third_folder_hint">No folder selected</string>
+    <string name="lower_third_folder_help">Select a folder containing Lottie JSON (.json) animation files for lower third overlays.</string>
+    <string name="clear_folder">Clear</string>
+    <string name="lower_third_files_found">%1$d animation file(s) found</string>
+    <string name="lower_third_no_files">No .json files found in selected folder</string>
 </resources>

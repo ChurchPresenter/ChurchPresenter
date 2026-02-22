@@ -10,6 +10,7 @@
     <string name="no_lyrics_available">Pro tuto píseň nejsou k dispozici texty</string>
     <string name="tune">Melodie</string>
     <string name="search">Hledat</string>
+    <string name="replace">Nahradit</string>
     <string name="search_songs">Hledat písně...</string>
     <string name="song_book">Zpěvník</string>
     <string name="all_song_books">Všechny zpěvníky</string>
@@ -378,7 +379,6 @@
     <string name="tooltip_edit">Upravit</string>
 
     <!-- Pictures Tab Strings -->
-    <string name="select_folder">Vybrat složku</string>
     <string name="no_folder_selected">Žádná složka nevybrána</string>
     <string name="images_count">%1$d obrázků</string>
     <string name="previous_image">Předchozí obrázek</string>
@@ -452,5 +452,16 @@
     <string name="media_open_in_browser">Otevřít v prohlížeči</string>
     <string name="media_web_preview_note">Webové video — přehrávání ovládáno přes prohlížeč.</string>
     <string name="media_local_preview_note">Místní video — použijte ovládací prvky výše.</string>
+
+    <!-- Streaming Settings Tab -->
+    <string name="streaming">Streaming</string>
+    <string name="streaming_settings">Nastavení streamingu</string>
+    <string name="lower_third_folder">Složka animací dolní třetiny</string>
+    <string name="lower_third_folder_hint">Žádná složka nebyla vybrána</string>
+    <string name="lower_third_folder_help">Vyberte složku se soubory animací Lottie JSON (.json) pro překryvy dolní třetiny.</string>
+    <string name="select_folder">Vybrat složku</string>
+    <string name="clear_folder">Vymazat</string>
+    <string name="lower_third_files_found">Nalezeno %1$d animačních souborů</string>
+    <string name="lower_third_no_files">V vybrané složce nebyly nalezeny žádné soubory .json</string>
 </resources>
 

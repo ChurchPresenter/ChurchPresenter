@@ -34,6 +34,7 @@ import org.churchpresenter.app.churchpresenter.tabs.PicturesTab
 import org.churchpresenter.app.churchpresenter.tabs.PresentationTab
 import org.churchpresenter.app.churchpresenter.tabs.ScheduleTab
 import org.churchpresenter.app.churchpresenter.tabs.SongsTab
+import org.churchpresenter.app.churchpresenter.tabs.StreamingTab
 import org.churchpresenter.app.churchpresenter.tabs.TabSection
 import org.churchpresenter.app.churchpresenter.tabs.Tabs
 import org.churchpresenter.app.churchpresenter.models.LyricSection
@@ -119,6 +120,10 @@ fun MainDesktop(
                             true
                         }
                         Key.F11 -> {
+                            selectedTabIndex = Tabs.STREAMING.ordinal
+                            true
+                        }
+                        Key.F12 -> {
                             selectedTabIndex = Tabs.ANNOUNCEMENTS.ordinal
                             true
                         }
@@ -331,6 +336,11 @@ fun MainDesktop(
                         )
 
                         Tabs.MEDIA -> { /* rendered above, always in composition */ }
+
+                        Tabs.STREAMING -> StreamingTab(
+                            modifier = Modifier.fillMaxSize(),
+                            appSettings = appSettings
+                        )
 
                         Tabs.ANNOUNCEMENTS -> AnnouncementsTab()
                     }

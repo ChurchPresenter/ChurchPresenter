@@ -39,6 +39,7 @@ import churchpresenter.composeapp.generated.resources.other
 import churchpresenter.composeapp.generated.resources.other_tab_content
 import churchpresenter.composeapp.generated.resources.projection
 import churchpresenter.composeapp.generated.resources.song
+import churchpresenter.composeapp.generated.resources.streaming
 import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.data.SettingsManager
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.BackgroundSettingsTab
@@ -46,6 +47,7 @@ import org.churchpresenter.app.churchpresenter.dialogs.tabs.BibleSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.MediaSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.ProjectionSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.SongSettingsTab
+import org.churchpresenter.app.churchpresenter.dialogs.tabs.StreamingSettingsTab
 import org.churchpresenter.app.churchpresenter.ui.theme.AppThemeWrapper
 import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
 import org.jetbrains.compose.resources.stringResource
@@ -108,6 +110,11 @@ fun OptionsDialog(
                         Tab(
                             selected = selectedTabIndex == 5,
                             onClick = { selectedTabIndex = 5 },
+                            text = { Text(stringResource(Res.string.streaming)) }
+                        )
+                        Tab(
+                            selected = selectedTabIndex == 6,
+                            onClick = { selectedTabIndex = 6 },
                             text = { Text(stringResource(Res.string.other)) }
                         )
                     }
@@ -151,7 +158,13 @@ fun OptionsDialog(
                                     currentSettings = updateFn(currentSettings)
                                 }
                             )
-                            5 -> PlaceholderTab(stringResource(Res.string.other_tab_content))
+                            5 -> StreamingSettingsTab(
+                                settings = currentSettings,
+                                onSettingsChange = { updateFn ->
+                                    currentSettings = updateFn(currentSettings)
+                                }
+                            )
+                            6 -> PlaceholderTab(stringResource(Res.string.other_tab_content))
                         }
                     }
 

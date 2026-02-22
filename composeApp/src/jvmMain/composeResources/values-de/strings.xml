@@ -10,6 +10,7 @@
     <string name="no_lyrics_available">Kein Liedtext verfügbar</string>
     <string name="tune">Melodie</string>
     <string name="search">Suchen</string>
+    <string name="replace">Ersetzen durch</string>
     <string name="search_songs">Lieder suchen...</string>
     <string name="song_book">Liederbuch</string>
     <string name="all_song_books">Alle Liederbücher</string>
@@ -366,5 +367,15 @@
     <string name="media_open_in_browser">Im Browser öffnen</string>
     <string name="media_web_preview_note">Web-Video — Wiedergabesteuerung über den Browser.</string>
     <string name="media_local_preview_note">Lokales Video — Steuerelemente oben verwenden.</string>
+
+    <!-- Streaming Settings Tab -->
+    <string name="streaming">Streaming</string>
+    <string name="streaming_settings">Streaming-Einstellungen</string>
+    <string name="lower_third_folder">Ordner für Lower-Third-Animationen</string>
+    <string name="lower_third_folder_hint">Kein Ordner ausgewählt</string>
+    <string name="lower_third_folder_help">Wählen Sie einen Ordner mit Lottie JSON (.json) Animationsdateien für Lower-Third-Overlays.</string>
+    <string name="clear_folder">Leeren</string>
+    <string name="lower_third_files_found">%1$d Animationsdatei(en) gefunden</string>
+    <string name="lower_third_no_files">Keine .json-Dateien im ausgewählten Ordner gefunden</string>
 </resources>
 
