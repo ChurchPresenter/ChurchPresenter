@@ -59,25 +59,30 @@ import churchpresenter.composeapp.generated.resources.starts_with
 import churchpresenter.composeapp.generated.resources.title
 import churchpresenter.composeapp.generated.resources.tune
 import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
+import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.data.SongItem
 import org.churchpresenter.app.churchpresenter.dialogs.EditSongDialog
 import org.churchpresenter.app.churchpresenter.models.LyricSection
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
 import org.churchpresenter.app.churchpresenter.utils.Constants
-import org.churchpresenter.app.churchpresenter.viewmodel.ScheduleViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.SongsViewModel
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun SongsTab(
     modifier: Modifier = Modifier,
-    viewModel: SongsViewModel,
-    scheduleViewModel: ScheduleViewModel? = null,
+    appSettings: AppSettings,
+    onAddToSchedule: (() -> Unit)? = null,
     onSongItemSelected: (LyricSection) -> Unit,
     onPresenting: (Presenting) -> Unit = { Presenting.NONE },
+    onViewModelReady: (SongsViewModel) -> Unit = {},
     theme: ThemeMode = ThemeMode.SYSTEM
 ) {
+    val viewModel = remember { SongsViewModel(appSettings) }
+
+    // Expose the ViewModel to the caller on first composition
+    LaunchedEffect(Unit) { onViewModelReady(viewModel) }
     // Observe ViewModel state
     val songbooks by viewModel.songbooks
     val searchQuery by viewModel.searchQuery
@@ -319,10 +324,10 @@ fun SongsTab(
                     Text(stringResource(Res.string.go_live), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onPrimary, maxLines = 2)
                 }
 
-                if (scheduleViewModel != null && selectedSongIndex >= 0 && selectedSongIndex < filteredSongs.size) {
+                if (onAddToSchedule != null && selectedSongIndex >= 0 && selectedSongIndex < filteredSongs.size) {
                     Button(
                         modifier = Modifier.wrapContentSize().padding(start = 4.dp),
-                        onClick = { scheduleViewModel.let { viewModel.addCurrentSongToSchedule(it) } },
+                        onClick = { onAddToSchedule() },
                         colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
                     ) {
                         Text(stringResource(Res.string.add_to_schedule), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSecondary, maxLines = 2)

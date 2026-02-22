@@ -58,10 +58,10 @@ import churchpresenter.composeapp.generated.resources.select_folder
 import churchpresenter.composeapp.generated.resources.select_folder_to_view
 import churchpresenter.composeapp.generated.resources.select_image_folder_dialog
 import kotlinx.coroutines.delay
+import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.models.ScheduleItem
 import org.churchpresenter.app.churchpresenter.viewmodel.PicturesViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
-import org.churchpresenter.app.churchpresenter.viewmodel.ScheduleViewModel
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import java.io.File
@@ -69,12 +69,30 @@ import java.io.File
 @Composable
 fun PicturesTab(
     modifier: Modifier = Modifier,
-    viewModel: PicturesViewModel = remember { PicturesViewModel() },
-    scheduleViewModel: ScheduleViewModel? = null,
+    appSettings: AppSettings? = null,
+    onAddToSchedule: ((folderPath: String, folderName: String, imageCount: Int) -> Unit)? = null,
     selectedPictureItem: ScheduleItem.PictureItem? = null,
-    presenterManager: PresenterManager? = null
+    presenterManager: PresenterManager? = null,
+    onSelectFolderRequest: ((folderPath: String) -> Unit) -> Unit = {},
+    onPresentPicturesRequest: ((folderPath: String) -> Unit) -> Unit = {}
 ) {
+    val viewModel = remember { PicturesViewModel(appSettings) }
     val folderDialogTitle = stringResource(Res.string.select_image_folder_dialog)
+
+    // Expose actions to parent — no ViewModel reference leaves this composable
+    LaunchedEffect(Unit) {
+        onSelectFolderRequest { folderPath ->
+            val folder = File(folderPath)
+            if (folder.exists() && folder.isDirectory) viewModel.selectFolder(folder)
+        }
+        onPresentPicturesRequest { folderPath ->
+            val folder = File(folderPath)
+            if (folder.exists() && folder.isDirectory) {
+                viewModel.selectFolder(folder)
+                presenterManager?.let { viewModel.goLive(it) }
+            }
+        }
+    }
 
     // Auto-scroll effect
     LaunchedEffect(viewModel.isPlaying, viewModel.selectedImageIndex, viewModel.autoScrollInterval) {
@@ -236,11 +254,11 @@ fun PicturesTab(
                         }
                     }
 
-                    if (scheduleViewModel != null && viewModel.selectedFolder != null) {
+                    if (onAddToSchedule != null && viewModel.selectedFolder != null) {
                         Button(
                             onClick = {
                                 viewModel.getScheduleData()?.let { (path, name, count) ->
-                                    scheduleViewModel.addPicture(path, name, count)
+                                    onAddToSchedule(path, name, count)
                                 }
                             },
                             colors = ButtonDefaults.buttonColors(

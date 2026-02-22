@@ -59,10 +59,10 @@ import churchpresenter.composeapp.generated.resources.slide_counter
 import churchpresenter.composeapp.generated.resources.slide_number
 import churchpresenter.composeapp.generated.resources.supported_formats
 import kotlinx.coroutines.delay
+import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
-import org.churchpresenter.app.churchpresenter.viewmodel.PresentationViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
-import org.churchpresenter.app.churchpresenter.viewmodel.ScheduleViewModel
+import org.churchpresenter.app.churchpresenter.viewmodel.PresentationViewModel
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import java.io.File
@@ -74,10 +74,19 @@ import javax.swing.filechooser.FileNameExtensionFilter
 @Composable
 fun PresentationTab(
     modifier: Modifier = Modifier,
-    viewModel: PresentationViewModel = remember { PresentationViewModel() },
-    scheduleViewModel: ScheduleViewModel? = null,
-    presenterManager: PresenterManager? = null
+    appSettings: AppSettings,
+    onAddToSchedule: ((filePath: String, fileName: String, slideCount: Int, fileType: String) -> Unit)? = null,
+    presenterManager: PresenterManager? = null,
+    onLoadPresentationRequest: ((filePath: String) -> Unit) -> Unit = {}
 ) {
+    val viewModel = remember { PresentationViewModel(appSettings) }
+
+    // Expose load-by-path action to parent — no ViewModel reference leaves this composable
+    LaunchedEffect(Unit) {
+        onLoadPresentationRequest { filePath -> viewModel.loadPresentationByPath(filePath) }
+    }
+    val presentationFileDialogTitle = stringResource(Res.string.select_presentation_file)
+
     // Auto-play effect using media settings (same as PicturesTab)
     LaunchedEffect(viewModel.isPlaying, viewModel.selectedSlideIndex, viewModel.autoScrollInterval) {
         if (viewModel.isPlaying && viewModel.slides.isNotEmpty()) {
@@ -131,7 +140,7 @@ fun PresentationTab(
                     SwingUtilities.invokeLater {
                         val chooser = createFileChooser {
                             fileSelectionMode = JFileChooser.FILES_ONLY
-                            dialogTitle = "Select Presentation File"
+                            dialogTitle = presentationFileDialogTitle
                             isMultiSelectionEnabled = true
 
                             val pptFilter = FileNameExtensionFilter(
@@ -282,16 +291,15 @@ fun PresentationTab(
                     }
 
                     // Add to Schedule button
-                    if (scheduleViewModel != null && viewModel.selectedPresentation != null) {
+                    if (onAddToSchedule != null && viewModel.selectedPresentation != null) {
                         Button(
                             onClick = {
                                 val file = viewModel.selectedPresentation!!
-                                val extension = file.extension.lowercase()
-                                scheduleViewModel.addPresentation(
-                                    filePath = file.absolutePath,
-                                    fileName = file.nameWithoutExtension,
-                                    slideCount = viewModel.slides.size,
-                                    fileType = extension
+                                onAddToSchedule(
+                                    file.absolutePath,
+                                    file.nameWithoutExtension,
+                                    viewModel.slides.size,
+                                    file.extension.lowercase()
                                 )
                             },
                             colors = ButtonDefaults.buttonColors(

@@ -41,18 +41,10 @@ import churchpresenter.composeapp.generated.resources.tooltip_move_down
 import churchpresenter.composeapp.generated.resources.tooltip_move_up
 import churchpresenter.composeapp.generated.resources.tooltip_remove
 import org.churchpresenter.app.churchpresenter.composables.TooltipIconButton
-import org.churchpresenter.app.churchpresenter.models.LyricSection
 import org.churchpresenter.app.churchpresenter.models.ScheduleItem
-import org.churchpresenter.app.churchpresenter.models.SelectedVerse
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.utils.Utils
-import org.churchpresenter.app.churchpresenter.viewmodel.BibleViewModel
-import org.churchpresenter.app.churchpresenter.viewmodel.MediaViewModel
-import org.churchpresenter.app.churchpresenter.viewmodel.PicturesViewModel
-import org.churchpresenter.app.churchpresenter.viewmodel.PresentationViewModel
-import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.app.churchpresenter.viewmodel.ScheduleViewModel
-import org.churchpresenter.app.churchpresenter.viewmodel.SongsViewModel
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
@@ -60,17 +52,14 @@ import org.jetbrains.compose.resources.stringResource
 fun ScheduleTab(
     modifier: Modifier = Modifier,
     scheduleViewModel: ScheduleViewModel,
-    songsViewModel: SongsViewModel,
-    bibleViewModel: BibleViewModel,
-    picturesViewModel: PicturesViewModel? = null,
-    presentationViewModel: PresentationViewModel? = null,
-    mediaViewModel: MediaViewModel? = null,
-    presenterManager: PresenterManager? = null,
-    onSongItemSelected: (LyricSection) -> Unit,
-    onVerseSelected: (List<SelectedVerse>) -> Unit,
     onPresenting: (Presenting) -> Unit = { Presenting.NONE },
     onItemClick: (ScheduleItem) -> Unit = {},
-    onEditLabel: (ScheduleItem.LabelItem) -> Unit = {}
+    onEditLabel: (ScheduleItem.LabelItem) -> Unit = {},
+    onPresentSong: ((ScheduleItem.SongItem) -> Unit)? = null,
+    onPresentBible: ((ScheduleItem.BibleVerseItem) -> Unit)? = null,
+    onPresentPresentation: ((ScheduleItem.PresentationItem) -> Unit)? = null,
+    onPresentPictures: ((ScheduleItem.PictureItem) -> Unit)? = null,
+    onPresentMedia: ((ScheduleItem.MediaItem) -> Unit)? = null
 ) {
     val scheduleItems = scheduleViewModel.scheduleItems
     val selectedItemId = scheduleViewModel.selectedItemId
@@ -131,15 +120,12 @@ fun ScheduleTab(
                         onPresent = {
                             scheduleViewModel.presentItem(
                                 item = item,
-                                songsViewModel = songsViewModel,
-                                bibleViewModel = bibleViewModel,
-                                picturesViewModel = picturesViewModel,
-                                presentationViewModel = presentationViewModel,
-                                mediaViewModel = mediaViewModel,
-                                presenterManager = presenterManager,
-                                onSongItemSelected = onSongItemSelected,
-                                onVerseSelected = onVerseSelected,
-                                onPresenting = onPresenting
+                                onPresenting = onPresenting,
+                                onPresentSong = onPresentSong,
+                                onPresentBible = onPresentBible,
+                                onPresentPresentation = onPresentPresentation,
+                                onPresentPictures = onPresentPictures,
+                                onPresentMedia = onPresentMedia
                             )
                         },
                         onEditLabel = {

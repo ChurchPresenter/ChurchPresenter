@@ -23,9 +23,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.rememberWindowState
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.app_name
-import churchpresenter.composeapp.generated.resources.file_chooser_open_schedule
-import churchpresenter.composeapp.generated.resources.file_chooser_save_schedule
-import churchpresenter.composeapp.generated.resources.file_filter_schedule
 import org.churchpresenter.app.churchpresenter.data.Language
 import org.churchpresenter.app.churchpresenter.data.SettingsManager
 import org.churchpresenter.app.churchpresenter.dialogs.OptionsDialog
@@ -38,11 +35,8 @@ import org.churchpresenter.app.churchpresenter.presenter.SongPresenter
 import org.churchpresenter.app.churchpresenter.ui.theme.AppThemeWrapper
 import org.churchpresenter.app.churchpresenter.ui.theme.LanguageProvider
 import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
-import org.churchpresenter.app.churchpresenter.viewmodel.BibleViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.MediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
-import org.churchpresenter.app.churchpresenter.viewmodel.ScheduleViewModel
-import org.churchpresenter.app.churchpresenter.viewmodel.SongsViewModel
 import org.churchpresenter.app.churchpresenter.composables.preWarmJavaFX
 import org.jetbrains.compose.resources.stringResource
 import java.util.Locale
@@ -65,21 +59,12 @@ fun main() {
         mutableStateOf(language)
     }
 
-    // Create BibleViewModel with settings (no fallback Bible needed)
-    val bibleViewModel = remember {
-        BibleViewModel(appSettings)
-    }
 
-    // Create SongsViewModel with settings
-    val songsViewModel = remember {
-        SongsViewModel(appSettings)
-    }
+    // Schedule actions are registered by MainDesktop — no ScheduleViewModel reference held here
+    var scheduleActions by remember { mutableStateOf(ScheduleActions()) }
 
-    // Create ScheduleViewModel
-    val scheduleViewModel = remember { ScheduleViewModel() }
-
-    // Create MediaViewModel — shared between MediaTab and MediaPresenter
-    val mediaViewModel = remember { MediaViewModel() }
+    // MediaViewModel is owned by MediaTab; we hold a reference here only for MediaPresenter
+    var mediaViewModel by remember { mutableStateOf<MediaViewModel?>(null) }
 
 
     // UI state — restore saved theme so toolbar/icons have the correct colors on first frame
@@ -92,8 +77,7 @@ fun main() {
         mutableStateOf(savedTheme)
     }
     var showOptionsDialog by remember { mutableStateOf(false) }
-    var currentTab by remember { mutableStateOf(0) } // Track which tab is selected
-    var selectedScheduleItemId by remember { mutableStateOf<String?>(null) } // Track selected schedule item
+    var selectedScheduleItemId by remember { mutableStateOf<String?>(null) }
 
     // Get bounds of the second screen if present
     val screens = GraphicsEnvironment.getLocalGraphicsEnvironment().screenDevices
@@ -119,9 +103,6 @@ fun main() {
         LanguageProvider(language = currentLanguage) {
             AppThemeWrapper(theme = theme) {
 
-                val strSaveScheduleAs = stringResource(Res.string.file_chooser_save_schedule)
-                val strOpenSchedule   = stringResource(Res.string.file_chooser_open_schedule)
-                val strFileFilter     = stringResource(Res.string.file_filter_schedule)
 
                 NavigationTopBar(
                     onAbout = { presenterManager.setShowPresenterWindow(true) },
@@ -141,88 +122,29 @@ fun main() {
                     },
                     onExit = { exitApplication() },
                     onAddToSchedule = {
-                        // Add currently selected song or verse to schedule
-                        when (currentTab) {
-                            0 -> { // Bible tab
-                                // Use getSelectedVerses which already has the right logic
-                                val verses = bibleViewModel.getSelectedVerses()
-                                verses.firstOrNull()?.let { verse ->
-                                    scheduleViewModel.addBibleVerse(
-                                        bookName = verse.bookName,
-                                        chapter = verse.chapter,
-                                        verseNumber = verse.verseNumber,
-                                        verseText = verse.verseText
-                                    )
-                                }
-                            }
-
-                            1 -> { // Songs tab
-                                // Access the filtered songs and get the selected song
-                                val selectedIndex = songsViewModel.selectedSongIndex.value
-                                val filteredSongs = songsViewModel.filteredSongs.value
-                                val allSongs = songsViewModel.songsData.value.getSongs()
-
-                                if (selectedIndex >= 0 && selectedIndex < filteredSongs.size) {
-                                    // Map back to Song objects
-                                    val songText = filteredSongs[selectedIndex]
-                                    val song = allSongs.find { "${it.number}. ${it.title}" == songText }
-
-                                    song?.let {
-                                        scheduleViewModel.addSong(
-                                            songNumber = it.number.toIntOrNull() ?: 0,
-                                            title = it.title,
-                                            songbook = it.songbook
-                                        )
-                                    }
-                                }
-                            }
-                        }
+                        // Handled by MainDesktop via BibleTab/SongsTab callbacks
                     },
-                    onNewSchedule = {
-                        scheduleViewModel.newSchedule()
-                    },
-                    onOpenSchedule = {
-                        scheduleViewModel.loadSchedule(strOpenSchedule, strFileFilter)
-                    },
-                    onSaveSchedule = {
-                        scheduleViewModel.saveSchedule(strSaveScheduleAs, strFileFilter)
-                    },
-                    onSaveScheduleAs = {
-                        scheduleViewModel.saveScheduleAs(strSaveScheduleAs, strFileFilter)
-                    },
-                    onCloseSchedule = {
-                        scheduleViewModel.newSchedule()
-                    },
+                    onNewSchedule = { scheduleActions.newSchedule() },
+                    onOpenSchedule = { scheduleActions.openSchedule() },
+                    onSaveSchedule = { scheduleActions.saveSchedule() },
+                    onSaveScheduleAs = { scheduleActions.saveScheduleAs() },
+                    onCloseSchedule = { scheduleActions.newSchedule() },
                     onRemoveFromSchedule = {
-                        // Remove selected item from schedule
-                        selectedScheduleItemId?.let { id ->
-                            scheduleViewModel.removeItem(id)
-                            selectedScheduleItemId = null
-                        }
+                        selectedScheduleItemId?.let { scheduleActions.removeSelected(); selectedScheduleItemId = null }
                     },
                     onClearSchedule = {
-                        // Clear all schedule items
-                        scheduleViewModel.clearSchedule()
+                        scheduleActions.clearSchedule()
                         selectedScheduleItemId = null
                     },
                 )
                 MainDesktop(
-                    onVerseSelected = { verses ->
-                        presenterManager.setSelectedVerses(verses)
-                    },
-                    onSongItemSelected = {
-                        presenterManager.setLyricSection(it)
-                    },
+                    onVerseSelected = { verses -> presenterManager.setSelectedVerses(verses) },
+                    onSongItemSelected = { presenterManager.setLyricSection(it) },
                     appSettings = appSettings,
-                    bibleViewModel = bibleViewModel,
-                    songsViewModel = songsViewModel,
-                    scheduleViewModel = scheduleViewModel,
                     presenterManager = presenterManager,
-                    mediaViewModel = mediaViewModel,
+                    onMediaViewModelReady = { mediaViewModel = it },
+                    onScheduleActionsReady = { scheduleActions = it },
                     presenting = { presenterManager.setPresentingMode(it) },
-                    onTabChange = { tabIndex ->
-                        currentTab = tabIndex
-                    },
                     onScheduleItemSelected = { itemId ->
                         selectedScheduleItemId = itemId
                     },
@@ -247,12 +169,7 @@ fun main() {
                     theme = theme,
                     settingsManager = settingsManager,
                     onDismiss = { showOptionsDialog = false },
-                    onSave = {
-                        appSettings = it
-                        // Reload ViewModels with new settings
-                        bibleViewModel.updateSettings(it)
-                        songsViewModel.updateSettings(it)
-                    }
+                    onSave = { appSettings = it }
                 )
             }
         }
@@ -292,7 +209,7 @@ fun main() {
                             .fillMaxSize()
                             .onPreviewKeyEvent { keyEvent ->
                                 if (keyEvent.type == KeyEventType.KeyDown && keyEvent.key == Key.Escape) {
-                                    mediaViewModel.pause()
+                                    mediaViewModel?.pause()
                                     presenterManager.setPresentingMode(Presenting.NONE)
                                     true
                                 } else false
@@ -300,7 +217,7 @@ fun main() {
                     ) {
                         // Always present, hidden when another mode is active
                         MediaPresenter(
-                            viewModel = mediaViewModel,
+                            viewModel = mediaViewModel ?: return@Box,
                             isVisible = presentingMode == Presenting.MEDIA,
                             modifier = Modifier.fillMaxSize().then(
                                 if (presentingMode == Presenting.MEDIA) Modifier

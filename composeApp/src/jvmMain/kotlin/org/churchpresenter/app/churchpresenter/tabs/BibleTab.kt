@@ -62,20 +62,38 @@ import churchpresenter.composeapp.generated.resources.verse
 import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
 import org.churchpresenter.app.churchpresenter.composables.SearchTextField
 import org.churchpresenter.app.churchpresenter.composables.SelectionListWithIndex
+import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.models.SelectedVerse
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.viewmodel.BibleViewModel
-import org.churchpresenter.app.churchpresenter.viewmodel.ScheduleViewModel
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun BibleTab(
     modifier: Modifier = Modifier,
-    viewModel: BibleViewModel,
-    scheduleViewModel: ScheduleViewModel? = null,
+    appSettings: AppSettings,
+    onAddToSchedule: ((bookName: String, chapter: Int, verseNumber: Int, verseText: String) -> Unit)? = null,
     onVerseSelected: (List<SelectedVerse>) -> Unit = {},
-    onPresenting: (Presenting) -> Unit = { Presenting.NONE }
+    onPresenting: (Presenting) -> Unit = { Presenting.NONE },
+    onAddToScheduleRegistration: (() -> Unit) -> Unit = {},
+    onSelectVerseRequest: ((bookName: String, chapter: Int, verseNumber: Int) -> Unit) -> Unit = {}
 ) {
+    val viewModel = remember { BibleViewModel(appSettings) }
+
+    LaunchedEffect(Unit) {
+        onAddToScheduleRegistration {
+            viewModel.addCurrentVerseToSchedule { bookName, chapter, verseNumber, verseText ->
+                onAddToSchedule?.invoke(bookName, chapter, verseNumber, verseText)
+            }
+        }
+    }
+
+    // Register the select-verse action with the parent once
+    LaunchedEffect(Unit) {
+        onSelectVerseRequest { bookName, chapter, verseNumber ->
+            viewModel.selectVerseByDetails(bookName, chapter, verseNumber)
+        }
+    }
 
     val books by viewModel.books
     val selectedBookIndex by viewModel.selectedBookIndex
@@ -334,7 +352,9 @@ fun BibleTab(
                         Button(
                             modifier = Modifier.wrapContentSize().padding(start = 8.dp),
                             onClick = {
-                                scheduleViewModel?.let { viewModel.addCurrentVerseToSchedule(it) }
+                                viewModel.addCurrentVerseToSchedule { bookName, chapter, verseNumber, verseText ->
+                                    onAddToSchedule?.invoke(bookName, chapter, verseNumber, verseText)
+                                }
                             },
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = MaterialTheme.colorScheme.secondary

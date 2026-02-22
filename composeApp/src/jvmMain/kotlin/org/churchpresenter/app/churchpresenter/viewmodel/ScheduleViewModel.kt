@@ -5,9 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
-import org.churchpresenter.app.churchpresenter.models.LyricSection
 import org.churchpresenter.app.churchpresenter.models.ScheduleItem
-import org.churchpresenter.app.churchpresenter.models.SelectedVerse
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.utils.createFileChooser
 import java.io.File
@@ -235,73 +233,20 @@ class ScheduleViewModel {
      */
     fun presentItem(
         item: ScheduleItem,
-        songsViewModel: SongsViewModel,
-        bibleViewModel: BibleViewModel,
-        picturesViewModel: PicturesViewModel?,
-        presentationViewModel: PresentationViewModel?,
-        mediaViewModel: MediaViewModel?,
-        presenterManager: PresenterManager?,
-        onSongItemSelected: (LyricSection) -> Unit,
-        onVerseSelected: (List<SelectedVerse>) -> Unit,
-        onPresenting: (Presenting) -> Unit
+        onPresenting: (Presenting) -> Unit,
+        onPresentSong: ((ScheduleItem.SongItem) -> Unit)? = null,
+        onPresentBible: ((ScheduleItem.BibleVerseItem) -> Unit)? = null,
+        onPresentPresentation: ((ScheduleItem.PresentationItem) -> Unit)? = null,
+        onPresentPictures: ((ScheduleItem.PictureItem) -> Unit)? = null,
+        onPresentMedia: ((ScheduleItem.MediaItem) -> Unit)? = null
     ) {
         when (item) {
-            is ScheduleItem.SongItem -> {
-                songsViewModel.selectSongByDetails(
-                    songNumber = item.songNumber,
-                    title = item.title,
-                    songbook = item.songbook
-                )
-                songsViewModel.getSelectedLyricSection()?.let { onSongItemSelected(it) }
-                onPresenting(Presenting.LYRICS)
-            }
-            is ScheduleItem.BibleVerseItem -> {
-                bibleViewModel.selectVerseByDetails(
-                    bookName = item.bookName,
-                    chapter = item.chapter,
-                    verseNumber = item.verseNumber
-                )
-                onVerseSelected(bibleViewModel.getSelectedVerses())
-                onPresenting(Presenting.BIBLE)
-            }
-            is ScheduleItem.LabelItem -> {
-                // Labels are not presentable
-            }
-            is ScheduleItem.PictureItem -> {
-                if (picturesViewModel != null && presenterManager != null) {
-                    val folder = File(item.folderPath)
-                    if (folder.exists() && folder.isDirectory) {
-                        picturesViewModel.selectFolder(folder)
-                        val firstImage = picturesViewModel.getCurrentImageFile()
-                        if (firstImage != null) {
-                            presenterManager.setSelectedImagePath(firstImage.absolutePath)
-                            presenterManager.setPresentingMode(Presenting.PICTURES)
-                            presenterManager.setShowPresenterWindow(true)
-                        }
-                    }
-                }
-            }
-            is ScheduleItem.PresentationItem -> {
-                if (presentationViewModel != null && presenterManager != null) {
-                    val file = File(item.filePath)
-                    if (file.exists()) {
-                        presentationViewModel.loadPresentationByPath(item.filePath)
-                        presenterManager.setPresentingMode(Presenting.PRESENTATION)
-                        presenterManager.setShowPresenterWindow(true)
-                    }
-                }
-            }
-            is ScheduleItem.MediaItem -> {
-                if (mediaViewModel != null && presenterManager != null) {
-                    mediaViewModel.loadMediaFromSchedule(
-                        url = item.mediaUrl,
-                        title = item.mediaTitle,
-                        type = item.mediaType
-                    )
-                    presenterManager.setPresentingMode(Presenting.MEDIA)
-                    presenterManager.setShowPresenterWindow(true)
-                }
-            }
+            is ScheduleItem.SongItem -> onPresentSong?.invoke(item) ?: onPresenting(Presenting.LYRICS)
+            is ScheduleItem.BibleVerseItem -> onPresentBible?.invoke(item) ?: onPresenting(Presenting.BIBLE)
+            is ScheduleItem.LabelItem -> { /* not presentable */ }
+            is ScheduleItem.PictureItem -> onPresentPictures?.invoke(item) ?: onPresenting(Presenting.PICTURES)
+            is ScheduleItem.PresentationItem -> onPresentPresentation?.invoke(item) ?: onPresenting(Presenting.PRESENTATION)
+            is ScheduleItem.MediaItem -> onPresentMedia?.invoke(item) ?: onPresenting(Presenting.MEDIA)
         }
     }
 }

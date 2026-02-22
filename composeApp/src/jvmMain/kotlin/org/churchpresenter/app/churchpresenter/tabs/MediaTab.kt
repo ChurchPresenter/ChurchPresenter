@@ -24,6 +24,7 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -71,7 +72,6 @@ import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.viewmodel.MediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
-import org.churchpresenter.app.churchpresenter.viewmodel.ScheduleViewModel
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.app.churchpresenter.utils.createFileChooser
@@ -82,13 +82,24 @@ import javax.swing.filechooser.FileNameExtensionFilter
 @Composable
 fun MediaTab(
     modifier: Modifier = Modifier,
-    viewModel: MediaViewModel = remember { MediaViewModel() },
-    scheduleViewModel: ScheduleViewModel? = null,
-    presenterManager: PresenterManager? = null
+    onAddToSchedule: ((mediaUrl: String, mediaTitle: String, mediaType: String) -> Unit)? = null,
+    presenterManager: PresenterManager? = null,
+    onViewModelReady: (MediaViewModel) -> Unit = {},
+    onPauseRequest: (() -> Unit) -> Unit = {},
+    onLoadMediaRequest: ((url: String, title: String, type: String) -> Unit) -> Unit = {}
 ) {
+    val viewModel = remember { MediaViewModel() }
     val focusRequester = remember { FocusRequester() }
     var volumeExpanded by remember { mutableStateOf(false) }
 
+    // Register actions with parent — no ViewModel reference leaves this composable
+    LaunchedEffect(Unit) {
+        onViewModelReady(viewModel)
+        onPauseRequest { viewModel.pause() }
+        onLoadMediaRequest { url, title, type ->
+            viewModel.loadMediaFromSchedule(url = url, title = title, type = type)
+        }
+    }
 
     Column(
         modifier = modifier
@@ -350,14 +361,10 @@ fun MediaTab(
                     }
                 }
 
-                if (scheduleViewModel != null && viewModel.isLoaded) {
+                if (onAddToSchedule != null && viewModel.isLoaded) {
                     Button(
                         onClick = {
-                            scheduleViewModel.addMedia(
-                                mediaUrl = viewModel.mediaUrl,
-                                mediaTitle = viewModel.mediaTitle,
-                                mediaType = viewModel.mediaType
-                            )
+                            onAddToSchedule(viewModel.mediaUrl, viewModel.mediaTitle, viewModel.mediaType)
                         },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = MaterialTheme.colorScheme.secondary

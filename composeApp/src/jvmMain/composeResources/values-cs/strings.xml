@@ -421,6 +421,7 @@
     <string name="slide_number">Snímek %1$d</string>
     <string name="remove">Odstranit</string>
     <string name="select_presentation_file_button">📄 Vybrat soubor</string>
+    <string name="select_presentation_file_dialog">Select Presentation File</string>
 
     <!-- Projection Settings Tab -->
     <string name="number_of_projection_windows">Počet projekčních oken</string>

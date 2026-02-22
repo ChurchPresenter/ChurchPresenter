@@ -336,6 +336,7 @@
     <string name="slide_number">Слайд %1$d</string>
     <string name="remove">Видалити</string>
     <string name="select_presentation_file_button">📄 Вибрати файл</string>
+    <string name="select_presentation_file_dialog">Select Presentation File</string>
 
     <!-- Projection Settings Tab -->
     <string name="number_of_projection_windows">Кількість вікон проекції</string>

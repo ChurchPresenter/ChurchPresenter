@@ -419,21 +419,24 @@ class BibleViewModel(
      * Adds the currently selected Bible verse to the given schedule.
      * Returns true if the verse was successfully added, false otherwise.
      */
-    fun addCurrentVerseToSchedule(scheduleViewModel: ScheduleViewModel): Boolean {
+    fun addCurrentVerseToSchedule(
+        onAdd: (bookName: String, chapter: Int, verseNumber: Int, verseText: String) -> Unit
+    ): Boolean {
         if (_verses.value.isEmpty()) return false
         val idx = _selectedVerseIndex.value
         if (idx < 0 || idx >= _verses.value.size) return false
         val selectedVerses = getSelectedVerses()
         if (selectedVerses.isEmpty()) return false
         val verse = selectedVerses[0]
-        scheduleViewModel.addBibleVerse(
-            bookName = verse.bookName,
-            chapter = verse.chapter,
-            verseNumber = verse.verseNumber,
-            verseText = verse.verseText
-        )
+        onAdd(verse.bookName, verse.chapter, verse.verseNumber, verse.verseText)
         return true
     }
+
+    // Keep legacy overload for callers that still pass a ScheduleViewModel
+    fun addCurrentVerseToSchedule(scheduleViewModel: ScheduleViewModel): Boolean =
+        addCurrentVerseToSchedule { bookName, chapter, verseNumber, verseText ->
+            scheduleViewModel.addBibleVerse(bookName, chapter, verseNumber, verseText)
+        }
 
     fun updateSearchQuery(query: String) {
         _searchQuery.value = query

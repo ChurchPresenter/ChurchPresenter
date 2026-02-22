@@ -21,6 +21,33 @@ This document tracks coding standards, common mistakes, and debugging notes for 
 - ❌ **AVOID**: `width: androidx.compose.ui.unit.Dp = 120.dp`
 - ✅ **PREFER**: `width: Dp = 120.dp`
 
+### 8. ViewModel Ownership — **CRITICAL RULE**
+- ❌ **NEVER** pass a ViewModel as a parameter to another class, tab, or ViewModel:
+  ```kotlin
+  // WRONG — SongsViewModel does not belong here
+  fun MainDesktop(songsViewModel: SongsViewModel, ...)
+  class PicturesViewModel(scheduleViewModel: ScheduleViewModel)
+  fun ScheduleTab(songsViewModel: SongsViewModel, ...)
+  ```
+- ✅ **ViewModels must ONLY be created and used inside the class/composable they manage**:
+  ```kotlin
+  // CORRECT — SongsTab owns its own ViewModel
+  @Composable
+  fun SongsTab(...) {
+      val viewModel = remember { SongsViewModel(appSettings) }
+  }
+  ```
+- ✅ **Pass data OUT via callbacks, lambdas, or coroutine Flows — never the ViewModel itself**:
+  ```kotlin
+  // CORRECT — expose data via callback
+  fun SongsTab(onViewModelReady: (SongsViewModel) -> Unit = {})
+  // CORRECT — expose data via Flow/StateFlow
+  val currentSong: StateFlow<Song?> = _currentSong.asStateFlow()
+  // CORRECT — use lambda to pass actions up
+  fun SongsTab(onAddToSchedule: (songNumber: Int, title: String, songbook: String) -> Unit)
+  ```
+- **Reason**: ViewModels passed around create tight coupling between unrelated components, make testing impossible, and violate single-responsibility. Each composable/class should only know about its own ViewModel.
+
 ### 7. Fully-Qualified Type Names — **NEVER DO THIS**
 - ❌ **NEVER EVER** use fully-qualified type names when the type can be imported:
   ```kotlin
