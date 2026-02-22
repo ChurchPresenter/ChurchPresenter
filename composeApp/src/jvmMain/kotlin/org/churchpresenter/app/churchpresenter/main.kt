@@ -10,7 +10,6 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
@@ -176,59 +175,57 @@ fun main() {
             }
         }
 
-        // Presenter windows — windowCount is read from settings (max 3).
-        // remember() must be called unconditionally and in stable order, so
-        // windowState is created BEFORE the if(showPresenterWindow) gate.
+        // Presenter windows — always composed (never destroyed) so the native HWND
+        // is created once and stays alive. Visibility is controlled via the visible=
+        // parameter — toggling it just hides/shows the existing window rather than
+        // destroying and recreating the native window, which is expensive on Windows.
         val windowCount = appSettings.projectionSettings.numberOfWindows
+        val proj = appSettings.projectionSettings
         for (i in 0 until windowCount) {
-            // Always call remember at this position regardless of showPresenterWindow,
-            // so the slot table stays stable and no memory corruption occurs.
-            val windowState = remember(i, appSettings.projectionSettings) {
-                val targetScreenIndex = i + 1
-                if (targetScreenIndex < screens.size) {
-                    val screenBounds = screens[targetScreenIndex].defaultConfiguration.bounds
+            val targetScreenIndex = i + 1
+            val windowState = if (targetScreenIndex < screens.size) {
+                val screenBounds = screens[targetScreenIndex].defaultConfiguration.bounds
+                remember(i, proj.windowLeft, proj.windowRight, proj.windowTop, proj.windowBottom) {
                     WindowState(
                         placement = WindowPlacement.Floating,
                         position = WindowPosition(
-                            (screenBounds.x + appSettings.projectionSettings.windowLeft).dp,
-                            (screenBounds.y + appSettings.projectionSettings.windowTop).dp
+                            (screenBounds.x + proj.windowLeft).dp,
+                            (screenBounds.y + proj.windowTop).dp
                         ),
-                        width = (screenBounds.width - appSettings.projectionSettings.windowLeft - appSettings.projectionSettings.windowRight).dp,
-                        height = (screenBounds.height - appSettings.projectionSettings.windowTop - appSettings.projectionSettings.windowBottom).dp
+                        width  = (screenBounds.width  - proj.windowLeft - proj.windowRight).dp,
+                        height = (screenBounds.height - proj.windowTop  - proj.windowBottom).dp
                     )
-                } else {
-                    WindowState(placement = WindowPlacement.Fullscreen)
                 }
+            } else {
+                remember(i) { WindowState(placement = WindowPlacement.Fullscreen) }
             }
 
-            if (showPresenterWindow) {
-                Window(
-                    title = "Presenter View ${i + 1}",
-                    onCloseRequest = { presenterManager.setShowPresenterWindow(false) },
-                    state = windowState,
-                ) {
-                    // Provide the same MediaViewModel instance to the presenter window
-                    CompositionLocalProvider(LocalMediaViewModel provides mediaViewModel) {
-                        PresenterScreen(modifier = Modifier.fillMaxSize(), appSettings = appSettings) {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .onPreviewKeyEvent { keyEvent ->
-                                        if (keyEvent.type == KeyEventType.KeyDown && keyEvent.key == Key.Escape) {
-                                            mediaViewModel.pause()
-                                            presenterManager.setPresentingMode(Presenting.NONE)
-                                            true
-                                        } else false
-                                    }
-                            ) {
-                                when (presentingMode) {
-                                    Presenting.BIBLE -> BiblePresenter(selectedVerses = selectedVerses, appSettings = appSettings)
-                                    Presenting.LYRICS -> SongPresenter(lyricSection = lyricSection, appSettings = appSettings)
-                                    Presenting.PICTURES -> PicturePresenter(imagePath = selectedImagePath, animationType = animationType, transitionDuration = transitionDuration)
-                                    Presenting.PRESENTATION -> SlidePresenter(slide = selectedSlide, animationType = animationType, transitionDuration = transitionDuration)
-                                    Presenting.MEDIA -> MediaPresenter(modifier = Modifier.fillMaxSize())
-                                    Presenting.NONE -> { /* nothing */ }
+            Window(
+                visible = showPresenterWindow,
+                title = "Presenter View ${i + 1}",
+                onCloseRequest = { presenterManager.setShowPresenterWindow(false) },
+                state = windowState,
+            ) {
+                CompositionLocalProvider(LocalMediaViewModel provides mediaViewModel) {
+                    PresenterScreen(modifier = Modifier.fillMaxSize(), appSettings = appSettings) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .onPreviewKeyEvent { keyEvent ->
+                                    if (keyEvent.type == KeyEventType.KeyDown && keyEvent.key == Key.Escape) {
+                                        mediaViewModel.pause()
+                                        presenterManager.setPresentingMode(Presenting.NONE)
+                                        true
+                                    } else false
                                 }
+                        ) {
+                            when (presentingMode) {
+                                Presenting.BIBLE -> BiblePresenter(selectedVerses = selectedVerses, appSettings = appSettings)
+                                Presenting.LYRICS -> SongPresenter(lyricSection = lyricSection, appSettings = appSettings)
+                                Presenting.PICTURES -> PicturePresenter(imagePath = selectedImagePath, animationType = animationType, transitionDuration = transitionDuration)
+                                Presenting.PRESENTATION -> SlidePresenter(slide = selectedSlide, animationType = animationType, transitionDuration = transitionDuration)
+                                Presenting.MEDIA -> MediaPresenter(modifier = Modifier.fillMaxSize())
+                                Presenting.NONE -> { /* nothing */ }
                             }
                         }
                     }
