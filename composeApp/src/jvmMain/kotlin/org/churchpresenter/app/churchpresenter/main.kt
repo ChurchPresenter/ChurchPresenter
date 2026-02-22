@@ -3,6 +3,9 @@ package org.churchpresenter.app.churchpresenter
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -10,8 +13,8 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.awt.ComposeWindow
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
@@ -21,6 +24,8 @@ import androidx.compose.ui.window.WindowState
 import androidx.compose.ui.window.WindowPlacement
 import androidx.compose.ui.window.WindowPosition
 import java.awt.GraphicsEnvironment
+import javax.swing.SwingUtilities
+import kotlinx.coroutines.delay
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.rememberWindowState
 import churchpresenter.composeapp.generated.resources.Res
@@ -91,16 +96,6 @@ fun main() {
         val state = rememberWindowState(
             placement = WindowPlacement.Maximized
         )
-
-        val showPresenterWindow by presenterManager.showPresenterWindow
-        val presentingMode by presenterManager.presentingMode
-        val selectedVerses by presenterManager.selectedVerses
-        val lyricSection by presenterManager.lyricSection
-        val selectedImagePath by presenterManager.selectedImagePath
-        val selectedSlide by presenterManager.selectedSlide
-        val animationType by presenterManager.animationType
-        val transitionDuration by presenterManager.transitionDuration
-
 
         Window(
             onCloseRequest = ::exitApplication,
@@ -176,69 +171,124 @@ fun main() {
             }
         }
 
-        // Presenter windows — windowCount is read from settings (max 3).
-        // remember() must be called unconditionally and in stable order, so
-        // windowState is created BEFORE the if(showPresenterWindow) gate.
-        val windowCount = appSettings.projectionSettings.numberOfWindows
-        for (i in 0 until windowCount) {
-            // Always call remember at this position regardless of showPresenterWindow,
-            // so the slot table stays stable and no memory corruption occurs.
-            val proj = appSettings.projectionSettings
-            val windowState = remember(
-                i,
-                proj.windowLeft, proj.windowRight,
-                proj.windowTop,  proj.windowBottom
-            ) {
-                val targetScreenIndex = i + 1
-                if (targetScreenIndex < screens.size) {
-                    val screenBounds = screens[targetScreenIndex].defaultConfiguration.bounds
-                    WindowState(
-                        placement = WindowPlacement.Floating,
-                        position = WindowPosition(
-                            (screenBounds.x + proj.windowLeft).dp,
-                            (screenBounds.y + proj.windowTop).dp
-                        ),
-                        width  = (screenBounds.width  - proj.windowLeft - proj.windowRight).dp,
-                        height = (screenBounds.height - proj.windowTop  - proj.windowBottom).dp
-                    )
-                } else {
-                    WindowState(placement = WindowPlacement.Fullscreen)
-                }
-            }
+        PresenterWindows(
+            appSettings = appSettings,
+            presenterManager = presenterManager,
+            mediaViewModel = mediaViewModel,
+            screens = screens,
+        )
+    } // end application
+}
 
-            if (showPresenterWindow) {
-                Window(
-                    title = "Presenter View ${i + 1}",
-                    onCloseRequest = { presenterManager.setShowPresenterWindow(false) },
-                    state = windowState,
-                ) {
-                    // Provide the same MediaViewModel instance to the presenter window
-                    CompositionLocalProvider(LocalMediaViewModel provides mediaViewModel) {
-                        PresenterScreen(modifier = Modifier.fillMaxSize(), appSettings = appSettings) {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .onPreviewKeyEvent { keyEvent ->
-                                        if (keyEvent.type == KeyEventType.KeyDown && keyEvent.key == Key.Escape) {
-                                            mediaViewModel.pause()
-                                            presenterManager.setPresentingMode(Presenting.NONE)
-                                            true
-                                        } else false
-                                    }
-                            ) {
-                                when (presentingMode) {
-                                    Presenting.BIBLE -> BiblePresenter(selectedVerses = selectedVerses, appSettings = appSettings)
-                                    Presenting.LYRICS -> SongPresenter(lyricSection = lyricSection, appSettings = appSettings)
-                                    Presenting.PICTURES -> PicturePresenter(imagePath = selectedImagePath, animationType = animationType, transitionDuration = transitionDuration)
-                                    Presenting.PRESENTATION -> SlidePresenter(slide = selectedSlide, animationType = animationType, transitionDuration = transitionDuration)
-                                    Presenting.MEDIA -> MediaPresenter(modifier = Modifier.fillMaxSize())
-                                    Presenting.NONE -> { /* nothing */ }
+/**
+ * Renders the presenter output windows (up to 3).
+ *
+ * The Window composable is always kept in composition once showPresenterWindow
+ * becomes true — it is never removed and re-added (which would recreate the native
+ * window and block the EDT). Instead, the native window starts AWT-invisible and
+ * is moved+shown via a single SwingUtilities.invokeLater call posted 500 ms later,
+ * after the main window's layout work has fully drained from the EDT queue.
+ */
+@androidx.compose.runtime.Composable
+private fun PresenterWindows(
+    appSettings: org.churchpresenter.app.churchpresenter.data.AppSettings,
+    presenterManager: PresenterManager,
+    mediaViewModel: MediaViewModel,
+    screens: Array<java.awt.GraphicsDevice>,
+) {
+    val proj          by derivedStateOf { appSettings.projectionSettings }
+    val windowCount   by derivedStateOf { appSettings.projectionSettings.numberOfWindows }
+
+    val showPresenterWindow by presenterManager.showPresenterWindow
+    val presentingMode      by presenterManager.presentingMode
+    val selectedVerses      by presenterManager.selectedVerses
+    val lyricSection        by presenterManager.lyricSection
+    val selectedImagePath   by presenterManager.selectedImagePath
+    val selectedSlide       by presenterManager.selectedSlide
+    val animationType       by presenterManager.animationType
+    val transitionDuration  by presenterManager.transitionDuration
+
+    val currentAppSettings by rememberUpdatedState(appSettings)
+
+    for (i in 0 until 3) {
+        if (i >= windowCount) continue
+
+        // Stable WindowState — created once, never recreated.
+        // We intentionally start with a tiny off-screen size; the real
+        // bounds are applied by AWT after the delay below.
+        val windowState = remember(i) {
+            WindowState(
+                placement = WindowPlacement.Floating,
+                position  = WindowPosition((-9999).dp, (-9999).dp),
+                width     = 1.dp,
+                height    = 1.dp
+            )
+        }
+
+        if (showPresenterWindow) {
+            Window(
+                title          = "Presenter View ${i + 1}",
+                onCloseRequest = { presenterManager.setShowPresenterWindow(false) },
+                state          = windowState,
+                visible        = false,   // AWT-invisible; we show it manually below
+            ) {
+                // Grab the underlying ComposeWindow handle.
+                val win: ComposeWindow = this.window
+                val projSnapshot by rememberUpdatedState(proj)
+                val screenIndex = i + 1
+
+                // After 500ms, do a single EDT post that sets bounds and shows the window.
+                // Using LaunchedEffect (coroutine) means the delay runs on the compose
+                // coroutine dispatcher, not the EDT — so the EDT is never blocked.
+                LaunchedEffect(i, proj.windowLeft, proj.windowRight, proj.windowTop, proj.windowBottom) {
+                    delay(500)
+                    SwingUtilities.invokeLater {
+                        if (screenIndex < screens.size) {
+                            val b = screens[screenIndex].defaultConfiguration.bounds
+                            win.setLocation(b.x + projSnapshot.windowLeft, b.y + projSnapshot.windowTop)
+                            win.setSize(
+                                b.width  - projSnapshot.windowLeft - projSnapshot.windowRight,
+                                b.height - projSnapshot.windowTop  - projSnapshot.windowBottom
+                            )
+                        } else {
+                            val b = screens[0].defaultConfiguration.bounds
+                            win.setLocation(b.x, b.y)
+                            win.setSize(b.width, b.height)
+                        }
+                        win.isVisible = true
+                    }
+                }
+
+                // Hide the native window when the composable leaves composition.
+                DisposableEffect(Unit) {
+                    onDispose { SwingUtilities.invokeLater { win.isVisible = false } }
+                }
+
+                CompositionLocalProvider(LocalMediaViewModel provides mediaViewModel) {
+                    PresenterScreen(modifier = Modifier.fillMaxSize(), appSettings = currentAppSettings) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .onPreviewKeyEvent { keyEvent ->
+                                    if (keyEvent.type == KeyEventType.KeyDown && keyEvent.key == Key.Escape) {
+                                        mediaViewModel.pause()
+                                        presenterManager.setPresentingMode(Presenting.NONE)
+                                        true
+                                    } else false
                                 }
+                        ) {
+                            when (presentingMode) {
+                                Presenting.BIBLE        -> BiblePresenter(selectedVerses = selectedVerses, appSettings = currentAppSettings)
+                                Presenting.LYRICS       -> SongPresenter(lyricSection = lyricSection, appSettings = currentAppSettings)
+                                Presenting.PICTURES     -> PicturePresenter(imagePath = selectedImagePath, animationType = animationType, transitionDuration = transitionDuration)
+                                Presenting.PRESENTATION -> SlidePresenter(slide = selectedSlide, animationType = animationType, transitionDuration = transitionDuration)
+                                Presenting.MEDIA        -> MediaPresenter(modifier = Modifier.fillMaxSize())
+                                Presenting.NONE         -> { /* blank */ }
                             }
                         }
                     }
                 }
             }
         }
-    } // end application
+    }
 }
