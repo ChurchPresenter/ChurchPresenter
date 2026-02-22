@@ -183,18 +183,23 @@ fun main() {
         for (i in 0 until windowCount) {
             // Always call remember at this position regardless of showPresenterWindow,
             // so the slot table stays stable and no memory corruption occurs.
-            val windowState = remember(i, appSettings.projectionSettings) {
+            val proj = appSettings.projectionSettings
+            val windowState = remember(
+                i,
+                proj.windowLeft, proj.windowRight,
+                proj.windowTop,  proj.windowBottom
+            ) {
                 val targetScreenIndex = i + 1
                 if (targetScreenIndex < screens.size) {
                     val screenBounds = screens[targetScreenIndex].defaultConfiguration.bounds
                     WindowState(
                         placement = WindowPlacement.Floating,
                         position = WindowPosition(
-                            (screenBounds.x + appSettings.projectionSettings.windowLeft).dp,
-                            (screenBounds.y + appSettings.projectionSettings.windowTop).dp
+                            (screenBounds.x + proj.windowLeft).dp,
+                            (screenBounds.y + proj.windowTop).dp
                         ),
-                        width = (screenBounds.width - appSettings.projectionSettings.windowLeft - appSettings.projectionSettings.windowRight).dp,
-                        height = (screenBounds.height - appSettings.projectionSettings.windowTop - appSettings.projectionSettings.windowBottom).dp
+                        width  = (screenBounds.width  - proj.windowLeft - proj.windowRight).dp,
+                        height = (screenBounds.height - proj.windowTop  - proj.windowBottom).dp
                     )
                 } else {
                     WindowState(placement = WindowPlacement.Fullscreen)
