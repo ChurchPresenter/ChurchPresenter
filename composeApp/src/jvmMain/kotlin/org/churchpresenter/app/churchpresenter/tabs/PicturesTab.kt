@@ -59,16 +59,12 @@ import churchpresenter.composeapp.generated.resources.select_folder_to_view
 import churchpresenter.composeapp.generated.resources.select_image_folder_dialog
 import kotlinx.coroutines.delay
 import org.churchpresenter.app.churchpresenter.models.ScheduleItem
-import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.viewmodel.PicturesViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.app.churchpresenter.viewmodel.ScheduleViewModel
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import org.churchpresenter.app.churchpresenter.utils.createFileChooser
 import java.io.File
-import javax.swing.JFileChooser
-import javax.swing.SwingUtilities
 
 @Composable
 fun PicturesTab(
@@ -78,6 +74,8 @@ fun PicturesTab(
     selectedPictureItem: ScheduleItem.PictureItem? = null,
     presenterManager: PresenterManager? = null
 ) {
+    val folderDialogTitle = stringResource(Res.string.select_image_folder_dialog)
+
     // Auto-scroll effect
     LaunchedEffect(viewModel.isPlaying, viewModel.selectedImageIndex, viewModel.autoScrollInterval) {
         if (viewModel.isPlaying && viewModel.images.isNotEmpty()) {
@@ -86,7 +84,7 @@ fun PicturesTab(
         }
     }
 
-    // Load folder when selectedPictureItem changes (from schedule)
+    // Load folder when a picture schedule item is selected
     LaunchedEffect(selectedPictureItem) {
         selectedPictureItem?.let { pictureItem ->
             val folder = File(pictureItem.folderPath)
@@ -96,14 +94,9 @@ fun PicturesTab(
         }
     }
 
-    // Update presenter image when selection changes (if presenting)
+    // Sync presenter image when selection or presenting mode changes
     LaunchedEffect(viewModel.selectedImageIndex, presenterManager?.presentingMode) {
-        if (presenterManager?.presentingMode?.value == Presenting.PICTURES && viewModel.images.isNotEmpty()) {
-            val currentImage = viewModel.getCurrentImageFile()
-            if (currentImage != null) {
-                presenterManager.setSelectedImagePath(currentImage.absolutePath)
-            }
-        }
+        presenterManager?.let { viewModel.syncWithPresenter(it) }
     }
 
     Column(
@@ -113,52 +106,27 @@ fun PicturesTab(
             .onPreviewKeyEvent { keyEvent ->
                 if (keyEvent.type == KeyEventType.KeyDown && viewModel.images.isNotEmpty()) {
                     when (keyEvent.key) {
-                        Key.DirectionLeft, Key.DirectionUp -> {
-                            viewModel.previousImage()
-                            true
-                        }
-                        Key.DirectionRight, Key.DirectionDown -> {
-                            viewModel.nextImage()
-                            true
-                        }
-                        Key.Spacebar -> {
-                            viewModel.togglePlayPause()
-                            true
-                        }
+                        Key.DirectionLeft, Key.DirectionUp -> { viewModel.previousImage(); true }
+                        Key.DirectionRight, Key.DirectionDown -> { viewModel.nextImage(); true }
+                        Key.Spacebar -> { viewModel.togglePlayPause(); true }
                         else -> false
                     }
-                } else {
-                    false
-                }
+                } else false
             }
     ) {
-        // Folder Selection Row
+        // Folder selection row
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            val folderDialogTitle = stringResource(Res.string.select_image_folder_dialog)
-
-            Button(
-                onClick = {
-                    SwingUtilities.invokeLater {
-                        val chooser = createFileChooser {
-                            fileSelectionMode = JFileChooser.DIRECTORIES_ONLY
-                            dialogTitle = folderDialogTitle
-                        }
-                        val result = chooser.showOpenDialog(null)
-                        if (result == JFileChooser.APPROVE_OPTION) {
-                            viewModel.selectFolder(chooser.selectedFile)
-                        }
-                    }
-                }
-            ) {
+            Button(onClick = { viewModel.openFolderChooser(folderDialogTitle) }) {
                 Text("📁 ${stringResource(Res.string.select_folder)}")
             }
 
             Text(
-                text = viewModel.selectedFolder?.absolutePath ?: stringResource(Res.string.no_folder_selected),
+                text = viewModel.selectedFolder?.absolutePath
+                    ?: stringResource(Res.string.no_folder_selected),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
                 modifier = Modifier.weight(1f)
@@ -171,17 +139,16 @@ fun PicturesTab(
             )
         }
 
-
         Spacer(modifier = Modifier.height(16.dp))
 
         if (viewModel.images.isNotEmpty()) {
-            // Single row with all playback controls
+            // Playback controls row
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Left side: Playback buttons
+                // Left: playback buttons
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                     verticalAlignment = Alignment.CenterVertically
@@ -194,7 +161,10 @@ fun PicturesTab(
                             painter = painterResource(Res.drawable.ic_skip_previous),
                             contentDescription = stringResource(Res.string.previous_image),
                             modifier = Modifier.size(32.dp),
-                            tint = if (viewModel.images.isNotEmpty()) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                            tint = if (viewModel.images.isNotEmpty())
+                                MaterialTheme.colorScheme.onSurface
+                            else
+                                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
                         )
                     }
 
@@ -204,13 +174,18 @@ fun PicturesTab(
                         modifier = Modifier
                             .size(48.dp)
                             .background(
-                                if (viewModel.isPlaying) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
+                                if (viewModel.isPlaying) MaterialTheme.colorScheme.error
+                                else MaterialTheme.colorScheme.primary,
                                 RoundedCornerShape(24.dp)
                             )
                     ) {
                         Icon(
-                            painter = painterResource(if (viewModel.isPlaying) Res.drawable.ic_pause else Res.drawable.ic_play),
-                            contentDescription = stringResource(if (viewModel.isPlaying) Res.string.pause else Res.string.play),
+                            painter = painterResource(
+                                if (viewModel.isPlaying) Res.drawable.ic_pause else Res.drawable.ic_play
+                            ),
+                            contentDescription = stringResource(
+                                if (viewModel.isPlaying) Res.string.pause else Res.string.play
+                            ),
                             modifier = Modifier.size(28.dp),
                             tint = Color.White
                         )
@@ -224,34 +199,32 @@ fun PicturesTab(
                             painter = painterResource(Res.drawable.ic_skip_next),
                             contentDescription = stringResource(Res.string.next_image),
                             modifier = Modifier.size(32.dp),
-                            tint = if (viewModel.images.isNotEmpty()) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                            tint = if (viewModel.images.isNotEmpty())
+                                MaterialTheme.colorScheme.onSurface
+                            else
+                                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
                         )
                     }
 
-                    // Image counter
                     Text(
-                        text = stringResource(Res.string.image_counter, viewModel.selectedImageIndex + 1, viewModel.images.size),
+                        text = stringResource(
+                            Res.string.image_counter,
+                            viewModel.selectedImageIndex + 1,
+                            viewModel.images.size
+                        ),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
 
-                // Right side: Action buttons
+                // Right: action buttons
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Go Live button
                     if (presenterManager != null) {
                         Button(
-                            onClick = {
-                                val currentImage = viewModel.getCurrentImageFile()
-                                if (currentImage != null) {
-                                    presenterManager.setSelectedImagePath(currentImage.absolutePath)
-                                    presenterManager.setPresentingMode(Presenting.PICTURES)
-                                    presenterManager.setShowPresenterWindow(true)
-                                }
-                            },
+                            onClick = { viewModel.goLive(presenterManager) },
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = MaterialTheme.colorScheme.primary
                             )
@@ -263,16 +236,12 @@ fun PicturesTab(
                         }
                     }
 
-                    // Add to Schedule button
                     if (scheduleViewModel != null && viewModel.selectedFolder != null) {
                         Button(
                             onClick = {
-                                val folder = viewModel.selectedFolder!!
-                                scheduleViewModel.addPicture(
-                                    folderPath = folder.absolutePath,
-                                    folderName = folder.name,
-                                    imageCount = viewModel.images.size
-                                )
+                                viewModel.getScheduleData()?.let { (path, name, count) ->
+                                    scheduleViewModel.addPicture(path, name, count)
+                                }
                             },
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = MaterialTheme.colorScheme.secondary
@@ -287,10 +256,9 @@ fun PicturesTab(
                 }
             }
 
-
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Image Grid
+            // Image grid
             val gridState = rememberLazyGridState()
 
             LazyVerticalGrid(
@@ -306,18 +274,14 @@ fun PicturesTab(
                     Box(
                         modifier = Modifier
                             .aspectRatio(1f)
-                            .background(
-                                MaterialTheme.colorScheme.surfaceVariant,
-                                RoundedCornerShape(8.dp)
-                            )
+                            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
                             .border(
                                 width = if (isSelected) 3.dp else 1.dp,
-                                color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline,
+                                color = if (isSelected) MaterialTheme.colorScheme.primary
+                                        else MaterialTheme.colorScheme.outline,
                                 shape = RoundedCornerShape(8.dp)
                             )
-                            .clickable {
-                                viewModel.selectImage(viewModel.images.indexOf(imageFile))
-                            }
+                            .clickable { viewModel.selectImage(viewModel.images.indexOf(imageFile)) }
                             .padding(4.dp)
                     ) {
                         viewModel.thumbnails[imageFile]?.let { bitmap ->
@@ -327,17 +291,15 @@ fun PicturesTab(
                                 modifier = Modifier.fillMaxSize(),
                                 contentScale = ContentScale.Crop
                             )
-                        } ?: run {
-                            Box(
-                                modifier = Modifier.fillMaxSize(),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = stringResource(Res.string.loading),
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
+                        } ?: Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = stringResource(Res.string.loading),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
                         }
 
                         // File name overlay
@@ -360,7 +322,7 @@ fun PicturesTab(
                 }
             }
 
-            // Auto-scroll to selected item
+            // Auto-scroll to selected item in grid
             LaunchedEffect(viewModel.selectedImageIndex) {
                 if (viewModel.selectedImageIndex in viewModel.images.indices) {
                     gridState.animateScrollToItem(viewModel.selectedImageIndex)
@@ -376,10 +338,7 @@ fun PicturesTab(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Text(
-                        text = "📷",
-                        style = MaterialTheme.typography.displayLarge
-                    )
+                    Text(text = "📷", style = MaterialTheme.typography.displayLarge)
                     Text(
                         text = stringResource(Res.string.select_folder_to_view),
                         style = MaterialTheme.typography.bodyLarge,

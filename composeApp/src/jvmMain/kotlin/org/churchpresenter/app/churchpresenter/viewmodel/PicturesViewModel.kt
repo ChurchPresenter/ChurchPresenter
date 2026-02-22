@@ -11,13 +11,19 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.models.AnimationType
+import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.app.churchpresenter.utils.createFileChooser
 import org.jetbrains.skia.Image
 import java.io.ByteArrayOutputStream
 import java.io.File
 import javax.imageio.ImageIO
+import javax.swing.JFileChooser
+import javax.swing.SwingUtilities
 
-class PicturesViewModel(appSettings: AppSettings? = null) {
+class PicturesViewModel(
+    appSettings: AppSettings? = null
+) {
     // State
     private val _selectedFolder = mutableStateOf<File?>(null)
     val selectedFolder: File? get() = _selectedFolder.value
@@ -150,6 +156,52 @@ class PicturesViewModel(appSettings: AppSettings? = null) {
             _images[_selectedImageIndex.value]
         } else {
             null
+        }
+    }
+
+    /**
+     * Opens a native folder chooser dialog and loads images from the selected folder.
+     */
+    fun openFolderChooser(dialogTitle: String) {
+        SwingUtilities.invokeLater {
+            val chooser = createFileChooser {
+                fileSelectionMode = JFileChooser.DIRECTORIES_ONLY
+                this.dialogTitle = dialogTitle
+            }
+            if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+                selectFolder(chooser.selectedFile)
+            }
+        }
+    }
+
+    /**
+     * Presents the current image in the presenter window.
+     */
+    fun goLive(presenterManager: PresenterManager) {
+        val currentImage = getCurrentImageFile() ?: return
+        presenterManager.setSelectedImagePath(currentImage.absolutePath)
+        presenterManager.setPresentingMode(Presenting.PICTURES)
+        presenterManager.setShowPresenterWindow(true)
+    }
+
+    /**
+     * Returns folder data for adding to the schedule, or null if no folder is selected.
+     * The caller is responsible for passing this to ScheduleViewModel.
+     */
+    fun getScheduleData(): Triple<String, String, Int>? {
+        val folder = _selectedFolder.value ?: return null
+        return Triple(folder.absolutePath, folder.name, _images.size)
+    }
+
+    /**
+     * Syncs the currently selected image with the presenter if pictures are being presented.
+     */
+    fun syncWithPresenter(presenterManager: PresenterManager) {
+        if (presenterManager.presentingMode.value == Presenting.PICTURES && _images.isNotEmpty()) {
+            val currentImage = getCurrentImageFile()
+            if (currentImage != null) {
+                presenterManager.setSelectedImagePath(currentImage.absolutePath)
+            }
         }
     }
 
