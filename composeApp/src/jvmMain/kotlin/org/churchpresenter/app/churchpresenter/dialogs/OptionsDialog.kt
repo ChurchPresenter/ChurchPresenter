@@ -160,6 +160,7 @@ fun OptionsDialog(
                             )
                             5 -> StreamingSettingsTab(
                                 settings = currentSettings,
+                                lottiePresetsDir = settingsManager.lottiePresetsDir,
                                 onSettingsChange = { updateFn ->
                                     currentSettings = updateFn(currentSettings)
                                 }

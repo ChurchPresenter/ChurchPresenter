@@ -385,4 +385,18 @@
     <string name="saved_strings">Saved values</string>
     <string name="no_saved_strings">No saved values</string>
     <string name="delete_saved_string">Delete</string>
+
+    <!-- Lottie Preset Management -->
+    <string name="lottie_presets">Lower Third Presets</string>
+    <string name="lottie_preset_import_file">Import Lottie File</string>
+    <string name="lottie_preset_label">Preset Label</string>
+    <string name="lottie_preset_label_hint">Enter preset name...</string>
+    <string name="lottie_preset_save">Save Preset</string>
+    <string name="lottie_preset_delete">Delete Preset</string>
+    <string name="lottie_preset_no_file">No file selected</string>
+    <string name="lottie_preset_add_pair">+ Add Pair</string>
+    <string name="lottie_preset_saved">Preset saved</string>
+    <string name="lottie_presets_list">Saved Presets</string>
+    <string name="lottie_no_presets">No presets saved yet</string>
+    <string name="lottie_select_preset">Select a preset to preview</string>
 </resources>

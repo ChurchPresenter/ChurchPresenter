@@ -10,6 +10,7 @@ class SettingsManager {
     private val userHome = System.getProperty("user.home")
     private val appDataDir = File(userHome, ".churchpresenter")
     private val settingsFile = File(appDataDir, "settings.json")
+    val lottiePresetsDir: File = File(appDataDir, "lottie_presets")
 
     private val jsonFormat = Json {
         ignoreUnknownKeys = true // ignore extra fields in JSON
@@ -20,6 +21,9 @@ class SettingsManager {
         // Create app data directory if it doesn't exist
         if (!appDataDir.exists()) {
             appDataDir.mkdirs()
+        }
+        if (!lottiePresetsDir.exists()) {
+            lottiePresetsDir.mkdirs()
         }
     }
 

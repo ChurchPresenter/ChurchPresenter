@@ -113,10 +113,25 @@ data class PictureSettings(
 )
 
 @Serializable
+data class LottieSearchReplacePair(
+    val search: String = "",
+    val replace: String = ""
+)
+
+@Serializable
+data class LottiePreset(
+    val id: String = "",
+    val label: String = "",
+    val savedFileName: String = "",
+    val searchReplacePairs: List<LottieSearchReplacePair> = emptyList()
+)
+
+@Serializable
 data class StreamingSettings(
     val lowerThirdFolder: String = "",
     val savedSearchStrings: List<String> = emptyList(),
-    val savedReplaceStrings: List<String> = emptyList()
+    val savedReplaceStrings: List<String> = emptyList(),
+    val lottiePresets: List<LottiePreset> = emptyList()
 )
 
 @Serializable
