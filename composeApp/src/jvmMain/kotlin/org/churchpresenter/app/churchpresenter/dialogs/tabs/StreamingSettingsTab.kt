@@ -24,6 +24,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -41,6 +42,8 @@ import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.ic_close
 import churchpresenter.composeapp.generated.resources.lottie_no_presets
+import churchpresenter.composeapp.generated.resources.lottie_pause_frame
+import churchpresenter.composeapp.generated.resources.lottie_pause_frame_none
 import churchpresenter.composeapp.generated.resources.lottie_preset_add_pair
 import churchpresenter.composeapp.generated.resources.lottie_preset_delete
 import churchpresenter.composeapp.generated.resources.lottie_preset_import_file
@@ -82,10 +85,12 @@ fun StreamingSettingsTab(
     var importSourcePath by remember { mutableStateOf("") }
     var presetLabel by remember { mutableStateOf("") }
     var importPairs by remember { mutableStateOf(listOf(LottieSearchReplacePair())) }
+    var importPauseFrame by remember { mutableStateOf(-1f) }
 
     // --- Preview state ---
     var selectedPreset by remember { mutableStateOf<LottiePreset?>(null) }
     var previewIsPlaying by remember { mutableStateOf(false) }
+    var isDraggingSlider by remember { mutableStateOf(false) }
 
     val searchLabel = stringResource(Res.string.search)
     val replaceLabel = stringResource(Res.string.replace)
@@ -126,15 +131,17 @@ fun StreamingSettingsTab(
     val composition by rememberLottieComposition(key = previewJsonContent) {
         LottieCompositionSpec.JsonString(previewJsonContent.ifBlank { "{}" })
     }
+    val totalFrames = composition?.durationFrames?.toInt() ?: 0
     val progress by animateLottieCompositionAsState(
         composition = composition,
         isPlaying = previewIsPlaying,
         iterations = Int.MAX_VALUE
     )
     LaunchedEffect(previewJsonContent) {
-        previewIsPlaying = previewJsonContent.isNotBlank()
+        previewIsPlaying = previewJsonContent.isNotBlank() && !isDraggingSlider
     }
-    val displayProgress = progress
+    // While dragging show the slider frame; otherwise show the animated progress
+    val displayProgress = if (isDraggingSlider && importPauseFrame >= 0f) importPauseFrame else progress
 
     // Main layout: left = editor, right = preview
     Row(modifier = Modifier.fillMaxSize()) {
@@ -259,6 +266,51 @@ fun StreamingSettingsTab(
                 }
             }
 
+            // Pause frame slider
+            Column(modifier = Modifier.fillMaxWidth()) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = stringResource(Res.string.lottie_pause_frame),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Text(
+                        text = if (importPauseFrame < 0f) stringResource(Res.string.lottie_pause_frame_none)
+                               else if (totalFrames > 0) "${(importPauseFrame * totalFrames).toInt()}"
+                               else "${(importPauseFrame * 100).toInt()}",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+                Slider(
+                    value = if (importPauseFrame < 0f) 0f else importPauseFrame,
+                    onValueChange = {
+                        importPauseFrame = it
+                        selectedPreset = null
+                        isDraggingSlider = true
+                        previewIsPlaying = false
+                    },
+                    onValueChangeFinished = {
+                        isDraggingSlider = false
+                        if (previewJsonContent.isNotBlank()) previewIsPlaying = true
+                    },
+                    valueRange = 0f..1f,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    TextButton(onClick = { importPauseFrame = -1f }) {
+                        Text(stringResource(Res.string.lottie_pause_frame_none), style = MaterialTheme.typography.labelSmall)
+                    }
+                }
+            }
+
             // Add pair + Save buttons
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -281,7 +333,8 @@ fun StreamingSettingsTab(
                                 id = id,
                                 label = presetLabel,
                                 savedFileName = savedFileName,
-                                searchReplacePairs = importPairs.filter { it.search.isNotBlank() }
+                                searchReplacePairs = importPairs.filter { it.search.isNotBlank() },
+                                pauseFrame = importPauseFrame
                             )
                             onSettingsChange { s ->
                                 s.copy(streamingSettings = s.streamingSettings.copy(
@@ -293,6 +346,7 @@ fun StreamingSettingsTab(
                             importSourcePath = ""
                             presetLabel = ""
                             importPairs = listOf(LottieSearchReplacePair())
+                            importPauseFrame = -1f
                         }
                     },
                     enabled = importSourcePath.isNotBlank() && presetLabel.isNotBlank(),
@@ -327,6 +381,7 @@ fun StreamingSettingsTab(
                             .clickable {
                                 selectedPreset = preset
                                 importSourcePath = ""
+                                importPauseFrame = preset.pauseFrame
                             },
                         shape = RoundedCornerShape(6.dp),
                         color = if (isSelected) MaterialTheme.colorScheme.primaryContainer

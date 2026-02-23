@@ -399,4 +399,10 @@
     <string name="lottie_presets_list">Saved Presets</string>
     <string name="lottie_no_presets">No presets saved yet</string>
     <string name="lottie_select_preset">Select a preset to preview</string>
+    <string name="lottie_pause_frame">Pause Frame</string>
+    <string name="lottie_pause_frame_none">None</string>
+    <string name="lottie_pause_at_frame">Pause at frame</string>
+    <string name="lottie_pause_duration">Pause duration (ms)</string>
+    <string name="lottie_play_next">Play Next</string>
+    <string name="lottie_run_to_end">Run to End</string>
 </resources>
