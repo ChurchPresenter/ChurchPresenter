@@ -85,4 +85,27 @@ class PresenterManager {
     fun setSelectedSlide(slide: ImageBitmap?) {
         _selectedSlide.value = slide
     }
+
+    private val _lottieJsonContent = mutableStateOf("")
+    val lottieJsonContent: State<String> = _lottieJsonContent
+
+    private val _lottiePauseAtFrame = mutableStateOf(false)
+    val lottiePauseAtFrame: State<Boolean> = _lottiePauseAtFrame
+
+    private val _lottiePauseDurationMs = mutableStateOf(2000L)
+    val lottiePauseDurationMs: State<Long> = _lottiePauseDurationMs
+
+    private val _lottieTrigger = mutableStateOf(0)
+    val lottieTrigger: State<Int> = _lottieTrigger
+
+    fun setLottieContent(json: String, pauseAtFrame: Boolean, pauseFrame: Float, pauseDurationMs: Long) {
+        _lottieJsonContent.value = json
+        _lottiePauseAtFrame.value = pauseAtFrame
+        _lottiePauseFrame.value = pauseFrame
+        _lottiePauseDurationMs.value = pauseDurationMs
+        _lottieTrigger.value++
+    }
+
+    private val _lottiePauseFrame = mutableStateOf(-1f)
+    val lottiePauseFrame: State<Float> = _lottiePauseFrame
 }

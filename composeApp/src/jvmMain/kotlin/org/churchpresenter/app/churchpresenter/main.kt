@@ -38,6 +38,7 @@ import org.churchpresenter.app.churchpresenter.data.Language
 import org.churchpresenter.app.churchpresenter.data.SettingsManager
 import org.churchpresenter.app.churchpresenter.dialogs.OptionsDialog
 import org.churchpresenter.app.churchpresenter.presenter.BiblePresenter
+import org.churchpresenter.app.churchpresenter.presenter.LowerThirdPresenter
 import org.churchpresenter.app.churchpresenter.presenter.MediaPresenter
 import org.churchpresenter.app.churchpresenter.presenter.PicturePresenter
 import org.churchpresenter.app.churchpresenter.presenter.SlidePresenter
@@ -113,6 +114,11 @@ fun main() {
         val selectedSlide by presenterManager.selectedSlide
         val animationType by presenterManager.animationType
         val transitionDuration by presenterManager.transitionDuration
+        val lottieJsonContent by presenterManager.lottieJsonContent
+        val lottiePauseAtFrame by presenterManager.lottiePauseAtFrame
+        val lottiePauseFrame by presenterManager.lottiePauseFrame
+        val lottiePauseDurationMs by presenterManager.lottiePauseDurationMs
+        val lottieTrigger by presenterManager.lottieTrigger
 
 
         Window(
@@ -264,6 +270,16 @@ fun main() {
                                 Presenting.MEDIA ->
                                     if (screenAssignment.showMedia)
                                         MediaPresenter(modifier = Modifier.fillMaxSize())
+                                Presenting.LOWER_THIRD ->
+                                    if (screenAssignment.showStreaming)
+                                        LowerThirdPresenter(
+                                            jsonContent = lottieJsonContent,
+                                            pauseAtFrame = lottiePauseAtFrame,
+                                            pauseFrame = lottiePauseFrame,
+                                            pauseDurationMs = lottiePauseDurationMs,
+                                            trigger = lottieTrigger,
+                                            appSettings = appSettings
+                                        )
                                 Presenting.NONE -> { /* nothing */ }
                             }
 

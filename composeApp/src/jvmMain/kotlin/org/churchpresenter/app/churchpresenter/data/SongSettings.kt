@@ -147,7 +147,11 @@ data class StreamingSettings(
     val lowerThirdFolder: String = "",
     val savedSearchStrings: List<String> = emptyList(),
     val savedReplaceStrings: List<String> = emptyList(),
-    val lottiePresets: List<LottiePreset> = emptyList()
+    val lottiePresets: List<LottiePreset> = emptyList(),
+    val windowTop: Int = 0,
+    val windowLeft: Int = 0,
+    val windowRight: Int = 0,
+    val windowBottom: Int = 0
 )
 
 @Serializable

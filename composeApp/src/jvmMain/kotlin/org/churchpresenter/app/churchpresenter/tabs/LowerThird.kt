@@ -28,6 +28,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -54,6 +55,7 @@ import churchpresenter.composeapp.generated.resources.ic_pause
 import churchpresenter.composeapp.generated.resources.ic_play
 import churchpresenter.composeapp.generated.resources.ic_skip_next
 import churchpresenter.composeapp.generated.resources.add_to_schedule
+import churchpresenter.composeapp.generated.resources.go_live
 import churchpresenter.composeapp.generated.resources.lottie_no_presets
 import churchpresenter.composeapp.generated.resources.lottie_pause_at_frame
 import churchpresenter.composeapp.generated.resources.lottie_pause_duration
@@ -83,7 +85,8 @@ fun LowerThirdTab(
     appSettings: AppSettings,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit = {},
     selectedLowerThirdItem: ScheduleItem.LowerThirdItem? = null,
-    onAddToSchedule: (presetId: String, presetLabel: String, pauseAtFrame: Boolean, pauseDurationMs: Long) -> Unit = { _, _, _, _ -> }
+    onAddToSchedule: (presetId: String, presetLabel: String, pauseAtFrame: Boolean, pauseDurationMs: Long) -> Unit = { _, _, _, _ -> },
+    onGoLive: (jsonContent: String, pauseAtFrame: Boolean, pauseFrame: Float, pauseDurationMs: Long) -> Unit = { _, _, _, _ -> }
 ) {
     val lottiePresetsDir = remember {
         File(System.getProperty("user.home"), ".churchpresenter/lottie_presets")
@@ -406,6 +409,49 @@ fun LowerThirdTab(
                         )
                     }
                 }
+                // Add to Schedule button
+                val preset = selectedPreset
+                if (preset != null) {
+                    Button(
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.secondary
+                        ),
+                        onClick = {
+                            onAddToSchedule(
+                                preset.id,
+                                preset.label,
+                                pauseAtFrame && hasPauseFrame,
+                                pauseDurationMs.toLongOrNull() ?: 2000L
+                            )
+                        }
+                    ) {
+                        Text(
+                            text = stringResource(Res.string.add_to_schedule),
+                            style = MaterialTheme.typography.labelSmall
+                        )
+                    }
+
+                    // Go Live button
+                    Button(
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primary
+                        ),
+                        onClick = {
+                            onGoLive(
+                                jsonContent,
+                                pauseAtFrame && hasPauseFrame,
+                                pauseFrame,
+                                pauseDurationMs.toLongOrNull() ?: 2000L
+                            )
+                        },
+                        enabled = canPlay
+                    ) {
+                        Text(
+                            text = stringResource(Res.string.go_live),
+                            style = MaterialTheme.typography.labelSmall
+                        )
+                    }
+                }
             }
 
             // Pause at frame checkbox + duration
@@ -426,32 +472,12 @@ fun LowerThirdTab(
                             value = pauseDurationMs,
                             onValueChange = { pauseDurationMs = it.filter { c -> c.isDigit() } },
                             singleLine = true,
-                            modifier = Modifier.width(120.dp),
+                            modifier = Modifier.width(150.dp),
                             textStyle = MaterialTheme.typography.bodySmall,
                             label = { Text(stringResource(Res.string.lottie_pause_duration), style = MaterialTheme.typography.labelSmall) },
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                         )
                     }
-                }
-            }
-
-            // Add to Schedule button
-            val preset = selectedPreset
-            if (preset != null) {
-                Button(
-                    onClick = {
-                        onAddToSchedule(
-                            preset.id,
-                            preset.label,
-                            pauseAtFrame && hasPauseFrame,
-                            pauseDurationMs.toLongOrNull() ?: 2000L
-                        )
-                    }
-                ) {
-                    Text(
-                        text = stringResource(Res.string.add_to_schedule),
-                        style = MaterialTheme.typography.labelMedium
-                    )
                 }
             }
         }

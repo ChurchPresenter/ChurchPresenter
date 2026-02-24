@@ -321,6 +321,10 @@ fun MainDesktop(
                                 selectedLowerThirdItem = selectedLowerThirdItem,
                                 onAddToSchedule = { presetId, presetLabel, pauseAtFrame, pauseDurationMs ->
                                     scheduleActions.addLowerThird(presetId, presetLabel, pauseAtFrame, pauseDurationMs)
+                                },
+                                onGoLive = { json, pauseAtFrame, pauseFrame, pauseDurationMs ->
+                                    presenterManager.setLottieContent(json, pauseAtFrame, pauseFrame, pauseDurationMs)
+                                    presenterManager.setPresentingMode(Presenting.LOWER_THIRD)
                                 }
                             )
 

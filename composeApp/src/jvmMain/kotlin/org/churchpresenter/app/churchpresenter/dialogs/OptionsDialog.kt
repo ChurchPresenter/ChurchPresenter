@@ -32,6 +32,7 @@ import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.background
 import churchpresenter.composeapp.generated.resources.bible
 import churchpresenter.composeapp.generated.resources.cancel
+import churchpresenter.composeapp.generated.resources.display_lower_third
 import churchpresenter.composeapp.generated.resources.media
 import churchpresenter.composeapp.generated.resources.ok
 import churchpresenter.composeapp.generated.resources.options
@@ -111,7 +112,7 @@ fun OptionsDialog(
                         Tab(
                             selected = selectedTabIndex == 5,
                             onClick = { selectedTabIndex = 5 },
-                            text = { Text(stringResource(Res.string.streaming)) }
+                            text = { Text(stringResource(Res.string.display_lower_third)) }
                         )
                         Tab(
                             selected = selectedTabIndex == 6,

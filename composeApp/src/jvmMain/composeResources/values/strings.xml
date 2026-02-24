@@ -386,7 +386,7 @@
     <string name="media_local_preview_note">Local video — use controls above to manage playback.</string>
 
     <!-- Lower Third Settings Tab -->
-    <string name="streaming">Streaming/string>
+    <string name="streaming">Streaming</string>
     <string name="streaming_settings">Lower Third Settings</string>
     <string name="lower_third_folder">Lower Third Animations Folder</string>
     <string name="lower_third_folder_hint">No folder selected</string>
