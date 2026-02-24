@@ -75,7 +75,8 @@ data class ScheduleTabActions(
     val addSong: (songNumber: Int, title: String, songbook: String) -> Unit = { _, _, _ -> },
     val addPicture: (folderPath: String, folderName: String, imageCount: Int) -> Unit = { _, _, _ -> },
     val addPresentation: (filePath: String, fileName: String, slideCount: Int, fileType: String) -> Unit = { _, _, _, _ -> },
-    val addMedia: (mediaUrl: String, mediaTitle: String, mediaType: String) -> Unit = { _, _, _ -> }
+    val addMedia: (mediaUrl: String, mediaTitle: String, mediaType: String) -> Unit = { _, _, _ -> },
+    val addLowerThird: (presetId: String, presetLabel: String, pauseAtFrame: Boolean, pauseDurationMs: Long) -> Unit = { _, _, _, _ -> }
 )
 
 @Composable
@@ -89,9 +90,7 @@ fun ScheduleTab(
     onPresentPresentation: ((ScheduleItem.PresentationItem) -> Unit)? = null,
     onPresentPictures: ((ScheduleItem.PictureItem) -> Unit)? = null,
     onPresentMedia: ((ScheduleItem.MediaItem) -> Unit)? = null,
-    // Called once so MainDesktop can wire toolbar/menu buttons without holding the VM
     onActionsReady: (ScheduleTabActions) -> Unit = {},
-    // Called whenever the selected item id changes (null = deselected)
     onSelectedItemChanged: (String?) -> Unit = {}
 ) {
     val viewModel = remember { ScheduleViewModel() }
@@ -122,7 +121,8 @@ fun ScheduleTab(
                 addSong          = { songNumber, title, songbook -> viewModel.addSong(songNumber, title, songbook) },
                 addPicture       = { folderPath, folderName, imageCount -> viewModel.addPicture(folderPath, folderName, imageCount) },
                 addPresentation  = { filePath, fileName, slideCount, fileType -> viewModel.addPresentation(filePath, fileName, slideCount, fileType) },
-                addMedia         = { mediaUrl, mediaTitle, mediaType -> viewModel.addMedia(mediaUrl, mediaTitle, mediaType) }
+                addMedia         = { mediaUrl, mediaTitle, mediaType -> viewModel.addMedia(mediaUrl, mediaTitle, mediaType) },
+                addLowerThird    = { presetId, presetLabel, pauseAtFrame, pauseDurationMs -> viewModel.addLowerThird(presetId, presetLabel, pauseAtFrame, pauseDurationMs) }
             )
         )
     }
@@ -260,6 +260,7 @@ private fun ScheduleItemRow(
                 is ScheduleItem.PictureItem -> "📷"
                 is ScheduleItem.PresentationItem -> "📊"
                 is ScheduleItem.MediaItem -> "🎬"
+                is ScheduleItem.LowerThirdItem -> "▼"
             },
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.primary,
@@ -323,6 +324,13 @@ private fun ScheduleItemRow(
                 is ScheduleItem.MediaItem -> Text(
                     maxLines = 1,
                     text = "${item.mediaType.uppercase()} - ${item.mediaUrl}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = if (isSelected) MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                            else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                )
+                is ScheduleItem.LowerThirdItem -> Text(
+                    maxLines = 1,
+                    text = if (item.pauseAtFrame) "Pause ${item.pauseDurationMs}ms" else "",
                     style = MaterialTheme.typography.bodySmall,
                     color = if (isSelected) MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                             else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)

@@ -351,7 +351,7 @@
     <string name="content_songs">Songs</string>
     <string name="content_pictures">Pictures/Presentation</string>
     <string name="content_media">Media</string>
-    <string name="content_streaming">Streaming</string>
+    <string name="content_streaming">Lower Third</string>
     <string name="content_announcements">Announcements</string>
     <string name="display_mode">Display Mode</string>
     <string name="display_fullscreen">Full Screen</string>
@@ -385,9 +385,9 @@
     <string name="media_web_preview_note">Web video preview — playback controlled via browser.</string>
     <string name="media_local_preview_note">Local video — use controls above to manage playback.</string>
 
-    <!-- Streaming Settings Tab -->
-    <string name="streaming">Streaming</string>
-    <string name="streaming_settings">Streaming Settings</string>
+    <!-- Lower Third Settings Tab -->
+    <string name="streaming">Streaming/string>
+    <string name="streaming_settings">Lower Third Settings</string>
     <string name="lower_third_folder">Lower Third Animations Folder</string>
     <string name="lower_third_folder_hint">No folder selected</string>
     <string name="lower_third_folder_help">Select a folder containing Lottie JSON (.json) animation files for lower third overlays.</string>

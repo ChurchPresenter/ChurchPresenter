@@ -10,6 +10,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.announcements
 import churchpresenter.composeapp.generated.resources.bible
+import churchpresenter.composeapp.generated.resources.display_lower_third
 import churchpresenter.composeapp.generated.resources.media
 import churchpresenter.composeapp.generated.resources.pictures
 import churchpresenter.composeapp.generated.resources.presentation
@@ -56,7 +57,7 @@ private fun getStringName(tabs: Tabs): String {
         Tabs.PICTURES -> stringResource(Res.string.pictures)
         Tabs.PRESENTATION -> stringResource(Res.string.presentation)
         Tabs.MEDIA -> stringResource(Res.string.media)
-        Tabs.STREAMING -> stringResource(Res.string.streaming)
+        Tabs.LOWER_THIRD -> stringResource(Res.string.display_lower_third)
         Tabs.ANNOUNCEMENTS -> stringResource(Res.string.announcements)
     }
 }

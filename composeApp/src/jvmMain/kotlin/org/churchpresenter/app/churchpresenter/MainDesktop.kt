@@ -38,7 +38,7 @@ import org.churchpresenter.app.churchpresenter.tabs.PresentationTab
 import org.churchpresenter.app.churchpresenter.tabs.ScheduleTab
 import org.churchpresenter.app.churchpresenter.tabs.ScheduleTabActions
 import org.churchpresenter.app.churchpresenter.tabs.SongsTab
-import org.churchpresenter.app.churchpresenter.tabs.StreamingTab
+import org.churchpresenter.app.churchpresenter.tabs.LowerThirdTab
 import org.churchpresenter.app.churchpresenter.tabs.TabSection
 import org.churchpresenter.app.churchpresenter.tabs.Tabs
 import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
@@ -82,14 +82,15 @@ fun MainDesktop(
     // below doesn't capture a stale instance across recompositions.
     val currentOnScheduleActionsReady by rememberUpdatedState(onScheduleActionsReady)
     var selectedBibleVerseItem by remember { mutableStateOf<ScheduleItem.BibleVerseItem?>(null) }
-    var selectedSongItem       by remember { mutableStateOf<ScheduleItem.SongItem?>(null) }
-    var selectedPictureItem    by remember { mutableStateOf<ScheduleItem.PictureItem?>(null) }
+    var selectedSongItem by remember { mutableStateOf<ScheduleItem.SongItem?>(null) }
+    var selectedPictureItem by remember { mutableStateOf<ScheduleItem.PictureItem?>(null) }
     var selectedPresentationItem by remember { mutableStateOf<ScheduleItem.PresentationItem?>(null) }
-    var selectedMediaItem      by remember { mutableStateOf<ScheduleItem.MediaItem?>(null) }
+    var selectedMediaItem by remember { mutableStateOf<ScheduleItem.MediaItem?>(null) }
+    var selectedLowerThirdItem by remember { mutableStateOf<ScheduleItem.LowerThirdItem?>(null) }
 
     var selectedTabIndex by rememberSaveable { mutableStateOf(0) }
     var showAddLabelDialog by remember { mutableStateOf(false) }
-    var editingLabelItem   by remember { mutableStateOf<ScheduleItem.LabelItem?>(null) }
+    var editingLabelItem by remember { mutableStateOf<ScheduleItem.LabelItem?>(null) }
 
     LaunchedEffect(selectedTabIndex) { onTabChange(selectedTabIndex) }
 
@@ -104,14 +105,38 @@ fun MainDesktop(
             .onPreviewKeyEvent { keyEvent ->
                 if (keyEvent.type == KeyEventType.KeyDown) {
                     when (keyEvent.key) {
-                        Key.Escape -> { mediaViewModel?.pause(); presenterManager.setPresentingMode(Presenting.NONE); true }
-                        Key.F6  -> { selectedTabIndex = Tabs.BIBLE.ordinal;          true }
-                        Key.F7  -> { selectedTabIndex = Tabs.SONGS.ordinal;          true }
-                        Key.F8  -> { selectedTabIndex = Tabs.PICTURES.ordinal;       true }
-                        Key.F9  -> { selectedTabIndex = Tabs.PRESENTATION.ordinal;   true }
-                        Key.F10 -> { selectedTabIndex = Tabs.MEDIA.ordinal;          true }
-                        Key.F11 -> { selectedTabIndex = Tabs.STREAMING.ordinal;      true }
-                        Key.F12 -> { selectedTabIndex = Tabs.ANNOUNCEMENTS.ordinal;  true }
+                        Key.Escape -> {
+                            mediaViewModel?.pause(); presenterManager.setPresentingMode(Presenting.NONE); true
+                        }
+
+                        Key.F6 -> {
+                            selectedTabIndex = Tabs.BIBLE.ordinal; true
+                        }
+
+                        Key.F7 -> {
+                            selectedTabIndex = Tabs.SONGS.ordinal; true
+                        }
+
+                        Key.F8 -> {
+                            selectedTabIndex = Tabs.PICTURES.ordinal; true
+                        }
+
+                        Key.F9 -> {
+                            selectedTabIndex = Tabs.PRESENTATION.ordinal; true
+                        }
+
+                        Key.F10 -> {
+                            selectedTabIndex = Tabs.MEDIA.ordinal; true
+                        }
+
+                        Key.F11 -> {
+                            selectedTabIndex = Tabs.LOWER_THIRD.ordinal; true
+                        }
+
+                        Key.F12 -> {
+                            selectedTabIndex = Tabs.ANNOUNCEMENTS.ordinal; true
+                        }
+
                         else -> false
                     }
                 } else false
@@ -122,18 +147,18 @@ fun MainDesktop(
             Toolbar(
                 currentTheme = theme,
                 onThemeChange = onThemeChange,
-                onNewSchedule    = { currentScheduleActions.newSchedule() },
-                onOpenSchedule   = { currentScheduleActions.openSchedule() },
-                onSaveSchedule   = { currentScheduleActions.saveSchedule() },
-                onMoveToTop      = { currentScheduleActions.moveSelectedToTop() },
-                onMoveUp         = { currentScheduleActions.moveSelectedUp() },
-                onMoveDown       = { currentScheduleActions.moveSelectedDown() },
-                onMoveToBottom   = { currentScheduleActions.moveSelectedToBottom() },
-                onAddToSchedule  = { /* handled per-tab via onAddToSchedule callbacks */ },
+                onNewSchedule = { currentScheduleActions.newSchedule() },
+                onOpenSchedule = { currentScheduleActions.openSchedule() },
+                onSaveSchedule = { currentScheduleActions.saveSchedule() },
+                onMoveToTop = { currentScheduleActions.moveSelectedToTop() },
+                onMoveUp = { currentScheduleActions.moveSelectedUp() },
+                onMoveDown = { currentScheduleActions.moveSelectedDown() },
+                onMoveToBottom = { currentScheduleActions.moveSelectedToBottom() },
+                onAddToSchedule = { /* handled per-tab via onAddToSchedule callbacks */ },
                 onRemoveFromSchedule = { currentScheduleActions.removeSelected() },
-                onClearSchedule  = { currentScheduleActions.clearSchedule() },
-                onAddLabel       = { showAddLabelDialog = true },
-                onOpenSettings   = onShowSettings
+                onClearSchedule = { currentScheduleActions.clearSchedule() },
+                onAddLabel = { showAddLabelDialog = true },
+                onOpenSettings = onShowSettings
             )
 
             Row(modifier = Modifier.fillMaxSize()) {
@@ -171,25 +196,35 @@ fun MainDesktop(
                                     selectedTabIndex = Tabs.SONGS.ordinal
                                     selectedSongItem = item
                                 }
+
                                 is ScheduleItem.BibleVerseItem -> {
                                     selectedTabIndex = Tabs.BIBLE.ordinal
                                     selectedBibleVerseItem = item
                                 }
+
                                 is ScheduleItem.LabelItem -> {
                                     editingLabelItem = item
                                     showAddLabelDialog = true
                                 }
+
                                 is ScheduleItem.PictureItem -> {
                                     selectedTabIndex = Tabs.PICTURES.ordinal
                                     selectedPictureItem = item
                                 }
+
                                 is ScheduleItem.PresentationItem -> {
                                     selectedTabIndex = Tabs.PRESENTATION.ordinal
                                     selectedPresentationItem = item
                                 }
+
                                 is ScheduleItem.MediaItem -> {
                                     selectedTabIndex = Tabs.MEDIA.ordinal
                                     selectedMediaItem = item
+                                }
+
+                                is ScheduleItem.LowerThirdItem -> {
+                                    selectedTabIndex = Tabs.LOWER_THIRD.ordinal
+                                    selectedLowerThirdItem = item
                                 }
                             }
                         },
@@ -201,12 +236,12 @@ fun MainDesktop(
                             scheduleActions = actions
                             currentOnScheduleActionsReady(
                                 ScheduleActions(
-                                    newSchedule    = actions.newSchedule,
-                                    openSchedule   = actions.openSchedule,
-                                    saveSchedule   = actions.saveSchedule,
+                                    newSchedule = actions.newSchedule,
+                                    openSchedule = actions.openSchedule,
+                                    saveSchedule = actions.saveSchedule,
                                     saveScheduleAs = actions.saveScheduleAs,
                                     removeSelected = actions.removeSelected,
-                                    clearSchedule  = actions.clearSchedule
+                                    clearSchedule = actions.clearSchedule
                                 )
                             )
                         },
@@ -236,6 +271,7 @@ fun MainDesktop(
                                 onVerseSelected = onVerseSelected,
                                 onPresenting = presenting
                             )
+
                             Tabs.SONGS -> SongsTab(
                                 modifier = Modifier.fillMaxSize(),
                                 appSettings = appSettings,
@@ -248,6 +284,7 @@ fun MainDesktop(
                                 isPresenting = presentingMode == Presenting.LYRICS,
                                 theme = theme
                             )
+
                             Tabs.PICTURES -> PicturesTab(
                                 modifier = Modifier.fillMaxSize(),
                                 appSettings = appSettings,
@@ -257,6 +294,7 @@ fun MainDesktop(
                                 selectedPictureItem = selectedPictureItem,
                                 presenterManager = presenterManager
                             )
+
                             Tabs.PRESENTATION -> PresentationTab(
                                 modifier = Modifier.fillMaxSize(),
                                 appSettings = appSettings,
@@ -266,6 +304,7 @@ fun MainDesktop(
                                 selectedPresentationItem = selectedPresentationItem,
                                 presenterManager = presenterManager
                             )
+
                             Tabs.MEDIA -> MediaTab(
                                 modifier = Modifier.fillMaxSize(),
                                 onAddToSchedule = { mediaUrl, mediaTitle, mediaType ->
@@ -274,11 +313,17 @@ fun MainDesktop(
                                 selectedMediaItem = selectedMediaItem,
                                 presenterManager = presenterManager
                             )
-                            Tabs.STREAMING -> StreamingTab(
+
+                            Tabs.LOWER_THIRD -> LowerThirdTab(
                                 modifier = Modifier.fillMaxSize(),
                                 appSettings = appSettings,
-                                onSettingsChange = onSettingsChange
+                                onSettingsChange = onSettingsChange,
+                                selectedLowerThirdItem = selectedLowerThirdItem,
+                                onAddToSchedule = { presetId, presetLabel, pauseAtFrame, pauseDurationMs ->
+                                    scheduleActions.addLowerThird(presetId, presetLabel, pauseAtFrame, pauseDurationMs)
+                                }
                             )
+
                             Tabs.ANNOUNCEMENTS -> AnnouncementsTab()
                         }
                     }

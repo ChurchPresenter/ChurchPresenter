@@ -27,6 +27,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -52,6 +53,7 @@ import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.ic_pause
 import churchpresenter.composeapp.generated.resources.ic_play
 import churchpresenter.composeapp.generated.resources.ic_skip_next
+import churchpresenter.composeapp.generated.resources.add_to_schedule
 import churchpresenter.composeapp.generated.resources.lottie_no_presets
 import churchpresenter.composeapp.generated.resources.lottie_pause_at_frame
 import churchpresenter.composeapp.generated.resources.lottie_pause_duration
@@ -69,16 +71,19 @@ import kotlinx.coroutines.launch
 import org.churchpresenter.app.churchpresenter.composables.ImageIconButton
 import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.data.LottiePreset
+import org.churchpresenter.app.churchpresenter.models.ScheduleItem
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import java.io.File
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun StreamingTab(
+fun LowerThirdTab(
     modifier: Modifier = Modifier,
     appSettings: AppSettings,
-    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit = {}
+    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit = {},
+    selectedLowerThirdItem: ScheduleItem.LowerThirdItem? = null,
+    onAddToSchedule: (presetId: String, presetLabel: String, pauseAtFrame: Boolean, pauseDurationMs: Long) -> Unit = { _, _, _, _ -> }
 ) {
     val lottiePresetsDir = remember {
         File(System.getProperty("user.home"), ".churchpresenter/lottie_presets")
@@ -93,6 +98,19 @@ fun StreamingTab(
     var isPlaying by remember { mutableStateOf(false) }
     var pauseAtFrame by remember { mutableStateOf(false) }
     var pauseDurationMs by remember { mutableStateOf("2000") }
+
+    // When a schedule item is clicked, find the matching preset and restore saved state
+    LaunchedEffect(selectedLowerThirdItem) {
+        val item = selectedLowerThirdItem ?: return@LaunchedEffect
+        val preset = presets.find { it.id == item.presetId } ?: return@LaunchedEffect
+        selectedPreset = preset
+        pauseAtFrame = item.pauseAtFrame
+        pauseDurationMs = item.pauseDurationMs.toString()
+        animJob?.cancel()
+        animJob = null
+        animatedProgress.snapTo(0f)
+        isPlaying = false
+    }
 
     val pauseFrame = selectedPreset?.pauseFrame ?: -1f
     val hasPauseFrame = pauseFrame in 0f..1f
@@ -414,6 +432,26 @@ fun StreamingTab(
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                         )
                     }
+                }
+            }
+
+            // Add to Schedule button
+            val preset = selectedPreset
+            if (preset != null) {
+                Button(
+                    onClick = {
+                        onAddToSchedule(
+                            preset.id,
+                            preset.label,
+                            pauseAtFrame && hasPauseFrame,
+                            pauseDurationMs.toLongOrNull() ?: 2000L
+                        )
+                    }
+                ) {
+                    Text(
+                        text = stringResource(Res.string.add_to_schedule),
+                        style = MaterialTheme.typography.labelMedium
+                    )
                 }
             }
         }

@@ -158,6 +158,18 @@ class ScheduleViewModel {
         _scheduleItems.add(item)
     }
 
+    fun addLowerThird(presetId: String, presetLabel: String, pauseAtFrame: Boolean, pauseDurationMs: Long) {
+        val id = UUID.randomUUID().toString()
+        val item = ScheduleItem.LowerThirdItem(
+            id = id,
+            presetId = presetId,
+            presetLabel = presetLabel,
+            pauseAtFrame = pauseAtFrame,
+            pauseDurationMs = pauseDurationMs
+        )
+        _scheduleItems.add(item)
+    }
+
     fun updateLabel(id: String, text: String, textColor: String, backgroundColor: String) {
         val index = _scheduleItems.indexOfFirst { it.id == id }
         if (index >= 0 && _scheduleItems[index] is ScheduleItem.LabelItem) {
@@ -247,6 +259,7 @@ class ScheduleViewModel {
             is ScheduleItem.PictureItem -> onPresentPictures?.invoke(item) ?: onPresenting(Presenting.PICTURES)
             is ScheduleItem.PresentationItem -> onPresentPresentation?.invoke(item) ?: onPresenting(Presenting.PRESENTATION)
             is ScheduleItem.MediaItem -> onPresentMedia?.invoke(item) ?: onPresenting(Presenting.MEDIA)
+            is ScheduleItem.LowerThirdItem -> { /* lower third shown via LowerThirdTab */ }
         }
     }
 }

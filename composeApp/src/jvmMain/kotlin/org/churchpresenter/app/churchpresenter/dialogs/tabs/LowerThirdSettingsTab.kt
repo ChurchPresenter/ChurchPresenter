@@ -76,7 +76,7 @@ import javax.swing.filechooser.FileNameExtensionFilter
 import javax.swing.SwingUtilities
 
 @Composable
-fun StreamingSettingsTab(
+fun LowerThirdSettingsTab(
     settings: AppSettings,
     lottiePresetsDir: File,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit

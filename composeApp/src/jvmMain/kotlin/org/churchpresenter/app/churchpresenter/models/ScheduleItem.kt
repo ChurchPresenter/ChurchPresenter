@@ -62,5 +62,15 @@ sealed class ScheduleItem {
         val mediaType: String,      // "local", "youtube", "vimeo"
         override val displayText: String = "🎬 $mediaTitle"
     ) : ScheduleItem()
+
+    @Serializable
+    data class LowerThirdItem(
+        override val id: String,
+        val presetId: String,
+        val presetLabel: String,
+        val pauseAtFrame: Boolean,
+        val pauseDurationMs: Long,
+        override val displayText: String = "▼ $presetLabel"
+    ) : ScheduleItem()
 }
 

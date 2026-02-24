@@ -47,7 +47,7 @@ import org.churchpresenter.app.churchpresenter.dialogs.tabs.BibleSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.MediaSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.ProjectionSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.SongSettingsTab
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.StreamingSettingsTab
+import org.churchpresenter.app.churchpresenter.dialogs.tabs.LowerThirdSettingsTab
 import org.churchpresenter.app.churchpresenter.ui.theme.AppThemeWrapper
 import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
 import org.jetbrains.compose.resources.stringResource
@@ -160,7 +160,7 @@ fun OptionsDialog(
                                 },
                                 onIdentifyScreen = { onIdentifyScreen() }
                             )
-                            5 -> StreamingSettingsTab(
+                            5 -> LowerThirdSettingsTab(
                                 settings = currentSettings,
                                 lottiePresetsDir = settingsManager.lottiePresetsDir,
                                 onSettingsChange = { updateFn ->
