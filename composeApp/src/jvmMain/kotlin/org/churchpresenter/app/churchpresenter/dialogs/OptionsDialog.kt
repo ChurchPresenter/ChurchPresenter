@@ -58,7 +58,8 @@ fun OptionsDialog(
     theme: ThemeMode,
     settingsManager: SettingsManager,
     onDismiss: () -> Unit,
-    onSave: (AppSettings) -> Unit = {}
+    onSave: (AppSettings) -> Unit = {},
+    onIdentifyScreen: () -> Unit = {}
 ) {
     if (!isVisible) return
 
@@ -156,7 +157,8 @@ fun OptionsDialog(
                                 settings = currentSettings,
                                 onSettingsChange = { updateFn ->
                                     currentSettings = updateFn(currentSettings)
-                                }
+                                },
+                                onIdentifyScreen = { onIdentifyScreen() }
                             )
                             5 -> StreamingSettingsTab(
                                 settings = currentSettings,

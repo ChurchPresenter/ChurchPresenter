@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -37,6 +38,7 @@ import churchpresenter.composeapp.generated.resources.content_streaming
 import churchpresenter.composeapp.generated.resources.display_fullscreen
 import churchpresenter.composeapp.generated.resources.display_lower_third
 import churchpresenter.composeapp.generated.resources.display_mode
+import churchpresenter.composeapp.generated.resources.identify_screen
 import churchpresenter.composeapp.generated.resources.left
 import churchpresenter.composeapp.generated.resources.num_screens_label
 import churchpresenter.composeapp.generated.resources.projection_position_help
@@ -55,7 +57,8 @@ import org.jetbrains.compose.resources.stringResource
 @Composable
 fun ProjectionSettingsTab(
     settings: AppSettings,
-    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit
+    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
+    onIdentifyScreen: () -> Unit = {}
 ) {
     val proj = settings.projectionSettings
     val numScreens = proj.numberOfWindows.coerceIn(1, 4)
@@ -72,7 +75,7 @@ fun ProjectionSettingsTab(
         SectionHeader(stringResource(Res.string.screen_assignment))
         Spacer(modifier = Modifier.height(4.dp))
 
-        // Number of screens row
+        // Number of screens row + Identify button
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
@@ -93,6 +96,13 @@ fun ProjectionSettingsTab(
                 },
                 range = 1..4
             )
+            Spacer(modifier = Modifier.width(8.dp))
+            Button(onClick = { onIdentifyScreen() }) {
+                Text(
+                    text = stringResource(Res.string.identify_screen),
+                    style = MaterialTheme.typography.labelSmall
+                )
+            }
         }
 
         Spacer(modifier = Modifier.height(4.dp))
@@ -130,7 +140,7 @@ fun ProjectionSettingsTab(
             lowerThirdLabel to Constants.DISPLAY_MODE_LOWER_THIRD
         )
 
-        // Header row: blank screen label cell + content column headers + display mode headers
+        // Header row: blank screen label cell + content column headers + display mode headers + identify
         Row(verticalAlignment = Alignment.CenterVertically) {
             Spacer(modifier = Modifier.width(screenLabelWidth))
             contentCols.forEach { col ->

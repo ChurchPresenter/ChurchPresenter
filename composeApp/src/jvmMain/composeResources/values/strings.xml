@@ -356,6 +356,7 @@
     <string name="display_mode">Display Mode</string>
     <string name="display_fullscreen">Full Screen</string>
     <string name="display_lower_third">Lower Third</string>
+    <string name="identify_screen">Identify</string>
 
     <!-- Background Settings Tab -->
     <string name="default_background_color">Default Background Color</string>

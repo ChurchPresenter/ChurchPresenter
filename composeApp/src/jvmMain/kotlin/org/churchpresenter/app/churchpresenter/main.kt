@@ -6,24 +6,34 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.Text
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.WindowState
 import androidx.compose.ui.window.WindowPlacement
 import androidx.compose.ui.window.WindowPosition
 import java.awt.GraphicsEnvironment
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.rememberWindowState
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.app_name
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.churchpresenter.app.churchpresenter.data.Language
 import org.churchpresenter.app.churchpresenter.data.SettingsManager
 import org.churchpresenter.app.churchpresenter.dialogs.OptionsDialog
@@ -72,6 +82,10 @@ fun main() {
         // and the presenter Window via LocalMediaViewModel CompositionLocal.
         // Documented legitimate exception: cross-Window JFX/Swing bridge.
         val mediaViewModel = remember { MediaViewModel() }
+
+        // false = not identifying; true = all screens showing their number for 5 seconds
+        var identifyingScreen by remember { mutableStateOf(false) }
+        val coroutineScope = rememberCoroutineScope()
 
         // UI state — restore saved theme so toolbar/icons have the correct colors on first frame
         var theme by remember {
@@ -168,7 +182,14 @@ fun main() {
                             theme = theme,
                             settingsManager = settingsManager,
                             onDismiss = { showOptionsDialog = false },
-                            onSave = { appSettings = it }
+                            onSave = { appSettings = it },
+                            onIdentifyScreen = {
+                                identifyingScreen = true
+                                coroutineScope.launch {
+                                    delay(5_000L)
+                                    identifyingScreen = false
+                                }
+                            }
                         )
                     } // end CompositionLocalProvider
                 }
@@ -200,6 +221,14 @@ fun main() {
                 remember(i) { WindowState(placement = WindowPlacement.Fullscreen) }
             }
 
+            // Resolve the screen assignment for this window index
+            val screenAssignment = when (i) {
+                0 -> proj.screen1Assignment
+                1 -> proj.screen2Assignment
+                2 -> proj.screen3Assignment
+                else -> proj.screen4Assignment
+            }
+
             Window(
                 visible = showPresenterWindow,
                 title = "Presenter View ${i + 1}",
@@ -220,12 +249,40 @@ fun main() {
                                 }
                         ) {
                             when (presentingMode) {
-                                Presenting.BIBLE -> BiblePresenter(selectedVerses = selectedVerses, appSettings = appSettings)
-                                Presenting.LYRICS -> SongPresenter(lyricSection = lyricSection, appSettings = appSettings)
-                                Presenting.PICTURES -> PicturePresenter(imagePath = selectedImagePath, animationType = animationType, transitionDuration = transitionDuration)
-                                Presenting.PRESENTATION -> SlidePresenter(slide = selectedSlide, animationType = animationType, transitionDuration = transitionDuration)
-                                Presenting.MEDIA -> MediaPresenter(modifier = Modifier.fillMaxSize())
+                                Presenting.BIBLE ->
+                                    if (screenAssignment.showBible)
+                                        BiblePresenter(selectedVerses = selectedVerses, appSettings = appSettings)
+                                Presenting.LYRICS ->
+                                    if (screenAssignment.showSongs)
+                                        SongPresenter(lyricSection = lyricSection, appSettings = appSettings)
+                                Presenting.PICTURES ->
+                                    if (screenAssignment.showPictures)
+                                        PicturePresenter(imagePath = selectedImagePath, animationType = animationType, transitionDuration = transitionDuration)
+                                Presenting.PRESENTATION ->
+                                    if (screenAssignment.showPictures)
+                                        SlidePresenter(slide = selectedSlide, animationType = animationType, transitionDuration = transitionDuration)
+                                Presenting.MEDIA ->
+                                    if (screenAssignment.showMedia)
+                                        MediaPresenter(modifier = Modifier.fillMaxSize())
                                 Presenting.NONE -> { /* nothing */ }
+                            }
+
+                            // Identify overlay — shown for 5 seconds when Identify is pressed
+                            if (identifyingScreen) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .background(Color.Black.copy(alpha = 0.75f)),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = "Screen ${i + 1}",
+                                        color = Color.White,
+                                        fontSize = 96.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        textAlign = TextAlign.Center
+                                    )
+                                }
                             }
                         }
                     }
