@@ -96,12 +96,27 @@ data class BibleSettings(
 )
 
 @Serializable
+data class ScreenAssignment(
+    val showBible: Boolean = true,
+    val showSongs: Boolean = true,
+    val showPictures: Boolean = true,
+    val showMedia: Boolean = true,
+    val showStreaming: Boolean = true,
+    val showAnnouncements: Boolean = true,
+    val displayMode: String = "fullscreen" // Constants.DISPLAY_MODE_FULLSCREEN or DISPLAY_MODE_LOWER_THIRD
+)
+
+@Serializable
 data class ProjectionSettings(
-    val numberOfWindows: Int = 1, // 1-3 projection windows
+    val numberOfWindows: Int = 1, // 1-4 projection windows
     val windowTop: Int = 32,
     val windowLeft: Int = 32,
     val windowRight: Int = 32,
-    val windowBottom: Int = 32
+    val windowBottom: Int = 32,
+    val screen1Assignment: ScreenAssignment = ScreenAssignment(),
+    val screen2Assignment: ScreenAssignment = ScreenAssignment(),
+    val screen3Assignment: ScreenAssignment = ScreenAssignment(),
+    val screen4Assignment: ScreenAssignment = ScreenAssignment()
 )
 
 @Serializable

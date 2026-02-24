@@ -344,6 +344,18 @@
     <string name="window_position">Window Position</string>
     <string name="screen">Screen</string>
     <string name="projection_position_help">Position values represent pixel offsets from screen edges. Use these to adjust projection window placement on secondary displays.</string>
+    <string name="screen_assignment">Screen Assignment</string>
+    <string name="num_screens_label">Number of Screens:</string>
+    <string name="screen_col_label">Screen %1$d</string>
+    <string name="content_bible">Bible</string>
+    <string name="content_songs">Songs</string>
+    <string name="content_pictures">Pictures/Presentation</string>
+    <string name="content_media">Media</string>
+    <string name="content_streaming">Streaming</string>
+    <string name="content_announcements">Announcements</string>
+    <string name="display_mode">Display Mode</string>
+    <string name="display_fullscreen">Full Screen</string>
+    <string name="display_lower_third">Lower Third</string>
 
     <!-- Background Settings Tab -->
     <string name="default_background_color">Default Background Color</string>

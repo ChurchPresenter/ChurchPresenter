@@ -83,6 +83,10 @@ object Constants {
     // Media Types
     const val MEDIA_TYPE_LOCAL = "local"
 
+    // Display Mode Types (for screen assignments)
+    const val DISPLAY_MODE_FULLSCREEN = "fullscreen"
+    const val DISPLAY_MODE_LOWER_THIRD = "lower_third"
+
     // Seek amount in ms
     const val MEDIA_SEEK_MS = 10_000L
 }
