@@ -213,6 +213,7 @@
     <string name="primary_bible_text">Primary Bible Text</string>
     <string name="primary_bible_reference">Primary Bible Book Reference</string>
     <string name="secondary_bible_text">Secondary Bible Text</string>
+    <string name="show_in_lower_third">Show in Lower Third</string>
     <string name="secondary_bible_reference">Secondary Bible Book Reference</string>
     <string name="show_abbreviation">Show book abbreviation</string>
     <string name="caption_language">Caption Language</string>

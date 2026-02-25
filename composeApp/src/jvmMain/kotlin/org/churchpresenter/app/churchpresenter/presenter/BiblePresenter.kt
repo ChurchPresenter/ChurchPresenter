@@ -261,7 +261,9 @@ fun BiblePresenter(
                     }
 
                     // Secondary Bible
-                    if (secondaryBible != null) {
+                    val showSecondary = secondaryBible != null &&
+                        (!isLowerThird || appSettings.bibleSettings.secondaryBibleLowerThirdEnabled)
+                    if (showSecondary) {
                         if (secondaryBibleReferencePosition == Constants.POSITION_ABOVE) {
                             Row(
                                 Modifier.fillMaxWidth(),

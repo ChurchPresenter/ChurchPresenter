@@ -91,6 +91,7 @@ data class BibleSettings(
     val secondaryBibleLowerThirdFontSize: Int = 28,
     val secondaryBibleHorizontalAlignment: String = Constants.CENTER,
     val secondaryBibleLowerThirdHorizontalAlignment: String = Constants.CENTER,
+    val secondaryBibleLowerThirdEnabled: Boolean = true,
 
     // Secondary Bible book reference
     val secondaryReferenceColor: String = "#CCCCCC",

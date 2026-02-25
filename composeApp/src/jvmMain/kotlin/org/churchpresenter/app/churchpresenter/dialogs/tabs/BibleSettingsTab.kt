@@ -71,6 +71,7 @@ import churchpresenter.composeapp.generated.resources.remove_bible_file
 import churchpresenter.composeapp.generated.resources.secondary_bible
 import churchpresenter.composeapp.generated.resources.secondary_bible_reference
 import churchpresenter.composeapp.generated.resources.secondary_bible_text
+import churchpresenter.composeapp.generated.resources.show_in_lower_third
 import churchpresenter.composeapp.generated.resources.show_abbreviation
 import churchpresenter.composeapp.generated.resources.storage_directory
 import churchpresenter.composeapp.generated.resources.vertical_alignment
@@ -411,23 +412,39 @@ private fun LeftColumn(
         )
     }
     SettingRow(stringResource(Res.string.secondary_bible)) {
-        DropdownSettingsField(
-            value = if (settings.bibleSettings.secondaryBible.isEmpty()) {
-                noneStr
-            } else {
-                bibleFileDisplayNames[settings.bibleSettings.secondaryBible] ?: settings.bibleSettings.secondaryBible
-            },
-            options = bibleDisplayOptions,
-            onValueChange = { displayName ->
-                // Find the filename that matches this display name
-                val fileName = if (displayName == noneStr) {
-                    ""
+        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            DropdownSettingsField(
+                value = if (settings.bibleSettings.secondaryBible.isEmpty()) {
+                    noneStr
                 } else {
-                    bibleFileDisplayNames.entries.find { it.value == displayName }?.key ?: displayName
+                    bibleFileDisplayNames[settings.bibleSettings.secondaryBible] ?: settings.bibleSettings.secondaryBible
+                },
+                options = bibleDisplayOptions,
+                onValueChange = { displayName ->
+                    val fileName = if (displayName == noneStr) {
+                        ""
+                    } else {
+                        bibleFileDisplayNames.entries.find { it.value == displayName }?.key ?: displayName
+                    }
+                    onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(secondaryBible = fileName)) }
                 }
-                onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(secondaryBible = fileName)) }
+            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Checkbox(
+                    checked = settings.bibleSettings.secondaryBibleLowerThirdEnabled,
+                    onCheckedChange = { checked ->
+                        onSettingsChange { s ->
+                            s.copy(bibleSettings = s.bibleSettings.copy(secondaryBibleLowerThirdEnabled = checked))
+                        }
+                    }
+                )
+                Text(
+                    text = stringResource(Res.string.show_in_lower_third),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
             }
-        )
+        }
     }
 
     Spacer(modifier = Modifier.height(20.dp))
