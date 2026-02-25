@@ -17,7 +17,9 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.focusTarget
+import androidx.compose.foundation.focusable
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
@@ -92,16 +94,22 @@ fun MainDesktop(
     var showAddLabelDialog by remember { mutableStateOf(false) }
     var editingLabelItem by remember { mutableStateOf<ScheduleItem.LabelItem?>(null) }
 
-    LaunchedEffect(selectedTabIndex) { onTabChange(selectedTabIndex) }
-
-
     val mediaViewModel = LocalMediaViewModel.current
     val presentingMode by presenterManager.presentingMode
+    val mainFocusRequester = remember { FocusRequester() }
+
+    LaunchedEffect(selectedTabIndex) {
+        onTabChange(selectedTabIndex)
+        // Re-request focus so F-key shortcuts keep working after the new tab's children steal focus
+        mainFocusRequester.requestFocus()
+    }
 
     Box(
         modifier = modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
+            .focusRequester(mainFocusRequester)
+            .focusable()
             .onPreviewKeyEvent { keyEvent ->
                 if (keyEvent.type == KeyEventType.KeyDown) {
                     when (keyEvent.key) {
@@ -141,7 +149,6 @@ fun MainDesktop(
                     }
                 } else false
             }
-            .focusTarget()
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
             Toolbar(
