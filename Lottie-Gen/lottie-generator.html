@@ -1,0 +1,1778 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lower Thirds — Lottie Generator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&family=Poppins:wght@400;700&family=Raleway:wght@400;700&family=Anonymous+Pro:wght@400;700&family=Patua+One&family=Lora:wght@400;700&family=Abril+Fatface&family=Cookie&family=Oleo+Script:wght@400;700&family=Kalam:wght@400;700&family=Fredoka+One&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.12.2/lottie.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Open Sans',sans-serif;background:#1a1a2e;color:#e0e0e0;display:flex;height:100vh;overflow:hidden}
+.panel{width:420px;min-width:420px;background:#16213e;overflow-y:auto;padding:20px;border-right:1px solid #0f3460}
+.preview-area{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;gap:16px}
+h1{font-size:18px;margin-bottom:16px;color:#e94560}
+h2{font-size:14px;margin:16px 0 8px;color:#e94560;border-bottom:1px solid #0f3460;padding-bottom:4px}
+label{display:block;font-size:12px;margin:6px 0 2px;color:#aaa}
+input[type=text],input[type=number],select{width:100%;padding:6px 8px;background:#0f3460;border:1px solid #1a1a4e;color:#e0e0e0;border-radius:4px;font-size:13px}
+input[type=color]{width:40px;height:28px;padding:0;border:1px solid #1a1a4e;border-radius:4px;cursor:pointer;background:none}
+input[type=range]{width:100%;accent-color:#e94560}
+input[type=file]{font-size:12px;color:#aaa}
+.row{display:flex;gap:8px;align-items:end}
+.row>*{flex:1}
+.color-row{display:flex;gap:8px;align-items:center}
+.color-row label{margin:0;min-width:80px}
+.toggle{display:flex;align-items:center;gap:8px;margin:6px 0}
+.toggle input[type=checkbox]{accent-color:#e94560;width:16px;height:16px}
+.btn{padding:8px 20px;border:none;border-radius:4px;cursor:pointer;font-size:13px;font-weight:700}
+.btn-primary{background:#e94560;color:#fff}
+.btn-primary:hover{background:#c73652}
+.btn-secondary{background:#0f3460;color:#e0e0e0;border:1px solid #1a1a4e}
+.btn-secondary:hover{background:#1a1a4e}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap}
+#preview-container{background:#000;border-radius:8px;overflow:hidden;position:relative}
+.controls-row{display:flex;gap:8px;align-items:center;width:100%;max-width:800px;padding:0 20px}
+.controls-row input[type=range]{flex:1}
+#preview-container svg,#preview-container canvas{display:block}
+.range-val{font-size:11px;color:#888;min-width:30px;text-align:right}
+.btn-sm{padding:4px 10px;font-size:11px;border:none;border-radius:3px;cursor:pointer;font-weight:700}
+.library-list{max-height:300px;overflow-y:auto;display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.preset-card{background:#0f3460;border:1px solid #1a1a4e;border-radius:6px;padding:8px 10px;display:flex;align-items:center;gap:8px}
+.preset-card:hover{border-color:#e94560}
+.preset-card .preset-name{flex:1;font-size:12px;font-weight:700;color:#e0e0e0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.preset-card .preset-texts{display:block;font-size:10px;color:#999;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.preset-card .preset-meta{font-size:10px;color:#888;white-space:nowrap}
+.preset-card .btn-sm{flex-shrink:0}
+.library-empty{font-size:12px;color:#666;padding:12px 0;text-align:center}
+.color-dots{display:flex;gap:3px;align-items:center}
+.color-dot{width:12px;height:12px;border-radius:50%;border:1px solid rgba(255,255,255,0.15)}
+</style>
+</head>
+<body>
+
+<div class="panel" id="config-panel">
+  <h1>Lottie Lower Third Generator</h1>
+
+  <h2>Canvas</h2>
+  <div class="row">
+    <div><label>Width</label><input type="number" id="canvasW" value="1920" min="100" max="7680"></div>
+    <div><label>Height</label><input type="number" id="canvasH" value="1080" min="100" max="4320"></div>
+  </div>
+
+  <h2>Style &amp; Layout</h2>
+  <div class="row">
+    <div>
+      <label>Style</label>
+      <select id="styleType">
+        <option value="1">Style 1 — Bar</option>
+        <option value="2">Style 2 — Boxed</option>
+        <option value="3">Style 3 — Circular</option>
+      </select>
+    </div>
+    <div>
+      <label>Alignment</label>
+      <select id="alignment">
+        <option value="left">Left</option>
+        <option value="center">Center</option>
+        <option value="right">Right</option>
+      </select>
+    </div>
+  </div>
+
+  <h2>Text</h2>
+  <label>Name</label>
+  <input type="text" id="nameText" value="Church Presenter">
+  <label>Info</label>
+  <input type="text" id="infoText" value="Software Engineer">
+
+  <div class="row" style="margin-top:8px">
+    <div>
+      <label>Font</label>
+      <select id="fontFamily">
+        <option value="Open Sans">Open Sans</option>
+        <option value="Poppins">Poppins</option>
+        <option value="Raleway">Raleway</option>
+        <option value="Anonymous Pro">Anonymous Pro</option>
+        <option value="Patua One">Patua One</option>
+        <option value="Lora">Lora</option>
+        <option value="Abril Fatface">Abril Fatface</option>
+        <option value="Cookie">Cookie</option>
+        <option value="Oleo Script">Oleo Script</option>
+        <option value="Kalam">Kalam</option>
+        <option value="Fredoka One">Fredoka One</option>
+      </select>
+    </div>
+    <div><label>Base Size (px)</label><input type="number" id="baseSize" value="24" min="10" max="80"></div>
+  </div>
+
+  <div class="row">
+    <div><label>Name Size (em)</label><input type="number" id="nameSize" value="1.2" min="0.5" max="4" step="0.1"></div>
+    <div><label>Info Size (em)</label><input type="number" id="infoSize" value="0.9" min="0.5" max="4" step="0.1"></div>
+  </div>
+  <div class="row">
+    <div>
+      <label>Name Weight</label>
+      <select id="nameWeight"><option value="700">Bold</option><option value="400">Normal</option></select>
+    </div>
+    <div>
+      <label>Info Weight</label>
+      <select id="infoWeight"><option value="400">Normal</option><option value="700">Bold</option></select>
+    </div>
+  </div>
+  <div class="row">
+    <div>
+      <label>Name Transform</label>
+      <select id="nameTransform"><option value="uppercase">Uppercase</option><option value="none">None</option></select>
+    </div>
+    <div>
+      <label>Info Transform</label>
+      <select id="infoTransform"><option value="none">None</option><option value="uppercase">Uppercase</option></select>
+    </div>
+  </div>
+
+  <h2>Colors</h2>
+  <div class="color-row"><label>Name Text</label><input type="color" id="nameColor" value="#F2F2F2"></div>
+  <div class="color-row"><label>Info Text</label><input type="color" id="infoColor" value="#CCCCCC"></div>
+  <div class="color-row"><label>Accent</label><input type="color" id="accentColor" value="#D54141"></div>
+  <div class="color-row"><label>Background</label><input type="color" id="bgColor" value="#222222"></div>
+  <div class="color-row"><label>Border</label><input type="color" id="borderColor" value="#D54141"></div>
+  <div style="margin-top:8px">
+    <button type="button" class="btn-sm btn-secondary" id="btnSaveColors">Save Colors</button>
+  </div>
+  <div class="library-list" id="colorLibraryList" style="margin-top:6px"></div>
+
+  <h2>Shape</h2>
+  <div class="row">
+    <div>
+      <label>Corners (em)</label>
+      <div class="row"><input type="range" id="corners" min="0" max="2" step="0.1" value="0.3"><span class="range-val" id="cornersVal">0.3</span></div>
+    </div>
+    <div>
+      <label>Border Thickness</label>
+      <div class="row"><input type="range" id="borderThickness" min="0" max="5" step="0.5" value="0"><span class="range-val" id="borderThicknessVal">0</span></div>
+    </div>
+  </div>
+  <div class="toggle"><input type="checkbox" id="bgEnabled" checked><label>Show Background</label></div>
+  <div class="toggle"><input type="checkbox" id="shadowEnabled"><label>Shadow</label></div>
+
+  <h2>Logo</h2>
+  <div class="toggle"><input type="checkbox" id="logoEnabled"><label>Show Logo</label></div>
+  <select id="logoSelect"><option value="">None</option><option value="__custom__">Custom…</option></select>
+  <input type="file" id="logoFile" accept="image/*" style="display:none">
+  <div class="row" style="margin-top:4px">
+    <div>
+      <label>Logo Size (em)</label>
+      <div class="row"><input type="range" id="logoSize" min="2" max="6" step="0.5" value="3.5"><span class="range-val" id="logoSizeVal">3.5</span></div>
+    </div>
+  </div>
+
+  <h2>Timing</h2>
+  <div class="row">
+    <div><label>Anim Duration (s)</label><input type="number" id="animDuration" value="4" min="0.5" max="20" step="0.5"></div>
+    <div><label>Hold Duration (s)</label><input type="number" id="holdDuration" value="3" min="0" max="30" step="0.5"></div>
+  </div>
+
+  <h2>Position</h2>
+  <div class="row">
+    <div>
+      <label>Margin H (rem)</label>
+      <div class="row"><input type="range" id="marginH" min="0" max="10" step="0.5" value="2"><span class="range-val" id="marginHVal">2</span></div>
+    </div>
+    <div>
+      <label>Margin V (rem)</label>
+      <div class="row"><input type="range" id="marginV" min="0" max="10" step="0.5" value="2"><span class="range-val" id="marginVVal">2</span></div>
+    </div>
+  </div>
+  <div>
+    <label>Line Spacing (em)</label>
+    <div class="row"><input type="range" id="lineSpacing" min="-0.5" max="1" step="0.1" value="0.2"><span class="range-val" id="lineSpacingVal">0.2</span></div>
+  </div>
+
+  <div style="margin-top:20px" class="btn-row">
+    <button class="btn btn-primary" id="btnDownload" disabled>Download JSON</button>
+    <button type="button" class="btn btn-secondary" id="btnSavePreset">Save to Library</button>
+  </div>
+
+  <h2>Library</h2>
+  <div class="library-list" id="libraryList">
+    <div class="library-empty">No presets saved yet.</div>
+  </div>
+</div>
+
+<div class="preview-area">
+  <div id="preview-container"></div>
+  <div class="controls-row">
+    <button class="btn btn-secondary" id="btnPlayPause" disabled>⏸</button>
+    <input type="range" id="seekBar" min="0" max="100" value="0" step="0.1" disabled>
+    <span id="frameDisplay" style="font-size:11px;color:#888;min-width:60px">0 / 0</span>
+  </div>
+  <div id="status" style="font-size:12px;color:#888"></div>
+</div>
+
+<script>
+// ============================================================
+// UTILITIES
+// ============================================================
+
+function hexToRgb(hex) {
+  hex = hex.replace('#', '');
+  return [
+    parseInt(hex.substring(0, 2), 16),
+    parseInt(hex.substring(2, 4), 16),
+    parseInt(hex.substring(4, 6), 16)
+  ];
+}
+
+function hexToLottie(hex) {
+  const [r, g, b] = hexToRgb(hex);
+  return [+(r / 255).toFixed(4), +(g / 255).toFixed(4), +(b / 255).toFixed(4)];
+}
+
+function emToPx(em, baseSizePx) {
+  return em * baseSizePx;
+}
+
+function remToPx(rem, baseSizePx) {
+  return rem * baseSizePx;
+}
+
+function pctToFrame(pct, totalFrames) {
+  return Math.round((pct / 100) * totalFrames);
+}
+
+// Cubic-bezier(0.19, 0.76, 0.32, 1) mapped to Lottie tangents
+const EASING = {
+  o: { x: [0.19], y: [0.76] },
+  i: { x: [0.32], y: [1] }
+};
+const LINEAR = {
+  o: { x: [0], y: [0] },
+  i: { x: [1], y: [1] }
+};
+
+function measureText(text, fontFamily, fontSizePx, fontWeight, transform) {
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  const displayText = transform === 'uppercase' ? text.toUpperCase() : text;
+  ctx.font = `${fontWeight} ${fontSizePx}px "${fontFamily}"`;
+  const metrics = ctx.measureText(displayText);
+  const w = metrics.width;
+  const h = (metrics.actualBoundingBoxAscent || fontSizePx * 0.8) +
+            (metrics.actualBoundingBoxDescent || fontSizePx * 0.2);
+  return { width: Math.ceil(w) + 4, height: Math.ceil(h) + 4 };
+}
+
+// Read config from UI
+function getConfig() {
+  const val = id => document.getElementById(id).value;
+  const num = id => parseFloat(val(id));
+  const chk = id => document.getElementById(id).checked;
+
+  return {
+    canvasW: num('canvasW'),
+    canvasH: num('canvasH'),
+    style: val('styleType'),
+    align: val('alignment'),
+    nameText: val('nameText'),
+    infoText: val('infoText'),
+    fontFamily: val('fontFamily'),
+    baseSize: num('baseSize'),
+    nameSize: num('nameSize'),
+    infoSize: num('infoSize'),
+    nameWeight: val('nameWeight'),
+    infoWeight: val('infoWeight'),
+    nameTransform: val('nameTransform'),
+    infoTransform: val('infoTransform'),
+    nameColor: val('nameColor'),
+    infoColor: val('infoColor'),
+    accentColor: val('accentColor'),
+    bgColor: val('bgColor'),
+    borderColor: val('borderColor'),
+    corners: num('corners'),
+    borderThickness: num('borderThickness'),
+    bgEnabled: chk('bgEnabled'),
+    shadowEnabled: chk('shadowEnabled'),
+    logoEnabled: chk('logoEnabled'),
+    logoSize: num('logoSize'),
+    logoSelect: val('logoSelect'),
+    animDuration: num('animDuration'),
+    holdDuration: num('holdDuration'),
+    marginH: num('marginH'),
+    marginV: num('marginV'),
+    lineSpacing: num('lineSpacing'),
+    logoData: window._logoData || null,
+    logoW: window._logoW || 0,
+    logoH: window._logoH || 0
+  };
+}
+
+// Logo handling
+function setLogoFromURL(url) {
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.onload = function() {
+    const c = document.createElement('canvas');
+    c.width = img.naturalWidth; c.height = img.naturalHeight;
+    c.getContext('2d').drawImage(img, 0, 0);
+    window._logoData = c.toDataURL('image/png');
+    window._logoW = img.naturalWidth;
+    window._logoH = img.naturalHeight;
+    scheduleGenerate(100);
+  };
+  img.src = url;
+}
+
+function clearLogo() {
+  window._logoData = null;
+  window._logoW = 0;
+  window._logoH = 0;
+  scheduleGenerate(100);
+}
+
+function loadLogoList() {
+  fetch('/api/logos').then(r => r.json()).then(files => {
+    const sel = document.getElementById('logoSelect');
+    // remove old preloaded options (keep None + Custom)
+    while (sel.options.length > 2) sel.remove(1);
+    files.forEach(f => {
+      const opt = document.createElement('option');
+      opt.value = 'logos/' + f;
+      opt.textContent = f.replace(/\.[^.]+$/, '');
+      sel.insertBefore(opt, sel.options[sel.options.length - 1]); // before Custom
+    });
+  }).catch(() => {});
+}
+
+document.getElementById('logoSelect').addEventListener('change', function() {
+  if (this.value === '__custom__') {
+    document.getElementById('logoFile').click();
+    return;
+  }
+  if (!this.value) { clearLogo(); return; }
+  setLogoFromURL(this.value);
+});
+
+document.getElementById('logoFile').addEventListener('change', function(e) {
+  const file = e.target.files[0];
+  if (!file) { document.getElementById('logoSelect').value = ''; return; }
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    // Upload to server
+    fetch('/api/logos', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: file.name, data: ev.target.result })
+    }).then(r => r.json()).then(res => {
+      loadLogoList();
+      // Select the newly uploaded logo after list refreshes
+      setTimeout(() => {
+        document.getElementById('logoSelect').value = 'logos/' + res.file;
+        setLogoFromURL('logos/' + res.file);
+      }, 200);
+    }).catch(() => {});
+  };
+  reader.readAsDataURL(file);
+  e.target.value = '';
+});
+
+// ============================================================
+// PRESET LIBRARY (disk via local server)
+// ============================================================
+let presets = [];
+const RANGE_IDS = ['corners','borderThickness','logoSize','marginH','marginV','lineSpacing'];
+const CONFIG_KEY_MAP = { style: 'styleType', align: 'alignment' };
+const LOGO_KEYS = ['logoData', 'logoW', 'logoH'];
+
+function savePresets() {
+  fetch('/api/presets', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(presets, null, 2)
+  }).catch(() => {});
+}
+
+function loadPresetsFromDisk() {
+  return fetch('/api/presets').then(r => r.json()).then(data => {
+    if (Array.isArray(data)) { presets = data; renderLibrary(); }
+  }).catch(() => {});
+}
+
+function uniquePresetName(base) {
+  const names = new Set(presets.map(p => p.name));
+  if (!names.has(base)) return base;
+  let i = 1;
+  while (names.has(base + ' - ' + i)) i++;
+  return base + ' - ' + i;
+}
+
+function savePreset() {
+  const base = document.getElementById('nameText').value.trim() || 'Untitled';
+  const name = uniquePresetName(base);
+  const cfg = getConfig();
+  LOGO_KEYS.forEach(k => delete cfg[k]);
+  presets.push({ name, savedAt: new Date().toISOString(), config: cfg });
+  savePresets();
+  renderLibrary();
+}
+
+function loadPreset(index) {
+  const preset = presets[index];
+  if (!preset) return;
+  const cfg = preset.config;
+  for (const [key, val] of Object.entries(cfg)) {
+    if (LOGO_KEYS.includes(key)) continue;
+    const elId = CONFIG_KEY_MAP[key] || key;
+    const el = document.getElementById(elId);
+    if (!el) continue;
+    if (el.type === 'checkbox') {
+      el.checked = val;
+    } else {
+      el.value = val;
+    }
+    if (RANGE_IDS.includes(elId)) {
+      const span = document.getElementById(elId + 'Val');
+      if (span) span.textContent = val;
+    }
+  }
+  // Restore logo from saved selection
+  if (cfg.logoSelect && cfg.logoSelect !== '__custom__') {
+    document.getElementById('logoSelect').value = cfg.logoSelect;
+    setLogoFromURL(cfg.logoSelect);
+    return; // generate() called by setLogoFromURL
+  } else if (!cfg.logoSelect) {
+    document.getElementById('logoSelect').value = '';
+    clearLogo();
+    return;
+  }
+  generate();
+}
+
+function deletePreset(index) {
+  presets.splice(index, 1);
+  savePresets();
+  renderLibrary();
+}
+
+function renderLibrary() {
+  const container = document.getElementById('libraryList');
+  if (presets.length === 0) {
+    container.innerHTML = '<div class="library-empty">No presets saved yet.</div>';
+    return;
+  }
+  const styleNames = { '1': 'Style 1', '2': 'Style 2', '3': 'Style 3' };
+  container.innerHTML = presets.map((p, i) => {
+    const s = styleNames[p.config.style] || p.config.style;
+    const a = (p.config.align || '').charAt(0).toUpperCase() + (p.config.align || '').slice(1);
+    const name = p.config.nameText || '';
+    const info = p.config.infoText || '';
+    return `<div class="preset-card" onclick="loadPreset(${i})" style="cursor:pointer">
+      <div style="flex:1;overflow:hidden">
+        <span class="preset-name" title="${p.name}">${p.name}</span>
+        <span class="preset-texts">${name}${info ? ' — ' + info : ''}</span>
+      </div>
+      <span class="preset-meta">${s} / ${a}</span>
+      <button class="btn-sm btn-secondary" onclick="event.stopPropagation();deletePreset(${i})">&times;</button>
+    </div>`;
+  }).join('');
+}
+
+// ============================================================
+// COLOR LIBRARY (disk via local server)
+// ============================================================
+const COLOR_KEYS = ['nameColor', 'infoColor', 'accentColor', 'bgColor', 'borderColor'];
+const DEFAULT_COLOR_THEMES = [
+  { name: 'Classic Red', colors: { nameColor: '#F2F2F2', infoColor: '#CCCCCC', accentColor: '#D54141', bgColor: '#222222', borderColor: '#D54141' } },
+  { name: 'Ocean Blue', colors: { nameColor: '#FFFFFF', infoColor: '#B0D4F1', accentColor: '#1A73E8', bgColor: '#0D253F', borderColor: '#1A73E8' } },
+  { name: 'Emerald', colors: { nameColor: '#FFFFFF', infoColor: '#A8E6CF', accentColor: '#2ECC71', bgColor: '#1A332A', borderColor: '#27AE60' } },
+  { name: 'Sunset', colors: { nameColor: '#FFFFFF', infoColor: '#FFD9B3', accentColor: '#FF6B35', bgColor: '#2D1810', borderColor: '#E85D26' } },
+  { name: 'Purple Haze', colors: { nameColor: '#F0E6FF', infoColor: '#C9A8FF', accentColor: '#8B5CF6', bgColor: '#1A1033', borderColor: '#7C3AED' } },
+  { name: 'Minimal Light', colors: { nameColor: '#222222', infoColor: '#555555', accentColor: '#333333', bgColor: '#F5F5F5', borderColor: '#DDDDDD' } },
+  { name: 'Gold', colors: { nameColor: '#FFFFFF', infoColor: '#F0D9A0', accentColor: '#D4A934', bgColor: '#1C1408', borderColor: '#B8941E' } },
+  { name: 'Neon Pink', colors: { nameColor: '#FFFFFF', infoColor: '#FFB3D9', accentColor: '#FF2D8A', bgColor: '#1A0A12', borderColor: '#E6196E' } },
+];
+let colorThemes = [];
+
+function saveColorThemes() {
+  fetch('/api/color-themes', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(colorThemes, null, 2)
+  }).catch(() => {});
+}
+
+function loadColorThemesFromDisk() {
+  return fetch('/api/color-themes').then(r => r.json()).then(data => {
+    if (Array.isArray(data) && data.length > 0) { colorThemes = data; }
+    else { colorThemes = [...DEFAULT_COLOR_THEMES]; saveColorThemes(); }
+    renderColorLibrary();
+  }).catch(() => {
+    colorThemes = [...DEFAULT_COLOR_THEMES];
+    renderColorLibrary();
+  });
+}
+
+function saveColorTheme() {
+  const colors = {};
+  COLOR_KEYS.forEach(k => colors[k] = document.getElementById(k).value);
+  const baseName = 'Custom';
+  const names = new Set(colorThemes.map(t => t.name));
+  let name = baseName;
+  let i = 1;
+  while (names.has(name)) { name = baseName + ' - ' + i; i++; }
+  colorThemes.push({ name, colors });
+  saveColorThemes();
+  renderColorLibrary();
+}
+
+function loadColorTheme(index) {
+  const theme = colorThemes[index];
+  if (!theme) return;
+  for (const [key, val] of Object.entries(theme.colors)) {
+    const el = document.getElementById(key);
+    if (el) el.value = val;
+  }
+  scheduleGenerate(100);
+}
+
+function deleteColorTheme(index) {
+  colorThemes.splice(index, 1);
+  saveColorThemes();
+  renderColorLibrary();
+}
+
+function renderColorLibrary() {
+  const container = document.getElementById('colorLibraryList');
+  if (colorThemes.length === 0) {
+    container.innerHTML = '<div class="library-empty">No color themes saved.</div>';
+    return;
+  }
+  container.innerHTML = colorThemes.map((t, i) => {
+    const c = t.colors;
+    const dots = COLOR_KEYS.map(k => `<span class="color-dot" style="background:${c[k]}"></span>`).join('');
+    return `<div class="preset-card" onclick="loadColorTheme(${i})" style="cursor:pointer">
+      <div style="flex:1;overflow:hidden">
+        <span class="preset-name">${t.name}</span>
+      </div>
+      <div class="color-dots">${dots}</div>
+      <button class="btn-sm btn-secondary" onclick="event.stopPropagation();deleteColorTheme(${i})">&times;</button>
+    </div>`;
+  }).join('');
+}
+
+// Range slider value display
+['corners','borderThickness','logoSize','marginH','marginV','lineSpacing'].forEach(id => {
+  const el = document.getElementById(id);
+  const display = document.getElementById(id + 'Val');
+  el.addEventListener('input', () => { display.textContent = el.value; });
+});
+
+// ============================================================
+// LOTTIE BUILDER
+// ============================================================
+
+class LottieBuilder {
+  constructor(w, h, fr) {
+    this.w = w;
+    this.h = h;
+    this.fr = fr;
+    this.layers = [];
+    this.assets = [];
+    this.fonts = [];
+    this.ip = 0;
+    this.op = 0;
+    this._layerIndex = 0;
+  }
+
+  setDuration(inFrames, holdFrames, outFrames) {
+    this.inFrames = inFrames;
+    this.holdFrames = holdFrames;
+    this.outFrames = outFrames;
+    this.op = inFrames + holdFrames + outFrames;
+  }
+
+  addImageAsset(id, dataUrl, w, h) {
+    this.assets.push({
+      id: id,
+      w: w,
+      h: h,
+      u: '',
+      p: dataUrl,
+      e: 1
+    });
+  }
+
+  addFont(family, weight) {
+    const style = weight >= 700 ? 'Bold' : 'Regular';
+    const fName = family + '-' + style;
+    if (!this.fonts.find(f => f.fName === fName)) {
+      this.fonts.push({
+        fName: fName,
+        fFamily: family,
+        fStyle: style,
+        ascent: 72.6
+      });
+    }
+    return fName;
+  }
+
+  // Create a keyframed property
+  static animatedProp(keyframes) {
+    return { a: 1, k: keyframes };
+  }
+
+  // Create a static property
+  static staticProp(value) {
+    return { a: 0, k: value };
+  }
+
+  // Create a single keyframe entry for multi-dimensional props (position, scale)
+  static kf(frame, value, easing) {
+    if (easing) {
+      return { t: frame, s: value, i: easing.i, o: easing.o };
+    }
+    return { t: frame, s: value };
+  }
+
+  // Build default transform
+  static defaultTransform(opts = {}) {
+    return {
+      o: opts.opacity || LottieBuilder.staticProp(100),
+      r: opts.rotation || LottieBuilder.staticProp(0),
+      p: opts.position || LottieBuilder.staticProp([0, 0, 0]),
+      a: opts.anchor || LottieBuilder.staticProp([0, 0, 0]),
+      s: opts.scale || LottieBuilder.staticProp([100, 100, 100])
+    };
+  }
+
+  addShapeLayer(name, shapes, transform, opts = {}) {
+    const idx = this._layerIndex++;
+    const layer = {
+      ddd: 0,
+      ind: idx,
+      ty: 4,
+      nm: name,
+      sr: 1,
+      ks: transform,
+      ao: 0,
+      shapes: shapes,
+      ip: this.ip,
+      op: this.op,
+      st: 0,
+      bm: 0
+    };
+    if (opts.td !== undefined) layer.td = opts.td;
+    if (opts.tt !== undefined) layer.tt = opts.tt;
+    if (opts.parent !== undefined) layer.parent = opts.parent;
+    this.layers.push(layer);
+    return idx;
+  }
+
+  addTextLayer(name, textData, transform, opts = {}) {
+    const idx = this._layerIndex++;
+    const layer = {
+      ddd: 0,
+      ind: idx,
+      ty: 5,
+      nm: name,
+      sr: 1,
+      ks: transform,
+      ao: 0,
+      t: textData,
+      ip: this.ip,
+      op: this.op,
+      st: 0,
+      bm: 0
+    };
+    if (opts.td !== undefined) layer.td = opts.td;
+    if (opts.tt !== undefined) layer.tt = opts.tt;
+    if (opts.parent !== undefined) layer.parent = opts.parent;
+    this.layers.push(layer);
+    return idx;
+  }
+
+  addImageLayer(name, assetId, transform, opts = {}) {
+    const idx = this._layerIndex++;
+    const layer = {
+      ddd: 0,
+      ind: idx,
+      ty: 2,
+      nm: name,
+      refId: assetId,
+      sr: 1,
+      ks: transform,
+      ao: 0,
+      ip: this.ip,
+      op: this.op,
+      st: 0,
+      bm: 0
+    };
+    if (opts.td !== undefined) layer.td = opts.td;
+    if (opts.tt !== undefined) layer.tt = opts.tt;
+    if (opts.parent !== undefined) layer.parent = opts.parent;
+    this.layers.push(layer);
+    return idx;
+  }
+
+  toJSON() {
+    const json = {
+      v: '5.7.4',
+      fr: this.fr,
+      ip: this.ip,
+      op: this.op,
+      w: this.w,
+      h: this.h,
+      nm: 'Lower Third',
+      ddd: 0,
+      assets: this.assets,
+      layers: this.layers
+    };
+    if (this.fonts.length > 0) {
+      json.fonts = { list: this.fonts };
+    }
+    return json;
+  }
+}
+
+// ============================================================
+// KEYFRAME GENERATION HELPERS
+// ============================================================
+
+// Build in+hold+out keyframes for a property
+// inKFs: array of {pct, value} for animation-in (0-100%)
+// The animation-out is the reverse
+function buildKeyframes(inKFs, inFrames, holdFrames, outFrames, easing) {
+  const kfs = [];
+  const totalOut = inFrames + holdFrames;
+  const e = easing || EASING;
+
+  // Animation-in keyframes (ALL with easing — no terminal keyframes here)
+  for (const kf of inKFs) {
+    kfs.push(LottieBuilder.kf(pctToFrame(kf.pct, inFrames), kf.value, e));
+  }
+
+  // Transition/hold keyframe at end of hold period
+  const finalValue = inKFs[inKFs.length - 1].value;
+  kfs.push(LottieBuilder.kf(totalOut, finalValue, e));
+
+  // Animation-out: reverse of in, skip first (duplicate of transition KF)
+  const reversedIn = [...inKFs].reverse();
+  for (let i = 1; i < reversedIn.length; i++) {
+    const pctFromEnd = 100 - reversedIn[i].pct;
+    const frame = totalOut + pctToFrame(pctFromEnd, outFrames);
+    const isLast = i === reversedIn.length - 1;
+    if (isLast) {
+      kfs.push(LottieBuilder.kf(frame, reversedIn[i].value)); // terminal — no easing
+    } else {
+      kfs.push(LottieBuilder.kf(frame, reversedIn[i].value, e));
+    }
+  }
+
+  return kfs;
+}
+
+// ============================================================
+// SHAPE HELPERS
+// ============================================================
+
+function makeRect(w, h, cornerRadius, position) {
+  return {
+    ty: 'rc',
+    d: 1,
+    s: { a: 0, k: [w, h] },
+    p: { a: 0, k: position || [0, 0] },
+    r: { a: 0, k: cornerRadius || 0 }
+  };
+}
+
+function makeAnimatedRect(sizeKFs, cornerRadius, position) {
+  return {
+    ty: 'rc',
+    d: 1,
+    s: { a: 1, k: sizeKFs },
+    p: { a: 0, k: position || [0, 0] },
+    r: { a: 0, k: cornerRadius || 0 }
+  };
+}
+
+function makeEllipse(w, h, position) {
+  return {
+    ty: 'el',
+    d: 1,
+    s: { a: 0, k: [w, h] },
+    p: { a: 0, k: position || [0, 0] }
+  };
+}
+
+function makeFill(color, opacity) {
+  return {
+    ty: 'fl',
+    c: { a: 0, k: [...color, 1] },
+    o: { a: 0, k: opacity !== undefined ? opacity : 100 },
+    r: 1,
+    bm: 0
+  };
+}
+
+function makeStroke(color, width) {
+  if (!width || width <= 0) return null;
+  return {
+    ty: 'st',
+    c: { a: 0, k: [...color, 1] },
+    o: { a: 0, k: 100 },
+    w: { a: 0, k: width },
+    lc: 1,
+    lj: 1,
+    ml: 4,
+    bm: 0
+  };
+}
+
+function makeGroup(items, transform) {
+  return {
+    ty: 'gr',
+    it: [...items, {
+      ty: 'tr',
+      p: transform?.p || { a: 0, k: [0, 0] },
+      a: transform?.a || { a: 0, k: [0, 0] },
+      s: transform?.s || { a: 0, k: [100, 100] },
+      r: transform?.r || { a: 0, k: 0 },
+      o: transform?.o || { a: 0, k: 100 },
+      sk: { a: 0, k: 0 },
+      sa: { a: 0, k: 0 }
+    }]
+  };
+}
+
+// ============================================================
+// TEXT LAYER HELPER
+// ============================================================
+
+function makeTextData(text, fontFamily, fontSizePx, fontWeight, color, transform, justify) {
+  const displayText = transform === 'uppercase' ? text.toUpperCase() : text;
+  const style = fontWeight >= 700 ? 'Bold' : 'Regular';
+  const fName = fontFamily + '-' + style;
+  // justify: 0=left, 1=right, 2=center
+  return {
+    d: {
+      k: [{
+        s: {
+          s: fontSizePx,
+          f: fName,
+          t: displayText,
+          ca: 0,
+          j: justify || 0,
+          tr: 0,
+          lh: fontSizePx * 1.2,
+          ls: 0,
+          fc: color
+        },
+        t: 0
+      }]
+    },
+    p: {},
+    m: { g: 1, a: { a: 0, k: [0, 0] } },
+    a: []
+  };
+}
+
+// ============================================================
+// STYLE GENERATORS
+// ============================================================
+
+function generateStyle1(builder, cfg) {
+  const { canvasW, canvasH, align, nameText, infoText, fontFamily, baseSize,
+    nameSize, infoSize, nameWeight, infoWeight, nameTransform, infoTransform,
+    nameColor, infoColor, accentColor, bgColor, borderColor, corners,
+    borderThickness, bgEnabled, logoEnabled, logoSize, logoData, logoW, logoH,
+    marginH, marginV, lineSpacing, shadowEnabled } = cfg;
+
+  const inF = builder.inFrames;
+  const holdF = builder.holdFrames;
+  const outF = builder.outFrames;
+
+  const nameSizePx = emToPx(nameSize, baseSize);
+  const infoSizePx = emToPx(infoSize, baseSize);
+  const nameM = measureText(nameText, fontFamily, nameSizePx, nameWeight, nameTransform);
+  const infoM = measureText(infoText, fontFamily, infoSizePx, infoWeight, infoTransform);
+
+  const barWidth = emToPx(0.3, baseSize);
+  const barHeight = emToPx(3.5, baseSize);
+  const textMargin = emToPx(1.2, baseSize);
+  const lineSpacingPx = emToPx(lineSpacing, baseSize);
+  const marginHPx = remToPx(marginH, baseSize);
+  const marginVPx = remToPx(marginV, baseSize);
+  const cornerPx = emToPx(corners, baseSize);
+  const borderPx = borderThickness * baseSize * 0.1;
+  const logoSizePx = emToPx(logoSize, baseSize);
+  const logoMargin = emToPx(0.8, baseSize);
+
+  const accentLottie = hexToLottie(accentColor);
+  const bgLottie = hexToLottie(bgColor);
+  const borderLottie = hexToLottie(borderColor);
+  const nameCLottie = hexToLottie(nameColor);
+  const infoCLottie = hexToLottie(infoColor);
+
+  // Calculate total content width
+  const textBlockW = Math.max(nameM.width, infoM.width) + textMargin + 10;
+  const totalContentW = textBlockW + barWidth + (logoEnabled ? logoSizePx + logoMargin : 0);
+  // Background: CSS uses width: calc(100% + 2em) where 100% = container width (totalContentW)
+  const bgW = totalContentW + emToPx(2, baseSize);
+  const bgH = barHeight + emToPx(2, baseSize);
+
+  // Determine base position based on alignment
+  let baseX, baseY;
+  baseY = canvasH - marginVPx - barHeight / 2;
+
+  const isRight = align === 'right';
+  const isCenter = align === 'center';
+
+  if (isRight) {
+    baseX = canvasW - marginHPx - totalContentW / 2;
+  } else if (isCenter) {
+    baseX = canvasW / 2;
+  } else {
+    baseX = marginHPx + totalContentW / 2;
+  }
+
+  // --- Calculate bar position (needed for logo + text positioning) ---
+  const logoSpace = logoEnabled ? logoSizePx + logoMargin : 0;
+  let barX;
+  if (isRight) {
+    barX = baseX + totalContentW / 2 - logoSpace - barWidth / 2;
+  } else if (isCenter) {
+    barX = baseX - totalContentW / 2 + logoSpace + barWidth / 2;
+  } else {
+    barX = baseX - totalContentW / 2 + logoSpace + barWidth / 2;
+  }
+
+  // --- Logo layer ---
+  if (logoEnabled && logoData) {
+    builder.addImageAsset('logo_0', logoData, logoW, logoH);
+    // Scale logo to fit logoSizePx
+    const scale = (logoSizePx / Math.max(logoW, logoH)) * 100;
+    let logoX;
+    if (isRight) {
+      logoX = baseX + totalContentW / 2 - logoSizePx / 2;
+    } else {
+      logoX = baseX - totalContentW / 2 + logoSizePx / 2;
+    }
+
+    // Logo starts at bar position and slides outward (emerges from behind bar)
+    const logoStartX = barX;
+
+    const posKFs = buildKeyframes([
+      { pct: 0, value: [logoStartX, baseY, 0] },
+      { pct: 55, value: [logoStartX, baseY, 0] },
+      { pct: 100, value: [logoX, baseY, 0] }
+    ], inF, holdF, outF, EASING);
+
+    const opKFs = buildKeyframes([
+      { pct: 0, value: [0] },
+      { pct: 55, value: [0] },
+      { pct: 100, value: [100] }
+    ], inF, holdF, outF, EASING);
+
+    builder.addImageLayer('Logo', 'logo_0', {
+      o: LottieBuilder.animatedProp(opKFs),
+      r: LottieBuilder.staticProp(0),
+      p: LottieBuilder.animatedProp(posKFs),
+      a: LottieBuilder.staticProp([logoW / 2, logoH / 2, 0]),
+      s: LottieBuilder.staticProp([scale, scale, 100])
+    });
+  }
+
+  // --- Text layers with masks (rendered on top, added first) ---
+  let textBaseX;
+  if (isRight) {
+    textBaseX = barX - textMargin;
+  } else if (isCenter) {
+    textBaseX = barX + barWidth / 2 + textBlockW / 2;
+  } else {
+    textBaseX = barX + barWidth / 2 + textMargin;
+  }
+
+  const nameY = baseY - lineSpacingPx / 2 - nameSizePx * 0.1;
+  const infoY = baseY + lineSpacingPx / 2 + infoSizePx * 0.9;
+
+  // Determine text slide direction and justify
+  let nameSlideDir, infoSlideDir, justify;
+  if (isRight) {
+    nameSlideDir = 1;  // slide from right
+    infoSlideDir = 1;
+    justify = 1;       // right justify
+  } else if (isCenter) {
+    nameSlideDir = -1;  // name from left
+    infoSlideDir = 1;   // info from right
+    justify = 2;        // center justify
+  } else {
+    nameSlideDir = -1;  // slide from left
+    infoSlideDir = -1;
+    justify = 0;        // left justify
+  }
+
+  const nameSlideOffset = (nameM.width + 30) * nameSlideDir;
+  const infoSlideOffset = (infoM.width + 30) * infoSlideDir;
+
+  const namePctStart = isCenter ? 50 : 45;
+  const infoPctStart = 50;
+
+  // Name mask layer (matte definition, td:1)
+  // Mask offset depends on text justify: left=+w/2, center=0, right=-w/2
+  const nameMaskOffsetX = isRight ? -nameM.width / 2 : isCenter ? 0 : nameM.width / 2;
+  const nameMaskShapes = [makeGroup([
+    makeRect(nameM.width + 20, nameSizePx + 10, 0),
+    makeFill([1, 1, 1])
+  ])];
+  const nameMaskIdx = builder.addShapeLayer('Name Mask', nameMaskShapes,
+    LottieBuilder.defaultTransform({
+      position: LottieBuilder.staticProp([textBaseX + nameMaskOffsetX, nameY, 0])
+    }),
+    { td: 1 }
+  );
+
+  // Name text layer (masked by above, tt:1)
+  builder.addFont(fontFamily, parseInt(nameWeight));
+  const namePosKFs = buildKeyframes([
+    { pct: 0, value: [textBaseX + nameSlideOffset, nameY, 0] },
+    { pct: namePctStart, value: [textBaseX + nameSlideOffset, nameY, 0] },
+    { pct: 100, value: [textBaseX, nameY, 0] }
+  ], inF, holdF, outF, EASING);
+
+  builder.addTextLayer('Name',
+    makeTextData(nameText, fontFamily, nameSizePx, parseInt(nameWeight), nameCLottie, nameTransform, justify),
+    {
+      o: LottieBuilder.staticProp(100),
+      r: LottieBuilder.staticProp(0),
+      p: LottieBuilder.animatedProp(namePosKFs),
+      a: LottieBuilder.staticProp([0, 0, 0]),
+      s: LottieBuilder.staticProp([100, 100, 100])
+    },
+    { tt: 1 }
+  );
+
+  // Info mask layer
+  const infoMaskOffsetX = isRight ? -infoM.width / 2 : isCenter ? 0 : infoM.width / 2;
+  const infoMaskShapes = [makeGroup([
+    makeRect(infoM.width + 20, infoSizePx + 10, 0),
+    makeFill([1, 1, 1])
+  ])];
+  builder.addShapeLayer('Info Mask', infoMaskShapes,
+    LottieBuilder.defaultTransform({
+      position: LottieBuilder.staticProp([textBaseX + infoMaskOffsetX, infoY, 0])
+    }),
+    { td: 1 }
+  );
+
+  // Info text layer
+  builder.addFont(fontFamily, parseInt(infoWeight));
+  const infoPosKFs = buildKeyframes([
+    { pct: 0, value: [textBaseX + infoSlideOffset, infoY, 0] },
+    { pct: infoPctStart, value: [textBaseX + infoSlideOffset, infoY, 0] },
+    { pct: 100, value: [textBaseX, infoY, 0] }
+  ], inF, holdF, outF, EASING);
+
+  builder.addTextLayer('Info',
+    makeTextData(infoText, fontFamily, infoSizePx, parseInt(infoWeight), infoCLottie, infoTransform, justify),
+    {
+      o: LottieBuilder.staticProp(100),
+      r: LottieBuilder.staticProp(0),
+      p: LottieBuilder.animatedProp(infoPosKFs),
+      a: LottieBuilder.staticProp([0, 0, 0]),
+      s: LottieBuilder.staticProp([100, 100, 100])
+    },
+    { tt: 1 }
+  );
+
+  // --- Accent bar (graph-1) — added after text so it renders behind ---
+  const slashOffset = emToPx(isRight ? -6 : 10, baseSize);
+  const slashPosKFs = buildKeyframes([
+    { pct: 0, value: [barX + slashOffset, baseY, 0] },
+    { pct: 23, value: [barX + slashOffset, baseY, 0] },
+    { pct: 75, value: [barX, baseY, 0] },
+    { pct: 100, value: [barX, baseY, 0] }
+  ], inF, holdF, outF, EASING);
+
+  const slashOpKFs = buildKeyframes([
+    { pct: 0, value: [0] },
+    { pct: 23, value: [0] },
+    { pct: 50, value: [100] },
+    { pct: 100, value: [100] }
+  ], inF, holdF, outF, EASING);
+
+  const barShapes = [makeGroup([
+    makeRect(barWidth, barHeight, 0),
+    makeFill(accentLottie)
+  ])];
+
+  builder.addShapeLayer('Accent Bar', barShapes, {
+    o: LottieBuilder.animatedProp(slashOpKFs),
+    r: LottieBuilder.staticProp(0),
+    p: LottieBuilder.animatedProp(slashPosKFs),
+    a: LottieBuilder.staticProp([0, 0, 0]),
+    s: LottieBuilder.staticProp([100, 100, 100])
+  });
+
+  // --- Background (graph-2) — added last so it renders at the bottom ---
+  if (bgEnabled) {
+    // CSS: position absolute with left:0/right:0 and margin: 0 -1em
+    // Background extends 1em beyond content on each side
+    const bgOverhang = emToPx(1, baseSize);
+    let bgX, anchorX;
+    if (isRight) {
+      // Anchor at right edge, position at content right + overhang
+      bgX = baseX + totalContentW / 2 + bgOverhang;
+      anchorX = bgW / 2;
+    } else if (isCenter) {
+      // Center on content
+      bgX = baseX;
+      anchorX = 0;
+    } else {
+      // Anchor at left edge, position at content left - overhang
+      bgX = baseX - totalContentW / 2 - bgOverhang;
+      anchorX = -bgW / 2;
+    }
+
+    // Animate width from 0 to full
+    const bgSizeKFs = buildKeyframes([
+      { pct: 0, value: [0, bgH] },
+      { pct: 30, value: [0, bgH] },
+      { pct: 100, value: [bgW, bgH] }
+    ], inF, holdF, outF, EASING);
+
+    const bgShapeItems = [
+      makeAnimatedRect(bgSizeKFs, cornerPx * 1.1),
+      makeFill(bgLottie)
+    ];
+    if (borderPx > 0) {
+      const stroke = makeStroke(borderLottie, borderPx);
+      if (stroke) bgShapeItems.push(stroke);
+    }
+
+    builder.addShapeLayer('Background', [makeGroup(bgShapeItems)], {
+      o: LottieBuilder.staticProp(100),
+      r: LottieBuilder.staticProp(0),
+      p: LottieBuilder.staticProp([bgX, baseY, 0]),
+      a: LottieBuilder.staticProp([anchorX, 0, 0]),
+      s: LottieBuilder.staticProp([100, 100, 100])
+    });
+  }
+}
+
+function generateStyle2(builder, cfg) {
+  const { canvasW, canvasH, align, nameText, infoText, fontFamily, baseSize,
+    nameSize, infoSize, nameWeight, infoWeight, nameTransform, infoTransform,
+    nameColor, infoColor, accentColor, bgColor, borderColor, corners,
+    borderThickness, logoEnabled, logoSize, logoData, logoW, logoH,
+    marginH, marginV, lineSpacing, shadowEnabled } = cfg;
+
+  const inF = builder.inFrames;
+  const holdF = builder.holdFrames;
+  const outF = builder.outFrames;
+
+  const nameSizePx = emToPx(nameSize, baseSize);
+  const infoSizePx = emToPx(infoSize, baseSize);
+  const nameM = measureText(nameText, fontFamily, nameSizePx, nameWeight, nameTransform);
+  const infoM = measureText(infoText, fontFamily, infoSizePx, infoWeight, infoTransform);
+
+  const paddingX = emToPx(1.3, baseSize);
+  const paddingY = emToPx(0.5, baseSize);
+  const lineSpacingPx = emToPx(lineSpacing, baseSize);
+  const marginHPx = remToPx(marginH, baseSize);
+  const marginVPx = remToPx(marginV, baseSize);
+  const cornerPx = emToPx(corners, baseSize);
+  const borderPx = borderThickness * baseSize * 0.1;
+  const logoSizePx = emToPx(logoSize, baseSize);
+  const logoMargin = emToPx(0.2, baseSize);
+
+  const accentLottie = hexToLottie(accentColor);
+  const bgLottie = hexToLottie(bgColor);
+  const borderLottie = hexToLottie(borderColor);
+  const nameCLottie = hexToLottie(nameColor);
+  const infoCLottie = hexToLottie(infoColor);
+
+  const isRight = align === 'right';
+  const isCenter = align === 'center';
+
+  const nameBoxW = nameM.width + paddingX * 2;
+  const nameBoxH = nameSizePx + paddingY * 2;
+  const infoBoxW = infoM.width + paddingX * 2;
+  const infoBoxH = infoSizePx + paddingY * 2;
+
+  const totalH = nameBoxH + lineSpacingPx + infoBoxH;
+  let baseX;
+  const baseY = canvasH - marginVPx - totalH / 2;
+
+  if (isRight) {
+    baseX = canvasW - marginHPx;
+  } else if (isCenter) {
+    baseX = canvasW / 2;
+  } else {
+    baseX = marginHPx;
+  }
+
+  // Logo — calculate position and shift baseX, but add layers later
+  let _logoX, _logoBgW, _logoBgH, _logoSlideOffset, _logoScale;
+  if (logoEnabled && logoData) {
+    _logoBgW = logoSizePx + emToPx(1.2, baseSize);
+    _logoBgH = logoSizePx + emToPx(0.8, baseSize);
+    const logoGap = lineSpacingPx;
+    const maxBoxW = Math.max(nameBoxW, infoBoxW);
+    if (isRight) {
+      _logoX = baseX - _logoBgW / 2 - logoGap;
+      baseX -= _logoBgW + logoGap * 2;
+    } else if (isCenter) {
+      // Place logo to the left of the widest box
+      _logoX = baseX - maxBoxW / 2 - logoGap - _logoBgW / 2;
+      // Don't shift baseX — text stays centered
+    } else {
+      _logoX = baseX + _logoBgW / 2 + logoGap;
+      baseX += _logoBgW + logoGap * 2;
+    }
+    _logoSlideOffset = totalH + _logoBgH;
+    _logoScale = (logoSizePx / Math.max(logoW, logoH)) * 100;
+  }
+
+  // Background/mask X positions (center of each box)
+  let nameX;
+  if (isRight) nameX = baseX - nameBoxW / 2;
+  else if (isCenter) nameX = baseX;
+  else nameX = baseX + nameBoxW / 2;
+
+  let infoX;
+  if (isRight) infoX = baseX - infoBoxW / 2;
+  else if (isCenter) infoX = baseX;
+  else infoX = baseX + infoBoxW / 2;
+
+  // Text X positions (at inner edge with padding for left/right, center of box for center)
+  let nameTextX, infoTextX;
+  if (isRight) {
+    nameTextX = baseX - paddingX;
+    infoTextX = baseX - paddingX;
+  } else if (isCenter) {
+    nameTextX = nameX;
+    infoTextX = infoX;
+  } else {
+    nameTextX = baseX + paddingX;
+    infoTextX = baseX + paddingX;
+  }
+
+  // Background/mask Y positions (properly spaced, no text baseline adjustments)
+  const nameBgY = baseY - lineSpacingPx / 2 - infoBoxH / 2;
+  const infoBgY = baseY + nameBoxH / 2 + lineSpacingPx / 2;
+
+  // Text Y positions (centered in their background with baseline offset)
+  const nameTextY = nameBgY + nameSizePx * 0.35;
+  const infoTextY = infoBgY + infoSizePx * 0.35;
+
+  // --- Logo image (added first = renders on top) ---
+  if (logoEnabled && logoData) {
+    builder.addImageAsset('logo_0', logoData, logoW, logoH);
+    const logoPosKFs = buildKeyframes([
+      { pct: 0, value: [_logoX, baseY + _logoSlideOffset, 0] },
+      { pct: 50, value: [_logoX, baseY + _logoSlideOffset, 0] },
+      { pct: 100, value: [_logoX, baseY, 0] }
+    ], inF, holdF, outF, EASING);
+    const logoOpKFs = buildKeyframes([
+      { pct: 0, value: [0] }, { pct: 50, value: [0] }, { pct: 100, value: [100] }
+    ], inF, holdF, outF, EASING);
+    builder.addImageLayer('Logo', 'logo_0', {
+      o: LottieBuilder.animatedProp(logoOpKFs),
+      r: LottieBuilder.staticProp(0),
+      p: LottieBuilder.animatedProp(logoPosKFs),
+      a: LottieBuilder.staticProp([logoW / 2, logoH / 2, 0]),
+      s: LottieBuilder.staticProp([_logoScale, _logoScale, 100])
+    });
+  }
+
+  // --- Text layers with masks ---
+  let justify = isRight ? 1 : isCenter ? 2 : 0;
+  const namePctStart = isCenter ? 50 : 45;
+
+  const nameSlideDir = isRight ? 1 : -1;
+  const infoSlideDir = isCenter ? 1 : nameSlideDir;
+  const nameSlideOffset = nameBoxW * 1.02 * nameSlideDir;
+  const infoSlideOffset = infoBoxW * 1.02 * infoSlideDir;
+
+  // Name mask
+  builder.addShapeLayer('Name Mask', [makeGroup([
+    makeRect(nameBoxW, nameBoxH, 0), makeFill([1, 1, 1])
+  ])], LottieBuilder.defaultTransform({
+    position: LottieBuilder.staticProp([nameX, nameBgY, 0])
+  }), { td: 1 });
+
+  // Name text
+  builder.addFont(fontFamily, parseInt(nameWeight));
+  const namePosKFs = buildKeyframes([
+    { pct: 0, value: [nameTextX + nameSlideOffset, nameTextY, 0] },
+    { pct: namePctStart, value: [nameTextX + nameSlideOffset, nameTextY, 0] },
+    { pct: 100, value: [nameTextX, nameTextY, 0] }
+  ], inF, holdF, outF, EASING);
+
+  builder.addTextLayer('Name',
+    makeTextData(nameText, fontFamily, nameSizePx, parseInt(nameWeight), nameCLottie, nameTransform, justify),
+    {
+      o: LottieBuilder.staticProp(100), r: LottieBuilder.staticProp(0),
+      p: LottieBuilder.animatedProp(namePosKFs),
+      a: LottieBuilder.staticProp([0, 0, 0]), s: LottieBuilder.staticProp([100, 100, 100])
+    }, { tt: 1 }
+  );
+
+  // Info mask
+  builder.addShapeLayer('Info Mask', [makeGroup([
+    makeRect(infoBoxW, infoBoxH, 0), makeFill([1, 1, 1])
+  ])], LottieBuilder.defaultTransform({
+    position: LottieBuilder.staticProp([infoX, infoBgY, 0])
+  }), { td: 1 });
+
+  // Info text
+  builder.addFont(fontFamily, parseInt(infoWeight));
+  const infoPosKFs = buildKeyframes([
+    { pct: 0, value: [infoTextX + infoSlideOffset, infoTextY, 0] },
+    { pct: 50, value: [infoTextX + infoSlideOffset, infoTextY, 0] },
+    { pct: 100, value: [infoTextX, infoTextY, 0] }
+  ], inF, holdF, outF, EASING);
+
+  builder.addTextLayer('Info',
+    makeTextData(infoText, fontFamily, infoSizePx, parseInt(infoWeight), infoCLottie, infoTransform, justify),
+    {
+      o: LottieBuilder.staticProp(100), r: LottieBuilder.staticProp(0),
+      p: LottieBuilder.animatedProp(infoPosKFs),
+      a: LottieBuilder.staticProp([0, 0, 0]), s: LottieBuilder.staticProp([100, 100, 100])
+    }, { tt: 1 }
+  );
+
+  // --- Name background rect (added after text so it renders behind) ---
+  // Animate height from 0 to full (vertical expansion from center), matching text slide-in timing
+  const nameBgSizeKFs = buildKeyframes([
+    { pct: 0, value: [nameBoxW, 0] },
+    { pct: namePctStart, value: [nameBoxW, 0] },
+    { pct: 100, value: [nameBoxW, nameBoxH] }
+  ], inF, holdF, outF, EASING);
+
+  const nameRectShapes = [makeGroup([
+    makeAnimatedRect(nameBgSizeKFs, cornerPx * 1.1),
+    makeFill(accentLottie),
+    ...(borderPx > 0 ? [makeStroke(borderLottie, borderPx)].filter(Boolean) : [])
+  ])];
+
+  builder.addShapeLayer('Name BG', nameRectShapes, LottieBuilder.defaultTransform({
+    position: LottieBuilder.staticProp([nameX, nameBgY, 0])
+  }));
+
+  // --- Info background rect (added last so it renders at the bottom) ---
+  const infoBgSizeKFs = buildKeyframes([
+    { pct: 0, value: [infoBoxW, 0] },
+    { pct: 50, value: [infoBoxW, 0] },
+    { pct: 100, value: [infoBoxW, infoBoxH] }
+  ], inF, holdF, outF, EASING);
+
+  const infoRectShapes = [makeGroup([
+    makeAnimatedRect(infoBgSizeKFs, cornerPx * 1.1),
+    makeFill(bgLottie),
+    ...(borderPx > 0 ? [makeStroke(borderLottie, borderPx)].filter(Boolean) : [])
+  ])];
+
+  builder.addShapeLayer('Info BG', infoRectShapes, LottieBuilder.defaultTransform({
+    position: LottieBuilder.staticProp([infoX, infoBgY, 0])
+  }));
+
+  // --- Logo background rect (added last = renders behind everything) ---
+  if (logoEnabled && logoData) {
+    const logoBgScaleKFs = buildKeyframes([
+      { pct: 0, value: [0, 0, 100] },
+      { pct: 45, value: [100, 100, 100] },
+      { pct: 100, value: [100, 100, 100] }
+    ], inF, holdF, outF, EASING);
+
+    builder.addShapeLayer('Logo BG', [makeGroup([
+      makeRect(_logoBgW, _logoBgH, cornerPx),
+      makeFill(accentLottie),
+      ...(borderPx > 0 ? [makeStroke(borderLottie, borderPx)].filter(Boolean) : [])
+    ])], {
+      o: LottieBuilder.staticProp(100),
+      r: LottieBuilder.staticProp(0),
+      p: LottieBuilder.staticProp([_logoX, baseY, 0]),
+      a: LottieBuilder.staticProp([0, 0, 0]),
+      s: LottieBuilder.animatedProp(logoBgScaleKFs)
+    });
+  }
+}
+
+function generateStyle3(builder, cfg) {
+  const { canvasW, canvasH, align, nameText, infoText, fontFamily, baseSize,
+    nameSize, infoSize, nameWeight, infoWeight, nameTransform, infoTransform,
+    nameColor, infoColor, accentColor, bgColor, borderColor, corners,
+    borderThickness, bgEnabled, logoEnabled, logoSize, logoData, logoW, logoH,
+    marginH, marginV, lineSpacing, shadowEnabled } = cfg;
+
+  const inF = builder.inFrames;
+  const holdF = builder.holdFrames;
+  const outF = builder.outFrames;
+
+  const nameSizePx = emToPx(nameSize, baseSize);
+  const infoSizePx = emToPx(infoSize, baseSize);
+  const nameM = measureText(nameText, fontFamily, nameSizePx, nameWeight, nameTransform);
+  const infoM = measureText(infoText, fontFamily, infoSizePx, infoWeight, infoTransform);
+
+  const circleSize = emToPx(5.5, baseSize);
+  const lineSpacingPx = emToPx(lineSpacing, baseSize);
+  const marginHPx = remToPx(marginH, baseSize);
+  const marginVPx = remToPx(marginV, baseSize);
+  const cornerPx = emToPx(corners, baseSize);
+  const borderPx = borderThickness * baseSize * 0.1;
+  const logoSizePx = emToPx(logoSize, baseSize);
+
+  const accentLottie = hexToLottie(accentColor);
+  const bgLottie = hexToLottie(bgColor);
+  const borderLottie = hexToLottie(borderColor);
+  const nameCLottie = hexToLottie(nameColor);
+  const infoCLottie = hexToLottie(infoColor);
+
+  const isRight = align === 'right';
+  const isCenter = align === 'center';
+
+  const textBlockW = Math.max(nameM.width, infoM.width) + 20;
+  const bgBarW = textBlockW + emToPx(1, baseSize);
+  const bgBarH = circleSize - emToPx(0.5, baseSize);
+
+  let circleX, baseY;
+  baseY = canvasH - marginVPx - circleSize / 2;
+
+  if (isRight) {
+    circleX = canvasW - marginHPx - circleSize / 2;
+  } else if (isCenter) {
+    // Center the whole composition (logo+bar or just bar)
+    const hasLogoCheck = logoEnabled && logoData;
+    const totalW = (hasLogoCheck ? circleSize : 0) + bgBarW;
+    circleX = canvasW / 2 - totalW / 2 + circleSize / 2;
+  } else {
+    circleX = marginHPx + circleSize / 2;
+  }
+
+  // --- Logo image (added first = renders on top of Logo BG) ---
+  const hasLogo = logoEnabled && logoData;
+  if (hasLogo) {
+    const rotDir = isRight ? -90 : 90;
+    const logoBgRotKFs = buildKeyframes([
+      { pct: 0, value: [rotDir] },
+      { pct: 40, value: [0] },
+      { pct: 100, value: [0] }
+    ], inF, holdF, outF, EASING);
+
+    builder.addImageAsset('logo_0', logoData, logoW, logoH);
+    const maxDim = emToPx(4.5, baseSize);
+    const scale = (maxDim / Math.max(logoW, logoH)) * 100;
+
+    builder.addImageLayer('Logo', 'logo_0', {
+      o: LottieBuilder.staticProp(100),
+      r: LottieBuilder.animatedProp(logoBgRotKFs),
+      p: LottieBuilder.staticProp([circleX, baseY, 0]),
+      a: LottieBuilder.staticProp([logoW / 2, logoH / 2, 0]),
+      s: LottieBuilder.animatedProp(
+        buildKeyframes([
+          { pct: 0, value: [0, 0, 100] },
+          { pct: 40, value: [scale, scale, 100] },
+          { pct: 100, value: [scale, scale, 100] }
+        ], inF, holdF, outF, EASING)
+      )
+    });
+  }
+
+  // --- Text layers (vertical slide) — added before background so they render on top ---
+  let textBaseX;
+  const textOffset = emToPx(0.75, baseSize);
+  if (hasLogo) {
+    textBaseX = isRight ? circleX - circleSize / 2 - textOffset : circleX + circleSize / 2 + textOffset;
+  } else if (isCenter) {
+    const totalW = bgBarW;
+    textBaseX = canvasW / 2 - totalW / 2 + textOffset;
+  } else {
+    textBaseX = isRight ? canvasW - marginHPx - textOffset : marginHPx + textOffset;
+  }
+
+  const nameY = baseY - lineSpacingPx / 2 - nameSizePx * 0.1;
+  const infoY = baseY + lineSpacingPx / 2 + infoSizePx * 0.9;
+  const slideAmount = circleSize * 1.02;
+  const justify = isRight ? 1 : 0;
+
+  // Name mask
+  builder.addShapeLayer('Name Mask', [makeGroup([
+    makeRect(nameM.width + 20, nameSizePx + 10, 0), makeFill([1, 1, 1])
+  ])], LottieBuilder.defaultTransform({
+    position: LottieBuilder.staticProp([textBaseX + (isRight ? -nameM.width/2 : nameM.width/2), nameY, 0])
+  }), { td: 1 });
+
+  // Name text - slides up from bottom
+  builder.addFont(fontFamily, parseInt(nameWeight));
+  const namePosKFs = buildKeyframes([
+    { pct: 0, value: [textBaseX, nameY + slideAmount, 0] },
+    { pct: 70, value: [textBaseX, nameY + slideAmount, 0] },
+    { pct: 100, value: [textBaseX, nameY, 0] }
+  ], inF, holdF, outF, EASING);
+
+  builder.addTextLayer('Name',
+    makeTextData(nameText, fontFamily, nameSizePx, parseInt(nameWeight), nameCLottie, nameTransform, justify),
+    {
+      o: LottieBuilder.staticProp(100), r: LottieBuilder.staticProp(0),
+      p: LottieBuilder.animatedProp(namePosKFs),
+      a: LottieBuilder.staticProp([0, 0, 0]), s: LottieBuilder.staticProp([100, 100, 100])
+    }, { tt: 1 }
+  );
+
+  // Info mask
+  builder.addShapeLayer('Info Mask', [makeGroup([
+    makeRect(infoM.width + 20, infoSizePx + 10, 0), makeFill([1, 1, 1])
+  ])], LottieBuilder.defaultTransform({
+    position: LottieBuilder.staticProp([textBaseX + (isRight ? -infoM.width/2 : infoM.width/2), infoY, 0])
+  }), { td: 1 });
+
+  // Info text - slides down from top
+  builder.addFont(fontFamily, parseInt(infoWeight));
+  const infoPosKFs = buildKeyframes([
+    { pct: 0, value: [textBaseX, infoY - slideAmount, 0] },
+    { pct: 70, value: [textBaseX, infoY - slideAmount, 0] },
+    { pct: 100, value: [textBaseX, infoY, 0] }
+  ], inF, holdF, outF, EASING);
+
+  builder.addTextLayer('Info',
+    makeTextData(infoText, fontFamily, infoSizePx, parseInt(infoWeight), infoCLottie, infoTransform, justify),
+    {
+      o: LottieBuilder.staticProp(100), r: LottieBuilder.staticProp(0),
+      p: LottieBuilder.animatedProp(infoPosKFs),
+      a: LottieBuilder.staticProp([0, 0, 0]), s: LottieBuilder.staticProp([100, 100, 100])
+    }, { tt: 1 }
+  );
+
+  // --- Logo BG (rounded square, behind text but in front of bg bar) ---
+  if (hasLogo) {
+    const rotDir = isRight ? -90 : 90;
+    const logoBgScaleKFs = buildKeyframes([
+      { pct: 0, value: [0, 0, 100] },
+      { pct: 40, value: [100, 100, 100] },
+      { pct: 100, value: [100, 100, 100] }
+    ], inF, holdF, outF, EASING);
+    const logoBgRotKFs = buildKeyframes([
+      { pct: 0, value: [rotDir] },
+      { pct: 40, value: [0] },
+      { pct: 100, value: [0] }
+    ], inF, holdF, outF, EASING);
+
+    builder.addShapeLayer('Logo BG', [makeGroup([
+      makeRect(circleSize, circleSize, cornerPx),
+      makeFill(accentLottie),
+      ...(borderPx > 0 ? [makeStroke(borderLottie, borderPx)].filter(Boolean) : [])
+    ])], {
+      o: LottieBuilder.staticProp(100),
+      r: LottieBuilder.animatedProp(logoBgRotKFs),
+      p: LottieBuilder.staticProp([circleX, baseY, 0]),
+      a: LottieBuilder.staticProp([0, 0, 0]),
+      s: LottieBuilder.animatedProp(logoBgScaleKFs)
+    });
+  }
+
+  // --- Background bar (graph-2) — added last so it renders behind everything ---
+  if (bgEnabled) {
+    let bgEdgeX, bgCenterEnd;
+    if (hasLogo) {
+      bgEdgeX = isRight ? circleX - circleSize / 2 : circleX + circleSize / 2;
+    } else if (isCenter) {
+      bgEdgeX = canvasW / 2 - bgBarW / 2;
+    } else {
+      bgEdgeX = isRight ? canvasW - marginHPx : marginHPx;
+    }
+    bgCenterEnd = isCenter && !hasLogo ? canvasW / 2 : (isRight ? bgEdgeX - bgBarW / 2 : bgEdgeX + bgBarW / 2);
+
+    const bgSizeKFs = buildKeyframes([
+      { pct: 0, value: [0, bgBarH] },
+      { pct: 40, value: [0, bgBarH] },
+      { pct: 100, value: [bgBarW, bgBarH] }
+    ], inF, holdF, outF, EASING);
+
+    const bgPosKFs = buildKeyframes([
+      { pct: 0, value: [bgEdgeX, baseY, 0] },
+      { pct: 40, value: [bgEdgeX, baseY, 0] },
+      { pct: 100, value: [bgCenterEnd, baseY, 0] }
+    ], inF, holdF, outF, EASING);
+
+    const bgShapeItems = [
+      makeAnimatedRect(bgSizeKFs, cornerPx * 1.1),
+      makeFill(bgLottie),
+      ...(borderPx > 0 ? [makeStroke(borderLottie, borderPx)].filter(Boolean) : [])
+    ];
+
+    builder.addShapeLayer('Background Bar', [makeGroup(bgShapeItems)], {
+      o: LottieBuilder.staticProp(100),
+      r: LottieBuilder.staticProp(0),
+      p: LottieBuilder.animatedProp(bgPosKFs),
+      a: LottieBuilder.staticProp([0, 0, 0]),
+      s: LottieBuilder.staticProp([100, 100, 100])
+    });
+  }
+}
+
+// ============================================================
+// MAIN GENERATION + PREVIEW
+// ============================================================
+
+let currentAnim = null;
+let currentJSON = null;
+
+function generate() {
+  const cfg = getConfig();
+  const fr = 30;
+  const inFrames = Math.round(cfg.animDuration * fr);
+  const holdFrames = Math.round(cfg.holdDuration * fr);
+  const outFrames = inFrames;
+
+  const builder = new LottieBuilder(cfg.canvasW, cfg.canvasH, fr);
+  builder.setDuration(inFrames, holdFrames, outFrames);
+
+  switch (cfg.style) {
+    case '1': generateStyle1(builder, cfg); break;
+    case '2': generateStyle2(builder, cfg); break;
+    case '3': generateStyle3(builder, cfg); break;
+  }
+
+  currentJSON = builder.toJSON();
+
+  // Update preview
+  const container = document.getElementById('preview-container');
+  if (currentAnim) {
+    currentAnim.destroy();
+    currentAnim = null;
+  }
+
+  resizePreview();
+
+  currentAnim = lottie.loadAnimation({
+    container: container,
+    renderer: 'svg',
+    loop: true,
+    autoplay: true,
+    animationData: JSON.parse(JSON.stringify(currentJSON))
+  });
+
+  document.getElementById('btnDownload').disabled = false;
+  document.getElementById('btnPlayPause').disabled = false;
+  document.getElementById('seekBar').disabled = false;
+  document.getElementById('btnPlayPause').textContent = '⏸';
+
+  // Sync seek bar with animation
+  currentAnim.addEventListener('enterFrame', (e) => {
+    const bar = document.getElementById('seekBar');
+    bar.max = currentAnim.totalFrames;
+    bar.value = e.currentTime;
+    document.getElementById('frameDisplay').textContent =
+      Math.round(e.currentTime) + ' / ' + Math.round(currentAnim.totalFrames);
+  });
+
+  document.getElementById('status').textContent =
+    `Generated: ${currentJSON.layers.length} layers, ${currentJSON.op} frames (${(currentJSON.op / fr).toFixed(1)}s)`;
+}
+
+function download() {
+  if (!currentJSON) return;
+  const blob = new Blob([JSON.stringify(currentJSON, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'lower-third.json';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// Resize preview container to fit available space
+function resizePreview() {
+  const container = document.getElementById('preview-container');
+  const cfg = getConfig();
+  // Reset container size so parent can shrink freely
+  container.style.width = '0';
+  container.style.height = '0';
+  const maxW = container.parentElement.clientWidth - 40;
+  const maxH = container.parentElement.clientHeight - 100;
+  const scale = Math.min(maxW / cfg.canvasW, maxH / cfg.canvasH, 1);
+  container.style.width = (cfg.canvasW * scale) + 'px';
+  container.style.height = (cfg.canvasH * scale) + 'px';
+  if (currentAnim) currentAnim.resize();
+}
+
+// Debounced auto-generation
+let _generateTimer = null;
+function scheduleGenerate(delay) {
+  if (_generateTimer) clearTimeout(_generateTimer);
+  _generateTimer = setTimeout(() => {
+    _generateTimer = null;
+    generate();
+  }, delay);
+}
+
+// Event listeners
+document.getElementById('btnDownload').addEventListener('click', download);
+let isPlaying = true;
+document.getElementById('btnPlayPause').addEventListener('click', () => {
+  if (!currentAnim) return;
+  if (isPlaying) {
+    currentAnim.pause();
+    isPlaying = false;
+    document.getElementById('btnPlayPause').textContent = '▶';
+  } else {
+    currentAnim.play();
+    isPlaying = true;
+    document.getElementById('btnPlayPause').textContent = '⏸';
+  }
+});
+document.getElementById('seekBar').addEventListener('input', (e) => {
+  if (!currentAnim) return;
+  const frame = parseFloat(e.target.value);
+  if (isPlaying) {
+    currentAnim.goToAndPlay(frame, true);
+  } else {
+    currentAnim.goToAndStop(frame, true);
+  }
+});
+
+// Live preview: auto-regenerate on any input change
+// Text inputs use longer debounce (wait for user to stop typing)
+['nameText', 'infoText'].forEach(id => {
+  document.getElementById(id).addEventListener('input', () => scheduleGenerate(500));
+});
+
+// All other inputs: immediate/short debounce
+['canvasW', 'canvasH', 'styleType', 'alignment', 'fontFamily', 'baseSize',
+ 'nameSize', 'infoSize', 'nameWeight', 'infoWeight', 'nameTransform', 'infoTransform',
+ 'nameColor', 'infoColor', 'accentColor', 'bgColor', 'borderColor',
+ 'corners', 'borderThickness', 'bgEnabled', 'shadowEnabled',
+ 'logoEnabled', 'logoSize', 'animDuration', 'holdDuration',
+ 'marginH', 'marginV', 'lineSpacing'].forEach(id => {
+  const el = document.getElementById(id);
+  el.addEventListener('input', () => scheduleGenerate(100));
+  el.addEventListener('change', () => scheduleGenerate(100));
+});
+
+
+// Window resize handler
+let _resizeTimer = null;
+window.addEventListener('resize', () => {
+  if (_resizeTimer) clearTimeout(_resizeTimer);
+  _resizeTimer = setTimeout(resizePreview, 150);
+});
+
+// Preset library button
+document.getElementById('btnSavePreset').addEventListener('click', () => savePreset());
+
+// Color library button
+document.getElementById('btnSaveColors').addEventListener('click', () => saveColorTheme());
+
+// Auto-generate on load after fonts are ready
+document.fonts.ready.then(() => {
+  setTimeout(generate, 200);
+});
+loadPresetsFromDisk();
+loadColorThemesFromDisk();
+loadLogoList();
+</script>
+</body>
+</html>
