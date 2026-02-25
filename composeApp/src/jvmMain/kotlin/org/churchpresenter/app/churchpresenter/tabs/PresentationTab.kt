@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -335,7 +336,16 @@ fun PresentationTab(
                         slide = slide,
                         slideNumber = index + 1,
                         isSelected = viewModel.selectedSlideIndex == index,
-                        onClick = { viewModel.selectSlide(index) }
+                        onClick = { viewModel.selectSlide(index) },
+                        onDoubleClick = {
+                            viewModel.selectSlide(index)
+                            if (presenterManager != null) {
+                                val selectedSlide = viewModel.slides.getOrNull(index)
+                                presenterManager.setSelectedSlide(selectedSlide)
+                                presenterManager.setPresentingMode(Presenting.PRESENTATION)
+                                presenterManager.setShowPresenterWindow(true)
+                            }
+                        }
                     )
                 }
             }
@@ -413,11 +423,12 @@ private fun SlideThumbnail(
     slide: androidx.compose.ui.graphics.ImageBitmap,
     slideNumber: Int,
     isSelected: Boolean,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    onDoubleClick: () -> Unit = {}
 ) {
     Column(
         modifier = Modifier
-            .clickable(onClick = onClick)
+            .combinedClickable(onClick = onClick, onDoubleClick = onDoubleClick)
             .border(
                 width = if (isSelected) 3.dp else 1.dp,
                 color = if (isSelected) MaterialTheme.colorScheme.primary

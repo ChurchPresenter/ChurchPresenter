@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -288,7 +289,13 @@ fun PicturesTab(
                                         else MaterialTheme.colorScheme.outline,
                                 shape = RoundedCornerShape(8.dp)
                             )
-                            .clickable { viewModel.selectImage(viewModel.images.indexOf(imageFile)) }
+                            .combinedClickable(
+                                onClick = { viewModel.selectImage(viewModel.images.indexOf(imageFile)) },
+                                onDoubleClick = {
+                                    viewModel.selectImage(viewModel.images.indexOf(imageFile))
+                                    if (presenterManager != null) viewModel.goLive(presenterManager)
+                                }
+                            )
                             .padding(4.dp)
                     ) {
                         viewModel.thumbnails[imageFile]?.let { bitmap ->
