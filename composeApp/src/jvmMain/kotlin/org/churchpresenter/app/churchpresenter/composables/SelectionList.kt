@@ -3,6 +3,7 @@ package org.churchpresenter.app.churchpresenter.composables
 import androidx.compose.foundation.background
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -31,10 +32,11 @@ fun SelectionList(
     SelectionListWithIndex(
         modifier = modifier,
         list = list,
-        selectedIndex = selectedIndex
-    ) { index, item ->
-        onItemSelected(item)
-    }
+        selectedIndex = selectedIndex,
+        onItemSelected = { _, item ->
+            onItemSelected(item)
+        }
+    )
 }
 
 // New version that passes both index and item
@@ -43,7 +45,8 @@ fun SelectionListWithIndex(
     modifier: Modifier = Modifier,
     list: List<String>,
     selectedIndex: Int = 0,
-    onItemSelected: (Int, String) -> Unit
+    onItemSelected: (Int, String) -> Unit,
+    onItemDoubleClicked: ((Int, String) -> Unit)? = null
 ) {
     val listState = rememberLazyListState()
 
@@ -82,12 +85,19 @@ fun SelectionListWithIndex(
                             else
                                 MaterialTheme.colorScheme.surface
                         )
-                        .clickable {
-                            // Only invoke callback if index is valid
-                            if (index >= 0 && index < list.size) {
-                                onItemSelected(index, item)
+                        .combinedClickable(
+                            onClick = {
+                                if (index >= 0 && index < list.size) {
+                                    onItemSelected(index, item)
+                                }
+                            },
+                            onDoubleClick = {
+                                if (index >= 0 && index < list.size) {
+                                    onItemSelected(index, item)
+                                    onItemDoubleClicked?.invoke(index, item)
+                                }
                             }
-                        }
+                        )
                         .padding(6.dp),
                     color = MaterialTheme.colorScheme.onSurface,
                 )

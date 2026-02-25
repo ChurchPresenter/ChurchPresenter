@@ -3,6 +3,7 @@ package org.churchpresenter.app.churchpresenter.tabs
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -404,10 +405,17 @@ fun SongsTab(
                                             MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
                                         else Color.Transparent
                                     )
-                                    .clickable {
-                                        viewModel.selectSection(sectionIndex)
-                                        onSongItemSelected(section)
-                                    }
+                                    .combinedClickable(
+                                        onClick = {
+                                            viewModel.selectSection(sectionIndex)
+                                            onSongItemSelected(section)
+                                        },
+                                        onDoubleClick = {
+                                            viewModel.selectSection(sectionIndex)
+                                            onSongItemSelected(section)
+                                            onPresenting(Presenting.LYRICS)
+                                        }
+                                    )
                                     .padding(8.dp)
                             ) {
                                 section.lines.forEachIndexed { lineIndex, line ->

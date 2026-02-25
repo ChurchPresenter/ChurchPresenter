@@ -309,14 +309,15 @@ fun BibleTab(
                     }
                     SelectionListWithIndex(
                         list = filteredBooks,
-                        selectedIndex = filteredBooks.indexOf(books.getOrNull(selectedBookIndex) ?: "").coerceAtLeast(0)
-                    ) { index, _ ->
-                        val bookName = filteredBooks.getOrNull(index)
-                        bookName?.let {
-                            val realIndex = books.indexOf(it)
-                            if (realIndex >= 0) viewModel.selectBook(realIndex)
+                        selectedIndex = filteredBooks.indexOf(books.getOrNull(selectedBookIndex) ?: "").coerceAtLeast(0),
+                        onItemSelected = { index, _ ->
+                            val bookName = filteredBooks.getOrNull(index)
+                            bookName?.let {
+                                val realIndex = books.indexOf(it)
+                                if (realIndex >= 0) viewModel.selectBook(realIndex)
+                            }
                         }
-                    }
+                    )
                 }
 
                 Column(modifier = Modifier.width(120.dp).padding(end = 8.dp)) {
@@ -325,11 +326,12 @@ fun BibleTab(
                     }
                     SelectionListWithIndex(
                         list = filteredChapters,
-                        selectedIndex = filteredChapters.indexOf(selectedChapter.toString()).coerceAtLeast(0)
-                    ) { index, _ ->
-                        val chapterStr = filteredChapters.getOrNull(index)
-                        chapterStr?.toIntOrNull()?.let { chapter -> viewModel.selectChapter(chapter) }
-                    }
+                        selectedIndex = filteredChapters.indexOf(selectedChapter.toString()).coerceAtLeast(0),
+                        onItemSelected = { index, _ ->
+                            val chapterStr = filteredChapters.getOrNull(index)
+                            chapterStr?.toIntOrNull()?.let { chapter -> viewModel.selectChapter(chapter) }
+                        }
+                    )
                 }
 
                 // Verses column
@@ -380,14 +382,18 @@ fun BibleTab(
                             selectedIndex = if (filteredVerses.isEmpty()) -1 else {
                                 val currentVerse = verses.getOrNull(selectedVerseIndex)
                                 filteredVerses.indexOf(currentVerse).coerceAtLeast(0)
+                            },
+                            onItemSelected = { index, _ ->
+                                val verseText = filteredVerses.getOrNull(index)
+                                verseText?.let {
+                                    val realIndex = verses.indexOf(it)
+                                    if (realIndex >= 0) viewModel.selectVerse(realIndex)
+                                }
+                            },
+                            onItemDoubleClicked = { _, _ ->
+                                onPresenting(Presenting.BIBLE)
                             }
-                        ) { index, _ ->
-                            val verseText = filteredVerses.getOrNull(index)
-                            verseText?.let {
-                                val realIndex = verses.indexOf(it)
-                                if (realIndex >= 0) viewModel.selectVerse(realIndex)
-                            }
-                        }
+                        )
                     }
                 }
             }
