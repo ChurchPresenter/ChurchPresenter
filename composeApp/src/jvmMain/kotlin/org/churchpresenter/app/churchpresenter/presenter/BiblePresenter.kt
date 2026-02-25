@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -159,10 +160,14 @@ fun BiblePresenter(
         val scaleFactor = min(widthScale, heightScale).coerceIn(0.5f, 3.0f)
 
         // Scale font sizes based on window size
-        val scaledPrimaryBibleSize = (appSettings.bibleSettings.primaryBibleFontSize * scaleFactor).sp
-        val scaledPrimaryReferenceSize = (appSettings.bibleSettings.primaryReferenceFontSize * scaleFactor).sp
-        val scaledSecondaryBibleSize = (appSettings.bibleSettings.secondaryBibleFontSize * scaleFactor).sp
-        val scaledSecondaryReferenceSize = (appSettings.bibleSettings.secondaryReferenceFontSize * scaleFactor).sp
+        val effectivePrimaryBibleSize = if (isLowerThird) appSettings.bibleSettings.primaryBibleLowerThirdFontSize else appSettings.bibleSettings.primaryBibleFontSize
+        val effectivePrimaryReferenceSize = if (isLowerThird) appSettings.bibleSettings.primaryReferenceLowerThirdFontSize else appSettings.bibleSettings.primaryReferenceFontSize
+        val effectiveSecondaryBibleSize = if (isLowerThird) appSettings.bibleSettings.secondaryBibleLowerThirdFontSize else appSettings.bibleSettings.secondaryBibleFontSize
+        val effectiveSecondaryReferenceSize = if (isLowerThird) appSettings.bibleSettings.secondaryReferenceLowerThirdFontSize else appSettings.bibleSettings.secondaryReferenceFontSize
+        val scaledPrimaryBibleSize = (effectivePrimaryBibleSize * scaleFactor).sp
+        val scaledPrimaryReferenceSize = (effectivePrimaryReferenceSize * scaleFactor).sp
+        val scaledSecondaryBibleSize = (effectiveSecondaryBibleSize * scaleFactor).sp
+        val scaledSecondaryReferenceSize = (effectiveSecondaryReferenceSize * scaleFactor).sp
         val leftOffSet = (appSettings.projectionSettings.windowLeft * scaleFactor).dp
         val rightOffSet = (appSettings.projectionSettings.windowRight * scaleFactor).dp
         val topOffSet = (appSettings.projectionSettings.windowTop * scaleFactor).dp
@@ -182,7 +187,14 @@ fun BiblePresenter(
             else
                 Modifier.align(Alignment.Center)
 
-            Column(modifier = innerModifier) {
+            Box(
+                modifier = innerModifier,
+                contentAlignment = if (isLowerThird) Alignment.BottomCenter else Alignment.TopStart
+            ) {
+            Column(
+                modifier = Modifier.fillMaxWidth().wrapContentHeight(),
+                verticalArrangement = if (isLowerThird) Arrangement.Bottom else Arrangement.Top
+            ) {
                 // Primary Bible
                 if (primaryBibleReferencePosition == Constants.POSITION_ABOVE) {
                     Row(
@@ -287,6 +299,7 @@ fun BiblePresenter(
                     }
                 }
             }
+            } // end inner Box
         }
     }
 }

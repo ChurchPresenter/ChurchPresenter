@@ -52,6 +52,8 @@ import churchpresenter.composeapp.generated.resources.confirm_delete_file
 import churchpresenter.composeapp.generated.resources.delete_error
 import churchpresenter.composeapp.generated.resources.font_size
 import churchpresenter.composeapp.generated.resources.font_type
+import churchpresenter.composeapp.generated.resources.full_screen
+import churchpresenter.composeapp.generated.resources.lower_third_size
 import churchpresenter.composeapp.generated.resources.horizontal_alignment
 import churchpresenter.composeapp.generated.resources.import_bible_file
 import churchpresenter.composeapp.generated.resources.import_error
@@ -536,13 +538,24 @@ private fun RightColumn(
         }
     }
     SettingRow(stringResource(Res.string.font_size)) {
-        NumberSettingsTextField(
-            initialText = settings.bibleSettings.primaryBibleFontSize,
-            onValueChange = {
-                onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(primaryBibleFontSize = it)) }
-            },
-            range = 8..72
-        )
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(stringResource(Res.string.full_screen), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                NumberSettingsTextField(
+                    initialText = settings.bibleSettings.primaryBibleFontSize,
+                    onValueChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(primaryBibleFontSize = it)) } },
+                    range = 8..72
+                )
+            }
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(stringResource(Res.string.lower_third_size), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                NumberSettingsTextField(
+                    initialText = settings.bibleSettings.primaryBibleLowerThirdFontSize,
+                    onValueChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(primaryBibleLowerThirdFontSize = it)) } },
+                    range = 8..72
+                )
+            }
+        }
     }
     SettingRow(stringResource(Res.string.horizontal_alignment), width = 200.dp) {
         HorizontalAlignmentButtons(
@@ -592,13 +605,24 @@ private fun RightColumn(
         }
     }
     SettingRow(stringResource(Res.string.font_size)) {
-        NumberSettingsTextField(
-            initialText = settings.bibleSettings.primaryReferenceFontSize,
-            onValueChange = {
-                onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(primaryReferenceFontSize = it)) }
-            },
-            range = 8..72
-        )
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(stringResource(Res.string.full_screen), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                NumberSettingsTextField(
+                    initialText = settings.bibleSettings.primaryReferenceFontSize,
+                    onValueChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(primaryReferenceFontSize = it)) } },
+                    range = 8..72
+                )
+            }
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(stringResource(Res.string.lower_third_size), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                NumberSettingsTextField(
+                    initialText = settings.bibleSettings.primaryReferenceLowerThirdFontSize,
+                    onValueChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(primaryReferenceLowerThirdFontSize = it)) } },
+                    range = 8..72
+                )
+            }
+        }
     }
     SettingRow(stringResource(Res.string.position)) {
         PositionButtons(
@@ -671,13 +695,24 @@ private fun RightColumn(
         }
     }
     SettingRow(stringResource(Res.string.font_size)) {
-        NumberSettingsTextField(
-            initialText = settings.bibleSettings.secondaryBibleFontSize,
-            onValueChange = {
-                onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(secondaryBibleFontSize = it)) }
-            },
-            range = 8..72
-        )
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(stringResource(Res.string.full_screen), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                NumberSettingsTextField(
+                    initialText = settings.bibleSettings.secondaryBibleFontSize,
+                    onValueChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(secondaryBibleFontSize = it)) } },
+                    range = 8..72
+                )
+            }
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(stringResource(Res.string.lower_third_size), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                NumberSettingsTextField(
+                    initialText = settings.bibleSettings.secondaryBibleLowerThirdFontSize,
+                    onValueChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(secondaryBibleLowerThirdFontSize = it)) } },
+                    range = 8..72
+                )
+            }
+        }
     }
     SettingRow(stringResource(Res.string.horizontal_alignment), width = 200.dp) {
         HorizontalAlignmentButtons(
@@ -727,13 +762,24 @@ private fun RightColumn(
         }
     }
     SettingRow(stringResource(Res.string.font_size)) {
-        NumberSettingsTextField(
-            initialText = settings.bibleSettings.secondaryReferenceFontSize,
-            onValueChange = {
-                onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(secondaryReferenceFontSize = it)) }
-            },
-            range = 8..72
-        )
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(stringResource(Res.string.full_screen), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                NumberSettingsTextField(
+                    initialText = settings.bibleSettings.secondaryReferenceFontSize,
+                    onValueChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(secondaryReferenceFontSize = it)) } },
+                    range = 8..72
+                )
+            }
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(stringResource(Res.string.lower_third_size), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                NumberSettingsTextField(
+                    initialText = settings.bibleSettings.secondaryReferenceLowerThirdFontSize,
+                    onValueChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(secondaryReferenceLowerThirdFontSize = it)) } },
+                    range = 8..72
+                )
+            }
+        }
     }
     SettingRow(stringResource(Res.string.position)) {
         PositionButtons(

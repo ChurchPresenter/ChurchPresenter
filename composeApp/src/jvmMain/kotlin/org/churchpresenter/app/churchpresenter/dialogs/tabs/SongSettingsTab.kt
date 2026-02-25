@@ -52,6 +52,8 @@ import churchpresenter.composeapp.generated.resources.files_in_directory
 import churchpresenter.composeapp.generated.resources.first_page
 import churchpresenter.composeapp.generated.resources.font_size
 import churchpresenter.composeapp.generated.resources.font_type
+import churchpresenter.composeapp.generated.resources.full_screen
+import churchpresenter.composeapp.generated.resources.lower_third_size
 import churchpresenter.composeapp.generated.resources.horizontal_alignment
 import churchpresenter.composeapp.generated.resources.import_error
 import churchpresenter.composeapp.generated.resources.import_song_file
@@ -496,15 +498,24 @@ private fun RightColumn(
     Spacer(modifier = Modifier.height(8.dp))
 
     SettingRow(stringResource(Res.string.font_size)) {
-        NumberSettingsTextField(
-            initialText = settings.songSettings.lyricsFontSize,
-            onValueChange = {
-                onSettingsChange { s ->
-                    s.copy(songSettings = s.songSettings.copy(lyricsFontSize = it))
-                }
-            },
-            range = 8..72
-        )
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(stringResource(Res.string.full_screen), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                NumberSettingsTextField(
+                    initialText = settings.songSettings.lyricsFontSize,
+                    onValueChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsFontSize = it)) } },
+                    range = 8..72
+                )
+            }
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(stringResource(Res.string.lower_third_size), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                NumberSettingsTextField(
+                    initialText = settings.songSettings.lyricsLowerThirdFontSize,
+                    onValueChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsLowerThirdFontSize = it)) } },
+                    range = 8..72
+                )
+            }
+        }
     }
 
     SettingRow(stringResource(Res.string.font_type)) {
@@ -618,15 +629,24 @@ private fun RightColumn(
     Spacer(modifier = Modifier.height(8.dp))
 
     SettingRow(stringResource(Res.string.font_size)) {
-        NumberSettingsTextField(
-            initialText = settings.songSettings.songNumberFontSize,
-            onValueChange = {
-                onSettingsChange { s ->
-                    s.copy(songSettings = s.songSettings.copy(songNumberFontSize = it))
-                }
-            },
-            range = 8..48
-        )
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(stringResource(Res.string.full_screen), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                NumberSettingsTextField(
+                    initialText = settings.songSettings.songNumberFontSize,
+                    onValueChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(songNumberFontSize = it)) } },
+                    range = 8..48
+                )
+            }
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(stringResource(Res.string.lower_third_size), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                NumberSettingsTextField(
+                    initialText = settings.songSettings.songNumberLowerThirdFontSize,
+                    onValueChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(songNumberLowerThirdFontSize = it)) } },
+                    range = 8..48
+                )
+            }
+        }
     }
 
     SettingRow(stringResource(Res.string.show_number)) {

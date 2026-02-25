@@ -125,10 +125,11 @@ fun SongPresenter(
         val heightScale = with(density) { maxHeight.toPx() / 1080f }
         val scaleFactor = min(widthScale, heightScale).coerceIn(0.5f, 3.0f)
 
-        // Scale font sizes based on window size
         val scaledTitleFontSize = (appSettings.songSettings.titleFontSize * scaleFactor).sp
-        val scaledLyricsFontSize = (appSettings.songSettings.lyricsFontSize * scaleFactor).sp
-        val scaledSongNumberFontSize = (appSettings.songSettings.songNumberFontSize * scaleFactor).sp
+        val effectiveLyricsFontSize = if (isLowerThird) appSettings.songSettings.lyricsLowerThirdFontSize else appSettings.songSettings.lyricsFontSize
+        val effectiveSongNumberFontSize = if (isLowerThird) appSettings.songSettings.songNumberLowerThirdFontSize else appSettings.songSettings.songNumberFontSize
+        val scaledLyricsFontSize = (effectiveLyricsFontSize * scaleFactor).sp
+        val scaledSongNumberFontSize = (effectiveSongNumberFontSize * scaleFactor).sp
 
         val leftOffSet = (appSettings.projectionSettings.windowLeft * scaleFactor).dp
         val rightOffSet = (appSettings.projectionSettings.windowRight * scaleFactor).dp
@@ -159,7 +160,10 @@ fun SongPresenter(
             val shouldShowTitle = shouldShowText(appSettings.songSettings.titleDisplay, lyricSection)
             val shouldShowSongNumber = shouldShowText(appSettings.songSettings.showNumber, lyricSection)
 
-            Box(modifier = innerModifier) {
+            Box(
+                modifier = innerModifier,
+                contentAlignment = if (isLowerThird) Alignment.BottomCenter else Alignment.TopStart
+            ) {
                 if (shouldShowSongNumber) {
                     Text(
                         modifier = Modifier.wrapContentWidth().align(alignment),
@@ -169,15 +173,27 @@ fun SongPresenter(
                         color = songNumberColor
                     )
                 }
-                Column(modifier = Modifier.wrapContentHeight()) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .wrapContentHeight(),
+                    verticalArrangement = if (isLowerThird) Arrangement.Bottom else Arrangement.Top
+                ) {
                     if (shouldShowTitle && appSettings.songSettings.titlePosition == Constants.ABOVE_VERSE) {
                         Row(Modifier.fillMaxWidth(), horizontalArrangement = titleHorizontalAlignment) {
                             Text(modifier = Modifier.wrapContentWidth(), fontFamily = titleFontFamily, fontSize = scaledTitleFontSize, text = lyricSection.title, color = titleColor)
                         }
                     }
-                    lyricSection.lines.forEachIndexed { _, line ->
-                        Row(Modifier.fillMaxWidth(), horizontalArrangement = lyricsHorizontalAlignment) {
-                            Text(modifier = Modifier.wrapContentWidth(), fontFamily = lyricsFontFamily, fontSize = scaledLyricsFontSize, softWrap = appSettings.songSettings.wordWrap, text = line, color = lyricsColor)
+                    lyricSection.lines.forEach { line ->
+                        val isSectionHeader =
+                            line.startsWith(Constants.VERSE_RUS, ignoreCase = true) ||
+                            line.startsWith(Constants.CHORUS_RUS, ignoreCase = true) ||
+                            line.startsWith(Constants.VERSE, ignoreCase = true) ||
+                            line.startsWith(Constants.CHORUS, ignoreCase = true)
+                        if (!isSectionHeader) {
+                            Row(Modifier.fillMaxWidth(), horizontalArrangement = lyricsHorizontalAlignment) {
+                                Text(modifier = Modifier.wrapContentWidth(), fontFamily = lyricsFontFamily, fontSize = scaledLyricsFontSize, softWrap = appSettings.songSettings.wordWrap, text = line, color = lyricsColor)
+                            }
                         }
                     }
                     if (shouldShowTitle && appSettings.songSettings.titlePosition == Constants.BELOW_VERSE) {

@@ -35,6 +35,7 @@ data class SongSettings(
 
     // Lyrics settings
     val lyricsFontSize: Int = 24,
+    val lyricsLowerThirdFontSize: Int = 18,
     val lyricsFontType: String = "Arial",
     val lyricsMinFontSize: Int = 12,
     val lyricsMaxFontSize: Int = 60,
@@ -45,6 +46,7 @@ data class SongSettings(
 
     // Song number settings
     val songNumberFontSize: Int = 16,
+    val songNumberLowerThirdFontSize: Int = 12,
     val showNumber: String = Constants.FIRST_PAGE,
     val songNumberPosition: String = Constants.BOTTOM_RIGHT,
     val songNumberColor: String = "#FFFFFF" // White
@@ -67,12 +69,14 @@ data class BibleSettings(
     val primaryBibleColor: String = "#FFFFFF",
     val primaryBibleFontType: String = "Arial",
     val primaryBibleFontSize: Int = 70,
+    val primaryBibleLowerThirdFontSize: Int = 32,
     val primaryBibleHorizontalAlignment: String = Constants.CENTER,
 
     // Primary Bible book reference
     val primaryReferenceColor: String = "#FFFFFF",
     val primaryReferenceFontType: String = "Arial",
     val primaryReferenceFontSize: Int = 70,
+    val primaryReferenceLowerThirdFontSize: Int = 24,
     val primaryReferencePosition: String = "Above", // "Above" or "Below"
     val primaryReferenceHorizontalAlignment: String = Constants.CENTER,
     val primaryShowAbbreviation: Boolean = false,
@@ -81,12 +85,14 @@ data class BibleSettings(
     val secondaryBibleColor: String = "#CCCCCC",
     val secondaryBibleFontType: String = "Arial",
     val secondaryBibleFontSize: Int = 70,
+    val secondaryBibleLowerThirdFontSize: Int = 28,
     val secondaryBibleHorizontalAlignment: String = Constants.CENTER,
 
     // Secondary Bible book reference
     val secondaryReferenceColor: String = "#CCCCCC",
     val secondaryReferenceFontType: String = "Arial",
     val secondaryReferenceFontSize: Int = 70,
+    val secondaryReferenceLowerThirdFontSize: Int = 24,
     val secondaryReferencePosition: String = "Above", // "Above" or "Below"
     val secondaryReferenceHorizontalAlignment: String = Constants.CENTER,
     val secondaryShowAbbreviation: Boolean = false,
