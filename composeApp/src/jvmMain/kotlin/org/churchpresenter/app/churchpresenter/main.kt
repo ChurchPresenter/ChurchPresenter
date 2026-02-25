@@ -37,6 +37,7 @@ import kotlinx.coroutines.launch
 import org.churchpresenter.app.churchpresenter.data.Language
 import org.churchpresenter.app.churchpresenter.data.SettingsManager
 import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.app.churchpresenter.dialogs.KeyboardShortcutsDialog
 import org.churchpresenter.app.churchpresenter.dialogs.OptionsDialog
 import org.churchpresenter.app.churchpresenter.presenter.BiblePresenter
 import org.churchpresenter.app.churchpresenter.presenter.LowerThirdPresenter
@@ -99,6 +100,7 @@ fun main() {
             mutableStateOf(savedTheme)
         }
         var showOptionsDialog by remember { mutableStateOf(false) }
+        var showKeyboardShortcutsDialog by remember { mutableStateOf(false) }
         var selectedScheduleItemId by remember { mutableStateOf<String?>(null) }
 
         // Queried once — screen layout doesn't change at runtime.
@@ -133,6 +135,7 @@ fun main() {
 
                         NavigationTopBar(
                             onAbout = { presenterManager.setShowPresenterWindow(true) },
+                            onKeyboardShortcuts = { showKeyboardShortcutsDialog = true },
                             theme = {
                                 appSettings = appSettings.copy(theme = it.toString())
                                 theme = it
@@ -197,6 +200,10 @@ fun main() {
                                     identifyingScreen = false
                                 }
                             }
+                        )
+                        KeyboardShortcutsDialog(
+                            isVisible = showKeyboardShortcutsDialog,
+                            onDismiss = { showKeyboardShortcutsDialog = false }
                         )
                     } // end CompositionLocalProvider
                 }
