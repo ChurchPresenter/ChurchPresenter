@@ -1677,7 +1677,9 @@ function download() {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = 'lower-third.json';
+  const nameVal = document.getElementById('nameText').value.trim() || 'lower-third';
+  const styleVal = document.getElementById('styleType').value;
+  a.download = nameVal + ' - Style ' + styleVal + '.json';
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
