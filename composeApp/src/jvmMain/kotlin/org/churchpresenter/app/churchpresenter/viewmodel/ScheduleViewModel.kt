@@ -9,7 +9,14 @@ import org.churchpresenter.app.churchpresenter.models.ScheduleItem
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.utils.createFileChooser
 import java.io.File
+import java.security.SecureRandom
+import java.util.Base64
 import java.util.UUID
+import javax.crypto.Cipher
+import javax.crypto.SecretKeyFactory
+import javax.crypto.spec.IvParameterSpec
+import javax.crypto.spec.PBEKeySpec
+import javax.crypto.spec.SecretKeySpec
 import javax.swing.JFileChooser
 import javax.swing.filechooser.FileNameExtensionFilter
 
@@ -23,6 +30,45 @@ class ScheduleViewModel {
     private val json = Json { prettyPrint = true; encodeDefaults = true }
     private var currentFilePath: String? = null
 
+    // ── Encryption ────────────────────────────────────────────────────────────
+
+    private companion object {
+        private const val PASS = "ChurchPresenter-Schedule-Key-2024"
+        private const val ALGO = "AES/CBC/PKCS5Padding"
+        private const val KEY_ALGO = "PBKDF2WithHmacSHA256"
+        private const val ITERATIONS = 65536
+        private const val KEY_LEN = 256
+        private const val SALT = "CPScheduleSalt01" // 16-byte fixed salt
+
+        private fun deriveKey(): SecretKeySpec {
+            val factory = SecretKeyFactory.getInstance(KEY_ALGO)
+            val spec = PBEKeySpec(PASS.toCharArray(), SALT.toByteArray(Charsets.UTF_8), ITERATIONS, KEY_LEN)
+            val secret = factory.generateSecret(spec)
+            return SecretKeySpec(secret.encoded, "AES")
+        }
+
+        fun encrypt(plainText: String): String {
+            val key = deriveKey()
+            val iv = ByteArray(16).also { SecureRandom().nextBytes(it) }
+            val cipher = Cipher.getInstance(ALGO)
+            cipher.init(Cipher.ENCRYPT_MODE, key, IvParameterSpec(iv))
+            val encrypted = cipher.doFinal(plainText.toByteArray(Charsets.UTF_8))
+            // Prepend IV to cipher bytes, then Base64-encode the whole thing
+            val combined = iv + encrypted
+            return Base64.getEncoder().encodeToString(combined)
+        }
+
+        fun decrypt(cipherText: String): String {
+            val key = deriveKey()
+            val combined = Base64.getDecoder().decode(cipherText)
+            val iv = combined.copyOfRange(0, 16)
+            val encrypted = combined.copyOfRange(16, combined.size)
+            val cipher = Cipher.getInstance(ALGO)
+            cipher.init(Cipher.DECRYPT_MODE, key, IvParameterSpec(iv))
+            return String(cipher.doFinal(encrypted), Charsets.UTF_8)
+        }
+    }
+
     // ── File I/O ──────────────────────────────────────────────────────────────
 
     /** Saves to the current file if known, otherwise prompts like Save As. */
@@ -34,7 +80,7 @@ class ScheduleViewModel {
         if (existing != null) {
             val file = File(existing)
             val serialized = json.encodeToString(ListSerializer(ScheduleItem.serializer()), _scheduleItems.toList())
-            file.writeText(serialized)
+            file.writeText(encrypt(serialized))
         } else {
             saveScheduleAs(dialogTitle, fileFilterDescription)
         }
@@ -56,7 +102,7 @@ class ScheduleViewModel {
                 file = file.resolveSibling("${file.name}.cps")
             }
             val serialized = json.encodeToString(ListSerializer(ScheduleItem.serializer()), _scheduleItems.toList())
-            file.writeText(serialized)
+            file.writeText(encrypt(serialized))
             currentFilePath = file.absolutePath
         }
     }
@@ -74,7 +120,10 @@ class ScheduleViewModel {
         if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
             val file = chooser.selectedFile
             if (file.exists()) {
-                val items = json.decodeFromString(ListSerializer(ScheduleItem.serializer()), file.readText())
+                val raw = file.readText()
+                // Support both old plain-JSON files and new encrypted files gracefully
+                val jsonText = try { decrypt(raw) } catch (_: Exception) { raw }
+                val items = json.decodeFromString(ListSerializer(ScheduleItem.serializer()), jsonText)
                 _scheduleItems.clear()
                 _scheduleItems.addAll(items)
                 currentFilePath = file.absolutePath

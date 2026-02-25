@@ -170,10 +170,14 @@ fun BiblePresenter(
         val scaleFactor = min(widthScale, heightScale).coerceIn(0.5f, 3.0f)
 
         // Scale font sizes based on window size
-        val effectivePrimaryBibleSize = if (isLowerThird) appSettings.bibleSettings.primaryBibleLowerThirdFontSize else appSettings.bibleSettings.primaryBibleFontSize
-        val effectivePrimaryReferenceSize = if (isLowerThird) appSettings.bibleSettings.primaryReferenceLowerThirdFontSize else appSettings.bibleSettings.primaryReferenceFontSize
-        val effectiveSecondaryBibleSize = if (isLowerThird) appSettings.bibleSettings.secondaryBibleLowerThirdFontSize else appSettings.bibleSettings.secondaryBibleFontSize
-        val effectiveSecondaryReferenceSize = if (isLowerThird) appSettings.bibleSettings.secondaryReferenceLowerThirdFontSize else appSettings.bibleSettings.secondaryReferenceFontSize
+        val effectivePrimaryBibleSize =
+            if (isLowerThird) appSettings.bibleSettings.primaryBibleLowerThirdFontSize else appSettings.bibleSettings.primaryBibleFontSize
+        val effectivePrimaryReferenceSize =
+            if (isLowerThird) appSettings.bibleSettings.primaryReferenceLowerThirdFontSize else appSettings.bibleSettings.primaryReferenceFontSize
+        val effectiveSecondaryBibleSize =
+            if (isLowerThird) appSettings.bibleSettings.secondaryBibleLowerThirdFontSize else appSettings.bibleSettings.secondaryBibleFontSize
+        val effectiveSecondaryReferenceSize =
+            if (isLowerThird) appSettings.bibleSettings.secondaryReferenceLowerThirdFontSize else appSettings.bibleSettings.secondaryReferenceFontSize
         val scaledPrimaryBibleSize = (effectivePrimaryBibleSize * scaleFactor).sp
         val scaledPrimaryReferenceSize = (effectivePrimaryReferenceSize * scaleFactor).sp
         val scaledSecondaryBibleSize = (effectiveSecondaryBibleSize * scaleFactor).sp
@@ -201,114 +205,114 @@ fun BiblePresenter(
                 modifier = innerModifier,
                 contentAlignment = if (isLowerThird) Alignment.BottomCenter else Alignment.TopStart
             ) {
-            Column(
-                modifier = Modifier.fillMaxWidth().wrapContentHeight(),
-                verticalArrangement = if (isLowerThird) Arrangement.Bottom else Arrangement.Top
-            ) {
-                // Primary Bible
-                if (primaryBibleReferencePosition == Constants.POSITION_ABOVE) {
-                    Row(
-                        Modifier.fillMaxWidth(),
-                        horizontalArrangement = primaryBibleReferenceHorizontalAlignment
-                    ) {
-                        val bookNameOrAbbr =
-                            if (appSettings.bibleSettings.primaryShowAbbreviation && primaryBible.bibleAbbreviation.isNotEmpty()) {
-                                primaryBible.bibleAbbreviation
-                            } else {
-                                ""
-                            }
-                        Text(
-                            fontFamily = primaryBibleReferenceFontStyle,
-                            fontSize = scaledPrimaryReferenceSize,
-                            text = "$bookNameOrAbbr ${primaryBible.bookName} ${primaryBible.chapter}:${primaryBible.verseNumber}",
-                            color = primaryBibleReferenceTextColor
-                        )
-                    }
-                }
-                Row(
-                    Modifier.fillMaxWidth(),
-                    horizontalArrangement = primaryBibleHorizontalAlignment
+                Column(
+                    modifier = Modifier.fillMaxWidth().wrapContentHeight(),
+                    verticalArrangement = if (isLowerThird) Arrangement.Bottom else Arrangement.Top
                 ) {
-                    Text(
-                        fontFamily = primaryBibleFontStyle,
-                        fontSize = scaledPrimaryBibleSize,
-                        text = primaryBible.verseText,
-                        color = primaryBibleTextColor
-                    )
-                }
-                if (primaryBibleReferencePosition == Constants.POSITION_BELOW) {
+                    // Primary Bible
+                    if (primaryBibleReferencePosition == Constants.POSITION_ABOVE) {
+                        Row(
+                            Modifier.fillMaxWidth(),
+                            horizontalArrangement = primaryBibleReferenceHorizontalAlignment
+                        ) {
+                            val bookNameOrAbbr =
+                                if (appSettings.bibleSettings.primaryShowAbbreviation && primaryBible.bibleAbbreviation.isNotEmpty()) {
+                                    primaryBible.bibleAbbreviation
+                                } else {
+                                    ""
+                                }
+                            Text(
+                                fontFamily = primaryBibleReferenceFontStyle,
+                                fontSize = scaledPrimaryReferenceSize,
+                                text = "$bookNameOrAbbr ${primaryBible.bookName} ${primaryBible.chapter}:${primaryBible.verseNumber}",
+                                color = primaryBibleReferenceTextColor
+                            )
+                        }
+                    }
                     Row(
                         Modifier.fillMaxWidth(),
-                        horizontalArrangement = primaryBibleReferenceHorizontalAlignment
+                        horizontalArrangement = primaryBibleHorizontalAlignment
                     ) {
-                        val bookNameOrAbbr =
-                            if (appSettings.bibleSettings.primaryShowAbbreviation && primaryBible.bibleAbbreviation.isNotEmpty()) {
-                                primaryBible.bibleAbbreviation
-                            } else {
-                                ""
-                            }
                         Text(
-                            fontFamily = primaryBibleReferenceFontStyle,
-                            fontSize = scaledPrimaryReferenceSize,
-                            text = "$bookNameOrAbbr ${primaryBible.bookName} ${primaryBible.chapter}:${primaryBible.verseNumber}",
-                            color = primaryBibleReferenceTextColor
+                            fontFamily = primaryBibleFontStyle,
+                            fontSize = scaledPrimaryBibleSize,
+                            text = primaryBible.verseText,
+                            color = primaryBibleTextColor
                         )
                     }
-                }
+                    if (primaryBibleReferencePosition == Constants.POSITION_BELOW) {
+                        Row(
+                            Modifier.fillMaxWidth(),
+                            horizontalArrangement = primaryBibleReferenceHorizontalAlignment
+                        ) {
+                            val bookNameOrAbbr =
+                                if (appSettings.bibleSettings.primaryShowAbbreviation && primaryBible.bibleAbbreviation.isNotEmpty()) {
+                                    primaryBible.bibleAbbreviation
+                                } else {
+                                    ""
+                                }
+                            Text(
+                                fontFamily = primaryBibleReferenceFontStyle,
+                                fontSize = scaledPrimaryReferenceSize,
+                                text = "$bookNameOrAbbr ${primaryBible.bookName} ${primaryBible.chapter}:${primaryBible.verseNumber}",
+                                color = primaryBibleReferenceTextColor
+                            )
+                        }
+                    }
 
-                // Secondary Bible
-                if (secondaryBible != null) {
-                    if (secondaryBibleReferencePosition == Constants.POSITION_ABOVE) {
+                    // Secondary Bible
+                    if (secondaryBible != null) {
+                        if (secondaryBibleReferencePosition == Constants.POSITION_ABOVE) {
+                            Row(
+                                Modifier.fillMaxWidth(),
+                                horizontalArrangement = secondaryBibleReferenceHorizontalAlignment
+                            ) {
+                                val bookNameOrAbbr =
+                                    if (appSettings.bibleSettings.secondaryShowAbbreviation && secondaryBible.bibleAbbreviation.isNotEmpty()) {
+                                        secondaryBible.bibleAbbreviation
+                                    } else {
+                                        ""
+                                    }
+                                Text(
+                                    fontFamily = secondaryBibleReferenceFontStyle,
+                                    fontSize = scaledSecondaryReferenceSize,
+                                    text = "$bookNameOrAbbr ${secondaryBible.bookName} ${secondaryBible.chapter}:${secondaryBible.verseNumber}",
+                                    color = secondaryBibleTextColor
+                                )
+                            }
+                        }
                         Row(
                             Modifier.fillMaxWidth(),
-                            horizontalArrangement = secondaryBibleReferenceHorizontalAlignment
+                            horizontalArrangement = secondaryBibleHorizontalAlignment
                         ) {
-                            val bookNameOrAbbr =
-                                if (appSettings.bibleSettings.secondaryShowAbbreviation && secondaryBible.bibleAbbreviation.isNotEmpty()) {
-                                    secondaryBible.bibleAbbreviation
-                                } else {
-                                    ""
-                                }
                             Text(
-                                fontFamily = secondaryBibleReferenceFontStyle,
-                                fontSize = scaledSecondaryReferenceSize,
-                                text = "$bookNameOrAbbr ${secondaryBible.bookName} ${secondaryBible.chapter}:${secondaryBible.verseNumber}",
+                                fontFamily = secondaryBibleFontStyle,
+                                fontSize = scaledSecondaryBibleSize,
+                                text = secondaryBible.verseText,
                                 color = secondaryBibleTextColor
                             )
                         }
-                    }
-                    Row(
-                        Modifier.fillMaxWidth(),
-                        horizontalArrangement = secondaryBibleHorizontalAlignment
-                    ) {
-                        Text(
-                            fontFamily = secondaryBibleFontStyle,
-                            fontSize = scaledSecondaryBibleSize,
-                            text = secondaryBible.verseText,
-                            color = secondaryBibleTextColor
-                        )
-                    }
-                    if (secondaryBibleReferencePosition == Constants.POSITION_BELOW) {
-                        Row(
-                            Modifier.fillMaxWidth(),
-                            horizontalArrangement = secondaryBibleReferenceHorizontalAlignment
-                        ) {
-                            val bookNameOrAbbr =
-                                if (appSettings.bibleSettings.secondaryShowAbbreviation && secondaryBible.bibleAbbreviation.isNotEmpty()) {
-                                    secondaryBible.bibleAbbreviation
-                                } else {
-                                    ""
-                                }
-                            Text(
-                                fontFamily = secondaryBibleReferenceFontStyle,
-                                fontSize = scaledSecondaryReferenceSize,
-                                text = "$bookNameOrAbbr ${secondaryBible.bookName} ${secondaryBible.chapter}:${secondaryBible.verseNumber}",
-                                color = secondaryBibleTextColor
-                            )
+                        if (secondaryBibleReferencePosition == Constants.POSITION_BELOW) {
+                            Row(
+                                Modifier.fillMaxWidth(),
+                                horizontalArrangement = secondaryBibleReferenceHorizontalAlignment
+                            ) {
+                                val bookNameOrAbbr =
+                                    if (appSettings.bibleSettings.secondaryShowAbbreviation && secondaryBible.bibleAbbreviation.isNotEmpty()) {
+                                        secondaryBible.bibleAbbreviation
+                                    } else {
+                                        ""
+                                    }
+                                Text(
+                                    fontFamily = secondaryBibleReferenceFontStyle,
+                                    fontSize = scaledSecondaryReferenceSize,
+                                    text = "$bookNameOrAbbr ${secondaryBible.bookName} ${secondaryBible.chapter}:${secondaryBible.verseNumber}",
+                                    color = secondaryBibleTextColor
+                                )
+                            }
                         }
                     }
                 }
-            }
             } // end inner Box
         }
     }
