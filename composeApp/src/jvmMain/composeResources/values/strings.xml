@@ -347,6 +347,8 @@
     <string name="screen_assignment">Screen Assignment</string>
     <string name="num_screens_label">Number of Screens:</string>
     <string name="screen_col_label">Screen %1$d</string>
+    <string name="detected_screens">Detected screens: %1$d</string>
+    <string name="presenter_windows_count">Presenter windows: %1$d</string>
     <string name="content_bible">Bible</string>
     <string name="content_songs">Songs</string>
     <string name="content_pictures">Pictures/Presentation</string>

@@ -23,6 +23,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
+import java.awt.GraphicsEnvironment
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
@@ -35,12 +38,14 @@ import churchpresenter.composeapp.generated.resources.content_media
 import churchpresenter.composeapp.generated.resources.content_pictures
 import churchpresenter.composeapp.generated.resources.content_songs
 import churchpresenter.composeapp.generated.resources.content_streaming
+import churchpresenter.composeapp.generated.resources.detected_screens
 import churchpresenter.composeapp.generated.resources.display_fullscreen
 import churchpresenter.composeapp.generated.resources.display_lower_third
 import churchpresenter.composeapp.generated.resources.display_mode
 import churchpresenter.composeapp.generated.resources.identify_screen
 import churchpresenter.composeapp.generated.resources.left
 import churchpresenter.composeapp.generated.resources.num_screens_label
+import churchpresenter.composeapp.generated.resources.presenter_windows_count
 import churchpresenter.composeapp.generated.resources.projection_position_help
 import churchpresenter.composeapp.generated.resources.right
 import churchpresenter.composeapp.generated.resources.screen
@@ -61,7 +66,23 @@ fun ProjectionSettingsTab(
     onIdentifyScreen: () -> Unit = {}
 ) {
     val proj = settings.projectionSettings
-    val numScreens = proj.numberOfWindows.coerceIn(1, 4)
+
+    // Detect physical screens once; derive presenter window count automatically.
+    val detectedScreens = remember {
+        GraphicsEnvironment.getLocalGraphicsEnvironment().screenDevices.size
+    }
+    val presenterWindowCount = (detectedScreens - 1).coerceIn(1, 4)
+
+    // Auto-save whenever the detected count differs from what's stored.
+    LaunchedEffect(presenterWindowCount) {
+        if (proj.numberOfWindows != presenterWindowCount) {
+            onSettingsChange { s ->
+                s.copy(projectionSettings = s.projectionSettings.copy(numberOfWindows = presenterWindowCount))
+            }
+        }
+    }
+
+    val numScreens = presenterWindowCount
     val screenAssignments = listOf(proj.screen1Assignment, proj.screen2Assignment, proj.screen3Assignment, proj.screen4Assignment)
 
     Column(
@@ -75,28 +96,25 @@ fun ProjectionSettingsTab(
         SectionHeader(stringResource(Res.string.screen_assignment))
         Spacer(modifier = Modifier.height(4.dp))
 
-        // Number of screens row + Identify button
+        // Detected screens info + Identify button
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Text(
-                text = stringResource(Res.string.num_screens_label),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.width(140.dp)
-            )
-            NumberSettingsTextField(
-                initialText = numScreens,
-                onValueChange = { value ->
-                    onSettingsChange { s ->
-                        s.copy(projectionSettings = s.projectionSettings.copy(numberOfWindows = value))
-                    }
-                },
-                range = 1..4
-            )
-            Spacer(modifier = Modifier.width(8.dp))
+            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Text(
+                    text = stringResource(Res.string.detected_screens, detectedScreens),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = stringResource(Res.string.presenter_windows_count, presenterWindowCount),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+            Spacer(modifier = Modifier.weight(1f))
             Button(onClick = { onIdentifyScreen() }) {
                 Text(
                     text = stringResource(Res.string.identify_screen),

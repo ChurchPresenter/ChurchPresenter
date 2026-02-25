@@ -63,6 +63,7 @@ import churchpresenter.composeapp.generated.resources.top
 import churchpresenter.composeapp.generated.resources.left
 import churchpresenter.composeapp.generated.resources.right
 import churchpresenter.composeapp.generated.resources.bottom
+import churchpresenter.composeapp.generated.resources.display_lower_third
 import churchpresenter.composeapp.generated.resources.screen
 import churchpresenter.composeapp.generated.resources.window_position
 import io.github.alexzhirkevich.compottie.LottieCompositionSpec
@@ -493,75 +494,80 @@ fun LowerThirdSettingsTab(
             )
 
             val streaming = settings.streamingSettings
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(160.dp)
-                    .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(4.dp))
-                    .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(4.dp))
-                    .padding(8.dp),
-                contentAlignment = Alignment.Center
+
+            // Top offset field
+            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
+                Text(stringResource(Res.string.top), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Spacer(Modifier.height(2.dp))
+                NumberSettingsTextField(
+                    initialText = streaming.windowTop,
+                    onValueChange = { v -> onSettingsChange { s -> s.copy(streamingSettings = s.streamingSettings.copy(windowTop = v)) } },
+                    range = 0..10000
+                )
+            }
+
+            // Middle row: Left / screen preview / Right
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Column(
-                    modifier = Modifier.fillMaxSize(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.SpaceBetween
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(stringResource(Res.string.left), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Spacer(Modifier.height(2.dp))
+                    NumberSettingsTextField(
+                        initialText = streaming.windowLeft,
+                        onValueChange = { v -> onSettingsChange { s -> s.copy(streamingSettings = s.streamingSettings.copy(windowLeft = v)) } },
+                        range = 0..10000
+                    )
+                }
+
+                // Screen preview: dark rectangle with a bright strip at the bottom
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(horizontal = 8.dp)
+                        .height(80.dp)
+                        .background(Color(0xFF1A1A1A), RoundedCornerShape(4.dp))
+                        .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(4.dp))
                 ) {
-                    // Top
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(stringResource(Res.string.top), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        Spacer(Modifier.height(2.dp))
-                        NumberSettingsTextField(
-                            initialText = streaming.windowTop,
-                            onValueChange = { v -> onSettingsChange { s -> s.copy(streamingSettings = s.streamingSettings.copy(windowTop = v)) } },
-                            range = 0..10000
-                        )
-                    }
-                    // Left / Screen indicator / Right
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
+                    // Lower third strip at the bottom (1/3 height)
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .fillMaxHeight(0.333f)
+                            .align(Alignment.BottomCenter)
+                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.7f))
                     ) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(stringResource(Res.string.left), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                            Spacer(Modifier.height(2.dp))
-                            NumberSettingsTextField(
-                                initialText = streaming.windowLeft,
-                                onValueChange = { v -> onSettingsChange { s -> s.copy(streamingSettings = s.streamingSettings.copy(windowLeft = v)) } },
-                                range = 0..10000
-                            )
-                        }
-                        Box(
-                            modifier = Modifier
-                                .size(50.dp)
-                                .background(MaterialTheme.colorScheme.primaryContainer, RoundedCornerShape(4.dp))
-                                .border(1.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(4.dp)),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(stringResource(Res.string.screen), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onPrimaryContainer)
-                        }
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(stringResource(Res.string.right), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                            Spacer(Modifier.height(2.dp))
-                            NumberSettingsTextField(
-                                initialText = streaming.windowRight,
-                                onValueChange = { v -> onSettingsChange { s -> s.copy(streamingSettings = s.streamingSettings.copy(windowRight = v)) } },
-                                range = 0..10000
-                            )
-                        }
-                    }
-                    // Bottom
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(stringResource(Res.string.bottom), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        Spacer(Modifier.height(2.dp))
-                        NumberSettingsTextField(
-                            initialText = streaming.windowBottom,
-                            onValueChange = { v -> onSettingsChange { s -> s.copy(streamingSettings = s.streamingSettings.copy(windowBottom = v)) } },
-                            range = 0..10000
+                        Text(
+                            text = stringResource(Res.string.display_lower_third),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = Color.White,
+                            modifier = Modifier.align(Alignment.Center)
                         )
                     }
                 }
+
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(stringResource(Res.string.right), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Spacer(Modifier.height(2.dp))
+                    NumberSettingsTextField(
+                        initialText = streaming.windowRight,
+                        onValueChange = { v -> onSettingsChange { s -> s.copy(streamingSettings = s.streamingSettings.copy(windowRight = v)) } },
+                        range = 0..10000
+                    )
+                }
+            }
+
+            // Bottom offset field
+            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
+                Text(stringResource(Res.string.bottom), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Spacer(Modifier.height(2.dp))
+                NumberSettingsTextField(
+                    initialText = streaming.windowBottom,
+                    onValueChange = { v -> onSettingsChange { s -> s.copy(streamingSettings = s.streamingSettings.copy(windowBottom = v)) } },
+                    range = 0..10000
+                )
             }
         }
     }

@@ -97,7 +97,7 @@ fun LowerThirdPresenter(
                 progress = { progress.value }
             ),
             contentDescription = null,
-            contentScale = ContentScale.FillWidth,
+            contentScale = ContentScale.FillHeight,
             modifier = Modifier
                 .fillMaxWidth()
                 .fillMaxHeight(0.333f)

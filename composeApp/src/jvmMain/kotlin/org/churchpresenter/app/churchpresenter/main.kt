@@ -206,7 +206,9 @@ fun main() {
         // is created once and stays alive. Visibility is controlled via the visible=
         // parameter — toggling it just hides/shows the existing window rather than
         // destroying and recreating the native window, which is expensive on Windows.
-        val windowCount = appSettings.projectionSettings.numberOfWindows
+        // Always derive window count from physically detected screens (screens[0] is the app screen).
+        // 2 screens → 1 presenter window, 3 screens → 2 presenter windows, etc.
+        val windowCount = (screens.size - 1).coerceIn(1, 4)
         val proj = appSettings.projectionSettings
         for (i in 0 until windowCount) {
             val targetScreenIndex = i + 1
@@ -214,7 +216,7 @@ fun main() {
                 val screenBounds = screens[targetScreenIndex].defaultConfiguration.bounds
                 remember(i, proj.windowLeft, proj.windowRight, proj.windowTop, proj.windowBottom) {
                     WindowState(
-                        placement = WindowPlacement.Floating,
+                        placement = WindowPlacement.Fullscreen,
                         position = WindowPosition(
                             (screenBounds.x + proj.windowLeft).dp,
                             (screenBounds.y + proj.windowTop).dp
