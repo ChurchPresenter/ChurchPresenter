@@ -175,5 +175,6 @@ data class AppSettings(
     val pictureSettings: PictureSettings = PictureSettings(),
     val streamingSettings: StreamingSettings = StreamingSettings(),
     val theme: String = Constants.LIGHT,
-    val language: String = "en"
+    val language: String = "en",
+    val licenseAccepted: Boolean = false
 )

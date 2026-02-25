@@ -38,6 +38,7 @@ import org.churchpresenter.app.churchpresenter.data.Language
 import org.churchpresenter.app.churchpresenter.data.SettingsManager
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.dialogs.KeyboardShortcutsDialog
+import org.churchpresenter.app.churchpresenter.dialogs.LicenseDialog
 import org.churchpresenter.app.churchpresenter.dialogs.OptionsDialog
 import org.churchpresenter.app.churchpresenter.presenter.BiblePresenter
 import org.churchpresenter.app.churchpresenter.presenter.LowerThirdPresenter
@@ -65,6 +66,23 @@ fun main() {
         val settingsManager = remember { SettingsManager() }
         var appSettings by remember { mutableStateOf(settingsManager.loadSettings()) }
         val presenterManager = remember { PresenterManager() }
+
+        // Show GPL2 license on first run — block everything until accepted
+        var licenseAccepted by remember { mutableStateOf(appSettings.licenseAccepted) }
+
+        if (!licenseAccepted) {
+            LicenseDialog(
+                onAccept = {
+                    appSettings = appSettings.copy(licenseAccepted = true)
+                    settingsManager.saveSettings(appSettings)
+                    licenseAccepted = true
+                },
+                onDecline = {
+                    exitApplication()
+                }
+            )
+            return@application
+        }
 
         // Load saved language and set locale
         var currentLanguage by remember {

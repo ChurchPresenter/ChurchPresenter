@@ -493,4 +493,8 @@
     <string name="lottie_pause_duration">Pause duration (ms)</string>
     <string name="lottie_play_next">Play Next</string>
     <string name="lottie_run_to_end">Run to End</string>
+    <string name="license_title">License Agreement — GNU General Public License v2</string>
+    <string name="license_accept_button">I Accept</string>
+    <string name="license_decline_button">Decline &amp; Exit</string>
+    <string name="license_prompt">You must accept the GNU GPL v2 license to use Church Presenter.</string>
 </resources>
