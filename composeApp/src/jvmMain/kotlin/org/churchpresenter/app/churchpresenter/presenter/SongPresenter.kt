@@ -67,7 +67,8 @@ fun SongPresenter(
         else -> Alignment.Center
     }
     val lyricsHorizontalAlignment = getHorizontalArrangement(
-        appSettings.songSettings.lyricsHorizontalAlignment
+        if (isLowerThird) appSettings.songSettings.lyricsLowerThirdHorizontalAlignment
+        else appSettings.songSettings.lyricsHorizontalAlignment
     )
     val titleHorizontalAlignment = getHorizontalArrangement(
         appSettings.songSettings.titleHorizontalAlignment

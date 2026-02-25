@@ -72,31 +72,41 @@ fun BiblePresenter(
         parseHexColor(appSettings.bibleSettings.secondaryBibleColor)
     }
 
-    val primaryBibleHorizontalAlignment = when (appSettings.bibleSettings.primaryBibleHorizontalAlignment) {
+    val primaryBibleHorizontalAlignment = when (
+        if (isLowerThird) appSettings.bibleSettings.primaryBibleLowerThirdHorizontalAlignment
+        else appSettings.bibleSettings.primaryBibleHorizontalAlignment
+    ) {
         Constants.LEFT -> Arrangement.Start
         Constants.RIGHT -> Arrangement.End
         else -> Arrangement.Center
     }
 
-    val primaryBibleReferenceHorizontalAlignment =
-        when (appSettings.bibleSettings.primaryReferenceHorizontalAlignment) {
-            Constants.LEFT -> Arrangement.Start
-            Constants.RIGHT -> Arrangement.End
-            else -> Arrangement.Center
-        }
-
-    val secondaryBibleHorizontalAlignment = when (appSettings.bibleSettings.secondaryBibleHorizontalAlignment) {
+    val primaryBibleReferenceHorizontalAlignment = when (
+        if (isLowerThird) appSettings.bibleSettings.primaryReferenceLowerThirdHorizontalAlignment
+        else appSettings.bibleSettings.primaryReferenceHorizontalAlignment
+    ) {
         Constants.LEFT -> Arrangement.Start
         Constants.RIGHT -> Arrangement.End
         else -> Arrangement.Center
     }
 
-    val secondaryBibleReferenceHorizontalAlignment =
-        when (appSettings.bibleSettings.secondaryReferenceHorizontalAlignment) {
-            Constants.LEFT -> Arrangement.Start
-            Constants.RIGHT -> Arrangement.End
-            else -> Arrangement.Center
-        }
+    val secondaryBibleHorizontalAlignment = when (
+        if (isLowerThird) appSettings.bibleSettings.secondaryBibleLowerThirdHorizontalAlignment
+        else appSettings.bibleSettings.secondaryBibleHorizontalAlignment
+    ) {
+        Constants.LEFT -> Arrangement.Start
+        Constants.RIGHT -> Arrangement.End
+        else -> Arrangement.Center
+    }
+
+    val secondaryBibleReferenceHorizontalAlignment = when (
+        if (isLowerThird) appSettings.bibleSettings.secondaryReferenceLowerThirdHorizontalAlignment
+        else appSettings.bibleSettings.secondaryReferenceHorizontalAlignment
+    ) {
+        Constants.LEFT -> Arrangement.Start
+        Constants.RIGHT -> Arrangement.End
+        else -> Arrangement.Center
+    }
 
     val primaryBibleReferencePosition = appSettings.bibleSettings.primaryReferencePosition
     val secondaryBibleReferencePosition = appSettings.bibleSettings.secondaryReferencePosition

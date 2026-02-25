@@ -42,6 +42,7 @@ data class SongSettings(
     val wordWrap: Boolean = true,
     val lyricsAlignment: String = Constants.MIDDLE,
     val lyricsHorizontalAlignment: String = Constants.CENTER,
+    val lyricsLowerThirdHorizontalAlignment: String = Constants.CENTER,
     val lyricsColor: String = "#FFFFFF", // White
 
     // Song number settings
@@ -71,6 +72,7 @@ data class BibleSettings(
     val primaryBibleFontSize: Int = 70,
     val primaryBibleLowerThirdFontSize: Int = 32,
     val primaryBibleHorizontalAlignment: String = Constants.CENTER,
+    val primaryBibleLowerThirdHorizontalAlignment: String = Constants.CENTER,
 
     // Primary Bible book reference
     val primaryReferenceColor: String = "#FFFFFF",
@@ -79,6 +81,7 @@ data class BibleSettings(
     val primaryReferenceLowerThirdFontSize: Int = 24,
     val primaryReferencePosition: String = "Above", // "Above" or "Below"
     val primaryReferenceHorizontalAlignment: String = Constants.CENTER,
+    val primaryReferenceLowerThirdHorizontalAlignment: String = Constants.CENTER,
     val primaryShowAbbreviation: Boolean = false,
 
     // Secondary Bible text
@@ -87,6 +90,7 @@ data class BibleSettings(
     val secondaryBibleFontSize: Int = 70,
     val secondaryBibleLowerThirdFontSize: Int = 28,
     val secondaryBibleHorizontalAlignment: String = Constants.CENTER,
+    val secondaryBibleLowerThirdHorizontalAlignment: String = Constants.CENTER,
 
     // Secondary Bible book reference
     val secondaryReferenceColor: String = "#CCCCCC",
@@ -95,6 +99,7 @@ data class BibleSettings(
     val secondaryReferenceLowerThirdFontSize: Int = 24,
     val secondaryReferencePosition: String = "Above", // "Above" or "Below"
     val secondaryReferenceHorizontalAlignment: String = Constants.CENTER,
+    val secondaryReferenceLowerThirdHorizontalAlignment: String = Constants.CENTER,
     val secondaryShowAbbreviation: Boolean = false,
 
     // Language for captions

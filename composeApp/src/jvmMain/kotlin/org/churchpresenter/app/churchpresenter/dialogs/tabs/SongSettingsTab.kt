@@ -608,17 +608,32 @@ private fun RightColumn(
     }
 
     SettingRow(stringResource(Res.string.horizontal_alignment), width = 200.dp) {
-        HorizontalAlignmentButtons(
-            selectedAlignment = settings.songSettings.lyricsHorizontalAlignment,
-            onAlignmentChange = { storedValue ->
-                onSettingsChange { s ->
-                    s.copy(songSettings = s.songSettings.copy(lyricsHorizontalAlignment = storedValue))
-                }
-            },
-            leftValue = Constants.LEFT,
-            centerValue = Constants.CENTER,
-            rightValue = Constants.RIGHT
-        )
+        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(stringResource(Res.string.full_screen), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(80.dp))
+                HorizontalAlignmentButtons(
+                    selectedAlignment = settings.songSettings.lyricsHorizontalAlignment,
+                    onAlignmentChange = { storedValue ->
+                        onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsHorizontalAlignment = storedValue)) }
+                    },
+                    leftValue = Constants.LEFT,
+                    centerValue = Constants.CENTER,
+                    rightValue = Constants.RIGHT
+                )
+            }
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(stringResource(Res.string.lower_third_size), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(80.dp))
+                HorizontalAlignmentButtons(
+                    selectedAlignment = settings.songSettings.lyricsLowerThirdHorizontalAlignment,
+                    onAlignmentChange = { storedValue ->
+                        onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsLowerThirdHorizontalAlignment = storedValue)) }
+                    },
+                    leftValue = Constants.LEFT,
+                    centerValue = Constants.CENTER,
+                    rightValue = Constants.RIGHT
+                )
+            }
+        }
     }
 
     Spacer(modifier = Modifier.height(20.dp))

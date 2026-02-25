@@ -558,15 +558,24 @@ private fun RightColumn(
         }
     }
     SettingRow(stringResource(Res.string.horizontal_alignment), width = 200.dp) {
-        HorizontalAlignmentButtons(
-            selectedAlignment = settings.bibleSettings.primaryBibleHorizontalAlignment,
-            onAlignmentChange = { value ->
-                onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(primaryBibleHorizontalAlignment = value)) }
-            },
-            leftValue = Constants.LEFT,
-            centerValue = Constants.CENTER,
-            rightValue = Constants.RIGHT
-        )
+        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(stringResource(Res.string.full_screen), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(80.dp))
+                HorizontalAlignmentButtons(
+                    selectedAlignment = settings.bibleSettings.primaryBibleHorizontalAlignment,
+                    onAlignmentChange = { value -> onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(primaryBibleHorizontalAlignment = value)) } },
+                    leftValue = Constants.LEFT, centerValue = Constants.CENTER, rightValue = Constants.RIGHT
+                )
+            }
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(stringResource(Res.string.lower_third_size), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(80.dp))
+                HorizontalAlignmentButtons(
+                    selectedAlignment = settings.bibleSettings.primaryBibleLowerThirdHorizontalAlignment,
+                    onAlignmentChange = { value -> onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(primaryBibleLowerThirdHorizontalAlignment = value)) } },
+                    leftValue = Constants.LEFT, centerValue = Constants.CENTER, rightValue = Constants.RIGHT
+                )
+            }
+        }
     }
 
     Spacer(modifier = Modifier.height(20.dp))
@@ -635,15 +644,24 @@ private fun RightColumn(
         )
     }
     SettingRow(stringResource(Res.string.horizontal_alignment), width = 200.dp) {
-        HorizontalAlignmentButtons(
-            selectedAlignment = settings.bibleSettings.primaryReferenceHorizontalAlignment,
-            onAlignmentChange = { value ->
-                onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(primaryReferenceHorizontalAlignment = value)) }
-            },
-            leftValue = Constants.LEFT,
-            centerValue = Constants.CENTER,
-            rightValue = Constants.RIGHT
-        )
+        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(stringResource(Res.string.full_screen), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(80.dp))
+                HorizontalAlignmentButtons(
+                    selectedAlignment = settings.bibleSettings.primaryReferenceHorizontalAlignment,
+                    onAlignmentChange = { value -> onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(primaryReferenceHorizontalAlignment = value)) } },
+                    leftValue = Constants.LEFT, centerValue = Constants.CENTER, rightValue = Constants.RIGHT
+                )
+            }
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(stringResource(Res.string.lower_third_size), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(80.dp))
+                HorizontalAlignmentButtons(
+                    selectedAlignment = settings.bibleSettings.primaryReferenceLowerThirdHorizontalAlignment,
+                    onAlignmentChange = { value -> onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(primaryReferenceLowerThirdHorizontalAlignment = value)) } },
+                    leftValue = Constants.LEFT, centerValue = Constants.CENTER, rightValue = Constants.RIGHT
+                )
+            }
+        }
     }
     Row(modifier = Modifier.fillMaxWidth().padding(vertical = 5.dp), verticalAlignment = Alignment.CenterVertically) {
         Checkbox(
@@ -715,15 +733,24 @@ private fun RightColumn(
         }
     }
     SettingRow(stringResource(Res.string.horizontal_alignment), width = 200.dp) {
-        HorizontalAlignmentButtons(
-            selectedAlignment = settings.bibleSettings.secondaryBibleHorizontalAlignment,
-            onAlignmentChange = { value ->
-                onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(secondaryBibleHorizontalAlignment = value)) }
-            },
-            leftValue = Constants.LEFT,
-            centerValue = Constants.CENTER,
-            rightValue = Constants.RIGHT
-        )
+        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(stringResource(Res.string.full_screen), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(80.dp))
+                HorizontalAlignmentButtons(
+                    selectedAlignment = settings.bibleSettings.secondaryBibleHorizontalAlignment,
+                    onAlignmentChange = { value -> onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(secondaryBibleHorizontalAlignment = value)) } },
+                    leftValue = Constants.LEFT, centerValue = Constants.CENTER, rightValue = Constants.RIGHT
+                )
+            }
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(stringResource(Res.string.lower_third_size), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(80.dp))
+                HorizontalAlignmentButtons(
+                    selectedAlignment = settings.bibleSettings.secondaryBibleLowerThirdHorizontalAlignment,
+                    onAlignmentChange = { value -> onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(secondaryBibleLowerThirdHorizontalAlignment = value)) } },
+                    leftValue = Constants.LEFT, centerValue = Constants.CENTER, rightValue = Constants.RIGHT
+                )
+            }
+        }
     }
 
     Spacer(modifier = Modifier.height(20.dp))
@@ -792,15 +819,24 @@ private fun RightColumn(
         )
     }
     SettingRow(stringResource(Res.string.horizontal_alignment), width = 200.dp) {
-        HorizontalAlignmentButtons(
-            selectedAlignment = settings.bibleSettings.secondaryReferenceHorizontalAlignment,
-            onAlignmentChange = { value ->
-                onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(secondaryReferenceHorizontalAlignment = value)) }
-            },
-            leftValue = Constants.LEFT,
-            centerValue = Constants.CENTER,
-            rightValue = Constants.RIGHT
-        )
+        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(stringResource(Res.string.full_screen), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(80.dp))
+                HorizontalAlignmentButtons(
+                    selectedAlignment = settings.bibleSettings.secondaryReferenceHorizontalAlignment,
+                    onAlignmentChange = { value -> onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(secondaryReferenceHorizontalAlignment = value)) } },
+                    leftValue = Constants.LEFT, centerValue = Constants.CENTER, rightValue = Constants.RIGHT
+                )
+            }
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(stringResource(Res.string.lower_third_size), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(80.dp))
+                HorizontalAlignmentButtons(
+                    selectedAlignment = settings.bibleSettings.secondaryReferenceLowerThirdHorizontalAlignment,
+                    onAlignmentChange = { value -> onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(secondaryReferenceLowerThirdHorizontalAlignment = value)) } },
+                    leftValue = Constants.LEFT, centerValue = Constants.CENTER, rightValue = Constants.RIGHT
+                )
+            }
+        }
     }
     Row(modifier = Modifier.fillMaxWidth().padding(vertical = 5.dp), verticalAlignment = Alignment.CenterVertically) {
         Checkbox(
