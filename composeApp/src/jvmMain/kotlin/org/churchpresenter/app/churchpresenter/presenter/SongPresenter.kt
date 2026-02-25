@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
@@ -40,6 +41,7 @@ fun SongPresenter(
     modifier: Modifier = Modifier,
     lyricSection: LyricSection,
     appSettings: AppSettings,
+    isLowerThird: Boolean = false,
 ) {
     val titleFontFamily = remember(appSettings.songSettings.titleFontType) {
         systemFontFamilyOrDefault(appSettings.songSettings.titleFontType)
@@ -137,8 +139,16 @@ fun SongPresenter(
             Modifier
                 .fillMaxSize()
                 .padding(start = leftOffSet, end = rightOffSet, top = topOffSet, bottom = bottomOffSet),
-            contentAlignment = contentAlignment
+            contentAlignment = if (isLowerThird) Alignment.BottomCenter else contentAlignment
         ) {
+            // When lower third mode: wrap content in a box capped at 1/3 screen height, pinned to bottom
+            val innerModifier = if (isLowerThird)
+                Modifier
+                    .fillMaxWidth()
+                    .fillMaxHeight(0.333f)
+                    .align(Alignment.BottomCenter)
+            else
+                Modifier
             // ...existing code...
             val alignment = when (appSettings.songSettings.songNumberPosition) {
                 Constants.TOP_LEFT -> Alignment.TopStart
@@ -148,58 +158,32 @@ fun SongPresenter(
             }
             val shouldShowTitle = shouldShowText(appSettings.songSettings.titleDisplay, lyricSection)
             val shouldShowSongNumber = shouldShowText(appSettings.songSettings.showNumber, lyricSection)
-            if (shouldShowSongNumber) {
-                Text(
-                    modifier = Modifier.wrapContentWidth().align(alignment),
-                    fontFamily = titleFontFamily,
-                    fontSize = scaledSongNumberFontSize,
-                    text = lyricSection.songNumber.toString(),
-                    color = songNumberColor
-                )
-            }
-            Column(modifier = Modifier.wrapContentHeight()) {
-                if (shouldShowTitle && appSettings.songSettings.titlePosition == Constants.ABOVE_VERSE) {
-                    Row(
-                        Modifier.fillMaxWidth(),
-                        horizontalArrangement = titleHorizontalAlignment
-                    ) {
-                        Text(
-                            modifier = Modifier.wrapContentWidth(),
-                            fontFamily = titleFontFamily,
-                            fontSize = scaledTitleFontSize,
-                            text = lyricSection.title,
-                            color = titleColor
-                        )
-                    }
-                }
 
-                lyricSection.lines.forEachIndexed { _, line ->
-                    Row(
-                        Modifier.fillMaxWidth(),
-                        horizontalArrangement = lyricsHorizontalAlignment
-                    ) {
-                        Text(
-                            modifier = Modifier.wrapContentWidth(),
-                            fontFamily = lyricsFontFamily,
-                            fontSize = scaledLyricsFontSize,
-                            softWrap = appSettings.songSettings.wordWrap,
-                            text = line,
-                            color = lyricsColor
-                        )
-                    }
+            Box(modifier = innerModifier) {
+                if (shouldShowSongNumber) {
+                    Text(
+                        modifier = Modifier.wrapContentWidth().align(alignment),
+                        fontFamily = titleFontFamily,
+                        fontSize = scaledSongNumberFontSize,
+                        text = lyricSection.songNumber.toString(),
+                        color = songNumberColor
+                    )
                 }
-                if (shouldShowTitle && appSettings.songSettings.titlePosition == Constants.BELOW_VERSE) {
-                    Row(
-                        Modifier.fillMaxWidth(),
-                        horizontalArrangement = titleHorizontalAlignment
-                    ) {
-                        Text(
-                            modifier = Modifier.wrapContentWidth(),
-                            fontFamily = titleFontFamily,
-                            fontSize = scaledTitleFontSize,
-                            text = lyricSection.title,
-                            color = titleColor
-                        )
+                Column(modifier = Modifier.wrapContentHeight()) {
+                    if (shouldShowTitle && appSettings.songSettings.titlePosition == Constants.ABOVE_VERSE) {
+                        Row(Modifier.fillMaxWidth(), horizontalArrangement = titleHorizontalAlignment) {
+                            Text(modifier = Modifier.wrapContentWidth(), fontFamily = titleFontFamily, fontSize = scaledTitleFontSize, text = lyricSection.title, color = titleColor)
+                        }
+                    }
+                    lyricSection.lines.forEachIndexed { _, line ->
+                        Row(Modifier.fillMaxWidth(), horizontalArrangement = lyricsHorizontalAlignment) {
+                            Text(modifier = Modifier.wrapContentWidth(), fontFamily = lyricsFontFamily, fontSize = scaledLyricsFontSize, softWrap = appSettings.songSettings.wordWrap, text = line, color = lyricsColor)
+                        }
+                    }
+                    if (shouldShowTitle && appSettings.songSettings.titlePosition == Constants.BELOW_VERSE) {
+                        Row(Modifier.fillMaxWidth(), horizontalArrangement = titleHorizontalAlignment) {
+                            Text(modifier = Modifier.wrapContentWidth(), fontFamily = titleFontFamily, fontSize = scaledTitleFontSize, text = lyricSection.title, color = titleColor)
+                        }
                     }
                 }
             }

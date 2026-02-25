@@ -81,14 +81,7 @@ fun LowerThirdPresenter(
 
     val s = appSettings.streamingSettings
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(
-                start = s.windowLeft.dp,
-                end = s.windowRight.dp,
-                top = s.windowTop.dp,
-                bottom = s.windowBottom.dp
-            ),
+        modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.BottomCenter
     ) {
         Image(
@@ -99,6 +92,12 @@ fun LowerThirdPresenter(
             contentDescription = null,
             contentScale = ContentScale.FillHeight,
             modifier = Modifier
+                .padding(
+                    start = s.windowLeft.dp,
+                    end = s.windowRight.dp,
+                    top = s.windowTop.dp,
+                    bottom = s.windowBottom.dp
+                )
                 .fillMaxWidth()
                 .fillMaxHeight(0.333f)
         )

@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
@@ -39,6 +40,7 @@ fun BiblePresenter(
     modifier: Modifier = Modifier,
     selectedVerses: List<SelectedVerse>,
     appSettings: AppSettings,
+    isLowerThird: Boolean = false,
 ) {
     val primaryBibleFontStyle = remember(appSettings.bibleSettings.primaryBibleFontType) {
         systemFontFamilyOrDefault(appSettings.bibleSettings.primaryBibleFontType)
@@ -170,9 +172,17 @@ fun BiblePresenter(
             modifier
                 .fillMaxSize()
                 .padding(start = leftOffSet, end = rightOffSet, top = topOffSet, bottom = bottomOffSet),
-            contentAlignment = contentAlignment
+            contentAlignment = if (isLowerThird) Alignment.BottomCenter else contentAlignment
         ) {
-            Column {
+            val innerModifier = if (isLowerThird)
+                Modifier
+                    .fillMaxWidth()
+                    .fillMaxHeight(0.333f)
+                    .align(Alignment.BottomCenter)
+            else
+                Modifier.align(Alignment.Center)
+
+            Column(modifier = innerModifier) {
                 // Primary Bible
                 if (primaryBibleReferencePosition == Constants.POSITION_ABOVE) {
                     Row(

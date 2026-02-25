@@ -36,6 +36,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.churchpresenter.app.churchpresenter.data.Language
 import org.churchpresenter.app.churchpresenter.data.SettingsManager
+import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.dialogs.OptionsDialog
 import org.churchpresenter.app.churchpresenter.presenter.BiblePresenter
 import org.churchpresenter.app.churchpresenter.presenter.LowerThirdPresenter
@@ -259,10 +260,18 @@ fun main() {
                             when (presentingMode) {
                                 Presenting.BIBLE ->
                                     if (screenAssignment.showBible)
-                                        BiblePresenter(selectedVerses = selectedVerses, appSettings = appSettings)
+                                        BiblePresenter(
+                                            selectedVerses = selectedVerses,
+                                            appSettings = appSettings,
+                                            isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD
+                                        )
                                 Presenting.LYRICS ->
                                     if (screenAssignment.showSongs)
-                                        SongPresenter(lyricSection = lyricSection, appSettings = appSettings)
+                                        SongPresenter(
+                                            lyricSection = lyricSection,
+                                            appSettings = appSettings,
+                                            isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD
+                                        )
                                 Presenting.PICTURES ->
                                     if (screenAssignment.showPictures)
                                         PicturePresenter(imagePath = selectedImagePath, animationType = animationType, transitionDuration = transitionDuration)
