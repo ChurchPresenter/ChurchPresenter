@@ -87,6 +87,11 @@ fun SongsTab(
 ) {
     val viewModel = remember { SongsViewModel(appSettings) }
 
+    // Reload songs whenever the storage directory changes (e.g. after settings are saved)
+    LaunchedEffect(appSettings.songSettings.storageDirectory) {
+        viewModel.updateSettings(appSettings)
+    }
+
     DisposableEffect(Unit) {
         onDispose { viewModel.dispose() }
     }

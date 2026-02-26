@@ -83,6 +83,15 @@ fun BibleTab(
 ) {
     val viewModel = remember { BibleViewModel(appSettings) }
 
+    // Reload bibles whenever storage directory or bible selection changes (e.g. after settings saved)
+    LaunchedEffect(
+        appSettings.bibleSettings.storageDirectory,
+        appSettings.bibleSettings.primaryBible,
+        appSettings.bibleSettings.secondaryBible
+    ) {
+        viewModel.updateSettings(appSettings)
+    }
+
     DisposableEffect(Unit) {
         onDispose { viewModel.dispose() }
     }

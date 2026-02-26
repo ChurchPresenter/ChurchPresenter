@@ -493,6 +493,8 @@
     <string name="lottie_pause_duration">Pause duration (ms)</string>
     <string name="lottie_play_next">Play Next</string>
     <string name="lottie_run_to_end">Run to End</string>
+    <string name="song_transition_settings">Transition</string>
+    <string name="bible_transition_settings">Transition</string>
     <string name="license_title">License Agreement — GNU General Public License v3</string>
     <string name="license_accept_button">I Accept</string>
     <string name="license_decline_button">Decline &amp; Exit</string>

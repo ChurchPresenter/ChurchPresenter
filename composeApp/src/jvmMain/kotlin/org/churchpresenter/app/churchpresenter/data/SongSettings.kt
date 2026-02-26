@@ -50,7 +50,11 @@ data class SongSettings(
     val songNumberLowerThirdFontSize: Int = 12,
     val showNumber: String = Constants.FIRST_PAGE,
     val songNumberPosition: String = Constants.BOTTOM_RIGHT,
-    val songNumberColor: String = "#FFFFFF" // White
+    val songNumberColor: String = "#FFFFFF", // White
+
+    // Transition animation
+    val animationType: String = Constants.ANIMATION_CROSSFADE,
+    val transitionDuration: Float = 500f
 )
 
 @Serializable
@@ -104,7 +108,11 @@ data class BibleSettings(
     val secondaryShowAbbreviation: Boolean = false,
 
     // Language for captions
-    val captionLanguage: String = "Interface" // "Interface" or "Database"
+    val captionLanguage: String = "Interface", // "Interface" or "Database"
+
+    // Transition animation
+    val animationType: String = Constants.ANIMATION_CROSSFADE,
+    val transitionDuration: Float = 500f
 )
 
 @Serializable

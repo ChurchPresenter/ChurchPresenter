@@ -1,5 +1,13 @@
 package org.churchpresenter.app.churchpresenter
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.togetherWith
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.compose.runtime.CompositionLocalProvider
@@ -47,6 +55,7 @@ import org.churchpresenter.app.churchpresenter.presenter.PicturePresenter
 import org.churchpresenter.app.churchpresenter.presenter.SlidePresenter
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.presenter.SongPresenter
+import org.churchpresenter.app.churchpresenter.models.AnimationType
 import org.churchpresenter.app.churchpresenter.ui.theme.AppThemeWrapper
 import org.churchpresenter.app.churchpresenter.ui.theme.LanguageProvider
 import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
@@ -56,6 +65,7 @@ import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.app.churchpresenter.composables.preWarmJavaFX
 import org.jetbrains.compose.resources.stringResource
 import java.util.Locale
+
 
 fun main() {
     // Pre-warm JavaFX on a background thread before UI starts
@@ -119,6 +129,7 @@ fun main() {
         val presentingMode by presenterManager.presentingMode
         val selectedVerses by presenterManager.selectedVerses
         val lyricSection by presenterManager.lyricSection
+        val lyricSectionVersion by presenterManager.lyricSectionVersion
         val selectedImagePath by presenterManager.selectedImagePath
         val selectedSlide by presenterManager.selectedSlide
         val animationType by presenterManager.animationType
@@ -198,7 +209,10 @@ fun main() {
                             theme = theme,
                             settingsManager = settingsManager,
                             onDismiss = { showOptionsDialog = false },
-                            onSave = { appSettings = it },
+                            onSave = { updated ->
+                                appSettings = updated
+                                settingsManager.saveSettings(updated)
+                            },
                             onIdentifyScreen = {
                                 identifyingScreen = true
                                 coroutineScope.launch {
@@ -272,19 +286,58 @@ fun main() {
                         ) {
                             when (presentingMode) {
                                 Presenting.BIBLE ->
-                                    if (screenAssignment.showBible)
-                                        BiblePresenter(
-                                            selectedVerses = selectedVerses,
-                                            appSettings = appSettings,
-                                            isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD
-                                        )
+                                    if (screenAssignment.showBible) {
+                                        val bibleAnimType = when (appSettings.bibleSettings.animationType) {
+                                            Constants.ANIMATION_FADE -> AnimationType.FADE
+                                            Constants.ANIMATION_SLIDE_LEFT -> AnimationType.SLIDE_LEFT
+                                            Constants.ANIMATION_SLIDE_RIGHT -> AnimationType.SLIDE_RIGHT
+                                            Constants.ANIMATION_NONE -> AnimationType.NONE
+                                            else -> AnimationType.CROSSFADE
+                                        }
+                                        val bibleDuration = appSettings.bibleSettings.transitionDuration.toInt()
+                                        when (bibleAnimType) {
+                                            AnimationType.CROSSFADE -> Crossfade(targetState = selectedVerses, animationSpec = tween(bibleDuration), label = "BibleCrossfade") { verses ->
+                                                BiblePresenter(selectedVerses = verses, appSettings = appSettings, isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD)
+                                            }
+                                            AnimationType.FADE -> AnimatedContent(targetState = selectedVerses, transitionSpec = { fadeIn(tween(bibleDuration)) togetherWith fadeOut(tween(bibleDuration)) }, label = "BibleFade") { verses ->
+                                                BiblePresenter(selectedVerses = verses, appSettings = appSettings, isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD)
+                                            }
+                                            AnimationType.SLIDE_LEFT -> AnimatedContent(targetState = selectedVerses, transitionSpec = { slideInHorizontally(tween(bibleDuration)) { it } togetherWith slideOutHorizontally(tween(bibleDuration)) { -it } }, label = "BibleSlideLeft") { verses ->
+                                                BiblePresenter(selectedVerses = verses, appSettings = appSettings, isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD)
+                                            }
+                                            AnimationType.SLIDE_RIGHT -> AnimatedContent(targetState = selectedVerses, transitionSpec = { slideInHorizontally(tween(bibleDuration)) { -it } togetherWith slideOutHorizontally(tween(bibleDuration)) { it } }, label = "BibleSlideRight") { verses ->
+                                                BiblePresenter(selectedVerses = verses, appSettings = appSettings, isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD)
+                                            }
+                                            AnimationType.NONE -> BiblePresenter(selectedVerses = selectedVerses, appSettings = appSettings, isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD)
+                                        }
+                                    }
                                 Presenting.LYRICS ->
-                                    if (screenAssignment.showSongs)
-                                        SongPresenter(
-                                            lyricSection = lyricSection,
-                                            appSettings = appSettings,
-                                            isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD
-                                        )
+                                    if (screenAssignment.showSongs) {
+                                        val songAnimType = when (appSettings.songSettings.animationType) {
+                                            Constants.ANIMATION_FADE -> AnimationType.FADE
+                                            Constants.ANIMATION_SLIDE_LEFT -> AnimationType.SLIDE_LEFT
+                                            Constants.ANIMATION_SLIDE_RIGHT -> AnimationType.SLIDE_RIGHT
+                                            Constants.ANIMATION_NONE -> AnimationType.NONE
+                                            else -> AnimationType.CROSSFADE
+                                        }
+                                        val songDuration = appSettings.songSettings.transitionDuration.toInt()
+                                        val songKey = lyricSection to lyricSectionVersion
+                                        when (songAnimType) {
+                                            AnimationType.CROSSFADE -> Crossfade(targetState = songKey, animationSpec = tween(songDuration), label = "SongCrossfade") { (section, _) ->
+                                                SongPresenter(lyricSection = section, appSettings = appSettings, isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD)
+                                            }
+                                            AnimationType.FADE -> AnimatedContent(targetState = songKey, transitionSpec = { fadeIn(tween(songDuration)) togetherWith fadeOut(tween(songDuration)) }, label = "SongFade") { (section, _) ->
+                                                SongPresenter(lyricSection = section, appSettings = appSettings, isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD)
+                                            }
+                                            AnimationType.SLIDE_LEFT -> AnimatedContent(targetState = songKey, transitionSpec = { slideInHorizontally(tween(songDuration)) { it } togetherWith slideOutHorizontally(tween(songDuration)) { -it } }, label = "SongSlideLeft") { (section, _) ->
+                                                SongPresenter(lyricSection = section, appSettings = appSettings, isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD)
+                                            }
+                                            AnimationType.SLIDE_RIGHT -> AnimatedContent(targetState = songKey, transitionSpec = { slideInHorizontally(tween(songDuration)) { -it } togetherWith slideOutHorizontally(tween(songDuration)) { it } }, label = "SongSlideRight") { (section, _) ->
+                                                SongPresenter(lyricSection = section, appSettings = appSettings, isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD)
+                                            }
+                                            AnimationType.NONE -> SongPresenter(lyricSection = lyricSection, appSettings = appSettings, isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD)
+                                        }
+                                    }
                                 Presenting.PICTURES ->
                                     if (screenAssignment.showPictures)
                                         PicturePresenter(imagePath = selectedImagePath, animationType = animationType, transitionDuration = transitionDuration)

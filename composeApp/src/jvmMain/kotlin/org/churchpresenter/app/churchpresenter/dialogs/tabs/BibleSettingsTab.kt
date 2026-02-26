@@ -23,6 +23,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Slider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -75,7 +76,18 @@ import churchpresenter.composeapp.generated.resources.show_in_lower_third
 import churchpresenter.composeapp.generated.resources.show_abbreviation
 import churchpresenter.composeapp.generated.resources.storage_directory
 import churchpresenter.composeapp.generated.resources.vertical_alignment
+import churchpresenter.composeapp.generated.resources.animation_crossfade
+import churchpresenter.composeapp.generated.resources.animation_fade
+import churchpresenter.composeapp.generated.resources.animation_none
+import churchpresenter.composeapp.generated.resources.animation_slide_left
+import churchpresenter.composeapp.generated.resources.animation_slide_right
+import churchpresenter.composeapp.generated.resources.animation_type
+import churchpresenter.composeapp.generated.resources.bible_transition_settings
+import churchpresenter.composeapp.generated.resources.milliseconds_suffix
+import churchpresenter.composeapp.generated.resources.transition_duration
+import org.churchpresenter.app.churchpresenter.models.AnimationType
 import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
+import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
 import org.churchpresenter.app.churchpresenter.composables.DropdownSettingsField
 import org.churchpresenter.app.churchpresenter.composables.FontSettingsDropdown
 import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
@@ -470,48 +482,83 @@ private fun LeftColumn(
 
     Spacer(modifier = Modifier.height(20.dp))
 
-    // Background
-    SectionHeader(stringResource(Res.string.background))
+    // Transition Section
+    SectionHeader(stringResource(Res.string.bible_transition_settings))
+
     Spacer(modifier = Modifier.height(8.dp))
-    SettingRow(stringResource(Res.string.background_type)) {
-        DropdownSettingsField(
-            value = when (settings.backgroundSettings.bibleBackground.backgroundType) {
-                Constants.BACKGROUND_DEFAULT -> backgroundDefaultStr
-                Constants.BACKGROUND_COLOR -> backgroundColorStr
-                Constants.BACKGROUND_IMAGE -> backgroundImageStr
-                else -> backgroundDefaultStr
+
+    val durationLabel = stringResource(Res.string.transition_duration)
+    val msSuffix = stringResource(Res.string.milliseconds_suffix)
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = durationLabel,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.width(120.dp)
+        )
+        Slider(
+            value = settings.bibleSettings.transitionDuration,
+            onValueChange = { rawValue ->
+                val snapped = (rawValue / 50f).toInt() * 50f
+                onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(transitionDuration = snapped)) }
             },
-            options = listOf(backgroundDefaultStr, backgroundColorStr, backgroundImageStr),
-            onValueChange = { displayValue ->
-                val value = when (displayValue) {
-                    backgroundDefaultStr -> Constants.BACKGROUND_DEFAULT
-                    backgroundColorStr -> Constants.BACKGROUND_COLOR
-                    backgroundImageStr -> Constants.BACKGROUND_IMAGE
-                    else -> Constants.BACKGROUND_DEFAULT
+            valueRange = 100f..2000f,
+            steps = 37,
+            modifier = Modifier.weight(1f)
+        )
+        Text(
+            text = "${settings.bibleSettings.transitionDuration.toInt()}$msSuffix",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.width(60.dp)
+        )
+    }
+
+    Spacer(modifier = Modifier.height(4.dp))
+
+    SettingRow(stringResource(Res.string.animation_type)) {
+        val crossfadeText = stringResource(Res.string.animation_crossfade)
+        val fadeText = stringResource(Res.string.animation_fade)
+        val slideLeftText = stringResource(Res.string.animation_slide_left)
+        val slideRightText = stringResource(Res.string.animation_slide_right)
+        val noneText = stringResource(Res.string.animation_none)
+
+        val currentType = when (settings.bibleSettings.animationType) {
+            Constants.ANIMATION_FADE -> AnimationType.FADE
+            Constants.ANIMATION_SLIDE_LEFT -> AnimationType.SLIDE_LEFT
+            Constants.ANIMATION_SLIDE_RIGHT -> AnimationType.SLIDE_RIGHT
+            Constants.ANIMATION_NONE -> AnimationType.NONE
+            else -> AnimationType.CROSSFADE
+        }
+
+        DropdownSelector(
+            modifier = Modifier.width(200.dp),
+            label = "",
+            items = listOf(crossfadeText, fadeText, slideLeftText, slideRightText, noneText),
+            selected = when (currentType) {
+                AnimationType.CROSSFADE -> crossfadeText
+                AnimationType.FADE -> fadeText
+                AnimationType.SLIDE_LEFT -> slideLeftText
+                AnimationType.SLIDE_RIGHT -> slideRightText
+                AnimationType.NONE -> noneText
+            },
+            onSelectedChange = { selected ->
+                val newType = when (selected) {
+                    fadeText -> Constants.ANIMATION_FADE
+                    slideLeftText -> Constants.ANIMATION_SLIDE_LEFT
+                    slideRightText -> Constants.ANIMATION_SLIDE_RIGHT
+                    noneText -> Constants.ANIMATION_NONE
+                    else -> Constants.ANIMATION_CROSSFADE
                 }
-                onSettingsChange { s ->
-                    s.copy(backgroundSettings = s.backgroundSettings.copy(
-                        bibleBackground = s.backgroundSettings.bibleBackground.copy(backgroundType = value)
-                    ))
-                }
+                onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(animationType = newType)) }
             }
         )
     }
 
-    if (settings.backgroundSettings.bibleBackground.backgroundType == Constants.BACKGROUND_COLOR) {
-        SettingRow(stringResource(Res.string.background_color)) {
-            ColorPickerField(
-                color = settings.backgroundSettings.bibleBackground.backgroundColor,
-                onColorChange = {
-                    onSettingsChange { s ->
-                        s.copy(backgroundSettings = s.backgroundSettings.copy(
-                            bibleBackground = s.backgroundSettings.bibleBackground.copy(backgroundColor = it)
-                        ))
-                    }
-                }
-            )
-        }
-    }
+    Spacer(modifier = Modifier.height(20.dp))
 }
 
 @Composable

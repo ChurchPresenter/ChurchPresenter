@@ -80,7 +80,19 @@ import churchpresenter.composeapp.generated.resources.top_left
 import churchpresenter.composeapp.generated.resources.top_right
 import churchpresenter.composeapp.generated.resources.vertical_alignment
 import churchpresenter.composeapp.generated.resources.word_wrap
+import churchpresenter.composeapp.generated.resources.animation_crossfade
+import churchpresenter.composeapp.generated.resources.animation_fade
+import churchpresenter.composeapp.generated.resources.animation_none
+import churchpresenter.composeapp.generated.resources.animation_slide_left
+import churchpresenter.composeapp.generated.resources.animation_slide_right
+import churchpresenter.composeapp.generated.resources.animation_type
+import churchpresenter.composeapp.generated.resources.milliseconds_suffix
+import churchpresenter.composeapp.generated.resources.song_transition_settings
+import churchpresenter.composeapp.generated.resources.transition_duration
+import androidx.compose.material3.Slider
 import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
+import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
+import org.churchpresenter.app.churchpresenter.models.AnimationType
 import org.churchpresenter.app.churchpresenter.composables.DropdownSettingsField
 import org.churchpresenter.app.churchpresenter.composables.FontSettingsDropdown
 import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
@@ -473,6 +485,86 @@ private fun LeftColumn(
             leftValue = Constants.LEFT,
             centerValue = Constants.CENTER,
             rightValue = Constants.RIGHT
+        )
+    }
+
+    Spacer(modifier = Modifier.height(20.dp))
+
+    // Transition Section
+    SectionHeader(stringResource(Res.string.song_transition_settings))
+
+    Spacer(modifier = Modifier.height(8.dp))
+
+    // Transition duration slider
+    val durationLabel = stringResource(Res.string.transition_duration)
+    val msSuffix = stringResource(Res.string.milliseconds_suffix)
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = durationLabel,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.width(120.dp)
+        )
+        Slider(
+            value = settings.songSettings.transitionDuration,
+            onValueChange = { rawValue ->
+                val snapped = (rawValue / 50f).toInt() * 50f
+                onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(transitionDuration = snapped)) }
+            },
+            valueRange = 100f..2000f,
+            steps = 37,
+            modifier = Modifier.weight(1f)
+        )
+        Text(
+            text = "${settings.songSettings.transitionDuration.toInt()}$msSuffix",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.width(60.dp)
+        )
+    }
+
+    Spacer(modifier = Modifier.height(4.dp))
+
+    // Animation type dropdown
+    SettingRow(stringResource(Res.string.animation_type)) {
+        val crossfadeText = stringResource(Res.string.animation_crossfade)
+        val fadeText = stringResource(Res.string.animation_fade)
+        val slideLeftText = stringResource(Res.string.animation_slide_left)
+        val slideRightText = stringResource(Res.string.animation_slide_right)
+        val noneText = stringResource(Res.string.animation_none)
+
+        val currentType = when (settings.songSettings.animationType) {
+            Constants.ANIMATION_FADE -> AnimationType.FADE
+            Constants.ANIMATION_SLIDE_LEFT -> AnimationType.SLIDE_LEFT
+            Constants.ANIMATION_SLIDE_RIGHT -> AnimationType.SLIDE_RIGHT
+            Constants.ANIMATION_NONE -> AnimationType.NONE
+            else -> AnimationType.CROSSFADE
+        }
+
+        DropdownSelector(
+            modifier = Modifier.width(200.dp),
+            label = "",
+            items = listOf(crossfadeText, fadeText, slideLeftText, slideRightText, noneText),
+            selected = when (currentType) {
+                AnimationType.CROSSFADE -> crossfadeText
+                AnimationType.FADE -> fadeText
+                AnimationType.SLIDE_LEFT -> slideLeftText
+                AnimationType.SLIDE_RIGHT -> slideRightText
+                AnimationType.NONE -> noneText
+            },
+            onSelectedChange = { selected ->
+                val newType = when (selected) {
+                    fadeText -> Constants.ANIMATION_FADE
+                    slideLeftText -> Constants.ANIMATION_SLIDE_LEFT
+                    slideRightText -> Constants.ANIMATION_SLIDE_RIGHT
+                    noneText -> Constants.ANIMATION_NONE
+                    else -> Constants.ANIMATION_CROSSFADE
+                }
+                onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(animationType = newType)) }
+            }
         )
     }
 }
