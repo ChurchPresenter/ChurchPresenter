@@ -80,6 +80,7 @@ input[type=file]{font-size:12px;color:#aaa}
         <option value="2">Style 2 — Boxed</option>
         <option value="3">Style 3 — Circular</option>
         <option value="4">Style 4 — Banner</option>
+        <option value="5">Style 5 — Gradient Bar</option>
       </select>
     </div>
     <div>
@@ -510,7 +511,7 @@ function renderLibrary() {
     container.innerHTML = '<div class="library-empty">No presets saved yet.</div>';
     return;
   }
-  const styleNames = { '1': 'Style 1', '2': 'Style 2', '3': 'Style 3', '4': 'Style 4' };
+  const styleNames = { '1': 'Style 1', '2': 'Style 2', '3': 'Style 3', '4': 'Style 4', '5': 'Style 5' };
   container.innerHTML = presets.map((p, i) => {
     const s = styleNames[p.config.style] || p.config.style;
     const a = (p.config.align || '').charAt(0).toUpperCase() + (p.config.align || '').slice(1);
@@ -880,6 +881,31 @@ function makeFill(color, opacity) {
     o: { a: 0, k: opacity !== undefined ? opacity : 100 },
     r: 1,
     bm: 0
+  };
+}
+
+function makeGradientFill(color, opacity, startPt, endPt) {
+  const r = color[0], g = color[1], b = color[2];
+  return {
+    ty: 'gf',
+    o: { a: 0, k: opacity !== undefined ? opacity : 100 },
+    r: 1,
+    bm: 0,
+    t: 1,
+    s: { a: 0, k: startPt },
+    e: { a: 0, k: endPt },
+    g: {
+      p: 2,
+      k: {
+        a: 0,
+        k: [
+          0, r, g, b,
+          1, r, g, b,
+          0, 1,
+          1, 0
+        ]
+      }
+    }
   };
 }
 
@@ -1875,9 +1901,9 @@ function generateStyle4(builder, cfg) {
     ], inF, holdF, outF, EASING);
 
     builder.addTextLayer('Info',
-      makeTextData(infoText, fontFamily, infoSizePx, parseInt(infoWeight), infoCLottie, infoTransform, justify, infoColorAlpha),
+      makeTextData(infoText, fontFamily, infoSizePx, parseInt(infoWeight), infoCLottie, infoTransform, justify),
       {
-        o: LottieBuilder.staticProp(100), r: LottieBuilder.staticProp(0),
+        o: LottieBuilder.staticProp(infoColorAlpha), r: LottieBuilder.staticProp(0),
         p: LottieBuilder.animatedProp(infoPosKFs),
         a: LottieBuilder.staticProp([0, 0, 0]), s: LottieBuilder.staticProp([100, 100, 100])
       }, { tt: 1 }
@@ -1974,6 +2000,385 @@ function generateStyle4(builder, cfg) {
 }
 
 // ============================================================
+// STYLE 5 — GRADIENT BAR
+// Two bars (name + info) that slide in/out horizontally.
+// Background: linear gradient from bgColor/accentColor to transparent.
+// Gradient direction follows alignment.
+// ============================================================
+
+function generateStyle5(builder, cfg) {
+  const { canvasW, canvasH, align, nameText, infoText, fontFamily, baseSize,
+    nameSize, infoSize, nameWeight, infoWeight, nameTransform, infoTransform,
+    nameColor, infoColor, accentColor, bgColor, borderColor, corners,
+    borderThickness, bgEnabled, logoEnabled, logoSize, logoData, logoW, logoH,
+    marginH, marginV, lineSpacing, shadowEnabled, hideName, hideInfo,
+    nameColorAlpha, infoColorAlpha, accentColorAlpha, bgColorAlpha, borderColorAlpha } = cfg;
+
+  const inF = builder.inFrames;
+  const holdF = builder.holdFrames;
+  const outF = builder.outFrames;
+
+  const nameSizePx = emToPx(nameSize, baseSize);
+  const infoSizePx = emToPx(infoSize, baseSize);
+  const nameM = measureText(nameText, fontFamily, nameSizePx, nameWeight, nameTransform);
+  const infoM = measureText(infoText, fontFamily, infoSizePx, infoWeight, infoTransform);
+
+  const paddingX = emToPx(1.0, baseSize);
+  const paddingY = emToPx(0.5, baseSize);
+  const lineSpacingPx = emToPx(lineSpacing, baseSize);
+  const marginHPx = remToPx(marginH, baseSize);
+  const marginVPx = remToPx(marginV, baseSize);
+  const cornerPx = emToPx(corners, baseSize);
+  const borderPx = borderThickness * baseSize * 0.1;
+
+  const bgLottie = hexToLottie(bgColor);
+  const accentLottie = hexToLottie(accentColor);
+  const borderLottie = hexToLottie(borderColor);
+  const nameCLottie = hexToLottie(nameColor);
+  const infoCLottie = hexToLottie(infoColor);
+
+  const isRight = align === 'right';
+  const isCenter = align === 'center';
+
+  // Bar dimensions — extra width for gradient fade area
+  const gradientExtra = emToPx(3.0, baseSize);
+  const nameBarW = nameM.width + paddingX * 2 + gradientExtra;
+  const nameBarH = nameSizePx + paddingY * 2;
+  const infoBarW = infoM.width + paddingX * 2 + gradientExtra;
+  const infoBarH = infoSizePx + paddingY * 1.5;
+
+  // Vertical positioning
+  const nameBlockH = hideName ? 0 : nameBarH;
+  const infoBlockH = hideInfo ? 0 : infoBarH;
+  const gap = (!hideName && !hideInfo) ? lineSpacingPx : 0;
+  const totalBlockH = nameBlockH + gap + infoBlockH;
+  const baseY = canvasH - marginVPx - totalBlockH / 2;
+  const nameBgCY = hideName ? baseY : baseY - (gap + infoBlockH) / 2;
+  const infoBarCY = hideInfo ? baseY : baseY + (nameBlockH + gap) / 2;
+
+  // Logo space calculation (needed before horizontal positioning)
+  const logoSizePx = emToPx(logoSize, baseSize);
+  const logoMargin = emToPx(0.5, baseSize);
+  const hasLogo = logoEnabled && logoData;
+  const logoBgSize = logoSizePx + emToPx(0.8, baseSize);
+  const logoSpace = hasLogo ? logoBgSize + logoMargin : 0;
+
+  // Horizontal positioning — bars offset by logo space on the solid edge
+  let nameBarCX, infoBarCX;
+  let nameTextX, infoTextX;
+  let justify;
+
+  if (isCenter) {
+    const centerOffset = logoSpace / 2;
+    nameBarCX = canvasW / 2 + centerOffset;
+    infoBarCX = canvasW / 2 + centerOffset;
+    nameTextX = canvasW / 2 + centerOffset;
+    infoTextX = canvasW / 2 + centerOffset;
+    justify = 2;
+  } else if (isRight) {
+    nameBarCX = canvasW - marginHPx - logoSpace - nameBarW / 2;
+    infoBarCX = canvasW - marginHPx - logoSpace - infoBarW / 2;
+    nameTextX = canvasW - marginHPx - logoSpace - paddingX;
+    infoTextX = canvasW - marginHPx - logoSpace - paddingX;
+    justify = 1;
+  } else {
+    nameBarCX = marginHPx + logoSpace + nameBarW / 2;
+    infoBarCX = marginHPx + logoSpace + infoBarW / 2;
+    nameTextX = marginHPx + logoSpace + paddingX;
+    infoTextX = marginHPx + logoSpace + paddingX;
+    justify = 0;
+  }
+
+  const nameTextY = nameBgCY + nameSizePx * 0.35;
+  const infoTextY = infoBarCY + infoSizePx * 0.35;
+
+  const slideDistance = canvasW * 0.6;
+
+  // Gradient only fades in the gradientExtra zone; text area stays solid.
+  // For center: 4-stop gradient with fade zones on both edges.
+  function makeCenterGradientFill(color, opacity, barW) {
+    const r = color[0], g = color[1], b = color[2];
+    const fadeHalf = gradientExtra / 2;
+    // Fade zone: left edge to fadeHalf, then solid, then fade from barW-fadeHalf to right edge
+    const fadeRatio = fadeHalf / barW; // fraction of bar that fades on each side
+    return {
+      ty: 'gf',
+      o: { a: 0, k: opacity !== undefined ? opacity : 100 },
+      r: 1, bm: 0, t: 1,
+      s: { a: 0, k: [-barW / 2, 0] },
+      e: { a: 0, k: [barW / 2, 0] },
+      g: {
+        p: 4,
+        k: {
+          a: 0,
+          k: [
+            0, r, g, b,
+            fadeRatio, r, g, b,
+            1 - fadeRatio, r, g, b,
+            1, r, g, b,
+            0, 0,
+            fadeRatio, 1,
+            1 - fadeRatio, 1,
+            1, 0
+          ]
+        }
+      }
+    };
+  }
+
+  function makeBarGradient(color, opacity, barW) {
+    if (isCenter) {
+      return makeCenterGradientFill(color, opacity, barW);
+    } else if (isRight) {
+      // Solid on right (past text), fades left. Fade only in gradientExtra zone.
+      return makeGradientFill(color, opacity, [-barW / 2 + gradientExtra, 0], [-barW / 2, 0]);
+    } else {
+      // Solid on left (past text), fades right. Fade only in gradientExtra zone.
+      return makeGradientFill(color, opacity, [barW / 2 - gradientExtra, 0], [barW / 2, 0]);
+    }
+  }
+
+  // ============= LAYERS (top to bottom render order) =============
+
+  // --- Name mask + text ---
+  if (!hideName) {
+    const nameMaskW = nameM.width + paddingX * 2;
+    const nameMaskSizeKFs = buildKeyframes([
+      { pct: 0, value: [0, nameBarH] },
+      { pct: 15, value: [0, nameBarH] },
+      { pct: 55, value: [nameMaskW, nameBarH] }
+    ], inF, holdF, outF, EASING);
+
+    let nameMaskX, nameMaskAnchorX;
+    if (isCenter) {
+      nameMaskX = canvasW / 2 + logoSpace / 2;
+      nameMaskAnchorX = 0;
+    } else if (isRight) {
+      nameMaskX = canvasW - marginHPx - logoSpace;
+      nameMaskAnchorX = nameMaskW / 2;
+    } else {
+      nameMaskX = marginHPx + logoSpace;
+      nameMaskAnchorX = -nameMaskW / 2;
+    }
+
+    builder.addShapeLayer('Name Mask', [makeGroup([
+      makeAnimatedRect(nameMaskSizeKFs, 0), makeFill([1, 1, 1])
+    ])], {
+      o: LottieBuilder.staticProp(100), r: LottieBuilder.staticProp(0),
+      p: LottieBuilder.staticProp([nameMaskX, nameBgCY, 0]),
+      a: LottieBuilder.staticProp([nameMaskAnchorX, 0, 0]),
+      s: LottieBuilder.staticProp([100, 100, 100])
+    }, { td: 1 });
+
+    builder.addFont(fontFamily, parseInt(nameWeight));
+    const nameSlideDir = isRight ? 1 : -1;
+    const nameSlideOffset = isCenter ? -slideDistance : nameSlideDir * slideDistance;
+    const namePosKFs = buildKeyframes([
+      { pct: 0, value: [nameTextX + nameSlideOffset, nameTextY, 0] },
+      { pct: 15, value: [nameTextX + nameSlideOffset, nameTextY, 0] },
+      { pct: 55, value: [nameTextX, nameTextY, 0] }
+    ], inF, holdF, outF, EASING);
+
+    builder.addTextLayer('Name',
+      makeTextData(nameText, fontFamily, nameSizePx, parseInt(nameWeight), nameCLottie, nameTransform, justify),
+      {
+        o: LottieBuilder.staticProp(nameColorAlpha), r: LottieBuilder.staticProp(0),
+        p: LottieBuilder.animatedProp(namePosKFs),
+        a: LottieBuilder.staticProp([0, 0, 0]), s: LottieBuilder.staticProp([100, 100, 100])
+      }, { tt: 1 }
+    );
+  }
+
+  // --- Info mask + text ---
+  if (!hideInfo) {
+    const infoMaskW = infoM.width + paddingX * 2;
+    const infoMaskSizeKFs = buildKeyframes([
+      { pct: 0, value: [0, infoBarH] },
+      { pct: 40, value: [0, infoBarH] },
+      { pct: 80, value: [infoMaskW, infoBarH] }
+    ], inF, holdF, outF, EASING);
+
+    let infoMaskX, infoMaskAnchorX;
+    if (isCenter) {
+      infoMaskX = canvasW / 2 + logoSpace / 2;
+      infoMaskAnchorX = 0;
+    } else if (isRight) {
+      infoMaskX = canvasW - marginHPx - logoSpace;
+      infoMaskAnchorX = infoMaskW / 2;
+    } else {
+      infoMaskX = marginHPx + logoSpace;
+      infoMaskAnchorX = -infoMaskW / 2;
+    }
+
+    builder.addShapeLayer('Info Mask', [makeGroup([
+      makeAnimatedRect(infoMaskSizeKFs, 0), makeFill([1, 1, 1])
+    ])], {
+      o: LottieBuilder.staticProp(100), r: LottieBuilder.staticProp(0),
+      p: LottieBuilder.staticProp([infoMaskX, infoBarCY, 0]),
+      a: LottieBuilder.staticProp([infoMaskAnchorX, 0, 0]),
+      s: LottieBuilder.staticProp([100, 100, 100])
+    }, { td: 1 });
+
+    builder.addFont(fontFamily, parseInt(infoWeight));
+    const infoSlideDir = isRight ? 1 : -1;
+    const infoSlideOffset = isCenter ? slideDistance : infoSlideDir * slideDistance;
+    const infoPosKFs = buildKeyframes([
+      { pct: 0, value: [infoTextX + infoSlideOffset, infoTextY, 0] },
+      { pct: 40, value: [infoTextX + infoSlideOffset, infoTextY, 0] },
+      { pct: 80, value: [infoTextX, infoTextY, 0] }
+    ], inF, holdF, outF, EASING);
+
+    builder.addTextLayer('Info',
+      makeTextData(infoText, fontFamily, infoSizePx, parseInt(infoWeight), infoCLottie, infoTransform, justify),
+      {
+        o: LottieBuilder.staticProp(infoColorAlpha), r: LottieBuilder.staticProp(0),
+        p: LottieBuilder.animatedProp(infoPosKFs),
+        a: LottieBuilder.staticProp([0, 0, 0]), s: LottieBuilder.staticProp([100, 100, 100])
+      }, { tt: 1 }
+    );
+  }
+
+  // --- Logo (optional) — on the solid edge, with solid accent BG ---
+  if (hasLogo) {
+    const logoAspect = logoW && logoH ? logoW / logoH : 1;
+    const lH = logoSizePx;
+    const lW = lH * logoAspect;
+    const _logoScale = (lH / logoH) * 100;
+
+    // Logo sits on the solid edge, inside the margin
+    let logoCX;
+    if (isCenter) {
+      const maxBarW = Math.max(nameBarW, infoBarW);
+      const centerOffset = logoSpace / 2;
+      logoCX = canvasW / 2 + centerOffset - maxBarW / 2 - logoMargin - logoBgSize / 2;
+    } else if (isRight) {
+      logoCX = canvasW - marginHPx - logoBgSize / 2;
+    } else {
+      logoCX = marginHPx + logoBgSize / 2;
+    }
+    const logoCY = (nameBgCY + infoBarCY) / 2;
+
+    const logoScaleKFs = buildKeyframes([
+      { pct: 0, value: [0, 0, 100] },
+      { pct: 30, value: [_logoScale, _logoScale, 100] },
+      { pct: 100, value: [_logoScale, _logoScale, 100] }
+    ], inF, holdF, outF, EASING);
+
+    builder.addImageAsset('logo', logoData, logoW, logoH);
+    builder.addImageLayer('Logo', 'logo', {
+      o: LottieBuilder.staticProp(100), r: LottieBuilder.staticProp(0),
+      p: LottieBuilder.staticProp([logoCX, logoCY, 0]),
+      a: LottieBuilder.staticProp([logoW / 2, logoH / 2, 0]),
+      s: LottieBuilder.animatedProp(logoScaleKFs)
+    });
+
+    // Solid accent BG behind logo
+    const logoBgScaleKFs = buildKeyframes([
+      { pct: 0, value: [0, 0, 100] },
+      { pct: 25, value: [100, 100, 100] },
+      { pct: 100, value: [100, 100, 100] }
+    ], inF, holdF, outF, EASING);
+
+    const logoBgItems = [
+      makeRect(logoBgSize, logoBgSize, cornerPx),
+      makeFill(accentLottie, accentColorAlpha)
+    ];
+    if (borderPx > 0) {
+      logoBgItems.push(makeStroke(borderLottie, borderPx, borderColorAlpha));
+    }
+
+    builder.addShapeLayer('Logo BG', [makeGroup(logoBgItems)], {
+      o: LottieBuilder.staticProp(100), r: LottieBuilder.staticProp(0),
+      p: LottieBuilder.staticProp([logoCX, logoCY, 0]),
+      a: LottieBuilder.staticProp([0, 0, 0]),
+      s: LottieBuilder.animatedProp(logoBgScaleKFs)
+    });
+  }
+
+  // --- Name gradient bar background ---
+  if (!hideName) {
+    const nameBarItems = [
+      makeRect(nameBarW, nameBarH, cornerPx),
+      makeBarGradient(bgLottie, 100, nameBarW)
+    ];
+    if (borderPx > 0) {
+      nameBarItems.push(makeStroke(borderLottie, borderPx, borderColorAlpha));
+    }
+
+    let nameBarTransform;
+    if (isCenter) {
+      const nameBarScaleKFs = buildKeyframes([
+        { pct: 0, value: [0, 100, 100] },
+        { pct: 10, value: [0, 100, 100] },
+        { pct: 50, value: [100, 100, 100] }
+      ], inF, holdF, outF, EASING);
+      nameBarTransform = {
+        o: LottieBuilder.staticProp(bgColorAlpha), r: LottieBuilder.staticProp(0),
+        p: LottieBuilder.staticProp([nameBarCX, nameBgCY, 0]),
+        a: LottieBuilder.staticProp([0, 0, 0]),
+        s: LottieBuilder.animatedProp(nameBarScaleKFs)
+      };
+    } else {
+      const nameBarSlideStart = isRight ? slideDistance : -slideDistance;
+      const nameBarPosKFs = buildKeyframes([
+        { pct: 0, value: [nameBarCX + nameBarSlideStart, nameBgCY, 0] },
+        { pct: 10, value: [nameBarCX + nameBarSlideStart, nameBgCY, 0] },
+        { pct: 50, value: [nameBarCX, nameBgCY, 0] }
+      ], inF, holdF, outF, EASING);
+      nameBarTransform = {
+        o: LottieBuilder.staticProp(bgColorAlpha), r: LottieBuilder.staticProp(0),
+        p: LottieBuilder.animatedProp(nameBarPosKFs),
+        a: LottieBuilder.staticProp([0, 0, 0]),
+        s: LottieBuilder.staticProp([100, 100, 100])
+      };
+    }
+
+    builder.addShapeLayer('Name Gradient Bar', [makeGroup(nameBarItems)], nameBarTransform);
+  }
+
+  // --- Info gradient bar background ---
+  if (!hideInfo) {
+    const infoBarItems = [
+      makeRect(infoBarW, infoBarH, cornerPx),
+      makeBarGradient(accentLottie, 100, infoBarW)
+    ];
+    if (borderPx > 0) {
+      infoBarItems.push(makeStroke(borderLottie, borderPx, borderColorAlpha));
+    }
+
+    let infoBarTransform;
+    if (isCenter) {
+      const infoBarScaleKFs = buildKeyframes([
+        { pct: 0, value: [0, 100, 100] },
+        { pct: 35, value: [0, 100, 100] },
+        { pct: 75, value: [100, 100, 100] }
+      ], inF, holdF, outF, EASING);
+      infoBarTransform = {
+        o: LottieBuilder.staticProp(accentColorAlpha), r: LottieBuilder.staticProp(0),
+        p: LottieBuilder.staticProp([infoBarCX, infoBarCY, 0]),
+        a: LottieBuilder.staticProp([0, 0, 0]),
+        s: LottieBuilder.animatedProp(infoBarScaleKFs)
+      };
+    } else {
+      const infoBarSlideStart = isRight ? slideDistance : -slideDistance;
+      const infoBarPosKFs = buildKeyframes([
+        { pct: 0, value: [infoBarCX + infoBarSlideStart, infoBarCY, 0] },
+        { pct: 35, value: [infoBarCX + infoBarSlideStart, infoBarCY, 0] },
+        { pct: 75, value: [infoBarCX, infoBarCY, 0] }
+      ], inF, holdF, outF, EASING);
+      infoBarTransform = {
+        o: LottieBuilder.staticProp(accentColorAlpha), r: LottieBuilder.staticProp(0),
+        p: LottieBuilder.animatedProp(infoBarPosKFs),
+        a: LottieBuilder.staticProp([0, 0, 0]),
+        s: LottieBuilder.staticProp([100, 100, 100])
+      };
+    }
+
+    builder.addShapeLayer('Info Gradient Bar', [makeGroup(infoBarItems)], infoBarTransform);
+  }
+}
+
+// ============================================================
 // MAIN GENERATION + PREVIEW
 // ============================================================
 
@@ -1995,6 +2400,7 @@ function generate() {
     case '2': generateStyle2(builder, cfg); break;
     case '3': generateStyle3(builder, cfg); break;
     case '4': generateStyle4(builder, cfg); break;
+    case '5': generateStyle5(builder, cfg); break;
   }
 
   currentJSON = builder.toJSON();
