@@ -7,6 +7,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -14,22 +15,18 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Slider
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -42,45 +39,32 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.ic_close
-import churchpresenter.composeapp.generated.resources.lottie_no_presets
-import churchpresenter.composeapp.generated.resources.lottie_pause_frame
-import churchpresenter.composeapp.generated.resources.lottie_pause_frame_none
-import churchpresenter.composeapp.generated.resources.lottie_preset_add_pair
-import churchpresenter.composeapp.generated.resources.lottie_preset_delete
-import churchpresenter.composeapp.generated.resources.lottie_preset_import_file
-import churchpresenter.composeapp.generated.resources.lottie_preset_label
-import churchpresenter.composeapp.generated.resources.lottie_preset_label_hint
-import churchpresenter.composeapp.generated.resources.lottie_preset_no_file
-import churchpresenter.composeapp.generated.resources.lottie_preset_save
-import churchpresenter.composeapp.generated.resources.lottie_presets
-import churchpresenter.composeapp.generated.resources.lottie_presets_list
-import churchpresenter.composeapp.generated.resources.lottie_select_preset
-import churchpresenter.composeapp.generated.resources.replace
-import churchpresenter.composeapp.generated.resources.search
-import churchpresenter.composeapp.generated.resources.streaming_settings
-import churchpresenter.composeapp.generated.resources.top
-import churchpresenter.composeapp.generated.resources.left
-import churchpresenter.composeapp.generated.resources.right
+import churchpresenter.composeapp.generated.resources.browse_directory
 import churchpresenter.composeapp.generated.resources.bottom
 import churchpresenter.composeapp.generated.resources.display_lower_third
-import churchpresenter.composeapp.generated.resources.screen
+import churchpresenter.composeapp.generated.resources.import_lottie_file
+import churchpresenter.composeapp.generated.resources.left
+import churchpresenter.composeapp.generated.resources.lottie_files
+import churchpresenter.composeapp.generated.resources.lottie_select_preset
+import churchpresenter.composeapp.generated.resources.no_directory_selected
+import churchpresenter.composeapp.generated.resources.no_lottie_files
+import churchpresenter.composeapp.generated.resources.remove_lottie_file
+import churchpresenter.composeapp.generated.resources.right
+import churchpresenter.composeapp.generated.resources.storage_directory
+import churchpresenter.composeapp.generated.resources.top
 import churchpresenter.composeapp.generated.resources.window_position
 import io.github.alexzhirkevich.compottie.LottieCompositionSpec
 import io.github.alexzhirkevich.compottie.animateLottieCompositionAsState
 import io.github.alexzhirkevich.compottie.rememberLottieComposition
 import io.github.alexzhirkevich.compottie.rememberLottiePainter
 import kotlinx.coroutines.delay
-import org.churchpresenter.app.churchpresenter.composables.ImageIconButton
 import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
 import org.churchpresenter.app.churchpresenter.data.AppSettings
-import org.churchpresenter.app.churchpresenter.data.LottiePreset
-import org.churchpresenter.app.churchpresenter.data.LottieSearchReplacePair
-import org.jetbrains.compose.resources.painterResource
+import org.churchpresenter.app.churchpresenter.viewmodel.FileManager
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.app.churchpresenter.utils.createFileChooser
+import java.awt.Window
 import java.io.File
-import java.util.UUID
 import javax.swing.JFileChooser
 import javax.swing.filechooser.FileNameExtensionFilter
 import javax.swing.SwingUtilities
@@ -88,354 +72,198 @@ import javax.swing.SwingUtilities
 @Composable
 fun LowerThirdSettingsTab(
     settings: AppSettings,
-    lottiePresetsDir: File,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit
 ) {
-    // --- Preset importer state ---
-    var importSourcePath by remember { mutableStateOf("") }
-    var presetLabel by remember { mutableStateOf("") }
-    var importPairs by remember { mutableStateOf(listOf(LottieSearchReplacePair())) }
-    var importPauseFrame by remember { mutableStateOf(-1f) }
+    val fileManager = remember { FileManager() }
+    var refreshTrigger by remember { mutableStateOf(0) }
+    var selectedFile by remember { mutableStateOf<String?>(null) }
 
-    // --- Preview state ---
-    var selectedPreset by remember { mutableStateOf<LottiePreset?>(null) }
-    var previewIsPlaying by remember { mutableStateOf(false) }
-    var isDraggingSlider by remember { mutableStateOf(false) }
-
-    val searchLabel = stringResource(Res.string.search)
-    val replaceLabel = stringResource(Res.string.replace)
-
-    // Build preview JSON: from selected preset, or from current import form if file picked
-    var debouncedImportPath by remember { mutableStateOf(importSourcePath) }
-    var debouncedPairs by remember { mutableStateOf(importPairs) }
-    LaunchedEffect(importSourcePath, importPairs) {
-        delay(400)
-        debouncedImportPath = importSourcePath
-        debouncedPairs = importPairs
+    val lottieFolder = settings.streamingSettings.lowerThirdFolder
+    val lottieFilesInDirectory = remember(lottieFolder, refreshTrigger) {
+        if (lottieFolder.isEmpty()) emptyList()
+        else File(lottieFolder).takeIf { it.exists() && it.isDirectory }
+            ?.listFiles { f -> f.extension.lowercase() == "json" }
+            ?.map { it.name }?.sorted() ?: emptyList()
     }
 
-    val previewJsonContent = remember(selectedPreset, debouncedImportPath, debouncedPairs) {
-        when {
-            selectedPreset != null -> {
-                val f = File(lottiePresetsDir, selectedPreset!!.savedFileName)
-                if (!f.exists()) return@remember ""
-                var json = f.readText()
-                for (p in selectedPreset!!.searchReplacePairs) {
-                    if (p.search.isNotBlank()) json = replaceLottieTextInSettings(json, p.search, p.replace)
-                }
-                json
-            }
-            debouncedImportPath.isNotBlank() -> {
-                val f = File(debouncedImportPath)
-                if (!f.exists()) return@remember ""
-                var json = f.readText()
-                for (p in debouncedPairs) {
-                    if (p.search.isNotBlank()) json = replaceLottieTextInSettings(json, p.search, p.replace)
-                }
-                json
-            }
-            else -> ""
-        }
+    // Preview state — driven by selected file
+    var previewIsPlaying by remember { mutableStateOf(false) }
+    val importSourcePath = remember(selectedFile, lottieFolder) {
+        if (selectedFile != null && lottieFolder.isNotEmpty())
+            File(lottieFolder, selectedFile!!).absolutePath
+        else ""
+    }
+
+    var debouncedImportPath by remember { mutableStateOf(importSourcePath) }
+    LaunchedEffect(importSourcePath) {
+        delay(400)
+        debouncedImportPath = importSourcePath
+    }
+
+    val previewJsonContent = remember(debouncedImportPath) {
+        if (debouncedImportPath.isBlank()) return@remember ""
+        val f = File(debouncedImportPath)
+        if (!f.exists()) return@remember ""
+        f.readText()
     }
 
     val composition by rememberLottieComposition(key = previewJsonContent) {
         LottieCompositionSpec.JsonString(previewJsonContent.ifBlank { "{}" })
     }
-    val totalFrames = composition?.durationFrames?.toInt() ?: 0
     val progress by animateLottieCompositionAsState(
         composition = composition,
         isPlaying = previewIsPlaying,
         iterations = Int.MAX_VALUE
     )
     LaunchedEffect(previewJsonContent) {
-        previewIsPlaying = previewJsonContent.isNotBlank() && !isDraggingSlider
+        previewIsPlaying = previewJsonContent.isNotBlank()
     }
-    // While dragging show the slider frame; otherwise show the animated progress
-    val displayProgress = if (isDraggingSlider && importPauseFrame >= 0f) importPauseFrame else progress
 
-    // Main layout: left = editor, right = preview
+    // Dialog string resources (captured outside lambdas)
+    val noDirectorySelectedStr = stringResource(Res.string.no_directory_selected)
+    val noLottieFilesStr = stringResource(Res.string.no_lottie_files)
+
     Row(modifier = Modifier.fillMaxSize()) {
 
         // ── Left panel ──────────────────────────────────────────────
         Column(
             modifier = Modifier
-                .weight(1f)
-                .fillMaxHeight()
-                .verticalScroll(rememberScrollState())
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+                .weight(0.48f)
+                .widthIn(min = 300.dp, max = 450.dp)
+                .heightIn(min = 600.dp)
+                .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(4.dp))
+                .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f), RoundedCornerShape(4.dp))
+                .padding(start = 15.dp, end = 15.dp, top = 8.dp, bottom = 15.dp)
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(0.dp)
         ) {
-            // --- Preset importer ---
-            Text(
-                text = stringResource(Res.string.lottie_presets),
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-
-            // File picker row
+            // Storage Directory
+            SectionHeader(stringResource(Res.string.storage_directory))
+            Spacer(modifier = Modifier.height(8.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                OutlinedTextField(
-                    value = if (importSourcePath.isBlank()) stringResource(Res.string.lottie_preset_no_file)
-                            else File(importSourcePath).name,
-                    onValueChange = {},
-                    readOnly = true,
-                    singleLine = true,
-                    modifier = Modifier.weight(1f),
-                    textStyle = MaterialTheme.typography.bodySmall,
-                    label = { Text(stringResource(Res.string.lottie_preset_import_file), style = MaterialTheme.typography.labelSmall) }
+                Text(
+                    text = lottieFolder.ifEmpty { noDirectorySelectedStr },
+                    modifier = Modifier
+                        .weight(1f)
+                        .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(2.dp))
+                        .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f), RoundedCornerShape(2.dp))
+                        .padding(horizontal = 8.dp, vertical = 6.dp),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-                Button(
+                ModernButton(
+                    text = stringResource(Res.string.browse_directory),
+                    backgroundColor = MaterialTheme.colorScheme.primaryContainer,
                     onClick = {
                         SwingUtilities.invokeLater {
+                            val parentWindow = Window.getWindows().firstOrNull { it.isActive }
+                            val selectedDir = fileManager.chooseDirectory(
+                                currentDirectory = lottieFolder,
+                                parentWindow = parentWindow
+                            )
+                            selectedDir?.let { dir ->
+                                onSettingsChange { s ->
+                                    s.copy(streamingSettings = s.streamingSettings.copy(lowerThirdFolder = dir))
+                                }
+                                selectedFile = null
+                                refreshTrigger++
+                            }
+                        }
+                    }
+                )
+            }
+
+            Spacer(modifier = Modifier.height(15.dp))
+
+            // Lottie Files list
+            SectionHeader(stringResource(Res.string.lottie_files))
+            Spacer(modifier = Modifier.height(8.dp))
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp)
+                    .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f), RoundedCornerShape(2.dp))
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState())
+                        .background(MaterialTheme.colorScheme.surface)
+                        .padding(8.dp)
+                ) {
+                    if (lottieFilesInDirectory.isEmpty()) {
+                        Text(
+                            text = if (lottieFolder.isEmpty()) noDirectorySelectedStr else noLottieFilesStr,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    } else {
+                        lottieFilesInDirectory.forEach { fileName ->
+                            val isSelected = fileName == selectedFile
+                            Text(
+                                text = fileName,
+                                style = MaterialTheme.typography.bodySmall,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .background(
+                                        if (isSelected) MaterialTheme.colorScheme.primaryContainer
+                                        else Color.Transparent
+                                    )
+                                    .clickable { selectedFile = fileName }
+                                    .padding(vertical = 4.dp, horizontal = 8.dp),
+                                color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer
+                                        else MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Import / Remove buttons
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                ModernButton(
+                    text = stringResource(Res.string.import_lottie_file),
+                    backgroundColor = MaterialTheme.colorScheme.inverseSurface,
+                    onClick = {
+                        SwingUtilities.invokeLater {
+                            val parentWindow = Window.getWindows().firstOrNull { it.isActive }
+                            if (lottieFolder.isEmpty()) return@invokeLater
                             val chooser = createFileChooser {
                                 fileSelectionMode = JFileChooser.FILES_ONLY
                                 dialogTitle = "Select Lottie JSON File"
                                 fileFilter = FileNameExtensionFilter("Lottie JSON (*.json)", "json")
                             }
-                            if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
-                                importSourcePath = chooser.selectedFile.absolutePath
-                                selectedPreset = null // switch preview to import form
-                                if (presetLabel.isBlank()) {
-                                    presetLabel = chooser.selectedFile.nameWithoutExtension
-                                }
+                            if (chooser.showOpenDialog(parentWindow) == JFileChooser.APPROVE_OPTION) {
+                                val src = chooser.selectedFile
+                                src.copyTo(File(lottieFolder, src.name), overwrite = true)
+                                selectedFile = src.name
+                                refreshTrigger++
                             }
                         }
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
-                ) {
-                    Text(stringResource(Res.string.lottie_preset_import_file), style = MaterialTheme.typography.labelMedium)
-                }
-            }
-
-            // Label field
-            OutlinedTextField(
-                value = presetLabel,
-                onValueChange = { presetLabel = it },
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth(),
-                textStyle = MaterialTheme.typography.bodyMedium,
-                label = { Text(stringResource(Res.string.lottie_preset_label), style = MaterialTheme.typography.labelSmall) },
-                placeholder = { Text(stringResource(Res.string.lottie_preset_label_hint), style = MaterialTheme.typography.bodySmall) }
-            )
-
-            // Search/replace pairs
-            importPairs.forEachIndexed { index, pair ->
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    OutlinedTextField(
-                        value = pair.search,
-                        onValueChange = { v ->
-                            importPairs = importPairs.toMutableList().also { it[index] = it[index].copy(search = v) }
-                            selectedPreset = null
-                        },
-                        singleLine = true,
-                        modifier = Modifier.weight(1f),
-                        textStyle = MaterialTheme.typography.bodySmall,
-                        label = { Text(searchLabel, style = MaterialTheme.typography.labelSmall) }
-                    )
-                    Text("→", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f))
-                    OutlinedTextField(
-                        value = pair.replace,
-                        onValueChange = { v ->
-                            importPairs = importPairs.toMutableList().also { it[index] = it[index].copy(replace = v) }
-                            selectedPreset = null
-                        },
-                        singleLine = true,
-                        modifier = Modifier.weight(1f),
-                        textStyle = MaterialTheme.typography.bodySmall,
-                        label = { Text(replaceLabel, style = MaterialTheme.typography.labelSmall) }
-                    )
-                    if (importPairs.size > 1) {
-                        ImageIconButton(
-                            onClick = { importPairs = importPairs.toMutableList().also { it.removeAt(index) } },
-                            size = 36.dp
-                        ) {
-                            Icon(
-                                painter = painterResource(Res.drawable.ic_close),
-                                contentDescription = stringResource(Res.string.lottie_preset_delete),
-                                modifier = Modifier.size(16.dp),
-                                tint = MaterialTheme.colorScheme.error
-                            )
-                        }
                     }
-                }
-            }
-
-            // Pause frame slider
-            Column(modifier = Modifier.fillMaxWidth()) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = stringResource(Res.string.lottie_pause_frame),
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                    Text(
-                        text = if (importPauseFrame < 0f) stringResource(Res.string.lottie_pause_frame_none)
-                               else if (totalFrames > 0) "${(importPauseFrame * totalFrames).toInt()}"
-                               else "${(importPauseFrame * 100).toInt()}",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                }
-                Slider(
-                    value = if (importPauseFrame < 0f) 0f else importPauseFrame,
-                    onValueChange = {
-                        importPauseFrame = it
-                        selectedPreset = null
-                        isDraggingSlider = true
-                        previewIsPlaying = false
-                    },
-                    onValueChangeFinished = {
-                        isDraggingSlider = false
-                        if (previewJsonContent.isNotBlank()) previewIsPlaying = true
-                    },
-                    valueRange = 0f..1f,
-                    modifier = Modifier.fillMaxWidth()
                 )
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End
-                ) {
-                    TextButton(onClick = { importPauseFrame = -1f }) {
-                        Text(stringResource(Res.string.lottie_pause_frame_none), style = MaterialTheme.typography.labelSmall)
-                    }
-                }
-            }
-
-            // Add pair + Save buttons
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                TextButton(onClick = { importPairs = importPairs + LottieSearchReplacePair() }) {
-                    Text(stringResource(Res.string.lottie_preset_add_pair), style = MaterialTheme.typography.labelSmall)
-                }
-                Spacer(modifier = Modifier.weight(1f))
-                Button(
+                ModernButton(
+                    text = stringResource(Res.string.remove_lottie_file),
+                    backgroundColor = MaterialTheme.colorScheme.errorContainer,
                     onClick = {
-                        if (importSourcePath.isNotBlank() && presetLabel.isNotBlank()) {
-                            val id = UUID.randomUUID().toString()
-                            val savedFileName = "$id.json"
-                            val destFile = File(lottiePresetsDir, savedFileName)
-                            lottiePresetsDir.mkdirs()
-                            File(importSourcePath).copyTo(destFile, overwrite = true)
-                            val preset = LottiePreset(
-                                id = id,
-                                label = presetLabel,
-                                savedFileName = savedFileName,
-                                searchReplacePairs = importPairs.filter { it.search.isNotBlank() },
-                                pauseFrame = importPauseFrame
-                            )
-                            onSettingsChange { s ->
-                                s.copy(streamingSettings = s.streamingSettings.copy(
-                                    lottiePresets = s.streamingSettings.lottiePresets + preset
-                                ))
-                            }
-                            // Reset form, select new preset for preview
-                            selectedPreset = preset
-                            importSourcePath = ""
-                            presetLabel = ""
-                            importPairs = listOf(LottieSearchReplacePair())
-                            importPauseFrame = -1f
-                        }
-                    },
-                    enabled = importSourcePath.isNotBlank() && presetLabel.isNotBlank(),
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
-                ) {
-                    Text(stringResource(Res.string.lottie_preset_save), style = MaterialTheme.typography.labelMedium)
-                }
-            }
-
-            HorizontalDivider()
-
-            // --- Saved presets list ---
-            Text(
-                text = stringResource(Res.string.lottie_presets_list),
-                style = MaterialTheme.typography.titleSmall,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-
-            val presets = settings.streamingSettings.lottiePresets
-            if (presets.isEmpty()) {
-                Text(
-                    text = stringResource(Res.string.lottie_no_presets),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-                )
-            } else {
-                presets.sortedBy { it.label.lowercase() }.forEach { preset ->
-                    val isSelected = selectedPreset?.id == preset.id
-                    Surface(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable {
-                                selectedPreset = preset
-                                importSourcePath = ""
-                                importPauseFrame = preset.pauseFrame
-                            },
-                        shape = RoundedCornerShape(6.dp),
-                        color = if (isSelected) MaterialTheme.colorScheme.primaryContainer
-                                else MaterialTheme.colorScheme.surfaceVariant,
-                        tonalElevation = 1.dp
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 12.dp, vertical = 8.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text(
-                                    preset.label,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer
-                                            else MaterialTheme.colorScheme.onSurface
-                                )
-                                if (preset.searchReplacePairs.isNotEmpty()) {
-                                    Text(
-                                        text = preset.searchReplacePairs.joinToString(", ") { "${it.search} → ${it.replace}" },
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                                    )
-                                }
-                            }
-                            ImageIconButton(
-                                onClick = {
-                                    if (selectedPreset?.id == preset.id) selectedPreset = null
-                                    File(lottiePresetsDir, preset.savedFileName).delete()
-                                    onSettingsChange { s ->
-                                        s.copy(streamingSettings = s.streamingSettings.copy(
-                                            lottiePresets = s.streamingSettings.lottiePresets.filter { it.id != preset.id }
-                                        ))
-                                    }
-                                },
-                                size = 36.dp
-                            ) {
-                                Icon(
-                                    painter = painterResource(Res.drawable.ic_close),
-                                    contentDescription = stringResource(Res.string.lottie_preset_delete),
-                                    modifier = Modifier.size(16.dp),
-                                    tint = MaterialTheme.colorScheme.error
-                                )
-                            }
+                        val fname = selectedFile
+                        if (fname != null && lottieFolder.isNotEmpty()) {
+                            File(lottieFolder, fname).delete()
+                            selectedFile = null
+                            refreshTrigger++
                         }
                     }
-                }
+                )
             }
         }
+
+        Spacer(modifier = Modifier.width(10.dp))
 
         // ── Right panel — live preview ───────────────────────────────
         Column(
@@ -447,9 +275,7 @@ fun LowerThirdSettingsTab(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = selectedPreset?.label
-                    ?: if (importSourcePath.isNotBlank()) File(importSourcePath).nameWithoutExtension
-                       else stringResource(Res.string.lottie_select_preset),
+                text = selectedFile ?: stringResource(Res.string.lottie_select_preset),
                 style = MaterialTheme.typography.bodyMedium,
                 color = if (previewJsonContent.isNotBlank()) MaterialTheme.colorScheme.onSurface
                         else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
@@ -469,7 +295,7 @@ fun LowerThirdSettingsTab(
                     Image(
                         painter = rememberLottiePainter(
                             composition = composition,
-                            progress = { displayProgress }
+                            progress = { progress }
                         ),
                         contentDescription = null,
                         contentScale = ContentScale.Fit,
@@ -495,7 +321,6 @@ fun LowerThirdSettingsTab(
 
             val streaming = settings.streamingSettings
 
-            // Top offset field
             Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
                 Text(stringResource(Res.string.top), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 Spacer(Modifier.height(2.dp))
@@ -506,7 +331,6 @@ fun LowerThirdSettingsTab(
                 )
             }
 
-            // Middle row: Left / screen preview / Right
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -521,8 +345,6 @@ fun LowerThirdSettingsTab(
                         range = 0..10000
                     )
                 }
-
-                // Screen preview: dark rectangle with a bright strip at the bottom
                 Box(
                     modifier = Modifier
                         .weight(1f)
@@ -531,7 +353,6 @@ fun LowerThirdSettingsTab(
                         .background(Color(0xFF1A1A1A), RoundedCornerShape(4.dp))
                         .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(4.dp))
                 ) {
-                    // Lower third strip at the bottom (1/3 height)
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -547,7 +368,6 @@ fun LowerThirdSettingsTab(
                         )
                     }
                 }
-
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(stringResource(Res.string.right), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     Spacer(Modifier.height(2.dp))
@@ -559,7 +379,6 @@ fun LowerThirdSettingsTab(
                 }
             }
 
-            // Bottom offset field
             Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
                 Text(stringResource(Res.string.bottom), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 Spacer(Modifier.height(2.dp))
@@ -573,15 +392,38 @@ fun LowerThirdSettingsTab(
     }
 }
 
-private fun replaceLottieTextInSettings(json: String, search: String, replacement: String): String {
-    val escaped = Regex.escape(search)
-    val result = json.replace(Regex(""""t"\s*:\s*"$escaped"""")) { """"t":"$replacement"""" }
-    val charsStart = Regex(""""chars"\s*:\s*\[""").find(result) ?: return result
-    var depth = 1
-    var pos = charsStart.range.last + 1
-    while (pos < result.length && depth > 0) {
-        when (result[pos]) { '[' -> depth++; ']' -> depth-- }
-        if (depth > 0) pos++
+@Composable
+private fun SectionHeader(text: String) {
+    Column {
+        Text(
+            text = text,
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.padding(top = 2.dp, bottom = 8.dp)
+        )
+        HorizontalDivider(
+            color = MaterialTheme.colorScheme.outlineVariant,
+            thickness = 1.dp,
+            modifier = Modifier.fillMaxWidth()
+        )
     }
-    return """${result.substring(0, charsStart.range.first)}"chars":[]${result.substring(pos + 1)}"""
+}
+
+@Composable
+private fun ModernButton(
+    text: String,
+    backgroundColor: Color,
+    onClick: () -> Unit
+) {
+    Button(
+        onClick = onClick,
+        colors = ButtonDefaults.buttonColors(
+            containerColor = backgroundColor,
+            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+        ),
+        shape = RoundedCornerShape(4.dp),
+        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+    ) {
+        Text(text = text, style = MaterialTheme.typography.labelMedium)
+    }
 }

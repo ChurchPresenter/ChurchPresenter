@@ -163,7 +163,6 @@ fun OptionsDialog(
                             )
                             5 -> LowerThirdSettingsTab(
                                 settings = currentSettings,
-                                lottiePresetsDir = settingsManager.lottiePresetsDir,
                                 onSettingsChange = { updateFn ->
                                     currentSettings = updateFn(currentSettings)
                                 }
