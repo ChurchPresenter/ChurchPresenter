@@ -67,24 +67,12 @@ fun main() {
         var appSettings by remember { mutableStateOf(settingsManager.loadSettings()) }
         val presenterManager = remember { PresenterManager() }
 
-        // Show GPL2 license on first run — block everything until accepted
+        // Show GPL3 license on first run — block main window until accepted.
+        // All remember blocks are always evaluated to avoid state loss on recomposition.
         var licenseAccepted by remember { mutableStateOf(appSettings.licenseAccepted) }
 
-        if (!licenseAccepted) {
-            LicenseDialog(
-                onAccept = {
-                    appSettings = appSettings.copy(licenseAccepted = true)
-                    settingsManager.saveSettings(appSettings)
-                    licenseAccepted = true
-                },
-                onDecline = {
-                    exitApplication()
-                }
-            )
-            return@application
-        }
-
-        // Load saved language and set locale
+        // Load saved language and set locale — always initialised so state survives
+        // the licenseAccepted transition without being reset.
         var currentLanguage by remember {
             val savedLanguageCode = appSettings.language
             val language = Language.entries.find { it.code == savedLanguageCode } ?: Language.ENGLISH
@@ -141,7 +129,7 @@ fun main() {
         val lottiePauseDurationMs by presenterManager.lottiePauseDurationMs
         val lottieTrigger by presenterManager.lottieTrigger
 
-
+        if (licenseAccepted) {
         Window(
             onCloseRequest = ::exitApplication,
             title = stringResource(Res.string.app_name),
@@ -340,6 +328,18 @@ fun main() {
                     }
                 }
             }
+        }
+        } else {
+            // License not yet accepted — show the agreement window and block the rest of the app
+            LicenseDialog(
+                onAccept = {
+                    val updated = appSettings.copy(licenseAccepted = true)
+                    settingsManager.saveSettings(updated)
+                    appSettings = updated
+                    licenseAccepted = true
+                },
+                onDecline = { exitApplication() }
+            )
         }
     } // end application
 }
