@@ -324,7 +324,6 @@ fun MainDesktop(
                             Tabs.LOWER_THIRD -> LowerThirdTab(
                                 modifier = Modifier.fillMaxSize(),
                                 appSettings = appSettings,
-                                onSettingsChange = onSettingsChange,
                                 selectedLowerThirdItem = selectedLowerThirdItem,
                                 onAddToSchedule = { presetId, presetLabel, pauseAtFrame, pauseDurationMs ->
                                     scheduleActions.addLowerThird(presetId, presetLabel, pauseAtFrame, pauseDurationMs)
