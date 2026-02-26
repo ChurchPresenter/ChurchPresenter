@@ -45,6 +45,9 @@ input[type=file]{font-size:12px;color:#aaa}
 .preset-card .preset-meta{font-size:10px;color:#888;white-space:nowrap}
 .preset-card .btn-sm{flex-shrink:0}
 .library-empty{font-size:12px;color:#666;padding:12px 0;text-align:center}
+.collapsible{cursor:pointer;user-select:none}
+.collapsible:hover{color:#ff6b7a}
+.collapsible.open{content:''}
 .color-dots{display:flex;gap:3px;align-items:center}
 .color-dot{width:12px;height:12px;border-radius:50%;border:1px solid rgba(255,255,255,0.15)}
 </style>
@@ -54,10 +57,18 @@ input[type=file]{font-size:12px;color:#aaa}
 <div class="panel" id="config-panel">
   <h1>Lottie Lower Third Generator</h1>
 
-  <h2>Canvas</h2>
-  <div class="row">
-    <div><label>Width</label><input type="number" id="canvasW" value="1920" min="100" max="7680"></div>
-    <div><label>Height</label><input type="number" id="canvasH" value="1080" min="100" max="4320"></div>
+  <h2 class="collapsible" onclick="this.classList.toggle('open');this.nextElementSibling.style.display=this.classList.contains('open')?'block':'none';this.textContent=this.classList.contains('open')?'Canvas ▾':'Canvas ▸'">Canvas ▸</h2>
+  <div style="display:none">
+    <div class="row" style="margin-bottom:6px">
+      <button type="button" class="btn-sm btn-secondary canvas-preset" data-w="1920" data-h="1080">1080p</button>
+      <button type="button" class="btn-sm btn-secondary canvas-preset" data-w="3840" data-h="2160">4K</button>
+      <button type="button" class="btn-sm btn-secondary canvas-preset" data-w="1080" data-h="1920">1080p Vert</button>
+      <button type="button" class="btn-sm btn-secondary canvas-preset" data-w="2160" data-h="3840">4K Vert</button>
+    </div>
+    <div class="row">
+      <div><label>Width</label><input type="number" id="canvasW" value="1920" min="100" max="7680"></div>
+      <div><label>Height</label><input type="number" id="canvasH" value="1080" min="100" max="4320"></div>
+    </div>
   </div>
 
   <h2>Style &amp; Layout</h2>
@@ -68,6 +79,7 @@ input[type=file]{font-size:12px;color:#aaa}
         <option value="1">Style 1 — Bar</option>
         <option value="2">Style 2 — Boxed</option>
         <option value="3">Style 3 — Circular</option>
+        <option value="4">Style 4 — Banner</option>
       </select>
     </div>
     <div>
@@ -86,107 +98,130 @@ input[type=file]{font-size:12px;color:#aaa}
   <label>Info</label>
   <input type="text" id="infoText" value="Software Engineer">
 
-  <div class="row" style="margin-top:8px">
-    <div>
-      <label>Font</label>
-      <select id="fontFamily">
-        <option value="Open Sans">Open Sans</option>
-        <option value="Poppins">Poppins</option>
-        <option value="Raleway">Raleway</option>
-        <option value="Anonymous Pro">Anonymous Pro</option>
-        <option value="Patua One">Patua One</option>
-        <option value="Lora">Lora</option>
-        <option value="Abril Fatface">Abril Fatface</option>
-        <option value="Cookie">Cookie</option>
-        <option value="Oleo Script">Oleo Script</option>
-        <option value="Kalam">Kalam</option>
-        <option value="Fredoka One">Fredoka One</option>
-      </select>
+  <h2 class="collapsible" onclick="this.classList.toggle('open');this.nextElementSibling.style.display=this.classList.contains('open')?'block':'none';this.textContent=this.classList.contains('open')?'Text Style ▾':'Text Style ▸'" style="font-size:12px;margin-top:8px">Text Style ▸</h2>
+  <div style="display:none">
+    <div class="row" style="margin-top:8px">
+      <div>
+        <label>Font</label>
+        <select id="fontFamily">
+          <option value="Verdana" selected>Verdana</option>
+          <option value="Open Sans">Open Sans</option>
+          <option value="Poppins">Poppins</option>
+          <option value="Raleway">Raleway</option>
+          <option value="Anonymous Pro">Anonymous Pro</option>
+          <option value="Patua One">Patua One</option>
+          <option value="Lora">Lora</option>
+          <option value="Abril Fatface">Abril Fatface</option>
+          <option value="Cookie">Cookie</option>
+          <option value="Oleo Script">Oleo Script</option>
+          <option value="Kalam">Kalam</option>
+          <option value="Fredoka One">Fredoka One</option>
+        </select>
+      </div>
+      <div><label>Base Size (px)</label><input type="number" id="baseSize" value="24" min="10" max="80"></div>
     </div>
-    <div><label>Base Size (px)</label><input type="number" id="baseSize" value="24" min="10" max="80"></div>
-  </div>
 
-  <div class="row">
-    <div><label>Name Size (em)</label><input type="number" id="nameSize" value="1.2" min="0.5" max="4" step="0.1"></div>
-    <div><label>Info Size (em)</label><input type="number" id="infoSize" value="0.9" min="0.5" max="4" step="0.1"></div>
-  </div>
-  <div class="row">
-    <div>
-      <label>Name Weight</label>
-      <select id="nameWeight"><option value="700">Bold</option><option value="400">Normal</option></select>
+    <div class="row">
+      <div><label>Name Size (em)</label><input type="number" id="nameSize" value="1.2" min="0.5" max="4" step="0.1"></div>
+      <div><label>Info Size (em)</label><input type="number" id="infoSize" value="0.9" min="0.5" max="4" step="0.1"></div>
     </div>
-    <div>
-      <label>Info Weight</label>
-      <select id="infoWeight"><option value="400">Normal</option><option value="700">Bold</option></select>
+    <div class="row">
+      <div>
+        <label>Name Weight</label>
+        <select id="nameWeight"><option value="700">Bold</option><option value="400">Normal</option></select>
+      </div>
+      <div>
+        <label>Info Weight</label>
+        <select id="infoWeight"><option value="400">Normal</option><option value="700">Bold</option></select>
+      </div>
     </div>
-  </div>
-  <div class="row">
-    <div>
-      <label>Name Transform</label>
-      <select id="nameTransform"><option value="uppercase">Uppercase</option><option value="none">None</option></select>
-    </div>
-    <div>
-      <label>Info Transform</label>
-      <select id="infoTransform"><option value="none">None</option><option value="uppercase">Uppercase</option></select>
-    </div>
-  </div>
-
-  <h2>Colors</h2>
-  <div class="color-row"><label>Name Text</label><input type="color" id="nameColor" value="#F2F2F2"></div>
-  <div class="color-row"><label>Info Text</label><input type="color" id="infoColor" value="#CCCCCC"></div>
-  <div class="color-row"><label>Accent</label><input type="color" id="accentColor" value="#D54141"></div>
-  <div class="color-row"><label>Background</label><input type="color" id="bgColor" value="#222222"></div>
-  <div class="color-row"><label>Border</label><input type="color" id="borderColor" value="#D54141"></div>
-  <div style="margin-top:8px">
-    <button type="button" class="btn-sm btn-secondary" id="btnSaveColors">Save Colors</button>
-  </div>
-  <div class="library-list" id="colorLibraryList" style="margin-top:6px"></div>
-
-  <h2>Shape</h2>
-  <div class="row">
-    <div>
-      <label>Corners (em)</label>
-      <div class="row"><input type="range" id="corners" min="0" max="2" step="0.1" value="0.3"><span class="range-val" id="cornersVal">0.3</span></div>
-    </div>
-    <div>
-      <label>Border Thickness</label>
-      <div class="row"><input type="range" id="borderThickness" min="0" max="5" step="0.5" value="0"><span class="range-val" id="borderThicknessVal">0</span></div>
-    </div>
-  </div>
-  <div class="toggle"><input type="checkbox" id="bgEnabled" checked><label>Show Background</label></div>
-  <div class="toggle"><input type="checkbox" id="shadowEnabled"><label>Shadow</label></div>
-
-  <h2>Logo</h2>
-  <div class="toggle"><input type="checkbox" id="logoEnabled"><label>Show Logo</label></div>
-  <select id="logoSelect"><option value="">None</option><option value="__custom__">Custom…</option></select>
-  <input type="file" id="logoFile" accept="image/*" style="display:none">
-  <div class="row" style="margin-top:4px">
-    <div>
-      <label>Logo Size (em)</label>
-      <div class="row"><input type="range" id="logoSize" min="2" max="6" step="0.5" value="3.5"><span class="range-val" id="logoSizeVal">3.5</span></div>
+    <div class="row">
+      <div>
+        <label>Name Transform</label>
+        <select id="nameTransform"><option value="uppercase">Uppercase</option><option value="none">None</option></select>
+      </div>
+      <div>
+        <label>Info Transform</label>
+        <select id="infoTransform"><option value="none">None</option><option value="uppercase">Uppercase</option></select>
+      </div>
     </div>
   </div>
 
-  <h2>Timing</h2>
-  <div class="row">
-    <div><label>Anim Duration (s)</label><input type="number" id="animDuration" value="4" min="0.5" max="20" step="0.5"></div>
-    <div><label>Hold Duration (s)</label><input type="number" id="holdDuration" value="3" min="0" max="30" step="0.5"></div>
+  <h2 class="collapsible" onclick="this.classList.toggle('open');this.nextElementSibling.style.display=this.classList.contains('open')?'block':'none';this.textContent=this.classList.contains('open')?'Colors ▾':'Colors ▸'">Colors ▸</h2>
+  <div id="colorsContent" style="display:none">
+    <div class="color-row"><label>Name Text</label><input type="color" id="nameColor" value="#F2F2F2"><input type="range" id="nameColorAlpha" min="0" max="100" value="100" style="width:80px"><span class="range-val" id="nameColorAlphaVal">100</span></div>
+    <div class="color-row"><label>Info Text</label><input type="color" id="infoColor" value="#CCCCCC"><input type="range" id="infoColorAlpha" min="0" max="100" value="100" style="width:80px"><span class="range-val" id="infoColorAlphaVal">100</span></div>
+    <div class="color-row"><label>Accent</label><input type="color" id="accentColor" value="#D54141"><input type="range" id="accentColorAlpha" min="0" max="100" value="100" style="width:80px"><span class="range-val" id="accentColorAlphaVal">100</span></div>
+    <div class="color-row"><label>Background</label><input type="color" id="bgColor" value="#222222"><input type="range" id="bgColorAlpha" min="0" max="100" value="100" style="width:80px"><span class="range-val" id="bgColorAlphaVal">100</span></div>
+    <div class="color-row"><label>Border</label><input type="color" id="borderColor" value="#D54141"><input type="range" id="borderColorAlpha" min="0" max="100" value="100" style="width:80px"><span class="range-val" id="borderColorAlphaVal">100</span></div>
+    <div style="margin-top:8px">
+      <button type="button" class="btn-sm btn-secondary" id="btnSaveColors">Save Colors</button>
+    </div>
+    <div class="library-list" id="colorLibraryList" style="margin-top:6px;max-height:none;overflow:visible"></div>
   </div>
 
-  <h2>Position</h2>
-  <div class="row">
-    <div>
-      <label>Margin H (rem)</label>
-      <div class="row"><input type="range" id="marginH" min="0" max="10" step="0.5" value="2"><span class="range-val" id="marginHVal">2</span></div>
+  <h2 class="collapsible" onclick="this.classList.toggle('open');this.nextElementSibling.style.display=this.classList.contains('open')?'block':'none';this.textContent=this.classList.contains('open')?'Shape ▾':'Shape ▸'">Shape ▸</h2>
+  <div style="display:none">
+    <div class="row">
+      <div>
+        <label>Corners (em)</label>
+        <div class="row"><input type="range" id="corners" min="0" max="2" step="0.1" value="0.3"><span class="range-val" id="cornersVal">0.3</span></div>
+      </div>
+      <div>
+        <label>Border Thickness</label>
+        <div class="row"><input type="range" id="borderThickness" min="0" max="5" step="0.5" value="0"><span class="range-val" id="borderThicknessVal">0</span></div>
+      </div>
     </div>
-    <div>
-      <label>Margin V (rem)</label>
-      <div class="row"><input type="range" id="marginV" min="0" max="10" step="0.5" value="2"><span class="range-val" id="marginVVal">2</span></div>
+    <div class="toggle"><input type="checkbox" id="bgEnabled" checked><label>Show Background</label></div>
+    <div class="toggle"><input type="checkbox" id="shadowEnabled"><label>Shadow</label></div>
+    <div class="toggle"><input type="checkbox" id="hideName"><label>Hide Name</label></div>
+    <div class="toggle"><input type="checkbox" id="hideInfo"><label>Hide Info</label></div>
+  </div>
+
+  <div id="logoSection">
+  <h2 class="collapsible" onclick="this.classList.toggle('open');this.nextElementSibling.style.display=this.classList.contains('open')?'block':'none';this.textContent=this.classList.contains('open')?'Logo ▾':'Logo ▸'">Logo ▸</h2>
+  <div style="display:none">
+    <div class="toggle"><input type="checkbox" id="logoEnabled"><label>Show Logo</label></div>
+    <select id="logoSelect"><option value="">None</option><option value="__custom__">Custom…</option></select>
+    <input type="file" id="logoFile" accept="image/*" style="display:none">
+    <div class="row" style="margin-top:4px">
+      <div>
+        <label>Logo Size (em)</label>
+        <div class="row"><input type="range" id="logoSize" min="2" max="6" step="0.5" value="3.5"><span class="range-val" id="logoSizeVal">3.5</span></div>
+      </div>
     </div>
   </div>
-  <div>
-    <label>Line Spacing (em)</label>
-    <div class="row"><input type="range" id="lineSpacing" min="-0.5" max="1" step="0.1" value="0.2"><span class="range-val" id="lineSpacingVal">0.2</span></div>
+  </div>
+
+  <h2 class="collapsible" onclick="this.classList.toggle('open');this.nextElementSibling.style.display=this.classList.contains('open')?'block':'none';this.textContent=this.classList.contains('open')?'Timing ▾':'Timing ▸'">Timing ▸</h2>
+  <div style="display:none">
+    <div class="row" style="margin-bottom:6px">
+      <button type="button" class="btn-sm btn-secondary timing-preset" data-anim="2" data-hold="2">Fast</button>
+      <button type="button" class="btn-sm btn-secondary timing-preset" data-anim="4" data-hold="3">Medium</button>
+      <button type="button" class="btn-sm btn-secondary timing-preset" data-anim="6" data-hold="5">Slow</button>
+    </div>
+    <div class="row">
+      <div><label>Anim Duration (s)</label><input type="number" id="animDuration" value="4" min="0.5" max="20" step="0.5"></div>
+      <div><label>Hold Duration (s)</label><input type="number" id="holdDuration" value="3" min="0" max="30" step="0.5"></div>
+    </div>
+  </div>
+
+  <h2 class="collapsible" onclick="this.classList.toggle('open');this.nextElementSibling.style.display=this.classList.contains('open')?'block':'none';this.textContent=this.classList.contains('open')?'Position ▾':'Position ▸'">Position ▸</h2>
+  <div style="display:none">
+    <div class="row">
+      <div>
+        <label>Margin H (rem)</label>
+        <div class="row"><input type="range" id="marginH" min="0" max="10" step="0.5" value="2"><span class="range-val" id="marginHVal">2</span></div>
+      </div>
+      <div>
+        <label>Margin V (rem)</label>
+        <div class="row"><input type="range" id="marginV" min="0" max="10" step="0.5" value="2"><span class="range-val" id="marginVVal">2</span></div>
+      </div>
+    </div>
+    <div>
+      <label>Line Spacing (em)</label>
+      <div class="row"><input type="range" id="lineSpacing" min="-0.5" max="1" step="0.1" value="0.2"><span class="range-val" id="lineSpacingVal">0.2</span></div>
+    </div>
   </div>
 
   <div style="margin-top:20px" class="btn-row">
@@ -194,7 +229,7 @@ input[type=file]{font-size:12px;color:#aaa}
     <button type="button" class="btn btn-secondary" id="btnSavePreset">Save to Library</button>
   </div>
 
-  <h2>Library</h2>
+  <h2 id="libraryHeading">Library</h2>
   <div class="library-list" id="libraryList">
     <div class="library-empty">No presets saved yet.</div>
   </div>
@@ -289,10 +324,17 @@ function getConfig() {
     accentColor: val('accentColor'),
     bgColor: val('bgColor'),
     borderColor: val('borderColor'),
+    nameColorAlpha: num('nameColorAlpha'),
+    infoColorAlpha: num('infoColorAlpha'),
+    accentColorAlpha: num('accentColorAlpha'),
+    bgColorAlpha: num('bgColorAlpha'),
+    borderColorAlpha: num('borderColorAlpha'),
     corners: num('corners'),
     borderThickness: num('borderThickness'),
     bgEnabled: chk('bgEnabled'),
     shadowEnabled: chk('shadowEnabled'),
+    hideName: chk('hideName'),
+    hideInfo: chk('hideInfo'),
     logoEnabled: chk('logoEnabled'),
     logoSize: num('logoSize'),
     logoSelect: val('logoSelect'),
@@ -380,7 +422,8 @@ document.getElementById('logoFile').addEventListener('change', function(e) {
 // PRESET LIBRARY (disk via local server)
 // ============================================================
 let presets = [];
-const RANGE_IDS = ['corners','borderThickness','logoSize','marginH','marginV','lineSpacing'];
+const RANGE_IDS = ['corners','borderThickness','logoSize','marginH','marginV','lineSpacing',
+  'nameColorAlpha','infoColorAlpha','accentColorAlpha','bgColorAlpha','borderColorAlpha'];
 const CONFIG_KEY_MAP = { style: 'styleType', align: 'alignment' };
 const LOGO_KEYS = ['logoData', 'logoW', 'logoH'];
 
@@ -435,6 +478,13 @@ function loadPreset(index) {
       if (span) span.textContent = val;
     }
   }
+  // Backward compat: default missing alpha keys to 100
+  ALPHA_KEYS.forEach(k => {
+    if (cfg[k] === undefined) {
+      document.getElementById(k).value = 100;
+      document.getElementById(k + 'Val').textContent = '100';
+    }
+  });
   // Restore logo from saved selection
   if (cfg.logoSelect && cfg.logoSelect !== '__custom__') {
     document.getElementById('logoSelect').value = cfg.logoSelect;
@@ -460,7 +510,7 @@ function renderLibrary() {
     container.innerHTML = '<div class="library-empty">No presets saved yet.</div>';
     return;
   }
-  const styleNames = { '1': 'Style 1', '2': 'Style 2', '3': 'Style 3' };
+  const styleNames = { '1': 'Style 1', '2': 'Style 2', '3': 'Style 3', '4': 'Style 4' };
   container.innerHTML = presets.map((p, i) => {
     const s = styleNames[p.config.style] || p.config.style;
     const a = (p.config.align || '').charAt(0).toUpperCase() + (p.config.align || '').slice(1);
@@ -481,6 +531,7 @@ function renderLibrary() {
 // COLOR LIBRARY (disk via local server)
 // ============================================================
 const COLOR_KEYS = ['nameColor', 'infoColor', 'accentColor', 'bgColor', 'borderColor'];
+const ALPHA_KEYS = ['nameColorAlpha', 'infoColorAlpha', 'accentColorAlpha', 'bgColorAlpha', 'borderColorAlpha'];
 const DEFAULT_COLOR_THEMES = [
   { name: 'Classic Red', colors: { nameColor: '#F2F2F2', infoColor: '#CCCCCC', accentColor: '#D54141', bgColor: '#222222', borderColor: '#D54141' } },
   { name: 'Ocean Blue', colors: { nameColor: '#FFFFFF', infoColor: '#B0D4F1', accentColor: '#1A73E8', bgColor: '#0D253F', borderColor: '#1A73E8' } },
@@ -515,6 +566,7 @@ function loadColorThemesFromDisk() {
 function saveColorTheme() {
   const colors = {};
   COLOR_KEYS.forEach(k => colors[k] = document.getElementById(k).value);
+  ALPHA_KEYS.forEach(k => colors[k] = parseInt(document.getElementById(k).value));
   const baseName = 'Custom';
   const names = new Set(colorThemes.map(t => t.name));
   let name = baseName;
@@ -531,7 +583,18 @@ function loadColorTheme(index) {
   for (const [key, val] of Object.entries(theme.colors)) {
     const el = document.getElementById(key);
     if (el) el.value = val;
+    if (ALPHA_KEYS.includes(key)) {
+      const span = document.getElementById(key + 'Val');
+      if (span) span.textContent = val;
+    }
   }
+  // Backward compat: default missing alpha keys to 100
+  ALPHA_KEYS.forEach(k => {
+    if (theme.colors[k] === undefined) {
+      document.getElementById(k).value = 100;
+      document.getElementById(k + 'Val').textContent = '100';
+    }
+  });
   scheduleGenerate(100);
 }
 
@@ -549,7 +612,12 @@ function renderColorLibrary() {
   }
   container.innerHTML = colorThemes.map((t, i) => {
     const c = t.colors;
-    const dots = COLOR_KEYS.map(k => `<span class="color-dot" style="background:${c[k]}"></span>`).join('');
+    const dots = COLOR_KEYS.map((k, idx) => {
+      const hex = c[k];
+      const alpha = c[ALPHA_KEYS[idx]] !== undefined ? c[ALPHA_KEYS[idx]] / 100 : 1;
+      const [r, g, b] = hexToRgb(hex);
+      return `<span class="color-dot" style="background:rgba(${r},${g},${b},${alpha})"></span>`;
+    }).join('');
     return `<div class="preset-card" onclick="loadColorTheme(${i})" style="cursor:pointer">
       <div style="flex:1;overflow:hidden">
         <span class="preset-name">${t.name}</span>
@@ -561,7 +629,8 @@ function renderColorLibrary() {
 }
 
 // Range slider value display
-['corners','borderThickness','logoSize','marginH','marginV','lineSpacing'].forEach(id => {
+['corners','borderThickness','logoSize','marginH','marginV','lineSpacing',
+ 'nameColorAlpha','infoColorAlpha','accentColorAlpha','bgColorAlpha','borderColorAlpha'].forEach(id => {
   const el = document.getElementById(id);
   const display = document.getElementById(id + 'Val');
   el.addEventListener('input', () => { display.textContent = el.value; });
@@ -814,17 +883,27 @@ function makeFill(color, opacity) {
   };
 }
 
-function makeStroke(color, width) {
+function makeStroke(color, width, opacity) {
   if (!width || width <= 0) return null;
   return {
     ty: 'st',
     c: { a: 0, k: [...color, 1] },
-    o: { a: 0, k: 100 },
+    o: { a: 0, k: opacity !== undefined ? opacity : 100 },
     w: { a: 0, k: width },
     lc: 1,
     lj: 1,
     ml: 4,
     bm: 0
+  };
+}
+
+function makeAnimatedStroke(color, widthKFs, opacity) {
+  return {
+    ty: 'st',
+    c: { a: 0, k: [...color, 1] },
+    o: { a: 0, k: opacity !== undefined ? opacity : 100 },
+    w: { a: 1, k: widthKFs },
+    lc: 1, lj: 1, ml: 4, bm: 0
   };
 }
 
@@ -885,7 +964,8 @@ function generateStyle1(builder, cfg) {
     nameSize, infoSize, nameWeight, infoWeight, nameTransform, infoTransform,
     nameColor, infoColor, accentColor, bgColor, borderColor, corners,
     borderThickness, bgEnabled, logoEnabled, logoSize, logoData, logoW, logoH,
-    marginH, marginV, lineSpacing, shadowEnabled } = cfg;
+    marginH, marginV, lineSpacing, shadowEnabled, hideName, hideInfo,
+    nameColorAlpha, infoColorAlpha, accentColorAlpha, bgColorAlpha, borderColorAlpha } = cfg;
 
   const inF = builder.inFrames;
   const holdF = builder.holdFrames;
@@ -1017,21 +1097,20 @@ function generateStyle1(builder, cfg) {
   const namePctStart = isCenter ? 50 : 45;
   const infoPctStart = 50;
 
-  // Name mask layer (matte definition, td:1)
-  // Mask offset depends on text justify: left=+w/2, center=0, right=-w/2
+  // Name mask + text layer
+  if (!hideName) {
   const nameMaskOffsetX = isRight ? -nameM.width / 2 : isCenter ? 0 : nameM.width / 2;
   const nameMaskShapes = [makeGroup([
-    makeRect(nameM.width + 20, nameSizePx + 10, 0),
+    makeRect(nameM.width + 20, nameSizePx * 1.5, 0),
     makeFill([1, 1, 1])
   ])];
-  const nameMaskIdx = builder.addShapeLayer('Name Mask', nameMaskShapes,
+  builder.addShapeLayer('Name Mask', nameMaskShapes,
     LottieBuilder.defaultTransform({
-      position: LottieBuilder.staticProp([textBaseX + nameMaskOffsetX, nameY, 0])
+      position: LottieBuilder.staticProp([textBaseX + nameMaskOffsetX, nameY - nameSizePx * 0.15, 0])
     }),
     { td: 1 }
   );
 
-  // Name text layer (masked by above, tt:1)
   builder.addFont(fontFamily, parseInt(nameWeight));
   const namePosKFs = buildKeyframes([
     { pct: 0, value: [textBaseX + nameSlideOffset, nameY, 0] },
@@ -1042,7 +1121,7 @@ function generateStyle1(builder, cfg) {
   builder.addTextLayer('Name',
     makeTextData(nameText, fontFamily, nameSizePx, parseInt(nameWeight), nameCLottie, nameTransform, justify),
     {
-      o: LottieBuilder.staticProp(100),
+      o: LottieBuilder.staticProp(nameColorAlpha),
       r: LottieBuilder.staticProp(0),
       p: LottieBuilder.animatedProp(namePosKFs),
       a: LottieBuilder.staticProp([0, 0, 0]),
@@ -1050,21 +1129,22 @@ function generateStyle1(builder, cfg) {
     },
     { tt: 1 }
   );
+  }
 
-  // Info mask layer
+  // Info mask + text layer
+  if (!hideInfo) {
   const infoMaskOffsetX = isRight ? -infoM.width / 2 : isCenter ? 0 : infoM.width / 2;
   const infoMaskShapes = [makeGroup([
-    makeRect(infoM.width + 20, infoSizePx + 10, 0),
+    makeRect(infoM.width + 20, infoSizePx * 1.5, 0),
     makeFill([1, 1, 1])
   ])];
   builder.addShapeLayer('Info Mask', infoMaskShapes,
     LottieBuilder.defaultTransform({
-      position: LottieBuilder.staticProp([textBaseX + infoMaskOffsetX, infoY, 0])
+      position: LottieBuilder.staticProp([textBaseX + infoMaskOffsetX, infoY - infoSizePx * 0.15, 0])
     }),
     { td: 1 }
   );
 
-  // Info text layer
   builder.addFont(fontFamily, parseInt(infoWeight));
   const infoPosKFs = buildKeyframes([
     { pct: 0, value: [textBaseX + infoSlideOffset, infoY, 0] },
@@ -1075,7 +1155,7 @@ function generateStyle1(builder, cfg) {
   builder.addTextLayer('Info',
     makeTextData(infoText, fontFamily, infoSizePx, parseInt(infoWeight), infoCLottie, infoTransform, justify),
     {
-      o: LottieBuilder.staticProp(100),
+      o: LottieBuilder.staticProp(infoColorAlpha),
       r: LottieBuilder.staticProp(0),
       p: LottieBuilder.animatedProp(infoPosKFs),
       a: LottieBuilder.staticProp([0, 0, 0]),
@@ -1083,6 +1163,7 @@ function generateStyle1(builder, cfg) {
     },
     { tt: 1 }
   );
+  }
 
   // --- Accent bar (graph-1) — added after text so it renders behind ---
   const slashOffset = emToPx(isRight ? -6 : 10, baseSize);
@@ -1102,7 +1183,7 @@ function generateStyle1(builder, cfg) {
 
   const barShapes = [makeGroup([
     makeRect(barWidth, barHeight, 0),
-    makeFill(accentLottie)
+    makeFill(accentLottie, accentColorAlpha)
   ])];
 
   builder.addShapeLayer('Accent Bar', barShapes, {
@@ -1142,11 +1223,13 @@ function generateStyle1(builder, cfg) {
 
     const bgShapeItems = [
       makeAnimatedRect(bgSizeKFs, cornerPx * 1.1),
-      makeFill(bgLottie)
+      makeFill(bgLottie, bgColorAlpha)
     ];
     if (borderPx > 0) {
-      const stroke = makeStroke(borderLottie, borderPx);
-      if (stroke) bgShapeItems.push(stroke);
+      const borderWidthKFs = buildKeyframes([
+        { pct: 0, value: [0] }, { pct: 30, value: [0] }, { pct: 100, value: [borderPx] }
+      ], inF, holdF, outF, EASING);
+      bgShapeItems.push(makeAnimatedStroke(borderLottie, borderWidthKFs, borderColorAlpha));
     }
 
     builder.addShapeLayer('Background', [makeGroup(bgShapeItems)], {
@@ -1164,7 +1247,8 @@ function generateStyle2(builder, cfg) {
     nameSize, infoSize, nameWeight, infoWeight, nameTransform, infoTransform,
     nameColor, infoColor, accentColor, bgColor, borderColor, corners,
     borderThickness, logoEnabled, logoSize, logoData, logoW, logoH,
-    marginH, marginV, lineSpacing, shadowEnabled } = cfg;
+    marginH, marginV, lineSpacing, shadowEnabled, hideName, hideInfo,
+    nameColorAlpha, infoColorAlpha, accentColorAlpha, bgColorAlpha, borderColorAlpha } = cfg;
 
   const inF = builder.inFrames;
   const holdF = builder.holdFrames;
@@ -1294,14 +1378,14 @@ function generateStyle2(builder, cfg) {
   const nameSlideOffset = nameBoxW * 1.02 * nameSlideDir;
   const infoSlideOffset = infoBoxW * 1.02 * infoSlideDir;
 
-  // Name mask
+  // Name mask + text
+  if (!hideName) {
   builder.addShapeLayer('Name Mask', [makeGroup([
     makeRect(nameBoxW, nameBoxH, 0), makeFill([1, 1, 1])
   ])], LottieBuilder.defaultTransform({
     position: LottieBuilder.staticProp([nameX, nameBgY, 0])
   }), { td: 1 });
 
-  // Name text
   builder.addFont(fontFamily, parseInt(nameWeight));
   const namePosKFs = buildKeyframes([
     { pct: 0, value: [nameTextX + nameSlideOffset, nameTextY, 0] },
@@ -1312,20 +1396,21 @@ function generateStyle2(builder, cfg) {
   builder.addTextLayer('Name',
     makeTextData(nameText, fontFamily, nameSizePx, parseInt(nameWeight), nameCLottie, nameTransform, justify),
     {
-      o: LottieBuilder.staticProp(100), r: LottieBuilder.staticProp(0),
+      o: LottieBuilder.staticProp(nameColorAlpha), r: LottieBuilder.staticProp(0),
       p: LottieBuilder.animatedProp(namePosKFs),
       a: LottieBuilder.staticProp([0, 0, 0]), s: LottieBuilder.staticProp([100, 100, 100])
     }, { tt: 1 }
   );
+  }
 
-  // Info mask
+  // Info mask + text
+  if (!hideInfo) {
   builder.addShapeLayer('Info Mask', [makeGroup([
     makeRect(infoBoxW, infoBoxH, 0), makeFill([1, 1, 1])
   ])], LottieBuilder.defaultTransform({
     position: LottieBuilder.staticProp([infoX, infoBgY, 0])
   }), { td: 1 });
 
-  // Info text
   builder.addFont(fontFamily, parseInt(infoWeight));
   const infoPosKFs = buildKeyframes([
     { pct: 0, value: [infoTextX + infoSlideOffset, infoTextY, 0] },
@@ -1336,46 +1421,58 @@ function generateStyle2(builder, cfg) {
   builder.addTextLayer('Info',
     makeTextData(infoText, fontFamily, infoSizePx, parseInt(infoWeight), infoCLottie, infoTransform, justify),
     {
-      o: LottieBuilder.staticProp(100), r: LottieBuilder.staticProp(0),
+      o: LottieBuilder.staticProp(infoColorAlpha), r: LottieBuilder.staticProp(0),
       p: LottieBuilder.animatedProp(infoPosKFs),
       a: LottieBuilder.staticProp([0, 0, 0]), s: LottieBuilder.staticProp([100, 100, 100])
     }, { tt: 1 }
   );
+  }
 
   // --- Name background rect (added after text so it renders behind) ---
-  // Animate height from 0 to full (vertical expansion from center), matching text slide-in timing
+  if (!hideName) {
   const nameBgSizeKFs = buildKeyframes([
     { pct: 0, value: [nameBoxW, 0] },
     { pct: namePctStart, value: [nameBoxW, 0] },
     { pct: 100, value: [nameBoxW, nameBoxH] }
   ], inF, holdF, outF, EASING);
 
+  const nameBorderKFs = borderPx > 0 ? buildKeyframes([
+    { pct: 0, value: [0] }, { pct: namePctStart, value: [0] }, { pct: 100, value: [borderPx] }
+  ], inF, holdF, outF, EASING) : null;
+
   const nameRectShapes = [makeGroup([
     makeAnimatedRect(nameBgSizeKFs, cornerPx * 1.1),
-    makeFill(accentLottie),
-    ...(borderPx > 0 ? [makeStroke(borderLottie, borderPx)].filter(Boolean) : [])
+    makeFill(accentLottie, accentColorAlpha),
+    ...(nameBorderKFs ? [makeAnimatedStroke(borderLottie, nameBorderKFs, borderColorAlpha)] : [])
   ])];
 
   builder.addShapeLayer('Name BG', nameRectShapes, LottieBuilder.defaultTransform({
     position: LottieBuilder.staticProp([nameX, nameBgY, 0])
   }));
+  }
 
   // --- Info background rect (added last so it renders at the bottom) ---
+  if (!hideInfo) {
   const infoBgSizeKFs = buildKeyframes([
     { pct: 0, value: [infoBoxW, 0] },
     { pct: 50, value: [infoBoxW, 0] },
     { pct: 100, value: [infoBoxW, infoBoxH] }
   ], inF, holdF, outF, EASING);
 
+  const infoBorderKFs = borderPx > 0 ? buildKeyframes([
+    { pct: 0, value: [0] }, { pct: 50, value: [0] }, { pct: 100, value: [borderPx] }
+  ], inF, holdF, outF, EASING) : null;
+
   const infoRectShapes = [makeGroup([
     makeAnimatedRect(infoBgSizeKFs, cornerPx * 1.1),
-    makeFill(bgLottie),
-    ...(borderPx > 0 ? [makeStroke(borderLottie, borderPx)].filter(Boolean) : [])
+    makeFill(bgLottie, bgColorAlpha),
+    ...(infoBorderKFs ? [makeAnimatedStroke(borderLottie, infoBorderKFs, borderColorAlpha)] : [])
   ])];
 
   builder.addShapeLayer('Info BG', infoRectShapes, LottieBuilder.defaultTransform({
     position: LottieBuilder.staticProp([infoX, infoBgY, 0])
   }));
+  }
 
   // --- Logo background rect (added last = renders behind everything) ---
   if (logoEnabled && logoData) {
@@ -1387,8 +1484,8 @@ function generateStyle2(builder, cfg) {
 
     builder.addShapeLayer('Logo BG', [makeGroup([
       makeRect(_logoBgW, _logoBgH, cornerPx),
-      makeFill(accentLottie),
-      ...(borderPx > 0 ? [makeStroke(borderLottie, borderPx)].filter(Boolean) : [])
+      makeFill(accentLottie, accentColorAlpha),
+      ...(borderPx > 0 ? [makeStroke(borderLottie, borderPx, borderColorAlpha)].filter(Boolean) : [])
     ])], {
       o: LottieBuilder.staticProp(100),
       r: LottieBuilder.staticProp(0),
@@ -1404,7 +1501,8 @@ function generateStyle3(builder, cfg) {
     nameSize, infoSize, nameWeight, infoWeight, nameTransform, infoTransform,
     nameColor, infoColor, accentColor, bgColor, borderColor, corners,
     borderThickness, bgEnabled, logoEnabled, logoSize, logoData, logoW, logoH,
-    marginH, marginV, lineSpacing, shadowEnabled } = cfg;
+    marginH, marginV, lineSpacing, shadowEnabled, hideName, hideInfo,
+    nameColorAlpha, infoColorAlpha, accentColorAlpha, bgColorAlpha, borderColorAlpha } = cfg;
 
   const inF = builder.inFrames;
   const holdF = builder.holdFrames;
@@ -1496,14 +1594,14 @@ function generateStyle3(builder, cfg) {
   const slideAmount = circleSize * 1.02;
   const justify = isRight ? 1 : 0;
 
-  // Name mask
+  // Name mask + text
+  if (!hideName) {
   builder.addShapeLayer('Name Mask', [makeGroup([
-    makeRect(nameM.width + 20, nameSizePx + 10, 0), makeFill([1, 1, 1])
+    makeRect(nameM.width + 20, nameSizePx * 1.5, 0), makeFill([1, 1, 1])
   ])], LottieBuilder.defaultTransform({
-    position: LottieBuilder.staticProp([textBaseX + (isRight ? -nameM.width/2 : nameM.width/2), nameY, 0])
+    position: LottieBuilder.staticProp([textBaseX + (isRight ? -nameM.width/2 : nameM.width/2), nameY - nameSizePx * 0.15, 0])
   }), { td: 1 });
 
-  // Name text - slides up from bottom
   builder.addFont(fontFamily, parseInt(nameWeight));
   const namePosKFs = buildKeyframes([
     { pct: 0, value: [textBaseX, nameY + slideAmount, 0] },
@@ -1514,20 +1612,21 @@ function generateStyle3(builder, cfg) {
   builder.addTextLayer('Name',
     makeTextData(nameText, fontFamily, nameSizePx, parseInt(nameWeight), nameCLottie, nameTransform, justify),
     {
-      o: LottieBuilder.staticProp(100), r: LottieBuilder.staticProp(0),
+      o: LottieBuilder.staticProp(nameColorAlpha), r: LottieBuilder.staticProp(0),
       p: LottieBuilder.animatedProp(namePosKFs),
       a: LottieBuilder.staticProp([0, 0, 0]), s: LottieBuilder.staticProp([100, 100, 100])
     }, { tt: 1 }
   );
+  }
 
-  // Info mask
+  // Info mask + text
+  if (!hideInfo) {
   builder.addShapeLayer('Info Mask', [makeGroup([
-    makeRect(infoM.width + 20, infoSizePx + 10, 0), makeFill([1, 1, 1])
+    makeRect(infoM.width + 20, infoSizePx * 1.5, 0), makeFill([1, 1, 1])
   ])], LottieBuilder.defaultTransform({
-    position: LottieBuilder.staticProp([textBaseX + (isRight ? -infoM.width/2 : infoM.width/2), infoY, 0])
+    position: LottieBuilder.staticProp([textBaseX + (isRight ? -infoM.width/2 : infoM.width/2), infoY - infoSizePx * 0.15, 0])
   }), { td: 1 });
 
-  // Info text - slides down from top
   builder.addFont(fontFamily, parseInt(infoWeight));
   const infoPosKFs = buildKeyframes([
     { pct: 0, value: [textBaseX, infoY - slideAmount, 0] },
@@ -1538,11 +1637,12 @@ function generateStyle3(builder, cfg) {
   builder.addTextLayer('Info',
     makeTextData(infoText, fontFamily, infoSizePx, parseInt(infoWeight), infoCLottie, infoTransform, justify),
     {
-      o: LottieBuilder.staticProp(100), r: LottieBuilder.staticProp(0),
+      o: LottieBuilder.staticProp(infoColorAlpha), r: LottieBuilder.staticProp(0),
       p: LottieBuilder.animatedProp(infoPosKFs),
       a: LottieBuilder.staticProp([0, 0, 0]), s: LottieBuilder.staticProp([100, 100, 100])
     }, { tt: 1 }
   );
+  }
 
   // --- Logo BG (rounded square, behind text but in front of bg bar) ---
   if (hasLogo) {
@@ -1560,8 +1660,8 @@ function generateStyle3(builder, cfg) {
 
     builder.addShapeLayer('Logo BG', [makeGroup([
       makeRect(circleSize, circleSize, cornerPx),
-      makeFill(accentLottie),
-      ...(borderPx > 0 ? [makeStroke(borderLottie, borderPx)].filter(Boolean) : [])
+      makeFill(accentLottie, accentColorAlpha),
+      ...(borderPx > 0 ? [makeStroke(borderLottie, borderPx, borderColorAlpha)].filter(Boolean) : [])
     ])], {
       o: LottieBuilder.staticProp(100),
       r: LottieBuilder.animatedProp(logoBgRotKFs),
@@ -1595,10 +1695,14 @@ function generateStyle3(builder, cfg) {
       { pct: 100, value: [bgCenterEnd, baseY, 0] }
     ], inF, holdF, outF, EASING);
 
+    const bgBorderKFs = borderPx > 0 ? buildKeyframes([
+      { pct: 0, value: [0] }, { pct: 40, value: [0] }, { pct: 100, value: [borderPx] }
+    ], inF, holdF, outF, EASING) : null;
+
     const bgShapeItems = [
       makeAnimatedRect(bgSizeKFs, cornerPx * 1.1),
-      makeFill(bgLottie),
-      ...(borderPx > 0 ? [makeStroke(borderLottie, borderPx)].filter(Boolean) : [])
+      makeFill(bgLottie, bgColorAlpha),
+      ...(bgBorderKFs ? [makeAnimatedStroke(borderLottie, bgBorderKFs, borderColorAlpha)] : [])
     ];
 
     builder.addShapeLayer('Background Bar', [makeGroup(bgShapeItems)], {
@@ -1606,6 +1710,264 @@ function generateStyle3(builder, cfg) {
       r: LottieBuilder.staticProp(0),
       p: LottieBuilder.animatedProp(bgPosKFs),
       a: LottieBuilder.staticProp([0, 0, 0]),
+      s: LottieBuilder.staticProp([100, 100, 100])
+    });
+  }
+}
+
+// ============================================================
+// STYLE 4 — BANNER (accented banner lower third)
+// ============================================================
+
+function generateStyle4(builder, cfg) {
+  const { canvasW, canvasH, align, nameText, infoText, fontFamily, baseSize,
+    nameSize, infoSize, nameWeight, infoWeight, nameTransform, infoTransform,
+    nameColor, infoColor, accentColor, bgColor, borderColor, corners,
+    borderThickness, bgEnabled, logoEnabled, logoSize, logoData, logoW, logoH,
+    marginH, marginV, lineSpacing, shadowEnabled, hideName, hideInfo,
+    nameColorAlpha, infoColorAlpha, accentColorAlpha, bgColorAlpha, borderColorAlpha } = cfg;
+
+  const inF = builder.inFrames;
+  const holdF = builder.holdFrames;
+  const outF = builder.outFrames;
+
+  const nameSizePx = emToPx(nameSize, baseSize);
+  const infoSizePx = emToPx(infoSize, baseSize);
+  const nameM = measureText(nameText, fontFamily, nameSizePx, nameWeight, nameTransform);
+  const infoM = measureText(infoText, fontFamily, infoSizePx, infoWeight, infoTransform);
+
+  const paddingX = emToPx(1.0, baseSize);
+  const paddingY = emToPx(0.5, baseSize);
+  const lineSpacingPx = emToPx(lineSpacing, baseSize);
+  const marginHPx = remToPx(marginH, baseSize);
+  const marginVPx = remToPx(marginV, baseSize);
+  const borderPx = borderThickness * baseSize * 0.1;
+
+  const accentLottie = hexToLottie(accentColor);
+  const bgLottie = hexToLottie(bgColor);
+  const borderLottie = hexToLottie(borderColor);
+  const nameCLottie = hexToLottie(nameColor);
+  const infoCLottie = hexToLottie(infoColor);
+
+  const isRight = align === 'right';
+
+  // --- Dimensions ---
+  const nameBoxW = nameM.width + paddingX * 2;
+  const nameBoxH = nameSizePx + paddingY * 2;
+  const accentW = nameBoxH * 0.55;
+  const accentH = nameBoxH;
+  const topLineH = Math.max(2, baseSize * 0.1);
+  const topLineW = nameBoxW + accentW;
+  const infoBarW = topLineW; // spans full width like top line
+  const infoBarH = infoSizePx + paddingY * 1.5;
+
+  // --- Vertical positioning ---
+  const baseY = canvasH - marginVPx - (nameBoxH + lineSpacingPx + infoBarH) / 2;
+
+  const nameBgCY = baseY - lineSpacingPx / 2 - infoBarH / 2;
+  const infoBarCY = baseY + nameBoxH / 2 + lineSpacingPx / 2;
+  const topLineY = nameBgCY - nameBoxH / 2 - topLineH / 2 - 1;
+
+  // --- Horizontal positioning ---
+  // Each layer is positioned at its expansion edge, with anchor pinning that edge.
+  // Left: expand leftward from accent side. Right: expand rightward from accent side.
+  // "edgeX" = the edge where the rect grows FROM (anchor point in world space).
+
+  let nameEdgeX, accentCX, topLineEdgeX, infoEdgeX;
+  let nameAnchorX, topLineAnchorX, infoAnchorX;
+
+  if (isRight) {
+    // Name BG: right edge at (canvasW - margin), expands leftward. Expansion starts at LEFT edge.
+    nameEdgeX = canvasW - marginHPx - nameBoxW;
+    nameAnchorX = -nameBoxW / 2;
+    accentCX = nameEdgeX - accentW / 2;
+    topLineEdgeX = canvasW - marginHPx;
+    topLineAnchorX = topLineW / 2;
+    infoEdgeX = canvasW - marginHPx;
+    infoAnchorX = infoBarW / 2;
+  } else {
+    // Name BG: left edge at margin, expands leftward FROM accent side (right edge).
+    nameEdgeX = marginHPx + nameBoxW;
+    nameAnchorX = nameBoxW / 2;
+    accentCX = nameEdgeX + accentW / 2;
+    topLineEdgeX = marginHPx;
+    topLineAnchorX = -topLineW / 2;
+    infoEdgeX = marginHPx;
+    infoAnchorX = -infoBarW / 2;
+  }
+
+  // --- Text X positions ---
+  const justify = isRight ? 1 : 0;
+  let nameTextX, infoTextX;
+  if (isRight) {
+    nameTextX = canvasW - marginHPx - paddingX;
+    infoTextX = canvasW - marginHPx - paddingX;
+  } else {
+    nameTextX = marginHPx + paddingX;
+    infoTextX = marginHPx + paddingX;
+  }
+
+  const nameTextY = nameBgCY + nameSizePx * 0.35;
+  const infoTextY = infoBarCY + infoSizePx * 0.35;
+
+  const dir = isRight ? -1 : 1;
+
+  // ============= LAYERS (top to bottom render order) =============
+
+  // --- Name mask + text ---
+  if (!hideName) {
+    const nameBgSizeKFs = buildKeyframes([
+      { pct: 0, value: [0, nameBoxH] },
+      { pct: 15, value: [0, nameBoxH] },
+      { pct: 55, value: [nameBoxW, nameBoxH] }
+    ], inF, holdF, outF, EASING);
+
+    builder.addShapeLayer('Name Mask', [makeGroup([
+      makeAnimatedRect(nameBgSizeKFs, 0), makeFill([1, 1, 1])
+    ])], {
+      o: LottieBuilder.staticProp(100), r: LottieBuilder.staticProp(0),
+      p: LottieBuilder.staticProp([nameEdgeX, nameBgCY, 0]),
+      a: LottieBuilder.staticProp([nameAnchorX, 0, 0]),
+      s: LottieBuilder.staticProp([100, 100, 100])
+    }, { td: 1 });
+
+    builder.addFont(fontFamily, parseInt(nameWeight));
+    const nameSlideOffset = nameBoxW * dir;
+    const namePosKFs = buildKeyframes([
+      { pct: 0, value: [nameTextX + nameSlideOffset, nameTextY, 0] },
+      { pct: 15, value: [nameTextX + nameSlideOffset, nameTextY, 0] },
+      { pct: 55, value: [nameTextX, nameTextY, 0] }
+    ], inF, holdF, outF, EASING);
+
+    builder.addTextLayer('Name',
+      makeTextData(nameText, fontFamily, nameSizePx, parseInt(nameWeight), nameCLottie, nameTransform, justify),
+      {
+        o: LottieBuilder.staticProp(nameColorAlpha), r: LottieBuilder.staticProp(0),
+        p: LottieBuilder.animatedProp(namePosKFs),
+        a: LottieBuilder.staticProp([0, 0, 0]), s: LottieBuilder.staticProp([100, 100, 100])
+      }, { tt: 1 }
+    );
+  }
+
+  // --- Info mask + text ---
+  if (!hideInfo) {
+    const infoBarSizeKFs = buildKeyframes([
+      { pct: 0, value: [0, infoBarH] },
+      { pct: 40, value: [0, infoBarH] },
+      { pct: 80, value: [infoBarW, infoBarH] }
+    ], inF, holdF, outF, EASING);
+
+    builder.addShapeLayer('Info Mask', [makeGroup([
+      makeAnimatedRect(infoBarSizeKFs, 0), makeFill([1, 1, 1])
+    ])], {
+      o: LottieBuilder.staticProp(100), r: LottieBuilder.staticProp(0),
+      p: LottieBuilder.staticProp([infoEdgeX, infoBarCY, 0]),
+      a: LottieBuilder.staticProp([infoAnchorX, 0, 0]),
+      s: LottieBuilder.staticProp([100, 100, 100])
+    }, { td: 1 });
+
+    builder.addFont(fontFamily, parseInt(infoWeight));
+    const infoSlideOffset = infoBarW * -dir;
+    const infoPosKFs = buildKeyframes([
+      { pct: 0, value: [infoTextX + infoSlideOffset, infoTextY, 0] },
+      { pct: 40, value: [infoTextX + infoSlideOffset, infoTextY, 0] },
+      { pct: 80, value: [infoTextX, infoTextY, 0] }
+    ], inF, holdF, outF, EASING);
+
+    builder.addTextLayer('Info',
+      makeTextData(infoText, fontFamily, infoSizePx, parseInt(infoWeight), infoCLottie, infoTransform, justify, infoColorAlpha),
+      {
+        o: LottieBuilder.staticProp(100), r: LottieBuilder.staticProp(0),
+        p: LottieBuilder.animatedProp(infoPosKFs),
+        a: LottieBuilder.staticProp([0, 0, 0]), s: LottieBuilder.staticProp([100, 100, 100])
+      }, { tt: 1 }
+    );
+  }
+
+  // --- Top line ---
+  const topLineSizeKFs = buildKeyframes([
+    { pct: 0, value: [0, topLineH] },
+    { pct: 30, value: [0, topLineH] },
+    { pct: 70, value: [topLineW, topLineH] }
+  ], inF, holdF, outF, EASING);
+
+  builder.addShapeLayer('Top Line', [makeGroup([
+    makeAnimatedRect(topLineSizeKFs, 0),
+    makeFill(accentLottie, accentColorAlpha)
+  ])], {
+    o: LottieBuilder.staticProp(100), r: LottieBuilder.staticProp(0),
+    p: LottieBuilder.staticProp([topLineEdgeX, topLineY, 0]),
+    a: LottieBuilder.staticProp([topLineAnchorX, 0, 0]),
+    s: LottieBuilder.staticProp([100, 100, 100])
+  });
+
+  // --- Accent block ---
+  const accentScaleKFs = buildKeyframes([
+    { pct: 0, value: [0, 0, 100] },
+    { pct: 20, value: [100, 100, 100] },
+    { pct: 100, value: [100, 100, 100] }
+  ], inF, holdF, outF, EASING);
+
+  builder.addShapeLayer('Accent Block', [makeGroup([
+    makeRect(accentW, accentH, 0),
+    makeFill(accentLottie, accentColorAlpha)
+  ])], {
+    o: LottieBuilder.staticProp(100), r: LottieBuilder.staticProp(0),
+    p: LottieBuilder.staticProp([accentCX, nameBgCY, 0]),
+    a: LottieBuilder.staticProp([0, 0, 0]),
+    s: LottieBuilder.animatedProp(accentScaleKFs)
+  });
+
+  // --- Name BG (behind text) ---
+  if (!hideName) {
+    const nameBgExpandKFs = buildKeyframes([
+      { pct: 0, value: [0, nameBoxH] },
+      { pct: 15, value: [0, nameBoxH] },
+      { pct: 55, value: [nameBoxW, nameBoxH] }
+    ], inF, holdF, outF, EASING);
+
+    const nameBgItems = [
+      makeAnimatedRect(nameBgExpandKFs, 0),
+      makeFill(bgLottie, bgColorAlpha)
+    ];
+    if (borderPx > 0) {
+      const bkf = buildKeyframes([
+        { pct: 0, value: [0] }, { pct: 15, value: [0] }, { pct: 55, value: [borderPx] }
+      ], inF, holdF, outF, EASING);
+      nameBgItems.push(makeAnimatedStroke(borderLottie, bkf, borderColorAlpha));
+    }
+
+    builder.addShapeLayer('Name BG', [makeGroup(nameBgItems)], {
+      o: LottieBuilder.staticProp(100), r: LottieBuilder.staticProp(0),
+      p: LottieBuilder.staticProp([nameEdgeX, nameBgCY, 0]),
+      a: LottieBuilder.staticProp([nameAnchorX, 0, 0]),
+      s: LottieBuilder.staticProp([100, 100, 100])
+    });
+  }
+
+  // --- Info bar BG (behind info text) ---
+  if (!hideInfo) {
+    const infoBgExpandKFs = buildKeyframes([
+      { pct: 0, value: [0, infoBarH] },
+      { pct: 40, value: [0, infoBarH] },
+      { pct: 80, value: [infoBarW, infoBarH] }
+    ], inF, holdF, outF, EASING);
+
+    const infoBgItems = [
+      makeAnimatedRect(infoBgExpandKFs, 0),
+      makeFill(accentLottie, accentColorAlpha)
+    ];
+    if (borderPx > 0) {
+      const bkf = buildKeyframes([
+        { pct: 0, value: [0] }, { pct: 40, value: [0] }, { pct: 80, value: [borderPx] }
+      ], inF, holdF, outF, EASING);
+      infoBgItems.push(makeAnimatedStroke(borderLottie, bkf, borderColorAlpha));
+    }
+
+    builder.addShapeLayer('Info Bar', [makeGroup(infoBgItems)], {
+      o: LottieBuilder.staticProp(100), r: LottieBuilder.staticProp(0),
+      p: LottieBuilder.staticProp([infoEdgeX, infoBarCY, 0]),
+      a: LottieBuilder.staticProp([infoAnchorX, 0, 0]),
       s: LottieBuilder.staticProp([100, 100, 100])
     });
   }
@@ -1632,6 +1994,7 @@ function generate() {
     case '1': generateStyle1(builder, cfg); break;
     case '2': generateStyle2(builder, cfg); break;
     case '3': generateStyle3(builder, cfg); break;
+    case '4': generateStyle4(builder, cfg); break;
   }
 
   currentJSON = builder.toJSON();
@@ -1679,7 +2042,8 @@ function download() {
   a.href = url;
   const nameVal = document.getElementById('nameText').value.trim() || 'lower-third';
   const styleVal = document.getElementById('styleType').value;
-  a.download = nameVal + ' - Style ' + styleVal + '.json';
+  const rand = Math.random().toString(36).substring(2, 6);
+  a.download = nameVal + ' - ' + rand + '.json';
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
@@ -1710,6 +2074,24 @@ function scheduleGenerate(delay) {
     generate();
   }, delay);
 }
+
+// Canvas preset buttons
+document.querySelectorAll('.canvas-preset').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.getElementById('canvasW').value = btn.dataset.w;
+    document.getElementById('canvasH').value = btn.dataset.h;
+    scheduleGenerate(100);
+  });
+});
+
+// Timing preset buttons
+document.querySelectorAll('.timing-preset').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.getElementById('animDuration').value = btn.dataset.anim;
+    document.getElementById('holdDuration').value = btn.dataset.hold;
+    scheduleGenerate(100);
+  });
+});
 
 // Event listeners
 document.getElementById('btnDownload').addEventListener('click', download);
@@ -1742,11 +2124,24 @@ document.getElementById('seekBar').addEventListener('input', (e) => {
   document.getElementById(id).addEventListener('input', () => scheduleGenerate(500));
 });
 
+// Style 4 doesn't support center alignment
+document.getElementById('styleType').addEventListener('change', () => {
+  const align = document.getElementById('alignment');
+  const centerOpt = align.querySelector('option[value="center"]');
+  if (document.getElementById('styleType').value === '4') {
+    centerOpt.disabled = true;
+    if (align.value === 'center') { align.value = 'left'; }
+  } else {
+    centerOpt.disabled = false;
+  }
+});
+
 // All other inputs: immediate/short debounce
 ['canvasW', 'canvasH', 'styleType', 'alignment', 'fontFamily', 'baseSize',
  'nameSize', 'infoSize', 'nameWeight', 'infoWeight', 'nameTransform', 'infoTransform',
  'nameColor', 'infoColor', 'accentColor', 'bgColor', 'borderColor',
- 'corners', 'borderThickness', 'bgEnabled', 'shadowEnabled',
+ 'nameColorAlpha', 'infoColorAlpha', 'accentColorAlpha', 'bgColorAlpha', 'borderColorAlpha',
+ 'corners', 'borderThickness', 'bgEnabled', 'shadowEnabled', 'hideName', 'hideInfo',
  'logoEnabled', 'logoSize', 'animDuration', 'holdDuration',
  'marginH', 'marginV', 'lineSpacing'].forEach(id => {
   const el = document.getElementById(id);
@@ -1772,9 +2167,35 @@ document.getElementById('btnSaveColors').addEventListener('click', () => saveCol
 document.fonts.ready.then(() => {
   setTimeout(generate, 200);
 });
-loadPresetsFromDisk();
-loadColorThemesFromDisk();
-loadLogoList();
+let serverAvailable = false;
+
+async function checkServer() {
+  try {
+    const r = await fetch('/api/presets');
+    if (r.ok) serverAvailable = true;
+  } catch(e) { serverAvailable = false; }
+  applyServerVisibility();
+}
+
+function applyServerVisibility() {
+  const hide = !serverAvailable;
+  document.getElementById('btnSavePreset').style.display = hide ? 'none' : '';
+  document.getElementById('libraryHeading').style.display = hide ? 'none' : '';
+  document.getElementById('libraryList').style.display = hide ? 'none' : '';
+  document.getElementById('btnSaveColors').style.display = hide ? 'none' : '';
+  document.getElementById('logoSection').style.display = hide ? 'none' : '';
+}
+
+checkServer().then(() => {
+  if (serverAvailable) {
+    loadPresetsFromDisk();
+    loadColorThemesFromDisk();
+    loadLogoList();
+  } else {
+    colorThemes = [...DEFAULT_COLOR_THEMES];
+    renderColorLibrary();
+  }
+});
 </script>
 </body>
 </html>
