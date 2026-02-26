@@ -32,6 +32,10 @@ data class SongSettings(
     val titlePosition: String = Constants.MIDDLE,
     val titleHorizontalAlignment: String = Constants.CENTER,
     val titleColor: String = "#FFFFFF", // White
+    val titleBold: Boolean = false,
+    val titleItalic: Boolean = false,
+    val titleUnderline: Boolean = false,
+    val titleShadow: Boolean = false,
 
     // Lyrics settings
     val lyricsFontSize: Int = 24,
@@ -44,6 +48,10 @@ data class SongSettings(
     val lyricsHorizontalAlignment: String = Constants.CENTER,
     val lyricsLowerThirdHorizontalAlignment: String = Constants.CENTER,
     val lyricsColor: String = "#FFFFFF", // White
+    val lyricsBold: Boolean = false,
+    val lyricsItalic: Boolean = false,
+    val lyricsUnderline: Boolean = false,
+    val lyricsShadow: Boolean = false,
 
     // Song number settings
     val songNumberFontSize: Int = 16,
@@ -51,6 +59,10 @@ data class SongSettings(
     val showNumber: String = Constants.FIRST_PAGE,
     val songNumberPosition: String = Constants.BOTTOM_RIGHT,
     val songNumberColor: String = "#FFFFFF", // White
+    val songNumberBold: Boolean = false,
+    val songNumberItalic: Boolean = false,
+    val songNumberUnderline: Boolean = false,
+    val songNumberShadow: Boolean = false,
 
     // Transition animation
     val animationType: String = Constants.ANIMATION_CROSSFADE,
@@ -77,6 +89,10 @@ data class BibleSettings(
     val primaryBibleLowerThirdFontSize: Int = 32,
     val primaryBibleHorizontalAlignment: String = Constants.CENTER,
     val primaryBibleLowerThirdHorizontalAlignment: String = Constants.CENTER,
+    val primaryBibleBold: Boolean = false,
+    val primaryBibleItalic: Boolean = false,
+    val primaryBibleUnderline: Boolean = false,
+    val primaryBibleShadow: Boolean = false,
 
     // Primary Bible book reference
     val primaryReferenceColor: String = "#FFFFFF",
@@ -87,6 +103,10 @@ data class BibleSettings(
     val primaryReferenceHorizontalAlignment: String = Constants.CENTER,
     val primaryReferenceLowerThirdHorizontalAlignment: String = Constants.CENTER,
     val primaryShowAbbreviation: Boolean = false,
+    val primaryReferenceBold: Boolean = false,
+    val primaryReferenceItalic: Boolean = false,
+    val primaryReferenceUnderline: Boolean = false,
+    val primaryReferenceShadow: Boolean = false,
 
     // Secondary Bible text
     val secondaryBibleColor: String = "#CCCCCC",
@@ -96,6 +116,10 @@ data class BibleSettings(
     val secondaryBibleHorizontalAlignment: String = Constants.CENTER,
     val secondaryBibleLowerThirdHorizontalAlignment: String = Constants.CENTER,
     val secondaryBibleLowerThirdEnabled: Boolean = true,
+    val secondaryBibleBold: Boolean = false,
+    val secondaryBibleItalic: Boolean = false,
+    val secondaryBibleUnderline: Boolean = false,
+    val secondaryBibleShadow: Boolean = false,
 
     // Secondary Bible book reference
     val secondaryReferenceColor: String = "#CCCCCC",
@@ -106,6 +130,10 @@ data class BibleSettings(
     val secondaryReferenceHorizontalAlignment: String = Constants.CENTER,
     val secondaryReferenceLowerThirdHorizontalAlignment: String = Constants.CENTER,
     val secondaryShowAbbreviation: Boolean = false,
+    val secondaryReferenceBold: Boolean = false,
+    val secondaryReferenceItalic: Boolean = false,
+    val secondaryReferenceUnderline: Boolean = false,
+    val secondaryReferenceShadow: Boolean = false,
 
     // Language for captions
     val captionLanguage: String = "Interface", // "Interface" or "Database"

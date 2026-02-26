@@ -94,6 +94,7 @@ import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextFie
 import org.churchpresenter.app.churchpresenter.composables.PositionButtons
 import org.churchpresenter.app.churchpresenter.composables.HorizontalAlignmentButtons
 import org.churchpresenter.app.churchpresenter.composables.VerticalAlignmentButtons
+import org.churchpresenter.app.churchpresenter.composables.TextStyleButtons
 import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDefault
@@ -572,12 +573,24 @@ private fun RightColumn(
     SectionHeader(stringResource(Res.string.primary_bible_text))
     Spacer(modifier = Modifier.height(8.dp))
     SettingRow(stringResource(Res.string.color)) {
-        ColorPickerField(
-            color = settings.bibleSettings.primaryBibleColor,
-            onColorChange = {
-                onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(primaryBibleColor = it)) }
-            }
-        )
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            ColorPickerField(
+                color = settings.bibleSettings.primaryBibleColor,
+                onColorChange = {
+                    onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(primaryBibleColor = it)) }
+                }
+            )
+            TextStyleButtons(
+                bold = settings.bibleSettings.primaryBibleBold,
+                italic = settings.bibleSettings.primaryBibleItalic,
+                underline = settings.bibleSettings.primaryBibleUnderline,
+                shadow = settings.bibleSettings.primaryBibleShadow,
+                onBoldChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(primaryBibleBold = it)) } },
+                onItalicChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(primaryBibleItalic = it)) } },
+                onUnderlineChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(primaryBibleUnderline = it)) } },
+                onShadowChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(primaryBibleShadow = it)) } }
+            )
+        }
     }
     SettingRow(stringResource(Res.string.font_type)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -648,12 +661,24 @@ private fun RightColumn(
     SectionHeader(stringResource(Res.string.primary_bible_reference))
     Spacer(modifier = Modifier.height(8.dp))
     SettingRow(stringResource(Res.string.color)) {
-        ColorPickerField(
-            color = settings.bibleSettings.primaryReferenceColor,
-            onColorChange = {
-                onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(primaryReferenceColor = it)) }
-            }
-        )
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            ColorPickerField(
+                color = settings.bibleSettings.primaryReferenceColor,
+                onColorChange = {
+                    onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(primaryReferenceColor = it)) }
+                }
+            )
+            TextStyleButtons(
+                bold = settings.bibleSettings.primaryReferenceBold,
+                italic = settings.bibleSettings.primaryReferenceItalic,
+                underline = settings.bibleSettings.primaryReferenceUnderline,
+                shadow = settings.bibleSettings.primaryReferenceShadow,
+                onBoldChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(primaryReferenceBold = it)) } },
+                onItalicChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(primaryReferenceItalic = it)) } },
+                onUnderlineChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(primaryReferenceUnderline = it)) } },
+                onShadowChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(primaryReferenceShadow = it)) } }
+            )
+        }
     }
     SettingRow(stringResource(Res.string.font_type)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -747,12 +772,24 @@ private fun RightColumn(
     SectionHeader(stringResource(Res.string.secondary_bible_text))
     Spacer(modifier = Modifier.height(8.dp))
     SettingRow(stringResource(Res.string.color)) {
-        ColorPickerField(
-            color = settings.bibleSettings.secondaryBibleColor,
-            onColorChange = {
-                onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(secondaryBibleColor = it)) }
-            }
-        )
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            ColorPickerField(
+                color = settings.bibleSettings.secondaryBibleColor,
+                onColorChange = {
+                    onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(secondaryBibleColor = it)) }
+                }
+            )
+            TextStyleButtons(
+                bold = settings.bibleSettings.secondaryBibleBold,
+                italic = settings.bibleSettings.secondaryBibleItalic,
+                underline = settings.bibleSettings.secondaryBibleUnderline,
+                shadow = settings.bibleSettings.secondaryBibleShadow,
+                onBoldChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(secondaryBibleBold = it)) } },
+                onItalicChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(secondaryBibleItalic = it)) } },
+                onUnderlineChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(secondaryBibleUnderline = it)) } },
+                onShadowChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(secondaryBibleShadow = it)) } }
+            )
+        }
     }
     SettingRow(stringResource(Res.string.font_type)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -823,12 +860,24 @@ private fun RightColumn(
     SectionHeader(stringResource(Res.string.secondary_bible_reference))
     Spacer(modifier = Modifier.height(8.dp))
     SettingRow(stringResource(Res.string.color)) {
-        ColorPickerField(
-            color = settings.bibleSettings.secondaryReferenceColor,
-            onColorChange = {
-                onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(secondaryReferenceColor = it)) }
-            }
-        )
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            ColorPickerField(
+                color = settings.bibleSettings.secondaryReferenceColor,
+                onColorChange = {
+                    onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(secondaryReferenceColor = it)) }
+                }
+            )
+            TextStyleButtons(
+                bold = settings.bibleSettings.secondaryReferenceBold,
+                italic = settings.bibleSettings.secondaryReferenceItalic,
+                underline = settings.bibleSettings.secondaryReferenceUnderline,
+                shadow = settings.bibleSettings.secondaryReferenceShadow,
+                onBoldChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(secondaryReferenceBold = it)) } },
+                onItalicChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(secondaryReferenceItalic = it)) } },
+                onUnderlineChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(secondaryReferenceUnderline = it)) } },
+                onShadowChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(secondaryReferenceShadow = it)) } }
+            )
+        }
     }
     SettingRow(stringResource(Res.string.font_type)) {
         Row(verticalAlignment = Alignment.CenterVertically) {

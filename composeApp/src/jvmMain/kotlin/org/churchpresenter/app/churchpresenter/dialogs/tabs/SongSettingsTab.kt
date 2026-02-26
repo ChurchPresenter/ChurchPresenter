@@ -98,6 +98,7 @@ import org.churchpresenter.app.churchpresenter.composables.FontSettingsDropdown
 import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
 import org.churchpresenter.app.churchpresenter.composables.HorizontalAlignmentButtons
 import org.churchpresenter.app.churchpresenter.composables.VerticalAlignmentButtons
+import org.churchpresenter.app.churchpresenter.composables.TextStyleButtons
 import org.churchpresenter.app.churchpresenter.composables.PositionButtons
 import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.utils.Constants
@@ -451,14 +452,26 @@ private fun LeftColumn(
     }
 
     SettingRow(stringResource(Res.string.color)) {
-        ColorPickerField(
-            color = settings.songSettings.titleColor,
-            onColorChange = {
-                onSettingsChange { s ->
-                    s.copy(songSettings = s.songSettings.copy(titleColor = it))
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            ColorPickerField(
+                color = settings.songSettings.titleColor,
+                onColorChange = {
+                    onSettingsChange { s ->
+                        s.copy(songSettings = s.songSettings.copy(titleColor = it))
+                    }
                 }
-            }
-        )
+            )
+            TextStyleButtons(
+                bold = settings.songSettings.titleBold,
+                italic = settings.songSettings.titleItalic,
+                underline = settings.songSettings.titleUnderline,
+                shadow = settings.songSettings.titleShadow,
+                onBoldChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleBold = it)) } },
+                onItalicChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleItalic = it)) } },
+                onUnderlineChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleUnderline = it)) } },
+                onShadowChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleShadow = it)) } }
+            )
+        }
     }
 
     SettingRow(stringResource(Res.string.vertical_alignment), width = 200.dp) {
@@ -635,30 +648,27 @@ private fun RightColumn(
         }
     }
 
-//    MinMaxRow(
-//        minValue = settings.songSettings.lyricsMinFontSize,
-//        maxValue = settings.songSettings.lyricsMaxFontSize,
-//        onMinChange = {
-//            onSettingsChange.invoke(
-//                settings.copy(songSettings = settings.songSettings.copy(lyricsMinFontSize = it))
-//            )
-//        },
-//        onMaxChange = {
-//            onSettingsChange.invoke(
-//                settings.copy(songSettings = settings.songSettings.copy(lyricsMaxFontSize = it))
-//            )
-//        }
-//    )
-
     SettingRow(stringResource(Res.string.color)) {
-        ColorPickerField(
-            color = settings.songSettings.lyricsColor,
-            onColorChange = {
-                onSettingsChange { s ->
-                    s.copy(songSettings = s.songSettings.copy(lyricsColor = it))
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            ColorPickerField(
+                color = settings.songSettings.lyricsColor,
+                onColorChange = {
+                    onSettingsChange { s ->
+                        s.copy(songSettings = s.songSettings.copy(lyricsColor = it))
+                    }
                 }
-            }
-        )
+            )
+            TextStyleButtons(
+                bold = settings.songSettings.lyricsBold,
+                italic = settings.songSettings.lyricsItalic,
+                underline = settings.songSettings.lyricsUnderline,
+                shadow = settings.songSettings.lyricsShadow,
+                onBoldChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsBold = it)) } },
+                onItalicChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsItalic = it)) } },
+                onUnderlineChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsUnderline = it)) } },
+                onShadowChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsShadow = it)) } }
+            )
+        }
     }
 
     Row(
@@ -811,14 +821,26 @@ private fun RightColumn(
     }
 
     SettingRow(stringResource(Res.string.color)) {
-        ColorPickerField(
-            color = settings.songSettings.songNumberColor,
-            onColorChange = {
-                onSettingsChange { s ->
-                    s.copy(songSettings = s.songSettings.copy(songNumberColor = it))
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            ColorPickerField(
+                color = settings.songSettings.songNumberColor,
+                onColorChange = {
+                    onSettingsChange { s ->
+                        s.copy(songSettings = s.songSettings.copy(songNumberColor = it))
+                    }
                 }
-            }
-        )
+            )
+            TextStyleButtons(
+                bold = settings.songSettings.songNumberBold,
+                italic = settings.songSettings.songNumberItalic,
+                underline = settings.songSettings.songNumberUnderline,
+                shadow = settings.songSettings.songNumberShadow,
+                onBoldChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(songNumberBold = it)) } },
+                onItalicChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(songNumberItalic = it)) } },
+                onUnderlineChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(songNumberUnderline = it)) } },
+                onShadowChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(songNumberShadow = it)) } }
+            )
+        }
     }
 }
 

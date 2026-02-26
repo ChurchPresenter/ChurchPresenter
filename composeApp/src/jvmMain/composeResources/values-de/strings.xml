@@ -43,6 +43,14 @@
     <string name="show_number">Nummer anzeigen:</string>
     <string name="font_size">Schriftgröße:</string>
     <string name="font_type">Schriftart:</string>
+    <string name="text_style_bold">B</string>
+    <string name="text_style_italic">I</string>
+    <string name="text_style_underline">U</string>
+    <string name="text_style_shadow">S</string>
+    <string name="tooltip_bold">Fett</string>
+    <string name="tooltip_italic">Kursiv</string>
+    <string name="tooltip_underline">Unterstrichen</string>
+    <string name="tooltip_shadow">Schatten</string>
     <string name="announcements">Ankündigungen</string>
     <string name="menu_file">Datei</string>
     <string name="menu_new_schedule">Neues Programm</string>

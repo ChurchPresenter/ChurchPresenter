@@ -19,12 +19,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.paint
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.toComposeImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.geometry.Offset
 import kotlin.math.min
 import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.extensions.conditional
@@ -50,7 +56,6 @@ fun SongPresenter(
         systemFontFamilyOrDefault(appSettings.songSettings.lyricsFontType)
     }
 
-    // Parse colors from hex strings
     val titleColor = remember(appSettings.songSettings.titleColor) {
         parseHexColor(appSettings.songSettings.titleColor)
     }
@@ -60,6 +65,26 @@ fun SongPresenter(
     val songNumberColor = remember(appSettings.songSettings.songNumberColor) {
         parseHexColor(appSettings.songSettings.songNumberColor)
     }
+
+    // Text styles derived from settings
+    val titleTextStyle = TextStyle(
+        fontWeight = if (appSettings.songSettings.titleBold) FontWeight.Bold else FontWeight.Normal,
+        fontStyle = if (appSettings.songSettings.titleItalic) FontStyle.Italic else FontStyle.Normal,
+        textDecoration = if (appSettings.songSettings.titleUnderline) TextDecoration.Underline else TextDecoration.None,
+        shadow = if (appSettings.songSettings.titleShadow) Shadow(color = Color.Black.copy(alpha = 0.7f), offset = Offset(2f, 2f), blurRadius = 4f) else null
+    )
+    val lyricsTextStyle = TextStyle(
+        fontWeight = if (appSettings.songSettings.lyricsBold) FontWeight.Bold else FontWeight.Normal,
+        fontStyle = if (appSettings.songSettings.lyricsItalic) FontStyle.Italic else FontStyle.Normal,
+        textDecoration = if (appSettings.songSettings.lyricsUnderline) TextDecoration.Underline else TextDecoration.None,
+        shadow = if (appSettings.songSettings.lyricsShadow) Shadow(color = Color.Black.copy(alpha = 0.7f), offset = Offset(2f, 2f), blurRadius = 4f) else null
+    )
+    val songNumberTextStyle = TextStyle(
+        fontWeight = if (appSettings.songSettings.songNumberBold) FontWeight.Bold else FontWeight.Normal,
+        fontStyle = if (appSettings.songSettings.songNumberItalic) FontStyle.Italic else FontStyle.Normal,
+        textDecoration = if (appSettings.songSettings.songNumberUnderline) TextDecoration.Underline else TextDecoration.None,
+        shadow = if (appSettings.songSettings.songNumberShadow) Shadow(color = Color.Black.copy(alpha = 0.7f), offset = Offset(2f, 2f), blurRadius = 4f) else null
+    )
 
     val contentAlignment = when (appSettings.songSettings.lyricsAlignment) {
         Constants.TOP -> Alignment.TopCenter
@@ -151,7 +176,6 @@ fun SongPresenter(
                     .align(Alignment.BottomCenter)
             else
                 Modifier
-            // ...existing code...
             val alignment = when (appSettings.songSettings.songNumberPosition) {
                 Constants.TOP_LEFT -> Alignment.TopStart
                 Constants.TOP_RIGHT -> Alignment.TopEnd
@@ -171,7 +195,8 @@ fun SongPresenter(
                         fontFamily = titleFontFamily,
                         fontSize = scaledSongNumberFontSize,
                         text = lyricSection.songNumber.toString(),
-                        color = songNumberColor
+                        color = songNumberColor,
+                        style = songNumberTextStyle
                     )
                 }
                 Column(
@@ -182,7 +207,14 @@ fun SongPresenter(
                 ) {
                     if (shouldShowTitle && appSettings.songSettings.titlePosition == Constants.ABOVE_VERSE) {
                         Row(Modifier.fillMaxWidth(), horizontalArrangement = titleHorizontalAlignment) {
-                            Text(modifier = Modifier.wrapContentWidth(), fontFamily = titleFontFamily, fontSize = scaledTitleFontSize, text = lyricSection.title, color = titleColor)
+                            Text(
+                                modifier = Modifier.wrapContentWidth(),
+                                fontFamily = titleFontFamily,
+                                fontSize = scaledTitleFontSize,
+                                text = lyricSection.title,
+                                color = titleColor,
+                                style = titleTextStyle
+                            )
                         }
                     }
                     lyricSection.lines.forEach { line ->
@@ -193,13 +225,28 @@ fun SongPresenter(
                             line.startsWith(Constants.CHORUS, ignoreCase = true)
                         if (!isSectionHeader) {
                             Row(Modifier.fillMaxWidth(), horizontalArrangement = lyricsHorizontalAlignment) {
-                                Text(modifier = Modifier.wrapContentWidth(), fontFamily = lyricsFontFamily, fontSize = scaledLyricsFontSize, softWrap = appSettings.songSettings.wordWrap, text = line, color = lyricsColor)
+                                Text(
+                                    modifier = Modifier.wrapContentWidth(),
+                                    fontFamily = lyricsFontFamily,
+                                    fontSize = scaledLyricsFontSize,
+                                    softWrap = appSettings.songSettings.wordWrap,
+                                    text = line,
+                                    color = lyricsColor,
+                                    style = lyricsTextStyle
+                                )
                             }
                         }
                     }
                     if (shouldShowTitle && appSettings.songSettings.titlePosition == Constants.BELOW_VERSE) {
                         Row(Modifier.fillMaxWidth(), horizontalArrangement = titleHorizontalAlignment) {
-                            Text(modifier = Modifier.wrapContentWidth(), fontFamily = titleFontFamily, fontSize = scaledTitleFontSize, text = lyricSection.title, color = titleColor)
+                            Text(
+                                modifier = Modifier.wrapContentWidth(),
+                                fontFamily = titleFontFamily,
+                                fontSize = scaledTitleFontSize,
+                                text = lyricSection.title,
+                                color = titleColor,
+                                style = titleTextStyle
+                            )
                         }
                     }
                 }

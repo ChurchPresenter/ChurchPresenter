@@ -43,6 +43,14 @@
     <string name="show_number">Zobrazit číslo:</string>
     <string name="font_size">Velikost písma:</string>
     <string name="font_type">Typ písma:</string>
+    <string name="text_style_bold">B</string>
+    <string name="text_style_italic">I</string>
+    <string name="text_style_underline">U</string>
+    <string name="text_style_shadow">S</string>
+    <string name="tooltip_bold">Tučné</string>
+    <string name="tooltip_italic">Kurzíva</string>
+    <string name="tooltip_underline">Podtržené</string>
+    <string name="tooltip_shadow">Stín</string>
     <string name="announcements">Oznámení</string>
     <string name="menu_file">Soubor</string>
     <string name="menu_new_schedule">Nový program</string>

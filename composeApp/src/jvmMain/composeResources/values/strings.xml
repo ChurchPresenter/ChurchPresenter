@@ -44,6 +44,14 @@
     <string name="show_number">Show Number:</string>
     <string name="font_size">Font Size:</string>
     <string name="font_type">Font Type:</string>
+    <string name="text_style_bold">B</string>
+    <string name="text_style_italic">I</string>
+    <string name="text_style_underline">U</string>
+    <string name="text_style_shadow">S</string>
+    <string name="tooltip_bold">Bold</string>
+    <string name="tooltip_italic">Italic</string>
+    <string name="tooltip_underline">Underline</string>
+    <string name="tooltip_shadow">Shadow</string>
     <string name="announcements">Announcements</string>
     <string name="menu_file">File</string>
     <string name="menu_new_schedule">New Schedule</string>
