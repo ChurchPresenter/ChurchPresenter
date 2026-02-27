@@ -12,9 +12,11 @@ data class BackgroundConfig(
 
 @Serializable
 data class BackgroundSettings(
-    val defaultBackgroundColor: String = "#000000", // Black - used when backgroundType is "Default"
+    val defaultBackgroundColor: String = "#000000",
     val bibleBackground: BackgroundConfig = BackgroundConfig(),
-    val songBackground: BackgroundConfig = BackgroundConfig()
+    val bibleLowerThirdBackground: BackgroundConfig = BackgroundConfig(),
+    val songBackground: BackgroundConfig = BackgroundConfig(),
+    val songLowerThirdBackground: BackgroundConfig = BackgroundConfig()
 )
 
 @Serializable

@@ -1,6 +1,8 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -8,7 +10,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
@@ -16,9 +20,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.background_color
@@ -31,11 +35,15 @@ import churchpresenter.composeapp.generated.resources.bible
 import churchpresenter.composeapp.generated.resources.color
 import churchpresenter.composeapp.generated.resources.default_background_color
 import churchpresenter.composeapp.generated.resources.default_background_color_help
+import churchpresenter.composeapp.generated.resources.display_lower_third
+import churchpresenter.composeapp.generated.resources.full_screen
 import churchpresenter.composeapp.generated.resources.songs
 import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
 import org.churchpresenter.app.churchpresenter.composables.FileImagePicker
 import org.churchpresenter.app.churchpresenter.data.AppSettings
+import org.churchpresenter.app.churchpresenter.data.BackgroundConfig
 import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.app.churchpresenter.viewmodel.BackgroundSettingsViewModel
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -43,6 +51,8 @@ fun BackgroundSettingsTab(
     settings: AppSettings,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit
 ) {
+    val viewModel = remember { BackgroundSettingsViewModel() }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -58,11 +68,7 @@ fun BackgroundSettingsTab(
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.padding(bottom = 8.dp)
             )
-            HorizontalDivider(
-                color = MaterialTheme.colorScheme.outlineVariant,
-                thickness = 2.dp,
-                modifier = Modifier.fillMaxWidth()
-            )
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant, thickness = 2.dp)
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = stringResource(Res.string.default_background_color_help),
@@ -73,195 +79,144 @@ fun BackgroundSettingsTab(
             SettingRow(stringResource(Res.string.color)) {
                 ColorPickerField(
                     color = settings.backgroundSettings.defaultBackgroundColor,
-                    onColorChange = {
-                        onSettingsChange { s ->
-                            s.copy(backgroundSettings = s.backgroundSettings.copy(defaultBackgroundColor = it))
-                        }
-                    }
+                    onColorChange = { viewModel.updateDefaultColor(it, onSettingsChange) }
                 )
             }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
-        // Two Column Layout for Bible and Songs
+        // 2-group layout: Bible | Songs, each with Full Screen + Lower Third sub-columns
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(24.dp)
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // Left Column - Bible Background
-            Column(
-                modifier = Modifier.weight(1f)
-            ) {
-                BibleBackgroundColumn(
-                    settings = settings,
-                    onSettingsChange = onSettingsChange
-                )
+            // ── Bible group ──────────────────────────────────────────
+            Column(modifier = Modifier.weight(1f)) {
+                GroupHeader(stringResource(Res.string.bible))
+                Spacer(modifier = Modifier.height(12.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        BackgroundColumn(
+                            subtitle = stringResource(Res.string.full_screen),
+                            config = settings.backgroundSettings.bibleBackground,
+                            onConfigChange = { viewModel.updateBibleBackground(it, onSettingsChange) }
+                        )
+                    }
+                    ColumnDivider()
+                    Column(modifier = Modifier.weight(1f)) {
+                        BackgroundColumn(
+                            subtitle = stringResource(Res.string.display_lower_third),
+                            config = settings.backgroundSettings.bibleLowerThirdBackground,
+                            onConfigChange = { viewModel.updateBibleLowerThirdBackground(it, onSettingsChange) }
+                        )
+                    }
+                }
             }
 
-            // Vertical Divider
-            HorizontalDivider(
-                modifier = Modifier
-                    .width(1.dp)
-                    .fillMaxSize(),
-                color = MaterialTheme.colorScheme.outlineVariant
-            )
+            ColumnDivider()
 
-            // Right Column - Song Background
-            Column(
-                modifier = Modifier.weight(1f)
-            ) {
-                SongBackgroundColumn(
-                    settings = settings,
-                    onSettingsChange = onSettingsChange
-                )
+            // ── Songs group ──────────────────────────────────────────
+            Column(modifier = Modifier.weight(1f)) {
+                GroupHeader(stringResource(Res.string.songs))
+                Spacer(modifier = Modifier.height(12.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        BackgroundColumn(
+                            subtitle = stringResource(Res.string.full_screen),
+                            config = settings.backgroundSettings.songBackground,
+                            onConfigChange = { viewModel.updateSongBackground(it, onSettingsChange) }
+                        )
+                    }
+                    ColumnDivider()
+                    Column(modifier = Modifier.weight(1f)) {
+                        BackgroundColumn(
+                            subtitle = stringResource(Res.string.display_lower_third),
+                            config = settings.backgroundSettings.songLowerThirdBackground,
+                            onConfigChange = { viewModel.updateSongLowerThirdBackground(it, onSettingsChange) }
+                        )
+                    }
+                }
             }
         }
     }
 }
 
 @Composable
-private fun BibleBackgroundColumn(
-    settings: AppSettings,
-    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit
+private fun GroupHeader(title: String) {
+    Column {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleLarge,
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant, thickness = 2.dp)
+    }
+}
+
+@Composable
+private fun BackgroundColumn(
+    subtitle: String,
+    config: BackgroundConfig,
+    onConfigChange: (BackgroundConfig) -> Unit
 ) {
-    // String resources
     val backgroundDefaultStr = stringResource(Res.string.background_default)
-    val backgroundColorStr = stringResource(Res.string.background_color_option)
-    val backgroundImageStr = stringResource(Res.string.background_image_option)
+    val backgroundColorStr   = stringResource(Res.string.background_color_option)
+    val backgroundImageStr   = stringResource(Res.string.background_image_option)
 
-    SectionHeader(stringResource(Res.string.bible))
-    Spacer(modifier = Modifier.height(16.dp))
+    SectionHeader(subtitle)
+    Spacer(modifier = Modifier.height(10.dp))
 
-    // Background Type Selection
     Text(
         text = stringResource(Res.string.background_type),
-        style = MaterialTheme.typography.titleSmall,
-        color = MaterialTheme.colorScheme.onSurface
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant
     )
-    Spacer(modifier = Modifier.height(8.dp))
+    Spacer(modifier = Modifier.height(4.dp))
 
-    // Radio buttons for background type
     BackgroundTypeRadioGroup(
-        selectedType = settings.backgroundSettings.bibleBackground.backgroundType,
-        onTypeSelected = { type ->
-            onSettingsChange { s ->
-                s.copy(backgroundSettings = s.backgroundSettings.copy(
-                    bibleBackground = s.backgroundSettings.bibleBackground.copy(backgroundType = type)
-                ))
-            }
-        },
+        selectedType = config.backgroundType,
+        onTypeSelected = { onConfigChange(config.copy(backgroundType = it)) },
         defaultLabel = backgroundDefaultStr,
-        colorLabel = backgroundColorStr,
-        imageLabel = backgroundImageStr
+        colorLabel   = backgroundColorStr,
+        imageLabel   = backgroundImageStr
     )
 
-    Spacer(modifier = Modifier.height(16.dp))
+    Spacer(modifier = Modifier.height(10.dp))
 
-    // Background Color
-    if (settings.backgroundSettings.bibleBackground.backgroundType == Constants.BACKGROUND_COLOR) {
-        SettingRow(stringResource(Res.string.background_color)) {
-            ColorPickerField(
-                color = settings.backgroundSettings.bibleBackground.backgroundColor,
-                onColorChange = {
-                    onSettingsChange { s ->
-                        s.copy(backgroundSettings = s.backgroundSettings.copy(
-                            bibleBackground = s.backgroundSettings.bibleBackground.copy(backgroundColor = it)
-                        ))
-                    }
-                }
-            )
+    when (config.backgroundType) {
+        Constants.BACKGROUND_COLOR -> {
+            SettingRow(stringResource(Res.string.background_color)) {
+                ColorPickerField(
+                    color = config.backgroundColor,
+                    onColorChange = { onConfigChange(config.copy(backgroundColor = it)) }
+                )
+            }
         }
-    }
-
-    // Background Image
-    if (settings.backgroundSettings.bibleBackground.backgroundType == Constants.BACKGROUND_IMAGE) {
-        SettingRow(stringResource(Res.string.background_image)) {
-            FileImagePicker(
-                imagePath = settings.backgroundSettings.bibleBackground.backgroundImage,
-                onImagePathChange = {
-                    onSettingsChange { s ->
-                        s.copy(backgroundSettings = s.backgroundSettings.copy(
-                            bibleBackground = s.backgroundSettings.bibleBackground.copy(backgroundImage = it)
-                        ))
-                    }
-                },
-                modifier = Modifier.fillMaxWidth()
-            )
+        Constants.BACKGROUND_IMAGE -> {
+            SettingRow(stringResource(Res.string.background_image)) {
+                FileImagePicker(
+                    imagePath = config.backgroundImage,
+                    onImagePathChange = { onConfigChange(config.copy(backgroundImage = it)) },
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        }
+        else -> {
+            // Default — nothing extra to show
         }
     }
 }
 
 @Composable
-private fun SongBackgroundColumn(
-    settings: AppSettings,
-    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit
-) {
-    // String resources
-    val backgroundDefaultStr = stringResource(Res.string.background_default)
-    val backgroundColorStr = stringResource(Res.string.background_color_option)
-    val backgroundImageStr = stringResource(Res.string.background_image_option)
-
-    SectionHeader(stringResource(Res.string.songs))
-    Spacer(modifier = Modifier.height(16.dp))
-
-    // Background Type Selection
-    Text(
-        text = stringResource(Res.string.background_type),
-        style = MaterialTheme.typography.titleSmall,
-        color = MaterialTheme.colorScheme.onSurface
+private fun ColumnDivider() {
+    Box(
+        modifier = Modifier
+            .width(1.dp)
+            .height(400.dp)
+            .background(MaterialTheme.colorScheme.outlineVariant)
     )
-    Spacer(modifier = Modifier.height(8.dp))
-
-    // Radio buttons for background type
-    BackgroundTypeRadioGroup(
-        selectedType = settings.backgroundSettings.songBackground.backgroundType,
-        onTypeSelected = { type ->
-            onSettingsChange { s ->
-                s.copy(backgroundSettings = s.backgroundSettings.copy(
-                    songBackground = s.backgroundSettings.songBackground.copy(backgroundType = type)
-                ))
-            }
-        },
-        defaultLabel = backgroundDefaultStr,
-        colorLabel = backgroundColorStr,
-        imageLabel = backgroundImageStr
-    )
-
-    Spacer(modifier = Modifier.height(16.dp))
-
-    // Background Color
-    if (settings.backgroundSettings.songBackground.backgroundType == Constants.BACKGROUND_COLOR) {
-        SettingRow(stringResource(Res.string.background_color)) {
-            ColorPickerField(
-                color = settings.backgroundSettings.songBackground.backgroundColor,
-                onColorChange = {
-                    onSettingsChange { s ->
-                        s.copy(backgroundSettings = s.backgroundSettings.copy(
-                            songBackground = s.backgroundSettings.songBackground.copy(backgroundColor = it)
-                        ))
-                    }
-                }
-            )
-        }
-    }
-
-    // Background Image
-    if (settings.backgroundSettings.songBackground.backgroundType == Constants.BACKGROUND_IMAGE) {
-        SettingRow(stringResource(Res.string.background_image)) {
-            FileImagePicker(
-                imagePath = settings.backgroundSettings.songBackground.backgroundImage,
-                onImagePathChange = {
-                    onSettingsChange { s ->
-                        s.copy(backgroundSettings = s.backgroundSettings.copy(
-                            songBackground = s.backgroundSettings.songBackground.copy(backgroundImage = it)
-                        ))
-                    }
-                },
-                modifier = Modifier.fillMaxWidth()
-            )
-        }
-    }
 }
 
 @Composable
@@ -272,94 +227,59 @@ private fun BackgroundTypeRadioGroup(
     colorLabel: String,
     imageLabel: String
 ) {
-    Column(
-        verticalArrangement = Arrangement.spacedBy(4.dp)
-    ) {
-        // Default option
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            RadioButton(
-                selected = selectedType == Constants.BACKGROUND_DEFAULT,
-                onClick = { onTypeSelected(Constants.BACKGROUND_DEFAULT) }
-            )
-            Text(
-                text = defaultLabel,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-        }
-
-        // Color option
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            RadioButton(
-                selected = selectedType == Constants.BACKGROUND_COLOR,
-                onClick = { onTypeSelected(Constants.BACKGROUND_COLOR) }
-            )
-            Text(
-                text = colorLabel,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-        }
-
-        // Image option
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            RadioButton(
-                selected = selectedType == Constants.BACKGROUND_IMAGE,
-                onClick = { onTypeSelected(Constants.BACKGROUND_IMAGE) }
-            )
-            Text(
-                text = imageLabel,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface
-            )
+    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        listOf(
+            Constants.BACKGROUND_DEFAULT to defaultLabel,
+            Constants.BACKGROUND_COLOR   to colorLabel,
+            Constants.BACKGROUND_IMAGE   to imageLabel
+        ).forEach { (type, label) ->
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                RadioButton(
+                    selected = selectedType == type,
+                    onClick = { onTypeSelected(type) },
+                    modifier = Modifier.size(28.dp),
+                    colors = RadioButtonDefaults.colors()
+                )
+                Text(
+                    text = label,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.padding(start = 4.dp)
+                )
+            }
         }
     }
 }
 
 @Composable
-private fun SectionHeader(text: String) {
+private fun SectionHeader(title: String) {
     Column {
         Text(
-            text = text,
-            style = MaterialTheme.typography.titleLarge,
-            color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.padding(bottom = 8.dp)
+            text = title,
+            style = MaterialTheme.typography.titleSmall,
+            color = MaterialTheme.colorScheme.secondary,
+            modifier = Modifier.padding(bottom = 6.dp)
         )
-        HorizontalDivider(
-            color = MaterialTheme.colorScheme.outlineVariant,
-            thickness = 2.dp,
-            modifier = Modifier.fillMaxWidth()
-        )
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant, thickness = 1.dp)
     }
 }
 
 @Composable
 private fun SettingRow(
     label: String,
-    width: Dp = 140.dp,
     content: @Composable () -> Unit
 ) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalAlignment = Alignment.CenterVertically
+    Column(
+        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
         Text(
             text = label,
-            style = MaterialTheme.typography.bodyMedium,
+            style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.width(width)
         )
         content()
     }

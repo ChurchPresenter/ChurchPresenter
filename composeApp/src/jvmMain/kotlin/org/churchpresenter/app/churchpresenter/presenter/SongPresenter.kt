@@ -33,7 +33,6 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.geometry.Offset
 import kotlin.math.min
 import org.churchpresenter.app.churchpresenter.data.AppSettings
-import org.churchpresenter.app.churchpresenter.extensions.conditional
 import org.churchpresenter.app.churchpresenter.models.LyricSection
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.Constants.VERSE_1_RUS
@@ -99,54 +98,42 @@ fun SongPresenter(
         appSettings.songSettings.titleHorizontalAlignment
     )
 
-    // Background settings
-    var backgroundColor: Color = parseHexColor(appSettings.backgroundSettings.songBackground.backgroundColor)
-    val backgroundType = appSettings.backgroundSettings.songBackground.backgroundType
-    val backgroundImagePath = appSettings.backgroundSettings.songBackground.backgroundImage
+    val bgConfig = if (isLowerThird) appSettings.backgroundSettings.songLowerThirdBackground
+                   else appSettings.backgroundSettings.songBackground
+
+    var backgroundColor: Color = parseHexColor(bgConfig.backgroundColor)
+    val backgroundType = bgConfig.backgroundType
+    val backgroundImagePath = bgConfig.backgroundImage
 
     if (backgroundType == Constants.BACKGROUND_DEFAULT) {
         backgroundColor = parseHexColor(appSettings.backgroundSettings.defaultBackgroundColor)
     }
 
-    // Load background image if type is IMAGE and path is not empty
-    val backgroundImageBitmap = remember(backgroundImagePath) {
+    val backgroundImageBitmap = remember(backgroundType, backgroundImagePath, isLowerThird) {
         if (backgroundType == Constants.BACKGROUND_IMAGE && backgroundImagePath.isNotEmpty()) {
             try {
                 val file = File(backgroundImagePath)
-                if (file.exists()) {
-                    val bytes = file.readBytes()
-                    Image.makeFromEncoded(bytes).toComposeImageBitmap()
-                } else {
-                    null
-                }
-            } catch (e: Exception) {
-                null
-            }
-        } else {
-            null
-        }
+                if (file.exists()) Image.makeFromEncoded(file.readBytes()).toComposeImageBitmap()
+                else null
+            } catch (_: Exception) { null }
+        } else null
+    }
+
+    val bgModifier: Modifier = when {
+        backgroundType == Constants.BACKGROUND_IMAGE && backgroundImageBitmap != null ->
+            Modifier.paint(painter = BitmapPainter(backgroundImageBitmap), contentScale = ContentScale.Crop)
+        backgroundType == Constants.BACKGROUND_IMAGE ->
+            Modifier.background(Color.Black)
+        else ->
+            Modifier.background(backgroundColor)
     }
 
     BoxWithConstraints(
         modifier
             .fillMaxSize()
-            .conditional(backgroundType == Constants.BACKGROUND_DEFAULT || backgroundType == Constants.BACKGROUND_COLOR) {
-                background(color = backgroundColor)
-            }
-            .conditional(backgroundType == Constants.BACKGROUND_IMAGE && backgroundImageBitmap != null) {
-                paint(
-                    painter = BitmapPainter(backgroundImageBitmap!!),
-                    contentScale = ContentScale.Crop
-                )
-            }
-            .conditional(backgroundType == Constants.BACKGROUND_IMAGE && backgroundImageBitmap == null) {
-                background(color = Color.Black) // Fallback if image fails to load
-            }
+            .then(if (!isLowerThird) bgModifier else Modifier)
     ) {
         val density = LocalDensity.current
-
-        // Calculate scale factor based on available width and height
-        // Using a reference size of 1920x1080 as base
         val widthScale = with(density) { maxWidth.toPx() / 1920f }
         val heightScale = with(density) { maxHeight.toPx() / 1080f }
         val scaleFactor = min(widthScale, heightScale).coerceIn(0.5f, 3.0f)
@@ -162,13 +149,23 @@ fun SongPresenter(
         val topOffSet = (appSettings.projectionSettings.windowTop * scaleFactor).dp
         val bottomOffSet = (appSettings.projectionSettings.windowBottom * scaleFactor).dp
 
+        if (isLowerThird) {
+            // Background stretches full width at bottom third, text respects padding on top
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .fillMaxHeight(0.333f)
+                    .align(Alignment.BottomCenter)
+                    .then(bgModifier)
+            )
+        }
+
         Box(
             Modifier
                 .fillMaxSize()
                 .padding(start = leftOffSet, end = rightOffSet, top = topOffSet, bottom = bottomOffSet),
             contentAlignment = if (isLowerThird) Alignment.BottomCenter else contentAlignment
         ) {
-            // When lower third mode: wrap content in a box capped at 1/3 screen height, pinned to bottom
             val innerModifier = if (isLowerThird)
                 Modifier
                     .fillMaxWidth()

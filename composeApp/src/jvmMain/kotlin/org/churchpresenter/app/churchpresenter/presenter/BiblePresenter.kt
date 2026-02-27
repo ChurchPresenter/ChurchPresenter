@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -20,7 +19,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.paint
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.toComposeImageBitmap
@@ -33,7 +31,6 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.churchpresenter.app.churchpresenter.data.AppSettings
-import org.churchpresenter.app.churchpresenter.extensions.conditional
 import org.churchpresenter.app.churchpresenter.models.SelectedVerse
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
@@ -151,58 +148,45 @@ fun BiblePresenter(
         else -> Alignment.Center  // MIDDLE or default
     }
 
-    var backgroundColor: Color = parseHexColor(appSettings.backgroundSettings.bibleBackground.backgroundColor)
-    val backgroundType = appSettings.backgroundSettings.bibleBackground.backgroundType
-    val backgroundImagePath = appSettings.backgroundSettings.bibleBackground.backgroundImage
+    val bgConfig = if (isLowerThird) appSettings.backgroundSettings.bibleLowerThirdBackground
+                   else appSettings.backgroundSettings.bibleBackground
+
+    var backgroundColor: Color = parseHexColor(bgConfig.backgroundColor)
+    val backgroundType = bgConfig.backgroundType
+    val backgroundImagePath = bgConfig.backgroundImage
 
     if (backgroundType == Constants.BACKGROUND_DEFAULT) {
         backgroundColor = parseHexColor(appSettings.backgroundSettings.defaultBackgroundColor)
     }
 
-    // Load background image if type is IMAGE and path is not empty
-    val backgroundImageBitmap = remember(backgroundImagePath) {
+    val backgroundImageBitmap = remember(backgroundType, backgroundImagePath, isLowerThird) {
         if (backgroundType == Constants.BACKGROUND_IMAGE && backgroundImagePath.isNotEmpty()) {
             try {
                 val file = File(backgroundImagePath)
-                if (file.exists()) {
-                    val bytes = file.readBytes()
-                    Image.makeFromEncoded(bytes).toComposeImageBitmap()
-                } else {
-                    null
-                }
-            } catch (e: Exception) {
-                null
-            }
-        } else {
-            null
-        }
+                if (file.exists()) Image.makeFromEncoded(file.readBytes()).toComposeImageBitmap()
+                else null
+            } catch (_: Exception) { null }
+        } else null
+    }
+
+    val bgModifier: Modifier = when {
+        backgroundType == Constants.BACKGROUND_IMAGE && backgroundImageBitmap != null ->
+            Modifier.paint(painter = BitmapPainter(backgroundImageBitmap), contentScale = ContentScale.Crop)
+        backgroundType == Constants.BACKGROUND_IMAGE ->
+            Modifier.background(Color.Black)
+        else ->
+            Modifier.background(backgroundColor)
     }
 
     BoxWithConstraints(
-        modifier
-            .fillMaxSize()
-            .conditional(backgroundType == Constants.BACKGROUND_DEFAULT || backgroundType == Constants.BACKGROUND_COLOR) {
-                background(color = backgroundColor)
-            }
-            .conditional(backgroundType == Constants.BACKGROUND_IMAGE && backgroundImageBitmap != null) {
-                paint(
-                    painter = BitmapPainter(backgroundImageBitmap!!),
-                    contentScale = ContentScale.Crop
-                )
-            }
-            .conditional(backgroundType == Constants.BACKGROUND_IMAGE && backgroundImageBitmap == null) {
-                background(color = Color.Black) // Fallback if image fails to load
-            }
+        modifier.fillMaxSize()
+            .then(if (!isLowerThird) bgModifier else Modifier)
     ) {
         val density = LocalDensity.current
-
-        // Calculate scale factor based on available width and height
-        // Using a reference size of 1920x1080 as base
         val widthScale = with(density) { maxWidth.toPx() / 1920f }
         val heightScale = with(density) { maxHeight.toPx() / 1080f }
         val scaleFactor = min(widthScale, heightScale).coerceIn(0.5f, 3.0f)
 
-        // Scale font sizes based on window size
         val effectivePrimaryBibleSize =
             if (isLowerThird) appSettings.bibleSettings.primaryBibleLowerThirdFontSize else appSettings.bibleSettings.primaryBibleFontSize
         val effectivePrimaryReferenceSize =
@@ -220,8 +204,19 @@ fun BiblePresenter(
         val topOffSet = (appSettings.projectionSettings.windowTop * scaleFactor).dp
         val bottomOffSet = (appSettings.projectionSettings.windowBottom * scaleFactor).dp
 
+        if (isLowerThird) {
+            // Background stretches full width at bottom third, text respects padding on top
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .fillMaxHeight(0.333f)
+                    .align(Alignment.BottomCenter)
+                    .then(bgModifier)
+            )
+        }
+
         Box(
-            modifier
+            modifier = Modifier
                 .fillMaxSize()
                 .padding(start = leftOffSet, end = rightOffSet, top = topOffSet, bottom = bottomOffSet),
             contentAlignment = if (isLowerThird) Alignment.BottomCenter else contentAlignment
@@ -283,11 +278,11 @@ fun BiblePresenter(
                     if (showSecondary) {
                         if (secondaryBibleReferencePosition == Constants.POSITION_ABOVE) {
                             Row(Modifier.fillMaxWidth(), horizontalArrangement = secondaryBibleReferenceHorizontalAlignment) {
-                                val bookNameOrAbbr = if (appSettings.bibleSettings.secondaryShowAbbreviation && secondaryBible!!.bibleAbbreviation.isNotEmpty()) secondaryBible.bibleAbbreviation else ""
+                                val bookNameOrAbbr = if (appSettings.bibleSettings.secondaryShowAbbreviation && secondaryBible.bibleAbbreviation.isNotEmpty()) secondaryBible.bibleAbbreviation else ""
                                 Text(
                                     fontFamily = secondaryBibleReferenceFontStyle,
                                     fontSize = scaledSecondaryReferenceSize,
-                                    text = "$bookNameOrAbbr ${secondaryBible!!.bookName} ${secondaryBible.chapter}:${secondaryBible.verseNumber}",
+                                    text = "$bookNameOrAbbr ${secondaryBible.bookName} ${secondaryBible.chapter}:${secondaryBible.verseNumber}",
                                     color = secondaryBibleReferenceTextColor,
                                     style = secondaryReferenceTextStyle
                                 )
@@ -297,18 +292,18 @@ fun BiblePresenter(
                             Text(
                                 fontFamily = secondaryBibleFontStyle,
                                 fontSize = scaledSecondaryBibleSize,
-                                text = secondaryBible!!.verseText,
+                                text = secondaryBible.verseText,
                                 color = secondaryBibleTextColor,
                                 style = secondaryBibleTextStyle
                             )
                         }
                         if (secondaryBibleReferencePosition == Constants.POSITION_BELOW) {
                             Row(Modifier.fillMaxWidth(), horizontalArrangement = secondaryBibleReferenceHorizontalAlignment) {
-                                val bookNameOrAbbr = if (appSettings.bibleSettings.secondaryShowAbbreviation && secondaryBible!!.bibleAbbreviation.isNotEmpty()) secondaryBible.bibleAbbreviation else ""
+                                val bookNameOrAbbr = if (appSettings.bibleSettings.secondaryShowAbbreviation && secondaryBible.bibleAbbreviation.isNotEmpty()) secondaryBible.bibleAbbreviation else ""
                                 Text(
                                     fontFamily = secondaryBibleReferenceFontStyle,
                                     fontSize = scaledSecondaryReferenceSize,
-                                    text = "$bookNameOrAbbr ${secondaryBible!!.bookName} ${secondaryBible.chapter}:${secondaryBible.verseNumber}",
+                                    text = "$bookNameOrAbbr ${secondaryBible.bookName} ${secondaryBible.chapter}:${secondaryBible.verseNumber}",
                                     color = secondaryBibleReferenceTextColor,
                                     style = secondaryReferenceTextStyle
                                 )

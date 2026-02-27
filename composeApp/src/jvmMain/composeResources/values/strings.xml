@@ -443,7 +443,7 @@
 
     <!-- Background Settings Tab -->
     <string name="default_background_color">Default Background Color</string>
-    <string name="default_background_color_help">This color is used when \'Default\' background type is selected for Bible or Songs</string>
+    <string name="default_background_color_help">This color is used when 'Default' background type is selected for Bible or Songs</string>
 
     <!-- Media Tab Strings -->
     <string name="media_tab_title">Media</string>
