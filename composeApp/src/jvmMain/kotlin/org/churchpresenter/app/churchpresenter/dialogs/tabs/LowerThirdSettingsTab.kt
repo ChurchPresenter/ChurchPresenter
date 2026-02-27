@@ -532,23 +532,7 @@ private fun openLottieGeneratorDialog(
                     }
 
                     win.setMember("_jvmBridge", bridge)
-
-                    // Patch download anchors to call bridge.save() instead
-                    engine.executeScript("""
-                        (function() {
-                            document.addEventListener('click', function(e) {
-                                var a = e.target.closest('a[download]');
-                                if (!a) return;
-                                var href = a.getAttribute('href') || '';
-                                if (!href.startsWith('data:')) return;
-                                e.preventDefault();
-                                var filename = a.getAttribute('download') || 'lower-third.json';
-                                var content = href.replace(/^data:[^,]+,/, '');
-                                try { content = atob(content); } catch(ex) { content = decodeURIComponent(content); }
-                                window._jvmBridge.save(filename, content);
-                            }, true);
-                        })();
-                    """.trimIndent())
+                    // Bridge is now live — the HTML's download() checks window._jvmBridge directly
                 }
             }
         )

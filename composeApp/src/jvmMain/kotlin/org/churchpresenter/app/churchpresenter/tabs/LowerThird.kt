@@ -175,7 +175,7 @@ fun LowerThirdTab(
         // Left column — file list
         LazyColumn(
             modifier = Modifier
-                .width(200.dp)
+                .width(400.dp)
                 .fillMaxHeight()
                 .background(MaterialTheme.colorScheme.surfaceVariant),
             verticalArrangement = Arrangement.spacedBy(1.dp)
@@ -235,7 +235,7 @@ fun LowerThirdTab(
             // Lottie preview
             Box(
                 modifier = Modifier
-                    .fillMaxWidth(0.5f)
+                    .fillMaxWidth()
                     .aspectRatio(16f / 9f)
                     .background(Color.Black, RoundedCornerShape(8.dp))
                     .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(8.dp)),

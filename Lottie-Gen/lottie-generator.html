@@ -2442,14 +2442,24 @@ function generate() {
 
 function download() {
   if (!currentJSON) return;
-  const blob = new Blob([JSON.stringify(currentJSON, null, 2)], { type: 'application/json' });
+  const nameVal = (document.getElementById('nameText').value.trim() || 'lower-third');
+  const infoVal = (document.getElementById('infoText').value.trim());
+  const styleEl = document.getElementById('styleType');
+  const styleLabel = styleEl.options[styleEl.selectedIndex].text.replace(/\s*—.*/, '').trim();
+  const baseName = (infoVal ? nameVal + ' - ' + infoVal : nameVal);
+  const filename = styleLabel + ' - ' + baseName + '.json';
+  const jsonStr = JSON.stringify(currentJSON, null, 2);
+  // If running inside the JVM WebView, hand off to the native bridge
+  if (window._jvmBridge) {
+    window._jvmBridge.save(filename, jsonStr);
+    return;
+  }
+  // Fallback: standard browser blob download
+  const blob = new Blob([jsonStr], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  const nameVal = document.getElementById('nameText').value.trim() || 'lower-third';
-  const styleVal = document.getElementById('styleType').value;
-  const rand = Math.random().toString(36).substring(2, 6);
-  a.download = nameVal + ' - ' + rand + '.json';
+  a.download = filename;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
