@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -42,6 +41,7 @@ import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.browse_directory
 import churchpresenter.composeapp.generated.resources.bottom
 import churchpresenter.composeapp.generated.resources.display_lower_third
+import churchpresenter.composeapp.generated.resources.generate_lower_third
 import churchpresenter.composeapp.generated.resources.import_lottie_file
 import churchpresenter.composeapp.generated.resources.left
 import churchpresenter.composeapp.generated.resources.lottie_files
@@ -63,8 +63,10 @@ import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.viewmodel.FileManager
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.app.churchpresenter.utils.createFileChooser
+import java.awt.Dimension
 import java.awt.Window
 import java.io.File
+import javax.swing.JDialog
 import javax.swing.JFileChooser
 import javax.swing.filechooser.FileNameExtensionFilter
 import javax.swing.SwingUtilities
@@ -128,8 +130,7 @@ fun LowerThirdSettingsTab(
         // ── Left panel ──────────────────────────────────────────────
         Column(
             modifier = Modifier
-                .weight(0.48f)
-                .widthIn(min = 300.dp, max = 450.dp)
+                .weight(1f)
                 .heightIn(min = 600.dp)
                 .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(4.dp))
                 .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f), RoundedCornerShape(4.dp))
@@ -260,6 +261,19 @@ fun LowerThirdSettingsTab(
                         }
                     }
                 )
+                ModernButton(
+                    text = stringResource(Res.string.generate_lower_third),
+                    backgroundColor = MaterialTheme.colorScheme.tertiaryContainer,
+                    onClick = {
+                        SwingUtilities.invokeLater {
+                            openLottieGeneratorDialog(
+                                parentWindow = Window.getWindows().firstOrNull { it.isActive },
+                                outputFolder = lottieFolder.ifEmpty { null },
+                                onFileSaved = { refreshTrigger++ }
+                            )
+                        }
+                    }
+                )
             }
         }
 
@@ -269,7 +283,7 @@ fun LowerThirdSettingsTab(
         Column(
             modifier = Modifier
                 .weight(1f)
-                .fillMaxHeight()
+                .verticalScroll(rememberScrollState())
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
             horizontalAlignment = Alignment.CenterHorizontally
@@ -427,3 +441,130 @@ private fun ModernButton(
         Text(text = text, style = MaterialTheme.typography.labelMedium)
     }
 }
+
+/**
+ * Opens the Lottie Generator HTML tool in a JavaFX WebView dialog.
+ * Intercepts download anchor clicks from the page and saves the file
+ * directly to [outputFolder] instead of the system Downloads folder.
+ */
+private fun openLottieGeneratorDialog(
+    parentWindow: Window?,
+    outputFolder: String?,
+    onFileSaved: () -> Unit
+) {
+    // Locate lottie-generator.html
+    val htmlFile = listOf(
+        File("Lottie-Gen/lottie-generator.html"),
+        File(System.getProperty("user.dir"), "Lottie-Gen/lottie-generator.html")
+    ).firstOrNull { it.exists() }
+
+    if (htmlFile == null) {
+        javax.swing.JOptionPane.showMessageDialog(
+            parentWindow,
+            "Lottie Generator not found.\nExpected at: Lottie-Gen/lottie-generator.html",
+            "Generator Not Found",
+            javax.swing.JOptionPane.ERROR_MESSAGE
+        )
+        return
+    }
+
+    // Ensure JavaFX toolkit is running
+    try {
+        javafx.application.Platform.setImplicitExit(false)
+        javafx.application.Platform.startup { }
+    } catch (_: IllegalStateException) {
+        // Already initialised — fine
+    }
+
+    // Build the dialog on the Swing EDT
+    val dialog = JDialog().apply {
+        title = "Lower Third Generator"
+        isModal = false
+        preferredSize = Dimension(1200, 800)
+        defaultCloseOperation = JDialog.DISPOSE_ON_CLOSE
+    }
+
+    // JFXPanel bridges Swing ↔ JavaFX
+    val jfxPanel = javafx.embed.swing.JFXPanel()
+    dialog.contentPane.add(jfxPanel, java.awt.BorderLayout.CENTER)
+    dialog.pack()
+    dialog.setLocationRelativeTo(parentWindow)
+
+    // Build the JavaFX scene on the FX thread
+    javafx.application.Platform.runLater {
+        val webView = javafx.scene.web.WebView()
+        val engine = webView.engine
+
+        // After page loads, inject a JS bridge that intercepts <a download> clicks
+        engine.loadWorker.stateProperty().addListener(
+            javafx.beans.value.ChangeListener { _, _, newState ->
+                if (newState == javafx.concurrent.Worker.State.SUCCEEDED) {
+                    val win = engine.executeScript("window") as? netscape.javascript.JSObject ?: return@ChangeListener
+
+                    // Kotlin object exposed to JavaScript
+                    val bridge = object {
+                        @Suppress("unused")
+                        fun save(filename: String, jsonContent: String) {
+                            SwingUtilities.invokeLater {
+                                val dest = outputFolder
+                                    ?.let { File(it) }
+                                    ?.takeIf { it.exists() }
+                                    ?.let { File(it, filename) }
+                                    ?: run {
+                                        val chooser = JFileChooser().apply {
+                                            dialogTitle = "Save Lottie File"
+                                            fileFilter = FileNameExtensionFilter("Lottie JSON (*.json)", "json")
+                                            selectedFile = File(filename)
+                                        }
+                                        if (chooser.showSaveDialog(dialog) != JFileChooser.APPROVE_OPTION) return@invokeLater
+                                        chooser.selectedFile
+                                    }
+                                dest.writeText(jsonContent)
+                                onFileSaved()
+                                javax.swing.JOptionPane.showMessageDialog(
+                                    dialog,
+                                    "Saved: ${dest.name}",
+                                    "Saved",
+                                    javax.swing.JOptionPane.INFORMATION_MESSAGE
+                                )
+                            }
+                        }
+                    }
+
+                    win.setMember("_jvmBridge", bridge)
+
+                    // Patch download anchors to call bridge.save() instead
+                    engine.executeScript("""
+                        (function() {
+                            document.addEventListener('click', function(e) {
+                                var a = e.target.closest('a[download]');
+                                if (!a) return;
+                                var href = a.getAttribute('href') || '';
+                                if (!href.startsWith('data:')) return;
+                                e.preventDefault();
+                                var filename = a.getAttribute('download') || 'lower-third.json';
+                                var content = href.replace(/^data:[^,]+,/, '');
+                                try { content = atob(content); } catch(ex) { content = decodeURIComponent(content); }
+                                window._jvmBridge.save(filename, content);
+                            }, true);
+                        })();
+                    """.trimIndent())
+                }
+            }
+        )
+
+        engine.load(htmlFile.toURI().toString())
+
+        val scene = javafx.scene.Scene(
+            javafx.scene.layout.StackPane(webView),
+            1180.0, 760.0
+        )
+        jfxPanel.scene = scene
+    }
+
+    dialog.isVisible = true
+}
+
+
+
+

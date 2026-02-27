@@ -53,12 +53,12 @@ kotlin {
             implementation("org.apache.poi:poi-scratchpad:5.2.5")
             // JavaFX for video playback — bundle all platforms so the installer works on any OS
             val jfxClassifier = currentOsClassifier()
-            listOf("javafx-base", "javafx-graphics", "javafx-media", "javafx-swing", "javafx-controls").forEach { module ->
+            listOf("javafx-base", "javafx-graphics", "javafx-media", "javafx-swing", "javafx-controls", "javafx-web").forEach { module ->
                 implementation("org.openjfx:$module:21:$jfxClassifier")
             }
             // Windows-specific: also pull win-x86_64 natives when building on Windows
             if (jfxClassifier == "win") {
-                listOf("javafx-base", "javafx-graphics", "javafx-media", "javafx-swing", "javafx-controls").forEach { module ->
+                listOf("javafx-base", "javafx-graphics", "javafx-media", "javafx-swing", "javafx-controls", "javafx-web").forEach { module ->
                     runtimeOnly("org.openjfx:$module:21:win")
                 }
             }
@@ -86,7 +86,7 @@ compose.desktop {
             "-Dawt.useSystemAAFontSettings=on",
             "-Dswing.aatext=true",
             // JavaFX modules required at runtime
-            "--add-modules=javafx.base,javafx.graphics,javafx.media,javafx.swing,javafx.controls",
+            "--add-modules=javafx.base,javafx.graphics,javafx.media,javafx.swing,javafx.controls,javafx.web",
             // Reflective access needed by Apache POI, PDFBox, and JavaFX internals
             "--add-opens=java.base/java.lang=ALL-UNNAMED",
             "--add-opens=java.base/java.lang.reflect=ALL-UNNAMED",
@@ -117,7 +117,7 @@ compose.desktop {
             macOS {
                 bundleID = "org.churchpresenter.app"
                 jvmArgs(
-                    "--add-modules=javafx.base,javafx.graphics,javafx.media,javafx.swing,javafx.controls",
+                    "--add-modules=javafx.base,javafx.graphics,javafx.media,javafx.swing,javafx.controls,javafx.web",
                     "--add-opens=java.base/java.lang=ALL-UNNAMED",
                     "--add-opens=java.base/java.io=ALL-UNNAMED",
                     "--add-opens=java.base/java.nio=ALL-UNNAMED",
@@ -132,7 +132,7 @@ compose.desktop {
                 upgradeUuid = "A1B2C3D4-E5F6-4789-A012-3456789ABCDE"
                 // Windows-specific JVM args added to the launcher script
                 jvmArgs(
-                    "--add-modules=javafx.base,javafx.graphics,javafx.media,javafx.swing,javafx.controls",
+                    "--add-modules=javafx.base,javafx.graphics,javafx.media,javafx.swing,javafx.controls,javafx.web",
                     "--add-opens=java.base/java.lang=ALL-UNNAMED",
                     "--add-opens=java.base/java.lang.reflect=ALL-UNNAMED",
                     "--add-opens=java.base/java.util=ALL-UNNAMED",
@@ -146,7 +146,7 @@ compose.desktop {
 
             linux {
                 jvmArgs(
-                    "--add-modules=javafx.base,javafx.graphics,javafx.media,javafx.swing,javafx.controls",
+                    "--add-modules=javafx.base,javafx.graphics,javafx.media,javafx.swing,javafx.controls,javafx.web",
                     "--add-opens=java.base/java.lang=ALL-UNNAMED",
                     "--add-opens=java.base/java.io=ALL-UNNAMED",
                     "--add-opens=java.base/java.nio=ALL-UNNAMED",
@@ -170,4 +170,3 @@ val problematicTasks = setOf(
 tasks.matching { it.name in problematicTasks }.configureEach {
     doNotTrackState("Temporary workaround: OneDrive placeholder snapshot errors")
 }
-

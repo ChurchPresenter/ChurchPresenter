@@ -506,6 +506,7 @@
     <string name="no_lottie_files">No JSON files found</string>
     <string name="import_lottie_file">Import File</string>
     <string name="remove_lottie_file">Remove File</string>
+    <string name="generate_lower_third">Generate</string>
     <string name="song_transition_settings">Transition</string>
     <string name="bible_transition_settings">Transition</string>
     <string name="license_title">License Agreement — GNU General Public License v3</string>
