@@ -27,10 +27,8 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -38,12 +36,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.background
-import churchpresenter.composeapp.generated.resources.background_color
-import churchpresenter.composeapp.generated.resources.background_color_option
-import churchpresenter.composeapp.generated.resources.background_default
-import churchpresenter.composeapp.generated.resources.background_image_option
-import churchpresenter.composeapp.generated.resources.background_type
 import churchpresenter.composeapp.generated.resources.bible_files
 import churchpresenter.composeapp.generated.resources.bible_selection
 import churchpresenter.composeapp.generated.resources.browse_directory
@@ -98,36 +90,13 @@ import org.churchpresenter.app.churchpresenter.composables.TextStyleButtons
 import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDefault
+import org.churchpresenter.app.churchpresenter.viewmodel.BibleSettingsViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.FileManager
 import org.jetbrains.compose.resources.stringResource
 import java.awt.GraphicsEnvironment
 import java.awt.Window
-import java.io.File
-import java.nio.charset.StandardCharsets
 import javax.swing.SwingUtilities
 
-/**
- * Extract Bible title from SPB file
- * Reads the header lines to find the title (usually line starting with ##Title:)
- */
-private fun extractBibleTitle(filePath: String): String {
-    return try {
-        File(filePath).bufferedReader(StandardCharsets.UTF_8).use { reader ->
-            // Read first few lines to find title
-            var title: String? = null
-            repeat(10) {
-                val line = reader.readLine() ?: return@use (title ?: File(filePath).nameWithoutExtension)
-                if (line.startsWith("##Title:")) {
-                    title = line.substring(8).trim()
-                    return@use title!!
-                }
-            }
-            title ?: File(filePath).nameWithoutExtension
-        }
-    } catch (_: Exception) {
-        File(filePath).nameWithoutExtension
-    }
-}
 
 @Composable
 fun BibleSettingsTab(
@@ -137,26 +106,24 @@ fun BibleSettingsTab(
     val availableFonts = remember {
         GraphicsEnvironment.getLocalGraphicsEnvironment().availableFontFamilyNames.toList()
     }
-    val fileManager = remember { FileManager() }
-
-    var refreshTrigger by remember { mutableStateOf(0) }
-    var selectedFile by remember { mutableStateOf<String?>(null) }
-
-    // Use FileManager to load Bible files
-    val bibleFilesInDirectory = remember(settings.bibleSettings.storageDirectory, refreshTrigger) {
-        fileManager.getBibleFilesInDirectory(settings.bibleSettings.storageDirectory)
+    val viewModel = remember {
+        BibleSettingsViewModel().also { vm ->
+            val dir = settings.bibleSettings.storageDirectory
+            if (dir.isNotEmpty()) vm.setDirectory(dir)
+        }
     }
 
-    // Create mapping from filename to display name (Bible title)
-    val bibleFileDisplayNames = remember(settings.bibleSettings.storageDirectory, bibleFilesInDirectory) {
-        if (settings.bibleSettings.storageDirectory.isNotEmpty()) {
-            bibleFilesInDirectory.associateWith { fileName ->
-                val filePath = File(settings.bibleSettings.storageDirectory, fileName).absolutePath
-                extractBibleTitle(filePath)
-            }
-        } else {
-            emptyMap()
-        }
+    // Keep viewModel directory in sync if settings change after initial load
+    LaunchedEffect(settings.bibleSettings.storageDirectory) {
+        val dir = settings.bibleSettings.storageDirectory
+        if (viewModel.storageDirectory != dir) viewModel.setDirectory(dir)
+    }
+
+    val bibleFilesInDirectory = remember(viewModel.storageDirectory, viewModel.refreshTrigger) {
+        viewModel.filesInDirectory()
+    }
+    val bibleFileDisplayNames = remember(viewModel.storageDirectory, bibleFilesInDirectory) {
+        viewModel.fileDisplayNames(bibleFilesInDirectory)
     }
 
     Box(
@@ -166,7 +133,6 @@ fun BibleSettingsTab(
             modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()),
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            // Left Column
             Column(
                 modifier = Modifier.weight(0.48f).widthIn(min = 400.dp, max = 450.dp).heightIn(min = 600.dp)
                     .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(4.dp))
@@ -176,17 +142,14 @@ fun BibleSettingsTab(
                 LeftColumn(
                     settings,
                     onSettingsChange,
-                    availableFonts,
                     bibleFilesInDirectory,
                     bibleFileDisplayNames,
-                    selectedFile,
-                    { selectedFile = it },
-                    { refreshTrigger++ },
-                    fileManager
+                    viewModel.selectedFile,
+                    { viewModel.selectFile(it) },
+                    { viewModel.refresh() },
+                    viewModel.fileManager
                 )
             }
-
-            // Right Column
             Column(
                 modifier = Modifier.weight(0.48f).widthIn(min = 400.dp, max = 450.dp).heightIn(min = 600.dp)
                     .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(4.dp))
@@ -203,7 +166,6 @@ fun BibleSettingsTab(
 private fun LeftColumn(
     settings: AppSettings,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
-    availableFonts: List<String>,
     bibleFilesInDirectory: List<String>,
     bibleFileDisplayNames: Map<String, String>,
     selectedFile: String?,
@@ -221,10 +183,6 @@ private fun LeftColumn(
     val importErrorStr = stringResource(Res.string.import_error)
     val deleteErrorStr = stringResource(Res.string.delete_error)
 
-    // Background type options
-    val backgroundDefaultStr = stringResource(Res.string.background_default)
-    val backgroundColorStr = stringResource(Res.string.background_color_option)
-    val backgroundImageStr = stringResource(Res.string.background_image_option)
 
 
     // Storage Directory
@@ -278,8 +236,8 @@ private fun LeftColumn(
         ) {
             if (bibleFilesInDirectory.isEmpty()) {
                 Text(
-                    text = if (settings.bibleSettings.storageDirectory.isEmpty()) stringResource(Res.string.no_directory_selected)
-                    else stringResource(Res.string.no_bible_files),
+                    text = if (settings.bibleSettings.storageDirectory.isEmpty()) noDirectorySelectedStr
+                           else stringResource(Res.string.no_bible_files),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -294,7 +252,7 @@ private fun LeftColumn(
                             .clickable { onFileSelected(fileName) }
                             .padding(vertical = 4.dp, horizontal = 8.dp),
                         color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer
-                        else MaterialTheme.colorScheme.onSurface
+                                else MaterialTheme.colorScheme.onSurface
                     )
                 }
             }
@@ -310,84 +268,32 @@ private fun LeftColumn(
             onClick = {
                 SwingUtilities.invokeLater {
                     val parentWindow = Window.getWindows().firstOrNull { it.isActive }
-
-                    // Check if directory is selected
                     if (settings.bibleSettings.storageDirectory.isEmpty()) {
-                        fileManager.showWarning(
-                            message = pleaseSelectDirectoryStr,
-                            title = noDirectorySelectedStr,
-                            parentWindow = parentWindow
-                        )
+                        fileManager.showWarning(pleaseSelectDirectoryStr, noDirectorySelectedStr, parentWindow)
                         return@invokeLater
                     }
-
-                    // Choose files to import
-                    val selectedFiles = fileManager.chooseBibleFile(parentWindow)
-                    selectedFiles?.let { file ->
-                        // Import files
-                        val errors = fileManager.importFiles(
-                            sourceFiles = listOf(file),
-                            targetDirectory = settings.bibleSettings.storageDirectory
-                        )
-
-                        // Show errors if any
-                        if (errors.isNotEmpty()) {
-                            fileManager.showError(
-                                message = errors.joinToString("\n"),
-                                title = importErrorStr,
-                                parentWindow = parentWindow
-                            )
-                        }
-
-                        // Trigger refresh
+                    fileManager.chooseBibleFile(parentWindow)?.let { file ->
+                        val errors = fileManager.importFiles(listOf(file), settings.bibleSettings.storageDirectory)
+                        if (errors.isNotEmpty()) fileManager.showError(errors.joinToString("\n"), importErrorStr, parentWindow)
                         onRefresh()
                     }
                 }
             }
         )
-
         ModernButton(
             text = stringResource(Res.string.remove_bible_file),
             backgroundColor = MaterialTheme.colorScheme.errorContainer,
             onClick = {
                 SwingUtilities.invokeLater {
                     val parentWindow = Window.getWindows().firstOrNull { it.isActive }
-
-                    // Check if file is selected
                     if (selectedFile == null) {
-                        fileManager.showWarning(
-                            message = pleaseSelectFileStr,
-                            title = noFileSelectedStr,
-                            parentWindow = parentWindow
-                        )
+                        fileManager.showWarning(pleaseSelectFileStr, noFileSelectedStr, parentWindow)
                         return@invokeLater
                     }
-
-                    // Confirm deletion
-                    val confirmed = fileManager.showConfirmDialog(
-                        message = String.format(confirmDeleteFileTemplate, selectedFile),
-                        title = confirmDeleteStr,
-                        parentWindow = parentWindow
-                    )
-
-                    if (confirmed) {
-                        // Delete file
-                        val error = fileManager.deleteFile(
-                            directory = settings.bibleSettings.storageDirectory,
-                            fileName = selectedFile
-                        )
-
-                        if (error != null) {
-                            fileManager.showError(
-                                message = error,
-                                title = deleteErrorStr,
-                                parentWindow = parentWindow
-                            )
-                        } else {
-                            // Success - clear selection and refresh
-                            onFileSelected(null)
-                            onRefresh()
-                        }
+                    if (fileManager.showConfirmDialog(String.format(confirmDeleteFileTemplate, selectedFile), confirmDeleteStr, parentWindow)) {
+                        val error = fileManager.deleteFile(settings.bibleSettings.storageDirectory, selectedFile)
+                        if (error != null) fileManager.showError(error, deleteErrorStr, parentWindow)
+                        else { onFileSelected(null); onRefresh() }
                     }
                 }
             }

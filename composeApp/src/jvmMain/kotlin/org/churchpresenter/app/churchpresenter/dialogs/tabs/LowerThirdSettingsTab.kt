@@ -60,9 +60,9 @@ import io.github.alexzhirkevich.compottie.rememberLottiePainter
 import kotlinx.coroutines.delay
 import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
 import org.churchpresenter.app.churchpresenter.data.AppSettings
-import org.churchpresenter.app.churchpresenter.viewmodel.FileManager
-import org.jetbrains.compose.resources.stringResource
+import org.churchpresenter.app.churchpresenter.viewmodel.LowerThirdSettingsViewModel
 import org.churchpresenter.app.churchpresenter.utils.createFileChooser
+import org.jetbrains.compose.resources.stringResource
 import java.awt.Dimension
 import java.awt.Window
 import java.io.File
@@ -76,52 +76,37 @@ fun LowerThirdSettingsTab(
     settings: AppSettings,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit
 ) {
-    val fileManager = remember { FileManager() }
-    var refreshTrigger by remember { mutableStateOf(0) }
-    var selectedFile by remember { mutableStateOf<String?>(null) }
+    val viewModel = remember { LowerThirdSettingsViewModel() }
 
-    val lottieFolder = settings.streamingSettings.lowerThirdFolder
-    val lottieFilesInDirectory = remember(lottieFolder, refreshTrigger) {
-        if (lottieFolder.isEmpty()) emptyList()
-        else File(lottieFolder).takeIf { it.exists() && it.isDirectory }
-            ?.listFiles { f -> f.extension.lowercase() == "json" }
-            ?.map { it.name }?.sorted() ?: emptyList()
+    // Keep viewModel folder in sync with settings
+    LaunchedEffect(settings.streamingSettings.lowerThirdFolder) {
+        val folder = settings.streamingSettings.lowerThirdFolder
+        if (viewModel.lottieFolder != folder) viewModel.setFolder(folder)
     }
 
-    // Preview state — driven by selected file
-    var previewIsPlaying by remember { mutableStateOf(false) }
-    val importSourcePath = remember(selectedFile, lottieFolder) {
-        if (selectedFile != null && lottieFolder.isNotEmpty())
-            File(lottieFolder, selectedFile!!).absolutePath
-        else ""
+    val lottieFolder = viewModel.lottieFolder
+    val lottieFilesInDirectory = remember(lottieFolder, viewModel.refreshTrigger) {
+        viewModel.filesInDirectory()
     }
+    val selectedFile = viewModel.selectedFile
 
-    var debouncedImportPath by remember { mutableStateOf(importSourcePath) }
-    LaunchedEffect(importSourcePath) {
+    // Preview — debounced so we don't re-read on every keystroke
+    var debouncedPath by remember { mutableStateOf(viewModel.importSourcePath()) }
+    LaunchedEffect(selectedFile, lottieFolder) {
         delay(400)
-        debouncedImportPath = importSourcePath
+        debouncedPath = viewModel.importSourcePath()
     }
-
-    val previewJsonContent = remember(debouncedImportPath) {
-        if (debouncedImportPath.isBlank()) return@remember ""
-        val f = File(debouncedImportPath)
-        if (!f.exists()) return@remember ""
-        f.readText()
-    }
+    val previewJsonContent = remember(debouncedPath) { viewModel.previewJsonContent() }
 
     val composition by rememberLottieComposition(key = previewJsonContent) {
         LottieCompositionSpec.JsonString(previewJsonContent.ifBlank { "{}" })
     }
     val progress by animateLottieCompositionAsState(
         composition = composition,
-        isPlaying = previewIsPlaying,
+        isPlaying = previewJsonContent.isNotBlank(),
         iterations = Int.MAX_VALUE
     )
-    LaunchedEffect(previewJsonContent) {
-        previewIsPlaying = previewJsonContent.isNotBlank()
-    }
 
-    // Dialog string resources (captured outside lambdas)
     val noDirectorySelectedStr = stringResource(Res.string.no_directory_selected)
     val noLottieFilesStr = stringResource(Res.string.no_lottie_files)
 
@@ -162,16 +147,16 @@ fun LowerThirdSettingsTab(
                     onClick = {
                         SwingUtilities.invokeLater {
                             val parentWindow = Window.getWindows().firstOrNull { it.isActive }
+                            val fileManager = org.churchpresenter.app.churchpresenter.viewmodel.FileManager()
                             val selectedDir = fileManager.chooseDirectory(
                                 currentDirectory = lottieFolder,
                                 parentWindow = parentWindow
                             )
                             selectedDir?.let { dir ->
+                                viewModel.setFolder(dir)
                                 onSettingsChange { s ->
                                     s.copy(streamingSettings = s.streamingSettings.copy(lowerThirdFolder = dir))
                                 }
-                                selectedFile = null
-                                refreshTrigger++
                             }
                         }
                     }
@@ -214,7 +199,7 @@ fun LowerThirdSettingsTab(
                                         if (isSelected) MaterialTheme.colorScheme.primaryContainer
                                         else Color.Transparent
                                     )
-                                    .clickable { selectedFile = fileName }
+                                    .clickable { viewModel.selectFile(fileName) }
                                     .padding(vertical = 4.dp, horizontal = 8.dp),
                                 color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer
                                         else MaterialTheme.colorScheme.onSurface
@@ -241,10 +226,7 @@ fun LowerThirdSettingsTab(
                                 fileFilter = FileNameExtensionFilter("Lottie JSON (*.json)", "json")
                             }
                             if (chooser.showOpenDialog(parentWindow) == JFileChooser.APPROVE_OPTION) {
-                                val src = chooser.selectedFile
-                                src.copyTo(File(lottieFolder, src.name), overwrite = true)
-                                selectedFile = src.name
-                                refreshTrigger++
+                                viewModel.importFile(chooser.selectedFile.absolutePath)
                             }
                         }
                     }
@@ -252,14 +234,7 @@ fun LowerThirdSettingsTab(
                 ModernButton(
                     text = stringResource(Res.string.remove_lottie_file),
                     backgroundColor = MaterialTheme.colorScheme.errorContainer,
-                    onClick = {
-                        val fname = selectedFile
-                        if (fname != null && lottieFolder.isNotEmpty()) {
-                            File(lottieFolder, fname).delete()
-                            selectedFile = null
-                            refreshTrigger++
-                        }
-                    }
+                    onClick = { viewModel.removeSelectedFile() }
                 )
                 ModernButton(
                     text = stringResource(Res.string.generate_lower_third),
@@ -269,7 +244,7 @@ fun LowerThirdSettingsTab(
                             openLottieGeneratorDialog(
                                 parentWindow = Window.getWindows().firstOrNull { it.isActive },
                                 outputFolder = lottieFolder.ifEmpty { null },
-                                onFileSaved = { refreshTrigger++ }
+                                onFileSaved = { viewModel.onFileSavedFromGenerator() }
                             )
                         }
                     }
@@ -548,6 +523,8 @@ private fun openLottieGeneratorDialog(
 
     dialog.isVisible = true
 }
+
+
 
 
 
