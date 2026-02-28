@@ -219,6 +219,40 @@ class ScheduleViewModel {
         _scheduleItems.add(item)
     }
 
+    fun addAnnouncement(
+        text: String,
+        textColor: String = "#FFFFFF",
+        backgroundColor: String = "#000000",
+        fontSize: Int = 48,
+        fontType: String = "Arial",
+        bold: Boolean = false,
+        italic: Boolean = false,
+        underline: Boolean = false,
+        shadow: Boolean = false,
+        position: String = "center",
+        animationType: String = "SLIDE_FROM_BOTTOM",
+        animationDuration: Int = 500
+    ) {
+        val id = UUID.randomUUID().toString()
+        _scheduleItems.add(
+            ScheduleItem.AnnouncementItem(
+                id = id,
+                text = text,
+                textColor = textColor,
+                backgroundColor = backgroundColor,
+                fontSize = fontSize,
+                fontType = fontType,
+                bold = bold,
+                italic = italic,
+                underline = underline,
+                shadow = shadow,
+                position = position,
+                animationType = animationType,
+                animationDuration = animationDuration
+            )
+        )
+    }
+
     fun updateLabel(id: String, text: String, textColor: String, backgroundColor: String) {
         val index = _scheduleItems.indexOfFirst { it.id == id }
         if (index >= 0 && _scheduleItems[index] is ScheduleItem.LabelItem) {
@@ -309,6 +343,7 @@ class ScheduleViewModel {
             is ScheduleItem.PresentationItem -> onPresentPresentation?.invoke(item) ?: onPresenting(Presenting.PRESENTATION)
             is ScheduleItem.MediaItem -> onPresentMedia?.invoke(item) ?: onPresenting(Presenting.MEDIA)
             is ScheduleItem.LowerThirdItem -> { /* lower third shown via LowerThirdTab */ }
+            is ScheduleItem.AnnouncementItem -> onPresenting(Presenting.ANNOUNCEMENTS)
         }
     }
 }

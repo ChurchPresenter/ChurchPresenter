@@ -451,6 +451,7 @@ private fun LeftColumn(
                 AnimationType.SLIDE_LEFT -> slideLeftText
                 AnimationType.SLIDE_RIGHT -> slideRightText
                 AnimationType.NONE -> noneText
+                else -> crossfadeText
             },
             onSelectedChange = { selected ->
                 val newType = when (selected) {

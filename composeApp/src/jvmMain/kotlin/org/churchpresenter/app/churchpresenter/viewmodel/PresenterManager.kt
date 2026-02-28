@@ -108,4 +108,11 @@ class PresenterManager {
 
     private val _lottiePauseFrame = mutableStateOf(-1f)
     val lottiePauseFrame: State<Float> = _lottiePauseFrame
+
+    private val _announcementText = mutableStateOf("")
+    val announcementText: State<String> = _announcementText
+
+    fun setAnnouncementText(text: String) {
+        _announcementText.value = text
+    }
 }

@@ -48,6 +48,7 @@ import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.dialogs.KeyboardShortcutsDialog
 import org.churchpresenter.app.churchpresenter.dialogs.LicenseDialog
 import org.churchpresenter.app.churchpresenter.dialogs.OptionsDialog
+import org.churchpresenter.app.churchpresenter.presenter.AnnouncementsPresenter
 import org.churchpresenter.app.churchpresenter.presenter.BiblePresenter
 import org.churchpresenter.app.churchpresenter.presenter.LowerThirdPresenter
 import org.churchpresenter.app.churchpresenter.presenter.MediaPresenter
@@ -355,6 +356,12 @@ fun main() {
                                             pauseFrame = lottiePauseFrame,
                                             pauseDurationMs = lottiePauseDurationMs,
                                             trigger = lottieTrigger,
+                                            appSettings = appSettings
+                                        )
+                                Presenting.ANNOUNCEMENTS ->
+                                    if (screenAssignment.showAnnouncements)
+                                        AnnouncementsPresenter(
+                                            text = presenterManager.announcementText.value,
                                             appSettings = appSettings
                                         )
                                 Presenting.NONE -> { /* nothing */ }

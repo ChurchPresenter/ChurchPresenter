@@ -233,6 +233,28 @@ fun MainDesktop(
                                     selectedTabIndex = Tabs.LOWER_THIRD.ordinal
                                     selectedLowerThirdItem = item
                                 }
+
+                                is ScheduleItem.AnnouncementItem -> {
+                                    selectedTabIndex = Tabs.ANNOUNCEMENTS.ordinal
+                                    onSettingsChange { settings ->
+                                        settings.copy(
+                                            announcementsSettings = settings.announcementsSettings.copy(
+                                                text             = item.text,
+                                                textColor        = item.textColor,
+                                                backgroundColor  = item.backgroundColor,
+                                                fontSize         = item.fontSize,
+                                                fontType         = item.fontType,
+                                                bold             = item.bold,
+                                                italic           = item.italic,
+                                                underline        = item.underline,
+                                                shadow           = item.shadow,
+                                                position         = item.position,
+                                                animationType    = item.animationType,
+                                                animationDuration = item.animationDuration
+                                            )
+                                        )
+                                    }
+                                }
                             }
                         },
                         onEditLabel = { labelItem ->
@@ -334,7 +356,28 @@ fun MainDesktop(
                                 }
                             )
 
-                            Tabs.ANNOUNCEMENTS -> AnnouncementsTab()
+                            Tabs.ANNOUNCEMENTS -> AnnouncementsTab(
+                                modifier = Modifier.fillMaxSize(),
+                                appSettings = appSettings,
+                                onSettingsChange = onSettingsChange,
+                                presenterManager = presenterManager,
+                                onAddToSchedule = { settings ->
+                                    currentScheduleActions.addAnnouncement(
+                                        settings.text,
+                                        settings.textColor,
+                                        settings.backgroundColor,
+                                        settings.fontSize,
+                                        settings.fontType,
+                                        settings.bold,
+                                        settings.italic,
+                                        settings.underline,
+                                        settings.shadow,
+                                        settings.position,
+                                        settings.animationType,
+                                        settings.animationDuration
+                                    )
+                                }
+                            )
                         }
                     }
                 }
