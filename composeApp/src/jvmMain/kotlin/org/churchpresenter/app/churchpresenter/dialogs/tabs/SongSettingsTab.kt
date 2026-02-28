@@ -902,19 +902,16 @@ private fun ModernButton(
     backgroundColor: Color,
     onClick: () -> Unit
 ) {
-    var isHovered by remember { mutableStateOf(false) }
-
     Button(
         onClick = onClick,
         colors = ButtonDefaults.buttonColors(
-            containerColor = if (isHovered) backgroundColor.copy(alpha = 0.8f) else backgroundColor,
-            contentColor = Color.White
+            containerColor = backgroundColor,
+            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
         ),
         shape = RoundedCornerShape(4.dp),
-        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-        modifier = Modifier
+        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
     ) {
-        Text(text = text, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+        Text(text = text, style = MaterialTheme.typography.labelMedium)
     }
 }
 
