@@ -115,4 +115,11 @@ class PresenterManager {
     fun setAnnouncementText(text: String) {
         _announcementText.value = text
     }
+
+    private val _websiteUrl = mutableStateOf("")
+    val websiteUrl: State<String> = _websiteUrl
+
+    fun setWebsiteUrl(url: String) {
+        _websiteUrl.value = url
+    }
 }

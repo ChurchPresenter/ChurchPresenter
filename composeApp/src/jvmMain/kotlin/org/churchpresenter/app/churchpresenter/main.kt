@@ -49,6 +49,7 @@ import org.churchpresenter.app.churchpresenter.dialogs.KeyboardShortcutsDialog
 import org.churchpresenter.app.churchpresenter.dialogs.LicenseDialog
 import org.churchpresenter.app.churchpresenter.dialogs.OptionsDialog
 import org.churchpresenter.app.churchpresenter.presenter.AnnouncementsPresenter
+import org.churchpresenter.app.churchpresenter.presenter.WebsitePresenter
 import org.churchpresenter.app.churchpresenter.presenter.BiblePresenter
 import org.churchpresenter.app.churchpresenter.presenter.LowerThirdPresenter
 import org.churchpresenter.app.churchpresenter.presenter.MediaPresenter
@@ -140,6 +141,7 @@ fun main() {
         val lottiePauseFrame by presenterManager.lottiePauseFrame
         val lottiePauseDurationMs by presenterManager.lottiePauseDurationMs
         val lottieTrigger by presenterManager.lottieTrigger
+        val websiteUrl by presenterManager.websiteUrl
 
         if (licenseAccepted) {
         Window(
@@ -364,6 +366,11 @@ fun main() {
                                             text = presenterManager.announcementText.value,
                                             appSettings = appSettings
                                         )
+                                Presenting.WEBSITE ->
+                                    WebsitePresenter(
+                                        url = websiteUrl,
+                                        modifier = Modifier.fillMaxSize()
+                                    )
                                 Presenting.NONE -> { /* nothing */ }
                             }
 

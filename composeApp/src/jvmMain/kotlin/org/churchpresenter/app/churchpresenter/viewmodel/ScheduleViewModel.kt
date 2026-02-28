@@ -253,6 +253,11 @@ class ScheduleViewModel {
         )
     }
 
+    fun addWebsite(url: String, title: String) {
+        val id = UUID.randomUUID().toString()
+        _scheduleItems.add(ScheduleItem.WebsiteItem(id = id, url = url, title = title.ifBlank { url }))
+    }
+
     fun updateLabel(id: String, text: String, textColor: String, backgroundColor: String) {
         val index = _scheduleItems.indexOfFirst { it.id == id }
         if (index >= 0 && _scheduleItems[index] is ScheduleItem.LabelItem) {
@@ -344,6 +349,7 @@ class ScheduleViewModel {
             is ScheduleItem.MediaItem -> onPresentMedia?.invoke(item) ?: onPresenting(Presenting.MEDIA)
             is ScheduleItem.LowerThirdItem -> { /* lower third shown via LowerThirdTab */ }
             is ScheduleItem.AnnouncementItem -> onPresenting(Presenting.ANNOUNCEMENTS)
+            is ScheduleItem.WebsiteItem -> onPresenting(Presenting.WEBSITE)
         }
     }
 }

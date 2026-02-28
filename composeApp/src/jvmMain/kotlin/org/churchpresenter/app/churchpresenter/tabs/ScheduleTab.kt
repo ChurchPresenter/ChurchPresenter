@@ -77,7 +77,8 @@ data class ScheduleTabActions(
     val addPresentation: (filePath: String, fileName: String, slideCount: Int, fileType: String) -> Unit = { _, _, _, _ -> },
     val addMedia: (mediaUrl: String, mediaTitle: String, mediaType: String) -> Unit = { _, _, _ -> },
     val addLowerThird: (presetId: String, presetLabel: String, pauseAtFrame: Boolean, pauseDurationMs: Long) -> Unit = { _, _, _, _ -> },
-    val addAnnouncement: (text: String, textColor: String, backgroundColor: String, fontSize: Int, fontType: String, bold: Boolean, italic: Boolean, underline: Boolean, shadow: Boolean, position: String, animationType: String, animationDuration: Int) -> Unit = { _, _, _, _, _, _, _, _, _, _, _, _ -> }
+    val addAnnouncement: (text: String, textColor: String, backgroundColor: String, fontSize: Int, fontType: String, bold: Boolean, italic: Boolean, underline: Boolean, shadow: Boolean, position: String, animationType: String, animationDuration: Int) -> Unit = { _, _, _, _, _, _, _, _, _, _, _, _ -> },
+    val addWebsite: (url: String, title: String) -> Unit = { _, _ -> }
 )
 
 @Composable
@@ -126,7 +127,8 @@ fun ScheduleTab(
                 addLowerThird    = { presetId, presetLabel, pauseAtFrame, pauseDurationMs -> viewModel.addLowerThird(presetId, presetLabel, pauseAtFrame, pauseDurationMs) },
                 addAnnouncement  = { text, textColor, backgroundColor, fontSize, fontType, bold, italic, underline, shadow, position, animationType, animationDuration ->
                     viewModel.addAnnouncement(text, textColor, backgroundColor, fontSize, fontType, bold, italic, underline, shadow, position, animationType, animationDuration)
-                }
+                },
+                addWebsite       = { url, title -> viewModel.addWebsite(url, title) }
             )
         )
     }
@@ -266,6 +268,7 @@ private fun ScheduleItemRow(
                 is ScheduleItem.MediaItem -> "🎬"
                 is ScheduleItem.LowerThirdItem -> "▼"
                 is ScheduleItem.AnnouncementItem -> "📢"
+                is ScheduleItem.WebsiteItem -> "🌐"
             },
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.primary,
@@ -342,6 +345,13 @@ private fun ScheduleItemRow(
                 )
                 is ScheduleItem.LabelItem -> { /* no secondary text */ }
                 is ScheduleItem.AnnouncementItem -> { /* no secondary text */ }
+                is ScheduleItem.WebsiteItem -> Text(
+                    maxLines = 1,
+                    text = item.url,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = if (isSelected) MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                            else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                )
             }
         }
 

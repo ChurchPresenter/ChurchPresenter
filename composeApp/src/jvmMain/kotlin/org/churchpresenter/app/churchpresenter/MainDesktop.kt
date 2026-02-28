@@ -28,6 +28,7 @@ import androidx.compose.ui.input.key.type
 import org.churchpresenter.app.churchpresenter.components.Toolbar
 import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.dialogs.AddLabelDialog
+import org.churchpresenter.app.churchpresenter.dialogs.AddWebsiteDialog
 import org.churchpresenter.app.churchpresenter.models.LyricSection
 import org.churchpresenter.app.churchpresenter.models.ScheduleItem
 import org.churchpresenter.app.churchpresenter.models.SelectedVerse
@@ -93,6 +94,7 @@ fun MainDesktop(
     var selectedTabIndex by rememberSaveable { mutableStateOf(0) }
     var showAddLabelDialog by remember { mutableStateOf(false) }
     var editingLabelItem by remember { mutableStateOf<ScheduleItem.LabelItem?>(null) }
+    var showAddWebsiteDialog by remember { mutableStateOf(false) }
 
     val mediaViewModel = LocalMediaViewModel.current
     val presentingMode by presenterManager.presentingMode
@@ -165,6 +167,7 @@ fun MainDesktop(
                 onRemoveFromSchedule = { currentScheduleActions.removeSelected() },
                 onClearSchedule = { currentScheduleActions.clearSchedule() },
                 onAddLabel = { showAddLabelDialog = true },
+                onAddWebsite = { showAddWebsiteDialog = true },
                 onOpenSettings = onShowSettings
             )
 
@@ -254,6 +257,11 @@ fun MainDesktop(
                                             )
                                         )
                                     }
+                                }
+
+                                is ScheduleItem.WebsiteItem -> {
+                                    presenterManager.setWebsiteUrl(item.url)
+                                    presenterManager.setPresentingMode(Presenting.WEBSITE)
                                 }
                             }
                         },
@@ -404,6 +412,16 @@ fun MainDesktop(
             existingTextColor = editingLabelItem?.textColor ?: "#FFFFFF",
             existingBackgroundColor = editingLabelItem?.backgroundColor ?: "#2196F3",
             isEdit = editingLabelItem != null
+        )
+    }
+
+    if (showAddWebsiteDialog) {
+        AddWebsiteDialog(
+            onDismiss = { showAddWebsiteDialog = false },
+            onConfirm = { url, title ->
+                currentScheduleActions.addWebsite(url, title)
+                showAddWebsiteDialog = false
+            }
         )
     }
 }

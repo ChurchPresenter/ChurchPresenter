@@ -25,10 +25,12 @@ import churchpresenter.composeapp.generated.resources.ic_close
 import churchpresenter.composeapp.generated.resources.ic_delete
 import churchpresenter.composeapp.generated.resources.ic_folder
 import churchpresenter.composeapp.generated.resources.ic_label
+import churchpresenter.composeapp.generated.resources.ic_web
 import churchpresenter.composeapp.generated.resources.ic_playlist_add
 import churchpresenter.composeapp.generated.resources.ic_save
 import churchpresenter.composeapp.generated.resources.ic_settings
 import churchpresenter.composeapp.generated.resources.tooltip_add_label
+import churchpresenter.composeapp.generated.resources.tooltip_add_website
 import churchpresenter.composeapp.generated.resources.tooltip_add_to_schedule
 import churchpresenter.composeapp.generated.resources.tooltip_clear_schedule
 import churchpresenter.composeapp.generated.resources.tooltip_move_down
@@ -62,6 +64,7 @@ fun Toolbar(
     onRemoveFromSchedule: () -> Unit = {},
     onClearSchedule: () -> Unit = {},
     onAddLabel: () -> Unit = {},
+    onAddWebsite: () -> Unit = {},
     onOpenSettings: () -> Unit = {}
 ) {
     Surface(
@@ -135,6 +138,13 @@ fun Toolbar(
                 painter = painterResource(Res.drawable.ic_label),
                 text = stringResource(Res.string.tooltip_add_label),
                 onClick = onAddLabel,
+                iconTint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            // Website button
+            TooltipIconButton(
+                painter = painterResource(Res.drawable.ic_web),
+                text = stringResource(Res.string.tooltip_add_website),
+                onClick = onAddWebsite,
                 iconTint = MaterialTheme.colorScheme.onSurfaceVariant
             )
 

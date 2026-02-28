@@ -362,7 +362,6 @@
     <string name="content_announcements">Оголошення</string>
     <string name="content_media">Медіа</string>
     <string name="content_presentations">Презентації</string>
-    <string name="display_fullscreen">Повний екран</string>
     <string name="display_lower_third">Нижня третина</string>
 
     <!-- Background Settings Tab -->
@@ -433,7 +432,6 @@
     <string name="screen_col_label">Екран %1$d</string>
     <string name="display_mode">Режим відображення</string>
     <string name="display_fullscreen">Повний екран</string>
-    <string name="display_lower_third">Нижня третина</string>
     <string name="full_screen">Повний екран</string>
     <string name="lower_third_size">Нижня третина</string>
     <string name="identify_screen">Визначити</string>

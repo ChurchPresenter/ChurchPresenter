@@ -533,4 +533,13 @@
     <string name="license_accept_button">I Accept</string>
     <string name="license_decline_button">Decline &amp; Exit</string>
     <string name="license_prompt">You must accept the GNU GPL v3 license to use Church Presenter.</string>
+
+    <!-- Website -->
+    <string name="tooltip_add_website">Add Website</string>
+    <string name="website_dialog_title">Add Website</string>
+    <string name="website_url_label">URL</string>
+    <string name="website_url_hint">https://example.com</string>
+    <string name="website_title_label">Title (optional)</string>
+    <string name="website_title_hint">Enter a display name…</string>
+    <string name="website_go_live">Go Live</string>
 </resources>
