@@ -77,6 +77,7 @@ compose.desktop {
             "-Xmx1536m",
             // GC
             "-XX:+UseG1GC",
+            "-XX:+UnlockExperimentalVMOptions",
             "-XX:G1NewSizePercent=20",
             "-XX:G1ReservePercent=20",
             "-XX:MaxGCPauseMillis=50",
