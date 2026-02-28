@@ -1,0 +1,58 @@
+Supported Bible Languages and Abbreviations
+=============================================
+
+Language              Codes
+--------------------  -----
+Afrikaans             AFR
+Albanian              ALB, ALS
+Arabic                ARA, SHU
+Basque                BAQ
+Belarusian            BEL
+Bulgarian             BUL
+Cebuano               CEB
+Chinese               CHI
+Church Slavonic       CHU
+Croatian              CRO, HRV
+Czech                 CES, CZE
+Danish                DAN
+Dutch                 NL
+English               ENG
+Finnish               FIN
+French                FRE
+Gaelic (Scottish)     GAE, GLA
+German                DEU, GER
+Gothic                GOT
+Greek                 GRC, GRE
+Haitian Creole        HAT
+Hebrew                HEB
+Hindi                 HIN
+Hungarian             HUN
+Italian               ITA
+Korean                KOR
+Kurdish (Sorani)      CKB
+Latin                 LAT
+Latvian               LAV, LET
+Low German            NDS
+Malayalam             MAL
+Maori                 MAO
+Marathi               MAR
+Norwegian             NOR
+Polish                POL
+Portuguese            POR
+Romanian              ROM, RUM
+Russian               RUS
+Serbian               SCR, SRP
+Spanish               ESP, SPA
+Swahili               SWA
+Swedish               SWE
+Syriac                SYR
+Tagalog               TGL
+Tamil                 TAM
+Thai                  THA
+Turkish               TUR
+Ukrainian             UKR
+Vietnamese            VIE
+
+Total: 49 languages, 59 language codes
+
+Right-to-Left languages: ARA, CKB, HEB, SHU, SYR
