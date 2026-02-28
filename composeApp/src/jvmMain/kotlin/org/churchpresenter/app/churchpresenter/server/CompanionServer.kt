@@ -84,6 +84,43 @@ data class ScheduleResponse(
     val total: Int
 )
 
+// ── Bible DTOs ────────────────────────────────────────────────────────────────
+
+@Serializable
+data class BibleChapterDto(
+    val chapter: Int,
+    @kotlinx.serialization.SerialName("verse-total") val verseTotal: Int
+)
+
+@Serializable
+data class BibleBookDto(
+    @kotlinx.serialization.SerialName("book-id")      val bookId: Int,
+    @kotlinx.serialization.SerialName("book-name")    val bookName: String,
+    @kotlinx.serialization.SerialName("chapter-total") val chapterTotal: Int,
+    val chapters: List<BibleChapterDto>
+)
+
+/**
+ * Top-level response for /api/bible
+ *
+ * {
+ *   "translation": "KJV",
+ *   "books": [
+ *     { "book-id": 1, "book-name": "Genesis", "chapter-total": 50,
+ *       "chapters": [ { "chapter": 1, "verse-total": 31 }, … ] }
+ *   ],
+ *   "book-total": 66,
+ *   "verse-total": 31102
+ * }
+ */
+@Serializable
+data class BibleCatalogResponse(
+    val translation: String,
+    val books: List<BibleBookDto>,
+    @kotlinx.serialization.SerialName("book-total")  val bookTotal: Int,
+    @kotlinx.serialization.SerialName("verse-total") val verseTotal: Int
+)
+
 @Serializable
 data class ServerInfoResponse(
     val name: String = Constants.SERVER_APP_NAME,
@@ -114,6 +151,7 @@ class CompanionServer {
     // All songs flat list
     // Current catalog — rebuilt whenever songs are updated
     private val _catalog = MutableStateFlow(SongCatalogResponse(emptyList(), 0, 0))
+    private val _bibleCatalog = MutableStateFlow<BibleCatalogResponse?>(null)
     private val _schedule = MutableStateFlow<List<ScheduleSongDto>>(emptyList())
 
     // API key config (updated from settings without restart)
@@ -164,6 +202,16 @@ class CompanionServer {
         ))
     }
 
+    /** Feed the primary Bible — builds full nested catalog and broadcasts to WS clients. */
+    fun updateBible(bible: org.churchpresenter.app.churchpresenter.data.Bible, translation: String) {
+        val catalog = buildBibleCatalog(bible, translation)
+        _bibleCatalog.value = catalog
+        broadcast(WebSocketMessage(
+            type = Constants.WS_EVENT_BIBLE_UPDATED,
+            payload = json.encodeToString(BibleCatalogResponse.serializer(), catalog)
+        ))
+    }
+
     /** Feed only the song-type items from the current schedule. */
     fun updateSchedule(items: List<ScheduleItem>) {
         val dtos = items.filterIsInstance<ScheduleItem.SongItem>().map { it.toDto() }
@@ -192,6 +240,38 @@ class CompanionServer {
             songBook = entries,
             songBooks = entries.size,
             total = songs.size
+        )
+    }
+
+    private fun buildBibleCatalog(
+        bible: org.churchpresenter.app.churchpresenter.data.Bible,
+        translation: String
+    ): BibleCatalogResponse {
+        val bookNames = bible.getBooks()
+        val bookDtos = mutableListOf<BibleBookDto>()
+        var totalVerses = 0
+
+        bookNames.forEachIndexed { bookIndex, bookName ->
+            val bookId = bookIndex + 1
+            val chapterCount = bible.getChapterCount(bookIndex)
+            val chapterDtos = (1..chapterCount).map { chapterNum ->
+                val verseCount = bible.getVerseCount(bookId, chapterNum)
+                totalVerses += verseCount
+                BibleChapterDto(chapter = chapterNum, verseTotal = verseCount)
+            }
+            bookDtos.add(BibleBookDto(
+                bookId = bookId,
+                bookName = bookName,
+                chapterTotal = chapterCount,
+                chapters = chapterDtos
+            ))
+        }
+
+        return BibleCatalogResponse(
+            translation = translation,
+            books = bookDtos,
+            bookTotal = bookDtos.size,
+            verseTotal = totalVerses
         )
     }
 
@@ -244,6 +324,37 @@ class CompanionServer {
                     call.respond(ScheduleResponse(schedule, schedule.size))
                 }
 
+                // GET /api/bible   → full Bible catalog (books → chapters → verses)
+                // GET /api/bible?book=Genesis            → single book
+                // GET /api/bible?book=Genesis&chapter=1  → single chapter
+                get(Constants.ENDPOINT_BIBLE) {
+                    if (!checkApiKey(call)) return@get
+                    val catalog = _bibleCatalog.value
+                    if (catalog == null) {
+                        call.respond(io.ktor.http.HttpStatusCode.ServiceUnavailable, "Bible not loaded")
+                        return@get
+                    }
+                    val bookFilter    = call.request.queryParameters[Constants.QUERY_PARAM_BOOK]
+                    val chapterFilter = call.request.queryParameters[Constants.QUERY_PARAM_CHAPTER]?.toIntOrNull()
+
+                    if (bookFilter.isNullOrBlank()) {
+                        call.respond(catalog)
+                    } else {
+                        val filteredBooks = catalog.books.filter {
+                            it.bookName.equals(bookFilter, ignoreCase = true)
+                        }.map { book ->
+                            if (chapterFilter != null) {
+                                book.copy(chapters = book.chapters.filter { it.chapter == chapterFilter })
+                            } else book
+                        }
+                        call.respond(catalog.copy(
+                            books = filteredBooks,
+                            bookTotal = filteredBooks.size,
+                            verseTotal = filteredBooks.sumOf { b -> b.chapters.sumOf { it.verseTotal } }
+                        ))
+                    }
+                }
+
                 // ── WebSocket ──────────────────────────────────────────────
                 webSocket(Constants.ENDPOINT_WS) {
                     val queryKey = call.request.queryParameters[Constants.QUERY_PARAM_API_KEY]
@@ -262,6 +373,11 @@ class CompanionServer {
                     send(Frame.Text(json.encodeToString(WebSocketMessage.serializer(),
                         WebSocketMessage(Constants.WS_EVENT_SONGS_UPDATED,
                             json.encodeToString(SongCatalogResponse.serializer(), catalog)))))
+                    _bibleCatalog.value?.let { bibleCatalog ->
+                        send(Frame.Text(json.encodeToString(WebSocketMessage.serializer(),
+                            WebSocketMessage(Constants.WS_EVENT_BIBLE_UPDATED,
+                                json.encodeToString(BibleCatalogResponse.serializer(), bibleCatalog)))))
+                    }
                     send(Frame.Text(json.encodeToString(WebSocketMessage.serializer(),
                         WebSocketMessage(Constants.WS_EVENT_SCHEDULE_UPDATED,
                             json.encodeToString(ScheduleResponse.serializer(), ScheduleResponse(schedule, schedule.size))))))

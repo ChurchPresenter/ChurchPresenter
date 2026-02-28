@@ -48,6 +48,7 @@ import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
 import org.churchpresenter.app.churchpresenter.server.CompanionServer
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.data.Songs
+import org.churchpresenter.app.churchpresenter.data.Bible
 import org.churchpresenter.app.churchpresenter.viewmodel.LocalMediaViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -134,6 +135,25 @@ fun MainDesktop(
             s.getSongs()
         }
         companionServer.updateSongs(songs)
+    }
+
+    // Load primary Bible for the companion server in the background.
+    // Re-runs whenever the storage directory or selected primary Bible changes.
+    LaunchedEffect(appSettings.bibleSettings.storageDirectory, appSettings.bibleSettings.primaryBible) {
+        val storageDir = appSettings.bibleSettings.storageDirectory
+        val primaryFile = appSettings.bibleSettings.primaryBible
+        if (storageDir.isNotEmpty() && primaryFile.isNotEmpty()) {
+            withContext(Dispatchers.IO) {
+                try {
+                    val f = File(storageDir, primaryFile)
+                    if (f.exists()) {
+                        val bible = Bible().apply { loadFromSpb(f.absolutePath) }
+                        val translationName = primaryFile.substringBeforeLast('.')
+                        companionServer.updateBible(bible, translationName)
+                    }
+                } catch (_: Exception) { }
+            }
+        }
     }
 
     Box(

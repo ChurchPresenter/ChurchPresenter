@@ -283,7 +283,7 @@ The user should not need to read this document.
 ## Ktor Companion Server (February 2026)
 
 ### Overview
-A Ktor HTTP + WebSocket server runs inside the desktop app to serve song/schedule data to a KMP mobile companion app.
+A Ktor HTTP + WebSocket server runs inside the desktop app to serve song/bible/schedule data to a KMP mobile companion app.
 
 ### File
 `server/CompanionServer.kt`
@@ -291,34 +291,93 @@ A Ktor HTTP + WebSocket server runs inside the desktop app to serve song/schedul
 ### Port
 `8765` (constant: `Constants.SERVER_DEFAULT_PORT`)
 
-### REST Endpoints
-| Endpoint | Response |
-|---|---|
-| `GET /api/info` | `ServerInfoResponse` (name, version, port) |
-| `GET /api/songbooks` | `SongbooksResponse` (list of songbooks with song counts) |
-| `GET /api/songs` | `SongListResponse` — all songs across all songbooks |
-| `GET /api/songs?songbook=Name` | `SongListResponse` — songs in a specific songbook only |
-| `GET /api/schedule` | `ScheduleResponse` (song-type schedule items only) |
-| `WS /ws` | WebSocket for real-time updates |
+### Default State
+- **Server is OFF by default** (`ServerSettings.enabled = false`)
+- User must enable it in **Settings → Server** tab
 
-### WebSocket Events
-- **Server → Client**: `songbooks_updated`, `songs_updated`, `schedule_updated` (JSON payload)
-- On connect the server immediately pushes all three events to the new client
-- **Client → Server**: `select_song` (payload: `ScheduleSongDto` JSON)
+### REST Endpoints
+| Endpoint | Query Params | Response |
+|---|---|---|
+| `GET /api/info` | — | `ServerInfoResponse` (name, version, port) |
+| `GET /api/songs` | `?songbook=Name` (optional) | `SongCatalogResponse` — all songbooks with nested songs |
+| `GET /api/bible` | `?book=Genesis`, `?book=Genesis&chapter=1` (optional) | `BibleCatalogResponse` — full Bible with nested chapters/verses |
+| `GET /api/schedule` | — | `ScheduleResponse` (song-type items only) |
+| `WS /ws` | `?apiKey=` (if enabled) | WebSocket for real-time updates |
+
+### Song Response Shape (`/api/songs`)
+```json
+{
+  "song-book": [
+    { "book-name": "Hymns", "song-total": 420, "songs": [
+        { "number": "1", "title": "Amazing Grace", "tune": "", "author": "" }
+    ]}
+  ],
+  "songBooks": 2,
+  "total": 507
+}
+```
+
+### Bible Response Shape (`/api/bible`)
+```json
+{
+  "translation": "KJV",
+  "books": [
+    {
+      "book-id": 1,
+      "book-name": "Genesis",
+      "chapter-total": 50,
+      "chapters": [
+        { "chapter": 1, "verse-total": 31 },
+        { "chapter": 2, "verse-total": 25 }
+      ]
+    }
+  ],
+  "book-total": 66,
+  "verse-total": 31102
+}
+```
+> Verse **text is not included** — only counts. Mobile app uses `book-id`, `book-name`, `chapter`, and `verse-total` to build pickers. To fetch actual verse text the mobile app sends a `select_verse` WS command (TBD) or the user navigates on desktop.
+
+### WebSocket Events (Server → Client)
+| Event type | Payload |
+|---|---|
+| `songs_updated` | `SongCatalogResponse` JSON |
+| `bible_updated` | `BibleCatalogResponse` JSON |
+| `schedule_updated` | `ScheduleResponse` JSON |
+
+On connect the server immediately pushes all three events to the new client.
+
+### WebSocket Commands (Client → Server)
+| Command type | Payload |
+|---|---|
+| `select_song` | `ScheduleSongDto` JSON |
+
+### API Key Authentication
+- Optional — enabled via Settings → Server tab
+- Clients must send `X-Api-Key` header or `?apiKey=` query param
+- REST returns HTTP 401 on invalid key
+- WebSocket sends `{"error":"Unauthorized"}` then closes
 
 ### Wiring
 - `CompanionServer` is created in **`main.kt`** (app scope) via `remember` — shared between `MainDesktop` (data feed) and `OptionsDialog` (settings tab)
-- Started in `LaunchedEffect(Unit)` respecting `appSettings.serverSettings.enabled` and `port`
+- Started in `LaunchedEffect(Unit)` only if `appSettings.serverSettings.enabled == true`
 - Stopped in `DisposableEffect` on app close
 - API key synced live (no restart) via `LaunchedEffect(apiKeyEnabled, apiKey)`
-- `SongsTab` has `onSongsLoaded` callback → calls `companionServer.updateSongs()`
-- `ScheduleTab` has `onScheduleChanged` callback → calls `companionServer.updateSchedule()`
 
-### Mobile App
-- Use KMP (Kotlin Multiplatform) for iOS + Android
-- Connect to `http://{desktop-ip}:8765/api/songs` for song list
-- Connect to `ws://{desktop-ip}:8765/ws` for real-time schedule updates
-- Send `select_song` WS message to trigger song selection on desktop
+### Data Loading (MainDesktop.kt)
+Data is loaded in **background `LaunchedEffect`s in `MainDesktop`**, independent of which tab is visible:
+- **Songs**: `LaunchedEffect(appSettings.songSettings.storageDirectory)` — scans `.sps` files, falls back to built-in songbook
+- **Bible**: `LaunchedEffect(appSettings.bibleSettings.storageDirectory, appSettings.bibleSettings.primaryBible)` — loads the primary `.spb` file
+- **Schedule**: `ScheduleTab.onScheduleChanged` callback → `companionServer.updateSchedule(items)`
+
+> ⚠️ **DO NOT** wire data updates through tab composables (e.g. `SongsTab.onSongsLoaded`) — tabs are only composed when visible. Always load data in `MainDesktop` or `main.kt` scope.
+
+### Mobile App Recommended Flow
+1. Connect to `ws://{ip}:8765/ws` → receive `songs_updated`, `bible_updated`, `schedule_updated`
+2. Songs: show songbook picker from `song-book[].book-name`, then songs from `songs[]`
+3. Bible: show book picker from `books[].book-name`, then chapters, then verses
+4. Send `select_song` WS message to trigger song selection on desktop
+5. Or call `GET /api/songs?songbook=X` / `GET /api/bible?book=Genesis&chapter=1` for filtered REST requests
 
 ### Dependencies added
 - `io.ktor:ktor-server-core-jvm:3.1.3`

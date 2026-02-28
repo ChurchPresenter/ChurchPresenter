@@ -114,18 +114,22 @@ object Constants {
     // REST endpoints
     const val ENDPOINT_INFO      = "/api/info"
     const val ENDPOINT_SONGS     = "/api/songs"
+    const val ENDPOINT_BIBLE     = "/api/bible"
     const val ENDPOINT_SCHEDULE  = "/api/schedule"
     const val ENDPOINT_WS        = "/ws"
 
     // WebSocket event types (server → client)
     const val WS_EVENT_SONGS_UPDATED    = "songs_updated"
+    const val WS_EVENT_BIBLE_UPDATED    = "bible_updated"
     const val WS_EVENT_SCHEDULE_UPDATED = "schedule_updated"
 
     // WebSocket command types (client → server)
     const val WS_CMD_SELECT_SONG = "select_song"
 
     // API key authentication
-    const val HEADER_API_KEY       = "X-Api-Key"
-    const val QUERY_PARAM_API_KEY  = "apiKey"
-    const val QUERY_PARAM_SONGBOOK = "songbook"
+    const val HEADER_API_KEY        = "X-Api-Key"
+    const val QUERY_PARAM_API_KEY   = "apiKey"
+    const val QUERY_PARAM_SONGBOOK  = "songbook"
+    const val QUERY_PARAM_BOOK      = "book"
+    const val QUERY_PARAM_CHAPTER   = "chapter"
 }
