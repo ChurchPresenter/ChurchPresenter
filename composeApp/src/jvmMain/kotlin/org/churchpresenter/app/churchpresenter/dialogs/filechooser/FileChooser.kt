@@ -82,11 +82,10 @@ abstract class FileChooser {
     companion object {
         val platformInstance: FileChooser by lazy {
             val osName = System.getProperty(Constants.SystemProperties.OS_NAME).lowercase()
-            when {
-                "win" in osName -> TODO()
-                "mac" in osName -> TODO()
-                "nix" in osName || "nux" in osName -> XdgFileChooser
-                else -> throw UnsupportedOperationException("Unsupported OS: ${System.getProperty(Constants.SystemProperties.OS_NAME)}")
+            if ("nix" in osName || "nux" in osName) {
+                XdgFileChooser
+            } else {
+                SwingFileChooser
             }
         }
     }
