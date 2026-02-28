@@ -280,3 +280,52 @@ This is an **AGENT-ONLY** document. It helps me (the AI agent):
 
 The user should not need to read this document.
 
+## Ktor Companion Server (February 2026)
+
+### Overview
+A Ktor HTTP + WebSocket server runs inside the desktop app to serve song/schedule data to a KMP mobile companion app.
+
+### File
+`server/CompanionServer.kt`
+
+### Port
+`8765` (constant: `Constants.SERVER_DEFAULT_PORT`)
+
+### REST Endpoints
+| Endpoint | Response |
+|---|---|
+| `GET /api/info` | `ServerInfoResponse` (name, version, port) |
+| `GET /api/songbooks` | `SongbooksResponse` (list of songbooks with song counts) |
+| `GET /api/songs` | `SongListResponse` — all songs across all songbooks |
+| `GET /api/songs?songbook=Name` | `SongListResponse` — songs in a specific songbook only |
+| `GET /api/schedule` | `ScheduleResponse` (song-type schedule items only) |
+| `WS /ws` | WebSocket for real-time updates |
+
+### WebSocket Events
+- **Server → Client**: `songbooks_updated`, `songs_updated`, `schedule_updated` (JSON payload)
+- On connect the server immediately pushes all three events to the new client
+- **Client → Server**: `select_song` (payload: `ScheduleSongDto` JSON)
+
+### Wiring
+- `CompanionServer` is created in **`main.kt`** (app scope) via `remember` — shared between `MainDesktop` (data feed) and `OptionsDialog` (settings tab)
+- Started in `LaunchedEffect(Unit)` respecting `appSettings.serverSettings.enabled` and `port`
+- Stopped in `DisposableEffect` on app close
+- API key synced live (no restart) via `LaunchedEffect(apiKeyEnabled, apiKey)`
+- `SongsTab` has `onSongsLoaded` callback → calls `companionServer.updateSongs()`
+- `ScheduleTab` has `onScheduleChanged` callback → calls `companionServer.updateSchedule()`
+
+### Mobile App
+- Use KMP (Kotlin Multiplatform) for iOS + Android
+- Connect to `http://{desktop-ip}:8765/api/songs` for song list
+- Connect to `ws://{desktop-ip}:8765/ws` for real-time schedule updates
+- Send `select_song` WS message to trigger song selection on desktop
+
+### Dependencies added
+- `io.ktor:ktor-server-core-jvm:3.1.3`
+- `io.ktor:ktor-server-netty-jvm:3.1.3`
+- `io.ktor:ktor-server-content-negotiation-jvm:3.1.3`
+- `io.ktor:ktor-server-cors-jvm:3.1.3`
+- `io.ktor:ktor-server-websockets-jvm:3.1.3`
+- `io.ktor:ktor-serialization-kotlinx-json-jvm:3.1.3`
+- `io.ktor:ktor-server-status-pages-jvm:3.1.3`
+

@@ -83,13 +83,21 @@ fun SongsTab(
     onSongItemSelected: (LyricSection) -> Unit,
     onPresenting: (Presenting) -> Unit = { Presenting.NONE },
     isPresenting: Boolean = false,
-    theme: ThemeMode = ThemeMode.SYSTEM
+    theme: ThemeMode = ThemeMode.SYSTEM,
+    onSongsLoaded: ((List<SongItem>) -> Unit)? = null
 ) {
     val viewModel = remember { SongsViewModel(appSettings) }
 
     // Reload songs whenever the storage directory changes (e.g. after settings are saved)
     LaunchedEffect(appSettings.songSettings.storageDirectory) {
         viewModel.updateSettings(appSettings)
+    }
+
+    // Notify caller when the full song list is available
+    LaunchedEffect(viewModel.isLoading.value) {
+        if (!viewModel.isLoading.value) {
+            onSongsLoaded?.invoke(viewModel.songsData.value.getSongs())
+        }
     }
 
     DisposableEffect(Unit) {
