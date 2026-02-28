@@ -89,4 +89,23 @@ object Constants {
 
     // Seek amount in ms
     const val MEDIA_SEEK_MS = 10_000L
+
+    object DBus {
+        const val DESKTOP_OBJECT_NAME = "org.freedesktop.portal.Desktop"
+        const val DESKTOP_OBJECT_PATH = "/org/freedesktop/portal/desktop"
+
+        object Options {
+            const val MULTIPLE = "multiple"
+            const val DIRECTORY = "directory"
+            const val FILTERS = "filters"
+            const val CURRENT_FOLDER = "current_folder"
+            const val CURRENT_NAME = "current_name"
+            const val HANDLE_TOKEN = "handle_token"
+        }
+    }
+
+    object SystemProperties {
+        const val OS_NAME = "os.name"
+        const val USER_HOME = "user.home"
+    }
 }

@@ -62,6 +62,9 @@ kotlin {
                     runtimeOnly("org.openjfx:$module:21:win")
                 }
             }
+            // DBus for Linux file chooser integration
+            implementation("com.github.hypfvieh:dbus-java-core:5.2.0")
+            implementation("com.github.hypfvieh:dbus-java-transport-junixsocket:5.2.0")
         }
     }
 }

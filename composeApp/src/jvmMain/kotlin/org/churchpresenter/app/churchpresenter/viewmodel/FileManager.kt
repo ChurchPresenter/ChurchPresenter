@@ -1,11 +1,18 @@
 package org.churchpresenter.app.churchpresenter.viewmodel
 
+import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
 import org.churchpresenter.app.churchpresenter.utils.Constants
-import org.churchpresenter.app.churchpresenter.utils.createFileChooser
 import java.io.File
-import javax.swing.JFileChooser
 import javax.swing.JOptionPane
 import java.awt.Window
+import java.nio.file.Path
+import javax.swing.filechooser.FileNameExtensionFilter
+import kotlin.io.path.Path
+import kotlin.io.path.absolutePathString
+import kotlin.io.path.copyTo
+import kotlin.io.path.exists
+import kotlin.io.path.isDirectory
+import kotlin.io.path.name
 
 /**
  * Handles all file system operations for the application.
@@ -44,74 +51,62 @@ class FileManager {
     /**
      * Show directory chooser dialog and return selected directory path
      */
-    fun chooseDirectory(currentDirectory: String = "", parentWindow: Window? = null): String? {
-        val dirChooser = createFileChooser {
-            fileSelectionMode = JFileChooser.DIRECTORIES_ONLY
-            if (currentDirectory.isNotEmpty()) {
-                this.currentDirectory = File(currentDirectory)
-            }
-        }
-        val result = dirChooser.showOpenDialog(parentWindow)
-        return if (result == JFileChooser.APPROVE_OPTION) {
-            dirChooser.selectedFile.absolutePath
-        } else {
-            null
-        }
+    suspend fun chooseDirectory(currentDirectory: String = ""): String? {
+        return FileChooser.platformInstance.chooseSingle(
+            path = Path(currentDirectory),
+            filters = emptyList(),
+            title = "",
+            selectDirectory = true
+        )?.absolutePathString()
     }
 
     /**
      * Show file chooser dialog for song files and return selected files
      */
-    fun chooseSongFiles(parentWindow: Window? = null): List<File>? {
-        val fileChooser = createFileChooser {
-            fileSelectionMode = JFileChooser.FILES_ONLY
-            isMultiSelectionEnabled = true
-            fileFilter = javax.swing.filechooser.FileNameExtensionFilter(
-                "Song Files (*.${Constants.EXTENSION_SPS})", Constants.EXTENSION_SPS
-            )
-        }
-        val result = fileChooser.showOpenDialog(parentWindow)
-        return if (result == JFileChooser.APPROVE_OPTION) {
-            fileChooser.selectedFiles.toList()
-        } else {
-            null
-        }
+    suspend fun chooseSongFiles(): List<Path>? {
+        return FileChooser.platformInstance.chooseMultiple(
+            path = null,
+            filters = listOf(
+                FileNameExtensionFilter(
+                    "Song Files (*.${Constants.EXTENSION_SPS})", Constants.EXTENSION_SPS
+                )
+            ),
+            title = "",
+            selectDirectory = false
+        )
     }
 
     /**
      * Show file chooser dialog for Bible files and return selected file
      */
-    fun chooseBibleFile(parentWindow: Window? = null): File? {
-        val fileChooser = createFileChooser {
-            fileSelectionMode = JFileChooser.FILES_ONLY
-            isMultiSelectionEnabled = false
-            fileFilter = javax.swing.filechooser.FileNameExtensionFilter(
-                "Bible Files (*.${Constants.EXTENSION_SPB})", Constants.EXTENSION_SPB
-            )
-        }
-        val result = fileChooser.showOpenDialog(parentWindow)
-        return if (result == JFileChooser.APPROVE_OPTION) {
-            fileChooser.selectedFile
-        } else {
-            null
-        }
+    suspend fun chooseBibleFile(): Path? {
+        return FileChooser.platformInstance.chooseSingle(
+            path = null,
+            filters = listOf(
+                FileNameExtensionFilter(
+                    "Bible Files (*.${Constants.EXTENSION_SPB})", Constants.EXTENSION_SPB
+                )
+            ),
+            title = "",
+            selectDirectory = false
+        )
     }
 
     /**
      * Import (copy) files to target directory
      * Returns list of error messages if any
      */
-    fun importFiles(sourceFiles: List<File>, targetDirectory: String): List<String> {
+    fun importFiles(sourceFiles: List<Path>, targetDirectory: String): List<String> {
         val errors = mutableListOf<String>()
-        val targetDir = File(targetDirectory)
+        val targetDir = Path(targetDirectory)
 
-        if (!targetDir.exists() || !targetDir.isDirectory) {
+        if (!targetDir.exists() || !targetDir.isDirectory()) {
             errors.add("Target directory does not exist: $targetDirectory")
             return errors
         }
 
         sourceFiles.forEach { sourceFile ->
-            val targetFile = File(targetDir, sourceFile.name)
+            val targetFile = targetDir.resolve(sourceFile.name)
             try {
                 sourceFile.copyTo(targetFile, overwrite = true)
             } catch (e: Exception) {

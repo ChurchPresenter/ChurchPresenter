@@ -30,6 +30,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -38,12 +39,9 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.background
-import churchpresenter.composeapp.generated.resources.background_color
 import churchpresenter.composeapp.generated.resources.background_color_option
 import churchpresenter.composeapp.generated.resources.background_default
 import churchpresenter.composeapp.generated.resources.background_image_option
-import churchpresenter.composeapp.generated.resources.background_type
 import churchpresenter.composeapp.generated.resources.bible_files
 import churchpresenter.composeapp.generated.resources.bible_selection
 import churchpresenter.composeapp.generated.resources.browse_directory
@@ -105,6 +103,7 @@ import java.awt.Window
 import java.io.File
 import java.nio.charset.StandardCharsets
 import javax.swing.SwingUtilities
+import kotlinx.coroutines.launch
 
 /**
  * Extract Bible title from SPB file
@@ -221,6 +220,8 @@ private fun LeftColumn(
     val importErrorStr = stringResource(Res.string.import_error)
     val deleteErrorStr = stringResource(Res.string.delete_error)
 
+    val scope = rememberCoroutineScope()
+
     // Background type options
     val backgroundDefaultStr = stringResource(Res.string.background_default)
     val backgroundColorStr = stringResource(Res.string.background_color_option)
@@ -249,11 +250,10 @@ private fun LeftColumn(
             text = stringResource(Res.string.browse_directory),
             backgroundColor = MaterialTheme.colorScheme.primaryContainer,
             onClick = {
-                SwingUtilities.invokeLater {
+                scope.launch {
                     val parentWindow = Window.getWindows().firstOrNull { it.isActive }
                     val selectedDir = fileManager.chooseDirectory(
-                        currentDirectory = settings.bibleSettings.storageDirectory,
-                        parentWindow = parentWindow
+                        currentDirectory = settings.bibleSettings.storageDirectory
                     )
                     selectedDir?.let { dir ->
                         onSettingsChange { it.copy(bibleSettings = it.bibleSettings.copy(storageDirectory = dir)) }
@@ -308,7 +308,7 @@ private fun LeftColumn(
             text = stringResource(Res.string.import_bible_file),
             backgroundColor = MaterialTheme.colorScheme.inverseSurface,
             onClick = {
-                SwingUtilities.invokeLater {
+                scope.launch {
                     val parentWindow = Window.getWindows().firstOrNull { it.isActive }
 
                     // Check if directory is selected
@@ -318,11 +318,11 @@ private fun LeftColumn(
                             title = noDirectorySelectedStr,
                             parentWindow = parentWindow
                         )
-                        return@invokeLater
+                        return@launch
                     }
 
                     // Choose files to import
-                    val selectedFiles = fileManager.chooseBibleFile(parentWindow)
+                    val selectedFiles = fileManager.chooseBibleFile()
                     selectedFiles?.let { file ->
                         // Import files
                         val errors = fileManager.importFiles(

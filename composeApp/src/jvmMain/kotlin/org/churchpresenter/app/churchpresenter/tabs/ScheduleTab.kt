@@ -25,6 +25,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -53,6 +54,7 @@ import org.churchpresenter.app.churchpresenter.utils.Utils
 import org.churchpresenter.app.churchpresenter.viewmodel.ScheduleViewModel
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import kotlinx.coroutines.launch
 
 /**
  * Actions exposed to the parent composable so toolbar/menu can drive the schedule
@@ -93,6 +95,7 @@ fun ScheduleTab(
     onActionsReady: (ScheduleTabActions) -> Unit = {},
     onSelectedItemChanged: (String?) -> Unit = {}
 ) {
+    val scope = rememberCoroutineScope()
     val viewModel = remember { ScheduleViewModel() }
 
     // State holders — lambdas capture the State object, not the string value,
@@ -106,9 +109,9 @@ fun ScheduleTab(
         onActionsReady(
             ScheduleTabActions(
                 newSchedule      = { viewModel.newSchedule() },
-                openSchedule     = { viewModel.loadSchedule(strOpenSchedule.value, strFileFilter.value) },
-                saveSchedule     = { viewModel.saveSchedule(strSaveScheduleAs.value, strFileFilter.value) },
-                saveScheduleAs   = { viewModel.saveScheduleAs(strSaveScheduleAs.value, strFileFilter.value) },
+                openSchedule     = { scope.launch { viewModel.loadSchedule(strOpenSchedule.value, strFileFilter.value) } },
+                saveSchedule     = { scope.launch { viewModel.saveSchedule(strSaveScheduleAs.value, strFileFilter.value) } },
+                saveScheduleAs   = { scope.launch { viewModel.saveScheduleAs(strSaveScheduleAs.value, strFileFilter.value) } },
                 removeSelected   = { viewModel.selectedItemId?.let { viewModel.removeItem(it) } },
                 clearSchedule    = { viewModel.clearSchedule() },
                 moveSelectedToTop    = { viewModel.selectedItemId?.let { viewModel.moveItemToTop(it) } },

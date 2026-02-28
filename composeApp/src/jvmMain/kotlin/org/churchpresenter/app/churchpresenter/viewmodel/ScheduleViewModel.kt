@@ -3,11 +3,9 @@ package org.churchpresenter.app.churchpresenter.viewmodel
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
-import kotlinx.serialization.builtins.ListSerializer
-import kotlinx.serialization.json.Json
+import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
 import org.churchpresenter.app.churchpresenter.models.ScheduleItem
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
-import org.churchpresenter.app.churchpresenter.utils.createFileChooser
 import java.io.File
 import java.security.SecureRandom
 import java.util.Base64
@@ -17,8 +15,14 @@ import javax.crypto.SecretKeyFactory
 import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.PBEKeySpec
 import javax.crypto.spec.SecretKeySpec
-import javax.swing.JFileChooser
 import javax.swing.filechooser.FileNameExtensionFilter
+import kotlin.io.path.absolutePathString
+import kotlin.io.path.exists
+import kotlin.io.path.name
+import kotlin.io.path.readText
+import kotlin.io.path.writeText
+import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.json.Json
 
 class ScheduleViewModel {
     private val _scheduleItems: SnapshotStateList<ScheduleItem> = mutableStateListOf()
@@ -72,7 +76,7 @@ class ScheduleViewModel {
     // ── File I/O ──────────────────────────────────────────────────────────────
 
     /** Saves to the current file if known, otherwise prompts like Save As. */
-    fun saveSchedule(
+    suspend fun saveSchedule(
         dialogTitle: String = "Save Schedule As",
         fileFilterDescription: String = "Church Presenter Schedule (*.cps)"
     ) {
@@ -87,38 +91,38 @@ class ScheduleViewModel {
     }
 
     /** Always opens a save-file dialog and serializes the schedule to a .cps file. */
-    fun saveScheduleAs(
+    suspend fun saveScheduleAs(
         dialogTitle: String = "Save Schedule As",
         fileFilterDescription: String = "Church Presenter Schedule (*.cps)"
     ) {
-        val chooser = createFileChooser {
-            this.dialogTitle = dialogTitle
-            fileFilter = FileNameExtensionFilter(fileFilterDescription, "cps")
-            isAcceptAllFileFilterUsed = false
-        }
-        if (chooser.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
-            var file = chooser.selectedFile
+        var file = FileChooser.platformInstance.save(
+            location = null,
+            suggestedName = "schedule.cps",
+            filters = listOf(FileNameExtensionFilter(fileFilterDescription, "cps")),
+            title = dialogTitle
+        )
+        if (file != null) {
             if (!file.name.endsWith(".cps", ignoreCase = true)) {
                 file = file.resolveSibling("${file.name}.cps")
             }
             val serialized = json.encodeToString(ListSerializer(ScheduleItem.serializer()), _scheduleItems.toList())
             file.writeText(encrypt(serialized))
-            currentFilePath = file.absolutePath
+            currentFilePath = file.absolutePathString()
         }
     }
 
     /** Opens an open-file dialog and loads a schedule from a .cps file. */
-    fun loadSchedule(
+    suspend fun loadSchedule(
         dialogTitle: String = "Open Schedule",
         fileFilterDescription: String = "Church Presenter Schedule (*.cps)"
     ) {
-        val chooser = createFileChooser {
-            this.dialogTitle = dialogTitle
-            fileFilter = FileNameExtensionFilter(fileFilterDescription, "cps")
-            isAcceptAllFileFilterUsed = false
-        }
-        if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
-            val file = chooser.selectedFile
+        val file = FileChooser.platformInstance.chooseSingle(
+            path = null,
+            filters = listOf(FileNameExtensionFilter(fileFilterDescription, "cps")),
+            title = dialogTitle,
+            selectDirectory = false
+        )
+        if (file != null) {
             if (file.exists()) {
                 val raw = file.readText()
                 // Support both old plain-JSON files and new encrypted files gracefully
@@ -126,7 +130,7 @@ class ScheduleViewModel {
                 val items = json.decodeFromString(ListSerializer(ScheduleItem.serializer()), jsonText)
                 _scheduleItems.clear()
                 _scheduleItems.addAll(items)
-                currentFilePath = file.absolutePath
+                currentFilePath = file.absolutePathString()
             }
         }
     }

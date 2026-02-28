@@ -6,22 +6,20 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.toComposeImageBitmap
+import org.churchpresenter.app.churchpresenter.data.AppSettings
+import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
+import org.churchpresenter.app.churchpresenter.models.AnimationType
+import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.jetbrains.skia.Image
+import java.io.ByteArrayOutputStream
+import java.io.File
+import javax.imageio.ImageIO
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
-import org.churchpresenter.app.churchpresenter.data.AppSettings
-import org.churchpresenter.app.churchpresenter.models.AnimationType
-import org.churchpresenter.app.churchpresenter.presenter.Presenting
-import org.churchpresenter.app.churchpresenter.utils.Constants
-import org.churchpresenter.app.churchpresenter.utils.createFileChooser
-import org.jetbrains.skia.Image
-import java.io.ByteArrayOutputStream
-import java.io.File
-import javax.imageio.ImageIO
-import javax.swing.JFileChooser
-import javax.swing.SwingUtilities
 
 class PicturesViewModel(
     appSettings: AppSettings? = null
@@ -164,15 +162,15 @@ class PicturesViewModel(
     /**
      * Opens a native folder chooser dialog and loads images from the selected folder.
      */
-    fun openFolderChooser(dialogTitle: String) {
-        SwingUtilities.invokeLater {
-            val chooser = createFileChooser {
-                fileSelectionMode = JFileChooser.DIRECTORIES_ONLY
-                this.dialogTitle = dialogTitle
-            }
-            if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
-                selectFolder(chooser.selectedFile)
-            }
+    suspend fun openFolderChooser(dialogTitle: String) {
+        val file = FileChooser.platformInstance.chooseSingle(
+            path = null,
+            filters = emptyList(),
+            title = dialogTitle,
+            selectDirectory = true
+        )
+        if (file != null) {
+            selectFolder(file.toFile())
         }
     }
 

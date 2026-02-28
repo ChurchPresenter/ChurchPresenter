@@ -2,6 +2,7 @@ package org.churchpresenter.app.churchpresenter.tabs
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -28,12 +29,12 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.foundation.focusable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
@@ -48,7 +49,6 @@ import androidx.compose.ui.window.PopupProperties
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.add_to_schedule
 import churchpresenter.composeapp.generated.resources.go_live
-import churchpresenter.composeapp.generated.resources.media_now_presenting
 import churchpresenter.composeapp.generated.resources.ic_fast_forward
 import churchpresenter.composeapp.generated.resources.ic_fast_rewind
 import churchpresenter.composeapp.generated.resources.ic_pause
@@ -58,6 +58,7 @@ import churchpresenter.composeapp.generated.resources.ic_volume_up
 import churchpresenter.composeapp.generated.resources.media_mute
 import churchpresenter.composeapp.generated.resources.media_no_source
 import churchpresenter.composeapp.generated.resources.media_now_playing
+import churchpresenter.composeapp.generated.resources.media_now_presenting
 import churchpresenter.composeapp.generated.resources.media_preview
 import churchpresenter.composeapp.generated.resources.media_seek_backward
 import churchpresenter.composeapp.generated.resources.media_seek_forward
@@ -68,6 +69,7 @@ import churchpresenter.composeapp.generated.resources.media_unmute
 import churchpresenter.composeapp.generated.resources.pause
 import churchpresenter.composeapp.generated.resources.play
 import org.churchpresenter.app.churchpresenter.composables.VideoPlayer
+import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
 import org.churchpresenter.app.churchpresenter.models.ScheduleItem
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.utils.Constants
@@ -75,10 +77,9 @@ import org.churchpresenter.app.churchpresenter.viewmodel.LocalMediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import org.churchpresenter.app.churchpresenter.utils.createFileChooser
-import javax.swing.JFileChooser
-import javax.swing.SwingUtilities
 import javax.swing.filechooser.FileNameExtensionFilter
+import kotlin.io.path.absolutePathString
+import kotlinx.coroutines.launch
 
 @Composable
 fun MediaTab(
@@ -92,6 +93,10 @@ fun MediaTab(
     val viewModel = LocalMediaViewModel.current ?: return
     val focusRequester = remember { FocusRequester() }
     var volumeExpanded by remember { mutableStateOf(false) }
+
+    val scope = rememberCoroutineScope()
+    // can't access stringResource without composable scope, so preload it here
+    val mediaSelectFileString = stringResource(Res.string.media_select_file)
 
     // React to schedule item selection
     LaunchedEffect(selectedMediaItem) {
@@ -145,18 +150,20 @@ fun MediaTab(
             // Local file picker
             Button(
                 onClick = {
-                    SwingUtilities.invokeLater {
-                        val chooser = createFileChooser {
-                            fileSelectionMode = JFileChooser.FILES_ONLY
-                            dialogTitle = "Select Video File"
-                            fileFilter = FileNameExtensionFilter(
-                                "Video Files",
-                                "mp4", "mov", "avi", "mkv", "wmv", "flv", "webm", "m4v"
-                            )
-                        }
-                        if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
-                            val file = chooser.selectedFile
-                            viewModel.loadMedia(file.absolutePath, Constants.MEDIA_TYPE_LOCAL)
+                     scope.launch {
+                        val file = FileChooser.platformInstance.chooseSingle(
+                            path = null,
+                            filters = listOf(
+                                FileNameExtensionFilter(
+                                    "Video Files",
+                                    "mp4", "mov", "avi", "mkv", "wmv", "flv", "webm", "m4v"
+                                )
+                            ),
+                            title = mediaSelectFileString,
+                            selectDirectory = false
+                        )
+                        if (file != null) {
+                            viewModel.loadMedia(file.absolutePathString(), Constants.MEDIA_TYPE_LOCAL)
                         }
                     }
                 }

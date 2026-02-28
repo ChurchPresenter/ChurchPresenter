@@ -29,6 +29,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -60,19 +61,18 @@ import churchpresenter.composeapp.generated.resources.slide_count
 import churchpresenter.composeapp.generated.resources.slide_counter
 import churchpresenter.composeapp.generated.resources.slide_number
 import churchpresenter.composeapp.generated.resources.supported_formats
-import kotlinx.coroutines.delay
 import org.churchpresenter.app.churchpresenter.data.AppSettings
+import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
 import org.churchpresenter.app.churchpresenter.models.ScheduleItem
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
-import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.app.churchpresenter.viewmodel.PresentationViewModel
+import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import java.io.File
-import org.churchpresenter.app.churchpresenter.utils.createFileChooser
-import javax.swing.JFileChooser
-import javax.swing.SwingUtilities
 import javax.swing.filechooser.FileNameExtensionFilter
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @Composable
 fun PresentationTab(
@@ -82,6 +82,7 @@ fun PresentationTab(
     selectedPresentationItem: ScheduleItem.PresentationItem? = null,
     presenterManager: PresenterManager? = null
 ) {
+    val scope = rememberCoroutineScope()
     val viewModel = remember { PresentationViewModel(appSettings) }
 
     DisposableEffect(Unit) {
@@ -144,40 +145,32 @@ fun PresentationTab(
         ) {
             Button(
                 onClick = {
-                    SwingUtilities.invokeLater {
-                        val chooser = createFileChooser {
-                            fileSelectionMode = JFileChooser.FILES_ONLY
-                            dialogTitle = presentationFileDialogTitle
-                            isMultiSelectionEnabled = true
-
-                            val pptFilter = FileNameExtensionFilter(
-                                "PowerPoint Files (*.ppt, *.pptx)",
-                                "ppt", "pptx"
-                            )
-                            val keynoteFilter = FileNameExtensionFilter(
-                                "Keynote Files (*.key)",
-                                "key"
-                            )
-                            val pdfFilter = FileNameExtensionFilter(
-                                "PDF Files (*.pdf)",
-                                "pdf"
-                            )
-                            val allFilter = FileNameExtensionFilter(
-                                "All Presentation Files",
-                                "ppt", "pptx", "key", "pdf"
-                            )
-
-                            addChoosableFileFilter(allFilter)
-                            addChoosableFileFilter(pptFilter)
-                            addChoosableFileFilter(keynoteFilter)
-                            addChoosableFileFilter(pdfFilter)
-                            fileFilter = allFilter
-                        }
-                        val result = chooser.showOpenDialog(null)
-                        if (result == JFileChooser.APPROVE_OPTION) {
-                            chooser.selectedFiles.forEach { file ->
-                                viewModel.addPresentation(file)
-                            }
+                    scope.launch {
+                        val files = FileChooser.platformInstance.chooseMultiple(
+                            path = null,
+                            filters = listOf(
+                                FileNameExtensionFilter(
+                                    "All Presentation Files (*.ppt, *.pptx, *.key, *.pdf)",
+                                    "ppt", "pptx", "key", "pdf"
+                                ),
+                                FileNameExtensionFilter(
+                                    "PowerPoint Files (*.ppt, *.pptx)",
+                                    "ppt", "pptx"
+                                ),
+                                FileNameExtensionFilter(
+                                    "Keynote Files (*.key)",
+                                    "key"
+                                ),
+                                FileNameExtensionFilter(
+                                    "PDF Files (*.pdf)",
+                                    "pdf"
+                                )
+                            ),
+                            title = presentationFileDialogTitle,
+                            selectDirectory = false
+                        )
+                        for (file in files.orEmpty()) {
+                            viewModel.addPresentation(file.toFile())
                         }
                     }
                 }

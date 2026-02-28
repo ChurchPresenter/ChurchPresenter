@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -39,7 +38,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.alpha
 import churchpresenter.composeapp.generated.resources.bottom_left
 import churchpresenter.composeapp.generated.resources.bottom_right
 import churchpresenter.composeapp.generated.resources.browse_directory
@@ -48,7 +46,6 @@ import churchpresenter.composeapp.generated.resources.confirm_delete
 import churchpresenter.composeapp.generated.resources.confirm_delete_file
 import churchpresenter.composeapp.generated.resources.delete_error
 import churchpresenter.composeapp.generated.resources.every_page
-import churchpresenter.composeapp.generated.resources.files_in_directory
 import churchpresenter.composeapp.generated.resources.first_page
 import churchpresenter.composeapp.generated.resources.font_size
 import churchpresenter.composeapp.generated.resources.font_type
@@ -69,12 +66,10 @@ import churchpresenter.composeapp.generated.resources.please_select_file_first
 import churchpresenter.composeapp.generated.resources.position_on_screen
 import churchpresenter.composeapp.generated.resources.remove_song_file
 import churchpresenter.composeapp.generated.resources.show_number
-import churchpresenter.composeapp.generated.resources.show_on_first_page_only
 import churchpresenter.composeapp.generated.resources.show_title
 import churchpresenter.composeapp.generated.resources.song_files
 import churchpresenter.composeapp.generated.resources.song_number
 import churchpresenter.composeapp.generated.resources.storage_directory
-import churchpresenter.composeapp.generated.resources.text_alignment
 import churchpresenter.composeapp.generated.resources.title
 import churchpresenter.composeapp.generated.resources.top_left
 import churchpresenter.composeapp.generated.resources.top_right
@@ -90,6 +85,7 @@ import churchpresenter.composeapp.generated.resources.milliseconds_suffix
 import churchpresenter.composeapp.generated.resources.song_transition_settings
 import churchpresenter.composeapp.generated.resources.transition_duration
 import androidx.compose.material3.Slider
+import androidx.compose.runtime.rememberCoroutineScope
 import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
 import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
 import org.churchpresenter.app.churchpresenter.models.AnimationType
@@ -108,6 +104,7 @@ import org.churchpresenter.app.churchpresenter.viewmodel.FileManager
 import org.jetbrains.compose.resources.stringResource
 import java.awt.Window
 import javax.swing.SwingUtilities
+import kotlinx.coroutines.launch
 
 
 @Composable
@@ -186,6 +183,8 @@ private fun LeftColumn(
     val importErrorStr = stringResource(Res.string.import_error)
     val deleteErrorStr = stringResource(Res.string.delete_error)
 
+    val scope = rememberCoroutineScope()
+
     // Storage Directory Section
     SectionHeader(stringResource(Res.string.storage_directory))
 
@@ -211,11 +210,10 @@ private fun LeftColumn(
             text = stringResource(Res.string.browse_directory),
             backgroundColor = MaterialTheme.colorScheme.primaryContainer,
             onClick = {
-                SwingUtilities.invokeLater {
+                scope.launch {
                     val parentWindow = Window.getWindows().firstOrNull { it.isActive }
                     val selectedDir = fileManager.chooseDirectory(
-                        currentDirectory = settings.songSettings.storageDirectory,
-                        parentWindow = parentWindow
+                        currentDirectory = settings.songSettings.storageDirectory
                     )
                     selectedDir?.let { dir ->
                         onSettingsChange { s ->
@@ -297,7 +295,7 @@ private fun LeftColumn(
             text = stringResource(Res.string.import_song_file),
             backgroundColor = MaterialTheme.colorScheme.inverseSurface,
             onClick = {
-                SwingUtilities.invokeLater {
+                scope.launch {
                     val parentWindow = Window.getWindows().firstOrNull { it.isActive }
 
                     // Check if directory is selected
@@ -307,11 +305,11 @@ private fun LeftColumn(
                             title = noDirectorySelectedStr,
                             parentWindow = parentWindow
                         )
-                        return@invokeLater
+                        return@launch
                     }
 
                     // Choose files to import
-                    val selectedFiles = fileManager.chooseSongFiles(parentWindow)
+                    val selectedFiles = fileManager.chooseSongFiles()
                     selectedFiles?.let { files ->
                         // Import files
                         val errors = fileManager.importFiles(

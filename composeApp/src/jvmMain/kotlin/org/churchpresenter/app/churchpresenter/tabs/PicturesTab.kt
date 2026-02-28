@@ -3,7 +3,6 @@ package org.churchpresenter.app.churchpresenter.tabs
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -31,6 +30,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -59,7 +59,6 @@ import churchpresenter.composeapp.generated.resources.previous_image
 import churchpresenter.composeapp.generated.resources.select_folder
 import churchpresenter.composeapp.generated.resources.select_folder_to_view
 import churchpresenter.composeapp.generated.resources.select_image_folder_dialog
-import kotlinx.coroutines.delay
 import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.models.ScheduleItem
 import org.churchpresenter.app.churchpresenter.viewmodel.PicturesViewModel
@@ -67,6 +66,8 @@ import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import java.io.File
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @Composable
 fun PicturesTab(
@@ -76,6 +77,7 @@ fun PicturesTab(
     selectedPictureItem: ScheduleItem.PictureItem? = null,
     presenterManager: PresenterManager? = null
 ) {
+    val scope = rememberCoroutineScope()
     val viewModel = remember { PicturesViewModel(appSettings) }
     val folderDialogTitle = stringResource(Res.string.select_image_folder_dialog)
 
@@ -128,7 +130,11 @@ fun PicturesTab(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Button(onClick = { viewModel.openFolderChooser(folderDialogTitle) }) {
+            Button(onClick = {
+                scope.launch {
+                    viewModel.openFolderChooser(folderDialogTitle)
+                }
+            }) {
                 Text("📁 ${stringResource(Res.string.select_folder)}")
             }
 

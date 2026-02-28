@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -35,6 +34,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -42,7 +42,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.bottom
+import churchpresenter.composeapp.generated.resources.display_lower_third
 import churchpresenter.composeapp.generated.resources.ic_close
+import churchpresenter.composeapp.generated.resources.left
 import churchpresenter.composeapp.generated.resources.lottie_no_presets
 import churchpresenter.composeapp.generated.resources.lottie_pause_frame
 import churchpresenter.composeapp.generated.resources.lottie_pause_frame_none
@@ -55,35 +58,32 @@ import churchpresenter.composeapp.generated.resources.lottie_preset_no_file
 import churchpresenter.composeapp.generated.resources.lottie_preset_save
 import churchpresenter.composeapp.generated.resources.lottie_presets
 import churchpresenter.composeapp.generated.resources.lottie_presets_list
+import churchpresenter.composeapp.generated.resources.lottie_select_json_file
 import churchpresenter.composeapp.generated.resources.lottie_select_preset
 import churchpresenter.composeapp.generated.resources.replace
-import churchpresenter.composeapp.generated.resources.search
-import churchpresenter.composeapp.generated.resources.streaming_settings
-import churchpresenter.composeapp.generated.resources.top
-import churchpresenter.composeapp.generated.resources.left
 import churchpresenter.composeapp.generated.resources.right
-import churchpresenter.composeapp.generated.resources.bottom
-import churchpresenter.composeapp.generated.resources.display_lower_third
-import churchpresenter.composeapp.generated.resources.screen
+import churchpresenter.composeapp.generated.resources.search
+import churchpresenter.composeapp.generated.resources.top
 import churchpresenter.composeapp.generated.resources.window_position
 import io.github.alexzhirkevich.compottie.LottieCompositionSpec
 import io.github.alexzhirkevich.compottie.animateLottieCompositionAsState
 import io.github.alexzhirkevich.compottie.rememberLottieComposition
 import io.github.alexzhirkevich.compottie.rememberLottiePainter
-import kotlinx.coroutines.delay
 import org.churchpresenter.app.churchpresenter.composables.ImageIconButton
 import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
 import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.data.LottiePreset
 import org.churchpresenter.app.churchpresenter.data.LottieSearchReplacePair
+import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import org.churchpresenter.app.churchpresenter.utils.createFileChooser
 import java.io.File
 import java.util.UUID
-import javax.swing.JFileChooser
 import javax.swing.filechooser.FileNameExtensionFilter
-import javax.swing.SwingUtilities
+import kotlin.io.path.absolutePathString
+import kotlin.io.path.nameWithoutExtension
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @Composable
 fun LowerThirdSettingsTab(
@@ -91,6 +91,10 @@ fun LowerThirdSettingsTab(
     lottiePresetsDir: File,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit
 ) {
+    val scope = rememberCoroutineScope()
+    // cannot use stringResource without a composable scope, so define here for file chooser dialog
+    val lottieSelectJsonFileString = stringResource(Res.string.lottie_select_json_file)
+
     // --- Preset importer state ---
     var importSourcePath by remember { mutableStateOf("") }
     var presetLabel by remember { mutableStateOf("") }
@@ -190,17 +194,18 @@ fun LowerThirdSettingsTab(
                 )
                 Button(
                     onClick = {
-                        SwingUtilities.invokeLater {
-                            val chooser = createFileChooser {
-                                fileSelectionMode = JFileChooser.FILES_ONLY
-                                dialogTitle = "Select Lottie JSON File"
-                                fileFilter = FileNameExtensionFilter("Lottie JSON (*.json)", "json")
-                            }
-                            if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
-                                importSourcePath = chooser.selectedFile.absolutePath
+                        scope.launch {
+                            val file = FileChooser.platformInstance.chooseSingle(
+                                path = null,
+                                filters = listOf(FileNameExtensionFilter("Lottie JSON files (*.json)", "json")),
+                                title = lottieSelectJsonFileString,
+                                selectDirectory = false
+                            )
+                            if (file != null) {
+                                importSourcePath = file.absolutePathString()
                                 selectedPreset = null // switch preview to import form
                                 if (presetLabel.isBlank()) {
-                                    presetLabel = chooser.selectedFile.nameWithoutExtension
+                                    presetLabel = file.nameWithoutExtension
                                 }
                             }
                         }
