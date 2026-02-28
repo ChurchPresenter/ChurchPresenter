@@ -114,14 +114,12 @@ object Constants {
     // REST endpoints
     const val ENDPOINT_INFO      = "/api/info"
     const val ENDPOINT_SONGS     = "/api/songs"
-    const val ENDPOINT_SONGBOOKS = "/api/songbooks"
     const val ENDPOINT_SCHEDULE  = "/api/schedule"
     const val ENDPOINT_WS        = "/ws"
 
     // WebSocket event types (server → client)
-    const val WS_EVENT_SONGS_UPDATED     = "songs_updated"
-    const val WS_EVENT_SONGBOOKS_UPDATED = "songbooks_updated"
-    const val WS_EVENT_SCHEDULE_UPDATED  = "schedule_updated"
+    const val WS_EVENT_SONGS_UPDATED    = "songs_updated"
+    const val WS_EVENT_SCHEDULE_UPDATED = "schedule_updated"
 
     // WebSocket command types (client → server)
     const val WS_CMD_SELECT_SONG = "select_song"

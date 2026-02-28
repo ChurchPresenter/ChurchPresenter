@@ -223,7 +223,7 @@ data class AnnouncementsSettings(
 
 @Serializable
 data class ServerSettings(
-    val enabled: Boolean = true,
+    val enabled: Boolean = false,
     val port: Int = 8765,
     val apiKeyEnabled: Boolean = false,
     val apiKey: String = ""

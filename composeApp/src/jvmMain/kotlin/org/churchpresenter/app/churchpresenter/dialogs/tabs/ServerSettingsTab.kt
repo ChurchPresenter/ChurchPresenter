@@ -112,7 +112,7 @@ fun ServerSettingsTab(
                         onSettingsChange { s ->
                             s.copy(serverSettings = s.serverSettings.copy(enabled = enabled))
                         }
-                        if (enabled) companionServer.start() else companionServer.stop()
+                        if (enabled) companionServer.start(serverSettings.port) else companionServer.stop()
                     }
                 )
             }

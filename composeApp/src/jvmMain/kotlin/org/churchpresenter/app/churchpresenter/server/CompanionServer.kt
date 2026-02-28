@@ -42,27 +42,31 @@ import java.net.NetworkInterface
 data class SongDto(
     val number: String,
     val title: String,
-    val songbook: String,
     val tune: String = "",
     val author: String = ""
 )
 
+/** One songbook entry — contains its songs inline. */
 @Serializable
-data class SongListResponse(
-    val songs: List<SongDto>,
-    val total: Int,
-    val songbook: String = ""      // empty = all songbooks
+data class SongbookEntry(
+    @kotlinx.serialization.SerialName("book-name")   val bookName: String,
+    @kotlinx.serialization.SerialName("song-total")  val songTotal: Int,
+    val songs: List<SongDto>
 )
 
+/**
+ * Top-level response for /api/songs and the WS songs_updated event.
+ *
+ * {
+ *   "song-book": [ { "book-name": "…", "song-total": 100, "songs": […] } ],
+ *   "songBooks": 3,
+ *   "total": 6255
+ * }
+ */
 @Serializable
-data class SongbookDto(
-    val name: String,
-    val songCount: Int
-)
-
-@Serializable
-data class SongbooksResponse(
-    val songbooks: List<SongbookDto>,
+data class SongCatalogResponse(
+    @kotlinx.serialization.SerialName("song-book") val songBook: List<SongbookEntry>,
+    @kotlinx.serialization.SerialName("songBooks") val songBooks: Int,
     val total: Int
 )
 
@@ -108,9 +112,8 @@ class CompanionServer {
 
     // Current data — thread-safe StateFlows
     // All songs flat list
-    private val _songs = MutableStateFlow<List<SongDto>>(emptyList())
-    // Songs grouped by songbook name
-    private val _songsByBook = MutableStateFlow<Map<String, List<SongDto>>>(emptyMap())
+    // Current catalog — rebuilt whenever songs are updated
+    private val _catalog = MutableStateFlow(SongCatalogResponse(emptyList(), 0, 0))
     private val _schedule = MutableStateFlow<List<ScheduleSongDto>>(emptyList())
 
     // API key config (updated from settings without restart)
@@ -151,22 +154,13 @@ class CompanionServer {
         _apiKey.value = key
     }
 
-    /** Feed the full song list from SongsViewModel — groups by songbook automatically. */
+    /** Feed the full song list — builds grouped catalog and broadcasts to WS clients. */
     fun updateSongs(songs: List<SongItem>) {
-        val dtos = songs.map { it.toDto() }
-        _songs.value = dtos
-        _songsByBook.value = dtos.groupBy { it.songbook }
-
-        // Broadcast updated songbooks list to all WS clients
-        val songbooks = buildSongbooksResponse()
-        broadcast(WebSocketMessage(
-            type = Constants.WS_EVENT_SONGBOOKS_UPDATED,
-            payload = json.encodeToString(SongbooksResponse.serializer(), songbooks)
-        ))
-        // Also broadcast full songs list for clients that requested it
+        val catalog = buildCatalog(songs)
+        _catalog.value = catalog
         broadcast(WebSocketMessage(
             type = Constants.WS_EVENT_SONGS_UPDATED,
-            payload = json.encodeToString(SongListResponse.serializer(), SongListResponse(dtos, dtos.size))
+            payload = json.encodeToString(SongCatalogResponse.serializer(), catalog)
         ))
     }
 
@@ -174,14 +168,31 @@ class CompanionServer {
     fun updateSchedule(items: List<ScheduleItem>) {
         val dtos = items.filterIsInstance<ScheduleItem.SongItem>().map { it.toDto() }
         _schedule.value = dtos
-        broadcast(WebSocketMessage(type = Constants.WS_EVENT_SCHEDULE_UPDATED, payload = json.encodeToString(ScheduleResponse.serializer(), ScheduleResponse(dtos, dtos.size))))
+        broadcast(WebSocketMessage(
+            type = Constants.WS_EVENT_SCHEDULE_UPDATED,
+            payload = json.encodeToString(ScheduleResponse.serializer(), ScheduleResponse(dtos, dtos.size))
+        ))
     }
 
-    private fun buildSongbooksResponse(): SongbooksResponse {
-        val books = _songsByBook.value.map { (name, songs) ->
-            SongbookDto(name = name, songCount = songs.size)
-        }.sortedBy { it.name }
-        return SongbooksResponse(songbooks = books, total = books.size)
+    private fun buildCatalog(songs: List<SongItem>): SongCatalogResponse {
+        val entries = songs
+            .groupBy { it.songbook }
+            .entries
+            .sortedBy { it.key }
+            .map { (bookName, bookSongs) ->
+                SongbookEntry(
+                    bookName = bookName,
+                    songTotal = bookSongs.size,
+                    songs = bookSongs.map { s ->
+                        SongDto(number = s.number, title = s.title, tune = s.tune, author = s.author)
+                    }
+                )
+            }
+        return SongCatalogResponse(
+            songBook = entries,
+            songBooks = entries.size,
+            total = songs.size
+        )
     }
 
     fun start(port: Int = Constants.SERVER_DEFAULT_PORT) {
@@ -209,23 +220,22 @@ class CompanionServer {
                     call.respond(ServerInfoResponse(port = currentPort))
                 }
 
-                // GET /api/songbooks  → list of all songbooks with song counts
-                get(Constants.ENDPOINT_SONGBOOKS) {
-                    if (!checkApiKey(call)) return@get
-                    call.respond(buildSongbooksResponse())
-                }
-
-                // GET /api/songs              → all songs (all songbooks)
-                // GET /api/songs?songbook=X   → songs in a specific songbook
+                // GET /api/songs              → full catalog (all songbooks with songs nested)
+                // GET /api/songs?songbook=X   → catalog filtered to one songbook
                 get(Constants.ENDPOINT_SONGS) {
                     if (!checkApiKey(call)) return@get
-                    val songbookFilter = call.request.queryParameters[Constants.QUERY_PARAM_SONGBOOK]
-                    val songs = if (songbookFilter.isNullOrBlank()) {
-                        _songs.value
+                    val filter = call.request.queryParameters[Constants.QUERY_PARAM_SONGBOOK]
+                    val catalog = _catalog.value
+                    if (filter.isNullOrBlank()) {
+                        call.respond(catalog)
                     } else {
-                        _songsByBook.value[songbookFilter] ?: emptyList()
+                        val filtered = catalog.songBook.filter { it.bookName == filter }
+                        call.respond(SongCatalogResponse(
+                            songBook = filtered,
+                            songBooks = filtered.size,
+                            total = filtered.sumOf { it.songTotal }
+                        ))
                     }
-                    call.respond(SongListResponse(songs, songs.size, songbookFilter ?: ""))
                 }
 
                 get(Constants.ENDPOINT_SCHEDULE) {
@@ -236,7 +246,6 @@ class CompanionServer {
 
                 // ── WebSocket ──────────────────────────────────────────────
                 webSocket(Constants.ENDPOINT_WS) {
-                    // Check API key via query param or header
                     val queryKey = call.request.queryParameters[Constants.QUERY_PARAM_API_KEY]
                     val headerKey = call.request.headers[Constants.HEADER_API_KEY]
                     if (_apiKeyEnabled.value && _apiKey.value.isNotEmpty()) {
@@ -247,19 +256,19 @@ class CompanionServer {
                         }
                     }
 
-                    // Send current state to newly connected client
-                    val currentSongs = _songs.value
-                    val currentSchedule = _schedule.value
-                    // Send songbooks first so mobile can populate picker immediately
-                    send(Frame.Text(json.encodeToString(WebSocketMessage.serializer(), WebSocketMessage(Constants.WS_EVENT_SONGBOOKS_UPDATED, json.encodeToString(SongbooksResponse.serializer(), buildSongbooksResponse())))))
-                    send(Frame.Text(json.encodeToString(WebSocketMessage.serializer(), WebSocketMessage(Constants.WS_EVENT_SONGS_UPDATED, json.encodeToString(SongListResponse.serializer(), SongListResponse(currentSongs, currentSongs.size))))))
-                    send(Frame.Text(json.encodeToString(WebSocketMessage.serializer(), WebSocketMessage(Constants.WS_EVENT_SCHEDULE_UPDATED, json.encodeToString(ScheduleResponse.serializer(), ScheduleResponse(currentSchedule, currentSchedule.size))))))
+                    // Push current state to newly connected client
+                    val catalog = _catalog.value
+                    val schedule = _schedule.value
+                    send(Frame.Text(json.encodeToString(WebSocketMessage.serializer(),
+                        WebSocketMessage(Constants.WS_EVENT_SONGS_UPDATED,
+                            json.encodeToString(SongCatalogResponse.serializer(), catalog)))))
+                    send(Frame.Text(json.encodeToString(WebSocketMessage.serializer(),
+                        WebSocketMessage(Constants.WS_EVENT_SCHEDULE_UPDATED,
+                            json.encodeToString(ScheduleResponse.serializer(), ScheduleResponse(schedule, schedule.size))))))
 
                     // Forward broadcasts to this client
                     val broadcastJob = scope.launch {
-                        broadcastChannel.collect { message ->
-                            send(Frame.Text(message))
-                        }
+                        broadcastChannel.collect { message -> send(Frame.Text(message)) }
                     }
 
                     // Handle incoming messages from mobile
@@ -334,7 +343,6 @@ class CompanionServer {
 fun SongItem.toDto() = SongDto(
     number = number,
     title = title,
-    songbook = songbook,
     tune = tune,
     author = author
 )
