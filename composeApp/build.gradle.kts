@@ -106,7 +106,8 @@ compose.desktop {
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Exe, TargetFormat.Deb)
             packageName = "ChurchPresenter"
-            packageVersion = "1.0.0"
+            val buildNumber = System.getenv("GITHUB_RUN_NUMBER") ?: "0"
+            packageVersion = "1.0.$buildNumber"
             description = "Church Presenter - Presentation software for worship services"
             copyright = "© 2025 Church Presenter. All rights reserved."
             vendor = "Church Presenter"
