@@ -28,6 +28,7 @@ import androidx.compose.ui.input.key.type
 import org.churchpresenter.app.churchpresenter.components.Toolbar
 import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.dialogs.AddLabelDialog
+import org.churchpresenter.app.churchpresenter.dialogs.AddWebsiteDialog
 import org.churchpresenter.app.churchpresenter.models.LyricSection
 import org.churchpresenter.app.churchpresenter.models.ScheduleItem
 import org.churchpresenter.app.churchpresenter.models.SelectedVerse
@@ -93,6 +94,7 @@ fun MainDesktop(
     var selectedTabIndex by rememberSaveable { mutableStateOf(0) }
     var showAddLabelDialog by remember { mutableStateOf(false) }
     var editingLabelItem by remember { mutableStateOf<ScheduleItem.LabelItem?>(null) }
+    var showAddWebsiteDialog by remember { mutableStateOf(false) }
 
     val mediaViewModel = LocalMediaViewModel.current
     val presentingMode by presenterManager.presentingMode
@@ -165,6 +167,7 @@ fun MainDesktop(
                 onRemoveFromSchedule = { currentScheduleActions.removeSelected() },
                 onClearSchedule = { currentScheduleActions.clearSchedule() },
                 onAddLabel = { showAddLabelDialog = true },
+                onAddWebsite = { showAddWebsiteDialog = true },
                 onOpenSettings = onShowSettings
             )
 
@@ -232,6 +235,33 @@ fun MainDesktop(
                                 is ScheduleItem.LowerThirdItem -> {
                                     selectedTabIndex = Tabs.LOWER_THIRD.ordinal
                                     selectedLowerThirdItem = item
+                                }
+
+                                is ScheduleItem.AnnouncementItem -> {
+                                    selectedTabIndex = Tabs.ANNOUNCEMENTS.ordinal
+                                    onSettingsChange { settings ->
+                                        settings.copy(
+                                            announcementsSettings = settings.announcementsSettings.copy(
+                                                text             = item.text,
+                                                textColor        = item.textColor,
+                                                backgroundColor  = item.backgroundColor,
+                                                fontSize         = item.fontSize,
+                                                fontType         = item.fontType,
+                                                bold             = item.bold,
+                                                italic           = item.italic,
+                                                underline        = item.underline,
+                                                shadow           = item.shadow,
+                                                position         = item.position,
+                                                animationType    = item.animationType,
+                                                animationDuration = item.animationDuration
+                                            )
+                                        )
+                                    }
+                                }
+
+                                is ScheduleItem.WebsiteItem -> {
+                                    presenterManager.setWebsiteUrl(item.url)
+                                    presenterManager.setPresentingMode(Presenting.WEBSITE)
                                 }
                             }
                         },
@@ -324,7 +354,6 @@ fun MainDesktop(
                             Tabs.LOWER_THIRD -> LowerThirdTab(
                                 modifier = Modifier.fillMaxSize(),
                                 appSettings = appSettings,
-                                onSettingsChange = onSettingsChange,
                                 selectedLowerThirdItem = selectedLowerThirdItem,
                                 onAddToSchedule = { presetId, presetLabel, pauseAtFrame, pauseDurationMs ->
                                     scheduleActions.addLowerThird(presetId, presetLabel, pauseAtFrame, pauseDurationMs)
@@ -335,7 +364,28 @@ fun MainDesktop(
                                 }
                             )
 
-                            Tabs.ANNOUNCEMENTS -> AnnouncementsTab()
+                            Tabs.ANNOUNCEMENTS -> AnnouncementsTab(
+                                modifier = Modifier.fillMaxSize(),
+                                appSettings = appSettings,
+                                onSettingsChange = onSettingsChange,
+                                presenterManager = presenterManager,
+                                onAddToSchedule = { settings ->
+                                    currentScheduleActions.addAnnouncement(
+                                        settings.text,
+                                        settings.textColor,
+                                        settings.backgroundColor,
+                                        settings.fontSize,
+                                        settings.fontType,
+                                        settings.bold,
+                                        settings.italic,
+                                        settings.underline,
+                                        settings.shadow,
+                                        settings.position,
+                                        settings.animationType,
+                                        settings.animationDuration
+                                    )
+                                }
+                            )
                         }
                     }
                 }
@@ -362,6 +412,16 @@ fun MainDesktop(
             existingTextColor = editingLabelItem?.textColor ?: "#FFFFFF",
             existingBackgroundColor = editingLabelItem?.backgroundColor ?: "#2196F3",
             isEdit = editingLabelItem != null
+        )
+    }
+
+    if (showAddWebsiteDialog) {
+        AddWebsiteDialog(
+            onDismiss = { showAddWebsiteDialog = false },
+            onConfirm = { url, title ->
+                currentScheduleActions.addWebsite(url, title)
+                showAddWebsiteDialog = false
+            }
         )
     }
 }

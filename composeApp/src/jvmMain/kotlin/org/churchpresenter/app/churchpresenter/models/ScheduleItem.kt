@@ -72,5 +72,30 @@ sealed class ScheduleItem {
         val pauseDurationMs: Long,
         override val displayText: String = "▼ $presetLabel"
     ) : ScheduleItem()
+
+    @Serializable
+    data class AnnouncementItem(        override val id: String,
+        val text: String,
+        val textColor: String = "#FFFFFF",
+        val backgroundColor: String = "#000000",
+        val fontSize: Int = 48,
+        val fontType: String = "Arial",
+        val bold: Boolean = false,
+        val italic: Boolean = false,
+        val underline: Boolean = false,
+        val shadow: Boolean = false,
+        val position: String = "center",
+        val animationType: String = "SLIDE_FROM_BOTTOM",
+        val animationDuration: Int = 500,
+        override val displayText: String = "${text.take(50)}${if (text.length > 50) "…" else ""}"
+    ) : ScheduleItem()
+
+    @Serializable
+    data class WebsiteItem(
+        override val id: String,
+        val url: String,
+        val title: String = url,
+        override val displayText: String = "${title.take(60)}${if (title.length > 60) "…" else ""}"
+    ) : ScheduleItem()
 }
 

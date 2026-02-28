@@ -7,4 +7,3 @@ enum class AnimationType {
     SLIDE_RIGHT,
     NONE
 }
-

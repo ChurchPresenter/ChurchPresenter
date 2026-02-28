@@ -26,6 +26,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -55,8 +56,6 @@ import churchpresenter.composeapp.generated.resources.horizontal_alignment
 import churchpresenter.composeapp.generated.resources.import_error
 import churchpresenter.composeapp.generated.resources.import_song_file
 import churchpresenter.composeapp.generated.resources.lyrics
-import churchpresenter.composeapp.generated.resources.max
-import churchpresenter.composeapp.generated.resources.min
 import churchpresenter.composeapp.generated.resources.no_directory_selected
 import churchpresenter.composeapp.generated.resources.no_file_selected_title
 import churchpresenter.composeapp.generated.resources.no_song_files
@@ -101,6 +100,7 @@ import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.Utils
 import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDefault
 import org.churchpresenter.app.churchpresenter.viewmodel.FileManager
+import org.churchpresenter.app.churchpresenter.viewmodel.SongSettingsViewModel
 import org.jetbrains.compose.resources.stringResource
 import java.awt.Window
 import javax.swing.SwingUtilities
@@ -113,7 +113,23 @@ fun SongSettingsTab(
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit
 ) {
     val availableFonts = remember { Utils.getAvailableSystemFonts() }
-    val fileManager = remember { FileManager() }
+    val viewModel = remember {
+        SongSettingsViewModel().also { vm ->
+            val dir = settings.songSettings.storageDirectory
+            if (dir.isNotEmpty()) vm.setDirectory(dir)
+        }
+    }
+
+    // Keep viewModel directory in sync if settings change after initial load
+    LaunchedEffect(settings.songSettings.storageDirectory) {
+        val dir = settings.songSettings.storageDirectory
+        if (viewModel.storageDirectory != dir) viewModel.setDirectory(dir)
+    }
+
+    val songFilesInDirectory = remember(viewModel.storageDirectory, viewModel.refreshTrigger) {
+        viewModel.filesInDirectory()
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -136,7 +152,16 @@ fun SongSettingsTab(
                     .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f), RoundedCornerShape(4.dp))
                     .padding(start = 15.dp, end = 15.dp, top = 8.dp, bottom = 15.dp)
             ) {
-                LeftColumn(settings, onSettingsChange, availableFonts, fileManager)
+                LeftColumn(
+                    settings = settings,
+                    onSettingsChange = onSettingsChange,
+                    availableFonts = availableFonts,
+                    songFilesInDirectory = songFilesInDirectory,
+                    selectedFile = viewModel.selectedFile,
+                    onFileSelected = { viewModel.selectFile(it) },
+                    onRefresh = { viewModel.refresh() },
+                    fileManager = viewModel.fileManager
+                )
             }
 
             // Right Column
@@ -160,13 +185,12 @@ private fun LeftColumn(
     settings: AppSettings,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
     availableFonts: List<String>,
+    songFilesInDirectory: List<String>,
+    selectedFile: String?,
+    onFileSelected: (String?) -> Unit,
+    onRefresh: () -> Unit,
     fileManager: FileManager
 ) {
-    // State to trigger refresh of file list
-    var refreshTrigger by remember { mutableStateOf(0) }
-
-    // State for selected file
-    var selectedFile by remember { mutableStateOf<String?>(null) }
 
     // Store string resources to avoid calling stringResource in callbacks
     val noneStr = stringResource(Res.string.none)
@@ -232,13 +256,6 @@ private fun LeftColumn(
 
     Spacer(modifier = Modifier.height(8.dp))
 
-    // Use FileManager to get song files
-    val songFilesInDirectory = remember(settings.songSettings.storageDirectory, refreshTrigger) {
-        fileManager.getSongFilesInDirectory(settings.songSettings.storageDirectory)
-    }
-
-    Spacer(modifier = Modifier.height(8.dp))
-
 
     Box(
         modifier = Modifier
@@ -276,7 +293,7 @@ private fun LeftColumn(
                                 if (isSelected) MaterialTheme.colorScheme.primaryContainer
                                 else Color.Transparent
                             )
-                            .clickable { selectedFile = fileName }
+                            .clickable { onFileSelected(fileName) }
                             .padding(vertical = 4.dp, horizontal = 8.dp),
                         color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer
                                 else MaterialTheme.colorScheme.onSurface
@@ -327,7 +344,7 @@ private fun LeftColumn(
                         }
 
                         // Trigger refresh
-                        refreshTrigger++
+                        onRefresh()
                     }
                 }
             }
@@ -361,7 +378,7 @@ private fun LeftColumn(
                         // Delete file
                         val error = fileManager.deleteFile(
                             directory = settings.songSettings.storageDirectory,
-                            fileName = selectedFile!!
+                            fileName = selectedFile
                         )
 
                         if (error != null) {
@@ -372,8 +389,8 @@ private fun LeftColumn(
                             )
                         } else {
                             // Success - clear selection and refresh
-                            selectedFile = null
-                            refreshTrigger++
+                            onFileSelected(null)
+                            onRefresh()
                         }
                     }
                 }
@@ -888,62 +905,17 @@ private fun ModernButton(
     backgroundColor: Color,
     onClick: () -> Unit
 ) {
-    var isHovered by remember { mutableStateOf(false) }
-
     Button(
         onClick = onClick,
         colors = ButtonDefaults.buttonColors(
-            containerColor = if (isHovered) backgroundColor.copy(alpha = 0.8f) else backgroundColor,
-            contentColor = Color.White
+            containerColor = backgroundColor,
+            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
         ),
         shape = RoundedCornerShape(4.dp),
-        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-        modifier = Modifier
+        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
     ) {
-        Text(text = text, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+        Text(text = text, style = MaterialTheme.typography.labelMedium)
     }
 }
 
 
-@Composable
-private fun MinMaxRow(
-    minValue: Int,
-    maxValue: Int,
-    onMinChange: (Int) -> Unit,
-    onMaxChange: (Int) -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 5.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = stringResource(Res.string.min),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.width(120.dp)
-        )
-
-        NumberSettingsTextField(
-            initialText = minValue,
-            onValueChange = onMinChange,
-            range = 8..72
-        )
-
-        Spacer(modifier = Modifier.width(5.dp))
-
-        Text(
-            text = stringResource(Res.string.max),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurface
-        )
-
-        NumberSettingsTextField(
-            initialText = maxValue,
-            onValueChange = onMaxChange,
-            range = 8..72
-        )
-    }
-}

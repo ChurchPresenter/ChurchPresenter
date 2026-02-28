@@ -12,9 +12,11 @@ data class BackgroundConfig(
 
 @Serializable
 data class BackgroundSettings(
-    val defaultBackgroundColor: String = "#000000", // Black - used when backgroundType is "Default"
+    val defaultBackgroundColor: String = "#000000",
     val bibleBackground: BackgroundConfig = BackgroundConfig(),
-    val songBackground: BackgroundConfig = BackgroundConfig()
+    val bibleLowerThirdBackground: BackgroundConfig = BackgroundConfig(),
+    val songBackground: BackgroundConfig = BackgroundConfig(),
+    val songLowerThirdBackground: BackgroundConfig = BackgroundConfig()
 )
 
 @Serializable
@@ -203,6 +205,23 @@ data class StreamingSettings(
 )
 
 @Serializable
+data class AnnouncementsSettings(
+    val text: String = "",
+    val textColor: String = "#FFFFFF",
+    val backgroundColor: String = "#000000",
+    val fontSize: Int = 48,
+    val fontType: String = "Arial",
+    val bold: Boolean = false,
+    val italic: Boolean = false,
+    val underline: Boolean = false,
+    val shadow: Boolean = false,
+    val horizontalAlignment: String = Constants.CENTER,
+    val position: String = Constants.CENTER,
+    val animationType: String = Constants.ANIMATION_SLIDE_FROM_BOTTOM,
+    val animationDuration: Int = 500
+)
+
+@Serializable
 data class AppSettings(
     val songSettings: SongSettings = SongSettings(),
     val bibleSettings: BibleSettings = BibleSettings(),
@@ -210,6 +229,7 @@ data class AppSettings(
     val projectionSettings: ProjectionSettings = ProjectionSettings(),
     val pictureSettings: PictureSettings = PictureSettings(),
     val streamingSettings: StreamingSettings = StreamingSettings(),
+    val announcementsSettings: AnnouncementsSettings = AnnouncementsSettings(),
     val theme: String = Constants.LIGHT,
     val language: String = "en",
     val licenseAccepted: Boolean = false

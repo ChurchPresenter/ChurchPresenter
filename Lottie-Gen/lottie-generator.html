@@ -69,6 +69,9 @@ input[type=file]{font-size:12px;color:#aaa}
       <div><label>Width</label><input type="number" id="canvasW" value="1920" min="100" max="7680"></div>
       <div><label>Height</label><input type="number" id="canvasH" value="1080" min="100" max="4320"></div>
     </div>
+    <div class="row">
+      <div><label>Scale</label><input type="range" id="scaleFactor" min="0.5" max="3" step="0.1" value="1"><span class="range-val" id="scaleFactorVal">1</span></div>
+    </div>
   </div>
 
   <h2>Style &amp; Layout</h2>
@@ -81,6 +84,11 @@ input[type=file]{font-size:12px;color:#aaa}
         <option value="3">Style 3 — Circular</option>
         <option value="4">Style 4 — Banner</option>
         <option value="5">Style 5 — Gradient Bar</option>
+        <option value="6">Style 6 — Line Split</option>
+        <option value="7">Style 7 — Random Fade</option>
+        <option value="8">Style 8 — Diagonal</option>
+        <option value="9">Style 9 — Diagonal Wipe</option>
+        <option value="10">Style 10 — Double Line</option>
       </select>
     </div>
     <div>
@@ -308,6 +316,7 @@ function getConfig() {
   return {
     canvasW: num('canvasW'),
     canvasH: num('canvasH'),
+    scaleFactor: num('scaleFactor'),
     style: val('styleType'),
     align: val('alignment'),
     nameText: val('nameText'),
@@ -424,7 +433,7 @@ document.getElementById('logoFile').addEventListener('change', function(e) {
 // ============================================================
 let presets = [];
 const RANGE_IDS = ['corners','borderThickness','logoSize','marginH','marginV','lineSpacing',
-  'nameColorAlpha','infoColorAlpha','accentColorAlpha','bgColorAlpha','borderColorAlpha'];
+  'nameColorAlpha','infoColorAlpha','accentColorAlpha','bgColorAlpha','borderColorAlpha','scaleFactor'];
 const CONFIG_KEY_MAP = { style: 'styleType', align: 'alignment' };
 const LOGO_KEYS = ['logoData', 'logoW', 'logoH'];
 
@@ -511,7 +520,7 @@ function renderLibrary() {
     container.innerHTML = '<div class="library-empty">No presets saved yet.</div>';
     return;
   }
-  const styleNames = { '1': 'Style 1', '2': 'Style 2', '3': 'Style 3', '4': 'Style 4', '5': 'Style 5' };
+  const styleNames = { '1': 'Style 1', '2': 'Style 2', '3': 'Style 3', '4': 'Style 4', '5': 'Style 5', '6': 'Style 6', '7': 'Style 7', '8': 'Style 8', '9': 'Style 9', '10': 'Style 10' };
   container.innerHTML = presets.map((p, i) => {
     const s = styleNames[p.config.style] || p.config.style;
     const a = (p.config.align || '').charAt(0).toUpperCase() + (p.config.align || '').slice(1);
@@ -631,7 +640,8 @@ function renderColorLibrary() {
 
 // Range slider value display
 ['corners','borderThickness','logoSize','marginH','marginV','lineSpacing',
- 'nameColorAlpha','infoColorAlpha','accentColorAlpha','bgColorAlpha','borderColorAlpha'].forEach(id => {
+ 'nameColorAlpha','infoColorAlpha','accentColorAlpha','bgColorAlpha','borderColorAlpha',
+ 'scaleFactor'].forEach(id => {
   const el = document.getElementById(id);
   const display = document.getElementById(id + 'Val');
   el.addEventListener('input', () => { display.textContent = el.value; });
@@ -874,6 +884,19 @@ function makeEllipse(w, h, position) {
   };
 }
 
+function makePath(vertices, closed) {
+  return {
+    ty: 'sh',
+    d: 1,
+    ks: { a: 0, k: {
+      v: vertices,
+      i: vertices.map(() => [0, 0]),
+      o: vertices.map(() => [0, 0]),
+      c: closed !== false
+    }}
+  };
+}
+
 function makeFill(color, opacity) {
   return {
     ty: 'fl',
@@ -978,6 +1001,95 @@ function makeTextData(text, fontFamily, fontSizePx, fontWeight, color, transform
     p: {},
     m: { g: 1, a: { a: 0, k: [0, 0] } },
     a: []
+  };
+}
+
+// Build a text animator for per-character reveal (letters pop from a position offset)
+// Characters start displaced + invisible, then appear sequentially as range selector sweeps.
+function makeTextRevealAnimator(startPct, endPct, posOffset, inFrames, holdFrames, outFrames) {
+  const totalOut = inFrames + holdFrames;
+  const e = EASING;
+
+  // Animate s (start) from 0 → 100. Characters INSIDE [s,e] get the animator (hidden+displaced).
+  // As s sweeps right, characters exit the selection left-to-right and become visible.
+  const inKFs = [
+    { pct: 0, value: [0] },
+    { pct: startPct, value: [0] },
+    { pct: endPct, value: [100] }
+  ];
+
+  // Build full keyframe sequence (in + hold + out with reverse)
+  const kfs = [];
+  for (const kf of inKFs) {
+    kfs.push(LottieBuilder.kf(pctToFrame(kf.pct, inFrames), kf.value, e));
+  }
+  // Hold at final value
+  kfs.push(LottieBuilder.kf(totalOut, [100], e));
+  // Out: reverse (100 → 0, characters re-enter selection and disappear)
+  const reversedIn = [...inKFs].reverse();
+  for (let i = 1; i < reversedIn.length; i++) {
+    const pctFromEnd = 100 - reversedIn[i].pct;
+    const frame = totalOut + pctToFrame(pctFromEnd, outFrames);
+    const isLast = i === reversedIn.length - 1;
+    kfs.push(isLast ? LottieBuilder.kf(frame, reversedIn[i].value) : LottieBuilder.kf(frame, reversedIn[i].value, e));
+  }
+
+  return {
+    nm: 'Reveal',
+    s: {
+      t: 0, b: 1, sh: 1, r: 1,
+      o: { a: 0, k: 0 },
+      s: { a: 1, k: kfs },
+      e: { a: 0, k: 100 },
+      ne: { a: 0, k: 0 },
+      xe: { a: 0, k: 0 },
+      a: { a: 0, k: 100 }
+    },
+    a: {
+      o: { a: 0, k: 0 },
+      p: { a: 0, k: [0, posOffset, 0] }
+    }
+  };
+}
+
+// Build a text animator for random per-character fade-in (opacity only, no position offset).
+function makeRandomFadeAnimator(startPct, endPct, inFrames, holdFrames, outFrames) {
+  const totalOut = inFrames + holdFrames;
+  const e = EASING;
+
+  const inKFs = [
+    { pct: 0, value: [0] },
+    { pct: startPct, value: [0] },
+    { pct: endPct, value: [100] }
+  ];
+
+  const kfs = [];
+  for (const kf of inKFs) {
+    kfs.push(LottieBuilder.kf(pctToFrame(kf.pct, inFrames), kf.value, e));
+  }
+  kfs.push(LottieBuilder.kf(totalOut, [100], e));
+  const reversedIn = [...inKFs].reverse();
+  for (let i = 1; i < reversedIn.length; i++) {
+    const pctFromEnd = 100 - reversedIn[i].pct;
+    const frame = totalOut + pctToFrame(pctFromEnd, outFrames);
+    const isLast = i === reversedIn.length - 1;
+    kfs.push(isLast ? LottieBuilder.kf(frame, reversedIn[i].value) : LottieBuilder.kf(frame, reversedIn[i].value, e));
+  }
+
+  return {
+    nm: 'Random Fade',
+    s: {
+      t: 0, b: 1, sh: 1, rn: 1, r: 1,
+      o: { a: 0, k: 0 },
+      s: { a: 1, k: kfs },
+      e: { a: 0, k: 100 },
+      ne: { a: 0, k: 0 },
+      xe: { a: 0, k: 0 },
+      a: { a: 0, k: 100 }
+    },
+    a: {
+      o: { a: 0, k: 0 }
+    }
   };
 }
 
@@ -1455,7 +1567,7 @@ function generateStyle2(builder, cfg) {
   }
 
   // --- Name background rect (added after text so it renders behind) ---
-  if (!hideName) {
+  if (!hideName && bgEnabled) {
   const nameBgSizeKFs = buildKeyframes([
     { pct: 0, value: [nameBoxW, 0] },
     { pct: namePctStart, value: [nameBoxW, 0] },
@@ -1478,7 +1590,7 @@ function generateStyle2(builder, cfg) {
   }
 
   // --- Info background rect (added last so it renders at the bottom) ---
-  if (!hideInfo) {
+  if (!hideInfo && bgEnabled) {
   const infoBgSizeKFs = buildKeyframes([
     { pct: 0, value: [infoBoxW, 0] },
     { pct: 50, value: [infoBoxW, 0] },
@@ -1781,8 +1893,9 @@ function generateStyle4(builder, cfg) {
   const nameBoxW = nameM.width + paddingX * 2;
   const nameBoxH = nameSizePx + paddingY * 2;
   const accentW = nameBoxH * 0.55;
-  const accentH = nameBoxH;
   const topLineH = Math.max(2, baseSize * 0.1);
+  const accentH = nameBoxH + (borderPx > 0 ? borderPx * 1.5 : 0);
+  const accentWFinal = accentW + (borderPx > 0 ? borderPx : 0);
   const topLineW = nameBoxW + accentW;
   const infoBarW = topLineW; // spans full width like top line
   const infoBarH = infoSizePx + paddingY * 1.5;
@@ -1911,41 +2024,45 @@ function generateStyle4(builder, cfg) {
   }
 
   // --- Top line ---
-  const topLineSizeKFs = buildKeyframes([
-    { pct: 0, value: [0, topLineH] },
-    { pct: 30, value: [0, topLineH] },
-    { pct: 70, value: [topLineW, topLineH] }
-  ], inF, holdF, outF, EASING);
+  if (borderPx > 0) {
+    const topLineSizeKFs = buildKeyframes([
+      { pct: 0, value: [0, topLineH] },
+      { pct: 30, value: [0, topLineH] },
+      { pct: 70, value: [topLineW, topLineH] }
+    ], inF, holdF, outF, EASING);
 
-  builder.addShapeLayer('Top Line', [makeGroup([
-    makeAnimatedRect(topLineSizeKFs, 0),
-    makeFill(accentLottie, accentColorAlpha)
-  ])], {
-    o: LottieBuilder.staticProp(100), r: LottieBuilder.staticProp(0),
-    p: LottieBuilder.staticProp([topLineEdgeX, topLineY, 0]),
-    a: LottieBuilder.staticProp([topLineAnchorX, 0, 0]),
-    s: LottieBuilder.staticProp([100, 100, 100])
-  });
+    builder.addShapeLayer('Top Line', [makeGroup([
+      makeAnimatedRect(topLineSizeKFs, 0),
+      makeFill(accentLottie, accentColorAlpha)
+    ])], {
+      o: LottieBuilder.staticProp(100), r: LottieBuilder.staticProp(0),
+      p: LottieBuilder.staticProp([topLineEdgeX, topLineY, 0]),
+      a: LottieBuilder.staticProp([topLineAnchorX, 0, 0]),
+      s: LottieBuilder.staticProp([100, 100, 100])
+    });
+  }
 
   // --- Accent block ---
-  const accentScaleKFs = buildKeyframes([
-    { pct: 0, value: [0, 0, 100] },
-    { pct: 20, value: [100, 100, 100] },
-    { pct: 100, value: [100, 100, 100] }
-  ], inF, holdF, outF, EASING);
+  if (bgEnabled) {
+    const accentScaleKFs = buildKeyframes([
+      { pct: 0, value: [0, 0, 100] },
+      { pct: 20, value: [100, 100, 100] },
+      { pct: 100, value: [100, 100, 100] }
+    ], inF, holdF, outF, EASING);
 
-  builder.addShapeLayer('Accent Block', [makeGroup([
-    makeRect(accentW, accentH, 0),
-    makeFill(accentLottie, accentColorAlpha)
-  ])], {
-    o: LottieBuilder.staticProp(100), r: LottieBuilder.staticProp(0),
-    p: LottieBuilder.staticProp([accentCX, nameBgCY, 0]),
-    a: LottieBuilder.staticProp([0, 0, 0]),
-    s: LottieBuilder.animatedProp(accentScaleKFs)
-  });
+    builder.addShapeLayer('Accent Block', [makeGroup([
+      makeRect(accentWFinal, accentH, 0),
+      makeFill(accentLottie, accentColorAlpha)
+    ])], {
+      o: LottieBuilder.staticProp(100), r: LottieBuilder.staticProp(0),
+      p: LottieBuilder.staticProp([accentCX, nameBgCY + (borderPx > 0 ? borderPx * 0.25 : 0), 0]),
+      a: LottieBuilder.staticProp([0, 0, 0]),
+      s: LottieBuilder.animatedProp(accentScaleKFs)
+    });
+  }
 
   // --- Name BG (behind text) ---
-  if (!hideName) {
+  if (!hideName && bgEnabled) {
     const nameBgExpandKFs = buildKeyframes([
       { pct: 0, value: [0, nameBoxH] },
       { pct: 15, value: [0, nameBoxH] },
@@ -1972,7 +2089,7 @@ function generateStyle4(builder, cfg) {
   }
 
   // --- Info bar BG (behind info text) ---
-  if (!hideInfo) {
+  if (!hideInfo && bgEnabled) {
     const infoBgExpandKFs = buildKeyframes([
       { pct: 0, value: [0, infoBarH] },
       { pct: 40, value: [0, infoBarH] },
@@ -2092,7 +2209,7 @@ function generateStyle5(builder, cfg) {
   const nameTextY = nameBgCY + nameSizePx * 0.35;
   const infoTextY = infoBarCY + infoSizePx * 0.35;
 
-  const slideDistance = canvasW * 0.6;
+  const slideDistance = canvasW;
 
   // Gradient only fades in the gradientExtra zone; text area stays solid.
   // For center: 4-stop gradient with fade zones on both edges.
@@ -2296,7 +2413,7 @@ function generateStyle5(builder, cfg) {
   }
 
   // --- Name gradient bar background ---
-  if (!hideName) {
+  if (!hideName && bgEnabled) {
     const nameBarItems = [
       makeRect(nameBarW, nameBarH, cornerPx),
       makeBarGradient(bgLottie, 100, nameBarW)
@@ -2337,7 +2454,7 @@ function generateStyle5(builder, cfg) {
   }
 
   // --- Info gradient bar background ---
-  if (!hideInfo) {
+  if (!hideInfo && bgEnabled) {
     const infoBarItems = [
       makeRect(infoBarW, infoBarH, cornerPx),
       makeBarGradient(accentLottie, 100, infoBarW)
@@ -2378,6 +2495,1028 @@ function generateStyle5(builder, cfg) {
   }
 }
 
+function generateStyle6(builder, cfg) {
+  const { canvasW, canvasH, align, nameText, infoText, fontFamily, baseSize,
+    nameSize, infoSize, nameWeight, infoWeight, nameTransform, infoTransform,
+    nameColor, infoColor, borderColor, logoEnabled, logoSize, logoData, logoW, logoH,
+    marginH, marginV, lineSpacing, hideName, hideInfo,
+    nameColorAlpha, infoColorAlpha, borderColorAlpha, borderThickness } = cfg;
+
+  const inF = builder.inFrames;
+  const holdF = builder.holdFrames;
+  const outF = builder.outFrames;
+
+  const nameSizePx = emToPx(nameSize, baseSize);
+  const infoSizePx = emToPx(infoSize, baseSize);
+  const nameM = measureText(nameText, fontFamily, nameSizePx, nameWeight, nameTransform);
+  const infoM = measureText(infoText, fontFamily, infoSizePx, infoWeight, infoTransform);
+
+  const paddingX = emToPx(0.6, baseSize);
+  const lineGap = emToPx(0.6, baseSize);
+  const marginHPx = remToPx(marginH, baseSize);
+  const marginVPx = remToPx(marginV, baseSize);
+  const linePx = Math.max(2, borderThickness * baseSize * 0.1);
+
+  const borderLottie = hexToLottie(borderColor);
+  const nameCLottie = hexToLottie(nameColor);
+  const infoCLottie = hexToLottie(infoColor);
+
+  const isRight = align === 'right';
+  const isCenter = align === 'center';
+
+  // Logo space
+  const logoSizePx = emToPx(logoSize, baseSize);
+  const logoMargin = emToPx(1.0, baseSize);
+  const hasLogo = logoEnabled && logoData;
+  const logoSpace = hasLogo ? logoSizePx + logoMargin : 0;
+
+  // Line width = max of name/info text widths + padding
+  const nameContentW = hideName ? 0 : nameM.width + paddingX * 2;
+  const infoContentW = hideInfo ? 0 : infoM.width + paddingX * 2;
+  const lineW = Math.max(nameContentW, infoContentW, emToPx(4, baseSize));
+
+  // Vertical positioning: line is the anchor, name above, info below
+  const nameBlockH = hideName ? 0 : nameSizePx;
+  const infoBlockH = hideInfo ? 0 : infoSizePx;
+  const gapAbove = hideName ? 0 : lineGap;
+  const gapBelow = hideInfo ? 0 : lineGap;
+  const totalH = nameBlockH + gapAbove + linePx + gapBelow + infoBlockH;
+  const blockTopY = canvasH - marginVPx - totalH;
+  const lineCY = blockTopY + nameBlockH + gapAbove + linePx / 2;
+
+  // Horizontal positioning — text edges align with line edges
+  let lineCX, nameTextX, infoTextX;
+  let justify;
+
+  if (isCenter) {
+    lineCX = canvasW / 2;
+    nameTextX = canvasW / 2;
+    infoTextX = canvasW / 2;
+    justify = 2; // center
+  } else if (isRight) {
+    const lineRight = canvasW - marginHPx - logoSpace;
+    lineCX = lineRight; // anchor pins right edge here
+    nameTextX = lineRight;
+    infoTextX = lineRight;
+    justify = 1; // right
+  } else {
+    // left
+    const lineLeft = marginHPx + logoSpace;
+    lineCX = lineLeft; // anchor pins left edge here
+    nameTextX = lineLeft;
+    infoTextX = lineLeft;
+    justify = 0; // left
+  }
+
+  const nameTextY = lineCY - lineGap - linePx / 2;
+  const infoTextY = lineCY + lineGap + linePx / 2 + infoSizePx * 0.425;
+
+  // ============= LAYERS (top to bottom render order) =============
+
+  // --- Name text (letters pop up from line, one at a time) ---
+  if (!hideName) {
+    const nameTextData = makeTextData(nameText, fontFamily, nameSizePx, parseInt(nameWeight), nameCLottie, nameTransform, justify);
+    nameTextData.a.push(makeTextRevealAnimator(20, 60, nameSizePx * 0.8, inF, holdF, outF));
+
+    builder.addFont(fontFamily, parseInt(nameWeight));
+    builder.addTextLayer('Name', nameTextData, {
+      o: LottieBuilder.staticProp(nameColorAlpha), r: LottieBuilder.staticProp(0),
+      p: LottieBuilder.staticProp([nameTextX, nameTextY, 0]),
+      a: LottieBuilder.staticProp([0, 0, 0]), s: LottieBuilder.staticProp([100, 100, 100])
+    });
+  }
+
+  // --- Info text (letters pop down from line, one at a time) ---
+  if (!hideInfo) {
+    const infoTextData = makeTextData(infoText, fontFamily, infoSizePx, parseInt(infoWeight), infoCLottie, infoTransform, justify);
+    infoTextData.a.push(makeTextRevealAnimator(35, 75, -infoSizePx * 0.8, inF, holdF, outF));
+
+    builder.addFont(fontFamily, parseInt(infoWeight));
+    builder.addTextLayer('Info', infoTextData, {
+      o: LottieBuilder.staticProp(infoColorAlpha), r: LottieBuilder.staticProp(0),
+      p: LottieBuilder.staticProp([infoTextX, infoTextY, 0]),
+      a: LottieBuilder.staticProp([0, 0, 0]), s: LottieBuilder.staticProp([100, 100, 100])
+    });
+  }
+
+  // --- Logo (optional) ---
+  if (hasLogo) {
+    const logoAspect = logoW && logoH ? logoW / logoH : 1;
+    const lH = logoSizePx;
+    const lW = lH * logoAspect;
+    const _logoScale = (lH / logoH) * 100;
+
+    let logoCX;
+    if (isCenter) {
+      logoCX = canvasW / 2 - lineW / 2 - logoMargin - logoSizePx / 2;
+    } else if (isRight) {
+      logoCX = canvasW - marginHPx - logoSizePx / 2;
+    } else {
+      logoCX = marginHPx + logoSizePx / 2;
+    }
+    const logoCY = lineCY;
+
+    const logoScaleKFs = buildKeyframes([
+      { pct: 0, value: [0, 0, 100] },
+      { pct: 25, value: [_logoScale, _logoScale, 100] },
+      { pct: 100, value: [_logoScale, _logoScale, 100] }
+    ], inF, holdF, outF, EASING);
+
+    builder.addImageAsset('logo', logoData, logoW, logoH);
+    builder.addImageLayer('Logo', 'logo', {
+      o: LottieBuilder.staticProp(100), r: LottieBuilder.staticProp(0),
+      p: LottieBuilder.staticProp([logoCX, logoCY, 0]),
+      a: LottieBuilder.staticProp([logoW / 2, logoH / 2, 0]),
+      s: LottieBuilder.animatedProp(logoScaleKFs)
+    });
+  }
+
+  // --- Horizontal line (expands from alignment edge or center) ---
+  let lineAnchorX;
+  if (isCenter) {
+    lineAnchorX = 0; // expand from center
+  } else if (isRight) {
+    lineAnchorX = lineW / 2; // expand from right edge
+  } else {
+    lineAnchorX = -lineW / 2; // expand from left edge
+  }
+
+  const lineSizeKFs = buildKeyframes([
+    { pct: 0, value: [0, linePx] },
+    { pct: 0, value: [0, linePx] },
+    { pct: 40, value: [lineW, linePx] }
+  ], inF, holdF, outF, EASING);
+
+  builder.addShapeLayer('Line', [makeGroup([
+    makeAnimatedRect(lineSizeKFs, 0),
+    makeFill(borderLottie, borderColorAlpha)
+  ])], {
+    o: LottieBuilder.staticProp(100), r: LottieBuilder.staticProp(0),
+    p: LottieBuilder.staticProp([lineCX, lineCY, 0]),
+    a: LottieBuilder.staticProp([lineAnchorX, 0, 0]),
+    s: LottieBuilder.staticProp([100, 100, 100])
+  });
+}
+
+function generateStyle7(builder, cfg) {
+  const { canvasW, canvasH, align, nameText, infoText, fontFamily, baseSize,
+    nameSize, infoSize, nameWeight, infoWeight, nameTransform, infoTransform,
+    nameColor, infoColor, logoEnabled, logoSize, logoData, logoW, logoH,
+    marginH, marginV, lineSpacing, hideName, hideInfo,
+    nameColorAlpha, infoColorAlpha } = cfg;
+
+  const inF = builder.inFrames;
+  const holdF = builder.holdFrames;
+  const outF = builder.outFrames;
+
+  const nameSizePx = emToPx(nameSize, baseSize);
+  const infoSizePx = emToPx(infoSize, baseSize);
+  const nameM = measureText(nameText, fontFamily, nameSizePx, nameWeight, nameTransform);
+  const infoM = measureText(infoText, fontFamily, infoSizePx, infoWeight, infoTransform);
+
+  const lineSpacingPx = emToPx(lineSpacing, baseSize);
+  const marginHPx = remToPx(marginH, baseSize);
+  const marginVPx = remToPx(marginV, baseSize);
+
+  const nameCLottie = hexToLottie(nameColor);
+  const infoCLottie = hexToLottie(infoColor);
+
+  const isRight = align === 'right';
+  const isCenter = align === 'center';
+
+  // Logo space
+  const logoSizePx = emToPx(logoSize, baseSize);
+  const logoMargin = emToPx(1.0, baseSize);
+  const hasLogo = logoEnabled && logoData;
+  const logoSpace = hasLogo ? logoSizePx + logoMargin : 0;
+
+  // Vertical positioning: name above info, no line between
+  const nameBlockH = hideName ? 0 : nameSizePx;
+  const infoBlockH = hideInfo ? 0 : infoSizePx;
+  const gap = (!hideName && !hideInfo) ? lineSpacingPx : 0;
+  const totalH = nameBlockH + gap + infoBlockH;
+  const blockTopY = canvasH - marginVPx - totalH;
+  const nameCY = blockTopY + nameBlockH / 2;
+  const infoCY = blockTopY + nameBlockH + gap + infoBlockH / 2;
+
+  // Horizontal positioning
+  let nameTextX, infoTextX;
+  let justify;
+
+  if (isCenter) {
+    nameTextX = canvasW / 2;
+    infoTextX = canvasW / 2;
+    justify = 2;
+  } else if (isRight) {
+    nameTextX = canvasW - marginHPx - logoSpace;
+    infoTextX = canvasW - marginHPx - logoSpace;
+    justify = 1;
+  } else {
+    nameTextX = marginHPx + logoSpace;
+    infoTextX = marginHPx + logoSpace;
+    justify = 0;
+  }
+
+  const nameTextY = nameCY + nameSizePx * 0.35;
+  const infoTextY = infoCY + infoSizePx * 0.35;
+
+  // ============= LAYERS (top to bottom render order) =============
+
+  // --- Name text (letters fade in randomly) ---
+  if (!hideName) {
+    const nameTextData = makeTextData(nameText, fontFamily, nameSizePx, parseInt(nameWeight), nameCLottie, nameTransform, justify);
+    nameTextData.a.push(makeRandomFadeAnimator(0, 55, inF, holdF, outF));
+
+    builder.addFont(fontFamily, parseInt(nameWeight));
+    builder.addTextLayer('Name', nameTextData, {
+      o: LottieBuilder.staticProp(nameColorAlpha), r: LottieBuilder.staticProp(0),
+      p: LottieBuilder.staticProp([nameTextX, nameTextY, 0]),
+      a: LottieBuilder.staticProp([0, 0, 0]), s: LottieBuilder.staticProp([100, 100, 100])
+    });
+  }
+
+  // --- Info text (letters fade in randomly, slightly delayed) ---
+  if (!hideInfo) {
+    const infoTextData = makeTextData(infoText, fontFamily, infoSizePx, parseInt(infoWeight), infoCLottie, infoTransform, justify);
+    infoTextData.a.push(makeRandomFadeAnimator(25, 70, inF, holdF, outF));
+
+    builder.addFont(fontFamily, parseInt(infoWeight));
+    builder.addTextLayer('Info', infoTextData, {
+      o: LottieBuilder.staticProp(infoColorAlpha), r: LottieBuilder.staticProp(0),
+      p: LottieBuilder.staticProp([infoTextX, infoTextY, 0]),
+      a: LottieBuilder.staticProp([0, 0, 0]), s: LottieBuilder.staticProp([100, 100, 100])
+    });
+  }
+
+  // --- Logo (optional) ---
+  if (hasLogo) {
+    const logoAspect = logoW && logoH ? logoW / logoH : 1;
+    const lH = logoSizePx;
+    const _logoScale = (lH / logoH) * 100;
+
+    let logoCX;
+    if (isCenter) {
+      const maxW = Math.max(hideName ? 0 : nameM.width, hideInfo ? 0 : infoM.width);
+      logoCX = canvasW / 2 - maxW / 2 - logoMargin - logoSizePx / 2;
+    } else if (isRight) {
+      logoCX = canvasW - marginHPx - logoSizePx / 2;
+    } else {
+      logoCX = marginHPx + logoSizePx / 2;
+    }
+    const logoCY = (nameCY + infoCY) / 2;
+
+    const logoScaleKFs = buildKeyframes([
+      { pct: 0, value: [0, 0, 100] },
+      { pct: 25, value: [_logoScale, _logoScale, 100] },
+      { pct: 100, value: [_logoScale, _logoScale, 100] }
+    ], inF, holdF, outF, EASING);
+
+    builder.addImageAsset('logo', logoData, logoW, logoH);
+    builder.addImageLayer('Logo', 'logo', {
+      o: LottieBuilder.staticProp(100), r: LottieBuilder.staticProp(0),
+      p: LottieBuilder.staticProp([logoCX, logoCY, 0]),
+      a: LottieBuilder.staticProp([logoW / 2, logoH / 2, 0]),
+      s: LottieBuilder.animatedProp(logoScaleKFs)
+    });
+  }
+}
+
+function generateStyle8(builder, cfg) {
+  const { canvasW, canvasH, align, nameText, infoText, fontFamily, baseSize,
+    nameSize, infoSize, nameWeight, infoWeight, nameTransform, infoTransform,
+    nameColor, infoColor, bgColor, borderColor, corners, borderThickness, bgEnabled,
+    logoEnabled, logoSize, logoData, logoW, logoH,
+    marginH, marginV, lineSpacing, hideName, hideInfo,
+    nameColorAlpha, infoColorAlpha, bgColorAlpha, borderColorAlpha } = cfg;
+
+  const inF = builder.inFrames;
+  const holdF = builder.holdFrames;
+  const outF = builder.outFrames;
+
+  const nameSizePx = emToPx(nameSize, baseSize);
+  const infoSizePx = emToPx(infoSize, baseSize);
+  const paddingX = emToPx(1.0, baseSize);
+  const paddingY = emToPx(0.6, baseSize);
+  const lineSpacingPx = emToPx(lineSpacing, baseSize);
+  const marginHPx = remToPx(marginH, baseSize);
+  const marginVPx = remToPx(marginV, baseSize);
+  const borderPx = borderThickness * baseSize * 0.15;
+  const isRight = align === 'right';
+  const isCenter = align === 'center';
+  const slant = isCenter ? 0 : emToPx(2.5, baseSize);
+
+  const bgLottie = hexToLottie(bgColor);
+  const borderLottie = hexToLottie(borderColor);
+  const nameCLottie = hexToLottie(nameColor);
+  const infoCLottie = hexToLottie(infoColor);
+
+  // Text measurements
+  const nameM = measureText(nameText, fontFamily, nameSizePx, nameWeight, nameTransform);
+  const infoM = measureText(infoText, fontFamily, infoSizePx, infoWeight, infoTransform);
+
+  // Bar dimensions — extends full canvas width with overflow for slant
+  const overflow = emToPx(2, baseSize);
+  const barLeft = -overflow;
+  const barRight = canvasW + overflow;
+
+  // Content height within the bar
+  const infoBlockH = hideInfo ? 0 : infoSizePx;
+  const nameBlockH = hideName ? 0 : nameSizePx;
+  const gap = (!hideName && !hideInfo) ? lineSpacingPx * 0.05 : 0;
+  const contentH = infoBlockH + gap + nameBlockH + paddingY * 5;
+  const barH = contentH + slant;
+
+  // Bar Y position — bottom of bar sits at canvasH, shape defined relative to layer center
+  // The bar layer position will be animated (slides up from below)
+  const barFinalY = canvasH - barH / 2;
+
+  // Diagonal shape vertices (relative to layer center at 0,0)
+  // For left-align: top-left is highest (taller on left), top-right is lowest
+  // For right-align: reversed
+  const halfW = (barRight - barLeft) / 2;
+  const halfH = barH / 2;
+  let vertices;
+  if (isRight) {
+    vertices = [
+      [-halfW, -halfH + slant],  // top-left (lower)
+      [halfW, -halfH],            // top-right (higher)
+      [halfW, halfH],             // bottom-right
+      [-halfW, halfH]             // bottom-left
+    ];
+  } else {
+    vertices = [
+      [-halfW, -halfH],           // top-left (higher)
+      [halfW, -halfH + slant],    // top-right (lower)
+      [halfW, halfH],             // bottom-right
+      [-halfW, halfH]             // bottom-left
+    ];
+  }
+
+  // Shift both BG and border down together (less shift for center since no slant)
+  const bgInset = isCenter ? emToPx(-0.3, baseSize) : emToPx(1.5, baseSize);
+  vertices[0] = [vertices[0][0], vertices[0][1] + bgInset];
+  vertices[1] = [vertices[1][0], vertices[1][1] + bgInset];
+  const lineVertices = [vertices[0], vertices[1]];
+
+  // Text positioning
+  const justify = isCenter ? 2 : (isRight ? 1 : 0);
+  let textX;
+  if (isCenter) {
+    textX = canvasW / 2;
+  } else if (isRight) {
+    textX = canvasW - marginHPx - paddingX;
+  } else {
+    textX = marginHPx + paddingX;
+  }
+
+  // Text Y positions relative to bar center (0,0) — info above name
+  // Offset from the top of the bar content area (below the highest point of the diagonal)
+  const contentTopY = -halfH + slant + paddingY * 2.0;
+  const infoRelY = hideInfo ? contentTopY : contentTopY + infoSizePx * 0.4;
+  const nameRelY = infoRelY + (hideInfo ? 0 : infoBlockH + gap) + (hideName ? 0 : nameSizePx * 0.7);
+
+  // Slide-up animation for the bar
+  const slideFrom = canvasH + barH;
+  const barPosKFs = buildKeyframes([
+    { pct: 0, value: [canvasW / 2, slideFrom, 0] },
+    { pct: 0, value: [canvasW / 2, slideFrom, 0] },
+    { pct: 40, value: [canvasW / 2, barFinalY, 0] }
+  ], inF, holdF, outF, EASING);
+
+  // ============= LAYERS (top to bottom render order) =============
+
+  // --- Info text ---
+  if (!hideInfo) {
+    const infoTextData = makeTextData(infoText, fontFamily, infoSizePx, parseInt(infoWeight), infoCLottie, infoTransform, justify);
+    infoTextData.a.push(makeTextRevealAnimator(30, 65, -infoSizePx * 0.6, inF, holdF, outF));
+
+    builder.addFont(fontFamily, parseInt(infoWeight));
+    const infoPosKFs = buildKeyframes([
+      { pct: 0, value: [textX, slideFrom + infoRelY, 0] },
+      { pct: 0, value: [textX, slideFrom + infoRelY, 0] },
+      { pct: 40, value: [textX, barFinalY + infoRelY, 0] }
+    ], inF, holdF, outF, EASING);
+
+    builder.addTextLayer('Info', infoTextData, {
+      o: LottieBuilder.staticProp(infoColorAlpha), r: LottieBuilder.staticProp(0),
+      p: LottieBuilder.animatedProp(infoPosKFs),
+      a: LottieBuilder.staticProp([0, 0, 0]), s: LottieBuilder.staticProp([100, 100, 100])
+    });
+  }
+
+  // --- Name text ---
+  if (!hideName) {
+    const nameTextData = makeTextData(nameText, fontFamily, nameSizePx, parseInt(nameWeight), nameCLottie, nameTransform, justify);
+    nameTextData.a.push(makeTextRevealAnimator(35, 70, -nameSizePx * 0.6, inF, holdF, outF));
+
+    builder.addFont(fontFamily, parseInt(nameWeight));
+    const namePosKFs = buildKeyframes([
+      { pct: 0, value: [textX, slideFrom + nameRelY, 0] },
+      { pct: 0, value: [textX, slideFrom + nameRelY, 0] },
+      { pct: 40, value: [textX, barFinalY + nameRelY, 0] }
+    ], inF, holdF, outF, EASING);
+
+    builder.addTextLayer('Name', nameTextData, {
+      o: LottieBuilder.staticProp(nameColorAlpha), r: LottieBuilder.staticProp(0),
+      p: LottieBuilder.animatedProp(namePosKFs),
+      a: LottieBuilder.staticProp([0, 0, 0]), s: LottieBuilder.staticProp([100, 100, 100])
+    });
+  }
+
+  // --- Diagonal line (top edge, rendered in front of BG) ---
+  if (borderPx > 0) {
+    const lineItems = [
+      makePath(lineVertices, false),
+      makeStroke(borderLottie, borderPx, borderColorAlpha)
+    ];
+
+    builder.addShapeLayer('Diagonal Line', [makeGroup(lineItems)], {
+      o: LottieBuilder.staticProp(100), r: LottieBuilder.staticProp(0),
+      p: LottieBuilder.animatedProp(barPosKFs),
+      a: LottieBuilder.staticProp([0, 0, 0]),
+      s: LottieBuilder.staticProp([100, 100, 100])
+    });
+  }
+
+  // --- Diagonal bar background ---
+  if (bgEnabled) {
+    const barItems = [
+      makePath(vertices),
+      makeFill(bgLottie, bgColorAlpha)
+    ];
+
+    builder.addShapeLayer('Diagonal BG', [makeGroup(barItems)], {
+      o: LottieBuilder.staticProp(100), r: LottieBuilder.staticProp(0),
+      p: LottieBuilder.animatedProp(barPosKFs),
+      a: LottieBuilder.staticProp([0, 0, 0]),
+      s: LottieBuilder.staticProp([100, 100, 100])
+    });
+  }
+}
+
+// ============================================================
+// STYLE 9 — DIAGONAL WIPE (two-pass wipe with color change)
+// ============================================================
+
+function generateStyle9(builder, cfg) {
+  const { canvasW, canvasH, align, nameText, infoText, fontFamily, baseSize,
+    nameSize, infoSize, nameWeight, infoWeight, nameTransform, infoTransform,
+    nameColor, infoColor, accentColor, logoEnabled, logoSize, logoData, logoW, logoH,
+    marginH, marginV, lineSpacing, hideName, hideInfo,
+    nameColorAlpha, infoColorAlpha, accentColorAlpha } = cfg;
+
+  const inF = builder.inFrames;
+  const holdF = builder.holdFrames;
+  const outF = builder.outFrames;
+  const totalOut = inF + holdF;
+  const e = EASING;
+
+  const nameSizePx = emToPx(nameSize, baseSize);
+  const infoSizePx = emToPx(infoSize, baseSize);
+  const nameM = measureText(nameText, fontFamily, nameSizePx, nameWeight, nameTransform);
+  const infoM = measureText(infoText, fontFamily, infoSizePx, infoWeight, infoTransform);
+
+  const lineSpacingPx = emToPx(lineSpacing, baseSize);
+  const marginHPx = remToPx(marginH, baseSize);
+  const marginVPx = remToPx(marginV, baseSize);
+
+  const accentLottie = hexToLottie(accentColor);
+  const nameCLottie = hexToLottie(nameColor);
+  const infoCLottie = hexToLottie(infoColor);
+
+  const isRight = align === 'right';
+  const isCenter = align === 'center';
+
+  // Logo space
+  const logoSizePx = emToPx(logoSize, baseSize);
+  const logoMargin = emToPx(1.0, baseSize);
+  const hasLogo = logoEnabled && logoData;
+  const logoSpace = hasLogo ? logoSizePx + logoMargin : 0;
+
+  // Vertical positioning: name above info
+  const nameBlockH = hideName ? 0 : nameSizePx;
+  const infoBlockH = hideInfo ? 0 : infoSizePx;
+  const gap = (!hideName && !hideInfo) ? lineSpacingPx : 0;
+  const totalH = nameBlockH + gap + infoBlockH;
+  const blockTopY = canvasH - marginVPx - totalH;
+  const nameCY = blockTopY + nameBlockH / 2;
+  const infoCY = blockTopY + nameBlockH + gap + infoBlockH / 2;
+
+  // Horizontal positioning
+  let nameTextX, infoTextX, justify;
+  if (isCenter) {
+    nameTextX = canvasW / 2;
+    infoTextX = canvasW / 2;
+    justify = 2;
+  } else if (isRight) {
+    nameTextX = canvasW - marginHPx - logoSpace;
+    infoTextX = canvasW - marginHPx - logoSpace;
+    justify = 1;
+  } else {
+    nameTextX = marginHPx + logoSpace;
+    infoTextX = marginHPx + logoSpace;
+    justify = 0;
+  }
+
+  const nameTextY = nameCY + nameSizePx * 0.35;
+  const infoTextY = infoCY + infoSizePx * 0.35;
+
+  // Diagonal wipe parameters
+  const slant = emToPx(1.0, baseSize);
+  const padding = emToPx(1.0, baseSize);
+  const maskH = totalH + padding * 2;
+  const lineThickness = Math.max(2, baseSize * 0.08);
+
+  // Text bounds — how far the text extends horizontally
+  const maxTextW = Math.max(hideName ? 0 : nameM.width, hideInfo ? 0 : infoM.width);
+  let textLeftX, textRightX;
+  if (isCenter) {
+    textLeftX = canvasW / 2 - maxTextW / 2 - logoSpace;
+    textRightX = canvasW / 2 + maxTextW / 2;
+  } else if (isRight) {
+    textRightX = canvasW - marginHPx;
+    textLeftX = textRightX - maxTextW - logoSpace;
+  } else {
+    textLeftX = marginHPx;
+    textRightX = textLeftX + maxTextW + logoSpace;
+  }
+  const wipeMargin = padding;
+  const wipeLeft = textLeftX - wipeMargin - slant;
+  const wipeRight = textRightX + wipeMargin + slant;
+
+  // Mask is oversized so it fully covers text at any wipe position
+  const maskW = (wipeRight - wipeLeft) + slant + padding * 2;
+  const halfMW = maskW / 2;
+  const halfMH = maskH / 2;
+
+  // For right alignment: mirror the slant and wipe direction
+  const dir = isRight ? -1 : 1; // 1 = left-to-right, -1 = right-to-left
+
+  // Mask polygon: leading edge is diagonal, trailing edge is straight
+  // Left/center: wipes left→right, diagonal on right edge (/)
+  // Right: wipes right→left, diagonal on left edge (\), but leading edge is still
+  //        the side that sweeps across — for right that's the LEFT edge of the mask
+  const maskVertices = isRight ? [
+    [-halfMW, -halfMH],
+    [halfMW, -halfMH],
+    [halfMW, halfMH],
+    [-halfMW + slant, halfMH]
+  ] : [
+    [-halfMW, -halfMH],
+    [halfMW, -halfMH],
+    [halfMW - slant, halfMH],
+    [-halfMW, halfMH]
+  ];
+
+  // Diagonal line vertices (matches the mask's leading edge angle)
+  const lineVertices = isRight ? [
+    [0, -halfMH],
+    [slant, halfMH]
+  ] : [
+    [0, -halfMH],
+    [-slant, halfMH]
+  ];
+
+  const maskCY = blockTopY + totalH / 2;
+
+  // offStart = mask hidden (before wipe), offEnd = mask fully covering text
+  // For left/center: start left, end right. For right: start right, end left.
+  let offStart, offEnd, lineEdgeOffset;
+  if (isRight) {
+    // Diagonal edge is on the LEFT: centerX - halfMW + slant (top), centerX - halfMW (bottom)
+    offStart = wipeRight + halfMW + slant;
+    offEnd = wipeLeft + halfMW - slant * 2;
+    lineEdgeOffset = -halfMW;
+  } else {
+    // Diagonal edge is on the RIGHT: centerX + halfMW (top), centerX + halfMW - slant (bottom)
+    offStart = wipeLeft - halfMW - slant;
+    offEnd = wipeRight - halfMW + slant * 2;
+    lineEdgeOffset = halfMW;
+  }
+
+  const fadeIn = 0.08;
+
+  // Use linear easing at midpoint so motion is constant through the turnaround
+  const L = LINEAR;
+
+  function buildWipeMaskKFs() {
+    const kfs = [];
+    kfs.push(LottieBuilder.kf(0, [offStart, maskCY, 0], e));
+    kfs.push(LottieBuilder.kf(Math.round(inF * fadeIn), [offStart, maskCY, 0], L));
+    kfs.push(LottieBuilder.kf(Math.round(inF * 0.5), [offEnd, maskCY, 0], L));
+    kfs.push(LottieBuilder.kf(inF, [offStart, maskCY, 0], e));
+    kfs.push(LottieBuilder.kf(totalOut, [offStart, maskCY, 0], e));
+    kfs.push(LottieBuilder.kf(Math.round(totalOut + outF * 0.5), [offEnd, maskCY, 0], L));
+    kfs.push(LottieBuilder.kf(Math.round(totalOut + outF * (1 - fadeIn)), [offStart, maskCY, 0], e));
+    kfs.push(LottieBuilder.kf(totalOut + outF, [offStart, maskCY, 0]));
+    return kfs;
+  }
+
+  function buildRevealMaskKFs() {
+    const kfs = [];
+    kfs.push(LottieBuilder.kf(0, [offStart, maskCY, 0], e));
+    kfs.push(LottieBuilder.kf(Math.round(inF * fadeIn), [offStart, maskCY, 0], L));
+    kfs.push(LottieBuilder.kf(Math.round(inF * 0.5), [offEnd, maskCY, 0], e));
+    kfs.push(LottieBuilder.kf(inF, [offEnd, maskCY, 0], e));
+    kfs.push(LottieBuilder.kf(totalOut, [offEnd, maskCY, 0], e));
+    kfs.push(LottieBuilder.kf(Math.round(totalOut + outF * 0.5), [offEnd, maskCY, 0], e));
+    kfs.push(LottieBuilder.kf(Math.round(totalOut + outF * (1 - fadeIn)), [offStart, maskCY, 0], e));
+    kfs.push(LottieBuilder.kf(totalOut + outF, [offStart, maskCY, 0]));
+    return kfs;
+  }
+
+  function buildLineKFs() {
+    const kfs = [];
+    kfs.push(LottieBuilder.kf(0, [offStart + lineEdgeOffset, maskCY, 0], e));
+    kfs.push(LottieBuilder.kf(Math.round(inF * fadeIn), [offStart + lineEdgeOffset, maskCY, 0], L));
+    kfs.push(LottieBuilder.kf(Math.round(inF * 0.5), [offEnd + lineEdgeOffset, maskCY, 0], L));
+    kfs.push(LottieBuilder.kf(inF, [offStart + lineEdgeOffset, maskCY, 0], e));
+    kfs.push(LottieBuilder.kf(totalOut, [offStart + lineEdgeOffset, maskCY, 0], e));
+    kfs.push(LottieBuilder.kf(Math.round(totalOut + outF * 0.5), [offEnd + lineEdgeOffset, maskCY, 0], L));
+    kfs.push(LottieBuilder.kf(Math.round(totalOut + outF * (1 - fadeIn)), [offStart + lineEdgeOffset, maskCY, 0], e));
+    kfs.push(LottieBuilder.kf(totalOut + outF, [offStart + lineEdgeOffset, maskCY, 0]));
+    return kfs;
+  }
+
+  // Line opacity: visible during both wipe passes, hidden during hold
+  function buildLineOpacityKFs() {
+    const kfs = [];
+    // IN: fade in, then visible for both passes
+    kfs.push(LottieBuilder.kf(0, [0], e));
+    kfs.push(LottieBuilder.kf(Math.round(inF * 0.08), [100], e));
+    kfs.push(LottieBuilder.kf(Math.round(inF * 0.95), [100], e));
+    kfs.push(LottieBuilder.kf(inF, [0], e));
+    // Hold: hidden
+    kfs.push(LottieBuilder.kf(totalOut, [0], e));
+    // OUT: fade in, visible for both passes, fade out at end
+    kfs.push(LottieBuilder.kf(Math.round(totalOut + outF * 0.05), [100], e));
+    kfs.push(LottieBuilder.kf(Math.round(totalOut + outF * 0.95), [100], e));
+    kfs.push(LottieBuilder.kf(totalOut + outF, [0]));
+    return kfs;
+  }
+
+  const wipeMaskKFs = buildWipeMaskKFs();
+  const revealMaskKFs = buildRevealMaskKFs();
+  const lineKFs = buildLineKFs();
+  const lineOpacityKFs = buildLineOpacityKFs();
+
+  // ============= LAYERS (top to bottom render order) =============
+
+  // --- Diagonal line (visual element) ---
+  builder.addShapeLayer('Diagonal Line', [makeGroup([
+    makePath(lineVertices, false),
+    makeStroke(accentLottie, lineThickness, accentColorAlpha)
+  ])], {
+    o: LottieBuilder.animatedProp(lineOpacityKFs), r: LottieBuilder.staticProp(0),
+    p: LottieBuilder.animatedProp(lineKFs),
+    a: LottieBuilder.staticProp([0, 0, 0]),
+    s: LottieBuilder.staticProp([100, 100, 100])
+  });
+
+  // --- Accent name text (mask + text) ---
+  if (!hideName) {
+    builder.addShapeLayer('Accent Name Mask', [makeGroup([
+      makePath(maskVertices),
+      makeFill([1, 1, 1])
+    ])], {
+      o: LottieBuilder.staticProp(100), r: LottieBuilder.staticProp(0),
+      p: LottieBuilder.animatedProp(wipeMaskKFs),
+      a: LottieBuilder.staticProp([0, 0, 0]),
+      s: LottieBuilder.staticProp([100, 100, 100])
+    }, { td: 1 });
+
+    const accentNameData = makeTextData(nameText, fontFamily, nameSizePx, parseInt(nameWeight), accentLottie, nameTransform, justify);
+    builder.addFont(fontFamily, parseInt(nameWeight));
+    builder.addTextLayer('Accent Name', accentNameData, {
+      o: LottieBuilder.staticProp(accentColorAlpha), r: LottieBuilder.staticProp(0),
+      p: LottieBuilder.staticProp([nameTextX, nameTextY, 0]),
+      a: LottieBuilder.staticProp([0, 0, 0]), s: LottieBuilder.staticProp([100, 100, 100])
+    }, { tt: 1 });
+  }
+
+  // --- Accent info text (mask + text) ---
+  if (!hideInfo) {
+    builder.addShapeLayer('Accent Info Mask', [makeGroup([
+      makePath(maskVertices),
+      makeFill([1, 1, 1])
+    ])], {
+      o: LottieBuilder.staticProp(100), r: LottieBuilder.staticProp(0),
+      p: LottieBuilder.animatedProp(wipeMaskKFs),
+      a: LottieBuilder.staticProp([0, 0, 0]),
+      s: LottieBuilder.staticProp([100, 100, 100])
+    }, { td: 1 });
+
+    const accentInfoData = makeTextData(infoText, fontFamily, infoSizePx, parseInt(infoWeight), accentLottie, infoTransform, justify);
+    builder.addFont(fontFamily, parseInt(infoWeight));
+    builder.addTextLayer('Accent Info', accentInfoData, {
+      o: LottieBuilder.staticProp(infoColorAlpha), r: LottieBuilder.staticProp(0),
+      p: LottieBuilder.staticProp([infoTextX, infoTextY, 0]),
+      a: LottieBuilder.staticProp([0, 0, 0]), s: LottieBuilder.staticProp([100, 100, 100])
+    }, { tt: 1 });
+  }
+
+  // --- Normal name text (revealed by separate mask, stays visible) ---
+  if (!hideName) {
+    builder.addShapeLayer('Name Reveal Mask', [makeGroup([
+      makePath(maskVertices),
+      makeFill([1, 1, 1])
+    ])], {
+      o: LottieBuilder.staticProp(100), r: LottieBuilder.staticProp(0),
+      p: LottieBuilder.animatedProp(revealMaskKFs),
+      a: LottieBuilder.staticProp([0, 0, 0]),
+      s: LottieBuilder.staticProp([100, 100, 100])
+    }, { td: 1 });
+
+    const nameData = makeTextData(nameText, fontFamily, nameSizePx, parseInt(nameWeight), nameCLottie, nameTransform, justify);
+    builder.addFont(fontFamily, parseInt(nameWeight));
+    builder.addTextLayer('Name', nameData, {
+      o: LottieBuilder.staticProp(nameColorAlpha), r: LottieBuilder.staticProp(0),
+      p: LottieBuilder.staticProp([nameTextX, nameTextY, 0]),
+      a: LottieBuilder.staticProp([0, 0, 0]), s: LottieBuilder.staticProp([100, 100, 100])
+    }, { tt: 1 });
+  }
+
+  // --- Normal info text (revealed by separate mask, stays visible) ---
+  if (!hideInfo) {
+    builder.addShapeLayer('Info Reveal Mask', [makeGroup([
+      makePath(maskVertices),
+      makeFill([1, 1, 1])
+    ])], {
+      o: LottieBuilder.staticProp(100), r: LottieBuilder.staticProp(0),
+      p: LottieBuilder.animatedProp(revealMaskKFs),
+      a: LottieBuilder.staticProp([0, 0, 0]),
+      s: LottieBuilder.staticProp([100, 100, 100])
+    }, { td: 1 });
+
+    const infoData = makeTextData(infoText, fontFamily, infoSizePx, parseInt(infoWeight), infoCLottie, infoTransform, justify);
+    builder.addFont(fontFamily, parseInt(infoWeight));
+    builder.addTextLayer('Info', infoData, {
+      o: LottieBuilder.staticProp(infoColorAlpha), r: LottieBuilder.staticProp(0),
+      p: LottieBuilder.staticProp([infoTextX, infoTextY, 0]),
+      a: LottieBuilder.staticProp([0, 0, 0]), s: LottieBuilder.staticProp([100, 100, 100])
+    }, { tt: 1 });
+  }
+
+  // --- Logo (optional) ---
+  if (hasLogo) {
+    const logoAspect = logoW && logoH ? logoW / logoH : 1;
+    const lH = logoSizePx;
+    const _logoScale = (lH / logoH) * 100;
+
+    let logoCX;
+    if (isCenter) {
+      const maxW = Math.max(hideName ? 0 : nameM.width, hideInfo ? 0 : infoM.width);
+      logoCX = canvasW / 2 - maxW / 2 - logoMargin - logoSizePx / 2;
+    } else if (isRight) {
+      logoCX = canvasW - marginHPx - logoSizePx / 2;
+    } else {
+      logoCX = marginHPx + logoSizePx / 2;
+    }
+    const logoCY = (infoCY + nameCY) / 2;
+
+    const logoScaleKFs = buildKeyframes([
+      { pct: 0, value: [0, 0, 100] },
+      { pct: 25, value: [_logoScale, _logoScale, 100] },
+      { pct: 100, value: [_logoScale, _logoScale, 100] }
+    ], inF, holdF, outF, EASING);
+
+    builder.addImageAsset('logo', logoData, logoW, logoH);
+    builder.addImageLayer('Logo', 'logo', {
+      o: LottieBuilder.staticProp(100), r: LottieBuilder.staticProp(0),
+      p: LottieBuilder.staticProp([logoCX, logoCY, 0]),
+      a: LottieBuilder.staticProp([logoW / 2, logoH / 2, 0]),
+      s: LottieBuilder.animatedProp(logoScaleKFs)
+    });
+  }
+}
+
+// ============================================================
+// STYLE 10 — DOUBLE LINE (two horizontal lines framing the name)
+// ============================================================
+
+function generateStyle10(builder, cfg) {
+  const { canvasW, canvasH, align, nameText, infoText, fontFamily, baseSize,
+    nameSize, infoSize, nameWeight, infoWeight, nameTransform, infoTransform,
+    nameColor, infoColor, accentColor, borderColor, logoEnabled, logoSize, logoData, logoW, logoH,
+    marginH, marginV, lineSpacing, hideName, hideInfo,
+    nameColorAlpha, infoColorAlpha, accentColorAlpha, borderColorAlpha, borderThickness } = cfg;
+
+  const inF = builder.inFrames;
+  const holdF = builder.holdFrames;
+  const outF = builder.outFrames;
+
+  const nameSizePx = emToPx(nameSize, baseSize);
+  const infoSizePx = emToPx(infoSize, baseSize);
+  const nameM = measureText(nameText, fontFamily, nameSizePx, nameWeight, nameTransform);
+  const infoM = measureText(infoText, fontFamily, infoSizePx, infoWeight, infoTransform);
+
+  const paddingX = emToPx(0.6, baseSize);
+  const lineGap = emToPx(0.4, baseSize);
+  const marginHPx = remToPx(marginH, baseSize);
+  const marginVPx = remToPx(marginV, baseSize);
+  const linePx = Math.max(2, borderThickness * baseSize * 0.1);
+
+  const accentLottie = hexToLottie(accentColor);
+  const nameCLottie = hexToLottie(nameColor);
+  const infoCLottie = hexToLottie(infoColor);
+
+  const isRight = align === 'right';
+  const isCenter = align === 'center';
+
+  // Logo space
+  const logoSizePx = emToPx(logoSize, baseSize);
+  const logoMargin = emToPx(1.0, baseSize);
+  const hasLogo = logoEnabled && logoData;
+  const logoSpace = hasLogo ? logoSizePx + logoMargin : 0;
+
+  // Line width = extends well beyond text
+  const nameContentW = hideName ? 0 : nameM.width + paddingX * 2;
+  const infoContentW = hideInfo ? 0 : infoM.width + paddingX * 2;
+  const textW = Math.max(nameContentW, infoContentW, emToPx(4, baseSize));
+  const lineW = textW + emToPx(0.5, baseSize);
+
+  // Vertical positioning: top line, name, bottom line, info
+  const nameBlockH = hideName ? 0 : nameSizePx;
+  const infoBlockH = hideInfo ? 0 : infoSizePx;
+  const gapName = hideName ? 0 : lineGap;
+  const gapInfo = hideInfo ? 0 : lineGap;
+  const totalH = linePx + gapName + nameBlockH + gapName + linePx + gapInfo + infoBlockH;
+  const blockTopY = canvasH - marginVPx - totalH;
+
+  const topLineCY = blockTopY + linePx / 2;
+  const nameCY = blockTopY + linePx + gapName + nameBlockH / 2;
+  const bottomLineCY = blockTopY + linePx + gapName + nameBlockH + gapName + linePx / 2;
+  const infoCY = bottomLineCY + linePx / 2 + gapInfo + infoBlockH / 2;
+
+  // Horizontal positioning
+  let linePosX, nameTextX, infoTextX, justify;
+  let lineAnchorX;
+
+  if (isCenter) {
+    nameTextX = canvasW / 2;
+    infoTextX = canvasW / 2;
+    justify = 2;
+    linePosX = canvasW / 2;
+    lineAnchorX = 0;
+  } else if (isRight) {
+    const textEdge = canvasW - marginHPx - logoSpace;
+    nameTextX = textEdge;
+    infoTextX = textEdge;
+    justify = 1;
+    // Anchor at right edge of line = text right edge, line extends left
+    linePosX = textEdge;
+    lineAnchorX = lineW / 2;
+  } else {
+    const textEdge = marginHPx + logoSpace;
+    nameTextX = textEdge;
+    infoTextX = textEdge;
+    justify = 0;
+    // Anchor at left edge of line = text left edge, line extends right
+    linePosX = textEdge;
+    lineAnchorX = -lineW / 2;
+  }
+
+  const nameTextY = nameCY + nameSizePx * 0.35;
+  const infoTextY = infoCY + infoSizePx * 0.35;
+
+  // --- Animation timing ---
+  // Lines expand from alignment side (left-to-right for left, right-to-left for right)
+  const topLineInKFs = buildKeyframes([
+    { pct: 0, value: [0, linePx] },
+    { pct: 40, value: [lineW, linePx] },
+    { pct: 100, value: [lineW, linePx] }
+  ], inF, holdF, outF, EASING);
+
+  const bottomLineInKFs = buildKeyframes([
+    { pct: 0, value: [0, linePx] },
+    { pct: 15, value: [0, linePx] },
+    { pct: 45, value: [lineW, linePx] },
+    { pct: 100, value: [lineW, linePx] }
+  ], inF, holdF, outF, EASING);
+
+  // Name slides up from bottom line to its position
+  const nameSlideKFs = buildKeyframes([
+    { pct: 0, value: [nameTextX, bottomLineCY + nameSizePx * 1.2, 0] },
+    { pct: 25, value: [nameTextX, bottomLineCY + nameSizePx * 1.2, 0] },
+    { pct: 55, value: [nameTextX, nameTextY, 0] },
+    { pct: 100, value: [nameTextX, nameTextY, 0] }
+  ], inF, holdF, outF, EASING);
+
+  // Name mask: covers the area above the bottom line where name will be visible
+  const nameMaskH = nameBlockH + gapName * 2;
+  const nameMaskCY = nameCY;
+
+  // ============= LAYERS (top to bottom render order) =============
+
+  // --- Name mask + text (slides up from behind bottom line) ---
+  if (!hideName) {
+    builder.addShapeLayer('Name Mask', [makeGroup([
+      makeRect(lineW, nameMaskH, 0),
+      makeFill([1, 1, 1])
+    ])], {
+      o: LottieBuilder.staticProp(100), r: LottieBuilder.staticProp(0),
+      p: LottieBuilder.staticProp([linePosX, nameMaskCY, 0]),
+      a: LottieBuilder.staticProp([lineAnchorX, 0, 0]),
+      s: LottieBuilder.staticProp([100, 100, 100])
+    }, { td: 1 });
+
+    const nameTextData = makeTextData(nameText, fontFamily, nameSizePx, parseInt(nameWeight), nameCLottie, nameTransform, justify);
+
+    builder.addFont(fontFamily, parseInt(nameWeight));
+    builder.addTextLayer('Name', nameTextData, {
+      o: LottieBuilder.staticProp(nameColorAlpha), r: LottieBuilder.staticProp(0),
+      p: LottieBuilder.animatedProp(nameSlideKFs),
+      a: LottieBuilder.staticProp([0, 0, 0]), s: LottieBuilder.staticProp([100, 100, 100])
+    }, { tt: 1 });
+  }
+
+  // --- Info mask + text (slides down from behind bottom line) ---
+  if (!hideInfo) {
+    const infoMaskH = infoBlockH + gapInfo * 2;
+    const infoMaskCY = infoCY;
+
+    builder.addShapeLayer('Info Mask', [makeGroup([
+      makeRect(lineW, infoMaskH, 0),
+      makeFill([1, 1, 1])
+    ])], {
+      o: LottieBuilder.staticProp(100), r: LottieBuilder.staticProp(0),
+      p: LottieBuilder.staticProp([linePosX, infoMaskCY, 0]),
+      a: LottieBuilder.staticProp([lineAnchorX, 0, 0]),
+      s: LottieBuilder.staticProp([100, 100, 100])
+    }, { td: 1 });
+
+    const infoSlideKFs = buildKeyframes([
+      { pct: 0, value: [infoTextX, bottomLineCY - infoSizePx * 0.5, 0] },
+      { pct: 30, value: [infoTextX, bottomLineCY - infoSizePx * 0.5, 0] },
+      { pct: 60, value: [infoTextX, infoTextY, 0] },
+      { pct: 100, value: [infoTextX, infoTextY, 0] }
+    ], inF, holdF, outF, EASING);
+
+    const infoTextData = makeTextData(infoText, fontFamily, infoSizePx, parseInt(infoWeight), infoCLottie, infoTransform, justify);
+
+    builder.addFont(fontFamily, parseInt(infoWeight));
+    builder.addTextLayer('Info', infoTextData, {
+      o: LottieBuilder.staticProp(infoColorAlpha), r: LottieBuilder.staticProp(0),
+      p: LottieBuilder.animatedProp(infoSlideKFs),
+      a: LottieBuilder.staticProp([0, 0, 0]), s: LottieBuilder.staticProp([100, 100, 100])
+    }, { tt: 1 });
+  }
+
+  // --- Top line (expands from alignment side) ---
+  builder.addShapeLayer('Top Line', [makeGroup([
+    makeAnimatedRect(topLineInKFs, 0),
+    makeFill(accentLottie, accentColorAlpha)
+  ])], {
+    o: LottieBuilder.staticProp(100), r: LottieBuilder.staticProp(0),
+    p: LottieBuilder.staticProp([linePosX, topLineCY, 0]),
+    a: LottieBuilder.staticProp([lineAnchorX, 0, 0]),
+    s: LottieBuilder.staticProp([100, 100, 100])
+  });
+
+  // --- Bottom line (expands from alignment side, slightly faster) ---
+  builder.addShapeLayer('Bottom Line', [makeGroup([
+    makeAnimatedRect(bottomLineInKFs, 0),
+    makeFill(accentLottie, accentColorAlpha)
+  ])], {
+    o: LottieBuilder.staticProp(100), r: LottieBuilder.staticProp(0),
+    p: LottieBuilder.staticProp([linePosX, bottomLineCY, 0]),
+    a: LottieBuilder.staticProp([lineAnchorX, 0, 0]),
+    s: LottieBuilder.staticProp([100, 100, 100])
+  });
+
+  // --- Logo (optional) ---
+  if (hasLogo) {
+    const logoAspect = logoW && logoH ? logoW / logoH : 1;
+    const lH = logoSizePx;
+    const _logoScale = (lH / logoH) * 100;
+
+    let logoCX;
+    if (isCenter) {
+      const maxW = Math.max(hideName ? 0 : nameM.width, hideInfo ? 0 : infoM.width);
+      logoCX = canvasW / 2 - maxW / 2 - logoMargin - logoSizePx / 2;
+    } else if (isRight) {
+      logoCX = canvasW - marginHPx - logoSizePx / 2;
+    } else {
+      logoCX = marginHPx + logoSizePx / 2;
+    }
+    const logoCY = (topLineCY + bottomLineCY) / 2;
+
+    const logoScaleKFs = buildKeyframes([
+      { pct: 0, value: [0, 0, 100] },
+      { pct: 25, value: [_logoScale, _logoScale, 100] },
+      { pct: 100, value: [_logoScale, _logoScale, 100] }
+    ], inF, holdF, outF, EASING);
+
+    builder.addImageAsset('logo', logoData, logoW, logoH);
+    builder.addImageLayer('Logo', 'logo', {
+      o: LottieBuilder.staticProp(100), r: LottieBuilder.staticProp(0),
+      p: LottieBuilder.staticProp([logoCX, logoCY, 0]),
+      a: LottieBuilder.staticProp([logoW / 2, logoH / 2, 0]),
+      s: LottieBuilder.animatedProp(logoScaleKFs)
+    });
+  }
+}
+
 // ============================================================
 // MAIN GENERATION + PREVIEW
 // ============================================================
@@ -2387,6 +3526,7 @@ let currentJSON = null;
 
 function generate() {
   const cfg = getConfig();
+  cfg.baseSize = cfg.baseSize * (cfg.canvasH / 1080) * cfg.scaleFactor;
   const fr = 30;
   const inFrames = Math.round(cfg.animDuration * fr);
   const holdFrames = Math.round(cfg.holdDuration * fr);
@@ -2401,6 +3541,11 @@ function generate() {
     case '3': generateStyle3(builder, cfg); break;
     case '4': generateStyle4(builder, cfg); break;
     case '5': generateStyle5(builder, cfg); break;
+    case '6': generateStyle6(builder, cfg); break;
+    case '7': generateStyle7(builder, cfg); break;
+    case '8': generateStyle8(builder, cfg); break;
+    case '9': generateStyle9(builder, cfg); break;
+    case '10': generateStyle10(builder, cfg); break;
   }
 
   currentJSON = builder.toJSON();
@@ -2442,14 +3587,24 @@ function generate() {
 
 function download() {
   if (!currentJSON) return;
-  const blob = new Blob([JSON.stringify(currentJSON, null, 2)], { type: 'application/json' });
+  const nameVal = (document.getElementById('nameText').value.trim() || 'lower-third');
+  const infoVal = (document.getElementById('infoText').value.trim());
+  const styleEl = document.getElementById('styleType');
+  const styleLabel = styleEl.options[styleEl.selectedIndex].text.replace(/\s*—.*/, '').trim();
+  const baseName = (infoVal ? nameVal + ' - ' + infoVal : nameVal);
+  const filename = styleLabel + ' - ' + baseName + '.json';
+  const jsonStr = JSON.stringify(currentJSON, null, 2);
+  // If running inside the JVM WebView, hand off to the native bridge
+  if (window._jvmBridge) {
+    window._jvmBridge.save(filename, jsonStr);
+    return;
+  }
+  // Fallback: standard browser blob download
+  const blob = new Blob([jsonStr], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  const nameVal = document.getElementById('nameText').value.trim() || 'lower-third';
-  const styleVal = document.getElementById('styleType').value;
-  const rand = Math.random().toString(36).substring(2, 6);
-  a.download = nameVal + ' - ' + rand + '.json';
+  a.download = filename;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
@@ -2534,11 +3689,22 @@ document.getElementById('seekBar').addEventListener('input', (e) => {
 document.getElementById('styleType').addEventListener('change', () => {
   const align = document.getElementById('alignment');
   const centerOpt = align.querySelector('option[value="center"]');
-  if (document.getElementById('styleType').value === '4') {
+  const sv = document.getElementById('styleType').value;
+  if (sv === '4') {
     centerOpt.disabled = true;
     if (align.value === 'center') { align.value = 'left'; }
   } else {
     centerOpt.disabled = false;
+  }
+  // Style 4 and 8 default border thickness to 2, others default to 0
+  const borderSlider = document.getElementById('borderThickness');
+  const borderVal = document.getElementById('borderThicknessVal');
+  if ((sv === '4' || sv === '8') && parseFloat(borderSlider.value) === 0) {
+    borderSlider.value = 2;
+    borderVal.textContent = '2';
+  } else if (sv !== '4' && sv !== '8' && parseFloat(borderSlider.value) === 2) {
+    borderSlider.value = 0;
+    borderVal.textContent = '0';
   }
 });
 
@@ -2547,6 +3713,7 @@ document.getElementById('styleType').addEventListener('change', () => {
  'nameSize', 'infoSize', 'nameWeight', 'infoWeight', 'nameTransform', 'infoTransform',
  'nameColor', 'infoColor', 'accentColor', 'bgColor', 'borderColor',
  'nameColorAlpha', 'infoColorAlpha', 'accentColorAlpha', 'bgColorAlpha', 'borderColorAlpha',
+ 'scaleFactor',
  'corners', 'borderThickness', 'bgEnabled', 'shadowEnabled', 'hideName', 'hideInfo',
  'logoEnabled', 'logoSize', 'animDuration', 'holdDuration',
  'marginH', 'marginV', 'lineSpacing'].forEach(id => {

@@ -108,4 +108,18 @@ class PresenterManager {
 
     private val _lottiePauseFrame = mutableStateOf(-1f)
     val lottiePauseFrame: State<Float> = _lottiePauseFrame
+
+    private val _announcementText = mutableStateOf("")
+    val announcementText: State<String> = _announcementText
+
+    fun setAnnouncementText(text: String) {
+        _announcementText.value = text
+    }
+
+    private val _websiteUrl = mutableStateOf("")
+    val websiteUrl: State<String> = _websiteUrl
+
+    fun setWebsiteUrl(url: String) {
+        _websiteUrl.value = url
+    }
 }

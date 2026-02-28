@@ -123,33 +123,33 @@ val AppTypography = Typography(
     )
 )
 
-// Light theme colors
+// Light theme colors — neutral grey palette
 private val LightColorScheme = lightColorScheme(
-    primary = Color(0xFF1976D2),
+    primary = Color(0xFF4A5568),           // muted slate-grey
     onPrimary = Color.White,
-    primaryContainer = Color(0xFFE3F2FD),
-    onPrimaryContainer = Color(0xFF0D47A1),
-    secondary = Color(0xFF03DAC6),
-    onSecondary = Color.Black,
-    secondaryContainer = Color(0xFFB2DFDB),
-    onSecondaryContainer = Color(0xFF004D40),
-    tertiary = Color(0xFF9C27B0),
+    primaryContainer = Color(0xFFDDE1E7),  // light grey-blue container
+    onPrimaryContainer = Color(0xFF1A202C),
+    secondary = Color(0xFF607D8B),         // blue-grey accent
+    onSecondary = Color.White,
+    secondaryContainer = Color(0xFFCFD8DC),
+    onSecondaryContainer = Color(0xFF263238),
+    tertiary = Color(0xFF78909C),          // lighter blue-grey
     onTertiary = Color.White,
     error = Color(0xFFB00020),
     onError = Color.White,
     errorContainer = Color(0xFFFDE7E7),
     onErrorContainer = Color(0xFF790000),
-    background = Color(0xFFFFFBFE),
-    onBackground = Color(0xFF1C1B1F),
-    surface = Color(0xFFF5F5F5),
-    onSurface = Color(0xFF1C1B1F),
-    surfaceVariant = Color(0xFFE7E0EC),
-    onSurfaceVariant = Color(0xFF49454F),
-    outline = Color(0xFF79747E),
-    outlineVariant = Color(0xFFCAC4D0),
+    background = Color(0xFFF4F4F5),        // very light grey, no blue tint
+    onBackground = Color(0xFF1A1A1A),
+    surface = Color(0xFFEFEFF1),           // neutral light grey surface
+    onSurface = Color(0xFF1A1A1A),
+    surfaceVariant = Color(0xFFE2E2E5),    // slightly darker grey, no purple
+    onSurfaceVariant = Color(0xFF44444A),
+    outline = Color(0xFF8A8A94),
+    outlineVariant = Color(0xFFCCCCD0),
     // Custom colors for buttons
-    inverseSurface = Color(0xFF4CAF50), // Success button background
-    inverseOnSurface = Color.White, // Success button text
+    inverseSurface = Color(0xFF4CAF50),    // Success button background
+    inverseOnSurface = Color.White,        // Success button text
 )
 
 // Dark theme colors

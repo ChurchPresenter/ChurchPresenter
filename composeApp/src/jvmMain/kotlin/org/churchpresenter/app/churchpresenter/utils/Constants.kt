@@ -14,8 +14,12 @@ object Constants {
     const val CENTER = "Center"
     const val RIGHT = "Right"
     const val TOP_LEFT = "Top Left"
+    const val TOP_CENTER = "Top Center"
     const val TOP_RIGHT = "Top Right"
+    const val CENTER_LEFT = "Center Left"
+    const val CENTER_RIGHT = "Center Right"
     const val BOTTOM_LEFT = "Bottom Left"
+    const val BOTTOM_CENTER = "Bottom Center"
     const val BOTTOM_RIGHT = "Bottom Right"
     const val LIGHT = "LIGHT"
 
@@ -78,7 +82,19 @@ object Constants {
     const val ANIMATION_FADE = "FADE"
     const val ANIMATION_SLIDE_LEFT = "SLIDE_LEFT"
     const val ANIMATION_SLIDE_RIGHT = "SLIDE_RIGHT"
+    const val ANIMATION_SLIDE_UP = "SLIDE_UP"
+    const val ANIMATION_SLIDE_TO_CENTER = "SLIDE_TO_CENTER"
     const val ANIMATION_NONE = "NONE"
+
+    // Announcement directional animation types (full edge-to-edge)
+    const val ANIMATION_SLIDE_FROM_LEFT   = "SLIDE_FROM_LEFT"
+    const val ANIMATION_SLIDE_FROM_RIGHT  = "SLIDE_FROM_RIGHT"
+    const val ANIMATION_SLIDE_FROM_TOP    = "SLIDE_FROM_TOP"
+    const val ANIMATION_SLIDE_FROM_BOTTOM = "SLIDE_FROM_BOTTOM"
+    const val ANIMATION_SLIDE_ALONG_TOP_LTR = "SLIDE_ALONG_TOP_LTR"
+    const val ANIMATION_SLIDE_ALONG_TOP_RTL = "SLIDE_ALONG_TOP_RTL"
+    const val ANIMATION_SLIDE_ALONG_BOTTOM_LTR = "SLIDE_ALONG_BOTTOM_LTR"
+    const val ANIMATION_SLIDE_ALONG_BOTTOM_RTL = "SLIDE_ALONG_BOTTOM_RTL"
 
     // Media Types
     const val MEDIA_TYPE_LOCAL = "local"

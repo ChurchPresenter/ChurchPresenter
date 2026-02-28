@@ -36,11 +36,8 @@ import churchpresenter.composeapp.generated.resources.display_lower_third
 import churchpresenter.composeapp.generated.resources.media
 import churchpresenter.composeapp.generated.resources.ok
 import churchpresenter.composeapp.generated.resources.options
-import churchpresenter.composeapp.generated.resources.other
-import churchpresenter.composeapp.generated.resources.other_tab_content
 import churchpresenter.composeapp.generated.resources.projection
 import churchpresenter.composeapp.generated.resources.song
-import churchpresenter.composeapp.generated.resources.streaming
 import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.data.SettingsManager
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.BackgroundSettingsTab
@@ -114,11 +111,6 @@ fun OptionsDialog(
                             onClick = { selectedTabIndex = 5 },
                             text = { Text(stringResource(Res.string.display_lower_third)) }
                         )
-                        Tab(
-                            selected = selectedTabIndex == 6,
-                            onClick = { selectedTabIndex = 6 },
-                            text = { Text(stringResource(Res.string.other)) }
-                        )
                     }
 
                     // Tab Content
@@ -163,12 +155,10 @@ fun OptionsDialog(
                             )
                             5 -> LowerThirdSettingsTab(
                                 settings = currentSettings,
-                                lottiePresetsDir = settingsManager.lottiePresetsDir,
                                 onSettingsChange = { updateFn ->
                                     currentSettings = updateFn(currentSettings)
                                 }
                             )
-                            6 -> PlaceholderTab(stringResource(Res.string.other_tab_content))
                         }
                     }
 
@@ -212,16 +202,3 @@ fun OptionsDialog(
     }
 }
 
-@Composable
-private fun PlaceholderTab(message: String) {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = message,
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onBackground
-        )
-    }
-}
