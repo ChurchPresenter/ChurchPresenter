@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SPB Bible Comparison</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 10px 20px; background: #f5f5f5; }
+        h1 { color: #333; display: inline; margin-right: 10px; vertical-align: middle; }
+        .controls { display: inline; margin-left: 10px; vertical-align: middle; }
+        span { vertical-align: middle; font-size: 14px; }
+        input[type="file"] { padding: 4px; margin-right: 5px; font-size: 12px; }
+        button { padding: 4px 12px; font-size: 12px; background: #0066cc; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #0055aa; }
+        
+        .comparison { display: none; margin-top: 15px; }
+        .comparison.active { display: block; }
+        
+        .summary { background: white; padding: 10px 15px; border-radius: 8px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 15px; flex-wrap: wrap; }
+        .summary-item { padding: 5px 12px; border-radius: 4px; font-size: 13px; }
+        
+        .diff-container { background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); overflow: auto; height: calc(100vh - 180px); }
+        .diff-header-row { display: flex; position: sticky; top: 0; z-index: 10; background: #f8f9fa; border-bottom: 1px solid #ddd; }
+        .diff-header-row > div { flex: 1; padding: 8px 15px; font-weight: bold; font-size: 13px; }
+        .diff-header-row > div + div { border-left: 2px solid #ddd; }
+        .diff-row { display: flex; border-bottom: 1px solid #f0f0f0; }
+        .diff-row:hover { background: #f8f8f8; }
+        .diff-cell { flex: 1; display: flex; min-height: 20px; font-family: monospace; font-size: 12px; line-height: 20px; }
+        .diff-cell + .diff-cell { border-left: 2px solid #ddd; }
+        .line-num { min-width: 40px; width: 40px; text-align: right; padding-right: 8px; color: #999; user-select: none; background: #f8f9fa; border-right: 1px solid #eee; flex-shrink: 0; }
+        .line-num.diff-marker { color: #cf222e; font-weight: bold; }
+        .line-num.diff-marker.add { color: #2ea043; }
+        .line-content { flex: 1; padding-left: 8px; white-space: pre-wrap; word-break: break-word; }
+        
+        .diff-cell.add { background: #e6ffec; }
+        .diff-cell.add .line-num { background: #cafed1; }
+
+        .diff-cell.remove { background: #ffebe9; }
+        .diff-cell.remove .line-num { background: #ffdce0; }
+
+        .diff-cell.empty { background: #fafafa; }
+        .diff-cell.empty .line-content { color: transparent; }
+
+        .diff-row.highlight { outline: 2px solid #0066cc; z-index: 10; position: relative; }
+        .char-diff-add { background: #a8e6cf; padding: 0 2px; border-radius: 2px; }
+        .char-diff-remove { background: #ffc3c3; padding: 0 2px; border-radius: 2px; }
+        
+        .loading { display: none; text-align: center; padding: 40px; }
+        .loading.active { display: block; }
+        .diff-content { display: none; }
+        .diff-content.active { display: block; }
+        .spinner { width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #0066cc; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 15px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        .diff-row.highlight > .diff-cell { outline: 2px solid #0066cc; }
+        
+        .nav-buttons { display: flex; gap: 5px; margin-bottom: 10px; position: sticky; top: 0; background: #f5f5f5; padding: 8px 0; z-index: 100; }
+        .nav-buttons button { background: #6c757d; }
+        .nav-buttons button.active { background: #0066cc; }
+        
+        .diff-stats { font-size: 12px; color: #666; margin-left: auto; }
+    </style>
+</head>
+<body>
+    <h1>SPB Bible Comparison</h1>
+    <span>Select two .spb files:</span>
+    <div class="controls">
+        <input type="file" id="file1" accept=".spb">
+        <input type="file" id="file2" accept=".spb">
+        <button onclick="compareFiles()">Compare</button>
+    </div>
+    
+    <div class="comparison" id="comparison">
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <div>Comparing files...</div>
+        </div>
+        
+        <div class="diff-content" id="diffContent">
+            <div class="summary" id="summary"></div>
+            
+            <div class="nav-buttons" id="navButtons">
+                <button id="btnAll" class="active" onclick="setFilter('all')">All</button>
+                <button id="btnDiffs" onclick="setFilter('diffs')">Changes Only</button>
+            <button onclick="jumpToDiff(-1)">Prev Diff ↑</button>
+            <button onclick="jumpToDiff(1)">Next Diff ↓</button>
+            </div>
+            
+            <div class="diff-container" id="diffContainer">
+                <div class="diff-header-row">
+                    <div id="header1"></div>
+                    <div id="header2"></div>
+                </div>
+                <div id="diffBody"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentLines1, currentLines2, currentFilter = 'all';
+        let diffIndices = [];
+        let currentDiffIndex = -1;
+        let cachedDiff = null;
+
+        // --- Web Worker for off-thread diff computation ---
+        const workerCode = `
+        self.onmessage = function(e) {
+            const { lines1, lines2 } = e.data;
+            const result = computeDiff(lines1, lines2);
+            self.postMessage(result);
+        };
+
+        function getLineKey(line) {
+            if (!line) return null;
+            // Header lines: use the header tag as key (e.g. "##Title:")
+            if (line.startsWith('##')) {
+                const colon = line.indexOf(':');
+                return colon !== -1 ? line.substring(0, colon + 1) : line;
+            }
+            // Verse lines: key is first tab-delimited field (e.g. "B001C002V021")
+            const tab = line.indexOf('\\t');
+            if (tab !== -1) return line.substring(0, tab);
+            // Book index lines: use the whole line as key (e.g. "1\\tGenesis\\t50")
+            return line;
+        }
+
+        // Extract verse text content (after the tab-delimited metadata fields)
+        function getVerseText(line) {
+            if (!line) return '';
+            // Verse lines have format: KEY\\tBOOK\\tCHAP\\tVERSE\\tTEXT
+            // Skip first 4 tab-separated fields to get the text
+            let pos = 0;
+            for (let t = 0; t < 4; t++) {
+                const idx = line.indexOf('\\t', pos);
+                if (idx === -1) return line;
+                pos = idx + 1;
+            }
+            return line.substring(pos);
+        }
+
+        function computeDiff(lines1, lines2) {
+            const left = [], right = [];
+
+            // Build key->index map for file2
+            const map2 = new Map();
+            for (let j = 0; j < lines2.length; j++) {
+                const key = getLineKey(lines2[j]);
+                if (key !== null) {
+                    if (!map2.has(key)) map2.set(key, []);
+                    map2.get(key).push(j);
+                }
+            }
+
+            // Track which lines in file2 have been consumed
+            const used2 = new Uint8Array(lines2.length);
+            // For each key in map2, track next available index
+            const map2pos = new Map();
+
+            let ln1 = 1, ln2 = 1;
+            let j2 = 0; // current position in file2 for flushing unmatched
+
+            for (let i = 0; i < lines1.length; i++) {
+                const line1 = lines1[i];
+                const key = getLineKey(line1);
+
+                // Find matching line in file2 by key
+                let matchIdx = -1;
+                if (key !== null && map2.has(key)) {
+                    const indices = map2.get(key);
+                    const pos = map2pos.get(key) || 0;
+                    if (pos < indices.length) {
+                        matchIdx = indices[pos];
+                        map2pos.set(key, pos + 1);
+                    }
+                }
+
+                if (matchIdx !== -1) {
+                    // Flush any unmatched file2 lines before matchIdx
+                    for (let j = j2; j < matchIdx; j++) {
+                        if (!used2[j]) {
+                            // Check if this is a split-verse continuation
+                            const fKey2 = getLineKey(lines2[j]);
+                            const fCont2 = fKey2 ? fKey2.match(/^(B\\d+C\\d+V\\d+)0$/) : null;
+                            if (fCont2 && right.length > 0) {
+                                const fBase2 = fCont2[1];
+                                const pRight = right[right.length - 1];
+                                const pRightKey = getLineKey(pRight.text);
+                                if (pRightKey === fBase2) {
+                                    const vText = getVerseText(lines2[j]);
+                                    pRight.text = pRight.text + ' ' + vText;
+                                    const pLeft = left[left.length - 1];
+                                    if (pLeft.text !== pRight.text) {
+                                        pLeft.status = 'remove';
+                                        pRight.status = 'add';
+                                    } else {
+                                        pLeft.status = '';
+                                        pRight.status = '';
+                                    }
+                                    used2[j] = 1;
+                                    ln2++;
+                                    continue;
+                                }
+                            }
+                            left.push({ num: '', text: '', status: 'empty' });
+                            right.push({ num: ln2++, text: lines2[j], status: 'add' });
+                            used2[j] = 1;
+                        }
+                    }
+                    j2 = matchIdx + 1;
+                    used2[matchIdx] = 1;
+
+                    if (line1 === lines2[matchIdx]) {
+                        // Exact match
+                        left.push({ num: ln1++, text: line1, status: '' });
+                        right.push({ num: ln2++, text: lines2[matchIdx], status: '' });
+                    } else {
+                        // Same key, different content - modification
+                        left.push({ num: ln1++, text: line1, status: 'remove' });
+                        right.push({ num: ln2++, text: lines2[matchIdx], status: 'add' });
+                    }
+                } else {
+                    // Check if this is a split-verse continuation (key like B002C015V0010)
+                    const contMatch = key ? key.match(/^(B\\d+C\\d+V\\d+)0$/) : null;
+                    if (contMatch && left.length > 0) {
+                        const baseKey = contMatch[1];
+                        const prevLeft = left[left.length - 1];
+                        const prevLeftKey = getLineKey(prevLeft.text);
+                        if (prevLeftKey === baseKey) {
+                            // Merge: append this line's verse text to the previous left row
+                            const verseText = getVerseText(line1);
+                            prevLeft.text = prevLeft.text + ' ' + verseText;
+                            // Update status if it was an exact match before
+                            const prevRight = right[right.length - 1];
+                            if (prevLeft.text !== prevRight.text) {
+                                prevLeft.status = 'remove';
+                                prevRight.status = 'add';
+                            } else {
+                                prevLeft.status = '';
+                                prevRight.status = '';
+                            }
+                            ln1++;
+                            continue;
+                        }
+                    }
+                    // Line only in file1
+                    left.push({ num: ln1++, text: line1, status: 'remove' });
+                    right.push({ num: '', text: '', status: 'empty' });
+                }
+            }
+
+            // Flush remaining unmatched file2 lines
+            for (let j = j2; j < lines2.length; j++) {
+                if (!used2[j]) {
+                    // Check if this is a split-verse continuation
+                    const fKey = getLineKey(lines2[j]);
+                    const fContMatch = fKey ? fKey.match(/^(B\\d+C\\d+V\\d+)0$/) : null;
+                    if (fContMatch && right.length > 0) {
+                        const fBaseKey = fContMatch[1];
+                        const prevRight = right[right.length - 1];
+                        const prevRightKey = getLineKey(prevRight.text);
+                        if (prevRightKey === fBaseKey) {
+                            const verseText = getVerseText(lines2[j]);
+                            prevRight.text = prevRight.text + ' ' + verseText;
+                            const prevLeft = left[left.length - 1];
+                            if (prevLeft.text !== prevRight.text) {
+                                prevLeft.status = 'remove';
+                                prevRight.status = 'add';
+                            } else {
+                                prevLeft.status = '';
+                                prevRight.status = '';
+                            }
+                            ln2++;
+                            continue;
+                        }
+                    }
+                    left.push({ num: '', text: '', status: 'empty' });
+                    right.push({ num: ln2++, text: lines2[j], status: 'add' });
+                }
+            }
+
+            return { left, right };
+        }
+        `;
+
+        const workerBlob = new Blob([workerCode], { type: 'application/javascript' });
+        const workerUrl = URL.createObjectURL(workerBlob);
+
+        function compareFiles() {
+            const file1Input = document.getElementById('file1');
+            const file2Input = document.getElementById('file2');
+            const file1 = file1Input.files[0];
+            const file2 = file2Input.files[0];
+
+            if (!file1 || !file2) { alert('Please select both files'); return; }
+
+            document.getElementById('loading').classList.add('active');
+            document.getElementById('diffContent').classList.remove('active');
+            document.getElementById('comparison').classList.add('active');
+
+            Promise.all([file1.text(), file2.text()]).then(([text1, text2]) => {
+                const lines1 = text1.split('\n');
+                const lines2 = text2.split('\n');
+                currentLines1 = lines1;
+                currentLines2 = lines2;
+
+                document.getElementById('header1').textContent = file1.name;
+                document.getElementById('header2').textContent = file2.name;
+
+                const worker = new Worker(workerUrl);
+                worker.onmessage = function(e) {
+                    cachedDiff = e.data;
+                    worker.terminate();
+                    renderFromCachedDiff();
+                    document.getElementById('loading').classList.remove('active');
+                    document.getElementById('diffContent').classList.add('active');
+                };
+                worker.postMessage({ lines1, lines2 });
+            });
+        }
+
+        function setFilter(filter) {
+            currentFilter = filter;
+            document.getElementById('btnAll').className = filter === 'all' ? 'active' : '';
+            document.getElementById('btnDiffs').className = filter === 'diffs' ? 'active' : '';
+            document.getElementById('diffBody').style.display = 'none';
+            document.getElementById('loading').classList.add('active');
+            setTimeout(() => {
+                renderFromCachedDiff();
+                document.getElementById('loading').classList.remove('active');
+                document.getElementById('diffBody').style.display = '';
+            }, 10);
+        }
+
+        function renderFromCachedDiff() {
+            const diff = cachedDiff;
+            let addCount = 0, removeCount = 0;
+            for (const line of diff.left) if (line.status === 'remove') removeCount++;
+            for (const line of diff.right) if (line.status === 'add') addCount++;
+
+            const summary = document.getElementById('summary');
+            const totalDiffs = addCount + removeCount;
+            const allSame = totalDiffs === 0;
+            summary.innerHTML = `
+                <div class="summary-item ${allSame ? 'match' : 'diff'}">${allSame ? '✓ All match' : `⚠ ${totalDiffs} changes`}</div>
+                <div class="summary-item">Lines: ${currentLines1.length} / ${currentLines2.length}</div>
+                <div class="summary-item" style="background:#ffebe9;color:#cf222e">-${removeCount}</div>
+                <div class="summary-item" style="background:#e6ffec;color:#2ea043">+${addCount}</div>
+            `;
+
+            diffIndices = [];
+            currentDiffIndex = -1;
+            let html = '';
+            let rowIdx = 0;
+
+            for (let i = 0; i < diff.left.length; i++) {
+                const l1 = diff.left[i], l2 = diff.right[i];
+                const status1 = l1.status, status2 = l2.status;
+                const isDiff = status1 || status2;
+
+                if (currentFilter === 'diffs' && !isDiff) continue;
+                if (isDiff) diffIndices.push(rowIdx);
+                rowIdx++;
+
+                const numClass1 = status1 === 'remove' ? 'line-num diff-marker' : 'line-num';
+                const numClass2 = status2 === 'add' ? 'line-num diff-marker add' : 'line-num';
+                const displayNum1 = status1 === 'empty' ? '' : l1.num;
+                const displayNum2 = status2 === 'empty' ? '' : l2.num;
+
+                let content1, content2;
+                if (status1 === 'remove' && status2 === 'add') {
+                    const wd = highlightWordDiffs(l1.text, l2.text);
+                    content1 = wd.left;
+                    content2 = wd.right;
+                } else {
+                    content1 = escapeHtml(l1.text);
+                    content2 = escapeHtml(l2.text);
+                }
+
+                html += `<div class="diff-row" data-idx="${i}"><div class="diff-cell ${status1}"><div class="${numClass1}">${displayNum1}</div><div class="line-content">${content1}</div></div><div class="diff-cell ${status2}"><div class="${numClass2}">${displayNum2}</div><div class="line-content">${content2}</div></div></div>`;
+            }
+
+            document.getElementById('diffBody').innerHTML = html;
+        }
+
+        function jumpToDiff(dir) {
+            if (diffIndices.length === 0) return;
+
+            // Remove previous highlight
+            const prev = document.querySelector('.diff-row.highlight');
+            if (prev) prev.classList.remove('highlight');
+
+            if (dir === 1) {
+                currentDiffIndex = (currentDiffIndex + 1) % diffIndices.length;
+            } else {
+                currentDiffIndex = (currentDiffIndex - 1 + diffIndices.length) % diffIndices.length;
+            }
+
+            const rows = document.getElementById('diffBody').children;
+            const target = rows[diffIndices[currentDiffIndex]];
+            if (target) {
+                target.classList.add('highlight');
+                target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        }
+
+        function highlightWordDiffs(text1, text2) {
+            if (!text1 || !text2) return { left: escapeHtml(text1 || ''), right: escapeHtml(text2 || '') };
+
+            const words1 = text1.split(/(\s+)/);
+            const words2 = text2.split(/(\s+)/);
+
+            const m = words1.length, n = words2.length;
+            const dp = new Int16Array((m + 1) * (n + 1));
+            const W = n + 1;
+            for (let i = 1; i <= m; i++) {
+                for (let j = 1; j <= n; j++) {
+                    if (words1[i-1] === words2[j-1]) dp[i*W+j] = dp[(i-1)*W+(j-1)] + 1;
+                    else dp[i*W+j] = Math.max(dp[(i-1)*W+j], dp[i*W+(j-1)]);
+                }
+            }
+
+            // Backtrack to find matched words
+            const match1 = new Uint8Array(m);
+            const match2 = new Uint8Array(n);
+            let i = m, j = n;
+            while (i > 0 && j > 0) {
+                if (words1[i-1] === words2[j-1]) { match1[--i] = 1; match2[--j] = 1; }
+                else if (dp[(i-1)*W+j] >= dp[i*W+(j-1)]) i--;
+                else j--;
+            }
+
+            let html1 = '', html2 = '';
+            for (let k = 0; k < m; k++) {
+                html1 += match1[k] ? escapeHtml(words1[k]) : `<span class="char-diff-remove">${escapeHtml(words1[k])}</span>`;
+            }
+            for (let k = 0; k < n; k++) {
+                html2 += match2[k] ? escapeHtml(words2[k]) : `<span class="char-diff-add">${escapeHtml(words2[k])}</span>`;
+            }
+
+            return { left: html1, right: html2 };
+        }
+    </script>
+</body>
+</html>
