@@ -427,8 +427,17 @@ private fun openLottieGeneratorDialog(
     outputFolder: String?,
     onFileSaved: () -> Unit
 ) {
-    // Locate lottie-generator.html
-    val htmlFile = listOf(
+    // Locate lottie-generator.html — check multiple locations:
+    // 1. Bundled inside the packaged app's resources (Contents/app/resources/Lottie-Gen on macOS)
+    // 2. Relative to the app executable (for DMG installs)
+    // 3. Dev working directory
+    val appResourcesDir = System.getProperty("compose.application.resources.dir")
+    val executablePath = ProcessHandle.current().info().command().orElse(null)
+        ?.let { File(it).parentFile }
+    val htmlFile = listOfNotNull(
+        appResourcesDir?.let { File(it, "Lottie-Gen/lottie-generator.html") },
+        executablePath?.let { File(it, "../app/resources/Lottie-Gen/lottie-generator.html") },
+        executablePath?.let { File(it, "Lottie-Gen/lottie-generator.html") },
         File("Lottie-Gen/lottie-generator.html"),
         File(System.getProperty("user.dir"), "Lottie-Gen/lottie-generator.html")
     ).firstOrNull { it.exists() }

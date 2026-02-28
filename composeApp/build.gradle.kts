@@ -132,6 +132,10 @@ compose.desktop {
             copyright = "© 2025 Church Presenter. All rights reserved."
             vendor = "Church Presenter"
 
+            // Bundle app resources (Lottie-Gen) alongside the packaged app.
+            // These land in Contents/app/resources/ on macOS.
+            appResourcesRootDir.set(project.layout.projectDirectory.dir("src/jvmMain/appResources"))
+
             // Bundle ALL dependency JARs into the distribution — critical for standalone mode
             includeAllModules = true
 
@@ -176,9 +180,6 @@ compose.desktop {
 }
 
 // Workaround: avoid Gradle incremental state tracking on Compose resource generation tasks
-// These tasks sometimes fail snapshotting when build outputs are OneDrive placeholders. This
-// marks them as untracked (preferred) or falls back to disabling up-to-date checking.
-
 val problematicTasks = setOf(
     "generateResourceAccessorsForJvmMain",
     "generateComposeResClass",
@@ -188,3 +189,23 @@ val problematicTasks = setOf(
 tasks.matching { it.name in problematicTasks }.configureEach {
     doNotTrackState("Temporary workaround: OneDrive placeholder snapshot errors")
 }
+
+// Copy Lottie-Gen into appResources so it gets bundled with the packaged app.
+val copyLottieGen by tasks.registering(Copy::class) {
+    from(rootProject.file("Lottie-Gen"))
+    into(layout.projectDirectory.dir("src/jvmMain/appResources/common/Lottie-Gen"))
+}
+
+afterEvaluate {
+    tasks.matching { t ->
+        t.name == "prepareAppResources" ||
+        t.name.startsWith("createDistributable") ||
+        t.name.startsWith("packageDmg") ||
+        t.name.startsWith("packageMsi") ||
+        t.name.startsWith("packageExe") ||
+        t.name.startsWith("packageDeb")
+    }.configureEach {
+        dependsOn(copyLottieGen)
+    }
+}
+

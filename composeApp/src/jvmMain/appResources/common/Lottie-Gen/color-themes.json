@@ -1,0 +1,82 @@
+[
+  {
+    "name": "Classic Red",
+    "colors": {
+      "nameColor": "#F2F2F2",
+      "infoColor": "#CCCCCC",
+      "accentColor": "#D54141",
+      "bgColor": "#222222",
+      "borderColor": "#D54141"
+    }
+  },
+  {
+    "name": "Ocean Blue",
+    "colors": {
+      "nameColor": "#FFFFFF",
+      "infoColor": "#B0D4F1",
+      "accentColor": "#1A73E8",
+      "bgColor": "#0D253F",
+      "borderColor": "#1A73E8"
+    }
+  },
+  {
+    "name": "Emerald",
+    "colors": {
+      "nameColor": "#FFFFFF",
+      "infoColor": "#A8E6CF",
+      "accentColor": "#2ECC71",
+      "bgColor": "#1A332A",
+      "borderColor": "#27AE60"
+    }
+  },
+  {
+    "name": "Sunset",
+    "colors": {
+      "nameColor": "#FFFFFF",
+      "infoColor": "#FFD9B3",
+      "accentColor": "#FF6B35",
+      "bgColor": "#2D1810",
+      "borderColor": "#E85D26"
+    }
+  },
+  {
+    "name": "Purple Haze",
+    "colors": {
+      "nameColor": "#F0E6FF",
+      "infoColor": "#C9A8FF",
+      "accentColor": "#8B5CF6",
+      "bgColor": "#1A1033",
+      "borderColor": "#7C3AED"
+    }
+  },
+  {
+    "name": "Minimal Light",
+    "colors": {
+      "nameColor": "#222222",
+      "infoColor": "#555555",
+      "accentColor": "#333333",
+      "bgColor": "#F5F5F5",
+      "borderColor": "#DDDDDD"
+    }
+  },
+  {
+    "name": "Gold",
+    "colors": {
+      "nameColor": "#FFFFFF",
+      "infoColor": "#F0D9A0",
+      "accentColor": "#D4A934",
+      "bgColor": "#1C1408",
+      "borderColor": "#B8941E"
+    }
+  },
+  {
+    "name": "Neon Pink",
+    "colors": {
+      "nameColor": "#FFFFFF",
+      "infoColor": "#FFB3D9",
+      "accentColor": "#FF2D8A",
+      "bgColor": "#1A0A12",
+      "borderColor": "#E6196E"
+    }
+  }
+]
