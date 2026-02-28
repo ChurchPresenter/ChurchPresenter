@@ -2801,14 +2801,14 @@ function generateStyle8(builder, cfg) {
   const marginHPx = remToPx(marginH, baseSize);
   const marginVPx = remToPx(marginV, baseSize);
   const borderPx = borderThickness * baseSize * 0.15;
-  const slant = emToPx(2.5, baseSize);
+  const isRight = align === 'right';
+  const isCenter = align === 'center';
+  const slant = isCenter ? 0 : emToPx(2.5, baseSize);
 
   const bgLottie = hexToLottie(bgColor);
   const borderLottie = hexToLottie(borderColor);
   const nameCLottie = hexToLottie(nameColor);
   const infoCLottie = hexToLottie(infoColor);
-
-  const isRight = align === 'right';
 
   // Text measurements
   const nameM = measureText(nameText, fontFamily, nameSizePx, nameWeight, nameTransform);
@@ -2852,16 +2852,18 @@ function generateStyle8(builder, cfg) {
     ];
   }
 
-  // Shift both BG and border down together
-  const bgInset = emToPx(1.5, baseSize);
+  // Shift both BG and border down together (less shift for center since no slant)
+  const bgInset = isCenter ? emToPx(-0.3, baseSize) : emToPx(1.5, baseSize);
   vertices[0] = [vertices[0][0], vertices[0][1] + bgInset];
   vertices[1] = [vertices[1][0], vertices[1][1] + bgInset];
   const lineVertices = [vertices[0], vertices[1]];
 
   // Text positioning
-  const justify = isRight ? 1 : 0;
+  const justify = isCenter ? 2 : (isRight ? 1 : 0);
   let textX;
-  if (isRight) {
+  if (isCenter) {
+    textX = canvasW / 2;
+  } else if (isRight) {
     textX = canvasW - marginHPx - paddingX;
   } else {
     textX = marginHPx + paddingX;
@@ -3331,7 +3333,7 @@ function generateStyle10(builder, cfg) {
   const nameContentW = hideName ? 0 : nameM.width + paddingX * 2;
   const infoContentW = hideInfo ? 0 : infoM.width + paddingX * 2;
   const textW = Math.max(nameContentW, infoContentW, emToPx(4, baseSize));
-  const lineW = textW + emToPx(2, baseSize);
+  const lineW = textW + emToPx(0.5, baseSize);
 
   // Vertical positioning: top line, name, bottom line, info
   const nameBlockH = hideName ? 0 : nameSizePx;
@@ -3394,45 +3396,70 @@ function generateStyle10(builder, cfg) {
 
   // Name slides up from bottom line to its position
   const nameSlideKFs = buildKeyframes([
-    { pct: 0, value: [nameTextX, bottomLineCY + nameSizePx * 0.35, 0] },
-    { pct: 25, value: [nameTextX, bottomLineCY + nameSizePx * 0.35, 0] },
+    { pct: 0, value: [nameTextX, bottomLineCY + nameSizePx * 1.2, 0] },
+    { pct: 25, value: [nameTextX, bottomLineCY + nameSizePx * 1.2, 0] },
     { pct: 55, value: [nameTextX, nameTextY, 0] },
     { pct: 100, value: [nameTextX, nameTextY, 0] }
   ], inF, holdF, outF, EASING);
 
-  // Name opacity: hidden until slide starts
-  const nameOpacityKFs = buildKeyframes([
-    { pct: 0, value: [0] },
-    { pct: 24, value: [0] },
-    { pct: 30, value: [nameColorAlpha] },
-    { pct: 100, value: [nameColorAlpha] }
-  ], inF, holdF, outF, EASING);
+  // Name mask: covers the area above the bottom line where name will be visible
+  const nameMaskH = nameBlockH + gapName * 2;
+  const nameMaskCY = nameCY;
 
   // ============= LAYERS (top to bottom render order) =============
 
-  // --- Name text (slides up from bottom line) ---
+  // --- Name mask + text (slides up from behind bottom line) ---
   if (!hideName) {
+    builder.addShapeLayer('Name Mask', [makeGroup([
+      makeRect(lineW, nameMaskH, 0),
+      makeFill([1, 1, 1])
+    ])], {
+      o: LottieBuilder.staticProp(100), r: LottieBuilder.staticProp(0),
+      p: LottieBuilder.staticProp([linePosX, nameMaskCY, 0]),
+      a: LottieBuilder.staticProp([lineAnchorX, 0, 0]),
+      s: LottieBuilder.staticProp([100, 100, 100])
+    }, { td: 1 });
+
     const nameTextData = makeTextData(nameText, fontFamily, nameSizePx, parseInt(nameWeight), nameCLottie, nameTransform, justify);
 
     builder.addFont(fontFamily, parseInt(nameWeight));
     builder.addTextLayer('Name', nameTextData, {
-      o: LottieBuilder.animatedProp(nameOpacityKFs), r: LottieBuilder.staticProp(0),
+      o: LottieBuilder.staticProp(nameColorAlpha), r: LottieBuilder.staticProp(0),
       p: LottieBuilder.animatedProp(nameSlideKFs),
       a: LottieBuilder.staticProp([0, 0, 0]), s: LottieBuilder.staticProp([100, 100, 100])
-    });
+    }, { tt: 1 });
   }
 
-  // --- Info text ---
+  // --- Info mask + text (slides down from behind bottom line) ---
   if (!hideInfo) {
+    const infoMaskH = infoBlockH + gapInfo * 2;
+    const infoMaskCY = infoCY;
+
+    builder.addShapeLayer('Info Mask', [makeGroup([
+      makeRect(lineW, infoMaskH, 0),
+      makeFill([1, 1, 1])
+    ])], {
+      o: LottieBuilder.staticProp(100), r: LottieBuilder.staticProp(0),
+      p: LottieBuilder.staticProp([linePosX, infoMaskCY, 0]),
+      a: LottieBuilder.staticProp([lineAnchorX, 0, 0]),
+      s: LottieBuilder.staticProp([100, 100, 100])
+    }, { td: 1 });
+
+    const infoSlideKFs = buildKeyframes([
+      { pct: 0, value: [infoTextX, bottomLineCY - infoSizePx * 0.5, 0] },
+      { pct: 30, value: [infoTextX, bottomLineCY - infoSizePx * 0.5, 0] },
+      { pct: 60, value: [infoTextX, infoTextY, 0] },
+      { pct: 100, value: [infoTextX, infoTextY, 0] }
+    ], inF, holdF, outF, EASING);
+
     const infoTextData = makeTextData(infoText, fontFamily, infoSizePx, parseInt(infoWeight), infoCLottie, infoTransform, justify);
-    infoTextData.a.push(makeTextRevealAnimator(30, 65, 0, inF, holdF, outF));
 
     builder.addFont(fontFamily, parseInt(infoWeight));
     builder.addTextLayer('Info', infoTextData, {
       o: LottieBuilder.staticProp(infoColorAlpha), r: LottieBuilder.staticProp(0),
-      p: LottieBuilder.staticProp([infoTextX, infoTextY, 0]),
+      p: LottieBuilder.animatedProp(infoSlideKFs),
       a: LottieBuilder.staticProp([0, 0, 0]), s: LottieBuilder.staticProp([100, 100, 100])
-    });
+    }, { tt: 1 });
   }
 
   // --- Top line (expands from alignment side) ---
@@ -3663,7 +3690,7 @@ document.getElementById('styleType').addEventListener('change', () => {
   const align = document.getElementById('alignment');
   const centerOpt = align.querySelector('option[value="center"]');
   const sv = document.getElementById('styleType').value;
-  if (sv === '4' || sv === '8') {
+  if (sv === '4') {
     centerOpt.disabled = true;
     if (align.value === 'center') { align.value = 'left'; }
   } else {
