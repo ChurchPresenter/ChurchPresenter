@@ -22,6 +22,8 @@ fun currentOsClassifier(): String {
 kotlin {
     jvm()
 
+    jvmToolchain(21)
+
     sourceSets {
         commonMain.dependencies {
             implementation(libs.compose.runtime)
@@ -51,14 +53,18 @@ kotlin {
             implementation("org.apache.poi:poi:5.2.5")
             implementation("org.apache.poi:poi-ooxml:5.2.5")
             implementation("org.apache.poi:poi-scratchpad:5.2.5")
-            // JavaFX for video playback — bundle all platforms so the installer works on any OS
+            // JavaFX for video playback
             val jfxClassifier = currentOsClassifier()
-            listOf("javafx-base", "javafx-graphics", "javafx-media", "javafx-swing", "javafx-controls", "javafx-web").forEach { module ->
+            val jfxModules = listOf("javafx-base", "javafx-graphics", "javafx-media", "javafx-swing", "javafx-controls", "javafx-web")
+            jfxModules.forEach { module ->
+                // Platform-neutral jar (contains the Java classes)
+                implementation("org.openjfx:$module:21")
+                // Platform-specific jar (contains the native libraries)
                 implementation("org.openjfx:$module:21:$jfxClassifier")
             }
-            // Windows-specific: also pull win-x86_64 natives when building on Windows
+            // Windows-specific: also pull win natives when building on Windows
             if (jfxClassifier == "win") {
-                listOf("javafx-base", "javafx-graphics", "javafx-media", "javafx-swing", "javafx-controls", "javafx-web").forEach { module ->
+                jfxModules.forEach { module ->
                     runtimeOnly("org.openjfx:$module:21:win")
                 }
             }
@@ -71,6 +77,24 @@ compose.desktop {
     application {
         mainClass = "org.churchpresenter.app.churchpresenter.MainKt"
 
+        // Java 24 breaks jlink/jpackage used by Compose Desktop packaging.
+        // Use a full Java 21 JDK locally (must include jpackage).
+        // On CI (GitHub Actions) Java 21 is set up via actions/setup-java.
+        val jdk21Paths = listOf(
+            // Temurin 21 installed to user Library
+            "${System.getProperty("user.home")}/Library/Java/JavaVirtualMachines/temurin-21.jdk/Contents/Home",
+            "${System.getProperty("user.home")}/Library/Java/JavaVirtualMachines/jdk-21.0.6+7/Contents/Home",
+            // Temurin 21 installed via .pkg to system
+            "/Library/Java/JavaVirtualMachines/temurin-21.jdk/Contents/Home",
+            "/Library/Java/JavaVirtualMachines/jdk-21.jdk/Contents/Home"
+        )
+        val localJdk21 = jdk21Paths.firstOrNull { path ->
+            File("$path/bin/jpackage").exists()
+        }
+        if (localJdk21 != null) {
+            javaHome = localJdk21
+        }
+
         jvmArgs(
             // Memory
             "-Xms512m",
@@ -82,12 +106,9 @@ compose.desktop {
             "-XX:G1ReservePercent=20",
             "-XX:MaxGCPauseMillis=50",
             "-XX:+UseStringDeduplication",
-            // Rendering
-            "-Dskiko.renderApi=OPENGL",
+            // Rendering - macOS requires Metal, other platforms use OpenGL
             "-Dawt.useSystemAAFontSettings=on",
             "-Dswing.aatext=true",
-            // JavaFX modules required at runtime
-            "--add-modules=javafx.base,javafx.graphics,javafx.media,javafx.swing,javafx.controls,javafx.web",
             // Reflective access needed by Apache POI, PDFBox, and JavaFX internals
             "--add-opens=java.base/java.lang=ALL-UNNAMED",
             "--add-opens=java.base/java.lang.reflect=ALL-UNNAMED",
@@ -95,9 +116,7 @@ compose.desktop {
             "--add-opens=java.base/java.util.concurrent=ALL-UNNAMED",
             "--add-opens=java.base/java.io=ALL-UNNAMED",
             "--add-opens=java.base/java.nio=ALL-UNNAMED",
-            "--add-opens=java.base/sun.nio.ch=ALL-UNNAMED",
-            "--add-opens=javafx.graphics/com.sun.javafx.application=ALL-UNNAMED",
-            "--add-opens=javafx.graphics/com.sun.glass.ui=ALL-UNNAMED"
+            "--add-opens=java.base/sun.nio.ch=ALL-UNNAMED"
         )
 
         buildTypes.release.proguard {
@@ -116,15 +135,29 @@ compose.desktop {
             // Bundle ALL dependency JARs into the distribution — critical for standalone mode
             includeAllModules = true
 
+            val commonJvmArgs = listOf(
+                "-Xms512m",
+                "-Xmx1536m",
+                "-XX:+UseG1GC",
+                "-XX:+UnlockExperimentalVMOptions",
+                "-XX:G1NewSizePercent=20",
+                "-XX:G1ReservePercent=20",
+                "-XX:MaxGCPauseMillis=50",
+                "-XX:+UseStringDeduplication",
+                "-Dawt.useSystemAAFontSettings=on",
+                "-Dswing.aatext=true",
+                "--add-opens=java.base/java.lang=ALL-UNNAMED",
+                "--add-opens=java.base/java.lang.reflect=ALL-UNNAMED",
+                "--add-opens=java.base/java.util=ALL-UNNAMED",
+                "--add-opens=java.base/java.util.concurrent=ALL-UNNAMED",
+                "--add-opens=java.base/java.io=ALL-UNNAMED",
+                "--add-opens=java.base/java.nio=ALL-UNNAMED",
+                "--add-opens=java.base/sun.nio.ch=ALL-UNNAMED"
+            )
+
             macOS {
                 bundleID = "org.churchpresenter.app"
-                jvmArgs(
-                    "--add-modules=javafx.base,javafx.graphics,javafx.media,javafx.swing,javafx.controls,javafx.web",
-                    "--add-opens=java.base/java.lang=ALL-UNNAMED",
-                    "--add-opens=java.base/java.io=ALL-UNNAMED",
-                    "--add-opens=java.base/java.nio=ALL-UNNAMED",
-                    "--add-opens=javafx.graphics/com.sun.javafx.application=ALL-UNNAMED"
-                )
+                jvmArgs(*commonJvmArgs.toTypedArray())
             }
 
             windows {
@@ -132,28 +165,11 @@ compose.desktop {
                 perUserInstall = true
                 dirChooser = true
                 upgradeUuid = "A1B2C3D4-E5F6-4789-A012-3456789ABCDE"
-                // Windows-specific JVM args added to the launcher script
-                jvmArgs(
-                    "--add-modules=javafx.base,javafx.graphics,javafx.media,javafx.swing,javafx.controls,javafx.web",
-                    "--add-opens=java.base/java.lang=ALL-UNNAMED",
-                    "--add-opens=java.base/java.lang.reflect=ALL-UNNAMED",
-                    "--add-opens=java.base/java.util=ALL-UNNAMED",
-                    "--add-opens=java.base/java.io=ALL-UNNAMED",
-                    "--add-opens=java.base/java.nio=ALL-UNNAMED",
-                    "--add-opens=java.base/sun.nio.ch=ALL-UNNAMED",
-                    "--add-opens=javafx.graphics/com.sun.javafx.application=ALL-UNNAMED",
-                    "--add-opens=javafx.graphics/com.sun.glass.ui=ALL-UNNAMED"
-                )
+                jvmArgs(*commonJvmArgs.toTypedArray())
             }
 
             linux {
-                jvmArgs(
-                    "--add-modules=javafx.base,javafx.graphics,javafx.media,javafx.swing,javafx.controls,javafx.web",
-                    "--add-opens=java.base/java.lang=ALL-UNNAMED",
-                    "--add-opens=java.base/java.io=ALL-UNNAMED",
-                    "--add-opens=java.base/java.nio=ALL-UNNAMED",
-                    "--add-opens=javafx.graphics/com.sun.javafx.application=ALL-UNNAMED"
-                )
+                jvmArgs(*commonJvmArgs.toTypedArray())
             }
         }
     }
