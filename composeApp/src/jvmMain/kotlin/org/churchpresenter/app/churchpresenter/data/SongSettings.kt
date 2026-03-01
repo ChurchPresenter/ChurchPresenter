@@ -232,7 +232,11 @@ data class AnnouncementsSettings(
     val horizontalAlignment: String = Constants.CENTER,
     val position: String = Constants.CENTER,
     val animationType: String = Constants.ANIMATION_SLIDE_FROM_BOTTOM,
-    val animationDuration: Int = 500
+    val animationDuration: Int = 500,
+    val timerMinutes: Int = 0,
+    val timerSeconds: Int = 0,
+    val timerTextColor: String = "#FFFFFF",
+    val timerExpiredText: String = ""
 )
 
 @Serializable

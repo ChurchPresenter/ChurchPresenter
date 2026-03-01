@@ -289,18 +289,22 @@ fun MainDesktop(
                                     onSettingsChange { settings ->
                                         settings.copy(
                                             announcementsSettings = settings.announcementsSettings.copy(
-                                                text             = item.text,
-                                                textColor        = item.textColor,
-                                                backgroundColor  = item.backgroundColor,
-                                                fontSize         = item.fontSize,
-                                                fontType         = item.fontType,
-                                                bold             = item.bold,
-                                                italic           = item.italic,
-                                                underline        = item.underline,
-                                                shadow           = item.shadow,
-                                                position         = item.position,
-                                                animationType    = item.animationType,
-                                                animationDuration = item.animationDuration
+                                                text              = item.text,
+                                                textColor         = item.textColor,
+                                                backgroundColor   = item.backgroundColor,
+                                                fontSize          = item.fontSize,
+                                                fontType          = item.fontType,
+                                                bold              = item.bold,
+                                                italic            = item.italic,
+                                                underline         = item.underline,
+                                                shadow            = item.shadow,
+                                                position          = item.position,
+                                                animationType     = item.animationType,
+                                                animationDuration = item.animationDuration,
+                                                timerMinutes      = item.timerMinutes,
+                                                timerSeconds      = item.timerSeconds,
+                                                timerTextColor    = item.timerTextColor,
+                                                timerExpiredText  = item.timerExpiredText
                                             )
                                         )
                                     }
@@ -464,6 +468,7 @@ fun MainDesktop(
                                 onSettingsChange = onSettingsChange,
                                 presenterManager = presenterManager,
                                 onAddToSchedule = { settings ->
+                                    val isTimer = settings.timerMinutes > 0 || settings.timerSeconds > 0
                                     currentScheduleActions.addAnnouncement(
                                         settings.text,
                                         settings.textColor,
@@ -476,7 +481,12 @@ fun MainDesktop(
                                         settings.shadow,
                                         settings.position,
                                         settings.animationType,
-                                        settings.animationDuration
+                                        settings.animationDuration,
+                                        isTimer,
+                                        settings.timerMinutes,
+                                        settings.timerSeconds,
+                                        settings.timerTextColor,
+                                        settings.timerExpiredText
                                     )
                                 }
                             )

@@ -536,7 +536,20 @@
     <string name="license_decline_button">Decline &amp; Exit</string>
     <string name="license_prompt">You must accept the GNU GPL v3 license to use Church Presenter.</string>
 
-    <!-- Schedule live preview -->
+    <!-- Announcements timer -->
+    <string name="timer_title">Timer</string>
+    <string name="timer_minutes">min</string>
+    <string name="timer_seconds">sec</string>
+    <string name="timer_start">Start</string>
+    <string name="timer_pause">Pause</string>
+    <string name="timer_resume">Resume</string>
+    <string name="timer_reset">Reset</string>
+    <string name="timer_text_color">Timer Color</string>
+    <string name="timer_expired_text_label">Text when timer expires</string>
+    <string name="timer_expired_text_hint">Enter message to show when done…</string>
+    <string name="timer_expired">Time\'s up!</string>
+
+    <!-- Live preview -->
     <string name="live_preview_title">Live</string>
     <string name="live_preview_nothing">Nothing is live</string>
     <string name="live_preview_bible">Bible</string>

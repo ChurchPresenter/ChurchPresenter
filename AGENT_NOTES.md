@@ -7,6 +7,8 @@ This document tracks coding standards, common mistakes, and debugging notes for 
 ### 1. Import Statements
 - ❌ **NEVER** use wildcard imports like `import churchpresenter.composeapp.generated.resources.*`
 - ✅ **ALWAYS** use explicit imports for each resource
+- ❌ **NEVER** use fully qualified type names inline (e.g. `org.churchpresenter.app.churchpresenter.data.AnnouncementsSettings`) when the type can simply be imported at the top of the file
+- ✅ **ALWAYS** add an `import` statement and use the short name
 
 ### 2. String Resources
 - ❌ **NEVER** use hard-coded strings in user-facing UI
