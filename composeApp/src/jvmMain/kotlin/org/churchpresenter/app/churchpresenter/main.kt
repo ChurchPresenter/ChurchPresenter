@@ -67,6 +67,7 @@ import org.churchpresenter.app.churchpresenter.viewmodel.LocalMediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.MediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.app.churchpresenter.composables.preWarmJavaFX
+import org.churchpresenter.app.churchpresenter.server.CompanionServer
 import org.jetbrains.compose.resources.stringResource
 import java.awt.GraphicsDevice
 import java.util.Locale
@@ -108,6 +109,7 @@ fun main() {
             }
             mutableStateOf(savedTheme)
         }
+        val companionServer = remember { CompanionServer() }
         var showOptionsDialog by remember { mutableStateOf(false) }
         var showKeyboardShortcutsDialog by remember { mutableStateOf(false) }
         var selectedScheduleItemId by remember { mutableStateOf<String?>(null) }
@@ -185,6 +187,7 @@ fun main() {
                                 isVisible = showOptionsDialog,
                                 theme = theme,
                                 settingsManager = settingsManager,
+                                companionServer = companionServer,
                                 onDismiss = { showOptionsDialog = false },
                                 onSave = { updated ->
                                     appSettings = updated
