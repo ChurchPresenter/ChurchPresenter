@@ -60,6 +60,10 @@ import java.awt.Toolkit
 import java.awt.datatransfer.StringSelection
 import java.util.UUID
 
+/**
+ * Settings tab for the Ktor companion server.
+ * Full API documentation: see COMPANION_API.md in the project root.
+ */
 @Composable
 fun ServerSettingsTab(
     settings: AppSettings,
