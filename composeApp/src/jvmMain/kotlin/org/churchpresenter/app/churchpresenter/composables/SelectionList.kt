@@ -100,6 +100,7 @@ fun SelectionListWithIndex(
                         )
                         .padding(6.dp),
                     color = MaterialTheme.colorScheme.onSurface,
+                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
                 )
             }
         }

@@ -1,5 +1,8 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.TooltipArea
+import androidx.compose.foundation.TooltipPlacement
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -15,14 +18,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -60,6 +64,9 @@ import churchpresenter.composeapp.generated.resources.edit_song
 import churchpresenter.composeapp.generated.resources.exact_match
 import churchpresenter.composeapp.generated.resources.filter_type_colon
 import churchpresenter.composeapp.generated.resources.go_live
+import churchpresenter.composeapp.generated.resources.ic_cast
+import churchpresenter.composeapp.generated.resources.ic_edit
+import churchpresenter.composeapp.generated.resources.ic_playlist_add
 import churchpresenter.composeapp.generated.resources.no_lyrics_available
 import churchpresenter.composeapp.generated.resources.number
 import churchpresenter.composeapp.generated.resources.search
@@ -78,8 +85,10 @@ import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.viewmodel.SongsViewModel
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun SongsTab(
     modifier: Modifier = Modifier,
@@ -173,13 +182,21 @@ fun SongsTab(
         mutableStateOf(with(density) { appSettings.songSettings.colWidthTune.dp.toPx() })
     }
 
+    // Panel split — lyrics panel width in px; 0 means "not yet set, use default"
+    val defaultLyricsPx = with(density) { 300.dp.toPx() }
+    var lyricsPanelPx by remember(appSettings.songSettings.lyricsPanelWidthDp) {
+        val saved = appSettings.songSettings.lyricsPanelWidthDp
+        mutableStateOf(if (saved > 0) with(density) { saved.dp.toPx() } else defaultLyricsPx)
+    }
+
     fun saveColWidths() {
         onSettingsChangeState.value { s ->
             s.copy(songSettings = s.songSettings.copy(
-                colWidthNumber   = with(density) { colWNumber.toDp().value.toInt() },
-                colWidthTitle    = with(density) { colWTitle.toDp().value.toInt() },
-                colWidthSongbook = with(density) { colWSongbook.toDp().value.toInt() },
-                colWidthTune     = with(density) { colWTune.toDp().value.toInt() }
+                colWidthNumber      = with(density) { colWNumber.toDp().value.toInt() },
+                colWidthTitle       = with(density) { colWTitle.toDp().value.toInt() },
+                colWidthSongbook    = with(density) { colWSongbook.toDp().value.toInt() },
+                colWidthTune        = with(density) { colWTune.toDp().value.toInt() },
+                lyricsPanelWidthDp  = with(density) { lyricsPanelPx.toDp().value.toInt() }
             ))
         }
     }
@@ -236,8 +253,8 @@ fun SongsTab(
             }
             .focusable()
     ) {
-        // Left panel — Search and song list
-        Column(modifier = Modifier.weight(0.6f).fillMaxHeight()) {
+        // Left panel — Search and song list (fills remaining space)
+        Column(modifier = Modifier.weight(1f).fillMaxHeight()) {
             // Search controls
             Column(modifier = Modifier.padding(8.dp)) {
                 DropdownSelector(
@@ -310,11 +327,11 @@ fun SongsTab(
                         .clickable { viewModel.updateSort(Constants.SORT_NUMBER) }
                 )
                 DragHandle(
-                    onDrag = { colWTune = (colWTune + it).coerceIn(with(density) { 30.dp.toPx() }, with(density) { 200.dp.toPx() }) },
+                    onDrag = { colWNumber = (colWNumber + it).coerceIn(with(density) { 30.dp.toPx() }, with(density) { 200.dp.toPx() }) },
                     onDragEnd = ::saveColWidths
                 )
                 Text(
-                    text = stringResource(Res.string.tune) + viewModel.getSortIndicator(Constants.SORT_TUNE),
+                    text = stringResource(Res.string.title) + viewModel.getSortIndicator(Constants.SORT_TITLE),
                     style = MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.secondary,
@@ -430,53 +447,144 @@ fun SongsTab(
             }
         }
 
-        // Right panel — Lyrics display
+        // Vertical drag handle — resize lyrics panel
+        Box(
+            modifier = Modifier
+                .width(6.dp)
+                .fillMaxHeight()
+                .background(MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f))
+                .pointerHoverIcon(PointerIcon.Hand)
+                .pointerInput(Unit) {
+                    detectHorizontalDragGestures(
+                        onDragEnd = { saveColWidths() }
+                    ) { _, amount ->
+                        lyricsPanelPx = (lyricsPanelPx - amount)
+                            .coerceIn(
+                                with(density) { 150.dp.toPx() },
+                                with(density) { 800.dp.toPx() }
+                            )
+                    }
+                }
+        )
+
+        // Right panel — Lyrics display (fixed width, resizable via drag handle)
         Column(
             modifier = Modifier
-                .weight(0.4f)
+                .width(with(density) { lyricsPanelPx.toDp() })
                 .fillMaxHeight()
                 .background(MaterialTheme.colorScheme.surfaceVariant)
                 .padding(8.dp)
         ) {
-            // Header row with action buttons
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
+            // Header row with action buttons — switches to icon-only when width is tight
+            val editSongStr    = stringResource(Res.string.edit_song)
+            val goLiveStr      = stringResource(Res.string.go_live)
+            val addScheduleStr = stringResource(Res.string.add_to_schedule)
+
+            androidx.compose.foundation.layout.BoxWithConstraints(
+                modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
             ) {
-                if (selectedSongIndex >= 0 && selectedSongIndex < filteredSongs.size) {
-                    Button(
-                        modifier = Modifier.wrapContentSize().padding(end = 4.dp),
-                        onClick = {
-                            songToEdit = filteredSongs[selectedSongIndex]
-                            showEditDialog = true
-                        },
-                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary)
-                    ) {
-                        Text(stringResource(Res.string.edit_song), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onTertiary, maxLines = 1)
-                    }
-                }
-
-                Button(
-                    modifier = Modifier.wrapContentSize(),
-                    onClick = { onPresenting(Presenting.LYRICS) },
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                val useIcons = maxWidth < 220.dp
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text(stringResource(Res.string.go_live), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onPrimary, maxLines = 2)
-                }
-
-                if (onAddToSchedule != null && selectedSongIndex >= 0 && selectedSongIndex < filteredSongs.size) {
-                    Button(
-                        modifier = Modifier.wrapContentSize().padding(start = 4.dp),
-                        onClick = {
-                            val item = filteredSongs.getOrNull(selectedSongIndex)
-                            if (item != null) {
-                                onAddToSchedule(item.number.toIntOrNull() ?: 0, item.title, item.songbook)
+                    if (selectedSongIndex >= 0 && selectedSongIndex < filteredSongs.size) {
+                        if (useIcons) {
+                            TooltipArea(
+                                tooltip = {
+                                    androidx.compose.material3.Surface(shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
+                                        Text(editSongStr, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
+                                    }
+                                },
+                                tooltipPlacement = TooltipPlacement.CursorPoint()
+                            ) {
+                                androidx.compose.material3.IconButton(
+                                    onClick = { songToEdit = filteredSongs[selectedSongIndex]; showEditDialog = true },
+                                    colors = androidx.compose.material3.IconButtonDefaults.iconButtonColors(
+                                        containerColor = MaterialTheme.colorScheme.tertiary,
+                                        contentColor = MaterialTheme.colorScheme.onTertiary
+                                    )
+                                ) {
+                                    Icon(painter = painterResource(Res.drawable.ic_edit), contentDescription = editSongStr, modifier = Modifier.size(20.dp))
+                                }
                             }
-                        },
-                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
-                    ) {
-                        Text(stringResource(Res.string.add_to_schedule), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSecondary, maxLines = 2)
+                        } else {
+                            Button(
+                                modifier = Modifier.padding(end = 4.dp),
+                                onClick = { songToEdit = filteredSongs[selectedSongIndex]; showEditDialog = true },
+                                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary)
+                            ) {
+                                Text(editSongStr, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onTertiary, maxLines = 1)
+                            }
+                        }
+                    }
+
+                    if (useIcons) {
+                        TooltipArea(
+                            tooltip = {
+                                androidx.compose.material3.Surface(shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
+                                    Text(goLiveStr, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
+                                }
+                            },
+                            tooltipPlacement = TooltipPlacement.CursorPoint()
+                        ) {
+                            androidx.compose.material3.IconButton(
+                                onClick = { onPresenting(Presenting.LYRICS) },
+                                colors = androidx.compose.material3.IconButtonDefaults.iconButtonColors(
+                                    containerColor = MaterialTheme.colorScheme.primary,
+                                    contentColor = MaterialTheme.colorScheme.onPrimary
+                                )
+                            ) {
+                                Icon(painter = painterResource(Res.drawable.ic_cast), contentDescription = goLiveStr, modifier = Modifier.size(20.dp))
+                            }
+                        }
+                    } else {
+                        Button(
+                            onClick = { onPresenting(Presenting.LYRICS) },
+                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                        ) {
+                            Text(goLiveStr, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onPrimary, maxLines = 1)
+                        }
+                    }
+
+                    if (onAddToSchedule != null && selectedSongIndex >= 0 && selectedSongIndex < filteredSongs.size) {
+                        if (useIcons) {
+                            TooltipArea(
+                                tooltip = {
+                                    androidx.compose.material3.Surface(shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
+                                        Text(addScheduleStr, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
+                                    }
+                                },
+                                tooltipPlacement = TooltipPlacement.CursorPoint()
+                            ) {
+                                androidx.compose.material3.IconButton(
+                                    onClick = {
+                                        filteredSongs.getOrNull(selectedSongIndex)?.let { item ->
+                                            onAddToSchedule(item.number.toIntOrNull() ?: 0, item.title, item.songbook)
+                                        }
+                                    },
+                                    colors = androidx.compose.material3.IconButtonDefaults.iconButtonColors(
+                                        containerColor = MaterialTheme.colorScheme.secondary,
+                                        contentColor = MaterialTheme.colorScheme.onSecondary
+                                    )
+                                ) {
+                                    Icon(painter = painterResource(Res.drawable.ic_playlist_add), contentDescription = addScheduleStr, modifier = Modifier.size(20.dp))
+                                }
+                            }
+                        } else {
+                            Button(
+                                modifier = Modifier.padding(start = 4.dp),
+                                onClick = {
+                                    filteredSongs.getOrNull(selectedSongIndex)?.let { item ->
+                                        onAddToSchedule(item.number.toIntOrNull() ?: 0, item.title, item.songbook)
+                                    }
+                                },
+                                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
+                            ) {
+                                Text(addScheduleStr, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSecondary, maxLines = 1)
+                            }
+                        }
                     }
                 }
             }

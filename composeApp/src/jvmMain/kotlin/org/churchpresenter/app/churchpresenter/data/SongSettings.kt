@@ -31,6 +31,9 @@ data class SongSettings(
     val colWidthSongbook: Int = 100,
     val colWidthTune: Int = 60,
 
+    // Left/right panel split — lyrics panel width in dp (0 = use default weight)
+    val lyricsPanelWidthDp: Int = 0,
+
     // Title settings
     val titleDisplay: String = Constants.FIRST_PAGE,
     val titleFontSize: Int = 70,
@@ -86,6 +89,10 @@ data class BibleSettings(
     // Bible selection
     val primaryBible: String = "",
     val secondaryBible: String = "",
+
+    // Bible tab column widths (dp); 0 = use default
+    val bibleColWidthBook: Int = 200,
+    val bibleColWidthChapter: Int = 120,
 
     // Global vertical alignment (affects all 4 sections)
     val verticalAlignment: String = Constants.MIDDLE,

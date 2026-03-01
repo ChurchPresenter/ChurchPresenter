@@ -352,6 +352,7 @@ fun MainDesktop(
                             Tabs.BIBLE -> BibleTab(
                                 modifier = Modifier.fillMaxSize(),
                                 appSettings = appSettings,
+                                onSettingsChange = onSettingsChange,
                                 onAddToSchedule = { bookName, chapter, verseNumber, verseText ->
                                     currentScheduleActions.addBibleVerse(bookName, chapter, verseNumber, verseText)
                                 },
