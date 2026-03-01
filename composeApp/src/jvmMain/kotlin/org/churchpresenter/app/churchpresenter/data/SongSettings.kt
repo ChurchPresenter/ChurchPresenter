@@ -76,7 +76,7 @@ data class SongSettings(
     val songNumberShadow: Boolean = false,
 
     // Transition animation
-    val animationType: String = Constants.ANIMATION_CROSSFADE,
+    val animationType: String = Constants.NONE,
     val transitionDuration: Float = 500f
 )
 

@@ -137,7 +137,10 @@ fun MainDesktop(
                 if (keyEvent.type == KeyEventType.KeyDown) {
                     when (keyEvent.key) {
                         Key.Escape -> {
-                            mediaViewModel?.pause(); presenterManager.setPresentingMode(Presenting.NONE); true
+                            mediaViewModel?.pause()
+                            presenterManager.setPresentingMode(Presenting.NONE)
+                            presenterManager.setShowPresenterWindow(false)
+                            true
                         }
 
                         Key.F6 -> {
@@ -305,6 +308,7 @@ fun MainDesktop(
                                 is ScheduleItem.WebsiteItem -> {
                                     presenterManager.setWebsiteUrl(item.url)
                                     presenterManager.setPresentingMode(Presenting.WEBSITE)
+                                    presenterManager.setShowPresenterWindow(true)
                                 }
                             }
                         },
@@ -449,6 +453,7 @@ fun MainDesktop(
                                 onGoLive = { json, pauseAtFrame, pauseFrame, pauseDurationMs ->
                                     presenterManager.setLottieContent(json, pauseAtFrame, pauseFrame, pauseDurationMs)
                                     presenterManager.setPresentingMode(Presenting.LOWER_THIRD)
+                                    presenterManager.setShowPresenterWindow(true)
                                 }
                             )
 
