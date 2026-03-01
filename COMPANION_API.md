@@ -9,7 +9,7 @@ The desktop app includes a built-in HTTP + WebSocket server that allows mobile c
 1. Open **Settings** (menu bar → Settings, or the gear icon in the toolbar)
 2. Go to the **Server** tab
 3. Toggle **Enable Server** to ON
-4. Note the **URL** shown (e.g. `http://192.168.1.10:8765`) — this is the address mobile clients connect to
+4. Note the **URL** shown (e.g. `https://192.168.1.10:8765`) — this is the address mobile clients connect to
 5. Click **Save**
 
 > The server is **disabled by default**. It only starts when you explicitly enable it.
@@ -21,11 +21,31 @@ The desktop app includes a built-in HTTP + WebSocket server that allows mobile c
 | Property | Value |
 |---|---|
 | Default port | `8765` |
-| Protocol | HTTP/1.1 + WebSocket |
-| Base URL | `http://{desktop-ip}:{port}` |
-| WebSocket URL | `ws://{desktop-ip}:{port}/ws` |
+| Protocol | HTTPS / WSS (self-signed TLS cert, generated at first launch) |
+| Base URL | `https://{desktop-ip}:{port}` |
+| WebSocket URL | `wss://{desktop-ip}:{port}/ws` |
 
 The desktop IP address is shown in the Server settings tab once the server is running.
+
+---
+
+## TLS / Self-Signed Certificate
+
+The server uses HTTPS with a **self-signed certificate** generated automatically at first launch and stored at `~/.churchpresenter/server.jks`.
+
+Because it is self-signed (not issued by a public CA), mobile clients must **explicitly trust** it:
+
+### Android (OkHttp / Ktor client)
+Install a custom `TrustManager` that accepts the cert, or for development use `hostnameVerifier { _, _ -> true }` + an all-trusting `SSLContext`. For production builds, export the cert from `server.jks` and bundle it as a raw resource, then pin it with `CertificatePinner`.
+
+### iOS (URLSession / Ktor client)
+Implement `URLSessionDelegate.urlSession(_:didReceive:completionHandler:)` and call `completionHandler(.useCredential, ...)` for the server's IP. For production, export the `.cer` and add it to the app bundle, then use `SecTrustEvaluateWithError`.
+
+### curl (testing)
+```bash
+curl -k https://192.168.1.10:8765/api/info
+```
+The `-k` / `--insecure` flag skips cert verification.
 
 ---
 
@@ -168,11 +188,11 @@ Returns the current schedule — only song-type items are included.
 
 ## WebSocket
 
-Connect to `ws://{desktop-ip}:{port}/ws` for real-time updates.
+Connect to `wss://{desktop-ip}:{port}/ws` for real-time updates.
 
 If API key is required, append it as a query parameter:
 ```
-ws://192.168.1.10:8765/ws?apiKey=your-key-here
+wss://192.168.1.10:8765/ws?apiKey=your-key-here
 ```
 
 ### On Connect
@@ -261,32 +281,34 @@ GET /api/bible?book=John&chapter=3
 
 ## Quick Test with `curl`
 
+> All endpoints use **HTTPS**. Use `-k` to skip self-signed cert verification when testing.
+
 ```bash
 # Check server is running
-curl http://192.168.1.10:8765/api/info
+curl -k https://192.168.1.10:8765/api/info
 
 # Get all song books and songs
-curl http://192.168.1.10:8765/api/songs
+curl -k https://192.168.1.10:8765/api/songs
 
 # Get songs from a specific book
-curl "http://192.168.1.10:8765/api/songs?songbook=Hymns%20%26%20Psalms"
+curl -k "https://192.168.1.10:8765/api/songs?songbook=Hymns%20%26%20Psalms"
 
 # Get Bible structure
-curl http://192.168.1.10:8765/api/bible
+curl -k https://192.168.1.10:8765/api/bible
 
 # Get a single book
-curl "http://192.168.1.10:8765/api/bible?book=Genesis"
+curl -k "https://192.168.1.10:8765/api/bible?book=Genesis"
 
 # Get a single chapter
-curl "http://192.168.1.10:8765/api/bible?book=Genesis&chapter=1"
+curl -k "https://192.168.1.10:8765/api/bible?book=Genesis&chapter=1"
 
 # Get current schedule
-curl http://192.168.1.10:8765/api/schedule
+curl -k https://192.168.1.10:8765/api/schedule
 
 # With API key
-curl -H "X-Api-Key: your-key-here" http://192.168.1.10:8765/api/songs
+curl -k -H "X-Api-Key: your-key-here" https://192.168.1.10:8765/api/songs
 # or
-curl "http://192.168.1.10:8765/api/songs?apiKey=your-key-here"
+curl -k "https://192.168.1.10:8765/api/songs?apiKey=your-key-here"
 ```
 
 ---
@@ -295,15 +317,15 @@ curl "http://192.168.1.10:8765/api/songs?apiKey=your-key-here"
 
 ```bash
 # Install websocat: https://github.com/vi/websocat
-# Connect and watch live events
-websocat ws://192.168.1.10:8765/ws
+# Connect and watch live events (use --insecure for self-signed cert)
+websocat --insecure wss://192.168.1.10:8765/ws
 
 # With API key
-websocat "ws://192.168.1.10:8765/ws?apiKey=your-key-here"
+websocat --insecure "wss://192.168.1.10:8765/ws?apiKey=your-key-here"
 
 # Send a select_song command
 echo '{"type":"select_song","payload":"{\"id\":\"\",\"songNumber\":1,\"title\":\"Amazing Grace\",\"songbook\":\"Hymns\"}"}' \
-  | websocat ws://192.168.1.10:8765/ws
+  | websocat --insecure wss://192.168.1.10:8765/ws
 ```
 
 ---

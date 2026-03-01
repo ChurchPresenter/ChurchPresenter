@@ -132,4 +132,10 @@ object Constants {
     const val QUERY_PARAM_SONGBOOK  = "songbook"
     const val QUERY_PARAM_BOOK      = "book"
     const val QUERY_PARAM_CHAPTER   = "chapter"
+
+    // SSL / TLS (self-signed cert for companion server)
+    const val SSL_KEYSTORE_TYPE     = "JKS"
+    const val SSL_KEY_ALGORITHM     = "RSA"
+    const val SSL_KEY_ALIAS         = "churchpresenter"
+    const val SSL_KEYSTORE_PASSWORD = "churchpresenter_ssl"
 }

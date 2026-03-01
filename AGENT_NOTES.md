@@ -373,11 +373,20 @@ Data is loaded in **background `LaunchedEffect`s in `MainDesktop`**, independent
 > ⚠️ **DO NOT** wire data updates through tab composables (e.g. `SongsTab.onSongsLoaded`) — tabs are only composed when visible. Always load data in `MainDesktop` or `main.kt` scope.
 
 ### Mobile App Recommended Flow
-1. Connect to `ws://{ip}:8765/ws` → receive `songs_updated`, `bible_updated`, `schedule_updated`
+1. Connect to `wss://{ip}:8765/ws` (use `--insecure` / skip cert verification for self-signed cert) → receive `songs_updated`, `bible_updated`, `schedule_updated`
 2. Songs: show songbook picker from `song-book[].book-name`, then songs from `songs[]`
 3. Bible: show book picker from `books[].book-name`, then chapters, then verses
 4. Send `select_song` WS message to trigger song selection on desktop
 5. Or call `GET /api/songs?songbook=X` / `GET /api/bible?book=Genesis&chapter=1` for filtered REST requests
+
+### SSL Certificate (server.jks)
+- Generated automatically at `~/.churchpresenter/server.jks` on first server start
+- Uses **SHA256withRSA** explicitly (NOT the JDK 21+ default SHA384withRSA which triggers RSA-PSS mode)
+- RSA-PSS causes "first octet invalid" in macOS LibreSSL 3.3 — always force `-sigalg SHA256withRSA` in keytool
+- `SslCertificateManager` uses `keytool -genkeypair` as the primary strategy (works Java 8–24+)
+- The old `sun.security.x509` reflection approach was removed — it fails on Java 17+ without `--add-exports`
+- If `server.jks` exists but is corrupted/missing the alias, it is deleted and regenerated automatically
+- To reset the cert: delete `~/.churchpresenter/server.jks` and restart the app
 
 ### Dependencies added
 - `io.ktor:ktor-server-core-jvm:3.1.3`

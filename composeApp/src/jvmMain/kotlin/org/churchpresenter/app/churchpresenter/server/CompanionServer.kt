@@ -6,6 +6,7 @@ import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.application.install
 import io.ktor.server.engine.EmbeddedServer
 import io.ktor.server.engine.embeddedServer
+import io.ktor.server.engine.sslConnector
 import io.ktor.server.netty.Netty
 import io.ktor.server.netty.NettyApplicationEngine
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
@@ -278,7 +279,42 @@ class CompanionServer {
     fun start(port: Int = Constants.SERVER_DEFAULT_PORT) {
         if (_isRunning.value) return
         currentPort = port
+
+        val keyStore = try {
+            SslCertificateManager.getOrCreateKeyStore()
+        } catch (e: Exception) {
+            startPlainHttp(port)
+            return
+        }
+
+        server = embeddedServer(Netty, configure = {
+            sslConnector(
+                keyStore = keyStore,
+                keyAlias = Constants.SSL_KEY_ALIAS,
+                keyStorePassword = { Constants.SSL_KEYSTORE_PASSWORD.toCharArray() },
+                privateKeyPassword = { Constants.SSL_KEYSTORE_PASSWORD.toCharArray() }
+            ) {
+                host = "0.0.0.0"
+                this.port = port
+            }
+        }) { configurePipeline() }
+
+        server!!.start(wait = false)
+        _isRunning.value = true
+        _serverUrl.value = "https://${localIpAddress()}:$port"
+    }
+
+    /** Fallback plain-HTTP start used only if SSL cert generation fails. */
+    private fun startPlainHttp(port: Int) {
         server = embeddedServer(Netty, port = port, host = "0.0.0.0") {
+            configurePipeline()
+        }
+        server!!.start(wait = false)
+        _isRunning.value = true
+        _serverUrl.value = "http://${localIpAddress()}:$port"
+    }
+
+    private fun io.ktor.server.application.Application.configurePipeline() {
             install(ContentNegotiation) { json(json) }
             install(WebSockets)
             install(CORS) {
@@ -294,14 +330,11 @@ class CompanionServer {
                 }
             }
             routing {
-                // ── REST endpoints ─────────────────────────────────────────
                 get(Constants.ENDPOINT_INFO) {
                     if (!checkApiKey(call)) return@get
                     call.respond(ServerInfoResponse(port = currentPort))
                 }
 
-                // GET /api/songs              → full catalog (all songbooks with songs nested)
-                // GET /api/songs?songbook=X   → catalog filtered to one songbook
                 get(Constants.ENDPOINT_SONGS) {
                     if (!checkApiKey(call)) return@get
                     val filter = call.request.queryParameters[Constants.QUERY_PARAM_SONGBOOK]
@@ -324,9 +357,6 @@ class CompanionServer {
                     call.respond(ScheduleResponse(schedule, schedule.size))
                 }
 
-                // GET /api/bible   → full Bible catalog (books → chapters → verses)
-                // GET /api/bible?book=Genesis            → single book
-                // GET /api/bible?book=Genesis&chapter=1  → single chapter
                 get(Constants.ENDPOINT_BIBLE) {
                     if (!checkApiKey(call)) return@get
                     val catalog = _bibleCatalog.value
@@ -355,7 +385,6 @@ class CompanionServer {
                     }
                 }
 
-                // ── WebSocket ──────────────────────────────────────────────
                 webSocket(Constants.ENDPOINT_WS) {
                     val queryKey = call.request.queryParameters[Constants.QUERY_PARAM_API_KEY]
                     val headerKey = call.request.headers[Constants.HEADER_API_KEY]
@@ -367,7 +396,6 @@ class CompanionServer {
                         }
                     }
 
-                    // Push current state to newly connected client
                     val catalog = _catalog.value
                     val schedule = _schedule.value
                     send(Frame.Text(json.encodeToString(WebSocketMessage.serializer(),
@@ -382,12 +410,10 @@ class CompanionServer {
                         WebSocketMessage(Constants.WS_EVENT_SCHEDULE_UPDATED,
                             json.encodeToString(ScheduleResponse.serializer(), ScheduleResponse(schedule, schedule.size))))))
 
-                    // Forward broadcasts to this client
                     val broadcastJob = scope.launch {
                         broadcastChannel.collect { message -> send(Frame.Text(message)) }
                     }
 
-                    // Handle incoming messages from mobile
                     for (frame in incoming) {
                         if (frame is Frame.Text) {
                             try {
@@ -404,10 +430,6 @@ class CompanionServer {
                     broadcastJob.cancel()
                 }
             }
-        }
-        server!!.start(wait = false)
-        _isRunning.value = true
-        _serverUrl.value = "http://${localIpAddress()}:$port"
     }
 
     fun stop() {
@@ -434,7 +456,6 @@ class CompanionServer {
 
 
 
-    // ── Helpers ───────────────────────────────────────────────────────────────
 
     private fun broadcast(msg: WebSocketMessage) {
         scope.launch {

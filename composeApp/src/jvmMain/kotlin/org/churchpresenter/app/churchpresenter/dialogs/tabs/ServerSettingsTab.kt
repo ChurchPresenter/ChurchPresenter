@@ -42,6 +42,7 @@ import churchpresenter.composeapp.generated.resources.server_api_key
 import churchpresenter.composeapp.generated.resources.server_api_key_enabled
 import churchpresenter.composeapp.generated.resources.server_api_key_hint
 import churchpresenter.composeapp.generated.resources.server_copy_key
+import churchpresenter.composeapp.generated.resources.server_copy_url
 import churchpresenter.composeapp.generated.resources.server_enabled
 import churchpresenter.composeapp.generated.resources.server_generate_key
 import churchpresenter.composeapp.generated.resources.server_info
@@ -50,8 +51,10 @@ import churchpresenter.composeapp.generated.resources.server_port
 import churchpresenter.composeapp.generated.resources.server_restart
 import churchpresenter.composeapp.generated.resources.server_restart_note
 import churchpresenter.composeapp.generated.resources.server_settings
+import churchpresenter.composeapp.generated.resources.server_ssl_notice
 import churchpresenter.composeapp.generated.resources.server_status_running
 import churchpresenter.composeapp.generated.resources.server_status_stopped
+import churchpresenter.composeapp.generated.resources.server_url_copied
 import churchpresenter.composeapp.generated.resources.server_url_label
 import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.server.CompanionServer
@@ -74,6 +77,7 @@ fun ServerSettingsTab(
     val isRunning by companionServer.isRunning.collectAsState()
     val serverUrl by companionServer.serverUrl.collectAsState()
     var keyCopied by remember { mutableStateOf(false) }
+    var urlCopied by remember { mutableStateOf(false) }
     var portText by remember(serverSettings.port) { mutableStateOf(serverSettings.port.toString()) }
 
     Column(
@@ -155,9 +159,33 @@ fun ServerSettingsTab(
                     Text(
                         text = serverUrl,
                         style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
-                        color = MaterialTheme.colorScheme.primary
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.weight(1f)
                     )
+                    Button(
+                        onClick = {
+                            val clipboard = Toolkit.getDefaultToolkit().systemClipboard
+                            clipboard.setContents(StringSelection(serverUrl), null)
+                            urlCopied = true
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                            contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                        ),
+                        contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 10.dp, vertical = 4.dp)
+                    ) {
+                        Text(
+                            text = if (urlCopied) stringResource(Res.string.server_url_copied)
+                                   else stringResource(Res.string.server_copy_url),
+                            style = MaterialTheme.typography.labelSmall
+                        )
+                    }
                 }
+                Text(
+                    text = stringResource(Res.string.server_ssl_notice),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                )
             }
 
             // Port
