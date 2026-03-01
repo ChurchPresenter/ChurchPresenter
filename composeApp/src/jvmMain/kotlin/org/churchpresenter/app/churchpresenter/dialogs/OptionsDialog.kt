@@ -37,7 +37,6 @@ import churchpresenter.composeapp.generated.resources.media
 import churchpresenter.composeapp.generated.resources.ok
 import churchpresenter.composeapp.generated.resources.options
 import churchpresenter.composeapp.generated.resources.projection
-import churchpresenter.composeapp.generated.resources.server
 import churchpresenter.composeapp.generated.resources.song
 import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.data.SettingsManager
@@ -47,8 +46,6 @@ import org.churchpresenter.app.churchpresenter.dialogs.tabs.MediaSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.ProjectionSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.SongSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.LowerThirdSettingsTab
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.ServerSettingsTab
-import org.churchpresenter.app.churchpresenter.server.CompanionServer
 import org.churchpresenter.app.churchpresenter.ui.theme.AppThemeWrapper
 import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
 import org.jetbrains.compose.resources.stringResource
@@ -58,7 +55,6 @@ fun OptionsDialog(
     isVisible: Boolean,
     theme: ThemeMode,
     settingsManager: SettingsManager,
-    companionServer: CompanionServer,
     onDismiss: () -> Unit,
     onSave: (AppSettings) -> Unit = {},
     onIdentifyScreen: () -> Unit = {}
@@ -115,11 +111,6 @@ fun OptionsDialog(
                             onClick = { selectedTabIndex = 5 },
                             text = { Text(stringResource(Res.string.display_lower_third)) }
                         )
-                        Tab(
-                            selected = selectedTabIndex == 6,
-                            onClick = { selectedTabIndex = 6 },
-                            text = { Text(stringResource(Res.string.server)) }
-                        )
                     }
 
                     // Tab Content
@@ -168,13 +159,6 @@ fun OptionsDialog(
                                     currentSettings = updateFn(currentSettings)
                                 }
                             )
-                            6 -> ServerSettingsTab(
-                                settings = currentSettings,
-                                companionServer = companionServer,
-                                onSettingsChange = { updateFn ->
-                                    currentSettings = updateFn(currentSettings)
-                                }
-                            )
                         }
                     }
 
@@ -217,3 +201,4 @@ fun OptionsDialog(
         }
     }
 }
+

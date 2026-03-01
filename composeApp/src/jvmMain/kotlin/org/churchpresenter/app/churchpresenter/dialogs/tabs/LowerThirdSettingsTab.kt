@@ -431,38 +431,15 @@ private fun openLottieGeneratorDialog(
     // 1. Bundled inside the packaged app's resources (Contents/app/resources/Lottie-Gen on macOS)
     // 2. Relative to the app executable (for DMG installs)
     // 3. Dev working directory
-    // 4. Paths relative to the JAR / class location
     val appResourcesDir = System.getProperty("compose.application.resources.dir")
     val executablePath = ProcessHandle.current().info().command().orElse(null)
         ?.let { File(it).parentFile }
-    // Walk up from working dir to find project root containing Lottie-Gen/
-    fun findProjectRoot(): File? {
-        var dir = File(System.getProperty("user.dir"))
-        repeat(6) {
-            val candidate = File(dir, "Lottie-Gen/lottie-generator.html")
-            if (candidate.exists()) return dir
-            dir = dir.parentFile ?: return null
-        }
-        return null
-    }
-    val projectRoot = findProjectRoot()
     val htmlFile = listOfNotNull(
         appResourcesDir?.let { File(it, "Lottie-Gen/lottie-generator.html") },
         executablePath?.let { File(it, "../app/resources/Lottie-Gen/lottie-generator.html") },
         executablePath?.let { File(it, "Lottie-Gen/lottie-generator.html") },
-        executablePath?.let { File(it, "../../Lottie-Gen/lottie-generator.html") },
-        projectRoot?.let { File(it, "Lottie-Gen/lottie-generator.html") },
         File("Lottie-Gen/lottie-generator.html"),
-        File(System.getProperty("user.dir"), "Lottie-Gen/lottie-generator.html"),
-        // Resolve relative to this class's code source (works in packaged JARs)
-        try {
-            val src = object {}.javaClass.protectionDomain?.codeSource?.location?.toURI()
-            src?.let { File(File(it).parentFile, "Lottie-Gen/lottie-generator.html") }
-        } catch (_: Exception) { null },
-        try {
-            val src = object {}.javaClass.protectionDomain?.codeSource?.location?.toURI()
-            src?.let { File(File(it).parentFile?.parentFile, "Lottie-Gen/lottie-generator.html") }
-        } catch (_: Exception) { null }
+        File(System.getProperty("user.dir"), "Lottie-Gen/lottie-generator.html")
     ).firstOrNull { it.exists() }
 
     if (htmlFile == null) {

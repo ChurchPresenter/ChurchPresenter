@@ -11,8 +11,6 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -66,7 +64,6 @@ import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
 import org.churchpresenter.app.churchpresenter.viewmodel.LocalMediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.MediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
-import org.churchpresenter.app.churchpresenter.server.CompanionServer
 import org.churchpresenter.app.churchpresenter.composables.preWarmJavaFX
 import org.jetbrains.compose.resources.stringResource
 import java.util.Locale
@@ -97,29 +94,15 @@ fun main() {
 
 
         // Schedule actions are registered by MainDesktop — no ScheduleViewModel reference held here.
+        // rememberUpdatedState ensures NavigationTopBar lambdas always read the latest actions
+        // without being recreated on every scheduleActions update.
         var scheduleActions by remember { mutableStateOf(ScheduleActions()) }
         val currentScheduleActions by rememberUpdatedState(scheduleActions)
 
         // MediaViewModel lives at application scope — shared between MediaTab (controls)
         // and the presenter Window via LocalMediaViewModel CompositionLocal.
+        // Documented legitimate exception: cross-Window JFX/Swing bridge.
         val mediaViewModel = remember { MediaViewModel() }
-
-        // CompanionServer lives at app scope — shared between MainDesktop (data feed) and OptionsDialog (settings)
-        val companionServer = remember { CompanionServer() }
-        LaunchedEffect(Unit) {
-            val s = appSettings.serverSettings
-            companionServer.updateApiKey(s.apiKeyEnabled, s.apiKey)
-            if (s.enabled) companionServer.start(s.port)
-        }
-        LaunchedEffect(appSettings.serverSettings.apiKeyEnabled, appSettings.serverSettings.apiKey) {
-            companionServer.updateApiKey(
-                appSettings.serverSettings.apiKeyEnabled,
-                appSettings.serverSettings.apiKey
-            )
-        }
-        DisposableEffect(Unit) {
-            onDispose { companionServer.stop() }
-        }
 
         // false = not identifying; true = all screens showing their number for 5 seconds
         var identifyingScreen by remember { mutableStateOf(false) }
@@ -209,7 +192,6 @@ fun main() {
                             onSongItemSelected = { presenterManager.setLyricSection(it) },
                             appSettings = appSettings,
                             presenterManager = presenterManager,
-                            companionServer = companionServer,
                             onScheduleActionsReady = { scheduleActions = it },
                             presenting = { presenterManager.setPresentingMode(it) },
                             onScheduleItemSelected = { itemId -> selectedScheduleItemId = itemId },
@@ -229,7 +211,6 @@ fun main() {
                             isVisible = showOptionsDialog,
                             theme = theme,
                             settingsManager = settingsManager,
-                            companionServer = companionServer,
                             onDismiss = { showOptionsDialog = false },
                             onSave = { updated ->
                                 appSettings = updated
