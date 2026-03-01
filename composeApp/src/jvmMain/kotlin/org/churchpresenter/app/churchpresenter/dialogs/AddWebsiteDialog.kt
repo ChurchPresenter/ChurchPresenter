@@ -29,6 +29,7 @@ import androidx.compose.ui.window.rememberDialogState
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.cancel
 import churchpresenter.composeapp.generated.resources.ok
+import churchpresenter.composeapp.generated.resources.website_disclaimer
 import churchpresenter.composeapp.generated.resources.website_dialog_title
 import churchpresenter.composeapp.generated.resources.website_title_hint
 import churchpresenter.composeapp.generated.resources.website_title_label
@@ -44,7 +45,7 @@ fun AddWebsiteDialog(
     var url by remember { mutableStateOf("https://") }
     var displayTitle by remember { mutableStateOf("") }
 
-    val dialogState = rememberDialogState(width = 500.dp, height = 400.dp)
+    val dialogState = rememberDialogState(width = 500.dp, height = 440.dp)
 
     Dialog(
         onCloseRequest = onDismiss,
@@ -75,7 +76,30 @@ fun AddWebsiteDialog(
                     modifier = Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    // URL field
+                    // Title field (first)
+                    Column {
+                        Text(
+                            text = stringResource(Res.string.website_title_label),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Spacer(modifier = Modifier.height(6.dp))
+                        OutlinedTextField(
+                            value = displayTitle,
+                            onValueChange = { displayTitle = it },
+                            placeholder = {
+                                Text(
+                                    stringResource(Res.string.website_title_hint),
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true,
+                            textStyle = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+
+                    // URL field (second)
                     Column {
                         Text(
                             text = stringResource(Res.string.website_url_label),
@@ -98,28 +122,12 @@ fun AddWebsiteDialog(
                         )
                     }
 
-                    // Title field
-                    Column {
-                        Text(
-                            text = stringResource(Res.string.website_title_label),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                        Spacer(modifier = Modifier.height(6.dp))
-                        OutlinedTextField(
-                            value = displayTitle,
-                            onValueChange = { displayTitle = it },
-                            placeholder = {
-                                Text(
-                                    stringResource(Res.string.website_title_hint),
-                                    style = MaterialTheme.typography.bodyMedium
-                                )
-                            },
-                            modifier = Modifier.fillMaxWidth(),
-                            singleLine = true,
-                            textStyle = MaterialTheme.typography.bodyMedium
-                        )
-                    }
+                    // Disclaimer
+                    Text(
+                        text = stringResource(Res.string.website_disclaimer),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
 
                 Spacer(modifier = Modifier.height(20.dp))
@@ -160,4 +168,3 @@ fun AddWebsiteDialog(
         }
     }
 }
-
