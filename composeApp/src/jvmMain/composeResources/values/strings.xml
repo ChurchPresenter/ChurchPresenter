@@ -365,6 +365,8 @@
     <string name="tooltip_edit_label">Edit Label</string>
     <string name="tooltip_go_live">Go Live</string>
     <string name="tooltip_add_label">Add Label</string>
+    <string name="tooltip_collapse_schedule">Collapse Schedule</string>
+    <string name="tooltip_expand_schedule">Expand Schedule</string>
 
     <!-- Add Label Dialog -->
     <string name="add_label">Add Label</string>

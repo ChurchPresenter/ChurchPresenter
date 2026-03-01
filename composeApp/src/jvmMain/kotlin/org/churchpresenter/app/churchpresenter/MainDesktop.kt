@@ -1,5 +1,8 @@
 package org.churchpresenter.app.churchpresenter
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandHorizontally
+import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -7,6 +10,10 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -16,6 +23,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.foundation.focusable
 import androidx.compose.ui.focus.FocusRequester
@@ -25,6 +33,14 @@ import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.unit.dp
+import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.ic_arrow_left
+import churchpresenter.composeapp.generated.resources.ic_arrow_right
+import churchpresenter.composeapp.generated.resources.tooltip_collapse_schedule
+import churchpresenter.composeapp.generated.resources.tooltip_expand_schedule
+import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.app.churchpresenter.components.Toolbar
 import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.dialogs.AddLabelDialog
@@ -171,8 +187,16 @@ fun MainDesktop(
                 onOpenSettings = onShowSettings
             )
 
+            var scheduleCollapsed by rememberSaveable { mutableStateOf(false) }
+
             Row(modifier = Modifier.fillMaxSize()) {
-                Column(modifier = Modifier.fillMaxWidth(0.30f).fillMaxHeight()) {
+                // Collapsible schedule panel
+                AnimatedVisibility(
+                    visible = !scheduleCollapsed,
+                    enter = expandHorizontally(expandFrom = Alignment.Start),
+                    exit = shrinkHorizontally(shrinkTowards = Alignment.Start)
+                ) {
+                    Column(modifier = Modifier.fillMaxWidth(0.30f).fillMaxHeight()) {
                     ScheduleTab(
                         onPresenting = presenting,
                         onPresentBible = { item ->
@@ -286,6 +310,33 @@ fun MainDesktop(
                             onScheduleItemSelected(id)
                         }
                     )
+                    } // end Column
+                } // end AnimatedVisibility
+
+                // Toggle button between schedule and main content
+                Box(
+                    modifier = Modifier
+                        .width(16.dp)
+                        .fillMaxHeight()
+                        .background(MaterialTheme.colorScheme.surfaceVariant),
+                    contentAlignment = Alignment.Center
+                ) {
+                    IconButton(
+                        onClick = { scheduleCollapsed = !scheduleCollapsed },
+                        modifier = Modifier.wrapContentHeight()
+                    ) {
+                        Icon(
+                            painter = painterResource(
+                                if (scheduleCollapsed) Res.drawable.ic_arrow_right
+                                else Res.drawable.ic_arrow_left
+                            ),
+                            contentDescription = stringResource(
+                                if (scheduleCollapsed) Res.string.tooltip_expand_schedule
+                                else Res.string.tooltip_collapse_schedule
+                            ),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
 
                 Column(modifier = Modifier.fillMaxWidth().fillMaxHeight()) {
