@@ -244,6 +244,7 @@ data class AppSettings(
     val pictureSettings: PictureSettings = PictureSettings(),
     val streamingSettings: StreamingSettings = StreamingSettings(),
     val announcementsSettings: AnnouncementsSettings = AnnouncementsSettings(),
+    val schedulePanelWidthDp: Int = 280,
     val theme: String = Constants.LIGHT,
     val language: String = "en",
     val licenseAccepted: Boolean = false

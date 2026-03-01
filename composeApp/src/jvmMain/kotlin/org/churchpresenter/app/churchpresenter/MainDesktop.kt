@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -25,6 +26,10 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.pointerHoverIcon
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.foundation.focusable
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -189,6 +194,20 @@ fun MainDesktop(
 
             var scheduleCollapsed by rememberSaveable { mutableStateOf(false) }
 
+            val density = LocalDensity.current
+            val onSettingsChangeState = rememberUpdatedState(onSettingsChange)
+
+            // Schedule panel width — loaded from settings, local state for smooth dragging
+            var schedulePanelPx by remember(appSettings.schedulePanelWidthDp) {
+                mutableStateOf(with(density) { appSettings.schedulePanelWidthDp.dp.toPx() })
+            }
+
+            fun saveScheduleWidth() {
+                onSettingsChangeState.value { s ->
+                    s.copy(schedulePanelWidthDp = with(density) { schedulePanelPx.toDp().value.toInt() })
+                }
+            }
+
             Row(modifier = Modifier.fillMaxSize()) {
                 // Collapsible schedule panel
                 AnimatedVisibility(
@@ -196,7 +215,7 @@ fun MainDesktop(
                     enter = expandHorizontally(expandFrom = Alignment.Start),
                     exit = shrinkHorizontally(shrinkTowards = Alignment.Start)
                 ) {
-                    Column(modifier = Modifier.fillMaxWidth(0.30f).fillMaxHeight()) {
+                    Column(modifier = Modifier.width(with(density) { schedulePanelPx.toDp() }).fillMaxHeight()) {
                     ScheduleTab(
                         onPresenting = presenting,
                         onPresentBible = { item ->
@@ -313,12 +332,27 @@ fun MainDesktop(
                     } // end Column
                 } // end AnimatedVisibility
 
-                // Toggle button between schedule and main content
+                // Drag handle + collapse toggle between schedule and main content
                 Box(
                     modifier = Modifier
                         .width(16.dp)
                         .fillMaxHeight()
-                        .background(MaterialTheme.colorScheme.surfaceVariant),
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                        .pointerInput(scheduleCollapsed) {
+                            if (!scheduleCollapsed) {
+                                detectHorizontalDragGestures(
+                                    onDragEnd = ::saveScheduleWidth
+                                ) { _, amount ->
+                                    schedulePanelPx = (schedulePanelPx + amount).coerceIn(
+                                        with(density) { 150.dp.toPx() },
+                                        with(density) { 600.dp.toPx() }
+                                    )
+                                }
+                            }
+                        }
+                        .pointerHoverIcon(
+                            if (scheduleCollapsed) PointerIcon.Default else PointerIcon.Hand
+                        ),
                     contentAlignment = Alignment.Center
                 ) {
                     IconButton(
