@@ -46,10 +46,13 @@ import churchpresenter.composeapp.generated.resources.tooltip_go_live
 import churchpresenter.composeapp.generated.resources.tooltip_move_down
 import churchpresenter.composeapp.generated.resources.tooltip_move_up
 import churchpresenter.composeapp.generated.resources.tooltip_remove
+import org.churchpresenter.app.churchpresenter.composables.LivePreviewPanel
 import org.churchpresenter.app.churchpresenter.composables.TooltipIconButton
+import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.models.ScheduleItem
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.utils.Utils
+import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.app.churchpresenter.viewmodel.ScheduleViewModel
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -84,6 +87,8 @@ data class ScheduleTabActions(
 @Composable
 fun ScheduleTab(
     modifier: Modifier = Modifier,
+    appSettings: AppSettings? = null,
+    presenterManager: PresenterManager? = null,
     onPresenting: (Presenting) -> Unit = { Presenting.NONE },
     onItemClick: (ScheduleItem) -> Unit = {},
     onEditLabel: (ScheduleItem.LabelItem) -> Unit = {},
@@ -142,6 +147,18 @@ fun ScheduleTab(
     val selectedItemId = viewModel.selectedItemId
 
     Column(modifier = modifier.fillMaxSize().padding(8.dp)) {
+
+        // Live preview — scaled-down replica of the presenter window
+        if (presenterManager != null && appSettings != null) {
+            LivePreviewPanel(
+                presenterManager = presenterManager,
+                appSettings = appSettings,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp)
+            )
+        }
+
         // Schedule list header
         Row(
             modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),

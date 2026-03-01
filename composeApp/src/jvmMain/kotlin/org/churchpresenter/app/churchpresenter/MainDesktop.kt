@@ -139,7 +139,6 @@ fun MainDesktop(
                         Key.Escape -> {
                             mediaViewModel?.pause()
                             presenterManager.setPresentingMode(Presenting.NONE)
-                            presenterManager.setShowPresenterWindow(false)
                             true
                         }
 
@@ -220,6 +219,8 @@ fun MainDesktop(
                 ) {
                     Column(modifier = Modifier.width(with(density) { schedulePanelPx.toDp() }).fillMaxHeight()) {
                     ScheduleTab(
+                        appSettings = appSettings,
+                        presenterManager = presenterManager,
                         onPresenting = presenting,
                         onPresentBible = { item ->
                             selectedBibleVerseItem = item

@@ -536,6 +536,18 @@
     <string name="license_decline_button">Decline &amp; Exit</string>
     <string name="license_prompt">You must accept the GNU GPL v3 license to use Church Presenter.</string>
 
+    <!-- Schedule live preview -->
+    <string name="live_preview_title">Live</string>
+    <string name="live_preview_nothing">Nothing is live</string>
+    <string name="live_preview_bible">Bible</string>
+    <string name="live_preview_song">Song</string>
+    <string name="live_preview_picture">Picture</string>
+    <string name="live_preview_presentation">Presentation</string>
+    <string name="live_preview_media">Media</string>
+    <string name="live_preview_lower_third">Lower Third</string>
+    <string name="live_preview_announcement">Announcement</string>
+    <string name="live_preview_website">Website</string>
+
     <!-- Website -->
     <string name="tooltip_add_website">Add Website</string>
     <string name="website_dialog_title">Add Website</string>
