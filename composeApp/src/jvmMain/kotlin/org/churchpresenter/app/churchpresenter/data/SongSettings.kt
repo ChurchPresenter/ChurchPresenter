@@ -222,6 +222,14 @@ data class AnnouncementsSettings(
 )
 
 @Serializable
+data class ServerSettings(
+    val enabled: Boolean = false,
+    val port: Int = 8765,
+    val apiKeyEnabled: Boolean = false,
+    val apiKey: String = ""
+)
+
+@Serializable
 data class AppSettings(
     val songSettings: SongSettings = SongSettings(),
     val bibleSettings: BibleSettings = BibleSettings(),
@@ -230,6 +238,7 @@ data class AppSettings(
     val pictureSettings: PictureSettings = PictureSettings(),
     val streamingSettings: StreamingSettings = StreamingSettings(),
     val announcementsSettings: AnnouncementsSettings = AnnouncementsSettings(),
+    val serverSettings: ServerSettings = ServerSettings(),
     val theme: String = Constants.LIGHT,
     val language: String = "en",
     val licenseAccepted: Boolean = false

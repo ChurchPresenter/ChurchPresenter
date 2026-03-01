@@ -45,8 +45,14 @@ import org.churchpresenter.app.churchpresenter.tabs.LowerThirdTab
 import org.churchpresenter.app.churchpresenter.tabs.TabSection
 import org.churchpresenter.app.churchpresenter.tabs.Tabs
 import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
+import org.churchpresenter.app.churchpresenter.server.CompanionServer
 import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.app.churchpresenter.data.Songs
+import org.churchpresenter.app.churchpresenter.data.Bible
 import org.churchpresenter.app.churchpresenter.viewmodel.LocalMediaViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import java.io.File
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 
 // Kept for NavigationTopBar / menu — wraps ScheduleTabActions
@@ -64,6 +70,7 @@ fun MainDesktop(
     modifier: Modifier = Modifier,
     appSettings: AppSettings,
     presenterManager: PresenterManager,
+    companionServer: CompanionServer,
     presenting: (Presenting) -> Unit,
     onVerseSelected: (List<SelectedVerse>) -> Unit,
     onSongItemSelected: (LyricSection) -> Unit,
@@ -100,10 +107,53 @@ fun MainDesktop(
     val presentingMode by presenterManager.presentingMode
     val mainFocusRequester = remember { FocusRequester() }
 
+
     LaunchedEffect(selectedTabIndex) {
         onTabChange(selectedTabIndex)
-        // Re-request focus so F-key shortcuts keep working after the new tab's children steal focus
         mainFocusRequester.requestFocus()
+    }
+
+    // Load songs for the companion server in the background regardless of which tab is active.
+    // This runs whenever the storage directory changes (e.g. after settings saved).
+    LaunchedEffect(appSettings.songSettings.storageDirectory) {
+        val songs = withContext(Dispatchers.IO) {
+            val s = Songs()
+            val dir = appSettings.songSettings.storageDirectory
+            if (dir.isNotEmpty()) {
+                val folder = File(dir)
+                if (folder.exists() && folder.isDirectory) {
+                    folder.listFiles { f -> f.extension.lowercase() == Constants.EXTENSION_SPS }
+                        ?.sortedBy { it.name }
+                        ?.forEach { file ->
+                            try { s.loadFromSpsAppend(file.absolutePath) } catch (_: Exception) {}
+                        }
+                }
+            }
+            if (s.getSongCount() == 0) {
+                try { s.loadFromSps(Constants.FALLBACK_SONG_RESOURCE) } catch (_: Exception) {}
+            }
+            s.getSongs()
+        }
+        companionServer.updateSongs(songs)
+    }
+
+    // Load primary Bible for the companion server in the background.
+    // Re-runs whenever the storage directory or selected primary Bible changes.
+    LaunchedEffect(appSettings.bibleSettings.storageDirectory, appSettings.bibleSettings.primaryBible) {
+        val storageDir = appSettings.bibleSettings.storageDirectory
+        val primaryFile = appSettings.bibleSettings.primaryBible
+        if (storageDir.isNotEmpty() && primaryFile.isNotEmpty()) {
+            withContext(Dispatchers.IO) {
+                try {
+                    val f = File(storageDir, primaryFile)
+                    if (f.exists()) {
+                        val bible = Bible().apply { loadFromSpb(f.absolutePath) }
+                        val translationName = primaryFile.substringBeforeLast('.')
+                        companionServer.updateBible(bible, translationName)
+                    }
+                } catch (_: Exception) { }
+            }
+        }
     }
 
     Box(
@@ -284,6 +334,9 @@ fun MainDesktop(
                         },
                         onSelectedItemChanged = { id ->
                             onScheduleItemSelected(id)
+                        },
+                        onScheduleChanged = { items ->
+                            companionServer.updateSchedule(items)
                         }
                     )
                 }

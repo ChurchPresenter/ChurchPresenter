@@ -542,4 +542,23 @@
     <string name="website_title_label">Title (optional)</string>
     <string name="website_title_hint">Enter a display name…</string>
     <string name="website_go_live">Go Live</string>
+    <string name="server">Server</string>
+    <string name="server_settings">Server Settings</string>
+    <string name="server_enabled">Enable companion server</string>
+    <string name="server_port">Port</string>
+    <string name="server_status_running">Server running</string>
+    <string name="server_status_stopped">Server stopped</string>
+    <string name="server_url_label">Address</string>
+    <string name="server_api_key_enabled">Require API key</string>
+    <string name="server_api_key">API Key</string>
+    <string name="server_api_key_hint">Enter or generate an API key…</string>
+    <string name="server_generate_key">Generate</string>
+    <string name="server_copy_key">Copy</string>
+    <string name="server_key_copied">Copied!</string>
+    <string name="server_copy_url">Copy Address</string>
+    <string name="server_url_copied">Copied!</string>
+    <string name="server_ssl_notice">Uses HTTPS with a self-signed certificate. Mobile clients must trust it on first connection.</string>
+    <string name="server_info">Mobile devices must include this key in the X-Api-Key header or ?apiKey= query parameter.</string>
+    <string name="server_restart_note">Restart the server to apply port changes.</string>
+    <string name="server_restart">Restart Server</string>
 </resources>

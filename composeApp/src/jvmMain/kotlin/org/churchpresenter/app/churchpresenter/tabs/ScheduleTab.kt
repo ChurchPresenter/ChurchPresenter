@@ -93,7 +93,8 @@ fun ScheduleTab(
     onPresentPictures: ((ScheduleItem.PictureItem) -> Unit)? = null,
     onPresentMedia: ((ScheduleItem.MediaItem) -> Unit)? = null,
     onActionsReady: (ScheduleTabActions) -> Unit = {},
-    onSelectedItemChanged: (String?) -> Unit = {}
+    onSelectedItemChanged: (String?) -> Unit = {},
+    onScheduleChanged: ((List<ScheduleItem>) -> Unit)? = null
 ) {
     val viewModel = remember { ScheduleViewModel() }
 
@@ -138,7 +139,11 @@ fun ScheduleTab(
         onSelectedItemChanged(viewModel.selectedItemId)
     }
 
+    // Notify companion server when schedule changes
     val scheduleItems = viewModel.scheduleItems
+    LaunchedEffect(scheduleItems.size, scheduleItems.toList()) {
+        onScheduleChanged?.invoke(scheduleItems.toList())
+    }
     val selectedItemId = viewModel.selectedItemId
 
     Column(modifier = modifier.fillMaxSize().padding(8.dp)) {

@@ -105,4 +105,37 @@ object Constants {
 
     // Seek amount in ms
     const val MEDIA_SEEK_MS = 10_000L
+
+    // Companion Server (Ktor)
+    const val SERVER_DEFAULT_PORT = 8765
+    const val SERVER_APP_NAME = "ChurchPresenter"
+    const val SERVER_VERSION = "1.0"
+
+    // REST endpoints
+    const val ENDPOINT_INFO      = "/api/info"
+    const val ENDPOINT_SONGS     = "/api/songs"
+    const val ENDPOINT_BIBLE     = "/api/bible"
+    const val ENDPOINT_SCHEDULE  = "/api/schedule"
+    const val ENDPOINT_WS        = "/ws"
+
+    // WebSocket event types (server → client)
+    const val WS_EVENT_SONGS_UPDATED    = "songs_updated"
+    const val WS_EVENT_BIBLE_UPDATED    = "bible_updated"
+    const val WS_EVENT_SCHEDULE_UPDATED = "schedule_updated"
+
+    // WebSocket command types (client → server)
+    const val WS_CMD_SELECT_SONG = "select_song"
+
+    // API key authentication
+    const val HEADER_API_KEY        = "X-Api-Key"
+    const val QUERY_PARAM_API_KEY   = "apiKey"
+    const val QUERY_PARAM_SONGBOOK  = "songbook"
+    const val QUERY_PARAM_BOOK      = "book"
+    const val QUERY_PARAM_CHAPTER   = "chapter"
+
+    // SSL / TLS (self-signed cert for companion server)
+    const val SSL_KEYSTORE_TYPE     = "JKS"
+    const val SSL_KEY_ALGORITHM     = "RSA"
+    const val SSL_KEY_ALIAS         = "churchpresenter"
+    const val SSL_KEYSTORE_PASSWORD = "churchpresenter_ssl"
 }

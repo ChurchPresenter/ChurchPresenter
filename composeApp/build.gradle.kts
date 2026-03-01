@@ -53,6 +53,14 @@ kotlin {
             implementation("org.apache.poi:poi:5.2.5")
             implementation("org.apache.poi:poi-ooxml:5.2.5")
             implementation("org.apache.poi:poi-scratchpad:5.2.5")
+            // Ktor server for mobile companion API
+            implementation(libs.ktor.server.core)
+            implementation(libs.ktor.server.netty)
+            implementation(libs.ktor.server.content.negotiation)
+            implementation(libs.ktor.server.cors)
+            implementation(libs.ktor.server.websockets)
+            implementation(libs.ktor.serialization.kotlinx.json)
+            implementation(libs.ktor.server.status.pages)
             // JavaFX for video playback
             val jfxClassifier = currentOsClassifier()
             val jfxModules = listOf("javafx-base", "javafx-graphics", "javafx-media", "javafx-swing", "javafx-controls", "javafx-web")

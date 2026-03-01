@@ -289,7 +289,7 @@ class Bible {
             .forEach { bv ->
                 val verse = bv.verseNumber
 
-                if (verse == verseOld) {
+                if (verse == verseOld && verseList.isNotEmpty()) {
                     verseText = "${verseList.last().substringAfter(". ")} ${bv.verseText}".trim()
                     id = "${previewIdList.last()},${bv.verseId}"
                     verseList.removeLast()
@@ -306,6 +306,32 @@ class Bible {
 
         // Return a new list instance so Compose can detect changes
         return verseList.toList()
+    }
+
+    fun getVerseCount(bookId: Int, chapter: Int): Int =
+        operatorBible.filter { it.book == bookId && it.chapter == chapter }
+            .distinctBy { it.verseNumber }
+            .size
+
+    /**
+     * Thread-safe verse reader for catalog/server use.
+     * Does NOT touch shared mutable state (verseList / previewIdList).
+     * Returns pairs of (verseNumber, verseText) for the given 1-based book id and chapter.
+     */
+    fun getChapterVerses(bookId: Int, chapter: Int): List<Pair<Int, String>> {
+        val result = mutableListOf<Pair<Int, String>>()
+        operatorBible
+            .filter { it.book == bookId && it.chapter == chapter }
+            .forEach { bv ->
+                if (bv.verseNumber == result.lastOrNull()?.first) {
+                    // merge split verse
+                    val (vn, existing) = result.removeLast()
+                    result.add(vn to "$existing ${bv.verseText}".trim())
+                } else {
+                    result.add(bv.verseNumber to bv.verseText.trim())
+                }
+            }
+        return result
     }
 
     fun searchBible(allWords: Boolean, searchExp: Regex): List<BibleSearch> {
