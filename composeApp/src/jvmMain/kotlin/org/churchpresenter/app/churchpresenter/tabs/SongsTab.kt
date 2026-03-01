@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.focusable
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -32,6 +33,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import kotlinx.coroutines.flow.first
@@ -43,6 +45,10 @@ import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.pointerHoverIcon
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -78,6 +84,7 @@ import org.jetbrains.compose.resources.stringResource
 fun SongsTab(
     modifier: Modifier = Modifier,
     appSettings: AppSettings,
+    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit = {},
     onAddToSchedule: ((songNumber: Int, title: String, songbook: String) -> Unit)? = null,
     selectedSongItem: ScheduleItem.SongItem? = null,
     onSongItemSelected: (LyricSection) -> Unit,
@@ -148,6 +155,50 @@ fun SongsTab(
         Constants.STARTS_WITH to startsWithText,
         Constants.EXACT_MATCH to exactMatchText
     )
+
+    val density = LocalDensity.current
+    val onSettingsChangeState = rememberUpdatedState(onSettingsChange)
+
+    // Column widths driven by settings; local state for smooth dragging
+    var colWNumber by remember(appSettings.songSettings.colWidthNumber) {
+        mutableStateOf(with(density) { appSettings.songSettings.colWidthNumber.dp.toPx() })
+    }
+    var colWTitle by remember(appSettings.songSettings.colWidthTitle) {
+        mutableStateOf(with(density) { appSettings.songSettings.colWidthTitle.dp.toPx() })
+    }
+    var colWSongbook by remember(appSettings.songSettings.colWidthSongbook) {
+        mutableStateOf(with(density) { appSettings.songSettings.colWidthSongbook.dp.toPx() })
+    }
+    var colWTune by remember(appSettings.songSettings.colWidthTune) {
+        mutableStateOf(with(density) { appSettings.songSettings.colWidthTune.dp.toPx() })
+    }
+
+    fun saveColWidths() {
+        onSettingsChangeState.value { s ->
+            s.copy(songSettings = s.songSettings.copy(
+                colWidthNumber   = with(density) { colWNumber.toDp().value.toInt() },
+                colWidthTitle    = with(density) { colWTitle.toDp().value.toInt() },
+                colWidthSongbook = with(density) { colWSongbook.toDp().value.toInt() },
+                colWidthTune     = with(density) { colWTune.toDp().value.toInt() }
+            ))
+        }
+    }
+
+    @Composable
+    fun DragHandle(onDrag: (Float) -> Unit, onDragEnd: () -> Unit) {
+        Box(
+            modifier = Modifier
+                .width(6.dp)
+                .fillMaxHeight()
+                .background(MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f))
+                .pointerHoverIcon(PointerIcon.Hand)
+                .pointerInput(Unit) {
+                    detectHorizontalDragGestures(onDragEnd = onDragEnd) { _, amount ->
+                        onDrag(amount)
+                    }
+                }
+        )
+    }
 
     Row(
         modifier = modifier
@@ -244,37 +295,61 @@ fun SongsTab(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(Color.Gray.copy(alpha = 0.2f))
-                    .padding(8.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    .height(32.dp)
+                    .background(Color.Gray.copy(alpha = 0.2f)),
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
                     text = stringResource(Res.string.number) + viewModel.getSortIndicator(Constants.SORT_NUMBER),
                     style = MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.secondary,
-                    modifier = Modifier.width(70.dp).clickable { viewModel.updateSort(Constants.SORT_NUMBER) }
+                    modifier = Modifier
+                        .width(with(density) { colWNumber.toDp() })
+                        .padding(horizontal = 8.dp)
+                        .clickable { viewModel.updateSort(Constants.SORT_NUMBER) }
                 )
-                Text(
-                    text = stringResource(Res.string.title) + viewModel.getSortIndicator(Constants.SORT_TITLE),
-                    style = MaterialTheme.typography.labelMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.secondary,
-                    modifier = Modifier.weight(1f).clickable { viewModel.updateSort(Constants.SORT_TITLE) }
-                )
-                Text(
-                    text = stringResource(Res.string.song_book) + viewModel.getSortIndicator(Constants.SORT_SONGBOOK),
-                    style = MaterialTheme.typography.labelMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.secondary,
-                    modifier = Modifier.width(100.dp).clickable { viewModel.updateSort(Constants.SORT_SONGBOOK) }
+                DragHandle(
+                    onDrag = { colWTune = (colWTune + it).coerceIn(with(density) { 30.dp.toPx() }, with(density) { 200.dp.toPx() }) },
+                    onDragEnd = ::saveColWidths
                 )
                 Text(
                     text = stringResource(Res.string.tune) + viewModel.getSortIndicator(Constants.SORT_TUNE),
                     style = MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.secondary,
-                    modifier = Modifier.width(60.dp).clickable { viewModel.updateSort(Constants.SORT_TUNE) }
+                    modifier = Modifier
+                        .width(with(density) { colWTitle.toDp() })
+                        .padding(horizontal = 8.dp)
+                        .clickable { viewModel.updateSort(Constants.SORT_TITLE) }
+                )
+                DragHandle(
+                    onDrag = { colWTitle = (colWTitle + it).coerceIn(with(density) { 60.dp.toPx() }, with(density) { 600.dp.toPx() }) },
+                    onDragEnd = ::saveColWidths
+                )
+                Text(
+                    text = stringResource(Res.string.song_book) + viewModel.getSortIndicator(Constants.SORT_SONGBOOK),
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.secondary,
+                    modifier = Modifier
+                        .width(with(density) { colWSongbook.toDp() })
+                        .padding(horizontal = 8.dp)
+                        .clickable { viewModel.updateSort(Constants.SORT_SONGBOOK) }
+                )
+                DragHandle(
+                    onDrag = { colWSongbook = (colWSongbook + it).coerceIn(with(density) { 40.dp.toPx() }, with(density) { 300.dp.toPx() }) },
+                    onDragEnd = ::saveColWidths
+                )
+                Text(
+                    text = stringResource(Res.string.tune) + viewModel.getSortIndicator(Constants.SORT_TUNE),
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.secondary,
+                    modifier = Modifier
+                        .width(with(density) { colWTune.toDp() })
+                        .padding(horizontal = 8.dp)
+                        .clickable { viewModel.updateSort(Constants.SORT_TUNE) }
                 )
             }
 
@@ -305,17 +380,45 @@ fun SongsTab(
                                     else MaterialTheme.colorScheme.surface
                                 )
                                 .clickable { viewModel.selectSong(index) }
-                                .padding(8.dp),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                .padding(vertical = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
                             val textColor = if (index == selectedSongIndex)
                                 MaterialTheme.colorScheme.onSurfaceVariant
                             else
                                 MaterialTheme.colorScheme.onSurface
-                            Text(song.number, style = MaterialTheme.typography.bodySmall, modifier = Modifier.width(70.dp), color = textColor)
-                            Text(song.title, style = MaterialTheme.typography.bodySmall, modifier = Modifier.weight(1f), maxLines = 1, overflow = TextOverflow.Ellipsis, color = textColor)
-                            Text(song.songbook, style = MaterialTheme.typography.bodySmall, modifier = Modifier.width(100.dp), maxLines = 1, overflow = TextOverflow.Ellipsis, color = textColor)
-                            Text(song.tune, style = MaterialTheme.typography.bodySmall, modifier = Modifier.width(60.dp), maxLines = 1, color = textColor)
+                            Text(
+                                song.number,
+                                style = MaterialTheme.typography.bodySmall,
+                                modifier = Modifier.width(with(density) { colWNumber.toDp() }).padding(horizontal = 8.dp),
+                                color = textColor
+                            )
+                            Box(modifier = Modifier.width(6.dp)) // spacer matching drag handle
+                            Text(
+                                song.title,
+                                style = MaterialTheme.typography.bodySmall,
+                                modifier = Modifier.width(with(density) { colWTitle.toDp() }).padding(horizontal = 8.dp),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                color = textColor
+                            )
+                            Box(modifier = Modifier.width(6.dp))
+                            Text(
+                                song.songbook,
+                                style = MaterialTheme.typography.bodySmall,
+                                modifier = Modifier.width(with(density) { colWSongbook.toDp() }).padding(horizontal = 8.dp),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                color = textColor
+                            )
+                            Box(modifier = Modifier.width(6.dp))
+                            Text(
+                                song.tune,
+                                style = MaterialTheme.typography.bodySmall,
+                                modifier = Modifier.width(with(density) { colWTune.toDp() }).padding(horizontal = 8.dp),
+                                maxLines = 1,
+                                color = textColor
+                            )
                         }
                         HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
                     }
@@ -486,4 +589,3 @@ fun SongsTab(
         }
     )
 }
-

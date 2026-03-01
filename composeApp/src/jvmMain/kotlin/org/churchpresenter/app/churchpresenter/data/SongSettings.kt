@@ -25,6 +25,12 @@ data class SongSettings(
     val storageDirectory: String = "",
     val songFiles: List<String> = emptyList(),
 
+    // Song list column widths (dp)
+    val colWidthNumber: Int = 70,
+    val colWidthTitle: Int = 220,
+    val colWidthSongbook: Int = 100,
+    val colWidthTune: Int = 60,
+
     // Title settings
     val titleDisplay: String = Constants.FIRST_PAGE,
     val titleFontSize: Int = 70,
@@ -201,7 +207,8 @@ data class StreamingSettings(
     val windowTop: Int = 0,
     val windowLeft: Int = 0,
     val windowRight: Int = 0,
-    val windowBottom: Int = 0
+    val windowBottom: Int = 0,
+    val lowerThirdListWidthDp: Int = 240
 )
 
 @Serializable

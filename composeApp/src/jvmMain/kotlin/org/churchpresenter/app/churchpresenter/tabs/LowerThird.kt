@@ -39,7 +39,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -78,6 +78,7 @@ fun LowerThirdTab(
     modifier: Modifier = Modifier,
     appSettings: AppSettings,
     selectedLowerThirdItem: ScheduleItem.LowerThirdItem? = null,
+    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit = {},
     onAddToSchedule: (presetId: String, presetLabel: String, pauseAtFrame: Boolean, pauseDurationMs: Long) -> Unit = { _, _, _, _ -> },
     onGoLive: (jsonContent: String, pauseAtFrame: Boolean, pauseFrame: Float, pauseDurationMs: Long) -> Unit = { _, _, _, _ -> }
 ) {
@@ -155,6 +156,13 @@ fun LowerThirdTab(
     val displayProgress = animatedProgress.value
     val canPlay = composition != null && jsonContent.isNotBlank()
 
+    val density = LocalDensity.current
+    var listWidthPx by remember(appSettings.streamingSettings.lowerThirdListWidthDp) {
+        mutableStateOf(with(density) { appSettings.streamingSettings.lowerThirdListWidthDp.dp.toPx() })
+    }
+    val listWidthDp = with(density) { listWidthPx.toDp() }
+    val onSettingsChangeState = rememberUpdatedState(onSettingsChange)
+
     @Composable
     fun Tooltip(text: String, content: @Composable () -> Unit) {
         TooltipArea(
@@ -177,9 +185,6 @@ fun LowerThirdTab(
         )
     }
 
-    val density = LocalDensity.current
-    var listWidthPx by rememberSaveable { mutableStateOf(with(density) { 240.dp.toPx() }) }
-    val listWidthDp = with(density) { listWidthPx.toDp() }
 
     Row(modifier = modifier.fillMaxSize()) {
         // Left column — file list (resizable)
@@ -236,7 +241,18 @@ fun LowerThirdTab(
                 .background(MaterialTheme.colorScheme.outlineVariant)
                 .pointerHoverIcon(PointerIcon.Hand)
                 .pointerInput(Unit) {
-                    detectHorizontalDragGestures { _, dragAmount ->
+                    detectHorizontalDragGestures(
+                        onDragEnd = {
+                            val newWidthDp = with(density) { listWidthPx.toDp().value.toInt() }
+                            onSettingsChangeState.value { s ->
+                                s.copy(
+                                    streamingSettings = s.streamingSettings.copy(
+                                        lowerThirdListWidthDp = newWidthDp
+                                    )
+                                )
+                            }
+                        }
+                    ) { _, dragAmount ->
                         listWidthPx = (listWidthPx + dragAmount)
                             .coerceIn(
                                 with(density) { 100.dp.toPx() },

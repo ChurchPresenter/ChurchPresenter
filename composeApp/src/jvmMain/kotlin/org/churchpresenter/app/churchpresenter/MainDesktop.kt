@@ -363,6 +363,7 @@ fun MainDesktop(
                             Tabs.SONGS -> SongsTab(
                                 modifier = Modifier.fillMaxSize(),
                                 appSettings = appSettings,
+                                onSettingsChange = onSettingsChange,
                                 onAddToSchedule = { songNumber, title, songbook ->
                                     currentScheduleActions.addSong(songNumber, title, songbook)
                                 },
@@ -406,6 +407,7 @@ fun MainDesktop(
                                 modifier = Modifier.fillMaxSize(),
                                 appSettings = appSettings,
                                 selectedLowerThirdItem = selectedLowerThirdItem,
+                                onSettingsChange = onSettingsChange,
                                 onAddToSchedule = { presetId, presetLabel, pauseAtFrame, pauseDurationMs ->
                                     scheduleActions.addLowerThird(presetId, presetLabel, pauseAtFrame, pauseDurationMs)
                                 },
