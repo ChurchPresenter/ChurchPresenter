@@ -572,4 +572,5 @@
     <string name="website_title_label">Title (optional)</string>
     <string name="website_title_hint">Enter a display name…</string>
     <string name="website_go_live">Go Live</string>
+    <string name="website_disclaimer">We are not responsible for any advertisements or content that may appear on the displayed website.</string>
 </resources>
