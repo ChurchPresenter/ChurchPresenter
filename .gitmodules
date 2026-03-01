@@ -1,0 +1,3 @@
+[submodule "composeApp/src/jvmMain/appResources/common/Lottie-Gen"]
+	path = composeApp/src/jvmMain/appResources/common/Lottie-Gen
+	url = https://github.com/ChurchPresenter/Lottie-Gen
