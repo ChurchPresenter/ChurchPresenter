@@ -83,7 +83,8 @@ import netscape.javascript.JSObject
 @Composable
 fun LowerThirdSettingsTab(
     settings: AppSettings,
-    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit
+    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
+    serverUrl: String = ""
 ) {
     val viewModel = remember { LowerThirdSettingsViewModel() }
 
@@ -252,7 +253,8 @@ fun LowerThirdSettingsTab(
                         SwingUtilities.invokeLater {
                             openLottieGeneratorDialog(
                                 parentWindow = Window.getWindows().firstOrNull { it.isActive },
-                                onFileSaved = { viewModel.onFileSavedFromGenerator() }
+                                onFileSaved = { viewModel.onFileSavedFromGenerator() },
+                                serverUrl = serverUrl
                             )
                         }
                     }
@@ -427,36 +429,44 @@ private fun ModernButton(
 
 /**
  * Opens the Lottie Generator HTML tool in an embedded JavaFX WebView dialog.
- * Intercepts download clicks and saves the file directly to [outputFolder].
+ * When [serverUrl] is provided, loads the generator from the Ktor server
+ * so API calls (/api/presets, /api/logos, etc.) resolve correctly.
+ * Falls back to loading from a local file if the server is not running.
+ * Intercepts download clicks and saves the file directly.
  */
 private fun openLottieGeneratorDialog(
     parentWindow: Window?,
-    onFileSaved: () -> Unit
+    onFileSaved: () -> Unit,
+    serverUrl: String = ""
 ) {
-    val appResourcesDir = System.getProperty("compose.application.resources.dir")
-    val executablePath = ProcessHandle.current().info().command().orElse(null)
-        ?.let { File(it).parentFile }
-    val userDir = File(System.getProperty("user.dir"))
-    val htmlFile = listOfNotNull(
-        appResourcesDir?.let { File(it, "Lottie-Gen/lottie-generator.html") },
-        executablePath?.let { File(it, "../app/resources/Lottie-Gen/lottie-generator.html") },
-        executablePath?.let { File(it, "Lottie-Gen/lottie-generator.html") },
-        File(userDir, "composeApp/src/jvmMain/appResources/common/Lottie-Gen/lottie-generator.html"),
-        File(userDir, "src/jvmMain/appResources/common/Lottie-Gen/lottie-generator.html"),
-        File(userDir, "Lottie-Gen/lottie-generator.html"),
-        File("Lottie-Gen/lottie-generator.html")
-    ).firstOrNull { it.exists() }
+    // Determine the URL to load
+    val loadUrl: String = if (serverUrl.isNotEmpty()) {
+        "$serverUrl/lottie-generator.html"
+    } else {
+        val appResourcesDir = System.getProperty("compose.application.resources.dir")
+        val executablePath = ProcessHandle.current().info().command().orElse(null)
+            ?.let { File(it).parentFile }
+        val userDir = File(System.getProperty("user.dir"))
+        val htmlFile = listOfNotNull(
+            appResourcesDir?.let { File(it, "Lottie-Gen/lottie-generator.html") },
+            executablePath?.let { File(it, "../app/resources/Lottie-Gen/lottie-generator.html") },
+            executablePath?.let { File(it, "Lottie-Gen/lottie-generator.html") },
+            File(userDir, "composeApp/src/jvmMain/appResources/common/Lottie-Gen/lottie-generator.html"),
+            File(userDir, "src/jvmMain/appResources/common/Lottie-Gen/lottie-generator.html"),
+            File(userDir, "Lottie-Gen/lottie-generator.html"),
+            File("Lottie-Gen/lottie-generator.html")
+        ).firstOrNull { it.exists() }
 
-    if (htmlFile == null) {
-        javax.swing.JOptionPane.showMessageDialog(
-            parentWindow,
-            "Lottie Generator not found.\nChecked:\n" +
-                "  <appResources>/Lottie-Gen/lottie-generator.html\n" +
-                "  ${userDir.absolutePath}/composeApp/src/jvmMain/appResources/common/Lottie-Gen/lottie-generator.html",
-            "Generator Not Found",
-            javax.swing.JOptionPane.ERROR_MESSAGE
-        )
-        return
+        if (htmlFile == null) {
+            javax.swing.JOptionPane.showMessageDialog(
+                parentWindow,
+                "Lottie Generator not found.\nEnsure the server is running or Lottie-Gen/lottie-generator.html exists.",
+                "Generator Not Found",
+                javax.swing.JOptionPane.ERROR_MESSAGE
+            )
+            return
+        }
+        htmlFile.toURI().toString()
     }
 
     // Ensure JavaFX toolkit is initialised
@@ -493,7 +503,7 @@ private fun openLottieGeneratorDialog(
                         SwingUtilities.invokeLater {
                             val chooser = createFileChooser {
                                 fileSelectionMode = JFileChooser.FILES_ONLY
-                                dialogTitle = "Save Lottie File"
+                                dialogTitle = "Save Lower Third"
                                 fileFilter = FileNameExtensionFilter("Lottie JSON (*.json)", "json")
                                 selectedFile = File(filename)
                             }
@@ -512,11 +522,16 @@ private fun openLottieGeneratorDialog(
                 }
 
                 win.setMember("_jvmBridge", bridge)
+
+                // Rename the download button to "Save Lower Third"
+                engine.executeScript(
+                    "var btn = document.getElementById('btnDownload'); if (btn) btn.textContent = 'Save Lower Third';"
+                )
             }
         }
 
         engine.loadWorker.stateProperty().addListener(stateListener)
-        engine.load(htmlFile.toURI().toString())
+        engine.load(loadUrl)
 
         jfxPanel.scene = Scene(StackPane(webView), 1180.0, 760.0)
     }

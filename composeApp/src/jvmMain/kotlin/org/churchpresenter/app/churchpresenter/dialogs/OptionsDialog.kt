@@ -40,6 +40,7 @@ import churchpresenter.composeapp.generated.resources.projection
 import churchpresenter.composeapp.generated.resources.song
 import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.data.SettingsManager
+import org.churchpresenter.app.churchpresenter.server.CompanionServer
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.BackgroundSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.BibleSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.MediaSettingsTab
@@ -55,6 +56,7 @@ fun OptionsDialog(
     isVisible: Boolean,
     theme: ThemeMode,
     settingsManager: SettingsManager,
+    companionServer: CompanionServer,
     onDismiss: () -> Unit,
     onSave: (AppSettings) -> Unit = {},
     onIdentifyScreen: () -> Unit = {}
@@ -157,7 +159,8 @@ fun OptionsDialog(
                                 settings = currentSettings,
                                 onSettingsChange = { updateFn ->
                                     currentSettings = updateFn(currentSettings)
-                                }
+                                },
+                                serverUrl = companionServer.serverUrl.value
                             )
                         }
                     }
