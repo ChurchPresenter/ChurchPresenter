@@ -30,6 +30,7 @@ git submodule update --remote --merge
 
 > This will include [Lottie-Gen](https://github.com/ChurchPresenter/Lottie-Gen), a standalone tool for generating Lottie animations, located at `composeApp/src/jvmMain/appResources/common/Lottie-Gen`.
 
+
 ---
 
 ### Build and Run Desktop (JVM) Application
