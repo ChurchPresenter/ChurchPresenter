@@ -573,4 +573,22 @@
     <string name="website_title_hint">Enter a display name…</string>
     <string name="website_go_live">Go Live</string>
     <string name="website_disclaimer">We are not responsible for any advertisements or content that may appear on the displayed website.</string>
+
+    <!-- Server Settings -->
+    <string name="server_settings">Server</string>
+    <string name="companion_server">Companion Server</string>
+    <string name="server_description">Exposes a local REST + WebSocket API so phones, tablets, and stage displays can receive the current slide content over your local network.</string>
+    <string name="enable_server">Enable Server</string>
+    <string name="server_running">Running</string>
+    <string name="server_stopped">Stopped</string>
+    <string name="server_port">Port</string>
+    <string name="server_port_hint">8765</string>
+    <string name="server_port_note">Change port before starting the server.</string>
+    <string name="api_key_protection">API Key Protection</string>
+    <string name="api_key_label">API Key</string>
+    <string name="api_key_hint">Enter a secret key…</string>
+    <string name="server_url_label">Server URL</string>
+    <string name="copy_url">Copy URL</string>
+    <string name="server_endpoints">Available Endpoints</string>
+    <string name="server_restart">Restart Server</string>
 </resources>

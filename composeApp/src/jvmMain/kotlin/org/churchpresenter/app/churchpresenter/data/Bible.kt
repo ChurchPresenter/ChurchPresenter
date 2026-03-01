@@ -378,6 +378,14 @@ class Bible {
         return b?.chapterCount ?: 0
     }
 
+    /**
+     * Returns the number of distinct verses for a given book+chapter,
+     * reading directly from the parsed verse data.
+     * Thread-safe: does NOT touch Compose mutableStateListOf fields.
+     */
+    fun getVerseCountForChapter(book: Int, chapter: Int): Int =
+        operatorBible.count { it.book == book && it.chapter == chapter }
+
     // Get verse details for presenter screen
     fun getVerseDetails(book: Int, chapter: Int, verseNumber: Int): Triple<String, String, String>? {
         // Find the verse

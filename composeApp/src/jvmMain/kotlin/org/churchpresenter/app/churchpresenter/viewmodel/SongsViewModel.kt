@@ -16,7 +16,8 @@ import org.churchpresenter.app.churchpresenter.utils.Constants
 import java.io.File
 
 class SongsViewModel(
-    private var appSettings: AppSettings
+    private var appSettings: AppSettings,
+    private val onSongsLoaded: ((List<SongItem>) -> Unit)? = null
 ) {
     private val _songsData = mutableStateOf(Songs())
     val songsData: State<Songs> = _songsData
@@ -114,6 +115,9 @@ class SongsViewModel(
                 _allSongs.value = songs.getSongs().map { "${it.number}. ${it.title}" }
                 _filteredSongs.value = _allSongs.value
                 refreshFilteredSongItems()
+
+                // Notify listener (e.g. companion server) with full song list
+                onSongsLoaded?.invoke(songs.getSongs())
             } finally {
                 _isLoading.value = false
             }

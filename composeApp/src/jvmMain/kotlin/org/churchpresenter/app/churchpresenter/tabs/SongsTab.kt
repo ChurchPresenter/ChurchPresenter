@@ -99,9 +99,11 @@ fun SongsTab(
     onSongItemSelected: (LyricSection) -> Unit,
     onPresenting: (Presenting) -> Unit = { Presenting.NONE },
     isPresenting: Boolean = false,
-    theme: ThemeMode = ThemeMode.SYSTEM
+    theme: ThemeMode = ThemeMode.SYSTEM,
+    onSongsLoaded: ((List<SongItem>) -> Unit)? = null
 ) {
-    val viewModel = remember { SongsViewModel(appSettings) }
+    val onSongsLoadedState by rememberUpdatedState(onSongsLoaded)
+    val viewModel = remember { SongsViewModel(appSettings, onSongsLoaded = { songs -> onSongsLoadedState?.invoke(songs) }) }
 
     // Reload songs whenever the storage directory changes (e.g. after settings are saved)
     LaunchedEffect(appSettings.songSettings.storageDirectory) {
