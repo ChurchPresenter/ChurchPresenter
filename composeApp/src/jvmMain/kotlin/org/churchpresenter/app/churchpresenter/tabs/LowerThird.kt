@@ -10,6 +10,7 @@ import androidx.compose.foundation.TooltipPlacement
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -38,11 +39,16 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
@@ -171,11 +177,15 @@ fun LowerThirdTab(
         )
     }
 
+    val density = LocalDensity.current
+    var listWidthPx by rememberSaveable { mutableStateOf(with(density) { 240.dp.toPx() }) }
+    val listWidthDp = with(density) { listWidthPx.toDp() }
+
     Row(modifier = modifier.fillMaxSize()) {
-        // Left column — file list
+        // Left column — file list (resizable)
         LazyColumn(
             modifier = Modifier
-                .width(400.dp)
+                .width(listWidthDp)
                 .fillMaxHeight()
                 .background(MaterialTheme.colorScheme.surfaceVariant),
             verticalArrangement = Arrangement.spacedBy(1.dp)
@@ -217,6 +227,24 @@ fun LowerThirdTab(
         }
 
         HorizontalDivider(modifier = Modifier.fillMaxHeight().width(1.dp))
+
+        // Drag handle — resize the list
+        Box(
+            modifier = Modifier
+                .width(6.dp)
+                .fillMaxHeight()
+                .background(MaterialTheme.colorScheme.outlineVariant)
+                .pointerHoverIcon(PointerIcon.Hand)
+                .pointerInput(Unit) {
+                    detectHorizontalDragGestures { _, dragAmount ->
+                        listWidthPx = (listWidthPx + dragAmount)
+                            .coerceIn(
+                                with(density) { 100.dp.toPx() },
+                                with(density) { 600.dp.toPx() }
+                            )
+                    }
+                }
+        )
 
         Column(
             modifier = Modifier
@@ -325,4 +353,3 @@ fun LowerThirdTab(
         }
     }
 }
-
