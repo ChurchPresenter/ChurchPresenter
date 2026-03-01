@@ -126,12 +126,15 @@ fun AnnouncementsTab(
     }
 
     Column(
-        modifier = modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
+        modifier = modifier.fillMaxSize()
     ) {
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .verticalScroll(rememberScrollState())
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
         // ── Text input ───────────────────────────────────────────────
         SectionLabel(stringResource(Res.string.announcement_text))
         OutlinedTextField(
@@ -517,9 +520,11 @@ fun AnnouncementsTab(
         }
 
 
+        } // end inner scrollable Column
+
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -527,32 +532,22 @@ fun AnnouncementsTab(
                 Button(
                     onClick = { onAddToSchedule.invoke(viewModel.buildSettings()) },
                     enabled = viewModel.text.isNotBlank(),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.secondary
-                    )
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
                 ) {
-                    Text(
-                        text = stringResource(Res.string.add_to_schedule),
-                        style = MaterialTheme.typography.labelMedium
-                    )
+                    Text(stringResource(Res.string.add_to_schedule), style = MaterialTheme.typography.labelMedium)
                 }
             }
             if (presenterManager != null) {
                 Button(
                     onClick = { viewModel.goLive(presenterManager) },
                     enabled = viewModel.text.isNotBlank(),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary
-                    )
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
                 ) {
-                    Text(
-                        text = stringResource(Res.string.go_live),
-                        style = MaterialTheme.typography.labelMedium
-                    )
+                    Text(stringResource(Res.string.go_live), style = MaterialTheme.typography.labelMedium)
                 }
             }
         }
-    }
+    } // end outer Column
 }
 
 @Composable
