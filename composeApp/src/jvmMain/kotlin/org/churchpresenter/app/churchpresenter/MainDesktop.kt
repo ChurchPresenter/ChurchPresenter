@@ -1,12 +1,20 @@
 package org.churchpresenter.app.churchpresenter
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandHorizontally
+import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -16,7 +24,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.pointerHoverIcon
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.foundation.focusable
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -25,6 +38,14 @@ import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.unit.dp
+import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.ic_arrow_left
+import churchpresenter.composeapp.generated.resources.ic_arrow_right
+import churchpresenter.composeapp.generated.resources.tooltip_collapse_schedule
+import churchpresenter.composeapp.generated.resources.tooltip_expand_schedule
+import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.app.churchpresenter.components.Toolbar
 import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.dialogs.AddLabelDialog
@@ -45,14 +66,8 @@ import org.churchpresenter.app.churchpresenter.tabs.LowerThirdTab
 import org.churchpresenter.app.churchpresenter.tabs.TabSection
 import org.churchpresenter.app.churchpresenter.tabs.Tabs
 import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
-import org.churchpresenter.app.churchpresenter.server.CompanionServer
 import org.churchpresenter.app.churchpresenter.utils.Constants
-import org.churchpresenter.app.churchpresenter.data.Songs
-import org.churchpresenter.app.churchpresenter.data.Bible
 import org.churchpresenter.app.churchpresenter.viewmodel.LocalMediaViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import java.io.File
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 
 // Kept for NavigationTopBar / menu — wraps ScheduleTabActions
@@ -70,7 +85,6 @@ fun MainDesktop(
     modifier: Modifier = Modifier,
     appSettings: AppSettings,
     presenterManager: PresenterManager,
-    companionServer: CompanionServer,
     presenting: (Presenting) -> Unit,
     onVerseSelected: (List<SelectedVerse>) -> Unit,
     onSongItemSelected: (LyricSection) -> Unit,
@@ -107,53 +121,10 @@ fun MainDesktop(
     val presentingMode by presenterManager.presentingMode
     val mainFocusRequester = remember { FocusRequester() }
 
-
     LaunchedEffect(selectedTabIndex) {
         onTabChange(selectedTabIndex)
+        // Re-request focus so F-key shortcuts keep working after the new tab's children steal focus
         mainFocusRequester.requestFocus()
-    }
-
-    // Load songs for the companion server in the background regardless of which tab is active.
-    // This runs whenever the storage directory changes (e.g. after settings saved).
-    LaunchedEffect(appSettings.songSettings.storageDirectory) {
-        val songs = withContext(Dispatchers.IO) {
-            val s = Songs()
-            val dir = appSettings.songSettings.storageDirectory
-            if (dir.isNotEmpty()) {
-                val folder = File(dir)
-                if (folder.exists() && folder.isDirectory) {
-                    folder.listFiles { f -> f.extension.lowercase() == Constants.EXTENSION_SPS }
-                        ?.sortedBy { it.name }
-                        ?.forEach { file ->
-                            try { s.loadFromSpsAppend(file.absolutePath) } catch (_: Exception) {}
-                        }
-                }
-            }
-            if (s.getSongCount() == 0) {
-                try { s.loadFromSps(Constants.FALLBACK_SONG_RESOURCE) } catch (_: Exception) {}
-            }
-            s.getSongs()
-        }
-        companionServer.updateSongs(songs)
-    }
-
-    // Load primary Bible for the companion server in the background.
-    // Re-runs whenever the storage directory or selected primary Bible changes.
-    LaunchedEffect(appSettings.bibleSettings.storageDirectory, appSettings.bibleSettings.primaryBible) {
-        val storageDir = appSettings.bibleSettings.storageDirectory
-        val primaryFile = appSettings.bibleSettings.primaryBible
-        if (storageDir.isNotEmpty() && primaryFile.isNotEmpty()) {
-            withContext(Dispatchers.IO) {
-                try {
-                    val f = File(storageDir, primaryFile)
-                    if (f.exists()) {
-                        val bible = Bible().apply { loadFromSpb(f.absolutePath) }
-                        val translationName = primaryFile.substringBeforeLast('.')
-                        companionServer.updateBible(bible, translationName)
-                    }
-                } catch (_: Exception) { }
-            }
-        }
     }
 
     Box(
@@ -166,7 +137,9 @@ fun MainDesktop(
                 if (keyEvent.type == KeyEventType.KeyDown) {
                     when (keyEvent.key) {
                         Key.Escape -> {
-                            mediaViewModel?.pause(); presenterManager.setPresentingMode(Presenting.NONE); true
+                            mediaViewModel?.pause()
+                            presenterManager.setPresentingMode(Presenting.NONE)
+                            true
                         }
 
                         Key.F6 -> {
@@ -221,9 +194,33 @@ fun MainDesktop(
                 onOpenSettings = onShowSettings
             )
 
+            var scheduleCollapsed by rememberSaveable { mutableStateOf(false) }
+
+            val density = LocalDensity.current
+            val onSettingsChangeState = rememberUpdatedState(onSettingsChange)
+
+            // Schedule panel width — loaded from settings, local state for smooth dragging
+            var schedulePanelPx by remember(appSettings.schedulePanelWidthDp) {
+                mutableStateOf(with(density) { appSettings.schedulePanelWidthDp.dp.toPx() })
+            }
+
+            fun saveScheduleWidth() {
+                onSettingsChangeState.value { s ->
+                    s.copy(schedulePanelWidthDp = with(density) { schedulePanelPx.toDp().value.toInt() })
+                }
+            }
+
             Row(modifier = Modifier.fillMaxSize()) {
-                Column(modifier = Modifier.fillMaxWidth(0.30f).fillMaxHeight()) {
+                // Collapsible schedule panel
+                AnimatedVisibility(
+                    visible = !scheduleCollapsed,
+                    enter = expandHorizontally(expandFrom = Alignment.Start),
+                    exit = shrinkHorizontally(shrinkTowards = Alignment.Start)
+                ) {
+                    Column(modifier = Modifier.width(with(density) { schedulePanelPx.toDp() }).fillMaxHeight()) {
                     ScheduleTab(
+                        appSettings = appSettings,
+                        presenterManager = presenterManager,
                         onPresenting = presenting,
                         onPresentBible = { item ->
                             selectedBibleVerseItem = item
@@ -292,18 +289,22 @@ fun MainDesktop(
                                     onSettingsChange { settings ->
                                         settings.copy(
                                             announcementsSettings = settings.announcementsSettings.copy(
-                                                text             = item.text,
-                                                textColor        = item.textColor,
-                                                backgroundColor  = item.backgroundColor,
-                                                fontSize         = item.fontSize,
-                                                fontType         = item.fontType,
-                                                bold             = item.bold,
-                                                italic           = item.italic,
-                                                underline        = item.underline,
-                                                shadow           = item.shadow,
-                                                position         = item.position,
-                                                animationType    = item.animationType,
-                                                animationDuration = item.animationDuration
+                                                text              = item.text,
+                                                textColor         = item.textColor,
+                                                backgroundColor   = item.backgroundColor,
+                                                fontSize          = item.fontSize,
+                                                fontType          = item.fontType,
+                                                bold              = item.bold,
+                                                italic            = item.italic,
+                                                underline         = item.underline,
+                                                shadow            = item.shadow,
+                                                position          = item.position,
+                                                animationType     = item.animationType,
+                                                animationDuration = item.animationDuration,
+                                                timerMinutes      = item.timerMinutes,
+                                                timerSeconds      = item.timerSeconds,
+                                                timerTextColor    = item.timerTextColor,
+                                                timerExpiredText  = item.timerExpiredText
                                             )
                                         )
                                     }
@@ -312,6 +313,7 @@ fun MainDesktop(
                                 is ScheduleItem.WebsiteItem -> {
                                     presenterManager.setWebsiteUrl(item.url)
                                     presenterManager.setPresentingMode(Presenting.WEBSITE)
+                                    presenterManager.setShowPresenterWindow(true)
                                 }
                             }
                         },
@@ -334,11 +336,50 @@ fun MainDesktop(
                         },
                         onSelectedItemChanged = { id ->
                             onScheduleItemSelected(id)
-                        },
-                        onScheduleChanged = { items ->
-                            companionServer.updateSchedule(items)
                         }
                     )
+                    } // end Column
+                } // end AnimatedVisibility
+
+                // Drag handle + collapse toggle between schedule and main content
+                Box(
+                    modifier = Modifier
+                        .width(16.dp)
+                        .fillMaxHeight()
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                        .pointerInput(scheduleCollapsed) {
+                            if (!scheduleCollapsed) {
+                                detectHorizontalDragGestures(
+                                    onDragEnd = ::saveScheduleWidth
+                                ) { _, amount ->
+                                    schedulePanelPx = (schedulePanelPx + amount).coerceIn(
+                                        with(density) { 150.dp.toPx() },
+                                        with(density) { 600.dp.toPx() }
+                                    )
+                                }
+                            }
+                        }
+                        .pointerHoverIcon(
+                            if (scheduleCollapsed) PointerIcon.Default else PointerIcon.Hand
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    IconButton(
+                        onClick = { scheduleCollapsed = !scheduleCollapsed },
+                        modifier = Modifier.wrapContentHeight()
+                    ) {
+                        Icon(
+                            painter = painterResource(
+                                if (scheduleCollapsed) Res.drawable.ic_arrow_right
+                                else Res.drawable.ic_arrow_left
+                            ),
+                            contentDescription = stringResource(
+                                if (scheduleCollapsed) Res.string.tooltip_expand_schedule
+                                else Res.string.tooltip_collapse_schedule
+                            ),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
 
                 Column(modifier = Modifier.fillMaxWidth().fillMaxHeight()) {
@@ -354,6 +395,7 @@ fun MainDesktop(
                             Tabs.BIBLE -> BibleTab(
                                 modifier = Modifier.fillMaxSize(),
                                 appSettings = appSettings,
+                                onSettingsChange = onSettingsChange,
                                 onAddToSchedule = { bookName, chapter, verseNumber, verseText ->
                                     currentScheduleActions.addBibleVerse(bookName, chapter, verseNumber, verseText)
                                 },
@@ -365,6 +407,7 @@ fun MainDesktop(
                             Tabs.SONGS -> SongsTab(
                                 modifier = Modifier.fillMaxSize(),
                                 appSettings = appSettings,
+                                onSettingsChange = onSettingsChange,
                                 onAddToSchedule = { songNumber, title, songbook ->
                                     currentScheduleActions.addSong(songNumber, title, songbook)
                                 },
@@ -408,12 +451,14 @@ fun MainDesktop(
                                 modifier = Modifier.fillMaxSize(),
                                 appSettings = appSettings,
                                 selectedLowerThirdItem = selectedLowerThirdItem,
+                                onSettingsChange = onSettingsChange,
                                 onAddToSchedule = { presetId, presetLabel, pauseAtFrame, pauseDurationMs ->
                                     scheduleActions.addLowerThird(presetId, presetLabel, pauseAtFrame, pauseDurationMs)
                                 },
                                 onGoLive = { json, pauseAtFrame, pauseFrame, pauseDurationMs ->
                                     presenterManager.setLottieContent(json, pauseAtFrame, pauseFrame, pauseDurationMs)
                                     presenterManager.setPresentingMode(Presenting.LOWER_THIRD)
+                                    presenterManager.setShowPresenterWindow(true)
                                 }
                             )
 
@@ -423,6 +468,7 @@ fun MainDesktop(
                                 onSettingsChange = onSettingsChange,
                                 presenterManager = presenterManager,
                                 onAddToSchedule = { settings ->
+                                    val isTimer = settings.timerMinutes > 0 || settings.timerSeconds > 0
                                     currentScheduleActions.addAnnouncement(
                                         settings.text,
                                         settings.textColor,
@@ -435,7 +481,12 @@ fun MainDesktop(
                                         settings.shadow,
                                         settings.position,
                                         settings.animationType,
-                                        settings.animationDuration
+                                        settings.animationDuration,
+                                        isTimer,
+                                        settings.timerMinutes,
+                                        settings.timerSeconds,
+                                        settings.timerTextColor,
+                                        settings.timerExpiredText
                                     )
                                 }
                             )

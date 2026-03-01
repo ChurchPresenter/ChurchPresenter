@@ -231,7 +231,12 @@ class ScheduleViewModel {
         shadow: Boolean = false,
         position: String = "center",
         animationType: String = "SLIDE_FROM_BOTTOM",
-        animationDuration: Int = 500
+        animationDuration: Int = 500,
+        isTimer: Boolean = false,
+        timerMinutes: Int = 0,
+        timerSeconds: Int = 0,
+        timerTextColor: String = "#FFFFFF",
+        timerExpiredText: String = ""
     ) {
         val id = UUID.randomUUID().toString()
         _scheduleItems.add(
@@ -248,7 +253,12 @@ class ScheduleViewModel {
                 shadow = shadow,
                 position = position,
                 animationType = animationType,
-                animationDuration = animationDuration
+                animationDuration = animationDuration,
+                isTimer = isTimer,
+                timerMinutes = timerMinutes,
+                timerSeconds = timerSeconds,
+                timerTextColor = timerTextColor,
+                timerExpiredText = timerExpiredText
             )
         )
     }
