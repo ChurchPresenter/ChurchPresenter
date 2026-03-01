@@ -588,7 +588,7 @@ fun AnnouncementsTab(
                             val displayMin = displayRemaining / 60
                             val displaySec = displayRemaining % 60
                             val displayColor = if (viewModel.timerExpired) MaterialTheme.colorScheme.error
-                                               else Utils.parseHexColor(viewModel.timerTextColor)
+                                               else Utils.parseHexColor(viewModel.textColor)
                             Text(
                                 text = "%02d:%02d".format(displayMin, displaySec),
                                 style = MaterialTheme.typography.displayMedium,
@@ -619,7 +619,7 @@ fun AnnouncementsTab(
                                 TimerStepButton("+") { viewModel.stepTimerMinutes(1); viewModel.saveToSettings(onSettingsChange) }
                             }
 
-                            Text(":", style = MaterialTheme.typography.displaySmall)
+                            Text(":", style = MaterialTheme.typography.displaySmall.copy(color = MaterialTheme.colorScheme.onSurfaceVariant))
 
                             // Seconds stepper
                             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
