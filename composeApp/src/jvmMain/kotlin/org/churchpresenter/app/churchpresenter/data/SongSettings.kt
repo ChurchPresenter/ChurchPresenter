@@ -25,6 +25,15 @@ data class SongSettings(
     val storageDirectory: String = "",
     val songFiles: List<String> = emptyList(),
 
+    // Song list column widths (dp)
+    val colWidthNumber: Int = 70,
+    val colWidthTitle: Int = 220,
+    val colWidthSongbook: Int = 100,
+    val colWidthTune: Int = 60,
+
+    // Left/right panel split — lyrics panel width in dp (0 = use default weight)
+    val lyricsPanelWidthDp: Int = 0,
+
     // Title settings
     val titleDisplay: String = Constants.FIRST_PAGE,
     val titleFontSize: Int = 70,
@@ -67,7 +76,7 @@ data class SongSettings(
     val songNumberShadow: Boolean = false,
 
     // Transition animation
-    val animationType: String = Constants.ANIMATION_CROSSFADE,
+    val animationType: String = Constants.NONE,
     val transitionDuration: Float = 500f
 )
 
@@ -80,6 +89,10 @@ data class BibleSettings(
     // Bible selection
     val primaryBible: String = "",
     val secondaryBible: String = "",
+
+    // Bible tab column widths (dp); 0 = use default
+    val bibleColWidthBook: Int = 200,
+    val bibleColWidthChapter: Int = 120,
 
     // Global vertical alignment (affects all 4 sections)
     val verticalAlignment: String = Constants.MIDDLE,
@@ -201,7 +214,8 @@ data class StreamingSettings(
     val windowTop: Int = 0,
     val windowLeft: Int = 0,
     val windowRight: Int = 0,
-    val windowBottom: Int = 0
+    val windowBottom: Int = 0,
+    val lowerThirdListWidthDp: Int = 240
 )
 
 @Serializable
@@ -218,15 +232,11 @@ data class AnnouncementsSettings(
     val horizontalAlignment: String = Constants.CENTER,
     val position: String = Constants.CENTER,
     val animationType: String = Constants.ANIMATION_SLIDE_FROM_BOTTOM,
-    val animationDuration: Int = 500
-)
-
-@Serializable
-data class ServerSettings(
-    val enabled: Boolean = false,
-    val port: Int = 8765,
-    val apiKeyEnabled: Boolean = false,
-    val apiKey: String = ""
+    val animationDuration: Int = 500,
+    val timerMinutes: Int = 0,
+    val timerSeconds: Int = 0,
+    val timerTextColor: String = "#FFFFFF",
+    val timerExpiredText: String = ""
 )
 
 @Serializable
@@ -238,7 +248,7 @@ data class AppSettings(
     val pictureSettings: PictureSettings = PictureSettings(),
     val streamingSettings: StreamingSettings = StreamingSettings(),
     val announcementsSettings: AnnouncementsSettings = AnnouncementsSettings(),
-    val serverSettings: ServerSettings = ServerSettings(),
+    val schedulePanelWidthDp: Int = 280,
     val theme: String = Constants.LIGHT,
     val language: String = "en",
     val licenseAccepted: Boolean = false

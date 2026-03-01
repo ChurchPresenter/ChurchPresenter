@@ -1,16 +1,18 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
-
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
@@ -28,7 +30,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import kotlinx.coroutines.flow.first
 import androidx.compose.ui.Alignment
@@ -41,6 +46,10 @@ import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.pointerHoverIcon
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -72,10 +81,12 @@ import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.viewmodel.BibleViewModel
 import org.jetbrains.compose.resources.stringResource
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun BibleTab(
     modifier: Modifier = Modifier,
     appSettings: AppSettings,
+    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit = {},
     onAddToSchedule: ((bookName: String, chapter: Int, verseNumber: Int, verseText: String) -> Unit)? = null,
     selectedVerseItem: ScheduleItem.BibleVerseItem? = null,
     onVerseSelected: (List<SelectedVerse>) -> Unit = {},
@@ -83,7 +94,6 @@ fun BibleTab(
 ) {
     val viewModel = remember { BibleViewModel(appSettings) }
 
-    // Reload bibles whenever storage directory or bible selection changes (e.g. after settings saved)
     LaunchedEffect(
         appSettings.bibleSettings.storageDirectory,
         appSettings.bibleSettings.primaryBible,
@@ -96,15 +106,10 @@ fun BibleTab(
         onDispose { viewModel.dispose() }
     }
 
-    // React to schedule item selection.
-    // If data is still loading when the item arrives, wait for loading to finish
-    // then retry — no fixed delay, no polling, no race condition.
     LaunchedEffect(selectedVerseItem) {
         selectedVerseItem?.let { item ->
-            // Wait until data is ready if currently loading
             if (viewModel.isLoading.value) {
-                snapshotFlow { viewModel.isLoading.value }
-                    .first { !it }
+                snapshotFlow { viewModel.isLoading.value }.first { !it }
             }
             viewModel.selectVerseByDetails(item.bookName, item.chapter, item.verseNumber)
         }
@@ -118,18 +123,14 @@ fun BibleTab(
     val searchQuery by viewModel.searchQuery
     val searchResults by viewModel.searchResults
     val isSearchMode by viewModel.isSearchMode
-
-    // Filtered lists are managed entirely by ViewModel
     val filteredBooks by viewModel.filteredBooks
     val filteredChapters by viewModel.filteredChapters
     val filteredVerses by viewModel.filteredVerses
 
-    // String resources for scope and mode options
     val scopeOptions = listOf(
         stringResource(Res.string.entire_bible),
         stringResource(Res.string.current_book),
     )
-
     val selectedScopeIndex by viewModel.selectedScopeIndex
     val selectedScope = scopeOptions.getOrElse(selectedScopeIndex) { scopeOptions.first() }
 
@@ -137,37 +138,64 @@ fun BibleTab(
         stringResource(Res.string.contains_phrase),
         stringResource(Res.string.exact_match),
     )
-
     val selectedModeIndex by viewModel.selectedModeIndex
     val selectedMode = modeOptions.getOrElse(selectedModeIndex) { modeOptions.first() }
 
-    // Focus management for keyboard navigation
     val focusRequester = remember { FocusRequester() }
+    LaunchedEffect(Unit) { focusRequester.requestFocus() }
 
-    LaunchedEffect(Unit) {
-        focusRequester.requestFocus()
-    }
-
-    // Notify parent when selected verse changes
     LaunchedEffect(selectedVerseIndex, verses.size) {
         if (verses.isNotEmpty() && selectedVerseIndex >= 0 && selectedVerseIndex < verses.size) {
             val selectedVerses = viewModel.getSelectedVerses()
-            if (selectedVerses.isNotEmpty()) {
-                onVerseSelected(selectedVerses)
-            }
+            if (selectedVerses.isNotEmpty()) onVerseSelected(selectedVerses)
         }
     }
 
-    // Handle keyboard navigation — thin UI delegation to ViewModel
     fun handleKeyEvent(event: KeyEvent): Boolean {
         if (event.type != KeyEventType.KeyDown) return false
         return when (event.key) {
-            Key.DirectionUp -> viewModel.navigatePreviousVerse()
-            Key.DirectionDown -> viewModel.navigateNextVerse()
-            Key.DirectionLeft -> viewModel.navigatePreviousChapter()
+            Key.DirectionUp    -> viewModel.navigatePreviousVerse()
+            Key.DirectionDown  -> viewModel.navigateNextVerse()
+            Key.DirectionLeft  -> viewModel.navigatePreviousChapter()
             Key.DirectionRight -> viewModel.navigateNextChapter()
             else -> false
         }
+    }
+
+    // ── Resizable column widths ───────────────────────────────────────
+    val density = LocalDensity.current
+    val onSettingsChangeState = rememberUpdatedState(onSettingsChange)
+
+    var colWBook by remember(appSettings.bibleSettings.bibleColWidthBook) {
+        mutableStateOf(with(density) { appSettings.bibleSettings.bibleColWidthBook.dp.toPx() })
+    }
+    var colWChapter by remember(appSettings.bibleSettings.bibleColWidthChapter) {
+        mutableStateOf(with(density) { appSettings.bibleSettings.bibleColWidthChapter.dp.toPx() })
+    }
+
+    fun saveColWidths() {
+        onSettingsChangeState.value { s ->
+            s.copy(bibleSettings = s.bibleSettings.copy(
+                bibleColWidthBook    = with(density) { colWBook.toDp().value.toInt() },
+                bibleColWidthChapter = with(density) { colWChapter.toDp().value.toInt() }
+            ))
+        }
+    }
+
+    @Composable
+    fun DragHandle(onDrag: (Float) -> Unit) {
+        Box(
+            modifier = Modifier
+                .width(6.dp)
+                .fillMaxHeight()
+                .background(MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f))
+                .pointerHoverIcon(PointerIcon.Hand)
+                .pointerInput(Unit) {
+                    detectHorizontalDragGestures(onDragEnd = ::saveColWidths) { _, amount ->
+                        onDrag(amount)
+                    }
+                }
+        )
     }
 
     Column(
@@ -177,17 +205,17 @@ fun BibleTab(
             .focusable()
             .onKeyEvent { handleKeyEvent(it) }
     ) {
-
-        // Search row
+        // ── Search row — text field shrinks to fill remaining space ──
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
+            modifier = Modifier.fillMaxWidth().padding(all = 4.dp)
         ) {
             OutlinedTextField(
-                modifier = Modifier.width(400.dp).padding(end = 8.dp),
+                modifier = Modifier.weight(1f).padding(end = 8.dp),
                 value = searchQuery,
                 onValueChange = { viewModel.updateSearchQuery(it) },
                 label = { Text(text = stringResource(Res.string.search)) },
+                singleLine = true,
                 maxLines = 1,
                 colors = OutlinedTextFieldDefaults.colors().copy(
                     unfocusedContainerColor = MaterialTheme.colorScheme.surface,
@@ -225,18 +253,15 @@ fun BibleTab(
                 Button(
                     modifier = Modifier.padding(start = 8.dp),
                     onClick = { viewModel.clearSearch() },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.secondary
-                    )
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
                 ) {
                     Text(stringResource(Res.string.clear))
                 }
             }
         }
 
-        // Show search results or normal view
+        // ── Main content ─────────────────────────────────────────────
         if (isSearchMode && searchResults.isNotEmpty()) {
-            // Display search results
             Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
                 Text(
                     text = stringResource(Res.string.found_results, searchResults.size),
@@ -244,10 +269,8 @@ fun BibleTab(
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
-
                 Box(modifier = Modifier.fillMaxWidth().fillMaxHeight()) {
                     val listState = rememberLazyListState()
-
                     LazyColumn(state = listState, modifier = Modifier.fillMaxSize()) {
                         itemsIndexed(searchResults) { _, result ->
                             val resultText = "${result.book} ${result.chapter}:${result.verse} - ${result.verseText}"
@@ -258,23 +281,18 @@ fun BibleTab(
                                 var startIndex = lowerText.indexOf(lowerQuery, lastIndex)
                                 while (startIndex != -1) {
                                     append(resultText.substring(lastIndex, startIndex))
-                                    withStyle(
-                                        style = SpanStyle(
-                                            background = MaterialTheme.colorScheme.primaryContainer,
-                                            color = MaterialTheme.colorScheme.onPrimaryContainer,
-                                            fontWeight = FontWeight.Bold
-                                        )
-                                    ) {
+                                    withStyle(style = SpanStyle(
+                                        background = MaterialTheme.colorScheme.primaryContainer,
+                                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                        fontWeight = FontWeight.Bold
+                                    )) {
                                         append(resultText.substring(startIndex, startIndex + searchQuery.length))
                                     }
                                     lastIndex = startIndex + searchQuery.length
                                     startIndex = lowerText.indexOf(lowerQuery, lastIndex)
                                 }
-                                if (lastIndex < resultText.length) {
-                                    append(resultText.substring(lastIndex))
-                                }
+                                if (lastIndex < resultText.length) append(resultText.substring(lastIndex))
                             }
-
                             Text(
                                 text = highlightedText,
                                 modifier = Modifier
@@ -290,7 +308,6 @@ fun BibleTab(
                             )
                         }
                     }
-
                     VerticalScrollbar(
                         modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
                         adapter = rememberScrollbarAdapter(scrollState = listState)
@@ -298,7 +315,6 @@ fun BibleTab(
                 }
             }
         } else if (isSearchMode && searchQuery.isNotEmpty()) {
-            // Show "no results" message
             Column(
                 modifier = Modifier.fillMaxWidth().padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
@@ -310,15 +326,18 @@ fun BibleTab(
                 )
             }
         } else {
-            // Normal book/chapter/verse view
-            Row(modifier = Modifier.fillMaxWidth().fillMaxHeight()) {
-                Column(modifier = Modifier.width(200.dp).padding(end = 8.dp)) {
+            // ── Book / Chapter / Verse columns ───────────────────────
+            Row(modifier = Modifier.fillMaxWidth().fillMaxHeight().padding(start = 4.dp)) {
+
+                // Book column (resizable)
+                Column(modifier = Modifier.width(with(density) { colWBook.toDp() }).fillMaxHeight()) {
                     SearchTextField(label = stringResource(Res.string.book)) { query ->
                         viewModel.updateBookSearchQuery(query)
                     }
                     SelectionListWithIndex(
                         list = filteredBooks,
                         selectedIndex = filteredBooks.indexOf(books.getOrNull(selectedBookIndex) ?: "").coerceAtLeast(0),
+                        singleLine = true,
                         onItemSelected = { index, _ ->
                             val bookName = filteredBooks.getOrNull(index)
                             bookName?.let {
@@ -329,7 +348,15 @@ fun BibleTab(
                     )
                 }
 
-                Column(modifier = Modifier.width(120.dp).padding(end = 8.dp)) {
+                DragHandle { amount ->
+                    colWBook = (colWBook + amount).coerceIn(
+                        with(density) { 80.dp.toPx() },
+                        with(density) { 400.dp.toPx() }
+                    )
+                }
+
+                // Chapter column (resizable)
+                Column(modifier = Modifier.width(with(density) { colWChapter.toDp() }).fillMaxHeight()) {
                     SearchTextField(label = stringResource(Res.string.chapter)) { query ->
                         viewModel.updateChapterSearchQuery(query)
                     }
@@ -343,11 +370,18 @@ fun BibleTab(
                     )
                 }
 
-                // Verses column
-                Column(modifier = Modifier.fillMaxWidth()) {
+                DragHandle { amount ->
+                    colWChapter = (colWChapter + amount).coerceIn(
+                        with(density) { 60.dp.toPx() },
+                        with(density) { 300.dp.toPx() }
+                    )
+                }
+
+                // Verse column (fills remaining space)
+                Column(modifier = Modifier.weight(1f).fillMaxHeight()) {
                     Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                         SearchTextField(
-                            modifier = Modifier.width(120.dp),
+                            modifier = Modifier.width(with(density) { colWChapter.toDp() }),
                             label = stringResource(Res.string.verse),
                         ) { query ->
                             viewModel.updateVerseSearchQuery(query)
@@ -355,9 +389,7 @@ fun BibleTab(
                         Button(
                             modifier = Modifier.wrapContentSize().padding(start = 8.dp),
                             onClick = { onPresenting(Presenting.BIBLE) },
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.primary
-                            )
+                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
                         ) {
                             Text(
                                 text = stringResource(Res.string.go_live),
@@ -373,9 +405,7 @@ fun BibleTab(
                                     onAddToSchedule?.invoke(bookName, chapter, verseNumber, verseText)
                                 }
                             },
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.secondary
-                            )
+                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
                         ) {
                             Text(
                                 text = stringResource(Res.string.add_to_schedule),
@@ -399,9 +429,7 @@ fun BibleTab(
                                     if (realIndex >= 0) viewModel.selectVerse(realIndex)
                                 }
                             },
-                            onItemDoubleClicked = { _, _ ->
-                                onPresenting(Presenting.BIBLE)
-                            }
+                            onItemDoubleClicked = { _, _ -> onPresenting(Presenting.BIBLE) }
                         )
                     }
                 }

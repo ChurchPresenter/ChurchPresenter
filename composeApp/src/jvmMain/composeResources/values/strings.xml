@@ -360,11 +360,16 @@
     <string name="tooltip_remove_from_schedule">Remove from Schedule</string>
     <string name="tooltip_clear_schedule">Clear Schedule</string>
     <string name="tooltip_settings">Settings</string>
+    <string name="tooltip_theme_light">Light Theme</string>
+    <string name="tooltip_theme_dark">Dark Theme</string>
+    <string name="tooltip_theme_system">System Theme</string>
     <string name="tooltip_remove">Remove</string>
     <string name="tooltip_edit">Edit</string>
     <string name="tooltip_edit_label">Edit Label</string>
     <string name="tooltip_go_live">Go Live</string>
     <string name="tooltip_add_label">Add Label</string>
+    <string name="tooltip_collapse_schedule">Collapse Schedule</string>
+    <string name="tooltip_expand_schedule">Expand Schedule</string>
 
     <!-- Add Label Dialog -->
     <string name="add_label">Add Label</string>
@@ -534,6 +539,31 @@
     <string name="license_decline_button">Decline &amp; Exit</string>
     <string name="license_prompt">You must accept the GNU GPL v3 license to use Church Presenter.</string>
 
+    <!-- Announcements timer -->
+    <string name="timer_title">Timer</string>
+    <string name="timer_minutes">min</string>
+    <string name="timer_seconds">sec</string>
+    <string name="timer_start">Start</string>
+    <string name="timer_pause">Pause</string>
+    <string name="timer_resume">Resume</string>
+    <string name="timer_reset">Reset</string>
+    <string name="timer_text_color">Timer Color</string>
+    <string name="timer_expired_text_label">Text when timer expires</string>
+    <string name="timer_expired_text_hint">Enter message to show when done…</string>
+    <string name="timer_expired">Time\'s up!</string>
+
+    <!-- Live preview -->
+    <string name="live_preview_title">Live</string>
+    <string name="live_preview_nothing">Nothing is live</string>
+    <string name="live_preview_bible">Bible</string>
+    <string name="live_preview_song">Song</string>
+    <string name="live_preview_picture">Picture</string>
+    <string name="live_preview_presentation">Presentation</string>
+    <string name="live_preview_media">Media</string>
+    <string name="live_preview_lower_third">Lower Third</string>
+    <string name="live_preview_announcement">Announcement</string>
+    <string name="live_preview_website">Website</string>
+
     <!-- Website -->
     <string name="tooltip_add_website">Add Website</string>
     <string name="website_dialog_title">Add Website</string>
@@ -542,23 +572,4 @@
     <string name="website_title_label">Title (optional)</string>
     <string name="website_title_hint">Enter a display name…</string>
     <string name="website_go_live">Go Live</string>
-    <string name="server">Server</string>
-    <string name="server_settings">Server Settings</string>
-    <string name="server_enabled">Enable companion server</string>
-    <string name="server_port">Port</string>
-    <string name="server_status_running">Server running</string>
-    <string name="server_status_stopped">Server stopped</string>
-    <string name="server_url_label">Address</string>
-    <string name="server_api_key_enabled">Require API key</string>
-    <string name="server_api_key">API Key</string>
-    <string name="server_api_key_hint">Enter or generate an API key…</string>
-    <string name="server_generate_key">Generate</string>
-    <string name="server_copy_key">Copy</string>
-    <string name="server_key_copied">Copied!</string>
-    <string name="server_copy_url">Copy Address</string>
-    <string name="server_url_copied">Copied!</string>
-    <string name="server_ssl_notice">Uses HTTPS with a self-signed certificate. Mobile clients must trust it on first connection.</string>
-    <string name="server_info">Mobile devices must include this key in the X-Api-Key header or ?apiKey= query parameter.</string>
-    <string name="server_restart_note">Restart the server to apply port changes.</string>
-    <string name="server_restart">Restart Server</string>
 </resources>

@@ -271,7 +271,7 @@ class CompanionServer {
             val bookId = bookIndex + 1
             val chapterCount = bible.getChapterCount(bookIndex)
             val chapterDtos = (1..chapterCount).map { chapterNum ->
-                val verseCount = bible.getVerseCount(bookId, chapterNum)
+                val verseCount = bible.getChapter(bookId, chapterNum).size
                 totalVerses += verseCount
                 BibleChapterDto(chapter = chapterNum, verseTotal = verseCount)
             }

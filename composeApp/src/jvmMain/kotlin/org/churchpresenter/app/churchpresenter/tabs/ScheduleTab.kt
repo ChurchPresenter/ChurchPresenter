@@ -46,10 +46,13 @@ import churchpresenter.composeapp.generated.resources.tooltip_go_live
 import churchpresenter.composeapp.generated.resources.tooltip_move_down
 import churchpresenter.composeapp.generated.resources.tooltip_move_up
 import churchpresenter.composeapp.generated.resources.tooltip_remove
+import org.churchpresenter.app.churchpresenter.composables.LivePreviewPanel
 import org.churchpresenter.app.churchpresenter.composables.TooltipIconButton
+import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.models.ScheduleItem
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.utils.Utils
+import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.app.churchpresenter.viewmodel.ScheduleViewModel
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -77,13 +80,15 @@ data class ScheduleTabActions(
     val addPresentation: (filePath: String, fileName: String, slideCount: Int, fileType: String) -> Unit = { _, _, _, _ -> },
     val addMedia: (mediaUrl: String, mediaTitle: String, mediaType: String) -> Unit = { _, _, _ -> },
     val addLowerThird: (presetId: String, presetLabel: String, pauseAtFrame: Boolean, pauseDurationMs: Long) -> Unit = { _, _, _, _ -> },
-    val addAnnouncement: (text: String, textColor: String, backgroundColor: String, fontSize: Int, fontType: String, bold: Boolean, italic: Boolean, underline: Boolean, shadow: Boolean, position: String, animationType: String, animationDuration: Int) -> Unit = { _, _, _, _, _, _, _, _, _, _, _, _ -> },
+    val addAnnouncement: (text: String, textColor: String, backgroundColor: String, fontSize: Int, fontType: String, bold: Boolean, italic: Boolean, underline: Boolean, shadow: Boolean, position: String, animationType: String, animationDuration: Int, isTimer: Boolean, timerMinutes: Int, timerSeconds: Int, timerTextColor: String, timerExpiredText: String) -> Unit = { _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _ -> },
     val addWebsite: (url: String, title: String) -> Unit = { _, _ -> }
 )
 
 @Composable
 fun ScheduleTab(
     modifier: Modifier = Modifier,
+    appSettings: AppSettings? = null,
+    presenterManager: PresenterManager? = null,
     onPresenting: (Presenting) -> Unit = { Presenting.NONE },
     onItemClick: (ScheduleItem) -> Unit = {},
     onEditLabel: (ScheduleItem.LabelItem) -> Unit = {},
@@ -93,8 +98,7 @@ fun ScheduleTab(
     onPresentPictures: ((ScheduleItem.PictureItem) -> Unit)? = null,
     onPresentMedia: ((ScheduleItem.MediaItem) -> Unit)? = null,
     onActionsReady: (ScheduleTabActions) -> Unit = {},
-    onSelectedItemChanged: (String?) -> Unit = {},
-    onScheduleChanged: ((List<ScheduleItem>) -> Unit)? = null
+    onSelectedItemChanged: (String?) -> Unit = {}
 ) {
     val viewModel = remember { ScheduleViewModel() }
 
@@ -126,8 +130,8 @@ fun ScheduleTab(
                 addPresentation  = { filePath, fileName, slideCount, fileType -> viewModel.addPresentation(filePath, fileName, slideCount, fileType) },
                 addMedia         = { mediaUrl, mediaTitle, mediaType -> viewModel.addMedia(mediaUrl, mediaTitle, mediaType) },
                 addLowerThird    = { presetId, presetLabel, pauseAtFrame, pauseDurationMs -> viewModel.addLowerThird(presetId, presetLabel, pauseAtFrame, pauseDurationMs) },
-                addAnnouncement  = { text, textColor, backgroundColor, fontSize, fontType, bold, italic, underline, shadow, position, animationType, animationDuration ->
-                    viewModel.addAnnouncement(text, textColor, backgroundColor, fontSize, fontType, bold, italic, underline, shadow, position, animationType, animationDuration)
+                addAnnouncement  = { text, textColor, backgroundColor, fontSize, fontType, bold, italic, underline, shadow, position, animationType, animationDuration, isTimer, timerMinutes, timerSeconds, timerTextColor, timerExpiredText ->
+                    viewModel.addAnnouncement(text, textColor, backgroundColor, fontSize, fontType, bold, italic, underline, shadow, position, animationType, animationDuration, isTimer, timerMinutes, timerSeconds, timerTextColor, timerExpiredText)
                 },
                 addWebsite       = { url, title -> viewModel.addWebsite(url, title) }
             )
@@ -139,14 +143,22 @@ fun ScheduleTab(
         onSelectedItemChanged(viewModel.selectedItemId)
     }
 
-    // Notify companion server when schedule changes
     val scheduleItems = viewModel.scheduleItems
-    LaunchedEffect(scheduleItems.size, scheduleItems.toList()) {
-        onScheduleChanged?.invoke(scheduleItems.toList())
-    }
     val selectedItemId = viewModel.selectedItemId
 
     Column(modifier = modifier.fillMaxSize().padding(8.dp)) {
+
+        // Live preview — scaled-down replica of the presenter window
+        if (presenterManager != null && appSettings != null) {
+            LivePreviewPanel(
+                presenterManager = presenterManager,
+                appSettings = appSettings,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp)
+            )
+        }
+
         // Schedule list header
         Row(
             modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
@@ -349,7 +361,17 @@ private fun ScheduleItemRow(
                             else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                 )
                 is ScheduleItem.LabelItem -> { /* no secondary text */ }
-                is ScheduleItem.AnnouncementItem -> { /* no secondary text */ }
+                is ScheduleItem.AnnouncementItem -> {
+                    if (item.isTimer) {
+                        Text(
+                            maxLines = 1,
+                            text = "%02d:%02d".format(item.timerMinutes, item.timerSeconds),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = if (isSelected) MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                                    else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                        )
+                    }
+                }
                 is ScheduleItem.WebsiteItem -> Text(
                     maxLines = 1,
                     text = item.url,

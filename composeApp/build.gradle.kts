@@ -53,7 +53,7 @@ kotlin {
             implementation("org.apache.poi:poi:5.2.5")
             implementation("org.apache.poi:poi-ooxml:5.2.5")
             implementation("org.apache.poi:poi-scratchpad:5.2.5")
-            // Ktor server for mobile companion API
+            // Ktor server for companion API
             implementation(libs.ktor.server.core)
             implementation(libs.ktor.server.netty)
             implementation(libs.ktor.server.content.negotiation)

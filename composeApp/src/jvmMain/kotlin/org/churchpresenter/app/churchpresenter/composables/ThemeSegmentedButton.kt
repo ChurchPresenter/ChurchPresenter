@@ -2,7 +2,12 @@ package org.churchpresenter.app.churchpresenter.composables
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.tooltip_theme_dark
+import churchpresenter.composeapp.generated.resources.tooltip_theme_light
+import churchpresenter.composeapp.generated.resources.tooltip_theme_system
 import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun ThemeSegmentedButton(
@@ -11,9 +16,9 @@ fun ThemeSegmentedButton(
     modifier: Modifier = Modifier
 ) {
     val themeItems = listOf(
-        SegmentedButtonItem(ThemeMode.LIGHT, "☀"),
-        SegmentedButtonItem(ThemeMode.DARK, "🌙"),
-        SegmentedButtonItem(ThemeMode.SYSTEM, "⚙")
+        SegmentedButtonItem(ThemeMode.LIGHT, "☀", stringResource(Res.string.tooltip_theme_light)),
+        SegmentedButtonItem(ThemeMode.DARK, "🌙", stringResource(Res.string.tooltip_theme_dark)),
+        SegmentedButtonItem(ThemeMode.SYSTEM, "⚙", stringResource(Res.string.tooltip_theme_system))
     )
 
     SegmentedButton(

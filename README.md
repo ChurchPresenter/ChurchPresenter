@@ -23,7 +23,13 @@ If you already cloned without submodules, run:
 git submodule update --init --recursive
 ```
 
+To pull the latest changes for all submodules:
+```shell
+git submodule update --remote --merge
+```
+
 > This will include [Lottie-Gen](https://github.com/ChurchPresenter/Lottie-Gen), a standalone tool for generating Lottie animations, located at `composeApp/src/jvmMain/appResources/common/Lottie-Gen`.
+
 
 ---
 
@@ -48,7 +54,6 @@ in your IDE's toolbar or run it directly from the terminal:
 **For developers working on this project:**
 - 📘 **[DEVELOPMENT_GUIDE.md](DEVELOPMENT_GUIDE.md)** - Complete coding standards, style rules, and workflow
 - 📋 **[DOCS_README.md](DOCS_README.md)** - Quick reference guide
-- 📡 **[COMPANION_API.md](COMPANION_API.md)** - Mobile companion app API reference (HTTP + WebSocket)
 
 **Build & deployment guides:**
 - 🔨 **[BUILD_INSTALLERS.md](BUILD_INSTALLERS.md)** - How to build installers

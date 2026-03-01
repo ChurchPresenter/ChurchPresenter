@@ -63,13 +63,22 @@ import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.viewmodel.LowerThirdSettingsViewModel
 import org.churchpresenter.app.churchpresenter.utils.createFileChooser
 import org.jetbrains.compose.resources.stringResource
+import java.awt.BorderLayout
 import java.awt.Dimension
 import java.awt.Window
 import java.io.File
+import javafx.application.Platform
+import javafx.beans.value.ChangeListener
+import javafx.concurrent.Worker
+import javafx.embed.swing.JFXPanel
+import javafx.scene.Scene
+import javafx.scene.layout.StackPane
+import javafx.scene.web.WebView
 import javax.swing.JDialog
 import javax.swing.JFileChooser
-import javax.swing.filechooser.FileNameExtensionFilter
 import javax.swing.SwingUtilities
+import javax.swing.filechooser.FileNameExtensionFilter
+import netscape.javascript.JSObject
 
 @Composable
 fun LowerThirdSettingsTab(
@@ -244,7 +253,6 @@ fun LowerThirdSettingsTab(
                         SwingUtilities.invokeLater {
                             openLottieGeneratorDialog(
                                 parentWindow = Window.getWindows().firstOrNull { it.isActive },
-                                outputFolder = lottieFolder.ifEmpty { null },
                                 onFileSaved = { viewModel.onFileSavedFromGenerator() },
                                 serverUrl = serverUrl
                             )
@@ -420,15 +428,14 @@ private fun ModernButton(
 }
 
 /**
- * Opens the Lottie Generator HTML tool in a JavaFX WebView dialog.
+ * Opens the Lottie Generator HTML tool in an embedded JavaFX WebView dialog.
  * When [serverUrl] is provided, loads the generator from the Ktor server
  * so API calls (/api/presets, /api/logos, etc.) resolve correctly.
  * Falls back to loading from a local file if the server is not running.
- * Intercepts download clicks and saves directly to [outputFolder].
+ * Intercepts download clicks and saves the file directly.
  */
 private fun openLottieGeneratorDialog(
     parentWindow: Window?,
-    outputFolder: String?,
     onFileSaved: () -> Unit,
     serverUrl: String = ""
 ) {
@@ -436,36 +443,18 @@ private fun openLottieGeneratorDialog(
     val loadUrl: String = if (serverUrl.isNotEmpty()) {
         "$serverUrl/lottie-generator.html"
     } else {
-        // Fallback: locate lottie-generator.html on disk
         val appResourcesDir = System.getProperty("compose.application.resources.dir")
         val executablePath = ProcessHandle.current().info().command().orElse(null)
             ?.let { File(it).parentFile }
-        fun findProjectRoot(): File? {
-            var dir = File(System.getProperty("user.dir"))
-            repeat(6) {
-                val candidate = File(dir, "Lottie-Gen/lottie-generator.html")
-                if (candidate.exists()) return dir
-                dir = dir.parentFile ?: return null
-            }
-            return null
-        }
-        val projectRoot = findProjectRoot()
+        val userDir = File(System.getProperty("user.dir"))
         val htmlFile = listOfNotNull(
             appResourcesDir?.let { File(it, "Lottie-Gen/lottie-generator.html") },
             executablePath?.let { File(it, "../app/resources/Lottie-Gen/lottie-generator.html") },
             executablePath?.let { File(it, "Lottie-Gen/lottie-generator.html") },
-            executablePath?.let { File(it, "../../Lottie-Gen/lottie-generator.html") },
-            projectRoot?.let { File(it, "Lottie-Gen/lottie-generator.html") },
-            File("Lottie-Gen/lottie-generator.html"),
-            File(System.getProperty("user.dir"), "Lottie-Gen/lottie-generator.html"),
-            try {
-                val src = object {}.javaClass.protectionDomain?.codeSource?.location?.toURI()
-                src?.let { File(File(it).parentFile, "Lottie-Gen/lottie-generator.html") }
-            } catch (_: Exception) { null },
-            try {
-                val src = object {}.javaClass.protectionDomain?.codeSource?.location?.toURI()
-                src?.let { File(File(it).parentFile?.parentFile, "Lottie-Gen/lottie-generator.html") }
-            } catch (_: Exception) { null }
+            File(userDir, "composeApp/src/jvmMain/appResources/common/Lottie-Gen/lottie-generator.html"),
+            File(userDir, "src/jvmMain/appResources/common/Lottie-Gen/lottie-generator.html"),
+            File(userDir, "Lottie-Gen/lottie-generator.html"),
+            File("Lottie-Gen/lottie-generator.html")
         ).firstOrNull { it.exists() }
 
         if (htmlFile == null) {
@@ -480,15 +469,14 @@ private fun openLottieGeneratorDialog(
         htmlFile.toURI().toString()
     }
 
-    // Ensure JavaFX toolkit is running
+    // Ensure JavaFX toolkit is initialised
     try {
-        javafx.application.Platform.setImplicitExit(false)
-        javafx.application.Platform.startup { }
+        Platform.setImplicitExit(false)
+        Platform.startup { }
     } catch (_: IllegalStateException) {
-        // Already initialised — fine
+        // Already running — fine
     }
 
-    // Build the dialog on the Swing EDT
     val dialog = JDialog().apply {
         title = "Lower Third Generator"
         isModal = false
@@ -496,70 +484,56 @@ private fun openLottieGeneratorDialog(
         defaultCloseOperation = JDialog.DISPOSE_ON_CLOSE
     }
 
-    // JFXPanel bridges Swing ↔ JavaFX
-    val jfxPanel = javafx.embed.swing.JFXPanel()
-    dialog.contentPane.add(jfxPanel, java.awt.BorderLayout.CENTER)
+    val jfxPanel = JFXPanel()
+    dialog.contentPane.add(jfxPanel, BorderLayout.CENTER)
     dialog.pack()
     dialog.setLocationRelativeTo(parentWindow)
 
-    // Build the JavaFX scene on the FX thread
-    javafx.application.Platform.runLater {
-        val webView = javafx.scene.web.WebView()
+    Platform.runLater {
+        val webView = WebView()
         val engine = webView.engine
 
-        // After page loads, inject the JS bridge and rename the download button
-        engine.loadWorker.stateProperty().addListener(
-            javafx.beans.value.ChangeListener { _, _, newState ->
-                if (newState == javafx.concurrent.Worker.State.SUCCEEDED) {
-                    val win = engine.executeScript("window") as? netscape.javascript.JSObject ?: return@ChangeListener
+        val stateListener = ChangeListener<Worker.State> { _, _, newState ->
+            if (newState == Worker.State.SUCCEEDED) {
+                val win = engine.executeScript("window") as? JSObject ?: return@ChangeListener
 
-                    // Kotlin object exposed to JavaScript
-                    val bridge = object {
-                        @Suppress("unused")
-                        fun save(filename: String, jsonContent: String) {
-                            SwingUtilities.invokeLater {
-                                val dest = outputFolder
-                                    ?.let { File(it) }
-                                    ?.takeIf { it.exists() }
-                                    ?.let { File(it, filename) }
-                                    ?: run {
-                                        val chooser = JFileChooser().apply {
-                                            dialogTitle = "Save Lower Third"
-                                            fileFilter = FileNameExtensionFilter("Lottie JSON (*.json)", "json")
-                                            selectedFile = File(filename)
-                                        }
-                                        if (chooser.showSaveDialog(dialog) != JFileChooser.APPROVE_OPTION) return@invokeLater
-                                        chooser.selectedFile
-                                    }
-                                dest.writeText(jsonContent)
+                val bridge = object {
+                    @Suppress("unused")
+                    fun save(filename: String, jsonContent: String) {
+                        SwingUtilities.invokeLater {
+                            val chooser = createFileChooser {
+                                fileSelectionMode = JFileChooser.FILES_ONLY
+                                dialogTitle = "Save Lower Third"
+                                fileFilter = FileNameExtensionFilter("Lottie JSON (*.json)", "json")
+                                selectedFile = File(filename)
+                            }
+                            if (chooser.showSaveDialog(dialog) == JFileChooser.APPROVE_OPTION) {
+                                chooser.selectedFile.writeText(jsonContent)
                                 onFileSaved()
                                 javax.swing.JOptionPane.showMessageDialog(
                                     dialog,
-                                    "Saved: ${dest.name}",
+                                    "Saved: ${chooser.selectedFile.name}",
                                     "Saved",
                                     javax.swing.JOptionPane.INFORMATION_MESSAGE
                                 )
                             }
                         }
                     }
-
-                    win.setMember("_jvmBridge", bridge)
-
-                    // Rename the download button to "Save Lower Third"
-                    engine.executeScript(
-                        "var btn = document.getElementById('btnDownload'); if (btn) btn.textContent = 'Save Lower Third';"
-                    )
                 }
-            }
-        )
 
+                win.setMember("_jvmBridge", bridge)
+
+                // Rename the download button to "Save Lower Third"
+                engine.executeScript(
+                    "var btn = document.getElementById('btnDownload'); if (btn) btn.textContent = 'Save Lower Third';"
+                )
+            }
+        }
+
+        engine.loadWorker.stateProperty().addListener(stateListener)
         engine.load(loadUrl)
 
-        val scene = javafx.scene.Scene(
-            javafx.scene.layout.StackPane(webView),
-            1180.0, 760.0
-        )
-        jfxPanel.scene = scene
+        jfxPanel.scene = Scene(StackPane(webView), 1180.0, 760.0)
     }
 
     dialog.isVisible = true
