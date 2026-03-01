@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -45,6 +46,7 @@ fun SelectionListWithIndex(
     modifier: Modifier = Modifier,
     list: List<String>,
     selectedIndex: Int = 0,
+    singleLine: Boolean = false,
     onItemSelected: (Int, String) -> Unit,
     onItemDoubleClicked: ((Int, String) -> Unit)? = null
 ) {
@@ -100,7 +102,8 @@ fun SelectionListWithIndex(
                         )
                         .padding(6.dp),
                     color = MaterialTheme.colorScheme.onSurface,
-                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                    maxLines = if (singleLine) 1 else Int.MAX_VALUE,
+                    overflow = if (singleLine) TextOverflow.Ellipsis else TextOverflow.Clip,
                 )
             }
         }

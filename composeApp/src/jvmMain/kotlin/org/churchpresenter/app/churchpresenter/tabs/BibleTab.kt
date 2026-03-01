@@ -337,6 +337,7 @@ fun BibleTab(
                     SelectionListWithIndex(
                         list = filteredBooks,
                         selectedIndex = filteredBooks.indexOf(books.getOrNull(selectedBookIndex) ?: "").coerceAtLeast(0),
+                        singleLine = true,
                         onItemSelected = { index, _ ->
                             val bookName = filteredBooks.getOrNull(index)
                             bookName?.let {
