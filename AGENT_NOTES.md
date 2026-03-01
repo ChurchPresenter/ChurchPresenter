@@ -13,6 +13,13 @@ This document tracks coding standards, common mistakes, and debugging notes for 
 - ✅ **ALWAYS** use string resources from `Res.string.*`
 - 📝 **OK** to use constants for internal/non-user-facing strings
 
+### 2a. Translations — **CRITICAL RULE**
+- ❌ **NEVER** add, update, or look up translations in `values-ru/`, `values-uk/`, `values-pl/`, `values-de/`, `values-be/`, `values-cs/`, `values-kk/`, or any other non-English locale file
+- ❌ **NEVER** attempt to translate strings into other languages unless the user **explicitly** says "get translations" or "translate"
+- ✅ **ONLY** add new strings to the default English `values/strings.xml`
+- ✅ Leave all other locale `strings.xml` files untouched unless instructed
+- **Reason**: Translations are managed separately and incorrect machine translations cause quality issues
+
 ### 3. Material Design
 - ✅ **ALWAYS** use Material 3 (`androidx.compose.material3.*`)
 - ❌ **AVOID** mixing Material 2 components

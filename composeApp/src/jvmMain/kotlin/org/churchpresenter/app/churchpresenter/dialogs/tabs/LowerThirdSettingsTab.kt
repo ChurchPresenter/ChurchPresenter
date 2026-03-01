@@ -63,13 +63,22 @@ import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.viewmodel.LowerThirdSettingsViewModel
 import org.churchpresenter.app.churchpresenter.utils.createFileChooser
 import org.jetbrains.compose.resources.stringResource
+import java.awt.BorderLayout
 import java.awt.Dimension
 import java.awt.Window
 import java.io.File
+import javafx.application.Platform
+import javafx.beans.value.ChangeListener
+import javafx.concurrent.Worker
+import javafx.embed.swing.JFXPanel
+import javafx.scene.Scene
+import javafx.scene.layout.StackPane
+import javafx.scene.web.WebView
 import javax.swing.JDialog
 import javax.swing.JFileChooser
-import javax.swing.filechooser.FileNameExtensionFilter
 import javax.swing.SwingUtilities
+import javax.swing.filechooser.FileNameExtensionFilter
+import netscape.javascript.JSObject
 
 @Composable
 fun LowerThirdSettingsTab(
@@ -243,7 +252,6 @@ fun LowerThirdSettingsTab(
                         SwingUtilities.invokeLater {
                             openLottieGeneratorDialog(
                                 parentWindow = Window.getWindows().firstOrNull { it.isActive },
-                                outputFolder = lottieFolder.ifEmpty { null },
                                 onFileSaved = { viewModel.onFileSavedFromGenerator() }
                             )
                         }
@@ -418,49 +426,47 @@ private fun ModernButton(
 }
 
 /**
- * Opens the Lottie Generator HTML tool in a JavaFX WebView dialog.
- * Intercepts download anchor clicks from the page and saves the file
- * directly to [outputFolder] instead of the system Downloads folder.
+ * Opens the Lottie Generator HTML tool in an embedded JavaFX WebView dialog.
+ * Intercepts download clicks and saves the file directly to [outputFolder].
  */
 private fun openLottieGeneratorDialog(
     parentWindow: Window?,
-    outputFolder: String?,
     onFileSaved: () -> Unit
 ) {
-    // Locate lottie-generator.html — check multiple locations:
-    // 1. Bundled inside the packaged app's resources (Contents/app/resources/Lottie-Gen on macOS)
-    // 2. Relative to the app executable (for DMG installs)
-    // 3. Dev working directory
     val appResourcesDir = System.getProperty("compose.application.resources.dir")
     val executablePath = ProcessHandle.current().info().command().orElse(null)
         ?.let { File(it).parentFile }
+    val userDir = File(System.getProperty("user.dir"))
     val htmlFile = listOfNotNull(
         appResourcesDir?.let { File(it, "Lottie-Gen/lottie-generator.html") },
         executablePath?.let { File(it, "../app/resources/Lottie-Gen/lottie-generator.html") },
         executablePath?.let { File(it, "Lottie-Gen/lottie-generator.html") },
-        File("Lottie-Gen/lottie-generator.html"),
-        File(System.getProperty("user.dir"), "Lottie-Gen/lottie-generator.html")
+        File(userDir, "composeApp/src/jvmMain/appResources/common/Lottie-Gen/lottie-generator.html"),
+        File(userDir, "src/jvmMain/appResources/common/Lottie-Gen/lottie-generator.html"),
+        File(userDir, "Lottie-Gen/lottie-generator.html"),
+        File("Lottie-Gen/lottie-generator.html")
     ).firstOrNull { it.exists() }
 
     if (htmlFile == null) {
         javax.swing.JOptionPane.showMessageDialog(
             parentWindow,
-            "Lottie Generator not found.\nExpected at: Lottie-Gen/lottie-generator.html",
+            "Lottie Generator not found.\nChecked:\n" +
+                "  <appResources>/Lottie-Gen/lottie-generator.html\n" +
+                "  ${userDir.absolutePath}/composeApp/src/jvmMain/appResources/common/Lottie-Gen/lottie-generator.html",
             "Generator Not Found",
             javax.swing.JOptionPane.ERROR_MESSAGE
         )
         return
     }
 
-    // Ensure JavaFX toolkit is running
+    // Ensure JavaFX toolkit is initialised
     try {
-        javafx.application.Platform.setImplicitExit(false)
-        javafx.application.Platform.startup { }
+        Platform.setImplicitExit(false)
+        Platform.startup { }
     } catch (_: IllegalStateException) {
-        // Already initialised — fine
+        // Already running — fine
     }
 
-    // Build the dialog on the Swing EDT
     val dialog = JDialog().apply {
         title = "Lower Third Generator"
         isModal = false
@@ -468,66 +474,51 @@ private fun openLottieGeneratorDialog(
         defaultCloseOperation = JDialog.DISPOSE_ON_CLOSE
     }
 
-    // JFXPanel bridges Swing ↔ JavaFX
-    val jfxPanel = javafx.embed.swing.JFXPanel()
-    dialog.contentPane.add(jfxPanel, java.awt.BorderLayout.CENTER)
+    val jfxPanel = JFXPanel()
+    dialog.contentPane.add(jfxPanel, BorderLayout.CENTER)
     dialog.pack()
     dialog.setLocationRelativeTo(parentWindow)
 
-    // Build the JavaFX scene on the FX thread
-    javafx.application.Platform.runLater {
-        val webView = javafx.scene.web.WebView()
+    Platform.runLater {
+        val webView = WebView()
         val engine = webView.engine
 
-        // After page loads, inject a JS bridge that intercepts <a download> clicks
-        engine.loadWorker.stateProperty().addListener(
-            javafx.beans.value.ChangeListener { _, _, newState ->
-                if (newState == javafx.concurrent.Worker.State.SUCCEEDED) {
-                    val win = engine.executeScript("window") as? netscape.javascript.JSObject ?: return@ChangeListener
+        val stateListener = ChangeListener<Worker.State> { _, _, newState ->
+            if (newState == Worker.State.SUCCEEDED) {
+                val win = engine.executeScript("window") as? JSObject ?: return@ChangeListener
 
-                    // Kotlin object exposed to JavaScript
-                    val bridge = object {
-                        @Suppress("unused")
-                        fun save(filename: String, jsonContent: String) {
-                            SwingUtilities.invokeLater {
-                                val dest = outputFolder
-                                    ?.let { File(it) }
-                                    ?.takeIf { it.exists() }
-                                    ?.let { File(it, filename) }
-                                    ?: run {
-                                        val chooser = JFileChooser().apply {
-                                            dialogTitle = "Save Lottie File"
-                                            fileFilter = FileNameExtensionFilter("Lottie JSON (*.json)", "json")
-                                            selectedFile = File(filename)
-                                        }
-                                        if (chooser.showSaveDialog(dialog) != JFileChooser.APPROVE_OPTION) return@invokeLater
-                                        chooser.selectedFile
-                                    }
-                                dest.writeText(jsonContent)
+                val bridge = object {
+                    @Suppress("unused")
+                    fun save(filename: String, jsonContent: String) {
+                        SwingUtilities.invokeLater {
+                            val chooser = createFileChooser {
+                                fileSelectionMode = JFileChooser.FILES_ONLY
+                                dialogTitle = "Save Lottie File"
+                                fileFilter = FileNameExtensionFilter("Lottie JSON (*.json)", "json")
+                                selectedFile = File(filename)
+                            }
+                            if (chooser.showSaveDialog(dialog) == JFileChooser.APPROVE_OPTION) {
+                                chooser.selectedFile.writeText(jsonContent)
                                 onFileSaved()
                                 javax.swing.JOptionPane.showMessageDialog(
                                     dialog,
-                                    "Saved: ${dest.name}",
+                                    "Saved: ${chooser.selectedFile.name}",
                                     "Saved",
                                     javax.swing.JOptionPane.INFORMATION_MESSAGE
                                 )
                             }
                         }
                     }
-
-                    win.setMember("_jvmBridge", bridge)
-                    // Bridge is now live — the HTML's download() checks window._jvmBridge directly
                 }
-            }
-        )
 
+                win.setMember("_jvmBridge", bridge)
+            }
+        }
+
+        engine.loadWorker.stateProperty().addListener(stateListener)
         engine.load(htmlFile.toURI().toString())
 
-        val scene = javafx.scene.Scene(
-            javafx.scene.layout.StackPane(webView),
-            1180.0, 760.0
-        )
-        jfxPanel.scene = scene
+        jfxPanel.scene = Scene(StackPane(webView), 1180.0, 760.0)
     }
 
     dialog.isVisible = true
