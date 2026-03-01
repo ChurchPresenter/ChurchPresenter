@@ -684,16 +684,6 @@ fun AnnouncementsTab(
                             ) {
                                 Text(resetLabel, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
-                            if (onAddToSchedule != null) {
-                                Button(
-                                    onClick = { onAddToSchedule.invoke(viewModel.buildSettings()) },
-                                    enabled = viewModel.text.isNotBlank() || viewModel.timerMinutes > 0 || viewModel.timerSeconds > 0,
-                                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
-                                    contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp)
-                                ) {
-                                    Text(stringResource(Res.string.add_to_schedule), style = MaterialTheme.typography.labelSmall)
-                                }
-                            }
                             if (presenterManager != null) {
                                 Button(
                                     onClick = {
@@ -705,6 +695,16 @@ fun AnnouncementsTab(
                                     contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp)
                                 ) {
                                     Text(stringResource(Res.string.go_live), style = MaterialTheme.typography.labelSmall)
+                                }
+                            }
+                            if (onAddToSchedule != null) {
+                                Button(
+                                    onClick = { onAddToSchedule.invoke(viewModel.buildSettings()) },
+                                    enabled = viewModel.text.isNotBlank() || viewModel.timerMinutes > 0 || viewModel.timerSeconds > 0,
+                                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
+                                    contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp)
+                                ) {
+                                    Text(stringResource(Res.string.add_to_schedule), style = MaterialTheme.typography.labelSmall)
                                 }
                             }
                         }
