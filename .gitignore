@@ -21,3 +21,5 @@ pull.sh
 set-identity.sh
 push.sh
 .claude/
+app_log.txt
+DMG_BUILD_SUCCESS.md
