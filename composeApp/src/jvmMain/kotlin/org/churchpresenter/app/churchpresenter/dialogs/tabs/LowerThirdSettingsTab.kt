@@ -74,7 +74,8 @@ import javax.swing.SwingUtilities
 @Composable
 fun LowerThirdSettingsTab(
     settings: AppSettings,
-    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit
+    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
+    serverUrl: String = ""
 ) {
     val viewModel = remember { LowerThirdSettingsViewModel() }
 
@@ -244,7 +245,8 @@ fun LowerThirdSettingsTab(
                             openLottieGeneratorDialog(
                                 parentWindow = Window.getWindows().firstOrNull { it.isActive },
                                 outputFolder = lottieFolder.ifEmpty { null },
-                                onFileSaved = { viewModel.onFileSavedFromGenerator() }
+                                onFileSaved = { viewModel.onFileSavedFromGenerator() },
+                                serverUrl = serverUrl
                             )
                         }
                     }
@@ -419,60 +421,63 @@ private fun ModernButton(
 
 /**
  * Opens the Lottie Generator HTML tool in a JavaFX WebView dialog.
- * Intercepts download anchor clicks from the page and saves the file
- * directly to [outputFolder] instead of the system Downloads folder.
+ * When [serverUrl] is provided, loads the generator from the Ktor server
+ * so API calls (/api/presets, /api/logos, etc.) resolve correctly.
+ * Falls back to loading from a local file if the server is not running.
+ * Intercepts download clicks and saves directly to [outputFolder].
  */
 private fun openLottieGeneratorDialog(
     parentWindow: Window?,
     outputFolder: String?,
-    onFileSaved: () -> Unit
+    onFileSaved: () -> Unit,
+    serverUrl: String = ""
 ) {
-    // Locate lottie-generator.html — check multiple locations:
-    // 1. Bundled inside the packaged app's resources (Contents/app/resources/Lottie-Gen on macOS)
-    // 2. Relative to the app executable (for DMG installs)
-    // 3. Dev working directory
-    // 4. Paths relative to the JAR / class location
-    val appResourcesDir = System.getProperty("compose.application.resources.dir")
-    val executablePath = ProcessHandle.current().info().command().orElse(null)
-        ?.let { File(it).parentFile }
-    // Walk up from working dir to find project root containing Lottie-Gen/
-    fun findProjectRoot(): File? {
-        var dir = File(System.getProperty("user.dir"))
-        repeat(6) {
-            val candidate = File(dir, "Lottie-Gen/lottie-generator.html")
-            if (candidate.exists()) return dir
-            dir = dir.parentFile ?: return null
+    // Determine the URL to load
+    val loadUrl: String = if (serverUrl.isNotEmpty()) {
+        "$serverUrl/lottie-generator.html"
+    } else {
+        // Fallback: locate lottie-generator.html on disk
+        val appResourcesDir = System.getProperty("compose.application.resources.dir")
+        val executablePath = ProcessHandle.current().info().command().orElse(null)
+            ?.let { File(it).parentFile }
+        fun findProjectRoot(): File? {
+            var dir = File(System.getProperty("user.dir"))
+            repeat(6) {
+                val candidate = File(dir, "Lottie-Gen/lottie-generator.html")
+                if (candidate.exists()) return dir
+                dir = dir.parentFile ?: return null
+            }
+            return null
         }
-        return null
-    }
-    val projectRoot = findProjectRoot()
-    val htmlFile = listOfNotNull(
-        appResourcesDir?.let { File(it, "Lottie-Gen/lottie-generator.html") },
-        executablePath?.let { File(it, "../app/resources/Lottie-Gen/lottie-generator.html") },
-        executablePath?.let { File(it, "Lottie-Gen/lottie-generator.html") },
-        executablePath?.let { File(it, "../../Lottie-Gen/lottie-generator.html") },
-        projectRoot?.let { File(it, "Lottie-Gen/lottie-generator.html") },
-        File("Lottie-Gen/lottie-generator.html"),
-        File(System.getProperty("user.dir"), "Lottie-Gen/lottie-generator.html"),
-        // Resolve relative to this class's code source (works in packaged JARs)
-        try {
-            val src = object {}.javaClass.protectionDomain?.codeSource?.location?.toURI()
-            src?.let { File(File(it).parentFile, "Lottie-Gen/lottie-generator.html") }
-        } catch (_: Exception) { null },
-        try {
-            val src = object {}.javaClass.protectionDomain?.codeSource?.location?.toURI()
-            src?.let { File(File(it).parentFile?.parentFile, "Lottie-Gen/lottie-generator.html") }
-        } catch (_: Exception) { null }
-    ).firstOrNull { it.exists() }
+        val projectRoot = findProjectRoot()
+        val htmlFile = listOfNotNull(
+            appResourcesDir?.let { File(it, "Lottie-Gen/lottie-generator.html") },
+            executablePath?.let { File(it, "../app/resources/Lottie-Gen/lottie-generator.html") },
+            executablePath?.let { File(it, "Lottie-Gen/lottie-generator.html") },
+            executablePath?.let { File(it, "../../Lottie-Gen/lottie-generator.html") },
+            projectRoot?.let { File(it, "Lottie-Gen/lottie-generator.html") },
+            File("Lottie-Gen/lottie-generator.html"),
+            File(System.getProperty("user.dir"), "Lottie-Gen/lottie-generator.html"),
+            try {
+                val src = object {}.javaClass.protectionDomain?.codeSource?.location?.toURI()
+                src?.let { File(File(it).parentFile, "Lottie-Gen/lottie-generator.html") }
+            } catch (_: Exception) { null },
+            try {
+                val src = object {}.javaClass.protectionDomain?.codeSource?.location?.toURI()
+                src?.let { File(File(it).parentFile?.parentFile, "Lottie-Gen/lottie-generator.html") }
+            } catch (_: Exception) { null }
+        ).firstOrNull { it.exists() }
 
-    if (htmlFile == null) {
-        javax.swing.JOptionPane.showMessageDialog(
-            parentWindow,
-            "Lottie Generator not found.\nExpected at: Lottie-Gen/lottie-generator.html",
-            "Generator Not Found",
-            javax.swing.JOptionPane.ERROR_MESSAGE
-        )
-        return
+        if (htmlFile == null) {
+            javax.swing.JOptionPane.showMessageDialog(
+                parentWindow,
+                "Lottie Generator not found.\nEnsure the server is running or Lottie-Gen/lottie-generator.html exists.",
+                "Generator Not Found",
+                javax.swing.JOptionPane.ERROR_MESSAGE
+            )
+            return
+        }
+        htmlFile.toURI().toString()
     }
 
     // Ensure JavaFX toolkit is running
@@ -502,7 +507,7 @@ private fun openLottieGeneratorDialog(
         val webView = javafx.scene.web.WebView()
         val engine = webView.engine
 
-        // After page loads, inject a JS bridge that intercepts <a download> clicks
+        // After page loads, inject the JS bridge and rename the download button
         engine.loadWorker.stateProperty().addListener(
             javafx.beans.value.ChangeListener { _, _, newState ->
                 if (newState == javafx.concurrent.Worker.State.SUCCEEDED) {
@@ -519,7 +524,7 @@ private fun openLottieGeneratorDialog(
                                     ?.let { File(it, filename) }
                                     ?: run {
                                         val chooser = JFileChooser().apply {
-                                            dialogTitle = "Save Lottie File"
+                                            dialogTitle = "Save Lower Third"
                                             fileFilter = FileNameExtensionFilter("Lottie JSON (*.json)", "json")
                                             selectedFile = File(filename)
                                         }
@@ -539,12 +544,16 @@ private fun openLottieGeneratorDialog(
                     }
 
                     win.setMember("_jvmBridge", bridge)
-                    // Bridge is now live — the HTML's download() checks window._jvmBridge directly
+
+                    // Rename the download button to "Save Lower Third"
+                    engine.executeScript(
+                        "var btn = document.getElementById('btnDownload'); if (btn) btn.textContent = 'Save Lower Third';"
+                    )
                 }
             }
         )
 
-        engine.load(htmlFile.toURI().toString())
+        engine.load(loadUrl)
 
         val scene = javafx.scene.Scene(
             javafx.scene.layout.StackPane(webView),

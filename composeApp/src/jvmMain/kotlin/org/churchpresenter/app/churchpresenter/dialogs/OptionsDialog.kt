@@ -166,7 +166,8 @@ fun OptionsDialog(
                                 settings = currentSettings,
                                 onSettingsChange = { updateFn ->
                                     currentSettings = updateFn(currentSettings)
-                                }
+                                },
+                                serverUrl = companionServer.serverUrl.value
                             )
                             6 -> ServerSettingsTab(
                                 settings = currentSettings,

@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.server
 
+import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
 import io.ktor.serialization.kotlinx.json.json
@@ -12,9 +13,12 @@ import io.ktor.server.netty.NettyApplicationEngine
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.plugins.cors.routing.CORS
 import io.ktor.server.plugins.statuspages.StatusPages
+import io.ktor.server.request.receiveText
 import io.ktor.server.response.respond
+import io.ktor.server.response.respondBytes
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.get
+import io.ktor.server.routing.post
 import io.ktor.server.routing.routing
 import io.ktor.server.websocket.WebSockets
 import io.ktor.server.websocket.webSocket
@@ -35,7 +39,9 @@ import kotlinx.serialization.json.Json
 import org.churchpresenter.app.churchpresenter.data.SongItem
 import org.churchpresenter.app.churchpresenter.models.ScheduleItem
 import org.churchpresenter.app.churchpresenter.utils.Constants
+import java.io.File
 import java.net.NetworkInterface
+import java.util.Base64
 
 // ── API DTOs ─────────────────────────────────────────────────────────────────
 
@@ -184,6 +190,15 @@ class CompanionServer {
         prettyPrint = false
         ignoreUnknownKeys = true
     }
+
+    // ── Lottie Generator data directories ─────────────────────────────────────
+    private val lottieDataDir: File = File(System.getProperty("user.home"), ".churchpresenter/lottie_presets").also { it.mkdirs() }
+    private val lottiePresetsFile: File = File(lottieDataDir, "presets.json")
+    private val lottieColorThemesFile: File = File(lottieDataDir, "color-themes.json")
+    private val lottieLogosDir: File = File(lottieDataDir, "logos")
+
+    /** Resolved path to the Lottie-Gen directory containing lottie-generator.html */
+    private val lottieGenDir: File? by lazy { findLottieGenDir() }
 
     // ── Public API ────────────────────────────────────────────────────────────
 
@@ -429,6 +444,115 @@ class CompanionServer {
                     }
                     broadcastJob.cancel()
                 }
+
+                // ── Lottie Generator endpoints ────────────────────────────────
+
+                // Serve the generator HTML page
+                get(Constants.ENDPOINT_LOTTIE_GENERATOR) {
+                    val dir = lottieGenDir
+                    val html = dir?.let { File(it, "lottie-generator.html") }
+                    if (html == null || !html.exists()) {
+                        call.respond(io.ktor.http.HttpStatusCode.NotFound, "Lottie generator not found")
+                        return@get
+                    }
+                    call.respondText(html.readText(), ContentType.Text.Html)
+                }
+
+                // Serve logo image files
+                get("/logos/{filename}") {
+                    val filename = call.parameters["filename"] ?: return@get
+                    // Check lottie data dir first, then fall back to bundled Lottie-Gen dir
+                    val file = File(lottieLogosDir, filename).takeIf { it.exists() }
+                        ?: lottieGenDir?.let { File(File(it, "logos"), filename) }?.takeIf { it.exists() }
+                    if (file == null) {
+                        call.respond(io.ktor.http.HttpStatusCode.NotFound, "Logo not found")
+                        return@get
+                    }
+                    val contentType = when (file.extension.lowercase()) {
+                        "png" -> ContentType.Image.PNG
+                        "jpg", "jpeg" -> ContentType.Image.JPEG
+                        "svg" -> ContentType.Image.SVG
+                        "webp" -> ContentType("image", "webp")
+                        else -> ContentType.Application.OctetStream
+                    }
+                    call.respondBytes(file.readBytes(), contentType)
+                }
+
+                // GET /api/presets — load saved generator presets
+                get(Constants.ENDPOINT_LOTTIE_PRESETS) {
+                    val data = if (lottiePresetsFile.exists()) lottiePresetsFile.readText() else "[]"
+                    call.respondText(data, ContentType.Application.Json)
+                }
+
+                // POST /api/presets — save generator presets
+                post(Constants.ENDPOINT_LOTTIE_PRESETS) {
+                    val body = call.receiveText()
+                    lottiePresetsFile.writeText(body)
+                    call.respondText("""{"ok":true}""", ContentType.Application.Json)
+                }
+
+                // GET /api/color-themes — load color themes
+                get(Constants.ENDPOINT_LOTTIE_COLOR_THEMES) {
+                    // Fall back to bundled defaults if user hasn't saved custom themes
+                    val data = when {
+                        lottieColorThemesFile.exists() -> lottieColorThemesFile.readText()
+                        else -> {
+                            val bundled = lottieGenDir?.let { File(it, "color-themes.json") }
+                            if (bundled != null && bundled.exists()) bundled.readText() else "[]"
+                        }
+                    }
+                    call.respondText(data, ContentType.Application.Json)
+                }
+
+                // POST /api/color-themes — save color themes
+                post(Constants.ENDPOINT_LOTTIE_COLOR_THEMES) {
+                    val body = call.receiveText()
+                    lottieColorThemesFile.writeText(body)
+                    call.respondText("""{"ok":true}""", ContentType.Application.Json)
+                }
+
+                // GET /api/logos — list available logo images
+                get(Constants.ENDPOINT_LOTTIE_LOGOS) {
+                    val files = mutableSetOf<String>()
+                    // Include logos from user data dir
+                    if (lottieLogosDir.exists()) {
+                        lottieLogosDir.listFiles()
+                            ?.filter { it.extension.lowercase().matches(Regex("png|jpe?g|svg|webp")) }
+                            ?.forEach { files.add(it.name) }
+                    }
+                    // Include bundled logos from Lottie-Gen
+                    lottieGenDir?.let { File(it, "logos") }?.listFiles()
+                        ?.filter { it.extension.lowercase().matches(Regex("png|jpe?g|svg|webp")) }
+                        ?.forEach { files.add(it.name) }
+                    val jsonArray = files.joinToString(",") { "\"$it\"" }
+                    call.respondText("[$jsonArray]", ContentType.Application.Json)
+                }
+
+                // POST /api/logos — upload a logo (base64 JSON body: { name, data })
+                post(Constants.ENDPOINT_LOTTIE_LOGOS) {
+                    try {
+                        val body = call.receiveText()
+                        val parsed = json.parseToJsonElement(body) as? kotlinx.serialization.json.JsonObject
+                        val name = parsed?.get("name")?.let { (it as? kotlinx.serialization.json.JsonPrimitive)?.content }
+                        val data = parsed?.get("data")?.let { (it as? kotlinx.serialization.json.JsonPrimitive)?.content }
+                        if (name.isNullOrBlank() || data.isNullOrBlank()) {
+                            call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":"bad data"}""")
+                            return@post
+                        }
+                        val safeName = File(name).name // strip path components
+                        val base64Match = Regex("^data:[^;]+;base64,(.+)$").find(data)
+                        if (base64Match == null) {
+                            call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":"bad data"}""")
+                            return@post
+                        }
+                        lottieLogosDir.mkdirs()
+                        val bytes = Base64.getDecoder().decode(base64Match.groupValues[1])
+                        File(lottieLogosDir, safeName).writeBytes(bytes)
+                        call.respondText("""{"file":"$safeName"}""", ContentType.Application.Json)
+                    } catch (e: Exception) {
+                        call.respond(io.ktor.http.HttpStatusCode.InternalServerError, """{"error":"write failed"}""")
+                    }
+                }
             }
     }
 
@@ -461,6 +585,30 @@ class CompanionServer {
         scope.launch {
             broadcastChannel.emit(json.encodeToString(WebSocketMessage.serializer(), msg))
         }
+    }
+
+    /** Locate the Lottie-Gen directory containing lottie-generator.html. */
+    private fun findLottieGenDir(): File? {
+        val appResourcesDir = System.getProperty("compose.application.resources.dir")
+        val executablePath = ProcessHandle.current().info().command().orElse(null)
+            ?.let { File(it).parentFile }
+        fun walkUp(): File? {
+            var dir = File(System.getProperty("user.dir"))
+            repeat(6) {
+                val candidate = File(dir, "Lottie-Gen/lottie-generator.html")
+                if (candidate.exists()) return File(dir, "Lottie-Gen")
+                dir = dir.parentFile ?: return null
+            }
+            return null
+        }
+        return listOfNotNull(
+            appResourcesDir?.let { File(it, "Lottie-Gen") },
+            executablePath?.let { File(it, "../app/resources/Lottie-Gen") },
+            executablePath?.let { File(it, "Lottie-Gen") },
+            walkUp(),
+            File("Lottie-Gen"),
+            File(System.getProperty("user.dir"), "Lottie-Gen")
+        ).firstOrNull { File(it, "lottie-generator.html").exists() }
     }
 
     private fun localIpAddress(): String {
