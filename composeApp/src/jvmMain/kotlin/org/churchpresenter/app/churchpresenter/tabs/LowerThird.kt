@@ -46,10 +46,10 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.ic_pause
-import churchpresenter.composeapp.generated.resources.ic_play
 import churchpresenter.composeapp.generated.resources.add_to_schedule
 import churchpresenter.composeapp.generated.resources.go_live
+import churchpresenter.composeapp.generated.resources.ic_pause
+import churchpresenter.composeapp.generated.resources.ic_play
 import churchpresenter.composeapp.generated.resources.lottie_no_presets
 import churchpresenter.composeapp.generated.resources.lottie_select_preset
 import churchpresenter.composeapp.generated.resources.pause
@@ -57,14 +57,20 @@ import churchpresenter.composeapp.generated.resources.play
 import io.github.alexzhirkevich.compottie.LottieCompositionSpec
 import io.github.alexzhirkevich.compottie.rememberLottieComposition
 import io.github.alexzhirkevich.compottie.rememberLottiePainter
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
 import org.churchpresenter.app.churchpresenter.composables.ImageIconButton
 import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.models.ScheduleItem
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import java.io.File
+import java.nio.file.Path
+import kotlin.io.path.exists
+import kotlin.io.path.isDirectory
+import kotlin.io.path.listDirectoryEntries
+import kotlin.io.path.name
+import kotlin.io.path.nameWithoutExtension
+import kotlin.io.path.readText
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -79,16 +85,17 @@ fun LowerThirdTab(
 
     // Build file list from user-chosen folder
     val lottieFiles = remember(lottieFolder) {
-        if (lottieFolder.isEmpty()) emptyList()
-        else File(lottieFolder).takeIf { it.exists() && it.isDirectory }
-            ?.listFiles { f -> f.extension.lowercase() == "json" }
-            ?.sortedBy { it.nameWithoutExtension.lowercase() } ?: emptyList()
+        lottieFolder
+            ?.takeIf { it.exists() && it.isDirectory() }
+            ?.listDirectoryEntries("*.json")
+            ?.sortedBy { it.nameWithoutExtension.lowercase() }
+            ?: emptyList()
     }
 
     val scope = rememberCoroutineScope()
     var animJob by remember { mutableStateOf<Job?>(null) }
 
-    var selectedFile by remember { mutableStateOf<File?>(null) }
+    var selectedFile by remember { mutableStateOf<Path?>(null) }
     val animatedProgress = remember { Animatable(0f) }
     var isPlaying by remember { mutableStateOf(false) }
 
@@ -107,8 +114,8 @@ fun LowerThirdTab(
     }
 
     val jsonContent = remember(selectedFile) {
-        val f = selectedFile ?: return@remember ""
-        if (!f.exists()) return@remember ""
+        val f: Path = selectedFile ?: return@remember ""
+        if (!f.exists() || f.isDirectory()) return@remember ""
         f.readText()
     }
 
@@ -195,7 +202,7 @@ fun LowerThirdTab(
                 }
             } else {
                 items(lottieFiles) { file ->
-                    val isSelected = selectedFile?.absolutePath == file.absolutePath
+                    val isSelected = selectedFile == file
                     Surface(
                         modifier = Modifier.fillMaxWidth().clickable {
                             selectedFile = file

@@ -1,14 +1,22 @@
 package org.churchpresenter.app.churchpresenter.viewmodel
 
 import androidx.compose.runtime.mutableStateOf
-import java.io.File
+import java.nio.file.Path
+import kotlin.io.path.absolutePathString
+import kotlin.io.path.copyTo
+import kotlin.io.path.deleteIfExists
+import kotlin.io.path.exists
+import kotlin.io.path.isDirectory
+import kotlin.io.path.listDirectoryEntries
+import kotlin.io.path.name
+import kotlin.io.path.readText
 
 class LowerThirdSettingsViewModel {
 
     // ── State ────────────────────────────────────────────────────────
 
-    private val _lottieFolder = mutableStateOf("")
-    val lottieFolder: String get() = _lottieFolder.value
+    private val _lottieFolder = mutableStateOf<Path?>(null)
+    val lottieFolder: Path? get() = _lottieFolder.value
 
     private val _refreshTrigger = mutableStateOf(0)
     val refreshTrigger: Int get() = _refreshTrigger.value
@@ -19,11 +27,9 @@ class LowerThirdSettingsViewModel {
     // ── Derived state ────────────────────────────────────────────────
 
     fun filesInDirectory(): List<String> {
-        val folder = _lottieFolder.value
-        if (folder.isEmpty()) return emptyList()
-        return File(folder)
-            .takeIf { it.exists() && it.isDirectory }
-            ?.listFiles { f -> f.extension.lowercase() == "json" }
+        return lottieFolder
+            ?.takeIf { it.exists() && it.isDirectory() }
+            ?.listDirectoryEntries("*.json")
             ?.map { it.name }
             ?.sorted()
             ?: emptyList()
@@ -31,22 +37,20 @@ class LowerThirdSettingsViewModel {
 
     fun previewJsonContent(): String {
         val fname = _selectedFile.value ?: return ""
-        val folder = _lottieFolder.value
-        if (folder.isEmpty()) return ""
-        val f = File(folder, fname)
+        val folder = _lottieFolder.value ?: return ""
+        val f = folder.resolve(fname)
         return if (f.exists()) f.readText() else ""
     }
 
     fun importSourcePath(): String {
         val fname = _selectedFile.value ?: return ""
-        val folder = _lottieFolder.value
-        if (folder.isEmpty()) return ""
-        return File(folder, fname).absolutePath
+        val folder = _lottieFolder.value ?: return ""
+        return folder.resolve(fname).absolutePathString()
     }
 
     // ── Actions ──────────────────────────────────────────────────────
 
-    fun setFolder(path: String) {
+    fun setFolder(path: Path) {
         _lottieFolder.value = path
         _selectedFile.value = null
         _refreshTrigger.value++
@@ -56,20 +60,17 @@ class LowerThirdSettingsViewModel {
         _selectedFile.value = name
     }
 
-    fun importFile(sourcePath: String) {
-        val folder = _lottieFolder.value
-        if (folder.isEmpty()) return
-        val src = File(sourcePath)
-        src.copyTo(File(folder, src.name), overwrite = true)
-        _selectedFile.value = src.name
+    fun importFile(sourcePath: Path) {
+        val folder = _lottieFolder.value ?: return
+        sourcePath.copyTo(folder.resolve(sourcePath.name), overwrite = true)
+        _selectedFile.value = sourcePath.name
         _refreshTrigger.value++
     }
 
     fun removeSelectedFile() {
         val fname = _selectedFile.value ?: return
-        val folder = _lottieFolder.value
-        if (folder.isEmpty()) return
-        File(folder, fname).delete()
+        val folder = _lottieFolder.value ?: return
+        folder.resolve(fname).deleteIfExists()
         _selectedFile.value = null
         _refreshTrigger.value++
     }

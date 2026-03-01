@@ -1,13 +1,15 @@
 package org.churchpresenter.app.churchpresenter.viewmodel
 
 import androidx.compose.runtime.mutableStateOf
+import java.nio.file.Path
+import kotlin.io.path.name
 
 class SongSettingsViewModel {
 
     // ── State ────────────────────────────────────────────────────────
 
-    private val _storageDirectory = mutableStateOf("")
-    val storageDirectory: String get() = _storageDirectory.value
+    private val _storageDirectory = mutableStateOf<Path?>(null)
+    val storageDirectory: Path? get() = _storageDirectory.value
 
     private val _refreshTrigger = mutableStateOf(0)
     val refreshTrigger: Int get() = _refreshTrigger.value
@@ -18,11 +20,11 @@ class SongSettingsViewModel {
     // ── Derived ──────────────────────────────────────────────────────
 
     fun filesInDirectory(): List<String> =
-        fileManager.getSongFilesInDirectory(_storageDirectory.value)
+        fileManager.getSongFilesInDirectory(_storageDirectory.value ?: return emptyList()).map { it.name }
 
     // ── Actions ──────────────────────────────────────────────────────
 
-    fun setDirectory(path: String) {
+    fun setDirectory(path: Path) {
         _storageDirectory.value = path
         _selectedFile.value = null
         _refreshTrigger.value++

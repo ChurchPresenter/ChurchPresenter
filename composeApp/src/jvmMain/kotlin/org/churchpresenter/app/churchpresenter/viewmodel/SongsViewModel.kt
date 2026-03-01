@@ -2,18 +2,21 @@ package org.churchpresenter.app.churchpresenter.viewmodel
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import org.churchpresenter.app.churchpresenter.data.AppSettings
+import org.churchpresenter.app.churchpresenter.data.SongItem
+import org.churchpresenter.app.churchpresenter.data.Songs
+import org.churchpresenter.app.churchpresenter.models.LyricSection
+import org.churchpresenter.app.churchpresenter.utils.Constants
+import kotlin.io.path.exists
+import kotlin.io.path.isDirectory
+import kotlin.io.path.listDirectoryEntries
+import kotlin.io.path.name
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.churchpresenter.app.churchpresenter.data.AppSettings
-import org.churchpresenter.app.churchpresenter.data.SongItem
-import org.churchpresenter.app.churchpresenter.data.Songs
-import org.churchpresenter.app.churchpresenter.models.LyricSection
-import org.churchpresenter.app.churchpresenter.utils.Constants
-import java.io.File
 
 class SongsViewModel(
     private var appSettings: AppSettings
@@ -77,16 +80,14 @@ class SongsViewModel(
             try {
                 val songs = withContext(Dispatchers.IO) {
                     val s = Songs()
-                    if (appSettings.songSettings.storageDirectory.isNotEmpty()) {
-                        val dir = File(appSettings.songSettings.storageDirectory)
-                        if (dir.exists() && dir.isDirectory) {
-                            val spsFiles: Array<File> = dir.listFiles { file ->
-                                file.extension.lowercase() == Constants.EXTENSION_SPS
-                            } ?: emptyArray()
+                    val storageDir = appSettings.songSettings.storageDirectory
+                    if (storageDir != null) {
+                        if (storageDir.exists() && storageDir.isDirectory()) {
+                            val spsFiles = storageDir.listDirectoryEntries("*.${Constants.EXTENSION_SPS}")
 
                             spsFiles.sortedBy { it.name }.forEach { file ->
                                 try {
-                                    s.loadFromSpsAppend(file.absolutePath)
+                                    s.loadFromSpsAppend(file.toUri().toURL())
                                 } catch (_: Exception) {
                                 }
                             }
@@ -94,7 +95,7 @@ class SongsViewModel(
                     }
                     if (s.getSongCount() == 0) {
                         try {
-                            s.loadFromSps(Constants.FALLBACK_SONG_RESOURCE)
+                            s.loadFromSps(Thread.currentThread().contextClassLoader.getResource(Constants.FALLBACK_SONG_RESOURCE)!!)
                         } catch (_: Exception) {
                         }
                     }

@@ -1,9 +1,11 @@
 package org.churchpresenter.app.churchpresenter.data
 
-import java.nio.file.Files
-import java.nio.file.Paths
-import java.nio.charset.StandardCharsets
 import androidx.compose.runtime.mutableStateListOf
+import java.nio.charset.StandardCharsets
+import java.nio.file.Path
+import kotlin.io.path.bufferedReader
+import kotlin.io.path.exists
+import kotlin.io.path.nameWithoutExtension
 
 // Note: This conversion assumes you're using a Kotlin database library
 // You may need to adapt the SQL queries based on your specific database framework
@@ -56,7 +58,7 @@ class Bible {
      *           "King James Version" -> "KJV"
      *           "ru_RST77.spb" -> "RST77"
      */
-    private fun extractBibleAbbreviation(title: String?, filename: String): String {
+    private fun extractBibleAbbreviation(title: String?, file: Path): String {
         // First try to extract from title if available
         if (!title.isNullOrBlank()) {
             // Look for common patterns: "Version", "Translation", etc.
@@ -72,28 +74,18 @@ class Bible {
         }
 
         // Fallback to filename without extension
-        return filename.substringBeforeLast(".").substringAfterLast("/").substringAfterLast("\\")
+        return file.nameWithoutExtension
     }
 
-    // New: load from a BibleQuote .spb plain text module
-    // resourcePath: either a classpath resource name (e.g. "ru_RST77.spb") or an absolute file path
-    fun loadFromSpb(resourcePath: String, bookNames: List<String> = emptyList()) {
+    fun loadFromSpb(file: Path, bookNames: List<String> = emptyList()) {
         operatorBible.clear()
         books.clear()
 
-
         try {
-            val inputStream = Thread.currentThread().contextClassLoader.getResourceAsStream(resourcePath)
-            val reader = if (inputStream != null) {
-                inputStream.bufferedReader(StandardCharsets.UTF_8)
+            val reader = if (file.exists()) {
+                file.bufferedReader(StandardCharsets.UTF_8)
             } else {
-                val path = Paths.get(resourcePath)
-                if (Files.exists(path)) {
-                    Files.newBufferedReader(path, StandardCharsets.UTF_8)
-                } else {
-                    val msg = "loadFromSpb: resource not found on classpath or filesystem: $resourcePath"
-                    throw IllegalArgumentException(msg)
-                }
+                throw IllegalArgumentException("SPB file not found: $file")
             }
 
             val codeRegex = Regex("^B(\\d{3})C(\\d{3})V(\\d{3})$")
@@ -240,7 +232,7 @@ class Bible {
             }
 
             // Extract and store Bible abbreviation from title or filename
-            bibleAbbreviation = extractBibleAbbreviation(bibleTitle, resourcePath)
+            bibleAbbreviation = extractBibleAbbreviation(bibleTitle, file)
 
         } catch (e: Exception) {
             throw e

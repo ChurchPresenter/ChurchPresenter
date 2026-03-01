@@ -2,18 +2,18 @@ package org.churchpresenter.app.churchpresenter.viewmodel
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import org.churchpresenter.app.churchpresenter.data.AppSettings
+import org.churchpresenter.app.churchpresenter.data.Bible
+import org.churchpresenter.app.churchpresenter.data.BibleBookNames
+import org.churchpresenter.app.churchpresenter.data.BibleSearch
+import org.churchpresenter.app.churchpresenter.models.SelectedVerse
+import kotlin.io.path.exists
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.churchpresenter.app.churchpresenter.data.AppSettings
-import org.churchpresenter.app.churchpresenter.data.Bible
-import org.churchpresenter.app.churchpresenter.data.BibleBookNames
-import org.churchpresenter.app.churchpresenter.data.BibleSearch
-import org.churchpresenter.app.churchpresenter.models.SelectedVerse
-import java.io.File
 
 class BibleViewModel(
     private var appSettings: AppSettings
@@ -113,42 +113,25 @@ class BibleViewModel(
         viewModelScope.launch {
             _isLoading.value = true
             try {
-                // Parse Bible files on IO thread so the UI stays responsive
-                val primary = withContext(Dispatchers.IO) {
-                    if (appSettings.bibleSettings.primaryBible.isNotEmpty() &&
-                        appSettings.bibleSettings.storageDirectory.isNotEmpty()
-                    ) {
-                        val bibleFile = File(
-                            appSettings.bibleSettings.storageDirectory,
-                            appSettings.bibleSettings.primaryBible
-                        )
-                        if (bibleFile.exists()) {
-                            try {
-                                Bible().apply { loadFromSpb(bibleFile.absolutePath) }
-                            } catch (e: Exception) {
-                                e.printStackTrace(); null
-                            }
+                suspend fun loadBible(bible: String): Bible? {
+                    // Parse Bible files on IO thread so the UI stays responsive
+                    return withContext(Dispatchers.IO) {
+                        val storageDir = appSettings.bibleSettings.storageDirectory
+                        if (bible.isNotEmpty() && storageDir != null) {
+                            val bibleFile = storageDir.resolve(bible)
+                            if (bibleFile.exists()) {
+                                try {
+                                    Bible().apply { loadFromSpb(bibleFile) }
+                                } catch (e: Exception) {
+                                    e.printStackTrace(); null
+                                }
+                            } else null
                         } else null
-                    } else null
+                    }
                 }
 
-                val secondary = withContext(Dispatchers.IO) {
-                    if (appSettings.bibleSettings.secondaryBible.isNotEmpty() &&
-                        appSettings.bibleSettings.storageDirectory.isNotEmpty()
-                    ) {
-                        val bibleFile = File(
-                            appSettings.bibleSettings.storageDirectory,
-                            appSettings.bibleSettings.secondaryBible
-                        )
-                        if (bibleFile.exists()) {
-                            try {
-                                Bible().apply { loadFromSpb(bibleFile.absolutePath) }
-                            } catch (e: Exception) {
-                                e.printStackTrace(); null
-                            }
-                        } else null
-                    } else null
-                }
+                val primary = loadBible(appSettings.bibleSettings.primaryBible)
+                val secondary = loadBible(appSettings.bibleSettings.secondaryBible)
 
                 // Update state back on the Main thread
                 _primaryBible.value = primary
