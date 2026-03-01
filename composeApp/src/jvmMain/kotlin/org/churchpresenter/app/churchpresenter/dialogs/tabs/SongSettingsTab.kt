@@ -17,35 +17,28 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.animation_crossfade
-import churchpresenter.composeapp.generated.resources.animation_fade
-import churchpresenter.composeapp.generated.resources.animation_none
-import churchpresenter.composeapp.generated.resources.animation_slide_left
-import churchpresenter.composeapp.generated.resources.animation_slide_right
-import churchpresenter.composeapp.generated.resources.animation_type
 import churchpresenter.composeapp.generated.resources.bottom_left
 import churchpresenter.composeapp.generated.resources.bottom_right
 import churchpresenter.composeapp.generated.resources.browse_directory
@@ -58,12 +51,11 @@ import churchpresenter.composeapp.generated.resources.first_page
 import churchpresenter.composeapp.generated.resources.font_size
 import churchpresenter.composeapp.generated.resources.font_type
 import churchpresenter.composeapp.generated.resources.full_screen
+import churchpresenter.composeapp.generated.resources.lower_third_size
 import churchpresenter.composeapp.generated.resources.horizontal_alignment
 import churchpresenter.composeapp.generated.resources.import_error
 import churchpresenter.composeapp.generated.resources.import_song_file
-import churchpresenter.composeapp.generated.resources.lower_third_size
 import churchpresenter.composeapp.generated.resources.lyrics
-import churchpresenter.composeapp.generated.resources.milliseconds_suffix
 import churchpresenter.composeapp.generated.resources.no_directory_selected
 import churchpresenter.composeapp.generated.resources.no_file_selected_title
 import churchpresenter.composeapp.generated.resources.no_song_files
@@ -76,25 +68,34 @@ import churchpresenter.composeapp.generated.resources.show_number
 import churchpresenter.composeapp.generated.resources.show_title
 import churchpresenter.composeapp.generated.resources.song_files
 import churchpresenter.composeapp.generated.resources.song_number
-import churchpresenter.composeapp.generated.resources.song_transition_settings
 import churchpresenter.composeapp.generated.resources.storage_directory
 import churchpresenter.composeapp.generated.resources.title
 import churchpresenter.composeapp.generated.resources.top_left
 import churchpresenter.composeapp.generated.resources.top_right
-import churchpresenter.composeapp.generated.resources.transition_duration
 import churchpresenter.composeapp.generated.resources.vertical_alignment
 import churchpresenter.composeapp.generated.resources.word_wrap
+import churchpresenter.composeapp.generated.resources.animation_crossfade
+import churchpresenter.composeapp.generated.resources.animation_fade
+import churchpresenter.composeapp.generated.resources.animation_none
+import churchpresenter.composeapp.generated.resources.animation_slide_left
+import churchpresenter.composeapp.generated.resources.animation_slide_right
+import churchpresenter.composeapp.generated.resources.animation_type
+import churchpresenter.composeapp.generated.resources.milliseconds_suffix
+import churchpresenter.composeapp.generated.resources.song_transition_settings
+import churchpresenter.composeapp.generated.resources.transition_duration
+import androidx.compose.material3.Slider
+import androidx.compose.runtime.rememberCoroutineScope
 import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
 import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
+import org.churchpresenter.app.churchpresenter.models.AnimationType
 import org.churchpresenter.app.churchpresenter.composables.DropdownSettingsField
 import org.churchpresenter.app.churchpresenter.composables.FontSettingsDropdown
-import org.churchpresenter.app.churchpresenter.composables.HorizontalAlignmentButtons
 import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
-import org.churchpresenter.app.churchpresenter.composables.PositionButtons
-import org.churchpresenter.app.churchpresenter.composables.TextStyleButtons
+import org.churchpresenter.app.churchpresenter.composables.HorizontalAlignmentButtons
 import org.churchpresenter.app.churchpresenter.composables.VerticalAlignmentButtons
+import org.churchpresenter.app.churchpresenter.composables.TextStyleButtons
+import org.churchpresenter.app.churchpresenter.composables.PositionButtons
 import org.churchpresenter.app.churchpresenter.data.AppSettings
-import org.churchpresenter.app.churchpresenter.models.AnimationType
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.Utils
 import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDefault
@@ -103,7 +104,6 @@ import org.churchpresenter.app.churchpresenter.viewmodel.SongSettingsViewModel
 import org.jetbrains.compose.resources.stringResource
 import java.awt.Window
 import javax.swing.SwingUtilities
-import kotlin.io.path.absolutePathString
 import kotlinx.coroutines.launch
 
 
@@ -116,14 +116,14 @@ fun SongSettingsTab(
     val viewModel = remember {
         SongSettingsViewModel().also { vm ->
             val dir = settings.songSettings.storageDirectory
-            if (dir != null) vm.setDirectory(dir)
+            if (dir.isNotEmpty()) vm.setDirectory(dir)
         }
     }
 
     // Keep viewModel directory in sync if settings change after initial load
     LaunchedEffect(settings.songSettings.storageDirectory) {
         val dir = settings.songSettings.storageDirectory
-        if (viewModel.storageDirectory != dir && dir != null) viewModel.setDirectory(dir)
+        if (viewModel.storageDirectory != dir) viewModel.setDirectory(dir)
     }
 
     val songFilesInDirectory = remember(viewModel.storageDirectory, viewModel.refreshTrigger) {
@@ -220,7 +220,7 @@ private fun LeftColumn(
     ) {
 
         Text(
-            text = settings.songSettings.storageDirectory?.absolutePathString() ?: stringResource(Res.string.no_directory_selected),
+            text = settings.songSettings.storageDirectory.ifEmpty { stringResource(Res.string.no_directory_selected) },
             modifier = Modifier
                 .weight(1f)
                 .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(2.dp))
@@ -235,6 +235,7 @@ private fun LeftColumn(
             backgroundColor = MaterialTheme.colorScheme.primaryContainer,
             onClick = {
                 scope.launch {
+                    val parentWindow = Window.getWindows().firstOrNull { it.isActive }
                     val selectedDir = fileManager.chooseDirectory(
                         currentDirectory = settings.songSettings.storageDirectory
                     )
@@ -272,7 +273,7 @@ private fun LeftColumn(
         ) {
             if (songFilesInDirectory.isEmpty()) {
                 Text(
-                    text = if (settings.songSettings.storageDirectory == null) {
+                    text = if (settings.songSettings.storageDirectory.isEmpty()) {
                         stringResource(Res.string.no_directory_selected)
                     } else {
                         stringResource(Res.string.no_song_files)
@@ -315,7 +316,7 @@ private fun LeftColumn(
                     val parentWindow = Window.getWindows().firstOrNull { it.isActive }
 
                     // Check if directory is selected
-                    if (settings.songSettings.storageDirectory == null) {
+                    if (settings.songSettings.storageDirectory.isEmpty()) {
                         fileManager.showWarning(
                             message = pleaseSelectDirectoryStr,
                             title = noDirectorySelectedStr,
@@ -375,7 +376,10 @@ private fun LeftColumn(
 
                     if (confirmed) {
                         // Delete file
-                        val error = fileManager.deleteFile(settings.songSettings.storageDirectory?.resolve(selectedFile),)
+                        val error = fileManager.deleteFile(
+                            directory = settings.songSettings.storageDirectory,
+                            fileName = selectedFile
+                        )
 
                         if (error != null) {
                             fileManager.showError(

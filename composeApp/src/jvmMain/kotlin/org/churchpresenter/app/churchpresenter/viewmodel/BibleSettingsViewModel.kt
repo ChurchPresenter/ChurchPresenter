@@ -1,18 +1,15 @@
 package org.churchpresenter.app.churchpresenter.viewmodel
 
 import androidx.compose.runtime.mutableStateOf
-import java.nio.file.Path
-import kotlin.io.path.Path
-import kotlin.io.path.name
-import kotlin.io.path.nameWithoutExtension
-import kotlin.io.path.useLines
+import java.io.File
+import java.nio.charset.StandardCharsets
 
 class BibleSettingsViewModel {
 
     // ── State ────────────────────────────────────────────────────────
 
-    private val _storageDirectory = mutableStateOf(Path(""))
-    val storageDirectory: Path get() = _storageDirectory.value
+    private val _storageDirectory = mutableStateOf("")
+    val storageDirectory: String get() = _storageDirectory.value
 
     private val _refreshTrigger = mutableStateOf(0)
     val refreshTrigger: Int get() = _refreshTrigger.value
@@ -23,19 +20,19 @@ class BibleSettingsViewModel {
     // ── Derived ──────────────────────────────────────────────────────
 
     fun filesInDirectory(): List<String> =
-        fileManager.getBibleFilesInDirectory(_storageDirectory.value).map { it.name }
+        fileManager.getBibleFilesInDirectory(_storageDirectory.value)
 
     fun fileDisplayNames(files: List<String>): Map<String, String> {
         val dir = _storageDirectory.value
-        if (dir.name.isEmpty()) return emptyMap()
+        if (dir.isEmpty()) return emptyMap()
         return files.associateWith { fileName ->
-            extractBibleTitle(dir.resolve(fileName))
+            extractBibleTitle(File(dir, fileName).absolutePath)
         }
     }
 
     // ── Actions ──────────────────────────────────────────────────────
 
-    fun setDirectory(path: Path) {
+    fun setDirectory(path: String) {
         _storageDirectory.value = path
         _selectedFile.value = null
         _refreshTrigger.value++
@@ -53,13 +50,21 @@ class BibleSettingsViewModel {
 
     val fileManager = FileManager()
 
-    private fun extractBibleTitle(file: Path): String {
+    private fun extractBibleTitle(filePath: String): String {
         return try {
-            file.useLines { lines ->
-                lines.find { it.startsWith("##Title:") }?.removePrefix("##Title:")?.trim() ?: file.nameWithoutExtension
+            File(filePath).bufferedReader(StandardCharsets.UTF_8).use { reader ->
+                var title: String? = null
+                repeat(10) {
+                    val line = reader.readLine() ?: return@use (title ?: File(filePath).nameWithoutExtension)
+                    if (line.startsWith("##Title:")) {
+                        title = line.substring(8).trim()
+                        return@use title!!
+                    }
+                }
+                title ?: File(filePath).nameWithoutExtension
             }
         } catch (_: Exception) {
-            file.nameWithoutExtension
+            File(filePath).nameWithoutExtension
         }
     }
 }

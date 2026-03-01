@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -43,9 +44,17 @@ import churchpresenter.composeapp.generated.resources.bottom
 import churchpresenter.composeapp.generated.resources.browse_directory
 import churchpresenter.composeapp.generated.resources.display_lower_third
 import churchpresenter.composeapp.generated.resources.generate_lower_third
+import churchpresenter.composeapp.generated.resources.ic_close
 import churchpresenter.composeapp.generated.resources.import_lottie_file
 import churchpresenter.composeapp.generated.resources.left
 import churchpresenter.composeapp.generated.resources.lottie_files
+import churchpresenter.composeapp.generated.resources.lottie_pause_frame
+import churchpresenter.composeapp.generated.resources.lottie_pause_frame_none
+import churchpresenter.composeapp.generated.resources.lottie_preset_delete
+import churchpresenter.composeapp.generated.resources.lottie_preset_import_file
+import churchpresenter.composeapp.generated.resources.lottie_preset_label
+import churchpresenter.composeapp.generated.resources.lottie_preset_label_hint
+import churchpresenter.composeapp.generated.resources.lottie_preset_no_file
 import churchpresenter.composeapp.generated.resources.lottie_select_preset
 import churchpresenter.composeapp.generated.resources.no_directory_selected
 import churchpresenter.composeapp.generated.resources.no_lottie_files
@@ -58,33 +67,21 @@ import io.github.alexzhirkevich.compottie.LottieCompositionSpec
 import io.github.alexzhirkevich.compottie.animateLottieCompositionAsState
 import io.github.alexzhirkevich.compottie.rememberLottieComposition
 import io.github.alexzhirkevich.compottie.rememberLottiePainter
-import javafx.application.Platform
-import javafx.concurrent.Worker
-import javafx.embed.swing.JFXPanel
-import javafx.scene.Scene
-import javafx.scene.layout.StackPane
-import javafx.scene.web.WebView
-import netscape.javascript.JSObject
+import org.churchpresenter.app.churchpresenter.composables.ImageIconButton
 import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
 import org.churchpresenter.app.churchpresenter.data.AppSettings
-import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
-import org.churchpresenter.app.churchpresenter.viewmodel.FileManager
-import org.churchpresenter.app.churchpresenter.viewmodel.LowerThirdSettingsViewModel
+import org.churchpresenter.app.churchpresenter.data.LottieSearchReplacePair
+import org.churchpresenter.app.churchpresenter.utils.createFileChooser
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import java.awt.BorderLayout
 import java.awt.Dimension
 import java.awt.Window
 import java.io.File
-import java.nio.file.Path
 import javax.swing.JDialog
-import javax.swing.JOptionPane
+import javax.swing.JFileChooser
 import javax.swing.filechooser.FileNameExtensionFilter
-import kotlin.io.path.exists
-import kotlin.io.path.name
-import kotlin.io.path.writeText
-import kotlinx.coroutines.CoroutineScope
+import kotlin.io.path.nameWithoutExtension
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 @Composable
 fun LowerThirdSettingsTab(
@@ -97,7 +94,7 @@ fun LowerThirdSettingsTab(
     // Keep viewModel folder in sync with settings
     LaunchedEffect(settings.streamingSettings.lowerThirdFolder) {
         val folder = settings.streamingSettings.lowerThirdFolder
-        if (viewModel.lottieFolder != folder && folder != null) viewModel.setFolder(folder)
+        if (viewModel.lottieFolder != folder) viewModel.setFolder(folder)
     }
 
     val lottieFolder = viewModel.lottieFolder
@@ -148,7 +145,7 @@ fun LowerThirdSettingsTab(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = lottieFolder?.toString() ?: noDirectorySelectedStr,
+                    text = lottieFolder.ifEmpty { noDirectorySelectedStr },
                     modifier = Modifier
                         .weight(1f)
                         .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(2.dp))
@@ -161,10 +158,12 @@ fun LowerThirdSettingsTab(
                     text = stringResource(Res.string.browse_directory),
                     backgroundColor = MaterialTheme.colorScheme.primaryContainer,
                     onClick = {
-                        scope.launch {
-                            val fileManager = FileManager()
+                        SwingUtilities.invokeLater {
+                            val parentWindow = Window.getWindows().firstOrNull { it.isActive }
+                            val fileManager = org.churchpresenter.app.churchpresenter.viewmodel.FileManager()
                             val selectedDir = fileManager.chooseDirectory(
-                                currentDirectory = lottieFolder
+                                currentDirectory = lottieFolder,
+                                parentWindow = parentWindow
                             )
                             selectedDir?.let { dir ->
                                 viewModel.setFolder(dir)
@@ -197,7 +196,7 @@ fun LowerThirdSettingsTab(
                 ) {
                     if (lottieFilesInDirectory.isEmpty()) {
                         Text(
-                            text = if (lottieFolder == null) noDirectorySelectedStr else noLottieFilesStr,
+                            text = if (lottieFolder.isEmpty()) noDirectorySelectedStr else noLottieFilesStr,
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -231,16 +230,16 @@ fun LowerThirdSettingsTab(
                     text = stringResource(Res.string.import_lottie_file),
                     backgroundColor = MaterialTheme.colorScheme.inverseSurface,
                     onClick = {
-                        scope.launch {
-                            if (lottieFolder == null) return@launch
-                            val file = FileChooser.platformInstance.chooseSingle(
-                                path = lottieFolder,
-                                filters = listOf(FileNameExtensionFilter("Lottie JSON (*.json)", "json")),
-                                title = "Select Lottie JSON File",
-                                selectDirectory = false
-                            )
-                            if (file != null) {
-                                viewModel.importFile(file)
+                        SwingUtilities.invokeLater {
+                            val parentWindow = Window.getWindows().firstOrNull { it.isActive }
+                            if (lottieFolder.isEmpty()) return@invokeLater
+                            val chooser = createFileChooser {
+                                fileSelectionMode = JFileChooser.FILES_ONLY
+                                dialogTitle = "Select Lottie JSON File"
+                                fileFilter = FileNameExtensionFilter("Lottie JSON (*.json)", "json")
+                            }
+                            if (chooser.showOpenDialog(parentWindow) == JFileChooser.APPROVE_OPTION) {
+                                viewModel.importFile(chooser.selectedFile.absolutePath)
                             }
                         }
                     }
@@ -254,11 +253,10 @@ fun LowerThirdSettingsTab(
                     text = stringResource(Res.string.generate_lower_third),
                     backgroundColor = MaterialTheme.colorScheme.tertiaryContainer,
                     onClick = {
-                        scope.launch {
+                        SwingUtilities.invokeLater {
                             openLottieGeneratorDialog(
-                                parentScope = scope,
                                 parentWindow = Window.getWindows().firstOrNull { it.isActive },
-                                outputFolder = lottieFolder,
+                                outputFolder = lottieFolder.ifEmpty { null },
                                 onFileSaved = { viewModel.onFileSavedFromGenerator() }
                             )
                         }
@@ -438,9 +436,8 @@ private fun ModernButton(
  * directly to [outputFolder] instead of the system Downloads folder.
  */
 private fun openLottieGeneratorDialog(
-    parentScope: CoroutineScope,
     parentWindow: Window?,
-    outputFolder: Path?,
+    outputFolder: String?,
     onFileSaved: () -> Unit
 ) {
     // Locate lottie-generator.html
@@ -450,19 +447,19 @@ private fun openLottieGeneratorDialog(
     ).firstOrNull { it.exists() }
 
     if (htmlFile == null) {
-        JOptionPane.showMessageDialog(
+        javax.swing.JOptionPane.showMessageDialog(
             parentWindow,
             "Lottie Generator not found.\nExpected at: Lottie-Gen/lottie-generator.html",
             "Generator Not Found",
-            JOptionPane.ERROR_MESSAGE
+            javax.swing.JOptionPane.ERROR_MESSAGE
         )
         return
     }
 
     // Ensure JavaFX toolkit is running
     try {
-        Platform.setImplicitExit(false)
-        Platform.startup { }
+        javafx.application.Platform.setImplicitExit(false)
+        javafx.application.Platform.startup { }
     } catch (_: IllegalStateException) {
         // Already initialised — fine
     }
@@ -476,57 +473,62 @@ private fun openLottieGeneratorDialog(
     }
 
     // JFXPanel bridges Swing ↔ JavaFX
-    val jfxPanel = JFXPanel()
-    dialog.contentPane.add(jfxPanel, BorderLayout.CENTER)
+    val jfxPanel = javafx.embed.swing.JFXPanel()
+    dialog.contentPane.add(jfxPanel, java.awt.BorderLayout.CENTER)
     dialog.pack()
     dialog.setLocationRelativeTo(parentWindow)
 
     // Build the JavaFX scene on the FX thread
-    Platform.runLater {
-        val webView = WebView()
+    javafx.application.Platform.runLater {
+        val webView = javafx.scene.web.WebView()
         val engine = webView.engine
 
         // After page loads, inject a JS bridge that intercepts <a download> clicks
-        engine.loadWorker.stateProperty().addListener { _, _, newState ->
-            if (newState == Worker.State.SUCCEEDED) {
-                val win = engine.executeScript("window") as? JSObject ?: return@addListener
+        engine.loadWorker.stateProperty().addListener(
+            javafx.beans.value.ChangeListener { _, _, newState ->
+                if (newState == javafx.concurrent.Worker.State.SUCCEEDED) {
+                    val win = engine.executeScript("window") as? netscape.javascript.JSObject ?: return@ChangeListener
 
-                // Kotlin object exposed to JavaScript
-                val bridge = object {
-                    @Suppress("unused")
-                    fun save(filename: String, jsonContent: String) {
-                        parentScope.launch {
-                            val dest = outputFolder
-                                ?.takeIf { it.exists() }
-                                ?.resolve(filename)
-                                ?: FileChooser.platformInstance.save(
-                                    location = null,
-                                    title = "Save Lottie File",
-                                    filters = listOf(FileNameExtensionFilter("Lottie JSON (*.json)", "json")),
-                                    suggestedName = filename
+                    // Kotlin object exposed to JavaScript
+                    val bridge = object {
+                        @Suppress("unused")
+                        fun save(filename: String, jsonContent: String) {
+                            SwingUtilities.invokeLater {
+                                val dest = outputFolder
+                                    ?.let { File(it) }
+                                    ?.takeIf { it.exists() }
+                                    ?.let { File(it, filename) }
+                                    ?: run {
+                                        val chooser = JFileChooser().apply {
+                                            dialogTitle = "Save Lottie File"
+                                            fileFilter = FileNameExtensionFilter("Lottie JSON (*.json)", "json")
+                                            selectedFile = File(filename)
+                                        }
+                                        if (chooser.showSaveDialog(dialog) != JFileChooser.APPROVE_OPTION) return@invokeLater
+                                        chooser.selectedFile
+                                    }
+                                dest.writeText(jsonContent)
+                                onFileSaved()
+                                javax.swing.JOptionPane.showMessageDialog(
+                                    dialog,
+                                    "Saved: ${dest.name}",
+                                    "Saved",
+                                    javax.swing.JOptionPane.INFORMATION_MESSAGE
                                 )
-                                ?: return@launch
-                            dest.writeText(jsonContent)
-                            onFileSaved()
-                            JOptionPane.showMessageDialog(
-                                dialog,
-                                "Saved: ${dest.name}",
-                                "Saved",
-                                JOptionPane.INFORMATION_MESSAGE
-                            )
+                            }
                         }
                     }
-                }
 
-                win.setMember("_jvmBridge", bridge)
-                // Bridge is now live — the HTML's download() checks window._jvmBridge directly
+                    win.setMember("_jvmBridge", bridge)
+                    // Bridge is now live — the HTML's download() checks window._jvmBridge directly
+                }
             }
-        }
+        )
 
         engine.load(htmlFile.toURI().toString())
 
-        val scene = Scene(
-            StackPane(webView),
+        val scene = javafx.scene.Scene(
+            javafx.scene.layout.StackPane(webView),
             1180.0, 760.0
         )
         jfxPanel.scene = scene

@@ -97,7 +97,6 @@ import org.jetbrains.compose.resources.stringResource
 import java.awt.GraphicsEnvironment
 import java.awt.Window
 import javax.swing.SwingUtilities
-import kotlin.io.path.absolutePathString
 import kotlinx.coroutines.launch
 
 
@@ -112,14 +111,14 @@ fun BibleSettingsTab(
     val viewModel = remember {
         BibleSettingsViewModel().also { vm ->
             val dir = settings.bibleSettings.storageDirectory
-            if (dir != null) vm.setDirectory(dir)
+            if (dir.isNotEmpty()) vm.setDirectory(dir)
         }
     }
 
     // Keep viewModel directory in sync if settings change after initial load
     LaunchedEffect(settings.bibleSettings.storageDirectory) {
         val dir = settings.bibleSettings.storageDirectory
-        if (viewModel.storageDirectory != dir && dir != null) viewModel.setDirectory(dir)
+        if (viewModel.storageDirectory != dir) viewModel.setDirectory(dir)
     }
 
     val bibleFilesInDirectory = remember(viewModel.storageDirectory, viewModel.refreshTrigger) {
@@ -197,7 +196,7 @@ private fun LeftColumn(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text = settings.bibleSettings.storageDirectory?.absolutePathString() ?: stringResource(Res.string.no_directory_selected),
+            text = settings.bibleSettings.storageDirectory.ifEmpty { stringResource(Res.string.no_directory_selected) },
             modifier = Modifier.weight(1f)
                 .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(2.dp))
                 .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f), RoundedCornerShape(2.dp))
@@ -211,6 +210,7 @@ private fun LeftColumn(
             backgroundColor = MaterialTheme.colorScheme.primaryContainer,
             onClick = {
                 scope.launch {
+                    val parentWindow = Window.getWindows().firstOrNull { it.isActive }
                     val selectedDir = fileManager.chooseDirectory(
                         currentDirectory = settings.bibleSettings.storageDirectory
                     )
@@ -237,20 +237,20 @@ private fun LeftColumn(
         ) {
             if (bibleFilesInDirectory.isEmpty()) {
                 Text(
-                    text = if (settings.bibleSettings.storageDirectory == null) noDirectorySelectedStr
+                    text = if (settings.bibleSettings.storageDirectory.isEmpty()) noDirectorySelectedStr
                            else stringResource(Res.string.no_bible_files),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             } else {
-                bibleFilesInDirectory.forEach { file ->
-                    val isSelected = file == selectedFile
+                bibleFilesInDirectory.forEach { fileName ->
+                    val isSelected = fileName == selectedFile
                     Text(
-                        text = file,
+                        text = fileName,
                         style = MaterialTheme.typography.bodySmall,
                         modifier = Modifier.fillMaxWidth()
                             .background(if (isSelected) MaterialTheme.colorScheme.primaryContainer else Color.Transparent)
-                            .clickable { onFileSelected(file) }
+                            .clickable { onFileSelected(fileName) }
                             .padding(vertical = 4.dp, horizontal = 8.dp),
                         color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer
                                 else MaterialTheme.colorScheme.onSurface
@@ -269,13 +269,12 @@ private fun LeftColumn(
             onClick = {
                 scope.launch {
                     val parentWindow = Window.getWindows().firstOrNull { it.isActive }
-                    val storageDir = settings.bibleSettings.storageDirectory
-                    if (storageDir == null) {
+                    if (settings.bibleSettings.storageDirectory.isEmpty()) {
                         fileManager.showWarning(pleaseSelectDirectoryStr, noDirectorySelectedStr, parentWindow)
                         return@launch
                     }
                     fileManager.chooseBibleFile()?.let { file ->
-                        val errors = fileManager.importFiles(listOf(file), storageDir)
+                        val errors = fileManager.importFiles(listOf(file), settings.bibleSettings.storageDirectory)
                         if (errors.isNotEmpty()) fileManager.showError(errors.joinToString("\n"), importErrorStr, parentWindow)
                         onRefresh()
                     }
@@ -293,7 +292,7 @@ private fun LeftColumn(
                         return@invokeLater
                     }
                     if (fileManager.showConfirmDialog(String.format(confirmDeleteFileTemplate, selectedFile), confirmDeleteStr, parentWindow)) {
-                        val error = fileManager.deleteFile(settings.bibleSettings.storageDirectory?.resolve(selectedFile))
+                        val error = fileManager.deleteFile(settings.bibleSettings.storageDirectory, selectedFile)
                         if (error != null) fileManager.showError(error, deleteErrorStr, parentWindow)
                         else { onFileSelected(null); onRefresh() }
                     }
@@ -309,8 +308,8 @@ private fun LeftColumn(
     Spacer(modifier = Modifier.height(8.dp))
 
     // Create list of display names for dropdown
-    val bibleDisplayOptions = listOf(noneStr) + bibleFilesInDirectory.map { file ->
-        bibleFileDisplayNames[file] ?: file
+    val bibleDisplayOptions = listOf(noneStr) + bibleFilesInDirectory.map { fileName ->
+        bibleFileDisplayNames[fileName] ?: fileName
     }
 
     SettingRow(stringResource(Res.string.primary_bible)) {

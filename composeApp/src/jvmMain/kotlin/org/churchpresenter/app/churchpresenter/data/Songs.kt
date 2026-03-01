@@ -2,81 +2,89 @@ package org.churchpresenter.app.churchpresenter.data
 
 import androidx.compose.runtime.mutableStateListOf
 import org.churchpresenter.app.churchpresenter.utils.Constants
-import java.net.URL
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
-import java.nio.file.Path
-import kotlin.io.path.exists
-import kotlin.io.path.isDirectory
-import kotlin.io.path.listDirectoryEntries
-import kotlin.io.path.readLines
+import java.nio.file.Paths
 
 
 class Songs {
     private val songs = mutableStateListOf<SongItem>()
 
-    fun loadFromSps(url: URL) {
+    fun loadFromSps(resourcePath: String) {
         songs.clear()
-        loadFromSpsAppend(url)
+        loadFromSpsAppend(resourcePath)
     }
 
-    fun loadFromSpsAppend(url: URL) {
+    fun loadFromSpsAppend(resourcePath: String) {
         try {
-            url.openStream().bufferedReader(StandardCharsets.UTF_8).use { reader ->
-                var databaseName = url.path.split('/').last() // Default to filename
-                val categoryToSongbookMap = mutableMapOf<String, String>()
-                var headerLineCount = 0 // Track which header line we're on
+            // Extract database name from the file path (without extension) as fallback
+            val fileBaseName = resourcePath.substringAfterLast('/').substringAfterLast('\\').substringBeforeLast('.')
 
-                reader.use { r ->
-                    r.forEachLine { rawLine ->
-                        val line = rawLine.trimEnd('\r', '\n')
+            val inputStream = Thread.currentThread().contextClassLoader.getResourceAsStream(resourcePath)
+            val reader = if (inputStream != null) {
+                inputStream.bufferedReader(StandardCharsets.UTF_8)
+            } else {
+                val path = Paths.get(resourcePath)
+                if (Files.exists(path)) {
+                    Files.newBufferedReader(path, StandardCharsets.UTF_8)
+                } else {
+                    throw IllegalArgumentException("loadFromSpsAppend: resource not found on classpath or filesystem: $resourcePath")
+                }
+            }
 
-                        // Parse header lines for songbook mappings
-                        if (line.startsWith("##")) {
-                            headerLineCount++
-                            val headerContent = line.substring(2).trim()
+            var databaseName = fileBaseName // Default to filename
+            val categoryToSongbookMap = mutableMapOf<String, String>()
+            var headerLineCount = 0 // Track which header line we're on
 
-                            // The second header line contains the actual songbook name
-                            if (headerLineCount == 2) {
-                                databaseName = headerContent
-                            }
-                            return@forEachLine
+            reader.use { r ->
+                r.forEachLine { rawLine ->
+                    val line = rawLine.trimEnd('\r', '\n')
+
+                    // Parse header lines for songbook mappings
+                    if (line.startsWith("##")) {
+                        headerLineCount++
+                        val headerContent = line.substring(2).trim()
+
+                        // The second header line contains the actual songbook name
+                        if (headerLineCount == 2) {
+                            databaseName = headerContent
                         }
+                        return@forEachLine
+                    }
 
-                        // Skip empty lines
-                        if (line.isBlank()) {
-                            return@forEachLine
-                        }
+                    // Skip empty lines
+                    if (line.isBlank()) {
+                        return@forEachLine
+                    }
 
-                        // Parse song entry
-                        val parts = line.split("#\$#")
-                        if (parts.size >= 6) {
-                            val number = parts[0]
-                            val title = parts[1]
-                            val categoryId = parts[2].trim() // This is the category/songbook ID
-                            val key = parts[3]
-                            val author = parts[4]
-                            val composer = parts[5]
-                            val lyricsText = if (parts.size > 6) parts[6] else ""
+                    // Parse song entry
+                    val parts = line.split("#\$#")
+                    if (parts.size >= 6) {
+                        val number = parts[0]
+                        val title = parts[1]
+                        val categoryId = parts[2].trim() // This is the category/songbook ID
+                        val key = parts[3]
+                        val author = parts[4]
+                        val composer = parts[5]
+                        val lyricsText = if (parts.size > 6) parts[6] else ""
 
-                            // Map category ID to actual songbook name, or use database name as fallback
-                            val songbookName = categoryToSongbookMap[categoryId] ?: databaseName
+                        // Map category ID to actual songbook name, or use database name as fallback
+                        val songbookName = categoryToSongbookMap[categoryId] ?: databaseName
 
-                            // Parse lyrics
-                            val lyrics = parseLyrics(lyricsText)
+                        // Parse lyrics
+                        val lyrics = parseLyrics(lyricsText)
 
-                            songs.add(
-                                SongItem(
-                                    number = number,
-                                    title = title,
-                                    songbook = songbookName,
-                                    tune = key,
-                                    author = author,
-                                    composer = composer,
-                                    lyrics = lyrics
-                                )
+                        songs.add(
+                            SongItem(
+                                number = number,
+                                title = title,
+                                songbook = songbookName,
+                                tune = key,
+                                author = author,
+                                composer = composer,
+                                lyrics = lyrics
                             )
-                        }
+                        )
                     }
                 }
             }
@@ -212,20 +220,23 @@ class Songs {
         }
     }
 
-    fun saveSongToFile(originalSong: SongItem, updatedSong: SongItem, storageDirectory: Path?): Boolean {
+    fun saveSongToFile(originalSong: SongItem, updatedSong: SongItem, storageDirectory: String): Boolean {
         try {
-            if (storageDirectory == null) {
+            if (storageDirectory.isEmpty()) {
                 return false
             }
 
-            if (!storageDirectory.exists() || !storageDirectory.isDirectory()) {
+            val dir = java.io.File(storageDirectory)
+            if (!dir.exists() || !dir.isDirectory) {
                 return false
             }
 
-            val spsFiles = storageDirectory.listDirectoryEntries("*.${Constants.EXTENSION_SPS}")
+            val spsFiles = dir.listFiles { file ->
+                file.extension.lowercase() == Constants.EXTENSION_SPS
+            } ?: emptyArray()
 
             for (file in spsFiles) {
-                if (updateSongInFile(file, originalSong, updatedSong)) {
+                if (updateSongInFile(file.absolutePath, originalSong, updatedSong)) {
                     return true
                 }
             }
@@ -239,13 +250,14 @@ class Songs {
     /**
      * Update a song in a specific .sps file
      */
-    private fun updateSongInFile(path: Path, originalSong: SongItem, updatedSong: SongItem): Boolean {
+    private fun updateSongInFile(filePath: String, originalSong: SongItem, updatedSong: SongItem): Boolean {
         try {
-            if (!path.exists()) {
+            val path = Paths.get(filePath)
+            if (!Files.exists(path)) {
                 return false
             }
 
-            val lines = path.readLines(StandardCharsets.UTF_8).toMutableList()
+            val lines = Files.readAllLines(path, StandardCharsets.UTF_8).toMutableList()
             var songUpdated = false
 
             for (i in lines.indices) {
@@ -277,7 +289,7 @@ class Songs {
             }
 
             return false
-        } catch (_: Exception) {
+        } catch (e: Exception) {
             return false
         }
     }

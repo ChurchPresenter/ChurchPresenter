@@ -1,8 +1,7 @@
 package org.churchpresenter.app.churchpresenter.data
 
-import org.churchpresenter.app.churchpresenter.utils.Constants
-import java.nio.file.Path
 import kotlinx.serialization.Serializable
+import org.churchpresenter.app.churchpresenter.utils.Constants
 
 @Serializable
 data class BackgroundConfig(
@@ -23,7 +22,7 @@ data class BackgroundSettings(
 @Serializable
 data class SongSettings(
     // Song file management
-    val storageDirectory: Path? = null,
+    val storageDirectory: String = "",
     val songFiles: List<String> = emptyList(),
 
     // Title settings
@@ -75,7 +74,7 @@ data class SongSettings(
 @Serializable
 data class BibleSettings(
     // Bible file management
-    val storageDirectory: Path? = null,
+    val storageDirectory: String = "",
     val bibleFiles: List<String> = emptyList(),
 
     // Bible selection
@@ -195,7 +194,7 @@ data class LottiePreset(
 
 @Serializable
 data class StreamingSettings(
-    val lowerThirdFolder: Path? = null,
+    val lowerThirdFolder: String = "",
     val savedSearchStrings: List<String> = emptyList(),
     val savedReplaceStrings: List<String> = emptyList(),
     val lottiePresets: List<LottiePreset> = emptyList(),

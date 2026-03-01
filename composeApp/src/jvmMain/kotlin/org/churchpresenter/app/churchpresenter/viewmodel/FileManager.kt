@@ -2,15 +2,16 @@ package org.churchpresenter.app.churchpresenter.viewmodel
 
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
 import org.churchpresenter.app.churchpresenter.utils.Constants
+import java.io.File
+import javax.swing.JOptionPane
 import java.awt.Window
 import java.nio.file.Path
-import javax.swing.JOptionPane
 import javax.swing.filechooser.FileNameExtensionFilter
+import kotlin.io.path.Path
+import kotlin.io.path.absolutePathString
 import kotlin.io.path.copyTo
-import kotlin.io.path.deleteIfExists
 import kotlin.io.path.exists
 import kotlin.io.path.isDirectory
-import kotlin.io.path.listDirectoryEntries
 import kotlin.io.path.name
 
 /**
@@ -22,29 +23,41 @@ class FileManager {
     /**
      * Get list of song files (*.sps) from a directory
      */
-    fun getSongFilesInDirectory(directory: Path): List<Path> {
-        if (!directory.exists() || !directory.isDirectory()) return emptyList()
-        return directory.listDirectoryEntries("*.${Constants.EXTENSION_SPS}").sortedBy { it.name }
+    fun getSongFilesInDirectory(directory: String): List<String> {
+        if (directory.isEmpty()) return emptyList()
+
+        val dir = File(directory)
+        if (!dir.exists() || !dir.isDirectory) return emptyList()
+
+        return dir.listFiles { file ->
+            file.extension.lowercase() == Constants.EXTENSION_SPS
+        }?.map { it.name }?.sorted() ?: emptyList()
     }
 
     /**
      * Get list of Bible files (*.spb) from a directory
      */
-    fun getBibleFilesInDirectory(directory: Path): List<Path> {
-        if (!directory.exists() || !directory.isDirectory()) return emptyList()
-        return directory.listDirectoryEntries("*.${Constants.EXTENSION_SPB}").sortedBy { it.name }
+    fun getBibleFilesInDirectory(directory: String): List<String> {
+        if (directory.isEmpty()) return emptyList()
+
+        val dir = File(directory)
+        if (!dir.exists() || !dir.isDirectory) return emptyList()
+
+        return dir.listFiles { file ->
+            file.extension.lowercase() == Constants.EXTENSION_SPB
+        }?.map { it.name }?.sorted() ?: emptyList()
     }
 
     /**
      * Show directory chooser dialog and return selected directory path
      */
-    suspend fun chooseDirectory(currentDirectory: Path? = null): Path? {
+    suspend fun chooseDirectory(currentDirectory: String = ""): String? {
         return FileChooser.platformInstance.chooseSingle(
-            path = currentDirectory,
+            path = Path(currentDirectory),
             filters = emptyList(),
             title = "",
             selectDirectory = true
-        )
+        )?.absolutePathString()
     }
 
     /**
@@ -83,16 +96,17 @@ class FileManager {
      * Import (copy) files to target directory
      * Returns list of error messages if any
      */
-    fun importFiles(sourceFiles: List<Path>, targetDirectory: Path): List<String> {
+    fun importFiles(sourceFiles: List<Path>, targetDirectory: String): List<String> {
         val errors = mutableListOf<String>()
+        val targetDir = Path(targetDirectory)
 
-        if (!targetDirectory.exists() || !targetDirectory.isDirectory()) {
+        if (!targetDir.exists() || !targetDir.isDirectory()) {
             errors.add("Target directory does not exist: $targetDirectory")
             return errors
         }
 
         sourceFiles.forEach { sourceFile ->
-            val targetFile = targetDirectory.resolve(sourceFile.name)
+            val targetFile = targetDir.resolve(sourceFile.name)
             try {
                 sourceFile.copyTo(targetFile, overwrite = true)
             } catch (e: Exception) {
@@ -107,10 +121,10 @@ class FileManager {
      * Delete a file from directory
      * Returns error message if failed, null if successful
      */
-    fun deleteFile(file: Path?): String? {
-        if (file == null) return "File does not exist"
+    fun deleteFile(directory: String, fileName: String): String? {
+        val fileToDelete = File(directory, fileName)
         return try {
-            if (file.deleteIfExists()) {
+            if (fileToDelete.delete()) {
                 null // Success
             } else {
                 "Failed to delete file"
