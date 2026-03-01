@@ -94,7 +94,10 @@ fun MainDesktop(
     onThemeChange: (ThemeMode) -> Unit = {},
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit = {},
     onScheduleActionsReady: (ScheduleActions) -> Unit = {},
-    theme: ThemeMode = ThemeMode.SYSTEM
+    theme: ThemeMode = ThemeMode.SYSTEM,
+    onSongsLoaded: ((List<org.churchpresenter.app.churchpresenter.data.SongItem>) -> Unit)? = null,
+    onBibleLoaded: ((bible: org.churchpresenter.app.churchpresenter.data.Bible, translation: String) -> Unit)? = null,
+    onScheduleChanged: ((List<org.churchpresenter.app.churchpresenter.models.ScheduleItem>) -> Unit)? = null
 ) {
     // ScheduleViewModel lives inside ScheduleTab — MainDesktop drives it via callbacks.
     // rememberUpdatedState ensures toolbar lambdas always read the latest actions without
@@ -336,7 +339,8 @@ fun MainDesktop(
                         },
                         onSelectedItemChanged = { id ->
                             onScheduleItemSelected(id)
-                        }
+                        },
+                        onScheduleChanged = onScheduleChanged
                     )
                     } // end Column
                 } // end AnimatedVisibility
@@ -401,7 +405,8 @@ fun MainDesktop(
                                 },
                                 selectedVerseItem = selectedBibleVerseItem,
                                 onVerseSelected = onVerseSelected,
-                                onPresenting = presenting
+                                onPresenting = presenting,
+                                onBibleLoaded = onBibleLoaded
                             )
 
                             Tabs.SONGS -> SongsTab(
@@ -415,7 +420,8 @@ fun MainDesktop(
                                 onSongItemSelected = onSongItemSelected,
                                 onPresenting = presenting,
                                 isPresenting = presentingMode == Presenting.LYRICS,
-                                theme = theme
+                                theme = theme,
+                                onSongsLoaded = onSongsLoaded
                             )
 
                             Tabs.PICTURES -> PicturesTab(

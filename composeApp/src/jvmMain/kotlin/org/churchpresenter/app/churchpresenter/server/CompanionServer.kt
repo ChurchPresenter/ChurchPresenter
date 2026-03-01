@@ -86,8 +86,45 @@ data class ScheduleSongDto(
 )
 
 @Serializable
+data class ScheduleItemDto(
+    val id: String,
+    val type: String,           // "song", "bible", "label", "picture", "presentation", "media", "lower_third", "announcement", "website"
+    val displayText: String,
+    // song
+    val songNumber: Int? = null,
+    val title: String? = null,
+    val songbook: String? = null,
+    // bible
+    val bookName: String? = null,
+    val chapter: Int? = null,
+    val verseNumber: Int? = null,
+    // label
+    val text: String? = null,
+    val textColor: String? = null,
+    val backgroundColor: String? = null,
+    // picture
+    val folderPath: String? = null,
+    val folderName: String? = null,
+    val imageCount: Int? = null,
+    // presentation
+    val filePath: String? = null,
+    val fileName: String? = null,
+    val slideCount: Int? = null,
+    val fileType: String? = null,
+    // media
+    val mediaUrl: String? = null,
+    val mediaTitle: String? = null,
+    val mediaType: String? = null,
+    // lower third
+    val presetId: String? = null,
+    val presetLabel: String? = null,
+    // website
+    val url: String? = null
+)
+
+@Serializable
 data class ScheduleResponse(
-    val songs: List<ScheduleSongDto>,
+    val items: List<ScheduleItemDto>,
     val total: Int
 )
 
@@ -159,7 +196,7 @@ class CompanionServer {
     // Current catalog — rebuilt whenever songs are updated
     private val _catalog = MutableStateFlow(SongCatalogResponse(emptyList(), 0, 0))
     private val _bibleCatalog = MutableStateFlow<BibleCatalogResponse?>(null)
-    private val _schedule = MutableStateFlow<List<ScheduleSongDto>>(emptyList())
+    private val _schedule = MutableStateFlow<List<ScheduleItemDto>>(emptyList())
 
     // API key config (updated from settings without restart)
     private val _apiKeyEnabled = MutableStateFlow(false)
@@ -208,6 +245,48 @@ class CompanionServer {
         _apiKey.value = key
     }
 
+    /**
+     * Preloads songs and bible from disk on the server's IO scope.
+     * Safe to call at any time; re-call whenever settings change.
+     */
+    fun preloadData(
+        songStorageDir: String,
+        bibleStorageDir: String,
+        primaryBibleFileName: String
+    ) {
+        scope.launch {
+            // ── Songs ──────────────────────────────────────────────────────────
+            if (songStorageDir.isNotEmpty()) {
+                try {
+                    val dir = java.io.File(songStorageDir)
+                    if (dir.exists() && dir.isDirectory) {
+                        val songs = org.churchpresenter.app.churchpresenter.data.Songs()
+                        dir.listFiles { f -> f.extension.lowercase() == Constants.EXTENSION_SPS }
+                            ?.sortedBy { it.name }
+                            ?.forEach { file ->
+                                try { songs.loadFromSpsAppend(file.absolutePath) } catch (_: Exception) {}
+                            }
+                        if (songs.getSongCount() > 0) {
+                            updateSongs(songs.getSongs())
+                        }
+                    }
+                } catch (_: Exception) {}
+            }
+
+            // ── Bible ──────────────────────────────────────────────────────────
+            if (bibleStorageDir.isNotEmpty() && primaryBibleFileName.isNotEmpty()) {
+                try {
+                    val file = java.io.File(bibleStorageDir, primaryBibleFileName)
+                    if (file.exists()) {
+                        val bible = org.churchpresenter.app.churchpresenter.data.Bible()
+                        bible.loadFromSpb(file.absolutePath)
+                        updateBible(bible, primaryBibleFileName)
+                    }
+                } catch (_: Exception) {}
+            }
+        }
+    }
+
     /** Feed the full song list — builds grouped catalog and broadcasts to WS clients. */
     fun updateSongs(songs: List<SongItem>) {
         val catalog = buildCatalog(songs)
@@ -228,9 +307,50 @@ class CompanionServer {
         ))
     }
 
-    /** Feed only the song-type items from the current schedule. */
+    /** Feed all schedule items — maps every type to ScheduleItemDto and broadcasts to WS clients. */
     fun updateSchedule(items: List<ScheduleItem>) {
-        val dtos = items.filterIsInstance<ScheduleItem.SongItem>().map { it.toDto() }
+        val dtos = items.map { item ->
+            when (item) {
+                is ScheduleItem.SongItem -> ScheduleItemDto(
+                    id = item.id, type = "song", displayText = item.displayText,
+                    songNumber = item.songNumber, title = item.title, songbook = item.songbook
+                )
+                is ScheduleItem.BibleVerseItem -> ScheduleItemDto(
+                    id = item.id, type = "bible", displayText = item.displayText,
+                    bookName = item.bookName, chapter = item.chapter, verseNumber = item.verseNumber,
+                    text = item.verseText
+                )
+                is ScheduleItem.LabelItem -> ScheduleItemDto(
+                    id = item.id, type = "label", displayText = item.displayText,
+                    text = item.text, textColor = item.textColor, backgroundColor = item.backgroundColor
+                )
+                is ScheduleItem.PictureItem -> ScheduleItemDto(
+                    id = item.id, type = "picture", displayText = item.displayText,
+                    folderPath = item.folderPath, folderName = item.folderName, imageCount = item.imageCount
+                )
+                is ScheduleItem.PresentationItem -> ScheduleItemDto(
+                    id = item.id, type = "presentation", displayText = item.displayText,
+                    filePath = item.filePath, fileName = item.fileName,
+                    slideCount = item.slideCount, fileType = item.fileType
+                )
+                is ScheduleItem.MediaItem -> ScheduleItemDto(
+                    id = item.id, type = "media", displayText = item.displayText,
+                    mediaUrl = item.mediaUrl, mediaTitle = item.mediaTitle, mediaType = item.mediaType
+                )
+                is ScheduleItem.LowerThirdItem -> ScheduleItemDto(
+                    id = item.id, type = "lower_third", displayText = item.displayText,
+                    presetId = item.presetId, presetLabel = item.presetLabel
+                )
+                is ScheduleItem.AnnouncementItem -> ScheduleItemDto(
+                    id = item.id, type = "announcement", displayText = item.displayText,
+                    text = item.text, textColor = item.textColor, backgroundColor = item.backgroundColor
+                )
+                is ScheduleItem.WebsiteItem -> ScheduleItemDto(
+                    id = item.id, type = "website", displayText = item.displayText,
+                    url = item.url, title = item.title
+                )
+            }
+        }
         _schedule.value = dtos
         broadcast(WebSocketMessage(
             type = Constants.WS_EVENT_SCHEDULE_UPDATED,
@@ -270,8 +390,10 @@ class CompanionServer {
         bookNames.forEachIndexed { bookIndex, bookName ->
             val bookId = bookIndex + 1
             val chapterCount = bible.getChapterCount(bookIndex)
+            // Count verses directly from the verse data without calling getChapter()
+            // which mutates Compose mutableStateListOf and requires the main thread.
             val chapterDtos = (1..chapterCount).map { chapterNum ->
-                val verseCount = bible.getChapter(bookId, chapterNum).size
+                val verseCount = bible.getVerseCountForChapter(bookId, chapterNum)
                 totalVerses += verseCount
                 BibleChapterDto(chapter = chapterNum, verseTotal = verseCount)
             }
@@ -632,10 +754,4 @@ fun SongItem.toDto() = SongDto(
     author = author
 )
 
-fun ScheduleItem.SongItem.toDto() = ScheduleSongDto(
-    id = id,
-    songNumber = songNumber,
-    title = title,
-    songbook = songbook
-)
 

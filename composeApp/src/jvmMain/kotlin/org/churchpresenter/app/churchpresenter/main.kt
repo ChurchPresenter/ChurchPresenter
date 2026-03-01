@@ -41,12 +41,12 @@ import java.awt.GraphicsEnvironment
 import androidx.compose.ui.window.rememberWindowState
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.app_name
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.data.Language
 import org.churchpresenter.app.churchpresenter.data.SettingsManager
-import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.dialogs.KeyboardShortcutsDialog
 import org.churchpresenter.app.churchpresenter.dialogs.LicenseDialog
 import org.churchpresenter.app.churchpresenter.dialogs.OptionsDialog
@@ -67,7 +67,9 @@ import org.churchpresenter.app.churchpresenter.viewmodel.LocalMediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.MediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.app.churchpresenter.composables.preWarmJavaFX
+import org.churchpresenter.app.churchpresenter.data.Bible
 import org.churchpresenter.app.churchpresenter.server.CompanionServer
+import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.jetbrains.compose.resources.stringResource
 import java.awt.GraphicsDevice
 import java.util.Locale
@@ -113,6 +115,16 @@ fun main() {
         var showOptionsDialog by remember { mutableStateOf(false) }
         var showKeyboardShortcutsDialog by remember { mutableStateOf(false) }
         var selectedScheduleItemId by remember { mutableStateOf<String?>(null) }
+
+        // Preload songs and bible at startup. Uses CompanionServer's own IO scope —
+        // no Compose composable context needed.
+        remember(Unit) {
+            companionServer.preloadData(
+                songStorageDir = appSettings.songSettings.storageDirectory,
+                bibleStorageDir = appSettings.bibleSettings.storageDirectory,
+                primaryBibleFileName = appSettings.bibleSettings.primaryBible
+            )
+        }
 
         val screens = remember { GraphicsEnvironment.getLocalGraphicsEnvironment().screenDevices }
         val state = rememberWindowState(placement = WindowPlacement.Maximized)
@@ -181,7 +193,10 @@ fun main() {
                                     appSettings = updateFn(appSettings)
                                     settingsManager.saveSettings(appSettings)
                                 },
-                                theme = theme
+                                theme = theme,
+                                onSongsLoaded = { songs -> companionServer.updateSongs(songs) },
+                                onBibleLoaded = { bible, translation -> companionServer.updateBible(bible, translation) },
+                                onScheduleChanged = { items -> companionServer.updateSchedule(items) }
                             )
                             OptionsDialog(
                                 isVisible = showOptionsDialog,
@@ -192,6 +207,12 @@ fun main() {
                                 onSave = { updated ->
                                     appSettings = updated
                                     settingsManager.saveSettings(updated)
+                                    // Re-preload in case bible/song directories changed
+                                    companionServer.preloadData(
+                                        songStorageDir = updated.songSettings.storageDirectory,
+                                        bibleStorageDir = updated.bibleSettings.storageDirectory,
+                                        primaryBibleFileName = updated.bibleSettings.primaryBible
+                                    )
                                 },
                                 onIdentifyScreen = {
                                     identifyingScreen = true

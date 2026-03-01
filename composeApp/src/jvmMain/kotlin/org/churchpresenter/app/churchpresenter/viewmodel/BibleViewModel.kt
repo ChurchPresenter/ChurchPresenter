@@ -16,7 +16,8 @@ import org.churchpresenter.app.churchpresenter.models.SelectedVerse
 import java.io.File
 
 class BibleViewModel(
-    private var appSettings: AppSettings
+    private var appSettings: AppSettings,
+    private val onBibleLoaded: ((bible: Bible, translation: String) -> Unit)? = null
 ) {
     private val _primaryBible = mutableStateOf<Bible?>(null)
     val primaryBible: State<Bible?> = _primaryBible
@@ -160,6 +161,8 @@ class BibleViewModel(
                     if (bible.getBookCount() > 0) {
                         loadChapter(_selectedBookIndex.value, _selectedChapter.value)
                     }
+                    // Notify listener (e.g. companion server) with loaded bible
+                    onBibleLoaded?.invoke(bible, appSettings.bibleSettings.primaryBible)
                 } ?: run {
                     _books.value = emptyList()
                     _verses.value = emptyList()

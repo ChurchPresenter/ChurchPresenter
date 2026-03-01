@@ -37,6 +37,7 @@ import churchpresenter.composeapp.generated.resources.media
 import churchpresenter.composeapp.generated.resources.ok
 import churchpresenter.composeapp.generated.resources.options
 import churchpresenter.composeapp.generated.resources.projection
+import churchpresenter.composeapp.generated.resources.server_settings
 import churchpresenter.composeapp.generated.resources.song
 import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.data.SettingsManager
@@ -45,6 +46,7 @@ import org.churchpresenter.app.churchpresenter.dialogs.tabs.BackgroundSettingsTa
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.BibleSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.MediaSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.ProjectionSettingsTab
+import org.churchpresenter.app.churchpresenter.dialogs.tabs.ServerSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.SongSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.LowerThirdSettingsTab
 import org.churchpresenter.app.churchpresenter.ui.theme.AppThemeWrapper
@@ -113,6 +115,11 @@ fun OptionsDialog(
                             onClick = { selectedTabIndex = 5 },
                             text = { Text(stringResource(Res.string.display_lower_third)) }
                         )
+                        Tab(
+                            selected = selectedTabIndex == 6,
+                            onClick = { selectedTabIndex = 6 },
+                            text = { Text(stringResource(Res.string.server_settings)) }
+                        )
                     }
 
                     // Tab Content
@@ -161,6 +168,13 @@ fun OptionsDialog(
                                     currentSettings = updateFn(currentSettings)
                                 },
                                 serverUrl = companionServer.serverUrl.value
+                            )
+                            6 -> ServerSettingsTab(
+                                settings = currentSettings,
+                                onSettingsChange = { updateFn ->
+                                    currentSettings = updateFn(currentSettings)
+                                },
+                                companionServer = companionServer
                             )
                         }
                     }

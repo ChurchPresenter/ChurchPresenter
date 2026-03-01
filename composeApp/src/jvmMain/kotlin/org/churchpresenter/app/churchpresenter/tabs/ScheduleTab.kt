@@ -98,9 +98,11 @@ fun ScheduleTab(
     onPresentPictures: ((ScheduleItem.PictureItem) -> Unit)? = null,
     onPresentMedia: ((ScheduleItem.MediaItem) -> Unit)? = null,
     onActionsReady: (ScheduleTabActions) -> Unit = {},
-    onSelectedItemChanged: (String?) -> Unit = {}
+    onSelectedItemChanged: (String?) -> Unit = {},
+    onScheduleChanged: ((List<ScheduleItem>) -> Unit)? = null
 ) {
-    val viewModel = remember { ScheduleViewModel() }
+    val onScheduleChangedState = rememberUpdatedState(onScheduleChanged)
+    val viewModel = remember { ScheduleViewModel(onScheduleChanged = { items -> onScheduleChangedState.value?.invoke(items) }) }
 
     // State holders — lambdas capture the State object, not the string value,
     // so they always read the latest value via .value without re-registering.

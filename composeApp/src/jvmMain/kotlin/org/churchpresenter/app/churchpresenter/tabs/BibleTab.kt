@@ -75,6 +75,7 @@ import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
 import org.churchpresenter.app.churchpresenter.composables.SearchTextField
 import org.churchpresenter.app.churchpresenter.composables.SelectionListWithIndex
 import org.churchpresenter.app.churchpresenter.data.AppSettings
+import org.churchpresenter.app.churchpresenter.data.Bible
 import org.churchpresenter.app.churchpresenter.models.ScheduleItem
 import org.churchpresenter.app.churchpresenter.models.SelectedVerse
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
@@ -90,9 +91,11 @@ fun BibleTab(
     onAddToSchedule: ((bookName: String, chapter: Int, verseNumber: Int, verseText: String) -> Unit)? = null,
     selectedVerseItem: ScheduleItem.BibleVerseItem? = null,
     onVerseSelected: (List<SelectedVerse>) -> Unit = {},
-    onPresenting: (Presenting) -> Unit = { Presenting.NONE }
+    onPresenting: (Presenting) -> Unit = { Presenting.NONE },
+    onBibleLoaded: ((bible: Bible, translation: String) -> Unit)? = null
 ) {
-    val viewModel = remember { BibleViewModel(appSettings) }
+    val onBibleLoadedState by rememberUpdatedState(onBibleLoaded)
+    val viewModel = remember { BibleViewModel(appSettings, onBibleLoaded = { bible, translation -> onBibleLoadedState?.invoke(bible, translation) }) }
 
     LaunchedEffect(
         appSettings.bibleSettings.storageDirectory,
