@@ -63,6 +63,8 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.sp
@@ -152,11 +154,13 @@ fun AnnouncementsTab(
 
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
-        // ── Font type + size + style + colors — all on one row ───────
-        Row(
+        // ── Font type + size + style + colors — wraps to next row if not enough space ─
+        @OptIn(ExperimentalLayoutApi::class)
+        FlowRow(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.Bottom
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            itemVerticalAlignment = Alignment.Bottom
         ) {
             // Font type — fixed narrow width
             Column(modifier = Modifier.width(160.dp)) {
@@ -185,7 +189,6 @@ fun AnnouncementsTab(
             }
             // Style buttons (B/I/U/S)
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                SectionLabel("")
                 TextStyleButtons(
                     bold      = viewModel.bold,
                     italic    = viewModel.italic,
