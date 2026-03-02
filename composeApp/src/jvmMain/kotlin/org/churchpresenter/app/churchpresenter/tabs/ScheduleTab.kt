@@ -6,18 +6,20 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollbarAdapter
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -31,28 +33,43 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.clear_schedule
 import churchpresenter.composeapp.generated.resources.file_chooser_open_schedule
 import churchpresenter.composeapp.generated.resources.file_chooser_save_schedule
 import churchpresenter.composeapp.generated.resources.file_filter_schedule
+import churchpresenter.composeapp.generated.resources.ic_add
 import churchpresenter.composeapp.generated.resources.ic_arrow_down
+import churchpresenter.composeapp.generated.resources.ic_arrow_down_double
 import churchpresenter.composeapp.generated.resources.ic_arrow_up
+import churchpresenter.composeapp.generated.resources.ic_arrow_up_double
 import churchpresenter.composeapp.generated.resources.ic_close
+import churchpresenter.composeapp.generated.resources.ic_delete
 import churchpresenter.composeapp.generated.resources.ic_edit
+import churchpresenter.composeapp.generated.resources.ic_folder
+import churchpresenter.composeapp.generated.resources.ic_label
 import churchpresenter.composeapp.generated.resources.ic_play
+import churchpresenter.composeapp.generated.resources.ic_playlist_add
+import churchpresenter.composeapp.generated.resources.ic_save
+import churchpresenter.composeapp.generated.resources.ic_web
 import churchpresenter.composeapp.generated.resources.schedule
+import churchpresenter.composeapp.generated.resources.tooltip_add_label
+import churchpresenter.composeapp.generated.resources.tooltip_add_to_schedule
+import churchpresenter.composeapp.generated.resources.tooltip_add_website
+import churchpresenter.composeapp.generated.resources.tooltip_clear_schedule
 import churchpresenter.composeapp.generated.resources.tooltip_edit_label
 import churchpresenter.composeapp.generated.resources.tooltip_go_live
 import churchpresenter.composeapp.generated.resources.tooltip_move_down
+import churchpresenter.composeapp.generated.resources.tooltip_move_to_bottom
+import churchpresenter.composeapp.generated.resources.tooltip_move_to_top
 import churchpresenter.composeapp.generated.resources.tooltip_move_up
+import churchpresenter.composeapp.generated.resources.tooltip_new_schedule
+import churchpresenter.composeapp.generated.resources.tooltip_open_schedule
 import churchpresenter.composeapp.generated.resources.tooltip_remove
-import org.churchpresenter.app.churchpresenter.composables.LivePreviewPanel
+import churchpresenter.composeapp.generated.resources.tooltip_remove_from_schedule
+import churchpresenter.composeapp.generated.resources.tooltip_save_schedule
 import org.churchpresenter.app.churchpresenter.composables.TooltipIconButton
-import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.models.ScheduleItem
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.utils.Utils
-import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.app.churchpresenter.viewmodel.ScheduleViewModel
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -84,11 +101,10 @@ data class ScheduleTabActions(
     val addWebsite: (url: String, title: String) -> Unit = { _, _ -> }
 )
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun ScheduleTab(
     modifier: Modifier = Modifier,
-    appSettings: AppSettings? = null,
-    presenterManager: PresenterManager? = null,
     onPresenting: (Presenting) -> Unit = { Presenting.NONE },
     onItemClick: (ScheduleItem) -> Unit = {},
     onEditLabel: (ScheduleItem.LabelItem) -> Unit = {},
@@ -99,7 +115,10 @@ fun ScheduleTab(
     onPresentMedia: ((ScheduleItem.MediaItem) -> Unit)? = null,
     onActionsReady: (ScheduleTabActions) -> Unit = {},
     onSelectedItemChanged: (String?) -> Unit = {},
-    onScheduleChanged: ((List<ScheduleItem>) -> Unit)? = null
+    onScheduleChanged: ((List<ScheduleItem>) -> Unit)? = null,
+    onAddLabel: () -> Unit = {},
+    onAddWebsite: () -> Unit = {},
+    onAddToSchedule: () -> Unit = {}
 ) {
     val onScheduleChangedState = rememberUpdatedState(onScheduleChanged)
     val viewModel = remember { ScheduleViewModel(onScheduleChanged = { items -> onScheduleChangedState.value?.invoke(items) }) }
@@ -150,44 +169,123 @@ fun ScheduleTab(
 
     Column(modifier = modifier.fillMaxSize().padding(8.dp)) {
 
-        // Live preview — scaled-down replica of the presenter window
-        if (presenterManager != null && appSettings != null) {
-            LivePreviewPanel(
-                presenterManager = presenterManager,
-                appSettings = appSettings,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 8.dp)
+        // Schedule toolbar buttons — row 1: file ops, label/website, add/remove/clear
+        FlowRow(
+            modifier = Modifier.fillMaxWidth().padding(bottom = 2.dp),
+            horizontalArrangement = Arrangement.spacedBy(2.dp),
+            verticalArrangement = Arrangement.spacedBy(2.dp)
+        ) {
+            // File operations
+            TooltipIconButton(
+                painter = painterResource(Res.drawable.ic_add),
+                text = stringResource(Res.string.tooltip_new_schedule),
+                onClick = { viewModel.newSchedule() },
+                buttonSize = 32.dp,
+                iconTint = MaterialTheme.colorScheme.onSurface
+            )
+            TooltipIconButton(
+                painter = painterResource(Res.drawable.ic_folder),
+                text = stringResource(Res.string.tooltip_open_schedule),
+                onClick = { viewModel.loadSchedule(strOpenSchedule.value, strFileFilter.value) },
+                buttonSize = 32.dp,
+                iconTint = MaterialTheme.colorScheme.onSurface
+            )
+            TooltipIconButton(
+                painter = painterResource(Res.drawable.ic_save),
+                text = stringResource(Res.string.tooltip_save_schedule),
+                onClick = { viewModel.saveSchedule(strSaveScheduleAs.value, strFileFilter.value) },
+                buttonSize = 32.dp,
+                iconTint = MaterialTheme.colorScheme.onSurface
+            )
+
+            Spacer(modifier = Modifier.width(4.dp))
+
+            // Label & Website
+            TooltipIconButton(
+                painter = painterResource(Res.drawable.ic_label),
+                text = stringResource(Res.string.tooltip_add_label),
+                onClick = onAddLabel,
+                buttonSize = 32.dp,
+                iconTint = MaterialTheme.colorScheme.onSurface
+            )
+            TooltipIconButton(
+                painter = painterResource(Res.drawable.ic_web),
+                text = stringResource(Res.string.tooltip_add_website),
+                onClick = onAddWebsite,
+                buttonSize = 32.dp,
+                iconTint = MaterialTheme.colorScheme.onSurface
+            )
+
+            Spacer(modifier = Modifier.width(4.dp))
+
+            // Add / Remove / Clear
+            TooltipIconButton(
+                painter = painterResource(Res.drawable.ic_playlist_add),
+                text = stringResource(Res.string.tooltip_add_to_schedule),
+                onClick = onAddToSchedule,
+                buttonSize = 32.dp,
+                iconTint = MaterialTheme.colorScheme.onSurface
+            )
+            TooltipIconButton(
+                painter = painterResource(Res.drawable.ic_close),
+                text = stringResource(Res.string.tooltip_remove_from_schedule),
+                onClick = { viewModel.selectedItemId?.let { viewModel.removeItem(it) } },
+                buttonSize = 32.dp,
+                iconTint = MaterialTheme.colorScheme.onSurface
+            )
+            TooltipIconButton(
+                painter = painterResource(Res.drawable.ic_delete),
+                text = stringResource(Res.string.tooltip_clear_schedule),
+                onClick = { viewModel.clearSchedule() },
+                buttonSize = 32.dp,
+                iconTint = MaterialTheme.colorScheme.onSurface
+            )
+        }
+
+        // Row 2: Move arrows on their own line
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp),
+            horizontalArrangement = Arrangement.spacedBy(2.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            TooltipIconButton(
+                painter = painterResource(Res.drawable.ic_arrow_up_double),
+                text = stringResource(Res.string.tooltip_move_to_top),
+                onClick = { viewModel.selectedItemId?.let { viewModel.moveItemToTop(it) } },
+                buttonSize = 32.dp,
+                iconTint = MaterialTheme.colorScheme.onSurface
+            )
+            TooltipIconButton(
+                painter = painterResource(Res.drawable.ic_arrow_up),
+                text = stringResource(Res.string.tooltip_move_up),
+                onClick = { viewModel.selectedItemId?.let { viewModel.moveItemUp(it) } },
+                buttonSize = 32.dp,
+                iconTint = MaterialTheme.colorScheme.onSurface
+            )
+            TooltipIconButton(
+                painter = painterResource(Res.drawable.ic_arrow_down),
+                text = stringResource(Res.string.tooltip_move_down),
+                onClick = { viewModel.selectedItemId?.let { viewModel.moveItemDown(it) } },
+                buttonSize = 32.dp,
+                iconTint = MaterialTheme.colorScheme.onSurface
+            )
+            TooltipIconButton(
+                painter = painterResource(Res.drawable.ic_arrow_down_double),
+                text = stringResource(Res.string.tooltip_move_to_bottom),
+                onClick = { viewModel.selectedItemId?.let { viewModel.moveItemToBottom(it) } },
+                buttonSize = 32.dp,
+                iconTint = MaterialTheme.colorScheme.onSurface
             )
         }
 
         // Schedule list header
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = stringResource(Res.string.schedule),
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-
-            Button(
-                onClick = { viewModel.clearSchedule() },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.secondary
-                )
-            ) {
-                Text(
-                    text = stringResource(Res.string.clear_schedule),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSecondary,
-                    maxLines = 1
-                )
-            }
-        }
+        Text(
+            text = stringResource(Res.string.schedule),
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
 
         // Schedule items list
         Box(modifier = Modifier.weight(1f).fillMaxWidth()) {

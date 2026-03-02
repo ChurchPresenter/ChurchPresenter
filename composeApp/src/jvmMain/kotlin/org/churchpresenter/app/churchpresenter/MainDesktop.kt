@@ -1,6 +1,7 @@
 package org.churchpresenter.app.churchpresenter
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.foundation.background
@@ -39,14 +40,21 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.padding
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.ic_arrow_left
 import churchpresenter.composeapp.generated.resources.ic_arrow_right
+import churchpresenter.composeapp.generated.resources.ic_settings
 import churchpresenter.composeapp.generated.resources.tooltip_collapse_schedule
 import churchpresenter.composeapp.generated.resources.tooltip_expand_schedule
+import churchpresenter.composeapp.generated.resources.tooltip_clear_display
+import churchpresenter.composeapp.generated.resources.tooltip_settings
+import churchpresenter.composeapp.generated.resources.ic_close
+import org.churchpresenter.app.churchpresenter.composables.LivePreviewPanel
+import org.churchpresenter.app.churchpresenter.composables.TooltipIconButton
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import org.churchpresenter.app.churchpresenter.components.Toolbar
 import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.dialogs.AddLabelDialog
 import org.churchpresenter.app.churchpresenter.dialogs.AddWebsiteDialog
@@ -91,7 +99,6 @@ fun MainDesktop(
     onTabChange: (Int) -> Unit = {},
     onScheduleItemSelected: (String?) -> Unit = {},
     onShowSettings: () -> Unit = {},
-    onThemeChange: (ThemeMode) -> Unit = {},
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit = {},
     onScheduleActionsReady: (ScheduleActions) -> Unit = {},
     theme: ThemeMode = ThemeMode.SYSTEM,
@@ -99,6 +106,12 @@ fun MainDesktop(
     onBibleLoaded: ((bible: org.churchpresenter.app.churchpresenter.data.Bible, translation: String) -> Unit)? = null,
     onScheduleChanged: ((List<org.churchpresenter.app.churchpresenter.models.ScheduleItem>) -> Unit)? = null
 ) {
+    val isDarkTheme = when (theme) {
+        ThemeMode.LIGHT -> false
+        ThemeMode.DARK -> true
+        ThemeMode.SYSTEM -> isSystemInDarkTheme()
+    }
+
     // ScheduleViewModel lives inside ScheduleTab — MainDesktop drives it via callbacks.
     // rememberUpdatedState ensures toolbar lambdas always read the latest actions without
     // needing to be recreated on every scheduleActions update.
@@ -179,24 +192,6 @@ fun MainDesktop(
             }
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
-            Toolbar(
-                currentTheme = theme,
-                onThemeChange = onThemeChange,
-                onNewSchedule = { currentScheduleActions.newSchedule() },
-                onOpenSchedule = { currentScheduleActions.openSchedule() },
-                onSaveSchedule = { currentScheduleActions.saveSchedule() },
-                onMoveToTop = { currentScheduleActions.moveSelectedToTop() },
-                onMoveUp = { currentScheduleActions.moveSelectedUp() },
-                onMoveDown = { currentScheduleActions.moveSelectedDown() },
-                onMoveToBottom = { currentScheduleActions.moveSelectedToBottom() },
-                onAddToSchedule = { /* handled per-tab via onAddToSchedule callbacks */ },
-                onRemoveFromSchedule = { currentScheduleActions.removeSelected() },
-                onClearSchedule = { currentScheduleActions.clearSchedule() },
-                onAddLabel = { showAddLabelDialog = true },
-                onAddWebsite = { showAddWebsiteDialog = true },
-                onOpenSettings = onShowSettings
-            )
-
             var scheduleCollapsed by rememberSaveable { mutableStateOf(false) }
 
             val density = LocalDensity.current
@@ -206,10 +201,20 @@ fun MainDesktop(
             var schedulePanelPx by remember(appSettings.schedulePanelWidthDp) {
                 mutableStateOf(with(density) { appSettings.schedulePanelWidthDp.dp.toPx() })
             }
+            var previewCollapsed by rememberSaveable { mutableStateOf(false) }
+            var previewPanelPx by remember(appSettings.previewPanelWidthDp) {
+                mutableStateOf(with(density) { appSettings.previewPanelWidthDp.dp.toPx() })
+            }
 
             fun saveScheduleWidth() {
                 onSettingsChangeState.value { s ->
                     s.copy(schedulePanelWidthDp = with(density) { schedulePanelPx.toDp().value.toInt() })
+                }
+            }
+
+            fun savePreviewWidth() {
+                onSettingsChangeState.value { s ->
+                    s.copy(previewPanelWidthDp = with(density) { previewPanelPx.toDp().value.toInt() })
                 }
             }
 
@@ -222,9 +227,10 @@ fun MainDesktop(
                 ) {
                     Column(modifier = Modifier.width(with(density) { schedulePanelPx.toDp() }).fillMaxHeight()) {
                     ScheduleTab(
-                        appSettings = appSettings,
-                        presenterManager = presenterManager,
                         onPresenting = presenting,
+                        onAddLabel = { showAddLabelDialog = true },
+                        onAddWebsite = { showAddWebsiteDialog = true },
+                        onAddToSchedule = { /* handled per-tab */ },
                         onPresentBible = { item ->
                             selectedBibleVerseItem = item
                             presenting(Presenting.BIBLE)
@@ -386,11 +392,24 @@ fun MainDesktop(
                     }
                 }
 
-                Column(modifier = Modifier.fillMaxWidth().fillMaxHeight()) {
-                    TabSection(
-                        selectedTabIndex = selectedTabIndex,
-                        onTabSelected = { selectedTabIndex = it }
-                    )
+                Column(modifier = Modifier.weight(1f).fillMaxHeight()) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        TabSection(
+                            modifier = Modifier.weight(1f),
+                            selectedTabIndex = selectedTabIndex,
+                            onTabSelected = { selectedTabIndex = it }
+                        )
+                        TooltipIconButton(
+                            painter = painterResource(Res.drawable.ic_settings),
+                            text = stringResource(Res.string.tooltip_settings),
+                            onClick = onShowSettings,
+                            buttonSize = 36.dp,
+                            iconTint = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
 
                     val currentTab = Tabs.entries[selectedTabIndex]
 
@@ -465,7 +484,8 @@ fun MainDesktop(
                                     presenterManager.setLottieContent(json, pauseAtFrame, pauseFrame, pauseDurationMs)
                                     presenterManager.setPresentingMode(Presenting.LOWER_THIRD)
                                     presenterManager.setShowPresenterWindow(true)
-                                }
+                                },
+                                isDarkTheme = isDarkTheme
                             )
 
                             Tabs.ANNOUNCEMENTS -> AnnouncementsTab(
@@ -497,6 +517,78 @@ fun MainDesktop(
                                 }
                             )
                         }
+                    }
+                }
+
+                // Right drag handle + collapse toggle for preview panel
+                Box(
+                    modifier = Modifier
+                        .width(16.dp)
+                        .fillMaxHeight()
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                        .pointerInput(previewCollapsed) {
+                            if (!previewCollapsed) {
+                                detectHorizontalDragGestures(
+                                    onDragEnd = ::savePreviewWidth
+                                ) { _, amount ->
+                                    // Invert drag direction: dragging left increases width
+                                    previewPanelPx = (previewPanelPx - amount).coerceIn(
+                                        with(density) { 150.dp.toPx() },
+                                        with(density) { 600.dp.toPx() }
+                                    )
+                                }
+                            }
+                        }
+                        .pointerHoverIcon(
+                            if (previewCollapsed) PointerIcon.Default else PointerIcon.Hand
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    IconButton(
+                        onClick = { previewCollapsed = !previewCollapsed },
+                        modifier = Modifier.wrapContentHeight()
+                    ) {
+                        Icon(
+                            painter = painterResource(
+                                if (previewCollapsed) Res.drawable.ic_arrow_left
+                                else Res.drawable.ic_arrow_right
+                            ),
+                            contentDescription = stringResource(
+                                if (previewCollapsed) Res.string.tooltip_expand_schedule
+                                else Res.string.tooltip_collapse_schedule
+                            ),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+
+                // Collapsible preview panel (right sidebar)
+                AnimatedVisibility(
+                    visible = !previewCollapsed,
+                    enter = expandHorizontally(expandFrom = Alignment.End),
+                    exit = shrinkHorizontally(shrinkTowards = Alignment.End)
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .width(with(density) { previewPanelPx.toDp() })
+                            .fillMaxHeight()
+                            .padding(8.dp)
+                    ) {
+                        TooltipIconButton(
+                            painter = painterResource(Res.drawable.ic_close),
+                            text = stringResource(Res.string.tooltip_clear_display),
+                            onClick = {
+                                mediaViewModel?.pause()
+                                presenterManager.setPresentingMode(Presenting.NONE)
+                            },
+                            buttonSize = 36.dp,
+                            iconTint = MaterialTheme.colorScheme.error
+                        )
+                        LivePreviewPanel(
+                            presenterManager = presenterManager,
+                            appSettings = appSettings,
+                            modifier = Modifier.fillMaxWidth()
+                        )
                     }
                 }
             }
