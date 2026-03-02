@@ -34,7 +34,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import kotlinx.coroutines.flow.first
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -97,12 +96,19 @@ fun BibleTab(
     val onBibleLoadedState by rememberUpdatedState(onBibleLoaded)
     val viewModel = remember { BibleViewModel(appSettings, onBibleLoaded = { bible, translation -> onBibleLoadedState?.invoke(bible, translation) }) }
 
+    // Only call updateSettings when paths change AFTER the first composition.
+    // The initial load already happens inside BibleViewModel.init.
+    val isFirstComposition = remember { mutableStateOf(true) }
     LaunchedEffect(
         appSettings.bibleSettings.storageDirectory,
         appSettings.bibleSettings.primaryBible,
         appSettings.bibleSettings.secondaryBible
     ) {
-        viewModel.updateSettings(appSettings)
+        if (isFirstComposition.value) {
+            isFirstComposition.value = false
+        } else {
+            viewModel.updateSettings(appSettings)
+        }
     }
 
     DisposableEffect(Unit) {
@@ -111,8 +117,8 @@ fun BibleTab(
 
     LaunchedEffect(selectedVerseItem) {
         selectedVerseItem?.let { item ->
-            if (viewModel.isLoading.value) {
-                snapshotFlow { viewModel.isLoading.value }.first { !it }
+            if (!viewModel.isFullyLoadedFlow.value) {
+                viewModel.isFullyLoadedFlow.first { it }
             }
             viewModel.selectVerseByDetails(item.bookName, item.chapter, item.verseNumber)
         }

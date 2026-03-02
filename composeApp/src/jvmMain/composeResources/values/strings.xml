@@ -550,7 +550,7 @@
     <string name="timer_text_color">Timer Color</string>
     <string name="timer_expired_text_label">Text when timer expires</string>
     <string name="timer_expired_text_hint">Enter message to show when done…</string>
-    <string name="timer_expired">Time\'s up!</string>
+    <string name="timer_expired">Time's up!</string>
 
     <!-- Live preview -->
     <string name="live_preview_title">Live</string>
