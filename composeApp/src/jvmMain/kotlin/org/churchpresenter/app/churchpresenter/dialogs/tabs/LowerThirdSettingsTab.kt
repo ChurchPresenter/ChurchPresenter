@@ -492,13 +492,18 @@ internal fun openLottieGeneratorDialog(
         // Strong reference to prevent GC of the bridge object
         val bridge = object {
             @Suppress("unused")
-            fun save(filename: String, jsonContent: String) {
+            fun save(baseName: String, jsonContent: String) {
                 SwingUtilities.invokeLater {
                     val targetDir = lowerThirdFolder.takeIf { it.isNotEmpty() }
                         ?.let { File(it) }
                         ?.takeIf { it.exists() && it.isDirectory }
                     if (targetDir != null) {
-                        val targetFile = File(targetDir, filename)
+                        var num = 1
+                        var targetFile = File(targetDir, "$baseName - %02d.json".format(num))
+                        while (targetFile.exists()) {
+                            num++
+                            targetFile = File(targetDir, "$baseName - %02d.json".format(num))
+                        }
                         targetFile.writeText(jsonContent)
                         onFileSaved()
                     } else {
@@ -523,10 +528,12 @@ internal fun openLottieGeneratorDialog(
                 win.setMember("_jvmBridge", bridge)
 
                 // Override download button: save rendered file + save config to library
+                // Clone the button to remove all existing event listeners, then add our handler
                 engine.executeScript(
                     "var btn = document.getElementById('btnDownload');" +
-                    "if (btn) { btn.textContent = 'Save Lower Third';" +
-                    "  btn.onclick = function() { download(); savePreset(); }; }"
+                    "if (btn) { var newBtn = btn.cloneNode(true); btn.parentNode.replaceChild(newBtn, btn);" +
+                    "  newBtn.textContent = 'Save Lower Third';" +
+                    "  newBtn.addEventListener('click', function() { download(); savePreset(); }); }"
                 )
 
                 // Apply app theme and hide the theme switcher
