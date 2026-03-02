@@ -62,7 +62,6 @@ import churchpresenter.composeapp.generated.resources.all_song_books
 import churchpresenter.composeapp.generated.resources.contains
 import churchpresenter.composeapp.generated.resources.edit_song
 import churchpresenter.composeapp.generated.resources.exact_match
-import churchpresenter.composeapp.generated.resources.filter_type_colon
 import churchpresenter.composeapp.generated.resources.go_live
 import churchpresenter.composeapp.generated.resources.ic_cast
 import churchpresenter.composeapp.generated.resources.ic_edit
@@ -257,57 +256,47 @@ fun SongsTab(
     ) {
         // Left panel — Search and song list (fills remaining space)
         Column(modifier = Modifier.weight(1f).fillMaxHeight()) {
-            // Search controls
-            Column(modifier = Modifier.padding(8.dp)) {
-                DropdownSelector(
-                    modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp),
-                    label = "",
-                    items = songbookOptions,
-                    selected = selectedSongbook.ifEmpty { allSongBooksText },
-                    onSelectedChange = { viewModel.updateSelectedSongbook(it) }
-                )
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        stringResource(Res.string.filter_type_colon),
-                        color = MaterialTheme.colorScheme.primary,
-                        style = MaterialTheme.typography.labelMedium
-                    )
-                    DropdownSelector(
-                        modifier = Modifier.weight(1f),
-                        label = "",
-                        items = filterTypes,
-                        selected = filterTypeDisplayMap[filterType] ?: containsText,
-                        onSelectedChange = { displayText ->
-                            val internalKey = filterTypeMap[displayText] ?: Constants.CONTAINS
-                            viewModel.updateFilterType(internalKey)
-                        }
-                    )
-                    Button(
-                        onClick = { /* Search action */ },
-                        modifier = Modifier.height(40.dp)
-                    ) {
-                        Text(stringResource(Res.string.search), style = MaterialTheme.typography.labelMedium)
-                    }
-                }
-
+            // Search controls — single row
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth().padding(all = 4.dp)
+            ) {
                 OutlinedTextField(
+                    modifier = Modifier.weight(1f).padding(end = 8.dp),
                     value = searchQuery,
                     onValueChange = { viewModel.updateSearchQuery(it) },
                     label = {
                         Text(stringResource(Res.string.search_songs), style = MaterialTheme.typography.labelMedium)
                     },
-                    modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
                     singleLine = true,
                     colors = OutlinedTextFieldDefaults.colors().copy(
                         unfocusedContainerColor = MaterialTheme.colorScheme.surface,
                         focusedContainerColor = MaterialTheme.colorScheme.surface,
                     )
                 )
+
+                DropdownSelector(
+                    modifier = Modifier.width(160.dp).padding(end = 8.dp),
+                    label = "",
+                    items = songbookOptions,
+                    selected = selectedSongbook.ifEmpty { allSongBooksText },
+                    onSelectedChange = { viewModel.updateSelectedSongbook(it) }
+                )
+
+                DropdownSelector(
+                    modifier = Modifier.width(160.dp).padding(end = 8.dp),
+                    label = "",
+                    items = filterTypes,
+                    selected = filterTypeDisplayMap[filterType] ?: containsText,
+                    onSelectedChange = { displayText ->
+                        val internalKey = filterTypeMap[displayText] ?: Constants.CONTAINS
+                        viewModel.updateFilterType(internalKey)
+                    }
+                )
+
+                Button(onClick = { /* Search action */ }) {
+                    Text(stringResource(Res.string.search), style = MaterialTheme.typography.labelMedium)
+                }
             }
 
             // Column header row

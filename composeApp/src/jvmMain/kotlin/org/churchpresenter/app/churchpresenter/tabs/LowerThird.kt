@@ -70,7 +70,11 @@ import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.models.ScheduleItem
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import churchpresenter.composeapp.generated.resources.generate_lower_third
+import org.churchpresenter.app.churchpresenter.dialogs.tabs.openLottieGeneratorDialog
+import java.awt.Window
 import java.io.File
+import javax.swing.SwingUtilities
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -80,12 +84,14 @@ fun LowerThirdTab(
     selectedLowerThirdItem: ScheduleItem.LowerThirdItem? = null,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit = {},
     onAddToSchedule: (presetId: String, presetLabel: String, pauseAtFrame: Boolean, pauseDurationMs: Long) -> Unit = { _, _, _, _ -> },
-    onGoLive: (jsonContent: String, pauseAtFrame: Boolean, pauseFrame: Float, pauseDurationMs: Long) -> Unit = { _, _, _, _ -> }
+    onGoLive: (jsonContent: String, pauseAtFrame: Boolean, pauseFrame: Float, pauseDurationMs: Long) -> Unit = { _, _, _, _ -> },
+    isDarkTheme: Boolean = true
 ) {
     val lottieFolder = appSettings.streamingSettings.lowerThirdFolder
+    var refreshKey by remember { mutableStateOf(0) }
 
     // Build file list from user-chosen folder
-    val lottieFiles = remember(lottieFolder) {
+    val lottieFiles = remember(lottieFolder, refreshKey) {
         if (lottieFolder.isEmpty()) emptyList()
         else File(lottieFolder).takeIf { it.exists() && it.isDirectory }
             ?.listFiles { f -> f.extension.lowercase() == "json" }
@@ -187,47 +193,72 @@ fun LowerThirdTab(
 
 
     Row(modifier = modifier.fillMaxSize()) {
-        // Left column — file list (resizable)
-        LazyColumn(
+        // Left column — file list (resizable) + generate button
+        Column(
             modifier = Modifier
                 .width(listWidthDp)
                 .fillMaxHeight()
-                .background(MaterialTheme.colorScheme.surfaceVariant),
-            verticalArrangement = Arrangement.spacedBy(1.dp)
+                .background(MaterialTheme.colorScheme.surfaceVariant)
         ) {
-            if (lottieFiles.isEmpty()) {
-                item {
-                    Box(
-                        modifier = Modifier.fillMaxWidth().padding(16.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = stringResource(Res.string.lottie_no_presets),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-                        )
+            LazyColumn(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(1.dp)
+            ) {
+                if (lottieFiles.isEmpty()) {
+                    item {
+                        Box(
+                            modifier = Modifier.fillMaxWidth().padding(16.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = stringResource(Res.string.lottie_no_presets),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                            )
+                        }
+                    }
+                } else {
+                    items(lottieFiles) { file ->
+                        val isSelected = selectedFile?.absolutePath == file.absolutePath
+                        Surface(
+                            modifier = Modifier.fillMaxWidth().clickable {
+                                selectedFile = file
+                                isPlaying = false
+                            },
+                            color = if (isSelected) MaterialTheme.colorScheme.primary
+                                    else MaterialTheme.colorScheme.surfaceVariant
+                        ) {
+                            Text(
+                                text = file.nameWithoutExtension,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = if (isSelected) MaterialTheme.colorScheme.onPrimary
+                                        else MaterialTheme.colorScheme.onSurface,
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
+                            )
+                        }
                     }
                 }
-            } else {
-                items(lottieFiles) { file ->
-                    val isSelected = selectedFile?.absolutePath == file.absolutePath
-                    Surface(
-                        modifier = Modifier.fillMaxWidth().clickable {
-                            selectedFile = file
-                            isPlaying = false
-                        },
-                        color = if (isSelected) MaterialTheme.colorScheme.primary
-                                else MaterialTheme.colorScheme.surfaceVariant
-                    ) {
-                        Text(
-                            text = file.nameWithoutExtension,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = if (isSelected) MaterialTheme.colorScheme.onPrimary
-                                    else MaterialTheme.colorScheme.onSurface,
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
+            }
+
+            Button(
+                onClick = {
+                    SwingUtilities.invokeLater {
+                        openLottieGeneratorDialog(
+                            parentWindow = Window.getWindows().firstOrNull { it.isActive },
+                            onFileSaved = { refreshKey++ },
+                            isDarkTheme = isDarkTheme
                         )
                     }
-                }
+                },
+                modifier = Modifier.fillMaxWidth().padding(8.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onTertiaryContainer
+                )
+            ) {
+                Text(stringResource(Res.string.generate_lower_third))
             }
         }
 

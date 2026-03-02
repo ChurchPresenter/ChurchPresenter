@@ -184,11 +184,6 @@ fun main() {
                                 },
                                 onScheduleItemSelected = { itemId -> selectedScheduleItemId = itemId },
                                 onShowSettings = { showOptionsDialog = true },
-                                onThemeChange = { newTheme ->
-                                    appSettings = appSettings.copy(theme = newTheme.toString())
-                                    theme = newTheme
-                                    settingsManager.saveSettings(appSettings)
-                                },
                                 onSettingsChange = { updateFn ->
                                     appSettings = updateFn(appSettings)
                                     settingsManager.saveSettings(appSettings)
@@ -213,6 +208,11 @@ fun main() {
                                         bibleStorageDir = updated.bibleSettings.storageDirectory,
                                         primaryBibleFileName = updated.bibleSettings.primaryBible
                                     )
+                                },
+                                onThemeChange = { newTheme ->
+                                    appSettings = appSettings.copy(theme = newTheme.toString())
+                                    theme = newTheme
+                                    settingsManager.saveSettings(appSettings)
                                 },
                                 onIdentifyScreen = {
                                     identifyingScreen = true

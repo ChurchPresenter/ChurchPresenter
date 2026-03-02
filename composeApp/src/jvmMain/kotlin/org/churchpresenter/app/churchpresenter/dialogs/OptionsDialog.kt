@@ -1,6 +1,7 @@
 package org.churchpresenter.app.churchpresenter.dialogs
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -29,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.rememberDialogState
 import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.appearance
 import churchpresenter.composeapp.generated.resources.background
 import churchpresenter.composeapp.generated.resources.bible
 import churchpresenter.composeapp.generated.resources.cancel
@@ -42,6 +44,7 @@ import churchpresenter.composeapp.generated.resources.song
 import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.data.SettingsManager
 import org.churchpresenter.app.churchpresenter.server.CompanionServer
+import org.churchpresenter.app.churchpresenter.dialogs.tabs.AppearanceSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.BackgroundSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.BibleSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.MediaSettingsTab
@@ -61,12 +64,18 @@ fun OptionsDialog(
     companionServer: CompanionServer,
     onDismiss: () -> Unit,
     onSave: (AppSettings) -> Unit = {},
-    onIdentifyScreen: () -> Unit = {}
+    onIdentifyScreen: () -> Unit = {},
+    onThemeChange: (ThemeMode) -> Unit = {}
 ) {
     if (!isVisible) return
 
     var currentSettings by remember { mutableStateOf(settingsManager.loadSettings()) }
     var selectedTabIndex by remember { mutableStateOf(0) }
+    val isDarkTheme = when (theme) {
+        ThemeMode.LIGHT -> false
+        ThemeMode.DARK -> true
+        ThemeMode.SYSTEM -> isSystemInDarkTheme()
+    }
     Dialog(
         onCloseRequest = onDismiss,
         state = rememberDialogState(width = 1000.dp, height = 700.dp),
@@ -88,36 +97,41 @@ fun OptionsDialog(
                         Tab(
                             selected = selectedTabIndex == 0,
                             onClick = { selectedTabIndex = 0 },
-                            text = { Text(stringResource(Res.string.bible)) }
+                            text = { Text(stringResource(Res.string.appearance)) }
                         )
                         Tab(
                             selected = selectedTabIndex == 1,
                             onClick = { selectedTabIndex = 1 },
-                            text = { Text(stringResource(Res.string.song)) }
+                            text = { Text(stringResource(Res.string.bible)) }
                         )
                         Tab(
                             selected = selectedTabIndex == 2,
                             onClick = { selectedTabIndex = 2 },
-                            text = { Text(stringResource(Res.string.background)) }
+                            text = { Text(stringResource(Res.string.song)) }
                         )
                         Tab(
                             selected = selectedTabIndex == 3,
                             onClick = { selectedTabIndex = 3 },
-                            text = { Text(stringResource(Res.string.media)) }
+                            text = { Text(stringResource(Res.string.background)) }
                         )
                         Tab(
                             selected = selectedTabIndex == 4,
                             onClick = { selectedTabIndex = 4 },
-                            text = { Text(stringResource(Res.string.projection)) }
+                            text = { Text(stringResource(Res.string.media)) }
                         )
                         Tab(
                             selected = selectedTabIndex == 5,
                             onClick = { selectedTabIndex = 5 },
-                            text = { Text(stringResource(Res.string.display_lower_third)) }
+                            text = { Text(stringResource(Res.string.projection)) }
                         )
                         Tab(
                             selected = selectedTabIndex == 6,
                             onClick = { selectedTabIndex = 6 },
+                            text = { Text(stringResource(Res.string.display_lower_third)) }
+                        )
+                        Tab(
+                            selected = selectedTabIndex == 7,
+                            onClick = { selectedTabIndex = 7 },
                             text = { Text(stringResource(Res.string.server_settings)) }
                         )
                     }
@@ -130,46 +144,54 @@ fun OptionsDialog(
                             .background(MaterialTheme.colorScheme.background)
                     ) {
                         when (selectedTabIndex) {
-                            0 -> BibleSettingsTab(
+                            0 -> AppearanceSettingsTab(
+                                currentTheme = theme,
+                                onThemeChange = onThemeChange,
                                 settings = currentSettings,
                                 onSettingsChange = { updateFn ->
                                     currentSettings = updateFn(currentSettings)
                                 }
                             )
-
-                            1 -> SongSettingsTab(
+                            1 -> BibleSettingsTab(
                                 settings = currentSettings,
                                 onSettingsChange = { updateFn ->
                                     currentSettings = updateFn(currentSettings)
                                 }
                             )
-                            2 -> BackgroundSettingsTab(
+                            2 -> SongSettingsTab(
                                 settings = currentSettings,
                                 onSettingsChange = { updateFn ->
                                     currentSettings = updateFn(currentSettings)
                                 }
                             )
-                            3 -> MediaSettingsTab(
+                            3 -> BackgroundSettingsTab(
                                 settings = currentSettings,
                                 onSettingsChange = { updateFn ->
                                     currentSettings = updateFn(currentSettings)
                                 }
                             )
-                            4 -> ProjectionSettingsTab(
+                            4 -> MediaSettingsTab(
+                                settings = currentSettings,
+                                onSettingsChange = { updateFn ->
+                                    currentSettings = updateFn(currentSettings)
+                                }
+                            )
+                            5 -> ProjectionSettingsTab(
                                 settings = currentSettings,
                                 onSettingsChange = { updateFn ->
                                     currentSettings = updateFn(currentSettings)
                                 },
                                 onIdentifyScreen = { onIdentifyScreen() }
                             )
-                            5 -> LowerThirdSettingsTab(
+                            6 -> LowerThirdSettingsTab(
                                 settings = currentSettings,
                                 onSettingsChange = { updateFn ->
                                     currentSettings = updateFn(currentSettings)
                                 },
-                                serverUrl = companionServer.serverUrl.value
+                                serverUrl = companionServer.serverUrl.value,
+                                isDarkTheme = isDarkTheme
                             )
-                            6 -> ServerSettingsTab(
+                            7 -> ServerSettingsTab(
                                 settings = currentSettings,
                                 onSettingsChange = { updateFn ->
                                     currentSettings = updateFn(currentSettings)
