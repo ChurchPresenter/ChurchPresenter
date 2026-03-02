@@ -84,7 +84,8 @@ import netscape.javascript.JSObject
 fun LowerThirdSettingsTab(
     settings: AppSettings,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
-    serverUrl: String = ""
+    serverUrl: String = "",
+    isDarkTheme: Boolean = true
 ) {
     val viewModel = remember { LowerThirdSettingsViewModel() }
 
@@ -254,7 +255,8 @@ fun LowerThirdSettingsTab(
                             openLottieGeneratorDialog(
                                 parentWindow = Window.getWindows().firstOrNull { it.isActive },
                                 onFileSaved = { viewModel.onFileSavedFromGenerator() },
-                                serverUrl = serverUrl
+                                serverUrl = serverUrl,
+                                isDarkTheme = isDarkTheme
                             )
                         }
                     }
@@ -434,10 +436,11 @@ private fun ModernButton(
  * Falls back to loading from a local file if the server is not running.
  * Intercepts download clicks and saves the file directly.
  */
-private fun openLottieGeneratorDialog(
+internal fun openLottieGeneratorDialog(
     parentWindow: Window?,
     onFileSaved: () -> Unit,
-    serverUrl: String = ""
+    serverUrl: String = "",
+    isDarkTheme: Boolean = true
 ) {
     // Determine the URL to load
     val loadUrl: String = if (serverUrl.isNotEmpty()) {
@@ -526,6 +529,13 @@ private fun openLottieGeneratorDialog(
                 // Rename the download button to "Save Lower Third"
                 engine.executeScript(
                     "var btn = document.getElementById('btnDownload'); if (btn) btn.textContent = 'Save Lower Third';"
+                )
+
+                // Apply app theme and hide the theme switcher
+                val themeMode = if (isDarkTheme) "dark" else "light"
+                engine.executeScript(
+                    "if(typeof applyUITheme==='function') applyUITheme('$themeMode');" +
+                    "var ts=document.getElementById('themeSwitcher'); if(ts) ts.style.display='none';"
                 )
             }
         }

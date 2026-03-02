@@ -35,6 +35,10 @@
     <string name="chapter">Chapter</string>
     <string name="verse">Verse</string>
     <string name="options">Options</string>
+    <string name="appearance">System</string>
+    <string name="bible_storage_directory">Bible Storage Directory</string>
+    <string name="songs_storage_directory">Songs Storage Directory</string>
+    <string name="lower_third_storage_directory">Lower Third Storage Directory</string>
     <string name="cancel">Cancel</string>
     <string name="ok">OK</string>
     <string name="none">None</string>
@@ -359,6 +363,7 @@
     <string name="tooltip_add_to_schedule">Add to Schedule</string>
     <string name="tooltip_remove_from_schedule">Remove from Schedule</string>
     <string name="tooltip_clear_schedule">Clear Schedule</string>
+    <string name="tooltip_clear_display">Clear Display</string>
     <string name="tooltip_settings">Settings</string>
     <string name="tooltip_theme_light">Light Theme</string>
     <string name="tooltip_theme_dark">Dark Theme</string>
