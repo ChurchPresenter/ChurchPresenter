@@ -232,7 +232,7 @@ data class AnnouncementsSettings(
     val horizontalAlignment: String = Constants.CENTER,
     val position: String = Constants.CENTER,
     val animationType: String = Constants.ANIMATION_SLIDE_FROM_BOTTOM,
-    val animationDuration: Int = 500,
+    val animationDuration: Int = 12000,
     val timerMinutes: Int = 0,
     val timerSeconds: Int = 0,
     val timerTextColor: String = "#FFFFFF",
@@ -258,6 +258,7 @@ data class AppSettings(
     val announcementsSettings: AnnouncementsSettings = AnnouncementsSettings(),
     val serverSettings: ServerSettings = ServerSettings(),
     val schedulePanelWidthDp: Int = 280,
+    val previewPanelWidthDp: Int = 280,
     val theme: String = Constants.LIGHT,
     val language: String = "en",
     val licenseAccepted: Boolean = false
