@@ -18,6 +18,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -76,6 +77,7 @@ import org.churchpresenter.app.churchpresenter.tabs.Tabs
 import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.viewmodel.LocalMediaViewModel
+import org.churchpresenter.app.churchpresenter.viewmodel.PicturesViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 
 // Kept for NavigationTopBar / menu — wraps ScheduleTabActions
@@ -104,7 +106,8 @@ fun MainDesktop(
     theme: ThemeMode = ThemeMode.SYSTEM,
     onSongsLoaded: ((List<org.churchpresenter.app.churchpresenter.data.SongItem>) -> Unit)? = null,
     onBibleLoaded: ((bible: org.churchpresenter.app.churchpresenter.data.Bible, translation: String) -> Unit)? = null,
-    onScheduleChanged: ((List<org.churchpresenter.app.churchpresenter.models.ScheduleItem>) -> Unit)? = null
+    onScheduleChanged: ((List<org.churchpresenter.app.churchpresenter.models.ScheduleItem>) -> Unit)? = null,
+    serverUrl: String = ""
 ) {
     val isDarkTheme = when (theme) {
         ThemeMode.LIGHT -> false
@@ -134,8 +137,20 @@ fun MainDesktop(
     var showAddWebsiteDialog by remember { mutableStateOf(false) }
 
     val mediaViewModel = LocalMediaViewModel.current
+    val picturesViewModel = remember { PicturesViewModel(appSettings) }
+    DisposableEffect(Unit) { onDispose { picturesViewModel.dispose() } }
     val presentingMode by presenterManager.presentingMode
     val mainFocusRequester = remember { FocusRequester() }
+
+    // Load picture folder when a picture schedule item is selected (works even before Pictures tab is composed)
+    LaunchedEffect(selectedPictureItem) {
+        selectedPictureItem?.let { pictureItem ->
+            val folder = java.io.File(pictureItem.folderPath)
+            if (folder.exists() && folder.isDirectory) {
+                picturesViewModel.selectFolder(folder)
+            }
+        }
+    }
 
     LaunchedEffect(selectedTabIndex) {
         onTabChange(selectedTabIndex)
@@ -251,10 +266,57 @@ fun MainDesktop(
                             selectedPresentationItem = item
                             presenting(Presenting.PRESENTATION)
                         },
-                        onPresentPictures = { item -> selectedPictureItem = item },
+                        onPresentPictures = { item ->
+                            selectedPictureItem = item
+                            selectedTabIndex = Tabs.PICTURES.ordinal
+                            presenting(Presenting.PICTURES)
+                        },
                         onPresentMedia = { item ->
                             selectedMediaItem = item
                             presenting(Presenting.MEDIA)
+                        },
+                        onPresentAnnouncement = { item ->
+                            onSettingsChange { settings ->
+                                settings.copy(
+                                    announcementsSettings = settings.announcementsSettings.copy(
+                                        text                = item.text,
+                                        textColor           = item.textColor,
+                                        backgroundColor     = item.backgroundColor,
+                                        fontSize            = item.fontSize,
+                                        fontType            = item.fontType,
+                                        bold                = item.bold,
+                                        italic              = item.italic,
+                                        underline           = item.underline,
+                                        shadow              = item.shadow,
+                                        horizontalAlignment = item.horizontalAlignment,
+                                        position            = item.position,
+                                        animationType       = item.animationType,
+                                        animationDuration   = item.animationDuration,
+                                        timerMinutes        = item.timerMinutes,
+                                        timerSeconds        = item.timerSeconds,
+                                        timerTextColor      = item.timerTextColor,
+                                        timerExpiredText    = item.timerExpiredText
+                                    )
+                                )
+                            }
+                            presenterManager.setAnnouncementText(item.text)
+                            presenting(Presenting.ANNOUNCEMENTS)
+                        },
+                        onPresentLowerThird = { item ->
+                            val lottieFolder = java.io.File(appSettings.streamingSettings.lowerThirdFolder)
+                            val lottieFile = lottieFolder.listFiles()?.find {
+                                it.nameWithoutExtension == item.presetLabel || it.nameWithoutExtension == item.presetId
+                            }
+                            if (lottieFile != null && lottieFile.exists()) {
+                                val json = lottieFile.readText()
+                                presenterManager.setLottieContent(json, item.pauseAtFrame, -1f, item.pauseDurationMs)
+                                presenterManager.setPresentingMode(Presenting.LOWER_THIRD)
+                                presenterManager.setShowPresenterWindow(true)
+                            }
+                        },
+                        onPresentWebsite = { item ->
+                            presenterManager.setWebsiteUrl(item.url)
+                            presenting(Presenting.WEBSITE)
                         },
                         onItemClick = { item ->
                             when (item) {
@@ -298,17 +360,18 @@ fun MainDesktop(
                                     onSettingsChange { settings ->
                                         settings.copy(
                                             announcementsSettings = settings.announcementsSettings.copy(
-                                                text              = item.text,
-                                                textColor         = item.textColor,
-                                                backgroundColor   = item.backgroundColor,
-                                                fontSize          = item.fontSize,
-                                                fontType          = item.fontType,
-                                                bold              = item.bold,
-                                                italic            = item.italic,
-                                                underline         = item.underline,
-                                                shadow            = item.shadow,
-                                                position          = item.position,
-                                                animationType     = item.animationType,
+                                                text                = item.text,
+                                                textColor           = item.textColor,
+                                                backgroundColor     = item.backgroundColor,
+                                                fontSize            = item.fontSize,
+                                                fontType            = item.fontType,
+                                                bold                = item.bold,
+                                                italic              = item.italic,
+                                                underline           = item.underline,
+                                                shadow              = item.shadow,
+                                                horizontalAlignment = item.horizontalAlignment,
+                                                position            = item.position,
+                                                animationType       = item.animationType,
                                                 animationDuration = item.animationDuration,
                                                 timerMinutes      = item.timerMinutes,
                                                 timerSeconds      = item.timerSeconds,
@@ -450,7 +513,9 @@ fun MainDesktop(
                                     currentScheduleActions.addPicture(folderPath, folderName, imageCount)
                                 },
                                 selectedPictureItem = selectedPictureItem,
-                                presenterManager = presenterManager
+                                presenterManager = presenterManager,
+                                onSettingsChange = onSettingsChange,
+                                viewModel = picturesViewModel
                             )
 
                             Tabs.PRESENTATION -> PresentationTab(
@@ -485,7 +550,8 @@ fun MainDesktop(
                                     presenterManager.setPresentingMode(Presenting.LOWER_THIRD)
                                     presenterManager.setShowPresenterWindow(true)
                                 },
-                                isDarkTheme = isDarkTheme
+                                isDarkTheme = isDarkTheme,
+                                serverUrl = serverUrl
                             )
 
                             Tabs.ANNOUNCEMENTS -> AnnouncementsTab(
@@ -505,6 +571,7 @@ fun MainDesktop(
                                         settings.italic,
                                         settings.underline,
                                         settings.shadow,
+                                        settings.horizontalAlignment,
                                         settings.position,
                                         settings.animationType,
                                         settings.animationDuration,

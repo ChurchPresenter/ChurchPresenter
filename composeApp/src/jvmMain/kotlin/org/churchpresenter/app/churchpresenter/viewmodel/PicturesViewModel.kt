@@ -8,9 +8,13 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.toComposeImageBitmap
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import java.nio.file.FileSystems
+import java.nio.file.StandardWatchEventKinds
 import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.models.AnimationType
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
@@ -75,6 +79,19 @@ class PicturesViewModel(
         set(value) { _animationType.value = value }
 
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    private var watchJob: Job? = null
+
+    private val imageExtensions = listOf("jpg", "jpeg", "png", "gif", "bmp", "webp", "heic", "heif")
+
+    init {
+        val savedFolder = appSettings?.pictureSettings?.storageDirectory.orEmpty()
+        if (savedFolder.isNotEmpty()) {
+            val folder = File(savedFolder)
+            if (folder.exists() && folder.isDirectory) {
+                selectFolder(folder)
+            }
+        }
+    }
 
     // Business Logic Methods
 
@@ -82,6 +99,7 @@ class PicturesViewModel(
         _selectedFolder.value = folder
         clearImages()
         loadImagesFromFolder(folder)
+        startWatching(folder)
     }
 
     fun loadImagesFromFolder(folder: File) {
@@ -92,7 +110,7 @@ class PicturesViewModel(
 
         // Load images from folder
         val imageFiles = folder.listFiles { file ->
-            file.isFile && file.extension.lowercase() in listOf("jpg", "jpeg", "png", "gif", "bmp", "webp", "heic", "heif")
+            file.isFile && file.extension.lowercase() in imageExtensions
         }?.sortedBy { it.name } ?: emptyList()
 
         println("PicturesViewModel: Found ${imageFiles.size} images in folder")
@@ -114,6 +132,8 @@ class PicturesViewModel(
     }
 
     fun clearImages() {
+        watchJob?.cancel()
+        watchJob = null
         _images.clear()
         _thumbnails.clear()
         _selectedImageIndex.value = 0
@@ -164,7 +184,7 @@ class PicturesViewModel(
     /**
      * Opens a native folder chooser dialog and loads images from the selected folder.
      */
-    fun openFolderChooser(dialogTitle: String) {
+    fun openFolderChooser(dialogTitle: String, onFolderSelected: ((String) -> Unit)? = null) {
         SwingUtilities.invokeLater {
             val chooser = createFileChooser {
                 fileSelectionMode = JFileChooser.DIRECTORIES_ONLY
@@ -172,6 +192,7 @@ class PicturesViewModel(
             }
             if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
                 selectFolder(chooser.selectedFile)
+                onFolderSelected?.invoke(chooser.selectedFile.absolutePath)
             }
         }
     }
@@ -279,7 +300,69 @@ class PicturesViewModel(
         }
     }
 
+    private fun startWatching(folder: File) {
+        watchJob?.cancel()
+        watchJob = scope.launch {
+            try {
+                val watchService = FileSystems.getDefault().newWatchService()
+                folder.toPath().register(
+                    watchService,
+                    StandardWatchEventKinds.ENTRY_CREATE,
+                    StandardWatchEventKinds.ENTRY_DELETE
+                )
+                while (isActive) {
+                    val key = watchService.take()
+                    var changed = false
+                    for (event in key.pollEvents()) {
+                        val kind = event.kind()
+                        if (kind == StandardWatchEventKinds.OVERFLOW) continue
+                        val fileName = event.context().toString()
+                        val ext = fileName.substringAfterLast('.', "").lowercase()
+                        if (ext !in imageExtensions) continue
+
+                        val file = File(folder, fileName)
+                        when (kind) {
+                            StandardWatchEventKinds.ENTRY_CREATE -> {
+                                if (file.exists() && file.isFile && file !in _images) {
+                                    // Insert in sorted order
+                                    val insertIndex = _images.indexOfFirst { it.name > file.name }
+                                    if (insertIndex >= 0) _images.add(insertIndex, file)
+                                    else _images.add(file)
+                                    // Load thumbnail
+                                    launch {
+                                        try {
+                                            _thumbnails[file] = loadImageBitmap(file)
+                                        } catch (_: Exception) {}
+                                    }
+                                    changed = true
+                                }
+                            }
+                            StandardWatchEventKinds.ENTRY_DELETE -> {
+                                val idx = _images.indexOf(file)
+                                if (idx >= 0) {
+                                    _images.removeAt(idx)
+                                    _thumbnails.remove(file)
+                                    if (_selectedImageIndex.value >= _images.size && _images.isNotEmpty()) {
+                                        _selectedImageIndex.value = _images.size - 1
+                                    }
+                                    changed = true
+                                }
+                            }
+                        }
+                    }
+                    if (!key.reset()) break
+                }
+                watchService.close()
+            } catch (_: java.nio.file.ClosedWatchServiceException) {
+                // Expected on dispose
+            } catch (_: InterruptedException) {
+                // Expected on cancel
+            }
+        }
+    }
+
     fun dispose() {
+        watchJob?.cancel()
         scope.cancel()
     }
 }

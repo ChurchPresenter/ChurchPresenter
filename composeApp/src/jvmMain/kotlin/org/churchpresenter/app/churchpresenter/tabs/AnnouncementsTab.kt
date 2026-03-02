@@ -16,6 +16,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -65,10 +66,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.add_to_schedule
-import churchpresenter.composeapp.generated.resources.anim_slide_along_bottom_ltr
-import churchpresenter.composeapp.generated.resources.anim_slide_along_bottom_rtl
-import churchpresenter.composeapp.generated.resources.anim_slide_along_top_ltr
-import churchpresenter.composeapp.generated.resources.anim_slide_along_top_rtl
 import churchpresenter.composeapp.generated.resources.anim_slide_from_bottom
 import churchpresenter.composeapp.generated.resources.anim_slide_from_left
 import churchpresenter.composeapp.generated.resources.anim_slide_from_right
@@ -79,6 +76,7 @@ import churchpresenter.composeapp.generated.resources.announcement_animation
 import churchpresenter.composeapp.generated.resources.announcement_animation_duration
 import churchpresenter.composeapp.generated.resources.announcement_background_color_label
 import churchpresenter.composeapp.generated.resources.announcement_text
+import churchpresenter.composeapp.generated.resources.transparent_default
 import churchpresenter.composeapp.generated.resources.announcement_text_hint
 import churchpresenter.composeapp.generated.resources.bottom_center
 import churchpresenter.composeapp.generated.resources.bottom_left
@@ -173,17 +171,11 @@ fun AnnouncementsTab(
             val slideFromRightText      = stringResource(Res.string.anim_slide_from_right)
             val slideFromTopText        = stringResource(Res.string.anim_slide_from_top)
             val slideFromBottomText     = stringResource(Res.string.anim_slide_from_bottom)
-            val slideAlongTopLtrText    = stringResource(Res.string.anim_slide_along_top_ltr)
-            val slideAlongTopRtlText    = stringResource(Res.string.anim_slide_along_top_rtl)
-            val slideAlongBottomLtrText = stringResource(Res.string.anim_slide_along_bottom_ltr)
-            val slideAlongBottomRtlText = stringResource(Res.string.anim_slide_along_bottom_rtl)
             val fadeText                = stringResource(Res.string.animation_fade)
             val noneText                = stringResource(Res.string.animation_none)
             val animItems = listOf(
                 slideFromBottomText, slideFromTopText,
                 slideFromLeftText, slideFromRightText,
-                slideAlongBottomLtrText, slideAlongBottomRtlText,
-                slideAlongTopLtrText, slideAlongTopRtlText,
                 fadeText, noneText
             )
             val selectedAnim = when (viewModel.animationType) {
@@ -191,10 +183,6 @@ fun AnnouncementsTab(
                 Constants.ANIMATION_SLIDE_FROM_RIGHT       -> slideFromRightText
                 Constants.ANIMATION_SLIDE_FROM_TOP         -> slideFromTopText
                 Constants.ANIMATION_SLIDE_FROM_BOTTOM      -> slideFromBottomText
-                Constants.ANIMATION_SLIDE_ALONG_TOP_LTR    -> slideAlongTopLtrText
-                Constants.ANIMATION_SLIDE_ALONG_TOP_RTL    -> slideAlongTopRtlText
-                Constants.ANIMATION_SLIDE_ALONG_BOTTOM_LTR -> slideAlongBottomLtrText
-                Constants.ANIMATION_SLIDE_ALONG_BOTTOM_RTL -> slideAlongBottomRtlText
                 Constants.ANIMATION_FADE                   -> fadeText
                 else                                       -> noneText
             }
@@ -237,7 +225,7 @@ fun AnnouncementsTab(
                         )
                         if (presenterManager != null) {
                             Button(
-                                onClick = { viewModel.goLive(presenterManager) },
+                                onClick = { viewModel.goLive(presenterManager, onSettingsChange) },
                                 enabled = viewModel.text.isNotBlank(),
                                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
                                 contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp)
@@ -321,13 +309,46 @@ fun AnnouncementsTab(
                         }
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             SectionLabel(stringResource(Res.string.announcement_background_color_label))
-                            ColorPickerField(
-                                color = viewModel.backgroundColor,
-                                onColorChange = {
-                                    viewModel.setBackgroundColor(it)
-                                    viewModel.saveToSettings(onSettingsChange)
+                            if (viewModel.backgroundColor == "transparent") {
+                                Button(
+                                    onClick = {
+                                        viewModel.setBackgroundColor("#000000")
+                                        viewModel.saveToSettings(onSettingsChange)
+                                    },
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = MaterialTheme.colorScheme.primary,
+                                        contentColor = MaterialTheme.colorScheme.onPrimary
+                                    )
+                                ) {
+                                    Text(
+                                        stringResource(Res.string.transparent_default),
+                                        style = MaterialTheme.typography.labelSmall
+                                    )
                                 }
-                            )
+                            } else {
+                                ColorPickerField(
+                                    color = viewModel.backgroundColor,
+                                    onColorChange = {
+                                        viewModel.setBackgroundColor(it)
+                                        viewModel.saveToSettings(onSettingsChange)
+                                    }
+                                )
+                                Button(
+                                    onClick = {
+                                        viewModel.setBackgroundColor("transparent")
+                                        viewModel.saveToSettings(onSettingsChange)
+                                    },
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                        contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                ) {
+                                    Text(
+                                        stringResource(Res.string.transparent_default),
+                                        style = MaterialTheme.typography.labelSmall
+                                    )
+                                }
+                            }
                         }
                     }
 
@@ -406,24 +427,26 @@ fun AnnouncementsTab(
                             Constants.ANIMATION_SLIDE_FROM_LEFT,
                             Constants.ANIMATION_SLIDE_FROM_RIGHT,
                             Constants.ANIMATION_SLIDE_FROM_TOP,
-                            Constants.ANIMATION_SLIDE_FROM_BOTTOM,
-                            Constants.ANIMATION_SLIDE_ALONG_TOP_LTR,
-                            Constants.ANIMATION_SLIDE_ALONG_TOP_RTL,
-                            Constants.ANIMATION_SLIDE_ALONG_BOTTOM_LTR,
-                            Constants.ANIMATION_SLIDE_ALONG_BOTTOM_RTL
+                            Constants.ANIMATION_SLIDE_FROM_BOTTOM
                         )
-                        val isHorizontal = viewModel.animationType != Constants.ANIMATION_SLIDE_FROM_TOP &&
-                                           viewModel.animationType != Constants.ANIMATION_SLIDE_FROM_BOTTOM
+                        val isHorizontal = viewModel.animationType == Constants.ANIMATION_SLIDE_FROM_LEFT ||
+                                           viewModel.animationType == Constants.ANIMATION_SLIDE_FROM_RIGHT
                         val movesPositive = viewModel.animationType == Constants.ANIMATION_SLIDE_FROM_LEFT ||
-                                           viewModel.animationType == Constants.ANIMATION_SLIDE_FROM_TOP ||
-                                           viewModel.animationType == Constants.ANIMATION_SLIDE_ALONG_TOP_LTR ||
-                                           viewModel.animationType == Constants.ANIMATION_SLIDE_ALONG_BOTTOM_LTR
-                        val verticalAnchor = when (viewModel.animationType) {
-                            Constants.ANIMATION_SLIDE_ALONG_TOP_LTR,
-                            Constants.ANIMATION_SLIDE_ALONG_TOP_RTL    -> Alignment.TopCenter
-                            Constants.ANIMATION_SLIDE_ALONG_BOTTOM_LTR,
-                            Constants.ANIMATION_SLIDE_ALONG_BOTTOM_RTL -> Alignment.BottomCenter
-                            else                                        -> Alignment.Center
+                                           viewModel.animationType == Constants.ANIMATION_SLIDE_FROM_TOP
+                        // For horizontal slides: use position's vertical component
+                        // For vertical slides: use position's horizontal component
+                        val slideAlignment: Alignment = if (isHorizontal) {
+                            when {
+                                viewModel.position.startsWith("Top")    -> Alignment.TopCenter
+                                viewModel.position.startsWith("Bottom") -> Alignment.BottomCenter
+                                else                                    -> Alignment.Center
+                            }
+                        } else {
+                            when {
+                                viewModel.position.endsWith("Left")  -> Alignment.CenterStart
+                                viewModel.position.endsWith("Right") -> Alignment.CenterEnd
+                                else                                 -> Alignment.Center
+                            }
                         }
                         val scrollDurationMs = durationMs.coerceAtLeast(500)
                         key(scrollDurationMs, movesPositive) {
@@ -445,7 +468,11 @@ fun AnnouncementsTab(
                                         color = Utils.parseHexColor(viewModel.textColor),
                                         maxLines = if (isHorizontal) 1 else 3,
                                         modifier = Modifier
-                                            .background(Utils.parseHexColor(viewModel.backgroundColor), RoundedCornerShape(2.dp))
+                                            .background(
+                                                if (viewModel.backgroundColor == "transparent") Color.Transparent
+                                                else Utils.parseHexColor(viewModel.backgroundColor),
+                                                RoundedCornerShape(2.dp)
+                                            )
                                             .padding(horizontal = scaledPadH, vertical = scaledPadV)
                                     )
                                 }
@@ -454,7 +481,7 @@ fun AnnouncementsTab(
                                         Box(
                                             modifier = Modifier
                                                 .fillMaxWidth()
-                                                .align(verticalAnchor)
+                                                .align(slideAlignment)
                                                 .graphicsLayer { translationX = size.width * offsetFraction },
                                             contentAlignment = Alignment.Center
                                         ) { textComposable() }
@@ -462,7 +489,7 @@ fun AnnouncementsTab(
                                         Box(
                                             modifier = Modifier
                                                 .fillMaxHeight()
-                                                .align(Alignment.Center)
+                                                .align(slideAlignment)
                                                 .graphicsLayer { translationY = size.height * offsetFraction },
                                             contentAlignment = Alignment.Center
                                         ) { textComposable() }
@@ -505,7 +532,8 @@ fun AnnouncementsTab(
                                             maxLines = 3,
                                             modifier = Modifier
                                                 .background(
-                                                    Utils.parseHexColor(viewModel.backgroundColor),
+                                                    if (viewModel.backgroundColor == "transparent") Color.Transparent
+                                                    else Utils.parseHexColor(viewModel.backgroundColor),
                                                     RoundedCornerShape(2.dp)
                                                 )
                                                 .padding(horizontal = scaledPadH, vertical = scaledPadV)
@@ -528,10 +556,6 @@ fun AnnouncementsTab(
                                 slideFromRightText      -> Constants.ANIMATION_SLIDE_FROM_RIGHT
                                 slideFromTopText        -> Constants.ANIMATION_SLIDE_FROM_TOP
                                 slideFromBottomText     -> Constants.ANIMATION_SLIDE_FROM_BOTTOM
-                                slideAlongTopLtrText    -> Constants.ANIMATION_SLIDE_ALONG_TOP_LTR
-                                slideAlongTopRtlText    -> Constants.ANIMATION_SLIDE_ALONG_TOP_RTL
-                                slideAlongBottomLtrText -> Constants.ANIMATION_SLIDE_ALONG_BOTTOM_LTR
-                                slideAlongBottomRtlText -> Constants.ANIMATION_SLIDE_ALONG_BOTTOM_RTL
                                 fadeText                -> Constants.ANIMATION_FADE
                                 else                    -> Constants.ANIMATION_NONE
                             }
@@ -649,6 +673,7 @@ fun AnnouncementsTab(
                             val total = viewModel.timerMinutes * 60 + viewModel.timerSeconds
                             IconButton(
                                 onClick = {
+                                    viewModel.saveToSettings(onSettingsChange)
                                     viewModel.startPauseTimer(
                                         onTick = { remaining ->
                                             if (presenterManager != null &&

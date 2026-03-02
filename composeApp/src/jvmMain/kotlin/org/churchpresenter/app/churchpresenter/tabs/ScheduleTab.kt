@@ -20,22 +20,28 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollbarAdapter
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.file_chooser_open_schedule
 import churchpresenter.composeapp.generated.resources.file_chooser_save_schedule
 import churchpresenter.composeapp.generated.resources.file_filter_schedule
+import churchpresenter.composeapp.generated.resources.schedule_add_files
+import churchpresenter.composeapp.generated.resources.schedule_drop_hint
 import churchpresenter.composeapp.generated.resources.ic_add
 import churchpresenter.composeapp.generated.resources.ic_arrow_down
 import churchpresenter.composeapp.generated.resources.ic_arrow_down_double
@@ -66,9 +72,18 @@ import churchpresenter.composeapp.generated.resources.tooltip_open_schedule
 import churchpresenter.composeapp.generated.resources.tooltip_remove
 import churchpresenter.composeapp.generated.resources.tooltip_remove_from_schedule
 import churchpresenter.composeapp.generated.resources.tooltip_save_schedule
+import java.awt.datatransfer.DataFlavor
+import java.awt.dnd.DnDConstants
+import java.awt.dnd.DropTarget
+import java.awt.dnd.DropTargetAdapter
+import java.awt.dnd.DropTargetDropEvent
+import java.io.File
+import javax.swing.JFileChooser
+import javax.swing.SwingUtilities
 import org.churchpresenter.app.churchpresenter.composables.TooltipIconButton
 import org.churchpresenter.app.churchpresenter.models.ScheduleItem
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.app.churchpresenter.utils.createFileChooser
 import org.churchpresenter.app.churchpresenter.utils.Utils
 import org.churchpresenter.app.churchpresenter.viewmodel.ScheduleViewModel
 import org.jetbrains.compose.resources.painterResource
@@ -97,7 +112,7 @@ data class ScheduleTabActions(
     val addPresentation: (filePath: String, fileName: String, slideCount: Int, fileType: String) -> Unit = { _, _, _, _ -> },
     val addMedia: (mediaUrl: String, mediaTitle: String, mediaType: String) -> Unit = { _, _, _ -> },
     val addLowerThird: (presetId: String, presetLabel: String, pauseAtFrame: Boolean, pauseDurationMs: Long) -> Unit = { _, _, _, _ -> },
-    val addAnnouncement: (text: String, textColor: String, backgroundColor: String, fontSize: Int, fontType: String, bold: Boolean, italic: Boolean, underline: Boolean, shadow: Boolean, position: String, animationType: String, animationDuration: Int, isTimer: Boolean, timerMinutes: Int, timerSeconds: Int, timerTextColor: String, timerExpiredText: String) -> Unit = { _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _ -> },
+    val addAnnouncement: (text: String, textColor: String, backgroundColor: String, fontSize: Int, fontType: String, bold: Boolean, italic: Boolean, underline: Boolean, shadow: Boolean, horizontalAlignment: String, position: String, animationType: String, animationDuration: Int, isTimer: Boolean, timerMinutes: Int, timerSeconds: Int, timerTextColor: String, timerExpiredText: String) -> Unit = { _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _ -> },
     val addWebsite: (url: String, title: String) -> Unit = { _, _ -> }
 )
 
@@ -113,6 +128,9 @@ fun ScheduleTab(
     onPresentPresentation: ((ScheduleItem.PresentationItem) -> Unit)? = null,
     onPresentPictures: ((ScheduleItem.PictureItem) -> Unit)? = null,
     onPresentMedia: ((ScheduleItem.MediaItem) -> Unit)? = null,
+    onPresentAnnouncement: ((ScheduleItem.AnnouncementItem) -> Unit)? = null,
+    onPresentLowerThird: ((ScheduleItem.LowerThirdItem) -> Unit)? = null,
+    onPresentWebsite: ((ScheduleItem.WebsiteItem) -> Unit)? = null,
     onActionsReady: (ScheduleTabActions) -> Unit = {},
     onSelectedItemChanged: (String?) -> Unit = {},
     onScheduleChanged: ((List<ScheduleItem>) -> Unit)? = null,
@@ -151,8 +169,8 @@ fun ScheduleTab(
                 addPresentation  = { filePath, fileName, slideCount, fileType -> viewModel.addPresentation(filePath, fileName, slideCount, fileType) },
                 addMedia         = { mediaUrl, mediaTitle, mediaType -> viewModel.addMedia(mediaUrl, mediaTitle, mediaType) },
                 addLowerThird    = { presetId, presetLabel, pauseAtFrame, pauseDurationMs -> viewModel.addLowerThird(presetId, presetLabel, pauseAtFrame, pauseDurationMs) },
-                addAnnouncement  = { text, textColor, backgroundColor, fontSize, fontType, bold, italic, underline, shadow, position, animationType, animationDuration, isTimer, timerMinutes, timerSeconds, timerTextColor, timerExpiredText ->
-                    viewModel.addAnnouncement(text, textColor, backgroundColor, fontSize, fontType, bold, italic, underline, shadow, position, animationType, animationDuration, isTimer, timerMinutes, timerSeconds, timerTextColor, timerExpiredText)
+                addAnnouncement  = { text, textColor, backgroundColor, fontSize, fontType, bold, italic, underline, shadow, horizontalAlignment, position, animationType, animationDuration, isTimer, timerMinutes, timerSeconds, timerTextColor, timerExpiredText ->
+                    viewModel.addAnnouncement(text, textColor, backgroundColor, fontSize, fontType, bold, italic, underline, shadow, horizontalAlignment, position, animationType, animationDuration, isTimer, timerMinutes, timerSeconds, timerTextColor, timerExpiredText)
                 },
                 addWebsite       = { url, title -> viewModel.addWebsite(url, title) }
             )
@@ -287,9 +305,50 @@ fun ScheduleTab(
             modifier = Modifier.padding(bottom = 8.dp)
         )
 
-        // Schedule items list
+        // Schedule items list with drag-and-drop support
+        val viewModelState = rememberUpdatedState(viewModel)
         Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
             val listState = rememberLazyListState()
+
+            // Register AWT DropTarget on the window for file drag-and-drop
+            DisposableEffect(Unit) {
+                val awtWindow = java.awt.Window.getWindows().firstOrNull { it.isShowing }
+                val dropTarget = awtWindow?.let { win ->
+                    DropTarget(win, DnDConstants.ACTION_COPY, object : DropTargetAdapter() {
+                        override fun drop(event: DropTargetDropEvent) {
+                            event.acceptDrop(DnDConstants.ACTION_COPY)
+                            try {
+                                val transferable = event.transferable
+                                if (transferable.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
+                                    @Suppress("UNCHECKED_CAST")
+                                    val files = transferable.getTransferData(DataFlavor.javaFileListFlavor) as List<File>
+                                    val vm = viewModelState.value
+                                    handleDroppedFiles(files, vm)
+                                }
+                                event.dropComplete(true)
+                            } catch (e: Exception) {
+                                event.dropComplete(false)
+                            }
+                        }
+                    }, true)
+                }
+                onDispose {
+                    if (dropTarget != null) {
+                        awtWindow.dropTarget = null
+                    }
+                }
+            }
+
+            if (scheduleItems.isEmpty()) {
+                // Empty state hint
+                Text(
+                    text = stringResource(Res.string.schedule_drop_hint),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.align(Alignment.Center).padding(32.dp)
+                )
+            }
 
             LazyColumn(
                 state = listState,
@@ -319,7 +378,10 @@ fun ScheduleTab(
                                 onPresentBible = onPresentBible,
                                 onPresentPresentation = onPresentPresentation,
                                 onPresentPictures = onPresentPictures,
-                                onPresentMedia = onPresentMedia
+                                onPresentMedia = onPresentMedia,
+                                onPresentAnnouncement = onPresentAnnouncement,
+                                onPresentLowerThird = onPresentLowerThird,
+                                onPresentWebsite = onPresentWebsite
                             )
                         },
                         onEditLabel = {
@@ -340,6 +402,74 @@ fun ScheduleTab(
                 modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
                 adapter = rememberScrollbarAdapter(scrollState = listState)
             )
+        }
+
+        // Add Files button at the bottom
+        Button(
+            onClick = {
+                SwingUtilities.invokeLater {
+                    val chooser = createFileChooser {
+                        fileSelectionMode = JFileChooser.FILES_AND_DIRECTORIES
+                        isMultiSelectionEnabled = true
+                        dialogTitle = "Add Files to Schedule"
+                    }
+                    if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+                        handleDroppedFiles(chooser.selectedFiles.toList(), viewModel)
+                    }
+                }
+            },
+            modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        ) {
+            Text(stringResource(Res.string.schedule_add_files))
+        }
+    }
+}
+
+private val IMAGE_EXTENSIONS = setOf("jpg", "jpeg", "png", "gif", "bmp", "webp")
+private val VIDEO_EXTENSIONS = setOf("mp4", "avi", "mov", "mkv", "webm")
+private val AUDIO_EXTENSIONS = setOf("mp3", "wav", "flac")
+private val PRESENTATION_EXTENSIONS = setOf("ppt", "pptx", "key", "pdf")
+
+private fun handleDroppedFiles(files: List<File>, viewModel: ScheduleViewModel) {
+    for (file in files) {
+        if (file.isDirectory) {
+            // Folder dropped — count image files inside and add as pictures
+            val imageCount = file.listFiles()?.count { child ->
+                child.isFile && child.extension.lowercase() in IMAGE_EXTENSIONS
+            } ?: 0
+            if (imageCount > 0) {
+                viewModel.addPicture(file.absolutePath, file.name, imageCount)
+            }
+            continue
+        }
+
+        val ext = file.extension.lowercase()
+        when {
+            ext in PRESENTATION_EXTENSIONS -> {
+                viewModel.addPresentation(file.absolutePath, file.nameWithoutExtension, 0, ext)
+            }
+            ext in VIDEO_EXTENSIONS || ext in AUDIO_EXTENSIONS -> {
+                viewModel.addMedia(file.absolutePath, file.nameWithoutExtension, "local")
+            }
+            ext in IMAGE_EXTENSIONS -> {
+                // Single image dropped — add parent folder as picture source
+                val parentFolder = file.parentFile
+                val imageCount = parentFolder?.listFiles()?.count { child ->
+                    child.isFile && child.extension.lowercase() in IMAGE_EXTENSIONS
+                } ?: 1
+                viewModel.addPicture(
+                    parentFolder?.absolutePath ?: file.absolutePath,
+                    parentFolder?.name ?: file.name,
+                    imageCount
+                )
+            }
+            ext == "json" -> {
+                viewModel.addLowerThird(file.nameWithoutExtension, file.nameWithoutExtension, false, 0L)
+            }
         }
     }
 }

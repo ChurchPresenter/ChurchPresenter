@@ -256,7 +256,8 @@ fun LowerThirdSettingsTab(
                                 parentWindow = Window.getWindows().firstOrNull { it.isActive },
                                 onFileSaved = { viewModel.onFileSavedFromGenerator() },
                                 serverUrl = serverUrl,
-                                isDarkTheme = isDarkTheme
+                                isDarkTheme = isDarkTheme,
+                                lowerThirdFolder = settings.streamingSettings.lowerThirdFolder
                             )
                         }
                     }
@@ -440,36 +441,22 @@ internal fun openLottieGeneratorDialog(
     parentWindow: Window?,
     onFileSaved: () -> Unit,
     serverUrl: String = "",
-    isDarkTheme: Boolean = true
+    isDarkTheme: Boolean = true,
+    lowerThirdFolder: String = ""
 ) {
-    // Determine the URL to load
+    // Determine the URL to load — use the plain HTTP connector (port+1) to avoid SSL issues in JavaFX WebView
     val loadUrl: String = if (serverUrl.isNotEmpty()) {
-        "$serverUrl/lottie-generator.html"
+        val port = java.net.URI(serverUrl).port.takeIf { it > 0 } ?: 8765
+        "http://127.0.0.1:${port + 1}/lottie-generator.html"
     } else {
-        val appResourcesDir = System.getProperty("compose.application.resources.dir")
-        val executablePath = ProcessHandle.current().info().command().orElse(null)
-            ?.let { File(it).parentFile }
-        val userDir = File(System.getProperty("user.dir"))
-        val htmlFile = listOfNotNull(
-            appResourcesDir?.let { File(it, "Lottie-Gen/lottie-generator.html") },
-            executablePath?.let { File(it, "../app/resources/Lottie-Gen/lottie-generator.html") },
-            executablePath?.let { File(it, "Lottie-Gen/lottie-generator.html") },
-            File(userDir, "composeApp/src/jvmMain/appResources/common/Lottie-Gen/lottie-generator.html"),
-            File(userDir, "src/jvmMain/appResources/common/Lottie-Gen/lottie-generator.html"),
-            File(userDir, "Lottie-Gen/lottie-generator.html"),
-            File("Lottie-Gen/lottie-generator.html")
-        ).firstOrNull { it.exists() }
-
-        if (htmlFile == null) {
-            javax.swing.JOptionPane.showMessageDialog(
-                parentWindow,
-                "Lottie Generator not found.\nEnsure the server is running or Lottie-Gen/lottie-generator.html exists.",
-                "Generator Not Found",
-                javax.swing.JOptionPane.ERROR_MESSAGE
-            )
-            return
-        }
-        htmlFile.toURI().toString()
+        javax.swing.JOptionPane.showMessageDialog(
+            parentWindow,
+            "Please start the API server to generate lower thirds.\n" +
+                "Generated files will be saved to the folder configured in Settings.",
+            "Server Not Running",
+            javax.swing.JOptionPane.INFORMATION_MESSAGE
+        )
+        return
     }
 
     // Ensure JavaFX toolkit is initialised
@@ -496,46 +483,58 @@ internal fun openLottieGeneratorDialog(
         val webView = WebView()
         val engine = webView.engine
 
+        // Log JS errors and load failures to stderr for debugging
+        engine.setOnError { e -> System.err.println("WebView error: ${e.message}") }
+        engine.loadWorker.exceptionProperty().addListener { _, _, ex ->
+            if (ex != null) System.err.println("WebView load exception: $ex")
+        }
+
+        // Strong reference to prevent GC of the bridge object
+        val bridge = object {
+            @Suppress("unused")
+            fun save(filename: String, jsonContent: String) {
+                SwingUtilities.invokeLater {
+                    val targetDir = lowerThirdFolder.takeIf { it.isNotEmpty() }
+                        ?.let { File(it) }
+                        ?.takeIf { it.exists() && it.isDirectory }
+                    if (targetDir != null) {
+                        val targetFile = File(targetDir, filename)
+                        targetFile.writeText(jsonContent)
+                        onFileSaved()
+                    } else {
+                        javax.swing.JOptionPane.showMessageDialog(
+                            dialog,
+                            "No folder configured.\nSet a Lower Third folder in Settings first.",
+                            "No Folder",
+                            javax.swing.JOptionPane.WARNING_MESSAGE
+                        )
+                    }
+                }
+            }
+        }
+
         val stateListener = ChangeListener<Worker.State> { _, _, newState ->
+            if (newState == Worker.State.FAILED) {
+                System.err.println("WebView FAILED to load: ${engine.loadWorker.exception}")
+            }
             if (newState == Worker.State.SUCCEEDED) {
                 val win = engine.executeScript("window") as? JSObject ?: return@ChangeListener
 
-                val bridge = object {
-                    @Suppress("unused")
-                    fun save(filename: String, jsonContent: String) {
-                        SwingUtilities.invokeLater {
-                            val chooser = createFileChooser {
-                                fileSelectionMode = JFileChooser.FILES_ONLY
-                                dialogTitle = "Save Lower Third"
-                                fileFilter = FileNameExtensionFilter("Lottie JSON (*.json)", "json")
-                                selectedFile = File(filename)
-                            }
-                            if (chooser.showSaveDialog(dialog) == JFileChooser.APPROVE_OPTION) {
-                                chooser.selectedFile.writeText(jsonContent)
-                                onFileSaved()
-                                javax.swing.JOptionPane.showMessageDialog(
-                                    dialog,
-                                    "Saved: ${chooser.selectedFile.name}",
-                                    "Saved",
-                                    javax.swing.JOptionPane.INFORMATION_MESSAGE
-                                )
-                            }
-                        }
-                    }
-                }
-
                 win.setMember("_jvmBridge", bridge)
 
-                // Rename the download button to "Save Lower Third"
+                // Override download button: save rendered file + save config to library
                 engine.executeScript(
-                    "var btn = document.getElementById('btnDownload'); if (btn) btn.textContent = 'Save Lower Third';"
+                    "var btn = document.getElementById('btnDownload');" +
+                    "if (btn) { btn.textContent = 'Save Lower Third';" +
+                    "  btn.onclick = function() { download(); savePreset(); }; }"
                 )
 
                 // Apply app theme and hide the theme switcher
                 val themeMode = if (isDarkTheme) "dark" else "light"
                 engine.executeScript(
                     "if(typeof applyUITheme==='function') applyUITheme('$themeMode');" +
-                    "var ts=document.getElementById('themeSwitcher'); if(ts) ts.style.display='none';"
+                    "var s=document.createElement('style');s.textContent='#themeSwitcher{display:none!important}';" +
+                    "document.head.appendChild(s);"
                 )
             }
         }

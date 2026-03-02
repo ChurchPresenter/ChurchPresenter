@@ -7,6 +7,7 @@ import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.application.install
 import io.ktor.server.engine.EmbeddedServer
 import io.ktor.server.engine.embeddedServer
+import io.ktor.server.engine.connector
 import io.ktor.server.engine.sslConnector
 import io.ktor.server.netty.Netty
 import io.ktor.server.netty.NettyApplicationEngine
@@ -425,6 +426,7 @@ class CompanionServer {
         }
 
         server = embeddedServer(Netty, configure = {
+            // HTTPS for external clients
             sslConnector(
                 keyStore = keyStore,
                 keyAlias = Constants.SSL_KEY_ALIAS,
@@ -433,6 +435,11 @@ class CompanionServer {
             ) {
                 host = "0.0.0.0"
                 this.port = port
+            }
+            // Plain HTTP on localhost for embedded WebView (avoids SSL handshake issues)
+            connector {
+                host = "127.0.0.1"
+                this.port = port + 1
             }
         }) { configurePipeline() }
 
@@ -578,6 +585,16 @@ class CompanionServer {
                         return@get
                     }
                     call.respondText(html.readText(), ContentType.Text.Html)
+                }
+
+                // Serve bundled lottie.min.js
+                get("/lottie.min.js") {
+                    val file = lottieGenDir?.let { File(it, "lottie.min.js") }
+                    if (file == null || !file.exists()) {
+                        call.respond(io.ktor.http.HttpStatusCode.NotFound, "lottie.min.js not found")
+                        return@get
+                    }
+                    call.respondText(file.readText(), ContentType.Application.JavaScript)
                 }
 
                 // Serve logo image files

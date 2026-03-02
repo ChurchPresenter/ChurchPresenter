@@ -85,6 +85,7 @@ sealed class ScheduleItem {
         val italic: Boolean = false,
         val underline: Boolean = false,
         val shadow: Boolean = false,
+        val horizontalAlignment: String = "center",
         val position: String = "center",
         val animationType: String = "SLIDE_FROM_BOTTOM",
         val animationDuration: Int = 500,

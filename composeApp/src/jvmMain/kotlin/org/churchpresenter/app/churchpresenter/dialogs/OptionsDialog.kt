@@ -38,6 +38,7 @@ import churchpresenter.composeapp.generated.resources.symbol_cancel
 import churchpresenter.composeapp.generated.resources.symbol_ok
 import churchpresenter.composeapp.generated.resources.display_lower_third
 import churchpresenter.composeapp.generated.resources.media
+import churchpresenter.composeapp.generated.resources.apply
 import churchpresenter.composeapp.generated.resources.ok
 import churchpresenter.composeapp.generated.resources.options
 import churchpresenter.composeapp.generated.resources.projection
@@ -219,6 +220,21 @@ fun OptionsDialog(
                             )
                         ) {
                             Text("${stringResource(Res.string.symbol_cancel)} ${stringResource(Res.string.cancel)}")
+                        }
+
+                        Spacer(modifier = Modifier.width(8.dp))
+
+                        Button(
+                            onClick = {
+                                settingsManager.saveSettings(currentSettings)
+                                onSave(currentSettings)
+                            },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                                contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                            )
+                        ) {
+                            Text(stringResource(Res.string.apply))
                         }
 
                         Spacer(modifier = Modifier.width(8.dp))

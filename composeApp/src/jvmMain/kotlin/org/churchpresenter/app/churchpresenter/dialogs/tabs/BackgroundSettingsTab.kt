@@ -31,6 +31,8 @@ import churchpresenter.composeapp.generated.resources.background_default
 import churchpresenter.composeapp.generated.resources.background_image
 import churchpresenter.composeapp.generated.resources.background_image_option
 import churchpresenter.composeapp.generated.resources.background_type
+import churchpresenter.composeapp.generated.resources.background_video
+import churchpresenter.composeapp.generated.resources.background_video_option
 import churchpresenter.composeapp.generated.resources.bible
 import churchpresenter.composeapp.generated.resources.color
 import churchpresenter.composeapp.generated.resources.default_background_color
@@ -40,6 +42,7 @@ import churchpresenter.composeapp.generated.resources.full_screen
 import churchpresenter.composeapp.generated.resources.songs
 import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
 import org.churchpresenter.app.churchpresenter.composables.FileImagePicker
+import org.churchpresenter.app.churchpresenter.composables.FileVideoPicker
 import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.data.BackgroundConfig
 import org.churchpresenter.app.churchpresenter.utils.Constants
@@ -60,7 +63,7 @@ fun BackgroundSettingsTab(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        // Default Background Color Section
+        // Default Background Section
         Column {
             Text(
                 text = stringResource(Res.string.default_background_color),
@@ -76,11 +79,60 @@ fun BackgroundSettingsTab(
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
             )
             Spacer(modifier = Modifier.height(8.dp))
-            SettingRow(stringResource(Res.string.color)) {
-                ColorPickerField(
-                    color = settings.backgroundSettings.defaultBackgroundColor,
-                    onColorChange = { viewModel.updateDefaultColor(it, onSettingsChange) }
+
+            BackgroundTypeRadioGroup(
+                selectedType = settings.backgroundSettings.defaultBackgroundType,
+                onTypeSelected = { type ->
+                    onSettingsChange { s ->
+                        s.copy(backgroundSettings = s.backgroundSettings.copy(defaultBackgroundType = type))
+                    }
+                },
+                defaultLabel = stringResource(Res.string.background_color_option),
+                colorLabel = stringResource(Res.string.background_image_option),
+                imageLabel = stringResource(Res.string.background_video_option),
+                types = listOf(
+                    Constants.BACKGROUND_COLOR,
+                    Constants.BACKGROUND_IMAGE,
+                    Constants.BACKGROUND_VIDEO
                 )
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+
+            when (settings.backgroundSettings.defaultBackgroundType) {
+                Constants.BACKGROUND_COLOR -> {
+                    SettingRow(stringResource(Res.string.color)) {
+                        ColorPickerField(
+                            color = settings.backgroundSettings.defaultBackgroundColor,
+                            onColorChange = { viewModel.updateDefaultColor(it, onSettingsChange) }
+                        )
+                    }
+                }
+                Constants.BACKGROUND_IMAGE -> {
+                    SettingRow(stringResource(Res.string.background_image)) {
+                        FileImagePicker(
+                            imagePath = settings.backgroundSettings.defaultBackgroundImage,
+                            onImagePathChange = { path ->
+                                onSettingsChange { s ->
+                                    s.copy(backgroundSettings = s.backgroundSettings.copy(defaultBackgroundImage = path))
+                                }
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+                }
+                Constants.BACKGROUND_VIDEO -> {
+                    SettingRow(stringResource(Res.string.background_video)) {
+                        FileVideoPicker(
+                            videoPath = settings.backgroundSettings.defaultBackgroundVideo,
+                            onVideoPathChange = { path ->
+                                onSettingsChange { s ->
+                                    s.copy(backgroundSettings = s.backgroundSettings.copy(defaultBackgroundVideo = path))
+                                }
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+                }
             }
         }
 
@@ -164,6 +216,7 @@ private fun BackgroundColumn(
     val backgroundDefaultStr = stringResource(Res.string.background_default)
     val backgroundColorStr   = stringResource(Res.string.background_color_option)
     val backgroundImageStr   = stringResource(Res.string.background_image_option)
+    val backgroundVideoStr   = stringResource(Res.string.background_video_option)
 
     SectionHeader(subtitle)
     Spacer(modifier = Modifier.height(10.dp))
@@ -180,7 +233,8 @@ private fun BackgroundColumn(
         onTypeSelected = { onConfigChange(config.copy(backgroundType = it)) },
         defaultLabel = backgroundDefaultStr,
         colorLabel   = backgroundColorStr,
-        imageLabel   = backgroundImageStr
+        imageLabel   = backgroundImageStr,
+        videoLabel   = backgroundVideoStr
     )
 
     Spacer(modifier = Modifier.height(10.dp))
@@ -199,6 +253,15 @@ private fun BackgroundColumn(
                 FileImagePicker(
                     imagePath = config.backgroundImage,
                     onImagePathChange = { onConfigChange(config.copy(backgroundImage = it)) },
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        }
+        Constants.BACKGROUND_VIDEO -> {
+            SettingRow(stringResource(Res.string.background_video)) {
+                FileVideoPicker(
+                    videoPath = config.backgroundVideo,
+                    onVideoPathChange = { onConfigChange(config.copy(backgroundVideo = it)) },
                     modifier = Modifier.fillMaxWidth()
                 )
             }
@@ -225,14 +288,25 @@ private fun BackgroundTypeRadioGroup(
     onTypeSelected: (String) -> Unit,
     defaultLabel: String,
     colorLabel: String,
-    imageLabel: String
+    imageLabel: String,
+    videoLabel: String? = null,
+    types: List<String>? = null
 ) {
+    val entries = if (types != null) {
+        // Custom types list with labels mapped positionally
+        val labels = listOfNotNull(defaultLabel, colorLabel, imageLabel, videoLabel)
+        types.zip(labels)
+    } else {
+        // Standard: Default, Color, Image + optional Video
+        buildList {
+            add(Constants.BACKGROUND_DEFAULT to defaultLabel)
+            add(Constants.BACKGROUND_COLOR to colorLabel)
+            add(Constants.BACKGROUND_IMAGE to imageLabel)
+            if (videoLabel != null) add(Constants.BACKGROUND_VIDEO to videoLabel)
+        }
+    }
     Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-        listOf(
-            Constants.BACKGROUND_DEFAULT to defaultLabel,
-            Constants.BACKGROUND_COLOR   to colorLabel,
-            Constants.BACKGROUND_IMAGE   to imageLabel
-        ).forEach { (type, label) ->
+        entries.forEach { (type, label) ->
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth()

@@ -5,14 +5,18 @@ import org.churchpresenter.app.churchpresenter.utils.Constants
 
 @Serializable
 data class BackgroundConfig(
-    val backgroundType: String = Constants.BACKGROUND_COLOR, // "Default", "Color", "Image"
+    val backgroundType: String = Constants.BACKGROUND_COLOR, // "Default", "Color", "Image", "Video"
     val backgroundColor: String = "#000000", // Black
-    val backgroundImage: String = ""
+    val backgroundImage: String = "",
+    val backgroundVideo: String = ""
 )
 
 @Serializable
 data class BackgroundSettings(
     val defaultBackgroundColor: String = "#000000",
+    val defaultBackgroundImage: String = "",
+    val defaultBackgroundVideo: String = "",
+    val defaultBackgroundType: String = Constants.BACKGROUND_COLOR,
     val bibleBackground: BackgroundConfig = BackgroundConfig(),
     val bibleLowerThirdBackground: BackgroundConfig = BackgroundConfig(),
     val songBackground: BackgroundConfig = BackgroundConfig(),
@@ -184,6 +188,7 @@ data class ProjectionSettings(
 
 @Serializable
 data class PictureSettings(
+    val storageDirectory: String = "",
     val autoScrollInterval: Float = 5f, // seconds
     val isLooping: Boolean = true,
     val transitionDuration: Float = 500f, // milliseconds

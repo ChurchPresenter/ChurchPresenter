@@ -90,7 +90,7 @@ fun LowerThirdPresenter(
                 progress = { progress.value }
             ),
             contentDescription = null,
-            contentScale = ContentScale.FillHeight,
+            contentScale = ContentScale.Fit,
             modifier = Modifier
                 .padding(
                     start = s.windowLeft.dp,
@@ -98,8 +98,7 @@ fun LowerThirdPresenter(
                     top = s.windowTop.dp,
                     bottom = s.windowBottom.dp
                 )
-                .fillMaxWidth()
-                .fillMaxHeight(0.333f)
+                .fillMaxSize()
         )
     }
 }

@@ -85,7 +85,8 @@ fun LowerThirdTab(
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit = {},
     onAddToSchedule: (presetId: String, presetLabel: String, pauseAtFrame: Boolean, pauseDurationMs: Long) -> Unit = { _, _, _, _ -> },
     onGoLive: (jsonContent: String, pauseAtFrame: Boolean, pauseFrame: Float, pauseDurationMs: Long) -> Unit = { _, _, _, _ -> },
-    isDarkTheme: Boolean = true
+    isDarkTheme: Boolean = true,
+    serverUrl: String = ""
 ) {
     val lottieFolder = appSettings.streamingSettings.lowerThirdFolder
     var refreshKey by remember { mutableStateOf(0) }
@@ -247,8 +248,10 @@ fun LowerThirdTab(
                     SwingUtilities.invokeLater {
                         openLottieGeneratorDialog(
                             parentWindow = Window.getWindows().firstOrNull { it.isActive },
-                            onFileSaved = { refreshKey++ },
-                            isDarkTheme = isDarkTheme
+                            onFileSaved = { scope.launch { refreshKey++ } },
+                            serverUrl = serverUrl,
+                            isDarkTheme = isDarkTheme,
+                            lowerThirdFolder = appSettings.streamingSettings.lowerThirdFolder
                         )
                     }
                 },

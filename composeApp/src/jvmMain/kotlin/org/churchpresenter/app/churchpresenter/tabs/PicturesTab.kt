@@ -28,7 +28,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -51,6 +50,8 @@ import churchpresenter.composeapp.generated.resources.ic_skip_previous
 import churchpresenter.composeapp.generated.resources.image_counter
 import churchpresenter.composeapp.generated.resources.images_suffix
 import churchpresenter.composeapp.generated.resources.loading
+import churchpresenter.composeapp.generated.resources.loop_off
+import churchpresenter.composeapp.generated.resources.loop_on
 import churchpresenter.composeapp.generated.resources.next_image
 import churchpresenter.composeapp.generated.resources.no_folder_selected
 import churchpresenter.composeapp.generated.resources.pause
@@ -74,14 +75,11 @@ fun PicturesTab(
     appSettings: AppSettings? = null,
     onAddToSchedule: ((folderPath: String, folderName: String, imageCount: Int) -> Unit)? = null,
     selectedPictureItem: ScheduleItem.PictureItem? = null,
-    presenterManager: PresenterManager? = null
+    presenterManager: PresenterManager? = null,
+    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit = {},
+    viewModel: PicturesViewModel = remember { PicturesViewModel(appSettings) }
 ) {
-    val viewModel = remember { PicturesViewModel(appSettings) }
     val folderDialogTitle = stringResource(Res.string.select_image_folder_dialog)
-
-    DisposableEffect(Unit) {
-        onDispose { viewModel.dispose() }
-    }
 
 
     // Auto-scroll effect
@@ -128,7 +126,13 @@ fun PicturesTab(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Button(onClick = { viewModel.openFolderChooser(folderDialogTitle) }) {
+            Button(onClick = {
+                viewModel.openFolderChooser(folderDialogTitle) { folderPath ->
+                    onSettingsChange { s ->
+                        s.copy(pictureSettings = s.pictureSettings.copy(storageDirectory = folderPath))
+                    }
+                }
+            }) {
                 Text("📁 ${stringResource(Res.string.select_folder)}")
             }
 
@@ -223,6 +227,32 @@ fun PicturesTab(
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
+
+                    Button(
+                        onClick = {
+                            viewModel.isLooping = !viewModel.isLooping
+                            onSettingsChange { s ->
+                                s.copy(pictureSettings = s.pictureSettings.copy(isLooping = viewModel.isLooping))
+                            }
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = if (viewModel.isLooping)
+                                MaterialTheme.colorScheme.primary
+                            else
+                                MaterialTheme.colorScheme.surfaceVariant,
+                            contentColor = if (viewModel.isLooping)
+                                MaterialTheme.colorScheme.onPrimary
+                            else
+                                MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    ) {
+                        Text(
+                            text = stringResource(
+                                if (viewModel.isLooping) Res.string.loop_on else Res.string.loop_off
+                            ),
+                            style = MaterialTheme.typography.labelSmall
+                        )
+                    }
                 }
 
                 // Right: action buttons

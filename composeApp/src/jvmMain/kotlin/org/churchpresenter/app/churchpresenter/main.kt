@@ -15,6 +15,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
@@ -124,6 +125,10 @@ fun main() {
                 bibleStorageDir = appSettings.bibleSettings.storageDirectory,
                 primaryBibleFileName = appSettings.bibleSettings.primaryBible
             )
+            // Auto-start server if user previously enabled it
+            if (appSettings.serverSettings.enabled) {
+                companionServer.start(appSettings.serverSettings.port)
+            }
         }
 
         val screens = remember { GraphicsEnvironment.getLocalGraphicsEnvironment().screenDevices }
@@ -191,7 +196,8 @@ fun main() {
                                 theme = theme,
                                 onSongsLoaded = { songs -> companionServer.updateSongs(songs) },
                                 onBibleLoaded = { bible, translation -> companionServer.updateBible(bible, translation) },
-                                onScheduleChanged = { items -> companionServer.updateSchedule(items) }
+                                onScheduleChanged = { items -> companionServer.updateSchedule(items) },
+                                serverUrl = companionServer.serverUrl.collectAsState().value
                             )
                             OptionsDialog(
                                 isVisible = showOptionsDialog,

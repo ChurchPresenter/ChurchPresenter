@@ -192,6 +192,7 @@ class ScheduleViewModel(
         italic: Boolean = false,
         underline: Boolean = false,
         shadow: Boolean = false,
+        horizontalAlignment: String = "center",
         position: String = "center",
         animationType: String = "SLIDE_FROM_BOTTOM",
         animationDuration: Int = 500,
@@ -214,6 +215,7 @@ class ScheduleViewModel(
                 italic = italic,
                 underline = underline,
                 shadow = shadow,
+                horizontalAlignment = horizontalAlignment,
                 position = position,
                 animationType = animationType,
                 animationDuration = animationDuration,
@@ -313,7 +315,10 @@ class ScheduleViewModel(
         onPresentBible: ((ScheduleItem.BibleVerseItem) -> Unit)? = null,
         onPresentPresentation: ((ScheduleItem.PresentationItem) -> Unit)? = null,
         onPresentPictures: ((ScheduleItem.PictureItem) -> Unit)? = null,
-        onPresentMedia: ((ScheduleItem.MediaItem) -> Unit)? = null
+        onPresentMedia: ((ScheduleItem.MediaItem) -> Unit)? = null,
+        onPresentAnnouncement: ((ScheduleItem.AnnouncementItem) -> Unit)? = null,
+        onPresentLowerThird: ((ScheduleItem.LowerThirdItem) -> Unit)? = null,
+        onPresentWebsite: ((ScheduleItem.WebsiteItem) -> Unit)? = null
     ) {
         when (item) {
             is ScheduleItem.SongItem -> onPresentSong?.invoke(item) ?: onPresenting(Presenting.LYRICS)
@@ -322,9 +327,9 @@ class ScheduleViewModel(
             is ScheduleItem.PictureItem -> onPresentPictures?.invoke(item) ?: onPresenting(Presenting.PICTURES)
             is ScheduleItem.PresentationItem -> onPresentPresentation?.invoke(item) ?: onPresenting(Presenting.PRESENTATION)
             is ScheduleItem.MediaItem -> onPresentMedia?.invoke(item) ?: onPresenting(Presenting.MEDIA)
-            is ScheduleItem.LowerThirdItem -> { /* lower third shown via LowerThirdTab */ }
-            is ScheduleItem.AnnouncementItem -> onPresenting(Presenting.ANNOUNCEMENTS)
-            is ScheduleItem.WebsiteItem -> onPresenting(Presenting.WEBSITE)
+            is ScheduleItem.LowerThirdItem -> onPresentLowerThird?.invoke(item)
+            is ScheduleItem.AnnouncementItem -> onPresentAnnouncement?.invoke(item) ?: onPresenting(Presenting.ANNOUNCEMENTS)
+            is ScheduleItem.WebsiteItem -> onPresentWebsite?.invoke(item) ?: onPresenting(Presenting.WEBSITE)
         }
     }
 }
