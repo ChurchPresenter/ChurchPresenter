@@ -28,6 +28,7 @@ import androidx.compose.ui.window.rememberDialogState
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.keyboard_shortcuts_title
 import churchpresenter.composeapp.generated.resources.ok
+import churchpresenter.composeapp.generated.resources.symbol_ok
 import churchpresenter.composeapp.generated.resources.shortcut_category_bible
 import churchpresenter.composeapp.generated.resources.shortcut_category_global
 import churchpresenter.composeapp.generated.resources.shortcut_category_media
@@ -190,7 +191,7 @@ fun KeyboardShortcutsDialog(
                     horizontalArrangement = Arrangement.End
                 ) {
                     Button(onClick = onDismiss) {
-                        Text("✓ ${stringResource(Res.string.ok)}")
+                        Text("${stringResource(Res.string.symbol_ok)} ${stringResource(Res.string.ok)}")
                     }
                 }
             }

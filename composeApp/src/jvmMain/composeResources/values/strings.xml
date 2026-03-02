@@ -596,4 +596,11 @@
     <string name="copy_url">Copy URL</string>
     <string name="server_endpoints">Available Endpoints</string>
     <string name="server_restart">Restart Server</string>
+
+    <!-- Misc UI -->
+    <string name="theme">Theme</string>
+    <string name="menu_view">View</string>
+    <string name="symbol_ok">✓</string>
+    <string name="symbol_cancel">✗</string>
+    <string name="symbol_dropdown">▾</string>
 </resources>
