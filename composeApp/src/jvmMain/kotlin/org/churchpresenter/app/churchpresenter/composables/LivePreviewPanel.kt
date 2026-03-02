@@ -2,7 +2,9 @@ package org.churchpresenter.app.churchpresenter.composables
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -28,6 +30,7 @@ import churchpresenter.composeapp.generated.resources.live_preview_nothing
 import churchpresenter.composeapp.generated.resources.live_preview_title
 import org.churchpresenter.app.churchpresenter.PresenterScreen
 import org.churchpresenter.app.churchpresenter.data.AppSettings
+import org.churchpresenter.app.churchpresenter.data.ScreenAssignment
 import org.churchpresenter.app.churchpresenter.presenter.AnnouncementsPresenter
 import org.churchpresenter.app.churchpresenter.presenter.BiblePresenter
 import org.churchpresenter.app.churchpresenter.presenter.LowerThirdPresenter
@@ -37,16 +40,50 @@ import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.presenter.SlidePresenter
 import org.churchpresenter.app.churchpresenter.presenter.SongPresenter
 import org.churchpresenter.app.churchpresenter.presenter.WebsitePresenter
+import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.jetbrains.compose.resources.stringResource
 
 /**
- * A scaled-down preview of whatever is currently live on the presenter window.
- * Renders the exact same presenter composables used in the real window,
- * just inside a 16:9 box that scales to fit the available width.
+ * A scaled-down preview of whatever is currently live on the presenter windows.
+ * Shows one preview per configured display, each respecting its screen assignment.
  */
 @Composable
 fun LivePreviewPanel(
+    presenterManager: PresenterManager,
+    appSettings: AppSettings,
+    modifier: Modifier = Modifier
+) {
+    val proj = appSettings.projectionSettings
+    val displayCount = proj.numberOfWindows.coerceIn(1, 4)
+
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        for (i in 0 until displayCount) {
+            val screenAssignment = when (i) {
+                0 -> proj.screen1Assignment
+                1 -> proj.screen2Assignment
+                2 -> proj.screen3Assignment
+                else -> proj.screen4Assignment
+            }
+
+            SingleDisplayPreview(
+                screenIndex = i,
+                screenAssignment = screenAssignment,
+                presenterManager = presenterManager,
+                appSettings = appSettings,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+    }
+}
+
+@Composable
+private fun SingleDisplayPreview(
+    screenIndex: Int,
+    screenAssignment: ScreenAssignment,
     presenterManager: PresenterManager,
     appSettings: AppSettings,
     modifier: Modifier = Modifier
@@ -64,6 +101,20 @@ fun LivePreviewPanel(
     val announcementText by presenterManager.announcementText
     val websiteUrl by presenterManager.websiteUrl
 
+    val isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD
+
+    // Determine if this screen shows the current content
+    val showsContent = when (presentingMode) {
+        Presenting.BIBLE -> screenAssignment.showBible
+        Presenting.LYRICS -> screenAssignment.showSongs
+        Presenting.PICTURES, Presenting.PRESENTATION -> screenAssignment.showPictures
+        Presenting.MEDIA -> screenAssignment.showMedia
+        Presenting.LOWER_THIRD -> screenAssignment.showStreaming
+        Presenting.ANNOUNCEMENTS -> screenAssignment.showAnnouncements
+        Presenting.WEBSITE -> true
+        Presenting.NONE -> false
+    }
+
     Box(
         modifier = modifier
             .fillMaxWidth()
@@ -71,66 +122,66 @@ fun LivePreviewPanel(
             .clip(RoundedCornerShape(6.dp))
             .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(6.dp))
     ) {
-        // The presenter content is rendered at full logical size and then scaled down
-        // using a layout modifier so font sizes and padding remain proportional.
         ScaledPresenterContent {
             PresenterScreen(appSettings = appSettings) {
-                when (presentingMode) {
-                    Presenting.BIBLE ->
-                        BiblePresenter(
-                            selectedVerses = selectedVerses,
-                            appSettings = appSettings,
-                            isLowerThird = false
-                        )
-                    Presenting.LYRICS ->
-                        SongPresenter(
-                            lyricSection = lyricSection,
-                            appSettings = appSettings,
-                            isLowerThird = false
-                        )
-                    Presenting.PICTURES ->
-                        PicturePresenter(imagePath = selectedImagePath)
-                    Presenting.PRESENTATION ->
-                        SlidePresenter(slide = selectedSlide)
-                    Presenting.MEDIA ->
-                        MediaPresenter(modifier = Modifier.fillMaxSize())
-                    Presenting.LOWER_THIRD ->
-                        LowerThirdPresenter(
-                            jsonContent = lottieJsonContent,
-                            pauseAtFrame = lottiePauseAtFrame,
-                            pauseFrame = lottiePauseFrame,
-                            pauseDurationMs = lottiePauseDurationMs,
-                            trigger = lottieTrigger,
-                            appSettings = appSettings
-                        )
-                    Presenting.ANNOUNCEMENTS ->
-                        AnnouncementsPresenter(
-                            text = announcementText,
-                            appSettings = appSettings
-                        )
-                    Presenting.WEBSITE ->
-                        WebsitePresenter(url = websiteUrl, modifier = Modifier.fillMaxSize())
-                    Presenting.NONE -> {
-                        // Dark blank screen with label
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(Color(0xFF121212)),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = stringResource(Res.string.live_preview_nothing),
-                                color = Color.White.copy(alpha = 0.4f),
-                                fontSize = 18.sp
+                if (presentingMode != Presenting.NONE && showsContent) {
+                    when (presentingMode) {
+                        Presenting.BIBLE ->
+                            BiblePresenter(
+                                selectedVerses = selectedVerses,
+                                appSettings = appSettings,
+                                isLowerThird = isLowerThird
                             )
-                        }
+                        Presenting.LYRICS ->
+                            SongPresenter(
+                                lyricSection = lyricSection,
+                                appSettings = appSettings,
+                                isLowerThird = isLowerThird
+                            )
+                        Presenting.PICTURES ->
+                            PicturePresenter(imagePath = selectedImagePath)
+                        Presenting.PRESENTATION ->
+                            SlidePresenter(slide = selectedSlide)
+                        Presenting.MEDIA ->
+                            MediaPresenter(modifier = Modifier.fillMaxSize())
+                        Presenting.LOWER_THIRD ->
+                            LowerThirdPresenter(
+                                jsonContent = lottieJsonContent,
+                                pauseAtFrame = lottiePauseAtFrame,
+                                pauseFrame = lottiePauseFrame,
+                                pauseDurationMs = lottiePauseDurationMs,
+                                trigger = lottieTrigger,
+                                appSettings = appSettings
+                            )
+                        Presenting.ANNOUNCEMENTS ->
+                            AnnouncementsPresenter(
+                                text = announcementText,
+                                appSettings = appSettings
+                            )
+                        Presenting.WEBSITE ->
+                            WebsitePresenter(url = websiteUrl, modifier = Modifier.fillMaxSize())
+                        Presenting.NONE -> {}
+                    }
+                } else {
+                    // Dark blank screen
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color(0xFF121212)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = stringResource(Res.string.live_preview_nothing),
+                            color = Color.White.copy(alpha = 0.4f),
+                            fontSize = 18.sp
+                        )
                     }
                 }
             }
         }
 
-        // "LIVE" badge — only when something is presenting
-        if (presentingMode != Presenting.NONE) {
+        // "LIVE" badge — only when this screen is showing content
+        if (presentingMode != Presenting.NONE && showsContent) {
             Text(
                 text = stringResource(Res.string.live_preview_title),
                 color = Color.White,
@@ -142,6 +193,18 @@ fun LivePreviewPanel(
                     .padding(horizontal = 6.dp, vertical = 2.dp)
             )
         }
+
+        // Screen number label
+        Text(
+            text = "Screen ${screenIndex + 1}",
+            color = Color.White.copy(alpha = 0.6f),
+            fontSize = 9.sp,
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(4.dp)
+                .background(Color.Black.copy(alpha = 0.5f), RoundedCornerShape(3.dp))
+                .padding(horizontal = 5.dp, vertical = 2.dp)
+        )
     }
 }
 
@@ -153,12 +216,6 @@ fun LivePreviewPanel(
 private fun ScaledPresenterContent(
     content: @Composable () -> Unit
 ) {
-    // Measure the content at 1920×1080 then scale it down to fit the container.
-    // We also override LocalDensity to 1.0 so that presenters using
-    // BoxWithConstraints + toPx() (e.g. BiblePresenter, SongPresenter) always
-    // compute scaleFactor = 1920px/1920 = 1.0, exactly as the real presenter
-    // window does on a 1:1 display.  The visual shrink is handled entirely by
-    // the placeWithLayer transform below.
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -191,8 +248,6 @@ private fun ScaledPresenterContent(
                 }
             }
     ) {
-        // Density(1f) means 1 dp == 1 physical pixel, so toPx() inside
-        // BoxWithConstraints returns the raw layout pixel count (1920, 1080).
         CompositionLocalProvider(LocalDensity provides Density(1f)) {
             content()
         }

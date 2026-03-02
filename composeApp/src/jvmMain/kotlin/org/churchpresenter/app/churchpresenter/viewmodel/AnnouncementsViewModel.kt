@@ -234,7 +234,8 @@ class AnnouncementsViewModel {
     )
 
     // ── Go Live ──────────────────────────────────────────────────────
-    fun goLive(presenterManager: PresenterManager) {
+    fun goLive(presenterManager: PresenterManager, onSettingsChange: ((AppSettings) -> AppSettings) -> Unit) {
+        saveToSettings(onSettingsChange)
         presenterManager.setAnnouncementText(_text.value)
         presenterManager.setPresentingMode(Presenting.ANNOUNCEMENTS)
     }

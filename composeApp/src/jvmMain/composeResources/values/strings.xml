@@ -39,8 +39,10 @@
     <string name="bible_storage_directory">Bible Storage Directory</string>
     <string name="songs_storage_directory">Songs Storage Directory</string>
     <string name="lower_third_storage_directory">Lower Third Storage Directory</string>
+    <string name="pictures_storage_directory">Pictures Storage Directory</string>
     <string name="cancel">Cancel</string>
     <string name="ok">OK</string>
+    <string name="apply">Apply</string>
     <string name="none">None</string>
     <string name="first_page">First Page</string>
     <string name="every_page">Every Page</string>
@@ -185,6 +187,7 @@
     <string name="song_files">Song Files</string>
     <string name="storage_directory">Storage Directory</string>
     <string name="browse_directory">Browse...</string>
+    <string name="set_all_directories">Set All</string>
     <string name="no_directory_selected">No directory selected</string>
     <string name="files_in_directory">Files in Directory</string>
     <string name="import_song_file">Import Song File</string>
@@ -313,6 +316,8 @@
     <string name="background_default">Default</string>
     <string name="background_color_option">Color</string>
     <string name="background_image_option">Image</string>
+    <string name="background_video_option">Video Loop</string>
+    <string name="background_video">Background Video:</string>
 
     <!-- Position Options -->
     <string name="position_above">Above</string>
@@ -375,6 +380,8 @@
     <string name="tooltip_add_label">Add Label</string>
     <string name="tooltip_collapse_schedule">Collapse Schedule</string>
     <string name="tooltip_expand_schedule">Expand Schedule</string>
+    <string name="schedule_drop_hint">Drag files here to add to schedule</string>
+    <string name="schedule_add_files">Add Files…</string>
 
     <!-- Add Label Dialog -->
     <string name="add_label">Add Label</string>
@@ -400,6 +407,8 @@
     <string name="select_folder_to_view">Select a folder to view images</string>
     <string name="select_image_folder_dialog">Select Image Folder</string>
     <string name="loop">Loop</string>
+    <string name="loop_on">Loop On</string>
+    <string name="loop_off">Loop Off</string>
     <string name="transition_duration">Transition Duration:</string>
     <string name="animation_type">Animation Type:</string>
     <string name="animation_crossfade">Crossfade</string>
@@ -526,6 +535,7 @@
     <string name="center_right">Center Right</string>
     <string name="bottom_center">Bottom Center</string>
     <string name="announcement_background_color_label">Background Color</string>
+    <string name="transparent_default">Transparent (Default)</string>
     <string name="announcement_animation">Animation</string>
     <string name="animation_slide_up">Slide Up (Bottom to Top)</string>
     <string name="anim_slide_from_left">Slide From Left</string>

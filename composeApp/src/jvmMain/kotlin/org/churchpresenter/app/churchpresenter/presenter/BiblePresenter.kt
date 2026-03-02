@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.models.SelectedVerse
+import org.churchpresenter.app.churchpresenter.composables.LoopingVideoBackground
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
 import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDefault
@@ -151,28 +152,42 @@ fun BiblePresenter(
     val bgConfig = if (isLowerThird) appSettings.backgroundSettings.bibleLowerThirdBackground
                    else appSettings.backgroundSettings.bibleBackground
 
-    var backgroundColor: Color = parseHexColor(bgConfig.backgroundColor)
-    val backgroundType = bgConfig.backgroundType
-    val backgroundImagePath = bgConfig.backgroundImage
+    // Resolve effective background type/paths (handle Default → inherit from global)
+    val effectiveType: String
+    val effectiveImagePath: String
+    val effectiveVideoPath: String
+    var backgroundColor: Color
 
-    if (backgroundType == Constants.BACKGROUND_DEFAULT) {
-        backgroundColor = parseHexColor(appSettings.backgroundSettings.defaultBackgroundColor)
+    if (bgConfig.backgroundType == Constants.BACKGROUND_DEFAULT) {
+        val defaults = appSettings.backgroundSettings
+        effectiveType = defaults.defaultBackgroundType
+        effectiveImagePath = defaults.defaultBackgroundImage
+        effectiveVideoPath = defaults.defaultBackgroundVideo
+        backgroundColor = parseHexColor(defaults.defaultBackgroundColor)
+    } else {
+        effectiveType = bgConfig.backgroundType
+        effectiveImagePath = bgConfig.backgroundImage
+        effectiveVideoPath = bgConfig.backgroundVideo
+        backgroundColor = parseHexColor(bgConfig.backgroundColor)
     }
 
-    val backgroundImageBitmap = remember(backgroundType, backgroundImagePath, isLowerThird) {
-        if (backgroundType == Constants.BACKGROUND_IMAGE && backgroundImagePath.isNotEmpty()) {
+    val backgroundImageBitmap = remember(effectiveType, effectiveImagePath, isLowerThird) {
+        if (effectiveType == Constants.BACKGROUND_IMAGE && effectiveImagePath.isNotEmpty()) {
             try {
-                val file = File(backgroundImagePath)
-                if (file.exists()) Image.makeFromEncoded(file.readBytes()).toComposeImageBitmap()
+                val file = File(effectiveImagePath)
+                if (file.exists()) org.jetbrains.skia.Image.makeFromEncoded(file.readBytes()).toComposeImageBitmap()
                 else null
             } catch (_: Exception) { null }
         } else null
     }
 
+    val useVideoBackground = effectiveType == Constants.BACKGROUND_VIDEO && effectiveVideoPath.isNotEmpty()
+
     val bgModifier: Modifier = when {
-        backgroundType == Constants.BACKGROUND_IMAGE && backgroundImageBitmap != null ->
+        useVideoBackground -> Modifier.background(Color.Black) // video rendered as overlay
+        effectiveType == Constants.BACKGROUND_IMAGE && backgroundImageBitmap != null ->
             Modifier.paint(painter = BitmapPainter(backgroundImageBitmap), contentScale = ContentScale.Crop)
-        backgroundType == Constants.BACKGROUND_IMAGE ->
+        effectiveType == Constants.BACKGROUND_IMAGE ->
             Modifier.background(Color.Black)
         else ->
             Modifier.background(backgroundColor)
@@ -182,6 +197,12 @@ fun BiblePresenter(
         modifier.fillMaxSize()
             .then(if (!isLowerThird) bgModifier else Modifier)
     ) {
+        if (useVideoBackground && !isLowerThird) {
+            LoopingVideoBackground(
+                videoPath = effectiveVideoPath,
+                modifier = Modifier.fillMaxSize()
+            )
+        }
         val density = LocalDensity.current
         val widthScale = with(density) { maxWidth.toPx() / 1920f }
         val heightScale = with(density) { maxHeight.toPx() / 1080f }

@@ -23,7 +23,9 @@ import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.bible_storage_directory
 import churchpresenter.composeapp.generated.resources.browse_directory
+import churchpresenter.composeapp.generated.resources.set_all_directories
 import churchpresenter.composeapp.generated.resources.lower_third_storage_directory
+import churchpresenter.composeapp.generated.resources.pictures_storage_directory
 import churchpresenter.composeapp.generated.resources.theme
 import churchpresenter.composeapp.generated.resources.no_directory_selected
 import churchpresenter.composeapp.generated.resources.songs_storage_directory
@@ -43,6 +45,18 @@ fun AppearanceSettingsTab(
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit = {}
 ) {
     val fileManager = FileManager()
+    val setAllText = stringResource(Res.string.set_all_directories)
+
+    val setAllDirectories: (String) -> Unit = { dir ->
+        onSettingsChange { s ->
+            s.copy(
+                bibleSettings = s.bibleSettings.copy(storageDirectory = dir),
+                songSettings = s.songSettings.copy(storageDirectory = dir),
+                pictureSettings = s.pictureSettings.copy(storageDirectory = dir),
+                streamingSettings = s.streamingSettings.copy(lowerThirdFolder = dir)
+            )
+        }
+    }
 
     Column(modifier = Modifier.padding(16.dp)) {
         // Theme section
@@ -68,12 +82,14 @@ fun AppearanceSettingsTab(
             currentPath = settings.bibleSettings.storageDirectory,
             noDirectoryText = stringResource(Res.string.no_directory_selected),
             browseText = stringResource(Res.string.browse_directory),
+            setAllText = setAllText,
             fileManager = fileManager,
             onDirectorySelected = { dir ->
                 onSettingsChange { s ->
                     s.copy(bibleSettings = s.bibleSettings.copy(storageDirectory = dir))
                 }
-            }
+            },
+            onSetAll = setAllDirectories
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -84,12 +100,32 @@ fun AppearanceSettingsTab(
             currentPath = settings.songSettings.storageDirectory,
             noDirectoryText = stringResource(Res.string.no_directory_selected),
             browseText = stringResource(Res.string.browse_directory),
+            setAllText = setAllText,
             fileManager = fileManager,
             onDirectorySelected = { dir ->
                 onSettingsChange { s ->
                     s.copy(songSettings = s.songSettings.copy(storageDirectory = dir))
                 }
-            }
+            },
+            onSetAll = setAllDirectories
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Pictures Storage Directory
+        DirectoryPicker(
+            label = stringResource(Res.string.pictures_storage_directory),
+            currentPath = settings.pictureSettings.storageDirectory,
+            noDirectoryText = stringResource(Res.string.no_directory_selected),
+            browseText = stringResource(Res.string.browse_directory),
+            setAllText = setAllText,
+            fileManager = fileManager,
+            onDirectorySelected = { dir ->
+                onSettingsChange { s ->
+                    s.copy(pictureSettings = s.pictureSettings.copy(storageDirectory = dir))
+                }
+            },
+            onSetAll = setAllDirectories
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -100,12 +136,14 @@ fun AppearanceSettingsTab(
             currentPath = settings.streamingSettings.lowerThirdFolder,
             noDirectoryText = stringResource(Res.string.no_directory_selected),
             browseText = stringResource(Res.string.browse_directory),
+            setAllText = setAllText,
             fileManager = fileManager,
             onDirectorySelected = { dir ->
                 onSettingsChange { s ->
                     s.copy(streamingSettings = s.streamingSettings.copy(lowerThirdFolder = dir))
                 }
-            }
+            },
+            onSetAll = setAllDirectories
         )
     }
 }
@@ -116,8 +154,10 @@ private fun DirectoryPicker(
     currentPath: String,
     noDirectoryText: String,
     browseText: String,
+    setAllText: String,
     fileManager: FileManager,
-    onDirectorySelected: (String) -> Unit
+    onDirectorySelected: (String) -> Unit,
+    onSetAll: (String) -> Unit
 ) {
     Text(
         text = label,
@@ -159,6 +199,18 @@ private fun DirectoryPicker(
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
         ) {
             Text(text = browseText, style = MaterialTheme.typography.labelMedium)
+        }
+        Button(
+            onClick = { if (currentPath.isNotEmpty()) onSetAll(currentPath) },
+            enabled = currentPath.isNotEmpty(),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+            ),
+            shape = RoundedCornerShape(4.dp),
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+        ) {
+            Text(text = setAllText, style = MaterialTheme.typography.labelMedium)
         }
     }
 }

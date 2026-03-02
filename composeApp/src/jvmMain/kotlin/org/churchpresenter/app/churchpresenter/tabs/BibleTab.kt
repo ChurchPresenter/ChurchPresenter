@@ -9,6 +9,7 @@ import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -395,6 +396,7 @@ fun BibleTab(
                         ) { query ->
                             viewModel.updateVerseSearchQuery(query)
                         }
+                        Spacer(modifier = Modifier.weight(1f))
                         Button(
                             modifier = Modifier.wrapContentSize().padding(start = 8.dp),
                             onClick = { onPresenting(Presenting.BIBLE) },

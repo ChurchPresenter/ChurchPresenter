@@ -46,6 +46,7 @@ object Constants {
     const val BACKGROUND_DEFAULT = "Default"
     const val BACKGROUND_COLOR = "Color"
     const val BACKGROUND_IMAGE = "Image"
+    const val BACKGROUND_VIDEO = "Video"
 
     // Position Options
     const val POSITION_ABOVE = "Above"
