@@ -34,6 +34,8 @@ import churchpresenter.composeapp.generated.resources.appearance
 import churchpresenter.composeapp.generated.resources.background
 import churchpresenter.composeapp.generated.resources.bible
 import churchpresenter.composeapp.generated.resources.cancel
+import churchpresenter.composeapp.generated.resources.symbol_cancel
+import churchpresenter.composeapp.generated.resources.symbol_ok
 import churchpresenter.composeapp.generated.resources.display_lower_third
 import churchpresenter.composeapp.generated.resources.media
 import churchpresenter.composeapp.generated.resources.ok
@@ -216,7 +218,7 @@ fun OptionsDialog(
                                 contentColor = MaterialTheme.colorScheme.onSurface
                             )
                         ) {
-                            Text("✗ ${stringResource(Res.string.cancel)}")
+                            Text("${stringResource(Res.string.symbol_cancel)} ${stringResource(Res.string.cancel)}")
                         }
 
                         Spacer(modifier = Modifier.width(8.dp))
@@ -232,7 +234,7 @@ fun OptionsDialog(
                                 contentColor = MaterialTheme.colorScheme.onPrimary
                             )
                         ) {
-                            Text("✓ ${stringResource(Res.string.ok)}")
+                            Text("${stringResource(Res.string.symbol_ok)} ${stringResource(Res.string.ok)}")
                         }
                     }
                 }

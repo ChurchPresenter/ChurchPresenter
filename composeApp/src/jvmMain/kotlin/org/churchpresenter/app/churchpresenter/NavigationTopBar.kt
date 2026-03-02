@@ -27,6 +27,7 @@ import churchpresenter.composeapp.generated.resources.menu_file
 import churchpresenter.composeapp.generated.resources.menu_help
 import churchpresenter.composeapp.generated.resources.menu_help_item
 import churchpresenter.composeapp.generated.resources.menu_language
+import churchpresenter.composeapp.generated.resources.menu_view
 import churchpresenter.composeapp.generated.resources.menu_new_schedule
 import churchpresenter.composeapp.generated.resources.menu_open_schedule
 import churchpresenter.composeapp.generated.resources.menu_remove_from_schedule
@@ -125,7 +126,7 @@ fun FrameWindowScope.NavigationTopBar(
             )
         }
 
-        Menu("View", mnemonic = 'V') {
+        Menu(stringResource(Res.string.menu_view), mnemonic = 'V') {
             Item(
                 text = stringResource(Res.string.light_theme),
                 onClick = {

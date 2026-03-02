@@ -24,6 +24,7 @@ import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.bible_storage_directory
 import churchpresenter.composeapp.generated.resources.browse_directory
 import churchpresenter.composeapp.generated.resources.lower_third_storage_directory
+import churchpresenter.composeapp.generated.resources.theme
 import churchpresenter.composeapp.generated.resources.no_directory_selected
 import churchpresenter.composeapp.generated.resources.songs_storage_directory
 import org.churchpresenter.app.churchpresenter.composables.ThemeSegmentedButton
@@ -46,7 +47,7 @@ fun AppearanceSettingsTab(
     Column(modifier = Modifier.padding(16.dp)) {
         // Theme section
         Text(
-            text = "Theme",
+            text = stringResource(Res.string.theme),
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onSurface,
             modifier = Modifier.padding(bottom = 12.dp)
