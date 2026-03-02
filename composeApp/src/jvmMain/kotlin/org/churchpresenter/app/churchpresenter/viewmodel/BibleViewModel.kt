@@ -5,7 +5,12 @@ import androidx.compose.runtime.mutableStateOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.churchpresenter.app.churchpresenter.data.AppSettings
@@ -83,25 +88,17 @@ class BibleViewModel(
     private val _isLoading = mutableStateOf(false)
     val isLoading: State<Boolean> = _isLoading
 
+    // True only after the full verse index (phase 3) is loaded — not just book names
+    // MutableStateFlow so coroutines can suspend on it with .first { it }
+    private val _isFullyLoadedFlow = MutableStateFlow(false)
+    val isFullyLoadedFlow: StateFlow<Boolean> = _isFullyLoadedFlow.asStateFlow()
+    val isFullyLoaded: State<Boolean> get() = mutableStateOf(_isFullyLoadedFlow.value)
+
     private val viewModelScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
 
     init {
-        // Initialize default search scope and mode indices
-        _selectedScopeIndex.value = 0  // Entire Bible
-        _selectedModeIndex.value = 0   // Contains
-
-        // Load localized book name mapping and English book names
-        viewModelScope.launch {
-            try {
-                _bookNameMapping.value = BibleBookNames.getBookNameMapping()
-                _englishBookNames.value = BibleBookNames.getEnglishBookNames()
-            } catch (e: Exception) {
-                e.printStackTrace()
-                _bookNameMapping.value = emptyMap()
-                _englishBookNames.value = emptyList()
-            }
-        }
-
+        _selectedScopeIndex.value = 0
+        _selectedModeIndex.value = 0
         loadBibles()
     }
 
@@ -113,63 +110,84 @@ class BibleViewModel(
     fun loadBibles() {
         viewModelScope.launch {
             _isLoading.value = true
+            _isFullyLoadedFlow.value = false
             try {
-                // Parse Bible files on IO thread so the UI stays responsive
-                val primary = withContext(Dispatchers.IO) {
-                    if (appSettings.bibleSettings.primaryBible.isNotEmpty() &&
-                        appSettings.bibleSettings.storageDirectory.isNotEmpty()
-                    ) {
-                        val bibleFile = File(
-                            appSettings.bibleSettings.storageDirectory,
-                            appSettings.bibleSettings.primaryBible
-                        )
-                        if (bibleFile.exists()) {
-                            try {
-                                Bible().apply { loadFromSpb(bibleFile.absolutePath) }
-                            } catch (e: Exception) {
-                                e.printStackTrace(); null
-                            }
-                        } else null
-                    } else null
+                val primaryPath = if (appSettings.bibleSettings.primaryBible.isNotEmpty() &&
+                    appSettings.bibleSettings.storageDirectory.isNotEmpty()
+                ) File(appSettings.bibleSettings.storageDirectory, appSettings.bibleSettings.primaryBible)
+                    .takeIf { it.exists() }
+                else null
+
+                val secondaryPath = if (appSettings.bibleSettings.secondaryBible.isNotEmpty() &&
+                    appSettings.bibleSettings.storageDirectory.isNotEmpty()
+                ) File(appSettings.bibleSettings.storageDirectory, appSettings.bibleSettings.secondaryBible)
+                    .takeIf { it.exists() }
+                else null
+
+                // ── Phase 1: load book names only (header scan — very fast) ──────────
+                val bookNameMappingDeferred = async(Dispatchers.IO) {
+                    try { BibleBookNames.getBookNameMapping() } catch (_: Exception) { emptyMap() }
+                }
+                val englishBookNamesDeferred = async(Dispatchers.IO) {
+                    try { BibleBookNames.getEnglishBookNames() } catch (_: Exception) { emptyList() }
+                }
+                val quickPrimary = primaryPath?.let { path ->
+                    async(Dispatchers.IO) {
+                        try { Bible().apply { loadBooksOnly(path.absolutePath) } }
+                        catch (_: Exception) { null }
+                    }
                 }
 
-                val secondary = withContext(Dispatchers.IO) {
-                    if (appSettings.bibleSettings.secondaryBible.isNotEmpty() &&
-                        appSettings.bibleSettings.storageDirectory.isNotEmpty()
-                    ) {
-                        val bibleFile = File(
-                            appSettings.bibleSettings.storageDirectory,
-                            appSettings.bibleSettings.secondaryBible
-                        )
-                        if (bibleFile.exists()) {
-                            try {
-                                Bible().apply { loadFromSpb(bibleFile.absolutePath) }
-                            } catch (e: Exception) {
-                                e.printStackTrace(); null
-                            }
-                        } else null
-                    } else null
+                // Show book names as soon as the header scan finishes
+                val booksOnlyBible = quickPrimary?.await()
+                _bookNameMapping.value = bookNameMappingDeferred.await()
+                _englishBookNames.value = englishBookNamesDeferred.await()
+
+                if (booksOnlyBible != null && booksOnlyBible.getBookCount() > 0) {
+                    _primaryBible.value = booksOnlyBible
+                    _books.value = booksOnlyBible.getBooks()
+                    refreshFilteredLists()
                 }
 
-                // Update state back on the Main thread
+                // ── Phase 2: load full verse data in background ────────────────────
+                val primaryDeferred = primaryPath?.let { path ->
+                    async(Dispatchers.IO) {
+                        try { Bible().apply { loadFromSpb(path.absolutePath) } }
+                        catch (e: Exception) { e.printStackTrace(); null }
+                    }
+                }
+                val secondaryDeferred = secondaryPath?.let { path ->
+                    async(Dispatchers.IO) {
+                        try { Bible().apply { loadFromSpb(path.absolutePath) } }
+                        catch (e: Exception) { e.printStackTrace(); null }
+                    }
+                }
+
+                val primary = primaryDeferred?.await()
+                val secondary = secondaryDeferred?.await()
+
+                // ── Phase 3: update state with full data and load first chapter ─────
                 _primaryBible.value = primary
                 _secondaryBible.value = secondary
 
-                primary?.let { bible ->
-                    _books.value = bible.getBooks()
-                    refreshFilteredLists()
-                    if (bible.getBookCount() > 0) {
-                        loadChapter(_selectedBookIndex.value, _selectedChapter.value)
+                if (primary != null) {
+                    _books.value = primary.getBooks()
+                    val bookId = _selectedBookIndex.value + 1
+                    val chapterVerses = withContext(Dispatchers.IO) {
+                        primary.getChapter(bookId, _selectedChapter.value)
                     }
-                    // Notify listener (e.g. companion server) with loaded bible
-                    onBibleLoaded?.invoke(bible, appSettings.bibleSettings.primaryBible)
-                } ?: run {
+                    _verses.value = chapterVerses
+                    _selectedVerseIndex.value = 0
+                    refreshFilteredLists()
+                    onBibleLoaded?.invoke(primary, appSettings.bibleSettings.primaryBible)
+                } else if (booksOnlyBible == null) {
                     _books.value = emptyList()
                     _verses.value = emptyList()
                     refreshFilteredLists()
                 }
             } finally {
                 _isLoading.value = false
+                _isFullyLoadedFlow.value = true
             }
         }
     }
@@ -181,12 +199,15 @@ class BibleViewModel(
                 val clampedIndex = bookIndex.coerceIn(0, bookCount - 1)
                 _selectedBookIndex.value = clampedIndex
                 _selectedChapter.value = chapter
-
-                val bookId = clampedIndex + 1
-                val chapterVerses = bible.getChapter(bookId, chapter)
-                _verses.value = chapterVerses
                 _selectedVerseIndex.value = 0
-                refreshFilteredLists()
+                viewModelScope.launch {
+                    val bookId = clampedIndex + 1
+                    val chapterVerses = withContext(Dispatchers.IO) {
+                        bible.getChapter(bookId, chapter)
+                    }
+                    _verses.value = chapterVerses
+                    refreshFilteredLists()
+                }
             }
         }
     }
@@ -215,29 +236,38 @@ class BibleViewModel(
     }
 
     fun selectVerseByDetails(bookName: String, chapter: Int, verseNumber: Int): Boolean {
-        // Find the book by name
-        val books = _books.value
-        val bookIndex = books.indexOfFirst { it.equals(bookName, ignoreCase = true) }
+        val bookIndex = _books.value.indexOfFirst { it.equals(bookName, ignoreCase = true) }
+        if (bookIndex < 0) return false
 
-        if (bookIndex >= 0) {
-            // Select the book
-            selectBook(bookIndex)
+        _selectedBookIndex.value = bookIndex
+        _selectedChapter.value = chapter
+        _selectedVerseIndex.value = 0
 
-            // Select the chapter
-            selectChapter(chapter)
-
-            // Find and select the verse
-            val verses = _verses.value
-            val verseIndex = verses.indexOfFirst {
-                it.startsWith("$verseNumber.")
+        viewModelScope.launch {
+            // Wait for full verse data (phase 3) — books-only bible has no chapter index
+            if (!_isFullyLoadedFlow.value) {
+                _isFullyLoadedFlow.first { it }
             }
 
-            if (verseIndex >= 0) {
-                selectVerse(verseIndex)
-                return true
+            val bible = _primaryBible.value ?: return@launch
+            val bookCount = bible.getBookCount()
+            if (bookCount == 0) return@launch
+
+            val clampedIndex = bookIndex.coerceIn(0, bookCount - 1)
+            val bookId = clampedIndex + 1
+
+            val chapterVerses = withContext(Dispatchers.IO) {
+                bible.getChapter(bookId, chapter)
             }
+            _verses.value = chapterVerses
+
+            // Use "N. " (with trailing space) to avoid "3." matching "13." or "23."
+            val verseIndex = chapterVerses.indexOfFirst { it.startsWith("$verseNumber. ") }
+            _selectedVerseIndex.value = if (verseIndex >= 0) verseIndex else 0
+
+            refreshFilteredLists()
         }
-        return false
+        return true
     }
 
     fun getChaptersForCurrentBook(): List<String> {
@@ -525,22 +555,32 @@ class BibleViewModel(
     }
 
     fun selectSearchResult(result: BibleSearch) {
-        // Find the book index
-        val bookName = result.book
-        val bookIndex = _books.value.indexOf(bookName)
-        if (bookIndex >= 0) {
-            val chapter = result.chapter.toIntOrNull() ?: 1
-            val verse = result.verse.toIntOrNull() ?: 1
+        val bookIndex = _books.value.indexOf(result.book)
+        if (bookIndex < 0) return
+        val chapter = result.chapter.toIntOrNull() ?: 1
+        val verse = result.verse.toIntOrNull() ?: 1
 
-            // Select the book and chapter
-            selectBook(bookIndex)
-            selectChapter(chapter)
+        val bible = _primaryBible.value ?: return
+        val bookCount = bible.getBookCount()
+        if (bookCount == 0) return
 
-            // Find and select the verse
-            val verseIndex = _verses.value.indexOfFirst { it.startsWith("$verse.") }
-            if (verseIndex >= 0) {
-                selectVerse(verseIndex)
+        val clampedIndex = bookIndex.coerceIn(0, bookCount - 1)
+        val bookId = clampedIndex + 1
+
+        _selectedBookIndex.value = clampedIndex
+        _selectedChapter.value = chapter
+        _selectedVerseIndex.value = 0
+
+        viewModelScope.launch {
+            val chapterVerses = withContext(Dispatchers.IO) {
+                bible.getChapter(bookId, chapter)
             }
+            _verses.value = chapterVerses
+
+            val verseIndex = chapterVerses.indexOfFirst { it.startsWith("$verse. ") }
+            _selectedVerseIndex.value = if (verseIndex >= 0) verseIndex else 0
+
+            refreshFilteredLists()
         }
     }
 
