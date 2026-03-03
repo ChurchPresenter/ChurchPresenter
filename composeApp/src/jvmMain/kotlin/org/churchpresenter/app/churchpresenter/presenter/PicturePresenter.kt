@@ -22,6 +22,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.toComposeImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalWindowInfo
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.failed_to_load_image
 import churchpresenter.composeapp.generated.resources.no_images
@@ -111,8 +112,14 @@ fun PicturePresenter(
 @Composable
 private fun ImageContent(currentImagePath: String?) {
     if (currentImagePath != null) {
-        val imageBitmap = remember(currentImagePath) {
-            loadAndDownscaleImage(currentImagePath)
+        // Use actual presenter window size so image is never loaded larger than what's displayed
+        val windowInfo = LocalWindowInfo.current
+        val containerSize = windowInfo.containerSize
+        val screenWidth = containerSize.width.takeIf { it > 0 } ?: 1920
+        val screenHeight = containerSize.height.takeIf { it > 0 } ?: 1080
+
+        val imageBitmap = remember(currentImagePath, screenWidth, screenHeight) {
+            loadAndDownscaleImage(currentImagePath, screenWidth, screenHeight)
         }
 
         if (imageBitmap != null) {
@@ -138,73 +145,61 @@ private fun ImageContent(currentImagePath: String?) {
     }
 }
 
-private fun loadAndDownscaleImage(imagePath: String): ImageBitmap? {
+private fun loadAndDownscaleImage(imagePath: String, maxWidth: Int = 1920, maxHeight: Int = 1080): ImageBitmap? {
     return try {
         val file = File(imagePath)
-        if (!file.exists()) {
-            println("PicturePresenter: File not found: $imagePath")
-            return null
-        }
+        if (!file.exists()) return null
 
         val bytes = file.readBytes()
 
-        // Try to decode with Skia first
         val originalImage = try {
             Image.makeFromEncoded(bytes)
         } catch (e: Exception) {
-            println("PicturePresenter: Skia failed to decode, trying ImageIO for HEIC")
-
-            // If it's a HEIC file, try converting with ImageIO
             if (file.extension.lowercase() in listOf("heic", "heif")) {
                 try {
                     val bufferedImage = ImageIO.read(file)
                     if (bufferedImage != null) {
                         val outputStream = ByteArrayOutputStream()
                         ImageIO.write(bufferedImage, "jpg", outputStream)
-                        val jpegBytes = outputStream.toByteArray()
-                        Image.makeFromEncoded(jpegBytes)
-                    } else {
-                        println("PicturePresenter: ImageIO returned null")
-                        return null
-                    }
-                } catch (heicError: Exception) {
-                    println("PicturePresenter: HEIC conversion failed: ${heicError.message}")
-                    return null
-                }
-            } else {
-                println("PicturePresenter: Failed to decode image: ${e.message}")
-                return null
-            }
+                        Image.makeFromEncoded(outputStream.toByteArray())
+                    } else return null
+                } catch (_: Exception) { return null }
+            } else return null
         }
 
-        // Downscale to max 1080p (1920x1080)
-        val maxWidth = 1920
-        val maxHeight = 1080
-
+        // Cap at actual screen resolution — no point storing more pixels than the display can show
         val widthScale = maxWidth.toFloat() / originalImage.width
         val heightScale = maxHeight.toFloat() / originalImage.height
-        val scale = minOf(widthScale, heightScale, 1.0f) // Don't upscale
+        val scale = minOf(widthScale, heightScale, 1.0f) // never upscale
 
         if (scale < 1.0f) {
-            // Downscale the image
             val newWidth = (originalImage.width * scale).toInt()
             val newHeight = (originalImage.height * scale).toInt()
 
-            println("PicturePresenter: Downscaling ${originalImage.width}x${originalImage.height} to ${newWidth}x${newHeight}")
-
             val surface = org.jetbrains.skia.Surface.makeRasterN32Premul(newWidth, newHeight)
             val canvas = surface.canvas
-            canvas.scale(scale, scale)
-            canvas.drawImage(originalImage, 0f, 0f)
+
+            // High-quality downscale using Mitchell filter via SamplingMode
+            val paint = org.jetbrains.skia.Paint()
+            val srcRect = org.jetbrains.skia.Rect.makeWH(
+                originalImage.width.toFloat(),
+                originalImage.height.toFloat()
+            )
+            val dstRect = org.jetbrains.skia.Rect.makeWH(newWidth.toFloat(), newHeight.toFloat())
+            canvas.drawImageRect(
+                originalImage,
+                srcRect,
+                dstRect,
+                org.jetbrains.skia.SamplingMode.MITCHELL,
+                paint,
+                true
+            )
 
             surface.makeImageSnapshot().toComposeImageBitmap()
         } else {
-            // Use original size if already smaller than 1080p
-            println("PicturePresenter: Using original size ${originalImage.width}x${originalImage.height}")
             originalImage.toComposeImageBitmap()
         }
     } catch (e: Exception) {
-        println("PicturePresenter: Failed to load image: ${e.message}")
         e.printStackTrace()
         null
     }

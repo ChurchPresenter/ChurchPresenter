@@ -273,29 +273,31 @@ class PicturesViewModel(
 
         println("Decoded ${file.name}: ${originalImage.width}x${originalImage.height}")
 
-        // Downscale to thumbnail size (300px max dimension) for better performance
-        val maxThumbnailSize = 300
+        // Downscale to thumbnail size (400px max dimension) for grid display
+        val maxThumbnailSize = 400
         val scale = maxThumbnailSize.toFloat() / maxOf(originalImage.width, originalImage.height)
 
         return if (scale < 1.0f) {
-            println("Downscaling ${file.name} with scale factor: $scale")
-            // Image is larger than thumbnail size, downscale it
             val newWidth = (originalImage.width * scale).toInt()
             val newHeight = (originalImage.height * scale).toInt()
 
-            // Create a scaled bitmap
             val surface = org.jetbrains.skia.Surface.makeRasterN32Premul(newWidth, newHeight)
             val canvas = surface.canvas
 
-            // Scale and draw the image
-            canvas.scale(scale, scale)
-            canvas.drawImage(originalImage, 0f, 0f)
+            // High-quality downscale using Mitchell filter
+            val srcRect = org.jetbrains.skia.Rect.makeWH(originalImage.width.toFloat(), originalImage.height.toFloat())
+            val dstRect = org.jetbrains.skia.Rect.makeWH(newWidth.toFloat(), newHeight.toFloat())
+            canvas.drawImageRect(
+                originalImage,
+                srcRect,
+                dstRect,
+                org.jetbrains.skia.SamplingMode.MITCHELL,
+                org.jetbrains.skia.Paint(),
+                true
+            )
 
-            // Get the resulting bitmap
             surface.makeImageSnapshot().toComposeImageBitmap()
         } else {
-            println("Using original size for ${file.name}")
-            // Image is already small enough, use as-is
             originalImage.toComposeImageBitmap()
         }
     }
