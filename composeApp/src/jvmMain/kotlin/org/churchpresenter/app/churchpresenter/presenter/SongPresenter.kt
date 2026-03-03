@@ -1,5 +1,13 @@
 package org.churchpresenter.app.churchpresenter.presenter
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -34,6 +42,7 @@ import androidx.compose.ui.geometry.Offset
 import kotlin.math.min
 import org.churchpresenter.app.churchpresenter.composables.LoopingVideoBackground
 import org.churchpresenter.app.churchpresenter.data.AppSettings
+import org.churchpresenter.app.churchpresenter.models.AnimationType
 import org.churchpresenter.app.churchpresenter.models.LyricSection
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.Constants.VERSE_1_RUS
@@ -71,19 +80,31 @@ fun SongPresenter(
         fontWeight = if (appSettings.songSettings.titleBold) FontWeight.Bold else FontWeight.Normal,
         fontStyle = if (appSettings.songSettings.titleItalic) FontStyle.Italic else FontStyle.Normal,
         textDecoration = if (appSettings.songSettings.titleUnderline) TextDecoration.Underline else TextDecoration.None,
-        shadow = if (appSettings.songSettings.titleShadow) Shadow(color = Color.Black.copy(alpha = 0.7f), offset = Offset(2f, 2f), blurRadius = 4f) else null
+        shadow = if (appSettings.songSettings.titleShadow) Shadow(
+            color = Color.Black.copy(alpha = 0.7f),
+            offset = Offset(2f, 2f),
+            blurRadius = 4f
+        ) else null
     )
     val lyricsTextStyle = TextStyle(
         fontWeight = if (appSettings.songSettings.lyricsBold) FontWeight.Bold else FontWeight.Normal,
         fontStyle = if (appSettings.songSettings.lyricsItalic) FontStyle.Italic else FontStyle.Normal,
         textDecoration = if (appSettings.songSettings.lyricsUnderline) TextDecoration.Underline else TextDecoration.None,
-        shadow = if (appSettings.songSettings.lyricsShadow) Shadow(color = Color.Black.copy(alpha = 0.7f), offset = Offset(2f, 2f), blurRadius = 4f) else null
+        shadow = if (appSettings.songSettings.lyricsShadow) Shadow(
+            color = Color.Black.copy(alpha = 0.7f),
+            offset = Offset(2f, 2f),
+            blurRadius = 4f
+        ) else null
     )
     val songNumberTextStyle = TextStyle(
         fontWeight = if (appSettings.songSettings.songNumberBold) FontWeight.Bold else FontWeight.Normal,
         fontStyle = if (appSettings.songSettings.songNumberItalic) FontStyle.Italic else FontStyle.Normal,
         textDecoration = if (appSettings.songSettings.songNumberUnderline) TextDecoration.Underline else TextDecoration.None,
-        shadow = if (appSettings.songSettings.songNumberShadow) Shadow(color = Color.Black.copy(alpha = 0.7f), offset = Offset(2f, 2f), blurRadius = 4f) else null
+        shadow = if (appSettings.songSettings.songNumberShadow) Shadow(
+            color = Color.Black.copy(alpha = 0.7f),
+            offset = Offset(2f, 2f),
+            blurRadius = 4f
+        ) else null
     )
 
     val contentAlignment = when (appSettings.songSettings.lyricsAlignment) {
@@ -100,7 +121,7 @@ fun SongPresenter(
     )
 
     val bgConfig = if (isLowerThird) appSettings.backgroundSettings.songLowerThirdBackground
-                   else appSettings.backgroundSettings.songBackground
+    else appSettings.backgroundSettings.songBackground
 
     // Resolve effective background type/paths (handle Default → inherit from global)
     val effectiveType: String
@@ -127,7 +148,9 @@ fun SongPresenter(
                 val file = File(effectiveImagePath)
                 if (file.exists()) Image.makeFromEncoded(file.readBytes()).toComposeImageBitmap()
                 else null
-            } catch (_: Exception) { null }
+            } catch (_: Exception) {
+                null
+            }
         } else null
     }
 
@@ -137,8 +160,10 @@ fun SongPresenter(
         useVideoBackground -> Modifier.background(Color.Black)
         effectiveType == Constants.BACKGROUND_IMAGE && backgroundImageBitmap != null ->
             Modifier.paint(painter = BitmapPainter(backgroundImageBitmap), contentScale = ContentScale.Crop)
+
         effectiveType == Constants.BACKGROUND_IMAGE ->
             Modifier.background(Color.Black)
+
         else ->
             Modifier.background(backgroundColor)
     }
@@ -160,8 +185,10 @@ fun SongPresenter(
         val scaleFactor = min(widthScale, heightScale).coerceIn(0.5f, 3.0f)
 
         val scaledTitleFontSize = (appSettings.songSettings.titleFontSize * scaleFactor).sp
-        val effectiveLyricsFontSize = if (isLowerThird) appSettings.songSettings.lyricsLowerThirdFontSize else appSettings.songSettings.lyricsFontSize
-        val effectiveSongNumberFontSize = if (isLowerThird) appSettings.songSettings.songNumberLowerThirdFontSize else appSettings.songSettings.songNumberFontSize
+        val effectiveLyricsFontSize =
+            if (isLowerThird) appSettings.songSettings.lyricsLowerThirdFontSize else appSettings.songSettings.lyricsFontSize
+        val effectiveSongNumberFontSize =
+            if (isLowerThird) appSettings.songSettings.songNumberLowerThirdFontSize else appSettings.songSettings.songNumberFontSize
         val scaledLyricsFontSize = (effectiveLyricsFontSize * scaleFactor).sp
         val scaledSongNumberFontSize = (effectiveSongNumberFontSize * scaleFactor).sp
 
@@ -194,80 +221,133 @@ fun SongPresenter(
                     .align(Alignment.BottomCenter)
             else
                 Modifier
-            val alignment = when (appSettings.songSettings.songNumberPosition) {
-                Constants.TOP_LEFT -> Alignment.TopStart
-                Constants.TOP_RIGHT -> Alignment.TopEnd
-                Constants.BOTTOM_LEFT -> Alignment.BottomStart
-                else -> Alignment.BottomEnd
-            }
-            val shouldShowTitle = shouldShowText(appSettings.songSettings.titleDisplay, lyricSection)
-            val shouldShowSongNumber = shouldShowText(appSettings.songSettings.showNumber, lyricSection)
 
-            Box(
-                modifier = innerModifier,
-                contentAlignment = if (isLowerThird) Alignment.BottomCenter else Alignment.TopStart
-            ) {
-                if (shouldShowSongNumber) {
-                    Text(
-                        modifier = Modifier.wrapContentWidth().align(alignment),
-                        fontFamily = titleFontFamily,
-                        fontSize = scaledSongNumberFontSize,
-                        text = lyricSection.songNumber.toString(),
-                        color = songNumberColor,
-                        style = songNumberTextStyle
-                    )
+            // Only animate the text content — background is never inside this block
+            @Composable
+            fun TextContent(section: LyricSection) {
+                val alignment = when (appSettings.songSettings.songNumberPosition) {
+                    Constants.TOP_LEFT -> Alignment.TopStart
+                    Constants.TOP_RIGHT -> Alignment.TopEnd
+                    Constants.BOTTOM_LEFT -> Alignment.BottomStart
+                    else -> Alignment.BottomEnd
                 }
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .wrapContentHeight(),
-                    verticalArrangement = if (isLowerThird) Arrangement.Bottom else Arrangement.Top
+                val shouldShowTitle = shouldShowText(appSettings.songSettings.titleDisplay, section)
+                val shouldShowSongNumber = shouldShowText(appSettings.songSettings.showNumber, section)
+
+                Box(
+                    modifier = innerModifier,
+                    contentAlignment = if (isLowerThird) Alignment.BottomCenter else Alignment.TopStart
                 ) {
-                    if (shouldShowTitle && appSettings.songSettings.titlePosition == Constants.ABOVE_VERSE) {
-                        Row(Modifier.fillMaxWidth(), horizontalArrangement = titleHorizontalAlignment) {
-                            Text(
-                                modifier = Modifier.wrapContentWidth(),
-                                fontFamily = titleFontFamily,
-                                fontSize = scaledTitleFontSize,
-                                text = lyricSection.title,
-                                color = titleColor,
-                                style = titleTextStyle
-                            )
-                        }
+                    if (shouldShowSongNumber) {
+                        Text(
+                            modifier = Modifier.wrapContentWidth().align(alignment),
+                            fontFamily = titleFontFamily,
+                            fontSize = scaledSongNumberFontSize,
+                            text = section.songNumber.toString(),
+                            color = songNumberColor,
+                            style = songNumberTextStyle
+                        )
                     }
-                    lyricSection.lines.forEach { line ->
-                        val isSectionHeader =
-                            line.startsWith(Constants.VERSE_RUS, ignoreCase = true) ||
-                            line.startsWith(Constants.CHORUS_RUS, ignoreCase = true) ||
-                            line.startsWith(Constants.VERSE, ignoreCase = true) ||
-                            line.startsWith(Constants.CHORUS, ignoreCase = true)
-                        if (!isSectionHeader) {
-                            Row(Modifier.fillMaxWidth(), horizontalArrangement = lyricsHorizontalAlignment) {
+                    Column(
+                        modifier = Modifier.fillMaxWidth().wrapContentHeight(),
+                        verticalArrangement = if (isLowerThird) Arrangement.Bottom else Arrangement.Top
+                    ) {
+                        if (shouldShowTitle && appSettings.songSettings.titlePosition == Constants.ABOVE_VERSE) {
+                            Row(Modifier.fillMaxWidth(), horizontalArrangement = titleHorizontalAlignment) {
                                 Text(
                                     modifier = Modifier.wrapContentWidth(),
-                                    fontFamily = lyricsFontFamily,
-                                    fontSize = scaledLyricsFontSize,
-                                    softWrap = appSettings.songSettings.wordWrap,
-                                    text = line,
-                                    color = lyricsColor,
-                                    style = lyricsTextStyle
+                                    fontFamily = titleFontFamily,
+                                    fontSize = scaledTitleFontSize,
+                                    text = section.title,
+                                    color = titleColor,
+                                    style = titleTextStyle
+                                )
+                            }
+                        }
+                        section.lines.forEach { line ->
+                            val isSectionHeader =
+                                line.startsWith(Constants.VERSE_RUS, ignoreCase = true) ||
+                                        line.startsWith(Constants.CHORUS_RUS, ignoreCase = true) ||
+                                        line.startsWith(Constants.VERSE, ignoreCase = true) ||
+                                        line.startsWith(Constants.CHORUS, ignoreCase = true)
+                            if (!isSectionHeader) {
+                                Row(Modifier.fillMaxWidth(), horizontalArrangement = lyricsHorizontalAlignment) {
+                                    Text(
+                                        modifier = Modifier.wrapContentWidth(),
+                                        fontFamily = lyricsFontFamily,
+                                        fontSize = scaledLyricsFontSize,
+                                        softWrap = appSettings.songSettings.wordWrap,
+                                        text = line,
+                                        color = lyricsColor,
+                                        style = lyricsTextStyle
+                                    )
+                                }
+                            }
+                        }
+                        if (shouldShowTitle && appSettings.songSettings.titlePosition == Constants.BELOW_VERSE) {
+                            Row(Modifier.fillMaxWidth(), horizontalArrangement = titleHorizontalAlignment) {
+                                Text(
+                                    modifier = Modifier.wrapContentWidth(),
+                                    fontFamily = titleFontFamily,
+                                    fontSize = scaledTitleFontSize,
+                                    text = section.title,
+                                    color = titleColor,
+                                    style = titleTextStyle
                                 )
                             }
                         }
                     }
-                    if (shouldShowTitle && appSettings.songSettings.titlePosition == Constants.BELOW_VERSE) {
-                        Row(Modifier.fillMaxWidth(), horizontalArrangement = titleHorizontalAlignment) {
-                            Text(
-                                modifier = Modifier.wrapContentWidth(),
-                                fontFamily = titleFontFamily,
-                                fontSize = scaledTitleFontSize,
-                                text = lyricSection.title,
-                                color = titleColor,
-                                style = titleTextStyle
-                            )
-                        }
-                    }
                 }
+            }
+
+            // Resolve animation from appSettings — no params needed from caller
+            val animationType = when (appSettings.songSettings.animationType) {
+                Constants.ANIMATION_FADE -> AnimationType.FADE
+                Constants.ANIMATION_SLIDE_LEFT -> AnimationType.SLIDE_LEFT
+                Constants.ANIMATION_SLIDE_RIGHT -> AnimationType.SLIDE_RIGHT
+                Constants.ANIMATION_NONE -> AnimationType.NONE
+                else -> AnimationType.CROSSFADE
+            }
+            val transitionDuration = appSettings.songSettings.transitionDuration.toInt()
+
+            when (animationType) {
+                AnimationType.CROSSFADE -> Crossfade(
+                    targetState = lyricSection,
+                    animationSpec = tween(transitionDuration),
+                    label = "SongCrossfade"
+                ) { TextContent(it) }
+
+                AnimationType.FADE -> AnimatedContent(
+                    targetState = lyricSection,
+                    transitionSpec = { fadeIn(tween(transitionDuration)) togetherWith fadeOut(tween(transitionDuration)) },
+                    label = "SongFade"
+                ) { TextContent(it) }
+
+                AnimationType.SLIDE_LEFT -> AnimatedContent(
+                    targetState = lyricSection,
+                    transitionSpec = {
+                        slideInHorizontally(tween(transitionDuration)) { it } togetherWith slideOutHorizontally(
+                            tween(
+                                transitionDuration
+                            )
+                        ) { -it }
+                    },
+                    label = "SongSlideLeft"
+                ) { TextContent(it) }
+
+                AnimationType.SLIDE_RIGHT -> AnimatedContent(
+                    targetState = lyricSection,
+                    transitionSpec = {
+                        slideInHorizontally(tween(transitionDuration)) { -it } togetherWith slideOutHorizontally(
+                            tween(
+                                transitionDuration
+                            )
+                        ) { it }
+                    },
+                    label = "SongSlideRight"
+                ) { TextContent(it) }
+
+                AnimationType.NONE -> TextContent(lyricSection)
             }
         }
     }
