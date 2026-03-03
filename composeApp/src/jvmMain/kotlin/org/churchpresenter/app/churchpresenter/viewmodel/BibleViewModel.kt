@@ -100,7 +100,14 @@ class BibleViewModel(
     val isFullyLoadedFlow: StateFlow<Boolean> = _isFullyLoadedFlow.asStateFlow()
     val isFullyLoaded: State<Boolean> get() = mutableStateOf(_isFullyLoadedFlow.value)
 
+    companion object {
+        private const val CANONICAL_BOOK_COUNT = 66
+    }
+
     private val viewModelScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
+
+    /** Returns at most 66 canonical books from a loaded Bible. */
+    private fun Bible.getCanonicalBooks(): List<String> = getBooks().take(CANONICAL_BOOK_COUNT)
 
     init {
         _selectedScopeIndex.value = 0
@@ -151,7 +158,7 @@ class BibleViewModel(
 
                 if (booksOnlyBible != null && booksOnlyBible.getBookCount() > 0) {
                     _primaryBible.value = booksOnlyBible
-                    _books.value = booksOnlyBible.getBooks()
+                    _books.value = booksOnlyBible.getCanonicalBooks()
                     refreshFilteredLists()
                 }
 
@@ -177,7 +184,7 @@ class BibleViewModel(
                 _secondaryBible.value = secondary
 
                 if (primary != null) {
-                    _books.value = primary.getBooks()
+                    _books.value = primary.getCanonicalBooks()
                     val bookId = _selectedBookIndex.value + 1
                     val chapterVerses = withContext(Dispatchers.IO) {
                         primary.getChapter(bookId, _selectedChapter.value)
@@ -200,7 +207,7 @@ class BibleViewModel(
 
     fun loadChapter(bookIndex: Int, chapter: Int) {
         _primaryBible.value?.let { bible ->
-            val bookCount = bible.getBookCount()
+            val bookCount = minOf(bible.getBookCount(), CANONICAL_BOOK_COUNT)
             if (bookCount > 0) {
                 val clampedIndex = bookIndex.coerceIn(0, bookCount - 1)
                 _selectedBookIndex.value = clampedIndex
@@ -255,7 +262,7 @@ class BibleViewModel(
             }
 
             val bible = _primaryBible.value ?: return@launch
-            val bookCount = bible.getBookCount()
+            val bookCount = minOf(bible.getBookCount(), CANONICAL_BOOK_COUNT)
             if (bookCount == 0) return@launch
 
             val clampedIndex = bookIndex.coerceIn(0, bookCount - 1)
@@ -569,7 +576,7 @@ class BibleViewModel(
         val verse = result.verse.toIntOrNull() ?: 1
 
         val bible = _primaryBible.value ?: return
-        val bookCount = bible.getBookCount()
+        val bookCount = minOf(bible.getBookCount(), CANONICAL_BOOK_COUNT)
         if (bookCount == 0) return
 
         val clampedIndex = bookIndex.coerceIn(0, bookCount - 1)
