@@ -88,6 +88,12 @@ class BibleViewModel(
     private val _isLoading = mutableStateOf(false)
     val isLoading: State<Boolean> = _isLoading
 
+    // Increments only when the user explicitly selects a verse — never on book/chapter/load resets.
+    // BibleTab keys its onVerseSelected LaunchedEffect on this so presenter is not updated
+    // when the user is just browsing books/chapters while presenting.
+    private val _verseSelectionToken = mutableStateOf(0)
+    val verseSelectionToken: State<Int> = _verseSelectionToken
+
     // True only after the full verse index (phase 3) is loaded — not just book names
     // MutableStateFlow so coroutines can suspend on it with .first { it }
     private val _isFullyLoadedFlow = MutableStateFlow(false)
@@ -226,11 +232,10 @@ class BibleViewModel(
     }
 
     fun selectVerse(verseIndex: Int) {
-        // Bounds check to prevent index out of bounds
         if (verseIndex >= 0 && verseIndex < _verses.value.size) {
             _selectedVerseIndex.value = verseIndex
+            _verseSelectionToken.value++
         } else {
-            // Reset to 0 if index is invalid
             _selectedVerseIndex.value = 0
         }
     }
@@ -264,6 +269,7 @@ class BibleViewModel(
             // Use "N. " (with trailing space) to avoid "3." matching "13." or "23."
             val verseIndex = chapterVerses.indexOfFirst { it.startsWith("$verseNumber. ") }
             _selectedVerseIndex.value = if (verseIndex >= 0) verseIndex else 0
+            _verseSelectionToken.value++
 
             refreshFilteredLists()
         }
@@ -411,6 +417,7 @@ class BibleViewModel(
     fun navigatePreviousVerse(): Boolean {
         if (_verses.value.isNotEmpty() && _selectedVerseIndex.value > 0) {
             _selectedVerseIndex.value--
+            _verseSelectionToken.value++
             return true
         }
         return false
@@ -419,6 +426,7 @@ class BibleViewModel(
     fun navigateNextVerse(): Boolean {
         if (_verses.value.isNotEmpty() && _selectedVerseIndex.value < _verses.value.size - 1) {
             _selectedVerseIndex.value++
+            _verseSelectionToken.value++
             return true
         }
         return false
@@ -579,6 +587,7 @@ class BibleViewModel(
 
             val verseIndex = chapterVerses.indexOfFirst { it.startsWith("$verse. ") }
             _selectedVerseIndex.value = if (verseIndex >= 0) verseIndex else 0
+            _verseSelectionToken.value++
 
             refreshFilteredLists()
         }

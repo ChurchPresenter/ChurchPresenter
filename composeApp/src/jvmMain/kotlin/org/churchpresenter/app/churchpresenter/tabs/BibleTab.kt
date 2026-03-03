@@ -92,7 +92,8 @@ fun BibleTab(
     selectedVerseItem: ScheduleItem.BibleVerseItem? = null,
     onVerseSelected: (List<SelectedVerse>) -> Unit = {},
     onPresenting: (Presenting) -> Unit = { Presenting.NONE },
-    onBibleLoaded: ((bible: Bible, translation: String) -> Unit)? = null
+    onBibleLoaded: ((bible: Bible, translation: String) -> Unit)? = null,
+    isPresenting: Boolean = false,
 ) {
     val onBibleLoadedState by rememberUpdatedState(onBibleLoaded)
     val viewModel = remember { BibleViewModel(appSettings, onBibleLoaded = { bible, translation -> onBibleLoadedState?.invoke(bible, translation) }) }
@@ -154,8 +155,21 @@ fun BibleTab(
     val focusRequester = remember { FocusRequester() }
     LaunchedEffect(Unit) { focusRequester.requestFocus() }
 
-    LaunchedEffect(selectedVerseIndex, verses.size) {
+    val verseSelectionToken by viewModel.verseSelectionToken
+
+    // Only push to presenter when:
+    //  - not currently presenting (free browsing always updates preview), OR
+    //  - an explicit verse selection happened (token changed) while presenting
+    LaunchedEffect(verseSelectionToken) {
         if (verses.isNotEmpty() && selectedVerseIndex >= 0 && selectedVerseIndex < verses.size) {
+            val selectedVerses = viewModel.getSelectedVerses()
+            if (selectedVerses.isNotEmpty()) onVerseSelected(selectedVerses)
+        }
+    }
+
+    // While not presenting, also update preview when chapter loads so the first verse shows
+    LaunchedEffect(verses.size) {
+        if (!isPresenting && verses.isNotEmpty()) {
             val selectedVerses = viewModel.getSelectedVerses()
             if (selectedVerses.isNotEmpty()) onVerseSelected(selectedVerses)
         }
