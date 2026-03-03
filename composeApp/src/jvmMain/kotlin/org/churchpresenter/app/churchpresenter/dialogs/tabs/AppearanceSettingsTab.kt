@@ -59,23 +59,6 @@ fun AppearanceSettingsTab(
     }
 
     Column(modifier = Modifier.padding(16.dp)) {
-        // Theme section
-        Text(
-            text = stringResource(Res.string.theme),
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.padding(bottom = 12.dp)
-        )
-
-        ThemeSegmentedButton(
-            selectedTheme = currentTheme,
-            onThemeChange = onThemeChange
-        )
-
-        Spacer(modifier = Modifier.height(24.dp))
-        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant, thickness = 1.dp)
-        Spacer(modifier = Modifier.height(16.dp))
-
         // Bible Storage Directory
         DirectoryPicker(
             label = stringResource(Res.string.bible_storage_directory),
