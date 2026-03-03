@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -294,6 +295,24 @@ fun SongPresenter(
                                     color = titleColor,
                                     style = titleTextStyle
                                 )
+                            }
+                        }
+
+                        // End-of-song indicator: 3 tight asterisks centered
+                        if (section.isLastSection) {
+                            Spacer(modifier = Modifier.padding(top = (4 * scaleFactor).dp))
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.Center
+                            ) {
+                                repeat(3) {
+                                    Text(
+                                        text = "  *  ",
+                                        fontSize = scaledLyricsFontSize,
+                                        color = lyricsColor,
+                                        style = lyricsTextStyle
+                                    )
+                                }
                             }
                         }
                     }

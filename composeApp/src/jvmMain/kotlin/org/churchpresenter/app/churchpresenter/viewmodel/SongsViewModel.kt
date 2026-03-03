@@ -271,7 +271,10 @@ class SongsViewModel(
             )
         }
 
-        return sections
+        // Mark the very last section so the presenter can show end-of-song indicator
+        return sections.mapIndexed { index, section ->
+            if (index == sections.lastIndex) section.copy(isLastSection = true) else section
+        }
     }
 
     fun getSelectedLyricSection(): LyricSection? {
