@@ -604,23 +604,25 @@ fun AnnouncementsTab(
                         modifier = Modifier.weight(1f),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
+                        // Countdown display — full width, centered above steppers
+                        val displayRemaining = viewModel.timerRemaining
+                        val displayMin = displayRemaining / 60
+                        val displaySec = displayRemaining % 60
+                        Text(
+                            text = "%02d:%02d".format(displayMin, displaySec),
+                            style = MaterialTheme.typography.displayMedium,
+                            color = if (viewModel.timerExpired) MaterialTheme.colorScheme.error
+                                    else MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.fillMaxWidth(),
+                            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                        )
+
+                        // Steppers row — minutes : seconds, centered, unconstrained width
                         Row(
-                            horizontalArrangement = Arrangement.spacedBy(16.dp),
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.Center,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            val displayRemaining = viewModel.timerRemaining
-                            val displayMin = displayRemaining / 60
-                            val displaySec = displayRemaining % 60
-                            val displayColor = if (viewModel.timerExpired) MaterialTheme.colorScheme.error
-                                               else Utils.parseHexColor(viewModel.textColor)
-                            Text(
-                                text = "%02d:%02d".format(displayMin, displaySec),
-                                style = MaterialTheme.typography.displayMedium,
-                                color = displayColor,
-                                modifier = Modifier.width(140.dp),
-                                textAlign = androidx.compose.ui.text.style.TextAlign.Center
-                            )
-
                             // Minutes stepper
                             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                                 TimerStepButton("-") { viewModel.stepTimerMinutes(-1); viewModel.saveToSettings(onSettingsChange) }
@@ -643,7 +645,12 @@ fun AnnouncementsTab(
                                 TimerStepButton("+") { viewModel.stepTimerMinutes(1); viewModel.saveToSettings(onSettingsChange) }
                             }
 
-                            Text(":", style = MaterialTheme.typography.displaySmall.copy(color = MaterialTheme.colorScheme.onSurfaceVariant))
+                            Text(
+                                text = ":",
+                                style = MaterialTheme.typography.displaySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(horizontal = 6.dp)
+                            )
 
                             // Seconds stepper
                             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
