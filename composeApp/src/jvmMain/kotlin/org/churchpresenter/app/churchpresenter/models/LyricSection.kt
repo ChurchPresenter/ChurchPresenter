@@ -6,4 +6,5 @@ data class LyricSection(
     val songNumber: Int = 0,
     val type: String = "", // "verse", "chorus"
     val lines: List<String> = emptyList(),
+    val isLastSection: Boolean = false,
 )
