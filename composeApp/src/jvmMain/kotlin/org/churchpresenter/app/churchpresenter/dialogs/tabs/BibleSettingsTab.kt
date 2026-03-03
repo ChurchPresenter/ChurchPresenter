@@ -528,7 +528,7 @@ private fun RightColumn(
                 NumberSettingsTextField(
                     initialText = settings.bibleSettings.primaryBibleFontSize,
                     onValueChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(primaryBibleFontSize = it)) } },
-                    range = 8..72
+                    range = 8..150
                 )
             }
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -536,7 +536,7 @@ private fun RightColumn(
                 NumberSettingsTextField(
                     initialText = settings.bibleSettings.primaryBibleLowerThirdFontSize,
                     onValueChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(primaryBibleLowerThirdFontSize = it)) } },
-                    range = 8..72
+                    range = 8..150
                 )
             }
         }
@@ -616,7 +616,7 @@ private fun RightColumn(
                 NumberSettingsTextField(
                     initialText = settings.bibleSettings.primaryReferenceFontSize,
                     onValueChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(primaryReferenceFontSize = it)) } },
-                    range = 8..72
+                    range = 8..150
                 )
             }
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -624,7 +624,7 @@ private fun RightColumn(
                 NumberSettingsTextField(
                     initialText = settings.bibleSettings.primaryReferenceLowerThirdFontSize,
                     onValueChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(primaryReferenceLowerThirdFontSize = it)) } },
-                    range = 8..72
+                    range = 8..150
                 )
             }
         }
@@ -727,7 +727,7 @@ private fun RightColumn(
                 NumberSettingsTextField(
                     initialText = settings.bibleSettings.secondaryBibleFontSize,
                     onValueChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(secondaryBibleFontSize = it)) } },
-                    range = 8..72
+                    range = 8..150
                 )
             }
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -735,7 +735,7 @@ private fun RightColumn(
                 NumberSettingsTextField(
                     initialText = settings.bibleSettings.secondaryBibleLowerThirdFontSize,
                     onValueChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(secondaryBibleLowerThirdFontSize = it)) } },
-                    range = 8..72
+                    range = 8..150
                 )
             }
         }
@@ -815,7 +815,7 @@ private fun RightColumn(
                 NumberSettingsTextField(
                     initialText = settings.bibleSettings.secondaryReferenceFontSize,
                     onValueChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(secondaryReferenceFontSize = it)) } },
-                    range = 8..72
+                    range = 8..150
                 )
             }
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -823,7 +823,7 @@ private fun RightColumn(
                 NumberSettingsTextField(
                     initialText = settings.bibleSettings.secondaryReferenceLowerThirdFontSize,
                     onValueChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(secondaryReferenceLowerThirdFontSize = it)) } },
-                    range = 8..72
+                    range = 8..150
                 )
             }
         }
