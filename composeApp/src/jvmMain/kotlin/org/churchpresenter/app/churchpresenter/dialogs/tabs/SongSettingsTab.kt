@@ -434,7 +434,7 @@ private fun LeftColumn(
                     s.copy(songSettings = s.songSettings.copy(titleFontSize = it))
                 }
             },
-            range = 8..72
+            range = 8..150
         )
     }
 
@@ -621,7 +621,7 @@ private fun RightColumn(
                 NumberSettingsTextField(
                     initialText = settings.songSettings.lyricsFontSize,
                     onValueChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsFontSize = it)) } },
-                    range = 8..72
+                    range = 8..150
                 )
             }
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -629,7 +629,7 @@ private fun RightColumn(
                 NumberSettingsTextField(
                     initialText = settings.songSettings.lyricsLowerThirdFontSize,
                     onValueChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsLowerThirdFontSize = it)) } },
-                    range = 8..72
+                    range = 8..150
                 )
             }
         }
@@ -764,7 +764,7 @@ private fun RightColumn(
                 NumberSettingsTextField(
                     initialText = settings.songSettings.songNumberFontSize,
                     onValueChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(songNumberFontSize = it)) } },
-                    range = 8..48
+                    range = 8..150
                 )
             }
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -772,7 +772,7 @@ private fun RightColumn(
                 NumberSettingsTextField(
                     initialText = settings.songSettings.songNumberLowerThirdFontSize,
                     onValueChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(songNumberLowerThirdFontSize = it)) } },
-                    range = 8..48
+                    range = 8..150
                 )
             }
         }
