@@ -62,7 +62,7 @@ val isVlcAvailable: Boolean by lazy {
             }
         }
         true
-    } catch (_: Exception) { false }
+    } catch (_: Throwable) { false }
 }
 
 data class VlcAudioDevice(val id: String, val description: String)
@@ -78,7 +78,7 @@ fun listVlcAudioDevices(): List<VlcAudioDevice> {
         mp.release()
         factory.release()
         devices
-    } catch (_: Exception) { emptyList() }
+    } catch (_: Throwable) { emptyList() }
 }
 
 /**
@@ -90,7 +90,7 @@ private fun createMediaPlayerComponent(): Component? {
     return try {
         if (isMacOS()) CallbackMediaPlayerComponent()
         else EmbeddedMediaPlayerComponent()
-    } catch (e: Exception) {
+    } catch (e: Throwable) {
         System.err.println("VLCJ: Could not initialise. Is VLC installed? ${e.message}")
         null
     }

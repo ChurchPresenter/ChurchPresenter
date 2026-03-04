@@ -30,7 +30,7 @@ fun LoopingVideoBackground(
             val os = System.getProperty("os.name", "generic").lowercase(Locale.ENGLISH)
             if ("mac" in os || "darwin" in os) CallbackMediaPlayerComponent()
             else EmbeddedMediaPlayerComponent()
-        } catch (_: Exception) { null }
+        } catch (_: Throwable) { null }
     } ?: return
 
     DisposableEffect(videoPath) {
