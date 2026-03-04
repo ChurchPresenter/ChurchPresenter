@@ -1,11 +1,14 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -14,6 +17,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -56,11 +60,19 @@ fun BackgroundSettingsTab(
 ) {
     val viewModel = remember { BackgroundSettingsViewModel() }
 
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.surfaceVariant)
+            .padding(5.dp)
+    ) {
     Column(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(16.dp),
+            .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(4.dp))
+            .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f), RoundedCornerShape(4.dp))
+            .padding(start = 15.dp, end = 15.dp, top = 8.dp, bottom = 15.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         // Default Background Section
@@ -140,7 +152,7 @@ fun BackgroundSettingsTab(
 
         // 2-group layout: Bible | Songs, each with Full Screen + Lower Third sub-columns
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             // ── Bible group ──────────────────────────────────────────
@@ -155,7 +167,6 @@ fun BackgroundSettingsTab(
                             onConfigChange = { viewModel.updateBibleBackground(it, onSettingsChange) }
                         )
                     }
-                    ColumnDivider()
                     Column(modifier = Modifier.weight(1f)) {
                         BackgroundColumn(
                             subtitle = stringResource(Res.string.display_lower_third),
@@ -180,7 +191,6 @@ fun BackgroundSettingsTab(
                             onConfigChange = { viewModel.updateSongBackground(it, onSettingsChange) }
                         )
                     }
-                    ColumnDivider()
                     Column(modifier = Modifier.weight(1f)) {
                         BackgroundColumn(
                             subtitle = stringResource(Res.string.display_lower_third),
@@ -191,6 +201,7 @@ fun BackgroundSettingsTab(
                 }
             }
         }
+    }
     }
 }
 
@@ -277,7 +288,7 @@ private fun ColumnDivider() {
     Box(
         modifier = Modifier
             .width(1.dp)
-            .height(400.dp)
+            .fillMaxHeight()
             .background(MaterialTheme.colorScheme.outlineVariant)
     )
 }

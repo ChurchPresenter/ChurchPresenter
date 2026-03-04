@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -115,17 +116,28 @@ fun LowerThirdSettingsTab(
     val noDirectorySelectedStr = stringResource(Res.string.no_directory_selected)
     val noLottieFilesStr = stringResource(Res.string.no_lottie_files)
 
-    Row(modifier = Modifier.fillMaxSize()) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.surfaceVariant)
+            .padding(5.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
 
         // ── Left panel ──────────────────────────────────────────────
         Column(
             modifier = Modifier
-                .weight(1f)
+                .weight(0.48f)
+                .widthIn(min = 400.dp, max = 450.dp)
                 .heightIn(min = 600.dp)
                 .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(4.dp))
                 .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f), RoundedCornerShape(4.dp))
-                .padding(start = 15.dp, end = 15.dp, top = 8.dp, bottom = 15.dp)
-                .verticalScroll(rememberScrollState()),
+                .padding(start = 15.dp, end = 15.dp, top = 8.dp, bottom = 15.dp),
             verticalArrangement = Arrangement.spacedBy(0.dp)
         ) {
             // Lottie Files list
@@ -198,14 +210,15 @@ fun LowerThirdSettingsTab(
             }
         }
 
-        Spacer(modifier = Modifier.width(10.dp))
-
         // ── Right panel — live preview ───────────────────────────────
         Column(
             modifier = Modifier
-                .weight(1f)
-                .verticalScroll(rememberScrollState())
-                .padding(16.dp),
+                .weight(0.48f)
+                .widthIn(min = 400.dp, max = 450.dp)
+                .heightIn(min = 600.dp)
+                .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(4.dp))
+                .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f), RoundedCornerShape(4.dp))
+                .padding(start = 15.dp, end = 15.dp, top = 8.dp, bottom = 15.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -324,6 +337,7 @@ fun LowerThirdSettingsTab(
                 )
             }
         }
+    }
     }
 }
 
