@@ -85,11 +85,19 @@ fun ProjectionSettingsTab(
     val numScreens = presenterWindowCount
     val screenAssignments = listOf(proj.screen1Assignment, proj.screen2Assignment, proj.screen3Assignment, proj.screen4Assignment)
 
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.surfaceVariant)
+            .padding(5.dp)
+    ) {
     Column(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(12.dp),
+            .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(4.dp))
+            .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f), RoundedCornerShape(4.dp))
+            .padding(start = 15.dp, end = 15.dp, top = 8.dp, bottom = 15.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         // ── Screen Assignment Grid ──────────────────────────────────────────
@@ -384,6 +392,7 @@ fun ProjectionSettingsTab(
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
             modifier = Modifier.fillMaxWidth()
         )
+    }
     }
 }
 
