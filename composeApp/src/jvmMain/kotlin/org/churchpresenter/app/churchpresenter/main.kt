@@ -34,6 +34,7 @@ import java.awt.GraphicsEnvironment
 import androidx.compose.ui.window.rememberWindowState
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.app_name
+import churchpresenter.composeapp.generated.resources.screen_number
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -395,7 +396,7 @@ private fun PresenterWindows(
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
-                                    text = "Screen ${i + 1}",
+                                    text = stringResource(Res.string.screen_number, i + 1),
                                     color = Color.White,
                                     fontSize = 96.sp,
                                     fontWeight = FontWeight.Bold,

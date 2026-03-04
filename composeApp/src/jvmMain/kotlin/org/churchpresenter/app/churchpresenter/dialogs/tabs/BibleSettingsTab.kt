@@ -34,6 +34,7 @@ import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.bible_selection
 import churchpresenter.composeapp.generated.resources.color
 import churchpresenter.composeapp.generated.resources.font_size
+import churchpresenter.composeapp.generated.resources.font_preview_text
 import churchpresenter.composeapp.generated.resources.font_type
 import churchpresenter.composeapp.generated.resources.full_screen
 import churchpresenter.composeapp.generated.resources.lower_third_size
@@ -363,7 +364,7 @@ private fun PrimaryBibleColumn(
                 systemFontFamilyOrDefault(settings.bibleSettings.primaryBibleFontType)
             }
             Text(
-                text = "ABCDabcd1234",
+                text = stringResource(Res.string.font_preview_text),
                 fontFamily = previewFontFamily,
                 fontSize = 14.sp,
                 color = MaterialTheme.colorScheme.onBackground,
@@ -451,7 +452,7 @@ private fun PrimaryBibleColumn(
                 systemFontFamilyOrDefault(settings.bibleSettings.primaryReferenceFontType)
             }
             Text(
-                text = "ABCDabcd1234",
+                text = stringResource(Res.string.font_preview_text),
                 fontFamily = previewFontFamily,
                 fontSize = 14.sp,
                 color = MaterialTheme.colorScheme.onBackground,
@@ -568,7 +569,7 @@ private fun SecondaryBibleColumn(
                 systemFontFamilyOrDefault(settings.bibleSettings.secondaryBibleFontType)
             }
             Text(
-                text = "ABCDabcd1234",
+                text = stringResource(Res.string.font_preview_text),
                 fontFamily = previewFontFamily,
                 fontSize = 14.sp,
                 color = MaterialTheme.colorScheme.onBackground,
@@ -656,7 +657,7 @@ private fun SecondaryBibleColumn(
                 systemFontFamilyOrDefault(settings.bibleSettings.secondaryReferenceFontType)
             }
             Text(
-                text = "ABCDabcd1234",
+                text = stringResource(Res.string.font_preview_text),
                 fontFamily = previewFontFamily,
                 fontSize = 14.sp,
                 color = MaterialTheme.colorScheme.onBackground,
