@@ -9,8 +9,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -19,8 +17,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
@@ -66,13 +62,7 @@ import churchpresenter.composeapp.generated.resources.media_now_playing
 import churchpresenter.composeapp.generated.resources.media_preview
 import churchpresenter.composeapp.generated.resources.media_seek_backward
 import churchpresenter.composeapp.generated.resources.media_seek_forward
-import churchpresenter.composeapp.generated.resources.media_screen_announcements
-import churchpresenter.composeapp.generated.resources.media_screen_bible
-import churchpresenter.composeapp.generated.resources.media_screen_content
-import churchpresenter.composeapp.generated.resources.media_screen_none
-import churchpresenter.composeapp.generated.resources.media_screen_pictures
-import churchpresenter.composeapp.generated.resources.media_screen_presentation
-import churchpresenter.composeapp.generated.resources.media_screen_songs
+import churchpresenter.composeapp.generated.resources.media_audio_continues
 import churchpresenter.composeapp.generated.resources.media_files_filter
 import churchpresenter.composeapp.generated.resources.media_select_file
 import churchpresenter.composeapp.generated.resources.media_select_to_begin
@@ -82,6 +72,7 @@ import churchpresenter.composeapp.generated.resources.media_unmute
 import churchpresenter.composeapp.generated.resources.pause
 import churchpresenter.composeapp.generated.resources.play
 import org.churchpresenter.app.churchpresenter.composables.VideoPlayer
+import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.composables.isVlcAvailable
 import org.churchpresenter.app.churchpresenter.models.ScheduleItem
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
@@ -98,6 +89,7 @@ import javax.swing.filechooser.FileNameExtensionFilter
 @Composable
 fun MediaTab(
     modifier: Modifier = Modifier,
+    appSettings: AppSettings = AppSettings(),
     onAddToSchedule: ((mediaUrl: String, mediaTitle: String, mediaType: String) -> Unit)? = null,
     selectedMediaItem: ScheduleItem.MediaItem? = null,
     presenterManager: PresenterManager? = null
@@ -137,6 +129,9 @@ fun MediaTab(
     // React to schedule item selection
     LaunchedEffect(selectedMediaItem) {
         selectedMediaItem?.let {
+            if (presenterManager?.presentingMode?.value == Presenting.MEDIA) {
+                presenterManager.setPresentingMode(Presenting.NONE)
+            }
             viewModel.loadMediaFromSchedule(url = it.mediaUrl, title = it.mediaTitle, type = it.mediaType)
         }
     }
@@ -185,6 +180,10 @@ fun MediaTab(
                         val chooser = createFileChooser {
                             fileSelectionMode = JFileChooser.FILES_ONLY
                             dialogTitle = selectFileLabel
+                            val defaultDir = appSettings.mediaStorageDirectory
+                            if (defaultDir.isNotEmpty()) {
+                                currentDirectory = java.io.File(defaultDir)
+                            }
                             fileFilter = FileNameExtensionFilter(
                                 mediaFilesLabel,
                                 "mp4", "mov", "avi", "mkv", "wmv", "flv", "webm", "m4v",
@@ -196,6 +195,11 @@ fun MediaTab(
                             val ext = file.extension.lowercase()
                             val type = if (ext in Constants.AUDIO_EXTENSIONS)
                                 Constants.MEDIA_TYPE_AUDIO else Constants.MEDIA_TYPE_LOCAL
+                            // Reset presenting mode so in-tab preview works and video
+                            // doesn't go to presenter screen until Go Live is pressed
+                            if (presenterManager?.presentingMode?.value == Presenting.MEDIA) {
+                                presenterManager.setPresentingMode(Presenting.NONE)
+                            }
                             viewModel.loadMedia(file.absolutePath, type)
                         }
                     }
@@ -436,35 +440,19 @@ fun MediaTab(
                 && presenterManager.showPresenterWindow.value
 
         if (viewModel.isLoaded && viewModel.isAudioFile) {
-            // Audio file: show screen content selector instead of video preview
+            // Hidden VLCJ player to drive audio playback while on this tab.
+            // When the user switches away, MainDesktop's hidden player takes over.
+            VideoPlayer(
+                viewModel = viewModel,
+                modifier = Modifier.size(0.dp)
+            )
+
+            // Audio file: info text
             Text(
-                text = stringResource(Res.string.media_screen_content),
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.primary
+                text = stringResource(Res.string.media_audio_continues),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-
-            val screenOptions = listOf(
-                stringResource(Res.string.media_screen_none) to Presenting.NONE,
-                stringResource(Res.string.media_screen_bible) to Presenting.BIBLE,
-                stringResource(Res.string.media_screen_songs) to Presenting.LYRICS,
-                stringResource(Res.string.media_screen_pictures) to Presenting.PICTURES,
-                stringResource(Res.string.media_screen_presentation) to Presenting.PRESENTATION,
-                stringResource(Res.string.media_screen_announcements) to Presenting.ANNOUNCEMENTS
-            )
-
-            @OptIn(ExperimentalLayoutApi::class)
-            FlowRow(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                screenOptions.forEach { (label, mode) ->
-                    FilterChip(
-                        selected = viewModel.audioScreenContent == mode,
-                        onClick = { viewModel.setAudioScreenContent(mode) },
-                        label = { Text(label, style = MaterialTheme.typography.labelMedium) }
-                    )
-                }
-            }
 
             Spacer(modifier = Modifier.weight(1f))
         } else {

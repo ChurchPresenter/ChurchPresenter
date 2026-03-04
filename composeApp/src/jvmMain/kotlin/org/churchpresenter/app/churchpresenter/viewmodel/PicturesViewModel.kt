@@ -30,6 +30,8 @@ import javax.swing.SwingUtilities
 class PicturesViewModel(
     appSettings: AppSettings? = null
 ) {
+    private val defaultDirectory = appSettings?.pictureSettings?.storageDirectory ?: ""
+
     // State
     private val _selectedFolder = mutableStateOf<File?>(null)
     val selectedFolder: File? get() = _selectedFolder.value
@@ -189,6 +191,9 @@ class PicturesViewModel(
             val chooser = createFileChooser {
                 fileSelectionMode = JFileChooser.DIRECTORIES_ONLY
                 this.dialogTitle = dialogTitle
+                if (defaultDirectory.isNotEmpty()) {
+                    currentDirectory = File(defaultDirectory)
+                }
             }
             if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
                 selectFolder(chooser.selectedFile)

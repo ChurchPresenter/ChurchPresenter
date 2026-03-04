@@ -29,7 +29,9 @@ import churchpresenter.composeapp.generated.resources.bible_storage_directory
 import churchpresenter.composeapp.generated.resources.browse_directory
 import churchpresenter.composeapp.generated.resources.set_all_directories
 import churchpresenter.composeapp.generated.resources.lower_third_storage_directory
+import churchpresenter.composeapp.generated.resources.media_storage_directory
 import churchpresenter.composeapp.generated.resources.pictures_storage_directory
+import churchpresenter.composeapp.generated.resources.presentation_storage_directory
 import churchpresenter.composeapp.generated.resources.theme
 import churchpresenter.composeapp.generated.resources.no_directory_selected
 import churchpresenter.composeapp.generated.resources.songs_storage_directory
@@ -57,7 +59,9 @@ fun SystemSettingsTab(
                 bibleSettings = s.bibleSettings.copy(storageDirectory = dir),
                 songSettings = s.songSettings.copy(storageDirectory = dir),
                 pictureSettings = s.pictureSettings.copy(storageDirectory = dir),
-                streamingSettings = s.streamingSettings.copy(lowerThirdFolder = dir)
+                streamingSettings = s.streamingSettings.copy(lowerThirdFolder = dir),
+                presentationStorageDirectory = dir,
+                mediaStorageDirectory = dir
             )
         }
     }
@@ -141,6 +145,42 @@ fun SystemSettingsTab(
             onDirectorySelected = { dir ->
                 onSettingsChange { s ->
                     s.copy(streamingSettings = s.streamingSettings.copy(lowerThirdFolder = dir))
+                }
+            },
+            onSetAll = setAllDirectories
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Presentation Storage Directory
+        DirectoryPicker(
+            label = stringResource(Res.string.presentation_storage_directory),
+            currentPath = settings.presentationStorageDirectory,
+            noDirectoryText = stringResource(Res.string.no_directory_selected),
+            browseText = stringResource(Res.string.browse_directory),
+            setAllText = setAllText,
+            fileManager = fileManager,
+            onDirectorySelected = { dir ->
+                onSettingsChange { s ->
+                    s.copy(presentationStorageDirectory = dir)
+                }
+            },
+            onSetAll = setAllDirectories
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Media Storage Directory
+        DirectoryPicker(
+            label = stringResource(Res.string.media_storage_directory),
+            currentPath = settings.mediaStorageDirectory,
+            noDirectoryText = stringResource(Res.string.no_directory_selected),
+            browseText = stringResource(Res.string.browse_directory),
+            setAllText = setAllText,
+            fileManager = fileManager,
+            onDirectorySelected = { dir ->
+                onSettingsChange { s ->
+                    s.copy(mediaStorageDirectory = dir)
                 }
             },
             onSetAll = setAllDirectories

@@ -238,7 +238,8 @@ fun BibleTab(
                 modifier = Modifier.weight(1f).padding(end = 8.dp),
                 value = searchQuery,
                 onValueChange = { viewModel.updateSearchQuery(it) },
-                label = { Text(text = stringResource(Res.string.search)) },
+                textStyle = MaterialTheme.typography.bodyMedium,
+                label = { Text(text = stringResource(Res.string.search), style = MaterialTheme.typography.bodyMedium) },
                 singleLine = true,
                 maxLines = 1,
                 colors = OutlinedTextFieldDefaults.colors().copy(
@@ -270,7 +271,7 @@ fun BibleTab(
             )
 
             Button(onClick = { viewModel.performSearch() }) {
-                Text(text = stringResource(Res.string.search))
+                Text(text = stringResource(Res.string.search), style = MaterialTheme.typography.labelMedium)
             }
 
             if (isSearchMode) {
@@ -279,7 +280,7 @@ fun BibleTab(
                     onClick = { viewModel.clearSearch() },
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
                 ) {
-                    Text(stringResource(Res.string.clear))
+                    Text(stringResource(Res.string.clear), style = MaterialTheme.typography.labelMedium)
                 }
             }
         }
@@ -424,7 +425,7 @@ fun BibleTab(
                             )
                         }
                         Button(
-                            modifier = Modifier.wrapContentSize().padding(start = 8.dp),
+                            modifier = Modifier.wrapContentSize().padding(start = 8.dp, end = 8.dp),
                             onClick = {
                                 viewModel.addCurrentVerseToSchedule { bookName, chapter, verseNumber, verseText ->
                                     onAddToSchedule?.invoke(bookName, chapter, verseNumber, verseText)

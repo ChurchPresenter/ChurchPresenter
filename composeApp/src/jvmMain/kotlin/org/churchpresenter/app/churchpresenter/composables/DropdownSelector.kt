@@ -47,7 +47,8 @@ fun DropdownSelector(
             value = selected,
             onValueChange = { /* read-only */ },
             readOnly = true,
-            label = { Text(text = label) },
+            textStyle = MaterialTheme.typography.bodyMedium,
+            label = { Text(text = label, style = MaterialTheme.typography.bodyMedium) },
             trailingIcon = { Text(stringResource(Res.string.symbol_dropdown)) },
             singleLine = true,
             colors = OutlinedTextFieldDefaults.colors().copy(
@@ -62,7 +63,7 @@ fun DropdownSelector(
         ) {
             items.forEach { item ->
                 DropdownMenuItem(
-                    text = { Text(item) },
+                    text = { Text(item, style = MaterialTheme.typography.bodyMedium) },
                     onClick = {
                         onSelectedChange(item)
                         expanded.value = false
