@@ -38,6 +38,7 @@ import churchpresenter.composeapp.generated.resources.bottom_right
 import churchpresenter.composeapp.generated.resources.color
 import churchpresenter.composeapp.generated.resources.every_page
 import churchpresenter.composeapp.generated.resources.first_page
+import churchpresenter.composeapp.generated.resources.font_preview_text
 import churchpresenter.composeapp.generated.resources.font_size
 import churchpresenter.composeapp.generated.resources.font_type
 import churchpresenter.composeapp.generated.resources.full_screen
@@ -201,7 +202,7 @@ private fun LeftColumn(
                 systemFontFamilyOrDefault(settings.songSettings.titleFontType)
             }
             Text(
-                text = "ABCDabcd1234",
+                text = stringResource(Res.string.font_preview_text),
                 fontFamily = previewFontFamily,
                 color = MaterialTheme.colorScheme.onBackground,
                 fontSize = MaterialTheme.typography.bodySmall.fontSize,
@@ -398,7 +399,7 @@ private fun RightColumn(
                 systemFontFamilyOrDefault(settings.songSettings.lyricsFontType)
             }
             Text(
-                text = "ABCDabcd1234",
+                text = stringResource(Res.string.font_preview_text),
                 fontFamily = previewFontFamily,
                 fontSize = 14.sp,
                 color = MaterialTheme.colorScheme.onBackground,

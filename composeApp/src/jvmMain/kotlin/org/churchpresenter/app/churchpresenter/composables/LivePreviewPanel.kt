@@ -46,6 +46,7 @@ import churchpresenter.composeapp.generated.resources.ic_pause
 import churchpresenter.composeapp.generated.resources.ic_play
 import churchpresenter.composeapp.generated.resources.live_preview_nothing
 import churchpresenter.composeapp.generated.resources.live_preview_title
+import churchpresenter.composeapp.generated.resources.screen_number
 import churchpresenter.composeapp.generated.resources.pause
 import churchpresenter.composeapp.generated.resources.play
 import org.churchpresenter.app.churchpresenter.PresenterScreen
@@ -232,7 +233,7 @@ private fun SingleDisplayPreview(
 
         // Screen number label
         Text(
-            text = "Screen ${screenIndex + 1}",
+            text = stringResource(Res.string.screen_number, screenIndex + 1),
             color = Color.White.copy(alpha = 0.6f),
             fontSize = 9.sp,
             modifier = Modifier

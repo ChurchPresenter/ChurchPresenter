@@ -42,6 +42,8 @@
     <string name="pictures_storage_directory">Pictures Storage Directory</string>
     <string name="presentation_storage_directory">Presentation Storage Directory</string>
     <string name="media_storage_directory">Media Storage Directory</string>
+    <string name="screen_number">Screen %1$d</string>
+    <string name="font_preview_text">ABCDabcd1234</string>
     <string name="cancel">Cancel</string>
     <string name="ok">OK</string>
     <string name="apply">Apply</string>
