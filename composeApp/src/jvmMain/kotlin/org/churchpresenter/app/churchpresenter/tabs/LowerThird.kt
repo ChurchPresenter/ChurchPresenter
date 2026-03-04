@@ -261,7 +261,7 @@ fun LowerThirdTab(
                     contentColor = MaterialTheme.colorScheme.onTertiaryContainer
                 )
             ) {
-                Text(stringResource(Res.string.generate_lower_third))
+                Text(stringResource(Res.string.generate_lower_third), style = MaterialTheme.typography.labelMedium)
             }
         }
 
@@ -385,7 +385,7 @@ fun LowerThirdTab(
                             )
                         }
                     ) {
-                        Text(text = stringResource(Res.string.add_to_schedule), style = MaterialTheme.typography.labelSmall)
+                        Text(text = stringResource(Res.string.add_to_schedule), style = MaterialTheme.typography.labelMedium)
                     }
 
                     // Go Live button
@@ -396,7 +396,7 @@ fun LowerThirdTab(
                         },
                         enabled = canPlay
                     ) {
-                        Text(text = stringResource(Res.string.go_live), style = MaterialTheme.typography.labelSmall)
+                        Text(text = stringResource(Res.string.go_live), style = MaterialTheme.typography.labelMedium)
                     }
                 }
             }

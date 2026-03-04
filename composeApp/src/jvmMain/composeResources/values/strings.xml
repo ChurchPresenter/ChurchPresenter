@@ -40,6 +40,8 @@
     <string name="songs_storage_directory">Songs Storage Directory</string>
     <string name="lower_third_storage_directory">Lower Third Storage Directory</string>
     <string name="pictures_storage_directory">Pictures Storage Directory</string>
+    <string name="presentation_storage_directory">Presentation Storage Directory</string>
+    <string name="media_storage_directory">Media Storage Directory</string>
     <string name="cancel">Cancel</string>
     <string name="ok">OK</string>
     <string name="apply">Apply</string>
@@ -483,13 +485,7 @@
     <string name="audio_output_default">System Default</string>
     <string name="media_vlc_required">VLC media player is required for media playback</string>
     <string name="media_vlc_install">Please install VLC from videolan.org and restart the application</string>
-    <string name="media_screen_content">Screen content</string>
-    <string name="media_screen_none">None (Background)</string>
-    <string name="media_screen_bible">Bible</string>
-    <string name="media_screen_songs">Songs</string>
-    <string name="media_screen_pictures">Pictures</string>
-    <string name="media_screen_presentation">Presentation</string>
-    <string name="media_screen_announcements">Announcements</string>
+    <string name="media_audio_continues">Audio will continue playing in the background when switching tabs or displaying other content</string>
     <string name="media_now_playing">Now playing:</string>
     <string name="media_now_presenting">Now presenting on screen</string>
     <string name="media_seek_backward">Seek Backward 10s</string>

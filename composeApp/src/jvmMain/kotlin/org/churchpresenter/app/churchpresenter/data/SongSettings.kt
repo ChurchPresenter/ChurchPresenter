@@ -265,6 +265,8 @@ data class AppSettings(
     val streamingSettings: StreamingSettings = StreamingSettings(),
     val announcementsSettings: AnnouncementsSettings = AnnouncementsSettings(),
     val serverSettings: ServerSettings = ServerSettings(),
+    val presentationStorageDirectory: String = "",
+    val mediaStorageDirectory: String = "",
     val schedulePanelWidthDp: Int = 280,
     val previewPanelWidthDp: Int = 280,
     val theme: String = Constants.LIGHT,

@@ -149,6 +149,10 @@ fun PresentationTab(
                             fileSelectionMode = JFileChooser.FILES_ONLY
                             dialogTitle = presentationFileDialogTitle
                             isMultiSelectionEnabled = true
+                            val defaultDir = appSettings.presentationStorageDirectory
+                            if (defaultDir.isNotEmpty()) {
+                                currentDirectory = File(defaultDir)
+                            }
 
                             val pptFilter = FileNameExtensionFilter(
                                 "PowerPoint Files (*.ppt, *.pptx)",
@@ -182,7 +186,7 @@ fun PresentationTab(
                     }
                 }
             ) {
-                Text(stringResource(Res.string.select_presentation_file_button))
+                Text(stringResource(Res.string.select_presentation_file_button), style = MaterialTheme.typography.labelMedium)
             }
 
             Text(
@@ -292,7 +296,7 @@ fun PresentationTab(
                         ) {
                             Text(
                                 text = stringResource(Res.string.go_live),
-                                style = MaterialTheme.typography.labelSmall
+                                style = MaterialTheme.typography.labelMedium
                             )
                         }
                     }
@@ -315,7 +319,7 @@ fun PresentationTab(
                         ) {
                             Text(
                                 text = stringResource(Res.string.add_to_schedule),
-                                style = MaterialTheme.typography.labelSmall
+                                style = MaterialTheme.typography.labelMedium
                             )
                         }
                     }

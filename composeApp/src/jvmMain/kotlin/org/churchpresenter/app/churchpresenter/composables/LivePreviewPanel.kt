@@ -1,16 +1,32 @@
 package org.churchpresenter.app.churchpresenter.composables
 
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -26,8 +42,12 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.ic_pause
+import churchpresenter.composeapp.generated.resources.ic_play
 import churchpresenter.composeapp.generated.resources.live_preview_nothing
 import churchpresenter.composeapp.generated.resources.live_preview_title
+import churchpresenter.composeapp.generated.resources.pause
+import churchpresenter.composeapp.generated.resources.play
 import org.churchpresenter.app.churchpresenter.PresenterScreen
 import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.data.ScreenAssignment
@@ -41,7 +61,10 @@ import org.churchpresenter.app.churchpresenter.presenter.SlidePresenter
 import org.churchpresenter.app.churchpresenter.presenter.SongPresenter
 import org.churchpresenter.app.churchpresenter.presenter.WebsitePresenter
 import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.app.churchpresenter.viewmodel.LocalMediaViewModel
+import org.churchpresenter.app.churchpresenter.viewmodel.MediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
 /**
@@ -56,6 +79,7 @@ fun LivePreviewPanel(
 ) {
     val proj = appSettings.projectionSettings
     val displayCount = proj.numberOfWindows.coerceIn(1, 4)
+    val mediaViewModel = LocalMediaViewModel.current
 
     Column(
         modifier = modifier.fillMaxWidth(),
@@ -76,6 +100,15 @@ fun LivePreviewPanel(
                 appSettings = appSettings,
                 modifier = Modifier.fillMaxWidth()
             )
+        }
+
+        // Media controls — visible when presenting and media is loaded.
+        // Controls disappear only via Clear Display / Escape (which reset presentingMode to NONE).
+        val presentingMode by presenterManager.presentingMode
+        if (presentingMode != Presenting.NONE
+            && mediaViewModel != null && mediaViewModel.isLoaded
+        ) {
+            MediaPreviewControls(mediaViewModel)
         }
     }
 }
@@ -100,6 +133,7 @@ private fun SingleDisplayPreview(
     val lottieTrigger by presenterManager.lottieTrigger
     val announcementText by presenterManager.announcementText
     val websiteUrl by presenterManager.websiteUrl
+    val mediaViewModel = LocalMediaViewModel.current
 
     val isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD
 
@@ -143,7 +177,9 @@ private fun SingleDisplayPreview(
                         Presenting.PRESENTATION ->
                             SlidePresenter(slide = selectedSlide)
                         Presenting.MEDIA ->
-                            MediaPresenter(modifier = Modifier.fillMaxSize())
+                            if (mediaViewModel != null && !mediaViewModel.isAudioFile) {
+                                MediaPresenter(modifier = Modifier.fillMaxSize(), audioEnabled = false)
+                            }
                         Presenting.LOWER_THIRD ->
                             LowerThirdPresenter(
                                 jsonContent = lottieJsonContent,
@@ -205,6 +241,99 @@ private fun SingleDisplayPreview(
                 .background(Color.Black.copy(alpha = 0.5f), RoundedCornerShape(3.dp))
                 .padding(horizontal = 5.dp, vertical = 2.dp)
         )
+
+        // Animated audio indicator — only when presenting and media is playing
+        if (presentingMode != Presenting.NONE
+            && mediaViewModel != null && mediaViewModel.isLoaded && mediaViewModel.isPlaying
+        ) {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 6.dp)
+                    .background(Color.Black.copy(alpha = 0.6f), RoundedCornerShape(4.dp))
+                    .padding(horizontal = 8.dp, vertical = 4.dp)
+            ) {
+                AnimatedEqualizer()
+            }
+        }
+    }
+}
+
+@Composable
+private fun AnimatedEqualizer() {
+    val transition = rememberInfiniteTransition()
+    val barHeights = (0..3).map { index ->
+        transition.animateFloat(
+            initialValue = 0.3f,
+            targetValue = 1f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(
+                    durationMillis = 300 + index * 100,
+                    easing = LinearEasing
+                ),
+                repeatMode = RepeatMode.Reverse
+            )
+        )
+    }
+
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(2.dp),
+        verticalAlignment = Alignment.Bottom,
+        modifier = Modifier.height(14.dp)
+    ) {
+        barHeights.forEach { heightFraction ->
+            Box(
+                modifier = Modifier
+                    .width(3.dp)
+                    .fillMaxHeight(heightFraction.value)
+                    .background(Color(0xFF4CAF50), RoundedCornerShape(1.dp))
+            )
+        }
+    }
+}
+
+@Composable
+private fun MediaPreviewControls(viewModel: MediaViewModel) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        IconButton(
+            onClick = { viewModel.togglePlayPause() },
+            modifier = Modifier.size(32.dp),
+            colors = IconButtonDefaults.iconButtonColors(
+                containerColor = if (viewModel.isPlaying) MaterialTheme.colorScheme.error.copy(alpha = 0.8f)
+                else MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
+            )
+        ) {
+            Icon(
+                painter = painterResource(
+                    if (viewModel.isPlaying) Res.drawable.ic_pause else Res.drawable.ic_play
+                ),
+                contentDescription = stringResource(
+                    if (viewModel.isPlaying) Res.string.pause else Res.string.play
+                ),
+                modifier = Modifier.size(18.dp),
+                tint = Color.White
+            )
+        }
+
+        if (viewModel.duration > 0) {
+            Slider(
+                value = viewModel.currentPosition.toFloat(),
+                onValueChange = { viewModel.seekTo(it.toLong()) },
+                valueRange = 0f..viewModel.duration.toFloat(),
+                modifier = Modifier.weight(1f)
+            )
+            Text(
+                text = viewModel.formatTime(viewModel.currentPosition),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        } else {
+            Spacer(modifier = Modifier.weight(1f))
+        }
     }
 }
 

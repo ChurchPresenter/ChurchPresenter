@@ -109,7 +109,7 @@ fun BibleSettingsTab(
     ) {
         Row(
             modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()),
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             Column(
                 modifier = Modifier.weight(0.48f).widthIn(min = 400.dp, max = 450.dp).heightIn(min = 600.dp)
@@ -125,12 +125,19 @@ fun BibleSettingsTab(
                 )
             }
             Column(
-                modifier = Modifier.weight(0.48f).widthIn(min = 400.dp, max = 450.dp).heightIn(min = 600.dp)
+                modifier = Modifier.weight(0.48f).widthIn(min = 400.dp, max = 450.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                val cardModifier = Modifier.fillMaxWidth()
                     .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(4.dp))
                     .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f), RoundedCornerShape(4.dp))
                     .padding(start = 15.dp, end = 15.dp, top = 8.dp, bottom = 15.dp)
-            ) {
-                RightColumn(settings, onSettingsChange, availableFonts)
+                Column(modifier = cardModifier) {
+                    PrimaryBibleColumn(settings, onSettingsChange, availableFonts)
+                }
+                Column(modifier = cardModifier) {
+                    SecondaryBibleColumn(settings, onSettingsChange, availableFonts)
+                }
             }
         }
     }
@@ -313,7 +320,7 @@ private fun LeftColumn(
 }
 
 @Composable
-private fun RightColumn(
+private fun PrimaryBibleColumn(
     settings: AppSettings,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
     availableFonts: List<String>
@@ -516,8 +523,14 @@ private fun RightColumn(
         )
     }
 
-    Spacer(modifier = Modifier.height(20.dp))
+}
 
+@Composable
+private fun SecondaryBibleColumn(
+    settings: AppSettings,
+    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
+    availableFonts: List<String>
+) {
     // Secondary Bible Text
     SectionHeader(stringResource(Res.string.secondary_bible_text))
     Spacer(modifier = Modifier.height(8.dp))
@@ -714,30 +727,6 @@ private fun RightColumn(
             modifier = Modifier.padding(start = 4.dp)
         )
     }
-
-    Spacer(modifier = Modifier.height(20.dp))
-
-    // Language
-//    SectionHeader(stringResource(Res.string.caption_language))
-//    Spacer(modifier = Modifier.height(8.dp))
-//    SettingRow(stringResource(Res.string.language_source)) {
-//        DropdownSettingsField(
-//            value = when (settings.bibleSettings.captionLanguage) {
-//                Constants.LANGUAGE_INTERFACE -> languageInterfaceStr
-//                Constants.LANGUAGE_DATABASE -> languageDatabaseStr
-//                else -> languageInterfaceStr
-//            },
-//            options = listOf(languageInterfaceStr, languageDatabaseStr),
-//            onValueChange = { displayValue ->
-//                val value = when (displayValue) {
-//                    languageInterfaceStr -> Constants.LANGUAGE_INTERFACE
-//                    languageDatabaseStr -> Constants.LANGUAGE_DATABASE
-//                    else -> Constants.LANGUAGE_INTERFACE
-//                }
-//                onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(captionLanguage = value)) }
-//            }
-//        )
-//    }
 }
 
 @Composable

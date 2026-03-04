@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.Icon
@@ -53,6 +54,7 @@ import churchpresenter.composeapp.generated.resources.tooltip_clear_display
 import churchpresenter.composeapp.generated.resources.tooltip_settings
 import churchpresenter.composeapp.generated.resources.ic_close
 import org.churchpresenter.app.churchpresenter.composables.LivePreviewPanel
+import org.churchpresenter.app.churchpresenter.composables.VideoPlayer
 import org.churchpresenter.app.churchpresenter.composables.TooltipIconButton
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -138,6 +140,18 @@ fun MainDesktop(
     var showAddWebsiteDialog by remember { mutableStateOf(false) }
 
     val mediaViewModel = LocalMediaViewModel.current
+
+    // Hidden VLCJ player for audio: keeps audio playing when user switches away from Media tab.
+    // Only composed when NOT on the Media tab (the tab has its own VideoPlayer).
+    if (mediaViewModel != null && mediaViewModel.isAudioFile && mediaViewModel.isPlaying
+        && selectedTabIndex != Tabs.MEDIA.ordinal
+    ) {
+        VideoPlayer(
+            viewModel = mediaViewModel,
+            modifier = Modifier.size(0.dp)
+        )
+    }
+
     val picturesViewModel = remember { PicturesViewModel(appSettings) }
     DisposableEffect(Unit) { onDispose { picturesViewModel.dispose() } }
     val presentingMode by presenterManager.presentingMode
@@ -532,6 +546,7 @@ fun MainDesktop(
 
                             Tabs.MEDIA -> MediaTab(
                                 modifier = Modifier.fillMaxSize(),
+                                appSettings = appSettings,
                                 onAddToSchedule = { mediaUrl, mediaTitle, mediaType ->
                                     currentScheduleActions.addMedia(mediaUrl, mediaTitle, mediaType)
                                 },

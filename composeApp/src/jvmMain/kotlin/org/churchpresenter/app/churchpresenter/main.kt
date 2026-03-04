@@ -14,7 +14,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Text
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -361,32 +360,8 @@ private fun PresenterWindows(
                             Presenting.MEDIA ->
                                 if (screenAssignment.showMedia) {
                                     if (mediaViewModel.isAudioFile) {
-                                        // Audio file: show selected background content, audio plays via hidden MediaPresenter
-                                        MediaPresenter(modifier = Modifier.size(0.dp), audioEnabled = true, audioDeviceId = appSettings.projectionSettings.audioOutputDeviceId)
-                                        when (mediaViewModel.audioScreenContent) {
-                                            Presenting.BIBLE ->
-                                                BiblePresenter(
-                                                    selectedVerses = selectedVerses,
-                                                    appSettings = appSettings,
-                                                    isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD
-                                                )
-                                            Presenting.LYRICS ->
-                                                SongPresenter(
-                                                    lyricSection = lyricSection,
-                                                    appSettings = appSettings,
-                                                    isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD
-                                                )
-                                            Presenting.PICTURES ->
-                                                PicturePresenter(imagePath = selectedImagePath, animationType = animationType, transitionDuration = transitionDuration)
-                                            Presenting.PRESENTATION ->
-                                                SlidePresenter(slide = selectedSlide, animationType = animationType, transitionDuration = transitionDuration)
-                                            Presenting.ANNOUNCEMENTS ->
-                                                AnnouncementsPresenter(
-                                                    text = presenterManager.announcementText.value,
-                                                    appSettings = appSettings
-                                                )
-                                            else -> { /* NONE — just show the background */ }
-                                        }
+                                        // Audio: playback handled by hidden VideoPlayer in MainDesktop
+                                        // Projection shows background only
                                     } else {
                                         MediaPresenter(modifier = Modifier.fillMaxSize(), audioDeviceId = appSettings.projectionSettings.audioOutputDeviceId)
                                     }

@@ -230,7 +230,7 @@ fun AnnouncementsTab(
                                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
                                 contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp)
                             ) {
-                                Text(stringResource(Res.string.go_live), style = MaterialTheme.typography.labelSmall)
+                                Text(stringResource(Res.string.go_live), style = MaterialTheme.typography.labelMedium)
                             }
                         }
                         if (onAddToSchedule != null) {
@@ -249,7 +249,7 @@ fun AnnouncementsTab(
                                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
                                 contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp)
                             ) {
-                                Text(stringResource(Res.string.add_to_schedule), style = MaterialTheme.typography.labelSmall)
+                                Text(stringResource(Res.string.add_to_schedule), style = MaterialTheme.typography.labelMedium)
                             }
                         }
                     }
@@ -322,7 +322,7 @@ fun AnnouncementsTab(
                                 ) {
                                     Text(
                                         stringResource(Res.string.transparent_default),
-                                        style = MaterialTheme.typography.labelSmall
+                                        style = MaterialTheme.typography.labelMedium
                                     )
                                 }
                             } else {
@@ -345,7 +345,7 @@ fun AnnouncementsTab(
                                 ) {
                                     Text(
                                         stringResource(Res.string.transparent_default),
-                                        style = MaterialTheme.typography.labelSmall
+                                        style = MaterialTheme.typography.labelMedium
                                     )
                                 }
                             }
@@ -389,7 +389,7 @@ fun AnnouncementsTab(
                                     ) {
                                         Text(
                                             text = posLabel,
-                                            style = MaterialTheme.typography.labelSmall,
+                                            style = MaterialTheme.typography.labelMedium,
                                             color = if (isSelected) MaterialTheme.colorScheme.onPrimary
                                                     else MaterialTheme.colorScheme.onSurfaceVariant
                                         )
@@ -640,7 +640,7 @@ fun AnnouncementsTab(
                                         singleLine = true,
                                         textStyle = MaterialTheme.typography.bodyLarge.copy(textAlign = androidx.compose.ui.text.style.TextAlign.Center)
                                     )
-                                    Text(minLabel, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                    Text(minLabel, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                 }
                                 TimerStepButton("+") { viewModel.stepTimerMinutes(1); viewModel.saveToSettings(onSettingsChange) }
                             }
@@ -669,14 +669,18 @@ fun AnnouncementsTab(
                                         singleLine = true,
                                         textStyle = MaterialTheme.typography.bodyLarge.copy(textAlign = androidx.compose.ui.text.style.TextAlign.Center)
                                     )
-                                    Text(secLabel, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                    Text(secLabel, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                 }
                                 TimerStepButton("+") { viewModel.stepTimerSeconds(1); viewModel.saveToSettings(onSettingsChange) }
                             }
                         }
 
                         // Controls row
-                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
                             val total = viewModel.timerMinutes * 60 + viewModel.timerSeconds
                             IconButton(
                                 onClick = {
@@ -714,7 +718,7 @@ fun AnnouncementsTab(
                                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
                                 contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp)
                             ) {
-                                Text(resetLabel, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Text(resetLabel, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
                             if (presenterManager != null) {
                                 Button(
@@ -726,7 +730,7 @@ fun AnnouncementsTab(
                                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
                                     contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp)
                                 ) {
-                                    Text(stringResource(Res.string.go_live), style = MaterialTheme.typography.labelSmall)
+                                    Text(stringResource(Res.string.go_live), style = MaterialTheme.typography.labelMedium)
                                 }
                             }
                             if (onAddToSchedule != null) {
@@ -736,7 +740,7 @@ fun AnnouncementsTab(
                                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
                                     contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp)
                                 ) {
-                                    Text(stringResource(Res.string.add_to_schedule), style = MaterialTheme.typography.labelSmall)
+                                    Text(stringResource(Res.string.add_to_schedule), style = MaterialTheme.typography.labelMedium)
                                 }
                             }
                         }

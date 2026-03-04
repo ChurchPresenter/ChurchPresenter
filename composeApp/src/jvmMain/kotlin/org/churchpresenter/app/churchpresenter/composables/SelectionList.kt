@@ -79,6 +79,7 @@ fun SelectionListWithIndex(
                 val isSelected = index == selectedIndex
                 Text(
                     text = item,
+                    style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier
                         .fillMaxWidth()
                         .background(

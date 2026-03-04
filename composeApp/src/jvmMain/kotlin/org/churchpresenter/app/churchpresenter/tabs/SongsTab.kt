@@ -271,8 +271,9 @@ fun SongsTab(
                     modifier = Modifier.weight(1f).widthIn(min = 120.dp),
                     value = searchQuery,
                     onValueChange = { viewModel.updateSearchQuery(it) },
+                    textStyle = MaterialTheme.typography.bodyMedium,
                     label = {
-                        Text(stringResource(Res.string.search_songs), style = MaterialTheme.typography.labelMedium)
+                        Text(stringResource(Res.string.search_songs), style = MaterialTheme.typography.bodyMedium)
                     },
                     singleLine = true,
                     colors = OutlinedTextFieldDefaults.colors().copy(

@@ -133,7 +133,7 @@ fun PicturesTab(
                     }
                 }
             }) {
-                Text("📁 ${stringResource(Res.string.select_folder)}")
+                Text("📁 ${stringResource(Res.string.select_folder)}", style = MaterialTheme.typography.labelMedium)
             }
 
             Text(
@@ -250,7 +250,7 @@ fun PicturesTab(
                             text = stringResource(
                                 if (viewModel.isLooping) Res.string.loop_on else Res.string.loop_off
                             ),
-                            style = MaterialTheme.typography.labelSmall
+                            style = MaterialTheme.typography.labelMedium
                         )
                     }
                 }
@@ -269,7 +269,7 @@ fun PicturesTab(
                         ) {
                             Text(
                                 text = stringResource(Res.string.go_live),
-                                style = MaterialTheme.typography.labelSmall
+                                style = MaterialTheme.typography.labelMedium
                             )
                         }
                     }
@@ -287,7 +287,7 @@ fun PicturesTab(
                         ) {
                             Text(
                                 text = stringResource(Res.string.add_to_schedule),
-                                style = MaterialTheme.typography.labelSmall
+                                style = MaterialTheme.typography.labelMedium
                             )
                         }
                     }
