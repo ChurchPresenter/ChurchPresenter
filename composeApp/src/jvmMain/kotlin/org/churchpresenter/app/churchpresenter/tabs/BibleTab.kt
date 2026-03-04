@@ -192,7 +192,7 @@ fun BibleTab(
 
     fun goLiveWithHistory() {
         val selectedVerses = viewModel.getSelectedVerses()
-        for (v in selectedVerses) {
+        selectedVerses.firstOrNull()?.let { v ->
             viewModel.addToHistory(v.bookName, v.chapter, v.verseNumber, v.verseText)
         }
         onPresenting(Presenting.BIBLE)
