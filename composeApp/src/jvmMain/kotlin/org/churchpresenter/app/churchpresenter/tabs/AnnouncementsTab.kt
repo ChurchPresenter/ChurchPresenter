@@ -97,6 +97,7 @@ import churchpresenter.composeapp.generated.resources.timer_expired_text_label
 import churchpresenter.composeapp.generated.resources.timer_minutes
 import churchpresenter.composeapp.generated.resources.timer_pause
 import churchpresenter.composeapp.generated.resources.timer_reset
+import churchpresenter.composeapp.generated.resources.timer_hours
 import churchpresenter.composeapp.generated.resources.timer_seconds
 import churchpresenter.composeapp.generated.resources.timer_start
 import churchpresenter.composeapp.generated.resources.timer_title
@@ -143,6 +144,7 @@ fun AnnouncementsTab(
     val startLabel        = stringResource(Res.string.timer_start)
     val pauseLabel        = stringResource(Res.string.timer_pause)
     val resetLabel        = stringResource(Res.string.timer_reset)
+    val hrLabel           = stringResource(Res.string.timer_hours)
     val minLabel          = stringResource(Res.string.timer_minutes)
     val secLabel          = stringResource(Res.string.timer_seconds)
 
@@ -605,11 +607,8 @@ fun AnnouncementsTab(
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         // Countdown display — full width, centered above steppers
-                        val displayRemaining = viewModel.timerRemaining
-                        val displayMin = displayRemaining / 60
-                        val displaySec = displayRemaining % 60
                         Text(
-                            text = "%02d:%02d".format(displayMin, displaySec),
+                            text = AnnouncementsViewModel.formatTimer(viewModel.timerRemaining),
                             style = MaterialTheme.typography.displayMedium,
                             color = if (viewModel.timerExpired) MaterialTheme.colorScheme.error
                                     else MaterialTheme.colorScheme.onSurfaceVariant,
@@ -617,12 +616,41 @@ fun AnnouncementsTab(
                             textAlign = androidx.compose.ui.text.style.TextAlign.Center
                         )
 
-                        // Steppers row — minutes : seconds, centered, unconstrained width
+                        // Steppers row — hours : minutes : seconds, centered
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.Center,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
+                            // Hours stepper
+                            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                                TimerStepButton("-") { viewModel.stepTimerHours(-1); viewModel.saveToSettings(onSettingsChange) }
+                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                    var hrText by remember { mutableStateOf("%02d".format(viewModel.timerHours)) }
+                                    LaunchedEffect(viewModel.timerHours) { hrText = "%02d".format(viewModel.timerHours) }
+                                    OutlinedTextField(
+                                        value = hrText,
+                                        onValueChange = { v ->
+                                            val digits = v.filter { it.isDigit() }.take(2)
+                                            hrText = digits
+                                            digits.toIntOrNull()?.let { viewModel.setTimerHours(it); viewModel.saveToSettings(onSettingsChange) }
+                                        },
+                                        modifier = Modifier.width(64.dp),
+                                        singleLine = true,
+                                        textStyle = MaterialTheme.typography.bodyLarge.copy(textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+                                    )
+                                    Text(hrLabel, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                }
+                                TimerStepButton("+") { viewModel.stepTimerHours(1); viewModel.saveToSettings(onSettingsChange) }
+                            }
+
+                            Text(
+                                text = ":",
+                                style = MaterialTheme.typography.displaySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(horizontal = 6.dp)
+                            )
+
                             // Minutes stepper
                             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                                 TimerStepButton("-") { viewModel.stepTimerMinutes(-1); viewModel.saveToSettings(onSettingsChange) }
@@ -681,7 +709,7 @@ fun AnnouncementsTab(
                             horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            val total = viewModel.timerMinutes * 60 + viewModel.timerSeconds
+                            val total = viewModel.timerHours * 3600 + viewModel.timerMinutes * 60 + viewModel.timerSeconds
                             IconButton(
                                 onClick = {
                                     viewModel.saveToSettings(onSettingsChange)
@@ -689,7 +717,7 @@ fun AnnouncementsTab(
                                         onTick = { remaining ->
                                             if (presenterManager != null &&
                                                 presenterManager.presentingMode.value == Presenting.ANNOUNCEMENTS) {
-                                                presenterManager.setAnnouncementText("%02d:%02d".format(remaining / 60, remaining % 60))
+                                                presenterManager.setAnnouncementText(AnnouncementsViewModel.formatTimer(remaining))
                                             }
                                         },
                                         onExpired = { expiredMsg ->
@@ -723,8 +751,7 @@ fun AnnouncementsTab(
                             if (presenterManager != null) {
                                 Button(
                                     onClick = {
-                                        val remaining = viewModel.timerRemaining
-                                        presenterManager.setAnnouncementText("%02d:%02d".format(remaining / 60, remaining % 60))
+                                        presenterManager.setAnnouncementText(AnnouncementsViewModel.formatTimer(viewModel.timerRemaining))
                                         presenterManager.setPresentingMode(Presenting.ANNOUNCEMENTS)
                                     },
                                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
@@ -736,7 +763,7 @@ fun AnnouncementsTab(
                             if (onAddToSchedule != null) {
                                 Button(
                                     onClick = { onAddToSchedule.invoke(viewModel.buildSettings()) },
-                                    enabled = viewModel.text.isNotBlank() || viewModel.timerMinutes > 0 || viewModel.timerSeconds > 0,
+                                    enabled = viewModel.text.isNotBlank() || viewModel.timerHours > 0 || viewModel.timerMinutes > 0 || viewModel.timerSeconds > 0,
                                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
                                     contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp)
                                 ) {

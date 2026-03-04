@@ -57,6 +57,9 @@ class AnnouncementsViewModel {
     val animationDuration: Int get() = _animationDuration.value
 
     // ── Timer state ──────────────────────────────────────────────────
+    private val _timerHours = mutableStateOf(0)
+    val timerHours: Int get() = _timerHours.value
+
     private val _timerMinutes = mutableStateOf(0)
     val timerMinutes: Int get() = _timerMinutes.value
 
@@ -100,13 +103,13 @@ class AnnouncementsViewModel {
         _position.value = settings.position
         _animationType.value = settings.animationType
         _animationDuration.value = settings.animationDuration
+        _timerHours.value = settings.timerHours
         _timerMinutes.value = settings.timerMinutes
         _timerSeconds.value = settings.timerSeconds
         _timerTextColor.value = settings.timerTextColor
         _timerExpiredText.value = settings.timerExpiredText
-        // Reset remaining to match restored minutes/seconds (only if not running)
         if (!_timerRunning.value) {
-            _timerRemaining.value = settings.timerMinutes * 60 + settings.timerSeconds
+            _timerRemaining.value = totalSeconds()
         }
     }
 
@@ -125,35 +128,76 @@ class AnnouncementsViewModel {
     fun setAnimationType(value: String) { _animationType.value = value }
     fun setAnimationDuration(value: Int) { _animationDuration.value = value }
 
-    fun setTimerMinutes(value: Int) {
-        _timerMinutes.value = value.coerceAtLeast(0)
-        // Only reset remaining if timer is not running
+    private fun totalSeconds(): Int =
+        _timerHours.value * 3600 + _timerMinutes.value * 60 + _timerSeconds.value
+
+    fun setTimerHours(value: Int) {
+        _timerHours.value = value.coerceAtLeast(0)
         if (!_timerRunning.value) {
-            _timerRemaining.value = _timerMinutes.value * 60 + _timerSeconds.value
+            _timerRemaining.value = totalSeconds()
+        }
+    }
+
+    fun stepTimerHours(delta: Int) {
+        setTimerHours((_timerHours.value + delta).coerceAtLeast(0))
+    }
+
+    fun setTimerMinutes(value: Int) {
+        _timerMinutes.value = value.coerceIn(0, 59)
+        if (!_timerRunning.value) {
+            _timerRemaining.value = totalSeconds()
         }
     }
 
     fun setTimerSeconds(value: Int) {
-        // Accept 0-59 for direct digit entry
         _timerSeconds.value = value.coerceIn(0, 59)
         if (!_timerRunning.value) {
-            _timerRemaining.value = _timerMinutes.value * 60 + _timerSeconds.value
+            _timerRemaining.value = totalSeconds()
         }
     }
 
     fun stepTimerMinutes(delta: Int) {
-        setTimerMinutes((_timerMinutes.value + delta).coerceAtLeast(0))
+        val cur = _timerMinutes.value
+        if (delta > 0) {
+            if (cur >= 59) {
+                _timerMinutes.value = 0
+                setTimerHours(_timerHours.value + 1)
+            } else {
+                setTimerMinutes(cur + 1)
+            }
+        } else {
+            if (cur <= 0) {
+                if (_timerHours.value > 0) {
+                    _timerMinutes.value = 59
+                    setTimerHours(_timerHours.value - 1)
+                }
+            } else {
+                setTimerMinutes(cur - 1)
+            }
+        }
     }
 
     fun stepTimerSeconds(delta: Int) {
-        // Snap to 15-sec increments: 0 → 15 → 30 → 45 → 0
         val cur = _timerSeconds.value
-        val next = if (delta > 0) {
-            if (cur >= 45) 0 else ((cur / 15) + 1) * 15
+        if (delta > 0) {
+            val next = if (cur >= 45) 0 else ((cur / 15) + 1) * 15
+            if (next == 0) {
+                _timerSeconds.value = 0
+                stepTimerMinutes(1)
+            } else {
+                setTimerSeconds(next)
+            }
         } else {
-            if (cur <= 0) 45 else ((cur - 1) / 15) * 15
+            val next = if (cur <= 0) 45 else ((cur - 1) / 15) * 15
+            if (cur <= 0) {
+                if (_timerHours.value > 0 || _timerMinutes.value > 0) {
+                    _timerSeconds.value = 45
+                    stepTimerMinutes(-1)
+                }
+            } else {
+                setTimerSeconds(next)
+            }
         }
-        setTimerSeconds(next)
     }
 
     fun setTimerExpiredText(value: String) { _timerExpiredText.value = value }
@@ -176,7 +220,7 @@ class AnnouncementsViewModel {
         } else {
             // Start / resume
             if (_timerRemaining.value <= 0) {
-                val total = _timerMinutes.value * 60 + _timerSeconds.value
+                val total = totalSeconds()
                 if (total <= 0) return
                 _timerRemaining.value = total
             }
@@ -200,7 +244,7 @@ class AnnouncementsViewModel {
         timerJob = null
         _timerRunning.value = false
         _timerExpired.value = false
-        _timerRemaining.value = _timerMinutes.value * 60 + _timerSeconds.value
+        _timerRemaining.value = totalSeconds()
     }
 
     fun dispose() {
@@ -227,11 +271,22 @@ class AnnouncementsViewModel {
         position = _position.value,
         animationType = _animationType.value,
         animationDuration = _animationDuration.value,
+        timerHours = _timerHours.value,
         timerMinutes = _timerMinutes.value,
         timerSeconds = _timerSeconds.value,
         timerTextColor = _timerTextColor.value,
         timerExpiredText = _timerExpiredText.value
     )
+
+    companion object {
+        fun formatTimer(remaining: Int): String {
+            val h = remaining / 3600
+            val m = (remaining % 3600) / 60
+            val s = remaining % 60
+            return if (h > 0) "%d:%02d:%02d".format(h, m, s)
+            else "%02d:%02d".format(m, s)
+        }
+    }
 
     // ── Go Live ──────────────────────────────────────────────────────
     fun goLive(presenterManager: PresenterManager, onSettingsChange: ((AppSettings) -> AppSettings) -> Unit) {

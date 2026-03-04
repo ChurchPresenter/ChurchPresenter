@@ -90,14 +90,18 @@ sealed class ScheduleItem {
         val animationType: String = "SLIDE_FROM_BOTTOM",
         val animationDuration: Int = 500,
         val isTimer: Boolean = false,
+        val timerHours: Int = 0,
         val timerMinutes: Int = 0,
         val timerSeconds: Int = 0,
         val timerTextColor: String = "#FFFFFF",
         val timerExpiredText: String = "",
-        override val displayText: String = if (isTimer)
-            "Timer %02d:%02d".format(timerMinutes, timerSeconds)
-        else
+        override val displayText: String = if (isTimer) {
+            val total = timerHours * 3600 + timerMinutes * 60 + timerSeconds
+            if (timerHours > 0) "Timer %d:%02d:%02d".format(timerHours, timerMinutes, timerSeconds)
+            else "Timer %02d:%02d".format(timerMinutes, timerSeconds)
+        } else {
             "${text.take(50)}${if (text.length > 50) "…" else ""}"
+        }
     ) : ScheduleItem()
 
     @Serializable

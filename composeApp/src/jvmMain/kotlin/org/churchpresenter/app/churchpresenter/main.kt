@@ -34,7 +34,9 @@ import java.awt.GraphicsEnvironment
 import androidx.compose.ui.window.rememberWindowState
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.app_name
+import churchpresenter.composeapp.generated.resources.ic_app_icon
 import churchpresenter.composeapp.generated.resources.screen_number
+import org.jetbrains.compose.resources.painterResource
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -132,6 +134,7 @@ fun main() {
             Window(
                 onCloseRequest = ::exitApplication,
                 title = stringResource(Res.string.app_name),
+                icon = painterResource(Res.drawable.ic_app_icon),
                 state = state
             ) {
                 LanguageProvider(language = currentLanguage) {

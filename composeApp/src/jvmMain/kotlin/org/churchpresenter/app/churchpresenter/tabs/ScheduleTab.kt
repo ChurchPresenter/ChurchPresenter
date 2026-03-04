@@ -112,7 +112,7 @@ data class ScheduleTabActions(
     val addPresentation: (filePath: String, fileName: String, slideCount: Int, fileType: String) -> Unit = { _, _, _, _ -> },
     val addMedia: (mediaUrl: String, mediaTitle: String, mediaType: String) -> Unit = { _, _, _ -> },
     val addLowerThird: (presetId: String, presetLabel: String, pauseAtFrame: Boolean, pauseDurationMs: Long) -> Unit = { _, _, _, _ -> },
-    val addAnnouncement: (text: String, textColor: String, backgroundColor: String, fontSize: Int, fontType: String, bold: Boolean, italic: Boolean, underline: Boolean, shadow: Boolean, horizontalAlignment: String, position: String, animationType: String, animationDuration: Int, isTimer: Boolean, timerMinutes: Int, timerSeconds: Int, timerTextColor: String, timerExpiredText: String) -> Unit = { _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _ -> },
+    val addAnnouncement: (text: String, textColor: String, backgroundColor: String, fontSize: Int, fontType: String, bold: Boolean, italic: Boolean, underline: Boolean, shadow: Boolean, horizontalAlignment: String, position: String, animationType: String, animationDuration: Int, isTimer: Boolean, timerHours: Int, timerMinutes: Int, timerSeconds: Int, timerTextColor: String, timerExpiredText: String) -> Unit = { _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _ -> },
     val addWebsite: (url: String, title: String) -> Unit = { _, _ -> }
 )
 
@@ -169,8 +169,8 @@ fun ScheduleTab(
                 addPresentation  = { filePath, fileName, slideCount, fileType -> viewModel.addPresentation(filePath, fileName, slideCount, fileType) },
                 addMedia         = { mediaUrl, mediaTitle, mediaType -> viewModel.addMedia(mediaUrl, mediaTitle, mediaType) },
                 addLowerThird    = { presetId, presetLabel, pauseAtFrame, pauseDurationMs -> viewModel.addLowerThird(presetId, presetLabel, pauseAtFrame, pauseDurationMs) },
-                addAnnouncement  = { text, textColor, backgroundColor, fontSize, fontType, bold, italic, underline, shadow, horizontalAlignment, position, animationType, animationDuration, isTimer, timerMinutes, timerSeconds, timerTextColor, timerExpiredText ->
-                    viewModel.addAnnouncement(text, textColor, backgroundColor, fontSize, fontType, bold, italic, underline, shadow, horizontalAlignment, position, animationType, animationDuration, isTimer, timerMinutes, timerSeconds, timerTextColor, timerExpiredText)
+                addAnnouncement  = { text, textColor, backgroundColor, fontSize, fontType, bold, italic, underline, shadow, horizontalAlignment, position, animationType, animationDuration, isTimer, timerHours, timerMinutes, timerSeconds, timerTextColor, timerExpiredText ->
+                    viewModel.addAnnouncement(text, textColor, backgroundColor, fontSize, fontType, bold, italic, underline, shadow, horizontalAlignment, position, animationType, animationDuration, isTimer, timerHours, timerMinutes, timerSeconds, timerTextColor, timerExpiredText)
                 },
                 addWebsite       = { url, title -> viewModel.addWebsite(url, title) }
             )

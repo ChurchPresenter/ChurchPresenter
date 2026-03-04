@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -30,6 +31,8 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -55,16 +58,21 @@ import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.ic_pause
 import churchpresenter.composeapp.generated.resources.ic_play
 import churchpresenter.composeapp.generated.resources.add_to_schedule
+import churchpresenter.composeapp.generated.resources.confirm_delete
+import churchpresenter.composeapp.generated.resources.confirm_delete_file
 import churchpresenter.composeapp.generated.resources.go_live
+import churchpresenter.composeapp.generated.resources.ic_close
 import churchpresenter.composeapp.generated.resources.lottie_no_presets
 import churchpresenter.composeapp.generated.resources.lottie_select_preset
 import churchpresenter.composeapp.generated.resources.pause
 import churchpresenter.composeapp.generated.resources.play
+import churchpresenter.composeapp.generated.resources.tooltip_remove
 import io.github.alexzhirkevich.compottie.LottieCompositionSpec
 import io.github.alexzhirkevich.compottie.rememberLottieComposition
 import io.github.alexzhirkevich.compottie.rememberLottiePainter
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import javax.swing.JOptionPane
 import org.churchpresenter.app.churchpresenter.composables.ImageIconButton
 import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.models.ScheduleItem
@@ -223,6 +231,8 @@ fun LowerThirdTab(
                 } else {
                     items(lottieFiles) { file ->
                         val isSelected = selectedFile?.absolutePath == file.absolutePath
+                        val confirmTitle = stringResource(Res.string.confirm_delete)
+                        val confirmMsg = stringResource(Res.string.confirm_delete_file, file.name)
                         Surface(
                             modifier = Modifier.fillMaxWidth().clickable {
                                 selectedFile = file
@@ -231,13 +241,45 @@ fun LowerThirdTab(
                             color = if (isSelected) MaterialTheme.colorScheme.primary
                                     else MaterialTheme.colorScheme.surfaceVariant
                         ) {
-                            Text(
-                                text = file.nameWithoutExtension,
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = if (isSelected) MaterialTheme.colorScheme.onPrimary
-                                        else MaterialTheme.colorScheme.onSurface,
-                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
-                            )
+                            Row(
+                                modifier = Modifier.fillMaxWidth().padding(start = 12.dp, end = 8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = file.nameWithoutExtension,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = if (isSelected) MaterialTheme.colorScheme.onPrimary
+                                            else MaterialTheme.colorScheme.onSurface,
+                                    modifier = Modifier.weight(1f).padding(vertical = 8.dp)
+                                )
+                                Icon(
+                                    painter = painterResource(Res.drawable.ic_close),
+                                    contentDescription = stringResource(Res.string.tooltip_remove),
+                                    modifier = Modifier
+                                        .size(16.dp)
+                                        .offset(y = 1.dp)
+                                        .clickable {
+                                            SwingUtilities.invokeLater {
+                                                val result = JOptionPane.showConfirmDialog(
+                                                    Window.getWindows().firstOrNull { it.isActive },
+                                                    confirmMsg,
+                                                    confirmTitle,
+                                                    JOptionPane.YES_NO_OPTION,
+                                                    JOptionPane.WARNING_MESSAGE
+                                                )
+                                                if (result == JOptionPane.YES_OPTION) {
+                                                    file.delete()
+                                                    if (selectedFile?.absolutePath == file.absolutePath) {
+                                                        selectedFile = null
+                                                    }
+                                                    refreshKey++
+                                                }
+                                            }
+                                        },
+                                    tint = if (isSelected) MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f)
+                                           else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                                )
+                            }
                         }
                     }
                 }
