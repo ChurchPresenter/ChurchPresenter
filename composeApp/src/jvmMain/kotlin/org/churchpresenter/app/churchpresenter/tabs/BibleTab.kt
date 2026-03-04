@@ -1,6 +1,8 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.HorizontalScrollbar
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -15,18 +17,23 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -53,6 +60,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
@@ -65,7 +73,11 @@ import churchpresenter.composeapp.generated.resources.current_book
 import churchpresenter.composeapp.generated.resources.entire_bible
 import churchpresenter.composeapp.generated.resources.exact_match
 import churchpresenter.composeapp.generated.resources.found_results
+import churchpresenter.composeapp.generated.resources.bible_history
+import churchpresenter.composeapp.generated.resources.bible_history_clear
 import churchpresenter.composeapp.generated.resources.go_live
+import churchpresenter.composeapp.generated.resources.ic_arrow_down
+import churchpresenter.composeapp.generated.resources.ic_arrow_up
 import churchpresenter.composeapp.generated.resources.mode
 import churchpresenter.composeapp.generated.resources.no_results_found
 import churchpresenter.composeapp.generated.resources.scope
@@ -80,6 +92,7 @@ import org.churchpresenter.app.churchpresenter.models.ScheduleItem
 import org.churchpresenter.app.churchpresenter.models.SelectedVerse
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.viewmodel.BibleViewModel
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -173,6 +186,16 @@ fun BibleTab(
             val selectedVerses = viewModel.getSelectedVerses()
             if (selectedVerses.isNotEmpty()) onVerseSelected(selectedVerses)
         }
+    }
+
+    var historyExpanded by remember { mutableStateOf(true) }
+
+    fun goLiveWithHistory() {
+        val selectedVerses = viewModel.getSelectedVerses()
+        for (v in selectedVerses) {
+            viewModel.addToHistory(v.bookName, v.chapter, v.verseNumber, v.verseText)
+        }
+        onPresenting(Presenting.BIBLE)
     }
 
     fun handleKeyEvent(event: KeyEvent): Boolean {
@@ -414,7 +437,7 @@ fun BibleTab(
                         Spacer(modifier = Modifier.weight(1f))
                         Button(
                             modifier = Modifier.wrapContentSize().padding(start = 8.dp),
-                            onClick = { onPresenting(Presenting.BIBLE) },
+                            onClick = { goLiveWithHistory() },
                             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
                         ) {
                             Text(
@@ -441,7 +464,7 @@ fun BibleTab(
                             )
                         }
                     }
-                    Box {
+                    Box(modifier = Modifier.weight(1f)) {
                         SelectionListWithIndex(
                             list = filteredVerses,
                             selectedIndex = if (filteredVerses.isEmpty()) -1 else {
@@ -455,8 +478,69 @@ fun BibleTab(
                                     if (realIndex >= 0) viewModel.selectVerse(realIndex)
                                 }
                             },
-                            onItemDoubleClicked = { _, _ -> onPresenting(Presenting.BIBLE) }
+                            onItemDoubleClicked = { _, _ -> goLiveWithHistory() }
                         )
+                    }
+
+                    // ── History panel ─────────────────────────────────────
+                    if (viewModel.history.isNotEmpty()) {
+                        HorizontalDivider()
+                        Row(
+                            modifier = Modifier.fillMaxWidth()
+                                .clickable { historyExpanded = !historyExpanded }
+                                .padding(horizontal = 8.dp, vertical = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                painter = painterResource(
+                                    if (historyExpanded) Res.drawable.ic_arrow_down else Res.drawable.ic_arrow_up
+                                ),
+                                contentDescription = null,
+                                modifier = Modifier.size(16.dp),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Text(
+                                text = stringResource(Res.string.bible_history),
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                modifier = Modifier.padding(start = 4.dp)
+                            )
+                            Spacer(modifier = Modifier.weight(1f))
+                            TextButton(onClick = { viewModel.clearHistory() }) {
+                                Text(
+                                    text = stringResource(Res.string.bible_history_clear),
+                                    style = MaterialTheme.typography.labelSmall
+                                )
+                            }
+                        }
+                        AnimatedVisibility(visible = historyExpanded) {
+                            val historyListState = rememberLazyListState()
+                            LaunchedEffect(viewModel.history.size) {
+                                historyListState.scrollToItem(0)
+                            }
+                            Box(modifier = Modifier.fillMaxWidth().height(120.dp)) {
+                                LazyColumn(state = historyListState, modifier = Modifier.fillMaxSize()) {
+                                    items(viewModel.history) { entry ->
+                                        Text(
+                                            text = "${entry.displayText}  ${entry.verseText}",
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurface,
+                                            maxLines = 1,
+                                            modifier = Modifier.fillMaxWidth()
+                                                .clickable {
+                                                    viewModel.selectVerseByDetails(entry.bookName, entry.chapter, entry.verseNumber)
+                                                }
+                                                .padding(horizontal = 8.dp, vertical = 4.dp),
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                    }
+                                }
+                                VerticalScrollbar(
+                                    modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
+                                    adapter = rememberScrollbarAdapter(scrollState = historyListState)
+                                )
+                            }
+                        }
                     }
                 }
             }

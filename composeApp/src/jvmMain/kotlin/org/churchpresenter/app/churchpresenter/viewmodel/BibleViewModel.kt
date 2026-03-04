@@ -1,6 +1,7 @@
 package org.churchpresenter.app.churchpresenter.viewmodel
 
 import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -99,6 +100,31 @@ class BibleViewModel(
     private val _isFullyLoadedFlow = MutableStateFlow(false)
     val isFullyLoadedFlow: StateFlow<Boolean> = _isFullyLoadedFlow.asStateFlow()
     val isFullyLoaded: State<Boolean> get() = mutableStateOf(_isFullyLoadedFlow.value)
+
+    // History of presented verses (most recent first)
+    data class HistoryEntry(
+        val bookName: String,
+        val chapter: Int,
+        val verseNumber: Int,
+        val verseText: String
+    ) {
+        val displayText: String get() = "$bookName $chapter:$verseNumber"
+    }
+
+    private val _history = mutableStateListOf<HistoryEntry>()
+    val history: List<HistoryEntry> get() = _history
+
+    fun addToHistory(bookName: String, chapter: Int, verseNumber: Int, verseText: String) {
+        val entry = HistoryEntry(bookName, chapter, verseNumber, verseText)
+        // Remove duplicate if exists
+        _history.removeAll { it.bookName == bookName && it.chapter == chapter && it.verseNumber == verseNumber }
+        // Add to front
+        _history.add(0, entry)
+        // Keep max 50 entries
+        while (_history.size > 50) _history.removeLast()
+    }
+
+    fun clearHistory() { _history.clear() }
 
     companion object {
         private const val CANONICAL_BOOK_COUNT = 66
