@@ -5,20 +5,16 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.awt.SwingPanel
-import javafx.application.Platform
-import javafx.embed.swing.JFXPanel
-import javafx.scene.Scene
-import javafx.scene.layout.StackPane
-import javafx.scene.media.Media
-import javafx.scene.media.MediaPlayer
-import javafx.scene.media.MediaView
-import java.awt.BorderLayout
+import uk.co.caprica.vlcj.player.component.CallbackMediaPlayerComponent
+import uk.co.caprica.vlcj.player.component.EmbeddedMediaPlayerComponent
+import java.awt.Component
 import java.io.File
-import javax.swing.JPanel
+import java.util.Locale
 
 /**
  * A self-contained looping video background with no audio.
  * Plays the video at [videoPath] in an infinite loop, filling the available space.
+ * Uses VLCJ — requires VLC to be installed on the system.
  */
 @Composable
 fun LoopingVideoBackground(
@@ -29,51 +25,33 @@ fun LoopingVideoBackground(
     val file = remember(videoPath) { File(videoPath) }
     if (!file.exists()) return
 
-    // Ensure JavaFX is initialised (shared with VideoPlayer)
-    preWarmJavaFX()
-
-    val swingContainer = remember { JPanel(BorderLayout()) }
-    val jfxPanel = remember { JFXPanel() }
+    val component = remember {
+        try {
+            val os = System.getProperty("os.name", "generic").lowercase(Locale.ENGLISH)
+            if ("mac" in os || "darwin" in os) CallbackMediaPlayerComponent()
+            else EmbeddedMediaPlayerComponent()
+        } catch (_: Exception) { null }
+    } ?: return
 
     DisposableEffect(videoPath) {
-        swingContainer.add(jfxPanel, BorderLayout.CENTER)
+        val mp = when (component) {
+            is CallbackMediaPlayerComponent -> component.mediaPlayer()
+            is EmbeddedMediaPlayerComponent -> component.mediaPlayer()
+            else -> null
+        } ?: return@DisposableEffect onDispose {}
 
-        Platform.runLater {
-            try {
-                val media = Media(file.toURI().toString())
-                val player = MediaPlayer(media).apply {
-                    cycleCount = MediaPlayer.INDEFINITE
-                    volume = 0.0
-                    isAutoPlay = true
-                }
-                val view = MediaView(player).apply {
-                    isPreserveRatio = false
-                }
-                val root = StackPane(view).apply {
-                    style = "-fx-background-color: black;"
-                }
-                view.fitWidthProperty().bind(root.widthProperty())
-                view.fitHeightProperty().bind(root.heightProperty())
-                jfxPanel.scene = Scene(root, javafx.scene.paint.Color.BLACK)
-
-                // Store player ref for cleanup
-                jfxPanel.putClientProperty("bgPlayer", player)
-            } catch (_: Exception) {
-                // Unsupported format — leave blank
-            }
-        }
+        mp.audio().setVolume(0)
+        mp.controls().setRepeat(true)
+        mp.media().play(file.absolutePath)
 
         onDispose {
-            Platform.runLater {
-                val player = jfxPanel.getClientProperty("bgPlayer") as? MediaPlayer
-                player?.stop()
-                player?.dispose()
-                jfxPanel.scene = null
-                jfxPanel.putClientProperty("bgPlayer", null)
+            mp.controls().stop()
+            when (component) {
+                is CallbackMediaPlayerComponent -> component.release()
+                is EmbeddedMediaPlayerComponent -> component.release()
             }
-            swingContainer.remove(jfxPanel)
         }
     }
 
-    SwingPanel(factory = { swingContainer }, modifier = modifier)
+    SwingPanel(factory = { component as Component }, modifier = modifier)
 }

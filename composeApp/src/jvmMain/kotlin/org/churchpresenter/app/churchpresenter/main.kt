@@ -14,6 +14,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Text
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -279,9 +280,30 @@ private fun PresenterWindows(
     val windowCount = (screens.size - 1).coerceIn(0, 4)
 
     for (i in 0 until windowCount) {
-        val targetScreenIndex = i + 1
+        val screenAssignment = when (i) {
+            0 -> proj.screen1Assignment
+            1 -> proj.screen2Assignment
+            2 -> proj.screen3Assignment
+            else -> proj.screen4Assignment
+        }
 
-        val windowState = remember(i) {
+        // DeckLink outputs are handled separately — no Compose window needed
+        if (screenAssignment.targetType == "decklink") {
+            // DeckLink rendering is managed by DeckLinkPresenter (launched externally)
+            continue
+        }
+
+        // Resolve target display: -1 = auto (screen index + 1), otherwise use the configured index
+        val targetScreenIndex = if (screenAssignment.targetDisplay == -1) {
+            i + 1  // auto: same as original behavior
+        } else {
+            screenAssignment.targetDisplay
+        }
+
+        // Skip if the target screen doesn't exist
+        if (targetScreenIndex < 0 || targetScreenIndex >= screens.size) continue
+
+        val windowState = remember(i, targetScreenIndex) {
             val b = screens[targetScreenIndex].defaultConfiguration.bounds
             WindowState(
                 placement = WindowPlacement.Floating,
@@ -289,13 +311,6 @@ private fun PresenterWindows(
                 width = b.width.dp,
                 height = b.height.dp
             )
-        }
-
-        val screenAssignment = when (i) {
-            0 -> proj.screen1Assignment
-            1 -> proj.screen2Assignment
-            2 -> proj.screen3Assignment
-            else -> proj.screen4Assignment
         }
 
         Window(
@@ -344,8 +359,38 @@ private fun PresenterWindows(
                                 if (screenAssignment.showPictures)
                                     SlidePresenter(slide = selectedSlide, animationType = animationType, transitionDuration = transitionDuration)
                             Presenting.MEDIA ->
-                                if (screenAssignment.showMedia)
-                                    MediaPresenter(modifier = Modifier.fillMaxSize())
+                                if (screenAssignment.showMedia) {
+                                    if (mediaViewModel.isAudioFile) {
+                                        // Audio file: show selected background content, audio plays via hidden MediaPresenter
+                                        MediaPresenter(modifier = Modifier.size(0.dp), audioEnabled = true, audioDeviceId = appSettings.projectionSettings.audioOutputDeviceId)
+                                        when (mediaViewModel.audioScreenContent) {
+                                            Presenting.BIBLE ->
+                                                BiblePresenter(
+                                                    selectedVerses = selectedVerses,
+                                                    appSettings = appSettings,
+                                                    isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD
+                                                )
+                                            Presenting.LYRICS ->
+                                                SongPresenter(
+                                                    lyricSection = lyricSection,
+                                                    appSettings = appSettings,
+                                                    isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD
+                                                )
+                                            Presenting.PICTURES ->
+                                                PicturePresenter(imagePath = selectedImagePath, animationType = animationType, transitionDuration = transitionDuration)
+                                            Presenting.PRESENTATION ->
+                                                SlidePresenter(slide = selectedSlide, animationType = animationType, transitionDuration = transitionDuration)
+                                            Presenting.ANNOUNCEMENTS ->
+                                                AnnouncementsPresenter(
+                                                    text = presenterManager.announcementText.value,
+                                                    appSettings = appSettings
+                                                )
+                                            else -> { /* NONE — just show the background */ }
+                                        }
+                                    } else {
+                                        MediaPresenter(modifier = Modifier.fillMaxSize(), audioDeviceId = appSettings.projectionSettings.audioOutputDeviceId)
+                                    }
+                                }
                             Presenting.LOWER_THIRD ->
                                 if (screenAssignment.showStreaming)
                                     LowerThirdPresenter(

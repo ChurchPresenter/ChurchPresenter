@@ -458,6 +458,9 @@
     <string name="full_screen">Full Screen</string>
     <string name="lower_third_size">Lower Third</string>
     <string name="identify_screen">Identify</string>
+    <string name="projection_target_display">Display</string>
+    <string name="projection_auto_display">Auto</string>
+    <string name="projection_display_label">Display %1$d (%2$dx%3$d)</string>
 
     <!-- Background Settings Tab -->
     <string name="default_background_color">Default Background Color</string>
@@ -471,9 +474,22 @@
     <string name="media_vimeo">Vimeo</string>
     <string name="media_url_hint">Enter YouTube or Vimeo URL...</string>
     <string name="media_load">Load</string>
-    <string name="media_select_file">Select Video File</string>
+    <string name="media_select_file">Select File</string>
+    <string name="media_files_filter">Media Files</string>
     <string name="media_no_source">No media loaded</string>
-    <string name="media_select_to_begin">Select a local video file or enter a YouTube / Vimeo URL</string>
+    <string name="media_select_to_begin">Select a local audio or video file to begin</string>
+    <string name="audio_output">Audio Output</string>
+    <string name="audio_output_device">Output device</string>
+    <string name="audio_output_default">System Default</string>
+    <string name="media_vlc_required">VLC media player is required for media playback</string>
+    <string name="media_vlc_install">Please install VLC from videolan.org and restart the application</string>
+    <string name="media_screen_content">Screen content</string>
+    <string name="media_screen_none">None (Background)</string>
+    <string name="media_screen_bible">Bible</string>
+    <string name="media_screen_songs">Songs</string>
+    <string name="media_screen_pictures">Pictures</string>
+    <string name="media_screen_presentation">Presentation</string>
+    <string name="media_screen_announcements">Announcements</string>
     <string name="media_now_playing">Now playing:</string>
     <string name="media_now_presenting">Now presenting on screen</string>
     <string name="media_seek_backward">Seek Backward 10s</string>

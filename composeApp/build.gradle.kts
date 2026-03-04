@@ -61,7 +61,9 @@ kotlin {
             implementation(libs.ktor.server.websockets)
             implementation(libs.ktor.serialization.kotlinx.json)
             implementation(libs.ktor.server.status.pages)
-            // JavaFX for video playback
+            // VLCJ for media playback (requires VLC installed on system)
+            implementation("uk.co.caprica:vlcj:4.8.3")
+            // JavaFX for WebView (website presenter, Lottie settings)
             val jfxClassifier = currentOsClassifier()
             val jfxModules = listOf("javafx-base", "javafx-graphics", "javafx-media", "javafx-swing", "javafx-controls", "javafx-web")
             jfxModules.forEach { module ->

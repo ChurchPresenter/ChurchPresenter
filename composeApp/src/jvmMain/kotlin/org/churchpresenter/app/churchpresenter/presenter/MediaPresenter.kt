@@ -14,7 +14,8 @@ import org.churchpresenter.app.churchpresenter.viewmodel.LocalMediaViewModel
 fun MediaPresenter(
     modifier: Modifier = Modifier,
     isVisible: Boolean = true,
-    audioEnabled: Boolean = true
+    audioEnabled: Boolean = true,
+    audioDeviceId: String = ""
 ) {
     val viewModel = LocalMediaViewModel.current ?: return
 
@@ -33,7 +34,8 @@ fun MediaPresenter(
             VideoPlayer(
                 viewModel = viewModel,
                 modifier = Modifier.fillMaxSize(),
-                audioEnabled = audioEnabled
+                audioEnabled = audioEnabled,
+                audioDeviceId = audioDeviceId
             )
         }
     }

@@ -18,14 +18,21 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import java.awt.GraphicsEnvironment
+import java.awt.GraphicsDevice
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
@@ -46,14 +53,24 @@ import churchpresenter.composeapp.generated.resources.identify_screen
 import churchpresenter.composeapp.generated.resources.left
 import churchpresenter.composeapp.generated.resources.num_screens_label
 import churchpresenter.composeapp.generated.resources.presenter_windows_count
+import churchpresenter.composeapp.generated.resources.projection_auto_display
+import churchpresenter.composeapp.generated.resources.projection_display_label
 import churchpresenter.composeapp.generated.resources.projection_position_help
+import churchpresenter.composeapp.generated.resources.projection_target_display
 import churchpresenter.composeapp.generated.resources.right
 import churchpresenter.composeapp.generated.resources.screen
 import churchpresenter.composeapp.generated.resources.screen_assignment
 import churchpresenter.composeapp.generated.resources.screen_col_label
 import churchpresenter.composeapp.generated.resources.top
 import churchpresenter.composeapp.generated.resources.window_position
+import churchpresenter.composeapp.generated.resources.audio_output
+import churchpresenter.composeapp.generated.resources.audio_output_default
+import churchpresenter.composeapp.generated.resources.audio_output_device
+import org.churchpresenter.app.churchpresenter.composables.DeckLinkManager
 import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
+import org.churchpresenter.app.churchpresenter.composables.VlcAudioDevice
+import org.churchpresenter.app.churchpresenter.composables.isVlcAvailable
+import org.churchpresenter.app.churchpresenter.composables.listVlcAudioDevices
 import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.data.ScreenAssignment
 import org.churchpresenter.app.churchpresenter.utils.Constants
@@ -84,6 +101,47 @@ fun ProjectionSettingsTab(
 
     val numScreens = presenterWindowCount
     val screenAssignments = listOf(proj.screen1Assignment, proj.screen2Assignment, proj.screen3Assignment, proj.screen4Assignment)
+
+    // Build display target options: Auto + physical displays + DeckLink devices
+    val screenDevices = remember {
+        GraphicsEnvironment.getLocalGraphicsEnvironment().screenDevices
+    }
+
+    data class DisplayOption(
+        val label: String,
+        val targetDisplay: Int,  // -1 = auto, 0+ = display/device index
+        val targetType: String   // "screen" or "decklink"
+    )
+
+    val autoLabel = stringResource(Res.string.projection_auto_display)
+    val displayOptions = remember(screenDevices, autoLabel) {
+        val options = mutableListOf<DisplayOption>()
+        options.add(DisplayOption(autoLabel, -1, "screen"))
+        // Add physical displays (skip display 0 = main app screen)
+        for (idx in 1 until screenDevices.size) {
+            val bounds = screenDevices[idx].defaultConfiguration.bounds
+            options.add(
+                DisplayOption(
+                    "Display $idx (${bounds.width}x${bounds.height})",
+                    idx,
+                    "screen"
+                )
+            )
+        }
+        // Add DeckLink devices if available
+        if (DeckLinkManager.isAvailable()) {
+            DeckLinkManager.listDevices().forEach { device ->
+                options.add(
+                    DisplayOption(
+                        device.name,
+                        device.index,
+                        "decklink"
+                    )
+                )
+            }
+        }
+        options.toList()
+    }
 
     Box(
         modifier = Modifier
@@ -166,9 +224,18 @@ fun ProjectionSettingsTab(
             lowerThirdLabel to Constants.DISPLAY_MODE_LOWER_THIRD
         )
 
-        // Header row: blank screen label cell + content column headers + display mode headers + identify
+        val displayDropdownWidth = 170.dp
+
+        // Header row: blank screen label cell + Display dropdown + content column headers + display mode headers
         Row(verticalAlignment = Alignment.CenterVertically) {
             Spacer(modifier = Modifier.width(screenLabelWidth))
+            Text(
+                text = stringResource(Res.string.projection_target_display),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.primary,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.width(displayDropdownWidth)
+            )
             contentCols.forEach { col ->
                 Text(
                     text = col.label,
@@ -189,7 +256,7 @@ fun ProjectionSettingsTab(
 
         // Sub-header for display mode columns
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Spacer(modifier = Modifier.width(screenLabelWidth + cellWidth * contentCols.size))
+            Spacer(modifier = Modifier.width(screenLabelWidth + displayDropdownWidth + cellWidth * contentCols.size))
             displayModes.forEach { (modeLabel, _) ->
                 Text(
                     text = modeLabel,
@@ -215,6 +282,47 @@ fun ProjectionSettingsTab(
                     color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.width(screenLabelWidth)
                 )
+
+                // Display target dropdown
+                Box(modifier = Modifier.width(displayDropdownWidth), contentAlignment = Alignment.Center) {
+                    var dropdownExpanded by remember { mutableStateOf(false) }
+                    val currentOption = displayOptions.find {
+                        it.targetDisplay == assignment.targetDisplay && it.targetType == assignment.targetType
+                    } ?: displayOptions.first()
+
+                    OutlinedButton(onClick = { dropdownExpanded = true }) {
+                        Text(
+                            text = currentOption.label,
+                            style = MaterialTheme.typography.labelSmall,
+                            maxLines = 1
+                        )
+                    }
+                    DropdownMenu(
+                        expanded = dropdownExpanded,
+                        onDismissRequest = { dropdownExpanded = false }
+                    ) {
+                        displayOptions.forEach { option ->
+                            DropdownMenuItem(
+                                text = { Text(option.label, style = MaterialTheme.typography.bodySmall) },
+                                onClick = {
+                                    dropdownExpanded = false
+                                    val updated = assignment.copy(
+                                        targetDisplay = option.targetDisplay,
+                                        targetType = option.targetType
+                                    )
+                                    onSettingsChange { s ->
+                                        when (i) {
+                                            0 -> s.copy(projectionSettings = s.projectionSettings.copy(screen1Assignment = updated))
+                                            1 -> s.copy(projectionSettings = s.projectionSettings.copy(screen2Assignment = updated))
+                                            2 -> s.copy(projectionSettings = s.projectionSettings.copy(screen3Assignment = updated))
+                                            else -> s.copy(projectionSettings = s.projectionSettings.copy(screen4Assignment = updated))
+                                        }
+                                    }
+                                }
+                            )
+                        }
+                    }
+                }
 
                 // Checkbox cells for each content type
                 contentCols.forEach { col ->
@@ -263,6 +371,69 @@ fun ProjectionSettingsTab(
         }
 
         Spacer(modifier = Modifier.height(8.dp))
+
+        // ── Audio Output ────────────────────────────────────────────────────
+        if (isVlcAvailable) {
+            SectionHeader(stringResource(Res.string.audio_output))
+            Spacer(modifier = Modifier.height(4.dp))
+
+            val audioDevices = remember { listVlcAudioDevices() }
+            val defaultLabel = stringResource(Res.string.audio_output_default)
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Text(
+                    text = stringResource(Res.string.audio_output_device),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+
+                Box {
+                    var expanded by remember { mutableStateOf(false) }
+                    val currentDevice = audioDevices.find { it.id == proj.audioOutputDeviceId }
+                    val currentLabel = currentDevice?.description ?: defaultLabel
+
+                    OutlinedButton(onClick = { expanded = true }) {
+                        Text(
+                            text = currentLabel,
+                            style = MaterialTheme.typography.labelSmall,
+                            maxLines = 1
+                        )
+                    }
+                    DropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false }
+                    ) {
+                        // System default option
+                        DropdownMenuItem(
+                            text = { Text(defaultLabel, style = MaterialTheme.typography.bodySmall) },
+                            onClick = {
+                                expanded = false
+                                onSettingsChange { s ->
+                                    s.copy(projectionSettings = s.projectionSettings.copy(audioOutputDeviceId = ""))
+                                }
+                            }
+                        )
+                        // VLC-detected devices
+                        audioDevices.forEach { device ->
+                            DropdownMenuItem(
+                                text = { Text(device.description, style = MaterialTheme.typography.bodySmall) },
+                                onClick = {
+                                    expanded = false
+                                    onSettingsChange { s ->
+                                        s.copy(projectionSettings = s.projectionSettings.copy(audioOutputDeviceId = device.id))
+                                    }
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+        }
 
         // ── Window Position Settings ────────────────────────────────────────
         SectionHeader(stringResource(Res.string.window_position))
