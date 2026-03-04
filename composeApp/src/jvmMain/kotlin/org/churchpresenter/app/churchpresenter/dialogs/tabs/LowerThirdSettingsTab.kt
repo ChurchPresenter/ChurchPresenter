@@ -61,10 +61,15 @@ import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.viewmodel.LowerThirdSettingsViewModel
 import org.jetbrains.compose.resources.stringResource
 import java.awt.BorderLayout
+import java.awt.CardLayout
 import java.awt.Dimension
 import java.awt.Window
 import java.io.File
 import javafx.application.Platform
+import javax.swing.BoxLayout
+import javax.swing.JLabel
+import javax.swing.JPanel
+import javax.swing.JProgressBar
 import javafx.beans.value.ChangeListener
 import javafx.concurrent.Worker
 import javafx.embed.swing.JFXPanel
@@ -377,6 +382,18 @@ private fun ModernButton(
     }
 }
 
+/**
+ * Cached generator dialog — keeps the WebView alive between uses so that
+ * re-opening is near-instant after the first (slow) JavaFX cold-start.
+ */
+private object LottieGeneratorCache {
+    var dialog: JDialog? = null
+    var loadedUrl: String? = null
+    @Volatile var onFileSavedCallback: (() -> Unit)? = null
+    @Volatile var lowerThirdFolderRef: String = ""
+    var bridgeRef: Any? = null // prevent GC
+}
+
 internal fun openLottieGeneratorDialog(
     parentWindow: Window?,
     onFileSaved: () -> Unit,
@@ -384,7 +401,6 @@ internal fun openLottieGeneratorDialog(
     isDarkTheme: Boolean = true,
     lowerThirdFolder: String = ""
 ) {
-    // Determine the URL to load — use the plain HTTP connector (port+1) to avoid SSL issues in JavaFX WebView
     val loadUrl: String = if (serverUrl.isNotEmpty()) {
         val port = java.net.URI(serverUrl).port.takeIf { it > 0 } ?: 8765
         "http://127.0.0.1:${port + 1}/lottie-generator.html"
@@ -399,23 +415,70 @@ internal fun openLottieGeneratorDialog(
         return
     }
 
+    // Update mutable refs so the cached bridge always uses latest values
+    LottieGeneratorCache.onFileSavedCallback = onFileSaved
+    LottieGeneratorCache.lowerThirdFolderRef = lowerThirdFolder
+
+    // Re-use existing dialog if the URL hasn't changed
+    val cached = LottieGeneratorCache.dialog
+    if (cached != null && LottieGeneratorCache.loadedUrl == loadUrl && cached.isDisplayable) {
+        // Apply theme in case it changed
+        Platform.runLater {
+            try {
+                val jfxPanel = cached.contentPane.getComponent(0) as? JFXPanel ?: return@runLater
+                val webView = (jfxPanel.scene?.root as? StackPane)?.children?.firstOrNull() as? WebView ?: return@runLater
+                val themeMode = if (isDarkTheme) "dark" else "light"
+                webView.engine.executeScript(
+                    "if(typeof applyUITheme==='function') applyUITheme('$themeMode');"
+                )
+            } catch (_: Exception) {}
+        }
+        cached.setLocationRelativeTo(parentWindow)
+        cached.isVisible = true
+        cached.toFront()
+        return
+    }
+
     // Ensure JavaFX toolkit is initialised
     try {
         Platform.setImplicitExit(false)
         Platform.startup { }
-    } catch (_: IllegalStateException) {
-        // Already running — fine
-    }
+    } catch (_: IllegalStateException) {}
 
     val dialog = JDialog().apply {
         title = "Lower Third Generator"
         isModal = false
         preferredSize = Dimension(1200, 800)
-        defaultCloseOperation = JDialog.DISPOSE_ON_CLOSE
+        defaultCloseOperation = JDialog.HIDE_ON_CLOSE
+    }
+
+    val cards = CardLayout()
+    val cardPanel = JPanel(cards)
+
+    // Loading panel — centered progress bar + label
+    val loadingPanel = JPanel().apply {
+        layout = BoxLayout(this, BoxLayout.Y_AXIS)
+        val glue1 = javax.swing.Box.createVerticalGlue()
+        val label = JLabel("Loading generator...").apply {
+            alignmentX = JLabel.CENTER_ALIGNMENT
+            font = font.deriveFont(16f)
+        }
+        val progress = JProgressBar().apply {
+            isIndeterminate = true
+            alignmentX = JProgressBar.CENTER_ALIGNMENT
+            maximumSize = Dimension(300, 20)
+        }
+        val spacer = javax.swing.Box.createRigidArea(Dimension(0, 12))
+        val glue2 = javax.swing.Box.createVerticalGlue()
+        add(glue1); add(label); add(spacer); add(progress); add(glue2)
     }
 
     val jfxPanel = JFXPanel()
-    dialog.contentPane.add(jfxPanel, BorderLayout.CENTER)
+    cardPanel.add(loadingPanel, "loading")
+    cardPanel.add(jfxPanel, "webview")
+    cards.show(cardPanel, "loading")
+
+    dialog.contentPane.add(cardPanel, BorderLayout.CENTER)
     dialog.pack()
     dialog.setLocationRelativeTo(parentWindow)
 
@@ -423,18 +486,17 @@ internal fun openLottieGeneratorDialog(
         val webView = WebView()
         val engine = webView.engine
 
-        // Log JS errors and load failures to stderr for debugging
         engine.setOnError { e -> System.err.println("WebView error: ${e.message}") }
         engine.loadWorker.exceptionProperty().addListener { _, _, ex ->
             if (ex != null) System.err.println("WebView load exception: $ex")
         }
 
-        // Strong reference to prevent GC of the bridge object
         val bridge = object {
             @Suppress("unused")
             fun save(baseName: String, jsonContent: String) {
                 SwingUtilities.invokeLater {
-                    val targetDir = lowerThirdFolder.takeIf { it.isNotEmpty() }
+                    val folder = LottieGeneratorCache.lowerThirdFolderRef
+                    val targetDir = folder.takeIf { it.isNotEmpty() }
                         ?.let { File(it) }
                         ?.takeIf { it.exists() && it.isDirectory }
                     if (targetDir != null) {
@@ -445,7 +507,7 @@ internal fun openLottieGeneratorDialog(
                             targetFile = File(targetDir, "$baseName - %02d.json".format(num))
                         }
                         targetFile.writeText(jsonContent)
-                        onFileSaved()
+                        LottieGeneratorCache.onFileSavedCallback?.invoke()
                     } else {
                         javax.swing.JOptionPane.showMessageDialog(
                             dialog,
@@ -457,6 +519,7 @@ internal fun openLottieGeneratorDialog(
                 }
             }
         }
+        LottieGeneratorCache.bridgeRef = bridge
 
         val stateListener = ChangeListener<Worker.State> { _, _, newState ->
             if (newState == Worker.State.FAILED) {
@@ -464,11 +527,8 @@ internal fun openLottieGeneratorDialog(
             }
             if (newState == Worker.State.SUCCEEDED) {
                 val win = engine.executeScript("window") as? JSObject ?: return@ChangeListener
-
                 win.setMember("_jvmBridge", bridge)
 
-                // Override download button: save rendered file + save config to library
-                // Clone the button to remove all existing event listeners, then add our handler
                 engine.executeScript(
                     "var btn = document.getElementById('btnDownload');" +
                     "if (btn) { var newBtn = btn.cloneNode(true); btn.parentNode.replaceChild(newBtn, btn);" +
@@ -476,13 +536,15 @@ internal fun openLottieGeneratorDialog(
                     "  newBtn.addEventListener('click', function() { download(); savePreset(); }); }"
                 )
 
-                // Apply app theme and hide the theme switcher
                 val themeMode = if (isDarkTheme) "dark" else "light"
                 engine.executeScript(
                     "if(typeof applyUITheme==='function') applyUITheme('$themeMode');" +
                     "var s=document.createElement('style');s.textContent='#themeSwitcher{display:none!important}';" +
                     "document.head.appendChild(s);"
                 )
+
+                // Switch from loading to webview
+                SwingUtilities.invokeLater { cards.show(cardPanel, "webview") }
             }
         }
 
@@ -492,6 +554,8 @@ internal fun openLottieGeneratorDialog(
         jfxPanel.scene = Scene(StackPane(webView), 1180.0, 760.0)
     }
 
+    LottieGeneratorCache.dialog = dialog
+    LottieGeneratorCache.loadedUrl = loadUrl
     dialog.isVisible = true
 }
 

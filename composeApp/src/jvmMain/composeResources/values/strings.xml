@@ -312,7 +312,7 @@
     <string name="please_select_file_first">Please select a file from the list first.</string>
     <string name="no_file_selected_title">No File Selected</string>
     <string name="confirm_delete">Confirm Delete</string>
-    <string name="confirm_delete_file">Are you sure you want to delete \'%s\'?</string>
+    <string name="confirm_delete_file">Are you sure you want to delete "%1$s"?</string>
     <string name="import_error">Import Error</string>
     <string name="delete_error">Delete Error</string>
 
@@ -346,10 +346,10 @@
     <string name="no_results_found">No results found for "%1$s"</string>
 
     <!-- File Manager Error Messages -->
-    <string name="error_target_directory_not_exist">Target directory does not exist: %s</string>
-    <string name="error_copying_file">Error copying %s: %s</string>
+    <string name="error_target_directory_not_exist">Target directory does not exist: %1$s</string>
+    <string name="error_copying_file">Error copying %1$s: %2$s</string>
     <string name="error_failed_delete">Failed to delete file</string>
-    <string name="error_deleting_file">Error deleting file: %s</string>
+    <string name="error_deleting_file">Error deleting file: %1$s</string>
     <string name="warning">Warning</string>
 
     <!-- Edit Song Dialog -->
@@ -570,6 +570,7 @@
 
     <!-- Announcements timer -->
     <string name="timer_title">Timer</string>
+    <string name="timer_hours">hr</string>
     <string name="timer_minutes">min</string>
     <string name="timer_seconds">sec</string>
     <string name="timer_start">Start</string>

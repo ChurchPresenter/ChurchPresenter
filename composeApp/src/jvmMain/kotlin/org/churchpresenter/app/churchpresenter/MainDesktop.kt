@@ -307,6 +307,7 @@ fun MainDesktop(
                                         position            = item.position,
                                         animationType       = item.animationType,
                                         animationDuration   = item.animationDuration,
+                                        timerHours          = item.timerHours,
                                         timerMinutes        = item.timerMinutes,
                                         timerSeconds        = item.timerSeconds,
                                         timerTextColor      = item.timerTextColor,
@@ -387,11 +388,12 @@ fun MainDesktop(
                                                 horizontalAlignment = item.horizontalAlignment,
                                                 position            = item.position,
                                                 animationType       = item.animationType,
-                                                animationDuration = item.animationDuration,
-                                                timerMinutes      = item.timerMinutes,
-                                                timerSeconds      = item.timerSeconds,
-                                                timerTextColor    = item.timerTextColor,
-                                                timerExpiredText  = item.timerExpiredText
+                                                animationDuration   = item.animationDuration,
+                                                timerHours          = item.timerHours,
+                                                timerMinutes        = item.timerMinutes,
+                                                timerSeconds        = item.timerSeconds,
+                                                timerTextColor      = item.timerTextColor,
+                                                timerExpiredText    = item.timerExpiredText
                                             )
                                         )
                                     }
@@ -577,7 +579,7 @@ fun MainDesktop(
                                 onSettingsChange = onSettingsChange,
                                 presenterManager = presenterManager,
                                 onAddToSchedule = { settings ->
-                                    val isTimer = settings.timerMinutes > 0 || settings.timerSeconds > 0
+                                    val isTimer = settings.timerHours > 0 || settings.timerMinutes > 0 || settings.timerSeconds > 0
                                     currentScheduleActions.addAnnouncement(
                                         settings.text,
                                         settings.textColor,
@@ -593,6 +595,7 @@ fun MainDesktop(
                                         settings.animationType,
                                         settings.animationDuration,
                                         isTimer,
+                                        settings.timerHours,
                                         settings.timerMinutes,
                                         settings.timerSeconds,
                                         settings.timerTextColor,

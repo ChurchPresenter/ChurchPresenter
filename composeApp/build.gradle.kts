@@ -171,6 +171,7 @@ compose.desktop {
 
             macOS {
                 bundleID = "org.churchpresenter.app"
+                iconFile.set(project.file("src/jvmMain/appResources/macos/icon.png"))
                 jvmArgs(*commonJvmArgs.toTypedArray())
             }
 
@@ -179,10 +180,12 @@ compose.desktop {
                 perUserInstall = true
                 dirChooser = true
                 upgradeUuid = "A1B2C3D4-E5F6-4789-A012-3456789ABCDE"
+                iconFile.set(project.file("src/jvmMain/appResources/windows/icon.ico"))
                 jvmArgs(*commonJvmArgs.toTypedArray())
             }
 
             linux {
+                iconFile.set(project.file("src/jvmMain/appResources/linux/icon.png"))
                 jvmArgs(*commonJvmArgs.toTypedArray())
             }
         }

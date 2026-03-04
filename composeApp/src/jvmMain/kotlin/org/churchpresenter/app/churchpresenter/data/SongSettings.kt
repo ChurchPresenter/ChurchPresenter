@@ -241,6 +241,7 @@ data class AnnouncementsSettings(
     val position: String = Constants.CENTER,
     val animationType: String = Constants.ANIMATION_SLIDE_FROM_BOTTOM,
     val animationDuration: Int = 12000,
+    val timerHours: Int = 0,
     val timerMinutes: Int = 0,
     val timerSeconds: Int = 0,
     val timerTextColor: String = "#FFFFFF",
