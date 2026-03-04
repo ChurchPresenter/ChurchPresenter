@@ -2,11 +2,9 @@ package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,8 +17,6 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Slider
@@ -31,42 +27,27 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.bible_files
 import churchpresenter.composeapp.generated.resources.bible_selection
-import churchpresenter.composeapp.generated.resources.browse_directory
 import churchpresenter.composeapp.generated.resources.color
-import churchpresenter.composeapp.generated.resources.confirm_delete
-import churchpresenter.composeapp.generated.resources.confirm_delete_file
-import churchpresenter.composeapp.generated.resources.delete_error
 import churchpresenter.composeapp.generated.resources.font_size
 import churchpresenter.composeapp.generated.resources.font_type
 import churchpresenter.composeapp.generated.resources.full_screen
 import churchpresenter.composeapp.generated.resources.lower_third_size
 import churchpresenter.composeapp.generated.resources.horizontal_alignment
-import churchpresenter.composeapp.generated.resources.import_bible_file
-import churchpresenter.composeapp.generated.resources.import_error
-import churchpresenter.composeapp.generated.resources.no_bible_files
-import churchpresenter.composeapp.generated.resources.no_directory_selected
-import churchpresenter.composeapp.generated.resources.no_file_selected_title
 import churchpresenter.composeapp.generated.resources.none
-import churchpresenter.composeapp.generated.resources.please_select_directory_first
-import churchpresenter.composeapp.generated.resources.please_select_file_first
 import churchpresenter.composeapp.generated.resources.position
 import churchpresenter.composeapp.generated.resources.primary_bible
 import churchpresenter.composeapp.generated.resources.primary_bible_reference
 import churchpresenter.composeapp.generated.resources.primary_bible_text
-import churchpresenter.composeapp.generated.resources.remove_bible_file
 import churchpresenter.composeapp.generated.resources.secondary_bible
 import churchpresenter.composeapp.generated.resources.secondary_bible_reference
 import churchpresenter.composeapp.generated.resources.secondary_bible_text
 import churchpresenter.composeapp.generated.resources.show_in_lower_third
 import churchpresenter.composeapp.generated.resources.show_abbreviation
-import churchpresenter.composeapp.generated.resources.storage_directory
 import churchpresenter.composeapp.generated.resources.vertical_alignment
 import churchpresenter.composeapp.generated.resources.animation_crossfade
 import churchpresenter.composeapp.generated.resources.animation_fade
@@ -91,11 +72,8 @@ import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDefault
 import org.churchpresenter.app.churchpresenter.viewmodel.BibleSettingsViewModel
-import org.churchpresenter.app.churchpresenter.viewmodel.FileManager
 import org.jetbrains.compose.resources.stringResource
 import java.awt.GraphicsEnvironment
-import java.awt.Window
-import javax.swing.SwingUtilities
 
 
 @Composable
@@ -143,11 +121,7 @@ fun BibleSettingsTab(
                     settings,
                     onSettingsChange,
                     bibleFilesInDirectory,
-                    bibleFileDisplayNames,
-                    viewModel.selectedFile,
-                    { viewModel.selectFile(it) },
-                    { viewModel.refresh() },
-                    viewModel.fileManager
+                    bibleFileDisplayNames
                 )
             }
             Column(
@@ -167,140 +141,9 @@ private fun LeftColumn(
     settings: AppSettings,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
     bibleFilesInDirectory: List<String>,
-    bibleFileDisplayNames: Map<String, String>,
-    selectedFile: String?,
-    onFileSelected: (String?) -> Unit,
-    onRefresh: () -> Unit,
-    fileManager: FileManager
+    bibleFileDisplayNames: Map<String, String>
 ) {
     val noneStr = stringResource(Res.string.none)
-    val pleaseSelectDirectoryStr = stringResource(Res.string.please_select_directory_first)
-    val noDirectorySelectedStr = stringResource(Res.string.no_directory_selected)
-    val pleaseSelectFileStr = stringResource(Res.string.please_select_file_first)
-    val noFileSelectedStr = stringResource(Res.string.no_file_selected_title)
-    val confirmDeleteStr = stringResource(Res.string.confirm_delete)
-    val confirmDeleteFileTemplate = stringResource(Res.string.confirm_delete_file)
-    val importErrorStr = stringResource(Res.string.import_error)
-    val deleteErrorStr = stringResource(Res.string.delete_error)
-
-
-
-    // Storage Directory
-    SectionHeader(stringResource(Res.string.storage_directory))
-    Spacer(modifier = Modifier.height(8.dp))
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = settings.bibleSettings.storageDirectory.ifEmpty { stringResource(Res.string.no_directory_selected) },
-            modifier = Modifier.weight(1f)
-                .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(2.dp))
-                .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f), RoundedCornerShape(2.dp))
-                .padding(horizontal = 8.dp, vertical = 6.dp),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-
-        ModernButton(
-            text = stringResource(Res.string.browse_directory),
-            backgroundColor = MaterialTheme.colorScheme.primaryContainer,
-            onClick = {
-                SwingUtilities.invokeLater {
-                    val parentWindow = Window.getWindows().firstOrNull { it.isActive }
-                    val selectedDir = fileManager.chooseDirectory(
-                        currentDirectory = settings.bibleSettings.storageDirectory,
-                        parentWindow = parentWindow
-                    )
-                    selectedDir?.let { dir ->
-                        onSettingsChange { it.copy(bibleSettings = it.bibleSettings.copy(storageDirectory = dir)) }
-                    }
-                }
-            }
-        )
-    }
-
-    Spacer(modifier = Modifier.height(15.dp))
-
-    // Bible Files
-    SectionHeader(stringResource(Res.string.bible_files))
-    Spacer(modifier = Modifier.height(8.dp))
-    Box(
-        modifier = Modifier.fillMaxWidth().height(120.dp)
-            .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f), RoundedCornerShape(2.dp))
-    ) {
-        Column(
-            modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())
-                .background(MaterialTheme.colorScheme.surface).padding(8.dp)
-        ) {
-            if (bibleFilesInDirectory.isEmpty()) {
-                Text(
-                    text = if (settings.bibleSettings.storageDirectory.isEmpty()) noDirectorySelectedStr
-                           else stringResource(Res.string.no_bible_files),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            } else {
-                bibleFilesInDirectory.forEach { fileName ->
-                    val isSelected = fileName == selectedFile
-                    Text(
-                        text = fileName,
-                        style = MaterialTheme.typography.bodySmall,
-                        modifier = Modifier.fillMaxWidth()
-                            .background(if (isSelected) MaterialTheme.colorScheme.primaryContainer else Color.Transparent)
-                            .clickable { onFileSelected(fileName) }
-                            .padding(vertical = 4.dp, horizontal = 8.dp),
-                        color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer
-                                else MaterialTheme.colorScheme.onSurface
-                    )
-                }
-            }
-        }
-    }
-
-    Spacer(modifier = Modifier.height(8.dp))
-
-    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        ModernButton(
-            text = stringResource(Res.string.import_bible_file),
-            backgroundColor = MaterialTheme.colorScheme.inverseSurface,
-            onClick = {
-                SwingUtilities.invokeLater {
-                    val parentWindow = Window.getWindows().firstOrNull { it.isActive }
-                    if (settings.bibleSettings.storageDirectory.isEmpty()) {
-                        fileManager.showWarning(pleaseSelectDirectoryStr, noDirectorySelectedStr, parentWindow)
-                        return@invokeLater
-                    }
-                    fileManager.chooseBibleFile(parentWindow)?.let { file ->
-                        val errors = fileManager.importFiles(listOf(file), settings.bibleSettings.storageDirectory)
-                        if (errors.isNotEmpty()) fileManager.showError(errors.joinToString("\n"), importErrorStr, parentWindow)
-                        onRefresh()
-                    }
-                }
-            }
-        )
-        ModernButton(
-            text = stringResource(Res.string.remove_bible_file),
-            backgroundColor = MaterialTheme.colorScheme.errorContainer,
-            onClick = {
-                SwingUtilities.invokeLater {
-                    val parentWindow = Window.getWindows().firstOrNull { it.isActive }
-                    if (selectedFile == null) {
-                        fileManager.showWarning(pleaseSelectFileStr, noFileSelectedStr, parentWindow)
-                        return@invokeLater
-                    }
-                    if (fileManager.showConfirmDialog(String.format(confirmDeleteFileTemplate, selectedFile), confirmDeleteStr, parentWindow)) {
-                        val error = fileManager.deleteFile(settings.bibleSettings.storageDirectory, selectedFile)
-                        if (error != null) fileManager.showError(error, deleteErrorStr, parentWindow)
-                        else { onFileSelected(null); onRefresh() }
-                    }
-                }
-            }
-        )
-    }
-
-    Spacer(modifier = Modifier.height(20.dp))
 
     // Bible Selection
     SectionHeader(stringResource(Res.string.bible_selection))
@@ -937,21 +780,3 @@ private fun SettingRow(
     }
 }
 
-@Composable
-private fun ModernButton(
-    text: String,
-    backgroundColor: Color,
-    onClick: () -> Unit
-) {
-    Button(
-        onClick = onClick,
-        colors = ButtonDefaults.buttonColors(
-            containerColor = backgroundColor,
-            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-        ),
-        shape = RoundedCornerShape(4.dp),
-        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
-    ) {
-        Text(text = text, style = MaterialTheme.typography.labelMedium)
-    }
-}

@@ -47,7 +47,7 @@ import churchpresenter.composeapp.generated.resources.song
 import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.data.SettingsManager
 import org.churchpresenter.app.churchpresenter.server.CompanionServer
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.AppearanceSettingsTab
+import org.churchpresenter.app.churchpresenter.dialogs.tabs.SystemSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.BackgroundSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.BibleSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.MediaSettingsTab
@@ -147,7 +147,7 @@ fun OptionsDialog(
                             .background(MaterialTheme.colorScheme.background)
                     ) {
                         when (selectedTabIndex) {
-                            0 -> AppearanceSettingsTab(
+                            0 -> SystemSettingsTab(
                                 currentTheme = theme,
                                 onThemeChange = onThemeChange,
                                 settings = currentSettings,

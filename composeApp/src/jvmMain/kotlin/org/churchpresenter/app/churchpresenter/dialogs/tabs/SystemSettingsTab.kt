@@ -38,7 +38,7 @@ import java.awt.Window
 import javax.swing.SwingUtilities
 
 @Composable
-fun AppearanceSettingsTab(
+fun SystemSettingsTab(
     currentTheme: ThemeMode,
     onThemeChange: (ThemeMode) -> Unit,
     settings: AppSettings = AppSettings(),
