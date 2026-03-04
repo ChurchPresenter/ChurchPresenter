@@ -3,19 +3,24 @@ package org.churchpresenter.app.churchpresenter.tabs
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
@@ -61,13 +66,23 @@ import churchpresenter.composeapp.generated.resources.media_now_playing
 import churchpresenter.composeapp.generated.resources.media_preview
 import churchpresenter.composeapp.generated.resources.media_seek_backward
 import churchpresenter.composeapp.generated.resources.media_seek_forward
+import churchpresenter.composeapp.generated.resources.media_screen_announcements
+import churchpresenter.composeapp.generated.resources.media_screen_bible
+import churchpresenter.composeapp.generated.resources.media_screen_content
+import churchpresenter.composeapp.generated.resources.media_screen_none
+import churchpresenter.composeapp.generated.resources.media_screen_pictures
+import churchpresenter.composeapp.generated.resources.media_screen_presentation
+import churchpresenter.composeapp.generated.resources.media_screen_songs
+import churchpresenter.composeapp.generated.resources.media_files_filter
 import churchpresenter.composeapp.generated.resources.media_select_file
 import churchpresenter.composeapp.generated.resources.media_select_to_begin
-import churchpresenter.composeapp.generated.resources.media_source
+import churchpresenter.composeapp.generated.resources.media_vlc_install
+import churchpresenter.composeapp.generated.resources.media_vlc_required
 import churchpresenter.composeapp.generated.resources.media_unmute
 import churchpresenter.composeapp.generated.resources.pause
 import churchpresenter.composeapp.generated.resources.play
 import org.churchpresenter.app.churchpresenter.composables.VideoPlayer
+import org.churchpresenter.app.churchpresenter.composables.isVlcAvailable
 import org.churchpresenter.app.churchpresenter.models.ScheduleItem
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.utils.Constants
@@ -87,6 +102,32 @@ fun MediaTab(
     selectedMediaItem: ScheduleItem.MediaItem? = null,
     presenterManager: PresenterManager? = null
 ) {
+    // Check if VLC is available
+    if (!isVlcAvailable) {
+        Column(
+            modifier = modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text("🎬", style = MaterialTheme.typography.displayLarge)
+            Spacer(modifier = Modifier.size(16.dp))
+            Text(
+                text = stringResource(Res.string.media_vlc_required),
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Spacer(modifier = Modifier.size(8.dp))
+            Text(
+                text = stringResource(Res.string.media_vlc_install),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+        return
+    }
+
     // Consume the app-scope MediaViewModel provided by main.kt via CompositionLocalProvider.
     // Do NOT create a local instance — that would disconnect MediaTab controls from MediaPresenter.
     val viewModel = LocalMediaViewModel.current ?: return
@@ -129,14 +170,9 @@ fun MediaTab(
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         // ── Source row ──────────────────────────────────────────────────
-        Text(
-            text = stringResource(Res.string.media_source),
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.primary
-        )
-        HorizontalDivider()
-
         // Single source row: file picker + URL field + Load button
+        val selectFileLabel = stringResource(Res.string.media_select_file)
+        val mediaFilesLabel = stringResource(Res.string.media_files_filter)
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -148,22 +184,26 @@ fun MediaTab(
                     SwingUtilities.invokeLater {
                         val chooser = createFileChooser {
                             fileSelectionMode = JFileChooser.FILES_ONLY
-                            dialogTitle = "Select Video File"
+                            dialogTitle = selectFileLabel
                             fileFilter = FileNameExtensionFilter(
-                                "Video Files",
-                                "mp4", "mov", "avi", "mkv", "wmv", "flv", "webm", "m4v"
+                                mediaFilesLabel,
+                                "mp4", "mov", "avi", "mkv", "wmv", "flv", "webm", "m4v",
+                                "mp3", "wav", "flac", "aac", "ogg", "wma", "m4a", "aiff", "opus"
                             )
                         }
                         if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
                             val file = chooser.selectedFile
-                            viewModel.loadMedia(file.absolutePath, Constants.MEDIA_TYPE_LOCAL)
+                            val ext = file.extension.lowercase()
+                            val type = if (ext in Constants.AUDIO_EXTENSIONS)
+                                Constants.MEDIA_TYPE_AUDIO else Constants.MEDIA_TYPE_LOCAL
+                            viewModel.loadMedia(file.absolutePath, type)
                         }
                     }
                 }
             ) {
                 Text(
                     text = stringResource(Res.string.media_select_file),
-                    style = MaterialTheme.typography.labelSmall
+                    style = MaterialTheme.typography.labelMedium
                 )
             }
 
@@ -327,7 +367,7 @@ fun MediaTab(
                                     )
                                     Text(
                                         text = "${(viewModel.effectiveVolume * 100).toInt()}%",
-                                        style = MaterialTheme.typography.labelSmall,
+                                        style = MaterialTheme.typography.labelMedium,
                                         modifier = Modifier.width(32.dp)
                                     )
                                 }
@@ -355,7 +395,7 @@ fun MediaTab(
                     ) {
                         Text(
                             text = stringResource(Res.string.go_live),
-                            style = MaterialTheme.typography.labelSmall
+                            style = MaterialTheme.typography.labelMedium
                         )
                     }
                 }
@@ -371,7 +411,7 @@ fun MediaTab(
                     ) {
                         Text(
                             text = stringResource(Res.string.add_to_schedule),
-                            style = MaterialTheme.typography.labelSmall
+                            style = MaterialTheme.typography.labelMedium
                         )
                     }
                 }
@@ -391,68 +431,108 @@ fun MediaTab(
         }
 
 
-        // ── Preview panel ───────────────────────────────────────────────
-        Text(
-            text = stringResource(Res.string.media_preview),
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.primary
-        )
-
+        // ── Preview / Screen content panel ──────────────────────────────
         val isPresenting = presenterManager?.presentingMode?.value == Presenting.MEDIA
                 && presenterManager.showPresenterWindow.value
 
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f)
-                .background(Color.Black, RoundedCornerShape(8.dp))
-                .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(8.dp)),
-            contentAlignment = Alignment.Center
-        ) {
-            when {
-                isPresenting -> {
-                    // Presenter window is active — don't run a second player here
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Text("📽️", style = MaterialTheme.typography.displayMedium)
-                        Text(
-                            text = stringResource(Res.string.media_now_presenting),
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = Color.White.copy(alpha = 0.8f)
-                        )
-                        Text(
-                            text = viewModel.mediaTitle,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = Color.White.copy(alpha = 0.5f),
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
-                }
-                viewModel.isLoaded -> {
-                    VideoPlayer(
-                        viewModel = viewModel,
-                        modifier = Modifier.fillMaxSize()
+        if (viewModel.isLoaded && viewModel.isAudioFile) {
+            // Audio file: show screen content selector instead of video preview
+            Text(
+                text = stringResource(Res.string.media_screen_content),
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.primary
+            )
+
+            val screenOptions = listOf(
+                stringResource(Res.string.media_screen_none) to Presenting.NONE,
+                stringResource(Res.string.media_screen_bible) to Presenting.BIBLE,
+                stringResource(Res.string.media_screen_songs) to Presenting.LYRICS,
+                stringResource(Res.string.media_screen_pictures) to Presenting.PICTURES,
+                stringResource(Res.string.media_screen_presentation) to Presenting.PRESENTATION,
+                stringResource(Res.string.media_screen_announcements) to Presenting.ANNOUNCEMENTS
+            )
+
+            @OptIn(ExperimentalLayoutApi::class)
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                screenOptions.forEach { (label, mode) ->
+                    FilterChip(
+                        selected = viewModel.audioScreenContent == mode,
+                        onClick = { viewModel.setAudioScreenContent(mode) },
+                        label = { Text(label, style = MaterialTheme.typography.labelMedium) }
                     )
                 }
-                else -> {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Text("🎬", style = MaterialTheme.typography.displayMedium)
-                        Text(
-                            text = stringResource(Res.string.media_no_source),
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = Color.White.copy(alpha = 0.6f)
-                        )
-                        Text(
-                            text = stringResource(Res.string.media_select_to_begin),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = Color.White.copy(alpha = 0.4f)
-                        )
+            }
+
+            Spacer(modifier = Modifier.weight(1f))
+        } else {
+            // Video file or no media: show video preview
+            Text(
+                text = stringResource(Res.string.media_preview),
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.primary
+            )
+
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ) {
+                Box(
+                    modifier = Modifier
+                        .aspectRatio(16f / 9f)
+                        .background(Color.Black, RoundedCornerShape(8.dp))
+                        .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(8.dp)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    when {
+                        isPresenting -> {
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Text("📽️", style = MaterialTheme.typography.displayMedium)
+                                Text(
+                                    text = stringResource(Res.string.media_now_presenting),
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = Color.White.copy(alpha = 0.8f)
+                                )
+                                Text(
+                                    text = viewModel.mediaTitle,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = Color.White.copy(alpha = 0.5f),
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
+                        }
+                        viewModel.isLoaded -> {
+                            VideoPlayer(
+                                viewModel = viewModel,
+                                modifier = Modifier.fillMaxSize()
+                            )
+                        }
+                        else -> {
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Text("🎬", style = MaterialTheme.typography.displayMedium)
+                                Text(
+                                    text = stringResource(Res.string.media_no_source),
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = Color.White.copy(alpha = 0.6f)
+                                )
+                                Text(
+                                    text = stringResource(Res.string.media_select_to_begin),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = Color.White.copy(alpha = 0.4f)
+                                )
+                            }
+                        }
                     }
                 }
             }

@@ -6,22 +6,25 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.awt.SwingPanel
-import javafx.application.Platform
 import javafx.embed.swing.JFXPanel
-import javafx.scene.Scene
-import javafx.scene.layout.StackPane
-import javafx.scene.media.Media
-import javafx.scene.media.MediaPlayer
-import javafx.scene.media.MediaView
-import javafx.util.Duration
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import org.churchpresenter.app.churchpresenter.viewmodel.MediaViewModel
-import java.awt.BorderLayout
+import uk.co.caprica.vlcj.factory.MediaPlayerFactory
+import uk.co.caprica.vlcj.player.base.AudioDevice
+import uk.co.caprica.vlcj.player.base.MediaPlayer
+import uk.co.caprica.vlcj.player.base.MediaPlayerEventAdapter
+import uk.co.caprica.vlcj.player.component.CallbackMediaPlayerComponent
+import uk.co.caprica.vlcj.player.component.EmbeddedMediaPlayerComponent
+import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer
+import java.awt.Component
 import java.io.File
-import javax.swing.JPanel
+import java.util.Locale
+import javax.swing.SwingUtilities
 
 /**
  * Initialises the JavaFX toolkit exactly once for the lifetime of the process.
- * Call [initAsync] early (e.g. from main) to pre-warm on a background thread.
+ * Still needed for WebView (WebsitePresenter, LowerThirdSettingsTab).
  */
 private object JfxInit {
     @Volatile private var initialised = false
@@ -30,12 +33,11 @@ private object JfxInit {
             synchronized(this) {
                 if (!initialised) {
                     initialised = true
-                    JFXPanel() // boots the JavaFX application thread
+                    JFXPanel()
                 }
             }
         }
     }
-    /** Pre-warms JavaFX on a daemon thread so the Media tab opens instantly. */
     fun initAsync() {
         if (initialised) return
         Thread(::ensureInit, "jfx-prewarm").apply { isDaemon = true; start() }
@@ -45,127 +47,171 @@ private object JfxInit {
 /** Call once from main() to pre-warm JavaFX on a background thread. */
 fun preWarmJavaFX() = JfxInit.initAsync()
 
+private fun isMacOS(): Boolean {
+    val os = System.getProperty("os.name", "generic").lowercase(Locale.ENGLISH)
+    return "mac" in os || "darwin" in os
+}
+
+/** Returns true if VLC is installed and VLCJ can initialise. */
+val isVlcAvailable: Boolean by lazy {
+    try {
+        createMediaPlayerComponent()?.let {
+            when (it) {
+                is CallbackMediaPlayerComponent -> it.release()
+                is EmbeddedMediaPlayerComponent -> it.release()
+            }
+        }
+        true
+    } catch (_: Exception) { false }
+}
+
+data class VlcAudioDevice(val id: String, val description: String)
+
+/** Lists available audio output devices via VLCJ. */
+fun listVlcAudioDevices(): List<VlcAudioDevice> {
+    if (!isVlcAvailable) return emptyList()
+    return try {
+        val factory = MediaPlayerFactory()
+        val mp = factory.mediaPlayers().newMediaPlayer()
+        val devices = mp.audio().outputDevices()
+            .map { VlcAudioDevice(it.deviceId, it.longName) }
+        mp.release()
+        factory.release()
+        devices
+    } catch (_: Exception) { emptyList() }
+}
+
 /**
- * Embeds a JavaFX MediaPlayer for local video files.
- * Every time this composable enters composition (e.g. tab switch back) it
- * rebuilds the player from scratch, so the video is always available.
+ * Creates a platform-appropriate VLCJ component.
+ * macOS requires CallbackMediaPlayerComponent; Linux/Windows use EmbeddedMediaPlayerComponent.
+ * See https://github.com/caprica/vlcj/issues/887#issuecomment-503288294
+ */
+private fun createMediaPlayerComponent(): Component? {
+    return try {
+        if (isMacOS()) CallbackMediaPlayerComponent()
+        else EmbeddedMediaPlayerComponent()
+    } catch (e: Exception) {
+        System.err.println("VLCJ: Could not initialise. Is VLC installed? ${e.message}")
+        null
+    }
+}
+
+/** Extracts the EmbeddedMediaPlayer from either component type. */
+private fun Component.mediaPlayer(): EmbeddedMediaPlayer = when (this) {
+    is CallbackMediaPlayerComponent -> mediaPlayer()
+    is EmbeddedMediaPlayerComponent -> mediaPlayer()
+    else -> error("Unexpected component type")
+}
+
+/** Releases the component. */
+private fun Component.releasePlayer() = when (this) {
+    is CallbackMediaPlayerComponent -> release()
+    is EmbeddedMediaPlayerComponent -> release()
+    else -> {}
+}
+
+/**
+ * Embeds a VLCJ media player for local video/audio files.
+ * Requires VLC to be installed on the system.
+ * Works cross-platform: Linux, Windows, and macOS.
  */
 @Composable
 fun VideoPlayer(
     viewModel: MediaViewModel,
     modifier: Modifier = Modifier,
-    audioEnabled: Boolean = true
+    audioEnabled: Boolean = true,
+    audioDeviceId: String = ""
 ) {
-    JfxInit.ensureInit()
-
-    val swingContainer = remember { JPanel(BorderLayout()) }
-    val jfxPanel       = remember { JFXPanel() }
-    val playerHolder   = remember { PlayerHolder() }
+    val component = remember { createMediaPlayerComponent() } ?: return
+    val mp: EmbeddedMediaPlayer = component.mediaPlayer()
 
     DisposableEffect(Unit) {
-        swingContainer.add(jfxPanel, BorderLayout.CENTER)
-        onDispose {
-            Platform.runLater {
-                playerHolder.clear()
-                jfxPanel.scene = null
+        mp.events().addMediaPlayerEventListener(object : MediaPlayerEventAdapter() {
+            override fun lengthChanged(mediaPlayer: MediaPlayer, newLength: Long) {
+                viewModel.setDuration(newLength)
             }
-            swingContainer.remove(jfxPanel)
+            override fun finished(mediaPlayer: MediaPlayer) {
+                if (audioEnabled) viewModel.pause()
+            }
+            override fun error(mediaPlayer: MediaPlayer) {
+                System.err.println("VLCJ: Playback error")
+            }
+        })
+        onDispose {
+            mp.controls().stop()
+            component.releasePlayer()
         }
     }
 
-    // Rebuild player when URL changes
+    // Apply audio output device
+    LaunchedEffect(audioDeviceId) {
+        if (audioDeviceId.isNotBlank()) {
+            mp.audio().setOutputDevice(null, audioDeviceId)
+        }
+    }
+
+    // Load media when URL changes
     LaunchedEffect(viewModel.mediaUrl) {
         val url = viewModel.mediaUrl
-        Platform.runLater {
-            playerHolder.clear()
-            if (url.isBlank()) {
-                jfxPanel.scene = null
-                return@runLater
+        mp.controls().stop()
+        if (url.isBlank()) return@LaunchedEffect
+
+        val mrl = try {
+            val f = File(url)
+            if (f.exists()) f.absolutePath else url
+        } catch (_: Exception) { url }
+
+        if (!audioEnabled) mp.audio().setVolume(0)
+        else mp.audio().setVolume((viewModel.effectiveVolume * 100).toInt())
+
+        mp.media().play(mrl)
+        // If viewModel says paused, pause after a brief start
+        if (!viewModel.isPlaying) {
+            delay(150)
+            SwingUtilities.invokeLater {
+                if (!viewModel.isPlaying && mp.status().isPlaying) {
+                    mp.controls().pause()
+                }
             }
-            buildPlayer(url, jfxPanel, playerHolder, viewModel, audioEnabled)
         }
     }
 
+    // Play / pause sync
     LaunchedEffect(viewModel.isPlaying) {
-        Platform.runLater {
-            val p = playerHolder.player ?: return@runLater
-            if (viewModel.isPlaying) p.play() else p.pause()
+        SwingUtilities.invokeLater {
+            if (viewModel.isPlaying) {
+                if (!mp.status().isPlaying) mp.controls().play()
+            } else {
+                if (mp.status().isPlaying) mp.controls().pause()
+            }
         }
     }
 
-    // Only update volume if audio is enabled — muted windows stay at 0.0 permanently.
+    // Volume sync
     LaunchedEffect(viewModel.effectiveVolume) {
         if (audioEnabled) {
-            Platform.runLater {
-                playerHolder.player?.volume = viewModel.effectiveVolume.toDouble()
-            }
+            mp.audio().setVolume((viewModel.effectiveVolume * 100).toInt())
         }
     }
 
+    // Seek sync
     LaunchedEffect(viewModel.seekVersion) {
-        Platform.runLater {
-            val p = playerHolder.player ?: return@runLater
-            p.seek(Duration.millis(viewModel.currentPosition.toDouble()))
+        if (viewModel.currentPosition >= 0) {
+            mp.controls().setTime(viewModel.currentPosition)
         }
     }
 
-    SwingPanel(factory = { swingContainer }, modifier = modifier)
-}
-
-private fun buildPlayer(
-    url: String,
-    jfxPanel: JFXPanel,
-    holder: PlayerHolder,
-    viewModel: MediaViewModel,
-    audioEnabled: Boolean
-) {
-    val uri = try {
-        val f = File(url)
-        if (f.exists()) f.toURI().toString() else url
-    } catch (_: Exception) { url }
-
-    try {
-        val media  = Media(uri)
-        val player = MediaPlayer(media)
-        val view   = MediaView(player)
-        view.isPreserveRatio = true
-
-        val root = StackPane(view)
-        root.style = "-fx-background-color: black;"
-        view.fitWidthProperty().bind(root.widthProperty())
-        view.fitHeightProperty().bind(root.heightProperty())
-
-        jfxPanel.scene = Scene(root, javafx.scene.paint.Color.BLACK)
-
-        player.setOnReady {
-            viewModel.setDuration(player.totalDuration.toMillis().toLong())
-        }
-        // Only the primary (audioEnabled) player reports position to avoid double-updates
-        if (audioEnabled) {
-            player.currentTimeProperty().addListener { _, _, v: Duration ->
-                viewModel.setCurrentPosition(v.toMillis().toLong())
+    // Poll position for progress bar updates
+    if (audioEnabled) {
+        LaunchedEffect(viewModel.mediaUrl) {
+            while (isActive) {
+                delay(250)
+                if (mp.status().isPlaying) {
+                    viewModel.setCurrentPosition(mp.status().time())
+                }
             }
         }
-        player.setOnEndOfMedia {
-            if (audioEnabled) viewModel.pause()
-            player.seek(Duration.ZERO)
-        }
-
-        holder.player = player
-        // Muted windows always play at volume 0 — never read effectiveVolume
-        player.volume = if (audioEnabled) viewModel.effectiveVolume.toDouble() else 0.0
-        if (viewModel.isPlaying) player.play()
-
-    } catch (_: Exception) {
-        // Unsupported format — leave blank screen
     }
-}
 
-private class PlayerHolder {
-    var player: MediaPlayer? = null
-    fun clear() {
-        player?.stop()
-        player?.dispose()
-        player = null
-    }
+    SwingPanel(factory = { component }, modifier = modifier)
 }

@@ -164,6 +164,8 @@ data class BibleSettings(
 
 @Serializable
 data class ScreenAssignment(
+    val targetDisplay: Int = -1,  // -1 = auto (screen index + 1), 0+ = specific display index
+    val targetType: String = "screen",  // "screen" or "decklink"
     val showBible: Boolean = true,
     val showSongs: Boolean = true,
     val showPictures: Boolean = true,
@@ -183,7 +185,8 @@ data class ProjectionSettings(
     val screen1Assignment: ScreenAssignment = ScreenAssignment(),
     val screen2Assignment: ScreenAssignment = ScreenAssignment(),
     val screen3Assignment: ScreenAssignment = ScreenAssignment(),
-    val screen4Assignment: ScreenAssignment = ScreenAssignment()
+    val screen4Assignment: ScreenAssignment = ScreenAssignment(),
+    val audioOutputDeviceId: String = "" // empty = system default
 )
 
 @Serializable

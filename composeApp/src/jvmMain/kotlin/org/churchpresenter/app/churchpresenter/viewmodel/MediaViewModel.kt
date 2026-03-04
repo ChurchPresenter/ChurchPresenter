@@ -2,6 +2,7 @@ package org.churchpresenter.app.churchpresenter.viewmodel
 
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.utils.Constants
 
 class MediaViewModel {
@@ -47,6 +48,18 @@ class MediaViewModel {
     /** Effective volume sent to the player (0 when muted). */
     val effectiveVolume: Float get() = if (_isMuted.value) 0f else _volume.value
 
+    // Audio file detection
+    private val _isAudioFile = mutableStateOf(false)
+    val isAudioFile: Boolean get() = _isAudioFile.value
+
+    // What to show on screen while audio plays
+    private val _audioScreenContent = mutableStateOf(Presenting.NONE)
+    val audioScreenContent: Presenting get() = _audioScreenContent.value
+
+    fun setAudioScreenContent(mode: Presenting) {
+        _audioScreenContent.value = mode
+    }
+
     fun loadMedia(url: String, type: String) {
         _mediaUrl.value = url
         _mediaType.value = type
@@ -55,6 +68,8 @@ class MediaViewModel {
         _isPlaying.value = false
         _currentPosition.value = 0L
         _duration.value = 0L
+        _isAudioFile.value = type == Constants.MEDIA_TYPE_AUDIO ||
+            url.substringAfterLast('.').lowercase() in Constants.AUDIO_EXTENSIONS
     }
 
     fun loadMediaFromSchedule(url: String, title: String, type: String) {
@@ -64,6 +79,8 @@ class MediaViewModel {
         _isLoaded.value = url.isNotBlank()
         _isPlaying.value = false
         _currentPosition.value = 0L
+        _isAudioFile.value = type == Constants.MEDIA_TYPE_AUDIO ||
+            url.substringAfterLast('.').lowercase() in Constants.AUDIO_EXTENSIONS
     }
 
     fun togglePlayPause() {
