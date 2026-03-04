@@ -71,6 +71,7 @@ import org.churchpresenter.app.churchpresenter.tabs.PresentationTab
 import org.churchpresenter.app.churchpresenter.tabs.ScheduleTab
 import org.churchpresenter.app.churchpresenter.tabs.ScheduleTabActions
 import org.churchpresenter.app.churchpresenter.tabs.SongsTab
+import org.churchpresenter.app.churchpresenter.tabs.WebTab
 import org.churchpresenter.app.churchpresenter.tabs.LowerThirdTab
 import org.churchpresenter.app.churchpresenter.tabs.TabSection
 import org.churchpresenter.app.churchpresenter.tabs.Tabs
@@ -426,7 +427,7 @@ fun MainDesktop(
                                     onDragEnd = ::saveScheduleWidth
                                 ) { _, amount ->
                                     schedulePanelPx = (schedulePanelPx + amount).coerceIn(
-                                        with(density) { 150.dp.toPx() },
+                                        with(density) { 160.dp.toPx() },
                                         with(density) { 600.dp.toPx() }
                                     )
                                 }
@@ -584,6 +585,8 @@ fun MainDesktop(
                                     )
                                 }
                             )
+
+                            Tabs.WEB -> WebTab(modifier = Modifier.fillMaxSize())
                         }
                     }
                 }
