@@ -218,18 +218,11 @@ fun ScheduleTab(
 
             Spacer(modifier = Modifier.width(4.dp))
 
-            // Label & Website
+            // Label
             TooltipIconButton(
                 painter = painterResource(Res.drawable.ic_label),
                 text = stringResource(Res.string.tooltip_add_label),
                 onClick = onAddLabel,
-                buttonSize = 32.dp,
-                iconTint = MaterialTheme.colorScheme.onSurface
-            )
-            TooltipIconButton(
-                painter = painterResource(Res.drawable.ic_web),
-                text = stringResource(Res.string.tooltip_add_website),
-                onClick = onAddWebsite,
                 buttonSize = 32.dp,
                 iconTint = MaterialTheme.colorScheme.onSurface
             )
@@ -260,50 +253,52 @@ fun ScheduleTab(
             )
         }
 
-        // Row 2: Move arrows on their own line
-        Row(
+        // Schedule header + move arrows (buttons wrap as a group)
+        FlowRow(
             modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp),
             horizontalArrangement = Arrangement.spacedBy(2.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalArrangement = Arrangement.spacedBy(2.dp),
+            itemVerticalAlignment = Alignment.CenterVertically
         ) {
-            TooltipIconButton(
-                painter = painterResource(Res.drawable.ic_arrow_up_double),
-                text = stringResource(Res.string.tooltip_move_to_top),
-                onClick = { viewModel.selectedItemId?.let { viewModel.moveItemToTop(it) } },
-                buttonSize = 32.dp,
-                iconTint = MaterialTheme.colorScheme.onSurface
+            Text(
+                text = stringResource(Res.string.schedule),
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.padding(end = 6.dp)
             )
-            TooltipIconButton(
-                painter = painterResource(Res.drawable.ic_arrow_up),
-                text = stringResource(Res.string.tooltip_move_up),
-                onClick = { viewModel.selectedItemId?.let { viewModel.moveItemUp(it) } },
-                buttonSize = 32.dp,
-                iconTint = MaterialTheme.colorScheme.onSurface
-            )
-            TooltipIconButton(
-                painter = painterResource(Res.drawable.ic_arrow_down),
-                text = stringResource(Res.string.tooltip_move_down),
-                onClick = { viewModel.selectedItemId?.let { viewModel.moveItemDown(it) } },
-                buttonSize = 32.dp,
-                iconTint = MaterialTheme.colorScheme.onSurface
-            )
-            TooltipIconButton(
-                painter = painterResource(Res.drawable.ic_arrow_down_double),
-                text = stringResource(Res.string.tooltip_move_to_bottom),
-                onClick = { viewModel.selectedItemId?.let { viewModel.moveItemToBottom(it) } },
-                buttonSize = 32.dp,
-                iconTint = MaterialTheme.colorScheme.onSurface
-            )
+            // Wrap all 4 buttons in a Row so FlowRow treats them as one item
+            Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+                TooltipIconButton(
+                    painter = painterResource(Res.drawable.ic_arrow_up_double),
+                    text = stringResource(Res.string.tooltip_move_to_top),
+                    onClick = { viewModel.selectedItemId?.let { viewModel.moveItemToTop(it) } },
+                    buttonSize = 32.dp,
+                    iconTint = MaterialTheme.colorScheme.onSurface
+                )
+                TooltipIconButton(
+                    painter = painterResource(Res.drawable.ic_arrow_up),
+                    text = stringResource(Res.string.tooltip_move_up),
+                    onClick = { viewModel.selectedItemId?.let { viewModel.moveItemUp(it) } },
+                    buttonSize = 32.dp,
+                    iconTint = MaterialTheme.colorScheme.onSurface
+                )
+                TooltipIconButton(
+                    painter = painterResource(Res.drawable.ic_arrow_down),
+                    text = stringResource(Res.string.tooltip_move_down),
+                    onClick = { viewModel.selectedItemId?.let { viewModel.moveItemDown(it) } },
+                    buttonSize = 32.dp,
+                    iconTint = MaterialTheme.colorScheme.onSurface
+                )
+                TooltipIconButton(
+                    painter = painterResource(Res.drawable.ic_arrow_down_double),
+                    text = stringResource(Res.string.tooltip_move_to_bottom),
+                    onClick = { viewModel.selectedItemId?.let { viewModel.moveItemToBottom(it) } },
+                    buttonSize = 32.dp,
+                    iconTint = MaterialTheme.colorScheme.onSurface
+                )
+            }
         }
-
-        // Schedule list header
-        Text(
-            text = stringResource(Res.string.schedule),
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
 
         // Schedule items list with drag-and-drop support
         val viewModelState = rememberUpdatedState(viewModel)
