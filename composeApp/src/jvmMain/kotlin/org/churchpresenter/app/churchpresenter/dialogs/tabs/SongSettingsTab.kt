@@ -2,11 +2,9 @@ package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,21 +17,17 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -41,11 +35,7 @@ import androidx.compose.ui.unit.sp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.bottom_left
 import churchpresenter.composeapp.generated.resources.bottom_right
-import churchpresenter.composeapp.generated.resources.browse_directory
 import churchpresenter.composeapp.generated.resources.color
-import churchpresenter.composeapp.generated.resources.confirm_delete
-import churchpresenter.composeapp.generated.resources.confirm_delete_file
-import churchpresenter.composeapp.generated.resources.delete_error
 import churchpresenter.composeapp.generated.resources.every_page
 import churchpresenter.composeapp.generated.resources.first_page
 import churchpresenter.composeapp.generated.resources.font_size
@@ -53,22 +43,12 @@ import churchpresenter.composeapp.generated.resources.font_type
 import churchpresenter.composeapp.generated.resources.full_screen
 import churchpresenter.composeapp.generated.resources.lower_third_size
 import churchpresenter.composeapp.generated.resources.horizontal_alignment
-import churchpresenter.composeapp.generated.resources.import_error
-import churchpresenter.composeapp.generated.resources.import_song_file
 import churchpresenter.composeapp.generated.resources.lyrics
-import churchpresenter.composeapp.generated.resources.no_directory_selected
-import churchpresenter.composeapp.generated.resources.no_file_selected_title
-import churchpresenter.composeapp.generated.resources.no_song_files
 import churchpresenter.composeapp.generated.resources.none
-import churchpresenter.composeapp.generated.resources.please_select_directory_first
-import churchpresenter.composeapp.generated.resources.please_select_file_first
 import churchpresenter.composeapp.generated.resources.position_on_screen
-import churchpresenter.composeapp.generated.resources.remove_song_file
 import churchpresenter.composeapp.generated.resources.show_number
 import churchpresenter.composeapp.generated.resources.show_title
-import churchpresenter.composeapp.generated.resources.song_files
 import churchpresenter.composeapp.generated.resources.song_number
-import churchpresenter.composeapp.generated.resources.storage_directory
 import churchpresenter.composeapp.generated.resources.title
 import churchpresenter.composeapp.generated.resources.top_left
 import churchpresenter.composeapp.generated.resources.top_right
@@ -98,11 +78,7 @@ import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.Utils
 import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDefault
-import org.churchpresenter.app.churchpresenter.viewmodel.FileManager
-import org.churchpresenter.app.churchpresenter.viewmodel.SongSettingsViewModel
 import org.jetbrains.compose.resources.stringResource
-import java.awt.Window
-import javax.swing.SwingUtilities
 
 
 @Composable
@@ -111,22 +87,6 @@ fun SongSettingsTab(
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit
 ) {
     val availableFonts = remember { Utils.getAvailableSystemFonts() }
-    val viewModel = remember {
-        SongSettingsViewModel().also { vm ->
-            val dir = settings.songSettings.storageDirectory
-            if (dir.isNotEmpty()) vm.setDirectory(dir)
-        }
-    }
-
-    // Keep viewModel directory in sync if settings change after initial load
-    LaunchedEffect(settings.songSettings.storageDirectory) {
-        val dir = settings.songSettings.storageDirectory
-        if (viewModel.storageDirectory != dir) viewModel.setDirectory(dir)
-    }
-
-    val songFilesInDirectory = remember(viewModel.storageDirectory, viewModel.refreshTrigger) {
-        viewModel.filesInDirectory()
-    }
 
     Box(
         modifier = Modifier
@@ -153,12 +113,7 @@ fun SongSettingsTab(
                 LeftColumn(
                     settings = settings,
                     onSettingsChange = onSettingsChange,
-                    availableFonts = availableFonts,
-                    songFilesInDirectory = songFilesInDirectory,
-                    selectedFile = viewModel.selectedFile,
-                    onFileSelected = { viewModel.selectFile(it) },
-                    onRefresh = { viewModel.refresh() },
-                    fileManager = viewModel.fileManager
+                    availableFonts = availableFonts
                 )
             }
 
@@ -182,221 +137,13 @@ fun SongSettingsTab(
 private fun LeftColumn(
     settings: AppSettings,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
-    availableFonts: List<String>,
-    songFilesInDirectory: List<String>,
-    selectedFile: String?,
-    onFileSelected: (String?) -> Unit,
-    onRefresh: () -> Unit,
-    fileManager: FileManager
+    availableFonts: List<String>
 ) {
 
     // Store string resources to avoid calling stringResource in callbacks
     val noneStr = stringResource(Res.string.none)
     val firstPageStr = stringResource(Res.string.first_page)
     val everyPageStr = stringResource(Res.string.every_page)
-
-    // Dialog message strings
-    val pleaseSelectDirectoryStr = stringResource(Res.string.please_select_directory_first)
-    val noDirectorySelectedStr = stringResource(Res.string.no_directory_selected)
-    val pleaseSelectFileStr = stringResource(Res.string.please_select_file_first)
-    val noFileSelectedStr = stringResource(Res.string.no_file_selected_title)
-    val confirmDeleteStr = stringResource(Res.string.confirm_delete)
-    val confirmDeleteFileTemplate = stringResource(Res.string.confirm_delete_file)
-    val importErrorStr = stringResource(Res.string.import_error)
-    val deleteErrorStr = stringResource(Res.string.delete_error)
-
-    // Storage Directory Section
-    SectionHeader(stringResource(Res.string.storage_directory))
-
-    Spacer(modifier = Modifier.height(8.dp))
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-
-        Text(
-            text = settings.songSettings.storageDirectory.ifEmpty { stringResource(Res.string.no_directory_selected) },
-            modifier = Modifier
-                .weight(1f)
-                .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(2.dp))
-                .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f), RoundedCornerShape(2.dp))
-                .padding(horizontal = 8.dp, vertical = 6.dp),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-
-        ModernButton(
-            text = stringResource(Res.string.browse_directory),
-            backgroundColor = MaterialTheme.colorScheme.primaryContainer,
-            onClick = {
-                SwingUtilities.invokeLater {
-                    val parentWindow = Window.getWindows().firstOrNull { it.isActive }
-                    val selectedDir = fileManager.chooseDirectory(
-                        currentDirectory = settings.songSettings.storageDirectory,
-                        parentWindow = parentWindow
-                    )
-                    selectedDir?.let { dir ->
-                        onSettingsChange { s ->
-                            s.copy(songSettings = s.songSettings.copy(storageDirectory = dir))
-                        }
-                    }
-                }
-            }
-        )
-    }
-
-    Spacer(modifier = Modifier.height(15.dp))
-
-    // Song Files Section
-    SectionHeader(stringResource(Res.string.song_files))
-
-    Spacer(modifier = Modifier.height(8.dp))
-
-
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(120.dp)
-            .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f), RoundedCornerShape(2.dp))
-    ) {
-        val scrollState = rememberScrollState()
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(scrollState)
-                .background(MaterialTheme.colorScheme.surface)
-                .padding(8.dp)
-        ) {
-            if (songFilesInDirectory.isEmpty()) {
-                Text(
-                    text = if (settings.songSettings.storageDirectory.isEmpty()) {
-                        stringResource(Res.string.no_directory_selected)
-                    } else {
-                        stringResource(Res.string.no_song_files)
-                    },
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            } else {
-                songFilesInDirectory.forEach { fileName ->
-                    val isSelected = fileName == selectedFile
-                    Text(
-                        text = fileName,
-                        style = MaterialTheme.typography.bodySmall,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(
-                                if (isSelected) MaterialTheme.colorScheme.primaryContainer
-                                else Color.Transparent
-                            )
-                            .clickable { onFileSelected(fileName) }
-                            .padding(vertical = 4.dp, horizontal = 8.dp),
-                        color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer
-                                else MaterialTheme.colorScheme.onSurface
-                    )
-                }
-            }
-        }
-    }
-
-    Spacer(modifier = Modifier.height(8.dp))
-
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        ModernButton(
-            text = stringResource(Res.string.import_song_file),
-            backgroundColor = MaterialTheme.colorScheme.inverseSurface,
-            onClick = {
-                SwingUtilities.invokeLater {
-                    val parentWindow = Window.getWindows().firstOrNull { it.isActive }
-
-                    // Check if directory is selected
-                    if (settings.songSettings.storageDirectory.isEmpty()) {
-                        fileManager.showWarning(
-                            message = pleaseSelectDirectoryStr,
-                            title = noDirectorySelectedStr,
-                            parentWindow = parentWindow
-                        )
-                        return@invokeLater
-                    }
-
-                    // Choose files to import
-                    val selectedFiles = fileManager.chooseSongFiles(parentWindow)
-                    selectedFiles?.let { files ->
-                        // Import files
-                        val errors = fileManager.importFiles(
-                            sourceFiles = files,
-                            targetDirectory = settings.songSettings.storageDirectory
-                        )
-
-                        // Show errors if any
-                        if (errors.isNotEmpty()) {
-                            fileManager.showError(
-                                message = errors.joinToString("\n"),
-                                title = importErrorStr,
-                                parentWindow = parentWindow
-                            )
-                        }
-
-                        // Trigger refresh
-                        onRefresh()
-                    }
-                }
-            }
-        )
-
-        ModernButton(
-            text = stringResource(Res.string.remove_song_file),
-            backgroundColor = MaterialTheme.colorScheme.errorContainer,
-            onClick = {
-                SwingUtilities.invokeLater {
-                    val parentWindow = Window.getWindows().firstOrNull { it.isActive }
-
-                    // Check if file is selected
-                    if (selectedFile == null) {
-                        fileManager.showWarning(
-                            message = pleaseSelectFileStr,
-                            title = noFileSelectedStr,
-                            parentWindow = parentWindow
-                        )
-                        return@invokeLater
-                    }
-
-                    // Confirm deletion
-                    val confirmed = fileManager.showConfirmDialog(
-                        message = String.format(confirmDeleteFileTemplate, selectedFile),
-                        title = confirmDeleteStr,
-                        parentWindow = parentWindow
-                    )
-
-                    if (confirmed) {
-                        // Delete file
-                        val error = fileManager.deleteFile(
-                            directory = settings.songSettings.storageDirectory,
-                            fileName = selectedFile
-                        )
-
-                        if (error != null) {
-                            fileManager.showError(
-                                message = error,
-                                title = deleteErrorStr,
-                                parentWindow = parentWindow
-                            )
-                        } else {
-                            // Success - clear selection and refresh
-                            onFileSelected(null)
-                            onRefresh()
-                        }
-                    }
-                }
-            }
-        )
-    }
-
-
-    Spacer(modifier = Modifier.height(20.dp))
 
     // Title Section
     SectionHeader(stringResource(Res.string.title))
@@ -893,25 +640,6 @@ private fun SettingRow(
             modifier = Modifier.width(width)
         )
         content()
-    }
-}
-
-@Composable
-private fun ModernButton(
-    text: String,
-    backgroundColor: Color,
-    onClick: () -> Unit
-) {
-    Button(
-        onClick = onClick,
-        colors = ButtonDefaults.buttonColors(
-            containerColor = backgroundColor,
-            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-        ),
-        shape = RoundedCornerShape(4.dp),
-        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
-    ) {
-        Text(text = text, style = MaterialTheme.typography.labelMedium)
     }
 }
 

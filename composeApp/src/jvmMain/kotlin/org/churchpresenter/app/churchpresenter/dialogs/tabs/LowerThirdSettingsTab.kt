@@ -38,11 +38,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.browse_directory
 import churchpresenter.composeapp.generated.resources.bottom
 import churchpresenter.composeapp.generated.resources.display_lower_third
 import churchpresenter.composeapp.generated.resources.generate_lower_third
-import churchpresenter.composeapp.generated.resources.import_lottie_file
 import churchpresenter.composeapp.generated.resources.left
 import churchpresenter.composeapp.generated.resources.lottie_files
 import churchpresenter.composeapp.generated.resources.lottie_select_preset
@@ -50,7 +48,6 @@ import churchpresenter.composeapp.generated.resources.no_directory_selected
 import churchpresenter.composeapp.generated.resources.no_lottie_files
 import churchpresenter.composeapp.generated.resources.remove_lottie_file
 import churchpresenter.composeapp.generated.resources.right
-import churchpresenter.composeapp.generated.resources.storage_directory
 import churchpresenter.composeapp.generated.resources.top
 import churchpresenter.composeapp.generated.resources.window_position
 import io.github.alexzhirkevich.compottie.LottieCompositionSpec
@@ -61,7 +58,6 @@ import kotlinx.coroutines.delay
 import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
 import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.viewmodel.LowerThirdSettingsViewModel
-import org.churchpresenter.app.churchpresenter.utils.createFileChooser
 import org.jetbrains.compose.resources.stringResource
 import java.awt.BorderLayout
 import java.awt.Dimension
@@ -75,9 +71,7 @@ import javafx.scene.Scene
 import javafx.scene.layout.StackPane
 import javafx.scene.web.WebView
 import javax.swing.JDialog
-import javax.swing.JFileChooser
 import javax.swing.SwingUtilities
-import javax.swing.filechooser.FileNameExtensionFilter
 import netscape.javascript.JSObject
 
 @Composable
@@ -134,48 +128,6 @@ fun LowerThirdSettingsTab(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(0.dp)
         ) {
-            // Storage Directory
-            SectionHeader(stringResource(Res.string.storage_directory))
-            Spacer(modifier = Modifier.height(8.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = lottieFolder.ifEmpty { noDirectorySelectedStr },
-                    modifier = Modifier
-                        .weight(1f)
-                        .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(2.dp))
-                        .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f), RoundedCornerShape(2.dp))
-                        .padding(horizontal = 8.dp, vertical = 6.dp),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                ModernButton(
-                    text = stringResource(Res.string.browse_directory),
-                    backgroundColor = MaterialTheme.colorScheme.primaryContainer,
-                    onClick = {
-                        SwingUtilities.invokeLater {
-                            val parentWindow = Window.getWindows().firstOrNull { it.isActive }
-                            val fileManager = org.churchpresenter.app.churchpresenter.viewmodel.FileManager()
-                            val selectedDir = fileManager.chooseDirectory(
-                                currentDirectory = lottieFolder,
-                                parentWindow = parentWindow
-                            )
-                            selectedDir?.let { dir ->
-                                viewModel.setFolder(dir)
-                                onSettingsChange { s ->
-                                    s.copy(streamingSettings = s.streamingSettings.copy(lowerThirdFolder = dir))
-                                }
-                            }
-                        }
-                    }
-                )
-            }
-
-            Spacer(modifier = Modifier.height(15.dp))
-
             // Lottie Files list
             SectionHeader(stringResource(Res.string.lottie_files))
             Spacer(modifier = Modifier.height(8.dp))
@@ -222,26 +174,7 @@ fun LowerThirdSettingsTab(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Import / Remove buttons
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                ModernButton(
-                    text = stringResource(Res.string.import_lottie_file),
-                    backgroundColor = MaterialTheme.colorScheme.inverseSurface,
-                    onClick = {
-                        SwingUtilities.invokeLater {
-                            val parentWindow = Window.getWindows().firstOrNull { it.isActive }
-                            if (lottieFolder.isEmpty()) return@invokeLater
-                            val chooser = createFileChooser {
-                                fileSelectionMode = JFileChooser.FILES_ONLY
-                                dialogTitle = "Select Lottie JSON File"
-                                fileFilter = FileNameExtensionFilter("Lottie JSON (*.json)", "json")
-                            }
-                            if (chooser.showOpenDialog(parentWindow) == JFileChooser.APPROVE_OPTION) {
-                                viewModel.importFile(chooser.selectedFile.absolutePath)
-                            }
-                        }
-                    }
-                )
                 ModernButton(
                     text = stringResource(Res.string.remove_lottie_file),
                     backgroundColor = MaterialTheme.colorScheme.errorContainer,
@@ -430,13 +363,6 @@ private fun ModernButton(
     }
 }
 
-/**
- * Opens the Lottie Generator HTML tool in an embedded JavaFX WebView dialog.
- * When [serverUrl] is provided, loads the generator from the Ktor server
- * so API calls (/api/presets, /api/logos, etc.) resolve correctly.
- * Falls back to loading from a local file if the server is not running.
- * Intercepts download clicks and saves the file directly.
- */
 internal fun openLottieGeneratorDialog(
     parentWindow: Window?,
     onFileSaved: () -> Unit,
