@@ -331,10 +331,16 @@ class PicturesViewModel(
                         when (kind) {
                             StandardWatchEventKinds.ENTRY_CREATE -> {
                                 if (file.exists() && file.isFile && file !in _images) {
-                                    // Insert in sorted order
+                                    // Insert in sorted order, keep selected image stable
                                     val insertIndex = _images.indexOfFirst { it.name > file.name }
-                                    if (insertIndex >= 0) _images.add(insertIndex, file)
-                                    else _images.add(file)
+                                    if (insertIndex >= 0) {
+                                        _images.add(insertIndex, file)
+                                        if (insertIndex <= _selectedImageIndex.value) {
+                                            _selectedImageIndex.value++
+                                        }
+                                    } else {
+                                        _images.add(file)
+                                    }
                                     // Load thumbnail
                                     launch {
                                         try {
@@ -349,7 +355,9 @@ class PicturesViewModel(
                                 if (idx >= 0) {
                                     _images.removeAt(idx)
                                     _thumbnails.remove(file)
-                                    if (_selectedImageIndex.value >= _images.size && _images.isNotEmpty()) {
+                                    if (idx < _selectedImageIndex.value) {
+                                        _selectedImageIndex.value--
+                                    } else if (_selectedImageIndex.value >= _images.size && _images.isNotEmpty()) {
                                         _selectedImageIndex.value = _images.size - 1
                                     }
                                     changed = true

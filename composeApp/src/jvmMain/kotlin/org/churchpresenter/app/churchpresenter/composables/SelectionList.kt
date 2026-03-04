@@ -52,8 +52,9 @@ fun SelectionListWithIndex(
 ) {
     val listState = rememberLazyListState()
 
-    // Scroll to selected item when selection changes
-    LaunchedEffect(selectedIndex, list.size) {
+    // Scroll to selected item only when the list content changes (e.g. new chapter loaded),
+    // not on every click — the user already sees the item they clicked.
+    LaunchedEffect(list.size) {
         if (selectedIndex >= 0 && selectedIndex < list.size) {
             listState.animateScrollToItem(selectedIndex)
         }
