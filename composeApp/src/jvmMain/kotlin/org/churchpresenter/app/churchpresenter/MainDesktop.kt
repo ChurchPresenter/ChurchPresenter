@@ -80,6 +80,7 @@ import org.churchpresenter.app.churchpresenter.tabs.Tabs
 import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.viewmodel.LocalMediaViewModel
+import org.churchpresenter.app.churchpresenter.viewmodel.BibleViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PicturesViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 
@@ -154,6 +155,11 @@ fun MainDesktop(
 
     val picturesViewModel = remember { PicturesViewModel(appSettings) }
     DisposableEffect(Unit) { onDispose { picturesViewModel.dispose() } }
+
+    val currentOnBibleLoaded by rememberUpdatedState(onBibleLoaded)
+    val bibleViewModel = remember { BibleViewModel(appSettings, onBibleLoaded = { bible, translation -> currentOnBibleLoaded?.invoke(bible, translation) }) }
+    DisposableEffect(Unit) { onDispose { bibleViewModel.dispose() } }
+
     val presentingMode by presenterManager.presentingMode
     val mainFocusRequester = remember { FocusRequester() }
 
@@ -497,6 +503,7 @@ fun MainDesktop(
                         when (currentTab) {
                             Tabs.BIBLE -> BibleTab(
                                 modifier = Modifier.fillMaxSize(),
+                                viewModel = bibleViewModel,
                                 appSettings = appSettings,
                                 onSettingsChange = onSettingsChange,
                                 onAddToSchedule = { bookName, chapter, verseNumber, verseText ->
@@ -505,7 +512,6 @@ fun MainDesktop(
                                 selectedVerseItem = selectedBibleVerseItem,
                                 onVerseSelected = onVerseSelected,
                                 onPresenting = presenting,
-                                onBibleLoaded = onBibleLoaded,
                                 isPresenting = presentingMode == Presenting.BIBLE
                             )
 

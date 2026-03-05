@@ -55,7 +55,14 @@ import churchpresenter.composeapp.generated.resources.top_left
 import churchpresenter.composeapp.generated.resources.top_right
 import churchpresenter.composeapp.generated.resources.vertical_alignment
 import churchpresenter.composeapp.generated.resources.word_wrap
+import androidx.compose.foundation.layout.size
 import churchpresenter.composeapp.generated.resources.animation_crossfade
+import churchpresenter.composeapp.generated.resources.bottom
+import churchpresenter.composeapp.generated.resources.left
+import churchpresenter.composeapp.generated.resources.right
+import churchpresenter.composeapp.generated.resources.screen
+import churchpresenter.composeapp.generated.resources.text_margins
+import churchpresenter.composeapp.generated.resources.top
 import churchpresenter.composeapp.generated.resources.animation_fade
 import churchpresenter.composeapp.generated.resources.animation_none
 import churchpresenter.composeapp.generated.resources.animation_slide_left
@@ -340,6 +347,80 @@ private fun LeftColumn(
             }
         )
     }
+
+    // ── Text Margins ──
+    SectionHeader(stringResource(Res.string.text_margins))
+    Spacer(modifier = Modifier.height(8.dp))
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth(0.5f)
+            .height(180.dp)
+            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(4.dp))
+            .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(4.dp))
+            .padding(8.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(text = stringResource(Res.string.top), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Spacer(modifier = Modifier.height(2.dp))
+                NumberSettingsTextField(
+                    initialText = settings.songSettings.marginTop,
+                    onValueChange = { value -> onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(marginTop = value)) } },
+                    range = 0..500
+                )
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(text = stringResource(Res.string.left), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Spacer(modifier = Modifier.height(2.dp))
+                    NumberSettingsTextField(
+                        initialText = settings.songSettings.marginLeft,
+                        onValueChange = { value -> onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(marginLeft = value)) } },
+                        range = 0..500
+                    )
+                }
+                Box(
+                    modifier = Modifier
+                        .size(60.dp)
+                        .background(MaterialTheme.colorScheme.primaryContainer, RoundedCornerShape(4.dp))
+                        .border(1.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(4.dp)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(text = stringResource(Res.string.screen), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onPrimaryContainer)
+                }
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(text = stringResource(Res.string.right), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Spacer(modifier = Modifier.height(2.dp))
+                    NumberSettingsTextField(
+                        initialText = settings.songSettings.marginRight,
+                        onValueChange = { value -> onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(marginRight = value)) } },
+                        range = 0..500
+                    )
+                }
+            }
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(text = stringResource(Res.string.bottom), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Spacer(modifier = Modifier.height(2.dp))
+                NumberSettingsTextField(
+                    initialText = settings.songSettings.marginBottom,
+                    onValueChange = { value -> onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(marginBottom = value)) } },
+                    range = 0..500
+                )
+            }
+        }
+    }
+
+    Spacer(modifier = Modifier.height(20.dp))
 }
 
 @Composable

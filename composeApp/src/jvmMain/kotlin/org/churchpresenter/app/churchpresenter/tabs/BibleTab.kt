@@ -35,7 +35,6 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -87,7 +86,6 @@ import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
 import org.churchpresenter.app.churchpresenter.composables.SearchTextField
 import org.churchpresenter.app.churchpresenter.composables.SelectionListWithIndex
 import org.churchpresenter.app.churchpresenter.data.AppSettings
-import org.churchpresenter.app.churchpresenter.data.Bible
 import org.churchpresenter.app.churchpresenter.models.ScheduleItem
 import org.churchpresenter.app.churchpresenter.models.SelectedVerse
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
@@ -99,20 +97,16 @@ import org.jetbrains.compose.resources.stringResource
 @Composable
 fun BibleTab(
     modifier: Modifier = Modifier,
+    viewModel: BibleViewModel,
     appSettings: AppSettings,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit = {},
     onAddToSchedule: ((bookName: String, chapter: Int, verseNumber: Int, verseText: String) -> Unit)? = null,
     selectedVerseItem: ScheduleItem.BibleVerseItem? = null,
     onVerseSelected: (List<SelectedVerse>) -> Unit = {},
     onPresenting: (Presenting) -> Unit = { Presenting.NONE },
-    onBibleLoaded: ((bible: Bible, translation: String) -> Unit)? = null,
     isPresenting: Boolean = false,
 ) {
-    val onBibleLoadedState by rememberUpdatedState(onBibleLoaded)
-    val viewModel = remember { BibleViewModel(appSettings, onBibleLoaded = { bible, translation -> onBibleLoadedState?.invoke(bible, translation) }) }
-
-    // Only call updateSettings when paths change AFTER the first composition.
-    // The initial load already happens inside BibleViewModel.init.
+    // Update settings when bible paths change
     val isFirstComposition = remember { mutableStateOf(true) }
     LaunchedEffect(
         appSettings.bibleSettings.storageDirectory,
@@ -124,10 +118,6 @@ fun BibleTab(
         } else {
             viewModel.updateSettings(appSettings)
         }
-    }
-
-    DisposableEffect(Unit) {
-        onDispose { viewModel.dispose() }
     }
 
     LaunchedEffect(selectedVerseItem) {

@@ -259,10 +259,10 @@ fun BiblePresenter(
         val scaledPrimaryReferenceSize = (effectivePrimaryReferenceSize * scaleFactor).sp
         val scaledSecondaryBibleSize = (effectiveSecondaryBibleSize * scaleFactor).sp
         val scaledSecondaryReferenceSize = (effectiveSecondaryReferenceSize * scaleFactor).sp
-        val leftOffSet = (appSettings.projectionSettings.windowLeft * scaleFactor).dp
-        val rightOffSet = (appSettings.projectionSettings.windowRight * scaleFactor).dp
-        val topOffSet = (appSettings.projectionSettings.windowTop * scaleFactor).dp
-        val bottomOffSet = (appSettings.projectionSettings.windowBottom * scaleFactor).dp
+        val leftOffSet = ((appSettings.projectionSettings.windowLeft + appSettings.bibleSettings.marginLeft) * scaleFactor).dp
+        val rightOffSet = ((appSettings.projectionSettings.windowRight + appSettings.bibleSettings.marginRight) * scaleFactor).dp
+        val topOffSet = ((appSettings.projectionSettings.windowTop + appSettings.bibleSettings.marginTop) * scaleFactor).dp
+        val bottomOffSet = ((appSettings.projectionSettings.windowBottom + appSettings.bibleSettings.marginBottom) * scaleFactor).dp
 
         if (isLowerThird) {
             // Background stretches full width at bottom third, text respects padding on top
