@@ -367,11 +367,11 @@ private fun LeftColumn(
 
     Box(
         modifier = Modifier
-            .fillMaxWidth(0.5f)
-            .height(180.dp)
+            .fillMaxWidth(0.75f)
+            .height(200.dp)
             .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(4.dp))
             .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(4.dp))
-            .padding(8.dp),
+            .padding(12.dp),
         contentAlignment = Alignment.Center
     ) {
         Column(
@@ -379,24 +379,28 @@ private fun LeftColumn(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceBetween
         ) {
+            // Top
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(text = stringResource(Res.string.top), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 Spacer(modifier = Modifier.height(2.dp))
                 NumberSettingsTextField(
+                    modifier = Modifier.width(100.dp),
                     initialText = settings.songSettings.marginTop,
                     onValueChange = { value -> onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(marginTop = value)) } },
                     range = 0..500
                 )
             }
+            // Left | Screen | Right
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
+                horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(text = stringResource(Res.string.left), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     Spacer(modifier = Modifier.height(2.dp))
                     NumberSettingsTextField(
+                        modifier = Modifier.width(100.dp),
                         initialText = settings.songSettings.marginLeft,
                         onValueChange = { value -> onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(marginLeft = value)) } },
                         range = 0..500
@@ -404,7 +408,7 @@ private fun LeftColumn(
                 }
                 Box(
                     modifier = Modifier
-                        .size(60.dp)
+                        .size(64.dp)
                         .background(MaterialTheme.colorScheme.primaryContainer, RoundedCornerShape(4.dp))
                         .border(1.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(4.dp)),
                     contentAlignment = Alignment.Center
@@ -415,16 +419,19 @@ private fun LeftColumn(
                     Text(text = stringResource(Res.string.right), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     Spacer(modifier = Modifier.height(2.dp))
                     NumberSettingsTextField(
+                        modifier = Modifier.width(100.dp),
                         initialText = settings.songSettings.marginRight,
                         onValueChange = { value -> onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(marginRight = value)) } },
                         range = 0..500
                     )
                 }
             }
+            // Bottom
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(text = stringResource(Res.string.bottom), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 Spacer(modifier = Modifier.height(2.dp))
                 NumberSettingsTextField(
+                    modifier = Modifier.width(100.dp),
                     initialText = settings.songSettings.marginBottom,
                     onValueChange = { value -> onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(marginBottom = value)) } },
                     range = 0..500
