@@ -36,6 +36,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -115,11 +116,11 @@ fun SongPresenter(
         Constants.BOTTOM -> Alignment.BottomCenter
         else -> Alignment.Center
     }
-    val lyricsHorizontalAlignment = getHorizontalArrangement(
+    val lyricsHorizontalAlignment = getTextAlign(
         if (isLowerThird) appSettings.songSettings.lyricsLowerThirdHorizontalAlignment
         else appSettings.songSettings.lyricsHorizontalAlignment
     )
-    val titleHorizontalAlignment = getHorizontalArrangement(
+    val titleHorizontalAlignment = getTextAlign(
         appSettings.songSettings.titleHorizontalAlignment
     )
 
@@ -262,16 +263,15 @@ fun SongPresenter(
                         verticalArrangement = if (isLowerThird) Arrangement.Bottom else Arrangement.Top
                     ) {
                         if (shouldShowTitle && appSettings.songSettings.titlePosition == Constants.ABOVE_VERSE) {
-                            Row(Modifier.fillMaxWidth(), horizontalArrangement = titleHorizontalAlignment) {
-                                Text(
-                                    modifier = Modifier.wrapContentWidth(),
-                                    fontFamily = titleFontFamily,
-                                    fontSize = scaledTitleFontSize,
-                                    text = section.title,
-                                    color = titleColor,
-                                    style = titleTextStyle
-                                )
-                            }
+                            Text(
+                                modifier = Modifier.fillMaxWidth(),
+                                textAlign = titleHorizontalAlignment,
+                                fontFamily = titleFontFamily,
+                                fontSize = scaledTitleFontSize,
+                                text = section.title,
+                                color = titleColor,
+                                style = titleTextStyle
+                            )
                         }
                         section.lines.forEach { line ->
                             val isSectionHeader =
@@ -280,30 +280,28 @@ fun SongPresenter(
                                         line.startsWith(Constants.VERSE, ignoreCase = true) ||
                                         line.startsWith(Constants.CHORUS, ignoreCase = true)
                             if (!isSectionHeader) {
-                                Row(Modifier.fillMaxWidth(), horizontalArrangement = lyricsHorizontalAlignment) {
-                                    Text(
-                                        modifier = Modifier.wrapContentWidth(),
-                                        fontFamily = lyricsFontFamily,
-                                        fontSize = scaledLyricsFontSize,
-                                        softWrap = appSettings.songSettings.wordWrap,
-                                        text = line,
-                                        color = lyricsColor,
-                                        style = lyricsTextStyle
-                                    )
-                                }
+                                Text(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    textAlign = lyricsHorizontalAlignment,
+                                    fontFamily = lyricsFontFamily,
+                                    fontSize = scaledLyricsFontSize,
+                                    softWrap = appSettings.songSettings.wordWrap,
+                                    text = line,
+                                    color = lyricsColor,
+                                    style = lyricsTextStyle
+                                )
                             }
                         }
                         if (shouldShowTitle && appSettings.songSettings.titlePosition == Constants.BELOW_VERSE) {
-                            Row(Modifier.fillMaxWidth(), horizontalArrangement = titleHorizontalAlignment) {
-                                Text(
-                                    modifier = Modifier.wrapContentWidth(),
-                                    fontFamily = titleFontFamily,
-                                    fontSize = scaledTitleFontSize,
-                                    text = section.title,
-                                    color = titleColor,
-                                    style = titleTextStyle
-                                )
-                            }
+                            Text(
+                                modifier = Modifier.fillMaxWidth(),
+                                textAlign = titleHorizontalAlignment,
+                                fontFamily = titleFontFamily,
+                                fontSize = scaledTitleFontSize,
+                                text = section.title,
+                                color = titleColor,
+                                style = titleTextStyle
+                            )
                         }
 
                         // End-of-song indicator: 3 tight asterisks centered
@@ -393,10 +391,10 @@ private fun shouldShowText(display: String, lyricSection: LyricSection): Boolean
     }
 }
 
-private fun getHorizontalArrangement(alignment: String): Arrangement.Horizontal {
+private fun getTextAlign(alignment: String): TextAlign {
     return when (alignment) {
-        Constants.LEFT -> Arrangement.Start
-        Constants.RIGHT -> Arrangement.End
-        else -> Arrangement.Center
+        Constants.LEFT -> TextAlign.Start
+        Constants.RIGHT -> TextAlign.End
+        else -> TextAlign.Center
     }
 }
