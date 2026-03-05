@@ -57,6 +57,7 @@ import org.churchpresenter.app.churchpresenter.dialogs.tabs.SongSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.LowerThirdSettingsTab
 import org.churchpresenter.app.churchpresenter.ui.theme.AppThemeWrapper
 import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
+import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -65,6 +66,7 @@ fun OptionsDialog(
     theme: ThemeMode,
     settingsManager: SettingsManager,
     companionServer: CompanionServer,
+    presenterManager: PresenterManager,
     onDismiss: () -> Unit,
     onSave: (AppSettings) -> Unit = {},
     onIdentifyScreen: () -> Unit = {},
@@ -159,13 +161,15 @@ fun OptionsDialog(
                                 settings = currentSettings,
                                 onSettingsChange = { updateFn ->
                                     currentSettings = updateFn(currentSettings)
-                                }
+                                },
+                                presenterManager = presenterManager
                             )
                             2 -> SongSettingsTab(
                                 settings = currentSettings,
                                 onSettingsChange = { updateFn ->
                                     currentSettings = updateFn(currentSettings)
-                                }
+                                },
+                                presenterManager = presenterManager
                             )
                             3 -> BackgroundSettingsTab(
                                 settings = currentSettings,

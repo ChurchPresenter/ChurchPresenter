@@ -27,13 +27,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.paint
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.toComposeImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -208,14 +211,35 @@ fun SongPresenter(
         val bottomOffSet = ((appSettings.projectionSettings.windowBottom + appSettings.songSettings.marginBottom) * scaleFactor).dp
 
         if (isLowerThird) {
+            val lowerThirdFraction = appSettings.projectionSettings.lowerThirdHeightPercent / 100f
             // Background stretches full width at bottom third, text respects padding on top
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .fillMaxHeight(0.333f)
+                    .fillMaxHeight(lowerThirdFraction)
                     .align(Alignment.BottomCenter)
                     .then(bgModifier)
             )
+            // Gradient overlay
+            if (bgConfig.gradientEnabled) {
+                val gradientTop = parseHexColor(bgConfig.gradientTopColor).copy(alpha = bgConfig.gradientTopOpacity)
+                val gradientBottom = parseHexColor(bgConfig.gradientBottomColor).copy(alpha = bgConfig.gradientBottomOpacity)
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .fillMaxHeight(lowerThirdFraction)
+                        .align(Alignment.BottomCenter)
+                        .background(
+                            Brush.verticalGradient(
+                                colorStops = arrayOf(
+                                    0.0f to gradientTop,
+                                    bgConfig.gradientPosition to gradientBottom,
+                                    1.0f to gradientBottom
+                                )
+                            )
+                        )
+                )
+            }
         }
 
         Box(
@@ -227,7 +251,7 @@ fun SongPresenter(
             val innerModifier = if (isLowerThird)
                 Modifier
                     .fillMaxWidth()
-                    .fillMaxHeight(0.333f)
+                    .fillMaxHeight(appSettings.projectionSettings.lowerThirdHeightPercent / 100f)
                     .align(Alignment.BottomCenter)
             else
                 Modifier
@@ -244,7 +268,7 @@ fun SongPresenter(
                 val shouldShowTitle = shouldShowText(appSettings.songSettings.titleDisplay, section)
                 val shouldShowSongNumber = shouldShowText(appSettings.songSettings.showNumber, section)
 
-                Box(
+                BoxWithConstraints(
                     modifier = innerModifier,
                     contentAlignment = if (isLowerThird) Alignment.BottomCenter else Alignment.TopStart
                 ) {
@@ -258,6 +282,36 @@ fun SongPresenter(
                             style = songNumberTextStyle
                         )
                     }
+
+                    // Auto-scale lyrics if they overflow the available height
+                    val songTextMeasurer = rememberTextMeasurer()
+                    val widthConstraint = Constraints(maxWidth = constraints.maxWidth)
+                    val titleH = if (shouldShowTitle) {
+                        songTextMeasurer.measure(
+                            text = section.title,
+                            style = titleTextStyle.copy(fontFamily = titleFontFamily, fontSize = scaledTitleFontSize),
+                            constraints = widthConstraint
+                        ).size.height
+                    } else 0
+                    val lyricsH = section.lines.filter { line ->
+                        !line.startsWith(Constants.VERSE_RUS, ignoreCase = true) &&
+                        !line.startsWith(Constants.CHORUS_RUS, ignoreCase = true) &&
+                        !line.startsWith(Constants.VERSE, ignoreCase = true) &&
+                        !line.startsWith(Constants.CHORUS, ignoreCase = true)
+                    }.sumOf { line ->
+                        songTextMeasurer.measure(
+                            text = line,
+                            style = lyricsTextStyle.copy(fontFamily = lyricsFontFamily, fontSize = scaledLyricsFontSize),
+                            constraints = widthConstraint
+                        ).size.height
+                    }
+                    val totalH = titleH + lyricsH
+                    val fitScale = if (totalH > constraints.maxHeight) {
+                        val spaceForLyrics = (constraints.maxHeight - titleH).coerceAtLeast(1)
+                        (spaceForLyrics.toFloat() / lyricsH).coerceAtLeast(0.3f)
+                    } else 1f
+                    val fittedLyricsFontSize = scaledLyricsFontSize * fitScale
+
                     Column(
                         modifier = Modifier.fillMaxWidth().wrapContentHeight(),
                         verticalArrangement = if (isLowerThird) Arrangement.Bottom else Arrangement.Top
@@ -284,7 +338,7 @@ fun SongPresenter(
                                     modifier = Modifier.fillMaxWidth(),
                                     textAlign = lyricsHorizontalAlignment,
                                     fontFamily = lyricsFontFamily,
-                                    fontSize = scaledLyricsFontSize,
+                                    fontSize = fittedLyricsFontSize,
                                     softWrap = appSettings.songSettings.wordWrap,
                                     text = line,
                                     color = lyricsColor,

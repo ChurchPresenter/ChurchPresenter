@@ -15,7 +15,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.RadioButtonDefaults
+import androidx.compose.material3.Slider
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -42,6 +44,11 @@ import churchpresenter.composeapp.generated.resources.color
 import churchpresenter.composeapp.generated.resources.default_background_color
 import churchpresenter.composeapp.generated.resources.default_background_color_help
 import churchpresenter.composeapp.generated.resources.display_lower_third
+import churchpresenter.composeapp.generated.resources.gradient_enabled
+import churchpresenter.composeapp.generated.resources.gradient_top_color
+import churchpresenter.composeapp.generated.resources.gradient_bottom_color
+import churchpresenter.composeapp.generated.resources.gradient_opacity
+import churchpresenter.composeapp.generated.resources.gradient_position
 import churchpresenter.composeapp.generated.resources.full_screen
 import churchpresenter.composeapp.generated.resources.songs
 import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
@@ -164,14 +171,16 @@ fun BackgroundSettingsTab(
                         BackgroundColumn(
                             subtitle = stringResource(Res.string.full_screen),
                             config = settings.backgroundSettings.bibleBackground,
-                            onConfigChange = { viewModel.updateBibleBackground(it, onSettingsChange) }
+                            onConfigChange = { viewModel.updateBibleBackground(it, onSettingsChange) },
+                            isLowerThird = false
                         )
                     }
                     Column(modifier = Modifier.weight(1f)) {
                         BackgroundColumn(
                             subtitle = stringResource(Res.string.display_lower_third),
                             config = settings.backgroundSettings.bibleLowerThirdBackground,
-                            onConfigChange = { viewModel.updateBibleLowerThirdBackground(it, onSettingsChange) }
+                            onConfigChange = { viewModel.updateBibleLowerThirdBackground(it, onSettingsChange) },
+                            isLowerThird = true
                         )
                     }
                 }
@@ -188,14 +197,16 @@ fun BackgroundSettingsTab(
                         BackgroundColumn(
                             subtitle = stringResource(Res.string.full_screen),
                             config = settings.backgroundSettings.songBackground,
-                            onConfigChange = { viewModel.updateSongBackground(it, onSettingsChange) }
+                            onConfigChange = { viewModel.updateSongBackground(it, onSettingsChange) },
+                            isLowerThird = false
                         )
                     }
                     Column(modifier = Modifier.weight(1f)) {
                         BackgroundColumn(
                             subtitle = stringResource(Res.string.display_lower_third),
                             config = settings.backgroundSettings.songLowerThirdBackground,
-                            onConfigChange = { viewModel.updateSongLowerThirdBackground(it, onSettingsChange) }
+                            onConfigChange = { viewModel.updateSongLowerThirdBackground(it, onSettingsChange) },
+                            isLowerThird = true
                         )
                     }
                 }
@@ -222,7 +233,8 @@ private fun GroupHeader(title: String) {
 private fun BackgroundColumn(
     subtitle: String,
     config: BackgroundConfig,
-    onConfigChange: (BackgroundConfig) -> Unit
+    onConfigChange: (BackgroundConfig) -> Unit,
+    isLowerThird: Boolean = false
 ) {
     val backgroundDefaultStr = stringResource(Res.string.background_default)
     val backgroundColorStr   = stringResource(Res.string.background_color_option)
@@ -279,6 +291,67 @@ private fun BackgroundColumn(
         }
         else -> {
             // Default — nothing extra to show
+        }
+    }
+
+    // Gradient controls — only for lower-third columns
+    if (isLowerThird) {
+        Spacer(modifier = Modifier.height(10.dp))
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant, thickness = 1.dp)
+        Spacer(modifier = Modifier.height(6.dp))
+
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Checkbox(
+                checked = config.gradientEnabled,
+                onCheckedChange = { onConfigChange(config.copy(gradientEnabled = it)) },
+                modifier = Modifier.size(28.dp)
+            )
+            Text(
+                text = stringResource(Res.string.gradient_enabled),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.padding(start = 4.dp)
+            )
+        }
+
+        if (config.gradientEnabled) {
+            Spacer(modifier = Modifier.height(6.dp))
+            SettingRow(stringResource(Res.string.gradient_top_color)) {
+                ColorPickerField(
+                    color = config.gradientTopColor,
+                    onColorChange = { onConfigChange(config.copy(gradientTopColor = it)) }
+                )
+            }
+            SettingRow("${stringResource(Res.string.gradient_opacity)}: ${(config.gradientTopOpacity * 100).toInt()}%") {
+                Slider(
+                    value = config.gradientTopOpacity,
+                    onValueChange = { onConfigChange(config.copy(gradientTopOpacity = it)) },
+                    valueRange = 0f..1f,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+            SettingRow(stringResource(Res.string.gradient_bottom_color)) {
+                ColorPickerField(
+                    color = config.gradientBottomColor,
+                    onColorChange = { onConfigChange(config.copy(gradientBottomColor = it)) }
+                )
+            }
+            SettingRow("${stringResource(Res.string.gradient_opacity)}: ${(config.gradientBottomOpacity * 100).toInt()}%") {
+                Slider(
+                    value = config.gradientBottomOpacity,
+                    onValueChange = { onConfigChange(config.copy(gradientBottomOpacity = it)) },
+                    valueRange = 0f..1f,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+            SettingRow("${stringResource(Res.string.gradient_position)}: ${(config.gradientPosition * 100).toInt()}%") {
+                Slider(
+                    value = config.gradientPosition,
+                    onValueChange = { onConfigChange(config.copy(gradientPosition = it)) },
+                    valueRange = 0f..1f,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
         }
     }
 }
