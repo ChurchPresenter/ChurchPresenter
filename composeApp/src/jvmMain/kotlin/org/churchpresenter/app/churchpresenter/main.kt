@@ -200,6 +200,7 @@ fun main() {
                                 theme = theme,
                                 settingsManager = settingsManager,
                                 companionServer = companionServer,
+                                presenterManager = presenterManager,
                                 onDismiss = { showOptionsDialog = false },
                                 onSave = { updated ->
                                     appSettings = updated

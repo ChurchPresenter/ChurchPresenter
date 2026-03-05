@@ -40,7 +40,7 @@ fun NumberSettingsTextField(
     range: IntRange,
     onValueChange: (Int) -> Unit,
 ) {
-    var value by rememberSaveable { mutableStateOf(initialText) }
+    var value by rememberSaveable(initialText) { mutableStateOf(initialText) }
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
     var isError by remember { mutableStateOf(false) }

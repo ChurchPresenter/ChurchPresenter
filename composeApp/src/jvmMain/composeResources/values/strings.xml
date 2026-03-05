@@ -444,6 +444,7 @@
     <string name="windows_count_label">Windows (1-3)</string>
     <string name="window_position">Window Position</string>
     <string name="text_margins">Text Margins</string>
+    <string name="auto_fit">Auto</string>
     <string name="screen">Screen</string>
     <string name="projection_position_help">Position values represent pixel offsets from screen edges. Use these to adjust projection window placement on secondary displays.</string>
     <string name="screen_assignment">Screen Assignment</string>
@@ -460,6 +461,7 @@
     <string name="display_mode">Display Mode</string>
     <string name="display_fullscreen">Full Screen</string>
     <string name="display_lower_third">Lower Third</string>
+    <string name="lower_third_height">Lower Third Height (%)</string>
     <string name="full_screen">Full Screen</string>
     <string name="lower_third_size">Lower Third</string>
     <string name="identify_screen">Identify</string>
@@ -469,7 +471,13 @@
 
     <!-- Background Settings Tab -->
     <string name="default_background_color">Default Background Color</string>
-    <string name="default_background_color_help">This color is used when 'Default' background type is selected for Bible or Songs</string>
+    <string name="default_background_color_help">This background is used when 'Default' is selected for Bible or Songs full screen</string>
+    <!-- Gradient Settings -->
+    <string name="gradient_enabled">Gradient</string>
+    <string name="gradient_top_color">Top Color:</string>
+    <string name="gradient_bottom_color">Bottom Color:</string>
+    <string name="gradient_opacity">Opacity</string>
+    <string name="gradient_position">Transition Position</string>
 
     <!-- Media Tab Strings -->
     <string name="media_tab_title">Media</string>

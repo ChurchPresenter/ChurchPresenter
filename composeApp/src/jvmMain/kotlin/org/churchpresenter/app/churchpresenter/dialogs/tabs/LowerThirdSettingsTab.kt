@@ -309,7 +309,7 @@ fun LowerThirdSettingsTab(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .fillMaxHeight(0.333f)
+                            .fillMaxHeight(settings.projectionSettings.lowerThirdHeightPercent / 100f)
                             .align(Alignment.BottomCenter)
                             .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.7f))
                     ) {
