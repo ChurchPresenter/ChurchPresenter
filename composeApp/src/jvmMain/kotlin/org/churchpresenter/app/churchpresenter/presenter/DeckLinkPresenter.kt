@@ -2,6 +2,7 @@ package org.churchpresenter.app.churchpresenter.presenter
 
 import kotlinx.coroutines.*
 import org.churchpresenter.app.churchpresenter.composables.DeckLinkManager
+import org.churchpresenter.app.churchpresenter.utils.Constants
 import java.awt.Graphics2D
 import java.awt.image.BufferedImage
 import javax.swing.JFrame
@@ -17,6 +18,7 @@ import java.awt.Dimension
  */
 class DeckLinkPresenter(
     private val deviceIndex: Int,
+    private val outputRole: String = Constants.OUTPUT_ROLE_NORMAL,
     private val width: Int = 1920,
     private val height: Int = 1080,
     private val fps: Double = 30.0
@@ -85,6 +87,9 @@ class DeckLinkPresenter(
 
                 // Convert ARGB to BGRA and schedule the frame
                 buffer.getRGB(0, 0, width, height, pixels, 0, width)
+                if (outputRole == Constants.OUTPUT_ROLE_KEY) {
+                    convertToKeySignal(pixels)
+                }
                 argbToBgra(pixels)
                 DeckLinkManager.scheduleFrame(pixels, width, height)
 
@@ -111,6 +116,17 @@ class DeckLinkPresenter(
         offscreenFrame?.isVisible = false
         offscreenFrame?.dispose()
         offscreenFrame = null
+    }
+
+    /**
+     * Converts pixels to a key signal: white with original alpha.
+     * Non-transparent pixels become white; transparent pixels stay black.
+     */
+    private fun convertToKeySignal(pixels: IntArray) {
+        for (i in pixels.indices) {
+            val a = (pixels[i] shr 24) and 0xFF
+            pixels[i] = (a shl 24) or 0x00FFFFFF
+        }
     }
 
     /**

@@ -166,6 +166,8 @@ data class BibleSettings(
 data class ScreenAssignment(
     val targetDisplay: Int = -1,  // -1 = auto (screen index + 1), 0+ = specific display index
     val targetType: String = "screen",  // "screen" or "decklink"
+    val keyTargetDisplay: Int = Constants.KEY_TARGET_NONE,  // -2 = none (disabled), 0+ = specific display/device
+    val keyTargetType: String = "screen",  // "screen" or "decklink"
     val showBible: Boolean = true,
     val showSongs: Boolean = true,
     val showPictures: Boolean = true,
@@ -173,7 +175,13 @@ data class ScreenAssignment(
     val showStreaming: Boolean = true,
     val showAnnouncements: Boolean = true,
     val displayMode: String = "fullscreen" // Constants.DISPLAY_MODE_FULLSCREEN or DISPLAY_MODE_LOWER_THIRD
-)
+) {
+    /** Whether a key output target is configured */
+    val hasKeyOutput: Boolean get() = keyTargetDisplay >= 0
+
+    /** Primary window role: "fill" if key output is configured, "normal" otherwise */
+    val primaryOutputRole: String get() = if (hasKeyOutput) Constants.OUTPUT_ROLE_FILL else Constants.OUTPUT_ROLE_NORMAL
+}
 
 @Serializable
 data class ProjectionSettings(

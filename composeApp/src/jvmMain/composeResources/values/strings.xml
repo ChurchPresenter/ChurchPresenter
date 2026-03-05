@@ -586,6 +586,13 @@
     <string name="bible_history">History</string>
     <string name="bible_history_clear">Clear</string>
 
+    <!-- Output role (fill+key) -->
+    <string name="output_role_normal">Normal</string>
+    <string name="output_role_fill">Fill</string>
+    <string name="output_role_key">Key</string>
+    <string name="key_output">Key Output</string>
+    <string name="key_output_none">None</string>
+
     <!-- Live preview -->
     <string name="live_preview_title">Live</string>
     <string name="live_preview_nothing">Nothing is live</string>

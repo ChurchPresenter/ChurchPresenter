@@ -43,11 +43,14 @@ import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDef
 fun AnnouncementsPresenter(
     modifier: Modifier = Modifier,
     text: String,
-    appSettings: AppSettings
+    appSettings: AppSettings,
+    outputRole: String = Constants.OUTPUT_ROLE_NORMAL,
 ) {
+    val isFillOrKey = outputRole == Constants.OUTPUT_ROLE_FILL || outputRole == Constants.OUTPUT_ROLE_KEY
     val settings   = appSettings.announcementsSettings
     val textColor  = parseHexColor(settings.textColor)
-    val bgColor    = if (settings.backgroundColor == "transparent") Color.Transparent
+    val bgColor    = if (isFillOrKey) Color.Transparent
+                     else if (settings.backgroundColor == "transparent") Color.Transparent
                      else parseHexColor(settings.backgroundColor)
     val fontFamily = systemFontFamilyOrDefault(settings.fontType)
 

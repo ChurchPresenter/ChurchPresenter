@@ -306,6 +306,9 @@ private fun PresenterWindows(
         // Skip if the target screen doesn't exist
         if (targetScreenIndex < 0 || targetScreenIndex >= screens.size) continue
 
+        // Derive output role from key target configuration
+        val primaryRole = screenAssignment.primaryOutputRole
+
         val windowState = remember(i, targetScreenIndex) {
             val b = screens[targetScreenIndex].defaultConfiguration.bounds
             WindowState(
@@ -316,6 +319,7 @@ private fun PresenterWindows(
             )
         }
 
+        // Primary window (fill or normal)
         Window(
             visible = showPresenterWindow,
             title = "Presenter View ${i + 1}",
@@ -326,7 +330,7 @@ private fun PresenterWindows(
             alwaysOnTop = true,
         ) {
             CompositionLocalProvider(LocalMediaViewModel provides mediaViewModel) {
-                PresenterScreen(modifier = Modifier.fillMaxSize(), appSettings = appSettings) {
+                PresenterScreen(modifier = Modifier.fillMaxSize(), appSettings = appSettings, outputRole = primaryRole) {
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
@@ -344,7 +348,8 @@ private fun PresenterWindows(
                                     BiblePresenter(
                                         selectedVerses = selectedVerses,
                                         appSettings = appSettings,
-                                        isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD
+                                        isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD,
+                                        outputRole = primaryRole
                                     )
                                 }
                             Presenting.LYRICS ->
@@ -352,7 +357,8 @@ private fun PresenterWindows(
                                     SongPresenter(
                                         lyricSection = lyricSection,
                                         appSettings = appSettings,
-                                        isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD
+                                        isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD,
+                                        outputRole = primaryRole
                                     )
                                 }
                             Presenting.PICTURES ->
@@ -384,7 +390,8 @@ private fun PresenterWindows(
                                 if (screenAssignment.showAnnouncements)
                                     AnnouncementsPresenter(
                                         text = presenterManager.announcementText.value,
-                                        appSettings = appSettings
+                                        appSettings = appSettings,
+                                        outputRole = primaryRole
                                     )
                             Presenting.WEBSITE ->
                                 WebsitePresenter(url = websiteUrl, modifier = Modifier.fillMaxSize())
@@ -405,6 +412,103 @@ private fun PresenterWindows(
                                     fontWeight = FontWeight.Bold,
                                     textAlign = TextAlign.Center
                                 )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Key output window — spawned when a key target is configured
+        if (screenAssignment.hasKeyOutput && screenAssignment.keyTargetType != "decklink") {
+            val keyScreenIndex = screenAssignment.keyTargetDisplay
+            if (keyScreenIndex in screens.indices) {
+                val keyWindowState = remember(i, keyScreenIndex) {
+                    val b = screens[keyScreenIndex].defaultConfiguration.bounds
+                    WindowState(
+                        placement = WindowPlacement.Floating,
+                        position = WindowPosition(b.x.dp, b.y.dp),
+                        width = b.width.dp,
+                        height = b.height.dp
+                    )
+                }
+
+                Window(
+                    visible = showPresenterWindow,
+                    title = "Key Output ${i + 1}",
+                    onCloseRequest = { presenterManager.setShowPresenterWindow(false) },
+                    state = keyWindowState,
+                    undecorated = true,
+                    resizable = false,
+                    alwaysOnTop = true,
+                ) {
+                    CompositionLocalProvider(LocalMediaViewModel provides mediaViewModel) {
+                        PresenterScreen(modifier = Modifier.fillMaxSize(), appSettings = appSettings, outputRole = Constants.OUTPUT_ROLE_KEY) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .onPreviewKeyEvent { keyEvent ->
+                                        if (keyEvent.type == KeyEventType.KeyDown && keyEvent.key == Key.Escape) {
+                                            mediaViewModel.pause()
+                                            presenterManager.setPresentingMode(Presenting.NONE)
+                                            true
+                                        } else false
+                                    }
+                            ) {
+                                when (presentingMode) {
+                                    Presenting.BIBLE ->
+                                        if (screenAssignment.showBible) {
+                                            BiblePresenter(
+                                                selectedVerses = selectedVerses,
+                                                appSettings = appSettings,
+                                                isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD,
+                                                outputRole = Constants.OUTPUT_ROLE_KEY
+                                            )
+                                        }
+                                    Presenting.LYRICS ->
+                                        if (screenAssignment.showSongs) {
+                                            SongPresenter(
+                                                lyricSection = lyricSection,
+                                                appSettings = appSettings,
+                                                isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD,
+                                                outputRole = Constants.OUTPUT_ROLE_KEY
+                                            )
+                                        }
+                                    Presenting.PICTURES ->
+                                        if (screenAssignment.showPictures)
+                                            PicturePresenter(imagePath = selectedImagePath, animationType = animationType, transitionDuration = transitionDuration)
+                                    Presenting.PRESENTATION ->
+                                        if (screenAssignment.showPictures)
+                                            SlidePresenter(slide = selectedSlide, animationType = animationType, transitionDuration = transitionDuration)
+                                    Presenting.MEDIA ->
+                                        if (screenAssignment.showMedia) {
+                                            if (mediaViewModel.isAudioFile) {
+                                                // Audio: background only
+                                            } else {
+                                                MediaPresenter(modifier = Modifier.fillMaxSize(), audioDeviceId = appSettings.projectionSettings.audioOutputDeviceId)
+                                            }
+                                        }
+                                    Presenting.LOWER_THIRD ->
+                                        if (screenAssignment.showStreaming)
+                                            LowerThirdPresenter(
+                                                jsonContent = lottieJsonContent,
+                                                pauseAtFrame = lottiePauseAtFrame,
+                                                pauseFrame = lottiePauseFrame,
+                                                pauseDurationMs = lottiePauseDurationMs,
+                                                trigger = lottieTrigger,
+                                                appSettings = appSettings
+                                            )
+                                    Presenting.ANNOUNCEMENTS ->
+                                        if (screenAssignment.showAnnouncements)
+                                            AnnouncementsPresenter(
+                                                text = presenterManager.announcementText.value,
+                                                appSettings = appSettings,
+                                                outputRole = Constants.OUTPUT_ROLE_KEY
+                                            )
+                                    Presenting.WEBSITE ->
+                                        WebsitePresenter(url = websiteUrl, modifier = Modifier.fillMaxSize())
+                                    Presenting.NONE -> { /* nothing */ }
+                                }
                             }
                         }
                     }

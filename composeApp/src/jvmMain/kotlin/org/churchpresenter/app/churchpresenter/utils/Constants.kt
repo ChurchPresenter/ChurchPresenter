@@ -108,6 +108,14 @@ object Constants {
     const val DISPLAY_MODE_FULLSCREEN = "fullscreen"
     const val DISPLAY_MODE_LOWER_THIRD = "lower_third"
 
+    // Output Role (fill+key for video mixers)
+    const val OUTPUT_ROLE_NORMAL = "normal"
+    const val OUTPUT_ROLE_FILL = "fill"
+    const val OUTPUT_ROLE_KEY = "key"
+
+    // Key output target sentinel: no key output configured
+    const val KEY_TARGET_NONE = -2
+
     // Seek amount in ms
     const val MEDIA_SEEK_MS = 10_000L
 
