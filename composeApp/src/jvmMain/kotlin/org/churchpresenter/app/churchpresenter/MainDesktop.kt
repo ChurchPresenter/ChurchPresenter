@@ -134,6 +134,7 @@ fun MainDesktop(
     var selectedPresentationItem by remember { mutableStateOf<ScheduleItem.PresentationItem?>(null) }
     var selectedMediaItem by remember { mutableStateOf<ScheduleItem.MediaItem?>(null) }
     var selectedLowerThirdItem by remember { mutableStateOf<ScheduleItem.LowerThirdItem?>(null) }
+    var selectedWebsiteItem by remember { mutableStateOf<ScheduleItem.WebsiteItem?>(null) }
 
     var selectedTabIndex by rememberSaveable { mutableStateOf(0) }
     var showAddLabelDialog by remember { mutableStateOf(false) }
@@ -337,6 +338,8 @@ fun MainDesktop(
                             }
                         },
                         onPresentWebsite = { item ->
+                            selectedWebsiteItem = item
+                            selectedTabIndex = Tabs.WEB.ordinal
                             presenterManager.setWebsiteUrl(item.url)
                             presenting(Presenting.WEBSITE)
                         },
@@ -406,9 +409,8 @@ fun MainDesktop(
                                 }
 
                                 is ScheduleItem.WebsiteItem -> {
-                                    presenterManager.setWebsiteUrl(item.url)
-                                    presenterManager.setPresentingMode(Presenting.WEBSITE)
-                                    presenterManager.setShowPresenterWindow(true)
+                                    selectedWebsiteItem = item
+                                    selectedTabIndex = Tabs.WEB.ordinal
                                 }
                             }
                         },
@@ -610,7 +612,17 @@ fun MainDesktop(
                                 }
                             )
 
-                            Tabs.WEB -> WebTab(modifier = Modifier.fillMaxSize())
+                            Tabs.WEB -> WebTab(
+                                modifier = Modifier.fillMaxSize(),
+                                presenterManager = presenterManager,
+                                selectedWebsiteItem = selectedWebsiteItem,
+                                onAddToSchedule = { url, title ->
+                                    currentScheduleActions.addWebsite(url, title)
+                                },
+                                onUpdateScheduleTitle = { url, title ->
+                                    currentScheduleActions.updateWebsiteTitle(url, title)
+                                }
+                            )
                         }
                     }
                 }

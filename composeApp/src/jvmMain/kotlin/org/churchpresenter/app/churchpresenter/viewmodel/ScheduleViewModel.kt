@@ -236,6 +236,19 @@ class ScheduleViewModel(
         notifyChanged()
     }
 
+    fun updateWebsiteTitle(url: String, title: String) {
+        if (title.isBlank()) return
+        val index = _scheduleItems.indexOfFirst { it is ScheduleItem.WebsiteItem && it.url == url }
+        if (index >= 0) {
+            val existing = _scheduleItems[index] as ScheduleItem.WebsiteItem
+            // Only update if the current title is still the URL (i.e. no real title was set yet)
+            if (existing.title == existing.url || existing.title.isBlank()) {
+                _scheduleItems[index] = existing.copy(title = title)
+                notifyChanged()
+            }
+        }
+    }
+
     fun updateLabel(id: String, text: String, textColor: String, backgroundColor: String) {
         val index = _scheduleItems.indexOfFirst { it.id == id }
         if (index >= 0 && _scheduleItems[index] is ScheduleItem.LabelItem) {

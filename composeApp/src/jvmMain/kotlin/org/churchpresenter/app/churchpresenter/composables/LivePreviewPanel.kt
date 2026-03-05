@@ -6,6 +6,7 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -36,6 +37,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
@@ -60,7 +62,6 @@ import org.churchpresenter.app.churchpresenter.presenter.PicturePresenter
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.presenter.SlidePresenter
 import org.churchpresenter.app.churchpresenter.presenter.SongPresenter
-import org.churchpresenter.app.churchpresenter.presenter.WebsitePresenter
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.viewmodel.LocalMediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.MediaViewModel
@@ -134,6 +135,7 @@ private fun SingleDisplayPreview(
     val lottieTrigger by presenterManager.lottieTrigger
     val announcementText by presenterManager.announcementText
     val websiteUrl by presenterManager.websiteUrl
+    val webSnapshot by presenterManager.webSnapshot
     val mediaViewModel = LocalMediaViewModel.current
 
     val isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD
@@ -159,65 +161,97 @@ private fun SingleDisplayPreview(
     ) {
         val primaryRole = screenAssignment.primaryOutputRole
 
-        ScaledPresenterContent {
-            PresenterScreen(appSettings = appSettings, outputRole = primaryRole) {
-                if (presentingMode != Presenting.NONE && showsContent) {
-                    when (presentingMode) {
-                        Presenting.BIBLE ->
-                            BiblePresenter(
-                                selectedVerses = selectedVerses,
-                                appSettings = appSettings,
-                                isLowerThird = isLowerThird,
-                                outputRole = primaryRole
+        // ── Scaled presenter content (all modes except WEBSITE) ───────────────
+        // JavaFX/Swing heavyweight components cannot be scaled by Compose layout,
+        // so WEBSITE is handled separately below at native size.
+        if (presentingMode != Presenting.WEBSITE) {
+            ScaledPresenterContent {
+                PresenterScreen(appSettings = appSettings, outputRole = primaryRole) {
+                    if (presentingMode != Presenting.NONE && showsContent) {
+                        when (presentingMode) {
+                            Presenting.BIBLE ->
+                                BiblePresenter(
+                                    selectedVerses = selectedVerses,
+                                    appSettings = appSettings,
+                                    isLowerThird = isLowerThird,
+                                    outputRole = primaryRole
+                                )
+                            Presenting.LYRICS ->
+                                SongPresenter(
+                                    lyricSection = lyricSection,
+                                    appSettings = appSettings,
+                                    isLowerThird = isLowerThird,
+                                    outputRole = primaryRole
+                                )
+                            Presenting.PICTURES ->
+                                PicturePresenter(imagePath = selectedImagePath)
+                            Presenting.PRESENTATION ->
+                                SlidePresenter(slide = selectedSlide)
+                            Presenting.MEDIA ->
+                                if (mediaViewModel != null && !mediaViewModel.isAudioFile) {
+                                    MediaPresenter(modifier = Modifier.fillMaxSize(), audioEnabled = false)
+                                }
+                            Presenting.LOWER_THIRD ->
+                                LowerThirdPresenter(
+                                    jsonContent = lottieJsonContent,
+                                    pauseAtFrame = lottiePauseAtFrame,
+                                    pauseFrame = lottiePauseFrame,
+                                    pauseDurationMs = lottiePauseDurationMs,
+                                    trigger = lottieTrigger,
+                                    appSettings = appSettings
+                                )
+                            Presenting.ANNOUNCEMENTS ->
+                                AnnouncementsPresenter(
+                                    text = announcementText,
+                                    appSettings = appSettings,
+                                    outputRole = primaryRole
+                                )
+                            else -> {}
+                        }
+                    } else {
+                        // Dark blank screen
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(Color(0xFF121212)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = stringResource(Res.string.live_preview_nothing),
+                                color = Color.White.copy(alpha = 0.4f),
+                                fontSize = 18.sp
                             )
-                        Presenting.LYRICS ->
-                            SongPresenter(
-                                lyricSection = lyricSection,
-                                appSettings = appSettings,
-                                isLowerThird = isLowerThird,
-                                outputRole = primaryRole
-                            )
-                        Presenting.PICTURES ->
-                            PicturePresenter(imagePath = selectedImagePath)
-                        Presenting.PRESENTATION ->
-                            SlidePresenter(slide = selectedSlide)
-                        Presenting.MEDIA ->
-                            if (mediaViewModel != null && !mediaViewModel.isAudioFile) {
-                                MediaPresenter(modifier = Modifier.fillMaxSize(), audioEnabled = false)
-                            }
-                        Presenting.LOWER_THIRD ->
-                            LowerThirdPresenter(
-                                jsonContent = lottieJsonContent,
-                                pauseAtFrame = lottiePauseAtFrame,
-                                pauseFrame = lottiePauseFrame,
-                                pauseDurationMs = lottiePauseDurationMs,
-                                trigger = lottieTrigger,
-                                appSettings = appSettings
-                            )
-                        Presenting.ANNOUNCEMENTS ->
-                            AnnouncementsPresenter(
-                                text = announcementText,
-                                appSettings = appSettings,
-                                outputRole = primaryRole
-                            )
-                        Presenting.WEBSITE ->
-                            WebsitePresenter(url = websiteUrl, modifier = Modifier.fillMaxSize())
-                        Presenting.NONE -> {}
+                        }
                     }
-                } else {
-                    // Dark blank screen
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(Color(0xFF121212)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = stringResource(Res.string.live_preview_nothing),
-                            color = Color.White.copy(alpha = 0.4f),
-                            fontSize = 18.sp
-                        )
-                    }
+                }
+            }
+        }
+
+        // ── WEBSITE: display live screenshot captured from WebTab's WebView ─
+        // A second JFXPanel instance can't be scaled/clipped by Compose.
+        // Instead, WebTab pushes a snapshot bitmap every 200ms via PresenterManager
+        // so this panel shows a pixel-accurate mirror including scroll position.
+        if (presentingMode == Presenting.WEBSITE) {
+            val snapshot = webSnapshot
+            if (snapshot != null) {
+                Image(
+                    bitmap = snapshot,
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.FillBounds
+                )
+            } else {
+                Box(
+                    modifier = Modifier.fillMaxSize().background(Color(0xFF121212)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = if (websiteUrl.isBlank()) stringResource(Res.string.live_preview_nothing)
+                               else websiteUrl,
+                        color = Color.White.copy(alpha = 0.5f),
+                        fontSize = 11.sp,
+                        maxLines = 2
+                    )
                 }
             }
         }

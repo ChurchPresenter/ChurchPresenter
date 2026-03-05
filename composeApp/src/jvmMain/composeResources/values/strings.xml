@@ -606,7 +606,14 @@
     <string name="live_preview_announcement">Announcement</string>
     <string name="live_preview_website">Website</string>
 
-    <!-- Website -->
+    <!-- Website / Web Tab -->
+    <string name="web_url_label">URL</string>
+    <string name="web_url_hint">https://example.com</string>
+    <string name="web_go_live">Go Live</string>
+    <string name="web_add_to_schedule">Add to Schedule</string>
+    <string name="web_preview_label">Preview</string>
+    <string name="web_preview_hint">Enter a URL above and tap Go Live</string>
+    <string name="web_live_badge">LIVE</string>
     <string name="tooltip_add_website">Add Website</string>
     <string name="website_dialog_title">Add Website</string>
     <string name="website_url_label">URL</string>

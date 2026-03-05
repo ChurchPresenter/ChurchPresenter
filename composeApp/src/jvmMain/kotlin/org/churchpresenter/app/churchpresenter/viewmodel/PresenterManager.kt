@@ -122,4 +122,20 @@ class PresenterManager {
     fun setWebsiteUrl(url: String) {
         _websiteUrl.value = url
     }
+
+    private val _webPageTitle = mutableStateOf("")
+    val webPageTitle: State<String> = _webPageTitle
+
+    fun setWebPageTitle(title: String) {
+        _webPageTitle.value = title
+    }
+
+    // Periodically-updated screenshot of the live WebView — used by LivePreviewPanel
+    // to mirror the exact visible content without needing a second WebView instance.
+    private val _webSnapshot = mutableStateOf<ImageBitmap?>(null)
+    val webSnapshot: State<ImageBitmap?> = _webSnapshot
+
+    fun setWebSnapshot(bitmap: ImageBitmap?) {
+        _webSnapshot.value = bitmap
+    }
 }
