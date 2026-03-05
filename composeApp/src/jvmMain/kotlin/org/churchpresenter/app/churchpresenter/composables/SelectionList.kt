@@ -50,13 +50,18 @@ fun SelectionListWithIndex(
     onItemSelected: (Int, String) -> Unit,
     onItemDoubleClicked: ((Int, String) -> Unit)? = null
 ) {
-    val listState = rememberLazyListState()
+    val listState = rememberLazyListState(
+        initialFirstVisibleItemIndex = selectedIndex.coerceIn(0, (list.size - 1).coerceAtLeast(0))
+    )
 
-    // Scroll to selected item only when the list content changes (e.g. new chapter loaded),
-    // not on every click — the user already sees the item they clicked.
-    LaunchedEffect(list.size) {
+    // Scroll only when the selected item is not visible
+    LaunchedEffect(selectedIndex, list.size) {
         if (selectedIndex >= 0 && selectedIndex < list.size) {
-            listState.animateScrollToItem(selectedIndex)
+            val visibleItems = listState.layoutInfo.visibleItemsInfo
+            val isVisible = visibleItems.any { it.index == selectedIndex }
+            if (!isVisible) {
+                listState.animateScrollToItem(selectedIndex)
+            }
         }
     }
 

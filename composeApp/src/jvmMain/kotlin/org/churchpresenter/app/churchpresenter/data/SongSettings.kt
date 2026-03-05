@@ -79,6 +79,12 @@ data class SongSettings(
     val songNumberUnderline: Boolean = false,
     val songNumberShadow: Boolean = false,
 
+    // Text margins (additional padding inside global projection offsets)
+    val marginTop: Int = 0,
+    val marginBottom: Int = 0,
+    val marginLeft: Int = 0,
+    val marginRight: Int = 0,
+
     // Transition animation
     val animationType: String = Constants.NONE,
     val transitionDuration: Float = 500f
@@ -156,6 +162,12 @@ data class BibleSettings(
 
     // Language for captions
     val captionLanguage: String = "Interface", // "Interface" or "Database"
+
+    // Text margins (additional padding inside global projection offsets)
+    val marginTop: Int = 0,
+    val marginBottom: Int = 0,
+    val marginLeft: Int = 0,
+    val marginRight: Int = 0,
 
     // Transition animation
     val animationType: String = Constants.ANIMATION_CROSSFADE,

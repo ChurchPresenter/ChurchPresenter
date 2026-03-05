@@ -202,10 +202,10 @@ fun SongPresenter(
         val scaledLyricsFontSize = (effectiveLyricsFontSize * scaleFactor).sp
         val scaledSongNumberFontSize = (effectiveSongNumberFontSize * scaleFactor).sp
 
-        val leftOffSet = (appSettings.projectionSettings.windowLeft * scaleFactor).dp
-        val rightOffSet = (appSettings.projectionSettings.windowRight * scaleFactor).dp
-        val topOffSet = (appSettings.projectionSettings.windowTop * scaleFactor).dp
-        val bottomOffSet = (appSettings.projectionSettings.windowBottom * scaleFactor).dp
+        val leftOffSet = ((appSettings.projectionSettings.windowLeft + appSettings.songSettings.marginLeft) * scaleFactor).dp
+        val rightOffSet = ((appSettings.projectionSettings.windowRight + appSettings.songSettings.marginRight) * scaleFactor).dp
+        val topOffSet = ((appSettings.projectionSettings.windowTop + appSettings.songSettings.marginTop) * scaleFactor).dp
+        val bottomOffSet = ((appSettings.projectionSettings.windowBottom + appSettings.songSettings.marginBottom) * scaleFactor).dp
 
         if (isLowerThird) {
             // Background stretches full width at bottom third, text respects padding on top
