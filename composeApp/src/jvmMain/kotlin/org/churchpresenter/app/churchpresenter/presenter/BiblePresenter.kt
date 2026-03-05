@@ -55,7 +55,9 @@ fun BiblePresenter(
     selectedVerses: List<SelectedVerse>,
     appSettings: AppSettings,
     isLowerThird: Boolean = false,
+    outputRole: String = Constants.OUTPUT_ROLE_NORMAL,
 ) {
+    val isFillOrKey = outputRole == Constants.OUTPUT_ROLE_FILL || outputRole == Constants.OUTPUT_ROLE_KEY
     val primaryBibleFontStyle = remember(appSettings.bibleSettings.primaryBibleFontType) {
         systemFontFamilyOrDefault(appSettings.bibleSettings.primaryBibleFontType)
     }
@@ -178,12 +180,18 @@ fun BiblePresenter(
     else appSettings.backgroundSettings.bibleBackground
 
     // Resolve effective background type/paths (handle Default → inherit from global)
+    // For fill/key output: force black background, skip images/videos
     val effectiveType: String
     val effectiveImagePath: String
     val effectiveVideoPath: String
     var backgroundColor: Color
 
-    if (bgConfig.backgroundType == Constants.BACKGROUND_DEFAULT) {
+    if (isFillOrKey) {
+        effectiveType = Constants.BACKGROUND_COLOR
+        effectiveImagePath = ""
+        effectiveVideoPath = ""
+        backgroundColor = Color.Black
+    } else if (bgConfig.backgroundType == Constants.BACKGROUND_DEFAULT) {
         val defaults = appSettings.backgroundSettings
         effectiveType = defaults.defaultBackgroundType
         effectiveImagePath = defaults.defaultBackgroundImage

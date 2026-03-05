@@ -157,21 +157,25 @@ private fun SingleDisplayPreview(
             .clip(RoundedCornerShape(6.dp))
             .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(6.dp))
     ) {
+        val primaryRole = screenAssignment.primaryOutputRole
+
         ScaledPresenterContent {
-            PresenterScreen(appSettings = appSettings) {
+            PresenterScreen(appSettings = appSettings, outputRole = primaryRole) {
                 if (presentingMode != Presenting.NONE && showsContent) {
                     when (presentingMode) {
                         Presenting.BIBLE ->
                             BiblePresenter(
                                 selectedVerses = selectedVerses,
                                 appSettings = appSettings,
-                                isLowerThird = isLowerThird
+                                isLowerThird = isLowerThird,
+                                outputRole = primaryRole
                             )
                         Presenting.LYRICS ->
                             SongPresenter(
                                 lyricSection = lyricSection,
                                 appSettings = appSettings,
-                                isLowerThird = isLowerThird
+                                isLowerThird = isLowerThird,
+                                outputRole = primaryRole
                             )
                         Presenting.PICTURES ->
                             PicturePresenter(imagePath = selectedImagePath)
@@ -193,7 +197,8 @@ private fun SingleDisplayPreview(
                         Presenting.ANNOUNCEMENTS ->
                             AnnouncementsPresenter(
                                 text = announcementText,
-                                appSettings = appSettings
+                                appSettings = appSettings,
+                                outputRole = primaryRole
                             )
                         Presenting.WEBSITE ->
                             WebsitePresenter(url = websiteUrl, modifier = Modifier.fillMaxSize())
@@ -228,6 +233,20 @@ private fun SingleDisplayPreview(
                     .padding(4.dp)
                     .background(Color.Red, RoundedCornerShape(3.dp))
                     .padding(horizontal = 6.dp, vertical = 2.dp)
+            )
+        }
+
+        // FILL badge when key output is configured
+        if (screenAssignment.hasKeyOutput) {
+            Text(
+                text = "FILL",
+                color = Color.White,
+                fontSize = 9.sp,
+                modifier = Modifier
+                    .align(Alignment.BottomStart)
+                    .padding(4.dp)
+                    .background(Color(0xFF2196F3), RoundedCornerShape(3.dp))
+                    .padding(horizontal = 5.dp, vertical = 2.dp)
             )
         }
 

@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -66,6 +67,8 @@ import churchpresenter.composeapp.generated.resources.window_position
 import churchpresenter.composeapp.generated.resources.audio_output
 import churchpresenter.composeapp.generated.resources.audio_output_default
 import churchpresenter.composeapp.generated.resources.audio_output_device
+import churchpresenter.composeapp.generated.resources.key_output
+import churchpresenter.composeapp.generated.resources.key_output_none
 import org.churchpresenter.app.churchpresenter.composables.DeckLinkManager
 import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
 import org.churchpresenter.app.churchpresenter.composables.VlcAudioDevice
@@ -192,8 +195,9 @@ fun ProjectionSettingsTab(
         Spacer(modifier = Modifier.height(4.dp))
 
         // Grid table — screens are rows (left), content types are columns (top)
-        val screenLabelWidth = 70.dp
-        val cellWidth = 80.dp
+        val screenLabelWidth = 58.dp
+        val displayDropdownWidth = 100.dp
+        val displayModeColWidth = 70.dp
 
         val bibleLabel = stringResource(Res.string.content_bible)
         val songsLabel = stringResource(Res.string.content_songs)
@@ -203,6 +207,8 @@ fun ProjectionSettingsTab(
         val announcementsLabel = stringResource(Res.string.content_announcements)
         val fullScreenLabel = stringResource(Res.string.display_fullscreen)
         val lowerThirdLabel = stringResource(Res.string.display_lower_third)
+
+        val cellWidth = 82.dp
 
         data class ContentCol(
             val label: String,
@@ -224,14 +230,19 @@ fun ProjectionSettingsTab(
             lowerThirdLabel to Constants.DISPLAY_MODE_LOWER_THIRD
         )
 
-        val displayDropdownWidth = 170.dp
-
-        // Header row: blank screen label cell + Display dropdown + content column headers + display mode headers
+        // Header row: Screen label + Display + Key Output + content columns + display mode
         Row(verticalAlignment = Alignment.CenterVertically) {
             Spacer(modifier = Modifier.width(screenLabelWidth))
             Text(
                 text = stringResource(Res.string.projection_target_display),
-                style = MaterialTheme.typography.labelSmall,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.primary,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.width(displayDropdownWidth)
+            )
+            Text(
+                text = stringResource(Res.string.key_output),
+                style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.primary,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.width(displayDropdownWidth)
@@ -239,7 +250,7 @@ fun ProjectionSettingsTab(
             contentCols.forEach { col ->
                 Text(
                     text = col.label,
-                    style = MaterialTheme.typography.labelSmall,
+                    style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.primary,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.width(cellWidth)
@@ -247,23 +258,23 @@ fun ProjectionSettingsTab(
             }
             Text(
                 text = stringResource(Res.string.display_mode),
-                style = MaterialTheme.typography.labelSmall,
+                style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.primary,
                 textAlign = TextAlign.Center,
-                modifier = Modifier.width(cellWidth * 2)
+                modifier = Modifier.width(displayModeColWidth * 2)
             )
         }
 
         // Sub-header for display mode columns
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Spacer(modifier = Modifier.width(screenLabelWidth + displayDropdownWidth + cellWidth * contentCols.size))
+            Spacer(modifier = Modifier.width(screenLabelWidth + displayDropdownWidth * 2 + cellWidth * contentCols.size))
             displayModes.forEach { (modeLabel, _) ->
                 Text(
                     text = modeLabel,
-                    style = MaterialTheme.typography.labelSmall,
+                    style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center,
-                    modifier = Modifier.width(cellWidth)
+                    modifier = Modifier.width(displayModeColWidth)
                 )
             }
         }
@@ -290,7 +301,10 @@ fun ProjectionSettingsTab(
                         it.targetDisplay == assignment.targetDisplay && it.targetType == assignment.targetType
                     } ?: displayOptions.first()
 
-                    OutlinedButton(onClick = { dropdownExpanded = true }) {
+                    OutlinedButton(
+                        onClick = { dropdownExpanded = true },
+                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
+                    ) {
                         Text(
                             text = currentOption.label,
                             style = MaterialTheme.typography.labelSmall,
@@ -309,6 +323,71 @@ fun ProjectionSettingsTab(
                                     val updated = assignment.copy(
                                         targetDisplay = option.targetDisplay,
                                         targetType = option.targetType
+                                    )
+                                    onSettingsChange { s ->
+                                        when (i) {
+                                            0 -> s.copy(projectionSettings = s.projectionSettings.copy(screen1Assignment = updated))
+                                            1 -> s.copy(projectionSettings = s.projectionSettings.copy(screen2Assignment = updated))
+                                            2 -> s.copy(projectionSettings = s.projectionSettings.copy(screen3Assignment = updated))
+                                            else -> s.copy(projectionSettings = s.projectionSettings.copy(screen4Assignment = updated))
+                                        }
+                                    }
+                                }
+                            )
+                        }
+                    }
+                }
+
+                // Key output target dropdown (None + display options)
+                Box(modifier = Modifier.width(displayDropdownWidth), contentAlignment = Alignment.Center) {
+                    var keyExpanded by remember { mutableStateOf(false) }
+                    val noneLabel = stringResource(Res.string.key_output_none)
+
+                    data class KeyOutputOption(
+                        val label: String,
+                        val targetDisplay: Int,
+                        val targetType: String
+                    )
+                    val keyOutputOptions = remember(screenDevices, noneLabel) {
+                        val opts = mutableListOf(KeyOutputOption(noneLabel, Constants.KEY_TARGET_NONE, "screen"))
+                        for (idx in 1 until screenDevices.size) {
+                            val bounds = screenDevices[idx].defaultConfiguration.bounds
+                            opts.add(KeyOutputOption("Display $idx (${bounds.width}x${bounds.height})", idx, "screen"))
+                        }
+                        if (DeckLinkManager.isAvailable()) {
+                            DeckLinkManager.listDevices().forEach { device ->
+                                opts.add(KeyOutputOption(device.name, device.index, "decklink"))
+                            }
+                        }
+                        opts.toList()
+                    }
+
+                    val currentKeyOption = keyOutputOptions.find {
+                        it.targetDisplay == assignment.keyTargetDisplay && it.targetType == assignment.keyTargetType
+                    } ?: keyOutputOptions.first()
+
+                    OutlinedButton(
+                        onClick = { keyExpanded = true },
+                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
+                    ) {
+                        Text(
+                            text = currentKeyOption.label,
+                            style = MaterialTheme.typography.labelSmall,
+                            maxLines = 1
+                        )
+                    }
+                    DropdownMenu(
+                        expanded = keyExpanded,
+                        onDismissRequest = { keyExpanded = false }
+                    ) {
+                        keyOutputOptions.forEach { option ->
+                            DropdownMenuItem(
+                                text = { Text(option.label, style = MaterialTheme.typography.bodySmall) },
+                                onClick = {
+                                    keyExpanded = false
+                                    val updated = assignment.copy(
+                                        keyTargetDisplay = option.targetDisplay,
+                                        keyTargetType = option.targetType
                                     )
                                     onSettingsChange { s ->
                                         when (i) {
@@ -346,7 +425,7 @@ fun ProjectionSettingsTab(
 
                 // Radio button cells for display mode
                 displayModes.forEach { (_, modeValue) ->
-                    Box(modifier = Modifier.width(cellWidth), contentAlignment = Alignment.Center) {
+                    Box(modifier = Modifier.width(displayModeColWidth), contentAlignment = Alignment.Center) {
                         RadioButton(
                             selected = assignment.displayMode == modeValue,
                             onClick = {
@@ -363,6 +442,7 @@ fun ProjectionSettingsTab(
                         )
                     }
                 }
+
             }
 
             if (i < numScreens - 1) {
