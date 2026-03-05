@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
@@ -21,14 +22,21 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -56,6 +64,7 @@ import churchpresenter.composeapp.generated.resources.top_right
 import churchpresenter.composeapp.generated.resources.vertical_alignment
 import churchpresenter.composeapp.generated.resources.word_wrap
 import androidx.compose.foundation.layout.size
+import churchpresenter.composeapp.generated.resources.auto_fit
 import churchpresenter.composeapp.generated.resources.animation_crossfade
 import churchpresenter.composeapp.generated.resources.bottom
 import churchpresenter.composeapp.generated.resources.left
@@ -86,13 +95,17 @@ import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.Utils
 import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDefault
+import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.app.churchpresenter.utils.calculateAutoFitFontSize
+import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.jetbrains.compose.resources.stringResource
 
 
 @Composable
 fun SongSettingsTab(
     settings: AppSettings,
-    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit
+    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
+    presenterManager: PresenterManager? = null
 ) {
     val availableFonts = remember { Utils.getAvailableSystemFonts() }
 
@@ -135,7 +148,7 @@ fun SongSettingsTab(
                     .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f), RoundedCornerShape(4.dp))
                     .padding(start = 15.dp, end = 15.dp, top = 8.dp, bottom = 15.dp)
             ) {
-                RightColumn(settings, onSettingsChange, availableFonts)
+                RightColumn(settings, onSettingsChange, availableFonts, presenterManager)
             }
         }
     }
@@ -427,7 +440,8 @@ private fun LeftColumn(
 private fun RightColumn(
     settings: AppSettings,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
-    availableFonts: List<String>
+    availableFonts: List<String>,
+    presenterManager: PresenterManager? = null
 ) {
     // Store string resources to avoid calling stringResource in callbacks
     val topLeftStr = stringResource(Res.string.top_left)
@@ -443,23 +457,132 @@ private fun RightColumn(
 
     Spacer(modifier = Modifier.height(8.dp))
 
+    val textMeasurer = rememberTextMeasurer()
+    val isPresentingLyrics = if (presenterManager != null) {
+        remember { derivedStateOf {
+            presenterManager.presentingMode.value == Presenting.LYRICS &&
+            presenterManager.lyricSection.value.lines.any { line ->
+                !line.startsWith(Constants.VERSE_RUS, ignoreCase = true) &&
+                !line.startsWith(Constants.CHORUS_RUS, ignoreCase = true) &&
+                !line.startsWith(Constants.VERSE, ignoreCase = true) &&
+                !line.startsWith(Constants.CHORUS, ignoreCase = true) &&
+                line.isNotBlank()
+            }
+        } }.value
+    } else false
+    val activeScreens = listOf(
+        settings.projectionSettings.screen1Assignment,
+        settings.projectionSettings.screen2Assignment,
+        settings.projectionSettings.screen3Assignment,
+        settings.projectionSettings.screen4Assignment
+    ).take(settings.projectionSettings.numberOfWindows)
+    val hasFullscreenScreen = activeScreens.any { it.displayMode == Constants.DISPLAY_MODE_FULLSCREEN }
+    val hasLowerThirdScreen = activeScreens.any { it.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD }
+
     SettingRow(stringResource(Res.string.font_size)) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(stringResource(Res.string.full_screen), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                NumberSettingsTextField(
-                    initialText = settings.songSettings.lyricsFontSize,
-                    onValueChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsFontSize = it)) } },
-                    range = 8..150
-                )
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    NumberSettingsTextField(
+                        initialText = settings.songSettings.lyricsFontSize,
+                        onValueChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsFontSize = it)) } },
+                        range = 8..150
+                    )
+                    if (presenterManager != null) {
+                        TextButton(
+                            enabled = isPresentingLyrics && hasFullscreenScreen,
+                            onClick = {
+                                val section = presenterManager.lyricSection.value
+                                val lyricsText = section.lines.filter { line ->
+                                    !line.startsWith(Constants.VERSE_RUS, ignoreCase = true) &&
+                                    !line.startsWith(Constants.CHORUS_RUS, ignoreCase = true) &&
+                                    !line.startsWith(Constants.VERSE, ignoreCase = true) &&
+                                    !line.startsWith(Constants.CHORUS, ignoreCase = true)
+                                }.joinToString("\n")
+                                if (lyricsText.isBlank()) return@TextButton
+                                val ss = settings.songSettings
+                                val proj = settings.projectionSettings
+                                val baseStyle = TextStyle(
+                                    fontFamily = systemFontFamilyOrDefault(ss.lyricsFontType),
+                                    fontWeight = if (ss.lyricsBold) FontWeight.Bold else FontWeight.Normal,
+                                    fontStyle = if (ss.lyricsItalic) FontStyle.Italic else FontStyle.Normal,
+                                    textDecoration = if (ss.lyricsUnderline) TextDecoration.Underline else TextDecoration.None
+                                )
+                                val availW = 1920 - proj.windowLeft - proj.windowRight - ss.marginLeft - ss.marginRight
+                                val availH = 1080 - proj.windowTop - proj.windowBottom - ss.marginTop - ss.marginBottom
+                                val shouldShowTitle = ss.titleDisplay != Constants.NONE && section.title.isNotBlank()
+                                val titleH = if (shouldShowTitle) {
+                                    val titleStyle = TextStyle(
+                                        fontFamily = systemFontFamilyOrDefault(ss.titleFontType),
+                                        fontWeight = if (ss.titleBold) FontWeight.Bold else FontWeight.Normal,
+                                        fontStyle = if (ss.titleItalic) FontStyle.Italic else FontStyle.Normal
+                                    )
+                                    val titleResult = textMeasurer.measure(section.title, titleStyle.copy(fontSize = ss.titleFontSize.sp), density = Density(1f))
+                                    titleResult.size.height
+                                } else 0
+                                val fullSize = calculateAutoFitFontSize(textMeasurer, lyricsText, baseStyle, availW, availH - titleH)
+                                onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsFontSize = fullSize)) }
+                            },
+                            modifier = Modifier.height(32.dp),
+                            contentPadding = PaddingValues(horizontal = 8.dp)
+                        ) {
+                            Text(stringResource(Res.string.auto_fit), style = MaterialTheme.typography.labelSmall)
+                        }
+                    }
+                }
             }
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(stringResource(Res.string.lower_third_size), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                NumberSettingsTextField(
-                    initialText = settings.songSettings.lyricsLowerThirdFontSize,
-                    onValueChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsLowerThirdFontSize = it)) } },
-                    range = 8..150
-                )
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    NumberSettingsTextField(
+                        initialText = settings.songSettings.lyricsLowerThirdFontSize,
+                        onValueChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsLowerThirdFontSize = it)) } },
+                        range = 8..150
+                    )
+                    if (presenterManager != null) {
+                        TextButton(
+                            enabled = isPresentingLyrics && hasLowerThirdScreen,
+                            onClick = {
+                                val section = presenterManager.lyricSection.value
+                                val lyricsText = section.lines.filter { line ->
+                                    !line.startsWith(Constants.VERSE_RUS, ignoreCase = true) &&
+                                    !line.startsWith(Constants.CHORUS_RUS, ignoreCase = true) &&
+                                    !line.startsWith(Constants.VERSE, ignoreCase = true) &&
+                                    !line.startsWith(Constants.CHORUS, ignoreCase = true)
+                                }.joinToString("\n")
+                                if (lyricsText.isBlank()) return@TextButton
+                                val ss = settings.songSettings
+                                val proj = settings.projectionSettings
+                                val baseStyle = TextStyle(
+                                    fontFamily = systemFontFamilyOrDefault(ss.lyricsFontType),
+                                    fontWeight = if (ss.lyricsBold) FontWeight.Bold else FontWeight.Normal,
+                                    fontStyle = if (ss.lyricsItalic) FontStyle.Italic else FontStyle.Normal,
+                                    textDecoration = if (ss.lyricsUnderline) TextDecoration.Underline else TextDecoration.None
+                                )
+                                val availW = 1920 - proj.windowLeft - proj.windowRight - ss.marginLeft - ss.marginRight
+                                val availH = 1080 - proj.windowTop - proj.windowBottom - ss.marginTop - ss.marginBottom
+                                val ltH = (availH * proj.lowerThirdHeightPercent / 100f).toInt()
+                                val shouldShowTitle = ss.titleDisplay != Constants.NONE && section.title.isNotBlank()
+                                val titleH = if (shouldShowTitle) {
+                                    val titleStyle = TextStyle(
+                                        fontFamily = systemFontFamilyOrDefault(ss.titleFontType),
+                                        fontWeight = if (ss.titleBold) FontWeight.Bold else FontWeight.Normal,
+                                        fontStyle = if (ss.titleItalic) FontStyle.Italic else FontStyle.Normal
+                                    )
+                                    val titleResult = textMeasurer.measure(section.title, titleStyle.copy(fontSize = ss.titleFontSize.sp), density = Density(1f))
+                                    titleResult.size.height
+                                } else 0
+                                val ltSize = calculateAutoFitFontSize(textMeasurer, lyricsText, baseStyle, availW, ltH - titleH)
+                                onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsLowerThirdFontSize = ltSize)) }
+                            },
+                            modifier = Modifier.height(32.dp),
+                            contentPadding = PaddingValues(horizontal = 8.dp)
+                        ) {
+                            Text(stringResource(Res.string.auto_fit), style = MaterialTheme.typography.labelSmall)
+                        }
+                    }
+                }
             }
         }
     }

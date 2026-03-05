@@ -52,6 +52,7 @@ import churchpresenter.composeapp.generated.resources.display_lower_third
 import churchpresenter.composeapp.generated.resources.display_mode
 import churchpresenter.composeapp.generated.resources.identify_screen
 import churchpresenter.composeapp.generated.resources.left
+import churchpresenter.composeapp.generated.resources.lower_third_height
 import churchpresenter.composeapp.generated.resources.num_screens_label
 import churchpresenter.composeapp.generated.resources.presenter_windows_count
 import churchpresenter.composeapp.generated.resources.projection_auto_display
@@ -452,6 +453,29 @@ fun ProjectionSettingsTab(
 
         Spacer(modifier = Modifier.height(8.dp))
 
+        // Lower third height
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Text(
+                text = stringResource(Res.string.lower_third_height),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            NumberSettingsTextField(
+                initialText = proj.lowerThirdHeightPercent,
+                onValueChange = { value ->
+                    onSettingsChange { s ->
+                        s.copy(projectionSettings = s.projectionSettings.copy(lowerThirdHeightPercent = value))
+                    }
+                },
+                range = 10..60
+            )
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
         // ── Audio Output ────────────────────────────────────────────────────
         if (isVlcAvailable) {
             SectionHeader(stringResource(Res.string.audio_output))
@@ -643,6 +667,7 @@ fun ProjectionSettingsTab(
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
             modifier = Modifier.fillMaxWidth()
         )
+
     }
     }
 }
