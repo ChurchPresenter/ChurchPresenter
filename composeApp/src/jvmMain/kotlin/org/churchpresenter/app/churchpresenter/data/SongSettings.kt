@@ -8,7 +8,13 @@ data class BackgroundConfig(
     val backgroundType: String = Constants.BACKGROUND_COLOR, // "Default", "Color", "Image", "Video"
     val backgroundColor: String = "#000000", // Black
     val backgroundImage: String = "",
-    val backgroundVideo: String = ""
+    val backgroundVideo: String = "",
+    val gradientEnabled: Boolean = false,
+    val gradientTopColor: String = "#000000",
+    val gradientTopOpacity: Float = 0.0f,
+    val gradientBottomColor: String = "#000000",
+    val gradientBottomOpacity: Float = 0.8f,
+    val gradientPosition: Float = 0.5f
 )
 
 @Serializable
@@ -80,10 +86,10 @@ data class SongSettings(
     val songNumberShadow: Boolean = false,
 
     // Text margins (additional padding inside global projection offsets)
-    val marginTop: Int = 0,
-    val marginBottom: Int = 0,
-    val marginLeft: Int = 0,
-    val marginRight: Int = 0,
+    val marginTop: Int = 54,
+    val marginBottom: Int = 54,
+    val marginLeft: Int = 96,
+    val marginRight: Int = 96,
 
     // Transition animation
     val animationType: String = Constants.NONE,
@@ -164,10 +170,10 @@ data class BibleSettings(
     val captionLanguage: String = "Interface", // "Interface" or "Database"
 
     // Text margins (additional padding inside global projection offsets)
-    val marginTop: Int = 0,
-    val marginBottom: Int = 0,
-    val marginLeft: Int = 0,
-    val marginRight: Int = 0,
+    val marginTop: Int = 54,
+    val marginBottom: Int = 54,
+    val marginLeft: Int = 96,
+    val marginRight: Int = 96,
 
     // Transition animation
     val animationType: String = Constants.ANIMATION_CROSSFADE,
@@ -206,7 +212,8 @@ data class ProjectionSettings(
     val screen2Assignment: ScreenAssignment = ScreenAssignment(),
     val screen3Assignment: ScreenAssignment = ScreenAssignment(),
     val screen4Assignment: ScreenAssignment = ScreenAssignment(),
-    val audioOutputDeviceId: String = "" // empty = system default
+    val audioOutputDeviceId: String = "", // empty = system default
+    val lowerThirdHeightPercent: Int = 33 // 10-60, used by Bible & Song presenters
 )
 
 @Serializable

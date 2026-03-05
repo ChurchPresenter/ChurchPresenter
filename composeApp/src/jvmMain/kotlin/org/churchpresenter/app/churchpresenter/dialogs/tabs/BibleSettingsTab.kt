@@ -24,9 +24,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -76,10 +78,22 @@ import org.churchpresenter.app.churchpresenter.composables.PositionButtons
 import org.churchpresenter.app.churchpresenter.composables.HorizontalAlignmentButtons
 import org.churchpresenter.app.churchpresenter.composables.VerticalAlignmentButtons
 import org.churchpresenter.app.churchpresenter.composables.TextStyleButtons
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.text.style.TextDecoration
+import churchpresenter.composeapp.generated.resources.auto_fit
 import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDefault
+import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.app.churchpresenter.utils.calculateAutoFitFontSize
 import org.churchpresenter.app.churchpresenter.viewmodel.BibleSettingsViewModel
+import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.jetbrains.compose.resources.stringResource
 import java.awt.GraphicsEnvironment
 
@@ -87,7 +101,8 @@ import java.awt.GraphicsEnvironment
 @Composable
 fun BibleSettingsTab(
     settings: AppSettings,
-    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit
+    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
+    presenterManager: PresenterManager? = null
 ) {
     val availableFonts = remember {
         GraphicsEnvironment.getLocalGraphicsEnvironment().availableFontFamilyNames.toList()
@@ -141,10 +156,10 @@ fun BibleSettingsTab(
                     .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f), RoundedCornerShape(4.dp))
                     .padding(start = 15.dp, end = 15.dp, top = 8.dp, bottom = 15.dp)
                 Column(modifier = cardModifier) {
-                    PrimaryBibleColumn(settings, onSettingsChange, availableFonts)
+                    PrimaryBibleColumn(settings, onSettingsChange, availableFonts, presenterManager)
                 }
                 Column(modifier = cardModifier) {
-                    SecondaryBibleColumn(settings, onSettingsChange, availableFonts)
+                    SecondaryBibleColumn(settings, onSettingsChange, availableFonts, presenterManager)
                 }
             }
         }
@@ -403,7 +418,8 @@ private fun LeftColumn(
 private fun PrimaryBibleColumn(
     settings: AppSettings,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
-    availableFonts: List<String>
+    availableFonts: List<String>,
+    presenterManager: PresenterManager? = null
 ) {
 
     // Primary Bible Text
@@ -451,23 +467,113 @@ private fun PrimaryBibleColumn(
             )
         }
     }
+    val textMeasurer = rememberTextMeasurer()
+    val isPresentingBible = if (presenterManager != null) {
+        remember { derivedStateOf {
+            presenterManager.presentingMode.value == Presenting.BIBLE &&
+            presenterManager.selectedVerses.value.let { it.isNotEmpty() && it.first().verseText.isNotBlank() }
+        } }.value
+    } else false
+    val activeScreens = listOf(
+        settings.projectionSettings.screen1Assignment,
+        settings.projectionSettings.screen2Assignment,
+        settings.projectionSettings.screen3Assignment,
+        settings.projectionSettings.screen4Assignment
+    ).take(settings.projectionSettings.numberOfWindows)
+    val hasFullscreenScreen = activeScreens.any { it.displayMode == Constants.DISPLAY_MODE_FULLSCREEN }
+    val hasLowerThirdScreen = activeScreens.any { it.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD }
     SettingRow(stringResource(Res.string.font_size)) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(stringResource(Res.string.full_screen), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                NumberSettingsTextField(
-                    initialText = settings.bibleSettings.primaryBibleFontSize,
-                    onValueChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(primaryBibleFontSize = it)) } },
-                    range = 8..150
-                )
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    NumberSettingsTextField(
+                        initialText = settings.bibleSettings.primaryBibleFontSize,
+                        onValueChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(primaryBibleFontSize = it)) } },
+                        range = 8..150
+                    )
+                    if (presenterManager != null) {
+                        TextButton(
+                            enabled = isPresentingBible && hasFullscreenScreen,
+                            onClick = {
+                                val verses = presenterManager.selectedVerses.value
+                                val verse = verses.firstOrNull() ?: return@TextButton
+                                val text = verse.verseText
+                                if (text.isBlank()) return@TextButton
+                                val bs = settings.bibleSettings
+                                val proj = settings.projectionSettings
+                                val baseStyle = TextStyle(
+                                    fontFamily = systemFontFamilyOrDefault(bs.primaryBibleFontType),
+                                    fontWeight = if (bs.primaryBibleBold) FontWeight.Bold else FontWeight.Normal,
+                                    fontStyle = if (bs.primaryBibleItalic) FontStyle.Italic else FontStyle.Normal,
+                                    textDecoration = if (bs.primaryBibleUnderline) TextDecoration.Underline else TextDecoration.None
+                                )
+                                val refStyle = TextStyle(
+                                    fontFamily = systemFontFamilyOrDefault(bs.primaryReferenceFontType),
+                                    fontWeight = if (bs.primaryReferenceBold) FontWeight.Bold else FontWeight.Normal,
+                                    fontStyle = if (bs.primaryReferenceItalic) FontStyle.Italic else FontStyle.Normal
+                                )
+                                val availW = 1920 - proj.windowLeft - proj.windowRight - bs.marginLeft - bs.marginRight
+                                val availH = 1080 - proj.windowTop - proj.windowBottom - bs.marginTop - bs.marginBottom
+                                val hasSecondary = verses.size > 1
+                                val effectiveH = if (hasSecondary) availH / 2 else availH
+                                val refText = "${verse.bookName} ${verse.chapter}:${verse.verseNumber}"
+                                val refH = textMeasurer.measure(refText, refStyle.copy(fontSize = bs.primaryReferenceFontSize.sp), density = Density(1f)).size.height
+                                val fullSize = calculateAutoFitFontSize(textMeasurer, text, baseStyle, availW, effectiveH - refH)
+                                onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(primaryBibleFontSize = fullSize)) }
+                            },
+                            modifier = Modifier.height(32.dp),
+                            contentPadding = PaddingValues(horizontal = 8.dp)
+                        ) {
+                            Text(stringResource(Res.string.auto_fit), style = MaterialTheme.typography.labelSmall)
+                        }
+                    }
+                }
             }
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(stringResource(Res.string.lower_third_size), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                NumberSettingsTextField(
-                    initialText = settings.bibleSettings.primaryBibleLowerThirdFontSize,
-                    onValueChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(primaryBibleLowerThirdFontSize = it)) } },
-                    range = 8..150
-                )
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    NumberSettingsTextField(
+                        initialText = settings.bibleSettings.primaryBibleLowerThirdFontSize,
+                        onValueChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(primaryBibleLowerThirdFontSize = it)) } },
+                        range = 8..150
+                    )
+                    if (presenterManager != null) {
+                        TextButton(
+                            enabled = isPresentingBible && hasLowerThirdScreen,
+                            onClick = {
+                                val verses = presenterManager.selectedVerses.value
+                                val verse = verses.firstOrNull() ?: return@TextButton
+                                val text = verse.verseText
+                                if (text.isBlank()) return@TextButton
+                                val bs = settings.bibleSettings
+                                val proj = settings.projectionSettings
+                                val baseStyle = TextStyle(
+                                    fontFamily = systemFontFamilyOrDefault(bs.primaryBibleFontType),
+                                    fontWeight = if (bs.primaryBibleBold) FontWeight.Bold else FontWeight.Normal,
+                                    fontStyle = if (bs.primaryBibleItalic) FontStyle.Italic else FontStyle.Normal,
+                                    textDecoration = if (bs.primaryBibleUnderline) TextDecoration.Underline else TextDecoration.None
+                                )
+                                val refStyle = TextStyle(
+                                    fontFamily = systemFontFamilyOrDefault(bs.primaryReferenceFontType),
+                                    fontWeight = if (bs.primaryReferenceBold) FontWeight.Bold else FontWeight.Normal,
+                                    fontStyle = if (bs.primaryReferenceItalic) FontStyle.Italic else FontStyle.Normal
+                                )
+                                val availW = 1920 - proj.windowLeft - proj.windowRight - bs.marginLeft - bs.marginRight
+                                val availH = 1080 - proj.windowTop - proj.windowBottom - bs.marginTop - bs.marginBottom
+                                val ltH = (availH * proj.lowerThirdHeightPercent / 100f).toInt()
+                                val refText = "${verse.bookName} ${verse.chapter}:${verse.verseNumber}"
+                                val ltRefH = textMeasurer.measure(refText, refStyle.copy(fontSize = bs.primaryReferenceLowerThirdFontSize.sp), density = Density(1f)).size.height
+                                val ltSize = calculateAutoFitFontSize(textMeasurer, text, baseStyle, availW, ltH - ltRefH)
+                                onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(primaryBibleLowerThirdFontSize = ltSize)) }
+                            },
+                            modifier = Modifier.height(32.dp),
+                            contentPadding = PaddingValues(horizontal = 8.dp)
+                        ) {
+                            Text(stringResource(Res.string.auto_fit), style = MaterialTheme.typography.labelSmall)
+                        }
+                    }
+                }
             }
         }
     }
@@ -609,7 +715,8 @@ private fun PrimaryBibleColumn(
 private fun SecondaryBibleColumn(
     settings: AppSettings,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
-    availableFonts: List<String>
+    availableFonts: List<String>,
+    presenterManager: PresenterManager? = null
 ) {
     // Secondary Bible Text
     SectionHeader(stringResource(Res.string.secondary_bible_text))
@@ -656,23 +763,112 @@ private fun SecondaryBibleColumn(
             )
         }
     }
+    val textMeasurer2 = rememberTextMeasurer()
+    val isPresentingSecondary = if (presenterManager != null) {
+        remember { derivedStateOf {
+            presenterManager.presentingMode.value == Presenting.BIBLE &&
+            presenterManager.selectedVerses.value.let { it.size > 1 && it[1].verseText.isNotBlank() }
+        } }.value
+    } else false
+    val activeScreens2 = listOf(
+        settings.projectionSettings.screen1Assignment,
+        settings.projectionSettings.screen2Assignment,
+        settings.projectionSettings.screen3Assignment,
+        settings.projectionSettings.screen4Assignment
+    ).take(settings.projectionSettings.numberOfWindows)
+    val hasFullscreenScreen2 = activeScreens2.any { it.displayMode == Constants.DISPLAY_MODE_FULLSCREEN }
+    val hasLowerThirdScreen2 = activeScreens2.any { it.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD }
     SettingRow(stringResource(Res.string.font_size)) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(stringResource(Res.string.full_screen), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                NumberSettingsTextField(
-                    initialText = settings.bibleSettings.secondaryBibleFontSize,
-                    onValueChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(secondaryBibleFontSize = it)) } },
-                    range = 8..150
-                )
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    NumberSettingsTextField(
+                        initialText = settings.bibleSettings.secondaryBibleFontSize,
+                        onValueChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(secondaryBibleFontSize = it)) } },
+                        range = 8..150
+                    )
+                    if (presenterManager != null) {
+                        TextButton(
+                            enabled = isPresentingSecondary && hasFullscreenScreen2,
+                            onClick = {
+                                val verses = presenterManager.selectedVerses.value
+                                val verse = verses.getOrNull(1) ?: return@TextButton
+                                val text = verse.verseText
+                                if (text.isBlank()) return@TextButton
+                                val bs = settings.bibleSettings
+                                val proj = settings.projectionSettings
+                                val baseStyle = TextStyle(
+                                    fontFamily = systemFontFamilyOrDefault(bs.secondaryBibleFontType),
+                                    fontWeight = if (bs.secondaryBibleBold) FontWeight.Bold else FontWeight.Normal,
+                                    fontStyle = if (bs.secondaryBibleItalic) FontStyle.Italic else FontStyle.Normal,
+                                    textDecoration = if (bs.secondaryBibleUnderline) TextDecoration.Underline else TextDecoration.None
+                                )
+                                val refStyle = TextStyle(
+                                    fontFamily = systemFontFamilyOrDefault(bs.secondaryReferenceFontType),
+                                    fontWeight = if (bs.secondaryReferenceBold) FontWeight.Bold else FontWeight.Normal,
+                                    fontStyle = if (bs.secondaryReferenceItalic) FontStyle.Italic else FontStyle.Normal
+                                )
+                                val availW = 1920 - proj.windowLeft - proj.windowRight - bs.marginLeft - bs.marginRight
+                                val availH = 1080 - proj.windowTop - proj.windowBottom - bs.marginTop - bs.marginBottom
+                                val effectiveH = availH / 2
+                                val refText = "${verse.bookName} ${verse.chapter}:${verse.verseNumber}"
+                                val refH = textMeasurer2.measure(refText, refStyle.copy(fontSize = bs.secondaryReferenceFontSize.sp), density = Density(1f)).size.height
+                                val fullSize = calculateAutoFitFontSize(textMeasurer2, text, baseStyle, availW, effectiveH - refH)
+                                onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(secondaryBibleFontSize = fullSize)) }
+                            },
+                            modifier = Modifier.height(32.dp),
+                            contentPadding = PaddingValues(horizontal = 8.dp)
+                        ) {
+                            Text(stringResource(Res.string.auto_fit), style = MaterialTheme.typography.labelSmall)
+                        }
+                    }
+                }
             }
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(stringResource(Res.string.lower_third_size), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                NumberSettingsTextField(
-                    initialText = settings.bibleSettings.secondaryBibleLowerThirdFontSize,
-                    onValueChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(secondaryBibleLowerThirdFontSize = it)) } },
-                    range = 8..150
-                )
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    NumberSettingsTextField(
+                        initialText = settings.bibleSettings.secondaryBibleLowerThirdFontSize,
+                        onValueChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(secondaryBibleLowerThirdFontSize = it)) } },
+                        range = 8..150
+                    )
+                    if (presenterManager != null) {
+                        TextButton(
+                            enabled = isPresentingSecondary && hasLowerThirdScreen2,
+                            onClick = {
+                                val verses = presenterManager.selectedVerses.value
+                                val verse = verses.getOrNull(1) ?: return@TextButton
+                                val text = verse.verseText
+                                if (text.isBlank()) return@TextButton
+                                val bs = settings.bibleSettings
+                                val proj = settings.projectionSettings
+                                val baseStyle = TextStyle(
+                                    fontFamily = systemFontFamilyOrDefault(bs.secondaryBibleFontType),
+                                    fontWeight = if (bs.secondaryBibleBold) FontWeight.Bold else FontWeight.Normal,
+                                    fontStyle = if (bs.secondaryBibleItalic) FontStyle.Italic else FontStyle.Normal,
+                                    textDecoration = if (bs.secondaryBibleUnderline) TextDecoration.Underline else TextDecoration.None
+                                )
+                                val refStyle = TextStyle(
+                                    fontFamily = systemFontFamilyOrDefault(bs.secondaryReferenceFontType),
+                                    fontWeight = if (bs.secondaryReferenceBold) FontWeight.Bold else FontWeight.Normal,
+                                    fontStyle = if (bs.secondaryReferenceItalic) FontStyle.Italic else FontStyle.Normal
+                                )
+                                val availW = 1920 - proj.windowLeft - proj.windowRight - bs.marginLeft - bs.marginRight
+                                val availH = 1080 - proj.windowTop - proj.windowBottom - bs.marginTop - bs.marginBottom
+                                val ltH = (availH * proj.lowerThirdHeightPercent / 100f).toInt()
+                                val refText = "${verse.bookName} ${verse.chapter}:${verse.verseNumber}"
+                                val ltRefH = textMeasurer2.measure(refText, refStyle.copy(fontSize = bs.secondaryReferenceLowerThirdFontSize.sp), density = Density(1f)).size.height
+                                val ltSize = calculateAutoFitFontSize(textMeasurer2, text, baseStyle, availW, ltH - ltRefH)
+                                onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(secondaryBibleLowerThirdFontSize = ltSize)) }
+                            },
+                            modifier = Modifier.height(32.dp),
+                            contentPadding = PaddingValues(horizontal = 8.dp)
+                        ) {
+                            Text(stringResource(Res.string.auto_fit), style = MaterialTheme.typography.labelSmall)
+                        }
+                    }
+                }
             }
         }
     }
