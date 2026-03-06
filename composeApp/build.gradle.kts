@@ -150,7 +150,11 @@ compose.desktop {
             "--add-opens=java.base/java.util.concurrent=ALL-UNNAMED",
             "--add-opens=java.base/java.io=ALL-UNNAMED",
             "--add-opens=java.base/java.nio=ALL-UNNAMED",
-            "--add-opens=java.base/sun.nio.ch=ALL-UNNAMED"
+            "--add-opens=java.base/sun.nio.ch=ALL-UNNAMED",
+            // JCEF on macOS needs access to sun.awt internals
+            "--add-opens=java.desktop/sun.awt=ALL-UNNAMED",
+            "--add-opens=java.desktop/sun.lwawt=ALL-UNNAMED",
+            "--add-opens=java.desktop/sun.lwawt.macosx=ALL-UNNAMED"
         )
 
         buildTypes.release.proguard {
@@ -190,7 +194,10 @@ compose.desktop {
                 "--add-opens=java.base/java.util.concurrent=ALL-UNNAMED",
                 "--add-opens=java.base/java.io=ALL-UNNAMED",
                 "--add-opens=java.base/java.nio=ALL-UNNAMED",
-                "--add-opens=java.base/sun.nio.ch=ALL-UNNAMED"
+                "--add-opens=java.base/sun.nio.ch=ALL-UNNAMED",
+                "--add-opens=java.desktop/sun.awt=ALL-UNNAMED",
+                "--add-opens=java.desktop/sun.lwawt=ALL-UNNAMED",
+                "--add-opens=java.desktop/sun.lwawt.macosx=ALL-UNNAMED"
             )
 
             macOS {
