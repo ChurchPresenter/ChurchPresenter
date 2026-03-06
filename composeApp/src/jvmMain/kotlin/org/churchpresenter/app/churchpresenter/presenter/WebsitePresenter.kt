@@ -184,16 +184,16 @@ fun EmbeddedWebView(
         }
         client.addLifeSpanHandler(lifeSpanHandler)
 
-        // Snapshot timer — paints the browser component to a BufferedImage every 200 ms
-        val timer = if (onSnapshot != null) {
-            javax.swing.Timer(200) {
+        // Snapshot timer — captures the browser via Robot screen capture every 500 ms
+        val robot = try { java.awt.Robot() } catch (_: Exception) { null }
+        val timer = if (onSnapshot != null && robot != null) {
+            javax.swing.Timer(500) {
                 try {
                     val comp = browser.getUIComponent()
-                    if (comp.width > 0 && comp.height > 0) {
-                        val img = BufferedImage(comp.width, comp.height, BufferedImage.TYPE_INT_ARGB)
-                        val g = img.createGraphics()
-                        comp.paint(g)
-                        g.dispose()
+                    if (comp.isShowing && comp.width > 0 && comp.height > 0) {
+                        val loc = comp.locationOnScreen
+                        val rect = java.awt.Rectangle(loc.x, loc.y, comp.width, comp.height)
+                        val img = robot.createScreenCapture(rect)
                         onSnapshot(img.toComposeImageBitmap())
                     }
                 } catch (_: Exception) {}
@@ -230,7 +230,8 @@ fun EmbeddedWebView(
 @Composable
 fun WebsitePresenter(
     url: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    targetViewportWidth: Int = 0
 ) {
-    EmbeddedWebView(url = url, modifier = modifier.fillMaxSize())
+    EmbeddedWebView(url = url, modifier = modifier.fillMaxSize(), targetViewportWidth = targetViewportWidth)
 }
