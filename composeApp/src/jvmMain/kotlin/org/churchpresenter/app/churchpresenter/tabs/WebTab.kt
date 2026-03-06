@@ -530,8 +530,8 @@ fun WebTab(
                                         val scroll = change.scrollDelta
                                         val bx = (pos.x * scaleX).toInt()
                                         val by = (pos.y * scaleY).toInt()
-                                        val vRotation = -(scroll.y * 3).toInt()
-                                        val hRotation = -(scroll.x * 3).toInt()
+                                        val vRotation = -(scroll.y * 15).toInt()
+                                        val hRotation = -(scroll.x * 15).toInt()
                                         if (vRotation == 0 && hRotation == 0) continue
                                         javax.swing.SwingUtilities.invokeLater {
                                             try {
