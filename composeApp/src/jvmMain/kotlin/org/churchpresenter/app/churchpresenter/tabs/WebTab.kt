@@ -62,6 +62,10 @@ fun WebTab(
     // Toggle between screenshot mirror (matched layout) and interactive local browser
     var useInteractivePreview by remember { mutableStateOf(false) }
 
+    // Zoom level (0.0 = 100%, each ±1.0 ≈ 1.2x scale change)
+    var zoomLevel by remember { mutableStateOf(0.0) }
+    var isMobileView by remember { mutableStateOf(false) }
+
     // Clear snapshot when no longer live
     LaunchedEffect(isLive) {
         if (!isLive) presenterManager?.setWebSnapshot(null)
@@ -95,6 +99,14 @@ fun WebTab(
         }
     }
 
+    // Apply zoom level when presenter browser becomes available
+    val liveBrowserRef = presenterManager?.liveBrowser?.value
+    LaunchedEffect(liveBrowserRef) {
+        if (liveBrowserRef != null && isLive) {
+            liveBrowserRef.setZoomLevel(zoomLevel)
+        }
+    }
+
     // Keep the presenter in sync whenever the preview navigates to a new page
     fun onPreviewNavigated(newUrl: String) {
         urlInput = newUrl
@@ -114,6 +126,13 @@ fun WebTab(
     }
 
     val navController = rememberWebNavController()
+
+    fun applyZoom(level: Double) {
+        zoomLevel = level
+        val browser = if (isLive && !useInteractivePreview)
+            presenterManager?.liveBrowser?.value else navController.browser
+        browser?.setZoomLevel(level)
+    }
 
     val bookmarks = appSettings.webBookmarks
     val currentUrlNormalised = normaliseUrl(urlInput)
@@ -163,6 +182,48 @@ fun WebTab(
             }) {
                 Text("X", style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.error)
+            }
+
+            // Zoom out
+            IconButton(onClick = { applyZoom(zoomLevel - 0.5) }, modifier = Modifier.size(32.dp)) {
+                Text("\u2212", style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface)
+            }
+            // Zoom percentage
+            Text(
+                text = "${(Math.pow(1.2, zoomLevel) * 100).toInt()}%",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            // Zoom in
+            IconButton(onClick = { applyZoom(zoomLevel + 0.5) }, modifier = Modifier.size(32.dp)) {
+                Text("+", style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface)
+            }
+            // Mobile / Desktop toggle
+            Surface(
+                shape = RoundedCornerShape(4.dp),
+                color = if (isMobileView) MaterialTheme.colorScheme.tertiaryContainer
+                        else MaterialTheme.colorScheme.surfaceVariant,
+                modifier = Modifier.clickable {
+                    isMobileView = !isMobileView
+                    if (isMobileView) {
+                        val browser = if (isLive) presenterManager?.liveBrowser?.value else navController.browser
+                        val screenW = browser?.getUIComponent()?.width?.toDouble() ?: 1920.0
+                        val mobileW = 414.0
+                        val factor = screenW / mobileW
+                        val level = Math.log(factor) / Math.log(1.2)
+                        applyZoom(level)
+                    } else {
+                        applyZoom(0.0)
+                    }
+                }
+            ) {
+                Text(
+                    text = if (isMobileView) "Mobile" else "Desktop",
+                    style = MaterialTheme.typography.labelSmall,
+                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 4.dp)
+                )
             }
 
             OutlinedTextField(
@@ -449,15 +510,28 @@ fun WebTab(
                                         val scroll = change.scrollDelta
                                         val bx = (pos.x * scaleX).toInt()
                                         val by = (pos.y * scaleY).toInt()
-                                        val rotation = -(scroll.y * 3).toInt()
-                                        if (rotation == 0) continue
+                                        val vRotation = -(scroll.y * 3).toInt()
+                                        val hRotation = -(scroll.x * 3).toInt()
+                                        if (vRotation == 0 && hRotation == 0) continue
                                         try {
-                                            sendWheel.invoke(liveBrowser, java.awt.event.MouseWheelEvent(
-                                                comp, java.awt.event.MouseWheelEvent.MOUSE_WHEEL,
-                                                System.currentTimeMillis(), 0, bx, by,
-                                                0, false, java.awt.event.MouseWheelEvent.WHEEL_UNIT_SCROLL,
-                                                1, rotation
-                                            ))
+                                            if (vRotation != 0) {
+                                                sendWheel.invoke(liveBrowser, java.awt.event.MouseWheelEvent(
+                                                    comp, java.awt.event.MouseWheelEvent.MOUSE_WHEEL,
+                                                    System.currentTimeMillis(), 0, bx, by,
+                                                    0, false, java.awt.event.MouseWheelEvent.WHEEL_UNIT_SCROLL,
+                                                    1, vRotation
+                                                ))
+                                            }
+                                            if (hRotation != 0) {
+                                                sendWheel.invoke(liveBrowser, java.awt.event.MouseWheelEvent(
+                                                    comp, java.awt.event.MouseWheelEvent.MOUSE_WHEEL,
+                                                    System.currentTimeMillis(),
+                                                    java.awt.event.InputEvent.SHIFT_DOWN_MASK,
+                                                    bx, by,
+                                                    0, false, java.awt.event.MouseWheelEvent.WHEEL_UNIT_SCROLL,
+                                                    1, hRotation
+                                                ))
+                                            }
                                         } catch (_: Exception) {}
                                     }
                                 }
@@ -497,7 +571,8 @@ fun WebTab(
                     modifier = Modifier.fillMaxSize(),
                     onUrlChanged = { newUrl -> onPreviewNavigated(newUrl) },
                     onTitleChanged = { title -> onTitleChanged(title) },
-                    navController = navController
+                    navController = navController,
+                    onBrowserCreated = { browser -> browser.setZoomLevel(zoomLevel) }
                 )
             } else {
                 Box(
