@@ -77,8 +77,14 @@ import javafx.scene.Scene
 import javafx.scene.layout.StackPane
 import javafx.scene.web.WebView
 import javax.swing.JDialog
+import javax.swing.JSplitPane
 import javax.swing.SwingUtilities
 import netscape.javascript.JSObject
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.ui.awt.ComposePanel
+import io.github.alexzhirkevich.compottie.LottieCompositionSpec as LottieSpec2
 
 @Composable
 fun LowerThirdSettingsTab(
@@ -382,6 +388,13 @@ private fun ModernButton(
     }
 }
 
+/** Shared state for the Compose-based Lottie preview in the generator dialog. */
+private object LottiePreviewState {
+    val jsonContent = mutableStateOf("")
+    val statusText = mutableStateOf("")
+    val isDark = mutableStateOf(true)
+}
+
 /**
  * Cached generator dialog — keeps the WebView alive between uses so that
  * re-opening is near-instant after the first (slow) JavaFX cold-start.
@@ -418,6 +431,7 @@ internal fun openLottieGeneratorDialog(
     // Update mutable refs so the cached bridge always uses latest values
     LottieGeneratorCache.onFileSavedCallback = onFileSaved
     LottieGeneratorCache.lowerThirdFolderRef = lowerThirdFolder
+    LottiePreviewState.isDark.value = isDarkTheme
 
     // Re-use existing dialog if the URL hasn't changed
     val cached = LottieGeneratorCache.dialog
@@ -425,7 +439,10 @@ internal fun openLottieGeneratorDialog(
         // Apply theme in case it changed
         Platform.runLater {
             try {
-                val jfxPanel = cached.contentPane.getComponent(0) as? JFXPanel ?: return@runLater
+                // Navigate: CardLayout panel → JSplitPane → JFXPanel (left component)
+                val cardPanel = cached.contentPane.getComponent(0) as? JPanel ?: return@runLater
+                val splitPane = cardPanel.components.filterIsInstance<JSplitPane>().firstOrNull() ?: return@runLater
+                val jfxPanel = splitPane.leftComponent as? JFXPanel ?: return@runLater
                 val webView = (jfxPanel.scene?.root as? StackPane)?.children?.firstOrNull() as? WebView ?: return@runLater
                 val themeMode = if (isDarkTheme) "dark" else "light"
                 webView.engine.executeScript(
@@ -489,9 +506,22 @@ internal fun openLottieGeneratorDialog(
         add(glue1); add(label); add(spacer); add(progress); add(glue2)
     }
 
+    // Content panel: JFXPanel (config sidebar) + ComposePanel (Lottie preview)
     val jfxPanel = JFXPanel()
+    val composePreviewPanel = ComposePanel().apply {
+        setContent {
+            GeneratorPreviewContent()
+        }
+    }
+
+    val contentPanel = JSplitPane(JSplitPane.HORIZONTAL_SPLIT, jfxPanel, composePreviewPanel).apply {
+        dividerLocation = 440
+        isOneTouchExpandable = false
+        dividerSize = 4
+    }
+
     cardPanel.add(loadingPanel, "loading")
-    cardPanel.add(jfxPanel, "webview")
+    cardPanel.add(contentPanel, "content")
     cards.show(cardPanel, "loading")
 
     dialog.contentPane.add(cardPanel, BorderLayout.CENTER)
@@ -534,6 +564,16 @@ internal fun openLottieGeneratorDialog(
                     }
                 }
             }
+
+            @Suppress("unused")
+            fun preview(jsonStr: String) {
+                LottiePreviewState.jsonContent.value = jsonStr
+            }
+
+            @Suppress("unused")
+            fun status(msg: String) {
+                LottiePreviewState.statusText.value = msg
+            }
         }
         LottieGeneratorCache.bridgeRef = bridge
 
@@ -552,6 +592,12 @@ internal fun openLottieGeneratorDialog(
                     "  newBtn.addEventListener('click', function() { download(); savePreset(); }); }"
                 )
 
+                // Hide the WebView preview area and expand config panel to fill
+                engine.executeScript(
+                    "var pa=document.querySelector('.preview-area');if(pa)pa.style.display='none';" +
+                    "var pn=document.querySelector('.panel');if(pn){pn.style.width='100%';pn.style.minWidth='100%';}"
+                )
+
                 val themeMode = if (isDarkTheme) "dark" else "light"
                 engine.executeScript(
                     "if(typeof applyUITheme==='function') applyUITheme('$themeMode');" +
@@ -559,15 +605,15 @@ internal fun openLottieGeneratorDialog(
                     "document.head.appendChild(s);"
                 )
 
-                // Switch from loading to webview
-                SwingUtilities.invokeLater { cards.show(cardPanel, "webview") }
+                // Switch from loading to content
+                SwingUtilities.invokeLater { cards.show(cardPanel, "content") }
             }
         }
 
         engine.loadWorker.stateProperty().addListener(stateListener)
         engine.load(loadUrl)
 
-        jfxPanel.scene = Scene(StackPane(webView), 1180.0, 760.0)
+        jfxPanel.scene = Scene(StackPane(webView), 440.0, 760.0)
     }
 
     LottieGeneratorCache.dialog = dialog
@@ -575,8 +621,155 @@ internal fun openLottieGeneratorDialog(
     dialog.isVisible = true
 }
 
+@Composable
+private fun GeneratorPreviewContent() {
+    val jsonContent by LottiePreviewState.jsonContent
 
+    val composition by rememberLottieComposition(key = jsonContent) {
+        LottieSpec2.JsonString(jsonContent.ifBlank { "{}" })
+    }
 
+    val progress = remember(jsonContent) { Animatable(0f) }
+    var isPlaying by remember { mutableStateOf(true) }
+    var seekTarget by remember { mutableStateOf(-1f) }
 
+    LaunchedEffect(composition, jsonContent, isPlaying) {
+        val comp = composition ?: return@LaunchedEffect
+        if (jsonContent.isBlank()) return@LaunchedEffect
+        if (!isPlaying) return@LaunchedEffect
+        val totalDurMs = ((comp.durationFrames / comp.frameRate) * 1000f).toLong().coerceAtLeast(1L)
+        while (isPlaying) {
+            val startFrom = progress.value
+            val remainMs = (totalDurMs * (1f - startFrom)).toInt().coerceAtLeast(1)
+            progress.animateTo(
+                targetValue = 1f,
+                animationSpec = tween(durationMillis = remainMs, easing = LinearEasing)
+            )
+            if (isPlaying) progress.snapTo(0f)
+        }
+    }
+
+    // Handle seek
+    LaunchedEffect(seekTarget) {
+        if (seekTarget >= 0f) {
+            progress.snapTo(seekTarget)
+            seekTarget = -1f
+        }
+    }
+
+    val comp = composition
+    val totalFrames = comp?.durationFrames ?: 0f
+    val currentFrame = progress.value * totalFrames
+
+    val isDark by LottiePreviewState.isDark
+    val bgColor = if (isDark) Color(0xFF10131A) else Color(0xFFE7E0EC)
+    val borderColor = if (isDark) Color.White.copy(alpha = 0.2f) else Color.Black.copy(alpha = 0.2f)
+    val textColor = if (isDark) Color.White.copy(alpha = 0.4f) else Color.Black.copy(alpha = 0.4f)
+    val btnBg = if (isDark) Color(0xFF49454F) else Color(0xFFE0E0E0)
+    val btnText = if (isDark) Color.White else Color.Black
+    val accentColor = if (isDark) Color(0xFF90CAF9) else Color(0xFF1976D2)
+    val trackColor = if (isDark) Color(0xFF49454F) else Color(0xFFCAC4D0)
+    val frameTextColor = if (isDark) Color(0xFF888888) else Color(0xFF666666)
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(bgColor)
+    ) {
+        // Preview area
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth()
+                .padding(16.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            if (jsonContent.isNotBlank() && comp != null) {
+                Box(
+                    modifier = Modifier
+                        .aspectRatio(comp.width / comp.height)
+                        .fillMaxSize()
+                        .border(1.dp, borderColor)
+                ) {
+                    Image(
+                        painter = rememberLottiePainter(
+                            composition = composition,
+                            progress = { progress.value }
+                        ),
+                        contentDescription = null,
+                        contentScale = ContentScale.Fit,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
+            } else {
+                Text(
+                    text = "Preview will appear here",
+                    color = textColor
+                )
+            }
+        }
+
+        // Playback controls
+        if (jsonContent.isNotBlank()) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                // Play/Pause button
+                Button(
+                    onClick = { isPlaying = !isPlaying },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = btnBg,
+                        contentColor = btnText
+                    ),
+                    shape = RoundedCornerShape(4.dp),
+                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp)
+                ) {
+                    Text(if (isPlaying) "\u23F8" else "\u25B6")
+                }
+
+                // Seek bar
+                androidx.compose.material3.Slider(
+                    value = progress.value,
+                    onValueChange = {
+                        isPlaying = false
+                        seekTarget = it
+                    },
+                    onValueChangeFinished = { isPlaying = true },
+                    modifier = Modifier.weight(1f),
+                    colors = androidx.compose.material3.SliderDefaults.colors(
+                        thumbColor = accentColor,
+                        activeTrackColor = accentColor,
+                        inactiveTrackColor = trackColor
+                    )
+                )
+
+                // Frame display
+                Text(
+                    text = "${currentFrame.toInt()} / ${totalFrames.toInt()}",
+                    color = frameTextColor,
+                    style = MaterialTheme.typography.labelSmall
+                )
+            }
+
+            // Status line
+            val statusText by LottiePreviewState.statusText
+            if (statusText.isNotBlank()) {
+                Text(
+                    text = statusText,
+                    color = frameTextColor,
+                    style = MaterialTheme.typography.labelSmall,
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 4.dp)
+                )
+            }
+        }
+    }
+}
 
 
