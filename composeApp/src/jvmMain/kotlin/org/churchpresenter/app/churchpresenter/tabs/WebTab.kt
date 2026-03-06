@@ -317,7 +317,7 @@ fun WebTab(
                     onUrlChanged = { newUrl -> onPreviewNavigated(newUrl) },
                     onTitleChanged = { title -> onTitleChanged(title) },
                     onSnapshot = { bitmap ->
-                        if (isLive) presenterManager?.setWebSnapshot(bitmap)
+                        presenterManager?.setWebSnapshot(bitmap)
                     },
                     navController = navController,
                     targetViewportWidth = presenterScreen.width

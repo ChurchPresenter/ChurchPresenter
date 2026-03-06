@@ -3,11 +3,11 @@ package org.churchpresenter.app.churchpresenter.utils
 import java.awt.GraphicsEnvironment
 import java.awt.Rectangle
 
-/** Returns the presenter screen bounds (second screen if available, else 1920×1080). */
+/** Returns the presenter screen bounds (second screen if available, else primary screen). */
 fun presenterScreenBounds(): Rectangle {
     val screens = GraphicsEnvironment.getLocalGraphicsEnvironment().screenDevices
     return if (screens.size > 1) screens[1].defaultConfiguration.bounds
-    else Rectangle(0, 0, 1920, 1080)
+    else screens[0].defaultConfiguration.bounds
 }
 
 /** Returns the aspect ratio of the presenter screen. */
@@ -63,6 +63,8 @@ object Constants {
     const val BACKGROUND_COLOR = "Color"
     const val BACKGROUND_IMAGE = "Image"
     const val BACKGROUND_VIDEO = "Video"
+    const val BACKGROUND_TRANSPARENT = "Transparent"
+    const val BACKGROUND_GRADIENT = "Gradient"
 
     // Position Options
     const val POSITION_ABOVE = "Above"
