@@ -713,8 +713,10 @@ private fun GeneratorPreviewContent() {
         if (jsonContent.isNotBlank()) {
             Row(
                 modifier = Modifier
+                    .widthIn(max = 800.dp)
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                    .align(Alignment.CenterHorizontally),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
