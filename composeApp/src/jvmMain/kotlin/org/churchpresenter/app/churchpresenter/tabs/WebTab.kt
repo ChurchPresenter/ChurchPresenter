@@ -62,6 +62,9 @@ fun WebTab(
     val presentingMode = presenterManager?.presentingMode?.value ?: Presenting.NONE
     val isLive = presentingMode == Presenting.WEBSITE
 
+    // Toggle between screenshot mirror (matched layout) and interactive local browser
+    var useInteractivePreview by remember { mutableStateOf(false) }
+
     // Clear snapshot when no longer live
     LaunchedEffect(isLive) {
         if (!isLive) presenterManager?.setWebSnapshot(null)
@@ -267,7 +270,7 @@ fun WebTab(
             }
         }
 
-        // ── Live badge ─────────────────────────────────────────────────────
+        // ── Live badge + preview mode toggle ──────────────────────────────
         if (isLive) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 Surface(
@@ -285,8 +288,22 @@ fun WebTab(
                     text = if (pageTitle.isNotBlank()) pageTitle else liveUrl,
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1
+                    maxLines = 1,
+                    modifier = Modifier.weight(1f)
                 )
+                // Toggle between screenshot mirror and interactive preview
+                Surface(
+                    shape = RoundedCornerShape(4.dp),
+                    color = if (useInteractivePreview) MaterialTheme.colorScheme.tertiaryContainer
+                            else MaterialTheme.colorScheme.surfaceVariant,
+                    modifier = Modifier.clickable { useInteractivePreview = !useInteractivePreview }
+                ) {
+                    Text(
+                        text = if (useInteractivePreview) "Interactive" else "Mirror",
+                        style = MaterialTheme.typography.labelSmall,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                    )
+                }
             }
         }
 
@@ -316,8 +333,8 @@ fun WebTab(
                     shape = RoundedCornerShape(4.dp)
                 )
         ) {
-            if (isLive) {
-                // When live, show presenter screenshot with input forwarding
+            if (isLive && !useInteractivePreview) {
+                // Mirror mode: show presenter screenshot with input forwarding
                 val webSnapshot = presenterManager?.webSnapshot?.value
                 val liveBrowser = presenterManager?.liveBrowser?.value
                 if (webSnapshot != null) {
