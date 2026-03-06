@@ -482,6 +482,10 @@
     <string name="gradient_opacity">Opacity</string>
     <string name="gradient_position">Transition Position</string>
 
+    <!-- System Settings -->
+    <string name="reset_settings">Reset All Settings</string>
+    <string name="reset_settings_confirm">Are you sure you want to reset all settings to defaults?\n\nThe application will restart.</string>
+
     <!-- Media Tab Strings -->
     <string name="media_tab_title">Media</string>
     <string name="media_source">Media Source</string>

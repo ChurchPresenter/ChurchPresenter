@@ -34,13 +34,17 @@ import churchpresenter.composeapp.generated.resources.pictures_storage_directory
 import churchpresenter.composeapp.generated.resources.presentation_storage_directory
 import churchpresenter.composeapp.generated.resources.theme
 import churchpresenter.composeapp.generated.resources.no_directory_selected
+import churchpresenter.composeapp.generated.resources.reset_settings
+import churchpresenter.composeapp.generated.resources.reset_settings_confirm
 import churchpresenter.composeapp.generated.resources.songs_storage_directory
 import org.churchpresenter.app.churchpresenter.composables.ThemeSegmentedButton
 import org.churchpresenter.app.churchpresenter.data.AppSettings
+import org.churchpresenter.app.churchpresenter.data.SettingsManager
 import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
 import org.churchpresenter.app.churchpresenter.viewmodel.FileManager
 import org.jetbrains.compose.resources.stringResource
 import java.awt.Window
+import javax.swing.JOptionPane
 import javax.swing.SwingUtilities
 
 @Composable
@@ -185,6 +189,47 @@ fun SystemSettingsTab(
             },
             onSetAll = setAllDirectories
         )
+
+        Spacer(modifier = Modifier.height(24.dp))
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant, thickness = 1.dp)
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Reset All Settings
+        val resetConfirmMsg = stringResource(Res.string.reset_settings_confirm)
+        val resetTitle = stringResource(Res.string.reset_settings)
+        Button(
+            onClick = {
+                SwingUtilities.invokeLater {
+                    val result = JOptionPane.showConfirmDialog(
+                        Window.getWindows().firstOrNull { it.isActive },
+                        resetConfirmMsg,
+                        resetTitle,
+                        JOptionPane.YES_NO_OPTION,
+                        JOptionPane.WARNING_MESSAGE
+                    )
+                    if (result == JOptionPane.YES_OPTION) {
+                        val settingsManager = SettingsManager()
+                        settingsManager.saveSettings(AppSettings())
+                        // Restart the application
+                        val javaBin = System.getProperty("java.home") + "/bin/java"
+                        val command = ProcessHandle.current().info().command().orElse(javaBin)
+                        val args = ProcessHandle.current().info().arguments().orElse(emptyArray())
+                        try {
+                            ProcessBuilder(listOf(command) + args.toList()).start()
+                        } catch (_: Exception) {}
+                        Runtime.getRuntime().exit(0)
+                    }
+                }
+            },
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.errorContainer,
+                contentColor = MaterialTheme.colorScheme.onErrorContainer
+            ),
+            shape = RoundedCornerShape(4.dp),
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+        ) {
+            Text(text = resetTitle, style = MaterialTheme.typography.labelMedium)
+        }
     }
     }
 }
