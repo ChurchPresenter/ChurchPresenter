@@ -220,7 +220,7 @@ fun WebTab(
                 }
             ) {
                 Text(
-                    text = if (isMobileView) "Mobile" else "Desktop",
+                    text = stringResource(if (isMobileView) Res.string.mobile_view else Res.string.desktop_view),
                     style = MaterialTheme.typography.labelSmall,
                     modifier = Modifier.padding(horizontal = 6.dp, vertical = 4.dp)
                 )
@@ -395,7 +395,7 @@ fun WebTab(
                     modifier = Modifier.clickable { useInteractivePreview = !useInteractivePreview }
                 ) {
                     Text(
-                        text = if (useInteractivePreview) "Interactive" else "Mirror",
+                        text = stringResource(if (useInteractivePreview) Res.string.interactive_mode else Res.string.mirror_mode),
                         style = MaterialTheme.typography.labelSmall,
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                     )

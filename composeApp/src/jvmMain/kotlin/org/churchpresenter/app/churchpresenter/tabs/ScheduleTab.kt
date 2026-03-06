@@ -72,6 +72,7 @@ import churchpresenter.composeapp.generated.resources.tooltip_open_schedule
 import churchpresenter.composeapp.generated.resources.tooltip_remove
 import churchpresenter.composeapp.generated.resources.tooltip_remove_from_schedule
 import churchpresenter.composeapp.generated.resources.tooltip_save_schedule
+import churchpresenter.composeapp.generated.resources.pause_duration_ms
 import java.awt.datatransfer.DataFlavor
 import java.awt.dnd.DnDConstants
 import java.awt.dnd.DropTarget
@@ -582,7 +583,7 @@ private fun ScheduleItemRow(
                 )
                 is ScheduleItem.LowerThirdItem -> Text(
                     maxLines = 1,
-                    text = if (item.pauseAtFrame) "Pause ${item.pauseDurationMs}ms" else "",
+                    text = if (item.pauseAtFrame) stringResource(Res.string.pause_duration_ms, item.pauseDurationMs) else "",
                     style = MaterialTheme.typography.bodySmall,
                     color = if (isSelected) MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                             else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)

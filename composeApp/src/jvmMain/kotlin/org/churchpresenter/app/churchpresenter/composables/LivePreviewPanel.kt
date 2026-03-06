@@ -46,6 +46,7 @@ import androidx.compose.ui.unit.sp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.ic_pause
 import churchpresenter.composeapp.generated.resources.ic_play
+import churchpresenter.composeapp.generated.resources.fill_badge
 import churchpresenter.composeapp.generated.resources.live_preview_nothing
 import churchpresenter.composeapp.generated.resources.live_preview_title
 import churchpresenter.composeapp.generated.resources.screen_number
@@ -275,7 +276,7 @@ private fun SingleDisplayPreview(
         // FILL badge when key output is configured
         if (screenAssignment.hasKeyOutput) {
             Text(
-                text = "FILL",
+                text = stringResource(Res.string.fill_badge),
                 color = Color.White,
                 fontSize = 9.sp,
                 modifier = Modifier

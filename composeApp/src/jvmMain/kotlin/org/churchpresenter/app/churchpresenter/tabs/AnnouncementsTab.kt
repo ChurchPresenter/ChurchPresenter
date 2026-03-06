@@ -74,6 +74,8 @@ import churchpresenter.composeapp.generated.resources.animation_fade
 import churchpresenter.composeapp.generated.resources.animation_none
 import churchpresenter.composeapp.generated.resources.announcement_animation
 import churchpresenter.composeapp.generated.resources.announcement_animation_duration
+import churchpresenter.composeapp.generated.resources.preview
+import churchpresenter.composeapp.generated.resources.time_separator
 import churchpresenter.composeapp.generated.resources.announcement_background_color_label
 import churchpresenter.composeapp.generated.resources.announcement_text
 import churchpresenter.composeapp.generated.resources.transparent_default
@@ -411,7 +413,7 @@ fun AnnouncementsTab(
                     verticalArrangement = Arrangement.spacedBy(4.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    SectionLabel("Preview")
+                    SectionLabel(stringResource(Res.string.preview))
                     BoxWithConstraints(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -467,7 +469,7 @@ fun AnnouncementsTab(
                             if (isDirectional) {
                                 val textComposable: @Composable () -> Unit = {
                                     Text(
-                                        text = viewModel.text.ifBlank { "Preview" },
+                                        text = viewModel.text.ifBlank { stringResource(Res.string.preview) },
                                         fontSize = scaledFontSize,
                                         color = Utils.parseHexColor(viewModel.textColor),
                                         maxLines = if (isHorizontal) 1 else 3,
@@ -530,7 +532,7 @@ fun AnnouncementsTab(
                                         contentAlignment = previewAlignment
                                     ) {
                                         Text(
-                                            text = text.ifBlank { "Preview" },
+                                            text = text.ifBlank { stringResource(Res.string.preview) },
                                             fontSize = scaledFontSize,
                                             color = Utils.parseHexColor(viewModel.textColor),
                                             maxLines = 3,
@@ -647,7 +649,7 @@ fun AnnouncementsTab(
                             }
 
                             Text(
-                                text = ":",
+                                text = stringResource(Res.string.time_separator),
                                 style = MaterialTheme.typography.displaySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.padding(horizontal = 6.dp)
@@ -676,7 +678,7 @@ fun AnnouncementsTab(
                             }
 
                             Text(
-                                text = ":",
+                                text = stringResource(Res.string.time_separator),
                                 style = MaterialTheme.typography.displaySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.padding(horizontal = 6.dp)

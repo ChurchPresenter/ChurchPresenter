@@ -618,5 +618,35 @@
     <string name="license_accept_button">Přijímám</string>
     <string name="license_decline_button">Odmítnout a ukončit</string>
     <string name="license_prompt">Pro použití Church Presenter musíte přijmout licenci GNU GPL v3.</string>
+
+    <!-- Hardcoded strings moved to resources -->
+    <string name="no_image_selected">Nebyl vybrán obrázek</string>
+    <string name="no_video_selected">Nebylo vybráno video</string>
+    <string name="align_left">Zarovnat vlevo</string>
+    <string name="align_center">Zarovnat na střed</string>
+    <string name="align_right">Zarovnat vpravo</string>
+    <string name="align_top">Zarovnat nahoru</string>
+    <string name="align_middle">Zarovnat na střed</string>
+    <string name="align_bottom">Zarovnat dolů</string>
+    <string name="position_above_desc">Nahoře</string>
+    <string name="position_below_desc">Dole</string>
+    <string name="increment">Zvýšit</string>
+    <string name="decrement">Snížit</string>
+    <string name="presented_image">Zobrazený obrázek</string>
+    <string name="presented_slide">Zobrazený snímek</string>
+    <string name="preview">Náhled</string>
+    <string name="fill_badge">FILL</string>
+    <string name="presenter_view_title">Zobrazení prezentéra %1$d</string>
+    <string name="key_output_title">Key Output %1$d</string>
+    <string name="lower_third_generator">Generátor dolní třetiny</string>
+    <string name="loading_generator">Načítání generátoru...</string>
+    <string name="preview_will_appear_here">Náhled se zobrazí zde</string>
+    <string name="pause_duration_ms">Pauza %1$dms</string>
+    <string name="aspect_ratio_mismatch">Nesoulad poměru stran: soubor je %1$dx%2$d, ale výstup je %3$s:1</string>
+    <string name="mobile_view">Mobilní</string>
+    <string name="desktop_view">Plocha</string>
+    <string name="interactive_mode">Interaktivní</string>
+    <string name="mirror_mode">Zrcadlo</string>
+    <string name="time_separator">:</string>
 </resources>
 

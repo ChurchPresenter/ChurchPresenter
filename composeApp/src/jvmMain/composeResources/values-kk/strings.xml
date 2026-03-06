@@ -532,5 +532,35 @@
     <string name="license_accept_button">Қабылдаймын</string>
     <string name="license_decline_button">Бас тарту және шығу</string>
     <string name="license_prompt">Church Presenter қолдану үшін GNU GPL v3 лицензиясын қабылдауыңыз қажет.</string>
+
+    <!-- Hardcoded strings moved to resources -->
+    <string name="no_image_selected">Сурет таңдалмаған</string>
+    <string name="no_video_selected">Бейне таңдалмаған</string>
+    <string name="align_left">Солға туралау</string>
+    <string name="align_center">Ортаға туралау</string>
+    <string name="align_right">Оңға туралау</string>
+    <string name="align_top">Жоғарыға туралау</string>
+    <string name="align_middle">Ортаға туралау</string>
+    <string name="align_bottom">Төменге туралау</string>
+    <string name="position_above_desc">Жоғарыда</string>
+    <string name="position_below_desc">Төменде</string>
+    <string name="increment">Арттыру</string>
+    <string name="decrement">Азайту</string>
+    <string name="presented_image">Көрсетілетін сурет</string>
+    <string name="presented_slide">Көрсетілетін слайд</string>
+    <string name="preview">Алдын ала қарау</string>
+    <string name="fill_badge">FILL</string>
+    <string name="presenter_view_title">Презентация терезесі %1$d</string>
+    <string name="key_output_title">Key Output %1$d</string>
+    <string name="lower_third_generator">Төменгі үштен бір генераторы</string>
+    <string name="loading_generator">Генератор жүктелуде...</string>
+    <string name="preview_will_appear_here">Алдын ала қарау мұнда пайда болады</string>
+    <string name="pause_duration_ms">Кідіріс %1$dмс</string>
+    <string name="aspect_ratio_mismatch">Қатынас сәйкессіздігі: файл %1$dx%2$d, бірақ шығыс %3$s:1</string>
+    <string name="mobile_view">Мобильді</string>
+    <string name="desktop_view">Жұмыс үстелі</string>
+    <string name="interactive_mode">Интерактивті</string>
+    <string name="mirror_mode">Айна</string>
+    <string name="time_separator">:</string>
 </resources>
 

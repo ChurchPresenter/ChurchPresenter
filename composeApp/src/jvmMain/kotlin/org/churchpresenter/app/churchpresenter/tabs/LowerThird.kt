@@ -80,6 +80,9 @@ import org.churchpresenter.app.churchpresenter.utils.presenterAspectRatio
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import churchpresenter.composeapp.generated.resources.generate_lower_third
+import churchpresenter.composeapp.generated.resources.aspect_ratio_mismatch
+import churchpresenter.composeapp.generated.resources.lower_third_generator
+import churchpresenter.composeapp.generated.resources.loading_generator
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.openLottieGeneratorDialog
 import java.awt.Window
 import java.io.File
@@ -286,6 +289,8 @@ fun LowerThirdTab(
                 }
             }
 
+            val genTitle = stringResource(Res.string.lower_third_generator)
+            val genLoading = stringResource(Res.string.loading_generator)
             Button(
                 onClick = {
                     SwingUtilities.invokeLater {
@@ -294,7 +299,9 @@ fun LowerThirdTab(
                             onFileSaved = { scope.launch { refreshKey++ } },
                             serverUrl = serverUrl,
                             isDarkTheme = isDarkTheme,
-                            lowerThirdFolder = appSettings.streamingSettings.lowerThirdFolder
+                            lowerThirdFolder = appSettings.streamingSettings.lowerThirdFolder,
+                            generatorDialogTitle = genTitle,
+                            loadingText = genLoading
                         )
                     }
                 },
@@ -360,8 +367,7 @@ fun LowerThirdTab(
                 val screenAR = presenterAspectRatio()
                 if (kotlin.math.abs(lottieAR - screenAR) > 0.05f) {
                     Text(
-                        text = "Aspect ratio mismatch: file is ${comp.width.toInt()}x${comp.height.toInt()} " +
-                               "but output is ${String.format("%.2f", screenAR)}:1",
+                        text = stringResource(Res.string.aspect_ratio_mismatch, comp.width.toInt(), comp.height.toInt(), String.format("%.2f", screenAR)),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.error
                     )
