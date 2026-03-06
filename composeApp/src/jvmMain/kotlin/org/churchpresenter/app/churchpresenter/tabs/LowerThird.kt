@@ -353,6 +353,21 @@ fun LowerThirdTab(
                         else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
             )
 
+            // Aspect ratio mismatch warning
+            val comp = composition
+            if (comp != null && comp.width > 0 && comp.height > 0) {
+                val lottieAR = comp.width / comp.height
+                val screenAR = presenterAspectRatio()
+                if (kotlin.math.abs(lottieAR - screenAR) > 0.05f) {
+                    Text(
+                        text = "Aspect ratio mismatch: file is ${comp.width.toInt()}x${comp.height.toInt()} " +
+                               "but output is ${String.format("%.2f", screenAR)}:1",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+            }
+
             // Lottie preview
             Box(
                 modifier = Modifier
