@@ -102,7 +102,8 @@ fun EmbeddedWebView(
     onUrlChanged: ((String) -> Unit)? = null,
     onTitleChanged: ((String) -> Unit)? = null,
     onSnapshot: ((ImageBitmap) -> Unit)? = null,
-    navController: WebNavController? = null
+    navController: WebNavController? = null,
+    onBrowserCreated: ((CefBrowser) -> Unit)? = null
 ) {
     if (url.isBlank() || !CefManager.initialized) return
 
@@ -110,7 +111,10 @@ fun EmbeddedWebView(
     val initialUrl = remember { url }
     val browser = remember { client.createBrowser(initialUrl, false, false) }
 
-    LaunchedEffect(browser) { navController?.browser = browser }
+    LaunchedEffect(browser) {
+        navController?.browser = browser
+        onBrowserCreated?.invoke(browser)
+    }
 
     DisposableEffect(Unit) {
         val displayHandler = object : CefDisplayHandlerAdapter() {
@@ -136,10 +140,10 @@ fun EmbeddedWebView(
         }
         client.addLifeSpanHandler(lifeSpanHandler)
 
-        // Snapshot timer — captures browser via Robot screen capture every second
+        // Snapshot timer — captures browser via Robot screen capture
         val robot = try { java.awt.Robot() } catch (_: Exception) { null }
         val timer = if (onSnapshot != null && robot != null) {
-            javax.swing.Timer(1000) {
+            javax.swing.Timer(150) {
                 try {
                     val comp = browser.getUIComponent()
                     if (comp.width > 0 && comp.height > 0 && comp.isShowing) {
@@ -181,7 +185,13 @@ fun EmbeddedWebView(
 fun WebsitePresenter(
     url: String,
     modifier: Modifier = Modifier,
-    onSnapshot: ((ImageBitmap) -> Unit)? = null
+    onSnapshot: ((ImageBitmap) -> Unit)? = null,
+    onBrowserCreated: ((CefBrowser) -> Unit)? = null
 ) {
-    EmbeddedWebView(url = url, modifier = modifier.fillMaxSize(), onSnapshot = onSnapshot)
+    EmbeddedWebView(
+        url = url,
+        modifier = modifier.fillMaxSize(),
+        onSnapshot = onSnapshot,
+        onBrowserCreated = onBrowserCreated
+    )
 }

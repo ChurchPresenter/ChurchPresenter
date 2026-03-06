@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.ImageBitmap
 import org.churchpresenter.app.churchpresenter.models.AnimationType
 import org.churchpresenter.app.churchpresenter.models.LyricSection
+import org.cef.browser.CefBrowser
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.models.SelectedVerse
 
@@ -137,5 +138,13 @@ class PresenterManager {
 
     fun setWebSnapshot(bitmap: ImageBitmap?) {
         _webSnapshot.value = bitmap
+    }
+
+    // Reference to the presenter's live CefBrowser — used by WebTab to forward input events
+    private val _liveBrowser = mutableStateOf<CefBrowser?>(null)
+    val liveBrowser: State<CefBrowser?> = _liveBrowser
+
+    fun setLiveBrowser(browser: CefBrowser?) {
+        _liveBrowser.value = browser
     }
 }
