@@ -233,12 +233,19 @@ class CompanionServer {
     private val lottieDataDir: File = File(System.getProperty("user.home"), ".churchpresenter/lottie_presets").also { it.mkdirs() }
     private val lottiePresetsFile: File = File(lottieDataDir, "presets.json")
     private val lottieColorThemesFile: File = File(lottieDataDir, "color-themes.json")
-    private val lottieLogosDir: File = File(lottieDataDir, "logos")
+    @Volatile private var lottieLogosDir: File? = null
 
     /** Resolved path to the Lottie-Gen directory containing lottie-generator.html */
     private val lottieGenDir: File? by lazy { findLottieGenDir() }
 
     // ── Public API ────────────────────────────────────────────────────────────
+
+    /** Update the logos directory to be inside the lower third folder. */
+    fun updateLowerThirdFolder(folder: String) {
+        if (folder.isNotEmpty()) {
+            lottieLogosDir = File(folder, "logos").also { it.mkdirs() }
+        }
+    }
 
     /** Update API key settings without restarting the server. */
     fun updateApiKey(enabled: Boolean, key: String) {
@@ -600,8 +607,8 @@ class CompanionServer {
                 // Serve logo image files
                 get("/logos/{filename}") {
                     val filename = call.parameters["filename"] ?: return@get
-                    // Check lottie data dir first, then fall back to bundled Lottie-Gen dir
-                    val file = File(lottieLogosDir, filename).takeIf { it.exists() }
+                    // Check user logos dir first, then fall back to bundled Lottie-Gen dir
+                    val file = lottieLogosDir?.let { File(it, filename) }?.takeIf { it.exists() }
                         ?: lottieGenDir?.let { File(File(it, "logos"), filename) }?.takeIf { it.exists() }
                     if (file == null) {
                         call.respond(io.ktor.http.HttpStatusCode.NotFound, "Logo not found")
@@ -653,13 +660,14 @@ class CompanionServer {
                 // GET /api/logos — list available logo images
                 get(Constants.ENDPOINT_LOTTIE_LOGOS) {
                     val files = mutableSetOf<String>()
-                    // Include logos from user data dir
-                    if (lottieLogosDir.exists()) {
-                        lottieLogosDir.listFiles()
+                    // Include logos from user data dir (if configured)
+                    val logosDir = lottieLogosDir
+                    if (logosDir != null && logosDir.exists()) {
+                        logosDir.listFiles()
                             ?.filter { it.extension.lowercase().matches(Regex("png|jpe?g|svg|webp")) }
                             ?.forEach { files.add(it.name) }
                     }
-                    // Include bundled logos from Lottie-Gen
+                    // Always include bundled logos from Lottie-Gen
                     lottieGenDir?.let { File(it, "logos") }?.listFiles()
                         ?.filter { it.extension.lowercase().matches(Regex("png|jpe?g|svg|webp")) }
                         ?.forEach { files.add(it.name) }
@@ -670,6 +678,11 @@ class CompanionServer {
                 // POST /api/logos — upload a logo (base64 JSON body: { name, data })
                 post(Constants.ENDPOINT_LOTTIE_LOGOS) {
                     try {
+                        val logosDir = lottieLogosDir
+                        if (logosDir == null) {
+                            call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":"No lower third folder configured"}""")
+                            return@post
+                        }
                         val body = call.receiveText()
                         val parsed = json.parseToJsonElement(body) as? kotlinx.serialization.json.JsonObject
                         val name = parsed?.get("name")?.let { (it as? kotlinx.serialization.json.JsonPrimitive)?.content }
@@ -684,9 +697,9 @@ class CompanionServer {
                             call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":"bad data"}""")
                             return@post
                         }
-                        lottieLogosDir.mkdirs()
+                        logosDir.mkdirs()
                         val bytes = Base64.getDecoder().decode(base64Match.groupValues[1])
-                        File(lottieLogosDir, safeName).writeBytes(bytes)
+                        File(logosDir, safeName).writeBytes(bytes)
                         call.respondText("""{"file":"$safeName"}""", ContentType.Application.Json)
                     } catch (e: Exception) {
                         call.respond(io.ktor.http.HttpStatusCode.InternalServerError, """{"error":"write failed"}""")

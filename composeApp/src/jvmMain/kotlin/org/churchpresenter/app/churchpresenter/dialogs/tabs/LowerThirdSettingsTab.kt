@@ -574,6 +574,49 @@ internal fun openLottieGeneratorDialog(
             fun status(msg: String) {
                 LottiePreviewState.statusText.value = msg
             }
+
+            @Suppress("unused")
+            fun chooseLogo() {
+                SwingUtilities.invokeLater {
+                    val folder = LottieGeneratorCache.lowerThirdFolderRef
+                    if (folder.isEmpty()) {
+                        javax.swing.JOptionPane.showMessageDialog(
+                            dialog,
+                            "No folder configured.\nSet a Lower Third folder in Settings first.",
+                            "No Folder",
+                            javax.swing.JOptionPane.WARNING_MESSAGE
+                        )
+                        Platform.runLater {
+                            engine.executeScript("document.getElementById('logoSelect').value='';")
+                        }
+                        return@invokeLater
+                    }
+                    val chooser = javax.swing.JFileChooser().apply {
+                        dialogTitle = "Choose Logo Image"
+                        fileFilter = javax.swing.filechooser.FileNameExtensionFilter(
+                            "Images", "png", "jpg", "jpeg", "gif", "svg", "webp"
+                        )
+                    }
+                    if (chooser.showOpenDialog(dialog) == javax.swing.JFileChooser.APPROVE_OPTION) {
+                        val file = chooser.selectedFile
+                        val bytes = file.readBytes()
+                        val mime = when (file.extension.lowercase()) {
+                            "png" -> "image/png"
+                            "jpg", "jpeg" -> "image/jpeg"
+                            "gif" -> "image/gif"
+                            "svg" -> "image/svg+xml"
+                            "webp" -> "image/webp"
+                            else -> "image/png"
+                        }
+                        val dataUrl = "data:$mime;base64,${java.util.Base64.getEncoder().encodeToString(bytes)}"
+                        Platform.runLater {
+                            engine.executeScript(
+                                "if(typeof onLogoChosen==='function') onLogoChosen(${escapeJs(file.name)}, ${escapeJs(dataUrl)});"
+                            )
+                        }
+                    }
+                }
+            }
         }
         LottieGeneratorCache.bridgeRef = bridge
 
@@ -619,6 +662,11 @@ internal fun openLottieGeneratorDialog(
     LottieGeneratorCache.dialog = dialog
     LottieGeneratorCache.loadedUrl = loadUrl
     dialog.isVisible = true
+}
+
+private fun escapeJs(s: String): String {
+    val escaped = s.replace("\\", "\\\\").replace("'", "\\'").replace("\n", "\\n").replace("\r", "\\r")
+    return "'$escaped'"
 }
 
 @Composable

@@ -124,6 +124,7 @@ fun main() {
                 bibleStorageDir = appSettings.bibleSettings.storageDirectory,
                 primaryBibleFileName = appSettings.bibleSettings.primaryBible
             )
+            companionServer.updateLowerThirdFolder(appSettings.streamingSettings.lowerThirdFolder)
             // Auto-start server if user previously enabled it
             if (appSettings.serverSettings.enabled) {
                 companionServer.start(appSettings.serverSettings.port)
@@ -215,6 +216,7 @@ fun main() {
                                         bibleStorageDir = updated.bibleSettings.storageDirectory,
                                         primaryBibleFileName = updated.bibleSettings.primaryBible
                                     )
+                                    companionServer.updateLowerThirdFolder(updated.streamingSettings.lowerThirdFolder)
                                 },
                                 onThemeChange = { newTheme ->
                                     appSettings = appSettings.copy(theme = newTheme.toString())
