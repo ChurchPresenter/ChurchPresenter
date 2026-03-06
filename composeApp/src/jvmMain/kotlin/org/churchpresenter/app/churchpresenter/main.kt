@@ -67,7 +67,6 @@ import org.churchpresenter.app.churchpresenter.data.Bible
 import org.churchpresenter.app.churchpresenter.server.CompanionServer
 import org.churchpresenter.app.churchpresenter.ui.theme.AppThemeWrapper
 import org.churchpresenter.app.churchpresenter.utils.Constants
-import org.churchpresenter.app.churchpresenter.utils.presenterScreenBounds
 import org.jetbrains.compose.resources.stringResource
 import java.awt.GraphicsDevice
 import java.util.Locale
@@ -400,7 +399,11 @@ private fun PresenterWindows(
                                         outputRole = primaryRole
                                     )
                             Presenting.WEBSITE ->
-                                WebsitePresenter(url = websiteUrl, modifier = Modifier.fillMaxSize(), targetViewportWidth = presenterScreenBounds().width)
+                                WebsitePresenter(
+                                    url = websiteUrl,
+                                    modifier = Modifier.fillMaxSize(),
+                                    onSnapshot = { bitmap -> presenterManager.setWebSnapshot(bitmap) }
+                                )
                             Presenting.NONE -> { /* nothing */ }
                         }
 
@@ -512,7 +515,11 @@ private fun PresenterWindows(
                                                 outputRole = Constants.OUTPUT_ROLE_KEY
                                             )
                                     Presenting.WEBSITE ->
-                                        WebsitePresenter(url = websiteUrl, modifier = Modifier.fillMaxSize(), targetViewportWidth = presenterScreenBounds().width)
+                                        WebsitePresenter(
+                                    url = websiteUrl,
+                                    modifier = Modifier.fillMaxSize(),
+                                    onSnapshot = { bitmap -> presenterManager.setWebSnapshot(bitmap) }
+                                )
                                     Presenting.NONE -> { /* nothing */ }
                                 }
                             }

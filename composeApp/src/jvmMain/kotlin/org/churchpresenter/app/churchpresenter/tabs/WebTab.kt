@@ -24,7 +24,6 @@ import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.presenter.WebNavController
 import org.churchpresenter.app.churchpresenter.presenter.rememberWebNavController
 import org.churchpresenter.app.churchpresenter.utils.presenterAspectRatio
-import org.churchpresenter.app.churchpresenter.utils.presenterScreenBounds
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.jetbrains.compose.resources.stringResource
 
@@ -38,8 +37,6 @@ fun WebTab(
     onAddToSchedule: ((url: String, title: String) -> Unit)? = null,
     onUpdateScheduleTitle: ((url: String, title: String) -> Unit)? = null
 ) {
-    // Presentation screen dimensions (use second screen if available, else 1920x1080)
-    val presenterScreen = remember { presenterScreenBounds() }
     val previewAspectRatio = remember { presenterAspectRatio() }
 
     // Restore URL / title from PresenterManager so state survives tab switches
@@ -316,11 +313,7 @@ fun WebTab(
                     modifier = Modifier.fillMaxSize(),
                     onUrlChanged = { newUrl -> onPreviewNavigated(newUrl) },
                     onTitleChanged = { title -> onTitleChanged(title) },
-                    onSnapshot = { bitmap ->
-                        presenterManager?.setWebSnapshot(bitmap)
-                    },
-                    navController = navController,
-                    targetViewportWidth = presenterScreen.width
+                    navController = navController
                 )
             } else {
                 Box(

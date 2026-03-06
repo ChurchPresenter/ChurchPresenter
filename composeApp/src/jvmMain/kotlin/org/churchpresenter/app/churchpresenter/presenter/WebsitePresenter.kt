@@ -18,9 +18,6 @@ import org.cef.browser.CefBrowser
 import org.cef.browser.CefFrame
 import org.cef.handler.CefDisplayHandlerAdapter
 import org.cef.handler.CefLifeSpanHandlerAdapter
-import org.cef.handler.CefLoadHandlerAdapter
-import java.awt.event.ComponentAdapter
-import java.awt.event.ComponentEvent
 import java.io.File
 
 /**
@@ -95,13 +92,8 @@ fun rememberWebNavController() = remember { WebNavController() }
  *
  * [onUrlChanged] — called whenever the page URL changes (main frame only).
  * [onTitleChanged] — called whenever the page title changes.
- * [onSnapshot]  — called every ~200 ms with an [ImageBitmap] of the current
- *                 browser frame, so other Compose surfaces can mirror it.
- *                 Pass null to disable snapshotting (saves CPU).
+ * [onSnapshot]  — called periodically with an [ImageBitmap] screen capture.
  * [navController] — optional controller for back/forward navigation.
- * [targetViewportWidth] — if > 0, zooms out so the browser renders at this
- *                          viewport width, producing a scaled-down preview that
- *                          matches the presenter's full-screen layout.
  */
 @Composable
 fun EmbeddedWebView(
@@ -110,48 +102,15 @@ fun EmbeddedWebView(
     onUrlChanged: ((String) -> Unit)? = null,
     onTitleChanged: ((String) -> Unit)? = null,
     onSnapshot: ((ImageBitmap) -> Unit)? = null,
-    navController: WebNavController? = null,
-    targetViewportWidth: Int = 0
+    navController: WebNavController? = null
 ) {
     if (url.isBlank() || !CefManager.initialized) return
 
     val client = remember { CefManager.createClient() } ?: return
-    // Load the initial URL directly to avoid an extra about:blank round-trip
     val initialUrl = remember { url }
     val browser = remember { client.createBrowser(initialUrl, false, false) }
 
-    // Wire up the nav controller
     LaunchedEffect(browser) { navController?.browser = browser }
-
-    // Inject CSS zoom so the browser viewport matches the presenter screen width.
-    // We use JavaScript to set document.documentElement.style.zoom after each page
-    // load and whenever the component resizes, producing a scaled-down preview that
-    // matches the full-screen presenter layout.
-    fun applyViewportZoom() {
-        if (targetViewportWidth <= 0) return
-        val comp = browser.getUIComponent()
-        val actualWidth = comp.width
-        if (actualWidth > 0 && actualWidth < targetViewportWidth) {
-            val scale = actualWidth.toDouble() / targetViewportWidth.toDouble()
-            browser.executeJavaScript(
-                "document.documentElement.style.zoom='${scale}';",
-                "", 0
-            )
-        }
-    }
-
-    if (targetViewportWidth > 0) {
-        DisposableEffect(targetViewportWidth) {
-            val comp = browser.getUIComponent()
-            val resizeListener = object : ComponentAdapter() {
-                override fun componentResized(e: ComponentEvent) {
-                    applyViewportZoom()
-                }
-            }
-            comp.addComponentListener(resizeListener)
-            onDispose { comp.removeComponentListener(resizeListener) }
-        }
-    }
 
     DisposableEffect(Unit) {
         val displayHandler = object : CefDisplayHandlerAdapter() {
@@ -163,14 +122,6 @@ fun EmbeddedWebView(
             }
         }
         client.addDisplayHandler(displayHandler)
-
-        // Re-apply CSS zoom after each page finishes loading
-        val loadHandler = object : CefLoadHandlerAdapter() {
-            override fun onLoadEnd(browser: CefBrowser, frame: CefFrame, httpStatusCode: Int) {
-                if (frame.isMain) applyViewportZoom()
-            }
-        }
-        client.addLoadHandler(loadHandler)
 
         // Intercept popups (target="_blank" links) — load in current browser instead
         val lifeSpanHandler = object : CefLifeSpanHandlerAdapter() {
@@ -205,14 +156,12 @@ fun EmbeddedWebView(
             timer?.stop()
             navController?.browser = null
             client.removeDisplayHandler()
-            client.removeLoadHandler()
             client.removeLifeSpanHandler()
             browser.close(true)
             client.dispose()
         }
     }
 
-    // Navigate when URL changes (skip the initial URL — already loaded by createBrowser)
     LaunchedEffect(url) {
         if (url != initialUrl) {
             browser.loadURL(url)
@@ -227,12 +176,12 @@ fun EmbeddedWebView(
     }
 }
 
-/** Full-screen presenter variant — no callbacks needed. */
+/** Full-screen presenter variant that captures snapshots for the live preview. */
 @Composable
 fun WebsitePresenter(
     url: String,
     modifier: Modifier = Modifier,
-    targetViewportWidth: Int = 0
+    onSnapshot: ((ImageBitmap) -> Unit)? = null
 ) {
-    EmbeddedWebView(url = url, modifier = modifier.fillMaxSize(), targetViewportWidth = targetViewportWidth)
+    EmbeddedWebView(url = url, modifier = modifier.fillMaxSize(), onSnapshot = onSnapshot)
 }
