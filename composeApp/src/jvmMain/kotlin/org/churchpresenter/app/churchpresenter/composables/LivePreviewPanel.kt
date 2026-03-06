@@ -63,6 +63,8 @@ import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.presenter.SlidePresenter
 import org.churchpresenter.app.churchpresenter.presenter.SongPresenter
 import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.app.churchpresenter.utils.presenterAspectRatio
+import org.churchpresenter.app.churchpresenter.utils.presenterScreenBounds
 import org.churchpresenter.app.churchpresenter.viewmodel.LocalMediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.MediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
@@ -155,7 +157,7 @@ private fun SingleDisplayPreview(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .aspectRatio(16f / 9f)
+            .aspectRatio(presenterAspectRatio())
             .clip(RoundedCornerShape(6.dp))
             .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(6.dp))
     ) {
@@ -403,8 +405,9 @@ private fun ScaledPresenterContent(
         modifier = Modifier
             .fillMaxSize()
             .layout { measurable, constraints ->
-                val presenterWidth = 1920
-                val presenterHeight = 1080
+                val screen = presenterScreenBounds()
+                val presenterWidth = screen.width
+                val presenterHeight = screen.height
 
                 val scaleX = constraints.maxWidth.toFloat() / presenterWidth
                 val scaleY = constraints.maxHeight.toFloat() / presenterHeight

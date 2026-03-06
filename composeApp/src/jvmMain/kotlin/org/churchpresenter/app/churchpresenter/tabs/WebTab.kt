@@ -7,6 +7,7 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -22,9 +23,10 @@ import org.churchpresenter.app.churchpresenter.presenter.EmbeddedWebView
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.presenter.WebNavController
 import org.churchpresenter.app.churchpresenter.presenter.rememberWebNavController
+import org.churchpresenter.app.churchpresenter.utils.presenterAspectRatio
+import org.churchpresenter.app.churchpresenter.utils.presenterScreenBounds
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.jetbrains.compose.resources.stringResource
-import java.awt.GraphicsEnvironment
 
 @Composable
 fun WebTab(
@@ -37,14 +39,8 @@ fun WebTab(
     onUpdateScheduleTitle: ((url: String, title: String) -> Unit)? = null
 ) {
     // Presentation screen dimensions (use second screen if available, else 1920x1080)
-    val presenterScreen = remember {
-        val screens = GraphicsEnvironment.getLocalGraphicsEnvironment().screenDevices
-        if (screens.size > 1) screens[1].defaultConfiguration.bounds
-        else java.awt.Rectangle(0, 0, 1920, 1080)
-    }
-    val previewAspectRatio = remember(presenterScreen) {
-        presenterScreen.width.toFloat() / presenterScreen.height.toFloat()
-    }
+    val presenterScreen = remember { presenterScreenBounds() }
+    val previewAspectRatio = remember { presenterAspectRatio() }
 
     // Restore URL / title from PresenterManager so state survives tab switches
     val savedUrl = presenterManager?.websiteUrl?.value ?: ""
@@ -289,10 +285,24 @@ fun WebTab(
         }
 
         // ── Preview WebView ────────────────────────────────────────────────
+        // Fit preview to remaining space while keeping presenter aspect ratio
+        BoxWithConstraints(
+            modifier = Modifier.weight(1f).fillMaxSize(),
+            contentAlignment = Alignment.TopCenter
+        ) {
+            // Pick the largest size that fits both width and height constraints
+            val maxW = maxWidth
+            val maxH = maxHeight
+            val fitByWidth = maxW
+            val fitByWidthH = maxW / previewAspectRatio
+            val (w, h) = if (fitByWidthH <= maxH) {
+                fitByWidth to fitByWidthH
+            } else {
+                maxH * previewAspectRatio to maxH
+            }
         Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .aspectRatio(previewAspectRatio)
+                .size(w, h)
                 .border(
                     width = if (isLive) 2.dp else 1.dp,
                     color = if (isLive) MaterialTheme.colorScheme.primary
@@ -326,6 +336,7 @@ fun WebTab(
                     )
                 }
             }
+        }
         }
     }
 }

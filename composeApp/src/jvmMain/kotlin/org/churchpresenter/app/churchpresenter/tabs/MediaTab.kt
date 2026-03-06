@@ -77,6 +77,7 @@ import org.churchpresenter.app.churchpresenter.composables.isVlcAvailable
 import org.churchpresenter.app.churchpresenter.models.ScheduleItem
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.app.churchpresenter.utils.presenterAspectRatio
 import org.churchpresenter.app.churchpresenter.viewmodel.LocalMediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.jetbrains.compose.resources.painterResource
@@ -471,7 +472,7 @@ fun MediaTab(
             ) {
                 Box(
                     modifier = Modifier
-                        .aspectRatio(16f / 9f)
+                        .aspectRatio(presenterAspectRatio())
                         .background(Color.Black, RoundedCornerShape(8.dp))
                         .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(8.dp)),
                     contentAlignment = Alignment.Center
