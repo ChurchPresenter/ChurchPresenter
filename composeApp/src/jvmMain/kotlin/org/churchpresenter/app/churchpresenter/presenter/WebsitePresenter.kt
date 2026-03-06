@@ -73,6 +73,45 @@ object CefManager {
         // triggers a native crash in libjcef Context::Shutdown().
         // The JVM process exit handles cleanup safely.
     }
+
+    /**
+     * Routes all audio streams from this JVM process to the given PulseAudio/PipeWire sink.
+     * Finds sink inputs belonging to our PID and moves them to the target device.
+     */
+    fun routeAudioToDevice(deviceId: String) {
+        if (deviceId.isBlank()) return
+        try {
+            val pid = ProcessHandle.current().pid()
+            val proc = ProcessBuilder("pactl", "list", "sink-inputs")
+                .redirectErrorStream(true).start()
+            val output = proc.inputStream.bufferedReader().readText()
+            proc.waitFor()
+
+            val indices = mutableListOf<String>()
+            var currentIndex: String? = null
+            var isOurProcess = false
+            for (line in output.lines()) {
+                val trimmed = line.trim()
+                if (trimmed.startsWith("Sink Input #")) {
+                    if (isOurProcess && currentIndex != null) indices.add(currentIndex)
+                    currentIndex = trimmed.removePrefix("Sink Input #").trim()
+                    isOurProcess = false
+                }
+                if (trimmed.contains("application.process.id") && trimmed.contains("\"$pid\"")) {
+                    isOurProcess = true
+                }
+            }
+            if (isOurProcess && currentIndex != null) indices.add(currentIndex)
+
+            for (idx in indices) {
+                ProcessBuilder("pactl", "move-sink-input", idx, deviceId)
+                    .redirectErrorStream(true).start().waitFor()
+                println("Routed audio stream $idx to sink $deviceId")
+            }
+        } catch (e: Exception) {
+            System.err.println("Failed to route audio: ${e.message}")
+        }
+    }
 }
 
 /** Navigation controller for an [EmbeddedWebView]. */
@@ -186,8 +225,21 @@ fun WebsitePresenter(
     url: String,
     modifier: Modifier = Modifier,
     onSnapshot: ((ImageBitmap) -> Unit)? = null,
-    onBrowserCreated: ((CefBrowser) -> Unit)? = null
+    onBrowserCreated: ((CefBrowser) -> Unit)? = null,
+    audioDeviceId: String = ""
 ) {
+    // Periodically route CEF audio streams to the configured device.
+    // New streams may appear as the user navigates to pages with audio/video.
+    LaunchedEffect(audioDeviceId) {
+        if (audioDeviceId.isNotBlank()) {
+            kotlinx.coroutines.delay(2000) // Wait for initial audio streams
+            while (true) {
+                CefManager.routeAudioToDevice(audioDeviceId)
+                kotlinx.coroutines.delay(5000)
+            }
+        }
+    }
+
     EmbeddedWebView(
         url = url,
         modifier = modifier.fillMaxSize(),
