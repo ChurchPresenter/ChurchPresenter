@@ -332,6 +332,10 @@ fun WebTab(
                             urlInput = bookmark.url
                             liveUrl = bookmark.url
                             pageTitle = bookmark.title
+                            presenterManager?.setWebsiteUrl(bookmark.url)
+                            if (isLive) {
+                                presenterManager?.liveBrowser?.value?.loadURL(bookmark.url)
+                            }
                         }
                     ) {
                         Row(
