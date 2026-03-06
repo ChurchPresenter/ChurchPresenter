@@ -437,6 +437,7 @@ fun WebTab(
                                 // Forward mouse events via CefBrowser_N.sendMouseEvent (reflection)
                                 if (liveBrowser == null) return@pointerInput
                                 val sendMouse = findMethod(liveBrowser, "sendMouseEvent", java.awt.event.MouseEvent::class.java)
+                                var lastMoveTime = 0L
                                 awaitPointerEventScope {
                                     while (true) {
                                         val event = awaitPointerEvent()
@@ -448,47 +449,58 @@ fun WebTab(
                                         val pos = event.changes.firstOrNull()?.position ?: continue
                                         val bx = (pos.x * scaleX).toInt()
                                         val by = (pos.y * scaleY).toInt()
-                                        try {
-                                            when (event.type) {
-                                                PointerEventType.Press -> {
-                                                    val now = System.currentTimeMillis()
-                                                    // Ensure CEF knows the mouse is inside + at position
-                                                    sendMouse.invoke(liveBrowser, java.awt.event.MouseEvent(
-                                                        comp, java.awt.event.MouseEvent.MOUSE_ENTERED,
-                                                        now, 0, bx, by, 0, false
-                                                    ))
-                                                    sendMouse.invoke(liveBrowser, java.awt.event.MouseEvent(
-                                                        comp, java.awt.event.MouseEvent.MOUSE_MOVED,
-                                                        now, 0, bx, by, 0, false
-                                                    ))
-                                                    sendMouse.invoke(liveBrowser, java.awt.event.MouseEvent(
-                                                        comp, java.awt.event.MouseEvent.MOUSE_PRESSED,
-                                                        now,
-                                                        java.awt.event.InputEvent.BUTTON1_DOWN_MASK,
-                                                        bx, by, 1, false, java.awt.event.MouseEvent.BUTTON1
-                                                    ))
+                                        when (event.type) {
+                                            PointerEventType.Press -> {
+                                                val now = System.currentTimeMillis()
+                                                javax.swing.SwingUtilities.invokeLater {
+                                                    try {
+                                                        sendMouse.invoke(liveBrowser, java.awt.event.MouseEvent(
+                                                            comp, java.awt.event.MouseEvent.MOUSE_ENTERED,
+                                                            now, 0, bx, by, 0, false
+                                                        ))
+                                                        sendMouse.invoke(liveBrowser, java.awt.event.MouseEvent(
+                                                            comp, java.awt.event.MouseEvent.MOUSE_MOVED,
+                                                            now, 0, bx, by, 0, false
+                                                        ))
+                                                        sendMouse.invoke(liveBrowser, java.awt.event.MouseEvent(
+                                                            comp, java.awt.event.MouseEvent.MOUSE_PRESSED,
+                                                            now,
+                                                            java.awt.event.InputEvent.BUTTON1_DOWN_MASK,
+                                                            bx, by, 1, false, java.awt.event.MouseEvent.BUTTON1
+                                                        ))
+                                                    } catch (_: Exception) {}
                                                 }
-                                                PointerEventType.Release -> {
-                                                    val now = System.currentTimeMillis()
-                                                    sendMouse.invoke(liveBrowser, java.awt.event.MouseEvent(
-                                                        comp, java.awt.event.MouseEvent.MOUSE_RELEASED,
-                                                        now, java.awt.event.InputEvent.BUTTON1_DOWN_MASK,
-                                                        bx, by, 1, false, java.awt.event.MouseEvent.BUTTON1
-                                                    ))
-                                                    sendMouse.invoke(liveBrowser, java.awt.event.MouseEvent(
-                                                        comp, java.awt.event.MouseEvent.MOUSE_CLICKED,
-                                                        now, 0, bx, by, 1, false, java.awt.event.MouseEvent.BUTTON1
-                                                    ))
-                                                }
-                                                PointerEventType.Move -> {
-                                                    sendMouse.invoke(liveBrowser, java.awt.event.MouseEvent(
-                                                        comp, java.awt.event.MouseEvent.MOUSE_MOVED,
-                                                        System.currentTimeMillis(), 0, bx, by, 0, false
-                                                    ))
-                                                }
-                                                else -> continue
                                             }
-                                        } catch (_: Exception) {}
+                                            PointerEventType.Release -> {
+                                                val now = System.currentTimeMillis()
+                                                javax.swing.SwingUtilities.invokeLater {
+                                                    try {
+                                                        sendMouse.invoke(liveBrowser, java.awt.event.MouseEvent(
+                                                            comp, java.awt.event.MouseEvent.MOUSE_RELEASED,
+                                                            now, 0, bx, by, 1, false, java.awt.event.MouseEvent.BUTTON1
+                                                        ))
+                                                        sendMouse.invoke(liveBrowser, java.awt.event.MouseEvent(
+                                                            comp, java.awt.event.MouseEvent.MOUSE_CLICKED,
+                                                            now, 0, bx, by, 1, false, java.awt.event.MouseEvent.BUTTON1
+                                                        ))
+                                                    } catch (_: Exception) {}
+                                                }
+                                            }
+                                            PointerEventType.Move -> {
+                                                val now = System.currentTimeMillis()
+                                                if (now - lastMoveTime < 50) continue // Throttle to ~20fps
+                                                lastMoveTime = now
+                                                javax.swing.SwingUtilities.invokeLater {
+                                                    try {
+                                                        sendMouse.invoke(liveBrowser, java.awt.event.MouseEvent(
+                                                            comp, java.awt.event.MouseEvent.MOUSE_MOVED,
+                                                            now, 0, bx, by, 0, false
+                                                        ))
+                                                    } catch (_: Exception) {}
+                                                }
+                                            }
+                                            else -> continue
+                                        }
                                     }
                                 }
                             }
@@ -513,26 +525,28 @@ fun WebTab(
                                         val vRotation = -(scroll.y * 3).toInt()
                                         val hRotation = -(scroll.x * 3).toInt()
                                         if (vRotation == 0 && hRotation == 0) continue
-                                        try {
-                                            if (vRotation != 0) {
-                                                sendWheel.invoke(liveBrowser, java.awt.event.MouseWheelEvent(
-                                                    comp, java.awt.event.MouseWheelEvent.MOUSE_WHEEL,
-                                                    System.currentTimeMillis(), 0, bx, by,
-                                                    0, false, java.awt.event.MouseWheelEvent.WHEEL_UNIT_SCROLL,
-                                                    1, vRotation
-                                                ))
-                                            }
-                                            if (hRotation != 0) {
-                                                sendWheel.invoke(liveBrowser, java.awt.event.MouseWheelEvent(
-                                                    comp, java.awt.event.MouseWheelEvent.MOUSE_WHEEL,
-                                                    System.currentTimeMillis(),
-                                                    java.awt.event.InputEvent.SHIFT_DOWN_MASK,
-                                                    bx, by,
-                                                    0, false, java.awt.event.MouseWheelEvent.WHEEL_UNIT_SCROLL,
-                                                    1, hRotation
-                                                ))
-                                            }
-                                        } catch (_: Exception) {}
+                                        javax.swing.SwingUtilities.invokeLater {
+                                            try {
+                                                if (vRotation != 0) {
+                                                    sendWheel.invoke(liveBrowser, java.awt.event.MouseWheelEvent(
+                                                        comp, java.awt.event.MouseWheelEvent.MOUSE_WHEEL,
+                                                        System.currentTimeMillis(), 0, bx, by,
+                                                        0, false, java.awt.event.MouseWheelEvent.WHEEL_UNIT_SCROLL,
+                                                        1, vRotation
+                                                    ))
+                                                }
+                                                if (hRotation != 0) {
+                                                    sendWheel.invoke(liveBrowser, java.awt.event.MouseWheelEvent(
+                                                        comp, java.awt.event.MouseWheelEvent.MOUSE_WHEEL,
+                                                        System.currentTimeMillis(),
+                                                        java.awt.event.InputEvent.SHIFT_DOWN_MASK,
+                                                        bx, by,
+                                                        0, false, java.awt.event.MouseWheelEvent.WHEEL_UNIT_SCROLL,
+                                                        1, hRotation
+                                                    ))
+                                                }
+                                            } catch (_: Exception) {}
+                                        }
                                     }
                                 }
                             }
@@ -546,13 +560,16 @@ fun WebTab(
                                     else -> return@onKeyEvent false
                                 }
                                 val nativeCode = keyEvent.key.nativeKeyCode
-                                try {
-                                    sendKey.invoke(liveBrowser, java.awt.event.KeyEvent(
-                                        liveBrowser.getUIComponent(), awtType,
-                                        System.currentTimeMillis(), 0,
-                                        nativeCode, nativeCode.toChar()
-                                    ))
-                                } catch (_: Exception) {}
+                                val comp = liveBrowser.getUIComponent()
+                                val now = System.currentTimeMillis()
+                                javax.swing.SwingUtilities.invokeLater {
+                                    try {
+                                        sendKey.invoke(liveBrowser, java.awt.event.KeyEvent(
+                                            comp, awtType, now, 0,
+                                            nativeCode, nativeCode.toChar()
+                                        ))
+                                    } catch (_: Exception) {}
+                                }
                                 true
                             },
                         contentScale = ContentScale.Fit
