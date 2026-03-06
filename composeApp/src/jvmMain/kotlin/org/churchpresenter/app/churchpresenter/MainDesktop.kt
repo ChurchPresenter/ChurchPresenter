@@ -616,6 +616,8 @@ fun MainDesktop(
                                 modifier = Modifier.fillMaxSize(),
                                 presenterManager = presenterManager,
                                 selectedWebsiteItem = selectedWebsiteItem,
+                                appSettings = appSettings,
+                                onSettingsChange = onSettingsChange,
                                 onAddToSchedule = { url, title ->
                                     currentScheduleActions.addWebsite(url, title)
                                 },

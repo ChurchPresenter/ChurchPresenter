@@ -19,6 +19,25 @@ fun currentOsClassifier(): String {
     }
 }
 
+// Detect current OS+arch for JCEF native binaries
+fun currentJcefPlatform(): String {
+    val os = System.getProperty("os.name").lowercase()
+    val arch = System.getProperty("os.arch").lowercase()
+    return when {
+        os.contains("mac") -> if (arch.contains("aarch64")) "macosx-arm64" else "macosx-amd64"
+        os.contains("win") -> when {
+            arch.contains("aarch64") -> "windows-arm64"
+            arch.contains("x86") && !arch.contains("64") -> "windows-i386"
+            else -> "windows-amd64"
+        }
+        else -> when {
+            arch.contains("aarch64") -> "linux-arm64"
+            arch.contains("arm") -> "linux-arm"
+            else -> "linux-amd64"
+        }
+    }
+}
+
 kotlin {
     jvm()
 
@@ -63,6 +82,11 @@ kotlin {
             implementation(libs.ktor.server.status.pages)
             // VLCJ for media playback (requires VLC installed on system)
             implementation("uk.co.caprica:vlcj:4.8.3")
+            // JCEF — embedded Chromium browser for web presenter
+            implementation("me.friwi:jcefmaven:143.0.14")
+            // Bundle platform-specific Chromium binaries so no runtime download is needed
+            val jcefNativesVersion = "jcef-cffac27+cef-143.0.14+gdd46a37+chromium-143.0.7499.193"
+            runtimeOnly("me.friwi:jcef-natives-${currentJcefPlatform()}:$jcefNativesVersion")
             // JavaFX for WebView (website presenter, Lottie settings)
             val jfxClassifier = currentOsClassifier()
             val jfxModules = listOf("javafx-base", "javafx-graphics", "javafx-media", "javafx-swing", "javafx-controls", "javafx-web")

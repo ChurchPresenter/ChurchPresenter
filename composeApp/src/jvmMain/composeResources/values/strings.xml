@@ -461,7 +461,7 @@
     <string name="display_mode">Display Mode</string>
     <string name="display_fullscreen">Full Screen</string>
     <string name="display_lower_third">Lower Third</string>
-    <string name="lower_third_height">Lower Third Height (%)</string>
+    <string name="lower_third_height">Lower Third Height % (for Bible and Songs)</string>
     <string name="full_screen">Full Screen</string>
     <string name="lower_third_size">Lower Third</string>
     <string name="identify_screen">Identify</string>
@@ -622,6 +622,10 @@
     <string name="web_preview_label">Preview</string>
     <string name="web_preview_hint">Enter a URL above and tap Go Live</string>
     <string name="web_live_badge">LIVE</string>
+    <string name="web_bookmark_add">Bookmark</string>
+    <string name="web_bookmark_remove">Remove</string>
+    <string name="web_bookmarks">Bookmarks</string>
+    <string name="web_clear_cache">Clear Cache</string>
     <string name="tooltip_add_website">Add Website</string>
     <string name="website_dialog_title">Add Website</string>
     <string name="website_url_label">URL</string>

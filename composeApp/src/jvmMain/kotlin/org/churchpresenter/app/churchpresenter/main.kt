@@ -47,6 +47,7 @@ import org.churchpresenter.app.churchpresenter.dialogs.KeyboardShortcutsDialog
 import org.churchpresenter.app.churchpresenter.dialogs.LicenseDialog
 import org.churchpresenter.app.churchpresenter.dialogs.OptionsDialog
 import org.churchpresenter.app.churchpresenter.presenter.AnnouncementsPresenter
+import org.churchpresenter.app.churchpresenter.presenter.CefManager
 import org.churchpresenter.app.churchpresenter.presenter.WebsitePresenter
 import org.churchpresenter.app.churchpresenter.presenter.BiblePresenter
 import org.churchpresenter.app.churchpresenter.presenter.LowerThirdPresenter
@@ -74,6 +75,9 @@ import java.util.Locale
 fun main() {
     // Pre-warm JavaFX on a background thread before UI starts
     preWarmJavaFX()
+
+    // Initialize JCEF (Chromium) for embedded web browsing
+    CefManager.init()
 
     application {
         // Business logic layer
@@ -132,7 +136,7 @@ fun main() {
 
         if (licenseAccepted) {
             Window(
-                onCloseRequest = ::exitApplication,
+                onCloseRequest = { CefManager.dispose(); exitApplication() },
                 title = stringResource(Res.string.app_name),
                 icon = painterResource(Res.drawable.ic_app_icon),
                 state = state

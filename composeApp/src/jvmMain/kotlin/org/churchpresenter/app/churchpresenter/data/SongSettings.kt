@@ -284,6 +284,12 @@ data class ServerSettings(
 )
 
 @Serializable
+data class WebBookmark(
+    val url: String = "",
+    val title: String = ""
+)
+
+@Serializable
 data class AppSettings(
     val songSettings: SongSettings = SongSettings(),
     val bibleSettings: BibleSettings = BibleSettings(),
@@ -299,5 +305,6 @@ data class AppSettings(
     val previewPanelWidthDp: Int = 280,
     val theme: String = Constants.LIGHT,
     val language: String = "en",
-    val licenseAccepted: Boolean = false
+    val licenseAccepted: Boolean = false,
+    val webBookmarks: List<WebBookmark> = emptyList()
 )
