@@ -137,7 +137,7 @@ fun main() {
 
         if (licenseAccepted) {
             Window(
-                onCloseRequest = { CefManager.dispose(); exitApplication() },
+                onCloseRequest = { exitApplication() },
                 title = stringResource(Res.string.app_name),
                 icon = painterResource(Res.drawable.ic_app_icon),
                 state = state

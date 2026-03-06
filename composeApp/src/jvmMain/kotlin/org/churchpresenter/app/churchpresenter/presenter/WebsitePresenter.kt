@@ -21,7 +21,6 @@ import org.cef.handler.CefLifeSpanHandlerAdapter
 import org.cef.handler.CefLoadHandlerAdapter
 import java.awt.event.ComponentAdapter
 import java.awt.event.ComponentEvent
-import java.awt.image.BufferedImage
 import java.io.File
 
 /**
@@ -73,7 +72,9 @@ object CefManager {
     fun createClient(): CefClient? = cefApp?.createClient()
 
     fun dispose() {
-        cefApp?.dispose()
+        // Intentionally no-op — calling CefApp.dispose() during shutdown
+        // triggers a native crash in libjcef Context::Shutdown().
+        // The JVM process exit handles cleanup safely.
     }
 }
 
@@ -184,13 +185,13 @@ fun EmbeddedWebView(
         }
         client.addLifeSpanHandler(lifeSpanHandler)
 
-        // Snapshot timer — captures the browser via Robot screen capture every 500 ms
+        // Snapshot timer — captures browser via Robot screen capture every second
         val robot = try { java.awt.Robot() } catch (_: Exception) { null }
         val timer = if (onSnapshot != null && robot != null) {
-            javax.swing.Timer(500) {
+            javax.swing.Timer(1000) {
                 try {
                     val comp = browser.getUIComponent()
-                    if (comp.isShowing && comp.width > 0 && comp.height > 0) {
+                    if (comp.width > 0 && comp.height > 0 && comp.isShowing) {
                         val loc = comp.locationOnScreen
                         val rect = java.awt.Rectangle(loc.x, loc.y, comp.width, comp.height)
                         val img = robot.createScreenCapture(rect)
