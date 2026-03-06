@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -13,6 +14,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.key.*
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.*
@@ -307,7 +309,27 @@ fun WebTab(
                     shape = RoundedCornerShape(4.dp)
                 )
         ) {
-            if (liveUrl.isNotBlank()) {
+            if (isLive) {
+                // When live, show the presenter's actual screenshot so preview matches output
+                val snapshot = presenterManager?.webSnapshot?.value
+                if (snapshot != null) {
+                    Image(
+                        bitmap = snapshot,
+                        contentDescription = null,
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Fit
+                    )
+                } else {
+                    Box(
+                        modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text("Loading presenter view...",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                }
+            } else if (liveUrl.isNotBlank()) {
                 EmbeddedWebView(
                     url = liveUrl,
                     modifier = Modifier.fillMaxSize(),
