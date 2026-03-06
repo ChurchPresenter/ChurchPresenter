@@ -533,5 +533,35 @@
     <string name="license_accept_button">Принять</string>
     <string name="license_decline_button">Отклонить и выйти</string>
     <string name="license_prompt">Необходимо принять лицензию GNU GPL v3 для использования Church Presenter.</string>
+
+    <!-- Hardcoded strings moved to resources -->
+    <string name="no_image_selected">Изображение не выбрано</string>
+    <string name="no_video_selected">Видео не выбрано</string>
+    <string name="align_left">Выровнять влево</string>
+    <string name="align_center">Выровнять по центру</string>
+    <string name="align_right">Выровнять вправо</string>
+    <string name="align_top">Выровнять вверх</string>
+    <string name="align_middle">Выровнять посередине</string>
+    <string name="align_bottom">Выровнять вниз</string>
+    <string name="position_above_desc">Сверху</string>
+    <string name="position_below_desc">Снизу</string>
+    <string name="increment">Увеличить</string>
+    <string name="decrement">Уменьшить</string>
+    <string name="presented_image">Показываемое изображение</string>
+    <string name="presented_slide">Показываемый слайд</string>
+    <string name="preview">Предпросмотр</string>
+    <string name="fill_badge">FILL</string>
+    <string name="presenter_view_title">Окно презентации %1$d</string>
+    <string name="key_output_title">Key Output %1$d</string>
+    <string name="lower_third_generator">Генератор нижней трети</string>
+    <string name="loading_generator">Загрузка генератора...</string>
+    <string name="preview_will_appear_here">Предпросмотр появится здесь</string>
+    <string name="pause_duration_ms">Пауза %1$dмс</string>
+    <string name="aspect_ratio_mismatch">Несоответствие соотношения сторон: файл %1$dx%2$d, но вывод %3$s:1</string>
+    <string name="mobile_view">Мобильный</string>
+    <string name="desktop_view">Настольный</string>
+    <string name="interactive_mode">Интерактивный</string>
+    <string name="mirror_mode">Зеркало</string>
+    <string name="time_separator">:</string>
 </resources>
 

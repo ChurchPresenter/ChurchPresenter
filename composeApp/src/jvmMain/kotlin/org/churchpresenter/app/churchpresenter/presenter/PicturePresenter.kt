@@ -26,6 +26,8 @@ import androidx.compose.ui.platform.LocalWindowInfo
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.failed_to_load_image
 import churchpresenter.composeapp.generated.resources.no_images
+import churchpresenter.composeapp.generated.resources.presented_image
+import churchpresenter.composeapp.generated.resources.presented_slide
 import org.churchpresenter.app.churchpresenter.models.AnimationType
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.skia.Image
@@ -125,7 +127,7 @@ private fun ImageContent(currentImagePath: String?) {
         if (imageBitmap != null) {
             Image(
                 bitmap = imageBitmap,
-                contentDescription = "Presented Image",
+                contentDescription = stringResource(Res.string.presented_image),
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Fit
             )
@@ -278,7 +280,7 @@ private fun SlideBitmapContent(slide: ImageBitmap?) {
     if (slide != null) {
         Image(
             bitmap = slide,
-            contentDescription = "Presented Slide",
+            contentDescription = stringResource(Res.string.presented_slide),
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Fit
         )

@@ -19,7 +19,10 @@ import java.awt.Window
 import javax.swing.JFileChooser
 import javax.swing.SwingUtilities
 import javax.swing.filechooser.FileNameExtensionFilter
+import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.no_video_selected
 import org.churchpresenter.app.churchpresenter.utils.createFileChooser
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun FileVideoPicker(
@@ -67,7 +70,7 @@ fun FileVideoPicker(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text = if (videoPath.isEmpty()) "No video selected" else videoPath.substringAfterLast('/').substringAfterLast('\\'),
+            text = if (videoPath.isEmpty()) stringResource(Res.string.no_video_selected) else videoPath.substringAfterLast('/').substringAfterLast('\\'),
             style = MaterialTheme.typography.bodySmall,
             color = if (videoPath.isEmpty())
                 MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)

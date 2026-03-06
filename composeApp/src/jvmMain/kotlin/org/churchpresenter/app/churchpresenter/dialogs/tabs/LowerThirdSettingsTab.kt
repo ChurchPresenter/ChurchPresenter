@@ -39,6 +39,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.lower_third_generator
+import churchpresenter.composeapp.generated.resources.loading_generator
+import churchpresenter.composeapp.generated.resources.preview_will_appear_here
 import churchpresenter.composeapp.generated.resources.bottom
 import churchpresenter.composeapp.generated.resources.display_lower_third
 import churchpresenter.composeapp.generated.resources.generate_lower_third
@@ -126,6 +129,8 @@ fun LowerThirdSettingsTab(
 
     val noDirectorySelectedStr = stringResource(Res.string.no_directory_selected)
     val noLottieFilesStr = stringResource(Res.string.no_lottie_files)
+    val generatorTitle = stringResource(Res.string.lower_third_generator)
+    val generatorLoading = stringResource(Res.string.loading_generator)
 
     Box(
         modifier = Modifier
@@ -207,13 +212,17 @@ fun LowerThirdSettingsTab(
                     text = stringResource(Res.string.generate_lower_third),
                     backgroundColor = MaterialTheme.colorScheme.tertiaryContainer,
                     onClick = {
+                        val genTitle = generatorTitle
+                        val genLoading = generatorLoading
                         SwingUtilities.invokeLater {
                             openLottieGeneratorDialog(
                                 parentWindow = Window.getWindows().firstOrNull { it.isActive },
                                 onFileSaved = { viewModel.onFileSavedFromGenerator() },
                                 serverUrl = serverUrl,
                                 isDarkTheme = isDarkTheme,
-                                lowerThirdFolder = settings.streamingSettings.lowerThirdFolder
+                                lowerThirdFolder = settings.streamingSettings.lowerThirdFolder,
+                                generatorDialogTitle = genTitle,
+                                loadingText = genLoading
                             )
                         }
                     }
@@ -412,7 +421,9 @@ internal fun openLottieGeneratorDialog(
     onFileSaved: () -> Unit,
     serverUrl: String = "",
     isDarkTheme: Boolean = true,
-    lowerThirdFolder: String = ""
+    lowerThirdFolder: String = "",
+    generatorDialogTitle: String = "Lower Third Generator",
+    loadingText: String = "Loading generator..."
 ) {
     val loadUrl: String = if (serverUrl.isNotEmpty()) {
         val port = java.net.URI(serverUrl).port.takeIf { it > 0 } ?: 8765
@@ -463,7 +474,7 @@ internal fun openLottieGeneratorDialog(
     } catch (_: IllegalStateException) {}
 
     val dialog = JDialog().apply {
-        title = "Lower Third Generator"
+        title = generatorDialogTitle
         isModal = false
         preferredSize = Dimension(1200, 800)
         defaultCloseOperation = JDialog.HIDE_ON_CLOSE
@@ -492,7 +503,7 @@ internal fun openLottieGeneratorDialog(
     val loadingPanel = JPanel().apply {
         layout = BoxLayout(this, BoxLayout.Y_AXIS)
         val glue1 = javax.swing.Box.createVerticalGlue()
-        val label = JLabel("Loading generator...").apply {
+        val label = JLabel(loadingText).apply {
             alignmentX = JLabel.CENTER_ALIGNMENT
             font = font.deriveFont(16f)
         }
@@ -751,7 +762,7 @@ private fun GeneratorPreviewContent() {
                 }
             } else {
                 Text(
-                    text = "Preview will appear here",
+                    text = stringResource(Res.string.preview_will_appear_here),
                     color = textColor
                 )
             }

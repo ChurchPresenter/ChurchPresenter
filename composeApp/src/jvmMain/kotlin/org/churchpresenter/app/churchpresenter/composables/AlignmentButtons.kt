@@ -19,7 +19,16 @@ import churchpresenter.composeapp.generated.resources.ic_align_left
 import churchpresenter.composeapp.generated.resources.ic_align_middle
 import churchpresenter.composeapp.generated.resources.ic_align_right
 import churchpresenter.composeapp.generated.resources.ic_align_top
+import churchpresenter.composeapp.generated.resources.align_left
+import churchpresenter.composeapp.generated.resources.align_center
+import churchpresenter.composeapp.generated.resources.align_right
+import churchpresenter.composeapp.generated.resources.align_top
+import churchpresenter.composeapp.generated.resources.align_middle
+import churchpresenter.composeapp.generated.resources.align_bottom
+import churchpresenter.composeapp.generated.resources.position_above_desc
+import churchpresenter.composeapp.generated.resources.position_below_desc
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 
 /**
  * A group of icon buttons for horizontal alignment (Left, Center, Right)
@@ -54,7 +63,7 @@ fun HorizontalAlignmentButtons(
         ) {
             Image(
                 painter = painterResource(Res.drawable.ic_align_left),
-                contentDescription = "Align Left",
+                contentDescription = stringResource(Res.string.align_left),
                 modifier = Modifier.size(20.dp),
                 colorFilter = ColorFilter.tint(
                     if (selectedAlignment == leftValue)
@@ -86,7 +95,7 @@ fun HorizontalAlignmentButtons(
         ) {
             Image(
                 painter = painterResource(Res.drawable.ic_align_center),
-                contentDescription = "Align Center",
+                contentDescription = stringResource(Res.string.align_center),
                 modifier = Modifier.size(20.dp),
                 colorFilter = ColorFilter.tint(
                     if (selectedAlignment == centerValue)
@@ -118,7 +127,7 @@ fun HorizontalAlignmentButtons(
         ) {
             Image(
                 painter = painterResource(Res.drawable.ic_align_right),
-                contentDescription = "Align Right",
+                contentDescription = stringResource(Res.string.align_right),
                 modifier = Modifier.size(20.dp),
                 colorFilter = ColorFilter.tint(
                     if (selectedAlignment == rightValue)
@@ -164,7 +173,7 @@ fun VerticalAlignmentButtons(
         ) {
             Image(
                 painter = painterResource(Res.drawable.ic_align_top),
-                contentDescription = "Align Top",
+                contentDescription = stringResource(Res.string.align_top),
                 modifier = Modifier.size(20.dp),
                 colorFilter = ColorFilter.tint(
                     if (selectedAlignment == topValue)
@@ -196,7 +205,7 @@ fun VerticalAlignmentButtons(
         ) {
             Image(
                 painter = painterResource(Res.drawable.ic_align_middle),
-                contentDescription = "Align Middle",
+                contentDescription = stringResource(Res.string.align_middle),
                 modifier = Modifier.size(20.dp),
                 colorFilter = ColorFilter.tint(
                     if (selectedAlignment == middleValue)
@@ -228,7 +237,7 @@ fun VerticalAlignmentButtons(
         ) {
             Image(
                 painter = painterResource(Res.drawable.ic_align_bottom),
-                contentDescription = "Align Bottom",
+                contentDescription = stringResource(Res.string.align_bottom),
                 modifier = Modifier.size(20.dp),
                 colorFilter = ColorFilter.tint(
                     if (selectedAlignment == bottomValue)
@@ -273,7 +282,7 @@ fun PositionButtons(
         ) {
             Image(
                 painter = painterResource(Res.drawable.ic_align_top),
-                contentDescription = "Above",
+                contentDescription = stringResource(Res.string.position_above_desc),
                 modifier = Modifier.size(20.dp),
                 colorFilter = ColorFilter.tint(
                     if (selectedPosition == aboveValue)
@@ -305,7 +314,7 @@ fun PositionButtons(
         ) {
             Image(
                 painter = painterResource(Res.drawable.ic_align_bottom),
-                contentDescription = "Below",
+                contentDescription = stringResource(Res.string.position_below_desc),
                 modifier = Modifier.size(20.dp),
                 colorFilter = ColorFilter.tint(
                     if (selectedPosition == belowValue)

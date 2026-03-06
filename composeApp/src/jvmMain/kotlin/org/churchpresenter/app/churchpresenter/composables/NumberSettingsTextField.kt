@@ -32,7 +32,10 @@ import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.arrow_down
 import churchpresenter.composeapp.generated.resources.arrow_up
 import org.churchpresenter.app.churchpresenter.extensions.errorShake
+import churchpresenter.composeapp.generated.resources.decrement
+import churchpresenter.composeapp.generated.resources.increment
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun NumberSettingsTextField(
@@ -125,7 +128,7 @@ fun NumberSettingsTextField(
             ) {
                 Image(
                     painter = painterResource(Res.drawable.arrow_up),
-                    contentDescription = "Increment",
+                    contentDescription = stringResource(Res.string.increment),
                     colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface),
                     modifier = Modifier.size(12.dp)
                 )
@@ -148,7 +151,7 @@ fun NumberSettingsTextField(
             ) {
                 Image(
                     painter = painterResource(Res.drawable.arrow_down),
-                    contentDescription = "Decrement",
+                    contentDescription = stringResource(Res.string.decrement),
                     colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface),
                     modifier = Modifier.size(12.dp)
                 )

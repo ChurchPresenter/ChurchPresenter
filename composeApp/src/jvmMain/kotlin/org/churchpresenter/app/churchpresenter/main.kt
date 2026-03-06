@@ -35,6 +35,8 @@ import androidx.compose.ui.window.rememberWindowState
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.app_name
 import churchpresenter.composeapp.generated.resources.ic_app_icon
+import churchpresenter.composeapp.generated.resources.presenter_view_title
+import churchpresenter.composeapp.generated.resources.key_output_title
 import churchpresenter.composeapp.generated.resources.screen_number
 import org.jetbrains.compose.resources.painterResource
 import kotlinx.coroutines.CoroutineScope
@@ -327,9 +329,10 @@ private fun PresenterWindows(
         }
 
         // Primary window (fill or normal)
+        val presenterTitle = stringResource(Res.string.presenter_view_title, i + 1)
         Window(
             visible = showPresenterWindow,
-            title = "Presenter View ${i + 1}",
+            title = presenterTitle,
             onCloseRequest = { presenterManager.setShowPresenterWindow(false) },
             state = windowState,
             undecorated = true,
@@ -455,9 +458,10 @@ private fun PresenterWindows(
                     )
                 }
 
+                val keyOutputTitle = stringResource(Res.string.key_output_title, i + 1)
                 Window(
                     visible = showPresenterWindow,
-                    title = "Key Output ${i + 1}",
+                    title = keyOutputTitle,
                     onCloseRequest = { presenterManager.setShowPresenterWindow(false) },
                     state = keyWindowState,
                     undecorated = true,

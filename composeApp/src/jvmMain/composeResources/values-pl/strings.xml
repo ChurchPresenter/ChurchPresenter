@@ -532,5 +532,35 @@
     <string name="license_accept_button">Akceptuję</string>
     <string name="license_decline_button">Odrzuć i wyjdź</string>
     <string name="license_prompt">Musisz zaakceptować licencję GNU GPL v3, aby używać Church Presenter.</string>
+
+    <!-- Hardcoded strings moved to resources -->
+    <string name="no_image_selected">Nie wybrano obrazu</string>
+    <string name="no_video_selected">Nie wybrano wideo</string>
+    <string name="align_left">Wyrównaj do lewej</string>
+    <string name="align_center">Wyrównaj do środka</string>
+    <string name="align_right">Wyrównaj do prawej</string>
+    <string name="align_top">Wyrównaj do góry</string>
+    <string name="align_middle">Wyrównaj do środka</string>
+    <string name="align_bottom">Wyrównaj do dołu</string>
+    <string name="position_above_desc">Powyżej</string>
+    <string name="position_below_desc">Poniżej</string>
+    <string name="increment">Zwiększ</string>
+    <string name="decrement">Zmniejsz</string>
+    <string name="presented_image">Wyświetlany obraz</string>
+    <string name="presented_slide">Wyświetlany slajd</string>
+    <string name="preview">Podgląd</string>
+    <string name="fill_badge">FILL</string>
+    <string name="presenter_view_title">Widok prezentera %1$d</string>
+    <string name="key_output_title">Key Output %1$d</string>
+    <string name="lower_third_generator">Generator dolnej trzeciej</string>
+    <string name="loading_generator">Ładowanie generatora...</string>
+    <string name="preview_will_appear_here">Podgląd pojawi się tutaj</string>
+    <string name="pause_duration_ms">Pauza %1$dms</string>
+    <string name="aspect_ratio_mismatch">Niezgodność proporcji: plik to %1$dx%2$d, ale wyjście to %3$s:1</string>
+    <string name="mobile_view">Mobilny</string>
+    <string name="desktop_view">Pulpit</string>
+    <string name="interactive_mode">Interaktywny</string>
+    <string name="mirror_mode">Lustro</string>
+    <string name="time_separator">:</string>
 </resources>
 

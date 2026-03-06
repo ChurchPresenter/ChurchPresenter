@@ -664,6 +664,36 @@
     <string name="server_endpoints">Available Endpoints</string>
     <string name="server_restart">Restart</string>
 
+    <!-- Hardcoded strings moved to resources -->
+    <string name="no_image_selected">No image selected</string>
+    <string name="no_video_selected">No video selected</string>
+    <string name="align_left">Align Left</string>
+    <string name="align_center">Align Center</string>
+    <string name="align_right">Align Right</string>
+    <string name="align_top">Align Top</string>
+    <string name="align_middle">Align Middle</string>
+    <string name="align_bottom">Align Bottom</string>
+    <string name="position_above_desc">Above</string>
+    <string name="position_below_desc">Below</string>
+    <string name="increment">Increment</string>
+    <string name="decrement">Decrement</string>
+    <string name="presented_image">Presented Image</string>
+    <string name="presented_slide">Presented Slide</string>
+    <string name="preview">Preview</string>
+    <string name="fill_badge">FILL</string>
+    <string name="presenter_view_title">Presenter View %1$d</string>
+    <string name="key_output_title">Key Output %1$d</string>
+    <string name="lower_third_generator">Lower Third Generator</string>
+    <string name="loading_generator">Loading generator...</string>
+    <string name="preview_will_appear_here">Preview will appear here</string>
+    <string name="pause_duration_ms">Pause %1$dms</string>
+    <string name="aspect_ratio_mismatch">Aspect ratio mismatch: file is %1$dx%2$d but output is %3$s:1</string>
+    <string name="mobile_view">Mobile</string>
+    <string name="desktop_view">Desktop</string>
+    <string name="interactive_mode">Interactive</string>
+    <string name="mirror_mode">Mirror</string>
+    <string name="time_separator">:</string>
+
     <!-- Misc UI -->
     <string name="theme">Theme</string>
     <string name="menu_view">View</string>

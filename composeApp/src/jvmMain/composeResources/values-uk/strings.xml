@@ -537,5 +537,35 @@
     <string name="license_accept_button">Прийняти</string>
     <string name="license_decline_button">Відхилити та вийти</string>
     <string name="license_prompt">Необхідно прийняти ліцензію GNU GPL v3 для використання Church Presenter.</string>
+
+    <!-- Hardcoded strings moved to resources -->
+    <string name="no_image_selected">Зображення не вибрано</string>
+    <string name="no_video_selected">Відео не вибрано</string>
+    <string name="align_left">Вирівняти ліворуч</string>
+    <string name="align_center">Вирівняти по центру</string>
+    <string name="align_right">Вирівняти праворуч</string>
+    <string name="align_top">Вирівняти вгору</string>
+    <string name="align_middle">Вирівняти посередині</string>
+    <string name="align_bottom">Вирівняти вниз</string>
+    <string name="position_above_desc">Зверху</string>
+    <string name="position_below_desc">Знизу</string>
+    <string name="increment">Збільшити</string>
+    <string name="decrement">Зменшити</string>
+    <string name="presented_image">Показуване зображення</string>
+    <string name="presented_slide">Показуваний слайд</string>
+    <string name="preview">Попередній перегляд</string>
+    <string name="fill_badge">FILL</string>
+    <string name="presenter_view_title">Вікно презентації %1$d</string>
+    <string name="key_output_title">Key Output %1$d</string>
+    <string name="lower_third_generator">Генератор нижньої третини</string>
+    <string name="loading_generator">Завантаження генератора...</string>
+    <string name="preview_will_appear_here">Попередній перегляд з\'явиться тут</string>
+    <string name="pause_duration_ms">Пауза %1$dмс</string>
+    <string name="aspect_ratio_mismatch">Невідповідність співвідношення сторін: файл %1$dx%2$d, але вивід %3$s:1</string>
+    <string name="mobile_view">Мобільний</string>
+    <string name="desktop_view">Настільний</string>
+    <string name="interactive_mode">Інтерактивний</string>
+    <string name="mirror_mode">Дзеркало</string>
+    <string name="time_separator">:</string>
 </resources>
 
