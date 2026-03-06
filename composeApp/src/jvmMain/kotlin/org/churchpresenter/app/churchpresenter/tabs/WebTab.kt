@@ -236,6 +236,10 @@ fun WebTab(
                             val url = normaliseUrl(urlInput)
                             urlInput = url
                             liveUrl = url
+                            presenterManager?.setWebsiteUrl(url)
+                            if (isLive) {
+                                presenterManager?.liveBrowser?.value?.loadURL(url)
+                            }
                             true
                         } else false
                     },
