@@ -348,45 +348,44 @@ fun WebTab(
                             .fillMaxSize()
                             .onSizeChanged { imageSize = it }
                             .pointerInput(liveBrowser) {
-                                // Forward mouse clicks and moves via CDP
-                                val devTools = liveBrowser?.getDevToolsClient()
+                                // Forward mouse events via CefBrowser_N.sendMouseEvent (reflection)
+                                if (liveBrowser == null) return@pointerInput
+                                val sendMouse = findMethod(liveBrowser, "sendMouseEvent", java.awt.event.MouseEvent::class.java)
                                 awaitPointerEventScope {
                                     while (true) {
                                         val event = awaitPointerEvent()
-                                        if (devTools == null || devTools.isClosed) continue
-                                        val comp = liveBrowser.getUIComponent()
+                                        if (sendMouse == null) continue
                                         if (imageSize.width <= 0 || imageSize.height <= 0) continue
+                                        val comp = liveBrowser.getUIComponent()
                                         val scaleX = comp.width.toFloat() / imageSize.width
                                         val scaleY = comp.height.toFloat() / imageSize.height
                                         val pos = event.changes.firstOrNull()?.position ?: continue
                                         val bx = (pos.x * scaleX).toInt()
                                         val by = (pos.y * scaleY).toInt()
-                                        when (event.type) {
-                                            PointerEventType.Press -> {
-                                                devTools.executeDevToolsMethod("Input.dispatchMouseEvent",
-                                                    """{"type":"mousePressed","x":$bx,"y":$by,"button":"left","clickCount":1}""")
-                                            }
-                                            PointerEventType.Release -> {
-                                                devTools.executeDevToolsMethod("Input.dispatchMouseEvent",
-                                                    """{"type":"mouseReleased","x":$bx,"y":$by,"button":"left","clickCount":1}""")
-                                            }
-                                            PointerEventType.Move -> {
-                                                devTools.executeDevToolsMethod("Input.dispatchMouseEvent",
-                                                    """{"type":"mouseMoved","x":$bx,"y":$by}""")
-                                            }
+                                        val awtId = when (event.type) {
+                                            PointerEventType.Press -> java.awt.event.MouseEvent.MOUSE_PRESSED
+                                            PointerEventType.Release -> java.awt.event.MouseEvent.MOUSE_RELEASED
+                                            PointerEventType.Move -> java.awt.event.MouseEvent.MOUSE_MOVED
                                             else -> continue
                                         }
+                                        try {
+                                            sendMouse.invoke(liveBrowser, java.awt.event.MouseEvent(
+                                                comp, awtId, System.currentTimeMillis(),
+                                                0, bx, by, 1, false
+                                            ))
+                                        } catch (_: Exception) {}
                                     }
                                 }
                             }
                             .pointerInput(liveBrowser) {
-                                // Forward scroll via CDP
-                                val devTools = liveBrowser?.getDevToolsClient()
+                                // Forward scroll via CefBrowser_N.sendMouseWheelEvent (reflection)
+                                if (liveBrowser == null) return@pointerInput
+                                val sendWheel = findMethod(liveBrowser, "sendMouseWheelEvent", java.awt.event.MouseWheelEvent::class.java)
                                 awaitPointerEventScope {
                                     while (true) {
                                         val event = awaitPointerEvent()
                                         if (event.type != PointerEventType.Scroll) continue
-                                        if (devTools == null || devTools.isClosed) continue
+                                        if (sendWheel == null) continue
                                         val comp = liveBrowser.getUIComponent()
                                         if (imageSize.width <= 0 || imageSize.height <= 0) continue
                                         val scaleX = comp.width.toFloat() / imageSize.width
@@ -396,23 +395,34 @@ fun WebTab(
                                         val scroll = change.scrollDelta
                                         val bx = (pos.x * scaleX).toInt()
                                         val by = (pos.y * scaleY).toInt()
-                                        val deltaY = (scroll.y * -120).toInt()
-                                        devTools.executeDevToolsMethod("Input.dispatchMouseEvent",
-                                            """{"type":"mouseWheel","x":$bx,"y":$by,"deltaX":0,"deltaY":$deltaY}""")
+                                        try {
+                                            sendWheel.invoke(liveBrowser, java.awt.event.MouseWheelEvent(
+                                                comp, java.awt.event.MouseWheelEvent.MOUSE_WHEEL,
+                                                System.currentTimeMillis(), 0, bx, by,
+                                                0, false, java.awt.event.MouseWheelEvent.WHEEL_UNIT_SCROLL,
+                                                3, scroll.y.toInt()
+                                            ))
+                                        } catch (_: Exception) {}
                                     }
                                 }
                             }
                             .onKeyEvent { keyEvent ->
-                                val devTools = liveBrowser?.getDevToolsClient() ?: return@onKeyEvent false
-                                if (devTools.isClosed) return@onKeyEvent false
-                                val cdpType = when (keyEvent.type) {
-                                    KeyEventType.KeyDown -> "keyDown"
-                                    KeyEventType.KeyUp -> "keyUp"
+                                if (liveBrowser == null) return@onKeyEvent false
+                                val sendKey = findMethod(liveBrowser, "sendKeyEvent", java.awt.event.KeyEvent::class.java)
+                                    ?: return@onKeyEvent false
+                                val awtType = when (keyEvent.type) {
+                                    KeyEventType.KeyDown -> java.awt.event.KeyEvent.KEY_PRESSED
+                                    KeyEventType.KeyUp -> java.awt.event.KeyEvent.KEY_RELEASED
                                     else -> return@onKeyEvent false
                                 }
                                 val nativeCode = keyEvent.key.nativeKeyCode
-                                devTools.executeDevToolsMethod("Input.dispatchKeyEvent",
-                                    """{"type":"$cdpType","windowsVirtualKeyCode":$nativeCode}""")
+                                try {
+                                    sendKey.invoke(liveBrowser, java.awt.event.KeyEvent(
+                                        liveBrowser.getUIComponent(), awtType,
+                                        System.currentTimeMillis(), 0,
+                                        nativeCode, nativeCode.toChar()
+                                    ))
+                                } catch (_: Exception) {}
                                 true
                             },
                         contentScale = ContentScale.Fit
@@ -450,6 +460,19 @@ fun WebTab(
         }
         }
     }
+}
+
+/** Walk up the class hierarchy to find a declared method and make it accessible. */
+private fun findMethod(obj: Any, name: String, vararg paramTypes: Class<*>): java.lang.reflect.Method? {
+    var c: Class<*>? = obj.javaClass
+    while (c != null) {
+        try {
+            val m = c.getDeclaredMethod(name, *paramTypes)
+            m.isAccessible = true
+            return m
+        } catch (_: NoSuchMethodException) { c = c.superclass }
+    }
+    return null
 }
 
 /** Prepend https:// if the user forgot the scheme. */
