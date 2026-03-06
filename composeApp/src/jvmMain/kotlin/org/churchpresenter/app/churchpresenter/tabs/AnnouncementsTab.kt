@@ -112,6 +112,8 @@ import org.churchpresenter.app.churchpresenter.data.AnnouncementsSettings
 import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.app.churchpresenter.utils.presenterAspectRatio
+import org.churchpresenter.app.churchpresenter.utils.presenterScreenBounds
 import org.churchpresenter.app.churchpresenter.utils.Utils
 import org.churchpresenter.app.churchpresenter.viewmodel.AnnouncementsViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
@@ -413,7 +415,7 @@ fun AnnouncementsTab(
                     BoxWithConstraints(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .aspectRatio(16f / 9f)
+                            .aspectRatio(presenterAspectRatio())
                             .clip(RoundedCornerShape(4.dp))
                             .background(androidx.compose.ui.graphics.Color.Black)
                             .border(
@@ -421,7 +423,7 @@ fun AnnouncementsTab(
                                 RoundedCornerShape(4.dp)
                             )
                     ) {
-                        val scaleFactor = maxWidth / 1920.dp
+                        val scaleFactor = maxWidth / presenterScreenBounds().width.dp
                         val scaledFontSize = (viewModel.fontSize * scaleFactor).coerceAtLeast(4f).sp
                         val scaledPadH = (32 * scaleFactor).coerceAtLeast(1f).dp
                         val scaledPadV = (16 * scaleFactor).coerceAtLeast(1f).dp

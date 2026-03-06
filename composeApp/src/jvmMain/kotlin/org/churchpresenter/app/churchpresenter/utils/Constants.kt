@@ -1,5 +1,21 @@
 package org.churchpresenter.app.churchpresenter.utils
 
+import java.awt.GraphicsEnvironment
+import java.awt.Rectangle
+
+/** Returns the presenter screen bounds (second screen if available, else 1920×1080). */
+fun presenterScreenBounds(): Rectangle {
+    val screens = GraphicsEnvironment.getLocalGraphicsEnvironment().screenDevices
+    return if (screens.size > 1) screens[1].defaultConfiguration.bounds
+    else Rectangle(0, 0, 1920, 1080)
+}
+
+/** Returns the aspect ratio of the presenter screen. */
+fun presenterAspectRatio(): Float {
+    val bounds = presenterScreenBounds()
+    return bounds.width.toFloat() / bounds.height.toFloat()
+}
+
 object Constants {
     const val NONE = "None"
     const val FIRST_PAGE = "First Page"
