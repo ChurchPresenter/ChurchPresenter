@@ -86,6 +86,10 @@ fun WebTab(
     fun onPreviewNavigated(newUrl: String) {
         urlInput = newUrl
         presenterManager?.setWebsiteUrl(newUrl)
+        // Directly navigate the presenter browser so it updates immediately
+        if (isLive) {
+            presenterManager?.liveBrowser?.value?.loadURL(newUrl)
+        }
     }
 
     fun onTitleChanged(title: String) {
