@@ -226,6 +226,8 @@ fun WebsitePresenter(
     modifier: Modifier = Modifier,
     onSnapshot: ((ImageBitmap) -> Unit)? = null,
     onBrowserCreated: ((CefBrowser) -> Unit)? = null,
+    onUrlChanged: ((String) -> Unit)? = null,
+    onTitleChanged: ((String) -> Unit)? = null,
     audioDeviceId: String = ""
 ) {
     // Periodically route CEF audio streams to the configured device.
@@ -244,6 +246,8 @@ fun WebsitePresenter(
         url = url,
         modifier = modifier.fillMaxSize(),
         onSnapshot = onSnapshot,
-        onBrowserCreated = onBrowserCreated
+        onBrowserCreated = onBrowserCreated,
+        onUrlChanged = onUrlChanged,
+        onTitleChanged = onTitleChanged
     )
 }

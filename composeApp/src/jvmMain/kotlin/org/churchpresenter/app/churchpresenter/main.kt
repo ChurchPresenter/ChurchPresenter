@@ -404,6 +404,8 @@ private fun PresenterWindows(
                                     modifier = Modifier.fillMaxSize(),
                                     onSnapshot = { bitmap -> presenterManager.setWebSnapshot(bitmap) },
                                     onBrowserCreated = { browser -> presenterManager.setLiveBrowser(browser) },
+                                    onUrlChanged = { newUrl -> presenterManager.setWebsiteUrl(newUrl) },
+                                    onTitleChanged = { title -> presenterManager.setWebPageTitle(title) },
                                     audioDeviceId = appSettings.projectionSettings.audioOutputDeviceId
                                 )
                             Presenting.NONE -> { /* nothing */ }
@@ -528,6 +530,8 @@ private fun PresenterWindows(
                                     url = websiteUrl,
                                     modifier = Modifier.fillMaxSize(),
                                     onSnapshot = { bitmap -> presenterManager.setWebSnapshot(bitmap) },
+                                    onUrlChanged = { newUrl -> presenterManager.setWebsiteUrl(newUrl) },
+                                    onTitleChanged = { title -> presenterManager.setWebPageTitle(title) },
                                     audioDeviceId = appSettings.projectionSettings.audioOutputDeviceId
                                 )
                                     Presenting.NONE -> { /* nothing */ }

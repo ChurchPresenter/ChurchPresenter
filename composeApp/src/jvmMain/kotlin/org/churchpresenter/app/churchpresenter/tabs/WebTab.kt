@@ -79,6 +79,22 @@ fun WebTab(
         }
     }
 
+    // Sync URL bar from presenter when the presenter navigates (Mirror mode clicks)
+    val presenterUrl = presenterManager?.websiteUrl?.value ?: ""
+    val presenterTitle = presenterManager?.webPageTitle?.value ?: ""
+    LaunchedEffect(presenterUrl) {
+        if (isLive && !useInteractivePreview && presenterUrl.isNotBlank()) {
+            urlInput = presenterUrl
+            liveUrl = presenterUrl
+        }
+    }
+    LaunchedEffect(presenterTitle) {
+        if (isLive && !useInteractivePreview && presenterTitle.isNotBlank()) {
+            pageTitle = presenterTitle
+            if (liveUrl.isNotBlank()) onUpdateScheduleTitle?.invoke(liveUrl, presenterTitle)
+        }
+    }
+
     // Keep the presenter in sync whenever the preview navigates to a new page
     fun onPreviewNavigated(newUrl: String) {
         urlInput = newUrl
