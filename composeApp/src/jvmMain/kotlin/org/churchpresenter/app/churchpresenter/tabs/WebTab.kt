@@ -85,6 +85,7 @@ fun WebTab(
     // Keep the presenter in sync whenever the preview navigates to a new page
     fun onPreviewNavigated(newUrl: String) {
         urlInput = newUrl
+        liveUrl = newUrl
         presenterManager?.setWebsiteUrl(newUrl)
         // Directly navigate the presenter browser so it updates immediately
         if (isLive) {
