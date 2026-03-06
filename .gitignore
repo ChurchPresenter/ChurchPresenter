@@ -3,7 +3,7 @@
 .gradle
 **/build/
 xcuserdata
-!src/**/build/
+\!src/**/build/
 local.properties
 .idea
 .DS_Store
@@ -11,13 +11,14 @@ captures
 .externalNativeBuild
 .cxx
 *.xcodeproj/*
-!*.xcodeproj/project.pbxproj
-!*.xcodeproj/xcshareddata/
-!*.xcodeproj/project.xcworkspace/
-!*.xcworkspace/contents.xcworkspacedata
+\!*.xcodeproj/project.pbxproj
+\!*.xcodeproj/xcshareddata/
+\!*.xcodeproj/project.xcworkspace/
+\!*.xcworkspace/contents.xcworkspacedata
 **/xcshareddata/WorkspaceSettings.xcsettings
 node_modules/
 pull.sh
+pull-lottie.sh
 set-identity.sh
 push.sh
 .claude/
