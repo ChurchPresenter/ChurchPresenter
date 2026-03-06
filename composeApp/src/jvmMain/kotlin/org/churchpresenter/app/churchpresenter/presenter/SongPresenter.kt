@@ -144,10 +144,17 @@ fun SongPresenter(
         backgroundColor = Color.Black
     } else if (bgConfig.backgroundType == Constants.BACKGROUND_DEFAULT) {
         val defaults = appSettings.backgroundSettings
-        effectiveType = defaults.defaultBackgroundType
-        effectiveImagePath = defaults.defaultBackgroundImage
-        effectiveVideoPath = defaults.defaultBackgroundVideo
-        backgroundColor = parseHexColor(defaults.defaultBackgroundColor)
+        if (isLowerThird) {
+            effectiveType = defaults.defaultLowerThirdBackgroundType
+            effectiveImagePath = defaults.defaultLowerThirdBackgroundImage
+            effectiveVideoPath = defaults.defaultLowerThirdBackgroundVideo
+            backgroundColor = parseHexColor(defaults.defaultLowerThirdBackgroundColor)
+        } else {
+            effectiveType = defaults.defaultBackgroundType
+            effectiveImagePath = defaults.defaultBackgroundImage
+            effectiveVideoPath = defaults.defaultBackgroundVideo
+            backgroundColor = parseHexColor(defaults.defaultBackgroundColor)
+        }
     } else {
         effectiveType = bgConfig.backgroundType
         effectiveImagePath = bgConfig.backgroundImage
@@ -170,6 +177,8 @@ fun SongPresenter(
     val useVideoBackground = effectiveType == Constants.BACKGROUND_VIDEO && effectiveVideoPath.isNotEmpty()
 
     val bgModifier: Modifier = when {
+        effectiveType == Constants.BACKGROUND_TRANSPARENT -> Modifier
+        effectiveType == Constants.BACKGROUND_GRADIENT -> Modifier
         useVideoBackground -> Modifier.background(Color.Black)
         effectiveType == Constants.BACKGROUND_IMAGE && backgroundImageBitmap != null ->
             Modifier.paint(painter = BitmapPainter(backgroundImageBitmap), contentScale = ContentScale.Crop)

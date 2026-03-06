@@ -14,8 +14,12 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.key.*
+import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.*
 import org.churchpresenter.app.churchpresenter.data.AppSettings
@@ -28,6 +32,9 @@ import org.churchpresenter.app.churchpresenter.presenter.rememberWebNavControlle
 import org.churchpresenter.app.churchpresenter.utils.presenterAspectRatio
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.jetbrains.compose.resources.stringResource
+import java.awt.event.MouseEvent
+import java.awt.event.MouseWheelEvent
+import javax.swing.SwingUtilities
 
 @Composable
 fun WebTab(
@@ -310,23 +317,97 @@ fun WebTab(
                 )
         ) {
             if (isLive) {
-                // When live, show the presenter's actual screenshot so preview matches output
-                val snapshot = presenterManager?.webSnapshot?.value
-                if (snapshot != null) {
+                // When live, show presenter screenshot with input forwarding
+                val webSnapshot = presenterManager?.webSnapshot?.value
+                val liveBrowser = presenterManager?.liveBrowser?.value
+                if (webSnapshot != null) {
+                    var imageSize by remember { mutableStateOf(IntSize.Zero) }
                     Image(
-                        bitmap = snapshot,
+                        bitmap = webSnapshot,
                         contentDescription = null,
-                        modifier = Modifier.fillMaxSize(),
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .onSizeChanged { imageSize = it }
+                            .pointerInput(liveBrowser) {
+                                awaitPointerEventScope {
+                                    while (true) {
+                                        val event = awaitPointerEvent()
+                                        val comp = liveBrowser?.getUIComponent() ?: continue
+                                        if (imageSize.width <= 0 || imageSize.height <= 0) continue
+                                        val scaleX = comp.width.toFloat() / imageSize.width
+                                        val scaleY = comp.height.toFloat() / imageSize.height
+                                        val pos = event.changes.firstOrNull()?.position ?: continue
+                                        val bx = (pos.x * scaleX).toInt()
+                                        val by = (pos.y * scaleY).toInt()
+                                        val awtId = when (event.type) {
+                                            PointerEventType.Press -> MouseEvent.MOUSE_PRESSED
+                                            PointerEventType.Release -> MouseEvent.MOUSE_RELEASED
+                                            PointerEventType.Move -> MouseEvent.MOUSE_MOVED
+                                            else -> continue
+                                        }
+                                        SwingUtilities.invokeLater {
+                                            comp.dispatchEvent(
+                                                MouseEvent(
+                                                    comp, awtId, System.currentTimeMillis(),
+                                                    0, bx, by, 1, false
+                                                )
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                            .pointerInput(liveBrowser) {
+                                awaitPointerEventScope {
+                                    while (true) {
+                                        val event = awaitPointerEvent()
+                                        if (event.type != PointerEventType.Scroll) continue
+                                        val comp = liveBrowser?.getUIComponent() ?: continue
+                                        if (imageSize.width <= 0 || imageSize.height <= 0) continue
+                                        val scaleX = comp.width.toFloat() / imageSize.width
+                                        val scaleY = comp.height.toFloat() / imageSize.height
+                                        val change = event.changes.firstOrNull() ?: continue
+                                        val pos = change.position
+                                        val scroll = change.scrollDelta
+                                        SwingUtilities.invokeLater {
+                                            comp.dispatchEvent(
+                                                MouseWheelEvent(
+                                                    comp, MouseWheelEvent.MOUSE_WHEEL,
+                                                    System.currentTimeMillis(), 0,
+                                                    (pos.x * scaleX).toInt(), (pos.y * scaleY).toInt(),
+                                                    0, false, MouseWheelEvent.WHEEL_UNIT_SCROLL,
+                                                    3, scroll.y.toInt()
+                                                )
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                            .onKeyEvent { keyEvent ->
+                                val comp = liveBrowser?.getUIComponent() ?: return@onKeyEvent false
+                                val awtId = when (keyEvent.type) {
+                                    KeyEventType.KeyDown -> java.awt.event.KeyEvent.KEY_PRESSED
+                                    KeyEventType.KeyUp -> java.awt.event.KeyEvent.KEY_RELEASED
+                                    else -> return@onKeyEvent false
+                                }
+                                val nativeCode = keyEvent.key.nativeKeyCode
+                                SwingUtilities.invokeLater {
+                                    comp.dispatchEvent(
+                                        java.awt.event.KeyEvent(
+                                            comp, awtId, System.currentTimeMillis(), 0,
+                                            nativeCode, nativeCode.toChar()
+                                        )
+                                    )
+                                }
+                                true
+                            },
                         contentScale = ContentScale.Fit
                     )
                 } else {
                     Box(
-                        modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface),
+                        Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text("Loading presenter view...",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        CircularProgressIndicator(modifier = Modifier.size(24.dp))
                     }
                 }
             } else if (liveUrl.isNotBlank()) {

@@ -321,6 +321,7 @@
     <string name="background_color_option">Color</string>
     <string name="background_image_option">Image</string>
     <string name="background_video_option">Video Loop</string>
+    <string name="background_transparent_option">Transparent</string>
     <string name="background_video">Background Video:</string>
 
     <!-- Position Options -->
@@ -470,8 +471,10 @@
     <string name="projection_display_label">Display %1$d (%2$dx%3$d)</string>
 
     <!-- Background Settings Tab -->
-    <string name="default_background_color">Default Background Color</string>
-    <string name="default_background_color_help">This background is used when 'Default' is selected for Bible or Songs full screen</string>
+    <string name="default_background_color">Default Background</string>
+    <string name="default_background_color_help">Used when \'Default\' is selected for Bible or Songs</string>
+    <string name="default_lower_third_background">Default Lower Third Background</string>
+    <string name="default_lower_third_background_help">Used when \'Default\' is selected for Bible or Songs in lower third display mode</string>
     <!-- Gradient Settings -->
     <string name="gradient_enabled">Gradient</string>
     <string name="gradient_top_color">Top Color:</string>

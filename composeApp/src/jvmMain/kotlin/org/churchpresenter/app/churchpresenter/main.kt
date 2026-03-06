@@ -402,9 +402,17 @@ private fun PresenterWindows(
                                 WebsitePresenter(
                                     url = websiteUrl,
                                     modifier = Modifier.fillMaxSize(),
-                                    onSnapshot = { bitmap -> presenterManager.setWebSnapshot(bitmap) }
+                                    onSnapshot = { bitmap -> presenterManager.setWebSnapshot(bitmap) },
+                                    onBrowserCreated = { browser -> presenterManager.setLiveBrowser(browser) }
                                 )
                             Presenting.NONE -> { /* nothing */ }
+                        }
+
+                        // Clear live browser ref when leaving WEBSITE mode
+                        androidx.compose.runtime.LaunchedEffect(presentingMode) {
+                            if (presentingMode != Presenting.WEBSITE) {
+                                presenterManager.setLiveBrowser(null)
+                            }
                         }
 
                         if (identifyingScreen) {

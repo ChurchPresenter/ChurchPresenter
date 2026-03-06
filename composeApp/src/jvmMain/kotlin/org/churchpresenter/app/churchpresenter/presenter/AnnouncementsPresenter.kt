@@ -154,7 +154,7 @@ fun AnnouncementsPresenter(
                             .align(slideAlignment)
                             .graphicsLayer { translationY = size.height * offsetFraction },
                         contentAlignment = Alignment.Center
-                    ) { textBlock(true) }
+                    ) { textBlock(false) }
                 }
             }
         } else if (settings.animationType == Constants.ANIMATION_FADE) {

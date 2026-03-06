@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Slider
 import androidx.compose.foundation.rememberScrollState
@@ -43,6 +42,8 @@ import churchpresenter.composeapp.generated.resources.bible
 import churchpresenter.composeapp.generated.resources.color
 import churchpresenter.composeapp.generated.resources.default_background_color
 import churchpresenter.composeapp.generated.resources.default_background_color_help
+import churchpresenter.composeapp.generated.resources.default_lower_third_background
+import churchpresenter.composeapp.generated.resources.default_lower_third_background_help
 import churchpresenter.composeapp.generated.resources.display_lower_third
 import churchpresenter.composeapp.generated.resources.gradient_enabled
 import churchpresenter.composeapp.generated.resources.gradient_top_color
@@ -50,6 +51,7 @@ import churchpresenter.composeapp.generated.resources.gradient_bottom_color
 import churchpresenter.composeapp.generated.resources.gradient_opacity
 import churchpresenter.composeapp.generated.resources.gradient_position
 import churchpresenter.composeapp.generated.resources.full_screen
+import churchpresenter.composeapp.generated.resources.background_transparent_option
 import churchpresenter.composeapp.generated.resources.songs
 import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
 import org.churchpresenter.app.churchpresenter.composables.FileImagePicker
@@ -82,74 +84,151 @@ fun BackgroundSettingsTab(
             .padding(start = 15.dp, end = 15.dp, top = 8.dp, bottom = 15.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        // Default Background Section
-        Column {
-            Text(
-                text = stringResource(Res.string.default_background_color),
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
-            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant, thickness = 2.dp)
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = stringResource(Res.string.default_background_color_help),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-
-            BackgroundTypeRadioGroup(
-                selectedType = settings.backgroundSettings.defaultBackgroundType,
-                onTypeSelected = { type ->
-                    onSettingsChange { s ->
-                        s.copy(backgroundSettings = s.backgroundSettings.copy(defaultBackgroundType = type))
-                    }
-                },
-                defaultLabel = stringResource(Res.string.background_color_option),
-                colorLabel = stringResource(Res.string.background_image_option),
-                imageLabel = stringResource(Res.string.background_video_option),
-                types = listOf(
-                    Constants.BACKGROUND_COLOR,
-                    Constants.BACKGROUND_IMAGE,
-                    Constants.BACKGROUND_VIDEO
+        // Default Background Section — Full Screen | Lower Third
+        Row(
+            modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            // ── Full Screen default ──────────────────────────────
+            Column(modifier = Modifier.weight(1f)) {
+                GroupHeader(stringResource(Res.string.default_background_color))
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = stringResource(Res.string.default_background_color_help),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                 )
-            )
-            Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(8.dp))
 
-            when (settings.backgroundSettings.defaultBackgroundType) {
-                Constants.BACKGROUND_COLOR -> {
-                    SettingRow(stringResource(Res.string.color)) {
-                        ColorPickerField(
-                            color = settings.backgroundSettings.defaultBackgroundColor,
-                            onColorChange = { viewModel.updateDefaultColor(it, onSettingsChange) }
-                        )
+                BackgroundTypeRadioGroup(
+                    selectedType = settings.backgroundSettings.defaultBackgroundType,
+                    onTypeSelected = { type ->
+                        onSettingsChange { s ->
+                            s.copy(backgroundSettings = s.backgroundSettings.copy(defaultBackgroundType = type))
+                        }
+                    },
+                    defaultLabel = stringResource(Res.string.background_color_option),
+                    colorLabel = stringResource(Res.string.background_image_option),
+                    imageLabel = stringResource(Res.string.background_video_option),
+                    videoLabel = stringResource(Res.string.background_transparent_option),
+                    types = listOf(
+                        Constants.BACKGROUND_COLOR,
+                        Constants.BACKGROUND_IMAGE,
+                        Constants.BACKGROUND_VIDEO,
+                        Constants.BACKGROUND_TRANSPARENT
+                    )
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+
+                when (settings.backgroundSettings.defaultBackgroundType) {
+                    Constants.BACKGROUND_COLOR -> {
+                        SettingRow(stringResource(Res.string.color)) {
+                            ColorPickerField(
+                                color = settings.backgroundSettings.defaultBackgroundColor,
+                                onColorChange = { viewModel.updateDefaultColor(it, onSettingsChange) }
+                            )
+                        }
+                    }
+                    Constants.BACKGROUND_IMAGE -> {
+                        SettingRow(stringResource(Res.string.background_image)) {
+                            FileImagePicker(
+                                imagePath = settings.backgroundSettings.defaultBackgroundImage,
+                                onImagePathChange = { path ->
+                                    onSettingsChange { s ->
+                                        s.copy(backgroundSettings = s.backgroundSettings.copy(defaultBackgroundImage = path))
+                                    }
+                                },
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
+                    }
+                    Constants.BACKGROUND_VIDEO -> {
+                        SettingRow(stringResource(Res.string.background_video)) {
+                            FileVideoPicker(
+                                videoPath = settings.backgroundSettings.defaultBackgroundVideo,
+                                onVideoPathChange = { path ->
+                                    onSettingsChange { s ->
+                                        s.copy(backgroundSettings = s.backgroundSettings.copy(defaultBackgroundVideo = path))
+                                    }
+                                },
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
                     }
                 }
-                Constants.BACKGROUND_IMAGE -> {
-                    SettingRow(stringResource(Res.string.background_image)) {
-                        FileImagePicker(
-                            imagePath = settings.backgroundSettings.defaultBackgroundImage,
-                            onImagePathChange = { path ->
-                                onSettingsChange { s ->
-                                    s.copy(backgroundSettings = s.backgroundSettings.copy(defaultBackgroundImage = path))
+            }
+
+            ColumnDivider()
+
+            // ── Lower Third default ──────────────────────────────
+            Column(modifier = Modifier.weight(1f)) {
+                GroupHeader(stringResource(Res.string.default_lower_third_background))
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = stringResource(Res.string.default_lower_third_background_help),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+
+                BackgroundTypeRadioGroup(
+                    selectedType = settings.backgroundSettings.defaultLowerThirdBackgroundType,
+                    onTypeSelected = { type ->
+                        onSettingsChange { s ->
+                            s.copy(backgroundSettings = s.backgroundSettings.copy(defaultLowerThirdBackgroundType = type))
+                        }
+                    },
+                    defaultLabel = stringResource(Res.string.background_color_option),
+                    colorLabel = stringResource(Res.string.background_image_option),
+                    imageLabel = stringResource(Res.string.background_video_option),
+                    videoLabel = stringResource(Res.string.background_transparent_option),
+                    types = listOf(
+                        Constants.BACKGROUND_COLOR,
+                        Constants.BACKGROUND_IMAGE,
+                        Constants.BACKGROUND_VIDEO,
+                        Constants.BACKGROUND_TRANSPARENT
+                    )
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+
+                when (settings.backgroundSettings.defaultLowerThirdBackgroundType) {
+                    Constants.BACKGROUND_COLOR -> {
+                        SettingRow(stringResource(Res.string.color)) {
+                            ColorPickerField(
+                                color = settings.backgroundSettings.defaultLowerThirdBackgroundColor,
+                                onColorChange = { color ->
+                                    onSettingsChange { s ->
+                                        s.copy(backgroundSettings = s.backgroundSettings.copy(defaultLowerThirdBackgroundColor = color))
+                                    }
                                 }
-                            },
-                            modifier = Modifier.fillMaxWidth()
-                        )
+                            )
+                        }
                     }
-                }
-                Constants.BACKGROUND_VIDEO -> {
-                    SettingRow(stringResource(Res.string.background_video)) {
-                        FileVideoPicker(
-                            videoPath = settings.backgroundSettings.defaultBackgroundVideo,
-                            onVideoPathChange = { path ->
-                                onSettingsChange { s ->
-                                    s.copy(backgroundSettings = s.backgroundSettings.copy(defaultBackgroundVideo = path))
-                                }
-                            },
-                            modifier = Modifier.fillMaxWidth()
-                        )
+                    Constants.BACKGROUND_IMAGE -> {
+                        SettingRow(stringResource(Res.string.background_image)) {
+                            FileImagePicker(
+                                imagePath = settings.backgroundSettings.defaultLowerThirdBackgroundImage,
+                                onImagePathChange = { path ->
+                                    onSettingsChange { s ->
+                                        s.copy(backgroundSettings = s.backgroundSettings.copy(defaultLowerThirdBackgroundImage = path))
+                                    }
+                                },
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
+                    }
+                    Constants.BACKGROUND_VIDEO -> {
+                        SettingRow(stringResource(Res.string.background_video)) {
+                            FileVideoPicker(
+                                videoPath = settings.backgroundSettings.defaultLowerThirdBackgroundVideo,
+                                onVideoPathChange = { path ->
+                                    onSettingsChange { s ->
+                                        s.copy(backgroundSettings = s.backgroundSettings.copy(defaultLowerThirdBackgroundVideo = path))
+                                    }
+                                },
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
                     }
                 }
             }
@@ -236,10 +315,12 @@ private fun BackgroundColumn(
     onConfigChange: (BackgroundConfig) -> Unit,
     isLowerThird: Boolean = false
 ) {
-    val backgroundDefaultStr = stringResource(Res.string.background_default)
-    val backgroundColorStr   = stringResource(Res.string.background_color_option)
-    val backgroundImageStr   = stringResource(Res.string.background_image_option)
-    val backgroundVideoStr   = stringResource(Res.string.background_video_option)
+    val backgroundDefaultStr      = stringResource(Res.string.background_default)
+    val backgroundColorStr        = stringResource(Res.string.background_color_option)
+    val backgroundImageStr        = stringResource(Res.string.background_image_option)
+    val backgroundVideoStr        = stringResource(Res.string.background_video_option)
+    val backgroundTransparentStr  = stringResource(Res.string.background_transparent_option)
+    val backgroundGradientStr     = stringResource(Res.string.gradient_enabled)
 
     SectionHeader(subtitle)
     Spacer(modifier = Modifier.height(10.dp))
@@ -253,11 +334,19 @@ private fun BackgroundColumn(
 
     BackgroundTypeRadioGroup(
         selectedType = config.backgroundType,
-        onTypeSelected = { onConfigChange(config.copy(backgroundType = it)) },
-        defaultLabel = backgroundDefaultStr,
-        colorLabel   = backgroundColorStr,
-        imageLabel   = backgroundImageStr,
-        videoLabel   = backgroundVideoStr
+        onTypeSelected = { type ->
+            if (type == Constants.BACKGROUND_GRADIENT) {
+                onConfigChange(config.copy(backgroundType = type, gradientEnabled = true))
+            } else {
+                onConfigChange(config.copy(backgroundType = type, gradientEnabled = false))
+            }
+        },
+        defaultLabel      = backgroundDefaultStr,
+        colorLabel        = backgroundColorStr,
+        imageLabel        = backgroundImageStr,
+        videoLabel        = backgroundVideoStr,
+        transparentLabel  = backgroundTransparentStr,
+        gradientLabel     = if (isLowerThird) backgroundGradientStr else null
     )
 
     Spacer(modifier = Modifier.height(10.dp))
@@ -294,64 +383,44 @@ private fun BackgroundColumn(
         }
     }
 
-    // Gradient controls — only for lower-third columns
-    if (isLowerThird) {
-        Spacer(modifier = Modifier.height(10.dp))
-        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant, thickness = 1.dp)
+    // Gradient controls — shown when Gradient type is selected (lower-third columns only)
+    if (isLowerThird && config.backgroundType == Constants.BACKGROUND_GRADIENT) {
         Spacer(modifier = Modifier.height(6.dp))
-
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Checkbox(
-                checked = config.gradientEnabled,
-                onCheckedChange = { onConfigChange(config.copy(gradientEnabled = it)) },
-                modifier = Modifier.size(28.dp)
-            )
-            Text(
-                text = stringResource(Res.string.gradient_enabled),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.padding(start = 4.dp)
+        SettingRow(stringResource(Res.string.gradient_top_color)) {
+            ColorPickerField(
+                color = config.gradientTopColor,
+                onColorChange = { onConfigChange(config.copy(gradientTopColor = it)) }
             )
         }
-
-        if (config.gradientEnabled) {
-            Spacer(modifier = Modifier.height(6.dp))
-            SettingRow(stringResource(Res.string.gradient_top_color)) {
-                ColorPickerField(
-                    color = config.gradientTopColor,
-                    onColorChange = { onConfigChange(config.copy(gradientTopColor = it)) }
-                )
-            }
-            SettingRow("${stringResource(Res.string.gradient_opacity)}: ${(config.gradientTopOpacity * 100).toInt()}%") {
-                Slider(
-                    value = config.gradientTopOpacity,
-                    onValueChange = { onConfigChange(config.copy(gradientTopOpacity = it)) },
-                    valueRange = 0f..1f,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-            SettingRow(stringResource(Res.string.gradient_bottom_color)) {
-                ColorPickerField(
-                    color = config.gradientBottomColor,
-                    onColorChange = { onConfigChange(config.copy(gradientBottomColor = it)) }
-                )
-            }
-            SettingRow("${stringResource(Res.string.gradient_opacity)}: ${(config.gradientBottomOpacity * 100).toInt()}%") {
-                Slider(
-                    value = config.gradientBottomOpacity,
-                    onValueChange = { onConfigChange(config.copy(gradientBottomOpacity = it)) },
-                    valueRange = 0f..1f,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-            SettingRow("${stringResource(Res.string.gradient_position)}: ${(config.gradientPosition * 100).toInt()}%") {
-                Slider(
-                    value = config.gradientPosition,
-                    onValueChange = { onConfigChange(config.copy(gradientPosition = it)) },
-                    valueRange = 0f..1f,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
+        SettingRow("${stringResource(Res.string.gradient_opacity)}: ${(config.gradientTopOpacity * 100).toInt()}%") {
+            Slider(
+                value = config.gradientTopOpacity,
+                onValueChange = { onConfigChange(config.copy(gradientTopOpacity = it)) },
+                valueRange = 0f..1f,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+        SettingRow(stringResource(Res.string.gradient_bottom_color)) {
+            ColorPickerField(
+                color = config.gradientBottomColor,
+                onColorChange = { onConfigChange(config.copy(gradientBottomColor = it)) }
+            )
+        }
+        SettingRow("${stringResource(Res.string.gradient_opacity)}: ${(config.gradientBottomOpacity * 100).toInt()}%") {
+            Slider(
+                value = config.gradientBottomOpacity,
+                onValueChange = { onConfigChange(config.copy(gradientBottomOpacity = it)) },
+                valueRange = 0f..1f,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+        SettingRow("${stringResource(Res.string.gradient_position)}: ${(config.gradientPosition * 100).toInt()}%") {
+            Slider(
+                value = config.gradientPosition,
+                onValueChange = { onConfigChange(config.copy(gradientPosition = it)) },
+                valueRange = 0f..1f,
+                modifier = Modifier.fillMaxWidth()
+            )
         }
     }
 }
@@ -374,6 +443,8 @@ private fun BackgroundTypeRadioGroup(
     colorLabel: String,
     imageLabel: String,
     videoLabel: String? = null,
+    transparentLabel: String? = null,
+    gradientLabel: String? = null,
     types: List<String>? = null
 ) {
     val entries = if (types != null) {
@@ -381,12 +452,14 @@ private fun BackgroundTypeRadioGroup(
         val labels = listOfNotNull(defaultLabel, colorLabel, imageLabel, videoLabel)
         types.zip(labels)
     } else {
-        // Standard: Default, Color, Image + optional Video
+        // Standard: Default, Color, Image + optional Video + optional Transparent + optional Gradient
         buildList {
             add(Constants.BACKGROUND_DEFAULT to defaultLabel)
             add(Constants.BACKGROUND_COLOR to colorLabel)
             add(Constants.BACKGROUND_IMAGE to imageLabel)
             if (videoLabel != null) add(Constants.BACKGROUND_VIDEO to videoLabel)
+            if (transparentLabel != null) add(Constants.BACKGROUND_TRANSPARENT to transparentLabel)
+            if (gradientLabel != null) add(Constants.BACKGROUND_GRADIENT to gradientLabel)
         }
     }
     Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
