@@ -2,36 +2,65 @@ package org.churchpresenter.app.churchpresenter.tabs
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.key.*
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.*
+import org.churchpresenter.app.churchpresenter.data.AppSettings
+import org.churchpresenter.app.churchpresenter.data.WebBookmark
+import org.churchpresenter.app.churchpresenter.presenter.CefManager
 import org.churchpresenter.app.churchpresenter.presenter.EmbeddedWebView
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.app.churchpresenter.presenter.WebNavController
+import org.churchpresenter.app.churchpresenter.presenter.rememberWebNavController
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.jetbrains.compose.resources.stringResource
+import java.awt.GraphicsEnvironment
 
 @Composable
 fun WebTab(
     modifier: Modifier = Modifier,
     presenterManager: PresenterManager? = null,
     selectedWebsiteItem: org.churchpresenter.app.churchpresenter.models.ScheduleItem.WebsiteItem? = null,
+    appSettings: AppSettings = AppSettings(),
+    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit = {},
     onAddToSchedule: ((url: String, title: String) -> Unit)? = null,
     onUpdateScheduleTitle: ((url: String, title: String) -> Unit)? = null
 ) {
-    // Current URL typed by the user
-    var urlInput by remember { mutableStateOf("https://") }
-    // URL actually loaded in the preview / sent live
-    var liveUrl by remember { mutableStateOf("") }
-    var isLive by remember { mutableStateOf(false) }
-    var pageTitle by remember { mutableStateOf("") }
+    // Presentation screen dimensions (use second screen if available, else 1920x1080)
+    val presenterScreen = remember {
+        val screens = GraphicsEnvironment.getLocalGraphicsEnvironment().screenDevices
+        if (screens.size > 1) screens[1].defaultConfiguration.bounds
+        else java.awt.Rectangle(0, 0, 1920, 1080)
+    }
+    val previewAspectRatio = remember(presenterScreen) {
+        presenterScreen.width.toFloat() / presenterScreen.height.toFloat()
+    }
 
-    // Clear snapshot when no longer live so preview shows blank
+    // Restore URL / title from PresenterManager so state survives tab switches
+    val savedUrl = presenterManager?.websiteUrl?.value ?: ""
+    val savedTitle = presenterManager?.webPageTitle?.value ?: ""
+
+    // Current URL typed by the user
+    var urlInput by remember { mutableStateOf(savedUrl.ifBlank { "https://" }) }
+    // URL actually loaded in the preview / sent live
+    var liveUrl by remember { mutableStateOf(savedUrl) }
+    var pageTitle by remember { mutableStateOf(savedTitle) }
+
+    // Derive isLive from the presenter mode — clears automatically on "Clear Display"
+    val presentingMode = presenterManager?.presentingMode?.value ?: Presenting.NONE
+    val isLive = presentingMode == Presenting.WEBSITE
+
+    // Clear snapshot when no longer live
     LaunchedEffect(isLive) {
         if (!isLive) presenterManager?.setWebSnapshot(null)
     }
@@ -42,7 +71,6 @@ fun WebTab(
             urlInput = item.url
             liveUrl = item.url
             pageTitle = item.title
-            isLive = true
             presenterManager?.setWebsiteUrl(item.url)
             presenterManager?.setWebPageTitle(item.title)
             presenterManager?.setPresentingMode(Presenting.WEBSITE)
@@ -51,9 +79,8 @@ fun WebTab(
 
     // Keep the presenter in sync whenever the preview navigates to a new page
     fun onPreviewNavigated(newUrl: String) {
-        if (isLive) {
-            presenterManager?.setWebsiteUrl(newUrl)
-        }
+        urlInput = newUrl
+        presenterManager?.setWebsiteUrl(newUrl)
     }
 
     fun onTitleChanged(title: String) {
@@ -63,18 +90,49 @@ fun WebTab(
         if (liveUrl.isNotBlank()) onUpdateScheduleTitle?.invoke(liveUrl, title)
     }
 
+    val navController = rememberWebNavController()
+
+    val bookmarks = appSettings.webBookmarks
+    val currentUrlNormalised = normaliseUrl(urlInput)
+    val isBookmarked = bookmarks.any { it.url == currentUrlNormalised }
+
     Column(
         modifier = modifier
             .fillMaxSize()
             .padding(8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-        // ── URL input + action buttons ────────────────────────────────────────
+        // ── URL input row ──────────────────────────────────────────────────
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            // Back
+            IconButton(onClick = { navController.goBack() }) {
+                Text("<", style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.onSurface)
+            }
+            // Forward
+            IconButton(onClick = { navController.goForward() }) {
+                Text(">", style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.onSurface)
+            }
+            // Refresh
+            IconButton(onClick = { navController.browser?.reload() }) {
+                Text("R", style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface)
+            }
+            // Clear cache
+            IconButton(onClick = {
+                val cacheDir = java.io.File(System.getProperty("user.home"), ".churchpresenter/webview-cache")
+                if (cacheDir.exists()) cacheDir.deleteRecursively()
+                cacheDir.mkdirs()
+            }) {
+                Text("X", style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.error)
+            }
+
             OutlinedTextField(
                 value = urlInput,
                 onValueChange = { urlInput = it },
@@ -100,20 +158,29 @@ fun WebTab(
                 textStyle = MaterialTheme.typography.bodyMedium
             )
 
-            // Go Live
-            Button(
+            // Star bookmark toggle
+            IconButton(
                 onClick = {
                     val url = normaliseUrl(urlInput)
-                    urlInput = url
-                    liveUrl = url
-                    isLive = true
-                    presenterManager?.setWebsiteUrl(url)
-                    presenterManager?.setPresentingMode(Presenting.WEBSITE)
+                    if (isBookmarked) {
+                        onSettingsChange { s ->
+                            s.copy(webBookmarks = s.webBookmarks.filter { it.url != url })
+                        }
+                    } else {
+                        val title = pageTitle.ifBlank { url }
+                        onSettingsChange { s ->
+                            s.copy(webBookmarks = s.webBookmarks + WebBookmark(url = url, title = title))
+                        }
+                    }
                 },
-                enabled = urlInput.isNotBlank(),
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                enabled = urlInput.isNotBlank() && urlInput != "https://"
             ) {
-                Text(stringResource(Res.string.web_go_live), style = MaterialTheme.typography.labelMedium)
+                Text(
+                    text = if (isBookmarked) "\u2605" else "\u2606",
+                    style = MaterialTheme.typography.titleLarge,
+                    color = if (isBookmarked) MaterialTheme.colorScheme.primary
+                    else MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
 
             // Add to Schedule
@@ -130,9 +197,75 @@ fun WebTab(
                     Text(stringResource(Res.string.web_add_to_schedule), style = MaterialTheme.typography.labelMedium)
                 }
             }
+
+            // Go Live
+            Button(
+                onClick = {
+                    val url = normaliseUrl(urlInput)
+                    urlInput = url
+                    liveUrl = url
+                    presenterManager?.setWebsiteUrl(url)
+                    presenterManager?.setPresentingMode(Presenting.WEBSITE)
+                },
+                enabled = urlInput.isNotBlank(),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+            ) {
+                Text(stringResource(Res.string.web_go_live), style = MaterialTheme.typography.labelMedium)
+            }
+
         }
 
-        // ── Live badge ────────────────────────────────────────────────────────
+        // ── Horizontal bookmarks bar ───────────────────────────────────────
+        if (bookmarks.isNotEmpty()) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .horizontalScroll(rememberScrollState())
+                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f), RoundedCornerShape(4.dp))
+                    .padding(horizontal = 4.dp, vertical = 2.dp),
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                bookmarks.forEach { bookmark ->
+                    Surface(
+                        shape = RoundedCornerShape(4.dp),
+                        color = if (liveUrl == bookmark.url) MaterialTheme.colorScheme.primaryContainer
+                        else MaterialTheme.colorScheme.surface,
+                        modifier = Modifier.clickable {
+                            urlInput = bookmark.url
+                            liveUrl = bookmark.url
+                            pageTitle = bookmark.title
+                        }
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Text(
+                                text = bookmark.title.ifBlank { bookmark.url },
+                                style = MaterialTheme.typography.labelSmall,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.widthIn(max = 160.dp)
+                            )
+                            Text(
+                                text = "\u2715",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                                modifier = Modifier.clickable {
+                                    onSettingsChange { s ->
+                                        s.copy(webBookmarks = s.webBookmarks.filter { it.url != bookmark.url })
+                                    }
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
+        // ── Live badge ─────────────────────────────────────────────────────
         if (isLive) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 Surface(
@@ -155,10 +288,11 @@ fun WebTab(
             }
         }
 
-        // ── Preview WebView ───────────────────────────────────────────────────
+        // ── Preview WebView ────────────────────────────────────────────────
         Box(
             modifier = Modifier
-                .fillMaxSize()
+                .fillMaxWidth()
+                .aspectRatio(previewAspectRatio)
                 .border(
                     width = if (isLive) 2.dp else 1.dp,
                     color = if (isLive) MaterialTheme.colorScheme.primary
@@ -174,7 +308,9 @@ fun WebTab(
                     onTitleChanged = { title -> onTitleChanged(title) },
                     onSnapshot = { bitmap ->
                         if (isLive) presenterManager?.setWebSnapshot(bitmap)
-                    }
+                    },
+                    navController = navController,
+                    targetViewportWidth = presenterScreen.width
                 )
             } else {
                 Box(

@@ -450,6 +450,22 @@ internal fun openLottieGeneratorDialog(
         isModal = false
         preferredSize = Dimension(1200, 800)
         defaultCloseOperation = JDialog.HIDE_ON_CLOSE
+        // Inherit the app icon from the parent window or load from app resources
+        try {
+            val icons = parentWindow?.iconImages
+            if (!icons.isNullOrEmpty()) {
+                iconImages = icons
+            } else {
+                val resDir = System.getProperty("compose.application.resources.dir")
+                if (resDir != null) {
+                    val iconFile = File(resDir, "icon-128.png").takeIf { it.exists() }
+                        ?: File(resDir, "icon-64.png").takeIf { it.exists() }
+                    if (iconFile != null) {
+                        iconImages = listOf(javax.imageio.ImageIO.read(iconFile))
+                    }
+                }
+            }
+        } catch (_: Exception) {}
     }
 
     val cards = CardLayout()
