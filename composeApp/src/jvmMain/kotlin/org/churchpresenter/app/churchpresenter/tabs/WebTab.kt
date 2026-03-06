@@ -132,17 +132,26 @@ fun WebTab(
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Back
-            IconButton(onClick = { navController.goBack() }) {
+            IconButton(onClick = {
+                val live = presenterManager?.liveBrowser?.value
+                if (isLive && !useInteractivePreview && live != null) live.goBack() else navController.goBack()
+            }) {
                 Text("<", style = MaterialTheme.typography.titleLarge,
                     color = MaterialTheme.colorScheme.onSurface)
             }
             // Forward
-            IconButton(onClick = { navController.goForward() }) {
+            IconButton(onClick = {
+                val live = presenterManager?.liveBrowser?.value
+                if (isLive && !useInteractivePreview && live != null) live.goForward() else navController.goForward()
+            }) {
                 Text(">", style = MaterialTheme.typography.titleLarge,
                     color = MaterialTheme.colorScheme.onSurface)
             }
             // Refresh
-            IconButton(onClick = { navController.browser?.reload() }) {
+            IconButton(onClick = {
+                val live = presenterManager?.liveBrowser?.value
+                if (isLive && !useInteractivePreview && live != null) live.reload() else navController.browser?.reload()
+            }) {
                 Text("R", style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurface)
             }
@@ -381,9 +390,19 @@ fun WebTab(
                                         try {
                                             when (event.type) {
                                                 PointerEventType.Press -> {
+                                                    val now = System.currentTimeMillis()
+                                                    // Ensure CEF knows the mouse is inside + at position
+                                                    sendMouse.invoke(liveBrowser, java.awt.event.MouseEvent(
+                                                        comp, java.awt.event.MouseEvent.MOUSE_ENTERED,
+                                                        now, 0, bx, by, 0, false
+                                                    ))
+                                                    sendMouse.invoke(liveBrowser, java.awt.event.MouseEvent(
+                                                        comp, java.awt.event.MouseEvent.MOUSE_MOVED,
+                                                        now, 0, bx, by, 0, false
+                                                    ))
                                                     sendMouse.invoke(liveBrowser, java.awt.event.MouseEvent(
                                                         comp, java.awt.event.MouseEvent.MOUSE_PRESSED,
-                                                        System.currentTimeMillis(),
+                                                        now,
                                                         java.awt.event.InputEvent.BUTTON1_DOWN_MASK,
                                                         bx, by, 1, false, java.awt.event.MouseEvent.BUTTON1
                                                     ))
@@ -392,7 +411,8 @@ fun WebTab(
                                                     val now = System.currentTimeMillis()
                                                     sendMouse.invoke(liveBrowser, java.awt.event.MouseEvent(
                                                         comp, java.awt.event.MouseEvent.MOUSE_RELEASED,
-                                                        now, 0, bx, by, 1, false, java.awt.event.MouseEvent.BUTTON1
+                                                        now, java.awt.event.InputEvent.BUTTON1_DOWN_MASK,
+                                                        bx, by, 1, false, java.awt.event.MouseEvent.BUTTON1
                                                     ))
                                                     sendMouse.invoke(liveBrowser, java.awt.event.MouseEvent(
                                                         comp, java.awt.event.MouseEvent.MOUSE_CLICKED,
