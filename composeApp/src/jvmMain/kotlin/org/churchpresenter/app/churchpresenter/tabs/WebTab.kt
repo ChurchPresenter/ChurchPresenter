@@ -32,9 +32,6 @@ import org.churchpresenter.app.churchpresenter.presenter.rememberWebNavControlle
 import org.churchpresenter.app.churchpresenter.utils.presenterAspectRatio
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.jetbrains.compose.resources.stringResource
-import java.awt.event.MouseEvent
-import java.awt.event.MouseWheelEvent
-import javax.swing.SwingUtilities
 
 @Composable
 fun WebTab(
@@ -351,75 +348,71 @@ fun WebTab(
                             .fillMaxSize()
                             .onSizeChanged { imageSize = it }
                             .pointerInput(liveBrowser) {
+                                // Forward mouse clicks and moves via CDP
+                                val devTools = liveBrowser?.getDevToolsClient()
                                 awaitPointerEventScope {
                                     while (true) {
                                         val event = awaitPointerEvent()
-                                        val comp = liveBrowser?.getUIComponent() ?: continue
+                                        if (devTools == null || devTools.isClosed) continue
+                                        val comp = liveBrowser.getUIComponent()
                                         if (imageSize.width <= 0 || imageSize.height <= 0) continue
                                         val scaleX = comp.width.toFloat() / imageSize.width
                                         val scaleY = comp.height.toFloat() / imageSize.height
                                         val pos = event.changes.firstOrNull()?.position ?: continue
                                         val bx = (pos.x * scaleX).toInt()
                                         val by = (pos.y * scaleY).toInt()
-                                        val awtId = when (event.type) {
-                                            PointerEventType.Press -> MouseEvent.MOUSE_PRESSED
-                                            PointerEventType.Release -> MouseEvent.MOUSE_RELEASED
-                                            PointerEventType.Move -> MouseEvent.MOUSE_MOVED
+                                        when (event.type) {
+                                            PointerEventType.Press -> {
+                                                devTools.executeDevToolsMethod("Input.dispatchMouseEvent",
+                                                    """{"type":"mousePressed","x":$bx,"y":$by,"button":"left","clickCount":1}""")
+                                            }
+                                            PointerEventType.Release -> {
+                                                devTools.executeDevToolsMethod("Input.dispatchMouseEvent",
+                                                    """{"type":"mouseReleased","x":$bx,"y":$by,"button":"left","clickCount":1}""")
+                                            }
+                                            PointerEventType.Move -> {
+                                                devTools.executeDevToolsMethod("Input.dispatchMouseEvent",
+                                                    """{"type":"mouseMoved","x":$bx,"y":$by}""")
+                                            }
                                             else -> continue
-                                        }
-                                        SwingUtilities.invokeLater {
-                                            comp.dispatchEvent(
-                                                MouseEvent(
-                                                    comp, awtId, System.currentTimeMillis(),
-                                                    0, bx, by, 1, false
-                                                )
-                                            )
                                         }
                                     }
                                 }
                             }
                             .pointerInput(liveBrowser) {
+                                // Forward scroll via CDP
+                                val devTools = liveBrowser?.getDevToolsClient()
                                 awaitPointerEventScope {
                                     while (true) {
                                         val event = awaitPointerEvent()
                                         if (event.type != PointerEventType.Scroll) continue
-                                        val comp = liveBrowser?.getUIComponent() ?: continue
+                                        if (devTools == null || devTools.isClosed) continue
+                                        val comp = liveBrowser.getUIComponent()
                                         if (imageSize.width <= 0 || imageSize.height <= 0) continue
                                         val scaleX = comp.width.toFloat() / imageSize.width
                                         val scaleY = comp.height.toFloat() / imageSize.height
                                         val change = event.changes.firstOrNull() ?: continue
                                         val pos = change.position
                                         val scroll = change.scrollDelta
-                                        SwingUtilities.invokeLater {
-                                            comp.dispatchEvent(
-                                                MouseWheelEvent(
-                                                    comp, MouseWheelEvent.MOUSE_WHEEL,
-                                                    System.currentTimeMillis(), 0,
-                                                    (pos.x * scaleX).toInt(), (pos.y * scaleY).toInt(),
-                                                    0, false, MouseWheelEvent.WHEEL_UNIT_SCROLL,
-                                                    3, scroll.y.toInt()
-                                                )
-                                            )
-                                        }
+                                        val bx = (pos.x * scaleX).toInt()
+                                        val by = (pos.y * scaleY).toInt()
+                                        val deltaY = (scroll.y * -120).toInt()
+                                        devTools.executeDevToolsMethod("Input.dispatchMouseEvent",
+                                            """{"type":"mouseWheel","x":$bx,"y":$by,"deltaX":0,"deltaY":$deltaY}""")
                                     }
                                 }
                             }
                             .onKeyEvent { keyEvent ->
-                                val comp = liveBrowser?.getUIComponent() ?: return@onKeyEvent false
-                                val awtId = when (keyEvent.type) {
-                                    KeyEventType.KeyDown -> java.awt.event.KeyEvent.KEY_PRESSED
-                                    KeyEventType.KeyUp -> java.awt.event.KeyEvent.KEY_RELEASED
+                                val devTools = liveBrowser?.getDevToolsClient() ?: return@onKeyEvent false
+                                if (devTools.isClosed) return@onKeyEvent false
+                                val cdpType = when (keyEvent.type) {
+                                    KeyEventType.KeyDown -> "keyDown"
+                                    KeyEventType.KeyUp -> "keyUp"
                                     else -> return@onKeyEvent false
                                 }
                                 val nativeCode = keyEvent.key.nativeKeyCode
-                                SwingUtilities.invokeLater {
-                                    comp.dispatchEvent(
-                                        java.awt.event.KeyEvent(
-                                            comp, awtId, System.currentTimeMillis(), 0,
-                                            nativeCode, nativeCode.toChar()
-                                        )
-                                    )
-                                }
+                                devTools.executeDevToolsMethod("Input.dispatchKeyEvent",
+                                    """{"type":"$cdpType","windowsVirtualKeyCode":$nativeCode}""")
                                 true
                             },
                         contentScale = ContentScale.Fit
