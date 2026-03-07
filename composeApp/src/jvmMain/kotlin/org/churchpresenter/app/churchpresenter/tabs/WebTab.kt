@@ -453,16 +453,18 @@ fun WebTab(
                                         if (sendMouse == null) continue
                                         if (imageSize.width <= 0 || imageSize.height <= 0) continue
                                         val comp = liveBrowser.getUIComponent()
+                                        if (!comp.isShowing || comp.width <= 0 || comp.height <= 0) continue
                                         val scaleX = comp.width.toFloat() / imageSize.width
                                         val scaleY = comp.height.toFloat() / imageSize.height
                                         val pos = event.changes.firstOrNull()?.position ?: continue
-                                        val bx = (pos.x * scaleX).toInt()
-                                        val by = (pos.y * scaleY).toInt()
+                                        val bx = (pos.x * scaleX).toInt().coerceIn(0, comp.width - 1)
+                                        val by = (pos.y * scaleY).toInt().coerceIn(0, comp.height - 1)
                                         when (event.type) {
                                             PointerEventType.Press -> {
                                                 val now = System.currentTimeMillis()
                                                 javax.swing.SwingUtilities.invokeLater {
                                                     try {
+                                                        if (!comp.isShowing) return@invokeLater
                                                         sendMouse.invoke(liveBrowser, java.awt.event.MouseEvent(
                                                             comp, java.awt.event.MouseEvent.MOUSE_ENTERED,
                                                             now, 0, bx, by, 0, false
@@ -484,6 +486,7 @@ fun WebTab(
                                                 val now = System.currentTimeMillis()
                                                 javax.swing.SwingUtilities.invokeLater {
                                                     try {
+                                                        if (!comp.isShowing) return@invokeLater
                                                         sendMouse.invoke(liveBrowser, java.awt.event.MouseEvent(
                                                             comp, java.awt.event.MouseEvent.MOUSE_RELEASED,
                                                             now, 0, bx, by, 1, false, java.awt.event.MouseEvent.BUTTON1
@@ -501,6 +504,7 @@ fun WebTab(
                                                 lastMoveTime = now
                                                 javax.swing.SwingUtilities.invokeLater {
                                                     try {
+                                                        if (!comp.isShowing) return@invokeLater
                                                         sendMouse.invoke(liveBrowser, java.awt.event.MouseEvent(
                                                             comp, java.awt.event.MouseEvent.MOUSE_MOVED,
                                                             now, 0, bx, by, 0, false
@@ -523,19 +527,21 @@ fun WebTab(
                                         if (event.type != PointerEventType.Scroll) continue
                                         if (sendWheel == null) continue
                                         val comp = liveBrowser.getUIComponent()
+                                        if (!comp.isShowing || comp.width <= 0 || comp.height <= 0) continue
                                         if (imageSize.width <= 0 || imageSize.height <= 0) continue
                                         val scaleX = comp.width.toFloat() / imageSize.width
                                         val scaleY = comp.height.toFloat() / imageSize.height
                                         val change = event.changes.firstOrNull() ?: continue
                                         val pos = change.position
                                         val scroll = change.scrollDelta
-                                        val bx = (pos.x * scaleX).toInt()
-                                        val by = (pos.y * scaleY).toInt()
-                                        val vRotation = -(scroll.y * 15).toInt()
-                                        val hRotation = -(scroll.x * 15).toInt()
+                                        val bx = (pos.x * scaleX).toInt().coerceIn(0, comp.width - 1)
+                                        val by = (pos.y * scaleY).toInt().coerceIn(0, comp.height - 1)
+                                        val vRotation = -(scroll.y * 15).toInt().coerceIn(-100, 100)
+                                        val hRotation = -(scroll.x * 15).toInt().coerceIn(-100, 100)
                                         if (vRotation == 0 && hRotation == 0) continue
                                         javax.swing.SwingUtilities.invokeLater {
                                             try {
+                                                if (!comp.isShowing) return@invokeLater
                                                 if (vRotation != 0) {
                                                     sendWheel.invoke(liveBrowser, java.awt.event.MouseWheelEvent(
                                                         comp, java.awt.event.MouseWheelEvent.MOUSE_WHEEL,
@@ -570,9 +576,11 @@ fun WebTab(
                                 }
                                 val nativeCode = keyEvent.key.nativeKeyCode
                                 val comp = liveBrowser.getUIComponent()
+                                if (!comp.isShowing) return@onKeyEvent false
                                 val now = System.currentTimeMillis()
                                 javax.swing.SwingUtilities.invokeLater {
                                     try {
+                                        if (!comp.isShowing) return@invokeLater
                                         sendKey.invoke(liveBrowser, java.awt.event.KeyEvent(
                                             comp, awtType, now, 0,
                                             nativeCode, nativeCode.toChar()
