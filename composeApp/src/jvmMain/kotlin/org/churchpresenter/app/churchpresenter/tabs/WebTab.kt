@@ -18,6 +18,7 @@ import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
@@ -583,11 +584,36 @@ fun WebTab(
                         contentScale = ContentScale.Fit
                     )
                 } else {
+                    // Show spinner while waiting for first snapshot; after 3s show help text
+                    var showHint by remember { mutableStateOf(false) }
+                    LaunchedEffect(Unit) {
+                        kotlinx.coroutines.delay(7000)
+                        showHint = true
+                    }
                     Box(
                         Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface),
                         contentAlignment = Alignment.Center
                     ) {
-                        CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                            if (showHint) {
+                                Spacer(Modifier.height(12.dp))
+                                if (System.getProperty("os.name", "").lowercase().contains("mac")) {
+                                    Text(
+                                        "If this persists, grant Screen Recording permission\nin System Settings > Privacy & Security > Screen Recording",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                                        textAlign = TextAlign.Center
+                                    )
+                                } else {
+                                    Text(
+                                        "Waiting for snapshot...",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
             } else if (liveUrl.isNotBlank()) {

@@ -21,6 +21,7 @@ import javax.swing.SwingUtilities
 import javax.swing.filechooser.FileNameExtensionFilter
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.no_video_selected
+import churchpresenter.composeapp.generated.resources.video_files_filter
 import org.churchpresenter.app.churchpresenter.utils.createFileChooser
 import org.jetbrains.compose.resources.stringResource
 
@@ -30,6 +31,7 @@ fun FileVideoPicker(
     onVideoPathChange: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val videoFilesFilterStr = stringResource(Res.string.video_files_filter)
     Row(
         modifier = modifier
             .height(32.dp)
@@ -40,7 +42,7 @@ fun FileVideoPicker(
                         fileSelectionMode = JFileChooser.FILES_ONLY
                         isMultiSelectionEnabled = false
                         fileFilter = FileNameExtensionFilter(
-                            "Video Files (*.mp4, *.mov, *.avi, *.mkv, *.webm)",
+                            videoFilesFilterStr,
                             "mp4", "mov", "avi", "mkv", "webm"
                         )
                         if (videoPath.isNotEmpty()) {

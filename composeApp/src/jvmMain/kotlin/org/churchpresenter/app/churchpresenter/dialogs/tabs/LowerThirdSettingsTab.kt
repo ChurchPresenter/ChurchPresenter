@@ -42,6 +42,12 @@ import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.lower_third_generator
 import churchpresenter.composeapp.generated.resources.loading_generator
 import churchpresenter.composeapp.generated.resources.preview_will_appear_here
+import churchpresenter.composeapp.generated.resources.server_not_running_title
+import churchpresenter.composeapp.generated.resources.server_not_running_message
+import churchpresenter.composeapp.generated.resources.no_folder_title
+import churchpresenter.composeapp.generated.resources.no_folder_message
+import churchpresenter.composeapp.generated.resources.choose_logo_image
+import churchpresenter.composeapp.generated.resources.images_filter
 import churchpresenter.composeapp.generated.resources.bottom
 import churchpresenter.composeapp.generated.resources.display_lower_third
 import churchpresenter.composeapp.generated.resources.generate_lower_third
@@ -131,6 +137,12 @@ fun LowerThirdSettingsTab(
     val noLottieFilesStr = stringResource(Res.string.no_lottie_files)
     val generatorTitle = stringResource(Res.string.lower_third_generator)
     val generatorLoading = stringResource(Res.string.loading_generator)
+    val serverNotRunningTitleStr = stringResource(Res.string.server_not_running_title)
+    val serverNotRunningMessageStr = stringResource(Res.string.server_not_running_message)
+    val noFolderTitleStr = stringResource(Res.string.no_folder_title)
+    val noFolderMessageStr = stringResource(Res.string.no_folder_message)
+    val chooseLogoTitleStr = stringResource(Res.string.choose_logo_image)
+    val imagesFilterStr = stringResource(Res.string.images_filter)
 
     Box(
         modifier = Modifier
@@ -214,6 +226,12 @@ fun LowerThirdSettingsTab(
                     onClick = {
                         val genTitle = generatorTitle
                         val genLoading = generatorLoading
+                        val srvTitle = serverNotRunningTitleStr
+                        val srvMsg = serverNotRunningMessageStr
+                        val nfTitle = noFolderTitleStr
+                        val nfMsg = noFolderMessageStr
+                        val logoTitle = chooseLogoTitleStr
+                        val imgFilter = imagesFilterStr
                         SwingUtilities.invokeLater {
                             openLottieGeneratorDialog(
                                 parentWindow = Window.getWindows().firstOrNull { it.isActive },
@@ -222,7 +240,13 @@ fun LowerThirdSettingsTab(
                                 isDarkTheme = isDarkTheme,
                                 lowerThirdFolder = settings.streamingSettings.lowerThirdFolder,
                                 generatorDialogTitle = genTitle,
-                                loadingText = genLoading
+                                loadingText = genLoading,
+                                serverNotRunningTitle = srvTitle,
+                                serverNotRunningMessage = srvMsg,
+                                noFolderTitle = nfTitle,
+                                noFolderMessage = nfMsg,
+                                chooseLogoTitle = logoTitle,
+                                imagesFilterText = imgFilter
                             )
                         }
                     }
@@ -423,7 +447,13 @@ internal fun openLottieGeneratorDialog(
     isDarkTheme: Boolean = true,
     lowerThirdFolder: String = "",
     generatorDialogTitle: String = "Lower Third Generator",
-    loadingText: String = "Loading generator..."
+    loadingText: String = "Loading generator...",
+    serverNotRunningTitle: String = "Server Not Running",
+    serverNotRunningMessage: String = "Please start the API server to generate lower thirds.\nGenerated files will be saved to the folder configured in Settings.",
+    noFolderTitle: String = "No Folder",
+    noFolderMessage: String = "No folder configured.\nSet a Lower Third folder in Settings first.",
+    chooseLogoTitle: String = "Choose Logo Image",
+    imagesFilterText: String = "Images"
 ) {
     val loadUrl: String = if (serverUrl.isNotEmpty()) {
         val port = java.net.URI(serverUrl).port.takeIf { it > 0 } ?: 8765
@@ -431,9 +461,8 @@ internal fun openLottieGeneratorDialog(
     } else {
         javax.swing.JOptionPane.showMessageDialog(
             parentWindow,
-            "Please start the API server to generate lower thirds.\n" +
-                "Generated files will be saved to the folder configured in Settings.",
-            "Server Not Running",
+            serverNotRunningMessage,
+            serverNotRunningTitle,
             javax.swing.JOptionPane.INFORMATION_MESSAGE
         )
         return
@@ -568,8 +597,8 @@ internal fun openLottieGeneratorDialog(
                     } else {
                         javax.swing.JOptionPane.showMessageDialog(
                             dialog,
-                            "No folder configured.\nSet a Lower Third folder in Settings first.",
-                            "No Folder",
+                            noFolderMessage,
+                            noFolderTitle,
                             javax.swing.JOptionPane.WARNING_MESSAGE
                         )
                     }
@@ -593,8 +622,8 @@ internal fun openLottieGeneratorDialog(
                     if (folder.isEmpty()) {
                         javax.swing.JOptionPane.showMessageDialog(
                             dialog,
-                            "No folder configured.\nSet a Lower Third folder in Settings first.",
-                            "No Folder",
+                            noFolderMessage,
+                            noFolderTitle,
                             javax.swing.JOptionPane.WARNING_MESSAGE
                         )
                         Platform.runLater {
@@ -603,9 +632,9 @@ internal fun openLottieGeneratorDialog(
                         return@invokeLater
                     }
                     val chooser = javax.swing.JFileChooser().apply {
-                        dialogTitle = "Choose Logo Image"
+                        dialogTitle = chooseLogoTitle
                         fileFilter = javax.swing.filechooser.FileNameExtensionFilter(
-                            "Images", "png", "jpg", "jpeg", "gif", "svg", "webp"
+                            imagesFilterText, "png", "jpg", "jpeg", "gif", "svg", "webp"
                         )
                     }
                     if (chooser.showOpenDialog(dialog) == javax.swing.JFileChooser.APPROVE_OPTION) {
