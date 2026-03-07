@@ -472,9 +472,9 @@
 
     <!-- Background Settings Tab -->
     <string name="default_background_color">Default Background</string>
-    <string name="default_background_color_help">Used when \'Default\' is selected for Bible or Songs</string>
+    <string name="default_background_color_help">Used when 'Default' is selected for Bible or Songs</string>
     <string name="default_lower_third_background">Default Lower Third Background</string>
-    <string name="default_lower_third_background_help">Used when \'Default\' is selected for Bible or Songs in lower third display mode</string>
+    <string name="default_lower_third_background_help">Used when 'Default' is selected for Bible or Songs in lower third display mode</string>
     <!-- Gradient Settings -->
     <string name="gradient_enabled">Gradient</string>
     <string name="gradient_top_color">Top Color:</string>
