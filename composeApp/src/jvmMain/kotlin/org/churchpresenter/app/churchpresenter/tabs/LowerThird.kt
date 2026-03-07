@@ -83,6 +83,12 @@ import churchpresenter.composeapp.generated.resources.generate_lower_third
 import churchpresenter.composeapp.generated.resources.aspect_ratio_mismatch
 import churchpresenter.composeapp.generated.resources.lower_third_generator
 import churchpresenter.composeapp.generated.resources.loading_generator
+import churchpresenter.composeapp.generated.resources.server_not_running_title
+import churchpresenter.composeapp.generated.resources.server_not_running_message
+import churchpresenter.composeapp.generated.resources.no_folder_title
+import churchpresenter.composeapp.generated.resources.no_folder_message
+import churchpresenter.composeapp.generated.resources.choose_logo_image
+import churchpresenter.composeapp.generated.resources.images_filter
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.openLottieGeneratorDialog
 import java.awt.Window
 import java.io.File
@@ -291,6 +297,12 @@ fun LowerThirdTab(
 
             val genTitle = stringResource(Res.string.lower_third_generator)
             val genLoading = stringResource(Res.string.loading_generator)
+            val srvTitle = stringResource(Res.string.server_not_running_title)
+            val srvMsg = stringResource(Res.string.server_not_running_message)
+            val nfTitle = stringResource(Res.string.no_folder_title)
+            val nfMsg = stringResource(Res.string.no_folder_message)
+            val logoTitle = stringResource(Res.string.choose_logo_image)
+            val imgFilter = stringResource(Res.string.images_filter)
             Button(
                 onClick = {
                     SwingUtilities.invokeLater {
@@ -301,7 +313,13 @@ fun LowerThirdTab(
                             isDarkTheme = isDarkTheme,
                             lowerThirdFolder = appSettings.streamingSettings.lowerThirdFolder,
                             generatorDialogTitle = genTitle,
-                            loadingText = genLoading
+                            loadingText = genLoading,
+                            serverNotRunningTitle = srvTitle,
+                            serverNotRunningMessage = srvMsg,
+                            noFolderTitle = nfTitle,
+                            noFolderMessage = nfMsg,
+                            chooseLogoTitle = logoTitle,
+                            imagesFilterText = imgFilter
                         )
                     }
                 },

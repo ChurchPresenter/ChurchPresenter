@@ -20,6 +20,7 @@ import javax.swing.JFileChooser
 import javax.swing.SwingUtilities
 import javax.swing.filechooser.FileNameExtensionFilter
 import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.image_files_filter
 import churchpresenter.composeapp.generated.resources.no_image_selected
 import org.churchpresenter.app.churchpresenter.utils.createFileChooser
 import org.jetbrains.compose.resources.stringResource
@@ -30,6 +31,7 @@ fun FileImagePicker(
     onImagePathChange: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val imageFilesFilterStr = stringResource(Res.string.image_files_filter)
     Row(
         modifier = modifier
             .height(32.dp)
@@ -41,7 +43,7 @@ fun FileImagePicker(
                         fileSelectionMode = JFileChooser.FILES_ONLY
                         isMultiSelectionEnabled = false
                         fileFilter = FileNameExtensionFilter(
-                            "Image Files (*.jpg, *.jpeg, *.png, *.gif, *.bmp)",
+                            imageFilesFilterStr,
                             "jpg", "jpeg", "png", "gif", "bmp"
                         )
                         if (imagePath.isNotEmpty()) {
