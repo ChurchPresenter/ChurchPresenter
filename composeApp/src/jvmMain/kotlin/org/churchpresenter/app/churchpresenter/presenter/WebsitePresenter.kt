@@ -200,6 +200,13 @@ fun EmbeddedWebView(
             navController?.browser = null
             client.removeDisplayHandler()
             client.removeLifeSpanHandler()
+            // Hide and detach the heavyweight AWT component before closing —
+            // on macOS, JCEF's native Canvas stays visible over Compose layers otherwise
+            try {
+                val comp = browser.getUIComponent()
+                comp.isVisible = false
+                comp.parent?.remove(comp)
+            } catch (_: Exception) {}
             browser.close(true)
             client.dispose()
         }
