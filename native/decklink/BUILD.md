@@ -2,6 +2,8 @@
 
 Native JNI bridge between ChurchPresenter (Java/Kotlin) and the BlackMagic DeckLink SDK.
 
+**Current SDK version: 15.3** (`BLACKMAGIC_DECKLINK_API_VERSION 0x0f030000`)
+
 End users do NOT need the SDK — only the compiled library (`.dll` / `.dylib`) is bundled with the app.
 Users with DeckLink hardware just need the BlackMagic Desktop Video drivers (which they already have).
 
@@ -144,14 +146,73 @@ g++ -std=c++17 -shared -fPIC -o libdecklink_jni.so \
 
 ## Installing the Built Library
 
+### During development (running via Gradle)
+
+Copy the compiled library into the project so Gradle can find it at runtime:
+
+```
+# Windows — copy decklink_jni.dll to:
+composeApp/src/jvmMain/resources/win-x64/decklink_jni.dll
+
+# macOS — copy libdecklink_jni.dylib to:
+composeApp/src/jvmMain/resources/macos-x64/libdecklink_jni.dylib
+# (or macos-arm64/ for Apple Silicon)
+
+# Linux — copy libdecklink_jni.so to:
+composeApp/src/jvmMain/resources/linux-x64/libdecklink_jni.so
+```
+
+Then add this JVM argument in `build.gradle.kts` under `jvmArgs(...)`:
+```
+"-Djava.library.path=src/jvmMain/resources/win-x64"   // adjust per platform
+```
+
+### Packaged app (installed via MSI/DMG)
+
 | Platform | Where to place it |
 |----------|-------------------|
-| **Dev (all)** | Add to JVM arg: `-Djava.library.path=/path/to/dir` |
-| **Windows** | Next to the app `.exe`, or in `C:\Windows\System32` |
-| **macOS** | `/usr/local/lib/` or inside the `.app` bundle's `lib/` |
+| **Windows** | Next to `ChurchPresenter.exe` inside the install directory (e.g. `C:\Program Files\ChurchPresenter\`) |
+| **macOS** | Inside `ChurchPresenter.app/Contents/app/lib/` |
 | **Linux** | `/usr/local/lib/` then run `sudo ldconfig` |
 
+To auto-bundle with the installer, place the compiled binary in:
+```
+composeApp/src/jvmMain/appResources/windows/decklink_jni.dll
+composeApp/src/jvmMain/appResources/macos/libdecklink_jni.dylib
+composeApp/src/jvmMain/appResources/linux/libdecklink_jni.so
+```
+These get included in the packaged app via the `appResourcesRootDir` setting in `build.gradle.kts`.
+
 The app handles the library being absent gracefully — DeckLink options simply won't appear in the settings.
+
+---
+
+## Updating to a Newer DeckLink SDK
+
+BlackMagic releases updated SDKs at [blackmagicdesign.com/support](https://www.blackmagicdesign.com/support). To update:
+
+1. Download the new SDK and extract it
+2. Point the build at the new SDK path:
+   ```
+   # CMake
+   cmake .. -DDECKLINK_SDK_DIR="C:\path\to\new-sdk\Win\include"
+
+   # No-CMake (update the -I path in the midl/cl commands)
+   ```
+3. Rebuild — the IDL files in the new SDK will generate updated headers automatically
+4. Update the version at the top of this file (`BUILD.md`)
+5. Test with your DeckLink hardware
+6. Replace the compiled DLL/dylib in `appResources/`
+
+**When do you need to update?**
+- New DeckLink hardware models not detected → update SDK + drivers
+- BlackMagic drops support for old SDK versions → update SDK
+- You don't need to update just because a new SDK is released — the API is backward-compatible
+
+**What changes between SDK versions?**
+- The `.idl` files may add new interfaces/methods, but existing ones stay the same
+- Our C++ code only uses core interfaces (`IDeckLinkIterator`, `IDeckLinkOutput`, `IDeckLinkDisplayMode`) which have been stable since SDK v10
+- If a new SDK changes these interfaces (rare), you'll get compile errors — fix by updating `decklink_jni.cpp` to match
 
 ---
 
