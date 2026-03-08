@@ -44,8 +44,8 @@ private object JfxInit {
     }
 }
 
-/** Call once from main() to pre-warm JavaFX on a background thread. */
-fun preWarmJavaFX() = JfxInit.initAsync()
+/** Call once from main() to initialise JavaFX before other native toolkits (JCEF). */
+fun preWarmJavaFX() = JfxInit.ensureInit()
 
 private fun isMacOS(): Boolean {
     val os = System.getProperty("os.name", "generic").lowercase(Locale.ENGLISH)

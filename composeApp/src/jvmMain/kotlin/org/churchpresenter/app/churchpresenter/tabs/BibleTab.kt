@@ -246,58 +246,109 @@ fun BibleTab(
             .focusable()
             .onKeyEvent { handleKeyEvent(it) }
     ) {
-        // ── Search row — text field shrinks to fill remaining space ──
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth().padding(all = 4.dp)
-        ) {
-            OutlinedTextField(
-                modifier = Modifier.weight(1f).padding(end = 8.dp),
-                value = searchQuery,
-                onValueChange = { viewModel.updateSearchQuery(it) },
-                textStyle = MaterialTheme.typography.bodyMedium,
-                label = { Text(text = stringResource(Res.string.search), style = MaterialTheme.typography.bodyMedium) },
-                singleLine = true,
-                maxLines = 1,
-                colors = OutlinedTextFieldDefaults.colors().copy(
-                    unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-                    focusedContainerColor = MaterialTheme.colorScheme.surface,
-                )
-            )
+        // ── Search row — wraps to two lines when window is narrow ──
+        BoxWithConstraints(modifier = Modifier.fillMaxWidth().padding(all = 4.dp)) {
+            val searchIsNarrow = maxWidth < 700.dp
 
-            DropdownSelector(
-                modifier = Modifier.width(160.dp).padding(end = 8.dp),
-                label = stringResource(Res.string.scope),
-                items = scopeOptions,
-                selected = selectedScope,
-                onSelectedChange = { newValue ->
-                    val newIndex = scopeOptions.indexOf(newValue).coerceAtLeast(0)
-                    viewModel.updateSelectedScopeIndex(newIndex)
+            if (searchIsNarrow) {
+                // Narrow: search field on its own line, controls below
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    OutlinedTextField(
+                        modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp),
+                        value = searchQuery,
+                        onValueChange = { viewModel.updateSearchQuery(it) },
+                        textStyle = MaterialTheme.typography.bodyMedium,
+                        label = { Text(text = stringResource(Res.string.search), style = MaterialTheme.typography.bodyMedium) },
+                        singleLine = true,
+                        maxLines = 1,
+                        colors = OutlinedTextFieldDefaults.colors().copy(
+                            unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                            focusedContainerColor = MaterialTheme.colorScheme.surface,
+                        )
+                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        DropdownSelector(
+                            modifier = Modifier.weight(1f).padding(end = 8.dp),
+                            label = stringResource(Res.string.scope),
+                            items = scopeOptions,
+                            selected = selectedScope,
+                            onSelectedChange = { newValue ->
+                                val newIndex = scopeOptions.indexOf(newValue).coerceAtLeast(0)
+                                viewModel.updateSelectedScopeIndex(newIndex)
+                            }
+                        )
+                        DropdownSelector(
+                            modifier = Modifier.weight(1f).padding(end = 8.dp),
+                            label = stringResource(Res.string.mode),
+                            items = modeOptions,
+                            selected = selectedMode,
+                            onSelectedChange = { newValue ->
+                                val newIndex = modeOptions.indexOf(newValue).coerceAtLeast(0)
+                                viewModel.updateSelectedModeIndex(newIndex)
+                            }
+                        )
+                        Button(onClick = { viewModel.performSearch() }) {
+                            Text(text = stringResource(Res.string.search), style = MaterialTheme.typography.labelMedium)
+                        }
+                        if (isSearchMode) {
+                            Button(
+                                modifier = Modifier.padding(start = 8.dp),
+                                onClick = { viewModel.clearSearch() },
+                                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
+                            ) {
+                                Text(stringResource(Res.string.clear), style = MaterialTheme.typography.labelMedium)
+                            }
+                        }
+                    }
                 }
-            )
-
-            DropdownSelector(
-                modifier = Modifier.width(200.dp).padding(end = 8.dp),
-                label = stringResource(Res.string.mode),
-                items = modeOptions,
-                selected = selectedMode,
-                onSelectedChange = { newValue ->
-                    val newIndex = modeOptions.indexOf(newValue).coerceAtLeast(0)
-                    viewModel.updateSelectedModeIndex(newIndex)
-                }
-            )
-
-            Button(onClick = { viewModel.performSearch() }) {
-                Text(text = stringResource(Res.string.search), style = MaterialTheme.typography.labelMedium)
-            }
-
-            if (isSearchMode) {
-                Button(
-                    modifier = Modifier.padding(start = 8.dp),
-                    onClick = { viewModel.clearSearch() },
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
-                ) {
-                    Text(stringResource(Res.string.clear), style = MaterialTheme.typography.labelMedium)
+            } else {
+                // Wide: everything on one line
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+                    OutlinedTextField(
+                        modifier = Modifier.weight(1f).padding(end = 8.dp),
+                        value = searchQuery,
+                        onValueChange = { viewModel.updateSearchQuery(it) },
+                        textStyle = MaterialTheme.typography.bodyMedium,
+                        label = { Text(text = stringResource(Res.string.search), style = MaterialTheme.typography.bodyMedium) },
+                        singleLine = true,
+                        maxLines = 1,
+                        colors = OutlinedTextFieldDefaults.colors().copy(
+                            unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                            focusedContainerColor = MaterialTheme.colorScheme.surface,
+                        )
+                    )
+                    DropdownSelector(
+                        modifier = Modifier.width(160.dp).padding(end = 8.dp),
+                        label = stringResource(Res.string.scope),
+                        items = scopeOptions,
+                        selected = selectedScope,
+                        onSelectedChange = { newValue ->
+                            val newIndex = scopeOptions.indexOf(newValue).coerceAtLeast(0)
+                            viewModel.updateSelectedScopeIndex(newIndex)
+                        }
+                    )
+                    DropdownSelector(
+                        modifier = Modifier.width(200.dp).padding(end = 8.dp),
+                        label = stringResource(Res.string.mode),
+                        items = modeOptions,
+                        selected = selectedMode,
+                        onSelectedChange = { newValue ->
+                            val newIndex = modeOptions.indexOf(newValue).coerceAtLeast(0)
+                            viewModel.updateSelectedModeIndex(newIndex)
+                        }
+                    )
+                    Button(onClick = { viewModel.performSearch() }) {
+                        Text(text = stringResource(Res.string.search), style = MaterialTheme.typography.labelMedium)
+                    }
+                    if (isSearchMode) {
+                        Button(
+                            modifier = Modifier.padding(start = 8.dp),
+                            onClick = { viewModel.clearSearch() },
+                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
+                        ) {
+                            Text(stringResource(Res.string.clear), style = MaterialTheme.typography.labelMedium)
+                        }
+                    }
                 }
             }
         }
