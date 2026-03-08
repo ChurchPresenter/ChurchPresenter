@@ -28,7 +28,7 @@ import org.churchpresenter.app.churchpresenter.data.WebBookmark
 import org.churchpresenter.app.churchpresenter.presenter.CefManager
 import org.churchpresenter.app.churchpresenter.presenter.EmbeddedWebView
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
-import java.awt.GraphicsEnvironment
+import org.churchpresenter.app.churchpresenter.utils.rememberScreenDevices
 import org.churchpresenter.app.churchpresenter.presenter.WebNavController
 import org.churchpresenter.app.churchpresenter.presenter.rememberWebNavController
 import org.churchpresenter.app.churchpresenter.utils.presenterAspectRatio
@@ -154,9 +154,7 @@ fun WebTab(
         val actionButtonsWidth = 320.dp // bookmark + Add to Schedule + Go Live
         val minUrlWidth = 200.dp
 
-        val hasSecondaryDisplay = remember {
-            GraphicsEnvironment.getLocalGraphicsEnvironment().screenDevices.size > 1
-        }
+        val hasSecondaryDisplay = rememberScreenDevices().size > 1
 
         // Shared composables for URL bar and action buttons
         val urlBar: @Composable RowScope.() -> Unit = {

@@ -30,7 +30,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.WindowState
 import androidx.compose.ui.window.WindowPlacement
 import androidx.compose.ui.window.WindowPosition
-import java.awt.GraphicsEnvironment
+import org.churchpresenter.app.churchpresenter.utils.rememberScreenDevices
 import androidx.compose.ui.window.rememberWindowState
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.app_name
@@ -138,7 +138,7 @@ fun main() {
             }
         }
 
-        val screens = remember { GraphicsEnvironment.getLocalGraphicsEnvironment().screenDevices }
+        val screens = rememberScreenDevices()
         val state = rememberWindowState(placement = WindowPlacement.Maximized)
 
 
