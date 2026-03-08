@@ -172,7 +172,7 @@ fun main() {
             placement = savedPlacement,
             position = if (savedPlacement == WindowPlacement.Floating && appSettings.windowX >= 0)
                 WindowPosition(appSettings.windowX.dp, appSettings.windowY.dp)
-            else WindowPosition.PlatformDefault,
+            else WindowPosition(0.dp, 0.dp),
             size = if (savedPlacement == WindowPlacement.Floating)
                 DpSize(appSettings.windowWidth.dp, appSettings.windowHeight.dp)
             else DpSize.Unspecified
@@ -191,12 +191,13 @@ fun main() {
                         WindowPlacement.Fullscreen -> "fullscreen"
                         WindowPlacement.Maximized -> "maximized"
                     }
+                    val isFloating = state.placement == WindowPlacement.Floating
                     appSettings = appSettings.copy(
                         windowPlacement = placementStr,
-                        windowWidth = state.size.width.value.toInt(),
-                        windowHeight = state.size.height.value.toInt(),
-                        windowX = state.position.x.value.toInt(),
-                        windowY = state.position.y.value.toInt()
+                        windowWidth = if (isFloating) state.size.width.value.toInt() else appSettings.windowWidth,
+                        windowHeight = if (isFloating) state.size.height.value.toInt() else appSettings.windowHeight,
+                        windowX = if (isFloating) state.position.x.value.toInt() else -1,
+                        windowY = if (isFloating) state.position.y.value.toInt() else -1
                     )
                     settingsManager.saveSettings(appSettings)
                     exitApplication()
