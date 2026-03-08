@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -337,7 +338,45 @@ fun BiblePresenter(
                 val showSecondary =
                     secondary != null && (!isLowerThird || appSettings.bibleSettings.secondaryBibleLowerThirdEnabled)
 
-                if (showSecondary && !isLowerThird) {
+                if (showSecondary && isLowerThird) {
+                    val sec = secondary ?: return@TextContent
+                    // Lower third: side-by-side Row layout (50/50)
+                    Row(
+                        modifier = innerModifier,
+                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        // Left half: primary bible
+                        Column(
+                            modifier = Modifier.weight(1f).fillMaxHeight(),
+                            verticalArrangement = Arrangement.Bottom
+                        ) {
+                            if (primaryBibleReferencePosition == Constants.POSITION_ABOVE) {
+                                val bookNameOrAbbr = if (appSettings.bibleSettings.primaryShowAbbreviation && primary.bibleAbbreviation.isNotEmpty()) primary.bibleAbbreviation else ""
+                                Text(modifier = Modifier.fillMaxWidth(), textAlign = primaryBibleReferenceHorizontalAlignment, fontFamily = primaryBibleReferenceFontStyle, fontSize = scaledPrimaryReferenceSize, text = "$bookNameOrAbbr ${primary.bookName} ${primary.chapter}:${primary.verseNumber}", color = primaryBibleReferenceTextColor, style = primaryReferenceTextStyle)
+                            }
+                            Text(modifier = Modifier.fillMaxWidth(), textAlign = primaryBibleHorizontalAlignment, fontFamily = primaryBibleFontStyle, fontSize = scaledPrimaryBibleSize, text = primary.verseText, color = primaryBibleTextColor, style = primaryBibleTextStyle)
+                            if (primaryBibleReferencePosition == Constants.POSITION_BELOW) {
+                                val bookNameOrAbbr = if (appSettings.bibleSettings.primaryShowAbbreviation && primary.bibleAbbreviation.isNotEmpty()) primary.bibleAbbreviation else ""
+                                Text(modifier = Modifier.fillMaxWidth(), textAlign = primaryBibleReferenceHorizontalAlignment, fontFamily = primaryBibleReferenceFontStyle, fontSize = scaledPrimaryReferenceSize, text = "$bookNameOrAbbr ${primary.bookName} ${primary.chapter}:${primary.verseNumber}", color = primaryBibleReferenceTextColor, style = primaryReferenceTextStyle)
+                            }
+                        }
+                        // Right half: secondary bible
+                        Column(
+                            modifier = Modifier.weight(1f).fillMaxHeight(),
+                            verticalArrangement = Arrangement.Bottom
+                        ) {
+                            if (secondaryBibleReferencePosition == Constants.POSITION_ABOVE) {
+                                val bookNameOrAbbr = if (appSettings.bibleSettings.secondaryShowAbbreviation && sec.bibleAbbreviation.isNotEmpty()) sec.bibleAbbreviation else ""
+                                Text(modifier = Modifier.fillMaxWidth(), textAlign = secondaryBibleReferenceHorizontalAlignment, fontFamily = secondaryBibleReferenceFontStyle, fontSize = scaledSecondaryReferenceSize, text = "$bookNameOrAbbr ${sec.bookName} ${sec.chapter}:${sec.verseNumber}", color = secondaryBibleReferenceTextColor, style = secondaryReferenceTextStyle)
+                            }
+                            Text(modifier = Modifier.fillMaxWidth(), textAlign = secondaryBibleHorizontalAlignment, fontFamily = secondaryBibleFontStyle, fontSize = scaledSecondaryBibleSize, text = sec.verseText, color = secondaryBibleTextColor, style = secondaryBibleTextStyle)
+                            if (secondaryBibleReferencePosition == Constants.POSITION_BELOW) {
+                                val bookNameOrAbbr = if (appSettings.bibleSettings.secondaryShowAbbreviation && sec.bibleAbbreviation.isNotEmpty()) sec.bibleAbbreviation else ""
+                                Text(modifier = Modifier.fillMaxWidth(), textAlign = secondaryBibleReferenceHorizontalAlignment, fontFamily = secondaryBibleReferenceFontStyle, fontSize = scaledSecondaryReferenceSize, text = "$bookNameOrAbbr ${sec.bookName} ${sec.chapter}:${sec.verseNumber}", color = secondaryBibleReferenceTextColor, style = secondaryReferenceTextStyle)
+                            }
+                        }
+                    }
+                } else if (showSecondary) {
                     // Parallel layout: rigid 50/50 split, each half has its own vertical alignment
                     Column(modifier = Modifier.fillMaxSize()) {
                         // ── Top half: primary bible ──
@@ -415,7 +454,7 @@ fun BiblePresenter(
                     // Original single-column layout (no secondary, or lower-third)
                     BoxWithConstraints(
                         modifier = innerModifier,
-                        contentAlignment = if (isLowerThird) Alignment.BottomCenter else Alignment.TopStart
+                        contentAlignment = if (isLowerThird) Alignment.BottomCenter else contentAlignment
                     ) {
                         // Auto-scale bible text if it overflows the available height
                         val widthConstraint = Constraints(maxWidth = constraints.maxWidth)
@@ -470,7 +509,7 @@ fun BiblePresenter(
                                 val bookNameOrAbbr = if (appSettings.bibleSettings.primaryShowAbbreviation && primary.bibleAbbreviation.isNotEmpty()) primary.bibleAbbreviation else ""
                                 Text(modifier = Modifier.fillMaxWidth(), textAlign = primaryBibleReferenceHorizontalAlignment, fontFamily = primaryBibleReferenceFontStyle, fontSize = scaledPrimaryReferenceSize, text = "$bookNameOrAbbr ${primary.bookName} ${primary.chapter}:${primary.verseNumber}", color = primaryBibleReferenceTextColor, style = primaryReferenceTextStyle)
                             }
-                            if (showSecondary) {
+                            if (showSecondary && secondary != null) {
                                 if (secondaryBibleReferencePosition == Constants.POSITION_ABOVE) {
                                     val bookNameOrAbbr = if (appSettings.bibleSettings.secondaryShowAbbreviation && secondary.bibleAbbreviation.isNotEmpty()) secondary.bibleAbbreviation else ""
                                     Text(modifier = Modifier.fillMaxWidth(), textAlign = secondaryBibleReferenceHorizontalAlignment, fontFamily = secondaryBibleReferenceFontStyle, fontSize = scaledSecondaryReferenceSize, text = "$bookNameOrAbbr ${secondary.bookName} ${secondary.chapter}:${secondary.verseNumber}", color = secondaryBibleReferenceTextColor, style = secondaryReferenceTextStyle)
