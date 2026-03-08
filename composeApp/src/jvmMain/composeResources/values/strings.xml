@@ -730,4 +730,5 @@
     <string name="video_files_filter">Video Files (*.mp4, *.mov, *.avi, *.mkv, *.webm)</string>
     <string name="images_filter">Images</string>
     <string name="swap_bibles">Swap</string>
+    <string name="multi_verse">Multi-verse</string>
 </resources>
