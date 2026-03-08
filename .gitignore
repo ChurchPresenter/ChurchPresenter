@@ -28,3 +28,10 @@ hs_err_pid*.log
 jcefmaven_build_meta.json.template
 /org/
 native/decklink/*.class
+
+# Credential / config files
+firebase-config.json
+serviceAccountKey.json
+google-services.json
+*.p12
+.env

@@ -82,6 +82,7 @@
     <string name="menu_help">Даведка</string>
     <string name="menu_about">Аб праграме</string>
     <string name="about_title">Аб Church Presenter</string>
+    <string name="open_crash_logs">Адкрыць журнал памылак</string>
     <string name="menu_help_item">Даведка</string>
 
     <!-- Options Dialog Strings -->

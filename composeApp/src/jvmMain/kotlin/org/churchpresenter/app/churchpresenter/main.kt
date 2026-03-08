@@ -73,12 +73,16 @@ import org.churchpresenter.app.churchpresenter.data.Bible
 import org.churchpresenter.app.churchpresenter.server.CompanionServer
 import org.churchpresenter.app.churchpresenter.ui.theme.AppThemeWrapper
 import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.app.churchpresenter.utils.CrashReporter
 import org.jetbrains.compose.resources.stringResource
 import java.awt.GraphicsDevice
 import java.util.Locale
 
 
 fun main() {
+    // Install crash reporting before anything else
+    CrashReporter.initialize()
+
     // Pre-warm JavaFX on a background thread before UI starts
     preWarmJavaFX()
 
@@ -312,7 +316,11 @@ private fun PresenterWindows(
             continue
         }
 
-        val targetScreenIndex = screenAssignment.targetDisplay
+        // Skip "None" — user disabled this output
+        if (screenAssignment.targetDisplay == Constants.KEY_TARGET_NONE) continue
+
+        // Resolve target display: -1 (auto) maps to corresponding display index
+        val targetScreenIndex = if (screenAssignment.targetDisplay == -1) i + 1 else screenAssignment.targetDisplay
 
         // Skip if the target screen doesn't exist
         if (targetScreenIndex < 0 || targetScreenIndex >= screens.size) continue

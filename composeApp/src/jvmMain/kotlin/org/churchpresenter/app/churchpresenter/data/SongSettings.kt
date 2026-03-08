@@ -236,7 +236,7 @@ data class BibleSettings(
 
 @Serializable
 data class ScreenAssignment(
-    val targetDisplay: Int = -1,  // -1 = auto (screen index + 1), 0+ = specific display index
+    val targetDisplay: Int = -1,  // -1 = auto (resolved to i+1 at runtime), -2 = none, 0+ = specific display
     val targetType: String = "screen",  // "screen" or "decklink"
     val keyTargetDisplay: Int = Constants.KEY_TARGET_NONE,  // -2 = none (disabled), 0+ = specific display/device
     val keyTargetType: String = "screen",  // "screen" or "decklink"
