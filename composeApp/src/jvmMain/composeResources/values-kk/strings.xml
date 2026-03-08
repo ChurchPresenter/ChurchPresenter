@@ -81,6 +81,7 @@
 
     <string name="menu_help">Анықтама</string>
     <string name="menu_about">Бағдарлама туралы</string>
+    <string name="about_title">Church Presenter туралы</string>
     <string name="menu_help_item">Анықтама</string>
 
     <!-- Options Dialog Strings -->

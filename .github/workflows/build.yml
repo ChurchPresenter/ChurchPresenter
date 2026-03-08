@@ -39,13 +39,18 @@ jobs:
         if: runner.os != 'Windows'
         run: chmod +x gradlew
 
+      - name: Get short commit hash
+        id: vars
+        shell: bash
+        run: echo "SHORT_SHA=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
+
       - name: Build installer
         run: ./gradlew :composeApp:clean :composeApp:${{ matrix.task }} --no-daemon --no-build-cache
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.artifact-name }}-build${{ github.run_number }}
+          name: ${{ matrix.artifact-name }}-${{ steps.vars.outputs.SHORT_SHA }}
           path: ${{ matrix.artifact-path }}
           retention-days: 30
 
