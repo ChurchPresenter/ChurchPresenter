@@ -2,7 +2,7 @@
 
 > **Comprehensive documentation for coding standards, cleanup tasks, and development practices**
 >
-> Last Updated: February 18, 2026
+> Last Updated: March 8, 2026
 
 ---
 
@@ -195,61 +195,33 @@ object Constants {
 
 ## 🧹 Cleanup TODO List
 
-### High Priority - Unused Code
+> Last audited: March 8, 2026
 
-#### PresenterManager.kt
-- [ ] **Unused Property**: `selectedVerse: State<SelectedVerse>` (line 14)
-  - Currently using `selectedVerses` list instead
-  - Consider removing or document reason for keeping
-  
-- [ ] **Unused Function**: `setSelectedVerse(verse: SelectedVerse)` (line 29)
-  - Now using `setSelectedVerses(verses: List<SelectedVerse>)`
-  - Safe to remove if single verse mode not needed
-  
-- [ ] **Unused Function**: `togglePresenterWindow()` (line 44)
-  - May be needed for future toggle functionality
-  - Either implement or remove
+### Previously Flagged — Now Resolved ✅
 
-**Action:** Review if single-verse mode is needed for future features
-
-#### BibleSettingsTab.kt
-- [ ] **Unused Parameter**: `availableFonts: List<String>` in multiple functions
-  - Parameter passed through chain but never used
-  - Either implement font selection or remove parameter
-
-#### Placeholder Tabs
-- [ ] **MediaTab.kt**: Unused `modifier` parameter (acceptable - placeholder)
-- [ ] **PicturesTab.kt**: Unused `modifier` parameter (acceptable - placeholder)
-- [ ] **AnnouncementsTab.kt**: Unused `modifier` parameter (acceptable - placeholder)
-
-### General Cleanup Tasks
-
-#### Completed ✅
-- [x] Removed all wildcard imports (`import ... .*`)
-- [x] Fixed Material 2 to Material 3 imports
+- [x] **PresenterManager.kt** — `selectedVerse`, `setSelectedVerse`, `togglePresenterWindow` are all actively used. Singular/plural verse API is intentional (singular derived from first element of plural list).
+- [x] **BibleSettingsTab.kt** — `availableFonts` parameter is actively used, passed to `FontSettingsDropdown`.
+- [x] **MediaTab.kt, PicturesTab.kt, AnnouncementsTab.kt** — All fully implemented. `modifier` parameter is actively used in each.
+- [x] Removed all Material 2 imports
 - [x] Most user-facing strings moved to strings.xml
 - [x] Technical strings moved to Constants.kt
+- [x] No significant commented-out code blocks found
 
-#### Pending ⚠️
-- [ ] Run IDE "Optimize Imports" on entire project
-- [ ] Check for remaining hardcoded UI strings
-- [ ] Verify all strings.xml entries are used
-- [ ] Audit Constants.kt for unused constants
-- [ ] Replace unnecessary non-null assertions (`!!`)
+### Pending ⚠️
+
+| Item | Count | Files | Notes |
+|------|-------|-------|-------|
+| Wildcard imports | 0 | — | All expanded to explicit imports ✅ |
+| Debug prints | ~8 | VideoPlayer.kt, LowerThirdSettingsTab.kt, WebsitePresenter.kt | All `System.err.println` for error diagnostics — kept intentionally |
+| Non-null assertions (`!!`) | 0 | — | Replaced with smart casts and `getValue()` ✅ |
+| Hardcoded UI strings | 0 | — | "OK" moved to strings.xml; emojis kept (not translatable) ✅ |
 
 ### Decision Log
 
-**Why some "unused" code is kept:**
-- API methods may be unused now but needed for completeness
-- Placeholder tabs kept for future implementation
-- Some properties exposed as State for potential future reactive UI needs
-- Single-verse mode in PresenterManager might be needed later
-
-**What should be removed:**
-- Truly dead code with no future purpose
-- Duplicate implementations
-- Old commented-out code blocks
-- Debug logging statements
+**Kept intentionally:**
+- Singular/plural verse API in PresenterManager — convenience accessors
+- `System.err.println` in VideoPlayer/WebsitePresenter/LowerThirdSettingsTab — error diagnostics for VLC/JCEF/WebView issues
+- Emoji strings — not translatable, no benefit to moving to resources
 
 ---
 
@@ -441,17 +413,10 @@ If you need access to project credentials, contact the maintainer directly.
 
 | Area | Status | Notes |
 |------|--------|-------|
-| Wildcard Imports | ✅ Complete | All removed |
+| Wildcard Imports | ✅ Complete | All expanded to explicit imports |
 | Material 3 | ✅ Complete | All Material 2 converted |
-| String Resources | ✅ Mostly Complete | Few technical strings remain |
+| String Resources | ✅ Complete | All UI strings in strings.xml |
 | Constants | ✅ Complete | All magic strings eliminated |
-| Unused Code | 🟡 In Progress | See cleanup TODO list |
+| Non-null Assertions | ✅ Complete | Replaced with smart casts |
 | Code Style | ✅ Complete | Fully qualified names fixed |
-
----
-
-**Document Version:** 1.0  
-**Last Updated:** March 8, 2026  
-**Maintained By:** Development Team  
-**Status:** 📘 Active Reference Document
 

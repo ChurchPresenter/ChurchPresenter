@@ -83,6 +83,7 @@
     <string name="menu_about">Бағдарлама туралы</string>
     <string name="about_title">Church Presenter туралы</string>
     <string name="open_crash_logs">Қате журналын ашу</string>
+    <string name="action_ok">OK</string>
     <string name="menu_help_item">Анықтама</string>
 
     <!-- Options Dialog Strings -->

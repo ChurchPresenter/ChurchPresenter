@@ -227,15 +227,16 @@ class Bible {
                     // Fallback for older SPB format
                     val m = codeRegex.matchEntire(line)
                     if (m != null) {
-                        if (currentCode != null) {
-                            val prev = codeRegex.matchEntire(currentCode!!)!!
+                        val code = currentCode
+                        if (code != null) {
+                            val prev = codeRegex.matchEntire(code) ?: error("Invalid verse code: $code")
                             val bPrev = prev.groupValues[1].toInt()
                             val chPrev = prev.groupValues[2].toInt()
                             val vnumPrev = prev.groupValues[3].toInt()
                             val textPrev = sb.toString().trim()
                             operatorBible.add(
                                 BibleVerse(
-                                    verseId = currentCode!!,
+                                    verseId = code,
                                     book = bPrev,
                                     chapter = chPrev,
                                     verseNumber = vnumPrev,
@@ -253,15 +254,16 @@ class Bible {
                 }
 
                 // Flush last verse if using multiline format
-                if (currentCode != null) {
-                    val prev = codeRegex.matchEntire(currentCode!!)!!
+                val lastCode = currentCode
+                if (lastCode != null) {
+                    val prev = codeRegex.matchEntire(lastCode) ?: error("Invalid verse code: $lastCode")
                     val b = prev.groupValues[1].toInt()
                     val ch = prev.groupValues[2].toInt()
                     val vnum = prev.groupValues[3].toInt()
                     val text = sb.toString().trim()
                     operatorBible.add(
                         BibleVerse(
-                            verseId = currentCode!!,
+                            verseId = lastCode,
                             book = b,
                             chapter = ch,
                             verseNumber = vnum,
@@ -277,7 +279,7 @@ class Bible {
             for (b in 1..maxBook) {
                 val chapterCount = bookChapterMap[b]?.maxOrNull() ?: 0
                 val name = when {
-                    parsedBookNames.containsKey(b) -> parsedBookNames[b]!!
+                    parsedBookNames.containsKey(b) -> parsedBookNames.getValue(b)
                     bookNames.size >= b -> bookNames[b - 1]
                     else -> "Book $b"
                 }

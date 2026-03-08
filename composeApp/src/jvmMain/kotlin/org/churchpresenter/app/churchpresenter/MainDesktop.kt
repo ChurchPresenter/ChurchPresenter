@@ -712,7 +712,7 @@ fun MainDesktop(
             },
             onConfirm = { text, textColor, backgroundColor ->
                 if (editingLabelItem != null) {
-                    currentScheduleActions.updateLabel(editingLabelItem!!.id, text, textColor, backgroundColor)
+                    currentScheduleActions.updateLabel(editingLabelItem?.id ?: return@AddLabelDialog, text, textColor, backgroundColor)
                 } else {
                     currentScheduleActions.addLabel(text, textColor, backgroundColor)
                 }

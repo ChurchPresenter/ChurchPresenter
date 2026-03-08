@@ -3,7 +3,10 @@ package org.churchpresenter.app.churchpresenter.presenter
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.awt.SwingPanel
 import androidx.compose.ui.graphics.Color
@@ -64,7 +67,6 @@ object CefManager {
 
             cefApp = builder.build()
             initialized = true
-            println("JCEF initialized successfully")
         } catch (e: Exception) {
             System.err.println("Failed to initialize JCEF: ${e.message}")
             e.printStackTrace()
@@ -111,7 +113,6 @@ object CefManager {
             for (idx in indices) {
                 ProcessBuilder("pactl", "move-sink-input", idx, deviceId)
                     .redirectErrorStream(true).start().waitFor()
-                println("Routed audio stream $idx to sink $deviceId")
             }
         } catch (e: Exception) {
             System.err.println("Failed to route audio: ${e.message}")
