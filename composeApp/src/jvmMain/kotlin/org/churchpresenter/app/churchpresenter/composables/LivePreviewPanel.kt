@@ -94,6 +94,9 @@ fun LivePreviewPanel(
         for (i in 0 until displayCount) {
             val screenAssignment = proj.getAssignment(i)
 
+            // Skip displays set to "None"
+            if (screenAssignment.targetDisplay == Constants.KEY_TARGET_NONE) continue
+
             SingleDisplayPreview(
                 screenIndex = i,
                 screenAssignment = screenAssignment,
