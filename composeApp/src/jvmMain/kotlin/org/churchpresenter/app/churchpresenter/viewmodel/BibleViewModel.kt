@@ -470,6 +470,8 @@ class BibleViewModel(
                 }
             }
 
+            val rangeStr = formatVerseRange(verseNumbers)
+
             if (primaryTexts.isNotEmpty()) {
                 verseList.add(
                     SelectedVerse(
@@ -477,7 +479,8 @@ class BibleViewModel(
                         bookName = bookName,
                         chapter = _selectedChapter.value,
                         verseNumber = verseNumbers.first(),
-                        verseText = primaryTexts.joinToString(" ")
+                        verseText = primaryTexts.joinToString(" "),
+                        verseRange = rangeStr
                     )
                 )
             }
@@ -488,7 +491,8 @@ class BibleViewModel(
                         bookName = secondaryBookName,
                         chapter = _selectedChapter.value,
                         verseNumber = verseNumbers.first(),
-                        verseText = secondaryTexts.joinToString(" ")
+                        verseText = secondaryTexts.joinToString(" "),
+                        verseRange = rangeStr
                     )
                 )
             }

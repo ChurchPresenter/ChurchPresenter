@@ -170,6 +170,8 @@ fun BibleTab(
     //  - not currently presenting (free browsing always updates preview), OR
     //  - an explicit verse selection happened (token changed) while presenting
     LaunchedEffect(verseSelectionToken) {
+        // In multi-verse mode while presenting, don't update until Go Live is pressed
+        if (viewModel.multiVerseEnabled.value && isPresenting) return@LaunchedEffect
         if (verses.isNotEmpty() && selectedVerseIndex >= 0 && selectedVerseIndex < verses.size) {
             val selectedVerses = viewModel.getSelectedVerses()
             if (selectedVerses.isNotEmpty()) onVerseSelected(selectedVerses)
