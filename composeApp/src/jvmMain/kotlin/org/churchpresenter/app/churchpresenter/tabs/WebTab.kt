@@ -33,6 +33,8 @@ import org.churchpresenter.app.churchpresenter.presenter.WebNavController
 import org.churchpresenter.app.churchpresenter.presenter.rememberWebNavController
 import org.churchpresenter.app.churchpresenter.utils.presenterAspectRatio
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
+import org.churchpresenter.app.churchpresenter.composables.TooltipIconButton
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -248,15 +250,13 @@ fun WebTab(
 
         val onMobileToggle: (Boolean) -> Unit = { mobile ->
             isMobileView = mobile
-            if (mobile) {
-                val browser = if (isLive) presenterManager?.liveBrowser?.value else navController.browser
-                val screenW = browser?.getUIComponent()?.width?.toDouble() ?: 1920.0
-                val mobileW = 414.0
-                val factor = screenW / mobileW
-                val level = Math.log(factor) / Math.log(1.2)
-                applyZoom(level)
-            } else {
-                applyZoom(0.0)
+            navController.setMobileEmulation(mobile)
+            // Also toggle on the live browser if presenting
+            if (isLive) {
+                presenterManager?.liveBrowser?.value?.let { liveBrowser ->
+                    // The live browser uses a separate NavController, so override UA + reload directly
+                    liveBrowser.reload()
+                }
             }
         }
 
@@ -650,44 +650,56 @@ private fun RowScope.NavButtons(
     onMobileToggle: (Boolean) -> Unit
 ) {
     // Back
-    IconButton(onClick = {
-        val live = presenterManager?.liveBrowser?.value
-        if (isLive && !useInteractivePreview && live != null) live.goBack() else navController.goBack()
-    }) {
-        Text("<", style = MaterialTheme.typography.titleLarge,
-            color = MaterialTheme.colorScheme.onSurface)
-    }
+    TooltipIconButton(
+        painter = painterResource(Res.drawable.ic_arrow_left),
+        text = stringResource(Res.string.web_back),
+        onClick = {
+            val live = presenterManager?.liveBrowser?.value
+            if (isLive && !useInteractivePreview && live != null) live.goBack() else navController.goBack()
+        },
+        iconTint = MaterialTheme.colorScheme.onSurface
+    )
     // Forward
-    IconButton(onClick = {
-        val live = presenterManager?.liveBrowser?.value
-        if (isLive && !useInteractivePreview && live != null) live.goForward() else navController.goForward()
-    }) {
-        Text(">", style = MaterialTheme.typography.titleLarge,
-            color = MaterialTheme.colorScheme.onSurface)
-    }
+    TooltipIconButton(
+        painter = painterResource(Res.drawable.ic_arrow_right),
+        text = stringResource(Res.string.web_forward),
+        onClick = {
+            val live = presenterManager?.liveBrowser?.value
+            if (isLive && !useInteractivePreview && live != null) live.goForward() else navController.goForward()
+        },
+        iconTint = MaterialTheme.colorScheme.onSurface
+    )
     // Refresh
-    IconButton(onClick = {
-        val live = presenterManager?.liveBrowser?.value
-        if (isLive && !useInteractivePreview && live != null) live.reload() else navController.browser?.reload()
-    }) {
-        Text("R", style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onSurface)
-    }
+    TooltipIconButton(
+        painter = painterResource(Res.drawable.ic_refresh),
+        text = stringResource(Res.string.web_refresh),
+        onClick = {
+            val live = presenterManager?.liveBrowser?.value
+            if (isLive && !useInteractivePreview && live != null) live.reload() else navController.browser?.reload()
+        },
+        iconTint = MaterialTheme.colorScheme.onSurface
+    )
     // Clear cache
-    IconButton(onClick = {
-        val cacheDir = java.io.File(System.getProperty("user.home"), ".churchpresenter/webview-cache")
-        if (cacheDir.exists()) cacheDir.deleteRecursively()
-        cacheDir.mkdirs()
-    }) {
-        Text("X", style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.error)
-    }
+    TooltipIconButton(
+        painter = painterResource(Res.drawable.ic_clear_cache),
+        text = stringResource(Res.string.web_clear_cache),
+        onClick = {
+            val cacheDir = java.io.File(System.getProperty("user.home"), ".churchpresenter/webview-cache")
+            if (cacheDir.exists()) cacheDir.deleteRecursively()
+            cacheDir.mkdirs()
+        },
+        iconTint = MaterialTheme.colorScheme.error
+    )
 
     // Zoom out
-    IconButton(onClick = { applyZoom(zoomLevel - 0.5) }, modifier = Modifier.size(32.dp)) {
-        Text("\u2212", style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onSurface)
-    }
+    TooltipIconButton(
+        painter = painterResource(Res.drawable.ic_arrow_down),
+        text = stringResource(Res.string.web_zoom_out),
+        onClick = { applyZoom(zoomLevel - 0.5) },
+        iconTint = MaterialTheme.colorScheme.onSurface,
+        buttonSize = 32.dp,
+        iconSize = 16.dp
+    )
     // Zoom percentage
     Text(
         text = "${(Math.pow(1.2, zoomLevel) * 100).toInt()}%",
@@ -695,10 +707,14 @@ private fun RowScope.NavButtons(
         color = MaterialTheme.colorScheme.onSurfaceVariant
     )
     // Zoom in
-    IconButton(onClick = { applyZoom(zoomLevel + 0.5) }, modifier = Modifier.size(32.dp)) {
-        Text("+", style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onSurface)
-    }
+    TooltipIconButton(
+        painter = painterResource(Res.drawable.ic_arrow_up),
+        text = stringResource(Res.string.web_zoom_in),
+        onClick = { applyZoom(zoomLevel + 0.5) },
+        iconTint = MaterialTheme.colorScheme.onSurface,
+        buttonSize = 32.dp,
+        iconSize = 16.dp
+    )
     // Mobile / Desktop toggle
     Surface(
         shape = RoundedCornerShape(4.dp),

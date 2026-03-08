@@ -561,7 +561,7 @@
     <string name="loading_generator">Завантаження генератора...</string>
     <string name="preview_will_appear_here">Попередній перегляд з\'явиться тут</string>
     <string name="pause_duration_ms">Пауза %1$dмс</string>
-    <string name="aspect_ratio_mismatch">Невідповідність співвідношення сторін: файл %1$dx%2$d, але вивід %3$s:1</string>
+    <string name="aspect_ratio_mismatch">Невідповідність співвідношення сторін: файл %1$dx%2$d (%3$s), але вивід %4$dx%5$d (%6$s)</string>
     <string name="mobile_view">Мобільний</string>
     <string name="desktop_view">Настільний</string>
     <string name="interactive_mode">Інтерактивний</string>
@@ -577,6 +577,7 @@
     <string name="image_files_filter">Файли зображень (*.jpg, *.jpeg, *.png, *.gif, *.bmp)</string>
     <string name="video_files_filter">Відеофайли (*.mp4, *.mov, *.avi, *.mkv, *.webm)</string>
     <string name="images_filter">Зображення</string>
+    <string name="swap_bibles">Поміняти</string>
 
     <!-- Additional translations -->
     <string name="api_key_hint">Введіть секретний ключ…</string>
@@ -643,6 +644,13 @@
     <string name="projection_target_display">Дисплей</string>
     <string name="reset_settings">Скинути всі налаштування</string>
     <string name="reset_settings_confirm">Ви впевнені, що хочете скинути всі налаштування до значень за замовчуванням?\n\nПрограма буде перезапущена.</string>
+    <string name="clear_lottie_cache_confirm">Ви також хочете очистити кеш генератора Lottie?\n\nЦе видалить збережені пресети, колірні теми та завантажені логотипи.</string>
+    <string name="export_settings">Експорт налаштувань</string>
+    <string name="import_settings">Імпорт налаштувань</string>
+    <string name="import_settings_confirm">Ви впевнені, що хочете імпортувати налаштування?\n\nЦе перезапише поточні налаштування, і програма буде перезапущена.</string>
+    <string name="settings_exported">Налаштування успішно експортовано.</string>
+    <string name="settings_export_failed">Не вдалося експортувати налаштування.</string>
+    <string name="settings_import_failed">Не вдалося імпортувати налаштування. Файл може бути пошкоджений.</string>
     <string name="schedule_add_files">Додати файли…</string>
     <string name="schedule_drop_hint">Перетягніть файли сюди, щоб додати до програми</string>
     <string name="screen_number">Екран %1$d</string>
@@ -689,6 +697,11 @@
     <string name="web_bookmark_remove">Видалити</string>
     <string name="web_bookmarks">Закладки</string>
     <string name="web_clear_cache">Очистити кеш</string>
+    <string name="web_back">Назад</string>
+    <string name="web_forward">Вперед</string>
+    <string name="web_refresh">Оновити</string>
+    <string name="web_zoom_in">Збільшити</string>
+    <string name="web_zoom_out">Зменшити</string>
     <string name="web_go_live">В ефір</string>
     <string name="web_live_badge">ЕФІР</string>
     <string name="web_preview_hint">Введіть URL вище та натисніть «В ефір»</string>

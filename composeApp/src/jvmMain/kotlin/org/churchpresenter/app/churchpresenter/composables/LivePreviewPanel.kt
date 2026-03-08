@@ -5,6 +5,7 @@ import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.runtime.remember
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -83,7 +84,9 @@ fun LivePreviewPanel(
     modifier: Modifier = Modifier
 ) {
     val proj = appSettings.projectionSettings
-    val displayCount = proj.numberOfWindows.coerceIn(1, 4)
+    val displayCount = remember {
+        (java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment().screenDevices.size - 1).coerceAtLeast(0)
+    }
     val mediaViewModel = LocalMediaViewModel.current
 
     Column(
@@ -91,12 +94,7 @@ fun LivePreviewPanel(
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         for (i in 0 until displayCount) {
-            val screenAssignment = when (i) {
-                0 -> proj.screen1Assignment
-                1 -> proj.screen2Assignment
-                2 -> proj.screen3Assignment
-                else -> proj.screen4Assignment
-            }
+            val screenAssignment = proj.getAssignment(i)
 
             SingleDisplayPreview(
                 screenIndex = i,

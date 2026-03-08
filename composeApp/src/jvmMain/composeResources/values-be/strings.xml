@@ -556,7 +556,7 @@
     <string name="loading_generator">Загрузка генератара...</string>
     <string name="preview_will_appear_here">Папярэдні прагляд з\'явіцца тут</string>
     <string name="pause_duration_ms">Паўза %1$dмс</string>
-    <string name="aspect_ratio_mismatch">Неадпаведнасць суадносін бакоў: файл %1$dx%2$d, але вывад %3$s:1</string>
+    <string name="aspect_ratio_mismatch">Неадпаведнасць суадносін бакоў: файл %1$dx%2$d (%3$s), але вывад %4$dx%5$d (%6$s)</string>
     <string name="mobile_view">Мабільны</string>
     <string name="desktop_view">Настольны</string>
     <string name="interactive_mode">Інтэрактыўны</string>
@@ -572,6 +572,7 @@
     <string name="image_files_filter">Файлы выяў (*.jpg, *.jpeg, *.png, *.gif, *.bmp)</string>
     <string name="video_files_filter">Відэафайлы (*.mp4, *.mov, *.avi, *.mkv, *.webm)</string>
     <string name="images_filter">Выявы</string>
+    <string name="swap_bibles">Памяняць</string>
 
     <!-- Additional translations -->
     <string name="api_key_hint">Увядзіце сакрэтны ключ…</string>
@@ -638,6 +639,13 @@
     <string name="projection_target_display">Дысплей</string>
     <string name="reset_settings">Скінуць усе налады</string>
     <string name="reset_settings_confirm">Вы ўпэўненыя, што хочаце скінуць усе налады да значэнняў па змаўчанні?\n\nПраграма будзе перазапушчана.</string>
+    <string name="clear_lottie_cache_confirm">Вы таксама хочаце ачысціць кэш генератара Lottie?\n\nГэта выдаліць захаваныя прэсеты, каляровыя тэмы і загружаныя лагатыпы.</string>
+    <string name="export_settings">Экспарт налад</string>
+    <string name="import_settings">Імпарт налад</string>
+    <string name="import_settings_confirm">Вы ўпэўненыя, што хочаце імпартаваць налады?\n\nГэта перазапіша бягучыя налады, і праграма будзе перазапушчана.</string>
+    <string name="settings_exported">Налады паспяхова экспартаваны.</string>
+    <string name="settings_export_failed">Не ўдалося экспартаваць налады.</string>
+    <string name="settings_import_failed">Не ўдалося імпартаваць налады. Файл можа быць пашкоджаны.</string>
     <string name="schedule_add_files">Дадаць файлы…</string>
     <string name="schedule_drop_hint">Перацягніце файлы сюды, каб дадаць у праграму</string>
     <string name="screen_number">Экран %1$d</string>
@@ -684,6 +692,11 @@
     <string name="web_bookmark_remove">Выдаліць</string>
     <string name="web_bookmarks">Закладкі</string>
     <string name="web_clear_cache">Ачысціць кэш</string>
+    <string name="web_back">Назад</string>
+    <string name="web_forward">Наперад</string>
+    <string name="web_refresh">Абнавіць</string>
+    <string name="web_zoom_in">Павялічыць</string>
+    <string name="web_zoom_out">Паменшыць</string>
     <string name="web_go_live">У эфір</string>
     <string name="web_live_badge">ЭФІР</string>
     <string name="web_preview_hint">Увядзіце URL вышэй і націсніце У эфір</string>

@@ -18,6 +18,11 @@ import org.cef.browser.CefBrowser
 import org.cef.browser.CefFrame
 import org.cef.handler.CefDisplayHandlerAdapter
 import org.cef.handler.CefLifeSpanHandlerAdapter
+import org.cef.handler.CefRequestHandlerAdapter
+import org.cef.handler.CefResourceRequestHandlerAdapter
+import org.cef.handler.CefResourceRequestHandler
+import org.cef.misc.BoolRef
+import org.cef.network.CefRequest
 import java.io.File
 
 /**
@@ -117,10 +122,22 @@ object CefManager {
 /** Navigation controller for an [EmbeddedWebView]. */
 class WebNavController {
     internal var browser: CefBrowser? = null
+    var mobileMode: Boolean = false
     fun goBack() { browser?.goBack() }
     fun goForward() { browser?.goForward() }
     fun canGoBack(): Boolean = browser?.canGoBack() ?: false
     fun canGoForward(): Boolean = browser?.canGoForward() ?: false
+
+    fun setMobileEmulation(enabled: Boolean) {
+        mobileMode = enabled
+        browser?.reload()
+    }
+
+    companion object {
+        const val MOBILE_USER_AGENT =
+            "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) " +
+            "AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1"
+    }
 }
 
 @Composable
@@ -179,6 +196,25 @@ fun EmbeddedWebView(
         }
         client.addLifeSpanHandler(lifeSpanHandler)
 
+        // Override User-Agent for mobile emulation
+        val requestHandler = object : CefRequestHandlerAdapter() {
+            override fun getResourceRequestHandler(
+                browser: CefBrowser?, frame: CefFrame?, request: CefRequest?,
+                isNavigation: Boolean, isDownload: Boolean, requestInitiator: String?,
+                disableDefaultHandling: BoolRef?
+            ): CefResourceRequestHandler {
+                return object : CefResourceRequestHandlerAdapter() {
+                    override fun onBeforeResourceLoad(browser: CefBrowser?, frame: CefFrame?, request: CefRequest?): Boolean {
+                        if (navController?.mobileMode == true && request != null) {
+                            request.setHeaderByName("User-Agent", WebNavController.MOBILE_USER_AGENT, true)
+                        }
+                        return false
+                    }
+                }
+            }
+        }
+        client.addRequestHandler(requestHandler)
+
         // Snapshot timer — captures browser via Robot screen capture
         val robot = try { java.awt.Robot() } catch (_: Exception) { null }
         val timer = if (onSnapshot != null && robot != null) {
@@ -200,6 +236,7 @@ fun EmbeddedWebView(
             navController?.browser = null
             client.removeDisplayHandler()
             client.removeLifeSpanHandler()
+            client.removeRequestHandler()
             // Hide and detach the heavyweight AWT component before closing —
             // on macOS, JCEF's native Canvas stays visible over Compose layers otherwise
             try {

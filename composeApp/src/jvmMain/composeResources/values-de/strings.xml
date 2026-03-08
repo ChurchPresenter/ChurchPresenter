@@ -556,7 +556,7 @@
     <string name="loading_generator">Generator wird geladen...</string>
     <string name="preview_will_appear_here">Vorschau wird hier angezeigt</string>
     <string name="pause_duration_ms">Pause %1$dms</string>
-    <string name="aspect_ratio_mismatch">Seitenverhältnis stimmt nicht überein: Datei ist %1$dx%2$d, aber Ausgabe ist %3$s:1</string>
+    <string name="aspect_ratio_mismatch">Seitenverhältnis stimmt nicht überein: Datei ist %1$dx%2$d (%3$s), aber Ausgabe ist %4$dx%5$d (%6$s)</string>
     <string name="mobile_view">Mobil</string>
     <string name="desktop_view">Desktop</string>
     <string name="interactive_mode">Interaktiv</string>
@@ -572,6 +572,7 @@
     <string name="image_files_filter">Bilddateien (*.jpg, *.jpeg, *.png, *.gif, *.bmp)</string>
     <string name="video_files_filter">Videodateien (*.mp4, *.mov, *.avi, *.mkv, *.webm)</string>
     <string name="images_filter">Bilder</string>
+    <string name="swap_bibles">Tauschen</string>
 
     <!-- Additional translations -->
     <string name="api_key_hint">Geheimschlüssel eingeben…</string>
@@ -638,6 +639,13 @@
     <string name="projection_target_display">Anzeige</string>
     <string name="reset_settings">Alle Einstellungen zurücksetzen</string>
     <string name="reset_settings_confirm">Sind Sie sicher, dass Sie alle Einstellungen auf die Standardwerte zurücksetzen möchten?\n\nDie Anwendung wird neu gestartet.</string>
+    <string name="clear_lottie_cache_confirm">Möchten Sie auch den Lottie-Generator-Cache leeren?\n\nDies entfernt gespeicherte Vorlagen, Farbthemen und hochgeladene Logos.</string>
+    <string name="export_settings">Einstellungen exportieren</string>
+    <string name="import_settings">Einstellungen importieren</string>
+    <string name="import_settings_confirm">Sind Sie sicher, dass Sie die Einstellungen importieren möchten?\n\nDies überschreibt Ihre aktuellen Einstellungen und die Anwendung wird neu gestartet.</string>
+    <string name="settings_exported">Einstellungen erfolgreich exportiert.</string>
+    <string name="settings_export_failed">Einstellungen konnten nicht exportiert werden.</string>
+    <string name="settings_import_failed">Einstellungen konnten nicht importiert werden. Die Datei ist möglicherweise ungültig.</string>
     <string name="schedule_add_files">Dateien hinzufügen…</string>
     <string name="schedule_drop_hint">Dateien hierher ziehen, um sie zum Programm hinzuzufügen</string>
     <string name="screen_number">Bildschirm %1$d</string>
@@ -684,6 +692,11 @@
     <string name="web_bookmark_remove">Entfernen</string>
     <string name="web_bookmarks">Lesezeichen</string>
     <string name="web_clear_cache">Cache leeren</string>
+    <string name="web_back">Zurück</string>
+    <string name="web_forward">Vorwärts</string>
+    <string name="web_refresh">Aktualisieren</string>
+    <string name="web_zoom_in">Vergrößern</string>
+    <string name="web_zoom_out">Verkleinern</string>
     <string name="web_go_live">Live gehen</string>
     <string name="web_live_badge">LIVE</string>
     <string name="web_preview_hint">Geben Sie oben eine URL ein und tippen Sie auf Live gehen</string>

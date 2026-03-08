@@ -485,6 +485,13 @@
     <!-- System Settings -->
     <string name="reset_settings">Reset All Settings</string>
     <string name="reset_settings_confirm">Are you sure you want to reset all settings to defaults?\n\nThe application will restart.</string>
+    <string name="clear_lottie_cache_confirm">Do you also want to clear the Lottie generator cache?\n\nThis will remove saved presets, color themes, and uploaded logos.</string>
+    <string name="export_settings">Export Settings</string>
+    <string name="import_settings">Import Settings</string>
+    <string name="import_settings_confirm">Are you sure you want to import settings?\n\nThis will overwrite your current settings and the application will restart.</string>
+    <string name="settings_exported">Settings exported successfully.</string>
+    <string name="settings_export_failed">Failed to export settings.</string>
+    <string name="settings_import_failed">Failed to import settings. The file may be invalid.</string>
 
     <!-- Media Tab Strings -->
     <string name="media_tab_title">Media</string>
@@ -637,6 +644,11 @@
     <string name="web_bookmark_remove">Remove</string>
     <string name="web_bookmarks">Bookmarks</string>
     <string name="web_clear_cache">Clear Cache</string>
+    <string name="web_back">Back</string>
+    <string name="web_forward">Forward</string>
+    <string name="web_refresh">Refresh</string>
+    <string name="web_zoom_in">Zoom In</string>
+    <string name="web_zoom_out">Zoom Out</string>
     <string name="tooltip_add_website">Add Website</string>
     <string name="website_dialog_title">Add Website</string>
     <string name="website_url_label">URL</string>
@@ -691,7 +703,7 @@
     <string name="loading_generator">Loading generator...</string>
     <string name="preview_will_appear_here">Preview will appear here</string>
     <string name="pause_duration_ms">Pause %1$dms</string>
-    <string name="aspect_ratio_mismatch">Aspect ratio mismatch: file is %1$dx%2$d but output is %3$s:1</string>
+    <string name="aspect_ratio_mismatch">Aspect ratio mismatch: file is %1$dx%2$d (%3$s) but output is %4$dx%5$d (%6$s)</string>
     <string name="mobile_view">Mobile</string>
     <string name="desktop_view">Desktop</string>
     <string name="interactive_mode">Interactive</string>
@@ -714,4 +726,5 @@
     <string name="image_files_filter">Image Files (*.jpg, *.jpeg, *.png, *.gif, *.bmp)</string>
     <string name="video_files_filter">Video Files (*.mp4, *.mov, *.avi, *.mkv, *.webm)</string>
     <string name="images_filter">Images</string>
+    <string name="swap_bibles">Swap</string>
 </resources>

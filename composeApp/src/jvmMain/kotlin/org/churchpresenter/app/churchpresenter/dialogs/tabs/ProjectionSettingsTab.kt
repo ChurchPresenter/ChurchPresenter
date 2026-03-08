@@ -104,19 +104,21 @@ fun ProjectionSettingsTab(
     val detectedScreens = remember {
         GraphicsEnvironment.getLocalGraphicsEnvironment().screenDevices.size
     }
-    val presenterWindowCount = (detectedScreens - 1).coerceIn(0, 4)
+    val presenterWindowCount = (detectedScreens - 1).coerceAtLeast(0)
 
-    // Auto-save whenever the detected count differs from what's stored.
+    // Extend the assignments list if more screens were connected.
     LaunchedEffect(presenterWindowCount) {
-        if (proj.numberOfWindows != presenterWindowCount) {
+        if (proj.screenAssignments.size < presenterWindowCount) {
+            val extended = proj.screenAssignments.toMutableList()
+            while (extended.size < presenterWindowCount) extended.add(ScreenAssignment())
             onSettingsChange { s ->
-                s.copy(projectionSettings = s.projectionSettings.copy(numberOfWindows = presenterWindowCount))
+                s.copy(projectionSettings = s.projectionSettings.copy(screenAssignments = extended))
             }
         }
     }
 
     val numScreens = presenterWindowCount
-    val screenAssignments = listOf(proj.screen1Assignment, proj.screen2Assignment, proj.screen3Assignment, proj.screen4Assignment)
+    val screenAssignments = (0 until numScreens).map { proj.getAssignment(it) }
 
     // Build display target options: Auto + physical displays + DeckLink devices
     val screenDevices = remember {
@@ -338,12 +340,7 @@ fun ProjectionSettingsTab(
                                         targetType = option.targetType
                                     )
                                     onSettingsChange { s ->
-                                        when (i) {
-                                            0 -> s.copy(projectionSettings = s.projectionSettings.copy(screen1Assignment = updated))
-                                            1 -> s.copy(projectionSettings = s.projectionSettings.copy(screen2Assignment = updated))
-                                            2 -> s.copy(projectionSettings = s.projectionSettings.copy(screen3Assignment = updated))
-                                            else -> s.copy(projectionSettings = s.projectionSettings.copy(screen4Assignment = updated))
-                                        }
+                                        s.copy(projectionSettings = s.projectionSettings.withAssignment(i, updated))
                                     }
                                 }
                             )
@@ -403,12 +400,7 @@ fun ProjectionSettingsTab(
                                         keyTargetType = option.targetType
                                     )
                                     onSettingsChange { s ->
-                                        when (i) {
-                                            0 -> s.copy(projectionSettings = s.projectionSettings.copy(screen1Assignment = updated))
-                                            1 -> s.copy(projectionSettings = s.projectionSettings.copy(screen2Assignment = updated))
-                                            2 -> s.copy(projectionSettings = s.projectionSettings.copy(screen3Assignment = updated))
-                                            else -> s.copy(projectionSettings = s.projectionSettings.copy(screen4Assignment = updated))
-                                        }
+                                        s.copy(projectionSettings = s.projectionSettings.withAssignment(i, updated))
                                     }
                                 }
                             )
@@ -424,12 +416,7 @@ fun ProjectionSettingsTab(
                             onCheckedChange = { checked ->
                                 val updated = col.setter(assignment, checked)
                                 onSettingsChange { s ->
-                                    when (i) {
-                                        0 -> s.copy(projectionSettings = s.projectionSettings.copy(screen1Assignment = updated))
-                                        1 -> s.copy(projectionSettings = s.projectionSettings.copy(screen2Assignment = updated))
-                                        2 -> s.copy(projectionSettings = s.projectionSettings.copy(screen3Assignment = updated))
-                                        else -> s.copy(projectionSettings = s.projectionSettings.copy(screen4Assignment = updated))
-                                    }
+                                    s.copy(projectionSettings = s.projectionSettings.withAssignment(i, updated))
                                 }
                             }
                         )
@@ -444,12 +431,7 @@ fun ProjectionSettingsTab(
                             onClick = {
                                 val updated = assignment.copy(displayMode = modeValue)
                                 onSettingsChange { s ->
-                                    when (i) {
-                                        0 -> s.copy(projectionSettings = s.projectionSettings.copy(screen1Assignment = updated))
-                                        1 -> s.copy(projectionSettings = s.projectionSettings.copy(screen2Assignment = updated))
-                                        2 -> s.copy(projectionSettings = s.projectionSettings.copy(screen3Assignment = updated))
-                                        else -> s.copy(projectionSettings = s.projectionSettings.copy(screen4Assignment = updated))
-                                    }
+                                    s.copy(projectionSettings = s.projectionSettings.withAssignment(i, updated))
                                 }
                             }
                         )

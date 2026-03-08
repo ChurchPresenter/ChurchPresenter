@@ -77,6 +77,8 @@ import org.churchpresenter.app.churchpresenter.composables.ImageIconButton
 import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.models.ScheduleItem
 import org.churchpresenter.app.churchpresenter.utils.presenterAspectRatio
+import org.churchpresenter.app.churchpresenter.utils.formatAspectRatio
+import org.churchpresenter.app.churchpresenter.utils.presenterScreenBounds
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import churchpresenter.composeapp.generated.resources.generate_lower_third
@@ -91,6 +93,7 @@ import churchpresenter.composeapp.generated.resources.choose_logo_image
 import churchpresenter.composeapp.generated.resources.images_filter
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.openLottieGeneratorDialog
 import java.awt.Window
+import org.churchpresenter.app.churchpresenter.viewmodel.isLottieFile
 import java.io.File
 import javax.swing.SwingUtilities
 
@@ -113,7 +116,7 @@ fun LowerThirdTab(
     val lottieFiles = remember(lottieFolder, refreshKey) {
         if (lottieFolder.isEmpty()) emptyList()
         else File(lottieFolder).takeIf { it.exists() && it.isDirectory }
-            ?.listFiles { f -> f.extension.lowercase() == "json" }
+            ?.listFiles { f -> f.extension.lowercase() == "json" && isLottieFile(f) }
             ?.sortedBy { it.nameWithoutExtension.lowercase() } ?: emptyList()
     }
 
@@ -382,10 +385,15 @@ fun LowerThirdTab(
             val comp = composition
             if (comp != null && comp.width > 0 && comp.height > 0) {
                 val lottieAR = comp.width / comp.height
-                val screenAR = presenterAspectRatio()
+                val screenBounds = presenterScreenBounds()
+                val screenAR = screenBounds.width.toFloat() / screenBounds.height.toFloat()
                 if (kotlin.math.abs(lottieAR - screenAR) > 0.05f) {
                     Text(
-                        text = stringResource(Res.string.aspect_ratio_mismatch, comp.width.toInt(), comp.height.toInt(), String.format("%.2f", screenAR)),
+                        text = stringResource(
+                            Res.string.aspect_ratio_mismatch,
+                            comp.width.toInt(), comp.height.toInt(), formatAspectRatio(comp.width.toInt(), comp.height.toInt()),
+                            screenBounds.width, screenBounds.height, formatAspectRatio(screenBounds.width, screenBounds.height)
+                        ),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.error
                     )

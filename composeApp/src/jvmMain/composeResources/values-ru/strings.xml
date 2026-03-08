@@ -557,7 +557,7 @@
     <string name="loading_generator">Загрузка генератора...</string>
     <string name="preview_will_appear_here">Предпросмотр появится здесь</string>
     <string name="pause_duration_ms">Пауза %1$dмс</string>
-    <string name="aspect_ratio_mismatch">Несоответствие соотношения сторон: файл %1$dx%2$d, но вывод %3$s:1</string>
+    <string name="aspect_ratio_mismatch">Несоответствие соотношения сторон: файл %1$dx%2$d (%3$s), но вывод %4$dx%5$d (%6$s)</string>
     <string name="mobile_view">Мобильный</string>
     <string name="desktop_view">Настольный</string>
     <string name="interactive_mode">Интерактивный</string>
@@ -573,6 +573,7 @@
     <string name="image_files_filter">Файлы изображений (*.jpg, *.jpeg, *.png, *.gif, *.bmp)</string>
     <string name="video_files_filter">Видеофайлы (*.mp4, *.mov, *.avi, *.mkv, *.webm)</string>
     <string name="images_filter">Изображения</string>
+    <string name="swap_bibles">Поменять</string>
 
     <!-- Additional translations -->
     <string name="api_key_hint">Введите секретный ключ…</string>
@@ -639,6 +640,13 @@
     <string name="projection_target_display">Дисплей</string>
     <string name="reset_settings">Сбросить все настройки</string>
     <string name="reset_settings_confirm">Вы уверены, что хотите сбросить все настройки?\n\nПриложение будет перезапущено.</string>
+    <string name="clear_lottie_cache_confirm">Вы также хотите очистить кеш генератора Lottie?\n\nЭто удалит сохранённые пресеты, цветовые темы и загруженные логотипы.</string>
+    <string name="export_settings">Экспорт настроек</string>
+    <string name="import_settings">Импорт настроек</string>
+    <string name="import_settings_confirm">Вы уверены, что хотите импортировать настройки?\n\nЭто перезапишет текущие настройки, и приложение будет перезапущено.</string>
+    <string name="settings_exported">Настройки успешно экспортированы.</string>
+    <string name="settings_export_failed">Не удалось экспортировать настройки.</string>
+    <string name="settings_import_failed">Не удалось импортировать настройки. Файл может быть повреждён.</string>
     <string name="schedule_add_files">Добавить файлы…</string>
     <string name="schedule_drop_hint">Перетащите файлы сюда, чтобы добавить в программу</string>
     <string name="screen_number">Экран %1$d</string>
@@ -685,6 +693,11 @@
     <string name="web_bookmark_remove">Удалить</string>
     <string name="web_bookmarks">Закладки</string>
     <string name="web_clear_cache">Очистить кэш</string>
+    <string name="web_back">Назад</string>
+    <string name="web_forward">Вперёд</string>
+    <string name="web_refresh">Обновить</string>
+    <string name="web_zoom_in">Увеличить</string>
+    <string name="web_zoom_out">Уменьшить</string>
     <string name="web_go_live">В эфир</string>
     <string name="web_live_badge">ЭФИР</string>
     <string name="web_preview_hint">Введите URL выше и нажмите «В эфир»</string>

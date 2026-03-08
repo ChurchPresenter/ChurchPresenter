@@ -9,6 +9,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -79,8 +80,11 @@ import churchpresenter.composeapp.generated.resources.ic_arrow_down
 import churchpresenter.composeapp.generated.resources.ic_arrow_up
 import churchpresenter.composeapp.generated.resources.mode
 import churchpresenter.composeapp.generated.resources.no_results_found
+import churchpresenter.composeapp.generated.resources.primary_bible
+import churchpresenter.composeapp.generated.resources.secondary_bible
 import churchpresenter.composeapp.generated.resources.scope
 import churchpresenter.composeapp.generated.resources.search
+import churchpresenter.composeapp.generated.resources.swap_bibles
 import churchpresenter.composeapp.generated.resources.verse
 import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
 import org.churchpresenter.app.churchpresenter.composables.SearchTextField
@@ -364,96 +368,146 @@ fun BibleTab(
                 )
             }
         } else {
-            // ── Book / Chapter / Verse columns ───────────────────────
-            Row(modifier = Modifier.fillMaxWidth().fillMaxHeight().padding(start = 4.dp)) {
-
-                // Book column (resizable)
-                Column(modifier = Modifier.width(with(density) { colWBook.toDp() }).fillMaxHeight()) {
-                    SearchTextField(label = stringResource(Res.string.book)) { query ->
-                        viewModel.updateBookSearchQuery(query)
-                    }
-                    SelectionListWithIndex(
-                        list = filteredBooks,
-                        selectedIndex = filteredBooks.indexOf(books.getOrNull(selectedBookIndex) ?: "").coerceAtLeast(0),
-                        singleLine = true,
-                        onItemSelected = { index, _ ->
-                            val bookName = filteredBooks.getOrNull(index)
-                            bookName?.let {
-                                val realIndex = books.indexOf(it)
-                                if (realIndex >= 0) viewModel.selectBook(realIndex)
+            // ── Toolbar: swap, bible labels, go live, add to schedule ─
+            val toolbarContent: @Composable () -> Unit = {
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    TextButton(
+                        onClick = {
+                            onSettingsChange { s ->
+                                s.copy(bibleSettings = s.bibleSettings.swapped())
                             }
                         }
-                    )
-                }
-
-                DragHandle { amount ->
-                    colWBook = (colWBook + amount).coerceIn(
-                        with(density) { 80.dp.toPx() },
-                        with(density) { 400.dp.toPx() }
-                    )
-                }
-
-                // Chapter column (resizable)
-                Column(modifier = Modifier.width(with(density) { colWChapter.toDp() }).fillMaxHeight()) {
-                    SearchTextField(label = stringResource(Res.string.chapter)) { query ->
-                        viewModel.updateChapterSearchQuery(query)
+                    ) {
+                        Text(
+                            text = stringResource(Res.string.swap_bibles),
+                            style = MaterialTheme.typography.labelMedium
+                        )
                     }
-                    SelectionListWithIndex(
-                        list = filteredChapters,
-                        selectedIndex = filteredChapters.indexOf(selectedChapter.toString()).coerceAtLeast(0),
-                        onItemSelected = { index, _ ->
-                            val chapterStr = filteredChapters.getOrNull(index)
-                            chapterStr?.toIntOrNull()?.let { chapter -> viewModel.selectChapter(chapter) }
-                        }
-                    )
+                    Column(modifier = Modifier.weight(1f).padding(start = 8.dp)) {
+                        Text(
+                            text = "${stringResource(Res.string.primary_bible)} ${appSettings.bibleSettings.primaryBible.substringBeforeLast('.').ifEmpty { "-" }}",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        Text(
+                            text = "${stringResource(Res.string.secondary_bible)} ${appSettings.bibleSettings.secondaryBible.substringBeforeLast('.').ifEmpty { "-" }}",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                    Button(
+                        modifier = Modifier.wrapContentSize().padding(start = 8.dp),
+                        onClick = { goLiveWithHistory() },
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                    ) {
+                        Text(
+                            text = stringResource(Res.string.go_live),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onPrimary,
+                            maxLines = 1
+                        )
+                    }
+                    Button(
+                        modifier = Modifier.wrapContentSize().padding(start = 8.dp, end = 8.dp),
+                        onClick = {
+                            viewModel.addCurrentVerseToSchedule { bookName, chapter, verseNumber, verseText ->
+                                onAddToSchedule?.invoke(bookName, chapter, verseNumber, verseText)
+                            }
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
+                    ) {
+                        Text(
+                            text = stringResource(Res.string.add_to_schedule),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSecondary,
+                            maxLines = 1
+                        )
+                    }
                 }
+            }
 
-                DragHandle { amount ->
-                    colWChapter = (colWChapter + amount).coerceIn(
-                        with(density) { 60.dp.toPx() },
-                        with(density) { 300.dp.toPx() }
-                    )
-                }
+            BoxWithConstraints(modifier = Modifier.fillMaxWidth().fillMaxHeight()) {
+                val isNarrow = maxWidth < 800.dp
 
-                // Verse column (fills remaining space)
-                Column(modifier = Modifier.weight(1f).fillMaxHeight()) {
-                    Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                        SearchTextField(
-                            modifier = Modifier.width(with(density) { colWChapter.toDp() }),
-                            label = stringResource(Res.string.verse),
-                        ) { query ->
-                            viewModel.updateVerseSearchQuery(query)
-                        }
-                        Spacer(modifier = Modifier.weight(1f))
-                        Button(
-                            modifier = Modifier.wrapContentSize().padding(start = 8.dp),
-                            onClick = { goLiveWithHistory() },
-                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
-                        ) {
-                            Text(
-                                text = stringResource(Res.string.go_live),
-                                style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.onPrimary,
-                                maxLines = 1
-                            )
-                        }
-                        Button(
-                            modifier = Modifier.wrapContentSize().padding(start = 8.dp, end = 8.dp),
-                            onClick = {
-                                viewModel.addCurrentVerseToSchedule { bookName, chapter, verseNumber, verseText ->
-                                    onAddToSchedule?.invoke(bookName, chapter, verseNumber, verseText)
+                Column(modifier = Modifier.fillMaxSize()) {
+                    if (isNarrow) {
+                        toolbarContent()
+                    }
+
+                    // ── Book / Chapter / Verse columns ───────────────────────
+                    Row(modifier = Modifier.fillMaxWidth().weight(1f).padding(start = 4.dp)) {
+
+                        // Book column (resizable)
+                        Column(modifier = Modifier.width(with(density) { colWBook.toDp() }).fillMaxHeight()) {
+                            SearchTextField(label = stringResource(Res.string.book)) { query ->
+                                viewModel.updateBookSearchQuery(query)
+                            }
+                            SelectionListWithIndex(
+                                list = filteredBooks,
+                                selectedIndex = filteredBooks.indexOf(books.getOrNull(selectedBookIndex) ?: "").coerceAtLeast(0),
+                                singleLine = true,
+                                onItemSelected = { index, _ ->
+                                    val bookName = filteredBooks.getOrNull(index)
+                                    bookName?.let {
+                                        val realIndex = books.indexOf(it)
+                                        if (realIndex >= 0) viewModel.selectBook(realIndex)
+                                    }
                                 }
-                            },
-                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
-                        ) {
-                            Text(
-                                text = stringResource(Res.string.add_to_schedule),
-                                style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.onSecondary,
-                                maxLines = 1
                             )
                         }
-                    }
+
+                        DragHandle { amount ->
+                            colWBook = (colWBook + amount).coerceIn(
+                                with(density) { 80.dp.toPx() },
+                                with(density) { 400.dp.toPx() }
+                            )
+                        }
+
+                        // Chapter column (resizable)
+                        Column(modifier = Modifier.width(with(density) { colWChapter.toDp() }).fillMaxHeight()) {
+                            SearchTextField(label = stringResource(Res.string.chapter)) { query ->
+                                viewModel.updateChapterSearchQuery(query)
+                            }
+                            SelectionListWithIndex(
+                                list = filteredChapters,
+                                selectedIndex = filteredChapters.indexOf(selectedChapter.toString()).coerceAtLeast(0),
+                                onItemSelected = { index, _ ->
+                                    val chapterStr = filteredChapters.getOrNull(index)
+                                    chapterStr?.toIntOrNull()?.let { chapter -> viewModel.selectChapter(chapter) }
+                                }
+                            )
+                        }
+
+                        DragHandle { amount ->
+                            colWChapter = (colWChapter + amount).coerceIn(
+                                with(density) { 60.dp.toPx() },
+                                with(density) { 300.dp.toPx() }
+                            )
+                        }
+
+                        // Verse column (fills remaining space)
+                        Column(modifier = Modifier.weight(1f).fillMaxHeight()) {
+                            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                                SearchTextField(
+                                    modifier = Modifier.width(with(density) { colWChapter.toDp() }),
+                                    label = stringResource(Res.string.verse),
+                                ) { query ->
+                                    viewModel.updateVerseSearchQuery(query)
+                                }
+                                if (!isNarrow) {
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    toolbarContent()
+                                } else {
+                                    Spacer(modifier = Modifier.weight(1f))
+                                }
+                            }
                     Box(modifier = Modifier.weight(1f)) {
                         SelectionListWithIndex(
                             list = filteredVerses,
@@ -534,6 +588,8 @@ fun BibleTab(
                     }
                 }
             }
+                }
+                }
         }
     }
 }

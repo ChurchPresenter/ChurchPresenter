@@ -35,7 +35,14 @@ import churchpresenter.composeapp.generated.resources.presentation_storage_direc
 import churchpresenter.composeapp.generated.resources.theme
 import churchpresenter.composeapp.generated.resources.no_directory_selected
 import churchpresenter.composeapp.generated.resources.reset_settings
+import churchpresenter.composeapp.generated.resources.clear_lottie_cache_confirm
+import churchpresenter.composeapp.generated.resources.export_settings
+import churchpresenter.composeapp.generated.resources.import_settings
+import churchpresenter.composeapp.generated.resources.import_settings_confirm
 import churchpresenter.composeapp.generated.resources.reset_settings_confirm
+import churchpresenter.composeapp.generated.resources.settings_export_failed
+import churchpresenter.composeapp.generated.resources.settings_exported
+import churchpresenter.composeapp.generated.resources.settings_import_failed
 import churchpresenter.composeapp.generated.resources.songs_storage_directory
 import org.churchpresenter.app.churchpresenter.composables.ThemeSegmentedButton
 import org.churchpresenter.app.churchpresenter.data.AppSettings
@@ -44,8 +51,19 @@ import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
 import org.churchpresenter.app.churchpresenter.viewmodel.FileManager
 import org.jetbrains.compose.resources.stringResource
 import java.awt.Window
+import javax.swing.JFileChooser
 import javax.swing.JOptionPane
 import javax.swing.SwingUtilities
+import javax.swing.filechooser.FileNameExtensionFilter
+
+private val exportJsonFormat = kotlinx.serialization.json.Json {
+    encodeDefaults = true
+    prettyPrint = true
+}
+
+private val importJsonFormat = kotlinx.serialization.json.Json {
+    ignoreUnknownKeys = true
+}
 
 @Composable
 fun SystemSettingsTab(
@@ -194,41 +212,164 @@ fun SystemSettingsTab(
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant, thickness = 1.dp)
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Reset All Settings
+        // Export / Import / Reset Settings
         val resetConfirmMsg = stringResource(Res.string.reset_settings_confirm)
         val resetTitle = stringResource(Res.string.reset_settings)
-        Button(
-            onClick = {
-                SwingUtilities.invokeLater {
-                    val result = JOptionPane.showConfirmDialog(
-                        Window.getWindows().firstOrNull { it.isActive },
-                        resetConfirmMsg,
-                        resetTitle,
-                        JOptionPane.YES_NO_OPTION,
-                        JOptionPane.WARNING_MESSAGE
-                    )
-                    if (result == JOptionPane.YES_OPTION) {
-                        val settingsManager = SettingsManager()
-                        settingsManager.saveSettings(AppSettings())
-                        // Restart the application
-                        val javaBin = System.getProperty("java.home") + "/bin/java"
-                        val command = ProcessHandle.current().info().command().orElse(javaBin)
-                        val args = ProcessHandle.current().info().arguments().orElse(emptyArray())
-                        try {
-                            ProcessBuilder(listOf(command) + args.toList()).start()
-                        } catch (_: Exception) {}
-                        Runtime.getRuntime().exit(0)
-                    }
-                }
-            },
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.errorContainer,
-                contentColor = MaterialTheme.colorScheme.onErrorContainer
-            ),
-            shape = RoundedCornerShape(4.dp),
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+        val clearLottieCacheMsg = stringResource(Res.string.clear_lottie_cache_confirm)
+        val exportTitle = stringResource(Res.string.export_settings)
+        val importTitle = stringResource(Res.string.import_settings)
+        val importConfirmMsg = stringResource(Res.string.import_settings_confirm)
+        val settingsExportedMsg = stringResource(Res.string.settings_exported)
+        val settingsExportFailedMsg = stringResource(Res.string.settings_export_failed)
+        val settingsImportFailedMsg = stringResource(Res.string.settings_import_failed)
+
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Text(text = resetTitle, style = MaterialTheme.typography.labelMedium)
+            // Export Settings
+            Button(
+                onClick = {
+                    SwingUtilities.invokeLater {
+                        val chooser = JFileChooser().apply {
+                            dialogTitle = exportTitle
+                            fileFilter = FileNameExtensionFilter("JSON (*.json)", "json")
+                            selectedFile = java.io.File("churchpresenter-settings.json")
+                        }
+                        val result = chooser.showSaveDialog(Window.getWindows().firstOrNull { it.isActive })
+                        if (result == JFileChooser.APPROVE_OPTION) {
+                            try {
+                                val settingsManager = SettingsManager()
+                                val currentSettings = settingsManager.loadSettings()
+                                val json = exportJsonFormat.encodeToString(AppSettings.serializer(), currentSettings)
+                                var file = chooser.selectedFile
+                                if (!file.name.endsWith(".json")) {
+                                    file = java.io.File(file.absolutePath + ".json")
+                                }
+                                file.writeText(json)
+                                JOptionPane.showMessageDialog(
+                                    Window.getWindows().firstOrNull { it.isActive },
+                                    settingsExportedMsg,
+                                    exportTitle,
+                                    JOptionPane.INFORMATION_MESSAGE
+                                )
+                            } catch (_: Exception) {
+                                JOptionPane.showMessageDialog(
+                                    Window.getWindows().firstOrNull { it.isActive },
+                                    settingsExportFailedMsg,
+                                    exportTitle,
+                                    JOptionPane.ERROR_MESSAGE
+                                )
+                            }
+                        }
+                    }
+                },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                ),
+                shape = RoundedCornerShape(4.dp),
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+            ) {
+                Text(text = exportTitle, style = MaterialTheme.typography.labelMedium)
+            }
+
+            // Import Settings
+            Button(
+                onClick = {
+                    SwingUtilities.invokeLater {
+                        val chooser = JFileChooser().apply {
+                            dialogTitle = importTitle
+                            fileFilter = FileNameExtensionFilter("JSON (*.json)", "json")
+                        }
+                        val result = chooser.showOpenDialog(Window.getWindows().firstOrNull { it.isActive })
+                        if (result == JFileChooser.APPROVE_OPTION) {
+                            val confirmResult = JOptionPane.showConfirmDialog(
+                                Window.getWindows().firstOrNull { it.isActive },
+                                importConfirmMsg,
+                                importTitle,
+                                JOptionPane.YES_NO_OPTION,
+                                JOptionPane.WARNING_MESSAGE
+                            )
+                            if (confirmResult == JOptionPane.YES_OPTION) {
+                                try {
+                                    val json = chooser.selectedFile.readText()
+                                    val imported = importJsonFormat.decodeFromString(AppSettings.serializer(), json)
+                                    val settingsManager = SettingsManager()
+                                    settingsManager.saveSettings(imported)
+                                    // Restart the application
+                                    val javaBin = System.getProperty("java.home") + "/bin/java"
+                                    val command = ProcessHandle.current().info().command().orElse(javaBin)
+                                    val args = ProcessHandle.current().info().arguments().orElse(emptyArray())
+                                    try {
+                                        ProcessBuilder(listOf(command) + args.toList()).start()
+                                    } catch (_: Exception) {}
+                                    Runtime.getRuntime().exit(0)
+                                } catch (_: Exception) {
+                                    JOptionPane.showMessageDialog(
+                                        Window.getWindows().firstOrNull { it.isActive },
+                                        settingsImportFailedMsg,
+                                        importTitle,
+                                        JOptionPane.ERROR_MESSAGE
+                                    )
+                                }
+                            }
+                        }
+                    }
+                },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                ),
+                shape = RoundedCornerShape(4.dp),
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+            ) {
+                Text(text = importTitle, style = MaterialTheme.typography.labelMedium)
+            }
+
+            // Reset All Settings
+            Button(
+                onClick = {
+                    SwingUtilities.invokeLater {
+                        val result2 = JOptionPane.showConfirmDialog(
+                            Window.getWindows().firstOrNull { it.isActive },
+                            resetConfirmMsg,
+                            resetTitle,
+                            JOptionPane.YES_NO_OPTION,
+                            JOptionPane.WARNING_MESSAGE
+                        )
+                        if (result2 == JOptionPane.YES_OPTION) {
+                            val settingsManager = SettingsManager()
+                            val clearCache = JOptionPane.showConfirmDialog(
+                                Window.getWindows().firstOrNull { it.isActive },
+                                clearLottieCacheMsg,
+                                resetTitle,
+                                JOptionPane.YES_NO_OPTION,
+                                JOptionPane.QUESTION_MESSAGE
+                            )
+                            if (clearCache == JOptionPane.YES_OPTION) {
+                                settingsManager.lottiePresetsDir.deleteRecursively()
+                            }
+                            settingsManager.saveSettings(AppSettings())
+                            // Restart the application
+                            val javaBin = System.getProperty("java.home") + "/bin/java"
+                            val command = ProcessHandle.current().info().command().orElse(javaBin)
+                            val args = ProcessHandle.current().info().arguments().orElse(emptyArray())
+                            try {
+                                ProcessBuilder(listOf(command) + args.toList()).start()
+                            } catch (_: Exception) {}
+                            Runtime.getRuntime().exit(0)
+                        }
+                    }
+                },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.errorContainer,
+                    contentColor = MaterialTheme.colorScheme.onErrorContainer
+                ),
+                shape = RoundedCornerShape(4.dp),
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+            ) {
+                Text(text = resetTitle, style = MaterialTheme.typography.labelMedium)
+            }
         }
     }
     }

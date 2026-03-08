@@ -3,6 +3,14 @@ package org.churchpresenter.app.churchpresenter.viewmodel
 import androidx.compose.runtime.mutableStateOf
 import java.io.File
 
+/** Quick check whether a JSON file looks like a Lottie animation (has "v" and "layers" keys). */
+fun isLottieFile(file: File): Boolean {
+    return try {
+        val text = file.readText()
+        text.contains("\"v\"") && text.contains("\"layers\"")
+    } catch (_: Exception) { false }
+}
+
 class LowerThirdSettingsViewModel {
 
     // ── State ────────────────────────────────────────────────────────
@@ -23,7 +31,7 @@ class LowerThirdSettingsViewModel {
         if (folder.isEmpty()) return emptyList()
         return File(folder)
             .takeIf { it.exists() && it.isDirectory }
-            ?.listFiles { f -> f.extension.lowercase() == "json" }
+            ?.listFiles { f -> f.extension.lowercase() == "json" && isLottieFile(f) }
             ?.map { it.name }
             ?.sorted()
             ?: emptyList()
