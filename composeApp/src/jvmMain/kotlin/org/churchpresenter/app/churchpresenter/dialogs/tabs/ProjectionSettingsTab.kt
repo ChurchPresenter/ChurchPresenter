@@ -114,7 +114,8 @@ fun ProjectionSettingsTab(
             changed = true
         }
         for (idx in assignments.indices) {
-            if (assignments[idx].targetDisplay < 0) {
+            // Only resolve auto (-1) to actual display; preserve none (-2)
+            if (assignments[idx].targetDisplay == -1) {
                 assignments[idx] = assignments[idx].copy(targetDisplay = idx + 1)
                 changed = true
             }
