@@ -1,5 +1,8 @@
 package org.churchpresenter.app.churchpresenter
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.compose.runtime.Composable
@@ -11,9 +14,17 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -26,6 +37,7 @@ import androidx.compose.ui.input.key.type
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -37,13 +49,16 @@ import androidx.compose.ui.window.rememberWindowState
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.app_name
 import churchpresenter.composeapp.generated.resources.ic_app_icon
+import churchpresenter.composeapp.generated.resources.loading
 import churchpresenter.composeapp.generated.resources.presenter_view_title
 import churchpresenter.composeapp.generated.resources.key_output_title
 import churchpresenter.composeapp.generated.resources.screen_number
 import org.jetbrains.compose.resources.painterResource
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.data.Language
 import org.churchpresenter.app.churchpresenter.data.SettingsManager
@@ -90,13 +105,14 @@ fun main() {
     CefManager.init()
 
     application {
+        var appReady by remember { mutableStateOf(false) }
+
         // Business logic layer
         val settingsManager = remember { SettingsManager() }
         var appSettings by remember { mutableStateOf(settingsManager.loadSettings()) }
         // Set custom VLC path from saved settings before first VLC access
         remember { vlcCustomPath = appSettings.projectionSettings.vlcPath }
         val presenterManager = remember { PresenterManager() }
-
 
         var licenseAccepted by remember { mutableStateOf(appSettings.licenseAccepted) }
 
@@ -129,26 +145,32 @@ fun main() {
         var showAboutDialog by remember { mutableStateOf(false) }
         var selectedScheduleItemId by remember { mutableStateOf<String?>(null) }
 
-        // Preload songs and bible at startup. Uses CompanionServer's own IO scope —
-        // no Compose composable context needed.
-        remember(Unit) {
-            companionServer.preloadData(
-                songStorageDir = appSettings.songSettings.storageDirectory,
-                bibleStorageDir = appSettings.bibleSettings.storageDirectory,
-                primaryBibleFileName = appSettings.bibleSettings.primaryBible
-            )
-            companionServer.updateLowerThirdFolder(appSettings.streamingSettings.lowerThirdFolder)
-            // Auto-start server if user previously enabled it
-            if (appSettings.serverSettings.enabled) {
-                companionServer.start(appSettings.serverSettings.port)
+        // Preload songs and bible at startup, then signal ready
+        LaunchedEffect(Unit) {
+            withContext(Dispatchers.IO) {
+                companionServer.preloadData(
+                    songStorageDir = appSettings.songSettings.storageDirectory,
+                    bibleStorageDir = appSettings.bibleSettings.storageDirectory,
+                    primaryBibleFileName = appSettings.bibleSettings.primaryBible
+                )
+                companionServer.updateLowerThirdFolder(appSettings.streamingSettings.lowerThirdFolder)
+                // Auto-start server if user previously enabled it
+                if (appSettings.serverSettings.enabled) {
+                    companionServer.start(appSettings.serverSettings.port)
+                }
             }
+            appReady = true
         }
 
         val screens = rememberScreenDevices()
         val state = rememberWindowState(placement = WindowPlacement.Maximized)
 
+        // Splash screen while app is loading
+        if (!appReady) {
+            SplashWindow()
+        }
 
-        if (licenseAccepted) {
+        if (appReady && licenseAccepted) {
             Window(
                 onCloseRequest = { exitApplication() },
                 title = stringResource(Res.string.app_name),
@@ -265,7 +287,7 @@ fun main() {
                 appSettings = appSettings,
                 identifyingScreen = identifyingScreen,
             )
-        } else {
+        } else if (appReady) {
             LicenseDialog(
                 onAccept = {
                     val updated = appSettings.copy(licenseAccepted = true)
@@ -275,6 +297,62 @@ fun main() {
                 },
                 onDecline = { exitApplication() }
             )
+        }
+    }
+}
+
+@Composable
+private fun SplashWindow() {
+    Window(
+        onCloseRequest = {},
+        title = stringResource(Res.string.app_name),
+        icon = painterResource(Res.drawable.ic_app_icon),
+        state = rememberWindowState(
+            width = 400.dp,
+            height = 300.dp,
+            position = WindowPosition(Alignment.Center)
+        ),
+        undecorated = true,
+        resizable = false,
+        alwaysOnTop = true
+    ) {
+        AppThemeWrapper(theme = ThemeMode.SYSTEM) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.surface),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Image(
+                        painter = painterResource(Res.drawable.ic_app_icon),
+                        contentDescription = null,
+                        modifier = Modifier.size(96.dp)
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = stringResource(Res.string.app_name),
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Spacer(modifier = Modifier.height(24.dp))
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(32.dp),
+                        color = MaterialTheme.colorScheme.primary,
+                        strokeWidth = 3.dp
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Text(
+                        text = stringResource(Res.string.loading),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
         }
     }
 }
