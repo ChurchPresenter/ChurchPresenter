@@ -157,7 +157,7 @@ data class BibleSettings(
     val secondaryBibleShadow: Boolean = false,
 
     // Secondary Bible book reference
-    val secondaryReferenceColor: String = "#CCCCCC",
+    val secondaryReferenceColor: String = "#FFFFFF",
     val secondaryReferenceFontType: String = "Arial",
     val secondaryReferenceFontSize: Int = 70,
     val secondaryReferenceLowerThirdFontSize: Int = 24,

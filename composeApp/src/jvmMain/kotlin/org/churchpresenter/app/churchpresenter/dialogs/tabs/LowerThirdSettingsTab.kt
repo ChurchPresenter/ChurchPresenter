@@ -581,25 +581,37 @@ internal fun openLottieGeneratorDialog(
             @Suppress("unused")
             fun save(baseName: String, jsonContent: String) {
                 SwingUtilities.invokeLater {
-                    val folder = LottieGeneratorCache.lowerThirdFolderRef
-                    val targetDir = folder.takeIf { it.isNotEmpty() }
-                        ?.let { File(it) }
-                        ?.takeIf { it.exists() && it.isDirectory }
-                    if (targetDir != null) {
-                        var num = 1
-                        var targetFile = File(targetDir, "$baseName - %02d.json".format(num))
-                        while (targetFile.exists()) {
-                            num++
-                            targetFile = File(targetDir, "$baseName - %02d.json".format(num))
+                    try {
+                        val folder = LottieGeneratorCache.lowerThirdFolderRef
+                        val targetDir = folder.takeIf { it.isNotEmpty() }
+                            ?.let { File(it) }
+                            ?.takeIf { it.exists() && it.isDirectory }
+                        if (targetDir != null) {
+                            // Sanitise base name: remove characters invalid in Windows file names
+                            val safeName = baseName.replace(Regex("[\\\\/:*?\"<>|]"), "_").ifBlank { "lower-third" }
+                            var num = 1
+                            var targetFile = File(targetDir, "$safeName - %02d.json".format(num))
+                            while (targetFile.exists()) {
+                                num++
+                                targetFile = File(targetDir, "$safeName - %02d.json".format(num))
+                            }
+                            targetFile.writeText(jsonContent, Charsets.UTF_8)
+                            LottieGeneratorCache.onFileSavedCallback?.invoke()
+                        } else {
+                            javax.swing.JOptionPane.showMessageDialog(
+                                dialog,
+                                noFolderMessage,
+                                noFolderTitle,
+                                javax.swing.JOptionPane.WARNING_MESSAGE
+                            )
                         }
-                        targetFile.writeText(jsonContent)
-                        LottieGeneratorCache.onFileSavedCallback?.invoke()
-                    } else {
+                    } catch (e: Exception) {
+                        System.err.println("Lower third save error: $e")
                         javax.swing.JOptionPane.showMessageDialog(
                             dialog,
-                            noFolderMessage,
-                            noFolderTitle,
-                            javax.swing.JOptionPane.WARNING_MESSAGE
+                            "Failed to save: ${e.message}",
+                            "Save Error",
+                            javax.swing.JOptionPane.ERROR_MESSAGE
                         )
                     }
                 }
@@ -681,7 +693,7 @@ internal fun openLottieGeneratorDialog(
                     "var btn = document.getElementById('btnDownload');" +
                     "if (btn) { var newBtn = btn.cloneNode(true); btn.parentNode.replaceChild(newBtn, btn);" +
                     "  newBtn.textContent = 'Save Lower Third';" +
-                    "  newBtn.addEventListener('click', function() { download(); savePreset(); }); }"
+                    "  newBtn.addEventListener('click', function() { try { download(); } catch(e) { console.error(e); } try { savePreset(); } catch(e) { console.error(e); } }); }"
                 )
 
                 // Hide the WebView preview area and expand config panel to fill
