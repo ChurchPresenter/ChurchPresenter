@@ -19,13 +19,10 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -374,7 +371,6 @@ fun LowerThirdTab(
             modifier = Modifier
                 .weight(1f)
                 .fillMaxHeight()
-                .verticalScroll(rememberScrollState())
                 .padding(12.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
@@ -404,25 +400,31 @@ fun LowerThirdTab(
                 }
             }
 
-            // Lottie preview
+            // Lottie preview — weight(1f) fills remaining space, aspectRatio inside
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .heightIn(max = 400.dp)
-                    .aspectRatio(presenterAspectRatio())
-                    .background(Color.Black, RoundedCornerShape(8.dp))
-                    .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(8.dp)),
+                    .weight(1f),
                 contentAlignment = Alignment.Center
             ) {
-                if (canPlay) {
-                    Image(
-                        painter = rememberLottiePainter(composition = composition, progress = { displayProgress }),
-                        contentDescription = null,
-                        contentScale = ContentScale.Fit,
-                        modifier = Modifier.fillMaxSize()
-                    )
-                } else if (selectedFile != null) {
-                    Text("⚠", style = MaterialTheme.typography.headlineLarge, color = MaterialTheme.colorScheme.error.copy(alpha = 0.5f))
+                Box(
+                    modifier = Modifier
+                        .aspectRatio(presenterAspectRatio())
+                        .fillMaxSize()
+                        .background(Color.Black, RoundedCornerShape(8.dp))
+                        .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(8.dp)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    if (canPlay) {
+                        Image(
+                            painter = rememberLottiePainter(composition = composition, progress = { displayProgress }),
+                            contentDescription = null,
+                            contentScale = ContentScale.Fit,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    } else if (selectedFile != null) {
+                        Text("⚠", style = MaterialTheme.typography.headlineLarge, color = MaterialTheme.colorScheme.error.copy(alpha = 0.5f))
+                    }
                 }
             }
 

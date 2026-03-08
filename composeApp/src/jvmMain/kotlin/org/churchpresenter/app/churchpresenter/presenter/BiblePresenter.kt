@@ -343,39 +343,75 @@ fun BiblePresenter(
 
                 if (showSecondary && isLowerThird) {
                     val sec = secondary ?: return@TextContent
-                    // Lower third: side-by-side Row layout (50/50)
+                    // Lower third: side-by-side Row layout (50/50) with auto-fit
                     Row(
                         modifier = innerModifier,
                         horizontalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
                         // Left half: primary bible
-                        Column(
+                        BoxWithConstraints(
                             modifier = Modifier.weight(1f).fillMaxHeight(),
-                            verticalArrangement = Arrangement.Bottom
+                            contentAlignment = Alignment.BottomCenter
                         ) {
-                            if (primaryBibleReferencePosition == Constants.POSITION_ABOVE) {
-                                val bookNameOrAbbr = if (appSettings.bibleSettings.primaryShowAbbreviation && primary.bibleAbbreviation.isNotEmpty()) primary.bibleAbbreviation else ""
-                                Text(modifier = Modifier.fillMaxWidth(), textAlign = primaryBibleReferenceHorizontalAlignment, fontFamily = primaryBibleReferenceFontStyle, fontSize = scaledPrimaryReferenceSize, text = "$bookNameOrAbbr ${primary.bookName} ${primary.chapter}:$primaryVerseRef", color = primaryBibleReferenceTextColor, style = primaryReferenceTextStyle)
-                            }
-                            Text(modifier = Modifier.fillMaxWidth(), textAlign = primaryBibleHorizontalAlignment, fontFamily = primaryBibleFontStyle, fontSize = scaledPrimaryBibleSize, text = primary.verseText, color = primaryBibleTextColor, style = primaryBibleTextStyle)
-                            if (primaryBibleReferencePosition == Constants.POSITION_BELOW) {
-                                val bookNameOrAbbr = if (appSettings.bibleSettings.primaryShowAbbreviation && primary.bibleAbbreviation.isNotEmpty()) primary.bibleAbbreviation else ""
-                                Text(modifier = Modifier.fillMaxWidth(), textAlign = primaryBibleReferenceHorizontalAlignment, fontFamily = primaryBibleReferenceFontStyle, fontSize = scaledPrimaryReferenceSize, text = "$bookNameOrAbbr ${primary.bookName} ${primary.chapter}:$primaryVerseRef", color = primaryBibleReferenceTextColor, style = primaryReferenceTextStyle)
+                            val widthConstraint = Constraints(maxWidth = constraints.maxWidth)
+                            val primaryRefText = buildRefText(primary, appSettings.bibleSettings.primaryShowAbbreviation)
+                            val primaryRefH = textMeasurer.measure(
+                                text = primaryRefText,
+                                style = primaryReferenceTextStyle.copy(fontFamily = primaryBibleReferenceFontStyle, fontSize = scaledPrimaryReferenceSize),
+                                constraints = widthConstraint
+                            ).size.height
+                            val primaryVerseH = textMeasurer.measure(
+                                text = primary.verseText,
+                                style = primaryBibleTextStyle.copy(fontFamily = primaryBibleFontStyle, fontSize = scaledPrimaryBibleSize),
+                                constraints = widthConstraint
+                            ).size.height
+                            val pFitScale = if (primaryRefH + primaryVerseH > constraints.maxHeight) {
+                                val spaceForVerse = (constraints.maxHeight - primaryRefH).coerceAtLeast(1)
+                                (spaceForVerse.toFloat() / primaryVerseH).coerceAtLeast(0.3f)
+                            } else 1f
+                            val pBibleSize = scaledPrimaryBibleSize * pFitScale
+
+                            Column(Modifier.fillMaxWidth().wrapContentHeight()) {
+                                if (primaryBibleReferencePosition == Constants.POSITION_ABOVE) {
+                                    Text(modifier = Modifier.fillMaxWidth(), textAlign = primaryBibleReferenceHorizontalAlignment, fontFamily = primaryBibleReferenceFontStyle, fontSize = scaledPrimaryReferenceSize, text = primaryRefText, color = primaryBibleReferenceTextColor, style = primaryReferenceTextStyle)
+                                }
+                                Text(modifier = Modifier.fillMaxWidth(), textAlign = primaryBibleHorizontalAlignment, fontFamily = primaryBibleFontStyle, fontSize = pBibleSize, text = primary.verseText, color = primaryBibleTextColor, style = primaryBibleTextStyle)
+                                if (primaryBibleReferencePosition == Constants.POSITION_BELOW) {
+                                    Text(modifier = Modifier.fillMaxWidth(), textAlign = primaryBibleReferenceHorizontalAlignment, fontFamily = primaryBibleReferenceFontStyle, fontSize = scaledPrimaryReferenceSize, text = primaryRefText, color = primaryBibleReferenceTextColor, style = primaryReferenceTextStyle)
+                                }
                             }
                         }
                         // Right half: secondary bible
-                        Column(
+                        BoxWithConstraints(
                             modifier = Modifier.weight(1f).fillMaxHeight(),
-                            verticalArrangement = Arrangement.Bottom
+                            contentAlignment = Alignment.BottomCenter
                         ) {
-                            if (secondaryBibleReferencePosition == Constants.POSITION_ABOVE) {
-                                val bookNameOrAbbr = if (appSettings.bibleSettings.secondaryShowAbbreviation && sec.bibleAbbreviation.isNotEmpty()) sec.bibleAbbreviation else ""
-                                Text(modifier = Modifier.fillMaxWidth(), textAlign = secondaryBibleReferenceHorizontalAlignment, fontFamily = secondaryBibleReferenceFontStyle, fontSize = scaledSecondaryReferenceSize, text = "$bookNameOrAbbr ${sec.bookName} ${sec.chapter}:$secondaryVerseRef", color = secondaryBibleReferenceTextColor, style = secondaryReferenceTextStyle)
-                            }
-                            Text(modifier = Modifier.fillMaxWidth(), textAlign = secondaryBibleHorizontalAlignment, fontFamily = secondaryBibleFontStyle, fontSize = scaledSecondaryBibleSize, text = sec.verseText, color = secondaryBibleTextColor, style = secondaryBibleTextStyle)
-                            if (secondaryBibleReferencePosition == Constants.POSITION_BELOW) {
-                                val bookNameOrAbbr = if (appSettings.bibleSettings.secondaryShowAbbreviation && sec.bibleAbbreviation.isNotEmpty()) sec.bibleAbbreviation else ""
-                                Text(modifier = Modifier.fillMaxWidth(), textAlign = secondaryBibleReferenceHorizontalAlignment, fontFamily = secondaryBibleReferenceFontStyle, fontSize = scaledSecondaryReferenceSize, text = "$bookNameOrAbbr ${sec.bookName} ${sec.chapter}:$secondaryVerseRef", color = secondaryBibleReferenceTextColor, style = secondaryReferenceTextStyle)
+                            val widthConstraint = Constraints(maxWidth = constraints.maxWidth)
+                            val secondaryRefText = buildRefText(sec, appSettings.bibleSettings.secondaryShowAbbreviation)
+                            val secondaryRefH = textMeasurer.measure(
+                                text = secondaryRefText,
+                                style = secondaryReferenceTextStyle.copy(fontFamily = secondaryBibleReferenceFontStyle, fontSize = scaledSecondaryReferenceSize),
+                                constraints = widthConstraint
+                            ).size.height
+                            val secondaryVerseH = textMeasurer.measure(
+                                text = sec.verseText,
+                                style = secondaryBibleTextStyle.copy(fontFamily = secondaryBibleFontStyle, fontSize = scaledSecondaryBibleSize),
+                                constraints = widthConstraint
+                            ).size.height
+                            val sFitScale = if (secondaryRefH + secondaryVerseH > constraints.maxHeight) {
+                                val spaceForVerse = (constraints.maxHeight - secondaryRefH).coerceAtLeast(1)
+                                (spaceForVerse.toFloat() / secondaryVerseH).coerceAtLeast(0.3f)
+                            } else 1f
+                            val sBibleSize = scaledSecondaryBibleSize * sFitScale
+
+                            Column(Modifier.fillMaxWidth().wrapContentHeight()) {
+                                if (secondaryBibleReferencePosition == Constants.POSITION_ABOVE) {
+                                    Text(modifier = Modifier.fillMaxWidth(), textAlign = secondaryBibleReferenceHorizontalAlignment, fontFamily = secondaryBibleReferenceFontStyle, fontSize = scaledSecondaryReferenceSize, text = secondaryRefText, color = secondaryBibleReferenceTextColor, style = secondaryReferenceTextStyle)
+                                }
+                                Text(modifier = Modifier.fillMaxWidth(), textAlign = secondaryBibleHorizontalAlignment, fontFamily = secondaryBibleFontStyle, fontSize = sBibleSize, text = sec.verseText, color = secondaryBibleTextColor, style = secondaryBibleTextStyle)
+                                if (secondaryBibleReferencePosition == Constants.POSITION_BELOW) {
+                                    Text(modifier = Modifier.fillMaxWidth(), textAlign = secondaryBibleReferenceHorizontalAlignment, fontFamily = secondaryBibleReferenceFontStyle, fontSize = scaledSecondaryReferenceSize, text = secondaryRefText, color = secondaryBibleReferenceTextColor, style = secondaryReferenceTextStyle)
+                                }
                             }
                         }
                     }

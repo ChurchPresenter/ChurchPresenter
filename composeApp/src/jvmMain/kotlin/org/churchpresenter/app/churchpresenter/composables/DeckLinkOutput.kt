@@ -29,7 +29,18 @@ object DeckLinkManager {
     fun isAvailable(): Boolean {
         if (available == null) {
             available = try {
-                System.loadLibrary("decklink_jni")
+                val resDir = System.getProperty("compose.application.resources.dir")
+                val libName = when {
+                    System.getProperty("os.name").lowercase().contains("win") -> "decklink_jni.dll"
+                    System.getProperty("os.name").lowercase().contains("mac") -> "libdecklink_jni.dylib"
+                    else -> "libdecklink_jni.so"
+                }
+                val libFile = resDir?.let { java.io.File(it, libName) }
+                if (libFile != null && libFile.exists()) {
+                    System.load(libFile.absolutePath)
+                } else {
+                    System.loadLibrary("decklink_jni")
+                }
                 true
             } catch (_: UnsatisfiedLinkError) {
                 false

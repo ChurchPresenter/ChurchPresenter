@@ -450,6 +450,7 @@ fun BibleTab(
                         Text(
                             text = stringResource(Res.string.multi_verse),
                             style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier.padding(start = 2.dp)
                         )
                     }
