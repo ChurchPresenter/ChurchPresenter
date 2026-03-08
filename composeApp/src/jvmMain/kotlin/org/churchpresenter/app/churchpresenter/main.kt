@@ -25,6 +25,8 @@ import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.WindowState
@@ -310,12 +312,7 @@ private fun PresenterWindows(
             continue
         }
 
-        // Resolve target display: -1 = auto (screen index + 1), otherwise use the configured index
-        val targetScreenIndex = if (screenAssignment.targetDisplay == -1) {
-            i + 1  // auto: same as original behavior
-        } else {
-            screenAssignment.targetDisplay
-        }
+        val targetScreenIndex = screenAssignment.targetDisplay
 
         // Skip if the target screen doesn't exist
         if (targetScreenIndex < 0 || targetScreenIndex >= screens.size) continue
@@ -323,7 +320,7 @@ private fun PresenterWindows(
         // Derive output role from key target configuration
         val primaryRole = screenAssignment.primaryOutputRole
 
-        val windowState = remember(i, targetScreenIndex) {
+        val windowState = remember(i) {
             val b = screens[targetScreenIndex].defaultConfiguration.bounds
             WindowState(
                 placement = WindowPlacement.Floating,
@@ -331,6 +328,13 @@ private fun PresenterWindows(
                 width = b.width.dp,
                 height = b.height.dp
             )
+        }
+
+        // Reposition window when target display changes
+        LaunchedEffect(targetScreenIndex) {
+            val b = screens[targetScreenIndex].defaultConfiguration.bounds
+            windowState.position = WindowPosition(b.x.dp, b.y.dp)
+            windowState.size = DpSize(b.width.dp, b.height.dp)
         }
 
         // Primary window (fill or normal)

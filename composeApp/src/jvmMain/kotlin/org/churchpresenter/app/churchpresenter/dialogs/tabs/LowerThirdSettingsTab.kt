@@ -663,6 +663,15 @@ internal fun openLottieGeneratorDialog(
         val stateListener = ChangeListener<Worker.State> { _, _, newState ->
             if (newState == Worker.State.FAILED) {
                 System.err.println("WebView FAILED to load: ${engine.loadWorker.exception}")
+                SwingUtilities.invokeLater {
+                    cards.show(cardPanel, "content")
+                    javax.swing.JOptionPane.showMessageDialog(
+                        dialog,
+                        "Failed to load the generator.\n${engine.loadWorker.exception?.message ?: "Unknown error"}",
+                        generatorDialogTitle,
+                        javax.swing.JOptionPane.ERROR_MESSAGE
+                    )
+                }
             }
             if (newState == Worker.State.SUCCEEDED) {
                 val win = engine.executeScript("window") as? JSObject ?: return@ChangeListener

@@ -457,9 +457,17 @@ class CompanionServer {
 
     /** Fallback plain-HTTP start used only if SSL cert generation fails. */
     private fun startPlainHttp(port: Int) {
-        server = embeddedServer(Netty, port = port, host = "0.0.0.0") {
-            configurePipeline()
-        }
+        server = embeddedServer(Netty, configure = {
+            connector {
+                host = "0.0.0.0"
+                this.port = port
+            }
+            // Plain HTTP on localhost for embedded WebView (mirrors the SSL dual-connector setup)
+            connector {
+                host = "127.0.0.1"
+                this.port = port + 1
+            }
+        }) { configurePipeline() }
         server!!.start(wait = false)
         _isRunning.value = true
         _serverUrl.value = "http://${localIpAddress()}:$port"
@@ -602,6 +610,33 @@ class CompanionServer {
                         return@get
                     }
                     call.respondText(file.readText(), ContentType.Application.JavaScript)
+                }
+
+                // Serve fonts.css from Lottie-Gen directory
+                get("/fonts.css") {
+                    val file = lottieGenDir?.let { File(it, "fonts.css") }
+                    if (file == null || !file.exists()) {
+                        call.respond(io.ktor.http.HttpStatusCode.NotFound)
+                        return@get
+                    }
+                    call.respondText(file.readText(), ContentType.Text.CSS)
+                }
+
+                // Serve font files from Lottie-Gen/fonts directory
+                get("/fonts/{filename}") {
+                    val filename = call.parameters["filename"] ?: return@get
+                    val file = lottieGenDir?.let { File(File(it, "fonts"), filename) }
+                    if (file == null || !file.exists()) {
+                        call.respond(io.ktor.http.HttpStatusCode.NotFound)
+                        return@get
+                    }
+                    val contentType = when (file.extension.lowercase()) {
+                        "woff2" -> ContentType("font", "woff2")
+                        "woff" -> ContentType("font", "woff")
+                        "ttf" -> ContentType("font", "ttf")
+                        else -> ContentType.Application.OctetStream
+                    }
+                    call.respondBytes(file.readBytes(), contentType)
                 }
 
                 // Serve logo image files
