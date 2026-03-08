@@ -56,7 +56,6 @@ import churchpresenter.composeapp.generated.resources.left
 import churchpresenter.composeapp.generated.resources.lower_third_height
 import churchpresenter.composeapp.generated.resources.num_screens_label
 import churchpresenter.composeapp.generated.resources.presenter_windows_count
-import churchpresenter.composeapp.generated.resources.projection_auto_display
 import churchpresenter.composeapp.generated.resources.projection_display_label
 import churchpresenter.composeapp.generated.resources.projection_position_help
 import churchpresenter.composeapp.generated.resources.projection_target_display
@@ -106,13 +105,23 @@ fun ProjectionSettingsTab(
     }
     val presenterWindowCount = (detectedScreens - 1).coerceAtLeast(0)
 
-    // Extend the assignments list if more screens were connected.
+    // Extend the assignments list and resolve any auto (-1) assignments to actual displays.
     LaunchedEffect(presenterWindowCount) {
-        if (proj.screenAssignments.size < presenterWindowCount) {
-            val extended = proj.screenAssignments.toMutableList()
-            while (extended.size < presenterWindowCount) extended.add(ScreenAssignment())
+        var changed = false
+        val assignments = proj.screenAssignments.toMutableList()
+        while (assignments.size < presenterWindowCount) {
+            assignments.add(ScreenAssignment(targetDisplay = assignments.size + 1))
+            changed = true
+        }
+        for (idx in assignments.indices) {
+            if (assignments[idx].targetDisplay == -1) {
+                assignments[idx] = assignments[idx].copy(targetDisplay = idx + 1)
+                changed = true
+            }
+        }
+        if (changed) {
             onSettingsChange { s ->
-                s.copy(projectionSettings = s.projectionSettings.copy(screenAssignments = extended))
+                s.copy(projectionSettings = s.projectionSettings.copy(screenAssignments = assignments))
             }
         }
     }
@@ -131,10 +140,10 @@ fun ProjectionSettingsTab(
         val targetType: String   // "screen" or "decklink"
     )
 
-    val autoLabel = stringResource(Res.string.projection_auto_display)
-    val displayOptions = remember(screenDevices, autoLabel) {
+    val noneLabel = stringResource(Res.string.key_output_none)
+    val displayOptions = remember(screenDevices, noneLabel) {
         val options = mutableListOf<DisplayOption>()
-        options.add(DisplayOption(autoLabel, -1, "screen"))
+        options.add(DisplayOption(noneLabel, Constants.KEY_TARGET_NONE, "screen"))
         // Add physical displays (skip display 0 = main app screen)
         for (idx in 1 until screenDevices.size) {
             val bounds = screenDevices[idx].defaultConfiguration.bounds
@@ -148,10 +157,10 @@ fun ProjectionSettingsTab(
         }
         // Add DeckLink devices if available
         if (DeckLinkManager.isAvailable()) {
-            DeckLinkManager.listDevices().forEach { device ->
+            DeckLinkManager.listDevices().forEachIndexed { i, device ->
                 options.add(
                     DisplayOption(
-                        device.name,
+                        "DeckLink ${i + 1}: ${device.name}",
                         device.index,
                         "decklink"
                     )
@@ -340,7 +349,22 @@ fun ProjectionSettingsTab(
                                         targetType = option.targetType
                                     )
                                     onSettingsChange { s ->
-                                        s.copy(projectionSettings = s.projectionSettings.withAssignment(i, updated))
+                                        var newProj = s.projectionSettings.withAssignment(i, updated)
+                                        // If selecting a specific display, clear it from other assignments
+                                        if (option.targetDisplay >= 0) {
+                                            for (j in 0 until numScreens) {
+                                                val other = newProj.getAssignment(j)
+                                                // Clear from other primary displays
+                                                if (j != i && other.targetDisplay == option.targetDisplay && other.targetType == option.targetType) {
+                                                    newProj = newProj.withAssignment(j, other.copy(targetDisplay = -1, targetType = "screen"))
+                                                }
+                                                // Clear from key outputs (any slot including this one)
+                                                if (other.keyTargetDisplay == option.targetDisplay && other.keyTargetType == option.targetType) {
+                                                    newProj = newProj.withAssignment(j, newProj.getAssignment(j).copy(keyTargetDisplay = Constants.KEY_TARGET_NONE, keyTargetType = "screen"))
+                                                }
+                                            }
+                                        }
+                                        s.copy(projectionSettings = newProj)
                                     }
                                 }
                             )
@@ -365,8 +389,8 @@ fun ProjectionSettingsTab(
                             opts.add(KeyOutputOption("Display $idx (${bounds.width}x${bounds.height})", idx, "screen"))
                         }
                         if (DeckLinkManager.isAvailable()) {
-                            DeckLinkManager.listDevices().forEach { device ->
-                                opts.add(KeyOutputOption(device.name, device.index, "decklink"))
+                            DeckLinkManager.listDevices().forEachIndexed { di, device ->
+                                opts.add(KeyOutputOption("DeckLink ${di + 1}: ${device.name}", device.index, "decklink"))
                             }
                         }
                         opts.toList()
@@ -400,7 +424,26 @@ fun ProjectionSettingsTab(
                                         keyTargetType = option.targetType
                                     )
                                     onSettingsChange { s ->
-                                        s.copy(projectionSettings = s.projectionSettings.withAssignment(i, updated))
+                                        var newProj = s.projectionSettings.withAssignment(i, updated)
+                                        if (option.targetDisplay >= 0) {
+                                            for (j in 0 until numScreens) {
+                                                val other = newProj.getAssignment(j)
+                                                // Clear from other primary displays
+                                                if (j != i && other.targetDisplay == option.targetDisplay && other.targetType == option.targetType) {
+                                                    newProj = newProj.withAssignment(j, other.copy(targetDisplay = -1, targetType = "screen"))
+                                                }
+                                                // Clear from other key outputs
+                                                if (j != i && other.keyTargetDisplay == option.targetDisplay && other.keyTargetType == option.targetType) {
+                                                    newProj = newProj.withAssignment(j, other.copy(keyTargetDisplay = Constants.KEY_TARGET_NONE, keyTargetType = "screen"))
+                                                }
+                                            }
+                                            // Also clear if same slot's primary display matches
+                                            val self = newProj.getAssignment(i)
+                                            if (self.targetDisplay == option.targetDisplay && self.targetType == option.targetType) {
+                                                newProj = newProj.withAssignment(i, self.copy(targetDisplay = -1, targetType = "screen"))
+                                            }
+                                        }
+                                        s.copy(projectionSettings = newProj)
                                     }
                                 }
                             )
