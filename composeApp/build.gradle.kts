@@ -1,4 +1,17 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
+import java.util.Calendar
+
+val versionYear = Calendar.getInstance().get(Calendar.YEAR) % 100
+
+fun gitCommitHash(): String {
+    return try {
+        val process = ProcessBuilder("git", "rev-parse", "--short", "HEAD")
+            .directory(rootProject.projectDir)
+            .redirectErrorStream(true)
+            .start()
+        process.inputStream.bufferedReader().readText().trim()
+    } catch (_: Exception) { "unknown" }
+}
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -164,8 +177,10 @@ compose.desktop {
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Exe, TargetFormat.Deb)
             packageName = "ChurchPresenter"
-            val buildNumber = System.getenv("GITHUB_RUN_NUMBER") ?: "0"
-            packageVersion = "1.0.$buildNumber"
+            val buildNum = (System.getenv("GITHUB_RUN_NUMBER") ?: "0").toInt()
+            val year = versionYear
+            // Windows MSI limits each version segment to 0-255, so split build number across minor.patch
+            packageVersion = "$year.${buildNum / 256}.${buildNum % 256}"
             description = "Church Presenter - Presentation software for worship services"
             copyright = "© 2025 Church Presenter. All rights reserved."
             vendor = "Church Presenter"
@@ -221,6 +236,46 @@ compose.desktop {
             }
         }
     }
+}
+
+// Generate BuildConfig with version info accessible at runtime
+val generateBuildConfig by tasks.registering {
+    val commitHash = gitCommitHash()
+    val buildNum = (System.getenv("GITHUB_RUN_NUMBER") ?: "0").toInt()
+    val fullYear = versionYear + 2000
+    val appVersion = "$fullYear.${buildNum / 256}.${buildNum % 256}"
+    val outputDir = layout.buildDirectory.dir("generated/buildconfig")
+
+    outputs.dir(outputDir)
+
+    doLast {
+        val dir = outputDir.get().asFile.resolve("org/churchpresenter/app/churchpresenter")
+        dir.mkdirs()
+        dir.resolve("BuildConfig.kt").writeText(
+            """
+            |package org.churchpresenter.app.churchpresenter
+            |
+            |object BuildConfig {
+            |    const val APP_VERSION = "$appVersion"
+            |    const val COMMIT_HASH = "$commitHash"
+            |    const val BUILD_NUMBER = "$buildNum"
+            |    const val VERSION_DISPLAY = "$appVersion ($commitHash)"
+            |}
+            """.trimMargin()
+        )
+    }
+}
+
+kotlin {
+    sourceSets {
+        jvmMain {
+            kotlin.srcDir(generateBuildConfig.map { layout.buildDirectory.dir("generated/buildconfig") })
+        }
+    }
+}
+
+tasks.named("compileKotlinJvm") {
+    dependsOn(generateBuildConfig)
 }
 
 // Workaround: avoid Gradle incremental state tracking on Compose resource generation tasks
