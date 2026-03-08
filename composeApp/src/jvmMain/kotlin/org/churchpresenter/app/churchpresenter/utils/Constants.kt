@@ -1,7 +1,33 @@
 package org.churchpresenter.app.churchpresenter.utils
 
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import kotlinx.coroutines.delay
+import java.awt.GraphicsDevice
 import java.awt.GraphicsEnvironment
 import java.awt.Rectangle
+
+/** Polls for screen devices every 2 seconds so hot-plugged displays trigger recomposition. */
+@Composable
+fun rememberScreenDevices(): Array<GraphicsDevice> {
+    var devices by remember {
+        mutableStateOf(GraphicsEnvironment.getLocalGraphicsEnvironment().screenDevices)
+    }
+    LaunchedEffect(Unit) {
+        while (true) {
+            delay(2000)
+            val current = GraphicsEnvironment.getLocalGraphicsEnvironment().screenDevices
+            if (current.size != devices.size) {
+                devices = current
+            }
+        }
+    }
+    return devices
+}
 
 /** Returns the presenter screen bounds (second screen if available, else primary screen). */
 fun presenterScreenBounds(): Rectangle {

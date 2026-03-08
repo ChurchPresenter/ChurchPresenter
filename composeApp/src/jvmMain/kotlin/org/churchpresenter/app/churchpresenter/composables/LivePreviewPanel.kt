@@ -5,7 +5,7 @@ import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.runtime.remember
+import org.churchpresenter.app.churchpresenter.utils.rememberScreenDevices
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -84,9 +84,7 @@ fun LivePreviewPanel(
     modifier: Modifier = Modifier
 ) {
     val proj = appSettings.projectionSettings
-    val displayCount = remember {
-        (java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment().screenDevices.size - 1).coerceAtLeast(0)
-    }
+    val displayCount = (rememberScreenDevices().size - 1).coerceAtLeast(0)
     val mediaViewModel = LocalMediaViewModel.current
 
     Column(
