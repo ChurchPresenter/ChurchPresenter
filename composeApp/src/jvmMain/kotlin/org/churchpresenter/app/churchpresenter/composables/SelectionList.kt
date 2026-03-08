@@ -46,6 +46,7 @@ fun SelectionListWithIndex(
     modifier: Modifier = Modifier,
     list: List<String>,
     selectedIndex: Int = 0,
+    selectedIndices: Set<Int>? = null,
     singleLine: Boolean = false,
     onItemSelected: (Int, String) -> Unit,
     onItemDoubleClicked: ((Int, String) -> Unit)? = null
@@ -82,7 +83,7 @@ fun SelectionListWithIndex(
                 items = list,
                 key = { index, _ -> "$index-${list.hashCode()}" }
             ) { index, item ->
-                val isSelected = index == selectedIndex
+                val isSelected = if (selectedIndices != null) selectedIndices.contains(index) else index == selectedIndex
                 Text(
                     text = item,
                     style = MaterialTheme.typography.bodyMedium,

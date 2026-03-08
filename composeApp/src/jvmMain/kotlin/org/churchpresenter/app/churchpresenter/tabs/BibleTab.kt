@@ -28,6 +28,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -84,6 +85,7 @@ import churchpresenter.composeapp.generated.resources.primary_bible
 import churchpresenter.composeapp.generated.resources.secondary_bible
 import churchpresenter.composeapp.generated.resources.scope
 import churchpresenter.composeapp.generated.resources.search
+import churchpresenter.composeapp.generated.resources.multi_verse
 import churchpresenter.composeapp.generated.resources.swap_bibles
 import churchpresenter.composeapp.generated.resources.verse
 import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
@@ -187,7 +189,13 @@ fun BibleTab(
     fun goLiveWithHistory() {
         val selectedVerses = viewModel.getSelectedVerses()
         selectedVerses.firstOrNull()?.let { v ->
-            viewModel.addToHistory(v.bookName, v.chapter, v.verseNumber, v.verseText)
+            if (viewModel.multiVerseEnabled.value) {
+                val verseNumbers = viewModel.getSelectedVerseNumbers()
+                val rangeStr = viewModel.formatVerseRange(verseNumbers)
+                viewModel.addToHistory(v.bookName, v.chapter, v.verseNumber, v.verseText, rangeStr)
+            } else {
+                viewModel.addToHistory(v.bookName, v.chapter, v.verseNumber, v.verseText)
+            }
         }
         onPresenting(Presenting.BIBLE)
     }
@@ -419,12 +427,25 @@ fun BibleTab(
                 )
             }
         } else {
-            // ── Toolbar: swap, bible labels, go live, add to schedule ─
+            // ── Toolbar: multi-verse, swap, bible labels, go live, add to schedule ─
+            val multiVerseEnabled by viewModel.multiVerseEnabled
             val toolbarContent: @Composable () -> Unit = {
                 Row(
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Checkbox(
+                            checked = multiVerseEnabled,
+                            onCheckedChange = { viewModel.toggleMultiVerse(it) },
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Text(
+                            text = stringResource(Res.string.multi_verse),
+                            style = MaterialTheme.typography.labelSmall,
+                            modifier = Modifier.padding(start = 2.dp)
+                        )
+                    }
                     TextButton(
                         onClick = {
                             onSettingsChange { s ->
@@ -560,12 +581,21 @@ fun BibleTab(
                                 }
                             }
                     Box(modifier = Modifier.weight(1f)) {
+                        // Map multi-verse indices from real verse list to filtered list
+                        val multiIndicesInFiltered = if (multiVerseEnabled) {
+                            viewModel.selectedVerseIndices.mapNotNull { realIdx ->
+                                val verseStr = verses.getOrNull(realIdx)
+                                verseStr?.let { filteredVerses.indexOf(it).takeIf { i -> i >= 0 } }
+                            }.toSet()
+                        } else null
+
                         SelectionListWithIndex(
                             list = filteredVerses,
                             selectedIndex = if (filteredVerses.isEmpty()) -1 else {
                                 val currentVerse = verses.getOrNull(selectedVerseIndex)
                                 filteredVerses.indexOf(currentVerse).coerceAtLeast(0)
                             },
+                            selectedIndices = multiIndicesInFiltered,
                             onItemSelected = { index, _ ->
                                 val verseText = filteredVerses.getOrNull(index)
                                 verseText?.let {
@@ -573,7 +603,7 @@ fun BibleTab(
                                     if (realIndex >= 0) viewModel.selectVerse(realIndex)
                                 }
                             },
-                            onItemDoubleClicked = { _, _ -> goLiveWithHistory() }
+                            onItemDoubleClicked = if (multiVerseEnabled) null else { _, _ -> goLiveWithHistory() }
                         )
                     }
 

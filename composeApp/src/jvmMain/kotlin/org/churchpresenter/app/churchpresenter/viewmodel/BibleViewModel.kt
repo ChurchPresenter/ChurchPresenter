@@ -95,6 +95,13 @@ class BibleViewModel(
     private val _verseSelectionToken = mutableStateOf(0)
     val verseSelectionToken: State<Int> = _verseSelectionToken
 
+    // Multi-verse selection mode
+    private val _multiVerseEnabled = mutableStateOf(false)
+    val multiVerseEnabled: State<Boolean> = _multiVerseEnabled
+
+    private val _selectedVerseIndices = mutableStateListOf<Int>()
+    val selectedVerseIndices: List<Int> get() = _selectedVerseIndices
+
     // True only after the full verse index (phase 3) is loaded — not just book names
     // MutableStateFlow so coroutines can suspend on it with .first { it }
     private val _isFullyLoadedFlow = MutableStateFlow(false)
@@ -106,18 +113,19 @@ class BibleViewModel(
         val bookName: String,
         val chapter: Int,
         val verseNumber: Int,
-        val verseText: String
+        val verseText: String,
+        val verseRange: String = ""
     ) {
-        val displayText: String get() = "$bookName $chapter:$verseNumber"
+        val displayText: String get() = if (verseRange.isNotEmpty()) "$bookName $chapter:$verseRange" else "$bookName $chapter:$verseNumber"
     }
 
     private val _history = mutableStateListOf<HistoryEntry>()
     val history: List<HistoryEntry> get() = _history
 
-    fun addToHistory(bookName: String, chapter: Int, verseNumber: Int, verseText: String) {
-        val entry = HistoryEntry(bookName, chapter, verseNumber, verseText)
+    fun addToHistory(bookName: String, chapter: Int, verseNumber: Int, verseText: String, verseRange: String = "") {
+        val entry = HistoryEntry(bookName, chapter, verseNumber, verseText, verseRange)
         // Remove duplicate if exists
-        _history.removeAll { it.bookName == bookName && it.chapter == chapter && it.verseNumber == verseNumber }
+        _history.removeAll { it.bookName == bookName && it.chapter == chapter && it.verseNumber == verseNumber && it.verseRange == verseRange }
         // Add to front
         _history.add(0, entry)
         // Keep max 50 entries
@@ -125,6 +133,32 @@ class BibleViewModel(
     }
 
     fun clearHistory() { _history.clear() }
+
+    fun toggleMultiVerse(enabled: Boolean) {
+        _multiVerseEnabled.value = enabled
+        if (!enabled) {
+            _selectedVerseIndices.clear()
+        }
+    }
+
+    fun toggleVerseInSelection(verseIndex: Int) {
+        if (verseIndex < 0 || verseIndex >= _verses.value.size) return
+        if (_selectedVerseIndices.contains(verseIndex)) {
+            _selectedVerseIndices.remove(verseIndex)
+        } else {
+            _selectedVerseIndices.add(verseIndex)
+        }
+        _verseSelectionToken.value++
+    }
+
+    fun formatVerseRange(numbers: List<Int>): String {
+        if (numbers.isEmpty()) return ""
+        if (numbers.size == 1) return numbers.first().toString()
+        val sorted = numbers.sorted()
+        val isContiguous = sorted.zipWithNext().all { (a, b) -> b == a + 1 }
+        return if (isContiguous) "${sorted.first()}-${sorted.last()}"
+        else sorted.joinToString(",")
+    }
 
     companion object {
         private const val CANONICAL_BOOK_COUNT = 66
@@ -255,16 +289,22 @@ class BibleViewModel(
         _selectedBookIndex.value = bookIndex
         _selectedChapter.value = 1
         _selectedVerseIndex.value = 0
+        _selectedVerseIndices.clear()
         loadChapter(bookIndex, 1)
     }
 
     fun selectChapter(chapter: Int) {
         _selectedChapter.value = chapter
         _selectedVerseIndex.value = 0
+        _selectedVerseIndices.clear()
         loadChapter(_selectedBookIndex.value, chapter)
     }
 
     fun selectVerse(verseIndex: Int) {
+        if (_multiVerseEnabled.value) {
+            toggleVerseInSelection(verseIndex)
+            return
+        }
         if (verseIndex >= 0 && verseIndex < _verses.value.size) {
             _selectedVerseIndex.value = verseIndex
             _verseSelectionToken.value++
@@ -399,11 +439,63 @@ class BibleViewModel(
     fun getSelectedVerses(): List<SelectedVerse> {
         val verseList = mutableListOf<SelectedVerse>()
 
-        // Safety checks: ensure we have verses and valid index
+        // Safety checks: ensure we have verses
         if (_verses.value.isEmpty()) {
             return verseList
         }
 
+        val bookId = _selectedBookIndex.value + 1
+
+        // ── Multi-verse mode: combine selected verses into one SelectedVerse per bible ──
+        if (_multiVerseEnabled.value && _selectedVerseIndices.isNotEmpty()) {
+            val sortedIndices = _selectedVerseIndices.sorted()
+            val primaryTexts = mutableListOf<String>()
+            val secondaryTexts = mutableListOf<String>()
+            val verseNumbers = mutableListOf<Int>()
+            var bookName = ""
+            var secondaryBookName = ""
+
+            for (idx in sortedIndices) {
+                val verse = _verses.value.getOrNull(idx) ?: continue
+                val vNum = verse.substringBefore(". ").toIntOrNull() ?: continue
+                verseNumbers.add(vNum)
+
+                _primaryBible.value?.getVerseDetails(bookId, _selectedChapter.value, vNum)?.let { (bk, text, _) ->
+                    if (bookName.isEmpty()) bookName = bk
+                    primaryTexts.add(text)
+                }
+                _secondaryBible.value?.getVerseDetails(bookId, _selectedChapter.value, vNum)?.let { (bk, text, _) ->
+                    if (secondaryBookName.isEmpty()) secondaryBookName = bk
+                    secondaryTexts.add(text)
+                }
+            }
+
+            if (primaryTexts.isNotEmpty()) {
+                verseList.add(
+                    SelectedVerse(
+                        bibleAbbreviation = _primaryBible.value?.getBibleAbbreviation() ?: "",
+                        bookName = bookName,
+                        chapter = _selectedChapter.value,
+                        verseNumber = verseNumbers.first(),
+                        verseText = primaryTexts.joinToString(" ")
+                    )
+                )
+            }
+            if (secondaryTexts.isNotEmpty()) {
+                verseList.add(
+                    SelectedVerse(
+                        bibleAbbreviation = _secondaryBible.value?.getBibleAbbreviation() ?: "",
+                        bookName = secondaryBookName,
+                        chapter = _selectedChapter.value,
+                        verseNumber = verseNumbers.first(),
+                        verseText = secondaryTexts.joinToString(" ")
+                    )
+                )
+            }
+            return verseList
+        }
+
+        // ── Single-verse mode ──
         // Clamp the index to valid range
         val safeIndex = _selectedVerseIndex.value.coerceIn(0, _verses.value.size - 1)
 
@@ -414,7 +506,6 @@ class BibleViewModel(
 
         val verse = _verses.value[safeIndex]
         val verseNumber = verse.substringBefore(". ").toIntOrNull() ?: 1
-        val bookId = _selectedBookIndex.value + 1
 
         // Add primary Bible verse
         _primaryBible.value?.getVerseDetails(bookId, _selectedChapter.value, verseNumber)?.let { (bookName, verseText, _) ->
@@ -445,6 +536,13 @@ class BibleViewModel(
         }
 
         return verseList
+    }
+
+    /** Returns verse numbers currently selected in multi-verse mode. */
+    fun getSelectedVerseNumbers(): List<Int> {
+        return _selectedVerseIndices.sorted().mapNotNull { idx ->
+            _verses.value.getOrNull(idx)?.substringBefore(". ")?.toIntOrNull()
+        }
     }
 
     fun navigatePreviousVerse(): Boolean {
