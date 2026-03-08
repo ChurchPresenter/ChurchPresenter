@@ -292,15 +292,10 @@ private fun PresenterWindows(
     val proj = appSettings.projectionSettings
     // Only create windows for screens that actually exist beyond screen 0 (the main app screen).
     // If there is only one screen, there is nowhere to project to — skip entirely.
-    val windowCount = (screens.size - 1).coerceIn(0, 4)
+    val windowCount = (screens.size - 1).coerceAtLeast(0)
 
     for (i in 0 until windowCount) {
-        val screenAssignment = when (i) {
-            0 -> proj.screen1Assignment
-            1 -> proj.screen2Assignment
-            2 -> proj.screen3Assignment
-            else -> proj.screen4Assignment
-        }
+        val screenAssignment = proj.getAssignment(i)
 
         // DeckLink outputs are handled separately — no Compose window needed
         if (screenAssignment.targetType == "decklink") {
@@ -336,6 +331,7 @@ private fun PresenterWindows(
         Window(
             visible = showPresenterWindow,
             title = presenterTitle,
+            icon = painterResource(Res.drawable.ic_app_icon),
             onCloseRequest = { presenterManager.setShowPresenterWindow(false) },
             state = windowState,
             undecorated = true,
@@ -465,6 +461,7 @@ private fun PresenterWindows(
                 Window(
                     visible = showPresenterWindow,
                     title = keyOutputTitle,
+                    icon = painterResource(Res.drawable.ic_app_icon),
                     onCloseRequest = { presenterManager.setShowPresenterWindow(false) },
                     state = keyWindowState,
                     undecorated = true,

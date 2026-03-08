@@ -16,6 +16,18 @@ fun presenterAspectRatio(): Float {
     return bounds.width.toFloat() / bounds.height.toFloat()
 }
 
+/** Formats an aspect ratio as a common name (e.g. "16:9") or decimal fallback (e.g. "1.78:1"). */
+fun formatAspectRatio(width: Int, height: Int): String {
+    val gcd = gcd(width, height)
+    val w = width / gcd
+    val h = height / gcd
+    // Accept simplified ratios where both sides are reasonable (≤64)
+    return if (w <= 64 && h <= 64) "$w:$h"
+    else String.format("%.2f:1", width.toFloat() / height.toFloat())
+}
+
+private fun gcd(a: Int, b: Int): Int = if (b == 0) a else gcd(b, a % b)
+
 object Constants {
     const val NONE = "None"
     const val FIRST_PAGE = "First Page"

@@ -556,7 +556,7 @@
     <string name="loading_generator">Ładowanie generatora...</string>
     <string name="preview_will_appear_here">Podgląd pojawi się tutaj</string>
     <string name="pause_duration_ms">Pauza %1$dms</string>
-    <string name="aspect_ratio_mismatch">Niezgodność proporcji: plik to %1$dx%2$d, ale wyjście to %3$s:1</string>
+    <string name="aspect_ratio_mismatch">Niezgodność proporcji: plik to %1$dx%2$d (%3$s), ale wyjście to %4$dx%5$d (%6$s)</string>
     <string name="mobile_view">Mobilny</string>
     <string name="desktop_view">Pulpit</string>
     <string name="interactive_mode">Interaktywny</string>
@@ -572,6 +572,7 @@
     <string name="image_files_filter">Pliki graficzne (*.jpg, *.jpeg, *.png, *.gif, *.bmp)</string>
     <string name="video_files_filter">Pliki wideo (*.mp4, *.mov, *.avi, *.mkv, *.webm)</string>
     <string name="images_filter">Obrazy</string>
+    <string name="swap_bibles">Zamień</string>
 
     <!-- Additional translations -->
     <string name="api_key_hint">Wprowadź tajny klucz…</string>
@@ -638,6 +639,13 @@
     <string name="projection_target_display">Wyświetlacz</string>
     <string name="reset_settings">Resetuj wszystkie ustawienia</string>
     <string name="reset_settings_confirm">Czy na pewno chcesz zresetować wszystkie ustawienia do wartości domyślnych?\n\nAplikacja zostanie ponownie uruchomiona.</string>
+    <string name="clear_lottie_cache_confirm">Czy chcesz również wyczyścić pamięć podręczną generatora Lottie?\n\nSpowoduje to usunięcie zapisanych presetów, motywów kolorystycznych i przesłanych logotypów.</string>
+    <string name="export_settings">Eksportuj ustawienia</string>
+    <string name="import_settings">Importuj ustawienia</string>
+    <string name="import_settings_confirm">Czy na pewno chcesz zaimportować ustawienia?\n\nSpowoduje to nadpisanie bieżących ustawień, a aplikacja zostanie ponownie uruchomiona.</string>
+    <string name="settings_exported">Ustawienia zostały pomyślnie wyeksportowane.</string>
+    <string name="settings_export_failed">Nie udało się wyeksportować ustawień.</string>
+    <string name="settings_import_failed">Nie udało się zaimportować ustawień. Plik może być nieprawidłowy.</string>
     <string name="schedule_add_files">Dodaj pliki…</string>
     <string name="schedule_drop_hint">Przeciągnij pliki tutaj, aby dodać do programu</string>
     <string name="screen_number">Ekran %1$d</string>
@@ -684,6 +692,11 @@
     <string name="web_bookmark_remove">Usuń</string>
     <string name="web_bookmarks">Zakładki</string>
     <string name="web_clear_cache">Wyczyść pamięć podręczną</string>
+    <string name="web_back">Wstecz</string>
+    <string name="web_forward">Dalej</string>
+    <string name="web_refresh">Odśwież</string>
+    <string name="web_zoom_in">Powiększ</string>
+    <string name="web_zoom_out">Pomniejsz</string>
     <string name="web_go_live">Na żywo</string>
     <string name="web_live_badge">NA ŻYWO</string>
     <string name="web_preview_hint">Wprowadź URL powyżej i naciśnij Na żywo</string>

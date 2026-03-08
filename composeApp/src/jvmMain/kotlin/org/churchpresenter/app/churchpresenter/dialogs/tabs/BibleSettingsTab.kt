@@ -480,12 +480,7 @@ private fun PrimaryBibleColumn(
             presenterManager.selectedVerses.value.let { it.isNotEmpty() && it.first().verseText.isNotBlank() }
         } }.value
     } else false
-    val activeScreens = listOf(
-        settings.projectionSettings.screen1Assignment,
-        settings.projectionSettings.screen2Assignment,
-        settings.projectionSettings.screen3Assignment,
-        settings.projectionSettings.screen4Assignment
-    ).take(settings.projectionSettings.numberOfWindows)
+    val activeScreens = settings.projectionSettings.screenAssignments
     val hasFullscreenScreen = activeScreens.any { it.displayMode == Constants.DISPLAY_MODE_FULLSCREEN }
     val hasLowerThirdScreen = activeScreens.any { it.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD }
     SettingRow(stringResource(Res.string.font_size)) {
@@ -776,12 +771,7 @@ private fun SecondaryBibleColumn(
             presenterManager.selectedVerses.value.let { it.size > 1 && it[1].verseText.isNotBlank() }
         } }.value
     } else false
-    val activeScreens2 = listOf(
-        settings.projectionSettings.screen1Assignment,
-        settings.projectionSettings.screen2Assignment,
-        settings.projectionSettings.screen3Assignment,
-        settings.projectionSettings.screen4Assignment
-    ).take(settings.projectionSettings.numberOfWindows)
+    val activeScreens2 = settings.projectionSettings.screenAssignments
     val hasFullscreenScreen2 = activeScreens2.any { it.displayMode == Constants.DISPLAY_MODE_FULLSCREEN }
     val hasLowerThirdScreen2 = activeScreens2.any { it.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD }
     SettingRow(stringResource(Res.string.font_size)) {

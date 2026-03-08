@@ -182,7 +182,57 @@ data class BibleSettings(
     // Transition animation
     val animationType: String = Constants.ANIMATION_CROSSFADE,
     val transitionDuration: Float = 500f
-)
+) {
+    /** Returns a copy with primary and secondary bible settings swapped. */
+    fun swapped() = copy(
+        primaryBible = secondaryBible,
+        secondaryBible = primaryBible,
+        primaryBibleColor = secondaryBibleColor,
+        primaryBibleFontType = secondaryBibleFontType,
+        primaryBibleFontSize = secondaryBibleFontSize,
+        primaryBibleLowerThirdFontSize = secondaryBibleLowerThirdFontSize,
+        primaryBibleHorizontalAlignment = secondaryBibleHorizontalAlignment,
+        primaryBibleLowerThirdHorizontalAlignment = secondaryBibleLowerThirdHorizontalAlignment,
+        primaryBibleBold = secondaryBibleBold,
+        primaryBibleItalic = secondaryBibleItalic,
+        primaryBibleUnderline = secondaryBibleUnderline,
+        primaryBibleShadow = secondaryBibleShadow,
+        primaryReferenceColor = secondaryReferenceColor,
+        primaryReferenceFontType = secondaryReferenceFontType,
+        primaryReferenceFontSize = secondaryReferenceFontSize,
+        primaryReferenceLowerThirdFontSize = secondaryReferenceLowerThirdFontSize,
+        primaryReferencePosition = secondaryReferencePosition,
+        primaryReferenceHorizontalAlignment = secondaryReferenceHorizontalAlignment,
+        primaryReferenceLowerThirdHorizontalAlignment = secondaryReferenceLowerThirdHorizontalAlignment,
+        primaryShowAbbreviation = secondaryShowAbbreviation,
+        primaryReferenceBold = secondaryReferenceBold,
+        primaryReferenceItalic = secondaryReferenceItalic,
+        primaryReferenceUnderline = secondaryReferenceUnderline,
+        primaryReferenceShadow = secondaryReferenceShadow,
+        secondaryBibleColor = primaryBibleColor,
+        secondaryBibleFontType = primaryBibleFontType,
+        secondaryBibleFontSize = primaryBibleFontSize,
+        secondaryBibleLowerThirdFontSize = primaryBibleLowerThirdFontSize,
+        secondaryBibleHorizontalAlignment = primaryBibleHorizontalAlignment,
+        secondaryBibleLowerThirdHorizontalAlignment = primaryBibleLowerThirdHorizontalAlignment,
+        secondaryBibleBold = primaryBibleBold,
+        secondaryBibleItalic = primaryBibleItalic,
+        secondaryBibleUnderline = primaryBibleUnderline,
+        secondaryBibleShadow = primaryBibleShadow,
+        secondaryReferenceColor = primaryReferenceColor,
+        secondaryReferenceFontType = primaryReferenceFontType,
+        secondaryReferenceFontSize = primaryReferenceFontSize,
+        secondaryReferenceLowerThirdFontSize = primaryReferenceLowerThirdFontSize,
+        secondaryReferencePosition = primaryReferencePosition,
+        secondaryReferenceHorizontalAlignment = primaryReferenceHorizontalAlignment,
+        secondaryReferenceLowerThirdHorizontalAlignment = primaryReferenceLowerThirdHorizontalAlignment,
+        secondaryShowAbbreviation = primaryShowAbbreviation,
+        secondaryReferenceBold = primaryReferenceBold,
+        secondaryReferenceItalic = primaryReferenceItalic,
+        secondaryReferenceUnderline = primaryReferenceUnderline,
+        secondaryReferenceShadow = primaryReferenceShadow,
+    )
+}
 
 @Serializable
 data class ScreenAssignment(
@@ -207,19 +257,26 @@ data class ScreenAssignment(
 
 @Serializable
 data class ProjectionSettings(
-    val numberOfWindows: Int = 1, // 1-4 projection windows
     val windowTop: Int = 32,
     val windowLeft: Int = 32,
     val windowRight: Int = 32,
     val windowBottom: Int = 32,
-    val screen1Assignment: ScreenAssignment = ScreenAssignment(),
-    val screen2Assignment: ScreenAssignment = ScreenAssignment(),
-    val screen3Assignment: ScreenAssignment = ScreenAssignment(),
-    val screen4Assignment: ScreenAssignment = ScreenAssignment(),
+    val screenAssignments: List<ScreenAssignment> = listOf(ScreenAssignment()),
     val audioOutputDeviceId: String = "", // empty = system default
     val vlcPath: String = "", // custom VLC installation directory (empty = auto-detect)
     val lowerThirdHeightPercent: Int = 33 // 10-60, used by Bible & Song presenters
-)
+) {
+    fun getAssignment(index: Int): ScreenAssignment =
+        screenAssignments.getOrElse(index) { ScreenAssignment() }
+
+    fun withAssignment(index: Int, assignment: ScreenAssignment): ProjectionSettings {
+        val mutable = screenAssignments.toMutableList()
+        while (mutable.size <= index) mutable.add(ScreenAssignment())
+        mutable[index] = assignment
+        return copy(screenAssignments = mutable)
+    }
+}
+
 
 @Serializable
 data class PictureSettings(

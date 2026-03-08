@@ -477,12 +477,7 @@ private fun RightColumn(
             }
         } }.value
     } else false
-    val activeScreens = listOf(
-        settings.projectionSettings.screen1Assignment,
-        settings.projectionSettings.screen2Assignment,
-        settings.projectionSettings.screen3Assignment,
-        settings.projectionSettings.screen4Assignment
-    ).take(settings.projectionSettings.numberOfWindows)
+    val activeScreens = settings.projectionSettings.screenAssignments
     val hasFullscreenScreen = activeScreens.any { it.displayMode == Constants.DISPLAY_MODE_FULLSCREEN }
     val hasLowerThirdScreen = activeScreens.any { it.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD }
 

@@ -642,7 +642,7 @@
     <string name="loading_generator">Načítání generátoru...</string>
     <string name="preview_will_appear_here">Náhled se zobrazí zde</string>
     <string name="pause_duration_ms">Pauza %1$dms</string>
-    <string name="aspect_ratio_mismatch">Nesoulad poměru stran: soubor je %1$dx%2$d, ale výstup je %3$s:1</string>
+    <string name="aspect_ratio_mismatch">Nesoulad poměru stran: soubor je %1$dx%2$d (%3$s), ale výstup je %4$dx%5$d (%6$s)</string>
     <string name="mobile_view">Mobilní</string>
     <string name="desktop_view">Plocha</string>
     <string name="interactive_mode">Interaktivní</string>
@@ -658,6 +658,7 @@
     <string name="image_files_filter">Soubory obrázků (*.jpg, *.jpeg, *.png, *.gif, *.bmp)</string>
     <string name="video_files_filter">Video soubory (*.mp4, *.mov, *.avi, *.mkv, *.webm)</string>
     <string name="images_filter">Obrázky</string>
+    <string name="swap_bibles">Prohodit</string>
 
     <!-- Additional translations -->
     <string name="api_key_hint">Zadejte tajný klíč…</string>
@@ -724,6 +725,13 @@
     <string name="projection_target_display">Displej</string>
     <string name="reset_settings">Obnovit všechna nastavení</string>
     <string name="reset_settings_confirm">Opravdu chcete obnovit všechna nastavení na výchozí hodnoty?\n\nAplikace se restartuje.</string>
+    <string name="clear_lottie_cache_confirm">Chcete také vymazat mezipaměť generátoru Lottie?\n\nTím se odstraní uložené předvolby, barevná témata a nahrané logotypy.</string>
+    <string name="export_settings">Exportovat nastavení</string>
+    <string name="import_settings">Importovat nastavení</string>
+    <string name="import_settings_confirm">Opravdu chcete importovat nastavení?\n\nTím se přepíší vaše aktuální nastavení a aplikace se restartuje.</string>
+    <string name="settings_exported">Nastavení bylo úspěšně exportováno.</string>
+    <string name="settings_export_failed">Export nastavení se nezdařil.</string>
+    <string name="settings_import_failed">Import nastavení se nezdařil. Soubor může být neplatný.</string>
     <string name="schedule_add_files">Přidat soubory…</string>
     <string name="schedule_drop_hint">Přetáhněte soubory sem pro přidání do programu</string>
     <string name="screen_number">Obrazovka %1$d</string>
@@ -770,6 +778,11 @@
     <string name="web_bookmark_remove">Odebrat</string>
     <string name="web_bookmarks">Záložky</string>
     <string name="web_clear_cache">Vymazat mezipaměť</string>
+    <string name="web_back">Zpět</string>
+    <string name="web_forward">Vpřed</string>
+    <string name="web_refresh">Obnovit</string>
+    <string name="web_zoom_in">Přiblížit</string>
+    <string name="web_zoom_out">Oddálit</string>
     <string name="web_go_live">Zobrazit živě</string>
     <string name="web_live_badge">ŽIVĚ</string>
     <string name="web_preview_hint">Zadejte URL výše a klepněte na Zobrazit živě</string>
