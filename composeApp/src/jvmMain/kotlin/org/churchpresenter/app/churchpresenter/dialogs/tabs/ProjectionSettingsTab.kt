@@ -105,7 +105,7 @@ fun ProjectionSettingsTab(
     }
     val presenterWindowCount = (detectedScreens - 1).coerceAtLeast(0)
 
-    // Extend the assignments list and resolve any auto (-1) assignments to actual displays.
+    // Extend the assignments list and resolve any unassigned (-1 auto or -2 none) to actual displays.
     LaunchedEffect(presenterWindowCount) {
         var changed = false
         val assignments = proj.screenAssignments.toMutableList()
@@ -114,7 +114,7 @@ fun ProjectionSettingsTab(
             changed = true
         }
         for (idx in assignments.indices) {
-            if (assignments[idx].targetDisplay == -1) {
+            if (assignments[idx].targetDisplay < 0) {
                 assignments[idx] = assignments[idx].copy(targetDisplay = idx + 1)
                 changed = true
             }
@@ -136,7 +136,7 @@ fun ProjectionSettingsTab(
 
     data class DisplayOption(
         val label: String,
-        val targetDisplay: Int,  // -1 = auto, 0+ = display/device index
+        val targetDisplay: Int,  // -2 = none, 0+ = display/device index
         val targetType: String   // "screen" or "decklink"
     )
 
@@ -356,7 +356,7 @@ fun ProjectionSettingsTab(
                                                 val other = newProj.getAssignment(j)
                                                 // Clear from other primary displays
                                                 if (j != i && other.targetDisplay == option.targetDisplay && other.targetType == option.targetType) {
-                                                    newProj = newProj.withAssignment(j, other.copy(targetDisplay = -1, targetType = "screen"))
+                                                    newProj = newProj.withAssignment(j, other.copy(targetDisplay = Constants.KEY_TARGET_NONE, targetType = "screen"))
                                                 }
                                                 // Clear from key outputs (any slot including this one)
                                                 if (other.keyTargetDisplay == option.targetDisplay && other.keyTargetType == option.targetType) {
@@ -430,7 +430,7 @@ fun ProjectionSettingsTab(
                                                 val other = newProj.getAssignment(j)
                                                 // Clear from other primary displays
                                                 if (j != i && other.targetDisplay == option.targetDisplay && other.targetType == option.targetType) {
-                                                    newProj = newProj.withAssignment(j, other.copy(targetDisplay = -1, targetType = "screen"))
+                                                    newProj = newProj.withAssignment(j, other.copy(targetDisplay = Constants.KEY_TARGET_NONE, targetType = "screen"))
                                                 }
                                                 // Clear from other key outputs
                                                 if (j != i && other.keyTargetDisplay == option.targetDisplay && other.keyTargetType == option.targetType) {
@@ -440,7 +440,7 @@ fun ProjectionSettingsTab(
                                             // Also clear if same slot's primary display matches
                                             val self = newProj.getAssignment(i)
                                             if (self.targetDisplay == option.targetDisplay && self.targetType == option.targetType) {
-                                                newProj = newProj.withAssignment(i, self.copy(targetDisplay = -1, targetType = "screen"))
+                                                newProj = newProj.withAssignment(i, self.copy(targetDisplay = Constants.KEY_TARGET_NONE, targetType = "screen"))
                                             }
                                         }
                                         s.copy(projectionSettings = newProj)

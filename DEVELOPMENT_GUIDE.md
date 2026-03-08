@@ -15,6 +15,8 @@
 5. [Cleanup TODO List](#-cleanup-todo-list)
 6. [Verification Commands](#-verification-commands)
 7. [Development Workflow](#-development-workflow)
+8. [Crash Reporting](#-crash-reporting)
+9. [Contributing](#-contributing)
 
 ---
 
@@ -344,6 +346,68 @@ Run with: `bash cleanup_check.sh`
 
 ---
 
+## 🛡️ Crash Reporting
+
+ChurchPresenter includes a built-in crash reporter that writes crash logs to disk.
+
+### How It Works
+
+- A global uncaught exception handler is installed at startup via `CrashReporter.initialize()`
+- Crash logs are saved to `~/.churchpresenter/crash-reports/`
+- Each log contains: timestamp, app version, OS, Java version, and full stack trace
+- Logs older than 30 days are automatically deleted on startup
+
+### Reporting Non-Fatal Errors
+
+Use `CrashReporter.reportException()` for important caught exceptions that should be tracked:
+
+```kotlin
+try {
+    // risky operation
+} catch (e: Exception) {
+    CrashReporter.reportException(e, "Loading song file")
+    // handle gracefully
+}
+```
+
+### For Users
+
+If the app crashes, the crash log is saved automatically. Users can find it at:
+- **Windows:** `C:\Users\<username>\.churchpresenter\crash-reports\`
+- **macOS/Linux:** `~/.churchpresenter/crash-reports/`
+
+Submit crash logs by opening a GitHub Issue and attaching the file.
+
+---
+
+## 🤝 Contributing
+
+### Getting Started
+
+1. Fork and clone the repository
+2. Install JDK 21 (Temurin recommended)
+3. Run `./gradlew :composeApp:run` to verify the build works
+4. Read this entire guide before making changes
+
+### Pull Request Guidelines
+
+- Keep PRs focused on a single feature or fix
+- Follow all coding standards documented above
+- Add string resources for any new UI text (no hardcoded strings)
+- Run the verification commands before submitting
+- Test on your platform before submitting
+
+### Credential Files
+
+**Never commit credential or config files** to the repository. The `.gitignore` excludes:
+- `firebase-config.json`, `google-services.json`, `serviceAccountKey.json`
+- `.env` files
+- `.p12` certificates
+
+If you need access to project credentials, contact the maintainer directly.
+
+---
+
 ## 💡 Developer Mantras
 
 > **"If it's unused, remove it or document why it stays"**
@@ -387,7 +451,7 @@ Run with: `bash cleanup_check.sh`
 ---
 
 **Document Version:** 1.0  
-**Last Updated:** February 18, 2026  
+**Last Updated:** March 8, 2026  
 **Maintained By:** Development Team  
 **Status:** 📘 Active Reference Document
 

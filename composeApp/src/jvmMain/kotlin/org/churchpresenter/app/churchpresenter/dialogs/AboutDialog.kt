@@ -2,6 +2,7 @@ package org.churchpresenter.app.churchpresenter.dialogs
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -9,6 +10,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -21,8 +23,11 @@ import androidx.compose.ui.window.rememberDialogState
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.about_title
 import churchpresenter.composeapp.generated.resources.app_name
+import churchpresenter.composeapp.generated.resources.open_crash_logs
 import org.churchpresenter.app.churchpresenter.BuildConfig
 import org.jetbrains.compose.resources.stringResource
+import java.awt.Desktop
+import java.io.File
 
 @Composable
 fun AboutDialog(
@@ -64,8 +69,20 @@ fun AboutDialog(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Spacer(modifier = Modifier.height(16.dp))
-                Button(onClick = onDismiss) {
-                    Text("OK")
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    OutlinedButton(onClick = {
+                        val crashDir = File(System.getProperty("user.home"), ".churchpresenter/crash-reports")
+                        crashDir.mkdirs()
+                        Desktop.getDesktop().open(crashDir)
+                    }) {
+                        Text(stringResource(Res.string.open_crash_logs))
+                    }
+                    Button(onClick = onDismiss) {
+                        Text("OK")
+                    }
                 }
             }
         }

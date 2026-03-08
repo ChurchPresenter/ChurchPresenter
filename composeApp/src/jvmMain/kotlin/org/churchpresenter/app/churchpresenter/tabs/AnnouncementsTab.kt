@@ -621,14 +621,12 @@ fun AnnouncementsTab(
                     color = MaterialTheme.colorScheme.primary
                 )
 
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                    verticalAlignment = Alignment.Top
-                ) {
-                    // ── LEFT: countdown + steppers + controls ──────────
+                BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+                    val timerIsNarrow = maxWidth < 600.dp
+
+                    val timerControls: @Composable (Modifier) -> Unit = { mod ->
                     Column(
-                        modifier = Modifier.weight(1f),
+                        modifier = mod,
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         // Countdown display — full width, centered above steppers
@@ -797,10 +795,12 @@ fun AnnouncementsTab(
                             }
                         }
                     }
+                    }
 
-                    // ── RIGHT: expired text field ──────────────────────
+                    val expiredTextField: @Composable (Modifier) -> Unit = { mod ->
+                    // ── Expired text field ──────────────────────
                     Column(
-                        modifier = Modifier.weight(1f),
+                        modifier = mod,
                         verticalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
                         SectionLabel(stringResource(Res.string.timer_expired_text_label))
@@ -818,6 +818,26 @@ fun AnnouncementsTab(
                             maxLines = 4,
                             textStyle = MaterialTheme.typography.bodySmall
                         )
+                    }
+                    }
+
+                    if (timerIsNarrow) {
+                        Column(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            timerControls(Modifier.fillMaxWidth())
+                            expiredTextField(Modifier.fillMaxWidth())
+                        }
+                    } else {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(16.dp),
+                            verticalAlignment = Alignment.Top
+                        ) {
+                            timerControls(Modifier.weight(1f))
+                            expiredTextField(Modifier.weight(1f))
+                        }
                     }
                 }
             }
