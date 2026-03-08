@@ -28,6 +28,7 @@ hs_err_pid*.log
 jcefmaven_build_meta.json.template
 /org/
 native/decklink/*.class
+native/decklink/build_now.bat
 
 # Credential / config files
 firebase-config.json

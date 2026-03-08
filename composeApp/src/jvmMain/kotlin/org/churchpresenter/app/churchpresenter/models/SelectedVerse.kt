@@ -5,5 +5,6 @@ data class SelectedVerse(
     val bookName: String = "",
     val chapter: Int = 0,
     val verseNumber: Int = 0,
-    val verseText: String = ""
+    val verseText: String = "",
+    val verseRange: String = ""
 )
