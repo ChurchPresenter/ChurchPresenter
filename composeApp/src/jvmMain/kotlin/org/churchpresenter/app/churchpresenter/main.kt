@@ -45,6 +45,7 @@ import kotlinx.coroutines.launch
 import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.data.Language
 import org.churchpresenter.app.churchpresenter.data.SettingsManager
+import org.churchpresenter.app.churchpresenter.dialogs.AboutDialog
 import org.churchpresenter.app.churchpresenter.dialogs.KeyboardShortcutsDialog
 import org.churchpresenter.app.churchpresenter.dialogs.LicenseDialog
 import org.churchpresenter.app.churchpresenter.dialogs.OptionsDialog
@@ -119,6 +120,7 @@ fun main() {
         val companionServer = remember { CompanionServer() }
         var showOptionsDialog by remember { mutableStateOf(false) }
         var showKeyboardShortcutsDialog by remember { mutableStateOf(false) }
+        var showAboutDialog by remember { mutableStateOf(false) }
         var selectedScheduleItemId by remember { mutableStateOf<String?>(null) }
 
         // Preload songs and bible at startup. Uses CompanionServer's own IO scope —
@@ -151,7 +153,8 @@ fun main() {
                     AppThemeWrapper(theme = theme) {
                         CompositionLocalProvider(LocalMediaViewModel provides mediaViewModel) {
                             NavigationTopBar(
-                                onAbout = { presenterManager.setShowPresenterWindow(true) },
+                                onAbout = { showAboutDialog = true },
+                                onHelp = { java.awt.Desktop.getDesktop().browse(java.net.URI("https://github.com/ChurchPresenter/ChurchPresenter/")) },
                                 onKeyboardShortcuts = { showKeyboardShortcutsDialog = true },
                                 theme = {
                                     appSettings = appSettings.copy(theme = it.toString())
@@ -239,6 +242,10 @@ fun main() {
                             KeyboardShortcutsDialog(
                                 isVisible = showKeyboardShortcutsDialog,
                                 onDismiss = { showKeyboardShortcutsDialog = false }
+                            )
+                            AboutDialog(
+                                isVisible = showAboutDialog,
+                                onDismiss = { showAboutDialog = false }
                             )
                         }
                     }
