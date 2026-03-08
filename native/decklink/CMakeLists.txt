@@ -14,7 +14,7 @@ include_directories(${JNI_INCLUDE_DIRS})
 # On macOS:   "/Library/Frameworks/DeckLinkAPI.framework/Headers"
 if(NOT DEFINED DECKLINK_SDK_DIR)
     if(WIN32)
-        set(DECKLINK_SDK_DIR "C:/Users/Sanya/Downloads/Blackmagic-DeckLink-SDK-15.3/Win/include")
+        message(FATAL_ERROR "DECKLINK_SDK_DIR not set. Pass -DDECKLINK_SDK_DIR=\"C:/path/to/Blackmagic-DeckLink-SDK/Win/include\"")
     elseif(APPLE)
         set(DECKLINK_SDK_DIR "/Library/Frameworks/DeckLinkAPI.framework/Headers")
     else()

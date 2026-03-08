@@ -141,6 +141,10 @@ class BibleViewModel(
         }
     }
 
+    fun clearMultiVerseSelection() {
+        _selectedVerseIndices.clear()
+    }
+
     fun toggleVerseInSelection(verseIndex: Int) {
         if (verseIndex < 0 || verseIndex >= _verses.value.size) return
         if (_selectedVerseIndices.contains(verseIndex)) {

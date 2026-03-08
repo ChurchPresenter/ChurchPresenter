@@ -199,6 +199,11 @@ fun BibleTab(
                 viewModel.addToHistory(v.bookName, v.chapter, v.verseNumber, v.verseText)
             }
         }
+        // In multi-verse mode, explicitly push verses and clear selection for next pick
+        if (viewModel.multiVerseEnabled.value && selectedVerses.isNotEmpty()) {
+            onVerseSelected(selectedVerses)
+            viewModel.clearMultiVerseSelection()
+        }
         onPresenting(Presenting.BIBLE)
     }
 

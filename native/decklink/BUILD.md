@@ -24,14 +24,14 @@ Users with DeckLink hardware just need the BlackMagic Desktop Video drivers (whi
 
 2. Navigate to this directory:
    ```
-   cd C:\Users\Sanya\Documents\GitHub\ChurchPresenter\native\decklink
+   cd path\to\ChurchPresenter\native\decklink
    ```
 
 3. Create a build directory and run CMake:
    ```
    mkdir build
    cd build
-   cmake .. -G "Visual Studio 17 2022" -A x64 -DDECKLINK_SDK_DIR="C:\Users\Sanya\Downloads\Blackmagic-DeckLink-SDK-15.3\Win\include"
+   cmake .. -G "Visual Studio 17 2022" -A x64 -DDECKLINK_SDK_DIR="path\to\Blackmagic-DeckLink-SDK\Win\include"
    ```
 
 4. Build:
@@ -49,15 +49,15 @@ Users with DeckLink hardware just need the BlackMagic Desktop Video drivers (whi
 From **x64 Native Tools Command Prompt for VS 2022**:
 
 ```
-cd C:\Users\Sanya\Documents\GitHub\ChurchPresenter\native\decklink
+cd path\to\ChurchPresenter\native\decklink
 
 REM 1. Generate headers from IDL
-midl /h DeckLinkAPI_h.h /iid DeckLinkAPI_i.c /env x64 /W1 /char signed "C:\Users\Sanya\Downloads\Blackmagic-DeckLink-SDK-15.3\Win\include\DeckLinkAPI.idl"
+midl /h DeckLinkAPI_h.h /iid DeckLinkAPI_i.c /env x64 /W1 /char signed "path\to\Blackmagic-DeckLink-SDK\Win\include\DeckLinkAPI.idl"
 
 REM 2. Compile
 cl /LD /EHsc /std:c++17 /O2 ^
    /I"%JAVA_HOME%\include" /I"%JAVA_HOME%\include\win32" ^
-   /I"C:\Users\Sanya\Downloads\Blackmagic-DeckLink-SDK-15.3\Win\include" ^
+   /I"path\to\Blackmagic-DeckLink-SDK\Win\include" ^
    /I"." ^
    decklink_jni.cpp DeckLinkAPI_i.c ^
    /Fe:decklink_jni.dll ^

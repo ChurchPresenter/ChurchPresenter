@@ -144,7 +144,7 @@ data class BibleSettings(
     val primaryReferenceShadow: Boolean = false,
 
     // Secondary Bible text
-    val secondaryBibleColor: String = "#CCCCCC",
+    val secondaryBibleColor: String = "#FFFFFF",
     val secondaryBibleFontType: String = "Arial",
     val secondaryBibleFontSize: Int = 70,
     val secondaryBibleLowerThirdFontSize: Int = 28,
@@ -368,5 +368,10 @@ data class AppSettings(
     val theme: String = Constants.LIGHT,
     val language: String = "en",
     val licenseAccepted: Boolean = false,
-    val webBookmarks: List<WebBookmark> = emptyList()
+    val webBookmarks: List<WebBookmark> = emptyList(),
+    val windowPlacement: String = "maximized",
+    val windowWidth: Int = 1280,
+    val windowHeight: Int = 800,
+    val windowX: Int = -1,
+    val windowY: Int = -1
 )

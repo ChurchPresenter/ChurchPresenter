@@ -163,7 +163,20 @@ fun main() {
         }
 
         val screens = rememberScreenDevices()
-        val state = rememberWindowState(placement = WindowPlacement.Maximized)
+        val savedPlacement = when (appSettings.windowPlacement) {
+            "floating" -> WindowPlacement.Floating
+            "fullscreen" -> WindowPlacement.Fullscreen
+            else -> WindowPlacement.Maximized
+        }
+        val state = rememberWindowState(
+            placement = savedPlacement,
+            position = if (savedPlacement == WindowPlacement.Floating && appSettings.windowX >= 0)
+                WindowPosition(appSettings.windowX.dp, appSettings.windowY.dp)
+            else WindowPosition.PlatformDefault,
+            size = if (savedPlacement == WindowPlacement.Floating)
+                DpSize(appSettings.windowWidth.dp, appSettings.windowHeight.dp)
+            else DpSize.Unspecified
+        )
 
         // Splash screen while app is loading
         if (!appReady) {
@@ -172,7 +185,22 @@ fun main() {
 
         if (appReady && licenseAccepted) {
             Window(
-                onCloseRequest = { exitApplication() },
+                onCloseRequest = {
+                    val placementStr = when (state.placement) {
+                        WindowPlacement.Floating -> "floating"
+                        WindowPlacement.Fullscreen -> "fullscreen"
+                        WindowPlacement.Maximized -> "maximized"
+                    }
+                    appSettings = appSettings.copy(
+                        windowPlacement = placementStr,
+                        windowWidth = state.size.width.value.toInt(),
+                        windowHeight = state.size.height.value.toInt(),
+                        windowX = state.position.x.value.toInt(),
+                        windowY = state.position.y.value.toInt()
+                    )
+                    settingsManager.saveSettings(appSettings)
+                    exitApplication()
+                },
                 title = stringResource(Res.string.app_name),
                 icon = painterResource(Res.drawable.ic_app_icon),
                 state = state
