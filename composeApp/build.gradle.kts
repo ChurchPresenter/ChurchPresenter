@@ -232,7 +232,7 @@ compose.desktop {
 
             windows {
                 menuGroup = "ChurchPresenter"
-                perUserInstall = true
+                perUserInstall = false
                 dirChooser = true
                 upgradeUuid = "A1B2C3D4-E5F6-4789-A012-3456789ABCDE"
                 iconFile.set(project.file("src/jvmMain/appResources/windows/icon.ico"))
