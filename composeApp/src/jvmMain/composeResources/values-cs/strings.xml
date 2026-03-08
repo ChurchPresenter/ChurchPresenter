@@ -709,6 +709,10 @@
     <string name="media_storage_directory">Adresář úložiště médií</string>
     <string name="media_vlc_install">Nainstalujte prosím VLC z videolan.org a restartujte aplikaci</string>
     <string name="media_vlc_required">Pro přehrávání médií je vyžadován přehrávač VLC</string>
+    <string name="vlc_custom_path">Vlastní cesta k VLC</string>
+    <string name="vlc_browse">Procházet</string>
+    <string name="vlc_path_hint">Vyberte instalační adresář VLC</string>
+    <string name="vlc_path_invalid">Adresář neobsahuje knihovny VLC</string>
     <string name="menu_view">Zobrazení</string>
     <string name="output_role_fill">Výplň</string>
     <string name="output_role_key">Klíč</string>

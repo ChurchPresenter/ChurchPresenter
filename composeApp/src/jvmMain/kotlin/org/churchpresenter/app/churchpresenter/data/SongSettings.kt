@@ -217,6 +217,7 @@ data class ProjectionSettings(
     val screen3Assignment: ScreenAssignment = ScreenAssignment(),
     val screen4Assignment: ScreenAssignment = ScreenAssignment(),
     val audioOutputDeviceId: String = "", // empty = system default
+    val vlcPath: String = "", // custom VLC installation directory (empty = auto-detect)
     val lowerThirdHeightPercent: Int = 33 // 10-60, used by Bible & Song presenters
 )
 

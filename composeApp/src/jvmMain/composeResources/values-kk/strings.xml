@@ -623,6 +623,10 @@
     <string name="media_storage_directory">Медиа сақтау қалтасы</string>
     <string name="media_vlc_install">VLC-ді videolan.org сайтынан орнатып, қосымшаны қайта іске қосыңыз</string>
     <string name="media_vlc_required">Медиа ойнату үшін VLC медиа ойнатқышы қажет</string>
+    <string name="vlc_custom_path">VLC жолы</string>
+    <string name="vlc_browse">Шолу</string>
+    <string name="vlc_path_hint">VLC орнату каталогын таңдаңыз</string>
+    <string name="vlc_path_invalid">Каталогта VLC кітапханалары жоқ</string>
     <string name="menu_view">Көрініс</string>
     <string name="output_role_fill">Толтыру</string>
     <string name="output_role_key">Key</string>

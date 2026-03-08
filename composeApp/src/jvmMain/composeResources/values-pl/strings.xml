@@ -623,6 +623,10 @@
     <string name="media_storage_directory">Katalog przechowywania mediów</string>
     <string name="media_vlc_install">Zainstaluj VLC ze strony videolan.org i uruchom ponownie aplikację</string>
     <string name="media_vlc_required">Odtwarzacz VLC jest wymagany do odtwarzania mediów</string>
+    <string name="vlc_custom_path">Ścieżka do VLC</string>
+    <string name="vlc_browse">Przeglądaj</string>
+    <string name="vlc_path_hint">Wybierz katalog instalacji VLC</string>
+    <string name="vlc_path_invalid">Katalog nie zawiera bibliotek VLC</string>
     <string name="menu_view">Widok</string>
     <string name="output_role_fill">Wypełnienie</string>
     <string name="output_role_key">Klucz</string>

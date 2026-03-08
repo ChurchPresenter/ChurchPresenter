@@ -623,6 +623,10 @@
     <string name="media_storage_directory">Medien-Speicherverzeichnis</string>
     <string name="media_vlc_install">Bitte installieren Sie VLC von videolan.org und starten Sie die Anwendung neu</string>
     <string name="media_vlc_required">VLC Media Player wird für die Medienwiedergabe benötigt</string>
+    <string name="vlc_custom_path">Benutzerdefinierter VLC-Pfad</string>
+    <string name="vlc_browse">Durchsuchen</string>
+    <string name="vlc_path_hint">VLC-Installationsverzeichnis auswählen</string>
+    <string name="vlc_path_invalid">Verzeichnis enthält keine VLC-Bibliotheken</string>
     <string name="menu_view">Ansicht</string>
     <string name="output_role_fill">Füllung</string>
     <string name="output_role_key">Key</string>

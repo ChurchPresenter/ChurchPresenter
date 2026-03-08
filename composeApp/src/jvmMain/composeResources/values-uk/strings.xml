@@ -628,6 +628,10 @@
     <string name="media_storage_directory">Папка зберігання медіа</string>
     <string name="media_vlc_install">Будь ласка, встановіть VLC з videolan.org та перезапустіть програму</string>
     <string name="media_vlc_required">Для відтворення медіа потрібен VLC media player</string>
+    <string name="vlc_custom_path">Шлях до VLC</string>
+    <string name="vlc_browse">Огляд</string>
+    <string name="vlc_path_hint">Оберіть каталог встановлення VLC</string>
+    <string name="vlc_path_invalid">Каталог не містить бібліотек VLC</string>
     <string name="menu_view">Вигляд</string>
     <string name="output_role_fill">Заповнення</string>
     <string name="output_role_key">Ключ</string>

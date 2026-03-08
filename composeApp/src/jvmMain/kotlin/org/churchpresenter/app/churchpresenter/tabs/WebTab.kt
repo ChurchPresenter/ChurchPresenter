@@ -28,6 +28,7 @@ import org.churchpresenter.app.churchpresenter.data.WebBookmark
 import org.churchpresenter.app.churchpresenter.presenter.CefManager
 import org.churchpresenter.app.churchpresenter.presenter.EmbeddedWebView
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import java.awt.GraphicsEnvironment
 import org.churchpresenter.app.churchpresenter.presenter.WebNavController
 import org.churchpresenter.app.churchpresenter.presenter.rememberWebNavController
 import org.churchpresenter.app.churchpresenter.utils.presenterAspectRatio
@@ -145,93 +146,24 @@ fun WebTab(
             .padding(8.dp),
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-        // ── URL input row ──────────────────────────────────────────────────
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // Back
-            IconButton(onClick = {
-                val live = presenterManager?.liveBrowser?.value
-                if (isLive && !useInteractivePreview && live != null) live.goBack() else navController.goBack()
-            }) {
-                Text("<", style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.onSurface)
-            }
-            // Forward
-            IconButton(onClick = {
-                val live = presenterManager?.liveBrowser?.value
-                if (isLive && !useInteractivePreview && live != null) live.goForward() else navController.goForward()
-            }) {
-                Text(">", style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.onSurface)
-            }
-            // Refresh
-            IconButton(onClick = {
-                val live = presenterManager?.liveBrowser?.value
-                if (isLive && !useInteractivePreview && live != null) live.reload() else navController.browser?.reload()
-            }) {
-                Text("R", style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface)
-            }
-            // Clear cache
-            IconButton(onClick = {
-                val cacheDir = java.io.File(System.getProperty("user.home"), ".churchpresenter/webview-cache")
-                if (cacheDir.exists()) cacheDir.deleteRecursively()
-                cacheDir.mkdirs()
-            }) {
-                Text("X", style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.error)
-            }
+        // ── Toolbar: nav + URL + actions (1 or 2 rows based on width) ──
+        // Approximate width consumed by nav buttons + zoom + desktop toggle + action buttons
+        val navButtonsWidth = 440.dp   // 4 icon buttons + zoom controls + desktop toggle
+        val actionButtonsWidth = 320.dp // bookmark + Add to Schedule + Go Live
+        val minUrlWidth = 200.dp
 
-            // Zoom out
-            IconButton(onClick = { applyZoom(zoomLevel - 0.5) }, modifier = Modifier.size(32.dp)) {
-                Text("\u2212", style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface)
-            }
-            // Zoom percentage
-            Text(
-                text = "${(Math.pow(1.2, zoomLevel) * 100).toInt()}%",
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            // Zoom in
-            IconButton(onClick = { applyZoom(zoomLevel + 0.5) }, modifier = Modifier.size(32.dp)) {
-                Text("+", style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface)
-            }
-            // Mobile / Desktop toggle
-            Surface(
-                shape = RoundedCornerShape(4.dp),
-                color = if (isMobileView) MaterialTheme.colorScheme.tertiaryContainer
-                        else MaterialTheme.colorScheme.surfaceVariant,
-                modifier = Modifier.clickable {
-                    isMobileView = !isMobileView
-                    if (isMobileView) {
-                        val browser = if (isLive) presenterManager?.liveBrowser?.value else navController.browser
-                        val screenW = browser?.getUIComponent()?.width?.toDouble() ?: 1920.0
-                        val mobileW = 414.0
-                        val factor = screenW / mobileW
-                        val level = Math.log(factor) / Math.log(1.2)
-                        applyZoom(level)
-                    } else {
-                        applyZoom(0.0)
-                    }
-                }
-            ) {
-                Text(
-                    text = stringResource(if (isMobileView) Res.string.mobile_view else Res.string.desktop_view),
-                    style = MaterialTheme.typography.labelSmall,
-                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 4.dp)
-                )
-            }
+        val hasSecondaryDisplay = remember {
+            GraphicsEnvironment.getLocalGraphicsEnvironment().screenDevices.size > 1
+        }
 
+        // Shared composables for URL bar and action buttons
+        val urlBar: @Composable RowScope.() -> Unit = {
             OutlinedTextField(
                 value = urlInput,
                 onValueChange = { urlInput = it },
                 modifier = Modifier
                     .weight(1f)
+                    .widthIn(min = minUrlWidth)
                     .onKeyEvent { event ->
                         if (event.type == KeyEventType.KeyUp && event.key == Key.Enter) {
                             val url = normaliseUrl(urlInput)
@@ -255,7 +187,9 @@ fun WebTab(
                 label = { Text(stringResource(Res.string.web_url_label)) },
                 textStyle = MaterialTheme.typography.bodyMedium
             )
+        }
 
+        val actionButtons: @Composable RowScope.() -> Unit = {
             // Star bookmark toggle
             IconButton(
                 onClick = {
@@ -305,12 +239,64 @@ fun WebTab(
                     presenterManager?.setWebsiteUrl(url)
                     presenterManager?.setPresentingMode(Presenting.WEBSITE)
                 },
-                enabled = urlInput.isNotBlank(),
+                enabled = urlInput.isNotBlank() && hasSecondaryDisplay,
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
             ) {
                 Text(stringResource(Res.string.web_go_live), style = MaterialTheme.typography.labelMedium)
             }
+        }
 
+        val onMobileToggle: (Boolean) -> Unit = { mobile ->
+            isMobileView = mobile
+            if (mobile) {
+                val browser = if (isLive) presenterManager?.liveBrowser?.value else navController.browser
+                val screenW = browser?.getUIComponent()?.width?.toDouble() ?: 1920.0
+                val mobileW = 414.0
+                val factor = screenW / mobileW
+                val level = Math.log(factor) / Math.log(1.2)
+                applyZoom(level)
+            } else {
+                applyZoom(0.0)
+            }
+        }
+
+        BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+            val singleRow = maxWidth >= navButtonsWidth + minUrlWidth + actionButtonsWidth
+
+            if (singleRow) {
+                // Everything on one line
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    NavButtons(navController, presenterManager, isLive, useInteractivePreview,
+                        zoomLevel, isMobileView, ::applyZoom, onMobileToggle)
+                    urlBar()
+                    actionButtons()
+                }
+            } else {
+                // Two rows: nav + actions on top, URL bar below
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        NavButtons(navController, presenterManager, isLive, useInteractivePreview,
+                            zoomLevel, isMobileView, ::applyZoom, onMobileToggle)
+                        Spacer(Modifier.weight(1f))
+                        actionButtons()
+                    }
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        urlBar()
+                    }
+                }
+            }
         }
 
         // ── Horizontal bookmarks bar ───────────────────────────────────────
@@ -649,6 +635,82 @@ fun WebTab(
             }
         }
         }
+    }
+}
+
+@Composable
+private fun RowScope.NavButtons(
+    navController: WebNavController,
+    presenterManager: PresenterManager?,
+    isLive: Boolean,
+    useInteractivePreview: Boolean,
+    zoomLevel: Double,
+    isMobileView: Boolean,
+    applyZoom: (Double) -> Unit,
+    onMobileToggle: (Boolean) -> Unit
+) {
+    // Back
+    IconButton(onClick = {
+        val live = presenterManager?.liveBrowser?.value
+        if (isLive && !useInteractivePreview && live != null) live.goBack() else navController.goBack()
+    }) {
+        Text("<", style = MaterialTheme.typography.titleLarge,
+            color = MaterialTheme.colorScheme.onSurface)
+    }
+    // Forward
+    IconButton(onClick = {
+        val live = presenterManager?.liveBrowser?.value
+        if (isLive && !useInteractivePreview && live != null) live.goForward() else navController.goForward()
+    }) {
+        Text(">", style = MaterialTheme.typography.titleLarge,
+            color = MaterialTheme.colorScheme.onSurface)
+    }
+    // Refresh
+    IconButton(onClick = {
+        val live = presenterManager?.liveBrowser?.value
+        if (isLive && !useInteractivePreview && live != null) live.reload() else navController.browser?.reload()
+    }) {
+        Text("R", style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurface)
+    }
+    // Clear cache
+    IconButton(onClick = {
+        val cacheDir = java.io.File(System.getProperty("user.home"), ".churchpresenter/webview-cache")
+        if (cacheDir.exists()) cacheDir.deleteRecursively()
+        cacheDir.mkdirs()
+    }) {
+        Text("X", style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.error)
+    }
+
+    // Zoom out
+    IconButton(onClick = { applyZoom(zoomLevel - 0.5) }, modifier = Modifier.size(32.dp)) {
+        Text("\u2212", style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurface)
+    }
+    // Zoom percentage
+    Text(
+        text = "${(Math.pow(1.2, zoomLevel) * 100).toInt()}%",
+        style = MaterialTheme.typography.labelSmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant
+    )
+    // Zoom in
+    IconButton(onClick = { applyZoom(zoomLevel + 0.5) }, modifier = Modifier.size(32.dp)) {
+        Text("+", style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurface)
+    }
+    // Mobile / Desktop toggle
+    Surface(
+        shape = RoundedCornerShape(4.dp),
+        color = if (isMobileView) MaterialTheme.colorScheme.tertiaryContainer
+                else MaterialTheme.colorScheme.surfaceVariant,
+        modifier = Modifier.clickable { onMobileToggle(!isMobileView) }
+    ) {
+        Text(
+            text = stringResource(if (isMobileView) Res.string.mobile_view else Res.string.desktop_view),
+            style = MaterialTheme.typography.labelSmall,
+            modifier = Modifier.padding(horizontal = 6.dp, vertical = 4.dp)
+        )
     }
 }
 
