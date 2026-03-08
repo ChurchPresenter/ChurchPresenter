@@ -207,55 +207,76 @@ fun AnnouncementsTab(
                 ) {
                     // Announcement text + buttons
                     SectionLabel(stringResource(Res.string.announcement_text))
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(6.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        OutlinedTextField(
-                            value = viewModel.text,
-                            onValueChange = {
-                                viewModel.setText(it)
-                                viewModel.saveToSettings(onSettingsChange)
-                            },
-                            placeholder = {
-                                Text(
-                                    text = stringResource(Res.string.announcement_text_hint),
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
-                                )
-                            },
-                            modifier = Modifier.weight(1f),
-                            textStyle = MaterialTheme.typography.bodyMedium,
-                            singleLine = true
-                        )
-                        if (presenterManager != null) {
-                            Button(
-                                onClick = { viewModel.goLive(presenterManager, onSettingsChange) },
-                                enabled = viewModel.text.isNotBlank(),
-                                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
-                                contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp)
-                            ) {
-                                Text(stringResource(Res.string.go_live), style = MaterialTheme.typography.labelMedium)
-                            }
-                        }
-                        if (onAddToSchedule != null) {
-                            Button(
-                                onClick = {
-                                    onAddToSchedule.invoke(
-                                        viewModel.buildSettings().copy(
-                                            timerMinutes = 0,
-                                            timerSeconds = 0,
-                                            timerTextColor = "#FFFFFF",
-                                            timerExpiredText = ""
-                                        )
+                    BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+                        val announcementIsNarrow = maxWidth < 500.dp
+
+                        val textField: @Composable (Modifier) -> Unit = { mod ->
+                            OutlinedTextField(
+                                value = viewModel.text,
+                                onValueChange = {
+                                    viewModel.setText(it)
+                                    viewModel.saveToSettings(onSettingsChange)
+                                },
+                                placeholder = {
+                                    Text(
+                                        text = stringResource(Res.string.announcement_text_hint),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
                                     )
                                 },
-                                enabled = viewModel.text.isNotBlank(),
-                                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
-                                contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp)
+                                modifier = mod,
+                                textStyle = MaterialTheme.typography.bodyMedium,
+                                singleLine = true
+                            )
+                        }
+
+                        val buttons: @Composable () -> Unit = {
+                            if (presenterManager != null) {
+                                Button(
+                                    onClick = { viewModel.goLive(presenterManager, onSettingsChange) },
+                                    enabled = viewModel.text.isNotBlank(),
+                                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                                    contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp)
+                                ) {
+                                    Text(stringResource(Res.string.go_live), style = MaterialTheme.typography.labelMedium)
+                                }
+                            }
+                            if (onAddToSchedule != null) {
+                                Button(
+                                    onClick = {
+                                        onAddToSchedule.invoke(
+                                            viewModel.buildSettings().copy(
+                                                timerMinutes = 0,
+                                                timerSeconds = 0,
+                                                timerTextColor = "#FFFFFF",
+                                                timerExpiredText = ""
+                                            )
+                                        )
+                                    },
+                                    enabled = viewModel.text.isNotBlank(),
+                                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
+                                    contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp)
+                                ) {
+                                    Text(stringResource(Res.string.add_to_schedule), style = MaterialTheme.typography.labelMedium)
+                                }
+                            }
+                        }
+
+                        if (announcementIsNarrow) {
+                            Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                                textField(Modifier.fillMaxWidth())
+                                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                    buttons()
+                                }
+                            }
+                        } else {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Text(stringResource(Res.string.add_to_schedule), style = MaterialTheme.typography.labelMedium)
+                                textField(Modifier.weight(1f))
+                                buttons()
                             }
                         }
                     }
