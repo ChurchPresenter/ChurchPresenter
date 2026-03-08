@@ -61,11 +61,24 @@ else()
     include_directories("${DECKLINK_SDK_DIR}")
 endif()
 
+# ---------- Detect DeckLink framework (macOS) ----------
+if(APPLE)
+    find_library(DECKLINK_FRAMEWORK DeckLinkAPI PATHS /Library/Frameworks)
+endif()
+
 # ---------- Sources ----------
 set(SOURCES decklink_jni.cpp)
 
 if(WIN32)
     list(APPEND SOURCES "${MIDL_OUTPUT_DIR}/DeckLinkAPI_i.c")
+elseif(APPLE AND NOT DECKLINK_FRAMEWORK)
+    # When the DeckLink framework is not installed (SDK-only build),
+    # compile the dispatch source which provides CreateDeckLinkIteratorInstance
+    # via runtime dynamic loading (dlopen).
+    if(EXISTS "${DECKLINK_SDK_DIR}/DeckLinkAPIDispatch.cpp")
+        list(APPEND SOURCES "${DECKLINK_SDK_DIR}/DeckLinkAPIDispatch.cpp")
+        message(STATUS "Using DeckLinkAPIDispatch.cpp for runtime linking (no framework)")
+    endif()
 endif()
 
 add_library(decklink_jni SHARED ${SOURCES})
@@ -80,7 +93,6 @@ if(WIN32)
     target_compile_definitions(decklink_jni PRIVATE _WIN32_WINNT=0x0601)
 elseif(APPLE)
     find_library(COREFOUNDATION_LIB CoreFoundation REQUIRED)
-    find_library(DECKLINK_FRAMEWORK DeckLinkAPI PATHS /Library/Frameworks)
     target_link_libraries(decklink_jni PRIVATE ${COREFOUNDATION_LIB})
     if(DECKLINK_FRAMEWORK)
         target_link_libraries(decklink_jni PRIVATE ${DECKLINK_FRAMEWORK})
