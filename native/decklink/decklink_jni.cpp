@@ -118,8 +118,14 @@ static IDeckLinkMutableVideoFrame* createFrame(IDeckLinkOutput* output, const ji
     );
     if (hr != S_OK || !frame) return nullptr;
 
+    // SDK 15.3+: GetBytes moved to IDeckLinkVideoBuffer interface
+    IDeckLinkVideoBuffer* buffer = nullptr;
+    frame->QueryInterface(IID_IDeckLinkVideoBuffer, reinterpret_cast<void**>(&buffer));
+    if (!buffer) { frame->Release(); return nullptr; }
+
     void* frameBytes = nullptr;
-    frame->GetBytes(&frameBytes);
+    buffer->GetBytes(&frameBytes);
+    buffer->Release();
     if (frameBytes && pixels) {
         // Java IntArray is ARGB, DeckLink expects BGRA
         // Convert: ARGB (0xAARRGGBB) → BGRA (0xBBGGRRAA)
