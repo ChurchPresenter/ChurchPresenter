@@ -83,6 +83,7 @@
     <string name="menu_about">О программе</string>
     <string name="about_title">О Church Presenter</string>
     <string name="open_crash_logs">Открыть журнал ошибок</string>
+    <string name="action_ok">OK</string>
     <string name="menu_help_item">Справка</string>
 
     <!-- Options Dialog Strings -->

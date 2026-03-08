@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
@@ -23,6 +22,7 @@ import androidx.compose.ui.window.rememberDialogState
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.about_title
 import churchpresenter.composeapp.generated.resources.app_name
+import churchpresenter.composeapp.generated.resources.action_ok
 import churchpresenter.composeapp.generated.resources.open_crash_logs
 import org.churchpresenter.app.churchpresenter.BuildConfig
 import org.jetbrains.compose.resources.stringResource
@@ -81,7 +81,7 @@ fun AboutDialog(
                         Text(stringResource(Res.string.open_crash_logs))
                     }
                     Button(onClick = onDismiss) {
-                        Text("OK")
+                        Text(stringResource(Res.string.action_ok))
                     }
                 }
             }

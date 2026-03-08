@@ -450,7 +450,7 @@ class CompanionServer {
             }
         }) { configurePipeline() }
 
-        server!!.start(wait = false)
+        server?.start(wait = false)
         _isRunning.value = true
         _serverUrl.value = "https://${localIpAddress()}:$port"
     }
@@ -468,7 +468,7 @@ class CompanionServer {
                 this.port = port + 1
             }
         }) { configurePipeline() }
-        server!!.start(wait = false)
+        server?.start(wait = false)
         _isRunning.value = true
         _serverUrl.value = "http://${localIpAddress()}:$port"
     }

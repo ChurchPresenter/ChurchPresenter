@@ -35,7 +35,7 @@ object DeckLinkManager {
                 false
             }
         }
-        return available!!
+        return available ?: false
     }
 
     /**

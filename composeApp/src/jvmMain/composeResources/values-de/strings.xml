@@ -83,6 +83,7 @@
     <string name="menu_about">Über</string>
     <string name="about_title">Über Church Presenter</string>
     <string name="open_crash_logs">Absturzberichte öffnen</string>
+    <string name="action_ok">OK</string>
     <string name="menu_help_item">Hilfe</string>
 
     <!-- Options Dialog Strings -->

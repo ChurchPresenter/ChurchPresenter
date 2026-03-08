@@ -305,7 +305,7 @@ fun PresentationTab(
                     if (onAddToSchedule != null && viewModel.selectedPresentation != null) {
                         Button(
                             onClick = {
-                                val file = viewModel.selectedPresentation!!
+                                val file = viewModel.selectedPresentation ?: return@Button
                                 onAddToSchedule(
                                     file.absolutePath,
                                     file.nameWithoutExtension,

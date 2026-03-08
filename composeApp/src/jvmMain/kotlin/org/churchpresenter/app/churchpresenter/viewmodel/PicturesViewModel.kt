@@ -106,7 +106,6 @@ class PicturesViewModel(
 
     fun loadImagesFromFolder(folder: File) {
         if (!folder.exists() || !folder.isDirectory) {
-            println("PicturesViewModel: Folder not found or not a directory: ${folder.absolutePath}")
             return
         }
 
@@ -115,7 +114,6 @@ class PicturesViewModel(
             file.isFile && file.extension.lowercase() in imageExtensions
         }?.sortedBy { it.name } ?: emptyList()
 
-        println("PicturesViewModel: Found ${imageFiles.size} images in folder")
         _images.addAll(imageFiles)
 
         // Load thumbnails in background
@@ -124,9 +122,7 @@ class PicturesViewModel(
                 try {
                     val bitmap = loadImageBitmap(file)
                     _thumbnails[file] = bitmap
-                    println("Successfully loaded: ${file.name}")
                 } catch (e: Exception) {
-                    println("Failed to load ${file.name}: ${e.message}")
                     e.printStackTrace()
                 }
             }
@@ -234,49 +230,35 @@ class PicturesViewModel(
     }
 
     private fun loadImageBitmap(file: File): ImageBitmap {
-        println("Loading image: ${file.name}, extension: ${file.extension}, size: ${file.length()} bytes")
-
         val bytes = file.readBytes()
-        println("Read ${bytes.size} bytes from ${file.name}")
 
         // Try to decode with Skia first
         val originalImage = try {
             Image.makeFromEncoded(bytes)
         } catch (e: Exception) {
-            println("Skia failed to decode ${file.name}: ${e.message}")
-
             // If it's a HEIC file, try converting with ImageIO
             if (file.extension.lowercase() in listOf("heic", "heif")) {
-                println("Attempting HEIC conversion using ImageIO for ${file.name}")
                 try {
                     // Use ImageIO to read HEIC and convert to JPEG bytes
                     val bufferedImage = ImageIO.read(file)
                     if (bufferedImage != null) {
-                        println("ImageIO successfully read HEIC: ${file.name}")
-
                         // Convert BufferedImage to JPEG bytes
                         val outputStream = ByteArrayOutputStream()
                         ImageIO.write(bufferedImage, "jpg", outputStream)
                         val jpegBytes = outputStream.toByteArray()
 
-                        println("Converted HEIC to JPEG: ${jpegBytes.size} bytes")
-
                         // Try decoding the JPEG with Skia
                         Image.makeFromEncoded(jpegBytes)
                     } else {
-                        println("ImageIO returned null for ${file.name}")
                         throw Exception("ImageIO could not read HEIC file")
                     }
                 } catch (heicError: Exception) {
-                    println("HEIC conversion also failed for ${file.name}: ${heicError.message}")
                     throw Exception("Failed to decode image ${file.name}: Cannot decode HEIC format. Original error: ${e.message}, Conversion error: ${heicError.message}", e)
                 }
             } else {
                 throw Exception("Failed to decode image ${file.name}: ${e.message}", e)
             }
         }
-
-        println("Decoded ${file.name}: ${originalImage.width}x${originalImage.height}")
 
         // Downscale to thumbnail size (400px max dimension) for grid display
         val maxThumbnailSize = 400

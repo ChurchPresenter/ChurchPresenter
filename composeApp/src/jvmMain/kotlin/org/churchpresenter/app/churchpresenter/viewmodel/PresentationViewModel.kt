@@ -179,6 +179,7 @@ class PresentationViewModel(appSettings: AppSettings? = null) {
                     val slides = xmlSlideShowClass.getMethod("getSlides").invoke(ppt) as List<*>
                     val pageSize = xmlSlideShowClass.getMethod("getPageSize").invoke(ppt) as java.awt.Dimension
                     slides.forEach { slide ->
+                        val s = slide ?: return@forEach
                         try {
                             val img = BufferedImage(pageSize.width, pageSize.height, BufferedImage.TYPE_INT_RGB)
                             val graphics = img.createGraphics()
@@ -188,7 +189,7 @@ class PresentationViewModel(appSettings: AppSettings? = null) {
                             graphics.setRenderingHint(java.awt.RenderingHints.KEY_FRACTIONALMETRICS, java.awt.RenderingHints.VALUE_FRACTIONALMETRICS_ON)
                             graphics.paint = java.awt.Color.WHITE
                             graphics.fillRect(0, 0, pageSize.width, pageSize.height)
-                            slide!!::class.java.getMethod("draw", java.awt.Graphics2D::class.java).invoke(slide, graphics)
+                            s::class.java.getMethod("draw", java.awt.Graphics2D::class.java).invoke(s, graphics)
                             graphics.dispose()
                             val imageBitmap = bufferedImageToImageBitmap(img)
                             withContext(Dispatchers.Main) { _slides.add(imageBitmap) }
@@ -209,6 +210,7 @@ class PresentationViewModel(appSettings: AppSettings? = null) {
                     val slides = hslfSlideShowClass.getMethod("getSlides").invoke(ppt) as List<*>
                     val pageSize = hslfSlideShowClass.getMethod("getPageSize").invoke(ppt) as java.awt.Dimension
                     slides.forEach { slide ->
+                        val s = slide ?: return@forEach
                         try {
                             val img = BufferedImage(pageSize.width, pageSize.height, BufferedImage.TYPE_INT_RGB)
                             val graphics = img.createGraphics()
@@ -216,7 +218,7 @@ class PresentationViewModel(appSettings: AppSettings? = null) {
                             graphics.setRenderingHint(java.awt.RenderingHints.KEY_RENDERING, java.awt.RenderingHints.VALUE_RENDER_QUALITY)
                             graphics.paint = java.awt.Color.WHITE
                             graphics.fillRect(0, 0, pageSize.width, pageSize.height)
-                            slide!!::class.java.getMethod("draw", java.awt.Graphics2D::class.java).invoke(slide, graphics)
+                            s::class.java.getMethod("draw", java.awt.Graphics2D::class.java).invoke(s, graphics)
                             graphics.dispose()
                             val imageBitmap = bufferedImageToImageBitmap(img)
                             withContext(Dispatchers.Main) { _slides.add(imageBitmap) }

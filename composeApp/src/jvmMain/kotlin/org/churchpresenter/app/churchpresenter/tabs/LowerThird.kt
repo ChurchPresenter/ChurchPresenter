@@ -467,9 +467,10 @@ fun LowerThirdTab(
                     Button(
                         colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
                         onClick = {
+                            val file = selectedFile ?: return@Button
                             onAddToSchedule(
-                                selectedFile!!.nameWithoutExtension,
-                                selectedFile!!.nameWithoutExtension,
+                                file.nameWithoutExtension,
+                                file.nameWithoutExtension,
                                 false,
                                 0L
                             )
