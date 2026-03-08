@@ -65,6 +65,7 @@ import org.churchpresenter.app.churchpresenter.viewmodel.LocalMediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.MediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.app.churchpresenter.composables.preWarmJavaFX
+import org.churchpresenter.app.churchpresenter.composables.vlcCustomPath
 import org.churchpresenter.app.churchpresenter.data.Bible
 import org.churchpresenter.app.churchpresenter.server.CompanionServer
 import org.churchpresenter.app.churchpresenter.ui.theme.AppThemeWrapper
@@ -85,6 +86,8 @@ fun main() {
         // Business logic layer
         val settingsManager = remember { SettingsManager() }
         var appSettings by remember { mutableStateOf(settingsManager.loadSettings()) }
+        // Set custom VLC path from saved settings before first VLC access
+        remember { vlcCustomPath = appSettings.projectionSettings.vlcPath }
         val presenterManager = remember { PresenterManager() }
 
 

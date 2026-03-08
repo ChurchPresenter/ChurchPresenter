@@ -24,6 +24,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -70,11 +71,22 @@ import churchpresenter.composeapp.generated.resources.audio_output_default
 import churchpresenter.composeapp.generated.resources.audio_output_device
 import churchpresenter.composeapp.generated.resources.key_output
 import churchpresenter.composeapp.generated.resources.key_output_none
+import churchpresenter.composeapp.generated.resources.media_vlc_required
+import churchpresenter.composeapp.generated.resources.media_vlc_install
+import churchpresenter.composeapp.generated.resources.vlc_custom_path
+import churchpresenter.composeapp.generated.resources.vlc_browse
+import churchpresenter.composeapp.generated.resources.vlc_path_hint
+import churchpresenter.composeapp.generated.resources.vlc_path_invalid
 import org.churchpresenter.app.churchpresenter.composables.DeckLinkManager
 import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
 import org.churchpresenter.app.churchpresenter.composables.VlcAudioDevice
 import org.churchpresenter.app.churchpresenter.composables.isVlcAvailable
 import org.churchpresenter.app.churchpresenter.composables.listVlcAudioDevices
+import org.churchpresenter.app.churchpresenter.composables.detectVlcInstallPath
+import org.churchpresenter.app.churchpresenter.composables.recheckVlcAvailability
+import org.churchpresenter.app.churchpresenter.composables.vlcCustomPath
+import org.churchpresenter.app.churchpresenter.utils.createFileChooser
+import javax.swing.JFileChooser
 import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.data.ScreenAssignment
 import org.churchpresenter.app.churchpresenter.utils.Constants
@@ -92,7 +104,7 @@ fun ProjectionSettingsTab(
     val detectedScreens = remember {
         GraphicsEnvironment.getLocalGraphicsEnvironment().screenDevices.size
     }
-    val presenterWindowCount = (detectedScreens - 1).coerceIn(1, 4)
+    val presenterWindowCount = (detectedScreens - 1).coerceIn(0, 4)
 
     // Auto-save whenever the detected count differs from what's stored.
     LaunchedEffect(presenterWindowCount) {
@@ -477,11 +489,15 @@ fun ProjectionSettingsTab(
         Spacer(modifier = Modifier.height(8.dp))
 
         // ── Audio Output ────────────────────────────────────────────────────
-        if (isVlcAvailable) {
-            SectionHeader(stringResource(Res.string.audio_output))
-            Spacer(modifier = Modifier.height(4.dp))
+        SectionHeader(stringResource(Res.string.audio_output))
+        Spacer(modifier = Modifier.height(4.dp))
 
-            val audioDevices = remember { listVlcAudioDevices() }
+        var vlcDetected by remember { mutableStateOf(isVlcAvailable) }
+        var vlcPathText by remember { mutableStateOf(proj.vlcPath.ifBlank { detectVlcInstallPath() }) }
+        var vlcPathError by remember { mutableStateOf(false) }
+
+        if (vlcDetected) {
+            val audioDevices = remember(vlcDetected) { listVlcAudioDevices() }
             val defaultLabel = stringResource(Res.string.audio_output_default)
 
             Row(
@@ -535,9 +551,84 @@ fun ProjectionSettingsTab(
                     }
                 }
             }
-
-            Spacer(modifier = Modifier.height(8.dp))
+        } else {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(
+                        MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f),
+                        RoundedCornerShape(4.dp)
+                    )
+                    .padding(12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Column {
+                    Text(
+                        text = stringResource(Res.string.media_vlc_required),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Text(
+                        text = stringResource(Res.string.media_vlc_install),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
         }
+
+        // Custom VLC path picker
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = stringResource(Res.string.vlc_custom_path),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            OutlinedTextField(
+                value = vlcPathText,
+                onValueChange = {},
+                readOnly = true,
+                placeholder = { Text(stringResource(Res.string.vlc_path_hint), style = MaterialTheme.typography.bodySmall) },
+                isError = vlcPathError,
+                supportingText = if (vlcPathError) {{ Text(stringResource(Res.string.vlc_path_invalid)) }} else null,
+                singleLine = true,
+                textStyle = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.weight(1f)
+            )
+            Button(onClick = {
+                val chooser = createFileChooser {
+                    fileSelectionMode = JFileChooser.DIRECTORIES_ONLY
+                    dialogTitle = "Select VLC installation directory"
+                    if (vlcPathText.isNotBlank()) {
+                        currentDirectory = java.io.File(vlcPathText)
+                    }
+                }
+                if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+                    val selectedPath = chooser.selectedFile.absolutePath
+                    vlcPathText = selectedPath
+                    vlcCustomPath = selectedPath
+                    onSettingsChange { s ->
+                        s.copy(projectionSettings = s.projectionSettings.copy(vlcPath = selectedPath))
+                    }
+                    val detected = recheckVlcAvailability()
+                    vlcDetected = detected
+                    vlcPathError = !detected && selectedPath.isNotBlank()
+                }
+            }) {
+                Text(
+                    text = stringResource(Res.string.vlc_browse),
+                    style = MaterialTheme.typography.labelSmall
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
 
         // ── Window Position Settings ────────────────────────────────────────
         SectionHeader(stringResource(Res.string.window_position))

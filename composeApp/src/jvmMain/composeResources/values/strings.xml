@@ -503,6 +503,10 @@
     <string name="audio_output_default">System Default</string>
     <string name="media_vlc_required">VLC media player is required for media playback</string>
     <string name="media_vlc_install">Please install VLC from videolan.org and restart the application</string>
+    <string name="vlc_custom_path">Custom VLC path</string>
+    <string name="vlc_browse">Browse</string>
+    <string name="vlc_path_hint">Select VLC installation directory</string>
+    <string name="vlc_path_invalid">Directory does not contain VLC libraries</string>
     <string name="media_audio_continues">Audio will continue playing in the background when switching tabs or displaying other content</string>
     <string name="media_now_playing">Now playing:</string>
     <string name="media_now_presenting">Now presenting on screen</string>

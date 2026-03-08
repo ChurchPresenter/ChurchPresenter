@@ -52,9 +52,27 @@ private fun isMacOS(): Boolean {
     return "mac" in os || "darwin" in os
 }
 
+/** Custom VLC installation directory. Set from saved settings before first VLC access. */
+var vlcCustomPath: String = ""
+
+private var _vlcAvailable: Boolean? = null
+
 /** Returns true if VLC is installed and VLCJ can initialise. */
-val isVlcAvailable: Boolean by lazy {
-    try {
+val isVlcAvailable: Boolean get() = _vlcAvailable ?: checkVlcAvailable().also { _vlcAvailable = it }
+
+/** Clears the cached result and re-checks VLC availability. */
+fun recheckVlcAvailability(): Boolean {
+    _vlcAvailable = null
+    return isVlcAvailable
+}
+
+private fun checkVlcAvailable(): Boolean {
+    return try {
+        applyCustomVlcPath()
+        if (!isVlcInstalledOnSystem()) {
+            System.err.println("VLCJ: VLC not found on this system. Skipping initialisation.")
+            return false
+        }
         createMediaPlayerComponent()?.let {
             when (it) {
                 is CallbackMediaPlayerComponent -> it.release()
@@ -63,6 +81,80 @@ val isVlcAvailable: Boolean by lazy {
         }
         true
     } catch (_: Throwable) { false }
+}
+
+/** If a custom VLC path is set and valid, adds it to jna.library.path so VLCJ/JNA can find native libs. */
+private fun applyCustomVlcPath() {
+    if (vlcCustomPath.isBlank()) return
+    val dir = File(vlcCustomPath)
+    if (!dir.isDirectory) return
+    val current = System.getProperty("jna.library.path", "")
+    if (current.contains(vlcCustomPath)) return
+    val newPath = if (current.isBlank()) vlcCustomPath else "$vlcCustomPath${File.pathSeparator}$current"
+    System.setProperty("jna.library.path", newPath)
+}
+
+/** Checks whether a directory contains a VLC native library (libvlc.dll / .so* / .dylib). */
+private fun dirContainsVlcLib(dir: java.nio.file.Path): Boolean {
+    if (!java.nio.file.Files.isDirectory(dir)) return false
+    return try {
+        java.nio.file.Files.list(dir).use { stream ->
+            stream.anyMatch { path ->
+                val name = path.fileName.toString()
+                name == "libvlc.dll" || name == "libvlc.dylib" ||
+                        name == "libvlc.so" || (name.startsWith("libvlc.so.") && !name.startsWith("libvlccore"))
+            }
+        }
+    } catch (_: Exception) { false }
+}
+
+/** Returns the auto-detected VLC installation directory, or empty string if not found. */
+fun detectVlcInstallPath(): String {
+    val osName = System.getProperty("os.name", "").lowercase()
+    return when {
+        "win" in osName -> {
+            val paths = listOfNotNull(
+                System.getenv("VLC_PLUGIN_PATH")?.let { java.nio.file.Paths.get(it).parent },
+                java.nio.file.Paths.get(System.getenv("ProgramFiles") ?: "C:\\Program Files", "VideoLAN", "VLC"),
+                java.nio.file.Paths.get(System.getenv("ProgramFiles(x86)") ?: "C:\\Program Files (x86)", "VideoLAN", "VLC")
+            )
+            paths.firstOrNull { dirContainsVlcLib(it) }?.toString() ?: ""
+        }
+        "mac" in osName || "darwin" in osName -> {
+            val libPath = java.nio.file.Paths.get("/Applications/VLC.app/Contents/MacOS/lib")
+            if (dirContainsVlcLib(libPath)) libPath.toString()
+            else if (java.nio.file.Files.exists(java.nio.file.Paths.get("/Applications/VLC.app"))) "/Applications/VLC.app"
+            else ""
+        }
+        else -> {
+            val libDirs = listOf(
+                java.nio.file.Paths.get("/usr/lib"),
+                java.nio.file.Paths.get("/usr/lib64"),
+                java.nio.file.Paths.get("/usr/lib/x86_64-linux-gnu"),
+                java.nio.file.Paths.get("/usr/lib/aarch64-linux-gnu"),
+                java.nio.file.Paths.get("/snap/vlc/current/usr/lib")
+            )
+            libDirs.firstOrNull { dirContainsVlcLib(it) }?.toString() ?: ""
+        }
+    }
+}
+
+/** Checks common installation paths for the VLC native library on each OS. */
+private fun isVlcInstalledOnSystem(): Boolean {
+    // Check custom path first
+    if (vlcCustomPath.isNotBlank()) {
+        if (dirContainsVlcLib(java.nio.file.Paths.get(vlcCustomPath))) return true
+    }
+    if (detectVlcInstallPath().isNotBlank()) return true
+    // Fallback for Linux: check if vlc is on PATH
+    val osName = System.getProperty("os.name", "").lowercase()
+    if ("win" !in osName && "mac" !in osName && "darwin" !in osName) {
+        return try {
+            val proc = ProcessBuilder("which", "vlc").start()
+            proc.waitFor() == 0
+        } catch (_: Exception) { false }
+    }
+    return false
 }
 
 data class VlcAudioDevice(val id: String, val description: String)
