@@ -44,6 +44,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.WindowState
 import androidx.compose.ui.window.WindowPlacement
 import androidx.compose.ui.window.WindowPosition
+import org.churchpresenter.app.churchpresenter.composables.DeckLinkManager
 import org.churchpresenter.app.churchpresenter.utils.findScreenIndexByBounds
 import org.churchpresenter.app.churchpresenter.utils.rememberScreenDevices
 import androidx.compose.ui.window.rememberWindowState
@@ -419,8 +420,9 @@ private fun PresenterWindows(
     val defaultDevice = java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment().defaultScreenDevice
     val availableScreens = screens.indices.filter { screens[it] != defaultDevice }
 
-    // Only create windows for non-primary screens
-    val windowCount = availableScreens.size
+    // Create windows for non-primary screens + DeckLink device slots
+    val deckLinkDeviceCount = if (DeckLinkManager.isAvailable()) DeckLinkManager.listDevices().size else 0
+    val windowCount = availableScreens.size + deckLinkDeviceCount
 
     for (i in 0 until windowCount) {
         val screenAssignment = proj.getAssignment(i)

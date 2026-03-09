@@ -33,6 +33,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -84,7 +85,8 @@ fun LivePreviewPanel(
     modifier: Modifier = Modifier
 ) {
     val proj = appSettings.projectionSettings
-    val displayCount = (rememberScreenDevices().size - 1).coerceAtLeast(0)
+    val deckLinkCount = remember { if (DeckLinkManager.isAvailable()) DeckLinkManager.listDevices().size else 0 }
+    val displayCount = ((rememberScreenDevices().size - 1) + deckLinkCount).coerceAtLeast(0)
     val mediaViewModel = LocalMediaViewModel.current
 
     Column(
@@ -209,20 +211,6 @@ private fun SingleDisplayPreview(
                                     outputRole = primaryRole
                                 )
                             else -> {}
-                        }
-                    } else {
-                        // Dark blank screen
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(Color(0xFF121212)),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = stringResource(Res.string.live_preview_nothing),
-                                color = Color.White.copy(alpha = 0.4f),
-                                fontSize = 18.sp
-                            )
                         }
                     }
                 }
