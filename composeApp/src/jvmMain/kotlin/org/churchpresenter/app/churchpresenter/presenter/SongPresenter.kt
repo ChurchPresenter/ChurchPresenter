@@ -56,6 +56,20 @@ import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDef
 import org.jetbrains.skia.Image
 import java.io.File
 
+private fun binarySearchFitScale(
+    minScale: Float = 0.3f,
+    iterations: Int = 8,
+    fits: (scale: Float) -> Boolean
+): Float {
+    var lo = minScale
+    var hi = 1f
+    repeat(iterations) {
+        val mid = (lo + hi) / 2f
+        if (fits(mid)) lo = mid else hi = mid
+    }
+    return lo
+}
+
 @Composable
 fun SongPresenter(
     modifier: Modifier = Modifier,
@@ -341,9 +355,24 @@ fun SongPresenter(
                         ).size.height
                     }
                     val totalH = titleH + lyricsH
-                    val fitScale = if (totalH > constraints.maxHeight) {
-                        val spaceForLyrics = (constraints.maxHeight - titleH).coerceAtLeast(1)
-                        (spaceForLyrics.toFloat() / lyricsH).coerceAtLeast(0.3f)
+                    val maxH = constraints.maxHeight
+                    val displayLines = section.lines.filter { line ->
+                        !line.startsWith(Constants.VERSE_RUS, ignoreCase = true) &&
+                        !line.startsWith(Constants.CHORUS_RUS, ignoreCase = true) &&
+                        !line.startsWith(Constants.VERSE, ignoreCase = true) &&
+                        !line.startsWith(Constants.CHORUS, ignoreCase = true)
+                    }
+                    val fitScale = if (totalH > maxH && displayLines.isNotEmpty()) {
+                        binarySearchFitScale { scale ->
+                            val scaledH = displayLines.sumOf { line ->
+                                songTextMeasurer.measure(
+                                    text = line,
+                                    style = lyricsTextStyleScaled.copy(fontFamily = lyricsFontFamily, fontSize = scaledLyricsFontSize * scale),
+                                    constraints = widthConstraint
+                                ).size.height
+                            }
+                            titleH + scaledH <= maxH
+                        }
                     } else 1f
                     val fittedLyricsFontSize = scaledLyricsFontSize * fitScale
 

@@ -53,6 +53,20 @@ import org.jetbrains.skia.Image
 import java.io.File
 import kotlin.math.min
 
+private fun binarySearchFitScale(
+    minScale: Float = 0.3f,
+    iterations: Int = 8,
+    fits: (scale: Float) -> Boolean
+): Float {
+    var lo = minScale
+    var hi = 1f
+    repeat(iterations) {
+        val mid = (lo + hi) / 2f
+        if (fits(mid)) lo = mid else hi = mid
+    }
+    return lo
+}
+
 @Composable
 fun BiblePresenter(
     modifier: Modifier = Modifier,
@@ -383,19 +397,21 @@ fun BiblePresenter(
 
                         val primaryRefText = buildRefText(primary, appSettings.bibleSettings.primaryShowAbbreviation)
                         val primaryRefH = textMeasurer.measure(primaryRefText, primaryReferenceTextStyle.copy(fontFamily = primaryBibleReferenceFontStyle, fontSize = scaledPrimaryReferenceSize), constraints = halfConstraint).size.height
-                        val primaryVerseH = textMeasurer.measure(primary.verseText, primaryBibleTextStyle.copy(fontFamily = primaryBibleFontStyle, fontSize = scaledPrimaryBibleSize), constraints = halfConstraint).size.height
-                        val pFitScale = if (primaryRefH + primaryVerseH > availH) {
-                            ((availH - primaryRefH).coerceAtLeast(1).toFloat() / primaryVerseH).coerceAtLeast(0.3f)
-                        } else 1f
-
                         val secondaryRefText = buildRefText(sec, appSettings.bibleSettings.secondaryShowAbbreviation)
                         val secondaryRefH = textMeasurer.measure(secondaryRefText, secondaryReferenceTextStyle.copy(fontFamily = secondaryBibleReferenceFontStyle, fontSize = scaledSecondaryReferenceSize), constraints = halfConstraint).size.height
-                        val secondaryVerseH = textMeasurer.measure(sec.verseText, secondaryBibleTextStyle.copy(fontFamily = secondaryBibleFontStyle, fontSize = scaledSecondaryBibleSize), constraints = halfConstraint).size.height
-                        val sFitScale = if (secondaryRefH + secondaryVerseH > availH) {
-                            ((availH - secondaryRefH).coerceAtLeast(1).toFloat() / secondaryVerseH).coerceAtLeast(0.3f)
-                        } else 1f
 
-                        val matchedScale = minOf(pFitScale, sFitScale)
+                        // Binary search for the largest scale where both primary and secondary fit
+                        val initialPH = textMeasurer.measure(primary.verseText, primaryBibleTextStyle.copy(fontFamily = primaryBibleFontStyle, fontSize = scaledPrimaryBibleSize), constraints = halfConstraint).size.height
+                        val initialSH = textMeasurer.measure(sec.verseText, secondaryBibleTextStyle.copy(fontFamily = secondaryBibleFontStyle, fontSize = scaledSecondaryBibleSize), constraints = halfConstraint).size.height
+                        val needsScaling = (primaryRefH + initialPH > availH) || (secondaryRefH + initialSH > availH)
+
+                        val matchedScale = if (needsScaling) {
+                            binarySearchFitScale { scale ->
+                                val pH = textMeasurer.measure(primary.verseText, primaryBibleTextStyle.copy(fontFamily = primaryBibleFontStyle, fontSize = scaledPrimaryBibleSize * scale), constraints = halfConstraint).size.height
+                                val sH = textMeasurer.measure(sec.verseText, secondaryBibleTextStyle.copy(fontFamily = secondaryBibleFontStyle, fontSize = scaledSecondaryBibleSize * scale), constraints = halfConstraint).size.height
+                                (primaryRefH + pH <= availH) && (secondaryRefH + sH <= availH)
+                            }
+                        } else 1f
                         val pBibleSize = scaledPrimaryBibleSize * matchedScale
                         val sBibleSize = scaledSecondaryBibleSize * matchedScale
 
@@ -433,19 +449,21 @@ fun BiblePresenter(
 
                         val primaryRefText = buildRefText(primary, appSettings.bibleSettings.primaryShowAbbreviation)
                         val primaryRefH = textMeasurer.measure(primaryRefText, primaryReferenceTextStyle.copy(fontFamily = primaryBibleReferenceFontStyle, fontSize = scaledPrimaryReferenceSize), constraints = widthConstraint).size.height
-                        val primaryVerseH = textMeasurer.measure(primary.verseText, primaryBibleTextStyle.copy(fontFamily = primaryBibleFontStyle, fontSize = scaledPrimaryBibleSize), constraints = widthConstraint).size.height
-                        val pFitScale = if (primaryRefH + primaryVerseH > halfH) {
-                            ((halfH - primaryRefH).coerceAtLeast(1).toFloat() / primaryVerseH).coerceAtLeast(0.3f)
-                        } else 1f
-
                         val secondaryRefText = buildRefText(secondary, appSettings.bibleSettings.secondaryShowAbbreviation)
                         val secondaryRefH = textMeasurer.measure(secondaryRefText, secondaryReferenceTextStyle.copy(fontFamily = secondaryBibleReferenceFontStyle, fontSize = scaledSecondaryReferenceSize), constraints = widthConstraint).size.height
-                        val secondaryVerseH = textMeasurer.measure(secondary.verseText, secondaryBibleTextStyle.copy(fontFamily = secondaryBibleFontStyle, fontSize = scaledSecondaryBibleSize), constraints = widthConstraint).size.height
-                        val sFitScale = if (secondaryRefH + secondaryVerseH > halfH) {
-                            ((halfH - secondaryRefH).coerceAtLeast(1).toFloat() / secondaryVerseH).coerceAtLeast(0.3f)
-                        } else 1f
 
-                        val matchedScale = minOf(pFitScale, sFitScale)
+                        // Binary search for the largest scale where both primary and secondary fit their halves
+                        val initialPH = textMeasurer.measure(primary.verseText, primaryBibleTextStyle.copy(fontFamily = primaryBibleFontStyle, fontSize = scaledPrimaryBibleSize), constraints = widthConstraint).size.height
+                        val initialSH = textMeasurer.measure(secondary.verseText, secondaryBibleTextStyle.copy(fontFamily = secondaryBibleFontStyle, fontSize = scaledSecondaryBibleSize), constraints = widthConstraint).size.height
+                        val needsScaling = (primaryRefH + initialPH > halfH) || (secondaryRefH + initialSH > halfH)
+
+                        val matchedScale = if (needsScaling) {
+                            binarySearchFitScale { scale ->
+                                val pH = textMeasurer.measure(primary.verseText, primaryBibleTextStyle.copy(fontFamily = primaryBibleFontStyle, fontSize = scaledPrimaryBibleSize * scale), constraints = widthConstraint).size.height
+                                val sH = textMeasurer.measure(secondary.verseText, secondaryBibleTextStyle.copy(fontFamily = secondaryBibleFontStyle, fontSize = scaledSecondaryBibleSize * scale), constraints = widthConstraint).size.height
+                                (primaryRefH + pH <= halfH) && (secondaryRefH + sH <= halfH)
+                            }
+                        } else 1f
                         val pBibleSize = scaledPrimaryBibleSize * matchedScale
                         val sBibleSize = scaledSecondaryBibleSize * matchedScale
 
@@ -520,10 +538,15 @@ fun BiblePresenter(
 
                         val totalH = primaryRefH + primaryVerseH + secondaryRefH + secondaryVerseH
                         val fixedH = primaryRefH + secondaryRefH
-                        val verseH = primaryVerseH + secondaryVerseH
-                        val fitScale = if (totalH > constraints.maxHeight && verseH > 0) {
-                            val spaceForVerses = (constraints.maxHeight - fixedH).coerceAtLeast(1)
-                            (spaceForVerses.toFloat() / verseH).coerceAtLeast(0.3f)
+                        val maxH = constraints.maxHeight
+                        val fitScale = if (totalH > maxH) {
+                            binarySearchFitScale { scale ->
+                                val pH = textMeasurer.measure(primary.verseText, primaryBibleTextStyle.copy(fontFamily = primaryBibleFontStyle, fontSize = scaledPrimaryBibleSize * scale), constraints = widthConstraint).size.height
+                                val sH = if (showSecondary && secondary != null) {
+                                    textMeasurer.measure(secondary.verseText, secondaryBibleTextStyle.copy(fontFamily = secondaryBibleFontStyle, fontSize = scaledSecondaryBibleSize * scale), constraints = widthConstraint).size.height
+                                } else 0
+                                fixedH + pH + sH <= maxH
+                            }
                         } else 1f
                         val fittedPrimaryBibleSize = scaledPrimaryBibleSize * fitScale
                         val fittedSecondaryBibleSize = scaledSecondaryBibleSize * fitScale
