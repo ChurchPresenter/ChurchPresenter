@@ -315,6 +315,7 @@ fun main() {
                 mediaViewModel = mediaViewModel,
                 appSettings = appSettings,
                 identifyingScreen = identifyingScreen,
+                mainWindowState = state,
             )
         } else if (appReady) {
             LicenseDialog(
@@ -393,6 +394,7 @@ private fun PresenterWindows(
     mediaViewModel: MediaViewModel,
     appSettings: AppSettings,
     identifyingScreen: Boolean,
+    mainWindowState: WindowState,
 ) {
     val showPresenterWindow by presenterManager.showPresenterWindow
     val presentingMode by presenterManager.presentingMode
@@ -410,9 +412,19 @@ private fun PresenterWindows(
     val websiteUrl by presenterManager.websiteUrl
 
     val proj = appSettings.projectionSettings
-    // Only create windows for screens that actually exist beyond screen 0 (the main app screen).
+
+    // Identify which screen the main window is on so auto-assignment can avoid it
+    val mainX = mainWindowState.position.x.value.toInt()
+    val mainY = mainWindowState.position.y.value.toInt()
+    val mainScreenIndex = screens.indexOfFirst { device ->
+        device.defaultConfiguration.bounds.contains(mainX, mainY)
+    }.takeIf { it >= 0 } ?: 0
+    // Available screens for auto-assignment: all screens except the main window's screen
+    val availableScreens = screens.indices.filter { it != mainScreenIndex }
+
+    // Only create windows for screens that actually exist beyond the main app screen.
     // If there is only one screen, there is nowhere to project to — skip entirely.
-    val windowCount = (screens.size - 1).coerceAtLeast(0)
+    val windowCount = availableScreens.size
 
     for (i in 0 until windowCount) {
         val screenAssignment = proj.getAssignment(i)
@@ -426,8 +438,12 @@ private fun PresenterWindows(
         // Skip "None" — user disabled this output
         if (screenAssignment.targetDisplay == Constants.KEY_TARGET_NONE) continue
 
-        // Resolve target display: -1 (auto) maps to corresponding display index
-        val targetScreenIndex = if (screenAssignment.targetDisplay == -1) i + 1 else screenAssignment.targetDisplay
+        // Resolve target display: -1 (auto) maps to next available screen avoiding the main window
+        val targetScreenIndex = if (screenAssignment.targetDisplay == -1) {
+            availableScreens.getOrNull(i) ?: continue
+        } else {
+            screenAssignment.targetDisplay
+        }
 
         // Skip if the target screen doesn't exist
         if (targetScreenIndex < 0 || targetScreenIndex >= screens.size) continue
