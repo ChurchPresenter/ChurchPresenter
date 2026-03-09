@@ -44,6 +44,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.WindowState
 import androidx.compose.ui.window.WindowPlacement
 import androidx.compose.ui.window.WindowPosition
+import org.churchpresenter.app.churchpresenter.utils.findScreenIndexByBounds
 import org.churchpresenter.app.churchpresenter.utils.rememberScreenDevices
 import androidx.compose.ui.window.rememberWindowState
 import churchpresenter.composeapp.generated.resources.Res
@@ -414,14 +415,11 @@ private fun PresenterWindows(
 
     val proj = appSettings.projectionSettings
 
-    // Use the OS primary monitor (where the main window lives) and exclude it from auto-assignment
+    // Identify the OS primary monitor and build list of non-primary screens
     val defaultDevice = java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment().defaultScreenDevice
-    val mainScreenIndex = screens.indexOfFirst { it == defaultDevice }.takeIf { it >= 0 } ?: 0
-    // Available screens for auto-assignment: all screens except the primary monitor
-    val availableScreens = screens.indices.filter { it != mainScreenIndex }
+    val availableScreens = screens.indices.filter { screens[it] != defaultDevice }
 
-    // Only create windows for screens that actually exist beyond the main app screen.
-    // If there is only one screen, there is nowhere to project to — skip entirely.
+    // Only create windows for non-primary screens
     val windowCount = availableScreens.size
 
     for (i in 0 until windowCount) {
@@ -436,11 +434,18 @@ private fun PresenterWindows(
         // Skip "None" — user disabled this output
         if (screenAssignment.targetDisplay == Constants.KEY_TARGET_NONE) continue
 
-        // Resolve target display: -1 (auto) maps to next available screen avoiding the main window
-        val targetScreenIndex = if (screenAssignment.targetDisplay == -1) {
-            availableScreens.getOrNull(i) ?: continue
-        } else {
+        // Resolve target display: try bounds first (reliable), fall back to index, then auto-assign
+        val targetScreenIndex = findScreenIndexByBounds(
+            screens,
+            screenAssignment.targetBoundsX,
+            screenAssignment.targetBoundsY,
+            screenAssignment.targetBoundsW,
+            screenAssignment.targetBoundsH
+        ) ?: if (screenAssignment.targetDisplay >= 0 && screenAssignment.targetDisplay < screens.size) {
             screenAssignment.targetDisplay
+        } else {
+            // Auto-assign to next available non-primary screen
+            availableScreens.getOrNull(i) ?: continue
         }
 
         // Skip if the target screen doesn't exist
@@ -585,7 +590,13 @@ private fun PresenterWindows(
 
         // Key output window — spawned when a key target is configured
         if (screenAssignment.hasKeyOutput && screenAssignment.keyTargetType != "decklink") {
-            val keyScreenIndex = screenAssignment.keyTargetDisplay
+            val keyScreenIndex = findScreenIndexByBounds(
+                screens,
+                screenAssignment.keyTargetBoundsX,
+                screenAssignment.keyTargetBoundsY,
+                screenAssignment.keyTargetBoundsW,
+                screenAssignment.keyTargetBoundsH
+            ) ?: screenAssignment.keyTargetDisplay
             if (keyScreenIndex in screens.indices) {
                 val keyWindowState = remember(i, keyScreenIndex) {
                     val b = screens[keyScreenIndex].defaultConfiguration.bounds

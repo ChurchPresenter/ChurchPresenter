@@ -99,24 +99,50 @@ fun ProjectionSettingsTab(
 ) {
     val proj = settings.projectionSettings
 
-    // Detect physical screens once; derive presenter window count automatically.
-    val detectedScreens = remember {
-        GraphicsEnvironment.getLocalGraphicsEnvironment().screenDevices.size
+    // Detect physical screens; exclude the primary monitor from presenter targets.
+    val screenDevicesAll = remember {
+        GraphicsEnvironment.getLocalGraphicsEnvironment().screenDevices
     }
-    val presenterWindowCount = (detectedScreens - 1).coerceAtLeast(0)
+    val primaryDevice = remember {
+        GraphicsEnvironment.getLocalGraphicsEnvironment().defaultScreenDevice
+    }
+    val detectedScreens = screenDevicesAll.size
+    val presenterWindowCount = screenDevicesAll.count { it != primaryDevice }.coerceAtLeast(0)
 
-    // Extend the assignments list and resolve any unassigned (-1 auto or -2 none) to actual displays.
-    LaunchedEffect(presenterWindowCount) {
+    // Extend the assignments list and resolve any unassigned (-1 auto) to actual non-primary displays.
+    val nonPrimaryDevices = remember(screenDevicesAll, primaryDevice) {
+        screenDevicesAll.filter { it != primaryDevice }
+    }
+    LaunchedEffect(presenterWindowCount, nonPrimaryDevices) {
         var changed = false
         val assignments = proj.screenAssignments.toMutableList()
         while (assignments.size < presenterWindowCount) {
-            assignments.add(ScreenAssignment(targetDisplay = assignments.size + 1))
+            val npIdx = assignments.size
+            val device = nonPrimaryDevices.getOrNull(npIdx)
+            val deviceIdx = if (device != null) screenDevicesAll.indexOf(device) else -1
+            val bounds = device?.defaultConfiguration?.bounds
+            assignments.add(ScreenAssignment(
+                targetDisplay = deviceIdx,
+                targetBoundsX = bounds?.x ?: Int.MIN_VALUE,
+                targetBoundsY = bounds?.y ?: Int.MIN_VALUE,
+                targetBoundsW = bounds?.width ?: 0,
+                targetBoundsH = bounds?.height ?: 0
+            ))
             changed = true
         }
         for (idx in assignments.indices) {
             // Only resolve auto (-1) to actual display; preserve none (-2)
             if (assignments[idx].targetDisplay == -1) {
-                assignments[idx] = assignments[idx].copy(targetDisplay = idx + 1)
+                val device = nonPrimaryDevices.getOrNull(idx)
+                val deviceIdx = if (device != null) screenDevicesAll.indexOf(device) else -1
+                val bounds = device?.defaultConfiguration?.bounds
+                assignments[idx] = assignments[idx].copy(
+                    targetDisplay = deviceIdx,
+                    targetBoundsX = bounds?.x ?: Int.MIN_VALUE,
+                    targetBoundsY = bounds?.y ?: Int.MIN_VALUE,
+                    targetBoundsW = bounds?.width ?: 0,
+                    targetBoundsH = bounds?.height ?: 0
+                )
                 changed = true
             }
         }
@@ -130,31 +156,38 @@ fun ProjectionSettingsTab(
     val numScreens = presenterWindowCount
     val screenAssignments = (0 until numScreens).map { proj.getAssignment(it) }
 
-    // Build display target options: Auto + physical displays + DeckLink devices
-    val screenDevices = remember {
-        GraphicsEnvironment.getLocalGraphicsEnvironment().screenDevices
-    }
-
+    // Build display target options: None + non-primary physical displays + DeckLink devices
     data class DisplayOption(
         val label: String,
         val targetDisplay: Int,  // -2 = none, 0+ = display/device index
-        val targetType: String   // "screen" or "decklink"
+        val targetType: String,  // "screen" or "decklink"
+        val boundsX: Int = Int.MIN_VALUE,
+        val boundsY: Int = Int.MIN_VALUE,
+        val boundsW: Int = 0,
+        val boundsH: Int = 0
     )
 
     val noneLabel = stringResource(Res.string.key_output_none)
-    val displayOptions = remember(screenDevices, noneLabel) {
+    val displayOptions = remember(screenDevicesAll, noneLabel) {
         val options = mutableListOf<DisplayOption>()
         options.add(DisplayOption(noneLabel, Constants.KEY_TARGET_NONE, "screen"))
-        // Add physical displays (skip display 0 = main app screen)
-        for (idx in 1 until screenDevices.size) {
-            val bounds = screenDevices[idx].defaultConfiguration.bounds
+        // Add physical displays, skipping the primary monitor
+        var displayNum = 1
+        for (idx in screenDevicesAll.indices) {
+            if (screenDevicesAll[idx] == primaryDevice) continue
+            val bounds = screenDevicesAll[idx].defaultConfiguration.bounds
             options.add(
                 DisplayOption(
-                    "Display $idx (${bounds.width}x${bounds.height})",
+                    "Display $displayNum (${bounds.width}x${bounds.height} @ ${bounds.x},${bounds.y})",
                     idx,
-                    "screen"
+                    "screen",
+                    boundsX = bounds.x,
+                    boundsY = bounds.y,
+                    boundsW = bounds.width,
+                    boundsH = bounds.height
                 )
             )
+            displayNum++
         }
         // Add DeckLink devices if available
         if (DeckLinkManager.isAvailable()) {
@@ -322,7 +355,12 @@ fun ProjectionSettingsTab(
                 // Display target dropdown
                 Box(modifier = Modifier.width(displayDropdownWidth), contentAlignment = Alignment.Center) {
                     var dropdownExpanded by remember { mutableStateOf(false) }
+                    // Match by bounds first (reliable), fall back to index
                     val currentOption = displayOptions.find {
+                        it.targetType == assignment.targetType &&
+                        it.boundsX == assignment.targetBoundsX && it.boundsY == assignment.targetBoundsY &&
+                        it.boundsW == assignment.targetBoundsW && it.boundsH == assignment.targetBoundsH
+                    } ?: displayOptions.find {
                         it.targetDisplay == assignment.targetDisplay && it.targetType == assignment.targetType
                     } ?: displayOptions.first()
 
@@ -347,7 +385,11 @@ fun ProjectionSettingsTab(
                                     dropdownExpanded = false
                                     val updated = assignment.copy(
                                         targetDisplay = option.targetDisplay,
-                                        targetType = option.targetType
+                                        targetType = option.targetType,
+                                        targetBoundsX = option.boundsX,
+                                        targetBoundsY = option.boundsY,
+                                        targetBoundsW = option.boundsW,
+                                        targetBoundsH = option.boundsH
                                     )
                                     onSettingsChange { s ->
                                         var newProj = s.projectionSettings.withAssignment(i, updated)
@@ -381,13 +423,24 @@ fun ProjectionSettingsTab(
                     data class KeyOutputOption(
                         val label: String,
                         val targetDisplay: Int,
-                        val targetType: String
+                        val targetType: String,
+                        val boundsX: Int = Int.MIN_VALUE,
+                        val boundsY: Int = Int.MIN_VALUE,
+                        val boundsW: Int = 0,
+                        val boundsH: Int = 0
                     )
-                    val keyOutputOptions = remember(screenDevices, noneLabel) {
+                    val keyOutputOptions = remember(screenDevicesAll, noneLabel) {
                         val opts = mutableListOf(KeyOutputOption(noneLabel, Constants.KEY_TARGET_NONE, "screen"))
-                        for (idx in 1 until screenDevices.size) {
-                            val bounds = screenDevices[idx].defaultConfiguration.bounds
-                            opts.add(KeyOutputOption("Display $idx (${bounds.width}x${bounds.height})", idx, "screen"))
+                        var keyDisplayNum = 1
+                        for (idx in screenDevicesAll.indices) {
+                            if (screenDevicesAll[idx] == primaryDevice) continue
+                            val bounds = screenDevicesAll[idx].defaultConfiguration.bounds
+                            opts.add(KeyOutputOption(
+                                "Display $keyDisplayNum (${bounds.width}x${bounds.height} @ ${bounds.x},${bounds.y})",
+                                idx, "screen",
+                                boundsX = bounds.x, boundsY = bounds.y, boundsW = bounds.width, boundsH = bounds.height
+                            ))
+                            keyDisplayNum++
                         }
                         if (DeckLinkManager.isAvailable()) {
                             DeckLinkManager.listDevices().forEachIndexed { di, device ->
@@ -397,7 +450,12 @@ fun ProjectionSettingsTab(
                         opts.toList()
                     }
 
+                    // Match by bounds first (reliable), fall back to index
                     val currentKeyOption = keyOutputOptions.find {
+                        it.targetType == assignment.keyTargetType &&
+                        it.boundsX == assignment.keyTargetBoundsX && it.boundsY == assignment.keyTargetBoundsY &&
+                        it.boundsW == assignment.keyTargetBoundsW && it.boundsH == assignment.keyTargetBoundsH
+                    } ?: keyOutputOptions.find {
                         it.targetDisplay == assignment.keyTargetDisplay && it.targetType == assignment.keyTargetType
                     } ?: keyOutputOptions.first()
 
@@ -422,7 +480,11 @@ fun ProjectionSettingsTab(
                                     keyExpanded = false
                                     val updated = assignment.copy(
                                         keyTargetDisplay = option.targetDisplay,
-                                        keyTargetType = option.targetType
+                                        keyTargetType = option.targetType,
+                                        keyTargetBoundsX = option.boundsX,
+                                        keyTargetBoundsY = option.boundsY,
+                                        keyTargetBoundsW = option.boundsW,
+                                        keyTargetBoundsH = option.boundsH
                                     )
                                     onSettingsChange { s ->
                                         var newProj = s.projectionSettings.withAssignment(i, updated)
