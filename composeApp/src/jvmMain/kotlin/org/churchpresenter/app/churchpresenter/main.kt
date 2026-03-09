@@ -168,14 +168,17 @@ fun main() {
             "fullscreen" -> WindowPlacement.Fullscreen
             else -> WindowPlacement.Maximized
         }
+        // Use OS primary monitor bounds so maximized/fullscreen stays on one screen
+        val primaryBounds = java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment()
+            .defaultScreenDevice.defaultConfiguration.bounds
         val state = rememberWindowState(
             placement = savedPlacement,
             position = if (savedPlacement == WindowPlacement.Floating && appSettings.windowX >= 0)
                 WindowPosition(appSettings.windowX.dp, appSettings.windowY.dp)
-            else WindowPosition(0.dp, 0.dp),
+            else WindowPosition(primaryBounds.x.dp, primaryBounds.y.dp),
             size = if (savedPlacement == WindowPlacement.Floating)
                 DpSize(appSettings.windowWidth.dp, appSettings.windowHeight.dp)
-            else DpSize.Unspecified
+            else DpSize(primaryBounds.width.dp, primaryBounds.height.dp)
         )
 
         // Splash screen while app is loading
