@@ -315,7 +315,6 @@ fun main() {
                 mediaViewModel = mediaViewModel,
                 appSettings = appSettings,
                 identifyingScreen = identifyingScreen,
-                mainWindowState = state,
             )
         } else if (appReady) {
             LicenseDialog(
@@ -394,7 +393,6 @@ private fun PresenterWindows(
     mediaViewModel: MediaViewModel,
     appSettings: AppSettings,
     identifyingScreen: Boolean,
-    mainWindowState: WindowState,
 ) {
     val showPresenterWindow by presenterManager.showPresenterWindow
     val presentingMode by presenterManager.presentingMode
@@ -413,13 +411,10 @@ private fun PresenterWindows(
 
     val proj = appSettings.projectionSettings
 
-    // Identify which screen the main window is on so auto-assignment can avoid it
-    val mainX = mainWindowState.position.x.value.toInt()
-    val mainY = mainWindowState.position.y.value.toInt()
-    val mainScreenIndex = screens.indexOfFirst { device ->
-        device.defaultConfiguration.bounds.contains(mainX, mainY)
-    }.takeIf { it >= 0 } ?: 0
-    // Available screens for auto-assignment: all screens except the main window's screen
+    // Use the OS primary monitor (where the main window lives) and exclude it from auto-assignment
+    val defaultDevice = java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment().defaultScreenDevice
+    val mainScreenIndex = screens.indexOfFirst { it == defaultDevice }.takeIf { it >= 0 } ?: 0
+    // Available screens for auto-assignment: all screens except the primary monitor
     val availableScreens = screens.indices.filter { it != mainScreenIndex }
 
     // Only create windows for screens that actually exist beyond the main app screen.
