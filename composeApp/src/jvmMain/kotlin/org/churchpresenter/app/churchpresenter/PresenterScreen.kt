@@ -24,18 +24,24 @@ fun PresenterScreen(
     modifier: Modifier = Modifier,
     appSettings: AppSettings,
     outputRole: String = Constants.OUTPUT_ROLE_NORMAL,
+    isLowerThird: Boolean = false,
     content: @Composable BoxScope.() -> Unit
 ) {
     val isFillOrKey = outputRole == Constants.OUTPUT_ROLE_FILL || outputRole == Constants.OUTPUT_ROLE_KEY
     val isKey = outputRole == Constants.OUTPUT_ROLE_KEY
 
     val bgSettings = appSettings.backgroundSettings
-    val backgroundColor = if (isFillOrKey) Color.Black else parseHexColor(bgSettings.defaultBackgroundColor)
+    // Use lower third defaults when screen is in lower third mode
+    val bgType = if (isLowerThird) bgSettings.defaultLowerThirdBackgroundType else bgSettings.defaultBackgroundType
+    val bgColorHex = if (isLowerThird) bgSettings.defaultLowerThirdBackgroundColor else bgSettings.defaultBackgroundColor
+    val bgImagePath = if (isLowerThird) bgSettings.defaultLowerThirdBackgroundImage else bgSettings.defaultBackgroundImage
+    val bgVideoPath = if (isLowerThird) bgSettings.defaultLowerThirdBackgroundVideo else bgSettings.defaultBackgroundVideo
+    val backgroundColor = if (isFillOrKey) Color.Black else parseHexColor(bgColorHex)
 
-    val backgroundImageBitmap = remember(bgSettings.defaultBackgroundType, bgSettings.defaultBackgroundImage, isFillOrKey) {
-        if (!isFillOrKey && bgSettings.defaultBackgroundType == Constants.BACKGROUND_IMAGE && bgSettings.defaultBackgroundImage.isNotEmpty()) {
+    val backgroundImageBitmap = remember(bgType, bgImagePath, isFillOrKey) {
+        if (!isFillOrKey && bgType == Constants.BACKGROUND_IMAGE && bgImagePath.isNotEmpty()) {
             try {
-                val file = File(bgSettings.defaultBackgroundImage)
+                val file = File(bgImagePath)
                 if (file.exists()) Image.makeFromEncoded(file.readBytes()).toComposeImageBitmap()
                 else null
             } catch (_: Exception) { null }
@@ -47,7 +53,7 @@ fun PresenterScreen(
         if (isFillOrKey) {
             Box(modifier = Modifier.fillMaxSize().background(Color.Black))
         } else {
-            when (bgSettings.defaultBackgroundType) {
+            when (bgType) {
                 Constants.BACKGROUND_IMAGE -> {
                     if (backgroundImageBitmap != null) {
                         Box(
@@ -68,7 +74,7 @@ fun PresenterScreen(
                 }
                 Constants.BACKGROUND_VIDEO -> {
                     LoopingVideoBackground(
-                        videoPath = bgSettings.defaultBackgroundVideo,
+                        videoPath = bgVideoPath,
                         modifier = Modifier.fillMaxSize()
                     )
                 }

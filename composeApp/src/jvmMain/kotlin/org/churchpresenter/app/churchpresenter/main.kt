@@ -484,7 +484,7 @@ private fun PresenterWindows(
             alwaysOnTop = true,
         ) {
             CompositionLocalProvider(LocalMediaViewModel provides mediaViewModel) {
-                PresenterScreen(modifier = Modifier.fillMaxSize(), appSettings = appSettings, outputRole = primaryRole) {
+                PresenterScreen(modifier = Modifier.fillMaxSize(), appSettings = appSettings, outputRole = primaryRole, isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD) {
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
