@@ -29,11 +29,22 @@ fun rememberScreenDevices(): Array<GraphicsDevice> {
     return devices
 }
 
-/** Returns the presenter screen bounds (second screen if available, else primary screen). */
+/** Returns the presenter screen bounds (first non-primary screen if available, else primary). */
 fun presenterScreenBounds(): Rectangle {
-    val screens = GraphicsEnvironment.getLocalGraphicsEnvironment().screenDevices
-    return if (screens.size > 1) screens[1].defaultConfiguration.bounds
-    else screens[0].defaultConfiguration.bounds
+    val ge = GraphicsEnvironment.getLocalGraphicsEnvironment()
+    val screens = ge.screenDevices
+    val primary = ge.defaultScreenDevice
+    val nonPrimary = screens.firstOrNull { it != primary }
+    return (nonPrimary ?: primary).defaultConfiguration.bounds
+}
+
+/** Find a screen index by stored bounds. Returns null if no match. */
+fun findScreenIndexByBounds(screens: Array<GraphicsDevice>, x: Int, y: Int, w: Int, h: Int): Int? {
+    if (x == Int.MIN_VALUE) return null  // bounds not set
+    return screens.indexOfFirst { device ->
+        val b = device.defaultConfiguration.bounds
+        b.x == x && b.y == y && b.width == w && b.height == h
+    }.takeIf { it >= 0 }
 }
 
 /** Returns the aspect ratio of the presenter screen. */
