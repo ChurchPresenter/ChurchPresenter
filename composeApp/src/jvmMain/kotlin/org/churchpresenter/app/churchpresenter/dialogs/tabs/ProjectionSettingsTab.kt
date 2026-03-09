@@ -393,17 +393,26 @@ fun ProjectionSettingsTab(
                                     )
                                     onSettingsChange { s ->
                                         var newProj = s.projectionSettings.withAssignment(i, updated)
-                                        // If selecting a specific display, clear it from other assignments
-                                        if (option.targetDisplay >= 0) {
+                                        // If selecting a specific display, clear it from other assignments (match by bounds)
+                                        if (option.targetDisplay >= 0 && option.boundsX != Int.MIN_VALUE) {
                                             for (j in 0 until numScreens) {
                                                 val other = newProj.getAssignment(j)
-                                                // Clear from other primary displays
-                                                if (j != i && other.targetDisplay == option.targetDisplay && other.targetType == option.targetType) {
-                                                    newProj = newProj.withAssignment(j, other.copy(targetDisplay = Constants.KEY_TARGET_NONE, targetType = "screen"))
+                                                // Clear from other primary displays that target the same screen
+                                                if (j != i && other.targetBoundsX == option.boundsX && other.targetBoundsY == option.boundsY &&
+                                                    other.targetBoundsW == option.boundsW && other.targetBoundsH == option.boundsH) {
+                                                    newProj = newProj.withAssignment(j, other.copy(
+                                                        targetDisplay = Constants.KEY_TARGET_NONE, targetType = "screen",
+                                                        targetBoundsX = Int.MIN_VALUE, targetBoundsY = Int.MIN_VALUE, targetBoundsW = 0, targetBoundsH = 0
+                                                    ))
                                                 }
-                                                // Clear from key outputs (any slot including this one)
-                                                if (other.keyTargetDisplay == option.targetDisplay && other.keyTargetType == option.targetType) {
-                                                    newProj = newProj.withAssignment(j, newProj.getAssignment(j).copy(keyTargetDisplay = Constants.KEY_TARGET_NONE, keyTargetType = "screen"))
+                                                // Clear from key outputs that target the same screen
+                                                val otherLatest = newProj.getAssignment(j)
+                                                if (otherLatest.keyTargetBoundsX == option.boundsX && otherLatest.keyTargetBoundsY == option.boundsY &&
+                                                    otherLatest.keyTargetBoundsW == option.boundsW && otherLatest.keyTargetBoundsH == option.boundsH) {
+                                                    newProj = newProj.withAssignment(j, otherLatest.copy(
+                                                        keyTargetDisplay = Constants.KEY_TARGET_NONE, keyTargetType = "screen",
+                                                        keyTargetBoundsX = Int.MIN_VALUE, keyTargetBoundsY = Int.MIN_VALUE, keyTargetBoundsW = 0, keyTargetBoundsH = 0
+                                                    ))
                                                 }
                                             }
                                         }
@@ -488,22 +497,35 @@ fun ProjectionSettingsTab(
                                     )
                                     onSettingsChange { s ->
                                         var newProj = s.projectionSettings.withAssignment(i, updated)
-                                        if (option.targetDisplay >= 0) {
+                                        if (option.targetDisplay >= 0 && option.boundsX != Int.MIN_VALUE) {
                                             for (j in 0 until numScreens) {
                                                 val other = newProj.getAssignment(j)
-                                                // Clear from other primary displays
-                                                if (j != i && other.targetDisplay == option.targetDisplay && other.targetType == option.targetType) {
-                                                    newProj = newProj.withAssignment(j, other.copy(targetDisplay = Constants.KEY_TARGET_NONE, targetType = "screen"))
+                                                // Clear from other primary displays that target the same screen
+                                                if (j != i && other.targetBoundsX == option.boundsX && other.targetBoundsY == option.boundsY &&
+                                                    other.targetBoundsW == option.boundsW && other.targetBoundsH == option.boundsH) {
+                                                    newProj = newProj.withAssignment(j, other.copy(
+                                                        targetDisplay = Constants.KEY_TARGET_NONE, targetType = "screen",
+                                                        targetBoundsX = Int.MIN_VALUE, targetBoundsY = Int.MIN_VALUE, targetBoundsW = 0, targetBoundsH = 0
+                                                    ))
                                                 }
-                                                // Clear from other key outputs
-                                                if (j != i && other.keyTargetDisplay == option.targetDisplay && other.keyTargetType == option.targetType) {
-                                                    newProj = newProj.withAssignment(j, other.copy(keyTargetDisplay = Constants.KEY_TARGET_NONE, keyTargetType = "screen"))
+                                                // Clear from other key outputs that target the same screen
+                                                val otherLatest = newProj.getAssignment(j)
+                                                if (j != i && otherLatest.keyTargetBoundsX == option.boundsX && otherLatest.keyTargetBoundsY == option.boundsY &&
+                                                    otherLatest.keyTargetBoundsW == option.boundsW && otherLatest.keyTargetBoundsH == option.boundsH) {
+                                                    newProj = newProj.withAssignment(j, otherLatest.copy(
+                                                        keyTargetDisplay = Constants.KEY_TARGET_NONE, keyTargetType = "screen",
+                                                        keyTargetBoundsX = Int.MIN_VALUE, keyTargetBoundsY = Int.MIN_VALUE, keyTargetBoundsW = 0, keyTargetBoundsH = 0
+                                                    ))
                                                 }
                                             }
-                                            // Also clear if same slot's primary display matches
+                                            // Also clear if same slot's primary display targets the same screen
                                             val self = newProj.getAssignment(i)
-                                            if (self.targetDisplay == option.targetDisplay && self.targetType == option.targetType) {
-                                                newProj = newProj.withAssignment(i, self.copy(targetDisplay = Constants.KEY_TARGET_NONE, targetType = "screen"))
+                                            if (self.targetBoundsX == option.boundsX && self.targetBoundsY == option.boundsY &&
+                                                self.targetBoundsW == option.boundsW && self.targetBoundsH == option.boundsH) {
+                                                newProj = newProj.withAssignment(i, self.copy(
+                                                    targetDisplay = Constants.KEY_TARGET_NONE, targetType = "screen",
+                                                    targetBoundsX = Int.MIN_VALUE, targetBoundsY = Int.MIN_VALUE, targetBoundsW = 0, targetBoundsH = 0
+                                                ))
                                             }
                                         }
                                         s.copy(projectionSettings = newProj)
