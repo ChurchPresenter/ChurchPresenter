@@ -206,6 +206,19 @@ fun SongPresenter(
         val heightScale = with(density) { maxHeight.toPx() / 1080f }
         val scaleFactor = min(widthScale, heightScale).coerceIn(0.5f, 3.0f)
 
+        // Scale shadow to be visible at projection resolution
+        val scaledShadow = Shadow(
+            color = Color.Black.copy(alpha = 0.8f),
+            offset = Offset(3f * scaleFactor, 3f * scaleFactor),
+            blurRadius = 6f * scaleFactor
+        )
+        val titleTextStyleScaled = if (appSettings.songSettings.titleShadow)
+            titleTextStyle.copy(shadow = scaledShadow) else titleTextStyle
+        val lyricsTextStyleScaled = if (appSettings.songSettings.lyricsShadow)
+            lyricsTextStyle.copy(shadow = scaledShadow) else lyricsTextStyle
+        val songNumberTextStyleScaled = if (appSettings.songSettings.songNumberShadow)
+            songNumberTextStyle.copy(shadow = scaledShadow) else songNumberTextStyle
+
         val scaledTitleFontSize = (appSettings.songSettings.titleFontSize * scaleFactor).sp
         val effectiveLyricsFontSize =
             if (isLowerThird) appSettings.songSettings.lyricsLowerThirdFontSize else appSettings.songSettings.lyricsFontSize
@@ -288,7 +301,7 @@ fun SongPresenter(
                             fontSize = scaledSongNumberFontSize,
                             text = section.songNumber.toString(),
                             color = songNumberColor,
-                            style = songNumberTextStyle
+                            style = songNumberTextStyleScaled
                         )
                     }
 
@@ -298,7 +311,7 @@ fun SongPresenter(
                     val titleH = if (shouldShowTitle) {
                         songTextMeasurer.measure(
                             text = section.title,
-                            style = titleTextStyle.copy(fontFamily = titleFontFamily, fontSize = scaledTitleFontSize),
+                            style = titleTextStyleScaled.copy(fontFamily = titleFontFamily, fontSize = scaledTitleFontSize),
                             constraints = widthConstraint
                         ).size.height
                     } else 0
@@ -310,7 +323,7 @@ fun SongPresenter(
                     }.sumOf { line ->
                         songTextMeasurer.measure(
                             text = line,
-                            style = lyricsTextStyle.copy(fontFamily = lyricsFontFamily, fontSize = scaledLyricsFontSize),
+                            style = lyricsTextStyleScaled.copy(fontFamily = lyricsFontFamily, fontSize = scaledLyricsFontSize),
                             constraints = widthConstraint
                         ).size.height
                     }
@@ -333,7 +346,7 @@ fun SongPresenter(
                                 fontSize = scaledTitleFontSize,
                                 text = section.title,
                                 color = titleColor,
-                                style = titleTextStyle
+                                style = titleTextStyleScaled
                             )
                         }
                         section.lines.forEach { line ->
@@ -351,7 +364,7 @@ fun SongPresenter(
                                     softWrap = appSettings.songSettings.wordWrap,
                                     text = line,
                                     color = lyricsColor,
-                                    style = lyricsTextStyle
+                                    style = lyricsTextStyleScaled
                                 )
                             }
                         }
@@ -363,7 +376,7 @@ fun SongPresenter(
                                 fontSize = scaledTitleFontSize,
                                 text = section.title,
                                 color = titleColor,
-                                style = titleTextStyle
+                                style = titleTextStyleScaled
                             )
                         }
 
@@ -379,7 +392,7 @@ fun SongPresenter(
                                         text = "  *  ",
                                         fontSize = scaledLyricsFontSize,
                                         color = lyricsColor,
-                                        style = lyricsTextStyle
+                                        style = lyricsTextStyleScaled
                                     )
                                 }
                             }
