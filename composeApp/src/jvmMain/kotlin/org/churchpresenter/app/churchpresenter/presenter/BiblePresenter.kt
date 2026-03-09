@@ -260,9 +260,9 @@ fun BiblePresenter(
 
         // Scale shadow to be visible at projection resolution
         val scaledShadow = Shadow(
-            color = Color.Black.copy(alpha = 0.8f),
-            offset = Offset(3f * scaleFactor, 3f * scaleFactor),
-            blurRadius = 6f * scaleFactor
+            color = Color.Black.copy(alpha = 0.9f),
+            offset = Offset(6f * scaleFactor, 6f * scaleFactor),
+            blurRadius = 12f * scaleFactor
         )
         val primaryBibleTextStyleScaled = if (appSettings.bibleSettings.primaryBibleShadow)
             primaryBibleTextStyle.copy(shadow = scaledShadow) else primaryBibleTextStyle

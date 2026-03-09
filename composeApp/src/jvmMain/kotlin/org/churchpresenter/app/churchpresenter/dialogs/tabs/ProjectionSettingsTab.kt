@@ -107,7 +107,8 @@ fun ProjectionSettingsTab(
         GraphicsEnvironment.getLocalGraphicsEnvironment().defaultScreenDevice
     }
     val detectedScreens = screenDevicesAll.size
-    val presenterWindowCount = screenDevicesAll.count { it != primaryDevice }.coerceAtLeast(0)
+    val deckLinkDeviceCount = remember { if (DeckLinkManager.isAvailable()) DeckLinkManager.listDevices().size else 0 }
+    val presenterWindowCount = (screenDevicesAll.count { it != primaryDevice } + deckLinkDeviceCount).coerceAtLeast(0)
 
     // Extend the assignments list and resolve any unassigned (-1 auto) to actual non-primary displays.
     val nonPrimaryDevices = remember(screenDevicesAll, primaryDevice) {
@@ -119,7 +120,7 @@ fun ProjectionSettingsTab(
         while (assignments.size < presenterWindowCount) {
             val npIdx = assignments.size
             val device = nonPrimaryDevices.getOrNull(npIdx)
-            val deviceIdx = if (device != null) screenDevicesAll.indexOf(device) else -1
+            val deviceIdx = if (device != null) screenDevicesAll.indexOf(device) else Constants.KEY_TARGET_NONE
             val bounds = device?.defaultConfiguration?.bounds
             assignments.add(ScreenAssignment(
                 targetDisplay = deviceIdx,
@@ -134,15 +135,20 @@ fun ProjectionSettingsTab(
             // Only resolve auto (-1) to actual display; preserve none (-2)
             if (assignments[idx].targetDisplay == -1) {
                 val device = nonPrimaryDevices.getOrNull(idx)
-                val deviceIdx = if (device != null) screenDevicesAll.indexOf(device) else -1
-                val bounds = device?.defaultConfiguration?.bounds
-                assignments[idx] = assignments[idx].copy(
-                    targetDisplay = deviceIdx,
-                    targetBoundsX = bounds?.x ?: Int.MIN_VALUE,
-                    targetBoundsY = bounds?.y ?: Int.MIN_VALUE,
-                    targetBoundsW = bounds?.width ?: 0,
-                    targetBoundsH = bounds?.height ?: 0
-                )
+                if (device != null) {
+                    val deviceIdx = screenDevicesAll.indexOf(device)
+                    val bounds = device.defaultConfiguration.bounds
+                    assignments[idx] = assignments[idx].copy(
+                        targetDisplay = deviceIdx,
+                        targetBoundsX = bounds.x,
+                        targetBoundsY = bounds.y,
+                        targetBoundsW = bounds.width,
+                        targetBoundsH = bounds.height
+                    )
+                } else {
+                    // No physical display available for this slot (e.g. DeckLink-only) — set to None
+                    assignments[idx] = assignments[idx].copy(targetDisplay = Constants.KEY_TARGET_NONE)
+                }
                 changed = true
             }
         }
