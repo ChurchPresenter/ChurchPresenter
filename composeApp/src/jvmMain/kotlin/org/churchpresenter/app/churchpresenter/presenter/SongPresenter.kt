@@ -240,8 +240,21 @@ fun SongPresenter(
                     .fillMaxWidth()
                     .fillMaxHeight(lowerThirdFraction)
                     .align(Alignment.BottomCenter)
-                    .then(bgModifier)
-            )
+                    .then(if (effectiveType == Constants.BACKGROUND_IMAGE && backgroundImageBitmap != null) Modifier else bgModifier)
+            ) {
+                if (effectiveType == Constants.BACKGROUND_IMAGE && backgroundImageBitmap != null) {
+                    androidx.compose.foundation.Image(
+                        painter = BitmapPainter(backgroundImageBitmap),
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        alignment = Alignment.BottomCenter,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
+                if (useVideoBackground) {
+                    LoopingVideoBackground(videoPath = effectiveVideoPath, modifier = Modifier.fillMaxSize())
+                }
+            }
             // Gradient overlay
             if (bgConfig.gradientEnabled) {
                 val gradientTop = parseHexColor(bgConfig.gradientTopColor).copy(alpha = bgConfig.gradientTopOpacity)

@@ -168,7 +168,7 @@ private fun SingleDisplayPreview(
         // so WEBSITE is handled separately below at native size.
         if (presentingMode != Presenting.WEBSITE) {
             ScaledPresenterContent {
-                PresenterScreen(appSettings = appSettings, outputRole = primaryRole) {
+                PresenterScreen(appSettings = appSettings, outputRole = primaryRole, isLowerThird = isLowerThird) {
                     if (presentingMode != Presenting.NONE && showsContent) {
                         when (presentingMode) {
                             Presenting.BIBLE ->
