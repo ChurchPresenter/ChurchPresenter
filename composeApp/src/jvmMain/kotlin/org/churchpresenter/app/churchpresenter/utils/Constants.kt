@@ -192,12 +192,14 @@ object Constants {
     const val SERVER_VERSION = "1.0"
 
     // REST endpoints
-    const val ENDPOINT_INFO          = "/api/info"
-    const val ENDPOINT_SONGS         = "/api/songs"
-    const val ENDPOINT_BIBLE         = "/api/bible"
-    const val ENDPOINT_SCHEDULE      = "/api/schedule"
-    const val ENDPOINT_PRESENTATIONS = "/api/presentations"
-    const val ENDPOINT_WS            = "/ws"
+    const val ENDPOINT_INFO              = "/api/info"
+    const val ENDPOINT_SONGS             = "/api/songs"
+    const val ENDPOINT_BIBLE             = "/api/bible"
+    const val ENDPOINT_SCHEDULE          = "/api/schedule"
+    const val ENDPOINT_SCHEDULE_ADD      = "/api/schedule/add"
+    const val ENDPOINT_PROJECT           = "/api/project"
+    const val ENDPOINT_PRESENTATIONS     = "/api/presentations"
+    const val ENDPOINT_WS                = "/ws"
 
     // Lottie Generator endpoints
     const val ENDPOINT_LOTTIE_PRESETS      = "/api/presets"
@@ -212,7 +214,16 @@ object Constants {
     const val WS_EVENT_PRESENTATION_UPDATED  = "presentation_updated"
 
     // WebSocket command types (client → server)
-    const val WS_CMD_SELECT_SONG = "select_song"
+    const val WS_CMD_SELECT_SONG    = "select_song"
+    const val WS_CMD_ADD_TO_SCHEDULE = "add_to_schedule"
+    const val WS_CMD_PROJECT         = "project"
+
+    // Item type strings shared by REST and WS payloads
+    const val ITEM_TYPE_SONG         = "song"
+    const val ITEM_TYPE_BIBLE        = "bible"
+    const val ITEM_TYPE_PRESENTATION = "presentation"
+    const val ITEM_TYPE_PICTURE      = "picture"
+    const val ITEM_TYPE_MEDIA        = "media"
 
     // API key authentication
     const val HEADER_API_KEY        = "X-Api-Key"

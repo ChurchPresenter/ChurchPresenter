@@ -231,6 +231,20 @@ data class WebSocketMessage(
     val payload: String = ""
 )
 
+/**
+ * Body for POST /api/schedule/add and WS command "add_to_schedule".
+ * Uses the same [ScheduleItem] subclasses already used throughout the app.
+ */
+@Serializable
+data class AddToScheduleRequest(val item: ScheduleItem)
+
+/**
+ * Body for POST /api/project and WS command "project".
+ * Uses the same [ScheduleItem] subclasses already used throughout the app.
+ */
+@Serializable
+data class ProjectRequest(val item: ScheduleItem)
+
 // ── CompanionServer ───────────────────────────────────────────────────────────
 
 /**
@@ -269,6 +283,18 @@ class CompanionServer {
     // Incoming song-selection requests from mobile clients
     val onSongSelected = MutableSharedFlow<ScheduleSongDto>(
         extraBufferCapacity = 8,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
+
+    /** Emitted when a remote client requests an item to be added to the schedule. */
+    val onAddToSchedule = MutableSharedFlow<AddToScheduleRequest>(
+        extraBufferCapacity = 16,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
+
+    /** Emitted when a remote client requests an item to be sent directly to projection. */
+    val onProject = MutableSharedFlow<ProjectRequest>(
+        extraBufferCapacity = 16,
         onBufferOverflow = BufferOverflow.DROP_OLDEST
     )
 
@@ -630,6 +656,40 @@ class CompanionServer {
                     call.respond(ScheduleResponse(schedule, schedule.size))
                 }
 
+                /**
+                 * POST /api/schedule/add
+                 * Body: AddToScheduleRequest JSON
+                 * Adds the item described in the body to the app schedule.
+                 * Returns {"ok":true} on success or {"error":"…"} on bad input.
+                 */
+                post(Constants.ENDPOINT_SCHEDULE_ADD) {
+                    if (!checkApiKey(call)) return@post
+                    try {
+                        val req = json.decodeFromString(AddToScheduleRequest.serializer(), call.receiveText())
+                        scope.launch { onAddToSchedule.emit(req) }
+                        call.respondText("""{"ok":true}""", ContentType.Application.Json)
+                    } catch (_: Exception) {
+                        call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":"invalid request body"}""")
+                    }
+                }
+
+                /**
+                 * POST /api/project
+                 * Body: ProjectRequest JSON
+                 * Immediately projects the described item to the presenter window.
+                 * Returns {"ok":true} on success or {"error":"…"} on bad input.
+                 */
+                post(Constants.ENDPOINT_PROJECT) {
+                    if (!checkApiKey(call)) return@post
+                    try {
+                        val req = json.decodeFromString(ProjectRequest.serializer(), call.receiveText())
+                        scope.launch { onProject.emit(req) }
+                        call.respondText("""{"ok":true}""", ContentType.Application.Json)
+                    } catch (_: Exception) {
+                        call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":"invalid request body"}""")
+                    }
+                }
+
                 get(Constants.ENDPOINT_BIBLE) {
                     if (!checkApiKey(call)) return@get
                     val catalog = _bibleCatalog.value
@@ -729,6 +789,14 @@ class CompanionServer {
                                     Constants.WS_CMD_SELECT_SONG -> {
                                         val song = json.decodeFromString(ScheduleSongDto.serializer(), msg.payload)
                                         scope.launch { onSongSelected.emit(song) }
+                                    }
+                                    Constants.WS_CMD_ADD_TO_SCHEDULE -> {
+                                        val req = json.decodeFromString(AddToScheduleRequest.serializer(), msg.payload)
+                                        scope.launch { onAddToSchedule.emit(req) }
+                                    }
+                                    Constants.WS_CMD_PROJECT -> {
+                                        val req = json.decodeFromString(ProjectRequest.serializer(), msg.payload)
+                                        scope.launch { onProject.emit(req) }
                                     }
                                 }
                             } catch (_: Exception) { /* ignore malformed frames */ }

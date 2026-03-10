@@ -91,7 +91,13 @@ data class ScheduleActions(
     val saveSchedule: () -> Unit = {},
     val saveScheduleAs: () -> Unit = {},
     val removeSelected: () -> Unit = {},
-    val clearSchedule: () -> Unit = {}
+    val clearSchedule: () -> Unit = {},
+    // Remote-API add helpers (populated from ScheduleTabActions)
+    val addSong: (songNumber: Int, title: String, songbook: String) -> Unit = { _, _, _ -> },
+    val addBibleVerse: (bookName: String, chapter: Int, verseNumber: Int, verseText: String) -> Unit = { _, _, _, _ -> },
+    val addPicture: (folderPath: String, folderName: String, imageCount: Int) -> Unit = { _, _, _ -> },
+    val addPresentation: (filePath: String, fileName: String, slideCount: Int, fileType: String) -> Unit = { _, _, _, _ -> },
+    val addMedia: (mediaUrl: String, mediaTitle: String, mediaType: String) -> Unit = { _, _, _ -> }
 )
 
 @Composable
@@ -428,7 +434,12 @@ fun MainDesktop(
                                     saveSchedule = actions.saveSchedule,
                                     saveScheduleAs = actions.saveScheduleAs,
                                     removeSelected = actions.removeSelected,
-                                    clearSchedule = actions.clearSchedule
+                                    clearSchedule = actions.clearSchedule,
+                                    addSong = actions.addSong,
+                                    addBibleVerse = actions.addBibleVerse,
+                                    addPicture = actions.addPicture,
+                                    addPresentation = actions.addPresentation,
+                                    addMedia = actions.addMedia
                                 )
                             )
                         },

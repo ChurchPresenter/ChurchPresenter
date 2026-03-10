@@ -79,6 +79,7 @@ import org.churchpresenter.app.churchpresenter.presenter.SlidePresenter
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.presenter.SongPresenter
 import org.churchpresenter.app.churchpresenter.models.LyricSection
+import org.churchpresenter.app.churchpresenter.models.ScheduleItem
 import org.churchpresenter.app.churchpresenter.ui.theme.LanguageProvider
 import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
 import org.churchpresenter.app.churchpresenter.viewmodel.LocalMediaViewModel
@@ -162,6 +163,64 @@ fun main() {
                 }
             }
             appReady = true
+        }
+
+        // ── Remote add-to-schedule requests (REST POST /api/schedule/add or WS add_to_schedule) ──
+        LaunchedEffect(Unit) {
+            companionServer.onAddToSchedule.collect { req ->
+                when (val item = req.item) {
+                    is ScheduleItem.SongItem ->
+                        currentScheduleActions.addSong(item.songNumber, item.title, item.songbook)
+                    is ScheduleItem.BibleVerseItem ->
+                        currentScheduleActions.addBibleVerse(item.bookName, item.chapter, item.verseNumber, item.verseText)
+                    is ScheduleItem.PresentationItem ->
+                        currentScheduleActions.addPresentation(item.filePath, item.fileName, item.slideCount, item.fileType)
+                    is ScheduleItem.PictureItem ->
+                        currentScheduleActions.addPicture(item.folderPath, item.folderName, item.imageCount)
+                    is ScheduleItem.MediaItem ->
+                        currentScheduleActions.addMedia(item.mediaUrl, item.mediaTitle, item.mediaType)
+                    else -> Unit
+                }
+            }
+        }
+
+        // ── Remote project requests (REST POST /api/project or WS project) ──────────────────────
+        LaunchedEffect(Unit) {
+            companionServer.onProject.collect { req ->
+                when (val item = req.item) {
+                    is ScheduleItem.SongItem -> {
+                        currentScheduleActions.addSong(item.songNumber, item.title, item.songbook)
+                        presenterManager.setPresentingMode(Presenting.LYRICS)
+                        presenterManager.setShowPresenterWindow(true)
+                    }
+                    is ScheduleItem.BibleVerseItem -> {
+                        presenterManager.setSelectedVerses(listOf(
+                            org.churchpresenter.app.churchpresenter.models.SelectedVerse(
+                                bookName = item.bookName,
+                                chapter = item.chapter,
+                                verseNumber = item.verseNumber,
+                                verseText = item.verseText
+                            )
+                        ))
+                        presenterManager.setPresentingMode(Presenting.BIBLE)
+                        presenterManager.setShowPresenterWindow(true)
+                    }
+                    is ScheduleItem.PictureItem -> {
+                        presenterManager.setSelectedImagePath(item.folderPath)
+                        presenterManager.setPresentingMode(Presenting.PICTURES)
+                        presenterManager.setShowPresenterWindow(true)
+                    }
+                    is ScheduleItem.PresentationItem -> {
+                        presenterManager.setPresentingMode(Presenting.PRESENTATION)
+                        presenterManager.setShowPresenterWindow(true)
+                    }
+                    is ScheduleItem.MediaItem -> {
+                        presenterManager.setPresentingMode(Presenting.MEDIA)
+                        presenterManager.setShowPresenterWindow(true)
+                    }
+                    else -> Unit
+                }
+            }
         }
 
         val screens = rememberScreenDevices()
