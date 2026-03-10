@@ -682,6 +682,25 @@
     <string name="copy_url">Copy URL</string>
     <string name="server_endpoints">Available Endpoints</string>
     <string name="server_restart">Restart</string>
+    <string name="server_endpoints_read">Read</string>
+    <string name="server_endpoints_actions">Actions</string>
+    <string name="server_endpoints_websocket">WebSocket</string>
+    <string name="server_payload_reference">Payload reference (item field)</string>
+    <!-- Endpoint descriptions -->
+    <string name="endpoint_desc_server_info">server info</string>
+    <string name="endpoint_desc_song_catalog">song catalog</string>
+    <string name="endpoint_desc_filter_songbook">filter by songbook</string>
+    <string name="endpoint_desc_bible_catalog">bible catalog</string>
+    <string name="endpoint_desc_filter_book">filter by book</string>
+    <string name="endpoint_desc_filter_chapter">filter by chapter</string>
+    <string name="endpoint_desc_schedule">current schedule</string>
+    <string name="endpoint_desc_presentation_catalog">presentation catalog</string>
+    <string name="endpoint_desc_slide_image">slide image (JPEG)</string>
+    <string name="endpoint_desc_add_to_schedule">add item to schedule</string>
+    <string name="endpoint_desc_project">send item directly to projection</string>
+    <string name="endpoint_desc_ws_realtime">real-time updates</string>
+    <string name="endpoint_desc_ws_add_to_schedule">add item to schedule (WS)</string>
+    <string name="endpoint_desc_ws_project">project item directly (WS)</string>
 
     <!-- Hardcoded strings moved to resources -->
     <string name="no_image_selected">No image selected</string>
