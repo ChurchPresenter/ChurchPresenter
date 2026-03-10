@@ -19,6 +19,16 @@ fun currentOsClassifier(): String {
     }
 }
 
+configurations.all {
+    resolutionStrategy {
+        // Force ktx coroutines version to prevent cast exception
+        force(libs.kotlinx.coroutines.core)
+        force(libs.kotlinx.coroutines.core.jvm)
+        force(libs.kotlinx.coroutines.swing)
+        force(libs.kotlin.stdlib)
+    }
+}
+
 kotlin {
     jvm()
 
@@ -42,7 +52,7 @@ kotlin {
             implementation(libs.kotlin.test)
         }
         jvmMain.dependencies {
-            implementation(libs.kotlinx.coroutinesSwing)
+            implementation(libs.kotlinx.coroutines.swing)
             implementation("com.twelvemonkeys.imageio:imageio-core:3.10.1")
             implementation("com.twelvemonkeys.imageio:imageio-jpeg:3.10.1")
             // Apache PDFBox for PDF slide extraction
