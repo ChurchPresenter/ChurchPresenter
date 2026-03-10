@@ -40,9 +40,13 @@ import kotlinx.serialization.json.Json
 import org.churchpresenter.app.churchpresenter.data.SongItem
 import org.churchpresenter.app.churchpresenter.models.ScheduleItem
 import org.churchpresenter.app.churchpresenter.utils.Constants
+import java.awt.image.BufferedImage
+import java.io.ByteArrayOutputStream
 import java.io.File
 import java.net.NetworkInterface
 import java.util.Base64
+import java.util.concurrent.ConcurrentHashMap
+import javax.imageio.ImageIO
 
 // ── API DTOs ─────────────────────────────────────────────────────────────────
 
@@ -166,6 +170,54 @@ data class BibleCatalogResponse(
     @kotlinx.serialization.SerialName("verse-total") val verseTotal: Int
 )
 
+// ── Presentation DTOs ─────────────────────────────────────────────────────────
+
+/**
+ * Metadata for a single slide within a presentation.
+ *
+ * The slide image can be retrieved via:
+ *   GET /api/presentations/{presentation-id}/slides/{slide-index}
+ */
+@Serializable
+data class SlideDto(
+    @kotlinx.serialization.SerialName("slide-index") val slideIndex: Int,
+    @kotlinx.serialization.SerialName("thumbnail-url") val thumbnailUrl: String
+)
+
+/**
+ * A single presentation entry.
+ *
+ * {
+ *   "id": "uuid",
+ *   "file-name": "MySlides.pptx",
+ *   "file-type": "pptx",
+ *   "slide-total": 5,
+ *   "slides": [ { "slide-index": 0, "thumbnail-url": "/api/presentations/uuid/slides/0" }, … ]
+ * }
+ */
+@Serializable
+data class PresentationDto(
+    val id: String,
+    @kotlinx.serialization.SerialName("file-name")   val fileName: String,
+    @kotlinx.serialization.SerialName("file-type")   val fileType: String,
+    @kotlinx.serialization.SerialName("slide-total") val slideTotal: Int,
+    val slides: List<SlideDto>
+)
+
+/**
+ * Top-level response for GET /api/presentations
+ *
+ * {
+ *   "presentations": [ … ],
+ *   "total": 1
+ * }
+ */
+@Serializable
+data class PresentationCatalogResponse(
+    val presentations: List<PresentationDto>,
+    val total: Int
+)
+
 @Serializable
 data class ServerInfoResponse(
     val name: String = Constants.SERVER_APP_NAME,
@@ -198,6 +250,11 @@ class CompanionServer {
     private val _catalog = MutableStateFlow(SongCatalogResponse(emptyList(), 0, 0))
     private val _bibleCatalog = MutableStateFlow<BibleCatalogResponse?>(null)
     private val _schedule = MutableStateFlow<List<ScheduleItemDto>>(emptyList())
+
+    // Presentation catalog — metadata only; raw JPEG bytes stored per-slide in _slideBytes
+    private val _presentationCatalog = MutableStateFlow(PresentationCatalogResponse(emptyList(), 0))
+    /** presentationId → list of JPEG-encoded slide bytes (index = slide number) */
+    private val _slideBytes = ConcurrentHashMap<String, List<ByteArray>>()
 
     // API key config (updated from settings without restart)
     private val _apiKeyEnabled = MutableStateFlow(false)
@@ -315,6 +372,38 @@ class CompanionServer {
         ))
     }
 
+    /**
+     * Feed a loaded presentation (id, fileName, fileType and rendered slide bitmaps).
+     * Slides are encoded to JPEG on the IO thread and stored in memory so clients
+     * can fetch them individually via GET /api/presentations/{id}/slides/{index}.
+     *
+     * [slides] is a list of AWT [BufferedImage] objects produced by PresentationViewModel.
+     * To avoid a hard dependency on Compose runtime here we accept [Any] and downcast.
+     */
+    fun updatePresentation(
+        id: String,
+        fileName: String,
+        fileType: String,
+        slides: List<BufferedImage>
+    ) {
+        scope.launch {
+            val jpegSlides = slides.map { img ->
+                val baos = ByteArrayOutputStream()
+                ImageIO.write(img, "jpg", baos)
+                baos.toByteArray()
+            }
+            _slideBytes[id] = jpegSlides
+
+            val catalog = buildPresentationCatalog(id, fileName, fileType, jpegSlides.size)
+            _presentationCatalog.value = catalog
+            broadcast(WebSocketMessage(
+                type = Constants.WS_EVENT_PRESENTATION_UPDATED,
+                payload = json.encodeToString(PresentationCatalogResponse.serializer(), catalog)
+            ))
+        }
+    }
+
+
     /** Feed all schedule items — maps every type to ScheduleItemDto and broadcasts to WS clients. */
     fun updateSchedule(items: List<ScheduleItem>) {
         val dtos = items.map { item ->
@@ -418,6 +507,31 @@ class CompanionServer {
             books = bookDtos,
             bookTotal = bookDtos.size,
             verseTotal = totalVerses
+        )
+    }
+
+    private fun buildPresentationCatalog(
+        id: String,
+        fileName: String,
+        fileType: String,
+        slideCount: Int
+    ): PresentationCatalogResponse {
+        val slides = (0 until slideCount).map { index ->
+            SlideDto(
+                slideIndex = index,
+                thumbnailUrl = "${Constants.ENDPOINT_PRESENTATIONS}/$id/slides/$index"
+            )
+        }
+        val dto = PresentationDto(
+            id = id,
+            fileName = fileName,
+            fileType = fileType,
+            slideTotal = slideCount,
+            slides = slides
+        )
+        return PresentationCatalogResponse(
+            presentations = listOf(dto),
+            total = 1
         )
     }
 
@@ -544,6 +658,34 @@ class CompanionServer {
                     }
                 }
 
+                // ── Presentation endpoints ────────────────────────────────────
+
+                /** GET /api/presentations — list all loaded presentations with slide metadata */
+                get(Constants.ENDPOINT_PRESENTATIONS) {
+                    if (!checkApiKey(call)) return@get
+                    call.respond(_presentationCatalog.value)
+                }
+
+                /**
+                 * GET /api/presentations/{id}/slides/{index}
+                 * Returns the slide at {index} as a JPEG image for the presentation with {id}.
+                 */
+                get("${Constants.ENDPOINT_PRESENTATIONS}/{id}/slides/{index}") {
+                    if (!checkApiKey(call)) return@get
+                    val id    = call.parameters["id"]    ?: run { call.respond(io.ktor.http.HttpStatusCode.BadRequest, "Missing id"); return@get }
+                    val index = call.parameters["index"]?.toIntOrNull() ?: run { call.respond(io.ktor.http.HttpStatusCode.BadRequest, "Invalid index"); return@get }
+                    val slides = _slideBytes[id]
+                    if (slides == null) {
+                        call.respond(io.ktor.http.HttpStatusCode.NotFound, "Presentation not found")
+                        return@get
+                    }
+                    if (index < 0 || index >= slides.size) {
+                        call.respond(io.ktor.http.HttpStatusCode.NotFound, "Slide index out of range")
+                        return@get
+                    }
+                    call.respondBytes(slides[index], ContentType.Image.JPEG)
+                }
+
                 webSocket(Constants.ENDPOINT_WS) {
                     val queryKey = call.request.queryParameters[Constants.QUERY_PARAM_API_KEY]
                     val headerKey = call.request.headers[Constants.HEADER_API_KEY]
@@ -568,6 +710,12 @@ class CompanionServer {
                     send(Frame.Text(json.encodeToString(WebSocketMessage.serializer(),
                         WebSocketMessage(Constants.WS_EVENT_SCHEDULE_UPDATED,
                             json.encodeToString(ScheduleResponse.serializer(), ScheduleResponse(schedule, schedule.size))))))
+                    val presentationCatalog = _presentationCatalog.value
+                    if (presentationCatalog.presentations.isNotEmpty()) {
+                        send(Frame.Text(json.encodeToString(WebSocketMessage.serializer(),
+                            WebSocketMessage(Constants.WS_EVENT_PRESENTATION_UPDATED,
+                                json.encodeToString(PresentationCatalogResponse.serializer(), presentationCatalog)))))
+                    }
 
                     val broadcastJob = scope.launch {
                         broadcastChannel.collect { message -> send(Frame.Text(message)) }

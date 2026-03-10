@@ -111,6 +111,7 @@ fun MainDesktop(
     onSongsLoaded: ((List<org.churchpresenter.app.churchpresenter.data.SongItem>) -> Unit)? = null,
     onBibleLoaded: ((bible: org.churchpresenter.app.churchpresenter.data.Bible, translation: String) -> Unit)? = null,
     onScheduleChanged: ((List<org.churchpresenter.app.churchpresenter.models.ScheduleItem>) -> Unit)? = null,
+    onPresentationSlidesLoaded: ((id: String, fileName: String, fileType: String, slides: List<java.awt.image.BufferedImage>) -> Unit)? = null,
     serverUrl: String = ""
 ) {
     val isDarkTheme = when (theme) {
@@ -551,7 +552,8 @@ fun MainDesktop(
                                     currentScheduleActions.addPresentation(filePath, fileName, slideCount, fileType)
                                 },
                                 selectedPresentationItem = selectedPresentationItem,
-                                presenterManager = presenterManager
+                                presenterManager = presenterManager,
+                                onSlidesLoaded = onPresentationSlidesLoaded
                             )
 
                             Tabs.MEDIA -> MediaTab(

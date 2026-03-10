@@ -192,11 +192,12 @@ object Constants {
     const val SERVER_VERSION = "1.0"
 
     // REST endpoints
-    const val ENDPOINT_INFO      = "/api/info"
-    const val ENDPOINT_SONGS     = "/api/songs"
-    const val ENDPOINT_BIBLE     = "/api/bible"
-    const val ENDPOINT_SCHEDULE  = "/api/schedule"
-    const val ENDPOINT_WS        = "/ws"
+    const val ENDPOINT_INFO          = "/api/info"
+    const val ENDPOINT_SONGS         = "/api/songs"
+    const val ENDPOINT_BIBLE         = "/api/bible"
+    const val ENDPOINT_SCHEDULE      = "/api/schedule"
+    const val ENDPOINT_PRESENTATIONS = "/api/presentations"
+    const val ENDPOINT_WS            = "/ws"
 
     // Lottie Generator endpoints
     const val ENDPOINT_LOTTIE_PRESETS      = "/api/presets"
@@ -205,9 +206,10 @@ object Constants {
     const val ENDPOINT_LOTTIE_GENERATOR    = "/lottie-generator.html"
 
     // WebSocket event types (server → client)
-    const val WS_EVENT_SONGS_UPDATED    = "songs_updated"
-    const val WS_EVENT_BIBLE_UPDATED    = "bible_updated"
-    const val WS_EVENT_SCHEDULE_UPDATED = "schedule_updated"
+    const val WS_EVENT_SONGS_UPDATED         = "songs_updated"
+    const val WS_EVENT_BIBLE_UPDATED         = "bible_updated"
+    const val WS_EVENT_SCHEDULE_UPDATED      = "schedule_updated"
+    const val WS_EVENT_PRESENTATION_UPDATED  = "presentation_updated"
 
     // WebSocket command types (client → server)
     const val WS_CMD_SELECT_SONG = "select_song"

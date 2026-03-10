@@ -263,6 +263,39 @@ This document tracks coding standards, common mistakes, and debugging notes for 
 - 💡 **Best Practice**: Export Keynote to PDF or PPTX for guaranteed multi-slide extraction
 - 🧹 **Cleanup**: Temporary extraction directory is automatically deleted after loading
 
+## Presentation API (March 2026)
+
+**Feature**: Mobile companion app can now retrieve presentation slides via the Ktor REST API.
+
+### How it works
+1. When slides finish loading in `PresentationTab`, the `onSlidesLoaded` callback fires with the raw `BufferedImage` list.
+2. `MainDesktop` forwards this to `companionServer.updatePresentation(id, fileName, fileType, bufferedImages)`.
+3. `CompanionServer` JPEG-encodes each slide on the IO thread and stores them in `_slideBytes: ConcurrentHashMap<String, List<ByteArray>>`.
+4. The metadata is stored in `_presentationCatalog` and broadcast to WebSocket clients via `presentation_updated`.
+
+### New Endpoints
+| Endpoint | Description |
+|---|---|
+| `GET /api/presentations` | Returns `PresentationCatalogResponse` with slide metadata |
+| `GET /api/presentations/{id}/slides/{index}` | Returns JPEG image bytes for slide at index |
+
+### Presentation ID
+Derived from `file.absolutePath.hashCode().toUInt().toString(16)` — stable per file path.
+
+### New DTOs
+- `SlideDto` — `slide-index` + `thumbnail-url`
+- `PresentationDto` — `id`, `file-name`, `file-type`, `slide-total`, `slides[]`
+- `PresentationCatalogResponse` — `presentations[]`, `total`
+
+### New WS Event
+`presentation_updated` — broadcast whenever a new presentation is loaded; also sent to newly-connected WS clients.
+
+### `PresentationViewModel` change
+`_bufferedSlides: MutableList<BufferedImage>` is now kept in sync alongside `_slides: SnapshotStateList<ImageBitmap>` for every slide source (PDF, PPTX, PPT, Keynote). Access via `viewModel.bufferedSlides`.
+
+### Key rule
+- Do **NOT** use `toAwtImage()` on `ImageBitmap` — this extension does not exist in this project. Always work with `BufferedImage` directly and convert to `ImageBitmap` via `bufferedImageToImageBitmap()`.
+
 ## Known Issues
 
 **Issue**: Song edits not saving/updating
