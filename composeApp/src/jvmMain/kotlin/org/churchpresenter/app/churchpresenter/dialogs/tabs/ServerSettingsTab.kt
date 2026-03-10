@@ -91,241 +91,269 @@ fun ServerSettingsTab(
             .background(MaterialTheme.colorScheme.surfaceVariant)
             .padding(5.dp)
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(4.dp))
-                .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f), RoundedCornerShape(4.dp))
-                .padding(start = 15.dp, end = 15.dp, top = 8.dp, bottom = 15.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+        Row(
+            modifier = Modifier.fillMaxSize(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            // ── Header ────────────────────────────────────────────────────────
-            Text(
-                text = stringResource(Res.string.companion_server),
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.primary
-            )
-            Text(
-                text = stringResource(Res.string.server_description),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-
-            HorizontalDivider()
-
-            // ── Enable toggle + status in one row ─────────────────────────────
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            // ── LEFT COLUMN: settings ─────────────────────────────────────────
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .verticalScroll(rememberScrollState())
+                    .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(4.dp))
+                    .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f), RoundedCornerShape(4.dp))
+                    .padding(start = 15.dp, end = 15.dp, top = 8.dp, bottom = 15.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
+                // ── Header ────────────────────────────────────────────────────
                 Text(
-                    text = stringResource(Res.string.enable_server),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurface
+                    text = stringResource(Res.string.companion_server),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.primary
                 )
-                Switch(
-                    checked = isRunning,
-                    onCheckedChange = { enable ->
-                        val port = portText.toIntOrNull() ?: Constants.SERVER_DEFAULT_PORT
-                        if (enable) {
-                            companionServer.start(port)
-                            onSettingsChange { s ->
-                                s.copy(serverSettings = s.serverSettings.copy(enabled = true, port = port))
+                Text(
+                    text = stringResource(Res.string.server_description),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+
+                HorizontalDivider()
+
+                // ── Enable toggle + status in one row ─────────────────────────
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Text(
+                        text = stringResource(Res.string.enable_server),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Switch(
+                        checked = isRunning,
+                        onCheckedChange = { enable ->
+                            val port = portText.toIntOrNull() ?: Constants.SERVER_DEFAULT_PORT
+                            if (enable) {
+                                companionServer.start(port)
+                                onSettingsChange { s ->
+                                    s.copy(serverSettings = s.serverSettings.copy(enabled = true, port = port))
+                                }
+                            } else {
+                                companionServer.stop()
+                                onSettingsChange { s ->
+                                    s.copy(serverSettings = s.serverSettings.copy(enabled = false))
+                                }
+                            }
+                        }
+                    )
+                    Text(
+                        text = if (isRunning) stringResource(Res.string.server_running)
+                               else stringResource(Res.string.server_stopped),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = if (isRunning) MaterialTheme.colorScheme.primary
+                                else MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+
+                HorizontalDivider()
+
+                // ── Port + note/Restart in one row ────────────────────────────
+                SettingRow(label = stringResource(Res.string.server_port)) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        OutlinedTextField(
+                            value = portText,
+                            onValueChange = { v ->
+                                if (v.length <= 5 && v.all(Char::isDigit)) {
+                                    portText = v
+                                    v.toIntOrNull()?.let { port ->
+                                        onSettingsChange { s ->
+                                            s.copy(serverSettings = s.serverSettings.copy(port = port))
+                                        }
+                                    }
+                                }
+                            },
+                            modifier = Modifier.width(100.dp),
+                            singleLine = true,
+                            enabled = !isRunning,
+                            textStyle = MaterialTheme.typography.bodyMedium,
+                            placeholder = { Text(stringResource(Res.string.server_port_hint)) }
+                        )
+                        if (isRunning) {
+                            Button(
+                                onClick = {
+                                    val port = portText.toIntOrNull() ?: Constants.SERVER_DEFAULT_PORT
+                                    companionServer.stop()
+                                    companionServer.start(port)
+                                },
+                                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.secondary
+                                )
+                            ) {
+                                Text(stringResource(Res.string.server_restart), style = MaterialTheme.typography.labelSmall)
                             }
                         } else {
-                            companionServer.stop()
-                            onSettingsChange { s ->
-                                s.copy(serverSettings = s.serverSettings.copy(enabled = false))
+                            Text(
+                                text = stringResource(Res.string.server_port_note),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                }
+
+                // ── Server URL + Copy in one row (shown when running) ─────────
+                if (isRunning && serverUrl.isNotBlank()) {
+                    SettingRow(label = stringResource(Res.string.server_url_label)) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Text(
+                                text = serverUrl,
+                                style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
+                                color = MaterialTheme.colorScheme.onSurface,
+                                modifier = Modifier
+                                    .widthIn(max = 280.dp)
+                                    .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(4.dp))
+                                    .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.4f), RoundedCornerShape(4.dp))
+                                    .padding(horizontal = 8.dp, vertical = 4.dp)
+                            )
+                            Button(
+                                onClick = { clipboardManager.setText(AnnotatedString(serverUrl)) },
+                                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                                )
+                            ) {
+                                Text(stringResource(Res.string.copy_url), style = MaterialTheme.typography.labelSmall)
                             }
                         }
                     }
-                )
-                Text(
-                    text = if (isRunning) stringResource(Res.string.server_running)
-                           else stringResource(Res.string.server_stopped),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = if (isRunning) MaterialTheme.colorScheme.primary
-                            else MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                }
+
+                HorizontalDivider()
+
+                // ── API Key protection toggle ─────────────────────────────────
+                SettingRow(label = stringResource(Res.string.api_key_protection)) {
+                    Switch(
+                        checked = settings.serverSettings.apiKeyEnabled,
+                        onCheckedChange = { enabled ->
+                            onSettingsChange { s ->
+                                s.copy(serverSettings = s.serverSettings.copy(apiKeyEnabled = enabled))
+                            }
+                        }
+                    )
+                }
+
+                // ── API Key field + Generate + Copy all in one row ────────────
+                if (settings.serverSettings.apiKeyEnabled) {
+                    SettingRow(label = stringResource(Res.string.api_key_label)) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            OutlinedTextField(
+                                value = apiKeyText,
+                                onValueChange = { v ->
+                                    apiKeyText = v
+                                    onSettingsChange { s ->
+                                        s.copy(serverSettings = s.serverSettings.copy(apiKey = v))
+                                    }
+                                },
+                                modifier = Modifier.width(350.dp),
+                                singleLine = true,
+                                textStyle = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
+                                placeholder = {
+                                    Text(
+                                        stringResource(Res.string.api_key_hint),
+                                        style = MaterialTheme.typography.bodySmall
+                                    )
+                                }
+                            )
+                            Button(
+                                onClick = {
+                                    val newKey = UUID.randomUUID().toString().replace("-", "")
+                                    apiKeyText = newKey
+                                    onSettingsChange { s ->
+                                        s.copy(serverSettings = s.serverSettings.copy(apiKey = newKey))
+                                    }
+                                },
+                                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                                )
+                            ) {
+                                Text(stringResource(Res.string.generate_api_key), style = MaterialTheme.typography.labelSmall)
+                            }
+                            Button(
+                                onClick = { clipboardManager.setText(AnnotatedString(apiKeyText)) },
+                                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                                )
+                            ) {
+                                Text(stringResource(Res.string.copy_api_key), style = MaterialTheme.typography.labelSmall)
+                            }
+                        }
+                    }
+                }
             }
 
-            HorizontalDivider()
-
-            // ── Port + note/Restart in one row ────────────────────────────────
-            SettingRow(label = stringResource(Res.string.server_port)) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    OutlinedTextField(
-                        value = portText,
-                        onValueChange = { v ->
-                            if (v.length <= 5 && v.all(Char::isDigit)) {
-                                portText = v
-                                v.toIntOrNull()?.let { port ->
-                                    onSettingsChange { s ->
-                                        s.copy(serverSettings = s.serverSettings.copy(port = port))
-                                    }
-                                }
-                            }
-                        },
-                        modifier = Modifier.width(100.dp),
-                        singleLine = true,
-                        enabled = !isRunning,
-                        textStyle = MaterialTheme.typography.bodyMedium,
-                        placeholder = { Text(stringResource(Res.string.server_port_hint)) }
-                    )
-                    if (isRunning) {
-                        Button(
-                            onClick = {
-                                val port = portText.toIntOrNull() ?: Constants.SERVER_DEFAULT_PORT
-                                companionServer.stop()
-                                companionServer.start(port)
-                            },
-                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.secondary
-                            )
-                        ) {
-                            Text(stringResource(Res.string.server_restart), style = MaterialTheme.typography.labelSmall)
-                        }
-                    } else {
+            // ── RIGHT COLUMN: available endpoints ─────────────────────────────
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .verticalScroll(rememberScrollState())
+                    .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(4.dp))
+                    .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f), RoundedCornerShape(4.dp))
+                    .padding(start = 15.dp, end = 15.dp, top = 8.dp, bottom = 15.dp),
+                verticalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                Text(
+                    text = stringResource(Res.string.server_endpoints),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.primary
+                )
+                HorizontalDivider()
+                Spacer(modifier = Modifier.height(2.dp))
+                listOf(
+                    "GET ${Constants.ENDPOINT_INFO}" to "server info",
+                    "GET ${Constants.ENDPOINT_SONGS}" to "song catalog",
+                    "GET ${Constants.ENDPOINT_SONGS}?songbook=Name" to "filter by songbook",
+                    "GET ${Constants.ENDPOINT_BIBLE}" to "bible catalog",
+                    "GET ${Constants.ENDPOINT_BIBLE}?book=Genesis" to "filter by book",
+                    "GET ${Constants.ENDPOINT_BIBLE}?book=Genesis&chapter=1" to "filter by chapter",
+                    "GET ${Constants.ENDPOINT_SCHEDULE}" to "current schedule",
+                    "GET ${Constants.ENDPOINT_PRESENTATIONS}" to "presentation catalog",
+                    "GET ${Constants.ENDPOINT_PRESENTATIONS}/{id}/slides/{index}" to "slide image (JPEG)",
+                    "WS  ${Constants.ENDPOINT_WS}" to "real-time updates"
+                ).forEach { (endpoint, description) ->
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(4.dp))
+                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                    ) {
                         Text(
-                            text = stringResource(Res.string.server_port_note),
+                            text = endpoint,
+                            style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                        Text(
+                            text = description,
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }
-            }
-
-            // ── Server URL + Copy in one row (shown when running) ─────────────
-            if (isRunning && serverUrl.isNotBlank()) {
-                SettingRow(label = stringResource(Res.string.server_url_label)) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
-                    ) {
-                        Text(
-                            text = serverUrl,
-                            style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
-                            color = MaterialTheme.colorScheme.onSurface,
-                            modifier = Modifier
-                                .widthIn(max = 280.dp)
-                                .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(4.dp))
-                                .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.4f), RoundedCornerShape(4.dp))
-                                .padding(horizontal = 8.dp, vertical = 4.dp)
-                        )
-                        Button(
-                            onClick = { clipboardManager.setText(AnnotatedString(serverUrl)) },
-                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                                contentColor = MaterialTheme.colorScheme.onSecondaryContainer
-                            )
-                        ) {
-                            Text(stringResource(Res.string.copy_url), style = MaterialTheme.typography.labelSmall)
-                        }
-                    }
-                }
-            }
-
-            HorizontalDivider()
-
-            // ── API Key protection toggle ─────────────────────────────────────
-            SettingRow(label = stringResource(Res.string.api_key_protection)) {
-                Switch(
-                    checked = settings.serverSettings.apiKeyEnabled,
-                    onCheckedChange = { enabled ->
-                        onSettingsChange { s ->
-                            s.copy(serverSettings = s.serverSettings.copy(apiKeyEnabled = enabled))
-                        }
-                    }
-                )
-            }
-
-            // ── API Key field + Generate + Copy all in one row ────────────────
-            if (settings.serverSettings.apiKeyEnabled) {
-                SettingRow(label = stringResource(Res.string.api_key_label)) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
-                    ) {
-                        OutlinedTextField(
-                            value = apiKeyText,
-                            onValueChange = { v ->
-                                apiKeyText = v
-                                onSettingsChange { s ->
-                                    s.copy(serverSettings = s.serverSettings.copy(apiKey = v))
-                                }
-                            },
-                            modifier = Modifier.width(350.dp),
-                            singleLine = true,
-                            textStyle = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
-                            placeholder = {
-                                Text(
-                                    stringResource(Res.string.api_key_hint),
-                                    style = MaterialTheme.typography.bodySmall
-                                )
-                            }
-                        )
-                        Button(
-                            onClick = {
-                                val newKey = UUID.randomUUID().toString().replace("-", "")
-                                apiKeyText = newKey
-                                onSettingsChange { s ->
-                                    s.copy(serverSettings = s.serverSettings.copy(apiKey = newKey))
-                                }
-                            },
-                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                            )
-                        ) {
-                            Text(stringResource(Res.string.generate_api_key), style = MaterialTheme.typography.labelSmall)
-                        }
-                        Button(
-                            onClick = { clipboardManager.setText(AnnotatedString(apiKeyText)) },
-                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                                contentColor = MaterialTheme.colorScheme.onSecondaryContainer
-                            )
-                        ) {
-                            Text(stringResource(Res.string.copy_api_key), style = MaterialTheme.typography.labelSmall)
-                        }
-                    }
-                }
-            }
-
-            HorizontalDivider()
-
-            // ── Endpoints info ────────────────────────────────────────────────
-            Text(
-                text = stringResource(Res.string.server_endpoints),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Spacer(modifier = Modifier.height(2.dp))
-            listOf(
-                "GET ${Constants.ENDPOINT_INFO}     — server info",
-                "GET ${Constants.ENDPOINT_SONGS}    — song catalog",
-                "GET ${Constants.ENDPOINT_BIBLE}    — bible catalog",
-                "GET ${Constants.ENDPOINT_SCHEDULE} — current schedule",
-                "WS  ${Constants.ENDPOINT_WS}       — real-time updates"
-            ).forEach { endpoint ->
-                Text(
-                    text = endpoint,
-                    style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(4.dp))
-                        .padding(horizontal = 8.dp, vertical = 2.dp)
-                )
             }
         }
     }

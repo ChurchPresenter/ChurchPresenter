@@ -80,7 +80,8 @@ fun PresentationTab(
     appSettings: AppSettings,
     onAddToSchedule: ((filePath: String, fileName: String, slideCount: Int, fileType: String) -> Unit)? = null,
     selectedPresentationItem: ScheduleItem.PresentationItem? = null,
-    presenterManager: PresenterManager? = null
+    presenterManager: PresenterManager? = null,
+    onSlidesLoaded: ((id: String, fileName: String, fileType: String, slides: List<java.awt.image.BufferedImage>) -> Unit)? = null
 ) {
     val viewModel = remember { PresentationViewModel(appSettings) }
 
@@ -93,6 +94,19 @@ fun PresentationTab(
         selectedPresentationItem?.let { viewModel.loadPresentationByPath(it.filePath) }
     }
     val presentationFileDialogTitle = stringResource(Res.string.select_presentation_file)
+
+    // Notify server when slides finish loading
+    LaunchedEffect(viewModel.slides.size) {
+        val file = viewModel.selectedPresentation
+        if (file != null && viewModel.slides.isNotEmpty()) {
+            onSlidesLoaded?.invoke(
+                file.absolutePath.hashCode().toUInt().toString(16),
+                file.nameWithoutExtension,
+                file.extension.lowercase(),
+                viewModel.bufferedSlides
+            )
+        }
+    }
 
     // Auto-play effect using media settings (same as PicturesTab)
     LaunchedEffect(viewModel.isPlaying, viewModel.selectedSlideIndex, viewModel.autoScrollInterval) {

@@ -268,6 +268,9 @@ fun main() {
                                 onSongsLoaded = { songs -> companionServer.updateSongs(songs) },
                                 onBibleLoaded = { bible, translation -> companionServer.updateBible(bible, translation) },
                                 onScheduleChanged = { items -> companionServer.updateSchedule(items) },
+                                onPresentationSlidesLoaded = { id, fileName, fileType, slides ->
+                                    companionServer.updatePresentation(id, fileName, fileType, slides)
+                                },
                                 serverUrl = companionServer.serverUrl.collectAsState().value
                             )
                             OptionsDialog(
