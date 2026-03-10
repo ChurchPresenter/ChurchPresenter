@@ -157,6 +157,12 @@ fun main() {
                     primaryBibleFileName = appSettings.bibleSettings.primaryBible
                 )
                 companionServer.updateLowerThirdFolder(appSettings.streamingSettings.lowerThirdFolder)
+                // Seed API key from saved settings before starting, so the first
+                // request is already checked against the correct key.
+                companionServer.updateApiKey(
+                    enabled = appSettings.serverSettings.apiKeyEnabled,
+                    key = appSettings.serverSettings.apiKey
+                )
                 // Auto-start server if user previously enabled it
                 if (appSettings.serverSettings.enabled) {
                     companionServer.start(appSettings.serverSettings.port)
@@ -349,6 +355,11 @@ fun main() {
                                         primaryBibleFileName = updated.bibleSettings.primaryBible
                                     )
                                     companionServer.updateLowerThirdFolder(updated.streamingSettings.lowerThirdFolder)
+                                    // Keep API key enforcement in sync with saved settings
+                                    companionServer.updateApiKey(
+                                        enabled = updated.serverSettings.apiKeyEnabled,
+                                        key = updated.serverSettings.apiKey
+                                    )
                                 },
                                 onThemeChange = { newTheme ->
                                     appSettings = appSettings.copy(theme = newTheme.toString())
