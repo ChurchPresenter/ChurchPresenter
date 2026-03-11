@@ -461,6 +461,18 @@ class Bible {
         return Triple(bookName, bibleVerse.verseText, bibleVerse.verseId)
     }
 
+    /**
+     * Returns the raw list of [BibleVerse] objects for the given book+chapter.
+     * O(1) via chapterIndex — safe to call from any thread and does NOT mutate any state.
+     */
+    fun getChapterVerses(book: Int, chapter: Int): List<BibleVerse> =
+        chapterIndex[chapterKey(book, chapter)] ?: emptyList()
+
+    /**
+     * Returns the book name for the given 1-based book id, or null if out of range.
+     */
+    fun getBookName(bookId: Int): String? = books.getOrNull(bookId - 1)?.book
+
     // Diagnostic helper: number of parsed verses from SPB
     fun getVerseCount(): Int {
         return operatorBible.size
