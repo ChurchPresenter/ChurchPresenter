@@ -47,18 +47,23 @@ import churchpresenter.composeapp.generated.resources.copy_url
 import churchpresenter.composeapp.generated.resources.enable_server
 import churchpresenter.composeapp.generated.resources.endpoint_desc_add_to_schedule
 import churchpresenter.composeapp.generated.resources.endpoint_desc_bible_catalog
+import churchpresenter.composeapp.generated.resources.endpoint_desc_bible_chapter
 import churchpresenter.composeapp.generated.resources.endpoint_desc_filter_book
 import churchpresenter.composeapp.generated.resources.endpoint_desc_filter_chapter
 import churchpresenter.composeapp.generated.resources.endpoint_desc_filter_songbook
+import churchpresenter.composeapp.generated.resources.endpoint_desc_picture_catalog
+import churchpresenter.composeapp.generated.resources.endpoint_desc_picture_image
 import churchpresenter.composeapp.generated.resources.endpoint_desc_presentation_catalog
 import churchpresenter.composeapp.generated.resources.endpoint_desc_project
 import churchpresenter.composeapp.generated.resources.endpoint_desc_schedule
+import churchpresenter.composeapp.generated.resources.endpoint_desc_select_picture
 import churchpresenter.composeapp.generated.resources.endpoint_desc_server_info
 import churchpresenter.composeapp.generated.resources.endpoint_desc_slide_image
 import churchpresenter.composeapp.generated.resources.endpoint_desc_song_catalog
 import churchpresenter.composeapp.generated.resources.endpoint_desc_ws_add_to_schedule
 import churchpresenter.composeapp.generated.resources.endpoint_desc_ws_project
 import churchpresenter.composeapp.generated.resources.endpoint_desc_ws_realtime
+import churchpresenter.composeapp.generated.resources.endpoint_desc_ws_select_picture
 import churchpresenter.composeapp.generated.resources.generate_api_key
 import churchpresenter.composeapp.generated.resources.server_description
 import churchpresenter.composeapp.generated.resources.server_endpoints
@@ -357,9 +362,12 @@ fun ServerSettingsTab(
                     "GET ${Constants.ENDPOINT_BIBLE}" to stringResource(Res.string.endpoint_desc_bible_catalog),
                     "GET ${Constants.ENDPOINT_BIBLE}?book=Genesis" to stringResource(Res.string.endpoint_desc_filter_book),
                     "GET ${Constants.ENDPOINT_BIBLE}?book=Genesis&chapter=1" to stringResource(Res.string.endpoint_desc_filter_chapter),
+                    "GET ${Constants.ENDPOINT_BIBLE}?book=1&chapter=1" to stringResource(Res.string.endpoint_desc_bible_chapter),
                     "GET ${Constants.ENDPOINT_SCHEDULE}" to stringResource(Res.string.endpoint_desc_schedule),
                     "GET ${Constants.ENDPOINT_PRESENTATIONS}" to stringResource(Res.string.endpoint_desc_presentation_catalog),
-                    "GET ${Constants.ENDPOINT_PRESENTATIONS}/{id}/slides/{index}" to stringResource(Res.string.endpoint_desc_slide_image)
+                    "GET ${Constants.ENDPOINT_PRESENTATIONS}/{id}/slides/{index}" to stringResource(Res.string.endpoint_desc_slide_image),
+                    "GET ${Constants.ENDPOINT_PICTURES}" to stringResource(Res.string.endpoint_desc_picture_catalog),
+                    "GET ${Constants.ENDPOINT_PICTURES}/{id}/images/{index}" to stringResource(Res.string.endpoint_desc_picture_image)
                 ).forEach { (endpoint, description) ->
                     EndpointCard(endpoint = endpoint, description = description)
                 }
@@ -374,7 +382,8 @@ fun ServerSettingsTab(
                 )
                 listOf(
                     "POST ${Constants.ENDPOINT_SCHEDULE_ADD}" to stringResource(Res.string.endpoint_desc_add_to_schedule),
-                    "POST ${Constants.ENDPOINT_PROJECT}" to stringResource(Res.string.endpoint_desc_project)
+                    "POST ${Constants.ENDPOINT_PROJECT}" to stringResource(Res.string.endpoint_desc_project),
+                    "POST ${Constants.ENDPOINT_PICTURES}/select" to stringResource(Res.string.endpoint_desc_select_picture)
                 ).forEach { (endpoint, description) ->
                     EndpointCard(endpoint = endpoint, description = description, isAction = true)
                 }
@@ -390,7 +399,8 @@ fun ServerSettingsTab(
                 listOf(
                     "WS  ${Constants.ENDPOINT_WS}" to stringResource(Res.string.endpoint_desc_ws_realtime),
                     "CMD ${Constants.WS_CMD_ADD_TO_SCHEDULE}" to stringResource(Res.string.endpoint_desc_ws_add_to_schedule),
-                    "CMD ${Constants.WS_CMD_PROJECT}" to stringResource(Res.string.endpoint_desc_ws_project)
+                    "CMD ${Constants.WS_CMD_PROJECT}" to stringResource(Res.string.endpoint_desc_ws_project),
+                    "CMD ${Constants.WS_CMD_SELECT_PICTURE}" to stringResource(Res.string.endpoint_desc_ws_select_picture)
                 ).forEach { (endpoint, description) ->
                     EndpointCard(endpoint = endpoint, description = description)
                 }
