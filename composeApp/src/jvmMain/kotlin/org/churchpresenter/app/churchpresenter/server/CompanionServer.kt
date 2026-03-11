@@ -149,6 +149,34 @@ data class BibleBookDto(
     val chapters: List<BibleChapterDto>
 )
 
+@Serializable
+data class BibleVerseDto(
+    @kotlinx.serialization.SerialName("verse") val verse: Int,
+    @kotlinx.serialization.SerialName("text")  val text: String
+)
+
+/**
+ * Response for /api/bible?book={id}&chapter={num} — full chapter with verse text.
+ *
+ * {
+ *   "translation": "KJV",
+ *   "book-id": 1,
+ *   "book-name": "Genesis",
+ *   "chapter": 1,
+ *   "verse-total": 31,
+ *   "verses": [ { "verse": 1, "text": "In the beginning…" }, … ]
+ * }
+ */
+@Serializable
+data class BibleChapterResponse(
+    val translation: String,
+    @kotlinx.serialization.SerialName("book-id")    val bookId: Int,
+    @kotlinx.serialization.SerialName("book-name")  val bookName: String,
+    val chapter: Int,
+    @kotlinx.serialization.SerialName("verse-total") val verseTotal: Int,
+    val verses: List<BibleVerseDto>
+)
+
 /**
  * Top-level response for /api/bible
  *
@@ -263,6 +291,7 @@ class CompanionServer {
     // Current catalog — rebuilt whenever songs are updated
     private val _catalog = MutableStateFlow(SongCatalogResponse(emptyList(), 0, 0))
     private val _bibleCatalog = MutableStateFlow<BibleCatalogResponse?>(null)
+    private val _bible = MutableStateFlow<org.churchpresenter.app.churchpresenter.data.Bible?>(null)
     private val _schedule = MutableStateFlow<List<ScheduleItemDto>>(emptyList())
 
     // Presentation catalog — metadata only; raw JPEG bytes stored per-slide in _slideBytes
@@ -390,6 +419,7 @@ class CompanionServer {
 
     /** Feed the primary Bible — builds full nested catalog and broadcasts to WS clients. */
     fun updateBible(bible: org.churchpresenter.app.churchpresenter.data.Bible, translation: String) {
+        _bible.value = bible
         val catalog = buildBibleCatalog(bible, translation)
         _bibleCatalog.value = catalog
         broadcast(WebSocketMessage(
@@ -697,14 +727,40 @@ class CompanionServer {
                         call.respond(io.ktor.http.HttpStatusCode.ServiceUnavailable, "Bible not loaded")
                         return@get
                     }
-                    val bookFilter    = call.request.queryParameters[Constants.QUERY_PARAM_BOOK]
+                    val bookParam     = call.request.queryParameters[Constants.QUERY_PARAM_BOOK]
                     val chapterFilter = call.request.queryParameters[Constants.QUERY_PARAM_CHAPTER]?.toIntOrNull()
 
-                    if (bookFilter.isNullOrBlank()) {
+                    // ── Numeric book id + chapter → return full chapter with verse text ──
+                    val bookIdParam = bookParam?.toIntOrNull()
+                    if (bookIdParam != null && chapterFilter != null) {
+                        val bible = _bible.value
+                        if (bible == null) {
+                            call.respond(io.ktor.http.HttpStatusCode.ServiceUnavailable, "Bible not loaded")
+                            return@get
+                        }
+                        val rawVerses = bible.getChapterVerses(bookIdParam, chapterFilter)
+                        if (rawVerses.isEmpty()) {
+                            call.respond(io.ktor.http.HttpStatusCode.NotFound, "Chapter not found")
+                            return@get
+                        }
+                        val bookName = bible.getBookName(bookIdParam) ?: "Book $bookIdParam"
+                        val verseDtos = rawVerses.map { BibleVerseDto(verse = it.verseNumber, text = it.verseText) }
+                        call.respond(BibleChapterResponse(
+                            translation = catalog.translation,
+                            bookId = bookIdParam,
+                            bookName = bookName,
+                            chapter = chapterFilter,
+                            verseTotal = verseDtos.size,
+                            verses = verseDtos
+                        ))
+                        return@get
+                    }
+
+                    if (bookParam.isNullOrBlank()) {
                         call.respond(catalog)
                     } else {
                         val filteredBooks = catalog.books.filter {
-                            it.bookName.equals(bookFilter, ignoreCase = true)
+                            it.bookName.equals(bookParam, ignoreCase = true)
                         }.map { book ->
                             if (chapterFilter != null) {
                                 book.copy(chapters = book.chapters.filter { it.chapter == chapterFilter })
