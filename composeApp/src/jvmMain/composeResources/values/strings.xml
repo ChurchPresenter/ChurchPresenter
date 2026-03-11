@@ -696,6 +696,11 @@
     <string name="endpoint_desc_schedule">current schedule</string>
     <string name="endpoint_desc_presentation_catalog">presentation catalog</string>
     <string name="endpoint_desc_slide_image">slide image (JPEG)</string>
+    <string name="endpoint_desc_picture_catalog">picture folder catalog</string>
+    <string name="endpoint_desc_picture_image">picture image (JPEG)</string>
+    <string name="endpoint_desc_select_picture">select image by index</string>
+    <string name="endpoint_desc_ws_select_picture">select picture image (WS)</string>
+    <string name="endpoint_desc_bible_chapter">full chapter with verse text</string>
     <string name="endpoint_desc_add_to_schedule">add item to schedule</string>
     <string name="endpoint_desc_project">send item directly to projection</string>
     <string name="endpoint_desc_ws_realtime">real-time updates</string>

@@ -336,6 +336,14 @@ fun main() {
                                 onPresentationSlidesLoaded = { id, fileName, fileType, slides ->
                                     companionServer.updatePresentation(id, fileName, fileType, slides)
                                 },
+                                onPicturesLoaded = { folderId, folderName, folderPath, imageFiles ->
+                                    companionServer.updatePictures(folderId, folderName, folderPath, imageFiles)
+                                },
+                                selectPictureImageFlow = kotlinx.coroutines.flow.flow {
+                                    companionServer.onSelectPicture.collect { req ->
+                                        emit(req.folderId to req.index)
+                                    }
+                                },
                                 serverUrl = companionServer.serverUrl.collectAsState().value
                             )
                             OptionsDialog(

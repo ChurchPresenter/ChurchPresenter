@@ -118,6 +118,8 @@ fun MainDesktop(
     onBibleLoaded: ((bible: org.churchpresenter.app.churchpresenter.data.Bible, translation: String) -> Unit)? = null,
     onScheduleChanged: ((List<org.churchpresenter.app.churchpresenter.models.ScheduleItem>) -> Unit)? = null,
     onPresentationSlidesLoaded: ((id: String, fileName: String, fileType: String, slides: List<java.awt.image.BufferedImage>) -> Unit)? = null,
+    onPicturesLoaded: ((folderId: String, folderName: String, folderPath: String, imageFiles: List<java.io.File>) -> Unit)? = null,
+    selectPictureImageFlow: kotlinx.coroutines.flow.Flow<Pair<String, Int>>? = null,
     serverUrl: String = ""
 ) {
     val isDarkTheme = when (theme) {
@@ -164,6 +166,7 @@ fun MainDesktop(
     val picturesViewModel = remember { PicturesViewModel(appSettings) }
     DisposableEffect(Unit) { onDispose { picturesViewModel.dispose() } }
 
+    val currentOnPicturesLoaded by rememberUpdatedState(onPicturesLoaded)
     val currentOnBibleLoaded by rememberUpdatedState(onBibleLoaded)
     val bibleViewModel = remember { BibleViewModel(appSettings, onBibleLoaded = { bible, translation -> currentOnBibleLoaded?.invoke(bible, translation) }) }
     DisposableEffect(Unit) { onDispose { bibleViewModel.dispose() } }
@@ -171,12 +174,33 @@ fun MainDesktop(
     val presentingMode by presenterManager.presentingMode
     val mainFocusRequester = remember { FocusRequester() }
 
+    // Notify server whenever the picture folder or image list changes
+    val pictureImages = picturesViewModel.images
+    val pictureFolder = picturesViewModel.selectedFolder
+    LaunchedEffect(pictureFolder, pictureImages.size) {
+        val folder = pictureFolder ?: return@LaunchedEffect
+        if (pictureImages.isEmpty()) return@LaunchedEffect
+        val folderId = folder.absolutePath.hashCode().toUInt().toString(16)
+        currentOnPicturesLoaded?.invoke(folderId, folder.name, folder.absolutePath, pictureImages.toList())
+    }
+
     // Load picture folder when a picture schedule item is selected (works even before Pictures tab is composed)
     LaunchedEffect(selectedPictureItem) {
         selectedPictureItem?.let { pictureItem ->
             val folder = java.io.File(pictureItem.folderPath)
             if (folder.exists() && folder.isDirectory) {
                 picturesViewModel.selectFolder(folder)
+            }
+        }
+    }
+
+    // Handle remote picture selection (from REST POST /api/pictures/select or WS select_picture)
+    LaunchedEffect(selectPictureImageFlow) {
+        selectPictureImageFlow?.collect { (_, index) ->
+            val images = picturesViewModel.images
+            if (index in images.indices) {
+                picturesViewModel.selectedImageIndex = index
+                picturesViewModel.syncWithPresenter(presenterManager)
             }
         }
     }

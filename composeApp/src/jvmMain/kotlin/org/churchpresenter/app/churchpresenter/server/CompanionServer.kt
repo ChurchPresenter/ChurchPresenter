@@ -246,6 +246,42 @@ data class PresentationCatalogResponse(
     val total: Int
 )
 
+// ── Picture DTOs ──────────────────────────────────────────────────────────────
+
+@Serializable
+data class PictureFileDto(
+    @kotlinx.serialization.SerialName("index")         val index: Int,
+    @kotlinx.serialization.SerialName("file-name")     val fileName: String,
+    @kotlinx.serialization.SerialName("thumbnail-url") val thumbnailUrl: String
+)
+
+/**
+ * Top-level response for GET /api/pictures
+ *
+ * {
+ *   "folder-id":   "a1b2c3d4",
+ *   "folder-name": "Easter 2026",
+ *   "image-total": 12,
+ *   "images": [ { "index": 0, "file-name": "img001.jpg", "thumbnail-url": "/api/pictures/a1b2c3d4/images/0" }, … ]
+ * }
+ */
+@Serializable
+data class PictureFolderResponse(
+    @kotlinx.serialization.SerialName("folder-id")    val folderId: String,
+    @kotlinx.serialization.SerialName("folder-name")  val folderName: String,
+    @kotlinx.serialization.SerialName("folder-path")  val folderPath: String,
+    @kotlinx.serialization.SerialName("image-total")  val imageTotal: Int,
+    val images: List<PictureFileDto>
+)
+
+@Serializable
+data class SelectPictureRequest(
+    @kotlinx.serialization.SerialName("folder-id") val folderId: String,
+    val index: Int
+)
+
+// ── ServerInfoResponse / WebSocketMessage / etc. ──────────────────────────────
+
 @Serializable
 data class ServerInfoResponse(
     val name: String = Constants.SERVER_APP_NAME,
@@ -299,6 +335,11 @@ class CompanionServer {
     /** presentationId → list of JPEG-encoded slide bytes (index = slide number) */
     private val _slideBytes = ConcurrentHashMap<String, List<ByteArray>>()
 
+    // Picture catalog — metadata + file references stored per folder
+    private val _pictureCatalog = MutableStateFlow<PictureFolderResponse?>(null)
+    /** folderId → ordered list of image Files (index = image order) */
+    private val _pictureFiles = ConcurrentHashMap<String, List<File>>()
+
     // API key config (updated from settings without restart)
     private val _apiKeyEnabled = MutableStateFlow(false)
     private val _apiKey = MutableStateFlow("")
@@ -318,6 +359,12 @@ class CompanionServer {
     /** Emitted when a remote client requests an item to be added to the schedule. */
     val onAddToSchedule = MutableSharedFlow<AddToScheduleRequest>(
         extraBufferCapacity = 16,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
+
+    /** Emitted when a remote client selects a picture image (POST /api/pictures/select or WS select_picture). */
+    val onSelectPicture = MutableSharedFlow<SelectPictureRequest>(
+        extraBufferCapacity = 8,
         onBufferOverflow = BufferOverflow.DROP_OLDEST
     )
 
@@ -459,6 +506,44 @@ class CompanionServer {
         }
     }
 
+    /**
+     * Feed the current picture folder — stores file references and broadcasts
+     * [Constants.WS_EVENT_PICTURES_UPDATED]. Image bytes are read from disk on-demand
+     * when a remote client requests [Constants.ENDPOINT_PICTURES]/{id}/images/{index}.
+     *
+     * [folderId] is a stable ID derived from the folder path (e.g. hex hash).
+     * [folderName] is the display name shown to remote clients.
+     * [folderPath] is the absolute filesystem path.
+     * [imageFiles] is the ordered list of image Files in the folder.
+     */
+    fun updatePictures(
+        folderId: String,
+        folderName: String,
+        folderPath: String,
+        imageFiles: List<File>
+    ) {
+        // Store file references — bytes are read on-demand when a client requests an image
+        _pictureFiles[folderId] = imageFiles.toList()
+
+        val catalog = PictureFolderResponse(
+            folderId = folderId,
+            folderName = folderName,
+            folderPath = folderPath,
+            imageTotal = imageFiles.size,
+            images = imageFiles.mapIndexed { index, file ->
+                PictureFileDto(
+                    index = index,
+                    fileName = file.name,
+                    thumbnailUrl = "${Constants.ENDPOINT_PICTURES}/$folderId/images/$index"
+                )
+            }
+        )
+        _pictureCatalog.value = catalog
+        broadcast(WebSocketMessage(
+            type = Constants.WS_EVENT_PICTURES_UPDATED,
+            payload = json.encodeToString(PictureFolderResponse.serializer(), catalog)
+        ))
+    }
 
     /** Feed all schedule items — maps every type to ScheduleItemDto and broadcasts to WS clients. */
     fun updateSchedule(items: List<ScheduleItem>) {
@@ -802,6 +887,63 @@ class CompanionServer {
                     call.respondBytes(slides[index], ContentType.Image.JPEG)
                 }
 
+                // ── Picture endpoints ─────────────────────────────────────────
+
+                /**
+                 * GET /api/pictures
+                 * Returns the currently loaded picture folder metadata with per-image thumbnail URLs.
+                 */
+                get(Constants.ENDPOINT_PICTURES) {
+                    if (!checkApiKey(call)) return@get
+                    val catalog = _pictureCatalog.value
+                    if (catalog == null) {
+                        call.respond(io.ktor.http.HttpStatusCode.ServiceUnavailable, "No picture folder loaded")
+                        return@get
+                    }
+                    call.respond(catalog)
+                }
+
+                /**
+                 * GET /api/pictures/{id}/images/{index}
+                 * Returns the image at {index} as a JPEG for the folder with {id}.
+                 */
+                get("${Constants.ENDPOINT_PICTURES}/{id}/images/{index}") {
+                    if (!checkApiKey(call)) return@get
+                    val id    = call.parameters["id"]    ?: run { call.respond(io.ktor.http.HttpStatusCode.BadRequest, "Missing id"); return@get }
+                    val index = call.parameters["index"]?.toIntOrNull() ?: run { call.respond(io.ktor.http.HttpStatusCode.BadRequest, "Invalid index"); return@get }
+                    val files = _pictureFiles[id]
+                    if (files == null) {
+                        call.respond(io.ktor.http.HttpStatusCode.NotFound, "Picture folder not found")
+                        return@get
+                    }
+                    if (index < 0 || index >= files.size) {
+                        call.respond(io.ktor.http.HttpStatusCode.NotFound, "Image index out of range")
+                        return@get
+                    }
+                    val file = files[index]
+                    if (!file.exists()) {
+                        call.respond(io.ktor.http.HttpStatusCode.NotFound, "Image file not found on disk")
+                        return@get
+                    }
+                    call.respondBytes(file.readBytes(), contentTypeForExtension(file.extension))
+                }
+
+                /**
+                 * POST /api/pictures/select
+                 * Body: { "folder-id": "…", "index": 3 }
+                 * Selects the image at {index} in the specified folder, triggering the [onSelectPicture] callback.
+                 */
+                post("${Constants.ENDPOINT_PICTURES}/select") {
+                    if (!checkApiKey(call)) return@post
+                    try {
+                        val req = json.decodeFromString(SelectPictureRequest.serializer(), call.receiveText())
+                        scope.launch { onSelectPicture.emit(req) }
+                        call.respondText("""{"ok":true}""", ContentType.Application.Json)
+                    } catch (_: Exception) {
+                        call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":"invalid request body"}""")
+                    }
+                }
+
                 webSocket(Constants.ENDPOINT_WS) {
                     val queryKey = call.request.queryParameters[Constants.QUERY_PARAM_API_KEY]
                     val headerKey = call.request.headers[Constants.HEADER_API_KEY]
@@ -832,6 +974,11 @@ class CompanionServer {
                             WebSocketMessage(Constants.WS_EVENT_PRESENTATION_UPDATED,
                                 json.encodeToString(PresentationCatalogResponse.serializer(), presentationCatalog)))))
                     }
+                    _pictureCatalog.value?.let { pictureCatalog ->
+                        send(Frame.Text(json.encodeToString(WebSocketMessage.serializer(),
+                            WebSocketMessage(Constants.WS_EVENT_PICTURES_UPDATED,
+                                json.encodeToString(PictureFolderResponse.serializer(), pictureCatalog)))))
+                    }
 
                     val broadcastJob = scope.launch {
                         broadcastChannel.collect { message -> send(Frame.Text(message)) }
@@ -845,6 +992,10 @@ class CompanionServer {
                                     Constants.WS_CMD_SELECT_SONG -> {
                                         val song = json.decodeFromString(ScheduleSongDto.serializer(), msg.payload)
                                         scope.launch { onSongSelected.emit(song) }
+                                    }
+                                    Constants.WS_CMD_SELECT_PICTURE -> {
+                                        val req = json.decodeFromString(SelectPictureRequest.serializer(), msg.payload)
+                                        scope.launch { onSelectPicture.emit(req) }
                                     }
                                     Constants.WS_CMD_ADD_TO_SCHEDULE -> {
                                         val req = json.decodeFromString(AddToScheduleRequest.serializer(), msg.payload)
@@ -1023,6 +1174,16 @@ class CompanionServer {
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────
+
+    private fun contentTypeForExtension(ext: String): ContentType = when (ext.lowercase()) {
+        "jpg", "jpeg" -> ContentType.Image.JPEG
+        "png"         -> ContentType.Image.PNG
+        "gif"         -> ContentType.Image.GIF
+        "webp"        -> ContentType.parse("image/webp")
+        "bmp"         -> ContentType.parse("image/bmp")
+        "heic", "heif"-> ContentType.parse("image/heic")
+        else          -> ContentType.Image.JPEG
+    }
 
     private suspend fun checkApiKey(call: io.ktor.server.application.ApplicationCall): Boolean {
         if (!_apiKeyEnabled.value || _apiKey.value.isEmpty()) return true
