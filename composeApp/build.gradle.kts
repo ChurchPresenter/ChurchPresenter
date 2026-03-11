@@ -1,4 +1,5 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
+import org.gradle.jvm.toolchain.JavaLanguageVersion
 import java.util.Calendar
 
 val versionYear = Calendar.getInstance().get(Calendar.YEAR) % 100
@@ -129,27 +130,38 @@ kotlin {
     }
 }
 
+// Resolve Java 21 home for both the run task and packaging tasks.
+// Java 24 breaks jlink/jpackage used by Compose Desktop — always use Java 21.
+// 1. Try Gradle's toolchain API (works on any machine with JDK 21 registered).
+// 2. Fall back to a manual path scan for common macOS install locations.
+val resolvedJdk21Home: String? = run {
+    try {
+        val launcher = javaToolchains.launcherFor {
+            languageVersion.set(JavaLanguageVersion.of(21))
+        }.get()
+        // executablePath is …/bin/java; go up two levels to get JAVA_HOME
+        launcher.executablePath.asFile.parentFile?.parentFile?.absolutePath
+    } catch (_: Exception) {
+        null
+    }
+} ?: run {
+    val jdk21Paths = listOf(
+        "${System.getProperty("user.home")}/Library/Java/JavaVirtualMachines/temurin-21.jdk/Contents/Home",
+        "${System.getProperty("user.home")}/Library/Java/JavaVirtualMachines/jdk-21.0.6+7/Contents/Home",
+        "${System.getProperty("user.home")}/Library/Java/JavaVirtualMachines/temurin-21.0.6/Contents/Home",
+        "/Library/Java/JavaVirtualMachines/temurin-21.jdk/Contents/Home",
+        "/Library/Java/JavaVirtualMachines/jdk-21.jdk/Contents/Home",
+        "/Library/Java/JavaVirtualMachines/temurin-21.0.6.jdk/Contents/Home"
+    )
+    jdk21Paths.firstOrNull { path -> File("$path/bin/java").exists() }
+}
 
 compose.desktop {
     application {
         mainClass = "org.churchpresenter.app.churchpresenter.MainKt"
 
-        // Java 24 breaks jlink/jpackage used by Compose Desktop packaging.
-        // Use a full Java 21 JDK locally (must include jpackage).
-        // On CI (GitHub Actions) Java 21 is set up via actions/setup-java.
-        val jdk21Paths = listOf(
-            // Temurin 21 installed to user Library
-            "${System.getProperty("user.home")}/Library/Java/JavaVirtualMachines/temurin-21.jdk/Contents/Home",
-            "${System.getProperty("user.home")}/Library/Java/JavaVirtualMachines/jdk-21.0.6+7/Contents/Home",
-            // Temurin 21 installed via .pkg to system
-            "/Library/Java/JavaVirtualMachines/temurin-21.jdk/Contents/Home",
-            "/Library/Java/JavaVirtualMachines/jdk-21.jdk/Contents/Home"
-        )
-        val localJdk21 = jdk21Paths.firstOrNull { path ->
-            File("$path/bin/jpackage").exists()
-        }
-        if (localJdk21 != null) {
-            javaHome = localJdk21
+        if (resolvedJdk21Home != null) {
+            javaHome = resolvedJdk21Home
         }
 
         jvmArgs(
