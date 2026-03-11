@@ -331,7 +331,7 @@ class CompanionServer {
     }
 
     /** Update API key settings without restarting the server. */
-    fun updateApiKey(enabled: Boolean, key: String) {
+    fun  updateApiKey(enabled: Boolean, key: String) {
         _apiKeyEnabled.value = enabled
         _apiKey.value = key
     }
