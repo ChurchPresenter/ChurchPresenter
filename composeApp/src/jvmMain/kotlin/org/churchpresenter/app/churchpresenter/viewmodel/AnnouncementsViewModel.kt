@@ -44,6 +44,10 @@ class AnnouncementsViewModel {
     private val _shadow = mutableStateOf(false)
     val shadow: Boolean get() = _shadow.value
 
+    private val _shadowColor = mutableStateOf("#000000")
+    private val _shadowSize = mutableStateOf(100)
+    private val _shadowOpacity = mutableStateOf(78)
+
     private val _horizontalAlignment = mutableStateOf(Constants.CENTER)
     val horizontalAlignment: String get() = _horizontalAlignment.value
 
@@ -99,6 +103,9 @@ class AnnouncementsViewModel {
         _italic.value = settings.italic
         _underline.value = settings.underline
         _shadow.value = settings.shadow
+        _shadowColor.value = settings.shadowColor
+        _shadowSize.value = settings.shadowSize
+        _shadowOpacity.value = settings.shadowOpacity
         _horizontalAlignment.value = settings.horizontalAlignment
         _position.value = settings.position
         _animationType.value = settings.animationType
@@ -267,6 +274,9 @@ class AnnouncementsViewModel {
         italic = _italic.value,
         underline = _underline.value,
         shadow = _shadow.value,
+        shadowColor = _shadowColor.value,
+        shadowSize = _shadowSize.value,
+        shadowOpacity = _shadowOpacity.value,
         horizontalAlignment = _horizontalAlignment.value,
         position = _position.value,
         animationType = _animationType.value,

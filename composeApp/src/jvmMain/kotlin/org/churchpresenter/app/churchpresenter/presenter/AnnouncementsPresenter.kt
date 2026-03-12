@@ -51,16 +51,21 @@ fun AnnouncementsPresenter(
                      else parseHexColor(settings.backgroundColor)
     val fontFamily = systemFontFamilyOrDefault(settings.fontType)
 
+    val shadowColorBase = parseHexColor(settings.shadowColor)
+    val shadowSizeMul = settings.shadowSize / 100f
+    val shadowAlpha = (settings.shadowOpacity / 100f).coerceIn(0f, 1f)
+    val announcementShadow = Shadow(
+        color = shadowColorBase.copy(alpha = shadowAlpha),
+        offset = Offset(6f * shadowSizeMul, 6f * shadowSizeMul),
+        blurRadius = 12f * shadowSizeMul
+    )
+
     val textStyle = TextStyle(
         fontFamily     = fontFamily,
         fontWeight     = if (settings.bold) FontWeight.Bold else FontWeight.Normal,
         fontStyle      = if (settings.italic) FontStyle.Italic else FontStyle.Normal,
         textDecoration = if (settings.underline) TextDecoration.Underline else TextDecoration.None,
-        shadow         = if (settings.shadow) Shadow(
-            color      = Color.Black.copy(alpha = 0.7f),
-            offset     = Offset(2f, 2f),
-            blurRadius = 4f
-        ) else null,
+        shadow         = if (settings.shadow) announcementShadow else null,
         textAlign = when (settings.horizontalAlignment) {
             Constants.LEFT -> TextAlign.Left
             Constants.RIGHT -> TextAlign.Right
