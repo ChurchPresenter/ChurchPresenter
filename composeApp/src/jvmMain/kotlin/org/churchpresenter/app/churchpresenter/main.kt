@@ -62,6 +62,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.churchpresenter.app.churchpresenter.data.AppSettings
+import org.churchpresenter.app.churchpresenter.data.ScreenAssignment
 import org.churchpresenter.app.churchpresenter.data.Language
 import org.churchpresenter.app.churchpresenter.data.SettingsManager
 import org.churchpresenter.app.churchpresenter.dialogs.AboutDialog
@@ -78,6 +79,7 @@ import org.churchpresenter.app.churchpresenter.presenter.PicturePresenter
 import org.churchpresenter.app.churchpresenter.presenter.SlidePresenter
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.presenter.SongPresenter
+import org.churchpresenter.app.churchpresenter.models.AnimationType
 import org.churchpresenter.app.churchpresenter.models.LyricSection
 import org.churchpresenter.app.churchpresenter.models.ScheduleItem
 import org.churchpresenter.app.churchpresenter.ui.theme.LanguageProvider
@@ -86,6 +88,8 @@ import org.churchpresenter.app.churchpresenter.viewmodel.LocalMediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.MediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.app.churchpresenter.composables.preWarmJavaFX
+import io.github.alexzhirkevich.compottie.LottieCompositionSpec
+import io.github.alexzhirkevich.compottie.rememberLottieComposition
 import org.churchpresenter.app.churchpresenter.composables.vlcCustomPath
 import org.churchpresenter.app.churchpresenter.data.Bible
 import org.churchpresenter.app.churchpresenter.server.CompanionServer
@@ -94,6 +98,7 @@ import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.CrashReporter
 import org.jetbrains.compose.resources.stringResource
 import java.awt.GraphicsDevice
+import java.awt.GraphicsEnvironment
 import java.util.Locale
 
 
@@ -113,6 +118,62 @@ fun main() {
         // Business logic layer
         val settingsManager = remember { SettingsManager() }
         var appSettings by remember { mutableStateOf(settingsManager.loadSettings()) }
+
+        // Resolve any unassigned (-1 auto) screen assignments at startup so that
+        // DeckLink-only slots are set to None before the UI renders.
+        remember {
+            val screenDevicesAll = GraphicsEnvironment.getLocalGraphicsEnvironment().screenDevices
+            val primaryDevice = GraphicsEnvironment.getLocalGraphicsEnvironment().defaultScreenDevice
+            val nonPrimaryDevices = screenDevicesAll.filter { it != primaryDevice }
+            val deckLinkCount = if (DeckLinkManager.isAvailable()) DeckLinkManager.listDevices().size else 0
+            val slotCount = (nonPrimaryDevices.size + deckLinkCount).coerceAtLeast(0)
+
+            val proj = appSettings.projectionSettings
+            var changed = false
+            val assignments = proj.screenAssignments.toMutableList()
+            while (assignments.size < slotCount) {
+                val npIdx = assignments.size
+                val device = nonPrimaryDevices.getOrNull(npIdx)
+                val deviceIdx = if (device != null) screenDevicesAll.indexOf(device) else Constants.KEY_TARGET_NONE
+                val bounds = device?.defaultConfiguration?.bounds
+                assignments.add(
+                    ScreenAssignment(
+                        targetDisplay = deviceIdx,
+                        targetBoundsX = bounds?.x ?: Int.MIN_VALUE,
+                        targetBoundsY = bounds?.y ?: Int.MIN_VALUE,
+                        targetBoundsW = bounds?.width ?: 0,
+                        targetBoundsH = bounds?.height ?: 0
+                    )
+                )
+                changed = true
+            }
+            for (idx in assignments.indices) {
+                if (assignments[idx].targetDisplay == -1) {
+                    val device = nonPrimaryDevices.getOrNull(idx)
+                    if (device != null) {
+                        val deviceIdx = screenDevicesAll.indexOf(device)
+                        val bounds = device.defaultConfiguration.bounds
+                        assignments[idx] = assignments[idx].copy(
+                            targetDisplay = deviceIdx,
+                            targetBoundsX = bounds.x,
+                            targetBoundsY = bounds.y,
+                            targetBoundsW = bounds.width,
+                            targetBoundsH = bounds.height
+                        )
+                    } else {
+                        assignments[idx] = assignments[idx].copy(targetDisplay = Constants.KEY_TARGET_NONE)
+                    }
+                    changed = true
+                }
+            }
+            if (changed) {
+                appSettings = appSettings.copy(
+                    projectionSettings = proj.copy(screenAssignments = assignments)
+                )
+                settingsManager.saveSettings(appSettings)
+            }
+        }
+
         // Set custom VLC path from saved settings before first VLC access
         remember { vlcCustomPath = appSettings.projectionSettings.vlcPath }
         val presenterManager = remember { PresenterManager() }
@@ -236,7 +297,7 @@ fun main() {
             else -> WindowPlacement.Maximized
         }
         // Use OS primary monitor bounds so maximized/fullscreen stays on one screen
-        val primaryBounds = java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment()
+        val primaryBounds = GraphicsEnvironment.getLocalGraphicsEnvironment()
             .defaultScreenDevice.defaultConfiguration.bounds
         val state = rememberWindowState(
             placement = savedPlacement,
@@ -483,22 +544,178 @@ private fun PresenterWindows(
     val showPresenterWindow by presenterManager.showPresenterWindow
     val presentingMode by presenterManager.presentingMode
     val selectedVerses by presenterManager.selectedVerses
+    val displayedVerses by presenterManager.displayedVerses
+    val bibleTransitionAlpha by presenterManager.bibleTransitionAlpha
     val lyricSection by presenterManager.lyricSection
+    val lyricSectionVersion by presenterManager.lyricSectionVersion
+    val displayedLyricSection by presenterManager.displayedLyricSection
+    val songTransitionAlpha by presenterManager.songTransitionAlpha
     val selectedImagePath by presenterManager.selectedImagePath
+    val displayedImagePath by presenterManager.displayedImagePath
+    val pictureTransitionAlpha by presenterManager.pictureTransitionAlpha
     val selectedSlide by presenterManager.selectedSlide
+    val displayedSlide by presenterManager.displayedSlide
+    val slideTransitionAlpha by presenterManager.slideTransitionAlpha
     val animationType by presenterManager.animationType
     val transitionDuration by presenterManager.transitionDuration
+    val announcementText by presenterManager.announcementText
+    val displayedAnnouncementText by presenterManager.displayedAnnouncementText
+    val announcementTransitionAlpha by presenterManager.announcementTransitionAlpha
     val lottieJsonContent by presenterManager.lottieJsonContent
     val lottiePauseAtFrame by presenterManager.lottiePauseAtFrame
     val lottiePauseFrame by presenterManager.lottiePauseFrame
     val lottiePauseDurationMs by presenterManager.lottiePauseDurationMs
     val lottieTrigger by presenterManager.lottieTrigger
+    val lottieProgress by presenterManager.lottieProgress
+    val mediaTransitionAlpha by presenterManager.mediaTransitionAlpha
     val websiteUrl by presenterManager.websiteUrl
 
     val proj = appSettings.projectionSettings
 
+    // Centralized Bible transition: one animation drives all windows so they stay in sync
+    LaunchedEffect(selectedVerses) {
+        if (presenterManager.displayedVerses.value.isEmpty() ||
+            appSettings.bibleSettings.animationType == Constants.ANIMATION_NONE
+        ) {
+            // First load or no animation — show immediately
+            presenterManager.setDisplayedVerses(selectedVerses)
+            presenterManager.setBibleTransitionAlpha(1f)
+        } else {
+            val duration = appSettings.bibleSettings.transitionDuration.toInt()
+            val halfDuration = duration / 2
+            // Fade out
+            val anim = androidx.compose.animation.core.Animatable(1f)
+            anim.animateTo(0f, androidx.compose.animation.core.tween(halfDuration)) {
+                presenterManager.setBibleTransitionAlpha(value)
+            }
+            // Swap content at alpha=0
+            presenterManager.setDisplayedVerses(selectedVerses)
+            // Fade in
+            anim.animateTo(1f, androidx.compose.animation.core.tween(halfDuration)) {
+                presenterManager.setBibleTransitionAlpha(value)
+            }
+        }
+    }
+
+    // Centralized Song transition
+    LaunchedEffect(lyricSection, lyricSectionVersion) {
+        if (presenterManager.displayedLyricSection.value.lines.isEmpty() ||
+            appSettings.songSettings.animationType == Constants.ANIMATION_NONE
+        ) {
+            presenterManager.setDisplayedLyricSection(lyricSection)
+            presenterManager.setSongTransitionAlpha(1f)
+        } else {
+            val duration = appSettings.songSettings.transitionDuration.toInt()
+            val halfDuration = duration / 2
+            val anim = androidx.compose.animation.core.Animatable(1f)
+            anim.animateTo(0f, androidx.compose.animation.core.tween(halfDuration)) {
+                presenterManager.setSongTransitionAlpha(value)
+            }
+            presenterManager.setDisplayedLyricSection(lyricSection)
+            anim.animateTo(1f, androidx.compose.animation.core.tween(halfDuration)) {
+                presenterManager.setSongTransitionAlpha(value)
+            }
+        }
+    }
+
+    // Centralized Picture transition
+    LaunchedEffect(selectedImagePath) {
+        if (presenterManager.displayedImagePath.value == null ||
+            animationType == AnimationType.NONE
+        ) {
+            presenterManager.setDisplayedImagePath(selectedImagePath)
+            presenterManager.setPictureTransitionAlpha(1f)
+        } else {
+            val halfDuration = transitionDuration / 2
+            val anim = androidx.compose.animation.core.Animatable(1f)
+            anim.animateTo(0f, androidx.compose.animation.core.tween(halfDuration)) {
+                presenterManager.setPictureTransitionAlpha(value)
+            }
+            presenterManager.setDisplayedImagePath(selectedImagePath)
+            anim.animateTo(1f, androidx.compose.animation.core.tween(halfDuration)) {
+                presenterManager.setPictureTransitionAlpha(value)
+            }
+        }
+    }
+
+    // Centralized Slide transition
+    LaunchedEffect(selectedSlide) {
+        if (presenterManager.displayedSlide.value == null ||
+            animationType == AnimationType.NONE
+        ) {
+            presenterManager.setDisplayedSlide(selectedSlide)
+            presenterManager.setSlideTransitionAlpha(1f)
+        } else {
+            val halfDuration = transitionDuration / 2
+            val anim = androidx.compose.animation.core.Animatable(1f)
+            anim.animateTo(0f, androidx.compose.animation.core.tween(halfDuration)) {
+                presenterManager.setSlideTransitionAlpha(value)
+            }
+            presenterManager.setDisplayedSlide(selectedSlide)
+            anim.animateTo(1f, androidx.compose.animation.core.tween(halfDuration)) {
+                presenterManager.setSlideTransitionAlpha(value)
+            }
+        }
+    }
+
+    // Centralized Announcements transition
+    LaunchedEffect(announcementText) {
+        if (presenterManager.displayedAnnouncementText.value.isEmpty() ||
+            appSettings.announcementsSettings.animationType == Constants.ANIMATION_NONE
+        ) {
+            presenterManager.setDisplayedAnnouncementText(announcementText)
+            presenterManager.setAnnouncementTransitionAlpha(1f)
+        } else {
+            val duration = appSettings.announcementsSettings.animationDuration.coerceAtLeast(50)
+            val halfDuration = duration / 2
+            val anim = androidx.compose.animation.core.Animatable(1f)
+            anim.animateTo(0f, androidx.compose.animation.core.tween(halfDuration)) {
+                presenterManager.setAnnouncementTransitionAlpha(value)
+            }
+            presenterManager.setDisplayedAnnouncementText(announcementText)
+            anim.animateTo(1f, androidx.compose.animation.core.tween(halfDuration)) {
+                presenterManager.setAnnouncementTransitionAlpha(value)
+            }
+        }
+    }
+
+    // Centralized Lottie (lower third) animation — one animation drives all windows
+    val lottieComposition by rememberLottieComposition(key = lottieJsonContent) {
+        LottieCompositionSpec.JsonString(lottieJsonContent)
+    }
+    LaunchedEffect(lottieComposition, lottiePauseAtFrame, lottiePauseFrame, lottiePauseDurationMs, lottieTrigger) {
+        val comp = lottieComposition ?: return@LaunchedEffect
+        val totalDurMs = ((comp.durationFrames / comp.frameRate) * 1000f).toLong().coerceAtLeast(1L)
+        val hasPause = lottiePauseAtFrame && lottiePauseFrame in 0f..1f
+
+        presenterManager.setLottieProgress(0f)
+
+        if (hasPause) {
+            val toPauseDur = (totalDurMs * lottiePauseFrame).toInt().coerceAtLeast(1)
+            val anim = androidx.compose.animation.core.Animatable(0f)
+            anim.animateTo(
+                targetValue = lottiePauseFrame,
+                animationSpec = androidx.compose.animation.core.tween(durationMillis = toPauseDur, easing = androidx.compose.animation.core.LinearEasing)
+            ) { presenterManager.setLottieProgress(value) }
+            if (lottiePauseDurationMs > 0) {
+                delay(lottiePauseDurationMs)
+                val remainDur = (totalDurMs * (1f - lottiePauseFrame)).toInt().coerceAtLeast(1)
+                anim.animateTo(
+                    targetValue = 1f,
+                    animationSpec = androidx.compose.animation.core.tween(durationMillis = remainDur, easing = androidx.compose.animation.core.LinearEasing)
+                ) { presenterManager.setLottieProgress(value) }
+            }
+        } else {
+            val anim = androidx.compose.animation.core.Animatable(0f)
+            anim.animateTo(
+                targetValue = 1f,
+                animationSpec = androidx.compose.animation.core.tween(durationMillis = totalDurMs.toInt(), easing = androidx.compose.animation.core.LinearEasing)
+            ) { presenterManager.setLottieProgress(value) }
+        }
+    }
+
     // Identify the OS primary monitor and build list of non-primary screens
-    val defaultDevice = java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment().defaultScreenDevice
+    val defaultDevice = GraphicsEnvironment.getLocalGraphicsEnvironment().defaultScreenDevice
     val availableScreens = screens.indices.filter { screens[it] != defaultDevice }
 
     // Create windows for non-primary screens + DeckLink device slots
@@ -583,52 +800,52 @@ private fun PresenterWindows(
                             Presenting.BIBLE ->
                                 if (screenAssignment.showBible) {
                                     BiblePresenter(
-                                        selectedVerses = selectedVerses,
+                                        selectedVerses = displayedVerses,
                                         appSettings = appSettings,
                                         isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD,
-                                        outputRole = primaryRole
+                                        outputRole = primaryRole,
+                                        transitionAlpha = bibleTransitionAlpha
                                     )
                                 }
                             Presenting.LYRICS ->
                                 if (screenAssignment.showSongs) {
                                     SongPresenter(
-                                        lyricSection = lyricSection,
+                                        lyricSection = displayedLyricSection,
                                         appSettings = appSettings,
                                         isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD,
-                                        outputRole = primaryRole
+                                        outputRole = primaryRole,
+                                        transitionAlpha = songTransitionAlpha
                                     )
                                 }
                             Presenting.PICTURES ->
                                 if (screenAssignment.showPictures)
-                                    PicturePresenter(imagePath = selectedImagePath, animationType = animationType, transitionDuration = transitionDuration)
+                                    PicturePresenter(imagePath = displayedImagePath, transitionAlpha = pictureTransitionAlpha)
                             Presenting.PRESENTATION ->
                                 if (screenAssignment.showPictures)
-                                    SlidePresenter(slide = selectedSlide, animationType = animationType, transitionDuration = transitionDuration)
+                                    SlidePresenter(slide = displayedSlide, transitionAlpha = slideTransitionAlpha)
                             Presenting.MEDIA ->
                                 if (screenAssignment.showMedia) {
                                     if (mediaViewModel.isAudioFile) {
                                         // Audio: playback handled by hidden VideoPlayer in MainDesktop
                                         // Projection shows background only
                                     } else {
-                                        MediaPresenter(modifier = Modifier.fillMaxSize(), audioDeviceId = appSettings.projectionSettings.audioOutputDeviceId)
+                                        MediaPresenter(modifier = Modifier.fillMaxSize(), audioDeviceId = appSettings.projectionSettings.audioOutputDeviceId, transitionAlpha = mediaTransitionAlpha)
                                     }
                                 }
                             Presenting.LOWER_THIRD ->
                                 if (screenAssignment.showStreaming)
                                     LowerThirdPresenter(
                                         jsonContent = lottieJsonContent,
-                                        pauseAtFrame = lottiePauseAtFrame,
-                                        pauseFrame = lottiePauseFrame,
-                                        pauseDurationMs = lottiePauseDurationMs,
-                                        trigger = lottieTrigger,
+                                        progress = lottieProgress,
                                         appSettings = appSettings
                                     )
                             Presenting.ANNOUNCEMENTS ->
                                 if (screenAssignment.showAnnouncements)
                                     AnnouncementsPresenter(
-                                        text = presenterManager.announcementText.value,
+                                        text = displayedAnnouncementText,
                                         appSettings = appSettings,
-                                        outputRole = primaryRole
+                                        outputRole = primaryRole,
+                                        transitionAlpha = announcementTransitionAlpha
                                     )
                             Presenting.WEBSITE ->
                                 WebsitePresenter(
@@ -719,51 +936,51 @@ private fun PresenterWindows(
                                     Presenting.BIBLE ->
                                         if (screenAssignment.showBible) {
                                             BiblePresenter(
-                                                selectedVerses = selectedVerses,
+                                                selectedVerses = displayedVerses,
                                                 appSettings = appSettings,
                                                 isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD,
-                                                outputRole = Constants.OUTPUT_ROLE_KEY
+                                                outputRole = Constants.OUTPUT_ROLE_KEY,
+                                                transitionAlpha = bibleTransitionAlpha
                                             )
                                         }
                                     Presenting.LYRICS ->
                                         if (screenAssignment.showSongs) {
                                             SongPresenter(
-                                                lyricSection = lyricSection,
+                                                lyricSection = displayedLyricSection,
                                                 appSettings = appSettings,
                                                 isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD,
-                                                outputRole = Constants.OUTPUT_ROLE_KEY
+                                                outputRole = Constants.OUTPUT_ROLE_KEY,
+                                                transitionAlpha = songTransitionAlpha
                                             )
                                         }
                                     Presenting.PICTURES ->
                                         if (screenAssignment.showPictures)
-                                            PicturePresenter(imagePath = selectedImagePath, animationType = animationType, transitionDuration = transitionDuration)
+                                            PicturePresenter(imagePath = displayedImagePath, transitionAlpha = pictureTransitionAlpha)
                                     Presenting.PRESENTATION ->
                                         if (screenAssignment.showPictures)
-                                            SlidePresenter(slide = selectedSlide, animationType = animationType, transitionDuration = transitionDuration)
+                                            SlidePresenter(slide = displayedSlide, transitionAlpha = slideTransitionAlpha)
                                     Presenting.MEDIA ->
                                         if (screenAssignment.showMedia) {
                                             if (mediaViewModel.isAudioFile) {
                                                 // Audio: background only
                                             } else {
-                                                MediaPresenter(modifier = Modifier.fillMaxSize(), audioDeviceId = appSettings.projectionSettings.audioOutputDeviceId)
+                                                MediaPresenter(modifier = Modifier.fillMaxSize(), audioDeviceId = appSettings.projectionSettings.audioOutputDeviceId, transitionAlpha = mediaTransitionAlpha)
                                             }
                                         }
                                     Presenting.LOWER_THIRD ->
                                         if (screenAssignment.showStreaming)
                                             LowerThirdPresenter(
                                                 jsonContent = lottieJsonContent,
-                                                pauseAtFrame = lottiePauseAtFrame,
-                                                pauseFrame = lottiePauseFrame,
-                                                pauseDurationMs = lottiePauseDurationMs,
-                                                trigger = lottieTrigger,
+                                                progress = lottieProgress,
                                                 appSettings = appSettings
                                             )
                                     Presenting.ANNOUNCEMENTS ->
                                         if (screenAssignment.showAnnouncements)
                                             AnnouncementsPresenter(
-                                                text = presenterManager.announcementText.value,
+                                                text = displayedAnnouncementText,
                                                 appSettings = appSettings,
-                                                outputRole = Constants.OUTPUT_ROLE_KEY
+                                                outputRole = Constants.OUTPUT_ROLE_KEY,
+                                                transitionAlpha = announcementTransitionAlpha
                                             )
                                     Presenting.WEBSITE ->
                                         WebsitePresenter(

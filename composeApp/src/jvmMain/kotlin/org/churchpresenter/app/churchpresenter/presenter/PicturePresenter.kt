@@ -1,13 +1,5 @@
 package org.churchpresenter.app.churchpresenter.presenter
 
-import androidx.compose.animation.Crossfade
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -18,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.toComposeImageBitmap
@@ -28,7 +21,6 @@ import churchpresenter.composeapp.generated.resources.failed_to_load_image
 import churchpresenter.composeapp.generated.resources.no_images
 import churchpresenter.composeapp.generated.resources.presented_image
 import churchpresenter.composeapp.generated.resources.presented_slide
-import org.churchpresenter.app.churchpresenter.models.AnimationType
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.skia.Image
 import java.io.ByteArrayOutputStream
@@ -39,75 +31,16 @@ import javax.imageio.ImageIO
 fun PicturePresenter(
     modifier: Modifier = Modifier,
     imagePath: String?,
-    animationType: AnimationType = AnimationType.CROSSFADE,
-    transitionDuration: Int = 500
+    transitionAlpha: Float = 1f,
 ) {
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(Color.Black),
+            .background(Color.Black)
+            .alpha(transitionAlpha),
         contentAlignment = Alignment.Center
     ) {
-        when (animationType) {
-            AnimationType.CROSSFADE -> {
-                Crossfade(
-                    targetState = imagePath,
-                    animationSpec = tween(durationMillis = transitionDuration),
-                    label = "Image Crossfade"
-                ) { currentImagePath ->
-                    ImageContent(currentImagePath)
-                }
-            }
-            AnimationType.FADE -> {
-                AnimatedContent(
-                    targetState = imagePath,
-                    transitionSpec = {
-                        fadeIn(animationSpec = tween(transitionDuration)) togetherWith
-                                fadeOut(animationSpec = tween(transitionDuration))
-                    },
-                    label = "Image Fade"
-                ) { currentImagePath ->
-                    ImageContent(currentImagePath)
-                }
-            }
-            AnimationType.SLIDE_LEFT -> {
-                AnimatedContent(
-                    targetState = imagePath,
-                    transitionSpec = {
-                        slideInHorizontally(
-                            animationSpec = tween(transitionDuration),
-                            initialOffsetX = { fullWidth -> fullWidth }
-                        ) togetherWith slideOutHorizontally(
-                            animationSpec = tween(transitionDuration),
-                            targetOffsetX = { fullWidth -> -fullWidth }
-                        )
-                    },
-                    label = "Image Slide Left"
-                ) { currentImagePath ->
-                    ImageContent(currentImagePath)
-                }
-            }
-            AnimationType.SLIDE_RIGHT -> {
-                AnimatedContent(
-                    targetState = imagePath,
-                    transitionSpec = {
-                        slideInHorizontally(
-                            animationSpec = tween(transitionDuration),
-                            initialOffsetX = { fullWidth -> -fullWidth }
-                        ) togetherWith slideOutHorizontally(
-                            animationSpec = tween(transitionDuration),
-                            targetOffsetX = { fullWidth -> fullWidth }
-                        )
-                    },
-                    label = "Image Slide Right"
-                ) { currentImagePath ->
-                    ImageContent(currentImagePath)
-                }
-            }
-            AnimationType.NONE -> {
-                ImageContent(imagePath)
-            }
-        }
+        ImageContent(imagePath)
     }
 }
 
@@ -211,67 +144,16 @@ private fun loadAndDownscaleImage(imagePath: String, maxWidth: Int = 1920, maxHe
 fun SlidePresenter(
     modifier: Modifier = Modifier,
     slide: ImageBitmap?,
-    animationType: AnimationType = AnimationType.CROSSFADE,
-    transitionDuration: Int = 500
+    transitionAlpha: Float = 1f,
 ) {
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(Color.Black),
+            .background(Color.Black)
+            .alpha(transitionAlpha),
         contentAlignment = Alignment.Center
     ) {
-        when (animationType) {
-            AnimationType.CROSSFADE -> {
-                Crossfade(
-                    targetState = slide,
-                    animationSpec = tween(durationMillis = transitionDuration),
-                    label = "Slide Crossfade"
-                ) { currentSlide -> SlideBitmapContent(currentSlide) }
-            }
-            AnimationType.FADE -> {
-                AnimatedContent(
-                    targetState = slide,
-                    transitionSpec = {
-                        fadeIn(animationSpec = tween(transitionDuration)) togetherWith
-                                fadeOut(animationSpec = tween(transitionDuration))
-                    },
-                    label = "Slide Fade"
-                ) { currentSlide -> SlideBitmapContent(currentSlide) }
-            }
-            AnimationType.SLIDE_LEFT -> {
-                AnimatedContent(
-                    targetState = slide,
-                    transitionSpec = {
-                        slideInHorizontally(
-                            animationSpec = tween(transitionDuration),
-                            initialOffsetX = { fullWidth -> fullWidth }
-                        ) togetherWith slideOutHorizontally(
-                            animationSpec = tween(transitionDuration),
-                            targetOffsetX = { fullWidth -> -fullWidth }
-                        )
-                    },
-                    label = "Slide Slide Left"
-                ) { currentSlide -> SlideBitmapContent(currentSlide) }
-            }
-            AnimationType.SLIDE_RIGHT -> {
-                AnimatedContent(
-                    targetState = slide,
-                    transitionSpec = {
-                        slideInHorizontally(
-                            animationSpec = tween(transitionDuration),
-                            initialOffsetX = { fullWidth -> -fullWidth }
-                        ) togetherWith slideOutHorizontally(
-                            animationSpec = tween(transitionDuration),
-                            targetOffsetX = { fullWidth -> fullWidth }
-                        )
-                    },
-                    label = "Slide Slide Right"
-                ) { currentSlide -> SlideBitmapContent(currentSlide) }
-            }
-            AnimationType.NONE -> {
-                SlideBitmapContent(slide)
-            }
-        }
+        SlideBitmapContent(slide)
     }
 }
 

@@ -51,6 +51,9 @@
     <string name="tooltip_italic">Kurzíva</string>
     <string name="tooltip_underline">Podtržené</string>
     <string name="tooltip_shadow">Stín</string>
+    <string name="shadow_settings">Stín</string>
+    <string name="shadow_size">Velikost (%)</string>
+    <string name="shadow_opacity">Intenzita (%)</string>
     <string name="announcements">Oznámení</string>
     <string name="menu_file">Soubor</string>
     <string name="menu_new_schedule">Nový program</string>
@@ -770,6 +773,7 @@
     <string name="timer_title">Časovač</string>
     <string name="tooltip_add_website">Přidat webovou stránku</string>
     <string name="tooltip_clear_display">Vymazat zobrazení</string>
+    <string name="tooltip_toggle_displays">Přepnout zobrazení prezentace</string>
     <string name="tooltip_collapse_schedule">Sbalit program</string>
     <string name="tooltip_expand_schedule">Rozbalit program</string>
     <string name="tooltip_theme_dark">Tmavý motiv</string>

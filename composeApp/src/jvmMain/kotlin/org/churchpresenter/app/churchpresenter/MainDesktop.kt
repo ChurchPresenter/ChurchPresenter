@@ -51,7 +51,9 @@ import churchpresenter.composeapp.generated.resources.ic_settings
 import churchpresenter.composeapp.generated.resources.tooltip_collapse_schedule
 import churchpresenter.composeapp.generated.resources.tooltip_expand_schedule
 import churchpresenter.composeapp.generated.resources.tooltip_clear_display
+import churchpresenter.composeapp.generated.resources.tooltip_toggle_displays
 import churchpresenter.composeapp.generated.resources.tooltip_settings
+import churchpresenter.composeapp.generated.resources.ic_cast
 import churchpresenter.composeapp.generated.resources.ic_close
 import org.churchpresenter.app.churchpresenter.composables.LivePreviewPanel
 import org.churchpresenter.app.churchpresenter.composables.VideoPlayer
@@ -720,16 +722,28 @@ fun MainDesktop(
                             .fillMaxHeight()
                             .padding(8.dp)
                     ) {
-                        TooltipIconButton(
-                            painter = painterResource(Res.drawable.ic_close),
-                            text = stringResource(Res.string.tooltip_clear_display),
-                            onClick = {
-                                mediaViewModel?.pause()
-                                presenterManager.setPresentingMode(Presenting.NONE)
-                            },
-                            buttonSize = 36.dp,
-                            iconTint = MaterialTheme.colorScheme.error
-                        )
+                        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                            TooltipIconButton(
+                                painter = painterResource(Res.drawable.ic_cast),
+                                text = stringResource(Res.string.tooltip_toggle_displays),
+                                onClick = { presenterManager.togglePresenterWindow() },
+                                buttonSize = 36.dp,
+                                iconTint = if (presenterManager.showPresenterWindow.value)
+                                    MaterialTheme.colorScheme.primary
+                                else
+                                    MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                            )
+                            TooltipIconButton(
+                                painter = painterResource(Res.drawable.ic_close),
+                                text = stringResource(Res.string.tooltip_clear_display),
+                                onClick = {
+                                    mediaViewModel?.pause()
+                                    presenterManager.setPresentingMode(Presenting.NONE)
+                                },
+                                buttonSize = 36.dp,
+                                iconTint = MaterialTheme.colorScheme.error
+                            )
+                        }
                         LivePreviewPanel(
                             presenterManager = presenterManager,
                             appSettings = appSettings,

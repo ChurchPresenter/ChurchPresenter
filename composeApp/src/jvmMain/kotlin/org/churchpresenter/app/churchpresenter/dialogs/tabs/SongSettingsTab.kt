@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -46,7 +47,6 @@ import churchpresenter.composeapp.generated.resources.bottom_right
 import churchpresenter.composeapp.generated.resources.color
 import churchpresenter.composeapp.generated.resources.every_page
 import churchpresenter.composeapp.generated.resources.first_page
-import churchpresenter.composeapp.generated.resources.font_preview_text
 import churchpresenter.composeapp.generated.resources.font_size
 import churchpresenter.composeapp.generated.resources.font_type
 import churchpresenter.composeapp.generated.resources.full_screen
@@ -82,6 +82,7 @@ import churchpresenter.composeapp.generated.resources.song_transition_settings
 import churchpresenter.composeapp.generated.resources.transition_duration
 import androidx.compose.material3.Slider
 import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
+import org.churchpresenter.app.churchpresenter.composables.ShadowDetailRow
 import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
 import org.churchpresenter.app.churchpresenter.models.AnimationType
 import org.churchpresenter.app.churchpresenter.composables.DropdownSettingsField
@@ -116,9 +117,7 @@ fun SongSettingsTab(
             .padding(5.dp)
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState()),
+            modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()),
             horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             // Left Column
@@ -207,50 +206,50 @@ private fun LeftColumn(
     }
 
     SettingRow(stringResource(Res.string.font_type)) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            FontSettingsDropdown(
-                modifier = Modifier.width(200.dp),
-                value = settings.songSettings.titleFontType,
-                fonts = availableFonts,
-                onValueChange = {
-                    onSettingsChange { s ->
-                        s.copy(songSettings = s.songSettings.copy(titleFontType = it))
-                    }
+        FontSettingsDropdown(
+            modifier = Modifier.width(200.dp),
+            value = settings.songSettings.titleFontType,
+            fonts = availableFonts,
+            onValueChange = {
+                onSettingsChange { s ->
+                    s.copy(songSettings = s.songSettings.copy(titleFontType = it))
                 }
-            )
-            val previewFontFamily = remember(settings.songSettings.titleFontType) {
-                systemFontFamilyOrDefault(settings.songSettings.titleFontType)
             }
-            Text(
-                text = stringResource(Res.string.font_preview_text),
-                fontFamily = previewFontFamily,
-                color = MaterialTheme.colorScheme.onBackground,
-                fontSize = MaterialTheme.typography.bodySmall.fontSize,
-                modifier = Modifier.padding(start = 10.dp, top = 4.dp)
-            )
-        }
+        )
     }
 
     SettingRow(stringResource(Res.string.color)) {
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            ColorPickerField(
-                color = settings.songSettings.titleColor,
-                onColorChange = {
-                    onSettingsChange { s ->
-                        s.copy(songSettings = s.songSettings.copy(titleColor = it))
+        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                ColorPickerField(
+                    color = settings.songSettings.titleColor,
+                    onColorChange = {
+                        onSettingsChange { s ->
+                            s.copy(songSettings = s.songSettings.copy(titleColor = it))
+                        }
                     }
-                }
-            )
-            TextStyleButtons(
-                bold = settings.songSettings.titleBold,
-                italic = settings.songSettings.titleItalic,
-                underline = settings.songSettings.titleUnderline,
-                shadow = settings.songSettings.titleShadow,
-                onBoldChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleBold = it)) } },
-                onItalicChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleItalic = it)) } },
-                onUnderlineChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleUnderline = it)) } },
-                onShadowChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleShadow = it)) } }
-            )
+                )
+                TextStyleButtons(
+                    bold = settings.songSettings.titleBold,
+                    italic = settings.songSettings.titleItalic,
+                    underline = settings.songSettings.titleUnderline,
+                    shadow = settings.songSettings.titleShadow,
+                    onBoldChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleBold = it)) } },
+                    onItalicChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleItalic = it)) } },
+                    onUnderlineChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleUnderline = it)) } },
+                    onShadowChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleShadow = it)) } }
+                )
+            }
+            AnimatedVisibility(visible = settings.songSettings.titleShadow) {
+                ShadowDetailRow(
+                    shadowColor = settings.songSettings.shadowColor,
+                    shadowSize = settings.songSettings.shadowSize,
+                    shadowOpacity = settings.songSettings.shadowOpacity,
+                    onColorChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(shadowColor = it)) } },
+                    onSizeChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(shadowSize = it)) } },
+                    onOpacityChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(shadowOpacity = it)) } }
+                )
+            }
         }
     }
 
@@ -590,50 +589,50 @@ private fun RightColumn(
     }
 
     SettingRow(stringResource(Res.string.font_type)) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            FontSettingsDropdown(
-                modifier = Modifier.width(200.dp),
-                value = settings.songSettings.lyricsFontType,
-                fonts = availableFonts,
-                onValueChange = {
-                    onSettingsChange { s ->
-                        s.copy(songSettings = s.songSettings.copy(lyricsFontType = it))
-                    }
+        FontSettingsDropdown(
+            modifier = Modifier.width(200.dp),
+            value = settings.songSettings.lyricsFontType,
+            fonts = availableFonts,
+            onValueChange = {
+                onSettingsChange { s ->
+                    s.copy(songSettings = s.songSettings.copy(lyricsFontType = it))
                 }
-            )
-            val previewFontFamily = remember(settings.songSettings.lyricsFontType) {
-                systemFontFamilyOrDefault(settings.songSettings.lyricsFontType)
             }
-            Text(
-                text = stringResource(Res.string.font_preview_text),
-                fontFamily = previewFontFamily,
-                fontSize = 14.sp,
-                color = MaterialTheme.colorScheme.onBackground,
-                modifier = Modifier.padding(start = 10.dp, top = 4.dp)
-            )
-        }
+        )
     }
 
     SettingRow(stringResource(Res.string.color)) {
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            ColorPickerField(
-                color = settings.songSettings.lyricsColor,
-                onColorChange = {
-                    onSettingsChange { s ->
-                        s.copy(songSettings = s.songSettings.copy(lyricsColor = it))
+        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                ColorPickerField(
+                    color = settings.songSettings.lyricsColor,
+                    onColorChange = {
+                        onSettingsChange { s ->
+                            s.copy(songSettings = s.songSettings.copy(lyricsColor = it))
+                        }
                     }
-                }
-            )
-            TextStyleButtons(
-                bold = settings.songSettings.lyricsBold,
-                italic = settings.songSettings.lyricsItalic,
-                underline = settings.songSettings.lyricsUnderline,
-                shadow = settings.songSettings.lyricsShadow,
-                onBoldChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsBold = it)) } },
-                onItalicChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsItalic = it)) } },
-                onUnderlineChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsUnderline = it)) } },
-                onShadowChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsShadow = it)) } }
-            )
+                )
+                TextStyleButtons(
+                    bold = settings.songSettings.lyricsBold,
+                    italic = settings.songSettings.lyricsItalic,
+                    underline = settings.songSettings.lyricsUnderline,
+                    shadow = settings.songSettings.lyricsShadow,
+                    onBoldChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsBold = it)) } },
+                    onItalicChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsItalic = it)) } },
+                    onUnderlineChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsUnderline = it)) } },
+                    onShadowChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsShadow = it)) } }
+                )
+            }
+            AnimatedVisibility(visible = settings.songSettings.lyricsShadow) {
+                ShadowDetailRow(
+                    shadowColor = settings.songSettings.shadowColor,
+                    shadowSize = settings.songSettings.shadowSize,
+                    shadowOpacity = settings.songSettings.shadowOpacity,
+                    onColorChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(shadowColor = it)) } },
+                    onSizeChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(shadowSize = it)) } },
+                    onOpacityChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(shadowOpacity = it)) } }
+                )
+            }
         }
     }
 
@@ -787,25 +786,37 @@ private fun RightColumn(
     }
 
     SettingRow(stringResource(Res.string.color)) {
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            ColorPickerField(
-                color = settings.songSettings.songNumberColor,
-                onColorChange = {
-                    onSettingsChange { s ->
-                        s.copy(songSettings = s.songSettings.copy(songNumberColor = it))
+        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                ColorPickerField(
+                    color = settings.songSettings.songNumberColor,
+                    onColorChange = {
+                        onSettingsChange { s ->
+                            s.copy(songSettings = s.songSettings.copy(songNumberColor = it))
+                        }
                     }
-                }
-            )
-            TextStyleButtons(
-                bold = settings.songSettings.songNumberBold,
-                italic = settings.songSettings.songNumberItalic,
-                underline = settings.songSettings.songNumberUnderline,
-                shadow = settings.songSettings.songNumberShadow,
-                onBoldChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(songNumberBold = it)) } },
-                onItalicChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(songNumberItalic = it)) } },
-                onUnderlineChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(songNumberUnderline = it)) } },
-                onShadowChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(songNumberShadow = it)) } }
-            )
+                )
+                TextStyleButtons(
+                    bold = settings.songSettings.songNumberBold,
+                    italic = settings.songSettings.songNumberItalic,
+                    underline = settings.songSettings.songNumberUnderline,
+                    shadow = settings.songSettings.songNumberShadow,
+                    onBoldChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(songNumberBold = it)) } },
+                    onItalicChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(songNumberItalic = it)) } },
+                    onUnderlineChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(songNumberUnderline = it)) } },
+                    onShadowChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(songNumberShadow = it)) } }
+                )
+            }
+            AnimatedVisibility(visible = settings.songSettings.songNumberShadow) {
+                ShadowDetailRow(
+                    shadowColor = settings.songSettings.shadowColor,
+                    shadowSize = settings.songSettings.shadowSize,
+                    shadowOpacity = settings.songSettings.shadowOpacity,
+                    onColorChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(shadowColor = it)) } },
+                    onSizeChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(shadowSize = it)) } },
+                    onOpacityChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(shadowOpacity = it)) } }
+                )
+            }
         }
     }
 }

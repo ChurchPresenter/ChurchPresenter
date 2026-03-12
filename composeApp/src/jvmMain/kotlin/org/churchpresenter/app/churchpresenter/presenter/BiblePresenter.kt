@@ -1,13 +1,5 @@
 package org.churchpresenter.app.churchpresenter.presenter
 
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.Crossfade
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -24,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.draw.paint
@@ -43,7 +36,6 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.churchpresenter.app.churchpresenter.data.AppSettings
-import org.churchpresenter.app.churchpresenter.models.AnimationType
 import org.churchpresenter.app.churchpresenter.models.SelectedVerse
 import org.churchpresenter.app.churchpresenter.composables.LoopingVideoBackground
 import org.churchpresenter.app.churchpresenter.utils.Constants
@@ -74,78 +66,109 @@ fun BiblePresenter(
     appSettings: AppSettings,
     isLowerThird: Boolean = false,
     outputRole: String = Constants.OUTPUT_ROLE_NORMAL,
+    transitionAlpha: Float = 1f,
 ) {
     val isFillOrKey = outputRole == Constants.OUTPUT_ROLE_FILL || outputRole == Constants.OUTPUT_ROLE_KEY
-    val primaryBibleFontStyle = remember(appSettings.bibleSettings.primaryBibleFontType) {
-        systemFontFamilyOrDefault(appSettings.bibleSettings.primaryBibleFontType)
-    }
-    val primaryBibleReferenceFontStyle = remember(appSettings.bibleSettings.primaryReferenceFontType) {
-        systemFontFamilyOrDefault(appSettings.bibleSettings.primaryReferenceFontType)
-    }
+    val bs = appSettings.bibleSettings
 
-    val secondaryBibleFontStyle = remember(appSettings.bibleSettings.secondaryBibleFontType) {
-        systemFontFamilyOrDefault(appSettings.bibleSettings.secondaryBibleFontType)
+    // Resolve font families — use lower-third-specific values when applicable
+    val primaryBibleFontStyle = remember(
+        if (isLowerThird) bs.primaryBibleLowerThirdFontType else bs.primaryBibleFontType
+    ) {
+        systemFontFamilyOrDefault(if (isLowerThird) bs.primaryBibleLowerThirdFontType else bs.primaryBibleFontType)
     }
-    val secondaryBibleReferenceFontStyle = remember(appSettings.bibleSettings.secondaryReferenceFontType) {
-        systemFontFamilyOrDefault(appSettings.bibleSettings.secondaryReferenceFontType)
+    val primaryBibleReferenceFontStyle = remember(
+        if (isLowerThird) bs.primaryReferenceLowerThirdFontType else bs.primaryReferenceFontType
+    ) {
+        systemFontFamilyOrDefault(if (isLowerThird) bs.primaryReferenceLowerThirdFontType else bs.primaryReferenceFontType)
+    }
+    val secondaryBibleFontStyle = remember(
+        if (isLowerThird) bs.secondaryBibleLowerThirdFontType else bs.secondaryBibleFontType
+    ) {
+        systemFontFamilyOrDefault(if (isLowerThird) bs.secondaryBibleLowerThirdFontType else bs.secondaryBibleFontType)
+    }
+    val secondaryBibleReferenceFontStyle = remember(
+        if (isLowerThird) bs.secondaryReferenceLowerThirdFontType else bs.secondaryReferenceFontType
+    ) {
+        systemFontFamilyOrDefault(if (isLowerThird) bs.secondaryReferenceLowerThirdFontType else bs.secondaryReferenceFontType)
     }
 
     val primaryBible = selectedVerses.first()
     val secondaryBible = selectedVerses.getOrNull(1)
 
-    val primaryBibleTextColor = remember(appSettings.bibleSettings.primaryBibleColor) {
-        parseHexColor(appSettings.bibleSettings.primaryBibleColor)
+    // Resolve colors — use lower-third-specific values when applicable
+    val primaryBibleTextColor = remember(
+        if (isLowerThird) bs.primaryBibleLowerThirdColor else bs.primaryBibleColor
+    ) {
+        parseHexColor(if (isLowerThird) bs.primaryBibleLowerThirdColor else bs.primaryBibleColor)
     }
-    val primaryBibleReferenceTextColor = remember(appSettings.bibleSettings.primaryReferenceColor) {
-        parseHexColor(appSettings.bibleSettings.primaryReferenceColor)
+    val primaryBibleReferenceTextColor = remember(
+        if (isLowerThird) bs.primaryReferenceLowerThirdColor else bs.primaryReferenceColor
+    ) {
+        parseHexColor(if (isLowerThird) bs.primaryReferenceLowerThirdColor else bs.primaryReferenceColor)
     }
-    val secondaryBibleTextColor = remember(appSettings.bibleSettings.secondaryBibleColor) {
-        parseHexColor(appSettings.bibleSettings.secondaryBibleColor)
+    val secondaryBibleTextColor = remember(
+        if (isLowerThird) bs.secondaryBibleLowerThirdColor else bs.secondaryBibleColor
+    ) {
+        parseHexColor(if (isLowerThird) bs.secondaryBibleLowerThirdColor else bs.secondaryBibleColor)
     }
-    val secondaryBibleReferenceTextColor = remember(appSettings.bibleSettings.secondaryReferenceColor) {
-        parseHexColor(appSettings.bibleSettings.secondaryReferenceColor)
+    val secondaryBibleReferenceTextColor = remember(
+        if (isLowerThird) bs.secondaryReferenceLowerThirdColor else bs.secondaryReferenceColor
+    ) {
+        parseHexColor(if (isLowerThird) bs.secondaryReferenceLowerThirdColor else bs.secondaryReferenceColor)
     }
+
+    // Resolve bold/italic/underline/shadow — use lower-third-specific values when applicable
+    val pBold = if (isLowerThird) bs.primaryBibleLowerThirdBold else bs.primaryBibleBold
+    val pItalic = if (isLowerThird) bs.primaryBibleLowerThirdItalic else bs.primaryBibleItalic
+    val pUnderline = if (isLowerThird) bs.primaryBibleLowerThirdUnderline else bs.primaryBibleUnderline
+    val pShadow = if (isLowerThird) bs.primaryBibleLowerThirdShadow else bs.primaryBibleShadow
+    val prBold = if (isLowerThird) bs.primaryReferenceLowerThirdBold else bs.primaryReferenceBold
+    val prItalic = if (isLowerThird) bs.primaryReferenceLowerThirdItalic else bs.primaryReferenceItalic
+    val prUnderline = if (isLowerThird) bs.primaryReferenceLowerThirdUnderline else bs.primaryReferenceUnderline
+    val prShadow = if (isLowerThird) bs.primaryReferenceLowerThirdShadow else bs.primaryReferenceShadow
+    val sBold = if (isLowerThird) bs.secondaryBibleLowerThirdBold else bs.secondaryBibleBold
+    val sItalic = if (isLowerThird) bs.secondaryBibleLowerThirdItalic else bs.secondaryBibleItalic
+    val sUnderline = if (isLowerThird) bs.secondaryBibleLowerThirdUnderline else bs.secondaryBibleUnderline
+    val sShadow = if (isLowerThird) bs.secondaryBibleLowerThirdShadow else bs.secondaryBibleShadow
+    val srBold = if (isLowerThird) bs.secondaryReferenceLowerThirdBold else bs.secondaryReferenceBold
+    val srItalic = if (isLowerThird) bs.secondaryReferenceLowerThirdItalic else bs.secondaryReferenceItalic
+    val srUnderline = if (isLowerThird) bs.secondaryReferenceLowerThirdUnderline else bs.secondaryReferenceUnderline
+    val srShadow = if (isLowerThird) bs.secondaryReferenceLowerThirdShadow else bs.secondaryReferenceShadow
+
+    val shadowColorBase = parseHexColor(if (isLowerThird) bs.lowerThirdShadowColor else bs.shadowColor)
+    val shadowSizeMul = (if (isLowerThird) bs.lowerThirdShadowSize else bs.shadowSize) / 100f
+    val shadowAlpha = ((if (isLowerThird) bs.lowerThirdShadowOpacity else bs.shadowOpacity) / 100f).coerceIn(0f, 1f)
+    val defaultShadow = Shadow(
+        color = shadowColorBase.copy(alpha = shadowAlpha * 0.78f),
+        offset = Offset(2f * shadowSizeMul, 2f * shadowSizeMul),
+        blurRadius = 4f * shadowSizeMul
+    )
 
     // Text styles from settings
     val primaryBibleTextStyle = TextStyle(
-        fontWeight = if (appSettings.bibleSettings.primaryBibleBold) FontWeight.Bold else FontWeight.Normal,
-        fontStyle = if (appSettings.bibleSettings.primaryBibleItalic) FontStyle.Italic else FontStyle.Normal,
-        textDecoration = if (appSettings.bibleSettings.primaryBibleUnderline) TextDecoration.Underline else TextDecoration.None,
-        shadow = if (appSettings.bibleSettings.primaryBibleShadow) Shadow(
-            color = Color.Black.copy(alpha = 0.7f),
-            offset = Offset(2f, 2f),
-            blurRadius = 4f
-        ) else null
+        fontWeight = if (pBold) FontWeight.Bold else FontWeight.Normal,
+        fontStyle = if (pItalic) FontStyle.Italic else FontStyle.Normal,
+        textDecoration = if (pUnderline) TextDecoration.Underline else TextDecoration.None,
+        shadow = if (pShadow) defaultShadow else null
     )
     val primaryReferenceTextStyle = TextStyle(
-        fontWeight = if (appSettings.bibleSettings.primaryReferenceBold) FontWeight.Bold else FontWeight.Normal,
-        fontStyle = if (appSettings.bibleSettings.primaryReferenceItalic) FontStyle.Italic else FontStyle.Normal,
-        textDecoration = if (appSettings.bibleSettings.primaryReferenceUnderline) TextDecoration.Underline else TextDecoration.None,
-        shadow = if (appSettings.bibleSettings.primaryReferenceShadow) Shadow(
-            color = Color.Black.copy(alpha = 0.7f),
-            offset = Offset(2f, 2f),
-            blurRadius = 4f
-        ) else null
+        fontWeight = if (prBold) FontWeight.Bold else FontWeight.Normal,
+        fontStyle = if (prItalic) FontStyle.Italic else FontStyle.Normal,
+        textDecoration = if (prUnderline) TextDecoration.Underline else TextDecoration.None,
+        shadow = if (prShadow) defaultShadow else null
     )
     val secondaryBibleTextStyle = TextStyle(
-        fontWeight = if (appSettings.bibleSettings.secondaryBibleBold) FontWeight.Bold else FontWeight.Normal,
-        fontStyle = if (appSettings.bibleSettings.secondaryBibleItalic) FontStyle.Italic else FontStyle.Normal,
-        textDecoration = if (appSettings.bibleSettings.secondaryBibleUnderline) TextDecoration.Underline else TextDecoration.None,
-        shadow = if (appSettings.bibleSettings.secondaryBibleShadow) Shadow(
-            color = Color.Black.copy(alpha = 0.7f),
-            offset = Offset(2f, 2f),
-            blurRadius = 4f
-        ) else null
+        fontWeight = if (sBold) FontWeight.Bold else FontWeight.Normal,
+        fontStyle = if (sItalic) FontStyle.Italic else FontStyle.Normal,
+        textDecoration = if (sUnderline) TextDecoration.Underline else TextDecoration.None,
+        shadow = if (sShadow) defaultShadow else null
     )
     val secondaryReferenceTextStyle = TextStyle(
-        fontWeight = if (appSettings.bibleSettings.secondaryReferenceBold) FontWeight.Bold else FontWeight.Normal,
-        fontStyle = if (appSettings.bibleSettings.secondaryReferenceItalic) FontStyle.Italic else FontStyle.Normal,
-        textDecoration = if (appSettings.bibleSettings.secondaryReferenceUnderline) TextDecoration.Underline else TextDecoration.None,
-        shadow = if (appSettings.bibleSettings.secondaryReferenceShadow) Shadow(
-            color = Color.Black.copy(alpha = 0.7f),
-            offset = Offset(2f, 2f),
-            blurRadius = 4f
-        ) else null
+        fontWeight = if (srBold) FontWeight.Bold else FontWeight.Normal,
+        fontStyle = if (srItalic) FontStyle.Italic else FontStyle.Normal,
+        textDecoration = if (srUnderline) TextDecoration.Underline else TextDecoration.None,
+        shadow = if (srShadow) defaultShadow else null
     )
 
     val primaryBibleHorizontalAlignment = when (
@@ -184,8 +207,8 @@ fun BiblePresenter(
         else -> TextAlign.Center
     }
 
-    val primaryBibleReferencePosition = appSettings.bibleSettings.primaryReferencePosition
-    val secondaryBibleReferencePosition = appSettings.bibleSettings.secondaryReferencePosition
+    val primaryBibleReferencePosition = if (isLowerThird) bs.primaryReferenceLowerThirdPosition else bs.primaryReferencePosition
+    val secondaryBibleReferencePosition = if (isLowerThird) bs.secondaryReferenceLowerThirdPosition else bs.secondaryReferencePosition
 
     // Combine vertical alignment with horizontal center
     val contentAlignment = when (appSettings.bibleSettings.verticalAlignment) {
@@ -274,17 +297,17 @@ fun BiblePresenter(
 
         // Scale shadow to be visible at projection resolution
         val scaledShadow = Shadow(
-            color = Color.Black.copy(alpha = 0.9f),
-            offset = Offset(6f * scaleFactor, 6f * scaleFactor),
-            blurRadius = 12f * scaleFactor
+            color = shadowColorBase.copy(alpha = shadowAlpha),
+            offset = Offset(6f * scaleFactor * shadowSizeMul, 6f * scaleFactor * shadowSizeMul),
+            blurRadius = 12f * scaleFactor * shadowSizeMul
         )
-        val primaryBibleTextStyleScaled = if (appSettings.bibleSettings.primaryBibleShadow)
+        val primaryBibleTextStyleScaled = if (pShadow)
             primaryBibleTextStyle.copy(shadow = scaledShadow) else primaryBibleTextStyle
-        val primaryReferenceTextStyleScaled = if (appSettings.bibleSettings.primaryReferenceShadow)
+        val primaryReferenceTextStyleScaled = if (prShadow)
             primaryReferenceTextStyle.copy(shadow = scaledShadow) else primaryReferenceTextStyle
-        val secondaryBibleTextStyleScaled = if (appSettings.bibleSettings.secondaryBibleShadow)
+        val secondaryBibleTextStyleScaled = if (sShadow)
             secondaryBibleTextStyle.copy(shadow = scaledShadow) else secondaryBibleTextStyle
-        val secondaryReferenceTextStyleScaled = if (appSettings.bibleSettings.secondaryReferenceShadow)
+        val secondaryReferenceTextStyleScaled = if (srShadow)
             secondaryReferenceTextStyle.copy(shadow = scaledShadow) else secondaryReferenceTextStyle
 
         val effectivePrimaryBibleSize =
@@ -586,54 +609,10 @@ fun BiblePresenter(
                 }
             }
 
-            // Resolve animation from appSettings — no params needed from caller
-            val animationType = when (appSettings.bibleSettings.animationType) {
-                Constants.ANIMATION_FADE -> AnimationType.FADE
-                Constants.ANIMATION_SLIDE_LEFT -> AnimationType.SLIDE_LEFT
-                Constants.ANIMATION_SLIDE_RIGHT -> AnimationType.SLIDE_RIGHT
-                Constants.ANIMATION_NONE -> AnimationType.NONE
-                else -> AnimationType.CROSSFADE
-            }
-            val transitionDuration = appSettings.bibleSettings.transitionDuration.toInt()
-
-            when (animationType) {
-                AnimationType.CROSSFADE -> Crossfade(
-                    targetState = selectedVerses,
-                    animationSpec = tween(transitionDuration),
-                    label = "BibleCrossfade"
-                ) { TextContent(it) }
-
-                AnimationType.FADE -> AnimatedContent(
-                    targetState = selectedVerses,
-                    transitionSpec = { fadeIn(tween(transitionDuration)) togetherWith fadeOut(tween(transitionDuration)) },
-                    label = "BibleFade"
-                ) { TextContent(it) }
-
-                AnimationType.SLIDE_LEFT -> AnimatedContent(
-                    targetState = selectedVerses,
-                    transitionSpec = {
-                        slideInHorizontally(tween(transitionDuration)) { it } togetherWith slideOutHorizontally(
-                            tween(
-                                transitionDuration
-                            )
-                        ) { -it }
-                    },
-                    label = "BibleSlideLeft"
-                ) { TextContent(it) }
-
-                AnimationType.SLIDE_RIGHT -> AnimatedContent(
-                    targetState = selectedVerses,
-                    transitionSpec = {
-                        slideInHorizontally(tween(transitionDuration)) { -it } togetherWith slideOutHorizontally(
-                            tween(
-                                transitionDuration
-                            )
-                        ) { it }
-                    },
-                    label = "BibleSlideRight"
-                ) { TextContent(it) }
-
-                AnimationType.NONE -> TextContent(selectedVerses)
+            // Animation is driven centrally via shared transitionAlpha so all
+            // presenter windows fade in/out in perfect sync.
+            Box(modifier = Modifier.alpha(transitionAlpha)) {
+                TextContent(selectedVerses)
             }
         }
     }

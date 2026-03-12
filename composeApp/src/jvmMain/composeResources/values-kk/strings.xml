@@ -51,6 +51,9 @@
     <string name="tooltip_italic">Курсив</string>
     <string name="tooltip_underline">Асты сызылған</string>
     <string name="tooltip_shadow">Көлеңке</string>
+    <string name="shadow_settings">Көлеңке</string>
+    <string name="shadow_size">Өлшемі (%)</string>
+    <string name="shadow_opacity">Қарқындылығы (%)</string>
     <string name="announcements">Хабарландырулар</string>
     <string name="menu_file">Файл</string>
     <string name="menu_new_schedule">Жаңа бағдарлама</string>
@@ -684,6 +687,7 @@
     <string name="timer_title">Таймер</string>
     <string name="tooltip_add_website">Веб-сайт қосу</string>
     <string name="tooltip_clear_display">Дисплейді тазалау</string>
+    <string name="tooltip_toggle_displays">Презентация дисплейлерін ауыстыру</string>
     <string name="tooltip_collapse_schedule">Бағдарламаны жию</string>
     <string name="tooltip_expand_schedule">Бағдарламаны жаю</string>
     <string name="tooltip_theme_dark">Қараңғы тақырып</string>
