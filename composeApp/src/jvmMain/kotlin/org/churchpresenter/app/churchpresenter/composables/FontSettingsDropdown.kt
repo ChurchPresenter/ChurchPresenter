@@ -30,7 +30,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
+import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDefault
 
 @Composable
 fun FontSettingsDropdown(
@@ -53,6 +55,8 @@ fun FontSettingsDropdown(
         1.dp
     }
 
+    val selectedFontFamily = remember(value) { systemFontFamilyOrDefault(value) }
+
     Box {
         OutlinedButton(
             interactionSource = interactionSource,
@@ -70,7 +74,7 @@ fun FontSettingsDropdown(
         ) {
             Text(
                 text = value,
-                style = MaterialTheme.typography.bodySmall,
+                style = MaterialTheme.typography.bodySmall.copy(fontFamily = selectedFontFamily),
                 modifier = Modifier.weight(1f)
             )
         }
@@ -92,8 +96,9 @@ fun FontSettingsDropdown(
                         .padding(end = 10.dp)
                 ) {
                     fonts.forEach { font ->
+                        val fontFamily = remember(font) { systemFontFamilyOrDefault(font) }
                         DropdownMenuItem(
-                            text = { Text(font, style = MaterialTheme.typography.bodySmall) },
+                            text = { Text(font, style = MaterialTheme.typography.bodySmall.copy(fontFamily = fontFamily)) },
                             onClick = {
                                 onValueChange(font)
                                 expanded = false

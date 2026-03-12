@@ -51,6 +51,9 @@
     <string name="tooltip_italic">Курсив</string>
     <string name="tooltip_underline">Підкреслений</string>
     <string name="tooltip_shadow">Тінь</string>
+    <string name="shadow_settings">Тінь</string>
+    <string name="shadow_size">Розмір (%)</string>
+    <string name="shadow_opacity">Інтенсивність (%)</string>
     <string name="announcements">Оголошення</string>
     <string name="menu_file">Файл</string>
     <string name="menu_new_schedule">Нова програма</string>
@@ -689,6 +692,7 @@
     <string name="timer_title">Таймер</string>
     <string name="tooltip_add_website">Додати вебсайт</string>
     <string name="tooltip_clear_display">Очистити екран</string>
+    <string name="tooltip_toggle_displays">Увімк/Вимк екрани презентації</string>
     <string name="tooltip_collapse_schedule">Згорнути програму</string>
     <string name="tooltip_expand_schedule">Розгорнути програму</string>
     <string name="tooltip_theme_dark">Темна тема</string>

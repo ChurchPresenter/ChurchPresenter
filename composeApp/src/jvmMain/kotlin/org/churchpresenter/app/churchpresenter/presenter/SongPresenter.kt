@@ -1,13 +1,5 @@
 package org.churchpresenter.app.churchpresenter.presenter
 
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.Crossfade
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -26,6 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.paint
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -47,7 +40,7 @@ import androidx.compose.ui.geometry.Offset
 import kotlin.math.min
 import org.churchpresenter.app.churchpresenter.composables.LoopingVideoBackground
 import org.churchpresenter.app.churchpresenter.data.AppSettings
-import org.churchpresenter.app.churchpresenter.models.AnimationType
+
 import org.churchpresenter.app.churchpresenter.models.LyricSection
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.Constants.VERSE_1_RUS
@@ -77,6 +70,7 @@ fun SongPresenter(
     appSettings: AppSettings,
     isLowerThird: Boolean = false,
     outputRole: String = Constants.OUTPUT_ROLE_NORMAL,
+    transitionAlpha: Float = 1f,
 ) {
     val isFillOrKey = outputRole == Constants.OUTPUT_ROLE_FILL || outputRole == Constants.OUTPUT_ROLE_KEY
     val titleFontFamily = remember(appSettings.songSettings.titleFontType) {
@@ -96,36 +90,35 @@ fun SongPresenter(
         parseHexColor(appSettings.songSettings.songNumberColor)
     }
 
+    // Shadow customization
+    val ss = appSettings.songSettings
+    val songShadowColor = parseHexColor(ss.shadowColor)
+    val songShadowSizeMul = ss.shadowSize / 100f
+    val songShadowAlpha = (ss.shadowOpacity / 100f).coerceIn(0f, 1f)
+    val baseShadow = Shadow(
+        color = songShadowColor.copy(alpha = songShadowAlpha * 0.78f),
+        offset = Offset(2f * songShadowSizeMul, 2f * songShadowSizeMul),
+        blurRadius = 4f * songShadowSizeMul
+    )
+
     // Text styles derived from settings
     val titleTextStyle = TextStyle(
-        fontWeight = if (appSettings.songSettings.titleBold) FontWeight.Bold else FontWeight.Normal,
-        fontStyle = if (appSettings.songSettings.titleItalic) FontStyle.Italic else FontStyle.Normal,
-        textDecoration = if (appSettings.songSettings.titleUnderline) TextDecoration.Underline else TextDecoration.None,
-        shadow = if (appSettings.songSettings.titleShadow) Shadow(
-            color = Color.Black.copy(alpha = 0.7f),
-            offset = Offset(2f, 2f),
-            blurRadius = 4f
-        ) else null
+        fontWeight = if (ss.titleBold) FontWeight.Bold else FontWeight.Normal,
+        fontStyle = if (ss.titleItalic) FontStyle.Italic else FontStyle.Normal,
+        textDecoration = if (ss.titleUnderline) TextDecoration.Underline else TextDecoration.None,
+        shadow = if (ss.titleShadow) baseShadow else null
     )
     val lyricsTextStyle = TextStyle(
-        fontWeight = if (appSettings.songSettings.lyricsBold) FontWeight.Bold else FontWeight.Normal,
-        fontStyle = if (appSettings.songSettings.lyricsItalic) FontStyle.Italic else FontStyle.Normal,
-        textDecoration = if (appSettings.songSettings.lyricsUnderline) TextDecoration.Underline else TextDecoration.None,
-        shadow = if (appSettings.songSettings.lyricsShadow) Shadow(
-            color = Color.Black.copy(alpha = 0.7f),
-            offset = Offset(2f, 2f),
-            blurRadius = 4f
-        ) else null
+        fontWeight = if (ss.lyricsBold) FontWeight.Bold else FontWeight.Normal,
+        fontStyle = if (ss.lyricsItalic) FontStyle.Italic else FontStyle.Normal,
+        textDecoration = if (ss.lyricsUnderline) TextDecoration.Underline else TextDecoration.None,
+        shadow = if (ss.lyricsShadow) baseShadow else null
     )
     val songNumberTextStyle = TextStyle(
-        fontWeight = if (appSettings.songSettings.songNumberBold) FontWeight.Bold else FontWeight.Normal,
-        fontStyle = if (appSettings.songSettings.songNumberItalic) FontStyle.Italic else FontStyle.Normal,
-        textDecoration = if (appSettings.songSettings.songNumberUnderline) TextDecoration.Underline else TextDecoration.None,
-        shadow = if (appSettings.songSettings.songNumberShadow) Shadow(
-            color = Color.Black.copy(alpha = 0.7f),
-            offset = Offset(2f, 2f),
-            blurRadius = 4f
-        ) else null
+        fontWeight = if (ss.songNumberBold) FontWeight.Bold else FontWeight.Normal,
+        fontStyle = if (ss.songNumberItalic) FontStyle.Italic else FontStyle.Normal,
+        textDecoration = if (ss.songNumberUnderline) TextDecoration.Underline else TextDecoration.None,
+        shadow = if (ss.songNumberShadow) baseShadow else null
     )
 
     val contentAlignment = when (appSettings.songSettings.lyricsAlignment) {
@@ -222,15 +215,15 @@ fun SongPresenter(
 
         // Scale shadow to be visible at projection resolution
         val scaledShadow = Shadow(
-            color = Color.Black.copy(alpha = 0.9f),
-            offset = Offset(6f * scaleFactor, 6f * scaleFactor),
-            blurRadius = 12f * scaleFactor
+            color = songShadowColor.copy(alpha = songShadowAlpha),
+            offset = Offset(6f * scaleFactor * songShadowSizeMul, 6f * scaleFactor * songShadowSizeMul),
+            blurRadius = 12f * scaleFactor * songShadowSizeMul
         )
-        val titleTextStyleScaled = if (appSettings.songSettings.titleShadow)
+        val titleTextStyleScaled = if (ss.titleShadow)
             titleTextStyle.copy(shadow = scaledShadow) else titleTextStyle
-        val lyricsTextStyleScaled = if (appSettings.songSettings.lyricsShadow)
+        val lyricsTextStyleScaled = if (ss.lyricsShadow)
             lyricsTextStyle.copy(shadow = scaledShadow) else lyricsTextStyle
-        val songNumberTextStyleScaled = if (appSettings.songSettings.songNumberShadow)
+        val songNumberTextStyleScaled = if (ss.songNumberShadow)
             songNumberTextStyle.copy(shadow = scaledShadow) else songNumberTextStyle
 
         val scaledTitleFontSize = (appSettings.songSettings.titleFontSize * scaleFactor).sp
@@ -443,54 +436,10 @@ fun SongPresenter(
                 }
             }
 
-            // Resolve animation from appSettings — no params needed from caller
-            val animationType = when (appSettings.songSettings.animationType) {
-                Constants.ANIMATION_FADE -> AnimationType.FADE
-                Constants.ANIMATION_SLIDE_LEFT -> AnimationType.SLIDE_LEFT
-                Constants.ANIMATION_SLIDE_RIGHT -> AnimationType.SLIDE_RIGHT
-                Constants.ANIMATION_NONE -> AnimationType.NONE
-                else -> AnimationType.CROSSFADE
-            }
-            val transitionDuration = appSettings.songSettings.transitionDuration.toInt()
-
-            when (animationType) {
-                AnimationType.CROSSFADE -> Crossfade(
-                    targetState = lyricSection,
-                    animationSpec = tween(transitionDuration),
-                    label = "SongCrossfade"
-                ) { TextContent(it) }
-
-                AnimationType.FADE -> AnimatedContent(
-                    targetState = lyricSection,
-                    transitionSpec = { fadeIn(tween(transitionDuration)) togetherWith fadeOut(tween(transitionDuration)) },
-                    label = "SongFade"
-                ) { TextContent(it) }
-
-                AnimationType.SLIDE_LEFT -> AnimatedContent(
-                    targetState = lyricSection,
-                    transitionSpec = {
-                        slideInHorizontally(tween(transitionDuration)) { it } togetherWith slideOutHorizontally(
-                            tween(
-                                transitionDuration
-                            )
-                        ) { -it }
-                    },
-                    label = "SongSlideLeft"
-                ) { TextContent(it) }
-
-                AnimationType.SLIDE_RIGHT -> AnimatedContent(
-                    targetState = lyricSection,
-                    transitionSpec = {
-                        slideInHorizontally(tween(transitionDuration)) { -it } togetherWith slideOutHorizontally(
-                            tween(
-                                transitionDuration
-                            )
-                        ) { it }
-                    },
-                    label = "SongSlideRight"
-                ) { TextContent(it) }
-
-                AnimationType.NONE -> TextContent(lyricSection)
+            // Animation is driven centrally via shared transitionAlpha so all
+            // presenter windows fade in/out in perfect sync.
+            Box(modifier = Modifier.alpha(transitionAlpha)) {
+                TextContent(lyricSection)
             }
         }
     }

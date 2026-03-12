@@ -1,15 +1,11 @@
 package org.churchpresenter.app.churchpresenter.presenter
 
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -45,6 +41,7 @@ fun AnnouncementsPresenter(
     text: String,
     appSettings: AppSettings,
     outputRole: String = Constants.OUTPUT_ROLE_NORMAL,
+    transitionAlpha: Float = 1f,
 ) {
     val isFillOrKey = outputRole == Constants.OUTPUT_ROLE_FILL || outputRole == Constants.OUTPUT_ROLE_KEY
     val settings   = appSettings.announcementsSettings
@@ -125,6 +122,7 @@ fun AnnouncementsPresenter(
         modifier = modifier
             .fillMaxSize()
             .background(Color.Transparent)
+            .graphicsLayer { alpha = transitionAlpha }
     ) {
         if (isDirectional) {
             key(scrollDurationMs, movesPositive, settings.animationType) {
@@ -157,24 +155,8 @@ fun AnnouncementsPresenter(
                     ) { textBlock(false) }
                 }
             }
-        } else if (settings.animationType == Constants.ANIMATION_FADE) {
-            val fadeDuration = settings.animationDuration.coerceAtLeast(50)
-            AnimatedContent(
-                targetState = text,
-                transitionSpec = {
-                    fadeIn(tween(fadeDuration)) togetherWith fadeOut(tween(fadeDuration))
-                },
-                modifier = Modifier.fillMaxSize(),
-                label = "presenterFade"
-            ) { _ ->
-                val boxAlignment = positionToAlignment(settings.position)
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = boxAlignment
-                ) { textBlock(false) }
-            }
         } else {
-            // NONE — static, respect position
+            // Static or fade — animation driven centrally via transitionAlpha
             val boxAlignment = positionToAlignment(settings.position)
             Box(
                 modifier = Modifier.fillMaxSize(),

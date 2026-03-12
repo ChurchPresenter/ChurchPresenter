@@ -128,16 +128,19 @@ private fun SingleDisplayPreview(
     modifier: Modifier = Modifier
 ) {
     val presentingMode by presenterManager.presentingMode
-    val selectedVerses by presenterManager.selectedVerses
-    val lyricSection by presenterManager.lyricSection
-    val selectedImagePath by presenterManager.selectedImagePath
-    val selectedSlide by presenterManager.selectedSlide
+    val displayedVerses by presenterManager.displayedVerses
+    val bibleTransitionAlpha by presenterManager.bibleTransitionAlpha
+    val displayedLyricSection by presenterManager.displayedLyricSection
+    val songTransitionAlpha by presenterManager.songTransitionAlpha
+    val displayedImagePath by presenterManager.displayedImagePath
+    val pictureTransitionAlpha by presenterManager.pictureTransitionAlpha
+    val displayedSlide by presenterManager.displayedSlide
+    val slideTransitionAlpha by presenterManager.slideTransitionAlpha
     val lottieJsonContent by presenterManager.lottieJsonContent
-    val lottiePauseAtFrame by presenterManager.lottiePauseAtFrame
-    val lottiePauseFrame by presenterManager.lottiePauseFrame
-    val lottiePauseDurationMs by presenterManager.lottiePauseDurationMs
-    val lottieTrigger by presenterManager.lottieTrigger
-    val announcementText by presenterManager.announcementText
+    val lottieProgress by presenterManager.lottieProgress
+    val displayedAnnouncementText by presenterManager.displayedAnnouncementText
+    val announcementTransitionAlpha by presenterManager.announcementTransitionAlpha
+    val mediaTransitionAlpha by presenterManager.mediaTransitionAlpha
     val websiteUrl by presenterManager.websiteUrl
     val webSnapshot by presenterManager.webSnapshot
     val mediaViewModel = LocalMediaViewModel.current
@@ -175,40 +178,40 @@ private fun SingleDisplayPreview(
                         when (presentingMode) {
                             Presenting.BIBLE ->
                                 BiblePresenter(
-                                    selectedVerses = selectedVerses,
+                                    selectedVerses = displayedVerses,
                                     appSettings = appSettings,
                                     isLowerThird = isLowerThird,
-                                    outputRole = primaryRole
+                                    outputRole = primaryRole,
+                                    transitionAlpha = bibleTransitionAlpha
                                 )
                             Presenting.LYRICS ->
                                 SongPresenter(
-                                    lyricSection = lyricSection,
+                                    lyricSection = displayedLyricSection,
                                     appSettings = appSettings,
                                     isLowerThird = isLowerThird,
-                                    outputRole = primaryRole
+                                    outputRole = primaryRole,
+                                    transitionAlpha = songTransitionAlpha
                                 )
                             Presenting.PICTURES ->
-                                PicturePresenter(imagePath = selectedImagePath)
+                                PicturePresenter(imagePath = displayedImagePath, transitionAlpha = pictureTransitionAlpha)
                             Presenting.PRESENTATION ->
-                                SlidePresenter(slide = selectedSlide)
+                                SlidePresenter(slide = displayedSlide, transitionAlpha = slideTransitionAlpha)
                             Presenting.MEDIA ->
                                 if (mediaViewModel != null && !mediaViewModel.isAudioFile) {
-                                    MediaPresenter(modifier = Modifier.fillMaxSize(), audioEnabled = false)
+                                    MediaPresenter(modifier = Modifier.fillMaxSize(), audioEnabled = false, transitionAlpha = mediaTransitionAlpha)
                                 }
                             Presenting.LOWER_THIRD ->
                                 LowerThirdPresenter(
                                     jsonContent = lottieJsonContent,
-                                    pauseAtFrame = lottiePauseAtFrame,
-                                    pauseFrame = lottiePauseFrame,
-                                    pauseDurationMs = lottiePauseDurationMs,
-                                    trigger = lottieTrigger,
+                                    progress = lottieProgress,
                                     appSettings = appSettings
                                 )
                             Presenting.ANNOUNCEMENTS ->
                                 AnnouncementsPresenter(
-                                    text = announcementText,
+                                    text = displayedAnnouncementText,
                                     appSettings = appSettings,
-                                    outputRole = primaryRole
+                                    outputRole = primaryRole,
+                                    transitionAlpha = announcementTransitionAlpha
                                 )
                             else -> {}
                         }

@@ -95,6 +95,11 @@ data class SongSettings(
     val marginLeft: Int = 96,
     val marginRight: Int = 96,
 
+    // Shadow customization
+    val shadowColor: String = "#000000",
+    val shadowSize: Int = 100,      // percentage multiplier for offset & blur (10–500)
+    val shadowOpacity: Int = 90,    // percentage for shadow alpha (10–100)
+
     // Transition animation
     val animationType: String = Constants.NONE,
     val transitionDuration: Float = 500f
@@ -122,53 +127,79 @@ data class BibleSettings(
     val primaryBibleFontType: String = "Arial",
     val primaryBibleFontSize: Int = 70,
     val primaryBibleLowerThirdFontSize: Int = 32,
-    val primaryBibleHorizontalAlignment: String = Constants.CENTER,
-    val primaryBibleLowerThirdHorizontalAlignment: String = Constants.CENTER,
+    val primaryBibleHorizontalAlignment: String = Constants.LEFT,
+    val primaryBibleLowerThirdHorizontalAlignment: String = Constants.LEFT,
     val primaryBibleBold: Boolean = false,
     val primaryBibleItalic: Boolean = false,
     val primaryBibleUnderline: Boolean = false,
     val primaryBibleShadow: Boolean = false,
+    val primaryBibleLowerThirdColor: String = "#FFFFFF",
+    val primaryBibleLowerThirdFontType: String = "Arial",
+    val primaryBibleLowerThirdBold: Boolean = false,
+    val primaryBibleLowerThirdItalic: Boolean = false,
+    val primaryBibleLowerThirdUnderline: Boolean = false,
+    val primaryBibleLowerThirdShadow: Boolean = false,
 
     // Primary Bible book reference
     val primaryReferenceColor: String = "#FFFFFF",
     val primaryReferenceFontType: String = "Arial",
     val primaryReferenceFontSize: Int = 70,
     val primaryReferenceLowerThirdFontSize: Int = 24,
-    val primaryReferencePosition: String = "Above", // "Above" or "Below"
-    val primaryReferenceHorizontalAlignment: String = Constants.CENTER,
-    val primaryReferenceLowerThirdHorizontalAlignment: String = Constants.CENTER,
+    val primaryReferencePosition: String = "Below", // "Above" or "Below"
+    val primaryReferenceLowerThirdPosition: String = "Below",
+    val primaryReferenceHorizontalAlignment: String = Constants.RIGHT,
+    val primaryReferenceLowerThirdHorizontalAlignment: String = Constants.RIGHT,
     val primaryShowAbbreviation: Boolean = false,
     val primaryReferenceBold: Boolean = false,
     val primaryReferenceItalic: Boolean = false,
     val primaryReferenceUnderline: Boolean = false,
     val primaryReferenceShadow: Boolean = false,
+    val primaryReferenceLowerThirdColor: String = "#FFFFFF",
+    val primaryReferenceLowerThirdFontType: String = "Arial",
+    val primaryReferenceLowerThirdBold: Boolean = false,
+    val primaryReferenceLowerThirdItalic: Boolean = false,
+    val primaryReferenceLowerThirdUnderline: Boolean = false,
+    val primaryReferenceLowerThirdShadow: Boolean = false,
 
     // Secondary Bible text
     val secondaryBibleColor: String = "#FFFFFF",
     val secondaryBibleFontType: String = "Arial",
     val secondaryBibleFontSize: Int = 70,
     val secondaryBibleLowerThirdFontSize: Int = 28,
-    val secondaryBibleHorizontalAlignment: String = Constants.CENTER,
-    val secondaryBibleLowerThirdHorizontalAlignment: String = Constants.CENTER,
+    val secondaryBibleHorizontalAlignment: String = Constants.LEFT,
+    val secondaryBibleLowerThirdHorizontalAlignment: String = Constants.LEFT,
     val secondaryBibleLowerThirdEnabled: Boolean = true,
     val secondaryBibleBold: Boolean = false,
     val secondaryBibleItalic: Boolean = false,
     val secondaryBibleUnderline: Boolean = false,
     val secondaryBibleShadow: Boolean = false,
+    val secondaryBibleLowerThirdColor: String = "#FFFFFF",
+    val secondaryBibleLowerThirdFontType: String = "Arial",
+    val secondaryBibleLowerThirdBold: Boolean = false,
+    val secondaryBibleLowerThirdItalic: Boolean = false,
+    val secondaryBibleLowerThirdUnderline: Boolean = false,
+    val secondaryBibleLowerThirdShadow: Boolean = false,
 
     // Secondary Bible book reference
     val secondaryReferenceColor: String = "#FFFFFF",
     val secondaryReferenceFontType: String = "Arial",
     val secondaryReferenceFontSize: Int = 70,
     val secondaryReferenceLowerThirdFontSize: Int = 24,
-    val secondaryReferencePosition: String = "Above", // "Above" or "Below"
-    val secondaryReferenceHorizontalAlignment: String = Constants.CENTER,
-    val secondaryReferenceLowerThirdHorizontalAlignment: String = Constants.CENTER,
+    val secondaryReferencePosition: String = "Below", // "Above" or "Below"
+    val secondaryReferenceLowerThirdPosition: String = "Below",
+    val secondaryReferenceHorizontalAlignment: String = Constants.RIGHT,
+    val secondaryReferenceLowerThirdHorizontalAlignment: String = Constants.RIGHT,
     val secondaryShowAbbreviation: Boolean = false,
     val secondaryReferenceBold: Boolean = false,
     val secondaryReferenceItalic: Boolean = false,
     val secondaryReferenceUnderline: Boolean = false,
     val secondaryReferenceShadow: Boolean = false,
+    val secondaryReferenceLowerThirdColor: String = "#FFFFFF",
+    val secondaryReferenceLowerThirdFontType: String = "Arial",
+    val secondaryReferenceLowerThirdBold: Boolean = false,
+    val secondaryReferenceLowerThirdItalic: Boolean = false,
+    val secondaryReferenceLowerThirdUnderline: Boolean = false,
+    val secondaryReferenceLowerThirdShadow: Boolean = false,
 
     // Language for captions
     val captionLanguage: String = "Interface", // "Interface" or "Database"
@@ -178,6 +209,15 @@ data class BibleSettings(
     val marginBottom: Int = 54,
     val marginLeft: Int = 96,
     val marginRight: Int = 96,
+
+    // Shadow customization — fullscreen
+    val shadowColor: String = "#000000",
+    val shadowSize: Int = 100,      // percentage multiplier for offset & blur (10–500)
+    val shadowOpacity: Int = 90,    // percentage for shadow alpha (10–100)
+    // Shadow customization — lower third
+    val lowerThirdShadowColor: String = "#000000",
+    val lowerThirdShadowSize: Int = 100,
+    val lowerThirdShadowOpacity: Int = 90,
 
     // Transition animation
     val animationType: String = Constants.ANIMATION_CROSSFADE,
@@ -197,11 +237,18 @@ data class BibleSettings(
         primaryBibleItalic = secondaryBibleItalic,
         primaryBibleUnderline = secondaryBibleUnderline,
         primaryBibleShadow = secondaryBibleShadow,
+        primaryBibleLowerThirdColor = secondaryBibleLowerThirdColor,
+        primaryBibleLowerThirdFontType = secondaryBibleLowerThirdFontType,
+        primaryBibleLowerThirdBold = secondaryBibleLowerThirdBold,
+        primaryBibleLowerThirdItalic = secondaryBibleLowerThirdItalic,
+        primaryBibleLowerThirdUnderline = secondaryBibleLowerThirdUnderline,
+        primaryBibleLowerThirdShadow = secondaryBibleLowerThirdShadow,
         primaryReferenceColor = secondaryReferenceColor,
         primaryReferenceFontType = secondaryReferenceFontType,
         primaryReferenceFontSize = secondaryReferenceFontSize,
         primaryReferenceLowerThirdFontSize = secondaryReferenceLowerThirdFontSize,
         primaryReferencePosition = secondaryReferencePosition,
+        primaryReferenceLowerThirdPosition = secondaryReferenceLowerThirdPosition,
         primaryReferenceHorizontalAlignment = secondaryReferenceHorizontalAlignment,
         primaryReferenceLowerThirdHorizontalAlignment = secondaryReferenceLowerThirdHorizontalAlignment,
         primaryShowAbbreviation = secondaryShowAbbreviation,
@@ -209,6 +256,12 @@ data class BibleSettings(
         primaryReferenceItalic = secondaryReferenceItalic,
         primaryReferenceUnderline = secondaryReferenceUnderline,
         primaryReferenceShadow = secondaryReferenceShadow,
+        primaryReferenceLowerThirdColor = secondaryReferenceLowerThirdColor,
+        primaryReferenceLowerThirdFontType = secondaryReferenceLowerThirdFontType,
+        primaryReferenceLowerThirdBold = secondaryReferenceLowerThirdBold,
+        primaryReferenceLowerThirdItalic = secondaryReferenceLowerThirdItalic,
+        primaryReferenceLowerThirdUnderline = secondaryReferenceLowerThirdUnderline,
+        primaryReferenceLowerThirdShadow = secondaryReferenceLowerThirdShadow,
         secondaryBibleColor = primaryBibleColor,
         secondaryBibleFontType = primaryBibleFontType,
         secondaryBibleFontSize = primaryBibleFontSize,
@@ -219,11 +272,18 @@ data class BibleSettings(
         secondaryBibleItalic = primaryBibleItalic,
         secondaryBibleUnderline = primaryBibleUnderline,
         secondaryBibleShadow = primaryBibleShadow,
+        secondaryBibleLowerThirdColor = primaryBibleLowerThirdColor,
+        secondaryBibleLowerThirdFontType = primaryBibleLowerThirdFontType,
+        secondaryBibleLowerThirdBold = primaryBibleLowerThirdBold,
+        secondaryBibleLowerThirdItalic = primaryBibleLowerThirdItalic,
+        secondaryBibleLowerThirdUnderline = primaryBibleLowerThirdUnderline,
+        secondaryBibleLowerThirdShadow = primaryBibleLowerThirdShadow,
         secondaryReferenceColor = primaryReferenceColor,
         secondaryReferenceFontType = primaryReferenceFontType,
         secondaryReferenceFontSize = primaryReferenceFontSize,
         secondaryReferenceLowerThirdFontSize = primaryReferenceLowerThirdFontSize,
         secondaryReferencePosition = primaryReferencePosition,
+        secondaryReferenceLowerThirdPosition = primaryReferenceLowerThirdPosition,
         secondaryReferenceHorizontalAlignment = primaryReferenceHorizontalAlignment,
         secondaryReferenceLowerThirdHorizontalAlignment = primaryReferenceLowerThirdHorizontalAlignment,
         secondaryShowAbbreviation = primaryShowAbbreviation,
@@ -231,6 +291,12 @@ data class BibleSettings(
         secondaryReferenceItalic = primaryReferenceItalic,
         secondaryReferenceUnderline = primaryReferenceUnderline,
         secondaryReferenceShadow = primaryReferenceShadow,
+        secondaryReferenceLowerThirdColor = primaryReferenceLowerThirdColor,
+        secondaryReferenceLowerThirdFontType = primaryReferenceLowerThirdFontType,
+        secondaryReferenceLowerThirdBold = primaryReferenceLowerThirdBold,
+        secondaryReferenceLowerThirdItalic = primaryReferenceLowerThirdItalic,
+        secondaryReferenceLowerThirdUnderline = primaryReferenceLowerThirdUnderline,
+        secondaryReferenceLowerThirdShadow = primaryReferenceLowerThirdShadow,
     )
 }
 
@@ -373,7 +439,7 @@ data class AppSettings(
     val mediaStorageDirectory: String = "",
     val schedulePanelWidthDp: Int = 280,
     val previewPanelWidthDp: Int = 280,
-    val theme: String = Constants.LIGHT,
+    val theme: String = Constants.SYSTEM,
     val language: String = "en",
     val licenseAccepted: Boolean = false,
     val webBookmarks: List<WebBookmark> = emptyList(),

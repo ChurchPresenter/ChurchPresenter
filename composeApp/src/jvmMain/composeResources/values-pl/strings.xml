@@ -51,6 +51,9 @@
     <string name="tooltip_italic">Kursywa</string>
     <string name="tooltip_underline">Podkreślenie</string>
     <string name="tooltip_shadow">Cień</string>
+    <string name="shadow_settings">Cień</string>
+    <string name="shadow_size">Rozmiar (%)</string>
+    <string name="shadow_opacity">Intensywność (%)</string>
     <string name="announcements">Ogłoszenia</string>
     <string name="menu_file">Plik</string>
     <string name="menu_new_schedule">Nowy program</string>
@@ -684,6 +687,7 @@
     <string name="timer_title">Minutnik</string>
     <string name="tooltip_add_website">Dodaj stronę internetową</string>
     <string name="tooltip_clear_display">Wyczyść wyświetlacz</string>
+    <string name="tooltip_toggle_displays">Przełącz ekrany prezentacji</string>
     <string name="tooltip_collapse_schedule">Zwiń program</string>
     <string name="tooltip_expand_schedule">Rozwiń program</string>
     <string name="tooltip_theme_dark">Ciemny motyw</string>
