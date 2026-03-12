@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.draw.alpha
 import org.churchpresenter.app.churchpresenter.composables.LoopingVideoBackground
 import org.churchpresenter.app.churchpresenter.composables.keySignal
 import org.churchpresenter.app.churchpresenter.data.AppSettings
@@ -36,6 +37,7 @@ fun PresenterScreen(
     val bgColorHex = if (isLowerThird) bgSettings.defaultLowerThirdBackgroundColor else bgSettings.defaultBackgroundColor
     val bgImagePath = if (isLowerThird) bgSettings.defaultLowerThirdBackgroundImage else bgSettings.defaultBackgroundImage
     val bgVideoPath = if (isLowerThird) bgSettings.defaultLowerThirdBackgroundVideo else bgSettings.defaultBackgroundVideo
+    val bgOpacity = if (isLowerThird) bgSettings.defaultLowerThirdBackgroundOpacity else bgSettings.defaultBackgroundOpacity
     val backgroundColor = if (isFillOrKey) Color.Black else parseHexColor(bgColorHex)
 
     val backgroundImageBitmap = remember(bgType, bgImagePath, isFillOrKey) {
@@ -65,7 +67,7 @@ fun PresenterScreen(
                                 painter = BitmapPainter(backgroundImageBitmap),
                                 contentDescription = null,
                                 contentScale = ContentScale.Crop,
-                                modifier = Modifier.fillMaxSize()
+                                modifier = Modifier.fillMaxSize().alpha(bgOpacity)
                             )
                         }
                     } else {
@@ -75,11 +77,11 @@ fun PresenterScreen(
                 Constants.BACKGROUND_VIDEO -> {
                     LoopingVideoBackground(
                         videoPath = bgVideoPath,
-                        modifier = Modifier.fillMaxSize()
+                        modifier = Modifier.fillMaxSize().alpha(bgOpacity)
                     )
                 }
                 else -> {
-                    Box(modifier = Modifier.fillMaxSize().background(backgroundColor))
+                    Box(modifier = Modifier.fillMaxSize().background(backgroundColor.copy(alpha = bgOpacity)))
                 }
             }
         }

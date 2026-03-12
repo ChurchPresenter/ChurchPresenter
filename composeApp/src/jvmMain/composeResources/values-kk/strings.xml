@@ -54,6 +54,9 @@
     <string name="shadow_settings">Көлеңке</string>
     <string name="shadow_size">Өлшемі (%)</string>
     <string name="shadow_opacity">Қарқындылығы (%)</string>
+    <string name="hold_live">Эфірді ұстау</string>
+    <string name="fade_in">Біртіндеп пайда болу</string>
+    <string name="fade_out">Біртіндеп жоғалу</string>
     <string name="announcements">Хабарландырулар</string>
     <string name="menu_file">Файл</string>
     <string name="menu_new_schedule">Жаңа бағдарлама</string>

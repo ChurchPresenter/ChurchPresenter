@@ -65,6 +65,9 @@
     <string name="shadow_settings">Shadow</string>
     <string name="shadow_size">Size (%)</string>
     <string name="shadow_opacity">Intensity (%)</string>
+    <string name="hold_live">Hold Live</string>
+    <string name="fade_in">Fade In</string>
+    <string name="fade_out">Fade Out</string>
     <string name="menu_file">File</string>
     <string name="menu_new_schedule">New Schedule</string>
     <string name="menu_open_schedule">Open Schedule</string>

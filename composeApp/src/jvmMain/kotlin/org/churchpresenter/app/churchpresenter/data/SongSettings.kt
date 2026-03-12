@@ -9,6 +9,7 @@ data class BackgroundConfig(
     val backgroundColor: String = "#000000", // Black
     val backgroundImage: String = "",
     val backgroundVideo: String = "",
+    val backgroundOpacity: Float = 1.0f,
     val gradientEnabled: Boolean = false,
     val gradientTopColor: String = "#000000",
     val gradientTopOpacity: Float = 0.0f,
@@ -26,7 +27,9 @@ data class BackgroundSettings(
     val defaultLowerThirdBackgroundColor: String = "#000000",
     val defaultLowerThirdBackgroundImage: String = "",
     val defaultLowerThirdBackgroundVideo: String = "",
+    val defaultBackgroundOpacity: Float = 1.0f,
     val defaultLowerThirdBackgroundType: String = Constants.BACKGROUND_COLOR,
+    val defaultLowerThirdBackgroundOpacity: Float = 1.0f,
     val bibleBackground: BackgroundConfig = BackgroundConfig(),
     val bibleLowerThirdBackground: BackgroundConfig = BackgroundConfig(),
     val songBackground: BackgroundConfig = BackgroundConfig(),
@@ -101,7 +104,8 @@ data class SongSettings(
     val shadowOpacity: Int = 90,    // percentage for shadow alpha (10–100)
 
     // Transition animation
-    val animationType: String = Constants.NONE,
+    val fadeIn: Boolean = true,
+    val fadeOut: Boolean = true,
     val transitionDuration: Float = 500f
 )
 
@@ -220,7 +224,8 @@ data class BibleSettings(
     val lowerThirdShadowOpacity: Int = 90,
 
     // Transition animation
-    val animationType: String = Constants.ANIMATION_CROSSFADE,
+    val fadeIn: Boolean = true,
+    val fadeOut: Boolean = true,
     val transitionDuration: Float = 500f
 ) {
     /** Returns a copy with primary and secondary bible settings swapped. */

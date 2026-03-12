@@ -552,7 +552,8 @@ fun MainDesktop(
                                 selectedVerseItem = selectedBibleVerseItem,
                                 onVerseSelected = onVerseSelected,
                                 onPresenting = presenting,
-                                isPresenting = presentingMode == Presenting.BIBLE
+                                isPresenting = presentingMode == Presenting.BIBLE,
+                                presenterManager = presenterManager
                             )
 
                             Tabs.SONGS -> SongsTab(

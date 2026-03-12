@@ -54,6 +54,9 @@
     <string name="shadow_settings">Schatten</string>
     <string name="shadow_size">Größe (%)</string>
     <string name="shadow_opacity">Intensität (%)</string>
+    <string name="hold_live">Live halten</string>
+    <string name="fade_in">Einblenden</string>
+    <string name="fade_out">Ausblenden</string>
     <string name="announcements">Ankündigungen</string>
     <string name="menu_file">Datei</string>
     <string name="menu_new_schedule">Neues Programm</string>
