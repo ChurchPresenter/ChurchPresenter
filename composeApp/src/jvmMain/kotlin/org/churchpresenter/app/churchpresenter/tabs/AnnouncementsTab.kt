@@ -1,6 +1,7 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.LinearEasing
@@ -33,6 +34,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -109,6 +111,7 @@ import churchpresenter.composeapp.generated.resources.top_right
 import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
 import org.churchpresenter.app.churchpresenter.composables.FontSettingsDropdown
 import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
+import org.churchpresenter.app.churchpresenter.composables.ShadowDetailRow
 import org.churchpresenter.app.churchpresenter.composables.TextStyleButtons
 import org.churchpresenter.app.churchpresenter.data.AnnouncementsSettings
 import org.churchpresenter.app.churchpresenter.data.AppSettings
@@ -281,7 +284,40 @@ fun AnnouncementsTab(
                         }
                     }
 
-                    // Font type + size + style + colors
+                    // Color + style row (matches Bible settings layout)
+                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            ColorPickerField(
+                                color = viewModel.textColor,
+                                onColorChange = {
+                                    viewModel.setTextColor(it)
+                                    viewModel.saveToSettings(onSettingsChange)
+                                }
+                            )
+                            TextStyleButtons(
+                                bold      = viewModel.bold,
+                                italic    = viewModel.italic,
+                                underline = viewModel.underline,
+                                shadow    = viewModel.shadow,
+                                onBoldChange      = { viewModel.setBold(it);      viewModel.saveToSettings(onSettingsChange) },
+                                onItalicChange    = { viewModel.setItalic(it);    viewModel.saveToSettings(onSettingsChange) },
+                                onUnderlineChange = { viewModel.setUnderline(it); viewModel.saveToSettings(onSettingsChange) },
+                                onShadowChange    = { viewModel.setShadow(it);    viewModel.saveToSettings(onSettingsChange) }
+                            )
+                        }
+                        AnimatedVisibility(visible = viewModel.shadow) {
+                            ShadowDetailRow(
+                                shadowColor = appSettings.announcementsSettings.shadowColor,
+                                shadowSize = appSettings.announcementsSettings.shadowSize,
+                                shadowOpacity = appSettings.announcementsSettings.shadowOpacity,
+                                onColorChange = { c -> onSettingsChange { s -> s.copy(announcementsSettings = s.announcementsSettings.copy(shadowColor = c)) } },
+                                onSizeChange = { v -> onSettingsChange { s -> s.copy(announcementsSettings = s.announcementsSettings.copy(shadowSize = v)) } },
+                                onOpacityChange = { v -> onSettingsChange { s -> s.copy(announcementsSettings = s.announcementsSettings.copy(shadowOpacity = v)) } },
+                            )
+                        }
+                    }
+
+                    // Font type + size
                     @OptIn(ExperimentalLayoutApi::class)
                     FlowRow(
                         modifier = Modifier.fillMaxWidth(),
@@ -312,30 +348,11 @@ fun AnnouncementsTab(
                                 }
                             )
                         }
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            TextStyleButtons(
-                                bold      = viewModel.bold,
-                                italic    = viewModel.italic,
-                                underline = viewModel.underline,
-                                shadow    = viewModel.shadow,
-                                onBoldChange      = { viewModel.setBold(it);      viewModel.saveToSettings(onSettingsChange) },
-                                onItalicChange    = { viewModel.setItalic(it);    viewModel.saveToSettings(onSettingsChange) },
-                                onUnderlineChange = { viewModel.setUnderline(it); viewModel.saveToSettings(onSettingsChange) },
-                                onShadowChange    = { viewModel.setShadow(it);    viewModel.saveToSettings(onSettingsChange) }
-                            )
-                        }
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            SectionLabel(stringResource(Res.string.text_color))
-                            ColorPickerField(
-                                color = viewModel.textColor,
-                                onColorChange = {
-                                    viewModel.setTextColor(it)
-                                    viewModel.saveToSettings(onSettingsChange)
-                                }
-                            )
-                        }
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            SectionLabel(stringResource(Res.string.announcement_background_color_label))
+                    }
+
+                    // Background color
+                    Column(horizontalAlignment = Alignment.Start) {
+                        SectionLabel(stringResource(Res.string.announcement_background_color_label))
                             if (viewModel.backgroundColor == "transparent") {
                                 Button(
                                     onClick = {
@@ -376,14 +393,13 @@ fun AnnouncementsTab(
                                     )
                                 }
                             }
-                        }
                     }
 
                     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
                     // Position on screen
                     SectionLabel(stringResource(Res.string.position_on_screen))
-                    Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                    Column(verticalArrangement = Arrangement.spacedBy(3.dp), modifier = Modifier.widthIn(max = 400.dp)) {
                         positions.chunked(3).forEach { rowItems ->
                             Row(
                                 modifier = Modifier.fillMaxWidth(),

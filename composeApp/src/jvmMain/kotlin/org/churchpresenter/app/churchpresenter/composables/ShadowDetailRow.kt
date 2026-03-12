@@ -3,6 +3,7 @@ package org.churchpresenter.app.churchpresenter.composables
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -31,46 +32,51 @@ fun ShadowDetailRow(
     modifier: Modifier = Modifier
 ) {
     Row(
-        modifier = modifier,
-        horizontalArrangement = Arrangement.spacedBy(6.dp),
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.Start,
         verticalAlignment = Alignment.Top
     ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(
-                text = stringResource(Res.string.color),
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            ColorPickerField(
-                color = shadowColor,
-                onColorChange = onColorChange
-            )
-        }
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(
-                text = stringResource(Res.string.shadow_size),
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            NumberSettingsTextField(
-                modifier = Modifier.width(60.dp),
-                initialText = shadowSize,
-                onValueChange = onSizeChange,
-                range = 10..500
-            )
-        }
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(
-                text = stringResource(Res.string.shadow_opacity),
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            NumberSettingsTextField(
-                modifier = Modifier.width(60.dp),
-                initialText = shadowOpacity,
-                onValueChange = onOpacityChange,
-                range = 10..100
-            )
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            verticalAlignment = Alignment.Top
+        ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    text = stringResource(Res.string.color),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                ColorPickerField(
+                    color = shadowColor,
+                    onColorChange = onColorChange
+                )
+            }
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    text = stringResource(Res.string.shadow_size),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                NumberSettingsTextField(
+                    modifier = Modifier.width(60.dp),
+                    initialText = shadowSize,
+                    onValueChange = onSizeChange,
+                    range = 10..500
+                )
+            }
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    text = stringResource(Res.string.shadow_opacity),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                NumberSettingsTextField(
+                    modifier = Modifier.width(60.dp),
+                    initialText = shadowOpacity,
+                    onValueChange = onOpacityChange,
+                    range = 10..100
+                )
+            }
         }
     }
 }
