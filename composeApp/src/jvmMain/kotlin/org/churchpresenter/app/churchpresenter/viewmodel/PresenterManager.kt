@@ -26,6 +26,10 @@ class PresenterManager {
     private val _bibleTransitionAlpha = mutableStateOf(1f)
     val bibleTransitionAlpha: State<Float> = _bibleTransitionAlpha
 
+    // Hold mode — when active, verse selection changes are staged but not sent to display
+    private val _bibleHold = mutableStateOf(false)
+    val bibleHold: State<Boolean> = _bibleHold
+
     private val _lyricSection = mutableStateOf(LyricSection())
     val lyricSection: State<LyricSection> = _lyricSection
 
@@ -107,6 +111,10 @@ class PresenterManager {
 
     fun setBibleTransitionAlpha(alpha: Float) {
         _bibleTransitionAlpha.value = alpha
+    }
+
+    fun setBibleHold(hold: Boolean) {
+        _bibleHold.value = hold
     }
 
     fun setLyricSection(section: LyricSection) {

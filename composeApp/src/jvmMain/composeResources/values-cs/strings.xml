@@ -54,6 +54,9 @@
     <string name="shadow_settings">Stín</string>
     <string name="shadow_size">Velikost (%)</string>
     <string name="shadow_opacity">Intenzita (%)</string>
+    <string name="hold_live">Podržet živě</string>
+    <string name="fade_in">Postupné zobrazení</string>
+    <string name="fade_out">Postupné zmizení</string>
     <string name="announcements">Oznámení</string>
     <string name="menu_file">Soubor</string>
     <string name="menu_new_schedule">Nový program</string>

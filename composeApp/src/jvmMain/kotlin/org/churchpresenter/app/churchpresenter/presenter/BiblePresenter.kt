@@ -226,12 +226,14 @@ fun BiblePresenter(
     val effectiveImagePath: String
     val effectiveVideoPath: String
     var backgroundColor: Color
+    val effectiveOpacity: Float
 
     if (isFillOrKey) {
         effectiveType = Constants.BACKGROUND_COLOR
         effectiveImagePath = ""
         effectiveVideoPath = ""
         backgroundColor = Color.Black
+        effectiveOpacity = 1.0f
     } else if (bgConfig.backgroundType == Constants.BACKGROUND_DEFAULT) {
         val defaults = appSettings.backgroundSettings
         if (isLowerThird) {
@@ -239,17 +241,20 @@ fun BiblePresenter(
             effectiveImagePath = defaults.defaultLowerThirdBackgroundImage
             effectiveVideoPath = defaults.defaultLowerThirdBackgroundVideo
             backgroundColor = parseHexColor(defaults.defaultLowerThirdBackgroundColor)
+            effectiveOpacity = defaults.defaultLowerThirdBackgroundOpacity
         } else {
             effectiveType = defaults.defaultBackgroundType
             effectiveImagePath = defaults.defaultBackgroundImage
             effectiveVideoPath = defaults.defaultBackgroundVideo
             backgroundColor = parseHexColor(defaults.defaultBackgroundColor)
+            effectiveOpacity = defaults.defaultBackgroundOpacity
         }
     } else {
         effectiveType = bgConfig.backgroundType
         effectiveImagePath = bgConfig.backgroundImage
         effectiveVideoPath = bgConfig.backgroundVideo
         backgroundColor = parseHexColor(bgConfig.backgroundColor)
+        effectiveOpacity = bgConfig.backgroundOpacity
     }
 
     val backgroundImageBitmap = remember(effectiveType, effectiveImagePath, isLowerThird) {
@@ -271,13 +276,13 @@ fun BiblePresenter(
         effectiveType == Constants.BACKGROUND_GRADIENT -> Modifier
         useVideoBackground -> Modifier.background(Color.Black) // video rendered as overlay
         effectiveType == Constants.BACKGROUND_IMAGE && backgroundImageBitmap != null ->
-            Modifier.paint(painter = BitmapPainter(backgroundImageBitmap), contentScale = ContentScale.Crop)
+            Modifier.alpha(effectiveOpacity).paint(painter = BitmapPainter(backgroundImageBitmap), contentScale = ContentScale.Crop)
 
         effectiveType == Constants.BACKGROUND_IMAGE ->
             Modifier.background(Color.Black)
 
         else ->
-            Modifier.background(backgroundColor)
+            Modifier.background(backgroundColor.copy(alpha = effectiveOpacity))
     }
 
     BoxWithConstraints(
@@ -287,7 +292,7 @@ fun BiblePresenter(
         if (useVideoBackground && !isLowerThird) {
             LoopingVideoBackground(
                 videoPath = effectiveVideoPath,
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier.fillMaxSize().alpha(effectiveOpacity)
             )
         }
         val density = LocalDensity.current
@@ -343,11 +348,11 @@ fun BiblePresenter(
                         contentDescription = null,
                         contentScale = ContentScale.Crop,
                         alignment = Alignment.BottomCenter,
-                        modifier = Modifier.fillMaxSize()
+                        modifier = Modifier.fillMaxSize().alpha(effectiveOpacity)
                     )
                 }
                 if (useVideoBackground) {
-                    LoopingVideoBackground(videoPath = effectiveVideoPath, modifier = Modifier.fillMaxSize())
+                    LoopingVideoBackground(videoPath = effectiveVideoPath, modifier = Modifier.fillMaxSize().alpha(effectiveOpacity))
                 }
             }
             // Gradient overlay

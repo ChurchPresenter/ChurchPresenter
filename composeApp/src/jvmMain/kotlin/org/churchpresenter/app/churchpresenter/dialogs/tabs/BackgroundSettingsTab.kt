@@ -128,6 +128,11 @@ fun BackgroundSettingsTab(
                                 onColorChange = { viewModel.updateDefaultColor(it, onSettingsChange) }
                             )
                         }
+                        OpacitySlider(settings.backgroundSettings.defaultBackgroundOpacity) { opacity ->
+                            onSettingsChange { s ->
+                                s.copy(backgroundSettings = s.backgroundSettings.copy(defaultBackgroundOpacity = opacity))
+                            }
+                        }
                     }
                     Constants.BACKGROUND_IMAGE -> {
                         SettingRow(stringResource(Res.string.background_image)) {
@@ -141,6 +146,11 @@ fun BackgroundSettingsTab(
                                 modifier = Modifier.fillMaxWidth()
                             )
                         }
+                        OpacitySlider(settings.backgroundSettings.defaultBackgroundOpacity) { opacity ->
+                            onSettingsChange { s ->
+                                s.copy(backgroundSettings = s.backgroundSettings.copy(defaultBackgroundOpacity = opacity))
+                            }
+                        }
                     }
                     Constants.BACKGROUND_VIDEO -> {
                         SettingRow(stringResource(Res.string.background_video)) {
@@ -153,6 +163,11 @@ fun BackgroundSettingsTab(
                                 },
                                 modifier = Modifier.fillMaxWidth()
                             )
+                        }
+                        OpacitySlider(settings.backgroundSettings.defaultBackgroundOpacity) { opacity ->
+                            onSettingsChange { s ->
+                                s.copy(backgroundSettings = s.backgroundSettings.copy(defaultBackgroundOpacity = opacity))
+                            }
                         }
                     }
                 }
@@ -203,6 +218,11 @@ fun BackgroundSettingsTab(
                                 }
                             )
                         }
+                        OpacitySlider(settings.backgroundSettings.defaultLowerThirdBackgroundOpacity) { opacity ->
+                            onSettingsChange { s ->
+                                s.copy(backgroundSettings = s.backgroundSettings.copy(defaultLowerThirdBackgroundOpacity = opacity))
+                            }
+                        }
                     }
                     Constants.BACKGROUND_IMAGE -> {
                         SettingRow(stringResource(Res.string.background_image)) {
@@ -216,6 +236,11 @@ fun BackgroundSettingsTab(
                                 modifier = Modifier.fillMaxWidth()
                             )
                         }
+                        OpacitySlider(settings.backgroundSettings.defaultLowerThirdBackgroundOpacity) { opacity ->
+                            onSettingsChange { s ->
+                                s.copy(backgroundSettings = s.backgroundSettings.copy(defaultLowerThirdBackgroundOpacity = opacity))
+                            }
+                        }
                     }
                     Constants.BACKGROUND_VIDEO -> {
                         SettingRow(stringResource(Res.string.background_video)) {
@@ -228,6 +253,11 @@ fun BackgroundSettingsTab(
                                 },
                                 modifier = Modifier.fillMaxWidth()
                             )
+                        }
+                        OpacitySlider(settings.backgroundSettings.defaultLowerThirdBackgroundOpacity) { opacity ->
+                            onSettingsChange { s ->
+                                s.copy(backgroundSettings = s.backgroundSettings.copy(defaultLowerThirdBackgroundOpacity = opacity))
+                            }
                         }
                     }
                 }
@@ -359,6 +389,7 @@ private fun BackgroundColumn(
                     onColorChange = { onConfigChange(config.copy(backgroundColor = it)) }
                 )
             }
+            OpacitySlider(config.backgroundOpacity) { onConfigChange(config.copy(backgroundOpacity = it)) }
         }
         Constants.BACKGROUND_IMAGE -> {
             SettingRow(stringResource(Res.string.background_image)) {
@@ -368,6 +399,7 @@ private fun BackgroundColumn(
                     modifier = Modifier.fillMaxWidth()
                 )
             }
+            OpacitySlider(config.backgroundOpacity) { onConfigChange(config.copy(backgroundOpacity = it)) }
         }
         Constants.BACKGROUND_VIDEO -> {
             SettingRow(stringResource(Res.string.background_video)) {
@@ -377,6 +409,7 @@ private fun BackgroundColumn(
                     modifier = Modifier.fillMaxWidth()
                 )
             }
+            OpacitySlider(config.backgroundOpacity) { onConfigChange(config.copy(backgroundOpacity = it)) }
         }
         else -> {
             // Default — nothing extra to show
@@ -495,6 +528,21 @@ private fun SectionHeader(title: String) {
             modifier = Modifier.padding(bottom = 6.dp)
         )
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant, thickness = 1.dp)
+    }
+}
+
+@Composable
+private fun OpacitySlider(
+    value: Float,
+    onValueChange: (Float) -> Unit
+) {
+    SettingRow("${stringResource(Res.string.gradient_opacity)}: ${(value * 100).toInt()}%") {
+        Slider(
+            value = value,
+            onValueChange = onValueChange,
+            valueRange = 0f..1f,
+            modifier = Modifier.fillMaxWidth()
+        )
     }
 }
 

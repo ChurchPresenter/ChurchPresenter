@@ -54,6 +54,9 @@
     <string name="shadow_settings">Тень</string>
     <string name="shadow_size">Размер (%)</string>
     <string name="shadow_opacity">Интенсивность (%)</string>
+    <string name="hold_live">Удержать эфир</string>
+    <string name="fade_in">Плавное появление</string>
+    <string name="fade_out">Плавное исчезание</string>
     <string name="announcements">Объявления</string>
     <string name="menu_file">Файл</string>
     <string name="menu_new_schedule">Новая программа</string>

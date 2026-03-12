@@ -85,6 +85,7 @@ import churchpresenter.composeapp.generated.resources.primary_bible
 import churchpresenter.composeapp.generated.resources.secondary_bible
 import churchpresenter.composeapp.generated.resources.scope
 import churchpresenter.composeapp.generated.resources.search
+import churchpresenter.composeapp.generated.resources.hold_live
 import churchpresenter.composeapp.generated.resources.multi_verse
 import churchpresenter.composeapp.generated.resources.swap_bibles
 import churchpresenter.composeapp.generated.resources.verse
@@ -96,6 +97,7 @@ import org.churchpresenter.app.churchpresenter.models.ScheduleItem
 import org.churchpresenter.app.churchpresenter.models.SelectedVerse
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.viewmodel.BibleViewModel
+import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
@@ -111,6 +113,7 @@ fun BibleTab(
     onVerseSelected: (List<SelectedVerse>) -> Unit = {},
     onPresenting: (Presenting) -> Unit = { Presenting.NONE },
     isPresenting: Boolean = false,
+    presenterManager: PresenterManager? = null,
 ) {
     // Update settings when bible paths change
     val isFirstComposition = remember { mutableStateOf(true) }
@@ -441,6 +444,25 @@ fun BibleTab(
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+                    if (presenterManager != null) {
+                        val holdLive by presenterManager.bibleHold
+                        Button(
+                            onClick = { presenterManager.setBibleHold(!holdLive) },
+                            modifier = Modifier.wrapContentSize().padding(end = 8.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = if (holdLive) MaterialTheme.colorScheme.error
+                                else MaterialTheme.colorScheme.surfaceVariant
+                            )
+                        ) {
+                            Text(
+                                text = stringResource(Res.string.hold_live),
+                                style = MaterialTheme.typography.labelMedium,
+                                color = if (holdLive) MaterialTheme.colorScheme.onError
+                                else MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 1
+                            )
+                        }
+                    }
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Checkbox(
                             checked = multiVerseEnabled,

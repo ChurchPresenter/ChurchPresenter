@@ -573,47 +573,63 @@ private fun PresenterWindows(
     val proj = appSettings.projectionSettings
 
     // Centralized Bible transition: one animation drives all windows so they stay in sync
-    LaunchedEffect(selectedVerses) {
-        if (presenterManager.displayedVerses.value.isEmpty() ||
-            appSettings.bibleSettings.animationType == Constants.ANIMATION_NONE
-        ) {
-            // First load or no animation — show immediately
+    // When hold is active, skip updating displayedVerses so the user can browse freely
+    val bibleHold by presenterManager.bibleHold
+    LaunchedEffect(selectedVerses, bibleHold) {
+        if (bibleHold) return@LaunchedEffect
+        val bs = appSettings.bibleSettings
+        if (presenterManager.displayedVerses.value.isEmpty() || (!bs.fadeIn && !bs.fadeOut)) {
             presenterManager.setDisplayedVerses(selectedVerses)
             presenterManager.setBibleTransitionAlpha(1f)
         } else {
-            val duration = appSettings.bibleSettings.transitionDuration.toInt()
-            val halfDuration = duration / 2
-            // Fade out
+            val duration = bs.transitionDuration.toInt()
             val anim = androidx.compose.animation.core.Animatable(1f)
-            anim.animateTo(0f, androidx.compose.animation.core.tween(halfDuration)) {
-                presenterManager.setBibleTransitionAlpha(value)
+            // Fade out (or instant)
+            if (bs.fadeOut) {
+                anim.animateTo(0f, androidx.compose.animation.core.tween(duration / 2)) {
+                    presenterManager.setBibleTransitionAlpha(value)
+                }
+            } else {
+                presenterManager.setBibleTransitionAlpha(0f)
             }
             // Swap content at alpha=0
             presenterManager.setDisplayedVerses(selectedVerses)
-            // Fade in
-            anim.animateTo(1f, androidx.compose.animation.core.tween(halfDuration)) {
-                presenterManager.setBibleTransitionAlpha(value)
+            // Fade in (or instant)
+            if (bs.fadeIn) {
+                anim.snapTo(0f)
+                anim.animateTo(1f, androidx.compose.animation.core.tween(duration / 2)) {
+                    presenterManager.setBibleTransitionAlpha(value)
+                }
+            } else {
+                presenterManager.setBibleTransitionAlpha(1f)
             }
         }
     }
 
     // Centralized Song transition
     LaunchedEffect(lyricSection, lyricSectionVersion) {
-        if (presenterManager.displayedLyricSection.value.lines.isEmpty() ||
-            appSettings.songSettings.animationType == Constants.ANIMATION_NONE
-        ) {
+        val ss = appSettings.songSettings
+        if (presenterManager.displayedLyricSection.value.lines.isEmpty() || (!ss.fadeIn && !ss.fadeOut)) {
             presenterManager.setDisplayedLyricSection(lyricSection)
             presenterManager.setSongTransitionAlpha(1f)
         } else {
-            val duration = appSettings.songSettings.transitionDuration.toInt()
-            val halfDuration = duration / 2
+            val duration = ss.transitionDuration.toInt()
             val anim = androidx.compose.animation.core.Animatable(1f)
-            anim.animateTo(0f, androidx.compose.animation.core.tween(halfDuration)) {
-                presenterManager.setSongTransitionAlpha(value)
+            if (ss.fadeOut) {
+                anim.animateTo(0f, androidx.compose.animation.core.tween(duration / 2)) {
+                    presenterManager.setSongTransitionAlpha(value)
+                }
+            } else {
+                presenterManager.setSongTransitionAlpha(0f)
             }
             presenterManager.setDisplayedLyricSection(lyricSection)
-            anim.animateTo(1f, androidx.compose.animation.core.tween(halfDuration)) {
-                presenterManager.setSongTransitionAlpha(value)
+            if (ss.fadeIn) {
+                anim.snapTo(0f)
+                anim.animateTo(1f, androidx.compose.animation.core.tween(duration / 2)) {
+                    presenterManager.setSongTransitionAlpha(value)
+                }
+            } else {
+                presenterManager.setSongTransitionAlpha(1f)
             }
         }
     }

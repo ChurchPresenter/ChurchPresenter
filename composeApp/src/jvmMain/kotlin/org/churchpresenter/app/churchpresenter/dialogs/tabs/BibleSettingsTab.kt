@@ -52,12 +52,8 @@ import churchpresenter.composeapp.generated.resources.secondary_bible_text
 import churchpresenter.composeapp.generated.resources.show_in_lower_third
 import churchpresenter.composeapp.generated.resources.show_abbreviation
 import churchpresenter.composeapp.generated.resources.vertical_alignment
-import churchpresenter.composeapp.generated.resources.animation_crossfade
-import churchpresenter.composeapp.generated.resources.animation_fade
-import churchpresenter.composeapp.generated.resources.animation_none
-import churchpresenter.composeapp.generated.resources.animation_slide_left
-import churchpresenter.composeapp.generated.resources.animation_slide_right
-import churchpresenter.composeapp.generated.resources.animation_type
+import churchpresenter.composeapp.generated.resources.fade_in
+import churchpresenter.composeapp.generated.resources.fade_out
 import churchpresenter.composeapp.generated.resources.bible_transition_settings
 import churchpresenter.composeapp.generated.resources.bottom
 import churchpresenter.composeapp.generated.resources.left
@@ -69,10 +65,10 @@ import churchpresenter.composeapp.generated.resources.milliseconds_suffix
 import churchpresenter.composeapp.generated.resources.transition_duration
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.size
-import org.churchpresenter.app.churchpresenter.models.AnimationType
+
 import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
 import org.churchpresenter.app.churchpresenter.composables.ShadowDetailRow
-import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
+
 import org.churchpresenter.app.churchpresenter.composables.DropdownSettingsField
 import org.churchpresenter.app.churchpresenter.composables.FontSettingsDropdown
 import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
@@ -299,44 +295,33 @@ private fun LeftColumn(
 
     Spacer(modifier = Modifier.height(4.dp))
 
-    SettingRow(stringResource(Res.string.animation_type)) {
-        val crossfadeText = stringResource(Res.string.animation_crossfade)
-        val fadeText = stringResource(Res.string.animation_fade)
-        val slideLeftText = stringResource(Res.string.animation_slide_left)
-        val slideRightText = stringResource(Res.string.animation_slide_right)
-        val noneText = stringResource(Res.string.animation_none)
-
-        val currentType = when (settings.bibleSettings.animationType) {
-            Constants.ANIMATION_FADE -> AnimationType.FADE
-            Constants.ANIMATION_SLIDE_LEFT -> AnimationType.SLIDE_LEFT
-            Constants.ANIMATION_SLIDE_RIGHT -> AnimationType.SLIDE_RIGHT
-            Constants.ANIMATION_NONE -> AnimationType.NONE
-            else -> AnimationType.CROSSFADE
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Checkbox(
+                checked = settings.bibleSettings.fadeIn,
+                onCheckedChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(fadeIn = it)) } },
+                modifier = Modifier.size(24.dp)
+            )
+            Text(
+                text = stringResource(Res.string.fade_in),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.padding(start = 4.dp)
+            )
         }
-
-        DropdownSelector(
-            modifier = Modifier.width(200.dp),
-            label = "",
-            items = listOf(crossfadeText, fadeText, slideLeftText, slideRightText, noneText),
-            selected = when (currentType) {
-                AnimationType.CROSSFADE -> crossfadeText
-                AnimationType.FADE -> fadeText
-                AnimationType.SLIDE_LEFT -> slideLeftText
-                AnimationType.SLIDE_RIGHT -> slideRightText
-                AnimationType.NONE -> noneText
-                else -> crossfadeText
-            },
-            onSelectedChange = { selected ->
-                val newType = when (selected) {
-                    fadeText -> Constants.ANIMATION_FADE
-                    slideLeftText -> Constants.ANIMATION_SLIDE_LEFT
-                    slideRightText -> Constants.ANIMATION_SLIDE_RIGHT
-                    noneText -> Constants.ANIMATION_NONE
-                    else -> Constants.ANIMATION_CROSSFADE
-                }
-                onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(animationType = newType)) }
-            }
-        )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Checkbox(
+                checked = settings.bibleSettings.fadeOut,
+                onCheckedChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(fadeOut = it)) } },
+                modifier = Modifier.size(24.dp)
+            )
+            Text(
+                text = stringResource(Res.string.fade_out),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.padding(start = 4.dp)
+            )
+        }
     }
 
     // ── Text Margins ──
