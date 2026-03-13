@@ -167,6 +167,7 @@ object Constants {
     // Media Types
     const val MEDIA_TYPE_LOCAL = "local"
     const val MEDIA_TYPE_AUDIO = "audio"
+    const val MEDIA_TYPE_URL = "url"
 
     // Audio file extensions (VLC supports all common formats)
     val AUDIO_EXTENSIONS = setOf("mp3", "wav", "flac", "aac", "ogg", "wma", "m4a", "aiff", "opus")

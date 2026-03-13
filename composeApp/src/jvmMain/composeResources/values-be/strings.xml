@@ -121,6 +121,8 @@
     <string name="storage_directory">Папка захавання</string>
     <string name="browse_directory">Агляд...</string>
     <string name="no_directory_selected">Папка не абрана</string>
+    <string name="no_files_detected">Файлы не знойдзены</string>
+    <string name="detected_files_label">Выяўлена:</string>
     <string name="files_in_directory">Файлы ў папцы</string>
     <string name="import_song_file">Імпарт файла песень</string>
     <string name="remove_song_file">Выдаліць файл песень</string>
@@ -369,9 +371,8 @@
     <string name="media_tab_title">Медыя</string>
     <string name="media_source">Крыніца медыя</string>
     <string name="media_local_file">Лакальны файл</string>
-    <string name="media_youtube">YouTube</string>
-    <string name="media_vimeo">Vimeo</string>
-    <string name="media_url_hint">Увядзіце URL YouTube або Vimeo...</string>
+    <string name="media_network_url">Сеткавы URL</string>
+    <string name="media_url_placeholder">Увядзіце URL (http://, rtsp://, ...)</string>
     <string name="media_load">Загрузіць</string>
     <string name="media_select_file">Выбраць відэафайл</string>
     <string name="media_no_source">Медыя не загружана</string>

@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -21,6 +22,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -64,13 +66,20 @@ import churchpresenter.composeapp.generated.resources.media_seek_backward
 import churchpresenter.composeapp.generated.resources.media_seek_forward
 import churchpresenter.composeapp.generated.resources.media_audio_continues
 import churchpresenter.composeapp.generated.resources.media_files_filter
+import churchpresenter.composeapp.generated.resources.media_load
+import churchpresenter.composeapp.generated.resources.media_local_file
+import churchpresenter.composeapp.generated.resources.media_network_url
 import churchpresenter.composeapp.generated.resources.media_select_file
 import churchpresenter.composeapp.generated.resources.media_select_to_begin
+
+import churchpresenter.composeapp.generated.resources.media_url_placeholder
 import churchpresenter.composeapp.generated.resources.media_vlc_install
 import churchpresenter.composeapp.generated.resources.media_vlc_required
 import churchpresenter.composeapp.generated.resources.media_unmute
 import churchpresenter.composeapp.generated.resources.pause
 import churchpresenter.composeapp.generated.resources.play
+import org.churchpresenter.app.churchpresenter.composables.SegmentedButton
+import org.churchpresenter.app.churchpresenter.composables.SegmentedButtonItem
 import org.churchpresenter.app.churchpresenter.composables.VideoPlayer
 import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.composables.isVlcAvailable
@@ -127,11 +136,31 @@ fun MediaTab(
     val focusRequester = remember { FocusRequester() }
     var volumeExpanded by remember { mutableStateOf(false) }
 
+    // Source type selector state
+    val localFileLabel = stringResource(Res.string.media_local_file)
+    val networkUrlLabel = stringResource(Res.string.media_network_url)
+    val sourceTypeItems = remember(localFileLabel, networkUrlLabel) {
+        listOf(
+            SegmentedButtonItem(Constants.MEDIA_TYPE_LOCAL, localFileLabel),
+            SegmentedButtonItem(Constants.MEDIA_TYPE_URL, networkUrlLabel)
+        )
+    }
+    var selectedSourceType by remember { mutableStateOf(Constants.MEDIA_TYPE_LOCAL) }
+    var urlInput by remember { mutableStateOf("") }
+
     // React to schedule item selection
     LaunchedEffect(selectedMediaItem) {
         selectedMediaItem?.let {
             if (presenterManager?.presentingMode?.value == Presenting.MEDIA) {
                 presenterManager.setPresentingMode(Presenting.NONE)
+            }
+            // Sync source type selector with loaded item
+            when (it.mediaType) {
+                Constants.MEDIA_TYPE_URL -> {
+                    selectedSourceType = Constants.MEDIA_TYPE_URL
+                    urlInput = it.mediaUrl
+                }
+                else -> selectedSourceType = Constants.MEDIA_TYPE_LOCAL
             }
             viewModel.loadMediaFromSchedule(url = it.mediaUrl, title = it.mediaTitle, type = it.mediaType)
         }
@@ -166,61 +195,107 @@ fun MediaTab(
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         // ── Source row ──────────────────────────────────────────────────
-        // Single source row: file picker + URL field + Load button
         val selectFileLabel = stringResource(Res.string.media_select_file)
         val mediaFilesLabel = stringResource(Res.string.media_files_filter)
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().height(48.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Local file picker
-            Button(
-                onClick = {
-                    SwingUtilities.invokeLater {
-                        val chooser = createFileChooser {
-                            fileSelectionMode = JFileChooser.FILES_ONLY
-                            dialogTitle = selectFileLabel
-                            val defaultDir = appSettings.mediaStorageDirectory
-                            if (defaultDir.isNotEmpty()) {
-                                currentDirectory = java.io.File(defaultDir)
+            // Source type toggle
+            SegmentedButton(
+                items = sourceTypeItems,
+                selectedValue = selectedSourceType,
+                onValueChange = { selectedSourceType = it },
+                buttonWidth = 90.dp,
+                buttonHeight = 36.dp,
+                fontSize = MaterialTheme.typography.labelMedium.fontSize
+            )
+
+            // Per-type input controls
+            when (selectedSourceType) {
+                Constants.MEDIA_TYPE_LOCAL -> {
+                    // Local file picker button
+                    Button(
+                        onClick = {
+                            SwingUtilities.invokeLater {
+                                val chooser = createFileChooser {
+                                    fileSelectionMode = JFileChooser.FILES_ONLY
+                                    dialogTitle = selectFileLabel
+                                    val defaultDir = appSettings.mediaStorageDirectory
+                                    if (defaultDir.isNotEmpty()) {
+                                        currentDirectory = java.io.File(defaultDir)
+                                    }
+                                    fileFilter = FileNameExtensionFilter(
+                                        mediaFilesLabel,
+                                        "mp4", "mov", "avi", "mkv", "wmv", "flv", "webm", "m4v",
+                                        "mp3", "wav", "flac", "aac", "ogg", "wma", "m4a", "aiff", "opus"
+                                    )
+                                }
+                                if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+                                    val file = chooser.selectedFile
+                                    val ext = file.extension.lowercase()
+                                    val type = if (ext in Constants.AUDIO_EXTENSIONS)
+                                        Constants.MEDIA_TYPE_AUDIO else Constants.MEDIA_TYPE_LOCAL
+                                    if (presenterManager?.presentingMode?.value == Presenting.MEDIA) {
+                                        presenterManager.setPresentingMode(Presenting.NONE)
+                                    }
+                                    viewModel.loadMedia(file.absolutePath, type)
+                                }
                             }
-                            fileFilter = FileNameExtensionFilter(
-                                mediaFilesLabel,
-                                "mp4", "mov", "avi", "mkv", "wmv", "flv", "webm", "m4v",
-                                "mp3", "wav", "flac", "aac", "ogg", "wma", "m4a", "aiff", "opus"
+                        }
+                    ) {
+                        Text(
+                            text = stringResource(Res.string.media_select_file),
+                            style = MaterialTheme.typography.labelMedium
+                        )
+                    }
+                    Text(
+                        text = if (viewModel.isLoaded && viewModel.mediaType != Constants.MEDIA_TYPE_URL)
+                            viewModel.mediaTitle
+                        else stringResource(Res.string.media_no_source),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                        modifier = Modifier.weight(1f),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+
+                Constants.MEDIA_TYPE_URL -> {
+                    // Network URL text field + Load button
+                    OutlinedTextField(
+                        value = urlInput,
+                        onValueChange = { urlInput = it },
+                        placeholder = {
+                            Text(
+                                text = stringResource(Res.string.media_url_placeholder),
+                                style = MaterialTheme.typography.bodySmall
                             )
-                        }
-                        if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
-                            val file = chooser.selectedFile
-                            val ext = file.extension.lowercase()
-                            val type = if (ext in Constants.AUDIO_EXTENSIONS)
-                                Constants.MEDIA_TYPE_AUDIO else Constants.MEDIA_TYPE_LOCAL
-                            // Reset presenting mode so in-tab preview works and video
-                            // doesn't go to presenter screen until Go Live is pressed
-                            if (presenterManager?.presentingMode?.value == Presenting.MEDIA) {
-                                presenterManager.setPresentingMode(Presenting.NONE)
+                        },
+                        singleLine = true,
+                        textStyle = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.weight(1f).heightIn(max = 52.dp)
+                    )
+                    Button(
+                        onClick = {
+                            if (urlInput.isNotBlank()) {
+                                if (presenterManager?.presentingMode?.value == Presenting.MEDIA) {
+                                    presenterManager.setPresentingMode(Presenting.NONE)
+                                }
+                                viewModel.loadMedia(urlInput.trim(), Constants.MEDIA_TYPE_URL)
                             }
-                            viewModel.loadMedia(file.absolutePath, type)
-                        }
+                        },
+                        enabled = urlInput.isNotBlank()
+                    ) {
+                        Text(
+                            text = stringResource(Res.string.media_load),
+                            style = MaterialTheme.typography.labelMedium
+                        )
                     }
                 }
-            ) {
-                Text(
-                    text = stringResource(Res.string.media_select_file),
-                    style = MaterialTheme.typography.labelMedium
-                )
-            }
 
-            Text(
-                text = if (viewModel.isLoaded) viewModel.mediaTitle
-                       else stringResource(Res.string.media_no_source),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-                modifier = Modifier.weight(1f),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
+            }
         }
 
         // Now playing label
