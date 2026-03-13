@@ -220,7 +220,7 @@ fun LowerThirdTab(
             modifier = Modifier
                 .width(listWidthDp)
                 .fillMaxHeight()
-                .background(MaterialTheme.colorScheme.surfaceVariant)
+                .background(MaterialTheme.colorScheme.background)
         ) {
             LazyColumn(
                 modifier = Modifier
@@ -326,7 +326,7 @@ fun LowerThirdTab(
                         )
                     }
                 },
-                modifier = Modifier.fillMaxWidth().padding(8.dp),
+                modifier = Modifier.width(200.dp).padding(8.dp).align(Alignment.CenterHorizontally),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.tertiaryContainer,
                     contentColor = MaterialTheme.colorScheme.onTertiaryContainer
