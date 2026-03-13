@@ -30,6 +30,7 @@ fun TabSection(
         containerColor = MaterialTheme.colorScheme.surface,
         contentColor = MaterialTheme.colorScheme.onSurface,
         edgePadding = 0.dp,
+        divider = {},
     ) {
         Tabs.entries.forEachIndexed { index, tab ->
             Tab(
