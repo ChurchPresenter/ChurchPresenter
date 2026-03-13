@@ -83,6 +83,41 @@ data class SongCatalogResponse(
 )
 
 @Serializable
+data class SongSectionDto(
+    val type: String,           // "verse", "chorus", "other"
+    val lines: List<String>
+)
+
+/**
+ * Full song detail returned by GET /api/songs/{number}[?songbook=Name]
+ *
+ * {
+ *   "number": "42",
+ *   "title": "Amazing Grace",
+ *   "songbook": "Hymns",
+ *   "tune": "NEW BRITAIN",
+ *   "author": "John Newton",
+ *   "composer": "",
+ *   "section-total": 4,
+ *   "sections": [
+ *     { "type": "verse", "lines": ["Amazing grace, how sweet the sound", "…"] },
+ *     { "type": "chorus", "lines": ["…"] }
+ *   ]
+ * }
+ */
+@Serializable
+data class SongDetailDto(
+    val number: String,
+    val title: String,
+    val songbook: String,
+    val tune: String,
+    val author: String,
+    val composer: String,
+    @kotlinx.serialization.SerialName("section-total") val sectionTotal: Int,
+    val sections: List<SongSectionDto>
+)
+
+@Serializable
 data class ScheduleSongDto(
     val id: String,
     val songNumber: Int,
@@ -326,6 +361,8 @@ class CompanionServer {
     // All songs flat list
     // Current catalog — rebuilt whenever songs are updated
     private val _catalog = MutableStateFlow(SongCatalogResponse(emptyList(), 0, 0))
+    /** Raw song list kept in sync with _catalog for per-number detail lookups */
+    @Volatile private var _songs: List<SongItem> = emptyList()
     private val _bibleCatalog = MutableStateFlow<BibleCatalogResponse?>(null)
     private val _bible = MutableStateFlow<org.churchpresenter.app.churchpresenter.data.Bible?>(null)
     private val _schedule = MutableStateFlow<List<ScheduleItemDto>>(emptyList())
@@ -456,6 +493,7 @@ class CompanionServer {
 
     /** Feed the full song list — builds grouped catalog and broadcasts to WS clients. */
     fun updateSongs(songs: List<SongItem>) {
+        _songs = songs
         val catalog = buildCatalog(songs)
         _catalog.value = catalog
         broadcast(WebSocketMessage(
@@ -594,6 +632,48 @@ class CompanionServer {
             type = Constants.WS_EVENT_SCHEDULE_UPDATED,
             payload = json.encodeToString(ScheduleResponse.serializer(), ScheduleResponse(dtos, dtos.size))
         ))
+    }
+
+    private fun buildSongDetail(song: SongItem): SongDetailDto {
+        // Split the flat lyrics list into typed sections by detecting section-header lines
+        val sections = mutableListOf<SongSectionDto>()
+        var currentType = Constants.SECTION_TYPE_VERSE
+        var currentLines = mutableListOf<String>()
+
+        for (line in song.lyrics) {
+            val trimmed = line.trim()
+            val isVerseHeader  = trimmed.contains(Constants.VERSE_RUS,   ignoreCase = true) ||
+                                  trimmed.contains(Constants.VERSE,       ignoreCase = true)
+            val isChorusHeader = trimmed.contains(Constants.CHORUS_RUS,  ignoreCase = true) ||
+                                  trimmed.contains(Constants.CHORUS,      ignoreCase = true)
+
+            if (isVerseHeader || isChorusHeader) {
+                // Flush previous section
+                if (currentLines.isNotEmpty()) {
+                    sections.add(SongSectionDto(type = currentType, lines = currentLines.toList()))
+                    currentLines = mutableListOf()
+                }
+                currentType = if (isChorusHeader) Constants.SECTION_TYPE_CHORUS else Constants.SECTION_TYPE_VERSE
+                // Don't include the bare header line itself — it carries no lyric content
+            } else if (trimmed.isNotEmpty()) {
+                currentLines.add(line)
+            }
+        }
+        // Flush last section
+        if (currentLines.isNotEmpty()) {
+            sections.add(SongSectionDto(type = currentType, lines = currentLines.toList()))
+        }
+
+        return SongDetailDto(
+            number       = song.number,
+            title        = song.title,
+            songbook     = song.songbook,
+            tune         = song.tune,
+            author       = song.author,
+            composer     = song.composer,
+            sectionTotal = sections.size,
+            sections     = sections
+        )
     }
 
     private fun buildCatalog(songs: List<SongItem>): SongCatalogResponse {
@@ -763,6 +843,29 @@ class CompanionServer {
                             total = filtered.sumOf { it.songTotal }
                         ))
                     }
+                }
+
+                /**
+                 * GET /api/songs/{number}[?songbook=Name]
+                 * Returns full song details including all lyric sections.
+                 * Use ?songbook= to disambiguate when the same number exists in multiple songbooks.
+                 */
+                get("${Constants.ENDPOINT_SONGS}/{number}") {
+                    if (!checkApiKey(call)) return@get
+                    val number = call.parameters["number"] ?: run {
+                        call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":"missing number"}""")
+                        return@get
+                    }
+                    val songbookFilter = call.request.queryParameters[Constants.QUERY_PARAM_SONGBOOK]
+                    val song = _songs.firstOrNull { s ->
+                        s.number == number &&
+                            (songbookFilter.isNullOrBlank() || s.songbook.equals(songbookFilter, ignoreCase = true))
+                    }
+                    if (song == null) {
+                        call.respond(io.ktor.http.HttpStatusCode.NotFound, """{"error":"song not found"}""")
+                        return@get
+                    }
+                    call.respond(buildSongDetail(song))
                 }
 
                 get(Constants.ENDPOINT_SCHEDULE) {
