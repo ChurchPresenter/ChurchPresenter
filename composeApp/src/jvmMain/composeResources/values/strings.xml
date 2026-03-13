@@ -697,6 +697,7 @@
     <!-- Endpoint descriptions -->
     <string name="endpoint_desc_server_info">server info</string>
     <string name="endpoint_desc_song_catalog">song catalog</string>
+    <string name="endpoint_desc_song_detail">full song details with lyrics</string>
     <string name="endpoint_desc_filter_songbook">filter by songbook</string>
     <string name="endpoint_desc_bible_catalog">bible catalog</string>
     <string name="endpoint_desc_filter_book">filter by book</string>

@@ -60,6 +60,7 @@ import churchpresenter.composeapp.generated.resources.endpoint_desc_select_pictu
 import churchpresenter.composeapp.generated.resources.endpoint_desc_server_info
 import churchpresenter.composeapp.generated.resources.endpoint_desc_slide_image
 import churchpresenter.composeapp.generated.resources.endpoint_desc_song_catalog
+import churchpresenter.composeapp.generated.resources.endpoint_desc_song_detail
 import churchpresenter.composeapp.generated.resources.endpoint_desc_ws_add_to_schedule
 import churchpresenter.composeapp.generated.resources.endpoint_desc_ws_project
 import churchpresenter.composeapp.generated.resources.endpoint_desc_ws_realtime
@@ -359,6 +360,8 @@ fun ServerSettingsTab(
                     "GET ${Constants.ENDPOINT_INFO}" to stringResource(Res.string.endpoint_desc_server_info),
                     "GET ${Constants.ENDPOINT_SONGS}" to stringResource(Res.string.endpoint_desc_song_catalog),
                     "GET ${Constants.ENDPOINT_SONGS}?songbook=Name" to stringResource(Res.string.endpoint_desc_filter_songbook),
+                    "GET ${Constants.ENDPOINT_SONG_DETAIL}" to stringResource(Res.string.endpoint_desc_song_detail),
+                    "GET ${Constants.ENDPOINT_SONG_DETAIL}?songbook=Name" to stringResource(Res.string.endpoint_desc_song_detail),
                     "GET ${Constants.ENDPOINT_BIBLE}" to stringResource(Res.string.endpoint_desc_bible_catalog),
                     "GET ${Constants.ENDPOINT_BIBLE}?book=Genesis" to stringResource(Res.string.endpoint_desc_filter_book),
                     "GET ${Constants.ENDPOINT_BIBLE}?book=Genesis&chapter=1" to stringResource(Res.string.endpoint_desc_filter_chapter),
