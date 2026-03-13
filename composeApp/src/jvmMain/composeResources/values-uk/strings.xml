@@ -121,6 +121,8 @@
     <string name="storage_directory">Папка зберігання</string>
     <string name="browse_directory">Огляд...</string>
     <string name="no_directory_selected">Папка не обрана</string>
+    <string name="no_files_detected">Файли не знайдено</string>
+    <string name="detected_files_label">Виявлено:</string>
     <string name="files_in_directory">Файли в папці</string>
     <string name="import_song_file">Імпорт файлу пісень</string>
     <string name="remove_song_file">Видалити файл пісень</string>
@@ -381,9 +383,8 @@
     <string name="media_tab_title">Медіа</string>
     <string name="media_source">Джерело медіа</string>
     <string name="media_local_file">Локальний файл</string>
-    <string name="media_youtube">YouTube</string>
-    <string name="media_vimeo">Vimeo</string>
-    <string name="media_url_hint">Введіть URL YouTube або Vimeo...</string>
+    <string name="media_network_url">Мережевий URL</string>
+    <string name="media_url_placeholder">Введіть URL (http://, rtsp://, ...)</string>
     <string name="media_load">Завантажити</string>
     <string name="media_select_file">Вибрати відеофайл</string>
     <string name="media_no_source">Медіа не завантажено</string>

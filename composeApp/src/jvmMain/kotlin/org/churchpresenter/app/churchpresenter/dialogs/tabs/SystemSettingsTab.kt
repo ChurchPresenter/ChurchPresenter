@@ -33,7 +33,9 @@ import churchpresenter.composeapp.generated.resources.media_storage_directory
 import churchpresenter.composeapp.generated.resources.pictures_storage_directory
 import churchpresenter.composeapp.generated.resources.presentation_storage_directory
 import churchpresenter.composeapp.generated.resources.theme
+import churchpresenter.composeapp.generated.resources.detected_files_label
 import churchpresenter.composeapp.generated.resources.no_directory_selected
+import churchpresenter.composeapp.generated.resources.no_files_detected
 import churchpresenter.composeapp.generated.resources.reset_settings
 import churchpresenter.composeapp.generated.resources.clear_lottie_cache_confirm
 import churchpresenter.composeapp.generated.resources.export_settings
@@ -117,6 +119,12 @@ fun SystemSettingsTab(
             },
             onSetAll = setAllDirectories
         )
+        DetectedFilesList(
+            files = fileManager.getBibleFilesInDirectory(settings.bibleSettings.storageDirectory),
+            directorySet = settings.bibleSettings.storageDirectory.isNotEmpty(),
+            detectedLabel = stringResource(Res.string.detected_files_label),
+            noFilesText = stringResource(Res.string.no_files_detected)
+        )
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -134,6 +142,12 @@ fun SystemSettingsTab(
                 }
             },
             onSetAll = setAllDirectories
+        )
+        DetectedFilesList(
+            files = fileManager.getSongFilesInDirectory(settings.songSettings.storageDirectory),
+            directorySet = settings.songSettings.storageDirectory.isNotEmpty(),
+            detectedLabel = stringResource(Res.string.detected_files_label),
+            noFilesText = stringResource(Res.string.no_files_detected)
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -440,4 +454,22 @@ private fun DirectoryPicker(
             Text(text = setAllText, style = MaterialTheme.typography.labelMedium)
         }
     }
+}
+
+@Composable
+private fun DetectedFilesList(
+    files: List<String>,
+    directorySet: Boolean,
+    detectedLabel: String,
+    noFilesText: String
+) {
+    if (!directorySet) return
+    Text(
+        text = if (files.isNotEmpty()) "$detectedLabel ${files.joinToString(", ")}"
+               else noFilesText,
+        style = MaterialTheme.typography.bodySmall,
+        color = if (files.isNotEmpty()) MaterialTheme.colorScheme.onSurfaceVariant
+                else MaterialTheme.colorScheme.error.copy(alpha = 0.7f),
+        modifier = Modifier.padding(top = 4.dp, start = 2.dp)
+    )
 }

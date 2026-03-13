@@ -51,6 +51,7 @@ class MediaViewModel {
     private val _isAudioFile = mutableStateOf(false)
     val isAudioFile: Boolean get() = _isAudioFile.value
 
+
     fun loadMedia(url: String, type: String) {
         _mediaUrl.value = url
         _mediaType.value = type
@@ -124,9 +125,16 @@ class MediaViewModel {
     }
 
     private fun deriveTitleFromUrl(url: String): String {
-        val file = java.io.File(url)
-        return if (file.exists()) file.nameWithoutExtension
-               else url.substringAfterLast("/").ifBlank { url }
+        return when {
+            url.startsWith("http://") || url.startsWith("https://") || url.startsWith("rtsp://") ||
+                url.startsWith("rtp://") || url.startsWith("mms://") || url.startsWith("udp://") ->
+                url.substringAfterLast("/").ifBlank { url }
+            else -> {
+                val file = java.io.File(url)
+                if (file.exists()) file.nameWithoutExtension
+                else url.substringAfterLast("/").ifBlank { url }
+            }
+        }
     }
 
     fun formatTime(ms: Long): String {
