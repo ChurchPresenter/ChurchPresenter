@@ -68,6 +68,9 @@ import org.churchpresenter.app.churchpresenter.data.SettingsManager
 import org.churchpresenter.app.churchpresenter.dialogs.AboutDialog
 import org.churchpresenter.app.churchpresenter.dialogs.KeyboardShortcutsDialog
 import org.churchpresenter.app.churchpresenter.dialogs.LicenseDialog
+import org.churchpresenter.app.churchpresenter.dialogs.RemoteEvent
+import org.churchpresenter.app.churchpresenter.dialogs.RemoteEventDialog
+import org.churchpresenter.app.churchpresenter.dialogs.RemoteEventType
 import org.churchpresenter.app.churchpresenter.dialogs.OptionsDialog
 import org.churchpresenter.app.churchpresenter.presenter.AnnouncementsPresenter
 import org.churchpresenter.app.churchpresenter.presenter.CefManager
@@ -93,6 +96,9 @@ import io.github.alexzhirkevich.compottie.rememberLottieComposition
 import org.churchpresenter.app.churchpresenter.composables.vlcCustomPath
 import org.churchpresenter.app.churchpresenter.data.Bible
 import org.churchpresenter.app.churchpresenter.server.CompanionServer
+import org.churchpresenter.app.churchpresenter.server.AddToScheduleRequest
+import org.churchpresenter.app.churchpresenter.server.PendingRemoteRequest
+import org.churchpresenter.app.churchpresenter.server.ProjectRequest
 import org.churchpresenter.app.churchpresenter.ui.theme.AppThemeWrapper
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.CrashReporter
@@ -232,63 +238,6 @@ fun main() {
             appReady = true
         }
 
-        // ── Remote add-to-schedule requests (REST POST /api/schedule/add or WS add_to_schedule) ──
-        LaunchedEffect(Unit) {
-            companionServer.onAddToSchedule.collect { req ->
-                when (val item = req.item) {
-                    is ScheduleItem.SongItem ->
-                        currentScheduleActions.addSong(item.songNumber, item.title, item.songbook)
-                    is ScheduleItem.BibleVerseItem ->
-                        currentScheduleActions.addBibleVerse(item.bookName, item.chapter, item.verseNumber, item.verseText)
-                    is ScheduleItem.PresentationItem ->
-                        currentScheduleActions.addPresentation(item.filePath, item.fileName, item.slideCount, item.fileType)
-                    is ScheduleItem.PictureItem ->
-                        currentScheduleActions.addPicture(item.folderPath, item.folderName, item.imageCount)
-                    is ScheduleItem.MediaItem ->
-                        currentScheduleActions.addMedia(item.mediaUrl, item.mediaTitle, item.mediaType)
-                    else -> Unit
-                }
-            }
-        }
-
-        // ── Remote project requests (REST POST /api/project or WS project) ──────────────────────
-        LaunchedEffect(Unit) {
-            companionServer.onProject.collect { req ->
-                when (val item = req.item) {
-                    is ScheduleItem.SongItem -> {
-                        currentScheduleActions.addSong(item.songNumber, item.title, item.songbook)
-                        presenterManager.setPresentingMode(Presenting.LYRICS)
-                        presenterManager.setShowPresenterWindow(true)
-                    }
-                    is ScheduleItem.BibleVerseItem -> {
-                        presenterManager.setSelectedVerses(listOf(
-                            org.churchpresenter.app.churchpresenter.models.SelectedVerse(
-                                bookName = item.bookName,
-                                chapter = item.chapter,
-                                verseNumber = item.verseNumber,
-                                verseText = item.verseText
-                            )
-                        ))
-                        presenterManager.setPresentingMode(Presenting.BIBLE)
-                        presenterManager.setShowPresenterWindow(true)
-                    }
-                    is ScheduleItem.PictureItem -> {
-                        presenterManager.setSelectedImagePath(item.folderPath)
-                        presenterManager.setPresentingMode(Presenting.PICTURES)
-                        presenterManager.setShowPresenterWindow(true)
-                    }
-                    is ScheduleItem.PresentationItem -> {
-                        presenterManager.setPresentingMode(Presenting.PRESENTATION)
-                        presenterManager.setShowPresenterWindow(true)
-                    }
-                    is ScheduleItem.MediaItem -> {
-                        presenterManager.setPresentingMode(Presenting.MEDIA)
-                        presenterManager.setShowPresenterWindow(true)
-                    }
-                    else -> Unit
-                }
-            }
-        }
 
         val screens = rememberScreenDevices()
         val savedPlacement = when (appSettings.windowPlacement) {
@@ -340,6 +289,71 @@ fun main() {
                 LanguageProvider(language = currentLanguage) {
                     AppThemeWrapper(theme = theme) {
                         CompositionLocalProvider(LocalMediaViewModel provides mediaViewModel) {
+                            Box(modifier = Modifier.fillMaxSize()) {
+
+                            // ── Remote API permission state (inside Window so schedule actions are live) ──
+                            // Each entry: Triple(RemoteEvent, allowAction, denyAction)
+                            val remoteEventQueue = remember { androidx.compose.runtime.mutableStateListOf<Triple<RemoteEvent, () -> Unit, () -> Unit>>() }
+                            var remoteApiBlocked by remember { mutableStateOf(false) }
+
+                            // ── Remote add-to-schedule requests ──────────────────────────────────────────
+                            LaunchedEffect(Unit) {
+                                companionServer.onAddToSchedule.collect { pending ->
+                                    if (remoteApiBlocked) {
+                                        pending.decision.complete(false)
+                                        return@collect
+                                    }
+                                    val item = pending.item
+                                    val (eventTitle, eventDetail) = remoteEventLabel(item)
+                                    val event = RemoteEvent(
+                                        type   = RemoteEventType.ADD_TO_SCHEDULE,
+                                        title  = eventTitle,
+                                        detail = eventDetail
+                                    )
+                                    val allow: () -> Unit = {
+                                        when (item) {
+                                            is ScheduleItem.SongItem ->
+                                                currentScheduleActions.addSong(item.songNumber, item.title, item.songbook)
+                                            is ScheduleItem.BibleVerseItem ->
+                                                currentScheduleActions.addBibleVerse(item.bookName, item.chapter, item.verseNumber, item.verseText)
+                                            is ScheduleItem.PresentationItem ->
+                                                currentScheduleActions.addPresentation(item.filePath, item.fileName, item.slideCount, item.fileType)
+                                            is ScheduleItem.PictureItem ->
+                                                currentScheduleActions.addPicture(item.folderPath, item.folderName, item.imageCount)
+                                            is ScheduleItem.MediaItem ->
+                                                currentScheduleActions.addMedia(item.mediaUrl, item.mediaTitle, item.mediaType)
+                                            else -> Unit
+                                        }
+                                        pending.decision.complete(true)
+                                    }
+                                    val deny: () -> Unit = { pending.decision.complete(false) }
+                                    remoteEventQueue.add(Triple(event, allow, deny))
+                                }
+                            }
+
+                            // ── Remote project requests ──────────────────────────────────────────────────
+                            LaunchedEffect(Unit) {
+                                companionServer.onProject.collect { pending ->
+                                    if (remoteApiBlocked) {
+                                        pending.decision.complete(false)
+                                        return@collect
+                                    }
+                                    val item = pending.item
+                                    val (eventTitle, eventDetail) = remoteEventLabel(item)
+                                    val event = RemoteEvent(
+                                        type   = RemoteEventType.PROJECT,
+                                        title  = eventTitle,
+                                        detail = eventDetail
+                                    )
+                                    val allow: () -> Unit = {
+                                        executeProjectItem(item, currentScheduleActions, presenterManager)
+                                        pending.decision.complete(true)
+                                    }
+                                    val deny: () -> Unit = { pending.decision.complete(false) }
+                                    remoteEventQueue.add(Triple(event, allow, deny))
+                                }
+                            }
+
                             NavigationTopBar(
                                 onAbout = { showAboutDialog = true },
                                 onHelp = { java.awt.Desktop.getDesktop().browse(java.net.URI("https://github.com/ChurchPresenter/ChurchPresenter/")) },
@@ -451,6 +465,28 @@ fun main() {
                                 isVisible = showAboutDialog,
                                 onDismiss = { showAboutDialog = false }
                             )
+
+                            // ── Remote API event dialog ───────────────────────
+                            val currentRemote = remoteEventQueue.firstOrNull()
+                            RemoteEventDialog(
+                                event = currentRemote?.first,
+                                queueSize = remoteEventQueue.size,
+                                onAllow = {
+                                    currentRemote?.second?.invoke()
+                                    if (remoteEventQueue.isNotEmpty()) remoteEventQueue.removeAt(0)
+                                },
+                                onBlockSession = {
+                                    // Deny all queued items
+                                    remoteEventQueue.forEach { it.third.invoke() }
+                                    remoteEventQueue.clear()
+                                    remoteApiBlocked = true
+                                },
+                                onDeny = {
+                                    currentRemote?.third?.invoke()
+                                    if (remoteEventQueue.isNotEmpty()) remoteEventQueue.removeAt(0)
+                                }
+                            )
+                            } // end Box (window content)
                         }
                     }
                 }
@@ -474,6 +510,76 @@ fun main() {
                 onDecline = { exitApplication() }
             )
         }
+    }
+}
+
+/** Returns a (title, detail) pair describing a ScheduleItem for the remote event banner. */
+private fun remoteEventLabel(item: ScheduleItem): Pair<String, String> = when (item) {
+    is ScheduleItem.SongItem         -> "${item.songNumber} - ${item.title}" to item.songbook
+    is ScheduleItem.BibleVerseItem   -> "${item.bookName} ${item.chapter}:${item.verseNumber}" to item.verseText.take(60)
+    is ScheduleItem.PictureItem      -> item.folderName to "${item.imageCount} images"
+    is ScheduleItem.PresentationItem -> item.fileName to item.fileType.uppercase()
+    is ScheduleItem.MediaItem        -> item.mediaTitle to item.mediaType
+    is ScheduleItem.LabelItem        -> item.text.take(60) to ""
+    is ScheduleItem.AnnouncementItem -> item.text.take(60) to ""
+    is ScheduleItem.LowerThirdItem   -> item.presetLabel to ""
+    is ScheduleItem.WebsiteItem      -> item.title to item.url
+}
+
+/**
+ * Executes a project request — adds to schedule and sets presenter state.
+ * Fixes the original bug where SongItem projection never selected the song in the Songs tab.
+ */
+private fun executeProjectItem(
+    item: ScheduleItem,
+    scheduleActions: ScheduleActions,
+    presenterManager: PresenterManager
+) {
+    when (item) {
+        is ScheduleItem.SongItem -> {
+            // Add to schedule AND select the song so the Songs tab navigates to it
+            scheduleActions.addSong(item.songNumber, item.title, item.songbook)
+            presenterManager.setLyricSection(
+                LyricSection(
+                    title      = item.title,
+                    songNumber = item.songNumber,
+                    lines      = emptyList(),
+                    type       = Constants.SECTION_TYPE_SONG
+                )
+            )
+            presenterManager.setPresentingMode(Presenting.LYRICS)
+            presenterManager.setShowPresenterWindow(true)
+        }
+        is ScheduleItem.BibleVerseItem -> {
+            scheduleActions.addBibleVerse(item.bookName, item.chapter, item.verseNumber, item.verseText)
+            presenterManager.setSelectedVerses(listOf(
+                org.churchpresenter.app.churchpresenter.models.SelectedVerse(
+                    bookName    = item.bookName,
+                    chapter     = item.chapter,
+                    verseNumber = item.verseNumber,
+                    verseText   = item.verseText
+                )
+            ))
+            presenterManager.setPresentingMode(Presenting.BIBLE)
+            presenterManager.setShowPresenterWindow(true)
+        }
+        is ScheduleItem.PictureItem -> {
+            scheduleActions.addPicture(item.folderPath, item.folderName, item.imageCount)
+            presenterManager.setSelectedImagePath(item.folderPath)
+            presenterManager.setPresentingMode(Presenting.PICTURES)
+            presenterManager.setShowPresenterWindow(true)
+        }
+        is ScheduleItem.PresentationItem -> {
+            scheduleActions.addPresentation(item.filePath, item.fileName, item.slideCount, item.fileType)
+            presenterManager.setPresentingMode(Presenting.PRESENTATION)
+            presenterManager.setShowPresenterWindow(true)
+        }
+        is ScheduleItem.MediaItem -> {
+            scheduleActions.addMedia(item.mediaUrl, item.mediaTitle, item.mediaType)
+            presenterManager.setPresentingMode(Presenting.MEDIA)
+            presenterManager.setShowPresenterWindow(true)
+        }
+        else -> Unit
     }
 }
 

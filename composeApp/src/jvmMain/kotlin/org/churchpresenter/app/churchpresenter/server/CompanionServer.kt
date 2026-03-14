@@ -330,19 +330,117 @@ data class WebSocketMessage(
     val payload: String = ""
 )
 
+// ── Flat remote-item DTO (accepts the format mobile apps actually send) ───────
+//
+// Both POST /api/schedule/add and POST /api/project accept the same body:
+//
+//   { "item": { "id":"1", "songNumber":42, "title":"Amazing Grace", "songbook":"Hymns" } }
+//
+// The "type" discriminator required by kotlinx.serialization is NOT needed —
+// the server infers the item type from which fields are present.
+
+@Serializable
+data class RemoteItemDto(
+    val id: String = "",
+    // song
+    val songNumber: Int? = null,
+    val title: String? = null,
+    val songbook: String? = null,
+    // bible
+    val bookName: String? = null,
+    val chapter: Int? = null,
+    val verseNumber: Int? = null,
+    val verseText: String? = null,
+    // picture
+    val folderPath: String? = null,
+    val folderName: String? = null,
+    val imageCount: Int? = null,
+    // presentation
+    val filePath: String? = null,
+    val fileName: String? = null,
+    val slideCount: Int? = null,
+    val fileType: String? = null,
+    // media
+    val mediaUrl: String? = null,
+    val mediaTitle: String? = null,
+    val mediaType: String? = null,
+    // display text (optional, ignored during parsing)
+    val displayText: String? = null
+)
+
+@Serializable
+data class RemoteItemRequest(val item: RemoteItemDto)
+
 /**
- * Body for POST /api/schedule/add and WS command "add_to_schedule".
- * Uses the same [ScheduleItem] subclasses already used throughout the app.
+ * Infer a [ScheduleItem] from the flat [RemoteItemDto] by detecting which fields are present.
+ * Returns null if the dto doesn't match any known item type.
  */
+fun RemoteItemDto.toScheduleItem(): ScheduleItem? {
+    val safeId = id.ifBlank { java.util.UUID.randomUUID().toString() }
+    return when {
+        // Song — must have songNumber
+        songNumber != null ->
+            ScheduleItem.SongItem(
+                id         = safeId,
+                songNumber = songNumber,
+                title      = title ?: "",
+                songbook   = songbook ?: ""
+            )
+        // Bible verse — must have bookName + chapter + verseNumber
+        bookName != null && chapter != null && verseNumber != null ->
+            ScheduleItem.BibleVerseItem(
+                id          = safeId,
+                bookName    = bookName,
+                chapter     = chapter,
+                verseNumber = verseNumber,
+                verseText   = verseText ?: ""
+            )
+        // Picture folder — must have folderPath
+        folderPath != null ->
+            ScheduleItem.PictureItem(
+                id         = safeId,
+                folderPath = folderPath,
+                folderName = folderName ?: folderPath,
+                imageCount = imageCount ?: 0
+            )
+        // Presentation — must have filePath
+        filePath != null ->
+            ScheduleItem.PresentationItem(
+                id         = safeId,
+                filePath   = filePath,
+                fileName   = fileName ?: filePath,
+                slideCount = slideCount ?: 0,
+                fileType   = fileType ?: ""
+            )
+        // Media — must have mediaUrl
+        mediaUrl != null ->
+            ScheduleItem.MediaItem(
+                id         = safeId,
+                mediaUrl   = mediaUrl,
+                mediaTitle = mediaTitle ?: mediaUrl,
+                mediaType  = mediaType ?: "local"
+            )
+        else -> null
+    }
+}
+
+// Keep old wrappers for WS payloads that still use the sealed class discriminator
 @Serializable
 data class AddToScheduleRequest(val item: ScheduleItem)
 
-/**
- * Body for POST /api/project and WS command "project".
- * Uses the same [ScheduleItem] subclasses already used throughout the app.
- */
 @Serializable
 data class ProjectRequest(val item: ScheduleItem)
+
+/**
+ * Wraps an incoming remote request with a [CompletableDeferred] that the UI
+ * resolves once the user clicks Allow (true) or Deny/Block (false).
+ * The HTTP endpoint suspends on [decision] before sending a response, so the
+ * calling device receives the correct status code.
+ */
+data class PendingRemoteRequest(
+    val item: ScheduleItem,
+    val decision: kotlinx.coroutines.CompletableDeferred<Boolean> = kotlinx.coroutines.CompletableDeferred()
+)
 
 // ── CompanionServer ───────────────────────────────────────────────────────────
 
@@ -394,7 +492,7 @@ class CompanionServer {
     )
 
     /** Emitted when a remote client requests an item to be added to the schedule. */
-    val onAddToSchedule = MutableSharedFlow<AddToScheduleRequest>(
+    val onAddToSchedule = MutableSharedFlow<PendingRemoteRequest>(
         extraBufferCapacity = 16,
         onBufferOverflow = BufferOverflow.DROP_OLDEST
     )
@@ -406,7 +504,7 @@ class CompanionServer {
     )
 
     /** Emitted when a remote client requests an item to be sent directly to projection. */
-    val onProject = MutableSharedFlow<ProjectRequest>(
+    val onProject = MutableSharedFlow<PendingRemoteRequest>(
         extraBufferCapacity = 16,
         onBufferOverflow = BufferOverflow.DROP_OLDEST
     )
@@ -876,35 +974,49 @@ class CompanionServer {
 
                 /**
                  * POST /api/schedule/add
-                 * Body: AddToScheduleRequest JSON
-                 * Adds the item described in the body to the app schedule.
-                 * Returns {"ok":true} on success or {"error":"…"} on bad input.
+                 * Suspends until the user approves or denies the request in the UI.
+                 * Returns {"ok":true} on Allow, {"ok":false,"reason":"denied"} on Deny,
+                 * or {"ok":false,"reason":"blocked"} if the session is blocked.
                  */
                 post(Constants.ENDPOINT_SCHEDULE_ADD) {
                     if (!checkApiKey(call)) return@post
-                    try {
-                        val req = json.decodeFromString(AddToScheduleRequest.serializer(), call.receiveText())
-                        scope.launch { onAddToSchedule.emit(req) }
-                        call.respondText("""{"ok":true}""", ContentType.Application.Json)
-                    } catch (_: Exception) {
+                    val body = call.receiveText()
+                    val item = parseRemoteItem(body)
+                    if (item == null) {
                         call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":"invalid request body"}""")
+                        return@post
+                    }
+                    val pending = PendingRemoteRequest(item)
+                    scope.launch { onAddToSchedule.emit(pending) }
+                    val allowed = pending.decision.await()
+                    if (allowed) {
+                        call.respondText("""{"ok":true}""", ContentType.Application.Json)
+                    } else {
+                        call.respond(io.ktor.http.HttpStatusCode.Forbidden,
+                            """{"ok":false,"reason":"${pending.decision.let { "denied" }}"}""")
                     }
                 }
 
                 /**
                  * POST /api/project
-                 * Body: ProjectRequest JSON
-                 * Immediately projects the described item to the presenter window.
-                 * Returns {"ok":true} on success or {"error":"…"} on bad input.
+                 * Same suspend-until-approved behaviour as /api/schedule/add.
                  */
                 post(Constants.ENDPOINT_PROJECT) {
                     if (!checkApiKey(call)) return@post
-                    try {
-                        val req = json.decodeFromString(ProjectRequest.serializer(), call.receiveText())
-                        scope.launch { onProject.emit(req) }
-                        call.respondText("""{"ok":true}""", ContentType.Application.Json)
-                    } catch (_: Exception) {
+                    val body = call.receiveText()
+                    val item = parseRemoteItem(body)
+                    if (item == null) {
                         call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":"invalid request body"}""")
+                        return@post
+                    }
+                    val pending = PendingRemoteRequest(item)
+                    scope.launch { onProject.emit(pending) }
+                    val allowed = pending.decision.await()
+                    if (allowed) {
+                        call.respondText("""{"ok":true}""", ContentType.Application.Json)
+                    } else {
+                        call.respond(io.ktor.http.HttpStatusCode.Forbidden,
+                            """{"ok":false,"reason":"denied"}""")
                     }
                 }
 
@@ -1101,12 +1213,20 @@ class CompanionServer {
                                         scope.launch { onSelectPicture.emit(req) }
                                     }
                                     Constants.WS_CMD_ADD_TO_SCHEDULE -> {
-                                        val req = json.decodeFromString(AddToScheduleRequest.serializer(), msg.payload)
-                                        scope.launch { onAddToSchedule.emit(req) }
+                                        val item = parseRemoteItem(msg.payload)
+                                            ?: json.decodeFromString(AddToScheduleRequest.serializer(), msg.payload).item
+                                        val pending = PendingRemoteRequest(item)
+                                        scope.launch {
+                                            onAddToSchedule.emit(pending)
+                                            // WS is fire-and-forget — complete automatically after emit
+                                            // (decision resolved by UI; if blocked, item is dropped silently)
+                                        }
                                     }
                                     Constants.WS_CMD_PROJECT -> {
-                                        val req = json.decodeFromString(ProjectRequest.serializer(), msg.payload)
-                                        scope.launch { onProject.emit(req) }
+                                        val item = parseRemoteItem(msg.payload)
+                                            ?: json.decodeFromString(ProjectRequest.serializer(), msg.payload).item
+                                        val pending = PendingRemoteRequest(item)
+                                        scope.launch { onProject.emit(pending) }
                                     }
                                 }
                             } catch (_: Exception) { /* ignore malformed frames */ }
@@ -1277,6 +1397,24 @@ class CompanionServer {
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────
+
+    /**
+     * Try to parse a [ScheduleItem] from raw JSON using the flat [RemoteItemRequest] format first,
+     * then fall back to the legacy sealed-class [AddToScheduleRequest] format.
+     */
+    private fun parseRemoteItem(body: String): ScheduleItem? {
+        // 1. Try flat format: {"item":{"songNumber":42,"title":"…","songbook":"…"}}
+        try {
+            val req = json.decodeFromString(RemoteItemRequest.serializer(), body)
+            val item = req.item.toScheduleItem()
+            if (item != null) return item
+        } catch (_: Exception) {}
+        // 2. Fall back to legacy sealed-class format with discriminator
+        try {
+            return json.decodeFromString(AddToScheduleRequest.serializer(), body).item
+        } catch (_: Exception) {}
+        return null
+    }
 
     private fun contentTypeForExtension(ext: String): ContentType = when (ext.lowercase()) {
         "jpg", "jpeg" -> ContentType.Image.JPEG
