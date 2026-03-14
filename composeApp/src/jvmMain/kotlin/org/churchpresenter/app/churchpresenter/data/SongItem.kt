@@ -8,4 +8,7 @@ data class SongItem(
     val author: String = "",
     val composer: String = "",
     val lyrics: List<String> = emptyList()
-)
+) {
+    /** Stable unique ID across songbooks: "songbook::number" */
+    val songId: String get() = "$songbook::$number"
+}

@@ -96,8 +96,9 @@ fun SongsTab(
     modifier: Modifier = Modifier,
     appSettings: AppSettings,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit = {},
-    onAddToSchedule: ((songNumber: Int, title: String, songbook: String) -> Unit)? = null,
+    onAddToSchedule: ((songNumber: Int, title: String, songbook: String, songId: String) -> Unit)? = null,
     selectedSongItem: ScheduleItem.SongItem? = null,
+    selectedSongItemVersion: Int = 0,
     onSongItemSelected: (LyricSection) -> Unit,
     onPresenting: (Presenting) -> Unit = { Presenting.NONE },
     isPresenting: Boolean = false,
@@ -117,16 +118,14 @@ fun SongsTab(
     }
 
     // React to schedule item selection.
-    // If data is still loading when the item arrives, wait for loading to finish
-    // then retry — no fixed delay, no polling, no race condition.
-    LaunchedEffect(selectedSongItem) {
+    // Uses selectedSongItemVersion as a key so clicking the same song twice always re-fires,
+    // even if selectedSongItem hasn't changed (same data class instance).
+    LaunchedEffect(selectedSongItem, selectedSongItemVersion) {
         selectedSongItem?.let { item ->
-            // Wait until data is ready if currently loading
             if (viewModel.isLoading.value) {
-                snapshotFlow { viewModel.isLoading.value }
-                    .first { !it }
+                snapshotFlow { viewModel.isLoading.value }.first { !it }
             }
-            val found = viewModel.selectSongByDetails(item.songNumber, item.title, item.songbook)
+            val found = viewModel.selectSongByDetails(item.songNumber, item.title, item.songbook, item.songId)
             if (found) {
                 viewModel.getSelectedLyricSection()?.let { section -> onSongItemSelected(section) }
             }
@@ -559,7 +558,7 @@ fun SongsTab(
                                 androidx.compose.material3.IconButton(
                                     onClick = {
                                         filteredSongs.getOrNull(selectedSongIndex)?.let { item ->
-                                            onAddToSchedule(item.number.toIntOrNull() ?: 0, item.title, item.songbook)
+                                            onAddToSchedule(item.number.toIntOrNull() ?: 0, item.title, item.songbook, item.songId)
                                         }
                                     },
                                     colors = androidx.compose.material3.IconButtonDefaults.iconButtonColors(
@@ -575,7 +574,7 @@ fun SongsTab(
                                 modifier = Modifier.padding(start = 4.dp),
                                 onClick = {
                                     filteredSongs.getOrNull(selectedSongIndex)?.let { item ->
-                                        onAddToSchedule(item.number.toIntOrNull() ?: 0, item.title, item.songbook)
+                                        onAddToSchedule(item.number.toIntOrNull() ?: 0, item.title, item.songbook, item.songId)
                                     }
                                 },
                                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)

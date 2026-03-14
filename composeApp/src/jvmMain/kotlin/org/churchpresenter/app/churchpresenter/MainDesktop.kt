@@ -96,7 +96,7 @@ data class ScheduleActions(
     val removeSelected: () -> Unit = {},
     val clearSchedule: () -> Unit = {},
     // Remote-API add helpers (populated from ScheduleTabActions)
-    val addSong: (songNumber: Int, title: String, songbook: String) -> Unit = { _, _, _ -> },
+    val addSong: (songNumber: Int, title: String, songbook: String, songId: String) -> Unit = { _, _, _, _ -> },
     val addBibleVerse: (bookName: String, chapter: Int, verseNumber: Int, verseText: String) -> Unit = { _, _, _, _ -> },
     val addPicture: (folderPath: String, folderName: String, imageCount: Int) -> Unit = { _, _, _ -> },
     val addPresentation: (filePath: String, fileName: String, slideCount: Int, fileType: String) -> Unit = { _, _, _, _ -> },
@@ -123,6 +123,7 @@ fun MainDesktop(
     onPresentationSlidesLoaded: ((id: String, fileName: String, fileType: String, slides: List<java.awt.image.BufferedImage>) -> Unit)? = null,
     onPicturesLoaded: ((folderId: String, folderName: String, folderPath: String, imageFiles: List<java.io.File>) -> Unit)? = null,
     selectPictureImageFlow: kotlinx.coroutines.flow.Flow<Pair<String, Int>>? = null,
+    remoteSelectSongFlow: kotlinx.coroutines.flow.Flow<ScheduleItem.SongItem>? = null,
     serverUrl: String = ""
 ) {
     val isDarkTheme = when (theme) {
@@ -142,6 +143,9 @@ fun MainDesktop(
     val currentOnScheduleActionsReady by rememberUpdatedState(onScheduleActionsReady)
     var selectedBibleVerseItem by remember { mutableStateOf<ScheduleItem.BibleVerseItem?>(null) }
     var selectedSongItem by remember { mutableStateOf<ScheduleItem.SongItem?>(null) }
+    // Incremented every time a song is selected — used as LaunchedEffect key so
+    // clicking the same song twice (or API→click) always re-triggers navigation.
+    var selectedSongItemVersion by remember { mutableStateOf(0) }
     var selectedPictureItem by remember { mutableStateOf<ScheduleItem.PictureItem?>(null) }
     var selectedPresentationItem by remember { mutableStateOf<ScheduleItem.PresentationItem?>(null) }
     var selectedMediaItem by remember { mutableStateOf<ScheduleItem.MediaItem?>(null) }
@@ -205,6 +209,15 @@ fun MainDesktop(
                 picturesViewModel.selectedImageIndex = index
                 picturesViewModel.syncWithPresenter(presenterManager)
             }
+        }
+    }
+
+    // Handle remote song selection — set selectedSongItem so the Songs tab navigates to it
+    LaunchedEffect(remoteSelectSongFlow) {
+        remoteSelectSongFlow?.collect { songItem ->
+            selectedSongItem = songItem
+            selectedSongItemVersion++
+            selectedTabIndex = Tabs.SONGS.ordinal
         }
     }
 
@@ -308,6 +321,7 @@ fun MainDesktop(
                         },
                         onPresentSong = { item ->
                             selectedSongItem = item
+                            selectedSongItemVersion++
                             onSongItemSelected(
                                 LyricSection(
                                     title = item.title,
@@ -382,6 +396,7 @@ fun MainDesktop(
                                 is ScheduleItem.SongItem -> {
                                     selectedTabIndex = Tabs.SONGS.ordinal
                                     selectedSongItem = item
+                                    selectedSongItemVersion++
                                 }
 
                                 is ScheduleItem.BibleVerseItem -> {
@@ -563,10 +578,11 @@ fun MainDesktop(
                                 modifier = Modifier.fillMaxSize(),
                                 appSettings = appSettings,
                                 onSettingsChange = onSettingsChange,
-                                onAddToSchedule = { songNumber, title, songbook ->
-                                    currentScheduleActions.addSong(songNumber, title, songbook)
+                                onAddToSchedule = { songNumber, title, songbook, songId ->
+                                    currentScheduleActions.addSong(songNumber, title, songbook, songId)
                                 },
                                 selectedSongItem = selectedSongItem,
+                                selectedSongItemVersion = selectedSongItemVersion,
                                 onSongItemSelected = onSongItemSelected,
                                 onPresenting = presenting,
                                 isPresenting = presentingMode == Presenting.LYRICS,
