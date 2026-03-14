@@ -334,6 +334,59 @@ fun main() {
                                 }
                             }
 
+                            // ── Remote add-batch-to-schedule requests ─────────────────────────────────────
+                            LaunchedEffect(Unit) {
+                                companionServer.onAddBatchToSchedule.collect { pending ->
+                                    if (remoteApiBlocked) {
+                                        pending.decision.complete(false)
+                                        return@collect
+                                    }
+                                    val count = pending.items.size
+                                    // Build a human-readable summary: first 3 items joined, then "…" if more
+                                    val summaryTitle = if (count == 1) {
+                                        remoteEventLabel(pending.items.first()).first
+                                    } else {
+                                        "$count items"
+                                    }
+                                    val summaryDetail = pending.items.take(3).joinToString(" · ") { item ->
+                                        when (item) {
+                                            is ScheduleItem.BibleVerseItem ->
+                                                "${item.bookName} ${item.chapter}:${item.verseNumber}"
+                                            is ScheduleItem.SongItem ->
+                                                "${item.songNumber} – ${item.title}"
+                                            else -> item.displayText.take(30)
+                                        }
+                                    }.let { if (count > 3) "$it …" else it }
+                                    val event = RemoteEvent(
+                                        type   = RemoteEventType.ADD_TO_SCHEDULE,
+                                        title  = summaryTitle,
+                                        detail = summaryDetail
+                                    )
+                                    val allow: () -> Unit = {
+                                        for (item in pending.items) {
+                                            when (item) {
+                                                is ScheduleItem.SongItem -> {
+                                                    currentScheduleActions.addSong(item.songNumber, item.title, item.songbook, item.songId)
+                                                    coroutineScope.launch { remoteSelectSongFlow.emit(item) }
+                                                }
+                                                is ScheduleItem.BibleVerseItem ->
+                                                    currentScheduleActions.addBibleVerse(item.bookName, item.chapter, item.verseNumber, item.verseText)
+                                                is ScheduleItem.PresentationItem ->
+                                                    currentScheduleActions.addPresentation(item.filePath, item.fileName, item.slideCount, item.fileType)
+                                                is ScheduleItem.PictureItem ->
+                                                    currentScheduleActions.addPicture(item.folderPath, item.folderName, item.imageCount)
+                                                is ScheduleItem.MediaItem ->
+                                                    currentScheduleActions.addMedia(item.mediaUrl, item.mediaTitle, item.mediaType)
+                                                else -> Unit
+                                            }
+                                        }
+                                        pending.decision.complete(true)
+                                    }
+                                    val deny: () -> Unit = { pending.decision.complete(false) }
+                                    remoteEventQueue.add(Triple(event, allow, deny))
+                                }
+                            }
+
                             // ── Remote project requests ──────────────────────────────────────────────────
                             LaunchedEffect(Unit) {
                                 companionServer.onProject.collect { pending ->
