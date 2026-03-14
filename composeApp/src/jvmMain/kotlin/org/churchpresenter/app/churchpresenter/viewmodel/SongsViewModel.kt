@@ -144,34 +144,40 @@ class SongsViewModel(
         _selectedSectionIndex.value = -1
     }
 
-    fun selectSongByDetails(songNumber: Int, title: String, @Suppress("UNUSED_PARAMETER") songbook: String): Boolean {
-        // First, check if we need to update the songbook filter
-        val songData = _songsData.value.getSongs().find {
-            it.number == songNumber.toString() && it.title.equals(title, ignoreCase = true)
-        }
+    fun selectSongByDetails(songNumber: Int, title: String, songbook: String, songId: String = ""): Boolean {
+        val allSongs = _songsData.value.getSongs()
 
-        if (songData == null) {
-            return false  // Song not found in database
-        }
+        // 1. Primary: stable songId "songbook::number" — unambiguous across songbooks
+        val songData = allSongs.find { songId.isNotBlank() && it.songId == songId }
+        // 2. Fallback: songbook + number (old saved schedules without songId)
+            ?: allSongs.find {
+                it.songbook.equals(songbook, ignoreCase = true) && it.number == songNumber.toString()
+            }
+        // 3. Last resort: title only
+            ?: allSongs.find { it.title.equals(title, ignoreCase = true) }
 
-        // Update the songbook filter if needed
-        if (songData.songbook != _selectedSongbook.value) {
-            _selectedSongbook.value = songData.songbook
+        if (songData == null) return false
+
+        // Find index in _filteredSongItems (what the UI renders) by songId — never change filter
+        var idx = _filteredSongItems.value.indexOfFirst { it.songId == songData.songId }
+
+        if (idx < 0) {
+            // Song is outside current filter — bypass temporarily, restore immediately
+            val savedSongbook = _selectedSongbook.value
+            val savedSearch   = _searchQuery.value
+            _selectedSongbook.value = ""
+            _searchQuery.value = ""
             applyFilters()
+            idx = _filteredSongItems.value.indexOfFirst { it.songId == songData.songId }
+            _selectedSongbook.value = savedSongbook
+            _searchQuery.value = savedSearch
+            applyFilters()
+            if (idx < 0) return false
         }
 
-        // Now find the song in the filtered list
-        val index = _filteredSongs.value.indexOfFirst { song ->
-            song.contains("$songNumber.") && song.contains(title, ignoreCase = true)
-        }
-
-        if (index >= 0) {
-            _selectedSongIndex.value = index
-            _selectedSectionIndex.value = 0  // Select first section
-            return true
-        }
-
-        return false
+        _selectedSongIndex.value = idx
+        _selectedSectionIndex.value = 0
+        return true
     }
 
     fun selectSection(index: Int) {
@@ -179,15 +185,10 @@ class SongsViewModel(
     }
 
     fun getSelectedSong(): LyricSection? {
-        if (_filteredSongs.value.isEmpty() || _selectedSongIndex.value >= _filteredSongs.value.size) {
-            return null
-        }
-
-        val songText = _filteredSongs.value[_selectedSongIndex.value]
-        val songNumber = songText.substringBefore(".").trim()
-
-        val song = _songsData.value.getSongs().find { it.number == songNumber } ?: return null
-
+        val items = _filteredSongItems.value
+        val idx = _selectedSongIndex.value
+        if (items.isEmpty() || idx < 0 || idx >= items.size) return null
+        val song = items[idx]
         return LyricSection(
             title = song.title,
             songNumber = song.number.toIntOrNull() ?: 0,
@@ -197,14 +198,10 @@ class SongsViewModel(
     }
 
     fun getLyricSections(): List<LyricSection> {
-        if (_filteredSongs.value.isEmpty() || _selectedSongIndex.value >= _filteredSongs.value.size) {
-            return emptyList()
-        }
-
-        val songText = _filteredSongs.value[_selectedSongIndex.value]
-        val songNumber = songText.substringBefore(".").trim()
-
-        val song = _songsData.value.getSongs().find { it.number == songNumber } ?: return emptyList()
+        val items = _filteredSongItems.value
+        val idx = _selectedSongIndex.value
+        if (items.isEmpty() || idx < 0 || idx >= items.size) return emptyList()
+        val song = items[idx]
 
         // Split lyrics into sections (verses and choruses)
         val sections = mutableListOf<LyricSection>()

@@ -13,6 +13,8 @@ sealed class ScheduleItem {
         val songNumber: Int,
         val title: String,
         val songbook: String,
+        /** Stable unique ID = "songbook::number". Empty on old saved schedules — fall back to title+number matching. */
+        val songId: String = "",
         override val displayText: String = "$songNumber - $title"
     ) : ScheduleItem()
 

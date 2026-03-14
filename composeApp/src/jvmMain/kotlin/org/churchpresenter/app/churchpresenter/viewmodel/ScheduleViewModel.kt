@@ -147,8 +147,8 @@ class ScheduleViewModel(
 
     // ── Existing methods ──────────────────────────────────────────────────────
 
-    fun addSong(songNumber: Int, title: String, songbook: String) {
-        _scheduleItems.add(ScheduleItem.SongItem(id = UUID.randomUUID().toString(), songNumber = songNumber, title = title, songbook = songbook))
+    fun addSong(songNumber: Int, title: String, songbook: String, songId: String = "") {
+        _scheduleItems.add(ScheduleItem.SongItem(id = UUID.randomUUID().toString(), songNumber = songNumber, title = title, songbook = songbook, songId = songId))
         notifyChanged()
     }
 

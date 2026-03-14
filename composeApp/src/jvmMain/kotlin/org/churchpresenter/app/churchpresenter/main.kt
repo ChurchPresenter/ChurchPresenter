@@ -210,6 +210,7 @@ fun main() {
             mutableStateOf(savedTheme)
         }
         val companionServer = remember { CompanionServer() }
+        val remoteSelectSongFlow = remember { kotlinx.coroutines.flow.MutableSharedFlow<ScheduleItem.SongItem>(extraBufferCapacity = 8) }
         var showOptionsDialog by remember { mutableStateOf(false) }
         var showKeyboardShortcutsDialog by remember { mutableStateOf(false) }
         var showAboutDialog by remember { mutableStateOf(false) }
@@ -312,8 +313,10 @@ fun main() {
                                     )
                                     val allow: () -> Unit = {
                                         when (item) {
-                                            is ScheduleItem.SongItem ->
-                                                currentScheduleActions.addSong(item.songNumber, item.title, item.songbook)
+                                            is ScheduleItem.SongItem -> {
+                                                currentScheduleActions.addSong(item.songNumber, item.title, item.songbook, item.songId)
+                                                coroutineScope.launch { remoteSelectSongFlow.emit(item) }
+                                            }
                                             is ScheduleItem.BibleVerseItem ->
                                                 currentScheduleActions.addBibleVerse(item.bookName, item.chapter, item.verseNumber, item.verseText)
                                             is ScheduleItem.PresentationItem ->
@@ -347,6 +350,10 @@ fun main() {
                                     )
                                     val allow: () -> Unit = {
                                         executeProjectItem(item, currentScheduleActions, presenterManager)
+                                        // Also drive Songs tab selection for song items
+                                        if (item is ScheduleItem.SongItem) {
+                                            coroutineScope.launch { remoteSelectSongFlow.emit(item) }
+                                        }
                                         pending.decision.complete(true)
                                     }
                                     val deny: () -> Unit = { pending.decision.complete(false) }
@@ -419,6 +426,7 @@ fun main() {
                                         emit(req.folderId to req.index)
                                     }
                                 },
+                                remoteSelectSongFlow = remoteSelectSongFlow,
                                 serverUrl = companionServer.serverUrl.collectAsState().value
                             )
                             OptionsDialog(
@@ -538,7 +546,7 @@ private fun executeProjectItem(
     when (item) {
         is ScheduleItem.SongItem -> {
             // Add to schedule AND select the song so the Songs tab navigates to it
-            scheduleActions.addSong(item.songNumber, item.title, item.songbook)
+            scheduleActions.addSong(item.songNumber, item.title, item.songbook, item.songId)
             presenterManager.setLyricSection(
                 LyricSection(
                     title      = item.title,
