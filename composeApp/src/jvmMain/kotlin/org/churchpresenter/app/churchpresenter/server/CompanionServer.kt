@@ -372,6 +372,20 @@ data class RemoteItemDto(
 data class RemoteItemRequest(val item: RemoteItemDto)
 
 /**
+ * Batch variant of [RemoteItemRequest] — used by POST /api/schedule/add-batch
+ * and the [Constants.WS_CMD_ADD_BATCH_TO_SCHEDULE] WebSocket command.
+ *
+ * {
+ *   "items": [
+ *     { "bookName": "John",  "chapter": 3, "verseNumber": 16, "verseText": "For God so loved…" },
+ *     { "bookName": "John",  "chapter": 3, "verseNumber": 17, "verseText": "For God did not send…" }
+ *   ]
+ * }
+ */
+@Serializable
+data class RemoteItemsRequest(val items: List<RemoteItemDto>)
+
+/**
  * Infer a [ScheduleItem] from the flat [RemoteItemDto] by detecting which fields are present.
  * Returns null if the dto doesn't match any known item type.
  */
@@ -442,6 +456,15 @@ data class PendingRemoteRequest(
     val decision: kotlinx.coroutines.CompletableDeferred<Boolean> = kotlinx.coroutines.CompletableDeferred()
 )
 
+/**
+ * Same as [PendingRemoteRequest] but carries multiple items — used by the
+ * batch add endpoint so the user approves or denies the whole group at once.
+ */
+data class PendingBatchRequest(
+    val items: List<ScheduleItem>,
+    val decision: kotlinx.coroutines.CompletableDeferred<Boolean> = kotlinx.coroutines.CompletableDeferred()
+)
+
 // ── CompanionServer ───────────────────────────────────────────────────────────
 
 /**
@@ -494,6 +517,12 @@ class CompanionServer {
     /** Emitted when a remote client requests an item to be added to the schedule. */
     val onAddToSchedule = MutableSharedFlow<PendingRemoteRequest>(
         extraBufferCapacity = 16,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
+
+    /** Emitted when a remote client requests multiple items to be added to the schedule in one call. */
+    val onAddBatchToSchedule = MutableSharedFlow<PendingBatchRequest>(
+        extraBufferCapacity = 8,
         onBufferOverflow = BufferOverflow.DROP_OLDEST
     )
 
@@ -998,6 +1027,46 @@ class CompanionServer {
                 }
 
                 /**
+                 * POST /api/schedule/add-batch
+                 * Adds multiple items in a single call.  Suspends until the user approves or denies
+                 * the whole batch.  On Allow every valid item is added; on Deny nothing is added.
+                 *
+                 * Request body:
+                 * {
+                 *   "items": [
+                 *     { "bookName": "John",  "chapter": 3, "verseNumber": 16, "verseText": "For God so loved…" },
+                 *     { "bookName": "John",  "chapter": 3, "verseNumber": 17, "verseText": "For God did not send…" }
+                 *   ]
+                 * }
+                 *
+                 * Success:  {"ok":true,"added":2}
+                 * Denied:   HTTP 403  {"ok":false,"reason":"denied"}
+                 * Bad body: HTTP 400  {"error":"…"}
+                 */
+                post(Constants.ENDPOINT_SCHEDULE_ADD_BATCH) {
+                    if (!checkApiKey(call)) return@post
+                    val body = call.receiveText()
+                    val items = try {
+                        json.decodeFromString(RemoteItemsRequest.serializer(), body)
+                            .items.mapNotNull { it.toScheduleItem() }
+                    } catch (_: Exception) { null }
+                    if (items.isNullOrEmpty()) {
+                        call.respond(io.ktor.http.HttpStatusCode.BadRequest,
+                            """{"error":"invalid request body or no recognisable items"}""")
+                        return@post
+                    }
+                    val pending = PendingBatchRequest(items)
+                    scope.launch { onAddBatchToSchedule.emit(pending) }
+                    val allowed = pending.decision.await()
+                    if (allowed) {
+                        call.respondText("""{"ok":true,"added":${items.size}}""", ContentType.Application.Json)
+                    } else {
+                        call.respond(io.ktor.http.HttpStatusCode.Forbidden,
+                            """{"ok":false,"reason":"denied"}""")
+                    }
+                }
+
+                /**
                  * POST /api/project
                  * Same suspend-until-approved behaviour as /api/schedule/add.
                  */
@@ -1220,6 +1289,16 @@ class CompanionServer {
                                             onAddToSchedule.emit(pending)
                                             // WS is fire-and-forget — complete automatically after emit
                                             // (decision resolved by UI; if blocked, item is dropped silently)
+                                        }
+                                    }
+                                    Constants.WS_CMD_ADD_BATCH_TO_SCHEDULE -> {
+                                        val items = try {
+                                            json.decodeFromString(RemoteItemsRequest.serializer(), msg.payload)
+                                                .items.mapNotNull { it.toScheduleItem() }
+                                        } catch (_: Exception) { emptyList() }
+                                        if (items.isNotEmpty()) {
+                                            val pending = PendingBatchRequest(items)
+                                            scope.launch { onAddBatchToSchedule.emit(pending) }
                                         }
                                     }
                                     Constants.WS_CMD_PROJECT -> {

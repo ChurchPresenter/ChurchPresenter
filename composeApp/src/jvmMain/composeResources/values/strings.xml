@@ -711,6 +711,7 @@
     <string name="endpoint_desc_ws_select_picture">select picture image (WS)</string>
     <string name="endpoint_desc_bible_chapter">full chapter with verse text</string>
     <string name="endpoint_desc_add_to_schedule">add item to schedule</string>
+    <string name="endpoint_desc_add_batch_to_schedule">add multiple items to schedule in one call</string>
     <string name="endpoint_desc_project">send item directly to projection</string>
     <string name="endpoint_desc_ws_realtime">real-time updates</string>
     <string name="endpoint_desc_ws_add_to_schedule">add item to schedule (WS)</string>

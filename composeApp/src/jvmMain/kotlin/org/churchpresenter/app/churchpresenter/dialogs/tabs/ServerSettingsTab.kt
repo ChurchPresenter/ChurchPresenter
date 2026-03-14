@@ -46,6 +46,7 @@ import churchpresenter.composeapp.generated.resources.copy_api_key
 import churchpresenter.composeapp.generated.resources.copy_url
 import churchpresenter.composeapp.generated.resources.enable_server
 import churchpresenter.composeapp.generated.resources.endpoint_desc_add_to_schedule
+import churchpresenter.composeapp.generated.resources.endpoint_desc_add_batch_to_schedule
 import churchpresenter.composeapp.generated.resources.endpoint_desc_bible_catalog
 import churchpresenter.composeapp.generated.resources.endpoint_desc_bible_chapter
 import churchpresenter.composeapp.generated.resources.endpoint_desc_filter_book
@@ -385,6 +386,7 @@ fun ServerSettingsTab(
                 )
                 listOf(
                     "POST ${Constants.ENDPOINT_SCHEDULE_ADD}" to stringResource(Res.string.endpoint_desc_add_to_schedule),
+                    "POST ${Constants.ENDPOINT_SCHEDULE_ADD_BATCH}" to stringResource(Res.string.endpoint_desc_add_batch_to_schedule),
                     "POST ${Constants.ENDPOINT_PROJECT}" to stringResource(Res.string.endpoint_desc_project),
                     "POST ${Constants.ENDPOINT_PICTURES}/select" to stringResource(Res.string.endpoint_desc_select_picture)
                 ).forEach { (endpoint, description) ->
