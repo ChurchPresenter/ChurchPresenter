@@ -89,6 +89,8 @@ kotlin {
         }
         jvmMain.dependencies {
             implementation(libs.kotlinx.coroutinesSwing)
+            // Sentry crash reporting
+            implementation(libs.sentry)
             implementation("com.twelvemonkeys.imageio:imageio-core:3.10.1")
             implementation("com.twelvemonkeys.imageio:imageio-jpeg:3.10.1")
             // Apache PDFBox for PDF slide extraction
