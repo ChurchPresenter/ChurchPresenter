@@ -17,6 +17,17 @@ class Songs {
 
     fun loadFromSpsAppend(resourcePath: String) {
         try {
+            // Detect SQLite format (Mac SongPresenter uses SQLite databases for .sps files)
+            val spsFile = java.io.File(resourcePath)
+            if (spsFile.exists() && spsFile.length() >= 16) {
+                val header = ByteArray(16)
+                spsFile.inputStream().use { it.read(header) }
+                if (String(header, Charsets.US_ASCII).startsWith("SQLite format 3")) {
+                    loadFromSpsSqlite(spsFile)
+                    return
+                }
+            }
+
             // Extract database name from the file path (without extension) as fallback
             val fileBaseName = resourcePath.substringAfterLast('/').substringAfterLast('\\').substringBeforeLast('.')
 
@@ -91,6 +102,54 @@ class Songs {
         } catch (e: Exception) {
             throw e
         }
+    }
+
+    /**
+     * Load songs from a SQLite-format .sps file (Mac SongPresenter).
+     */
+    private fun loadFromSpsSqlite(file: java.io.File) {
+        val conn = JdbcDatabase.openConnection(file.absolutePath)
+        conn.use { c ->
+            // Get songbook name from SongBook table
+            val songbookName = try {
+                val sbResult = JdbcDatabase.executeQuery(c, "SELECT title FROM SongBook LIMIT 1")
+                sbResult.firstOrNull()?.getString(0)?.ifEmpty { null }
+            } catch (_: Exception) { null } ?: file.nameWithoutExtension
+
+            // Load all songs
+            val result = JdbcDatabase.executeQuery(c,
+                "SELECT number, title, category, tune, words, music, song_text FROM Songs ORDER BY number")
+            for (row in result) {
+                val songText = row.getString(6)
+                val lyrics = parseSqliteLyrics(songText)
+                songs.add(
+                    SongItem(
+                        number = row.getString(0),
+                        title = row.getString(1),
+                        songbook = songbookName,
+                        tune = row.getString(3),
+                        author = row.getString(4),
+                        composer = row.getString(5),
+                        lyrics = lyrics
+                    )
+                )
+            }
+        }
+    }
+
+    /**
+     * Parse lyrics from SQLite song_text format.
+     * Uses newlines to separate lines and blank lines to separate sections.
+     * Section headers like "Куплет 1", "Припев" appear on their own lines.
+     */
+    private fun parseSqliteLyrics(songText: String): List<String> {
+        if (songText.isBlank()) return emptyList()
+        // The song_text uses plain newlines — just split and return as-is
+        // Section headers and empty line separators are already in the correct format
+        val lines = songText.split("\n").map { it.trimEnd('\r') }
+        // Remove trailing empty lines
+        val trimmed = lines.dropLastWhile { it.isBlank() }
+        return trimmed
     }
 
     private fun parseLyrics(lyricsText: String): List<String> {
