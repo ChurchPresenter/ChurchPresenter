@@ -789,7 +789,9 @@ private fun PresenterWindows(
         }
         // Skip fade in line mode — only one line visible, instant swap is cleaner
         val isLineMode = ss.fullscreenDisplayMode == Constants.SONG_DISPLAY_MODE_LINE ||
-            ss.lowerThirdDisplayMode == Constants.SONG_DISPLAY_MODE_LINE
+            ss.lowerThirdDisplayMode == Constants.SONG_DISPLAY_MODE_LINE ||
+            ss.lookAheadDisplayMode == Constants.SONG_DISPLAY_MODE_LINE ||
+            ss.lowerThirdLookAheadDisplayMode == Constants.SONG_DISPLAY_MODE_LINE
         if (isLineMode) {
             presenterManager.setDisplayedLyricSection(lyricSection)
             presenterManager.setSongTransitionAlpha(1f)

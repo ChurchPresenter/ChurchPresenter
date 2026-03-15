@@ -458,6 +458,8 @@
     <string name="window_position">Window Position</string>
     <string name="text_margins">Text Margins</string>
     <string name="auto_fit">Auto</string>
+    <string name="auto_fit_checkbox_tooltip">Automatically fit text to screen, using font size as maximum</string>
+    <string name="auto_fit_button_tooltip">Calculate optimal font size for current verse</string>
     <string name="screen">Screen</string>
     <string name="projection_position_help">Position values represent pixel offsets from screen edges. Use these to adjust projection window placement on secondary displays.</string>
     <string name="screen_assignment">Screen Assignment</string>

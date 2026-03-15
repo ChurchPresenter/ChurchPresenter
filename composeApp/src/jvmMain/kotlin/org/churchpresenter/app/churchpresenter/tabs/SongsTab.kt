@@ -269,7 +269,9 @@ fun SongsTab(
             .onKeyEvent { keyEvent ->
                 if (keyEvent.type == KeyEventType.KeyDown) {
                     val isLineMode = appSettings.songSettings.fullscreenDisplayMode != Constants.SONG_DISPLAY_MODE_VERSE ||
-                        appSettings.songSettings.lowerThirdDisplayMode != Constants.SONG_DISPLAY_MODE_VERSE
+                        appSettings.songSettings.lowerThirdDisplayMode != Constants.SONG_DISPLAY_MODE_VERSE ||
+                        appSettings.songSettings.lookAheadDisplayMode != Constants.SONG_DISPLAY_MODE_VERSE ||
+                        appSettings.songSettings.lowerThirdLookAheadDisplayMode != Constants.SONG_DISPLAY_MODE_VERSE
                     when (keyEvent.key) {
                         Key.DirectionLeft -> {
                             if (isLineMode) {
@@ -687,7 +689,9 @@ fun SongsTab(
 
             // Arrow key navigation hint — only in line mode
             val isLineModeHint = appSettings.songSettings.fullscreenDisplayMode != Constants.SONG_DISPLAY_MODE_VERSE ||
-                    appSettings.songSettings.lowerThirdDisplayMode != Constants.SONG_DISPLAY_MODE_VERSE
+                    appSettings.songSettings.lowerThirdDisplayMode != Constants.SONG_DISPLAY_MODE_VERSE ||
+                    appSettings.songSettings.lookAheadDisplayMode != Constants.SONG_DISPLAY_MODE_VERSE ||
+                    appSettings.songSettings.lowerThirdLookAheadDisplayMode != Constants.SONG_DISPLAY_MODE_VERSE
             if (isLineModeHint) {
                 Text(
                     text = lineNavHintStr,
@@ -748,7 +752,9 @@ fun SongsTab(
                                     MaterialTheme.colorScheme.onSurface
 
                                 val isPerLineMode = appSettings.songSettings.fullscreenDisplayMode != Constants.SONG_DISPLAY_MODE_VERSE ||
-                                    appSettings.songSettings.lowerThirdDisplayMode != Constants.SONG_DISPLAY_MODE_VERSE
+                                    appSettings.songSettings.lowerThirdDisplayMode != Constants.SONG_DISPLAY_MODE_VERSE ||
+                                    appSettings.songSettings.lookAheadDisplayMode != Constants.SONG_DISPLAY_MODE_VERSE ||
+                                    appSettings.songSettings.lowerThirdLookAheadDisplayMode != Constants.SONG_DISPLAY_MODE_VERSE
                                 val activeLineIndex = if (isPerLineMode && sectionIndex == selectedSectionIndex)
                                     viewModel.selectedLineIndex.value else -1
 
