@@ -302,9 +302,35 @@ fun SongPresenter(
                     fontStyle = if (effectiveLyricsItalic) FontStyle.Italic else FontStyle.Normal,
                     fontFamily = lyricsFontFamily
                 )
+                // Resolve display mode to know if we're in line mode
+                val fitDisplayMode = if (lookAheadEnabled) {
+                    if (isLowerThird) ss.lowerThirdLookAheadDisplayMode else ss.lookAheadDisplayMode
+                } else {
+                    if (isLowerThird) ss.lowerThirdDisplayMode else ss.fullscreenDisplayMode
+                }
+                val fitIsLineMode = fitDisplayMode == Constants.SONG_DISPLAY_MODE_LINE
+
                 // For lookahead: combine each section with its next section so auto-fit
-                // accounts for displaying both simultaneously at the same font size
-                val sectionsForFit = if (lookAheadEnabled) {
+                // accounts for displaying both simultaneously at the same font size.
+                // In line mode, only 2 lines are shown (1 main + 1 lookahead), so create
+                // 2-line sections pairing each line with the next.
+                val sectionsForFit = if (lookAheadEnabled && fitIsLineMode) {
+                    // Line mode: pair each line with the next line across all sections
+                    val allLines = allLyricSections.flatMap { it.lines }
+                    val allSecLines = allLyricSections.flatMap { it.secondaryLines }
+                    allLines.indices.map { i ->
+                        val nextLine = allLines.getOrElse(i + 1) { allLines[i] }
+                        LyricSection(
+                            lines = listOf(allLines[i], nextLine),
+                            secondaryLines = if (allSecLines.isNotEmpty()) {
+                                val secLine = allSecLines.getOrElse(i) { "" }
+                                val secNext = allSecLines.getOrElse(i + 1) { secLine }
+                                listOf(secLine, secNext)
+                            } else emptyList()
+                        )
+                    }
+                } else if (lookAheadEnabled) {
+                    // Verse mode: combine full section with next section
                     allLyricSections.mapIndexed { i, section ->
                         val next = allLyricSections.getOrNull(i + 1)
                         if (next != null) {
@@ -336,7 +362,14 @@ fun SongPresenter(
                 ss.bilingualLayout == Constants.BILINGUAL_SIDE_BY_SIDE && hasBilingualContent
         val isBilingualTopBottom = langDisplay == Constants.SONG_LANG_BOTH &&
                 ss.bilingualLayout == Constants.BILINGUAL_TOP_BOTTOM && hasBilingualContent
-        val effectiveLyricsFontSize = autoFitFontSize ?: settingsLyricsFontSize
+        val autoFitEnabled = if (lookAheadEnabled) {
+            if (isLowerThird) ss.lowerThirdLookAheadFontSizeAutoFit else ss.lookAheadFontSizeAutoFit
+        } else {
+            if (isLowerThird) ss.lyricsLowerThirdFontSizeAutoFit else ss.lyricsFontSizeAutoFit
+        }
+        val effectiveLyricsFontSize = if (autoFitEnabled) {
+            (autoFitFontSize ?: settingsLyricsFontSize).coerceAtMost(settingsLyricsFontSize)
+        } else settingsLyricsFontSize
 
         val scaledLyricsFontSize = (effectiveLyricsFontSize * scaleFactor).sp
         val scaledSongNumberFontSize = (effectiveSongNumberFontSize * scaleFactor).sp
@@ -586,8 +619,11 @@ fun SongPresenter(
                         textDecoration = if (laUnderline) TextDecoration.Underline else TextDecoration.None,
                         shadow = if (laShadowEnabled) laBaseShadow else null
                     )
-                    // Look-ahead uses same auto-fit font size as main verse
-                    val effectiveLaFontSize = effectiveLyricsFontSize
+                    // Look-ahead next uses auto-fit capped at its own configured max
+                    val laAutoFitEnabled = if (isLowerThird) ss.lowerThirdLookAheadNextFontSizeAutoFit else ss.lookAheadNextFontSizeAutoFit
+                    val effectiveLaFontSize = if (laAutoFitEnabled) {
+                        (autoFitFontSize ?: laFontSize).coerceAtMost(laFontSize)
+                    } else laFontSize
                     val scaledLaFontSize = (effectiveLaFontSize * scaleFactor).sp
 
                     @Composable
@@ -627,7 +663,9 @@ fun SongPresenter(
                     @Composable
                     fun LookAheadPlaceholder() {
                         if (lookAheadEnabled && effectiveLaLines.isEmpty() && effectiveDisplayLines.isNotEmpty()) {
-                            Spacer(modifier = Modifier.padding(top = (12 * scaleFactor).dp))
+                            if (!laIsLineMode) {
+                                Spacer(modifier = Modifier.padding(top = (12 * scaleFactor).dp))
+                            }
                             Column(modifier = Modifier.alpha(0f)) {
                                 effectiveDisplayLines.forEach { line ->
                                     Text(
@@ -759,29 +797,48 @@ fun SongPresenter(
                                         }
                                     }
                                 } else {
-                                    // Top/bottom bilingual layout — each language gets its own half
-                                    // Each half respects the vertical alignment setting
-                                    val halfAlignment = if (isLowerThird) Alignment.BottomCenter else contentAlignment
-                                    Column(modifier = Modifier.fillMaxWidth().fillMaxHeight()) {
-                                        Box(modifier = Modifier.fillMaxWidth().weight(1f), contentAlignment = halfAlignment) {
-                                            Column(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
-                                                combinedPrimaryLines.forEachIndexed { idx, line ->
-                                                    LookAheadSpacer(idx, primaryLaStart)
-                                                    LyricLine(idx, line, primaryLaStart)
-                                                }
-                                                EndOfSongIndicator()
-                                                LookAheadPlaceholder()
+                                    // Top/bottom bilingual layout
+                                    if (isLowerThird) {
+                                        // Lower third: compact layout, no height splitting
+                                        Column(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
+                                            combinedPrimaryLines.forEachIndexed { idx, line ->
+                                                LookAheadSpacer(idx, primaryLaStart)
+                                                LyricLine(idx, line, primaryLaStart)
                                             }
+                                            EndOfSongIndicator()
+                                            LookAheadPlaceholder()
+                                            Spacer(modifier = Modifier.padding(top = (12 * scaleFactor).dp))
+                                            combinedSecondaryLines.forEachIndexed { idx, line ->
+                                                LookAheadSpacer(idx, secondaryLaStart)
+                                                LyricLine(idx, line, secondaryLaStart)
+                                            }
+                                            EndOfSongIndicator()
+                                            LookAheadPlaceholder()
                                         }
-                                        Spacer(modifier = Modifier.padding(top = (12 * scaleFactor).dp))
-                                        Box(modifier = Modifier.fillMaxWidth().weight(1f), contentAlignment = halfAlignment) {
-                                            Column(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
-                                                combinedSecondaryLines.forEachIndexed { idx, line ->
-                                                    LookAheadSpacer(idx, secondaryLaStart)
-                                                    LyricLine(idx, line, secondaryLaStart)
+                                    } else {
+                                        // Full screen: each language gets its own half
+                                        val halfAlignment = contentAlignment
+                                        Column(modifier = Modifier.fillMaxWidth().fillMaxHeight()) {
+                                            Box(modifier = Modifier.fillMaxWidth().weight(1f), contentAlignment = halfAlignment) {
+                                                Column(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
+                                                    combinedPrimaryLines.forEachIndexed { idx, line ->
+                                                        LookAheadSpacer(idx, primaryLaStart)
+                                                        LyricLine(idx, line, primaryLaStart)
+                                                    }
+                                                    EndOfSongIndicator()
+                                                    LookAheadPlaceholder()
                                                 }
-                                                EndOfSongIndicator()
-                                                LookAheadPlaceholder()
+                                            }
+                                            Spacer(modifier = Modifier.padding(top = (12 * scaleFactor).dp))
+                                            Box(modifier = Modifier.fillMaxWidth().weight(1f), contentAlignment = halfAlignment) {
+                                                Column(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
+                                                    combinedSecondaryLines.forEachIndexed { idx, line ->
+                                                        LookAheadSpacer(idx, secondaryLaStart)
+                                                        LyricLine(idx, line, secondaryLaStart)
+                                                    }
+                                                    EndOfSongIndicator()
+                                                    LookAheadPlaceholder()
+                                                }
                                             }
                                         }
                                     }

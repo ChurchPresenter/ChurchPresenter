@@ -64,7 +64,13 @@ import churchpresenter.composeapp.generated.resources.top_right
 import churchpresenter.composeapp.generated.resources.vertical_alignment
 import churchpresenter.composeapp.generated.resources.word_wrap
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.TooltipArea
+import androidx.compose.foundation.TooltipPlacement
+import androidx.compose.material3.Surface
 import churchpresenter.composeapp.generated.resources.auto_fit
+import churchpresenter.composeapp.generated.resources.auto_fit_checkbox_tooltip
+import churchpresenter.composeapp.generated.resources.auto_fit_button_tooltip
 import churchpresenter.composeapp.generated.resources.fade_in
 import churchpresenter.composeapp.generated.resources.fade_out
 import churchpresenter.composeapp.generated.resources.bottom
@@ -96,6 +102,7 @@ import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.jetbrains.compose.resources.stringResource
 
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun SongSettingsTab(
     settings: AppSettings,
@@ -162,6 +169,7 @@ fun SongSettingsTab(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun LeftColumn(
     settings: AppSettings,
@@ -725,6 +733,7 @@ private fun LeftColumn(
     Spacer(modifier = Modifier.height(20.dp))
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun RightColumn(
     settings: AppSettings,
@@ -831,40 +840,58 @@ private fun RightColumn(
                 onValueChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsFontSize = it)) } },
                 range = 8..150
             )
+            TooltipArea(
+                tooltip = { Surface(shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.auto_fit_checkbox_tooltip), modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
+                tooltipPlacement = TooltipPlacement.CursorPoint()
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Checkbox(
+                        checked = settings.songSettings.lyricsFontSizeAutoFit,
+                        onCheckedChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsFontSizeAutoFit = it)) } },
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Text(stringResource(Res.string.auto_fit), style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(start = 4.dp))
+                }
+            }
             if (presenterManager != null) {
-                TextButton(
-                    enabled = isPresentingLyrics && hasFullscreenScreen,
-                    onClick = {
-                        val section = presenterManager.lyricSection.value
-                        val lyricsText = section.lines.joinToString("\n")
-                        if (lyricsText.isBlank()) return@TextButton
-                        val ss = settings.songSettings
-                        val proj = settings.projectionSettings
-                        val baseStyle = TextStyle(
-                            fontFamily = systemFontFamilyOrDefault(ss.lyricsFontType),
-                            fontWeight = if (ss.lyricsBold) FontWeight.Bold else FontWeight.Normal,
-                            fontStyle = if (ss.lyricsItalic) FontStyle.Italic else FontStyle.Normal,
-                            textDecoration = if (ss.lyricsUnderline) TextDecoration.Underline else TextDecoration.None
-                        )
-                        val availW = 1920 - proj.windowLeft - proj.windowRight - ss.marginLeft - ss.marginRight
-                        val availH = 1080 - proj.windowTop - proj.windowBottom - ss.marginTop - ss.marginBottom
-                        val shouldShowTitle = ss.titleDisplay != Constants.NONE && section.title.isNotBlank()
-                        val titleH = if (shouldShowTitle) {
-                            val titleStyle = TextStyle(
-                                fontFamily = systemFontFamilyOrDefault(ss.titleFontType),
-                                fontWeight = if (ss.titleBold) FontWeight.Bold else FontWeight.Normal,
-                                fontStyle = if (ss.titleItalic) FontStyle.Italic else FontStyle.Normal
-                            )
-                            val titleResult = textMeasurer.measure(section.title, titleStyle.copy(fontSize = ss.titleFontSize.sp), density = Density(1f))
-                            titleResult.size.height
-                        } else 0
-                        val fullSize = calculateAutoFitFontSize(textMeasurer, lyricsText, baseStyle, availW, availH - titleH)
-                        onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsFontSize = fullSize)) }
-                    },
-                    modifier = Modifier.height(32.dp),
-                    contentPadding = PaddingValues(horizontal = 8.dp)
+                TooltipArea(
+                    tooltip = { Surface(shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.auto_fit_button_tooltip), modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
+                    tooltipPlacement = TooltipPlacement.CursorPoint()
                 ) {
-                    Text(stringResource(Res.string.auto_fit), style = MaterialTheme.typography.labelSmall)
+                    TextButton(
+                        enabled = isPresentingLyrics && hasFullscreenScreen,
+                        onClick = {
+                            val section = presenterManager.lyricSection.value
+                            val lyricsText = section.lines.joinToString("\n")
+                            if (lyricsText.isBlank()) return@TextButton
+                            val ss = settings.songSettings
+                            val proj = settings.projectionSettings
+                            val baseStyle = TextStyle(
+                                fontFamily = systemFontFamilyOrDefault(ss.lyricsFontType),
+                                fontWeight = if (ss.lyricsBold) FontWeight.Bold else FontWeight.Normal,
+                                fontStyle = if (ss.lyricsItalic) FontStyle.Italic else FontStyle.Normal,
+                                textDecoration = if (ss.lyricsUnderline) TextDecoration.Underline else TextDecoration.None
+                            )
+                            val availW = 1920 - proj.windowLeft - proj.windowRight - ss.marginLeft - ss.marginRight
+                            val availH = 1080 - proj.windowTop - proj.windowBottom - ss.marginTop - ss.marginBottom
+                            val shouldShowTitle = ss.titleDisplay != Constants.NONE && section.title.isNotBlank()
+                            val titleH = if (shouldShowTitle) {
+                                val titleStyle = TextStyle(
+                                    fontFamily = systemFontFamilyOrDefault(ss.titleFontType),
+                                    fontWeight = if (ss.titleBold) FontWeight.Bold else FontWeight.Normal,
+                                    fontStyle = if (ss.titleItalic) FontStyle.Italic else FontStyle.Normal
+                                )
+                                val titleResult = textMeasurer.measure(section.title, titleStyle.copy(fontSize = ss.titleFontSize.sp), density = Density(1f))
+                                titleResult.size.height
+                            } else 0
+                            val fullSize = calculateAutoFitFontSize(textMeasurer, lyricsText, baseStyle, availW, availH - titleH)
+                            onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsFontSize = fullSize)) }
+                        },
+                        modifier = Modifier.height(32.dp),
+                        contentPadding = PaddingValues(horizontal = 8.dp)
+                    ) {
+                        Text(stringResource(Res.string.auto_fit), style = MaterialTheme.typography.labelSmall)
+                    }
                 }
             }
         }
@@ -958,7 +985,24 @@ private fun RightColumn(
                 onValueChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsLowerThirdFontSize = it)) } },
                 range = 8..150
             )
+            TooltipArea(
+                tooltip = { Surface(shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.auto_fit_checkbox_tooltip), modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
+                tooltipPlacement = TooltipPlacement.CursorPoint()
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Checkbox(
+                        checked = settings.songSettings.lyricsLowerThirdFontSizeAutoFit,
+                        onCheckedChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsLowerThirdFontSizeAutoFit = it)) } },
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Text(stringResource(Res.string.auto_fit), style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(start = 4.dp))
+                }
+            }
             if (presenterManager != null) {
+                TooltipArea(
+                    tooltip = { Surface(shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.auto_fit_button_tooltip), modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
+                    tooltipPlacement = TooltipPlacement.CursorPoint()
+                ) {
                 TextButton(
                     enabled = isPresentingLyrics && hasLowerThirdScreen,
                     onClick = {
@@ -993,6 +1037,7 @@ private fun RightColumn(
                     contentPadding = PaddingValues(horizontal = 8.dp)
                 ) {
                     Text(stringResource(Res.string.auto_fit), style = MaterialTheme.typography.labelSmall)
+                }
                 }
             }
         }
@@ -1052,6 +1097,7 @@ private fun RightColumn(
 
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun LookAheadColumn(
     settings: AppSettings,
@@ -1096,11 +1142,26 @@ private fun LookAheadColumn(
         )
     }
     SettingRow(stringResource(Res.string.font_size)) {
-        NumberSettingsTextField(
-            initialText = settings.songSettings.lookAheadFontSize,
-            onValueChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lookAheadFontSize = it)) } },
-            range = 8..150
-        )
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            NumberSettingsTextField(
+                initialText = settings.songSettings.lookAheadFontSize,
+                onValueChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lookAheadFontSize = it)) } },
+                range = 8..150
+            )
+            TooltipArea(
+                tooltip = { Surface(shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.auto_fit_checkbox_tooltip), modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
+                tooltipPlacement = TooltipPlacement.CursorPoint()
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Checkbox(
+                        checked = settings.songSettings.lookAheadFontSizeAutoFit,
+                        onCheckedChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lookAheadFontSizeAutoFit = it)) } },
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Text(stringResource(Res.string.auto_fit), style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(start = 4.dp))
+                }
+            }
+        }
     }
     SettingRow(stringResource(Res.string.font_type)) {
         FontSettingsDropdown(
@@ -1146,11 +1207,26 @@ private fun LookAheadColumn(
     SectionHeader("Look Ahead Next Section (Fullscreen)")
     Spacer(modifier = Modifier.height(8.dp))
     SettingRow(stringResource(Res.string.font_size)) {
-        NumberSettingsTextField(
-            initialText = settings.songSettings.lookAheadNextFontSize,
-            onValueChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lookAheadNextFontSize = it)) } },
-            range = 8..150
-        )
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            NumberSettingsTextField(
+                initialText = settings.songSettings.lookAheadNextFontSize,
+                onValueChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lookAheadNextFontSize = it)) } },
+                range = 8..150
+            )
+            TooltipArea(
+                tooltip = { Surface(shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.auto_fit_checkbox_tooltip), modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
+                tooltipPlacement = TooltipPlacement.CursorPoint()
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Checkbox(
+                        checked = settings.songSettings.lookAheadNextFontSizeAutoFit,
+                        onCheckedChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lookAheadNextFontSizeAutoFit = it)) } },
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Text(stringResource(Res.string.auto_fit), style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(start = 4.dp))
+                }
+            }
+        }
     }
     SettingRow(stringResource(Res.string.font_type)) {
         FontSettingsDropdown(
@@ -1230,11 +1306,26 @@ private fun LookAheadColumn(
         )
     }
     SettingRow(stringResource(Res.string.font_size)) {
-        NumberSettingsTextField(
-            initialText = settings.songSettings.lowerThirdLookAheadFontSize,
-            onValueChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lowerThirdLookAheadFontSize = it)) } },
-            range = 8..150
-        )
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            NumberSettingsTextField(
+                initialText = settings.songSettings.lowerThirdLookAheadFontSize,
+                onValueChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lowerThirdLookAheadFontSize = it)) } },
+                range = 8..150
+            )
+            TooltipArea(
+                tooltip = { Surface(shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.auto_fit_checkbox_tooltip), modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
+                tooltipPlacement = TooltipPlacement.CursorPoint()
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Checkbox(
+                        checked = settings.songSettings.lowerThirdLookAheadFontSizeAutoFit,
+                        onCheckedChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lowerThirdLookAheadFontSizeAutoFit = it)) } },
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Text(stringResource(Res.string.auto_fit), style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(start = 4.dp))
+                }
+            }
+        }
     }
     SettingRow(stringResource(Res.string.font_type)) {
         FontSettingsDropdown(
@@ -1280,11 +1371,26 @@ private fun LookAheadColumn(
     SectionHeader("Look Ahead Next Section (Lower Third)")
     Spacer(modifier = Modifier.height(8.dp))
     SettingRow(stringResource(Res.string.font_size)) {
-        NumberSettingsTextField(
-            initialText = settings.songSettings.lowerThirdLookAheadNextFontSize,
-            onValueChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lowerThirdLookAheadNextFontSize = it)) } },
-            range = 8..150
-        )
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            NumberSettingsTextField(
+                initialText = settings.songSettings.lowerThirdLookAheadNextFontSize,
+                onValueChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lowerThirdLookAheadNextFontSize = it)) } },
+                range = 8..150
+            )
+            TooltipArea(
+                tooltip = { Surface(shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.auto_fit_checkbox_tooltip), modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
+                tooltipPlacement = TooltipPlacement.CursorPoint()
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Checkbox(
+                        checked = settings.songSettings.lowerThirdLookAheadNextFontSizeAutoFit,
+                        onCheckedChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lowerThirdLookAheadNextFontSizeAutoFit = it)) } },
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Text(stringResource(Res.string.auto_fit), style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(start = 4.dp))
+                }
+            }
+        }
     }
     SettingRow(stringResource(Res.string.font_type)) {
         FontSettingsDropdown(

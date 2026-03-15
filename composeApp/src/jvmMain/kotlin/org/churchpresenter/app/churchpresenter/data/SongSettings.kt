@@ -79,7 +79,9 @@ data class SongSettings(
 
     // Lyrics settings
     val lyricsFontSize: Int = 70,
+    val lyricsFontSizeAutoFit: Boolean = true,
     val lyricsLowerThirdFontSize: Int = 28,
+    val lyricsLowerThirdFontSizeAutoFit: Boolean = true,
     val lyricsFontType: String = "Arial",
     val lyricsMinFontSize: Int = 12,
     val lyricsMaxFontSize: Int = 60,
@@ -160,6 +162,7 @@ data class SongSettings(
     val lookAheadLanguageDisplay: String = Constants.SONG_LANG_PRIMARY,
     val lookAheadHorizontalAlignment: String = Constants.CENTER,
     val lookAheadFontSize: Int = 70,
+    val lookAheadFontSizeAutoFit: Boolean = true,
     val lookAheadFontType: String = "Arial",
     val lookAheadColor: String = "#FFFFFF",
     val lookAheadBold: Boolean = false,
@@ -172,6 +175,7 @@ data class SongSettings(
 
     // Look-ahead next section preview styling — fullscreen
     val lookAheadNextFontSize: Int = 70,
+    val lookAheadNextFontSizeAutoFit: Boolean = true,
     val lookAheadNextFontType: String = "Arial",
     val lookAheadNextColor: String = "#888888",
     val lookAheadNextBold: Boolean = false,
@@ -187,6 +191,7 @@ data class SongSettings(
     val lowerThirdLookAheadLanguageDisplay: String = Constants.SONG_LANG_PRIMARY,
     val lowerThirdLookAheadHorizontalAlignment: String = Constants.CENTER,
     val lowerThirdLookAheadFontSize: Int = 28,
+    val lowerThirdLookAheadFontSizeAutoFit: Boolean = true,
     val lowerThirdLookAheadFontType: String = "Arial",
     val lowerThirdLookAheadColor: String = "#FFFFFF",
     val lowerThirdLookAheadBold: Boolean = false,
@@ -199,6 +204,7 @@ data class SongSettings(
 
     // Look-ahead next section preview styling — lower third
     val lowerThirdLookAheadNextFontSize: Int = 28,
+    val lowerThirdLookAheadNextFontSizeAutoFit: Boolean = true,
     val lowerThirdLookAheadNextFontType: String = "Arial",
     val lowerThirdLookAheadNextColor: String = "#888888",
     val lowerThirdLookAheadNextBold: Boolean = false,
