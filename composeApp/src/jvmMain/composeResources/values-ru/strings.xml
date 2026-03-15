@@ -285,7 +285,7 @@
     <string name="author">Автор</string>
     <string name="composer">Композитор</string>
     <string name="enter_lyrics_here">Введите текст здесь...</string>
-    <string name="lyrics_format_help">Формат: Используйте разрывы строк для разделения куплетов. Начинайте строки куплетов с "Куплет" или "Припев".</string>
+    <string name="lyrics_format_help">Формат: Используйте [Verse 1], [Verse 2] и т.д. для заголовков куплетов и {Chorus} для припева. Разделяйте секции пустыми строками.</string>
     <string name="save">Сохранить</string>
 
     <!-- Tooltips -->
@@ -723,5 +723,9 @@
     <string name="website_title_label">Название (необязательно)</string>
     <string name="website_url_hint">https://example.com</string>
     <string name="website_url_label">URL</string>
+    <string name="new_song">Новая песня</string>
+    <string name="back_to_live">Вернуться к прямому эфиру</string>
+    <string name="line_navigation_hint">← → для навигации по строкам, ↑ ↓ для куплетов</string>
+    <string name="multi_verse">Несколько стихов</string>
 </resources>
 

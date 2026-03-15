@@ -285,7 +285,7 @@
     <string name="author">Автор</string>
     <string name="composer">Композитор</string>
     <string name="enter_lyrics_here">Мәтінді мұнда енгізіңіз...</string>
-    <string name="lyrics_format_help">Пішім: Шумақтарды бөлу үшін жол бөлгіштерін пайдаланыңыз. Шумақ жолдарын "Куплет" немесе "Припев" деп бастаңыз.</string>
+    <string name="lyrics_format_help">Пішім: Шумақ тақырыптары үшін [Verse 1], [Verse 2] т.б. және жыр үшін {Chorus} пайдаланыңыз. Бөлімдерді бос жолдармен бөліңіз.</string>
     <string name="save">Сақтау</string>
 
     <!-- Tooltips -->
@@ -722,5 +722,9 @@
     <string name="website_title_label">Атауы (міндетті емес)</string>
     <string name="website_url_hint">https://example.com</string>
     <string name="website_url_label">URL</string>
+    <string name="new_song">Жаңа ән</string>
+    <string name="back_to_live">Тікелей эфірге оралу</string>
+    <string name="line_navigation_hint">← → жолдар бойынша, ↑ ↓ шумақтар бойынша</string>
+    <string name="multi_verse">Бірнеше аят</string>
 </resources>
 

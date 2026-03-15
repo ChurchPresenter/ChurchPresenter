@@ -381,7 +381,7 @@
     <string name="bottom_left">Vlevo dole</string>
     <string name="bottom_right">Vpravo dole</string>
     <string name="enter_lyrics_here">Zadejte text písně zde...</string>
-    <string name="lyrics_format_help">Formát: Použijte zalomení řádků k oddělení slok. Začněte řádky sloky s "Куплет" nebo "Припев".</string>
+    <string name="lyrics_format_help">Formát: Použijte [Verse 1], [Verse 2] atd. pro záhlaví slok a {Chorus} pro refrén. Oddělte sekce prázdnými řádky.</string>
     <string name="select_image">Vybrat obrázek</string>
     <string name="background_type">Typ pozadí:</string>
     <string name="background_color">Barva pozadí:</string>
@@ -808,5 +808,9 @@
     <string name="website_title_label">Název (volitelný)</string>
     <string name="website_url_hint">https://example.com</string>
     <string name="website_url_label">URL</string>
+    <string name="new_song">Nová píseň</string>
+    <string name="back_to_live">Zpět na živé vysílání</string>
+    <string name="line_navigation_hint">← → pro navigaci v řádcích, ↑ ↓ pro sloky</string>
+    <string name="multi_verse">Více veršů</string>
 </resources>
 

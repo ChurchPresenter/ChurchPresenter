@@ -285,7 +285,7 @@
     <string name="author">Autor</string>
     <string name="composer">Komponist</string>
     <string name="enter_lyrics_here">Liedtext hier eingeben...</string>
-    <string name="lyrics_format_help">Format: Verwenden Sie Zeilenumbrüche zum Trennen von Versen. Beginnen Sie Verszeilen mit "Куплет" oder "Припев".</string>
+    <string name="lyrics_format_help">Format: Verwenden Sie [Verse 1], [Verse 2] usw. für Strophen und {Chorus} für den Refrain. Trennen Sie Abschnitte mit Leerzeilen.</string>
     <string name="save">Speichern</string>
 
     <!-- Tooltips -->
@@ -722,5 +722,9 @@
     <string name="website_title_label">Titel (optional)</string>
     <string name="website_url_hint">https://example.com</string>
     <string name="website_url_label">URL</string>
+    <string name="new_song">Neues Lied</string>
+    <string name="back_to_live">Zurück zur Live-Ansicht</string>
+    <string name="line_navigation_hint">← → für Zeilen, ↑ ↓ für Strophen</string>
+    <string name="multi_verse">Mehrere Verse</string>
 </resources>
 

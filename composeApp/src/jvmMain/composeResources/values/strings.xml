@@ -370,7 +370,7 @@
     <string name="author">Author</string>
     <string name="composer">Composer</string>
     <string name="enter_lyrics_here">Enter lyrics here...</string>
-    <string name="lyrics_format_help">Format: Use line breaks to separate verses. Start verse lines with "Куплет" or "Припев".</string>
+    <string name="lyrics_format_help">Format: Use [Verse 1], [Verse 2] etc. for verse headers and {Chorus} for chorus. Separate sections with blank lines.</string>
     <string name="save">Save</string>
 
     <!-- Tooltips -->
@@ -765,4 +765,7 @@
     <string name="images_filter">Images</string>
     <string name="swap_bibles">Swap</string>
     <string name="multi_verse">Multi-verse</string>
+    <string name="new_song">New Song</string>
+    <string name="back_to_live">Back to Live</string>
+    <string name="line_navigation_hint">Use ← → to navigate lines, ↑ ↓ for verses</string>
 </resources>

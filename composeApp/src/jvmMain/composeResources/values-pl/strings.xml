@@ -285,7 +285,7 @@
     <string name="author">Autor</string>
     <string name="composer">Kompozytor</string>
     <string name="enter_lyrics_here">Wprowadź tekst tutaj...</string>
-    <string name="lyrics_format_help">Format: Użyj podziałów wierszy, aby oddzielić zwrotki. Rozpocznij wiersze zwrotek od "Куплет" lub "Припев".</string>
+    <string name="lyrics_format_help">Format: Użyj [Verse 1], [Verse 2] itp. dla nagłówków zwrotek i {Chorus} dla refrenu. Oddzielaj sekcje pustymi wierszami.</string>
     <string name="save">Zapisz</string>
 
     <!-- Tooltips -->
@@ -722,5 +722,9 @@
     <string name="website_title_label">Tytuł (opcjonalnie)</string>
     <string name="website_url_hint">https://example.com</string>
     <string name="website_url_label">URL</string>
+    <string name="new_song">Nowa pieśń</string>
+    <string name="back_to_live">Wróć do transmisji</string>
+    <string name="line_navigation_hint">← → nawigacja po wierszach, ↑ ↓ po zwrotkach</string>
+    <string name="multi_verse">Wiele wersetów</string>
 </resources>
 

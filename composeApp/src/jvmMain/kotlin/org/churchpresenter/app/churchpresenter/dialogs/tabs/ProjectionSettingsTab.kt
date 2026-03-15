@@ -282,7 +282,14 @@ fun ProjectionSettingsTab(
 
         val contentCols = listOf(
             ContentCol(bibleLabel, { it.showBible }, { a, v -> a.copy(showBible = v) }),
-            ContentCol(songsLabel, { it.showSongs }, { a, v -> a.copy(showSongs = v) }),
+            ContentCol(songsLabel, { it.showSongs && !it.songLookAhead }, { a, v ->
+                if (v) a.copy(showSongs = true, songLookAhead = false)
+                else a.copy(showSongs = false, songLookAhead = false)
+            }),
+            ContentCol("Song with Look Ahead", { it.songLookAhead }, { a, v ->
+                if (v) a.copy(showSongs = true, songLookAhead = true)
+                else a.copy(showSongs = false, songLookAhead = false)
+            }),
             ContentCol(picturesLabel, { it.showPictures }, { a, v -> a.copy(showPictures = v) }),
             ContentCol(mediaLabel, { it.showMedia }, { a, v -> a.copy(showMedia = v) }),
             ContentCol(streamingLabel, { it.showStreaming }, { a, v -> a.copy(showStreaming = v) }),

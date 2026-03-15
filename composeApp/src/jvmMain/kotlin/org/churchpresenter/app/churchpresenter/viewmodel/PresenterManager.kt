@@ -46,6 +46,16 @@ class PresenterManager {
     private val _songTransitionAlpha = mutableStateOf(1f)
     val songTransitionAlpha: State<Float> = _songTransitionAlpha
 
+    private val _songDisplayLineIndex = mutableStateOf(-1)
+    val songDisplayLineIndex: State<Int> = _songDisplayLineIndex
+
+    private val _songDisplaySectionIndex = mutableStateOf(-1)
+    val songDisplaySectionIndex: State<Int> = _songDisplaySectionIndex
+
+    // All sections of the currently selected song — used for auto-fit font sizing
+    private val _allLyricSections = mutableStateOf<List<LyricSection>>(emptyList())
+    val allLyricSections: State<List<LyricSection>> = _allLyricSections
+
     private val _selectedImagePath = mutableStateOf<String?>(null)
     val selectedImagePath: State<String?> = _selectedImagePath
 
@@ -128,6 +138,18 @@ class PresenterManager {
 
     fun setSongTransitionAlpha(alpha: Float) {
         _songTransitionAlpha.value = alpha
+    }
+
+    fun setSongDisplayLineIndex(index: Int) {
+        _songDisplayLineIndex.value = index
+    }
+
+    fun setSongDisplaySectionIndex(index: Int) {
+        _songDisplaySectionIndex.value = index
+    }
+
+    fun setAllLyricSections(sections: List<LyricSection>) {
+        _allLyricSections.value = sections
     }
 
     fun setSelectedImagePath(imagePath: String?) {

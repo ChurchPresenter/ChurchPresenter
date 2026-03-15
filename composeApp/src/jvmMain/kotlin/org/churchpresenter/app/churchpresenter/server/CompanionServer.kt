@@ -40,6 +40,8 @@ import kotlinx.serialization.json.Json
 import org.churchpresenter.app.churchpresenter.data.SongItem
 import org.churchpresenter.app.churchpresenter.models.ScheduleItem
 import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.app.churchpresenter.utils.isChorusHeader
+import org.churchpresenter.app.churchpresenter.utils.isHeaderLine
 import java.awt.image.BufferedImage
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -769,18 +771,16 @@ class CompanionServer {
 
         for (line in song.lyrics) {
             val trimmed = line.trim()
-            val isVerseHeader  = trimmed.contains(Constants.VERSE_RUS,   ignoreCase = true) ||
-                                  trimmed.contains(Constants.VERSE,       ignoreCase = true)
-            val isChorusHeader = trimmed.contains(Constants.CHORUS_RUS,  ignoreCase = true) ||
-                                  trimmed.contains(Constants.CHORUS,      ignoreCase = true)
+            val isSectionHeader = isHeaderLine(trimmed)
+            val isChorus = isChorusHeader(trimmed)
 
-            if (isVerseHeader || isChorusHeader) {
+            if (isSectionHeader) {
                 // Flush previous section
                 if (currentLines.isNotEmpty()) {
                     sections.add(SongSectionDto(type = currentType, lines = currentLines.toList()))
                     currentLines = mutableListOf()
                 }
-                currentType = if (isChorusHeader) Constants.SECTION_TYPE_CHORUS else Constants.SECTION_TYPE_VERSE
+                currentType = if (isChorus) Constants.SECTION_TYPE_CHORUS else Constants.SECTION_TYPE_VERSE
                 // Don't include the bare header line itself — it carries no lyric content
             } else if (trimmed.isNotEmpty()) {
                 currentLines.add(line)

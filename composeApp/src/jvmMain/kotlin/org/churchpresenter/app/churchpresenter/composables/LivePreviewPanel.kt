@@ -132,6 +132,9 @@ private fun SingleDisplayPreview(
     val bibleTransitionAlpha by presenterManager.bibleTransitionAlpha
     val displayedLyricSection by presenterManager.displayedLyricSection
     val songTransitionAlpha by presenterManager.songTransitionAlpha
+    val songDisplayLineIndex by presenterManager.songDisplayLineIndex
+    val allLyricSections by presenterManager.allLyricSections
+    val songDisplaySectionIndex by presenterManager.songDisplaySectionIndex
     val displayedImagePath by presenterManager.displayedImagePath
     val pictureTransitionAlpha by presenterManager.pictureTransitionAlpha
     val displayedSlide by presenterManager.displayedSlide
@@ -190,7 +193,11 @@ private fun SingleDisplayPreview(
                                     appSettings = appSettings,
                                     isLowerThird = isLowerThird,
                                     outputRole = primaryRole,
-                                    transitionAlpha = songTransitionAlpha
+                                    transitionAlpha = songTransitionAlpha,
+                                    displayLineIndex = songDisplayLineIndex,
+                                    lookAheadEnabled = screenAssignment.songLookAhead,
+                                    allLyricSections = allLyricSections,
+                                    displaySectionIndex = songDisplaySectionIndex
                                 )
                             Presenting.PICTURES ->
                                 PicturePresenter(imagePath = displayedImagePath, transitionAlpha = pictureTransitionAlpha)
