@@ -2,12 +2,9 @@ package org.churchpresenter.app.churchpresenter.composables
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.VerticalScrollbar
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.foundation.lazy.LazyColumn
@@ -20,6 +17,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.input.pointer.isCtrlPressed
+import androidx.compose.ui.input.pointer.isMetaPressed
+import androidx.compose.ui.input.pointer.isShiftPressed
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 
 // Original version that passes the item
@@ -49,7 +51,11 @@ fun SelectionListWithIndex(
     selectedIndices: Set<Int>? = null,
     singleLine: Boolean = false,
     onItemSelected: (Int, String) -> Unit,
-    onItemDoubleClicked: ((Int, String) -> Unit)? = null
+    onItemDoubleClicked: ((Int, String) -> Unit)? = null,
+    /** Called when the item is clicked with Ctrl (Windows/Linux) or Cmd (macOS) held. */
+    onItemCtrlClicked: ((Int, String) -> Unit)? = null,
+    /** Called when the item is clicked with Shift held. */
+    onItemShiftClicked: ((Int, String) -> Unit)? = null,
 ) {
     val listState = rememberLazyListState(
         initialFirstVisibleItemIndex = selectedIndex.coerceIn(0, (list.size - 1).coerceAtLeast(0))
@@ -95,19 +101,33 @@ fun SelectionListWithIndex(
                             else
                                 MaterialTheme.colorScheme.surface
                         )
-                        .combinedClickable(
-                            onClick = {
-                                if (index >= 0 && index < list.size) {
-                                    onItemSelected(index, item)
-                                }
-                            },
-                            onDoubleClick = {
-                                if (index >= 0 && index < list.size) {
-                                    onItemSelected(index, item)
-                                    onItemDoubleClicked?.invoke(index, item)
+                        .pointerInput(index, list.size) {
+                            var lastClickTime = 0L
+                            awaitPointerEventScope {
+                                while (true) {
+                                    val event = awaitPointerEvent()
+                                    if (event.type == PointerEventType.Release &&
+                                        index >= 0 && index < list.size
+                                    ) {
+                                        val now = System.currentTimeMillis()
+                                        val isDouble = now - lastClickTime < 300L
+                                        lastClickTime = now
+                                        val mods = event.keyboardModifiers
+                                        when {
+                                            isDouble && onItemDoubleClicked != null -> {
+                                                onItemSelected(index, item)
+                                                onItemDoubleClicked.invoke(index, item)
+                                            }
+                                            (mods.isCtrlPressed || mods.isMetaPressed) && onItemCtrlClicked != null ->
+                                                onItemCtrlClicked.invoke(index, item)
+                                            mods.isShiftPressed && onItemShiftClicked != null ->
+                                                onItemShiftClicked.invoke(index, item)
+                                            else -> onItemSelected(index, item)
+                                        }
+                                    }
                                 }
                             }
-                        )
+                        }
                         .padding(6.dp),
                     color = MaterialTheme.colorScheme.onSurface,
                     maxLines = if (singleLine) 1 else Int.MAX_VALUE,
