@@ -8,6 +8,8 @@ import androidx.compose.ui.awt.SwingPanel
 import uk.co.caprica.vlcj.player.component.CallbackMediaPlayerComponent
 import uk.co.caprica.vlcj.player.component.EmbeddedMediaPlayerComponent
 import java.awt.Component
+import java.awt.event.HierarchyEvent
+import java.awt.event.HierarchyListener
 import java.io.File
 import java.util.Locale
 
@@ -33,6 +35,9 @@ fun LoopingVideoBackground(
         } catch (_: Throwable) { null }
     } ?: return
 
+    // Render the SwingPanel first so the AWT component gets attached to the window hierarchy
+    SwingPanel(factory = { component as Component }, modifier = modifier)
+
     DisposableEffect(videoPath) {
         val mp = when (component) {
             is CallbackMediaPlayerComponent -> component.mediaPlayer()
@@ -40,18 +45,41 @@ fun LoopingVideoBackground(
             else -> null
         } ?: return@DisposableEffect onDispose {}
 
-        mp.audio().setVolume(0)
-        mp.controls().setRepeat(true)
-        mp.media().play(file.absolutePath)
+        val awtComponent = component as Component
 
-        onDispose {
-            mp.controls().stop()
-            when (component) {
-                is CallbackMediaPlayerComponent -> component.release()
-                is EmbeddedMediaPlayerComponent -> component.release()
+        fun startPlayback() {
+            try {
+                mp.audio().setVolume(0)
+                mp.controls().setRepeat(true)
+                mp.media().play(file.absolutePath)
+            } catch (_: Throwable) {
+                // VLC not installed or component not ready — fail silently
             }
         }
-    }
 
-    SwingPanel(factory = { component as Component }, modifier = modifier)
+        if (awtComponent.isDisplayable) {
+            startPlayback()
+        } else {
+            // Wait for the component to be attached to a visible window
+            val listener = object : HierarchyListener {
+                override fun hierarchyChanged(e: HierarchyEvent) {
+                    if (awtComponent.isDisplayable) {
+                        awtComponent.removeHierarchyListener(this)
+                        startPlayback()
+                    }
+                }
+            }
+            awtComponent.addHierarchyListener(listener)
+        }
+
+        onDispose {
+            try {
+                mp.controls().stop()
+                when (component) {
+                    is CallbackMediaPlayerComponent -> component.release()
+                    is EmbeddedMediaPlayerComponent -> component.release()
+                }
+            } catch (_: Throwable) { }
+        }
+    }
 }
