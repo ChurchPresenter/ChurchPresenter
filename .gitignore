@@ -36,4 +36,3 @@ serviceAccountKey.json
 google-services.json
 *.p12
 .env
-**/sentry.properties

@@ -1,9 +1,0 @@
-# Sentry crash reporting configuration for ChurchPresenter
-# Copy this file to sentry.properties and fill in your DSN.
-# Get your DSN from: https://sentry.io → your project → Settings → Client Keys (DSN)
-# sentry.properties is .gitignored — never commit the real DSN.
-dsn=
-environment=production
-release=unknown
-max-breadcrumbs=50
-
