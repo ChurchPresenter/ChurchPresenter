@@ -97,7 +97,7 @@ data class ScheduleActions(
     val clearSchedule: () -> Unit = {},
     // Remote-API add helpers (populated from ScheduleTabActions)
     val addSong: (songNumber: Int, title: String, songbook: String, songId: String) -> Unit = { _, _, _, _ -> },
-    val addBibleVerse: (bookName: String, chapter: Int, verseNumber: Int, verseText: String) -> Unit = { _, _, _, _ -> },
+    val addBibleVerse: (bookName: String, chapter: Int, verseNumber: Int, verseText: String, verseRange: String) -> Unit = { _, _, _, _, _ -> },
     val addPicture: (folderPath: String, folderName: String, imageCount: Int) -> Unit = { _, _, _ -> },
     val addPresentation: (filePath: String, fileName: String, slideCount: Int, fileType: String) -> Unit = { _, _, _, _ -> },
     val addMedia: (mediaUrl: String, mediaTitle: String, mediaType: String) -> Unit = { _, _, _ -> }
@@ -573,8 +573,8 @@ fun MainDesktop(
                                 viewModel = bibleViewModel,
                                 appSettings = appSettings,
                                 onSettingsChange = onSettingsChange,
-                                onAddToSchedule = { bookName, chapter, verseNumber, verseText ->
-                                    currentScheduleActions.addBibleVerse(bookName, chapter, verseNumber, verseText)
+                                onAddToSchedule = { bookName, chapter, verseNumber, verseText, verseRange ->
+                                    currentScheduleActions.addBibleVerse(bookName, chapter, verseNumber, verseText, verseRange)
                                 },
                                 selectedVerseItem = selectedBibleVerseItem,
                                 onVerseSelected = onVerseSelected,

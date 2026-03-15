@@ -320,7 +320,7 @@ fun main() {
                                                 coroutineScope.launch { remoteSelectSongFlow.emit(item) }
                                             }
                                             is ScheduleItem.BibleVerseItem ->
-                                                currentScheduleActions.addBibleVerse(item.bookName, item.chapter, item.verseNumber, item.verseText)
+                                                currentScheduleActions.addBibleVerse(item.bookName, item.chapter, item.verseNumber, item.verseText, item.verseRange)
                                             is ScheduleItem.PresentationItem ->
                                                 currentScheduleActions.addPresentation(item.filePath, item.fileName, item.slideCount, item.fileType)
                                             is ScheduleItem.PictureItem ->
@@ -372,7 +372,7 @@ fun main() {
                                                     coroutineScope.launch { remoteSelectSongFlow.emit(item) }
                                                 }
                                                 is ScheduleItem.BibleVerseItem ->
-                                                    currentScheduleActions.addBibleVerse(item.bookName, item.chapter, item.verseNumber, item.verseText)
+                                                    currentScheduleActions.addBibleVerse(item.bookName, item.chapter, item.verseNumber, item.verseText, item.verseRange)
                                                 is ScheduleItem.PresentationItem ->
                                                     currentScheduleActions.addPresentation(item.filePath, item.fileName, item.slideCount, item.fileType)
                                                 is ScheduleItem.PictureItem ->
@@ -584,7 +584,11 @@ fun main() {
 /** Returns a (title, detail) pair describing a ScheduleItem for the remote event banner. */
 private fun remoteEventLabel(item: ScheduleItem): Pair<String, String> = when (item) {
     is ScheduleItem.SongItem         -> "${item.songNumber} - ${item.title}" to item.songbook
-    is ScheduleItem.BibleVerseItem   -> "${item.bookName} ${item.chapter}:${item.verseNumber}" to item.verseText.take(60)
+    is ScheduleItem.BibleVerseItem   -> {
+        val ref = if (item.verseRange.isNotEmpty()) "${item.bookName} ${item.chapter}:${item.verseRange}"
+                  else "${item.bookName} ${item.chapter}:${item.verseNumber}"
+        ref to item.verseText.take(60)
+    }
     is ScheduleItem.PictureItem      -> item.folderName to "${item.imageCount} images"
     is ScheduleItem.PresentationItem -> item.fileName to item.fileType.uppercase()
     is ScheduleItem.MediaItem        -> item.mediaTitle to item.mediaType
@@ -621,13 +625,14 @@ private fun executeProjectItem(
             presenterManager.setShowPresenterWindow(true)
         }
         is ScheduleItem.BibleVerseItem -> {
-            scheduleActions.addBibleVerse(item.bookName, item.chapter, item.verseNumber, item.verseText)
+            scheduleActions.addBibleVerse(item.bookName, item.chapter, item.verseNumber, item.verseText, item.verseRange)
             presenterManager.setSelectedVerses(listOf(
                 org.churchpresenter.app.churchpresenter.models.SelectedVerse(
                     bookName    = item.bookName,
                     chapter     = item.chapter,
                     verseNumber = item.verseNumber,
-                    verseText   = item.verseText
+                    verseText   = item.verseText,
+                    verseRange  = item.verseRange
                 )
             ))
             presenterManager.setPresentingMode(Presenting.BIBLE)

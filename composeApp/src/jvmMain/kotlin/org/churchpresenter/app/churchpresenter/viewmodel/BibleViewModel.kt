@@ -365,13 +365,37 @@ class BibleViewModel(
         }
     }
 
-    fun selectVerseByDetails(bookName: String, chapter: Int, verseNumber: Int): Boolean {
+    /**
+     * Parses a verse range string (e.g. "1-3", "2,4", "1-3,5") into a list of verse numbers.
+     * Handles both hyphen ranges and comma-separated lists, including mixed formats.
+     */
+    private fun parseVerseNumbers(rangeStr: String): List<Int> {
+        val result = mutableListOf<Int>()
+        rangeStr.split(",").forEach { part ->
+            val trimmed = part.trim()
+            if (trimmed.contains("-")) {
+                val bounds = trimmed.split("-")
+                val from = bounds.getOrNull(0)?.trim()?.toIntOrNull() ?: return@forEach
+                val to   = bounds.getOrNull(1)?.trim()?.toIntOrNull() ?: return@forEach
+                (from..to).forEach { result.add(it) }
+            } else {
+                trimmed.toIntOrNull()?.let { result.add(it) }
+            }
+        }
+        return result
+    }
+
+    fun selectVerseByDetails(bookName: String, chapter: Int, verseNumber: Int, verseRange: String = ""): Boolean {
         val bookIndex = _books.value.indexOfFirst { it.equals(bookName, ignoreCase = true) }
         if (bookIndex < 0) return false
 
         _selectedBookIndex.value = bookIndex
         _selectedChapter.value = chapter
         _selectedVerseIndex.value = 0
+        // Always clear multi-selection when navigating to a specific verse (e.g. from schedule)
+        // so stale indices from a different chapter don't highlight wrong verses
+        _selectedVerseIndices.clear()
+        _multiVerseEnabled.value = false
 
         viewModelScope.launch {
             // Wait for full verse data (phase 3) — books-only bible has no chapter index
@@ -394,6 +418,20 @@ class BibleViewModel(
             // Use "N. " (with trailing space) to avoid "3." matching "13." or "23."
             val verseIndex = chapterVerses.indexOfFirst { it.startsWith("$verseNumber. ") }
             _selectedVerseIndex.value = if (verseIndex >= 0) verseIndex else 0
+
+            // Restore multi-verse selection when a range is provided (e.g. from schedule click)
+            if (verseRange.isNotEmpty()) {
+                val verseNumbers = parseVerseNumbers(verseRange)
+                if (verseNumbers.size > 1) {
+                    _selectedVerseIndices.clear()
+                    for (vNum in verseNumbers) {
+                        val vIdx = chapterVerses.indexOfFirst { it.startsWith("$vNum. ") }
+                        if (vIdx >= 0) _selectedVerseIndices.add(vIdx)
+                    }
+                    _multiVerseEnabled.value = _selectedVerseIndices.size > 1
+                }
+            }
+
             _verseSelectionToken.value++
 
             refreshFilteredLists()
@@ -654,11 +692,13 @@ class BibleViewModel(
     }
 
     /**
-     * Adds the currently selected Bible verse to the given schedule.
+     * Adds the currently selected Bible verse(s) to the given schedule.
+     * When multiple verses are selected the joined text and range are forwarded.
+     * The multi-verse selection is cleared after a successful add.
      * Returns true if the verse was successfully added, false otherwise.
      */
     fun addCurrentVerseToSchedule(
-        onAdd: (bookName: String, chapter: Int, verseNumber: Int, verseText: String) -> Unit
+        onAdd: (bookName: String, chapter: Int, verseNumber: Int, verseText: String, verseRange: String) -> Unit
     ): Boolean {
         if (_verses.value.isEmpty()) return false
         val idx = _selectedVerseIndex.value
@@ -666,14 +706,18 @@ class BibleViewModel(
         val selectedVerses = getSelectedVerses()
         if (selectedVerses.isEmpty()) return false
         val verse = selectedVerses[0]
-        onAdd(verse.bookName, verse.chapter, verse.verseNumber, verse.verseText)
+        onAdd(verse.bookName, verse.chapter, verse.verseNumber, verse.verseText, verse.verseRange)
+        // Clear multi-selection so the next pick starts clean
+        if (_multiVerseEnabled.value) {
+            clearMultiVerseSelection()
+        }
         return true
     }
 
     // Keep legacy overload for callers that still pass a ScheduleViewModel
     fun addCurrentVerseToSchedule(scheduleViewModel: ScheduleViewModel): Boolean =
-        addCurrentVerseToSchedule { bookName, chapter, verseNumber, verseText ->
-            scheduleViewModel.addBibleVerse(bookName, chapter, verseNumber, verseText)
+        addCurrentVerseToSchedule { bookName, chapter, verseNumber, verseText, verseRange ->
+            scheduleViewModel.addBibleVerse(bookName, chapter, verseNumber, verseText, verseRange)
         }
 
     fun updateSearchQuery(query: String) {

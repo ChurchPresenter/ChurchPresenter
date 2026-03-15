@@ -25,7 +25,14 @@ sealed class ScheduleItem {
         val chapter: Int,
         val verseNumber: Int,
         val verseText: String,
-        override val displayText: String = "$bookName $chapter:$verseNumber"
+        /**
+         * Formatted range string for multi-verse items, e.g. "16-18" or "16,18,20".
+         * Empty for a single verse — [verseNumber] is used for display in that case.
+         */
+        val verseRange: String = "",
+        override val displayText: String =
+            if (verseRange.isNotEmpty()) "$bookName $chapter:$verseRange"
+            else "$bookName $chapter:$verseNumber"
     ) : ScheduleItem()
 
     @Serializable
