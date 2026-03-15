@@ -32,7 +32,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -90,7 +89,6 @@ import churchpresenter.composeapp.generated.resources.secondary_bible
 import churchpresenter.composeapp.generated.resources.scope
 import churchpresenter.composeapp.generated.resources.search
 import churchpresenter.composeapp.generated.resources.hold_live
-import churchpresenter.composeapp.generated.resources.multi_verse
 import churchpresenter.composeapp.generated.resources.swap_bibles
 import churchpresenter.composeapp.generated.resources.verse
 import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
@@ -453,8 +451,8 @@ fun BibleTab(
                 )
             }
         } else {
-            // ── Toolbar: multi-verse, swap, bible labels, go live, add to schedule ─
-            val multiVerseEnabled by viewModel.multiVerseEnabled
+            // ── Toolbar: swap, bible labels, go live, add to schedule ─
+            // Multi-verse selection is keyboard-driven: Ctrl/Cmd+Click to toggle, Shift+Click for range
             val toolbarContent: @Composable () -> Unit = {
                 Row(
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp),
@@ -479,19 +477,13 @@ fun BibleTab(
                             )
                         }
                     }
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Checkbox(
-                            checked = multiVerseEnabled,
-                            onCheckedChange = { viewModel.toggleMultiVerse(it) },
-                            modifier = Modifier.size(24.dp)
-                        )
-                        Text(
-                            text = stringResource(Res.string.multi_verse),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurface,
-                            modifier = Modifier.padding(start = 2.dp)
-                        )
-                    }
+                    // Multi-verse hint — Ctrl/Cmd+Click to toggle, Shift+Click to range-select
+                    Text(
+                        text = "⌘/Ctrl · Shift",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(end = 8.dp)
+                    )
                     TooltipArea(
                         tooltip = {
                             Surface(
@@ -637,13 +629,14 @@ fun BibleTab(
                                 }
                             }
                     Box(modifier = Modifier.weight(1f)) {
-                        // Map multi-verse indices from real verse list to filtered list
-                        val multiIndicesInFiltered = if (multiVerseEnabled) {
-                            viewModel.selectedVerseIndices.mapNotNull { realIdx ->
+                        // Always map multi-verse indices into the filtered verse list
+                        val multiIndicesInFiltered = viewModel.selectedVerseIndices
+                            .mapNotNull { realIdx ->
                                 val verseStr = verses.getOrNull(realIdx)
                                 verseStr?.let { filteredVerses.indexOf(it).takeIf { i -> i >= 0 } }
-                            }.toSet()
-                        } else null
+                            }
+                            .toSet()
+                            .takeIf { it.isNotEmpty() }
 
                         SelectionListWithIndex(
                             list = filteredVerses,
@@ -659,7 +652,21 @@ fun BibleTab(
                                     if (realIndex >= 0) viewModel.selectVerse(realIndex)
                                 }
                             },
-                            onItemDoubleClicked = if (multiVerseEnabled) null else { _, _ -> goLiveWithHistory() }
+                            onItemDoubleClicked = { _, _ -> goLiveWithHistory() },
+                            onItemCtrlClicked = { index, _ ->
+                                val verseText = filteredVerses.getOrNull(index)
+                                verseText?.let {
+                                    val realIndex = verses.indexOf(it)
+                                    if (realIndex >= 0) viewModel.ctrlClickVerse(realIndex)
+                                }
+                            },
+                            onItemShiftClicked = { index, _ ->
+                                val verseText = filteredVerses.getOrNull(index)
+                                verseText?.let {
+                                    val realIndex = verses.indexOf(it)
+                                    if (realIndex >= 0) viewModel.shiftClickVerse(realIndex)
+                                }
+                            }
                         )
                     }
 

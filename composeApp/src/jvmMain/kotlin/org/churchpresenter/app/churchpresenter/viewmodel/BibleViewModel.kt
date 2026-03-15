@@ -134,24 +134,71 @@ class BibleViewModel(
 
     fun clearHistory() { _history.clear() }
 
+    /** No longer driven by a checkbox — kept for any legacy call sites. */
     fun toggleMultiVerse(enabled: Boolean) {
-        _multiVerseEnabled.value = enabled
         if (!enabled) {
             _selectedVerseIndices.clear()
+            _multiVerseEnabled.value = false
         }
     }
 
     fun clearMultiVerseSelection() {
         _selectedVerseIndices.clear()
+        _multiVerseEnabled.value = false
     }
 
-    fun toggleVerseInSelection(verseIndex: Int) {
+    /**
+     * Ctrl/Cmd + Click — toggle the individual verse in the multi-selection.
+     * On the first ctrl-click the current single selection is also included so
+     * the user can start a multi-select from wherever they are.
+     */
+    fun ctrlClickVerse(verseIndex: Int) {
+        if (verseIndex < 0 || verseIndex >= _verses.value.size) return
+        if (_selectedVerseIndices.contains(verseIndex)) {
+            _selectedVerseIndices.remove(verseIndex)
+            if (_selectedVerseIndices.isEmpty()) {
+                // Deselected last item — fall back to plain single selection
+                _selectedVerseIndex.value = verseIndex
+            }
+        } else {
+            // On the very first ctrl-click include the current anchor too
+            if (_selectedVerseIndices.isEmpty()) {
+                val anchor = _selectedVerseIndex.value
+                if (anchor >= 0 && anchor < _verses.value.size && anchor != verseIndex) {
+                    _selectedVerseIndices.add(anchor)
+                }
+            }
+            _selectedVerseIndices.add(verseIndex)
+            _selectedVerseIndex.value = verseIndex   // update anchor
+        }
+        _multiVerseEnabled.value = _selectedVerseIndices.isNotEmpty()
+        _verseSelectionToken.value++
+    }
+
+    /**
+     * Shift + Click — range-select from the current anchor to [targetIndex].
+     * The anchor stays fixed; repeated shift-clicks extend/shrink from it.
+     */
+    fun shiftClickVerse(targetIndex: Int) {
+        if (targetIndex < 0 || targetIndex >= _verses.value.size) return
+        val anchor = _selectedVerseIndex.value.coerceIn(0, _verses.value.size - 1)
+        val from = minOf(anchor, targetIndex)
+        val to   = maxOf(anchor, targetIndex)
+        _selectedVerseIndices.clear()
+        (from..to).forEach { _selectedVerseIndices.add(it) }
+        _multiVerseEnabled.value = _selectedVerseIndices.size > 1
+        _verseSelectionToken.value++
+    }
+
+    /** @deprecated Use [ctrlClickVerse] or [shiftClickVerse]. Kept for internal use. */
+    private fun toggleVerseInSelection(verseIndex: Int) {
         if (verseIndex < 0 || verseIndex >= _verses.value.size) return
         if (_selectedVerseIndices.contains(verseIndex)) {
             _selectedVerseIndices.remove(verseIndex)
         } else {
             _selectedVerseIndices.add(verseIndex)
         }
+        _multiVerseEnabled.value = _selectedVerseIndices.isNotEmpty()
         _verseSelectionToken.value++
     }
 
@@ -294,6 +341,7 @@ class BibleViewModel(
         _selectedChapter.value = 1
         _selectedVerseIndex.value = 0
         _selectedVerseIndices.clear()
+        _multiVerseEnabled.value = false
         loadChapter(bookIndex, 1)
     }
 
@@ -301,14 +349,14 @@ class BibleViewModel(
         _selectedChapter.value = chapter
         _selectedVerseIndex.value = 0
         _selectedVerseIndices.clear()
+        _multiVerseEnabled.value = false
         loadChapter(_selectedBookIndex.value, chapter)
     }
 
+    /** Plain click — always selects a single verse and clears any multi-selection. */
     fun selectVerse(verseIndex: Int) {
-        if (_multiVerseEnabled.value) {
-            toggleVerseInSelection(verseIndex)
-            return
-        }
+        _selectedVerseIndices.clear()
+        _multiVerseEnabled.value = false
         if (verseIndex >= 0 && verseIndex < _verses.value.size) {
             _selectedVerseIndex.value = verseIndex
             _verseSelectionToken.value++
@@ -559,6 +607,8 @@ class BibleViewModel(
 
     fun navigatePreviousVerse(): Boolean {
         if (_verses.value.isNotEmpty() && _selectedVerseIndex.value > 0) {
+            _selectedVerseIndices.clear()
+            _multiVerseEnabled.value = false
             _selectedVerseIndex.value--
             _verseSelectionToken.value++
             return true
@@ -568,6 +618,8 @@ class BibleViewModel(
 
     fun navigateNextVerse(): Boolean {
         if (_verses.value.isNotEmpty() && _selectedVerseIndex.value < _verses.value.size - 1) {
+            _selectedVerseIndices.clear()
+            _multiVerseEnabled.value = false
             _selectedVerseIndex.value++
             _verseSelectionToken.value++
             return true
