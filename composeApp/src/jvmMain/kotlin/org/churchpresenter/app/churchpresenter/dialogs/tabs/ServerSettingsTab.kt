@@ -7,8 +7,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
@@ -26,6 +28,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -34,16 +37,26 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.allowed_clients
+import churchpresenter.composeapp.generated.resources.allowed_clients_description
 import churchpresenter.composeapp.generated.resources.api_key_hint
 import churchpresenter.composeapp.generated.resources.api_key_label
 import churchpresenter.composeapp.generated.resources.api_key_protection
+import churchpresenter.composeapp.generated.resources.blocked_clients
+import churchpresenter.composeapp.generated.resources.blocked_clients_description
 import churchpresenter.composeapp.generated.resources.companion_server
 import churchpresenter.composeapp.generated.resources.copy_api_key
 import churchpresenter.composeapp.generated.resources.copy_url
 import churchpresenter.composeapp.generated.resources.enable_server
 import churchpresenter.composeapp.generated.resources.generate_api_key
+import churchpresenter.composeapp.generated.resources.no_allowed_clients
+import churchpresenter.composeapp.generated.resources.no_blocked_clients
+import churchpresenter.composeapp.generated.resources.remote_clients_description
+import churchpresenter.composeapp.generated.resources.remote_clients_title
+import churchpresenter.composeapp.generated.resources.remove
 import churchpresenter.composeapp.generated.resources.server_description
 import churchpresenter.composeapp.generated.resources.server_port
 import churchpresenter.composeapp.generated.resources.server_port_hint
@@ -53,6 +66,7 @@ import churchpresenter.composeapp.generated.resources.server_running
 import churchpresenter.composeapp.generated.resources.server_stopped
 import churchpresenter.composeapp.generated.resources.server_url_label
 import org.churchpresenter.app.churchpresenter.data.AppSettings
+import org.churchpresenter.app.churchpresenter.data.RemoteClientManager
 import org.churchpresenter.app.churchpresenter.server.CompanionServer
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.jetbrains.compose.resources.stringResource
@@ -62,7 +76,8 @@ import java.util.UUID
 fun ServerSettingsTab(
     settings: AppSettings,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
-    companionServer: CompanionServer
+    companionServer: CompanionServer,
+    remoteClientManager: RemoteClientManager
 ) {
     val isRunning by companionServer.isRunning.collectAsState()
     val serverUrl by companionServer.serverUrl.collectAsState()
@@ -298,6 +313,136 @@ fun ServerSettingsTab(
                         }
                     }
                 }
+
+                HorizontalDivider()
+
+                // ── Remote Clients ────────────────────────────────────────────
+                Text(
+                    text = stringResource(Res.string.remote_clients_title),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.primary
+                )
+                Text(
+                    text = stringResource(Res.string.remote_clients_description),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+
+                Spacer(Modifier.height(4.dp))
+
+                // ── Allowed clients list ──────────────────────────────────────
+                Text(
+                    text = stringResource(Res.string.allowed_clients),
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.primary
+                )
+                Text(
+                    text = stringResource(Res.string.allowed_clients_description),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+
+                val allowedClients = remoteClientManager.allowedClients.toList().sorted()
+                if (allowedClients.isEmpty()) {
+                    Text(
+                        text = stringResource(Res.string.no_allowed_clients),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                        modifier = Modifier.padding(vertical = 4.dp)
+                    )
+                } else {
+                    allowedClients.forEach { clientId ->
+                        key(clientId) {
+                            ClientRow(
+                                clientId = clientId,
+                                statusColor = MaterialTheme.colorScheme.primary,
+                                statusLabel = stringResource(Res.string.allowed_clients),
+                                onRemove = { remoteClientManager.removeAllowed(clientId) }
+                            )
+                        }
+                    }
+                }
+
+                Spacer(Modifier.height(4.dp))
+
+                // ── Blocked clients list ──────────────────────────────────────
+                Text(
+                    text = stringResource(Res.string.blocked_clients),
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.error
+                )
+                Text(
+                    text = stringResource(Res.string.blocked_clients_description),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+
+                val blockedClients = remoteClientManager.blockedClients.toList().sorted()
+                if (blockedClients.isEmpty()) {
+                    Text(
+                        text = stringResource(Res.string.no_blocked_clients),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                        modifier = Modifier.padding(vertical = 4.dp)
+                    )
+                } else {
+                    blockedClients.forEach { clientId ->
+                        key(clientId) {
+                            ClientRow(
+                                clientId = clientId,
+                                statusColor = MaterialTheme.colorScheme.error,
+                                statusLabel = stringResource(Res.string.blocked_clients),
+                                onRemove = { remoteClientManager.removeBlocked(clientId) }
+                            )
+                        }
+                    }
+                }
+        }
+    }
+}
+
+@Composable
+private fun ClientRow(
+    clientId: String,
+    statusColor: androidx.compose.ui.graphics.Color,
+    statusLabel: String,
+    onRemove: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(
+                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                RoundedCornerShape(4.dp)
+            )
+            .padding(horizontal = 10.dp, vertical = 6.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = clientId,
+                style = MaterialTheme.typography.bodyMedium,
+                fontFamily = FontFamily.Monospace
+            )
+            Text(
+                text = statusLabel,
+                style = MaterialTheme.typography.labelSmall,
+                color = statusColor
+            )
+        }
+        Spacer(Modifier.width(8.dp))
+        Button(
+            onClick = onRemove,
+            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.errorContainer,
+                contentColor = MaterialTheme.colorScheme.onErrorContainer
+            )
+        ) {
+            Text(stringResource(Res.string.remove), style = MaterialTheme.typography.labelSmall)
         }
     }
 }
@@ -320,5 +465,3 @@ private fun SettingRow(
         content()
     }
 }
-
-
