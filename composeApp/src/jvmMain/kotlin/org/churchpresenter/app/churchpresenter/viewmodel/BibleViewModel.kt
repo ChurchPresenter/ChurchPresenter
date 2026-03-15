@@ -480,6 +480,7 @@ class BibleViewModel(
                 verseList.add(
                     SelectedVerse(
                         bibleAbbreviation = _primaryBible.value?.getBibleAbbreviation() ?: "",
+                        bibleName = _primaryBible.value?.getBibleTitle() ?: "",
                         bookName = bookName,
                         chapter = _selectedChapter.value,
                         verseNumber = verseNumbers.first(),
@@ -492,6 +493,7 @@ class BibleViewModel(
                 verseList.add(
                     SelectedVerse(
                         bibleAbbreviation = _secondaryBible.value?.getBibleAbbreviation() ?: "",
+                        bibleName = _secondaryBible.value?.getBibleTitle() ?: "",
                         bookName = secondaryBookName,
                         chapter = _selectedChapter.value,
                         verseNumber = verseNumbers.first(),
@@ -521,6 +523,7 @@ class BibleViewModel(
             verseList.add(
                 SelectedVerse(
                     bibleAbbreviation = abbreviation,
+                    bibleName = _primaryBible.value?.getBibleTitle() ?: "",
                     bookName = bookName,
                     chapter = _selectedChapter.value,
                     verseNumber = verseNumber,
@@ -535,6 +538,7 @@ class BibleViewModel(
             verseList.add(
                 SelectedVerse(
                     bibleAbbreviation = abbreviation,
+                    bibleName = _secondaryBible.value?.getBibleTitle() ?: "",
                     bookName = bookName,
                     chapter = _selectedChapter.value,
                     verseNumber = verseNumber,

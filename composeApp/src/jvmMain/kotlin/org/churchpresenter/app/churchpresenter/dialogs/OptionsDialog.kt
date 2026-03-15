@@ -16,6 +16,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
+import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -44,8 +45,10 @@ import churchpresenter.composeapp.generated.resources.options
 import churchpresenter.composeapp.generated.resources.projection
 import churchpresenter.composeapp.generated.resources.server_settings
 import churchpresenter.composeapp.generated.resources.song
+import churchpresenter.composeapp.generated.resources.statistics
 import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.data.SettingsManager
+import org.churchpresenter.app.churchpresenter.data.StatisticsManager
 import org.churchpresenter.app.churchpresenter.server.CompanionServer
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.SystemSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.BackgroundSettingsTab
@@ -55,6 +58,7 @@ import org.churchpresenter.app.churchpresenter.dialogs.tabs.ProjectionSettingsTa
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.ServerSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.SongSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.LowerThirdSettingsTab
+import org.churchpresenter.app.churchpresenter.dialogs.tabs.StatisticsTab
 import org.churchpresenter.app.churchpresenter.ui.theme.AppThemeWrapper
 import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
@@ -65,6 +69,7 @@ fun OptionsDialog(
     isVisible: Boolean,
     theme: ThemeMode,
     settingsManager: SettingsManager,
+    statisticsManager: StatisticsManager,
     companionServer: CompanionServer,
     presenterManager: PresenterManager,
     onDismiss: () -> Unit,
@@ -94,10 +99,11 @@ fun OptionsDialog(
             ) {
                 Column(modifier = Modifier.fillMaxSize()) {
                     // Tab Row
-                    TabRow(
+                    ScrollableTabRow(
                         selectedTabIndex = selectedTabIndex,
                         containerColor = MaterialTheme.colorScheme.surface,
-                        contentColor = MaterialTheme.colorScheme.onSurface
+                        contentColor = MaterialTheme.colorScheme.onSurface,
+                        edgePadding = 0.dp
                     ) {
                         Tab(
                             selected = selectedTabIndex == 0,
@@ -138,6 +144,11 @@ fun OptionsDialog(
                             selected = selectedTabIndex == 7,
                             onClick = { selectedTabIndex = 7 },
                             text = { Text(stringResource(Res.string.server_settings)) }
+                        )
+                        Tab(
+                            selected = selectedTabIndex == 8,
+                            onClick = { selectedTabIndex = 8 },
+                            text = { Text(stringResource(Res.string.statistics)) }
                         )
                     }
 
@@ -204,6 +215,9 @@ fun OptionsDialog(
                                     currentSettings = updateFn(currentSettings)
                                 },
                                 companionServer = companionServer
+                            )
+                            8 -> StatisticsTab(
+                                statisticsManager = statisticsManager
                             )
                         }
                     }

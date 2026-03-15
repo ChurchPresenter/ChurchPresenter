@@ -726,5 +726,12 @@
     <string name="back_to_live">Вярнуцца да прамога эфіру</string>
     <string name="line_navigation_hint">← → для навігацыі па радках, ↑ ↓ для куплетаў</string>
     <string name="multi_verse">Некалькі вершаў</string>
+
+    <!-- Statistics -->
+    <string name="statistics">Статыстыка</string>
+    <string name="top_songs">Топ песень</string>
+    <string name="top_verses">Топ вершаў</string>
+    <string name="clear_statistics">Ачысціць статыстыку</string>
+    <string name="times_displayed">разоў</string>
 </resources>
 

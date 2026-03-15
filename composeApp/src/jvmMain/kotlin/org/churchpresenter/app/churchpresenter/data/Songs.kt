@@ -124,12 +124,12 @@ class Songs {
                 val lyrics = parseSqliteLyrics(songText)
                 songs.add(
                     SongItem(
-                        number = row.getString(0),
-                        title = row.getString(1),
+                        number = row.getString(0).trim(),
+                        title = row.getString(1).trim(),
                         songbook = songbookName,
-                        tune = row.getString(3),
-                        author = row.getString(4),
-                        composer = row.getString(5),
+                        tune = row.getString(3).trim(),
+                        author = row.getString(4).trim(),
+                        composer = row.getString(5).trim(),
                         lyrics = lyrics
                     )
                 )
@@ -146,7 +146,7 @@ class Songs {
         if (songText.isBlank()) return emptyList()
         // The song_text uses plain newlines — just split and return as-is
         // Section headers and empty line separators are already in the correct format
-        val lines = songText.split("\n").map { it.trimEnd('\r') }
+        val lines = songText.split("\n").map { wrapSectionHeader(it.trimEnd('\r')) }
         // Remove trailing empty lines
         val trimmed = lines.dropLastWhile { it.isBlank() }
         return trimmed
@@ -178,11 +178,12 @@ class Songs {
             }
 
             if (sectionLines.isNotEmpty()) {
+                sectionLines[0] = wrapSectionHeader(sectionLines[0])
                 val firstLine = sectionLines[0]
                 val section = LyricSection(
                     type = when {
-                        firstLine.startsWith("Куплет") -> Constants.SECTION_TYPE_VERSE
-                        firstLine.startsWith("Припев") -> Constants.SECTION_TYPE_CHORUS
+                        firstLine.startsWith("[") -> Constants.SECTION_TYPE_VERSE
+                        firstLine.startsWith("{") -> Constants.SECTION_TYPE_CHORUS
                         else -> Constants.OTHER
                     },
                     lines = sectionLines
@@ -228,6 +229,15 @@ class Songs {
         }
 
         return lyrics
+    }
+
+    private fun wrapSectionHeader(line: String): String {
+        val t = line.trim()
+        return when {
+            t.matches(Regex("^(Припев|Chorus|Refrain).*", RegexOption.IGNORE_CASE)) -> "{$t}"
+            t.matches(Regex("^(Куплет|Verse|Bridge).*", RegexOption.IGNORE_CASE)) -> "[$t]"
+            else -> line
+        }
     }
 
     private data class LyricSection(
@@ -382,16 +392,17 @@ class Songs {
         for (line in lyrics) {
             val trimmedLine = line.trim()
 
-            // Check if this is a section marker (Куплет, Припев, etc.)
-            if (trimmedLine.matches(Regex("^(Куплет|Припев|Verse|Chorus|Bridge).*", RegexOption.IGNORE_CASE))) {
+            // Check if this is a section marker ([Куплет], {Припев}, etc.)
+            if (trimmedLine.matches(Regex("^[\\[{](Куплет|Припев|Verse|Chorus|Refrain|Bridge).*[\\]}]$", RegexOption.IGNORE_CASE))) {
                 // If we have accumulated lines, save them as a section
                 if (currentSection.isNotEmpty()) {
                     if (result.isNotEmpty()) result.append("@\$")
                     result.append(currentSection)
                     currentSection = StringBuilder()
                 }
-                // Start new section with the marker
-                currentSection.append(trimmedLine)
+                // Start new section with the marker (strip [] or {} wrapping for SPS format)
+                val unwrapped = trimmedLine.removePrefix("[").removePrefix("{").removeSuffix("]").removeSuffix("}")
+                currentSection.append(unwrapped)
             } else if (trimmedLine.isNotEmpty()) {
                 // Add line to current section
                 if (currentSection.isNotEmpty()) {

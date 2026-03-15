@@ -12,6 +12,7 @@ import androidx.compose.runtime.mutableStateListOf
 class Bible {
     private var bibleId: String = ""
     private var bibleAbbreviation: String = ""
+    private var bibleTitle: String = ""
     private val books = mutableStateListOf<BibleBook>()
     private val operatorBible = mutableStateListOf<BibleVerse>()
     // Index: (bookId, chapterNum) -> ordered list of verses — built at load time for O(1) lookup
@@ -292,7 +293,8 @@ class Bible {
                 ))
             }
 
-            // Extract and store Bible abbreviation from title or filename
+            // Store full title and abbreviation
+            this.bibleTitle = bibleTitle ?: resourcePath.substringBeforeLast(".").substringAfterLast("/").substringAfterLast("\\")
             bibleAbbreviation = extractBibleAbbreviation(bibleTitle, resourcePath)
 
             // Build chapter index for O(1) lookup in getChapter()
@@ -483,5 +485,9 @@ class Bible {
      */
     fun getBibleAbbreviation(): String {
         return bibleAbbreviation
+    }
+
+    fun getBibleTitle(): String {
+        return bibleTitle
     }
 }

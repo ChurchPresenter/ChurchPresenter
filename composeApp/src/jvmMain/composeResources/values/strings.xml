@@ -770,4 +770,11 @@
     <string name="new_song">New Song</string>
     <string name="back_to_live">Back to Live</string>
     <string name="line_navigation_hint">Use ← → to navigate lines, ↑ ↓ for verses</string>
+
+    <!-- Statistics -->
+    <string name="statistics">Statistics</string>
+    <string name="top_songs">Top Songs</string>
+    <string name="top_verses">Top Verses</string>
+    <string name="clear_statistics">Clear Statistics</string>
+    <string name="times_displayed">times</string>
 </resources>

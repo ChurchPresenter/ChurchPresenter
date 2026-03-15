@@ -118,6 +118,7 @@ fun BibleTab(
     onPresenting: (Presenting) -> Unit = { Presenting.NONE },
     isPresenting: Boolean = false,
     presenterManager: PresenterManager? = null,
+    statisticsManager: org.churchpresenter.app.churchpresenter.data.StatisticsManager? = null,
 ) {
     // Update settings when bible paths change
     val isFirstComposition = remember { mutableStateOf(true) }
@@ -204,6 +205,17 @@ fun BibleTab(
                 viewModel.addToHistory(v.bookName, v.chapter, v.verseNumber, v.verseText, rangeStr)
             } else {
                 viewModel.addToHistory(v.bookName, v.chapter, v.verseNumber, v.verseText)
+            }
+        }
+        // Record each individual verse for statistics (primary bible only)
+        val primaryVerse = selectedVerses.firstOrNull()
+        if (primaryVerse != null && statisticsManager != null) {
+            if (viewModel.multiVerseEnabled.value) {
+                for (vNum in viewModel.getSelectedVerseNumbers()) {
+                    statisticsManager.recordVerseDisplay(primaryVerse.bibleName, primaryVerse.bookName, primaryVerse.chapter, vNum)
+                }
+            } else {
+                statisticsManager.recordVerseDisplay(primaryVerse.bibleName, primaryVerse.bookName, primaryVerse.chapter, primaryVerse.verseNumber)
             }
         }
         // In multi-verse mode, explicitly push verses and clear selection for next pick

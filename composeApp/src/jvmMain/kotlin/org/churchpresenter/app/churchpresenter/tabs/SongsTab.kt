@@ -115,7 +115,8 @@ fun SongsTab(
     onPresenting: (Presenting) -> Unit = { Presenting.NONE },
     isPresenting: Boolean = false,
     theme: ThemeMode = ThemeMode.SYSTEM,
-    onSongsLoaded: ((List<SongItem>) -> Unit)? = null
+    onSongsLoaded: ((List<SongItem>) -> Unit)? = null,
+    statisticsManager: org.churchpresenter.app.churchpresenter.data.StatisticsManager? = null
 ) {
     val onSongsLoadedState by rememberUpdatedState(onSongsLoaded)
     val viewModel = remember { SongsViewModel(appSettings, onSongsLoaded = { songs -> onSongsLoadedState?.invoke(songs) }) }
@@ -157,6 +158,19 @@ fun SongsTab(
         onSectionIndexChanged(viewModel.selectedSectionIndex.value)
         onLineIndexChanged(viewModel.selectedLineIndex.value)
         viewModel.getSelectedLyricSection()?.let { onSongItemSelected(it) }
+        // Record song display for statistics — only when a different song is presented
+        val idx = viewModel.selectedSongIndex.value
+        if (idx != liveSongIndex) {
+            val items = viewModel.filteredSongItems.value
+            if (idx in items.indices) {
+                val song = items[idx]
+                statisticsManager?.recordSongDisplay(
+                    songNumber = song.number.toIntOrNull() ?: 0,
+                    title = song.title,
+                    songbook = song.songbook
+                )
+            }
+        }
         liveSongIndex = viewModel.selectedSongIndex.value
         liveSectionIndex = viewModel.selectedSectionIndex.value
         liveLineIndex = viewModel.selectedLineIndex.value
@@ -536,7 +550,7 @@ fun SongsTab(
                 modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
             ) {
                 val useIcons = maxWidth < 220.dp
-                val hasSongSelected = selectedSongIndex >= 0 && selectedSongIndex < filteredSongs.size
+                val hasSongSelected = selectedSongIndex >= 0 && selectedSongIndex < filteredSongs.size && selectedSectionIndex >= 0
                 @OptIn(ExperimentalLayoutApi::class)
                 FlowRow(
                     modifier = Modifier.fillMaxWidth(),

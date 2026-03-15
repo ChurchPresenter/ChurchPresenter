@@ -108,6 +108,7 @@ fun MainDesktop(
     modifier: Modifier = Modifier,
     appSettings: AppSettings,
     presenterManager: PresenterManager,
+    statisticsManager: org.churchpresenter.app.churchpresenter.data.StatisticsManager? = null,
     presenting: (Presenting) -> Unit,
     onVerseSelected: (List<SelectedVerse>) -> Unit,
     onSongItemSelected: (LyricSection) -> Unit,
@@ -332,6 +333,11 @@ fun MainDesktop(
                                     lines = emptyList(),
                                     type = Constants.SECTION_TYPE_SONG
                                 )
+                            )
+                            statisticsManager?.recordSongDisplay(
+                                songNumber = item.songNumber,
+                                title = item.title,
+                                songbook = item.songbook
                             )
                             presenting(Presenting.LYRICS)
                         },
@@ -574,7 +580,8 @@ fun MainDesktop(
                                 onVerseSelected = onVerseSelected,
                                 onPresenting = presenting,
                                 isPresenting = presentingMode == Presenting.BIBLE,
-                                presenterManager = presenterManager
+                                presenterManager = presenterManager,
+                                statisticsManager = statisticsManager
                             )
 
                             Tabs.SONGS -> SongsTab(
@@ -593,7 +600,8 @@ fun MainDesktop(
                                 onPresenting = presenting,
                                 isPresenting = presentingMode == Presenting.LYRICS,
                                 theme = theme,
-                                onSongsLoaded = onSongsLoaded
+                                onSongsLoaded = onSongsLoaded,
+                                statisticsManager = statisticsManager
                             )
 
                             Tabs.PICTURES -> PicturesTab(

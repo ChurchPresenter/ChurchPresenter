@@ -727,5 +727,12 @@
     <string name="back_to_live">Вернуться к прямому эфиру</string>
     <string name="line_navigation_hint">← → для навигации по строкам, ↑ ↓ для куплетов</string>
     <string name="multi_verse">Несколько стихов</string>
+
+    <!-- Statistics -->
+    <string name="statistics">Статистика</string>
+    <string name="top_songs">Топ песен</string>
+    <string name="top_verses">Топ стихов</string>
+    <string name="clear_statistics">Очистить статистику</string>
+    <string name="times_displayed">раз</string>
 </resources>
 
