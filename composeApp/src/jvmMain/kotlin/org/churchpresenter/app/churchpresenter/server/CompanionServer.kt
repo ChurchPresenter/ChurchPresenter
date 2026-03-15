@@ -140,6 +140,8 @@ data class ScheduleItemDto(
     val bookName: String? = null,
     val chapter: Int? = null,
     val verseNumber: Int? = null,
+    /** Non-null for multi-verse items, e.g. "1-3" or "2,4". Null / absent for single verses. */
+    val verseRange: String? = null,
     // label
     val text: String? = null,
     val textColor: String? = null,
@@ -353,6 +355,8 @@ data class RemoteItemDto(
     val chapter: Int? = null,
     val verseNumber: Int? = null,
     val verseText: String? = null,
+    /** Optional multi-verse range, e.g. "1-3" or "2,4". When present the schedule item groups all those verses. */
+    val verseRange: String? = null,
     // picture
     val folderPath: String? = null,
     val folderName: String? = null,
@@ -409,7 +413,8 @@ fun RemoteItemDto.toScheduleItem(): ScheduleItem? {
                 bookName    = bookName,
                 chapter     = chapter,
                 verseNumber = verseNumber,
-                verseText   = verseText ?: ""
+                verseText   = verseText ?: "",
+                verseRange  = verseRange ?: ""
             )
         // Picture folder — must have folderPath
         folderPath != null ->
@@ -723,6 +728,7 @@ class CompanionServer {
                 is ScheduleItem.BibleVerseItem -> ScheduleItemDto(
                     id = item.id, type = "bible", displayText = item.displayText,
                     bookName = item.bookName, chapter = item.chapter, verseNumber = item.verseNumber,
+                    verseRange = item.verseRange.ifEmpty { null },
                     text = item.verseText
                 )
                 is ScheduleItem.LabelItem -> ScheduleItemDto(
