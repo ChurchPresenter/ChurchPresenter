@@ -7,10 +7,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
@@ -45,34 +43,8 @@ import churchpresenter.composeapp.generated.resources.companion_server
 import churchpresenter.composeapp.generated.resources.copy_api_key
 import churchpresenter.composeapp.generated.resources.copy_url
 import churchpresenter.composeapp.generated.resources.enable_server
-import churchpresenter.composeapp.generated.resources.endpoint_desc_add_to_schedule
-import churchpresenter.composeapp.generated.resources.endpoint_desc_add_batch_to_schedule
-import churchpresenter.composeapp.generated.resources.endpoint_desc_bible_catalog
-import churchpresenter.composeapp.generated.resources.endpoint_desc_bible_chapter
-import churchpresenter.composeapp.generated.resources.endpoint_desc_filter_book
-import churchpresenter.composeapp.generated.resources.endpoint_desc_filter_chapter
-import churchpresenter.composeapp.generated.resources.endpoint_desc_filter_songbook
-import churchpresenter.composeapp.generated.resources.endpoint_desc_picture_catalog
-import churchpresenter.composeapp.generated.resources.endpoint_desc_picture_image
-import churchpresenter.composeapp.generated.resources.endpoint_desc_presentation_catalog
-import churchpresenter.composeapp.generated.resources.endpoint_desc_project
-import churchpresenter.composeapp.generated.resources.endpoint_desc_schedule
-import churchpresenter.composeapp.generated.resources.endpoint_desc_select_picture
-import churchpresenter.composeapp.generated.resources.endpoint_desc_server_info
-import churchpresenter.composeapp.generated.resources.endpoint_desc_slide_image
-import churchpresenter.composeapp.generated.resources.endpoint_desc_song_catalog
-import churchpresenter.composeapp.generated.resources.endpoint_desc_song_detail
-import churchpresenter.composeapp.generated.resources.endpoint_desc_ws_add_to_schedule
-import churchpresenter.composeapp.generated.resources.endpoint_desc_ws_project
-import churchpresenter.composeapp.generated.resources.endpoint_desc_ws_realtime
-import churchpresenter.composeapp.generated.resources.endpoint_desc_ws_select_picture
 import churchpresenter.composeapp.generated.resources.generate_api_key
 import churchpresenter.composeapp.generated.resources.server_description
-import churchpresenter.composeapp.generated.resources.server_endpoints
-import churchpresenter.composeapp.generated.resources.server_endpoints_actions
-import churchpresenter.composeapp.generated.resources.server_endpoints_read
-import churchpresenter.composeapp.generated.resources.server_endpoints_websocket
-import churchpresenter.composeapp.generated.resources.server_payload_reference
 import churchpresenter.composeapp.generated.resources.server_port
 import churchpresenter.composeapp.generated.resources.server_port_hint
 import churchpresenter.composeapp.generated.resources.server_port_note
@@ -81,7 +53,6 @@ import churchpresenter.composeapp.generated.resources.server_running
 import churchpresenter.composeapp.generated.resources.server_stopped
 import churchpresenter.composeapp.generated.resources.server_url_label
 import org.churchpresenter.app.churchpresenter.data.AppSettings
-import org.churchpresenter.app.churchpresenter.models.ScheduleItem
 import org.churchpresenter.app.churchpresenter.server.CompanionServer
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.jetbrains.compose.resources.stringResource
@@ -117,20 +88,16 @@ fun ServerSettingsTab(
             .background(MaterialTheme.colorScheme.surfaceVariant)
             .padding(5.dp)
     ) {
-        Row(
-            modifier = Modifier.fillMaxSize(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        // ── Settings column ───────────────────────────────────────────────────
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(4.dp))
+                .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f), RoundedCornerShape(4.dp))
+                .padding(start = 15.dp, end = 15.dp, top = 8.dp, bottom = 15.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            // ── LEFT COLUMN: settings ─────────────────────────────────────────
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .verticalScroll(rememberScrollState())
-                    .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(4.dp))
-                    .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f), RoundedCornerShape(4.dp))
-                    .padding(start = 15.dp, end = 15.dp, top = 8.dp, bottom = 15.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
                 // ── Header ────────────────────────────────────────────────────
                 Text(
                     text = stringResource(Res.string.companion_server),
@@ -331,136 +298,6 @@ fun ServerSettingsTab(
                         }
                     }
                 }
-            }
-
-            // ── RIGHT COLUMN: available endpoints ─────────────────────────────
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .verticalScroll(rememberScrollState())
-                    .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(4.dp))
-                    .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f), RoundedCornerShape(4.dp))
-                    .padding(start = 15.dp, end = 15.dp, top = 8.dp, bottom = 15.dp),
-                verticalArrangement = Arrangement.spacedBy(6.dp)
-            ) {
-                Text(
-                    text = stringResource(Res.string.server_endpoints),
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.primary
-                )
-                HorizontalDivider()
-                Spacer(modifier = Modifier.height(2.dp))
-
-                // ── Read endpoints ────────────────────────────────────────────
-                Text(
-                    text = stringResource(Res.string.server_endpoints_read),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                listOf(
-                    "GET ${Constants.ENDPOINT_INFO}" to stringResource(Res.string.endpoint_desc_server_info),
-                    "GET ${Constants.ENDPOINT_SONGS}" to stringResource(Res.string.endpoint_desc_song_catalog),
-                    "GET ${Constants.ENDPOINT_SONGS}?songbook=Name" to stringResource(Res.string.endpoint_desc_filter_songbook),
-                    "GET ${Constants.ENDPOINT_SONG_DETAIL}" to stringResource(Res.string.endpoint_desc_song_detail),
-                    "GET ${Constants.ENDPOINT_SONG_DETAIL}?songbook=Name" to stringResource(Res.string.endpoint_desc_song_detail),
-                    "GET ${Constants.ENDPOINT_BIBLE}" to stringResource(Res.string.endpoint_desc_bible_catalog),
-                    "GET ${Constants.ENDPOINT_BIBLE}?book=Genesis" to stringResource(Res.string.endpoint_desc_filter_book),
-                    "GET ${Constants.ENDPOINT_BIBLE}?book=Genesis&chapter=1" to stringResource(Res.string.endpoint_desc_filter_chapter),
-                    "GET ${Constants.ENDPOINT_BIBLE}?book=1&chapter=1" to stringResource(Res.string.endpoint_desc_bible_chapter),
-                    "GET ${Constants.ENDPOINT_SCHEDULE}" to stringResource(Res.string.endpoint_desc_schedule),
-                    "GET ${Constants.ENDPOINT_PRESENTATIONS}" to stringResource(Res.string.endpoint_desc_presentation_catalog),
-                    "GET ${Constants.ENDPOINT_PRESENTATIONS}/{id}/slides/{index}" to stringResource(Res.string.endpoint_desc_slide_image),
-                    "GET ${Constants.ENDPOINT_PICTURES}" to stringResource(Res.string.endpoint_desc_picture_catalog),
-                    "GET ${Constants.ENDPOINT_PICTURES}/{id}/images/{index}" to stringResource(Res.string.endpoint_desc_picture_image)
-                ).forEach { (endpoint, description) ->
-                    EndpointCard(endpoint = endpoint, description = description)
-                }
-
-                HorizontalDivider()
-
-                // ── Action endpoints ──────────────────────────────────────────
-                Text(
-                    text = stringResource(Res.string.server_endpoints_actions),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                listOf(
-                    "POST ${Constants.ENDPOINT_SCHEDULE_ADD}" to stringResource(Res.string.endpoint_desc_add_to_schedule),
-                    "POST ${Constants.ENDPOINT_SCHEDULE_ADD_BATCH}" to stringResource(Res.string.endpoint_desc_add_batch_to_schedule),
-                    "POST ${Constants.ENDPOINT_PROJECT}" to stringResource(Res.string.endpoint_desc_project),
-                    "POST ${Constants.ENDPOINT_PICTURES}/select" to stringResource(Res.string.endpoint_desc_select_picture)
-                ).forEach { (endpoint, description) ->
-                    EndpointCard(endpoint = endpoint, description = description, isAction = true)
-                }
-
-                HorizontalDivider()
-
-                // ── WebSocket ─────────────────────────────────────────────────
-                Text(
-                    text = stringResource(Res.string.server_endpoints_websocket),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                listOf(
-                    "WS  ${Constants.ENDPOINT_WS}" to stringResource(Res.string.endpoint_desc_ws_realtime),
-                    "CMD ${Constants.WS_CMD_ADD_TO_SCHEDULE}" to stringResource(Res.string.endpoint_desc_ws_add_to_schedule),
-                    "CMD ${Constants.WS_CMD_PROJECT}" to stringResource(Res.string.endpoint_desc_ws_project),
-                    "CMD ${Constants.WS_CMD_SELECT_PICTURE}" to stringResource(Res.string.endpoint_desc_ws_select_picture)
-                ).forEach { (endpoint, description) ->
-                    EndpointCard(endpoint = endpoint, description = description)
-                }
-
-                Spacer(modifier = Modifier.height(4.dp))
-
-                // ── Payload reference — mirrors ScheduleItem subclass fields ─
-                Text(
-                    text = stringResource(Res.string.server_payload_reference),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                PayloadCard(
-                    subclassName = ScheduleItem.SongItem::class.simpleName!!,
-                    fields = listOf(
-                        ScheduleItem.SongItem::songNumber.name,
-                        ScheduleItem.SongItem::title.name,
-                        ScheduleItem.SongItem::songbook.name
-                    )
-                )
-                PayloadCard(
-                    subclassName = ScheduleItem.BibleVerseItem::class.simpleName!!,
-                    fields = listOf(
-                        ScheduleItem.BibleVerseItem::bookName.name,
-                        ScheduleItem.BibleVerseItem::chapter.name,
-                        ScheduleItem.BibleVerseItem::verseNumber.name,
-                        ScheduleItem.BibleVerseItem::verseText.name
-                    )
-                )
-                PayloadCard(
-                    subclassName = ScheduleItem.PresentationItem::class.simpleName!!,
-                    fields = listOf(
-                        ScheduleItem.PresentationItem::filePath.name,
-                        ScheduleItem.PresentationItem::fileName.name,
-                        ScheduleItem.PresentationItem::slideCount.name,
-                        ScheduleItem.PresentationItem::fileType.name
-                    )
-                )
-                PayloadCard(
-                    subclassName = ScheduleItem.PictureItem::class.simpleName!!,
-                    fields = listOf(
-                        ScheduleItem.PictureItem::folderPath.name,
-                        ScheduleItem.PictureItem::folderName.name,
-                        ScheduleItem.PictureItem::imageCount.name
-                    )
-                )
-                PayloadCard(
-                    subclassName = ScheduleItem.MediaItem::class.simpleName!!,
-                    fields = listOf(
-                        ScheduleItem.MediaItem::mediaUrl.name,
-                        ScheduleItem.MediaItem::mediaTitle.name,
-                        ScheduleItem.MediaItem::mediaType.name
-                    )
-                )
-            }
         }
     }
 }
@@ -484,55 +321,4 @@ private fun SettingRow(
     }
 }
 
-@Composable
-private fun EndpointCard(endpoint: String, description: String, isAction: Boolean = false) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(
-                if (isAction) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
-                else MaterialTheme.colorScheme.surfaceVariant,
-                RoundedCornerShape(4.dp)
-            )
-            .padding(horizontal = 8.dp, vertical = 4.dp)
-    ) {
-        Text(
-            text = endpoint,
-            style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
-            color = if (isAction) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary
-        )
-        Text(
-            text = description,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-    }
-}
 
-/**
- * Displays the field names of a [ScheduleItem] subclass as the expected
- * JSON payload shape for the remote API actions.
- */
-@Composable
-private fun PayloadCard(subclassName: String, fields: List<String>) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(4.dp))
-            .padding(horizontal = 8.dp, vertical = 4.dp),
-        verticalArrangement = Arrangement.spacedBy(1.dp)
-    ) {
-        Text(
-            text = "{ \"item\": $subclassName }",
-            style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
-            color = MaterialTheme.colorScheme.primary
-        )
-        fields.forEach { field ->
-            Text(
-                text = "  \"$field\": …",
-                style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-    }
-}
