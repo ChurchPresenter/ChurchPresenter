@@ -11,7 +11,8 @@ import java.io.File
 @Serializable
 data class RemoteClientLists(
     val allowedClients: Set<String> = emptySet(),
-    val blockedClients: Set<String> = emptySet()
+    val blockedClients: Set<String> = emptySet(),
+    val clientLabels: Map<String, String> = emptyMap()
 )
 
 /**
@@ -31,6 +32,7 @@ class RemoteClientManager {
 
     val allowedClients: Set<String> get() = _lists.allowedClients
     val blockedClients: Set<String> get() = _lists.blockedClients
+    val clientLabels: Map<String, String> get() = _lists.clientLabels
 
     private fun load(): RemoteClientLists = try {
         if (clientsFile.exists()) jsonFormat.decodeFromString(clientsFile.readText())
@@ -83,6 +85,19 @@ class RemoteClientManager {
         save()
     }
 
+    /** Returns the human-readable label for the given device ID, or empty string if none set. */
+    fun getLabel(clientId: String): String = _lists.clientLabels[clientId] ?: ""
+
+    /** Saves (or clears when blank) the human-readable label for a device ID. */
+    fun setLabel(clientId: String, label: String) {
+        if (clientId.isBlank()) return
+        val trimmed = label.trim()
+        _lists = _lists.copy(
+            clientLabels = if (trimmed.isEmpty()) _lists.clientLabels - clientId
+                           else _lists.clientLabels + (clientId to trimmed)
+        )
+        save()
+    }
+
     fun reload() { _lists = load() }
 }
-

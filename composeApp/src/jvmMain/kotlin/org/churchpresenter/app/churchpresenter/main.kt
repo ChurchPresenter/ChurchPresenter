@@ -344,10 +344,11 @@ fun main() {
                                     val item = pending.item
                                     val (eventTitle, eventDetail) = remoteEventLabel(item)
                                     val event = RemoteEvent(
-                                        type     = RemoteEventType.ADD_TO_SCHEDULE,
-                                        title    = eventTitle,
-                                        detail   = eventDetail,
-                                        clientId = clientId
+                                        type        = RemoteEventType.ADD_TO_SCHEDULE,
+                                        title       = eventTitle,
+                                        detail      = eventDetail,
+                                        clientId    = clientId,
+                                        clientLabel = remoteClientManager.getLabel(clientId)
                                     )
                                     val allow: () -> Unit = {
                                         when (item) {
@@ -422,10 +423,11 @@ fun main() {
                                         }
                                     }.let { if (count > 3) "$it …" else it }
                                     val event = RemoteEvent(
-                                        type     = RemoteEventType.ADD_TO_SCHEDULE,
-                                        title    = summaryTitle,
-                                        detail   = summaryDetail,
-                                        clientId = clientId
+                                        type        = RemoteEventType.ADD_TO_SCHEDULE,
+                                        title       = summaryTitle,
+                                        detail      = summaryDetail,
+                                        clientId    = clientId,
+                                        clientLabel = remoteClientManager.getLabel(clientId)
                                     )
                                     val allow: () -> Unit = {
                                         for (item in pending.items) {
@@ -476,10 +478,11 @@ fun main() {
                                     val item = pending.item
                                     val (eventTitle, eventDetail) = remoteEventLabel(item)
                                     val event = RemoteEvent(
-                                        type     = RemoteEventType.PROJECT,
-                                        title    = eventTitle,
-                                        detail   = eventDetail,
-                                        clientId = clientId
+                                        type        = RemoteEventType.PROJECT,
+                                        title       = eventTitle,
+                                        detail      = eventDetail,
+                                        clientId    = clientId,
+                                        clientLabel = remoteClientManager.getLabel(clientId)
                                     )
                                     val allow: () -> Unit = {
                                         executeProjectItem(item, currentScheduleActions, presenterManager, statisticsManager)

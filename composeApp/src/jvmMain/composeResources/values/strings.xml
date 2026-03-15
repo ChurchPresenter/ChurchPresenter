@@ -804,4 +804,8 @@
     <string name="blocked_clients_description">Requests from these clients are automatically rejected without showing a dialog.</string>
     <string name="no_allowed_clients">No permanently allowed clients.</string>
     <string name="no_blocked_clients">No permanently blocked clients.</string>
+    <string name="client_label_placeholder">Enter a friendly name…</string>
+    <string name="client_label_edit_tooltip">Set friendly name</string>
+    <string name="client_label_save">Save</string>
+    <string name="client_label_cancel">Cancel</string>
 </resources>

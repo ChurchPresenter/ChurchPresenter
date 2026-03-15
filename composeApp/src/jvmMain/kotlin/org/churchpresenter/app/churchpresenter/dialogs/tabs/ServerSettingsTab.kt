@@ -12,14 +12,21 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
@@ -47,6 +54,10 @@ import churchpresenter.composeapp.generated.resources.api_key_label
 import churchpresenter.composeapp.generated.resources.api_key_protection
 import churchpresenter.composeapp.generated.resources.blocked_clients
 import churchpresenter.composeapp.generated.resources.blocked_clients_description
+import churchpresenter.composeapp.generated.resources.client_label_cancel
+import churchpresenter.composeapp.generated.resources.client_label_edit_tooltip
+import churchpresenter.composeapp.generated.resources.client_label_placeholder
+import churchpresenter.composeapp.generated.resources.client_label_save
 import churchpresenter.composeapp.generated.resources.companion_server
 import churchpresenter.composeapp.generated.resources.copy_api_key
 import churchpresenter.composeapp.generated.resources.copy_url
@@ -356,6 +367,8 @@ fun ServerSettingsTab(
                         key(clientId) {
                             ClientRow(
                                 clientId = clientId,
+                                label = remoteClientManager.getLabel(clientId),
+                                onSetLabel = { remoteClientManager.setLabel(clientId, it) },
                                 statusColor = MaterialTheme.colorScheme.primary,
                                 statusLabel = stringResource(Res.string.allowed_clients),
                                 onRemove = { remoteClientManager.removeAllowed(clientId) }
@@ -392,6 +405,8 @@ fun ServerSettingsTab(
                         key(clientId) {
                             ClientRow(
                                 clientId = clientId,
+                                label = remoteClientManager.getLabel(clientId),
+                                onSetLabel = { remoteClientManager.setLabel(clientId, it) },
                                 statusColor = MaterialTheme.colorScheme.error,
                                 statusLabel = stringResource(Res.string.blocked_clients),
                                 onRemove = { remoteClientManager.removeBlocked(clientId) }
@@ -406,43 +421,130 @@ fun ServerSettingsTab(
 @Composable
 private fun ClientRow(
     clientId: String,
+    label: String,
+    onSetLabel: (String) -> Unit,
     statusColor: androidx.compose.ui.graphics.Color,
     statusLabel: String,
     onRemove: () -> Unit
 ) {
-    Row(
+    var editing by remember { mutableStateOf(false) }
+    var editText by remember(label) { mutableStateOf(label) }
+
+    Column(
         modifier = Modifier
             .fillMaxWidth()
             .background(
                 MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
                 RoundedCornerShape(4.dp)
             )
-            .padding(horizontal = 10.dp, vertical = 6.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
+            .padding(horizontal = 10.dp, vertical = 6.dp)
     ) {
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = clientId,
-                style = MaterialTheme.typography.bodyMedium,
-                fontFamily = FontFamily.Monospace
-            )
-            Text(
-                text = statusLabel,
-                style = MaterialTheme.typography.labelSmall,
-                color = statusColor
-            )
-        }
-        Spacer(Modifier.width(8.dp))
-        Button(
-            onClick = onRemove,
-            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.errorContainer,
-                contentColor = MaterialTheme.colorScheme.onErrorContainer
-            )
+        // ── Top row: identity + action buttons ───────────────────────────────
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text(stringResource(Res.string.remove), style = MaterialTheme.typography.labelSmall)
+            Column(modifier = Modifier.weight(1f)) {
+                // Friendly label (if set)
+                if (label.isNotBlank()) {
+                    Text(
+                        text = label,
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = statusColor
+                    )
+                }
+                // Raw device ID
+                Text(
+                    text = clientId,
+                    style = if (label.isNotBlank()) MaterialTheme.typography.labelSmall
+                            else MaterialTheme.typography.bodyMedium,
+                    fontFamily = FontFamily.Monospace,
+                    color = MaterialTheme.colorScheme.onSurface.copy(
+                        alpha = if (label.isNotBlank()) 0.6f else 1f
+                    )
+                )
+                Text(
+                    text = statusLabel,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = statusColor
+                )
+            }
+            Spacer(Modifier.width(8.dp))
+            // Edit (pencil) button
+            IconButton(
+                onClick = { editing = !editing; editText = label },
+                modifier = Modifier.size(32.dp)
+            ) {
+                Icon(
+                    Icons.Filled.Edit,
+                    contentDescription = stringResource(Res.string.client_label_edit_tooltip),
+                    modifier = Modifier.size(16.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            Spacer(Modifier.width(4.dp))
+            Button(
+                onClick = onRemove,
+                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.errorContainer,
+                    contentColor = MaterialTheme.colorScheme.onErrorContainer
+                )
+            ) {
+                Text(stringResource(Res.string.remove), style = MaterialTheme.typography.labelSmall)
+            }
+        }
+
+        // ── Inline label editor (shown when editing) ──────────────────────────
+        if (editing) {
+            Spacer(Modifier.height(6.dp))
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                OutlinedTextField(
+                    value = editText,
+                    onValueChange = { editText = it },
+                    modifier = Modifier.weight(1f),
+                    singleLine = true,
+                    textStyle = MaterialTheme.typography.bodySmall,
+                    placeholder = {
+                        Text(
+                            stringResource(Res.string.client_label_placeholder),
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+                )
+                // Confirm
+                IconButton(
+                    onClick = {
+                        onSetLabel(editText)
+                        editing = false
+                    },
+                    modifier = Modifier.size(32.dp)
+                ) {
+                    Icon(
+                        Icons.Filled.Check,
+                        contentDescription = stringResource(Res.string.client_label_save),
+                        modifier = Modifier.size(18.dp),
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+                // Cancel
+                IconButton(
+                    onClick = { editing = false; editText = label },
+                    modifier = Modifier.size(32.dp)
+                ) {
+                    Icon(
+                        Icons.Filled.Close,
+                        contentDescription = stringResource(Res.string.client_label_cancel),
+                        modifier = Modifier.size(18.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
         }
     }
 }
