@@ -726,5 +726,12 @@
     <string name="back_to_live">Тікелей эфірге оралу</string>
     <string name="line_navigation_hint">← → жолдар бойынша, ↑ ↓ шумақтар бойынша</string>
     <string name="multi_verse">Бірнеше аят</string>
+
+    <!-- Statistics -->
+    <string name="statistics">Статистика</string>
+    <string name="top_songs">Үздік әндер</string>
+    <string name="top_verses">Үздік аяттар</string>
+    <string name="clear_statistics">Статистиканы тазалау</string>
+    <string name="times_displayed">рет</string>
 </resources>
 

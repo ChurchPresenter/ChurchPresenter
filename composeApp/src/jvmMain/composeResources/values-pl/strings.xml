@@ -726,5 +726,12 @@
     <string name="back_to_live">Wróć do transmisji</string>
     <string name="line_navigation_hint">← → nawigacja po wierszach, ↑ ↓ po zwrotkach</string>
     <string name="multi_verse">Wiele wersetów</string>
+
+    <!-- Statistics -->
+    <string name="statistics">Statystyki</string>
+    <string name="top_songs">Najczęściej wyświetlane pieśni</string>
+    <string name="top_verses">Najczęściej wyświetlane wersety</string>
+    <string name="clear_statistics">Wyczyść statystyki</string>
+    <string name="times_displayed">razy</string>
 </resources>
 

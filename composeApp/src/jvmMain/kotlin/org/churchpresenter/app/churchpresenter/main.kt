@@ -65,6 +65,7 @@ import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.data.ScreenAssignment
 import org.churchpresenter.app.churchpresenter.data.Language
 import org.churchpresenter.app.churchpresenter.data.SettingsManager
+import org.churchpresenter.app.churchpresenter.data.StatisticsManager
 import org.churchpresenter.app.churchpresenter.dialogs.AboutDialog
 import org.churchpresenter.app.churchpresenter.dialogs.KeyboardShortcutsDialog
 import org.churchpresenter.app.churchpresenter.dialogs.LicenseDialog
@@ -123,6 +124,7 @@ fun main() {
 
         // Business logic layer
         val settingsManager = remember { SettingsManager() }
+        val statisticsManager = remember { StatisticsManager() }
         var appSettings by remember { mutableStateOf(settingsManager.loadSettings()) }
 
         // Resolve any unassigned (-1 auto) screen assignments at startup so that
@@ -402,7 +404,7 @@ fun main() {
                                         detail = eventDetail
                                     )
                                     val allow: () -> Unit = {
-                                        executeProjectItem(item, currentScheduleActions, presenterManager)
+                                        executeProjectItem(item, currentScheduleActions, presenterManager, statisticsManager)
                                         // Also drive Songs tab selection for song items
                                         if (item is ScheduleItem.SongItem) {
                                             coroutineScope.launch { remoteSelectSongFlow.emit(item) }
@@ -456,6 +458,7 @@ fun main() {
                                 onLineIndexChanged = { presenterManager.setSongDisplayLineIndex(it) },
                                 appSettings = appSettings,
                                 presenterManager = presenterManager,
+                                statisticsManager = statisticsManager,
                                 onScheduleActionsReady = { scheduleActions = it },
                                 presenting = { mode ->
                                     presenterManager.setPresentingMode(mode)
@@ -489,6 +492,7 @@ fun main() {
                                 isVisible = showOptionsDialog,
                                 theme = theme,
                                 settingsManager = settingsManager,
+                                statisticsManager = statisticsManager,
                                 companionServer = companionServer,
                                 presenterManager = presenterManager,
                                 onDismiss = { showOptionsDialog = false },
@@ -597,7 +601,8 @@ private fun remoteEventLabel(item: ScheduleItem): Pair<String, String> = when (i
 private fun executeProjectItem(
     item: ScheduleItem,
     scheduleActions: ScheduleActions,
-    presenterManager: PresenterManager
+    presenterManager: PresenterManager,
+    statisticsManager: StatisticsManager? = null
 ) {
     when (item) {
         is ScheduleItem.SongItem -> {
@@ -611,6 +616,7 @@ private fun executeProjectItem(
                     type       = Constants.SECTION_TYPE_SONG
                 )
             )
+            statisticsManager?.recordSongDisplay(item.songNumber, item.title, item.songbook)
             presenterManager.setPresentingMode(Presenting.LYRICS)
             presenterManager.setShowPresenterWindow(true)
         }

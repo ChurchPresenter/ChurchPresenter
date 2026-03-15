@@ -731,5 +731,12 @@
     <string name="back_to_live">Повернутися до ефіру</string>
     <string name="line_navigation_hint">← → для навігації по рядках, ↑ ↓ для куплетів</string>
     <string name="multi_verse">Кілька віршів</string>
+
+    <!-- Statistics -->
+    <string name="statistics">Статистика</string>
+    <string name="top_songs">Топ пісень</string>
+    <string name="top_verses">Топ віршів</string>
+    <string name="clear_statistics">Очистити статистику</string>
+    <string name="times_displayed">разів</string>
 </resources>
 

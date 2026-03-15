@@ -726,5 +726,12 @@
     <string name="back_to_live">Zurück zur Live-Ansicht</string>
     <string name="line_navigation_hint">← → für Zeilen, ↑ ↓ für Strophen</string>
     <string name="multi_verse">Mehrere Verse</string>
+
+    <!-- Statistics -->
+    <string name="statistics">Statistik</string>
+    <string name="top_songs">Top Lieder</string>
+    <string name="top_verses">Top Verse</string>
+    <string name="clear_statistics">Statistik löschen</string>
+    <string name="times_displayed">mal</string>
 </resources>
 

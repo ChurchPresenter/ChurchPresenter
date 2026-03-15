@@ -812,5 +812,12 @@
     <string name="back_to_live">Zpět na živé vysílání</string>
     <string name="line_navigation_hint">← → pro navigaci v řádcích, ↑ ↓ pro sloky</string>
     <string name="multi_verse">Více veršů</string>
+
+    <!-- Statistics -->
+    <string name="statistics">Statistiky</string>
+    <string name="top_songs">Nejčastější písně</string>
+    <string name="top_verses">Nejčastější verše</string>
+    <string name="clear_statistics">Vymazat statistiky</string>
+    <string name="times_displayed">krát</string>
 </resources>
 
