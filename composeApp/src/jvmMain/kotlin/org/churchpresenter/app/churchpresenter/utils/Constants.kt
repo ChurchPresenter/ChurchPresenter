@@ -65,6 +65,19 @@ fun formatAspectRatio(width: Int, height: Int): String {
 
 private fun gcd(a: Int, b: Int): Int = if (b == 0) a else gcd(b, a % b)
 
+/** Any line wrapped in [] or {} is a section header. */
+fun isHeaderLine(line: String): Boolean {
+    val t = line.trim()
+    return (t.startsWith("[") && t.endsWith("]")) ||
+           (t.startsWith("{") && t.endsWith("}"))
+}
+
+/** {} = chorus, [] = verse/other */
+fun isChorusHeader(line: String): Boolean {
+    val t = line.trim()
+    return t.startsWith("{") && t.endsWith("}")
+}
+
 object Constants {
     const val NONE = "None"
     const val FIRST_PAGE = "First Page"
@@ -92,13 +105,6 @@ object Constants {
 
     const val SYSTEM = "SYSTEM"
 
-    const val VERSE_RUS = "Куплет"
-
-    const val VERSE_1_RUS = "Куплет 1"
-    const val VERSE = "Verse"
-    const val CHORUS = "Chorus"
-
-    const val CHORUS_RUS = "Припев"
     const val OTHER = "Other"
 
     const val CONTAINS = "Contains"
@@ -126,6 +132,20 @@ object Constants {
     // File Extensions
     const val EXTENSION_SPS = "sps"
     const val EXTENSION_SPB = "spb"
+    const val EXTENSION_SONG = "song"
+
+    // Song Display Modes
+    const val SONG_DISPLAY_MODE_VERSE = "verse"
+    const val SONG_DISPLAY_MODE_LINE = "line"
+
+    // Song Language Display
+    const val SONG_LANG_BOTH = "both"
+    const val SONG_LANG_PRIMARY = "primary"
+    const val SONG_LANG_SECONDARY = "secondary"
+
+    // Bilingual Layout
+    const val BILINGUAL_SIDE_BY_SIDE = "side_by_side"
+    const val BILINGUAL_TOP_BOTTOM = "top_bottom"
 
     // Section Types
     const val SECTION_TYPE_SONG = "song"

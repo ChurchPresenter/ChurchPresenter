@@ -451,6 +451,9 @@ fun main() {
                             MainDesktop(
                                 onVerseSelected = { verses -> presenterManager.setSelectedVerses(verses) },
                                 onSongItemSelected = { presenterManager.setLyricSection(it) },
+                                onAllSectionsChanged = { presenterManager.setAllLyricSections(it) },
+                                onSectionIndexChanged = { presenterManager.setSongDisplaySectionIndex(it) },
+                                onLineIndexChanged = { presenterManager.setSongDisplayLineIndex(it) },
                                 appSettings = appSettings,
                                 presenterManager = presenterManager,
                                 onScheduleActionsReady = { scheduleActions = it },
@@ -717,6 +720,9 @@ private fun PresenterWindows(
     val lyricSectionVersion by presenterManager.lyricSectionVersion
     val displayedLyricSection by presenterManager.displayedLyricSection
     val songTransitionAlpha by presenterManager.songTransitionAlpha
+    val songDisplayLineIndex by presenterManager.songDisplayLineIndex
+    val allLyricSections by presenterManager.allLyricSections
+    val songDisplaySectionIndex by presenterManager.songDisplaySectionIndex
     val selectedImagePath by presenterManager.selectedImagePath
     val displayedImagePath by presenterManager.displayedImagePath
     val pictureTransitionAlpha by presenterManager.pictureTransitionAlpha
@@ -776,6 +782,19 @@ private fun PresenterWindows(
     // Centralized Song transition
     LaunchedEffect(lyricSection, lyricSectionVersion) {
         val ss = appSettings.songSettings
+        // Skip animation when section content hasn't changed (e.g. line navigation within same verse)
+        if (lyricSection == presenterManager.displayedLyricSection.value) {
+            presenterManager.setSongTransitionAlpha(1f)
+            return@LaunchedEffect
+        }
+        // Skip fade in line mode — only one line visible, instant swap is cleaner
+        val isLineMode = ss.fullscreenDisplayMode == Constants.SONG_DISPLAY_MODE_LINE ||
+            ss.lowerThirdDisplayMode == Constants.SONG_DISPLAY_MODE_LINE
+        if (isLineMode) {
+            presenterManager.setDisplayedLyricSection(lyricSection)
+            presenterManager.setSongTransitionAlpha(1f)
+            return@LaunchedEffect
+        }
         if (presenterManager.displayedLyricSection.value.lines.isEmpty() || (!ss.fadeIn && !ss.fadeOut)) {
             presenterManager.setDisplayedLyricSection(lyricSection)
             presenterManager.setSongTransitionAlpha(1f)
@@ -997,7 +1016,11 @@ private fun PresenterWindows(
                                         appSettings = appSettings,
                                         isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD,
                                         outputRole = primaryRole,
-                                        transitionAlpha = songTransitionAlpha
+                                        transitionAlpha = songTransitionAlpha,
+                                        displayLineIndex = songDisplayLineIndex,
+                                        lookAheadEnabled = screenAssignment.songLookAhead,
+                                        allLyricSections = allLyricSections,
+                                        displaySectionIndex = songDisplaySectionIndex
                                     )
                                 }
                             Presenting.PICTURES ->
@@ -1133,7 +1156,11 @@ private fun PresenterWindows(
                                                 appSettings = appSettings,
                                                 isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD,
                                                 outputRole = Constants.OUTPUT_ROLE_KEY,
-                                                transitionAlpha = songTransitionAlpha
+                                                transitionAlpha = songTransitionAlpha,
+                                                displayLineIndex = songDisplayLineIndex,
+                                                lookAheadEnabled = screenAssignment.songLookAhead,
+                                                allLyricSections = allLyricSections,
+                                                displaySectionIndex = songDisplaySectionIndex
                                             )
                                         }
                                     Presenting.PICTURES ->

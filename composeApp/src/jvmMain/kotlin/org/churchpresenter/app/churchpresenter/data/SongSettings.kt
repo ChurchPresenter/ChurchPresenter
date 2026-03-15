@@ -65,13 +65,25 @@ data class SongSettings(
     val titleUnderline: Boolean = false,
     val titleShadow: Boolean = false,
 
+    // Title settings — lower third
+    val titleLowerThirdDisplay: String = Constants.FIRST_PAGE,
+    val titleLowerThirdFontSize: Int = 28,
+    val titleLowerThirdFontType: String = "Arial",
+    val titleLowerThirdPosition: String = Constants.MIDDLE,
+    val titleLowerThirdHorizontalAlignment: String = Constants.CENTER,
+    val titleLowerThirdColor: String = "#FFFFFF",
+    val titleLowerThirdBold: Boolean = false,
+    val titleLowerThirdItalic: Boolean = false,
+    val titleLowerThirdUnderline: Boolean = false,
+    val titleLowerThirdShadow: Boolean = false,
+
     // Lyrics settings
-    val lyricsFontSize: Int = 24,
-    val lyricsLowerThirdFontSize: Int = 18,
+    val lyricsFontSize: Int = 70,
+    val lyricsLowerThirdFontSize: Int = 28,
     val lyricsFontType: String = "Arial",
     val lyricsMinFontSize: Int = 12,
     val lyricsMaxFontSize: Int = 60,
-    val wordWrap: Boolean = true,
+    val wordWrap: Boolean = false,
     val lyricsAlignment: String = Constants.MIDDLE,
     val lyricsHorizontalAlignment: String = Constants.CENTER,
     val lyricsLowerThirdHorizontalAlignment: String = Constants.CENTER,
@@ -81,16 +93,36 @@ data class SongSettings(
     val lyricsUnderline: Boolean = false,
     val lyricsShadow: Boolean = false,
 
+    // Lyrics settings — lower third
+    val lyricsLowerThirdFontType: String = "Arial",
+    val lyricsLowerThirdColor: String = "#FFFFFF",
+    val lyricsLowerThirdBold: Boolean = false,
+    val lyricsLowerThirdItalic: Boolean = false,
+    val lyricsLowerThirdUnderline: Boolean = false,
+    val lyricsLowerThirdShadow: Boolean = false,
+
     // Song number settings
-    val songNumberFontSize: Int = 16,
-    val songNumberLowerThirdFontSize: Int = 12,
+    val songNumberFontSize: Int = 70,
+    val songNumberLowerThirdFontSize: Int = 28,
     val showNumber: String = Constants.FIRST_PAGE,
-    val songNumberPosition: String = Constants.BOTTOM_RIGHT,
+    val songNumberPosition: String = Constants.BELOW_VERSE,
+    val songNumberHorizontalAlignment: String = Constants.RIGHT,
     val songNumberColor: String = "#FFFFFF", // White
     val songNumberBold: Boolean = false,
     val songNumberItalic: Boolean = false,
     val songNumberUnderline: Boolean = false,
     val songNumberShadow: Boolean = false,
+
+    // Song number settings — lower third
+    val showNumberLowerThird: String = Constants.FIRST_PAGE,
+    val songNumberLowerThirdColor: String = "#FFFFFF",
+    val songNumberLowerThirdPosition: String = Constants.BELOW_VERSE,
+    val songNumberLowerThirdHorizontalAlignment: String = Constants.RIGHT,
+    val songNumberLowerThirdBold: Boolean = false,
+    val songNumberLowerThirdItalic: Boolean = false,
+    val songNumberLowerThirdUnderline: Boolean = false,
+    val songNumberLowerThirdShadow: Boolean = false,
+    val songNumberBeforeTitle: Boolean = true,
 
     // Text margins (additional padding inside global projection offsets)
     val marginTop: Int = 54,
@@ -98,15 +130,84 @@ data class SongSettings(
     val marginLeft: Int = 96,
     val marginRight: Int = 96,
 
-    // Shadow customization
+    // Shadow customization — fullscreen
     val shadowColor: String = "#000000",
     val shadowSize: Int = 100,      // percentage multiplier for offset & blur (10–500)
     val shadowOpacity: Int = 90,    // percentage for shadow alpha (10–100)
+    // Shadow customization — lower third
+    val lowerThirdShadowColor: String = "#000000",
+    val lowerThirdShadowSize: Int = 100,
+    val lowerThirdShadowOpacity: Int = 90,
 
     // Transition animation
     val fadeIn: Boolean = true,
     val fadeOut: Boolean = true,
-    val transitionDuration: Float = 500f
+    val transitionDuration: Float = 500f,
+
+    // Fullscreen display
+    val fullscreenDisplayMode: String = Constants.SONG_DISPLAY_MODE_VERSE, // "verse" or "line"
+    val fullscreenLanguageDisplay: String = Constants.SONG_LANG_BOTH, // "both", "primary", "secondary"
+
+    // Lower third display
+    val lowerThirdDisplayMode: String = Constants.SONG_DISPLAY_MODE_LINE, // "verse" or "line"
+    val lowerThirdLanguageDisplay: String = Constants.SONG_LANG_BOTH, // "both", "primary", "secondary"
+
+    // Bilingual layout: "side_by_side" or "top_bottom"
+    val bilingualLayout: String = Constants.BILINGUAL_SIDE_BY_SIDE,
+
+    // Look-ahead styling — fullscreen
+    val lookAheadDisplayMode: String = Constants.SONG_DISPLAY_MODE_VERSE,
+    val lookAheadLanguageDisplay: String = Constants.SONG_LANG_PRIMARY,
+    val lookAheadHorizontalAlignment: String = Constants.CENTER,
+    val lookAheadFontSize: Int = 70,
+    val lookAheadFontType: String = "Arial",
+    val lookAheadColor: String = "#FFFFFF",
+    val lookAheadBold: Boolean = false,
+    val lookAheadItalic: Boolean = false,
+    val lookAheadUnderline: Boolean = false,
+    val lookAheadShadow: Boolean = false,
+    val lookAheadShadowColor: String = "#000000",
+    val lookAheadShadowSize: Int = 100,
+    val lookAheadShadowOpacity: Int = 90,
+
+    // Look-ahead next section preview styling — fullscreen
+    val lookAheadNextFontSize: Int = 70,
+    val lookAheadNextFontType: String = "Arial",
+    val lookAheadNextColor: String = "#888888",
+    val lookAheadNextBold: Boolean = false,
+    val lookAheadNextItalic: Boolean = true,
+    val lookAheadNextUnderline: Boolean = false,
+    val lookAheadNextShadow: Boolean = false,
+    val lookAheadNextShadowColor: String = "#000000",
+    val lookAheadNextShadowSize: Int = 100,
+    val lookAheadNextShadowOpacity: Int = 90,
+
+    // Look-ahead styling — lower third
+    val lowerThirdLookAheadDisplayMode: String = Constants.SONG_DISPLAY_MODE_LINE,
+    val lowerThirdLookAheadLanguageDisplay: String = Constants.SONG_LANG_PRIMARY,
+    val lowerThirdLookAheadHorizontalAlignment: String = Constants.CENTER,
+    val lowerThirdLookAheadFontSize: Int = 28,
+    val lowerThirdLookAheadFontType: String = "Arial",
+    val lowerThirdLookAheadColor: String = "#FFFFFF",
+    val lowerThirdLookAheadBold: Boolean = false,
+    val lowerThirdLookAheadItalic: Boolean = false,
+    val lowerThirdLookAheadUnderline: Boolean = false,
+    val lowerThirdLookAheadShadow: Boolean = false,
+    val lowerThirdLookAheadShadowColor: String = "#000000",
+    val lowerThirdLookAheadShadowSize: Int = 100,
+    val lowerThirdLookAheadShadowOpacity: Int = 90,
+
+    // Look-ahead next section preview styling — lower third
+    val lowerThirdLookAheadNextFontSize: Int = 28,
+    val lowerThirdLookAheadNextFontType: String = "Arial",
+    val lowerThirdLookAheadNextColor: String = "#888888",
+    val lowerThirdLookAheadNextBold: Boolean = false,
+    val lowerThirdLookAheadNextItalic: Boolean = true,
+    val lowerThirdLookAheadNextUnderline: Boolean = false,
+    val lowerThirdLookAheadNextShadow: Boolean = false,
+    val lowerThirdLookAheadNextShadowColor: String = "#000000",
+    val lowerThirdLookAheadNextShadowSize: Int = 100,
+    val lowerThirdLookAheadNextShadowOpacity: Int = 90
 )
 
 @Serializable
@@ -325,7 +426,8 @@ data class ScreenAssignment(
     val showMedia: Boolean = true,
     val showStreaming: Boolean = true,
     val showAnnouncements: Boolean = true,
-    val displayMode: String = "fullscreen" // Constants.DISPLAY_MODE_FULLSCREEN or DISPLAY_MODE_LOWER_THIRD
+    val displayMode: String = "fullscreen", // Constants.DISPLAY_MODE_FULLSCREEN or DISPLAY_MODE_LOWER_THIRD
+    val songLookAhead: Boolean = false // enable look-ahead for songs on this output
 ) {
     /** Whether a key output target is configured */
     val hasKeyOutput: Boolean get() = keyTargetDisplay >= 0

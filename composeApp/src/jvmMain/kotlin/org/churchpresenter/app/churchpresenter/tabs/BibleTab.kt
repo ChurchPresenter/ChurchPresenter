@@ -2,6 +2,10 @@ package org.churchpresenter.app.churchpresenter.tabs
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.TooltipArea
+import androidx.compose.foundation.TooltipPlacement
+import androidx.compose.material3.Surface
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.foundation.HorizontalScrollbar
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
@@ -476,33 +480,43 @@ fun BibleTab(
                             modifier = Modifier.padding(start = 2.dp)
                         )
                     }
-                    TextButton(
-                        onClick = {
-                            onSettingsChange { s ->
-                                s.copy(bibleSettings = s.bibleSettings.swapped())
+                    TooltipArea(
+                        tooltip = {
+                            Surface(
+                                color = MaterialTheme.colorScheme.inverseSurface,
+                                shape = MaterialTheme.shapes.extraSmall,
+                                tonalElevation = 4.dp
+                            ) {
+                                Column(modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) {
+                                    Text(
+                                        text = "${stringResource(Res.string.primary_bible)} ${appSettings.bibleSettings.primaryBible.substringBeforeLast('.').ifEmpty { "-" }}",
+                                        color = MaterialTheme.colorScheme.inverseOnSurface,
+                                        style = MaterialTheme.typography.bodySmall
+                                    )
+                                    Text(
+                                        text = "${stringResource(Res.string.secondary_bible)} ${appSettings.bibleSettings.secondaryBible.substringBeforeLast('.').ifEmpty { "-" }}",
+                                        color = MaterialTheme.colorScheme.inverseOnSurface,
+                                        style = MaterialTheme.typography.bodySmall
+                                    )
+                                }
                             }
-                        }
+                        },
+                        tooltipPlacement = TooltipPlacement.CursorPoint(
+                            offset = DpOffset(0.dp, 16.dp)
+                        )
                     ) {
-                        Text(
-                            text = stringResource(Res.string.swap_bibles),
-                            style = MaterialTheme.typography.labelMedium
-                        )
-                    }
-                    Column(modifier = Modifier.weight(1f).padding(start = 8.dp)) {
-                        Text(
-                            text = "${stringResource(Res.string.primary_bible)} ${appSettings.bibleSettings.primaryBible.substringBeforeLast('.').ifEmpty { "-" }}",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            maxLines = 2,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                        Text(
-                            text = "${stringResource(Res.string.secondary_bible)} ${appSettings.bibleSettings.secondaryBible.substringBeforeLast('.').ifEmpty { "-" }}",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            maxLines = 2,
-                            overflow = TextOverflow.Ellipsis
-                        )
+                        TextButton(
+                            onClick = {
+                                onSettingsChange { s ->
+                                    s.copy(bibleSettings = s.bibleSettings.swapped())
+                                }
+                            }
+                        ) {
+                            Text(
+                                text = stringResource(Res.string.swap_bibles),
+                                style = MaterialTheme.typography.labelMedium
+                            )
+                        }
                     }
                     Button(
                         modifier = Modifier.wrapContentSize().padding(start = 8.dp),

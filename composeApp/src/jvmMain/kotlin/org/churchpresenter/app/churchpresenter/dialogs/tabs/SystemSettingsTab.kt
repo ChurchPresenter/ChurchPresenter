@@ -12,15 +12,26 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -49,6 +60,7 @@ import churchpresenter.composeapp.generated.resources.songs_storage_directory
 import org.churchpresenter.app.churchpresenter.composables.ThemeSegmentedButton
 import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.data.SettingsManager
+import org.churchpresenter.app.churchpresenter.data.SpsConverter
 import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
 import org.churchpresenter.app.churchpresenter.viewmodel.FileManager
 import org.jetbrains.compose.resources.stringResource
@@ -143,12 +155,145 @@ fun SystemSettingsTab(
             },
             onSetAll = setAllDirectories
         )
-        DetectedFilesList(
-            files = fileManager.getSongFilesInDirectory(settings.songSettings.storageDirectory),
-            directorySet = settings.songSettings.storageDirectory.isNotEmpty(),
-            detectedLabel = stringResource(Res.string.detected_files_label),
-            noFilesText = stringResource(Res.string.no_files_detected)
-        )
+        if (settings.songSettings.storageDirectory.isNotEmpty()) {
+            var convertingFile by remember { mutableStateOf<String?>(null) }
+            val coroutineScope = rememberCoroutineScope()
+            val spsFiles = fileManager.getSongFilesInDirectory(settings.songSettings.storageDirectory)
+            val songFolders = fileManager.getSongFoldersInDirectory(settings.songSettings.storageDirectory)
+
+            // Add Song Samples button
+            val sampleScope = rememberCoroutineScope()
+            var copyingSamples by remember { mutableStateOf(false) }
+
+            Row(
+                modifier = Modifier.padding(top = 2.dp, start = 2.dp).height(24.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                if (spsFiles.isEmpty() && songFolders.isEmpty()) {
+                    Text(
+                        text = stringResource(Res.string.no_files_detected),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error.copy(alpha = 0.7f)
+                    )
+                } else {
+                    Text(
+                        text = stringResource(Res.string.detected_files_label),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                TextButton(
+                    onClick = {
+                        val samplesDir = java.io.File(settings.songSettings.storageDirectory, "Song Samples")
+                        val proceed = if (samplesDir.exists()) {
+                            JOptionPane.showConfirmDialog(
+                                null,
+                                "\"Song Samples\" folder already exists. This will overwrite existing files.\nContinue?",
+                                "Folder Already Exists",
+                                JOptionPane.YES_NO_OPTION,
+                                JOptionPane.WARNING_MESSAGE
+                            ) == JOptionPane.YES_OPTION
+                        } else true
+                        if (proceed) {
+                            copyingSamples = true
+                            sampleScope.launch {
+                                val count = withContext(Dispatchers.IO) {
+                                    copySongSamples(settings.songSettings.storageDirectory)
+                                }
+                                copyingSamples = false
+                                JOptionPane.showMessageDialog(
+                                    null,
+                                    "Copied $count sample songs to \"Song Samples\" folder.",
+                                    "Song Samples",
+                                    JOptionPane.INFORMATION_MESSAGE
+                                )
+                            }
+                        }
+                    },
+                    enabled = !copyingSamples,
+                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp)
+                ) {
+                    Text("Add Song Samples", style = MaterialTheme.typography.labelSmall)
+                }
+                if (copyingSamples) {
+                    CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
+                }
+            }
+
+            for (spsFile in spsFiles) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(start = 2.dp, top = 2.dp).height(32.dp)
+                ) {
+                    Text(
+                        text = "$spsFile (not supported)",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error.copy(alpha = 0.7f)
+                    )
+                    if (convertingFile == spsFile) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.padding(start = 8.dp).size(16.dp),
+                            strokeWidth = 2.dp
+                        )
+                    } else {
+                        TextButton(
+                            onClick = {
+                                val converter = SpsConverter()
+                                val spsPath = java.io.File(settings.songSettings.storageDirectory, spsFile).absolutePath
+
+                                // Check if target folder already exists
+                                if (converter.targetFolderExists(spsPath, settings.songSettings.storageDirectory)) {
+                                    val folderName = converter.getTargetFolderName(spsPath, settings.songSettings.storageDirectory) ?: spsFile
+                                    val confirm = JOptionPane.showConfirmDialog(
+                                        null,
+                                        "Folder \"$folderName\" already exists. This will overwrite existing song files.\nContinue?",
+                                        "Folder Already Exists",
+                                        JOptionPane.YES_NO_OPTION,
+                                        JOptionPane.WARNING_MESSAGE
+                                    )
+                                    if (confirm != JOptionPane.YES_OPTION) return@TextButton
+                                }
+
+                                convertingFile = spsFile
+                                coroutineScope.launch {
+                                    val result = withContext(Dispatchers.IO) {
+                                        converter.convertSpsToSongFiles(spsPath, settings.songSettings.storageDirectory)
+                                    }
+                                    convertingFile = null
+                                    if (result.errors.isEmpty()) {
+                                        JOptionPane.showMessageDialog(
+                                            null,
+                                            "Converted ${result.songsConverted} songs to folder: ${java.io.File(result.songbookFolder).name}",
+                                            "Conversion Complete",
+                                            JOptionPane.INFORMATION_MESSAGE
+                                        )
+                                    } else {
+                                        JOptionPane.showMessageDialog(
+                                            null,
+                                            "Converted ${result.songsConverted} songs.\nErrors:\n${result.errors.joinToString("\n")}",
+                                            "Conversion Complete",
+                                            JOptionPane.WARNING_MESSAGE
+                                        )
+                                    }
+                                }
+                            },
+                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp)
+                        ) {
+                            Text("Convert", style = MaterialTheme.typography.labelSmall)
+                        }
+                    }
+                }
+            }
+
+            for (folder in songFolders) {
+                Text(
+                    text = "${folder.first} (${folder.second} songs)",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 2.dp, start = 2.dp)
+                )
+            }
+        }
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -472,4 +617,25 @@ private fun DetectedFilesList(
                 else MaterialTheme.colorScheme.error.copy(alpha = 0.7f),
         modifier = Modifier.padding(top = 4.dp, start = 2.dp)
     )
+}
+
+private suspend fun copySongSamples(storageDirectory: String): Int {
+    val targetDir = java.io.File(storageDirectory, "Song Samples")
+    if (!targetDir.exists()) targetDir.mkdirs()
+
+    val indexBytes = churchpresenter.composeapp.generated.resources.Res.readBytes("files/song_samples/index.txt")
+    val filenames = indexBytes.toString(Charsets.UTF_8).lines().filter { it.isNotBlank() }
+
+    var count = 0
+    for (filename in filenames) {
+        try {
+            val songBytes = churchpresenter.composeapp.generated.resources.Res.readBytes("files/song_samples/$filename")
+            val targetFile = java.io.File(targetDir, filename)
+            targetFile.writeBytes(songBytes)
+            count++
+        } catch (_: Exception) {
+            // Skip files that can't be read
+        }
+    }
+    return count
 }

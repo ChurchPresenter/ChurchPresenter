@@ -25,14 +25,18 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -47,6 +51,7 @@ import kotlinx.coroutines.flow.first
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
@@ -65,7 +70,11 @@ import churchpresenter.composeapp.generated.resources.all_song_books
 import churchpresenter.composeapp.generated.resources.contains
 import churchpresenter.composeapp.generated.resources.edit_song
 import churchpresenter.composeapp.generated.resources.exact_match
+import churchpresenter.composeapp.generated.resources.back_to_live
 import churchpresenter.composeapp.generated.resources.go_live
+import churchpresenter.composeapp.generated.resources.ic_add
+import churchpresenter.composeapp.generated.resources.line_navigation_hint
+import churchpresenter.composeapp.generated.resources.new_song
 import churchpresenter.composeapp.generated.resources.ic_cast
 import churchpresenter.composeapp.generated.resources.ic_edit
 import churchpresenter.composeapp.generated.resources.ic_playlist_add
@@ -100,6 +109,9 @@ fun SongsTab(
     selectedSongItem: ScheduleItem.SongItem? = null,
     selectedSongItemVersion: Int = 0,
     onSongItemSelected: (LyricSection) -> Unit,
+    onAllSectionsChanged: (List<LyricSection>) -> Unit = {},
+    onSectionIndexChanged: (Int) -> Unit = {},
+    onLineIndexChanged: (Int) -> Unit = {},
     onPresenting: (Presenting) -> Unit = { Presenting.NONE },
     isPresenting: Boolean = false,
     theme: ThemeMode = ThemeMode.SYSTEM,
@@ -118,19 +130,8 @@ fun SongsTab(
     }
 
     // React to schedule item selection.
-    // Uses selectedSongItemVersion as a key so clicking the same song twice always re-fires,
-    // even if selectedSongItem hasn't changed (same data class instance).
-    LaunchedEffect(selectedSongItem, selectedSongItemVersion) {
-        selectedSongItem?.let { item ->
-            if (viewModel.isLoading.value) {
-                snapshotFlow { viewModel.isLoading.value }.first { !it }
-            }
-            val found = viewModel.selectSongByDetails(item.songNumber, item.title, item.songbook, item.songId)
-            if (found) {
-                viewModel.getSelectedLyricSection()?.let { section -> onSongItemSelected(section) }
-            }
-        }
-    }
+    // If data is still loading when the item arrives, wait for loading to finish
+    // then retry — no fixed delay, no polling, no race condition.
     // Observe ViewModel state
     val songbooks by viewModel.songbooks
     val searchQuery by viewModel.searchQuery
@@ -143,8 +144,44 @@ fun SongsTab(
     // Edit Song Dialog state (pure UI state — fine to keep here)
     var showEditDialog by remember { mutableStateOf(false) }
     var songToEdit by remember { mutableStateOf<SongItem?>(null) }
+    var showNewSongDialog by remember { mutableStateOf(false) }
+
+    // Track which song/section/line is currently live on the presenter
+    var liveSongIndex by remember { mutableStateOf(-1) }
+    var liveSectionIndex by remember { mutableStateOf(0) }
+    var liveLineIndex by remember { mutableStateOf(0) }
+
+    // Helper: push current viewModel selection to presenter and track as live
+    fun sendToPresenter() {
+        onAllSectionsChanged(viewModel.getLyricSections())
+        onSectionIndexChanged(viewModel.selectedSectionIndex.value)
+        onLineIndexChanged(viewModel.selectedLineIndex.value)
+        viewModel.getSelectedLyricSection()?.let { onSongItemSelected(it) }
+        liveSongIndex = viewModel.selectedSongIndex.value
+        liveSectionIndex = viewModel.selectedSectionIndex.value
+        liveLineIndex = viewModel.selectedLineIndex.value
+    }
+
+    // React to schedule item selection
+    // Uses selectedSongItemVersion as a key so clicking the same song twice always re-fires
+    LaunchedEffect(selectedSongItem, selectedSongItemVersion) {
+        selectedSongItem?.let { item ->
+            // Wait until data is ready if currently loading
+            if (viewModel.isLoading.value) {
+                snapshotFlow { viewModel.isLoading.value }
+                    .first { !it }
+            }
+            val found = viewModel.selectSongByDetails(item.songNumber, item.title, item.songbook, item.songId)
+            if (found) {
+                sendToPresenter()
+            }
+        }
+    }
 
     // String resources
+    val newSongStr = stringResource(Res.string.new_song)
+    val backToLiveStr = stringResource(Res.string.back_to_live)
+    val lineNavHintStr = stringResource(Res.string.line_navigation_hint)
     val allSongBooksText = stringResource(Res.string.all_song_books)
 
     // Prepend "All" option to songbooks
@@ -185,12 +222,12 @@ fun SongsTab(
         mutableStateOf(with(density) { appSettings.songSettings.colWidthTune.dp.toPx() })
     }
 
-    // Panel split — lyrics panel width in px; 0 means "not yet set, use default"
-    val defaultLyricsPx = with(density) { 300.dp.toPx() }
+    // Panel split — lyrics panel width in px; 0 means "not yet set, use half of row"
     var lyricsPanelPx by remember(appSettings.songSettings.lyricsPanelWidthDp) {
         val saved = appSettings.songSettings.lyricsPanelWidthDp
-        mutableStateOf(if (saved > 0) with(density) { saved.dp.toPx() } else defaultLyricsPx)
+        mutableStateOf(if (saved > 0) with(density) { saved.dp.toPx() } else 0f)
     }
+    var rowTotalWidth by remember { mutableStateOf(0f) }
 
     fun saveColWidths() {
         onSettingsChangeState.value { s ->
@@ -223,31 +260,43 @@ fun SongsTab(
     Row(
         modifier = modifier
             .fillMaxSize()
+            .onSizeChanged { size ->
+                rowTotalWidth = size.width.toFloat()
+                if (lyricsPanelPx == 0f) {
+                    lyricsPanelPx = rowTotalWidth / 2f
+                }
+            }
             .onKeyEvent { keyEvent ->
                 if (keyEvent.type == KeyEventType.KeyDown) {
+                    val isLineMode = appSettings.songSettings.fullscreenDisplayMode != Constants.SONG_DISPLAY_MODE_VERSE ||
+                        appSettings.songSettings.lowerThirdDisplayMode != Constants.SONG_DISPLAY_MODE_VERSE
                     when (keyEvent.key) {
                         Key.DirectionLeft -> {
-                            if (!isPresenting) {
+                            if (isLineMode) {
+                                viewModel.navigatePreviousLine()
+                                sendToPresenter()
+                            } else if (!isPresenting) {
                                 viewModel.navigatePreviousSong()
-                                viewModel.getSelectedLyricSection()?.let { onSongItemSelected(it) }
                             }
                             true
                         }
                         Key.DirectionRight -> {
-                            if (!isPresenting) {
+                            if (isLineMode) {
+                                viewModel.navigateNextLine()
+                                sendToPresenter()
+                            } else if (!isPresenting) {
                                 viewModel.navigateNextSong()
-                                viewModel.getSelectedLyricSection()?.let { onSongItemSelected(it) }
                             }
                             true
                         }
                         Key.DirectionUp -> {
                             if (!viewModel.navigatePreviousSection() && !isPresenting) viewModel.navigatePreviousSong()
-                            viewModel.getSelectedLyricSection()?.let { onSongItemSelected(it) }
+                            sendToPresenter()
                             true
                         }
                         Key.DirectionDown -> {
                             if (!viewModel.navigateNextSection() && !isPresenting) viewModel.navigateNextSong()
-                            viewModel.getSelectedLyricSection()?.let { onSongItemSelected(it) }
+                            sendToPresenter()
                             true
                         }
                         else -> false
@@ -368,7 +417,7 @@ fun SongsTab(
             }
 
             Box(modifier = Modifier.weight(1f)) {
-                val lazyListState = androidx.compose.foundation.lazy.rememberLazyListState()
+                val lazyListState = rememberLazyListState()
 
                 LaunchedEffect(selectedSongIndex, filteredSongs.size) {
                     if (selectedSongIndex >= 0 && selectedSongIndex < filteredSongs.size) {
@@ -393,7 +442,12 @@ fun SongsTab(
                                     if (index == selectedSongIndex) MaterialTheme.colorScheme.surfaceVariant
                                     else MaterialTheme.colorScheme.surface
                                 )
-                                .clickable { viewModel.selectSong(index) }
+                                .clickable {
+                                    viewModel.selectSong(index)
+                                    if (isPresenting && liveSongIndex >= 0) {
+                                        viewModel.selectSection(-1)
+                                    }
+                                }
                                 .padding(vertical = 8.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
@@ -469,7 +523,6 @@ fun SongsTab(
             modifier = Modifier
                 .width(with(density) { lyricsPanelPx.toDp() })
                 .fillMaxHeight()
-                .background(MaterialTheme.colorScheme.surfaceVariant)
                 .padding(8.dp)
         ) {
             // Header row with action buttons — switches to icon-only when width is tight
@@ -481,54 +534,26 @@ fun SongsTab(
                 modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
             ) {
                 val useIcons = maxWidth < 220.dp
-                Row(
+                val hasSongSelected = selectedSongIndex >= 0 && selectedSongIndex < filteredSongs.size
+                @OptIn(ExperimentalLayoutApi::class)
+                FlowRow(
                     modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
-                    if (selectedSongIndex >= 0 && selectedSongIndex < filteredSongs.size) {
-                        if (useIcons) {
-                            TooltipArea(
-                                tooltip = {
-                                    androidx.compose.material3.Surface(shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
-                                        Text(editSongStr, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
-                                    }
-                                },
-                                tooltipPlacement = TooltipPlacement.CursorPoint()
-                            ) {
-                                androidx.compose.material3.IconButton(
-                                    onClick = { songToEdit = filteredSongs[selectedSongIndex]; showEditDialog = true },
-                                    colors = androidx.compose.material3.IconButtonDefaults.iconButtonColors(
-                                        containerColor = MaterialTheme.colorScheme.tertiary,
-                                        contentColor = MaterialTheme.colorScheme.onTertiary
-                                    )
-                                ) {
-                                    Icon(painter = painterResource(Res.drawable.ic_edit), contentDescription = editSongStr, modifier = Modifier.size(20.dp))
-                                }
-                            }
-                        } else {
-                            Button(
-                                modifier = Modifier.padding(end = 4.dp),
-                                onClick = { songToEdit = filteredSongs[selectedSongIndex]; showEditDialog = true },
-                                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary)
-                            ) {
-                                Text(editSongStr, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onTertiary, maxLines = 1)
-                            }
-                        }
-                    }
-
                     if (useIcons) {
                         TooltipArea(
                             tooltip = {
-                                androidx.compose.material3.Surface(shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
+                                Surface(shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
                                     Text(goLiveStr, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
                                 }
                             },
                             tooltipPlacement = TooltipPlacement.CursorPoint()
                         ) {
-                            androidx.compose.material3.IconButton(
-                                onClick = { onPresenting(Presenting.LYRICS) },
-                                colors = androidx.compose.material3.IconButtonDefaults.iconButtonColors(
+                            IconButton(
+                                onClick = { sendToPresenter(); onPresenting(Presenting.LYRICS) },
+                                enabled = hasSongSelected,
+                                colors = IconButtonDefaults.iconButtonColors(
                                     containerColor = MaterialTheme.colorScheme.primary,
                                     contentColor = MaterialTheme.colorScheme.onPrimary
                                 )
@@ -538,10 +563,70 @@ fun SongsTab(
                         }
                     } else {
                         Button(
-                            onClick = { onPresenting(Presenting.LYRICS) },
+                            onClick = { sendToPresenter(); onPresenting(Presenting.LYRICS) },
+                            enabled = hasSongSelected,
                             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
                         ) {
                             Text(goLiveStr, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onPrimary, maxLines = 1)
+                        }
+                    }
+
+                    if (selectedSongIndex >= 0 && selectedSongIndex < filteredSongs.size) {
+                        if (useIcons) {
+                            TooltipArea(
+                                tooltip = {
+                                    Surface(shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
+                                        Text(editSongStr, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
+                                    }
+                                },
+                                tooltipPlacement = TooltipPlacement.CursorPoint()
+                            ) {
+                                IconButton(
+                                    onClick = { songToEdit = filteredSongs[selectedSongIndex]; showEditDialog = true },
+                                    colors = IconButtonDefaults.iconButtonColors(
+                                        containerColor = MaterialTheme.colorScheme.tertiary,
+                                        contentColor = MaterialTheme.colorScheme.onTertiary
+                                    )
+                                ) {
+                                    Icon(painter = painterResource(Res.drawable.ic_edit), contentDescription = editSongStr, modifier = Modifier.size(20.dp))
+                                }
+                            }
+                        } else {
+                            Button(
+                                onClick = { songToEdit = filteredSongs[selectedSongIndex]; showEditDialog = true },
+                                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary)
+                            ) {
+                                Text(editSongStr, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onTertiary, maxLines = 1)
+                            }
+                        }
+                    }
+
+                    // New Song button
+                    if (useIcons) {
+                        TooltipArea(
+                            tooltip = {
+                                Surface(shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
+                                    Text(newSongStr, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
+                                }
+                            },
+                            tooltipPlacement = TooltipPlacement.CursorPoint()
+                        ) {
+                            IconButton(
+                                onClick = { showNewSongDialog = true },
+                                colors = IconButtonDefaults.iconButtonColors(
+                                    containerColor = MaterialTheme.colorScheme.tertiary,
+                                    contentColor = MaterialTheme.colorScheme.onTertiary
+                                )
+                            ) {
+                                Icon(painter = painterResource(Res.drawable.ic_add), contentDescription = newSongStr, modifier = Modifier.size(20.dp))
+                            }
+                        }
+                    } else {
+                        Button(
+                            onClick = { showNewSongDialog = true },
+                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary)
+                        ) {
+                            Text(newSongStr, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onTertiary, maxLines = 1)
                         }
                     }
 
@@ -549,19 +634,19 @@ fun SongsTab(
                         if (useIcons) {
                             TooltipArea(
                                 tooltip = {
-                                    androidx.compose.material3.Surface(shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
+                                    Surface(shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
                                         Text(addScheduleStr, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
                                     }
                                 },
                                 tooltipPlacement = TooltipPlacement.CursorPoint()
                             ) {
-                                androidx.compose.material3.IconButton(
+                                IconButton(
                                     onClick = {
                                         filteredSongs.getOrNull(selectedSongIndex)?.let { item ->
                                             onAddToSchedule(item.number.toIntOrNull() ?: 0, item.title, item.songbook, item.songId)
                                         }
                                     },
-                                    colors = androidx.compose.material3.IconButtonDefaults.iconButtonColors(
+                                    colors = IconButtonDefaults.iconButtonColors(
                                         containerColor = MaterialTheme.colorScheme.secondary,
                                         contentColor = MaterialTheme.colorScheme.onSecondary
                                     )
@@ -571,7 +656,6 @@ fun SongsTab(
                             }
                         } else {
                             Button(
-                                modifier = Modifier.padding(start = 4.dp),
                                 onClick = {
                                     filteredSongs.getOrNull(selectedSongIndex)?.let { item ->
                                         onAddToSchedule(item.number.toIntOrNull() ?: 0, item.title, item.songbook, item.songId)
@@ -586,9 +670,36 @@ fun SongsTab(
                 }
             }
 
+            // "Back to Live" button — shown when browsing a different song than what's live
+            if (isPresenting && liveSongIndex >= 0 && selectedSongIndex != liveSongIndex) {
+                Button(
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = {
+                        viewModel.selectSong(liveSongIndex)
+                        viewModel.selectSection(liveSectionIndex)
+                        viewModel.setLineIndex(liveLineIndex)
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                ) {
+                    Text(backToLiveStr, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onError, maxLines = 1)
+                }
+            }
+
+            // Arrow key navigation hint — only in line mode
+            val isLineModeHint = appSettings.songSettings.fullscreenDisplayMode != Constants.SONG_DISPLAY_MODE_VERSE ||
+                    appSettings.songSettings.lowerThirdDisplayMode != Constants.SONG_DISPLAY_MODE_VERSE
+            if (isLineModeHint) {
+                Text(
+                    text = lineNavHintStr,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                    modifier = Modifier.padding(bottom = 4.dp)
+                )
+            }
+
             // Lyrics content
             Box {
-                val lyricsListState = androidx.compose.foundation.lazy.rememberLazyListState()
+                val lyricsListState = rememberLazyListState()
 
                 LaunchedEffect(selectedSectionIndex) {
                     if (selectedSectionIndex >= 0) {
@@ -621,41 +732,61 @@ fun SongsTab(
                                     .combinedClickable(
                                         onClick = {
                                             viewModel.selectSection(sectionIndex)
-                                            onSongItemSelected(section)
+                                            sendToPresenter()
                                         },
                                         onDoubleClick = {
                                             viewModel.selectSection(sectionIndex)
-                                            onSongItemSelected(section)
+                                            sendToPresenter()
                                             onPresenting(Presenting.LYRICS)
                                         }
                                     )
                                     .padding(8.dp)
                             ) {
-                                section.lines.forEachIndexed { lineIndex, line ->
-                                    val isHeader = lineIndex == 0 && (
-                                        line.startsWith(Constants.VERSE_RUS) || line.startsWith(Constants.CHORUS_RUS) ||
-                                        line.startsWith(Constants.VERSE) || line.startsWith(Constants.CHORUS)
+                                val textColor = if (sectionIndex == selectedSectionIndex)
+                                    MaterialTheme.colorScheme.onSurfaceVariant
+                                else
+                                    MaterialTheme.colorScheme.onSurface
+
+                                val isPerLineMode = appSettings.songSettings.fullscreenDisplayMode != Constants.SONG_DISPLAY_MODE_VERSE ||
+                                    appSettings.songSettings.lowerThirdDisplayMode != Constants.SONG_DISPLAY_MODE_VERSE
+                                val activeLineIndex = if (isPerLineMode && sectionIndex == selectedSectionIndex)
+                                    viewModel.selectedLineIndex.value else -1
+
+                                // Render section header if present
+                                section.header?.let { header ->
+                                    Text(
+                                        text = header,
+                                        style = MaterialTheme.typography.titleSmall,
+                                        fontWeight = FontWeight.Bold,
+                                        color = textColor,
+                                        modifier = Modifier.padding(vertical = 4.dp)
                                     )
-                                    val textColor = if (sectionIndex == selectedSectionIndex)
-                                        MaterialTheme.colorScheme.onSurfaceVariant
-                                    else
-                                        MaterialTheme.colorScheme.onSurface
-                                    if (isHeader) {
-                                        Text(
-                                            text = line,
-                                            style = MaterialTheme.typography.titleSmall,
-                                            fontWeight = FontWeight.Bold,
-                                            color = textColor,
-                                            modifier = Modifier.padding(vertical = 4.dp)
-                                        )
-                                    } else {
-                                        Text(
-                                            text = line,
-                                            style = MaterialTheme.typography.bodyMedium,
-                                            color = textColor,
-                                            modifier = Modifier.padding(vertical = 2.dp)
-                                        )
+                                }
+
+                                // Lyrics panel always shows both — language filtering only applies to presenter
+                                val langDisplay = Constants.SONG_LANG_BOTH
+                                val showPrimary = langDisplay != Constants.SONG_LANG_SECONDARY
+                                val showSecondary = langDisplay != Constants.SONG_LANG_PRIMARY && section.secondaryLines.isNotEmpty()
+
+                                val lineClickHandler: ((Int) -> Unit)? = if (isPerLineMode) { lineIdx ->
+                                    viewModel.selectSection(sectionIndex)
+                                    viewModel.setLineIndex(lineIdx)
+                                    sendToPresenter()
+                                } else null
+
+                                if (showPrimary && showSecondary) {
+                                    Row(modifier = Modifier.fillMaxWidth()) {
+                                        Column(modifier = Modifier.weight(1f)) {
+                                            LyricLines(section.lines, textColor, activeLineIndex, lineClickHandler)
+                                        }
+                                        Column(modifier = Modifier.weight(1f)) {
+                                            LyricLines(section.secondaryLines, textColor, activeLineIndex, lineClickHandler)
+                                        }
                                     }
+                                } else if (showSecondary) {
+                                    LyricLines(section.secondaryLines, textColor, activeLineIndex, lineClickHandler)
+                                } else {
+                                    LyricLines(section.lines, textColor, activeLineIndex, lineClickHandler)
                                 }
                             }
                         }
@@ -681,6 +812,8 @@ fun SongsTab(
     EditSongDialog(
         isVisible = showEditDialog,
         song = songToEdit,
+        songbooks = viewModel.songbooks.value,
+        existingSongs = viewModel.songsData.value.getSongs(),
         theme = theme,
         onDismiss = { showEditDialog = false },
         onSave = { updatedSong ->
@@ -693,4 +826,47 @@ fun SongsTab(
             }
         }
     )
+
+    // New Song Dialog
+    val newSongTemplate = remember {
+        val templateLyrics = listOf("[Verse 1]", "", "", "[Chorus]", "", "", "[Verse 2]", "", "", "[Verse 3]", "", "")
+        SongItem(
+            number = "",
+            title = "",
+            songbook = "",
+            lyrics = templateLyrics,
+            secondaryLyrics = templateLyrics
+        )
+    }
+    EditSongDialog(
+        isVisible = showNewSongDialog,
+        song = newSongTemplate,
+        songbooks = viewModel.songbooks.value,
+        existingSongs = viewModel.songsData.value.getSongs(),
+        isNewSong = true,
+        theme = theme,
+        onDismiss = { showNewSongDialog = false },
+        onSave = { newSong ->
+            val success = viewModel.createSong(newSong)
+            if (success) {
+                showNewSongDialog = false
+            }
+        }
+    )
+}
+
+@Composable
+private fun LyricLines(lines: List<String>, textColor: Color, activeLineIndex: Int = -1, onLineClick: ((Int) -> Unit)? = null) {
+    lines.forEachIndexed { lineIndex, line ->
+        val isActiveLine = activeLineIndex >= 0 && lineIndex == activeLineIndex
+        Text(
+            text = line,
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = if (isActiveLine) FontWeight.Bold else FontWeight.Normal,
+            color = if (isActiveLine) MaterialTheme.colorScheme.primary else textColor,
+            modifier = Modifier
+                .padding(vertical = 2.dp)
+                .then(if (onLineClick != null) Modifier.clickable { onLineClick(lineIndex) } else Modifier)
+        )
+    }
 }

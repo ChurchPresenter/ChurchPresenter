@@ -122,8 +122,8 @@ class Songs {
                 val firstLine = sectionLines[0]
                 val section = LyricSection(
                     type = when {
-                        firstLine.startsWith(Constants.VERSE_RUS) -> Constants.VERSE_RUS
-                        firstLine.startsWith(Constants.CHORUS_RUS) -> Constants.CHORUS
+                        firstLine.startsWith("Куплет") -> Constants.SECTION_TYPE_VERSE
+                        firstLine.startsWith("Припев") -> Constants.SECTION_TYPE_CHORUS
                         else -> Constants.OTHER
                     },
                     lines = sectionLines
@@ -132,7 +132,7 @@ class Songs {
                 sections.add(section)
 
                 // Store chorus for later use
-                if (section.type == Constants.CHORUS) {
+                if (section.type == Constants.SECTION_TYPE_CHORUS) {
                     chorusSection = section
                 }
             }
@@ -143,7 +143,7 @@ class Songs {
             val section = sections[i]
 
             // Skip the original chorus section - we'll add it after each verse instead
-            if (section.type == Constants.CHORUS) {
+            if (section.type == Constants.SECTION_TYPE_CHORUS) {
                 continue
             }
 
@@ -151,13 +151,13 @@ class Songs {
             lyrics.addAll(section.lines)
 
             // If this is a verse and we have a chorus, add the chorus after it
-            if (section.type == "verse" && chorusSection != null) {
+            if (section.type == Constants.SECTION_TYPE_VERSE && chorusSection != null) {
                 lyrics.add("") // Empty line separator before chorus
                 lyrics.addAll(chorusSection.lines)
             }
 
             // Add empty line after current section if there are more non-chorus sections coming
-            val hasMoreSections = sections.subList(i + 1, sections.size).any { it.type != Constants.CHORUS }
+            val hasMoreSections = sections.subList(i + 1, sections.size).any { it.type != Constants.SECTION_TYPE_CHORUS }
             if (hasMoreSections) {
                 lyrics.add("") // Empty line separator after section
             }
@@ -175,6 +175,10 @@ class Songs {
         val type: String, // "verse", "chorus", "other"
         val lines: List<String>
     )
+
+    fun addSongs(newSongs: List<SongItem>) {
+        songs.addAll(newSongs)
+    }
 
     fun getSongs(): List<SongItem> {
         return songs.toList()
@@ -224,6 +228,18 @@ class Songs {
         try {
             if (storageDirectory.isEmpty()) {
                 return false
+            }
+
+            // If the song has a sourceFile (.song format), save directly to that file
+            if (updatedSong.sourceFile.isNotEmpty()) {
+                val parser = SongFileParser()
+                parser.writeSongFile(updatedSong, updatedSong.sourceFile)
+                return true
+            }
+            if (originalSong.sourceFile.isNotEmpty()) {
+                val parser = SongFileParser()
+                parser.writeSongFile(updatedSong.copy(sourceFile = originalSong.sourceFile), originalSong.sourceFile)
+                return true
             }
 
             val dir = java.io.File(storageDirectory)
