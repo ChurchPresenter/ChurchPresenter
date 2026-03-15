@@ -460,6 +460,7 @@ data class ProjectRequest(val item: ScheduleItem)
  */
 data class PendingRemoteRequest(
     val item: ScheduleItem,
+    val clientId: String = "",
     val decision: kotlinx.coroutines.CompletableDeferred<Boolean> = kotlinx.coroutines.CompletableDeferred()
 )
 
@@ -469,6 +470,7 @@ data class PendingRemoteRequest(
  */
 data class PendingBatchRequest(
     val items: List<ScheduleItem>,
+    val clientId: String = "",
     val decision: kotlinx.coroutines.CompletableDeferred<Boolean> = kotlinx.coroutines.CompletableDeferred()
 )
 
@@ -949,6 +951,7 @@ class CompanionServer {
                 allowMethod(HttpMethod.Post)
                 allowHeader(HttpHeaders.ContentType)
                 allowHeader(Constants.HEADER_API_KEY)
+                allowHeader(Constants.HEADER_DEVICE_ID)
                 anyHost()
             }
             install(StatusPages) {
@@ -1021,7 +1024,8 @@ class CompanionServer {
                         call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":"invalid request body"}""")
                         return@post
                     }
-                    val pending = PendingRemoteRequest(item)
+                    val clientId = call.request.headers[Constants.HEADER_DEVICE_ID] ?: ""
+                    val pending = PendingRemoteRequest(item, clientId)
                     scope.launch { onAddToSchedule.emit(pending) }
                     val allowed = pending.decision.await()
                     if (allowed) {
@@ -1061,7 +1065,8 @@ class CompanionServer {
                             """{"error":"invalid request body or no recognisable items"}""")
                         return@post
                     }
-                    val pending = PendingBatchRequest(items)
+                    val clientId = call.request.headers[Constants.HEADER_DEVICE_ID] ?: ""
+                    val pending = PendingBatchRequest(items, clientId)
                     scope.launch { onAddBatchToSchedule.emit(pending) }
                     val allowed = pending.decision.await()
                     if (allowed) {
@@ -1084,7 +1089,8 @@ class CompanionServer {
                         call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":"invalid request body"}""")
                         return@post
                     }
-                    val pending = PendingRemoteRequest(item)
+                    val clientId = call.request.headers[Constants.HEADER_DEVICE_ID] ?: ""
+                    val pending = PendingRemoteRequest(item, clientId)
                     scope.launch { onProject.emit(pending) }
                     val allowed = pending.decision.await()
                     if (allowed) {

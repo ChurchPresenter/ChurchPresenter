@@ -47,6 +47,7 @@ import churchpresenter.composeapp.generated.resources.server_settings
 import churchpresenter.composeapp.generated.resources.song
 import churchpresenter.composeapp.generated.resources.statistics
 import org.churchpresenter.app.churchpresenter.data.AppSettings
+import org.churchpresenter.app.churchpresenter.data.RemoteClientManager
 import org.churchpresenter.app.churchpresenter.data.SettingsManager
 import org.churchpresenter.app.churchpresenter.data.StatisticsManager
 import org.churchpresenter.app.churchpresenter.server.CompanionServer
@@ -71,6 +72,7 @@ fun OptionsDialog(
     settingsManager: SettingsManager,
     statisticsManager: StatisticsManager,
     companionServer: CompanionServer,
+    remoteClientManager: RemoteClientManager,
     presenterManager: PresenterManager,
     onDismiss: () -> Unit,
     onSave: (AppSettings) -> Unit = {},
@@ -214,7 +216,8 @@ fun OptionsDialog(
                                 onSettingsChange = { updateFn ->
                                     currentSettings = updateFn(currentSettings)
                                 },
-                                companionServer = companionServer
+                                companionServer = companionServer,
+                                remoteClientManager = remoteClientManager
                             )
                             8 -> StatisticsTab(
                                 statisticsManager = statisticsManager
@@ -276,4 +279,3 @@ fun OptionsDialog(
         }
     }
 }
-

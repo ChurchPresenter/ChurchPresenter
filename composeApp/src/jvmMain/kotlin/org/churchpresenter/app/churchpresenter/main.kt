@@ -64,6 +64,7 @@ import kotlinx.coroutines.withContext
 import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.data.ScreenAssignment
 import org.churchpresenter.app.churchpresenter.data.Language
+import org.churchpresenter.app.churchpresenter.data.RemoteClientManager
 import org.churchpresenter.app.churchpresenter.data.SettingsManager
 import org.churchpresenter.app.churchpresenter.data.StatisticsManager
 import org.churchpresenter.app.churchpresenter.dialogs.AboutDialog
@@ -297,21 +298,56 @@ fun main() {
                             // ── Remote API permission state (inside Window so schedule actions are live) ──
                             // Each entry: Triple(RemoteEvent, allowAction, denyAction)
                             val remoteEventQueue = remember { androidx.compose.runtime.mutableStateListOf<Triple<RemoteEvent, () -> Unit, () -> Unit>>() }
-                            var remoteApiBlocked by remember { mutableStateOf(false) }
+
+                            // Persistent allow/block lists (survive app restarts)
+                            val remoteClientManager = remember { RemoteClientManager() }
+                            // Session-only sets (cleared on app restart)
+                            val sessionAllowedClients = remember { androidx.compose.runtime.mutableStateListOf<String>() }
+                            val sessionBlockedClients = remember { androidx.compose.runtime.mutableStateListOf<String>() }
 
                             // ── Remote add-to-schedule requests ──────────────────────────────────────────
                             LaunchedEffect(Unit) {
                                 companionServer.onAddToSchedule.collect { pending ->
-                                    if (remoteApiBlocked) {
+                                    val clientId = pending.clientId
+                                    // Permanent block → auto-reject
+                                    if (remoteClientManager.isBlocked(clientId)) {
                                         pending.decision.complete(false)
+                                        return@collect
+                                    }
+                                    // Session block → auto-reject
+                                    if (clientId.isNotBlank() && sessionBlockedClients.contains(clientId)) {
+                                        pending.decision.complete(false)
+                                        return@collect
+                                    }
+                                    // Permanent allow or session allow → auto-approve
+                                    if (remoteClientManager.isAllowed(clientId) ||
+                                        (clientId.isNotBlank() && sessionAllowedClients.contains(clientId))) {
+                                        val item = pending.item
+                                        when (item) {
+                                            is ScheduleItem.SongItem -> {
+                                                currentScheduleActions.addSong(item.songNumber, item.title, item.songbook, item.songId)
+                                                coroutineScope.launch { remoteSelectSongFlow.emit(item) }
+                                            }
+                                            is ScheduleItem.BibleVerseItem ->
+                                                currentScheduleActions.addBibleVerse(item.bookName, item.chapter, item.verseNumber, item.verseText, item.verseRange)
+                                            is ScheduleItem.PresentationItem ->
+                                                currentScheduleActions.addPresentation(item.filePath, item.fileName, item.slideCount, item.fileType)
+                                            is ScheduleItem.PictureItem ->
+                                                currentScheduleActions.addPicture(item.folderPath, item.folderName, item.imageCount)
+                                            is ScheduleItem.MediaItem ->
+                                                currentScheduleActions.addMedia(item.mediaUrl, item.mediaTitle, item.mediaType)
+                                            else -> Unit
+                                        }
+                                        pending.decision.complete(true)
                                         return@collect
                                     }
                                     val item = pending.item
                                     val (eventTitle, eventDetail) = remoteEventLabel(item)
                                     val event = RemoteEvent(
-                                        type   = RemoteEventType.ADD_TO_SCHEDULE,
-                                        title  = eventTitle,
-                                        detail = eventDetail
+                                        type     = RemoteEventType.ADD_TO_SCHEDULE,
+                                        title    = eventTitle,
+                                        detail   = eventDetail,
+                                        clientId = clientId
                                     )
                                     val allow: () -> Unit = {
                                         when (item) {
@@ -339,8 +375,34 @@ fun main() {
                             // ── Remote add-batch-to-schedule requests ─────────────────────────────────────
                             LaunchedEffect(Unit) {
                                 companionServer.onAddBatchToSchedule.collect { pending ->
-                                    if (remoteApiBlocked) {
+                                    val clientId = pending.clientId
+                                    // Permanent block or session block → auto-reject
+                                    if (remoteClientManager.isBlocked(clientId) ||
+                                        (clientId.isNotBlank() && sessionBlockedClients.contains(clientId))) {
                                         pending.decision.complete(false)
+                                        return@collect
+                                    }
+                                    // Permanent allow or session allow → auto-approve
+                                    if (remoteClientManager.isAllowed(clientId) ||
+                                        (clientId.isNotBlank() && sessionAllowedClients.contains(clientId))) {
+                                        for (item in pending.items) {
+                                            when (item) {
+                                                is ScheduleItem.SongItem -> {
+                                                    currentScheduleActions.addSong(item.songNumber, item.title, item.songbook, item.songId)
+                                                    coroutineScope.launch { remoteSelectSongFlow.emit(item) }
+                                                }
+                                                is ScheduleItem.BibleVerseItem ->
+                                                    currentScheduleActions.addBibleVerse(item.bookName, item.chapter, item.verseNumber, item.verseText, item.verseRange)
+                                                is ScheduleItem.PresentationItem ->
+                                                    currentScheduleActions.addPresentation(item.filePath, item.fileName, item.slideCount, item.fileType)
+                                                is ScheduleItem.PictureItem ->
+                                                    currentScheduleActions.addPicture(item.folderPath, item.folderName, item.imageCount)
+                                                is ScheduleItem.MediaItem ->
+                                                    currentScheduleActions.addMedia(item.mediaUrl, item.mediaTitle, item.mediaType)
+                                                else -> Unit
+                                            }
+                                        }
+                                        pending.decision.complete(true)
                                         return@collect
                                     }
                                     val count = pending.items.size
@@ -360,9 +422,10 @@ fun main() {
                                         }
                                     }.let { if (count > 3) "$it …" else it }
                                     val event = RemoteEvent(
-                                        type   = RemoteEventType.ADD_TO_SCHEDULE,
-                                        title  = summaryTitle,
-                                        detail = summaryDetail
+                                        type     = RemoteEventType.ADD_TO_SCHEDULE,
+                                        title    = summaryTitle,
+                                        detail   = summaryDetail,
+                                        clientId = clientId
                                     )
                                     val allow: () -> Unit = {
                                         for (item in pending.items) {
@@ -392,16 +455,31 @@ fun main() {
                             // ── Remote project requests ──────────────────────────────────────────────────
                             LaunchedEffect(Unit) {
                                 companionServer.onProject.collect { pending ->
-                                    if (remoteApiBlocked) {
+                                    val clientId = pending.clientId
+                                    // Permanent block or session block → auto-reject
+                                    if (remoteClientManager.isBlocked(clientId) ||
+                                        (clientId.isNotBlank() && sessionBlockedClients.contains(clientId))) {
                                         pending.decision.complete(false)
+                                        return@collect
+                                    }
+                                    // Permanent allow or session allow → auto-approve
+                                    if (remoteClientManager.isAllowed(clientId) ||
+                                        (clientId.isNotBlank() && sessionAllowedClients.contains(clientId))) {
+                                        val item = pending.item
+                                        executeProjectItem(item, currentScheduleActions, presenterManager, statisticsManager)
+                                        if (item is ScheduleItem.SongItem) {
+                                            coroutineScope.launch { remoteSelectSongFlow.emit(item) }
+                                        }
+                                        pending.decision.complete(true)
                                         return@collect
                                     }
                                     val item = pending.item
                                     val (eventTitle, eventDetail) = remoteEventLabel(item)
                                     val event = RemoteEvent(
-                                        type   = RemoteEventType.PROJECT,
-                                        title  = eventTitle,
-                                        detail = eventDetail
+                                        type     = RemoteEventType.PROJECT,
+                                        title    = eventTitle,
+                                        detail   = eventDetail,
+                                        clientId = clientId
                                     )
                                     val allow: () -> Unit = {
                                         executeProjectItem(item, currentScheduleActions, presenterManager, statisticsManager)
@@ -494,6 +572,7 @@ fun main() {
                                 settingsManager = settingsManager,
                                 statisticsManager = statisticsManager,
                                 companionServer = companionServer,
+                                remoteClientManager = remoteClientManager,
                                 presenterManager = presenterManager,
                                 onDismiss = { showOptionsDialog = false },
                                 onSave = { updated ->
@@ -536,18 +615,52 @@ fun main() {
 
                             // ── Remote API event dialog ───────────────────────
                             val currentRemote = remoteEventQueue.firstOrNull()
+                            val currentClientId = currentRemote?.first?.clientId ?: ""
                             RemoteEventDialog(
                                 event = currentRemote?.first,
                                 queueSize = remoteEventQueue.size,
+                                isClientKnownAllowed = remoteClientManager.isAllowed(currentClientId),
+                                isClientKnownBlocked = remoteClientManager.isBlocked(currentClientId),
                                 onAllow = {
                                     currentRemote?.second?.invoke()
                                     if (remoteEventQueue.isNotEmpty()) remoteEventQueue.removeAt(0)
                                 },
-                                onBlockSession = {
-                                    // Deny all queued items
-                                    remoteEventQueue.forEach { it.third.invoke() }
-                                    remoteEventQueue.clear()
-                                    remoteApiBlocked = true
+                                onAllowForSession = {
+                                    // Mark this client as session-allowed, then silently approve
+                                    // the current item AND every other queued item from the same client
+                                    if (currentClientId.isNotBlank() && !sessionAllowedClients.contains(currentClientId)) {
+                                        sessionAllowedClients.add(currentClientId)
+                                    }
+                                    val clientToAllow = currentClientId
+                                    val toApprove = remoteEventQueue.filter { it.first.clientId == clientToAllow || clientToAllow.isBlank() }
+                                    toApprove.forEach { it.second.invoke() }
+                                    remoteEventQueue.removeAll(toApprove)
+                                },
+                                onAllowPermanently = {
+                                    // Permanently allow and silently approve all queued items from this client
+                                    remoteClientManager.allowPermanently(currentClientId)
+                                    val clientToAllow = currentClientId
+                                    val toApprove = remoteEventQueue.filter { it.first.clientId == clientToAllow || clientToAllow.isBlank() }
+                                    toApprove.forEach { it.second.invoke() }
+                                    remoteEventQueue.removeAll(toApprove)
+                                },
+                                onBlockForSession = {
+                                    // Deny all queued items from this client; mark session-blocked
+                                    if (currentClientId.isNotBlank() && !sessionBlockedClients.contains(currentClientId)) {
+                                        sessionBlockedClients.add(currentClientId)
+                                    }
+                                    val clientToBlock = currentClientId
+                                    val toRemove = remoteEventQueue.filter { it.first.clientId == clientToBlock || clientToBlock.isBlank() }
+                                    toRemove.forEach { it.third.invoke() }
+                                    remoteEventQueue.removeAll(toRemove)
+                                },
+                                onBlockPermanently = {
+                                    remoteClientManager.blockPermanently(currentClientId)
+                                    // Deny all queued items from this client
+                                    val clientToBlock = currentClientId
+                                    val toRemove = remoteEventQueue.filter { it.first.clientId == clientToBlock || clientToBlock.isBlank() }
+                                    toRemove.forEach { it.third.invoke() }
+                                    remoteEventQueue.removeAll(toRemove)
                                 },
                                 onDeny = {
                                     currentRemote?.third?.invoke()

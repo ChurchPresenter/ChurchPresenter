@@ -777,4 +777,31 @@
     <string name="top_verses">Top Verses</string>
     <string name="clear_statistics">Clear Statistics</string>
     <string name="times_displayed">times</string>
+
+    <!-- Remote API event dialog -->
+    <string name="remote_api_add_to_schedule">Add to Schedule</string>
+    <string name="remote_api_project">Project (Go Live)</string>
+    <string name="remote_api_request_title">Remote API Request</string>
+    <string name="remote_api_request_title_queued">Remote API Request (%1$d pending)</string>
+    <string name="remote_client_label">Client:</string>
+    <string name="remote_client_allowed_badge">✓ allowed</string>
+    <string name="remote_client_blocked_badge">⛔ blocked</string>
+    <string name="remote_queue_waiting_one">1 more request waiting in queue</string>
+    <string name="remote_queue_waiting_many">%1$d more requests waiting in queue</string>
+    <string name="allow">Allow</string>
+    <string name="allow_for_session">Allow for Session</string>
+    <string name="allow_permanently">Allow Permanently</string>
+    <string name="deny">Deny</string>
+    <string name="block_for_session">Block for Session</string>
+    <string name="block_permanently">Block Permanently</string>
+
+    <!-- Remote Clients settings section (Server Settings tab) -->
+    <string name="remote_clients_title">Remote Clients</string>
+    <string name="remote_clients_description">Manage permanently allowed and blocked companion clients. Clients are identified by the X-Device-Id header sent with each request.</string>
+    <string name="allowed_clients">✓  Allowed Clients</string>
+    <string name="allowed_clients_description">Requests from these clients are automatically approved without showing a dialog.</string>
+    <string name="blocked_clients">⛔  Blocked Clients</string>
+    <string name="blocked_clients_description">Requests from these clients are automatically rejected without showing a dialog.</string>
+    <string name="no_allowed_clients">No permanently allowed clients.</string>
+    <string name="no_blocked_clients">No permanently blocked clients.</string>
 </resources>
