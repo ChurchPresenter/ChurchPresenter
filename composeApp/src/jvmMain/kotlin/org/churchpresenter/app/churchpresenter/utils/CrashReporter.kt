@@ -37,6 +37,8 @@ object CrashReporter {
         val defaultHandler = Thread.getDefaultUncaughtExceptionHandler()
         Thread.setDefaultUncaughtExceptionHandler { thread, throwable ->
             writeCrashLog(throwable, context = "Thread: ${thread.name}", fatal = true)
+            // Flush Sentry synchronously so the event is delivered before the JVM exits
+            try { Sentry.flush(3_000) } catch (_: Exception) {}
             defaultHandler?.uncaughtException(thread, throwable)
         }
 
@@ -51,22 +53,54 @@ object CrashReporter {
         writeCrashLog(throwable, context, fatal = false)
     }
 
+    /** True when Sentry is initialised with a valid DSN. */
+    fun isEnabled(): Boolean = try { Sentry.isEnabled() } catch (_: Exception) { false }
+
+    /** DSN from sentry.properties with the secret key partially masked. Empty when not configured. */
+    fun maskedDsn(): String = try {
+        val dsn = readDsn()
+        if (dsn.isBlank()) return ""
+        val atIdx = dsn.indexOf('@')
+        if (atIdx < 0) return dsn.take(12) + "••••"
+        val beforeAt = dsn.substring(0, atIdx)
+        val afterAt  = dsn.substring(atIdx)
+        val schemeEnd = beforeAt.indexOf("//") + 2
+        val key = beforeAt.substring(schemeEnd)
+        val scheme = beforeAt.substring(0, schemeEnd)
+        "$scheme${key.take(6)}${"•".repeat(maxOf(0, key.length - 6))}$afterAt"
+    } catch (_: Exception) { "" }
+
+    /** Sends a test exception to Sentry and flushes. Returns true on success. */
+    fun sendTestEvent(): Boolean = try {
+        if (!isEnabled()) return false
+        val version = try { BuildConfig.VERSION_DISPLAY } catch (_: Exception) { "unknown" }
+        Sentry.captureException(RuntimeException("🧪 ChurchPresenter Sentry test event — v$version"))
+        Sentry.flush(5_000)
+        true
+    } catch (_: Exception) { false }
+
     // ── Sentry ────────────────────────────────────────────────────────────────
+
+    private fun readDsn(): String {
+        val props = java.util.Properties()
+        CrashReporter::class.java.classLoader
+            ?.getResourceAsStream("sentry.properties")
+            ?.use { props.load(it) }
+        return props.getProperty("dsn", "").trim()
+    }
 
     private fun initSentry() {
         try {
+            val dsn = readDsn()
+            if (dsn.isBlank()) return   // no DSN → stay disabled, nothing sent
             val appVersion = try { BuildConfig.APP_VERSION } catch (_: Exception) { "unknown" }
             Sentry.init { options ->
-                // sentry.properties on the classpath sets the DSN automatically.
-                // If dsn is blank Sentry stays disabled — no data is ever sent.
+                options.dsn = dsn
                 options.release = appVersion
                 options.environment = "production"
-                // Capture all unhandled exceptions automatically
                 options.isEnableUncaughtExceptionHandler = true
-                // Attach the current thread info to each event
                 options.isAttachThreads = false
                 options.isAttachStacktrace = true
-                // Avoid performance overhead — capture errors only, no tracing
                 options.tracesSampleRate = null
             }
         } catch (_: Exception) {
