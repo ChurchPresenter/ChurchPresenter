@@ -573,13 +573,18 @@ private fun DirectoryPicker(
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
         if (currentPath.isNotEmpty()) {
-            val isWritable = remember(currentPath) { java.io.File(currentPath).canWrite() }
+            val dirFile = remember(currentPath) { java.io.File(currentPath) }
+            val dirExists = remember(currentPath) { dirFile.exists() }
+            val isWritable = remember(currentPath) { dirExists && dirFile.canWrite() }
             TooltipArea(
                 tooltip = {
                     Surface(shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
                         Text(
-                            if (isWritable) "Directory is writable"
-                            else "Cannot write to this directory. Choose a different location or change permissions.",
+                            when {
+                                isWritable -> "Directory is writable"
+                                !dirExists -> "Directory not found. Create it or choose a different location."
+                                else -> "Cannot write to this directory. Choose a different location or change permissions."
+                            },
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                             style = MaterialTheme.typography.bodySmall
                         )

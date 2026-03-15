@@ -120,6 +120,9 @@ fun main() {
     // Initialize JCEF (Chromium) for embedded web browsing
     CefManager.init()
 
+    // Set custom VLC path from saved settings before any composable checks isVlcAvailable
+    vlcCustomPath = SettingsManager().loadSettings().projectionSettings.vlcPath
+
     application {
         var appReady by remember { mutableStateOf(false) }
 
@@ -183,8 +186,6 @@ fun main() {
             }
         }
 
-        // Set custom VLC path from saved settings before first VLC access
-        remember { vlcCustomPath = appSettings.projectionSettings.vlcPath }
         val presenterManager = remember { PresenterManager() }
 
         var licenseAccepted by remember { mutableStateOf(appSettings.licenseAccepted) }

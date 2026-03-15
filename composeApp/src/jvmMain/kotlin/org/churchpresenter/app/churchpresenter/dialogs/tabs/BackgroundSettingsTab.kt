@@ -59,6 +59,7 @@ import org.churchpresenter.app.churchpresenter.composables.FileVideoPicker
 import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.data.BackgroundConfig
 import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.app.churchpresenter.composables.isVlcAvailable
 import org.churchpresenter.app.churchpresenter.viewmodel.BackgroundSettingsViewModel
 import org.jetbrains.compose.resources.stringResource
 
@@ -116,7 +117,8 @@ fun BackgroundSettingsTab(
                         Constants.BACKGROUND_IMAGE,
                         Constants.BACKGROUND_VIDEO,
                         Constants.BACKGROUND_TRANSPARENT
-                    )
+                    ),
+                    disabledTypes = if (!isVlcAvailable) setOf(Constants.BACKGROUND_VIDEO) else emptySet()
                 )
                 Spacer(modifier = Modifier.height(8.dp))
 
@@ -202,7 +204,8 @@ fun BackgroundSettingsTab(
                         Constants.BACKGROUND_IMAGE,
                         Constants.BACKGROUND_VIDEO,
                         Constants.BACKGROUND_TRANSPARENT
-                    )
+                    ),
+                    disabledTypes = if (!isVlcAvailable) setOf(Constants.BACKGROUND_VIDEO) else emptySet()
                 )
                 Spacer(modifier = Modifier.height(8.dp))
 
@@ -376,7 +379,8 @@ private fun BackgroundColumn(
         imageLabel        = backgroundImageStr,
         videoLabel        = backgroundVideoStr,
         transparentLabel  = backgroundTransparentStr,
-        gradientLabel     = if (isLowerThird) backgroundGradientStr else null
+        gradientLabel     = if (isLowerThird) backgroundGradientStr else null,
+        disabledTypes     = if (!isVlcAvailable) setOf(Constants.BACKGROUND_VIDEO) else emptySet()
     )
 
     Spacer(modifier = Modifier.height(10.dp))
@@ -478,7 +482,8 @@ private fun BackgroundTypeRadioGroup(
     videoLabel: String? = null,
     transparentLabel: String? = null,
     gradientLabel: String? = null,
-    types: List<String>? = null
+    types: List<String>? = null,
+    disabledTypes: Set<String> = emptySet()
 ) {
     val entries = if (types != null) {
         // Custom types list with labels mapped positionally
@@ -497,6 +502,7 @@ private fun BackgroundTypeRadioGroup(
     }
     Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
         entries.forEach { (type, label) ->
+            val isDisabled = type in disabledTypes
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth()
@@ -504,13 +510,15 @@ private fun BackgroundTypeRadioGroup(
                 RadioButton(
                     selected = selectedType == type,
                     onClick = { onTypeSelected(type) },
+                    enabled = !isDisabled,
                     modifier = Modifier.size(28.dp),
                     colors = RadioButtonDefaults.colors()
                 )
                 Text(
-                    text = label,
+                    text = if (isDisabled) "$label (Install VLC)" else label,
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurface,
+                    color = if (isDisabled) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                            else MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.padding(start = 4.dp)
                 )
             }
