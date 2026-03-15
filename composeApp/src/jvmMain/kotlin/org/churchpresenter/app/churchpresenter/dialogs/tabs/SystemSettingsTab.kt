@@ -1,5 +1,8 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.TooltipArea
+import androidx.compose.foundation.TooltipPlacement
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -18,6 +21,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Surface
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -33,6 +37,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
@@ -534,6 +539,7 @@ fun SystemSettingsTab(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun DirectoryPicker(
     label: String,
@@ -566,6 +572,31 @@ private fun DirectoryPicker(
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
+        if (currentPath.isNotEmpty()) {
+            val isWritable = remember(currentPath) { java.io.File(currentPath).canWrite() }
+            TooltipArea(
+                tooltip = {
+                    Surface(shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
+                        Text(
+                            if (isWritable) "Directory is writable"
+                            else "Cannot write to this directory. Choose a different location or change permissions.",
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+                },
+                tooltipPlacement = TooltipPlacement.CursorPoint()
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(12.dp)
+                        .background(
+                            if (isWritable) Color(0xFF4CAF50) else Color(0xFFF44336),
+                            shape = androidx.compose.foundation.shape.CircleShape
+                        )
+                )
+            }
+        }
         Button(
             onClick = {
                 SwingUtilities.invokeLater {

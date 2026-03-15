@@ -403,26 +403,28 @@ fun ScheduleTab(
         }
 
         // Add Files button at the bottom
-        Button(
-            onClick = {
-                SwingUtilities.invokeLater {
-                    val chooser = createFileChooser {
-                        fileSelectionMode = JFileChooser.FILES_AND_DIRECTORIES
-                        isMultiSelectionEnabled = true
-                        dialogTitle = "Add Files to Schedule"
+        Box(modifier = Modifier.fillMaxWidth().padding(top = 4.dp), contentAlignment = Alignment.Center) {
+            Button(
+                onClick = {
+                    SwingUtilities.invokeLater {
+                        val chooser = createFileChooser {
+                            fileSelectionMode = JFileChooser.FILES_AND_DIRECTORIES
+                            isMultiSelectionEnabled = true
+                            dialogTitle = "Add Files to Schedule"
+                        }
+                        if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+                            handleDroppedFiles(chooser.selectedFiles.toList(), viewModel)
+                        }
                     }
-                    if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
-                        handleDroppedFiles(chooser.selectedFiles.toList(), viewModel)
-                    }
-                }
-            },
-            modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                contentColor = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        ) {
-            Text(stringResource(Res.string.schedule_add_files))
+                },
+                modifier = Modifier.width(200.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            ) {
+                Text(stringResource(Res.string.schedule_add_files))
+            }
         }
     }
 }
