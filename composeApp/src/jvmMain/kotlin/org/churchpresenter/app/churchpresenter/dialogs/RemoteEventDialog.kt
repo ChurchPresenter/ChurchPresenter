@@ -39,6 +39,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -70,7 +71,9 @@ data class RemoteEvent(
     val title: String,
     val detail: String = "",
     /** The value of the X-Device-Id header sent by the remote client. Empty if none provided. */
-    val clientId: String = ""
+    val clientId: String = "",
+    /** Human-readable label saved for this device. Empty if none has been set. */
+    val clientLabel: String = ""
 )
 
 enum class RemoteEventType {
@@ -183,7 +186,7 @@ fun RemoteEventDialog(
                         Text(event.detail, style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f))
                     }
-                    // Show client ID if present
+                    // Show client identity if present
                     if (event.clientId.isNotBlank()) {
                         Spacer(Modifier.height(4.dp))
                         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -191,16 +194,34 @@ fun RemoteEventDialog(
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
                             Spacer(Modifier.width(4.dp))
-                            Text(
-                                text = event.clientId,
-                                style = MaterialTheme.typography.labelSmall,
-                                color = when {
-                                    isClientKnownAllowed -> MaterialTheme.colorScheme.primary
-                                    isClientKnownBlocked -> MaterialTheme.colorScheme.error
-                                    else -> MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                                },
-                                maxLines = 1, overflow = TextOverflow.Ellipsis
-                            )
+                            Column {
+                                // Label (if set) shown as primary identifier
+                                if (event.clientLabel.isNotBlank()) {
+                                    Text(
+                                        text = event.clientLabel,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = when {
+                                            isClientKnownAllowed -> MaterialTheme.colorScheme.primary
+                                            isClientKnownBlocked -> MaterialTheme.colorScheme.error
+                                            else -> MaterialTheme.colorScheme.onSurface
+                                        },
+                                        maxLines = 1, overflow = TextOverflow.Ellipsis
+                                    )
+                                }
+                                // Raw device ID always shown (smaller when label present)
+                                Text(
+                                    text = event.clientId,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    fontFamily = FontFamily.Monospace,
+                                    color = when {
+                                        isClientKnownAllowed -> MaterialTheme.colorScheme.primary
+                                        isClientKnownBlocked -> MaterialTheme.colorScheme.error
+                                        else -> MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                                    },
+                                    maxLines = 1, overflow = TextOverflow.Ellipsis
+                                )
+                            }
                             if (isClientKnownAllowed) {
                                 Spacer(Modifier.width(4.dp))
                                 Text(stringResource(Res.string.remote_client_allowed_badge),
