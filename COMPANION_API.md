@@ -243,6 +243,16 @@ curl -k https://192.168.1.10:8765/api/schedule
       "text": "For God so loved the world…"
     },
     {
+      "id": "e5f6g7",
+      "type": "bible",
+      "displayText": "Genesis 1:1-3",
+      "bookName": "Genesis",
+      "chapter": 1,
+      "verseNumber": 1,
+      "verseRange": "1-3",
+      "text": "In the beginning God created…"
+    },
+    {
       "id": "g7h8i9",
       "type": "picture",
       "displayText": "Easter 2026 (12 images)",
@@ -251,9 +261,11 @@ curl -k https://192.168.1.10:8765/api/schedule
       "imageCount": 12
     }
   ],
-  "total": 3
+  "total": 4
 }
 ```
+
+> For **single-verse** Bible items `verseRange` is omitted (null). For **multi-verse** items it contains the range string, e.g. `"1-3"` or `"2,4"`. `verseNumber` is always the first verse in the range.
 
 `type` values: `song` · `bible` · `label` · `picture` · `presentation` · `media` · `lower_third` · `announcement` · `website`
 
@@ -352,10 +364,15 @@ The HTTP connection stays open until that decision is made.
 Requests to add a **single item** to the schedule.
 
 ```bash
-# Bible verse
+# Bible verse — single
 curl -k -X POST https://192.168.1.10:8765/api/schedule/add \
   -H "Content-Type: application/json" \
   -d '{"item":{"bookName":"John","chapter":3,"verseNumber":16,"verseText":"For God so loved the world…"}}'
+
+# Bible verse — multi-verse range (Genesis 1:1-3)
+curl -k -X POST https://192.168.1.10:8765/api/schedule/add \
+  -H "Content-Type: application/json" \
+  -d '{"item":{"bookName":"Genesis","chapter":1,"verseNumber":1,"verseText":"In the beginning…","verseRange":"1-3"}}'
 
 # Song
 curl -k -X POST https://192.168.1.10:8765/api/schedule/add \
@@ -601,7 +618,7 @@ ws.send(JSON.stringify({
 Add a single item (triggers the desktop permission dialog).
 
 ```javascript
-// Bible verse
+// Bible verse — single
 ws.send(JSON.stringify({
   type: 'add_to_schedule',
   payload: JSON.stringify({
@@ -610,6 +627,20 @@ ws.send(JSON.stringify({
       chapter: 3,
       verseNumber: 16,
       verseText: 'For God so loved the world…'
+    }
+  })
+}));
+
+// Bible verse — multi-verse range (Genesis 1:1-3)
+ws.send(JSON.stringify({
+  type: 'add_to_schedule',
+  payload: JSON.stringify({
+    item: {
+      bookName: 'Genesis',
+      chapter: 1,
+      verseNumber: 1,
+      verseText: 'In the beginning…',
+      verseRange: '1-3'
     }
   })
 }));
@@ -692,8 +723,9 @@ The server auto-detects item type from which fields are present. Required fields
 |-------|------|----------|
 | **`bookName`** | `String` | ✅ |
 | **`chapter`** | `Int` | ✅ |
-| **`verseNumber`** | `Int` | ✅ |
+| **`verseNumber`** | `Int` | ✅ (first verse in the range) |
 | `verseText` | `String` | optional (defaults to `""`) |
+| `verseRange` | `String` | optional — e.g. `"1-3"` or `"2,4"` for multi-verse items; omit for a single verse |
 | `id` | `String` | optional (auto-generated) |
 
 ### Presentation
