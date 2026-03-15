@@ -26,6 +26,7 @@ fun LoopingVideoBackground(
     if (videoPath.isBlank()) return
     val file = remember(videoPath) { File(videoPath) }
     if (!file.exists()) return
+    if (!isVlcAvailable) return
 
     val component = remember {
         try {
