@@ -110,7 +110,7 @@ fun BibleTab(
     viewModel: BibleViewModel,
     appSettings: AppSettings,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit = {},
-    onAddToSchedule: ((bookName: String, chapter: Int, verseNumber: Int, verseText: String) -> Unit)? = null,
+    onAddToSchedule: ((bookName: String, chapter: Int, verseNumber: Int, verseText: String, verseRange: String) -> Unit)? = null,
     selectedVerseItem: ScheduleItem.BibleVerseItem? = null,
     onVerseSelected: (List<SelectedVerse>) -> Unit = {},
     onPresenting: (Presenting) -> Unit = { Presenting.NONE },
@@ -137,7 +137,7 @@ fun BibleTab(
             if (!viewModel.isFullyLoadedFlow.value) {
                 viewModel.isFullyLoadedFlow.first { it }
             }
-            viewModel.selectVerseByDetails(item.bookName, item.chapter, item.verseNumber)
+            viewModel.selectVerseByDetails(item.bookName, item.chapter, item.verseNumber, item.verseRange)
         }
     }
 
@@ -537,8 +537,8 @@ fun BibleTab(
                     Button(
                         modifier = Modifier.wrapContentSize().padding(start = 8.dp, end = 8.dp),
                         onClick = {
-                            viewModel.addCurrentVerseToSchedule { bookName, chapter, verseNumber, verseText ->
-                                onAddToSchedule?.invoke(bookName, chapter, verseNumber, verseText)
+                            viewModel.addCurrentVerseToSchedule { bookName, chapter, verseNumber, verseText, verseRange ->
+                                onAddToSchedule?.invoke(bookName, chapter, verseNumber, verseText, verseRange)
                             }
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)

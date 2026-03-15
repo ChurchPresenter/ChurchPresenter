@@ -152,8 +152,15 @@ class ScheduleViewModel(
         notifyChanged()
     }
 
-    fun addBibleVerse(bookName: String, chapter: Int, verseNumber: Int, verseText: String) {
-        _scheduleItems.add(ScheduleItem.BibleVerseItem(id = UUID.randomUUID().toString(), bookName = bookName, chapter = chapter, verseNumber = verseNumber, verseText = verseText))
+    fun addBibleVerse(bookName: String, chapter: Int, verseNumber: Int, verseText: String, verseRange: String = "") {
+        _scheduleItems.add(ScheduleItem.BibleVerseItem(
+            id = UUID.randomUUID().toString(),
+            bookName = bookName,
+            chapter = chapter,
+            verseNumber = verseNumber,
+            verseText = verseText,
+            verseRange = verseRange
+        ))
         notifyChanged()
     }
 
