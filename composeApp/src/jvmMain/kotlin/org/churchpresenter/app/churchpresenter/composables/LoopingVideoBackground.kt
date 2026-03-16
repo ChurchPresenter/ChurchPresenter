@@ -2,16 +2,17 @@ package org.churchpresenter.app.churchpresenter.composables
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.awt.SwingPanel
+import kotlinx.coroutines.delay
 import uk.co.caprica.vlcj.player.component.CallbackMediaPlayerComponent
 import uk.co.caprica.vlcj.player.component.EmbeddedMediaPlayerComponent
 import java.awt.Component
-import java.awt.event.HierarchyEvent
-import java.awt.event.HierarchyListener
 import java.io.File
 import java.util.Locale
+import javax.swing.SwingUtilities
 
 /**
  * A self-contained looping video background with no audio.
@@ -36,43 +37,15 @@ fun LoopingVideoBackground(
         } catch (_: Throwable) { null }
     } ?: return
 
-    // Render the SwingPanel first so the AWT component gets attached to the window hierarchy
-    SwingPanel(factory = { component as Component }, modifier = modifier)
-
-    DisposableEffect(videoPath) {
-        val mp = when (component) {
+    val mp = remember(component) {
+        when (component) {
             is CallbackMediaPlayerComponent -> component.mediaPlayer()
             is EmbeddedMediaPlayerComponent -> component.mediaPlayer()
             else -> null
-        } ?: return@DisposableEffect onDispose {}
-
-        val awtComponent = component as Component
-
-        fun startPlayback() {
-            try {
-                mp.audio().setVolume(0)
-                mp.controls().setRepeat(true)
-                mp.media().play(file.absolutePath)
-            } catch (_: Throwable) {
-                // VLC not installed or component not ready — fail silently
-            }
         }
+    } ?: return
 
-        if (awtComponent.isDisplayable) {
-            startPlayback()
-        } else {
-            // Wait for the component to be attached to a visible window
-            val listener = object : HierarchyListener {
-                override fun hierarchyChanged(e: HierarchyEvent) {
-                    if (awtComponent.isDisplayable) {
-                        awtComponent.removeHierarchyListener(this)
-                        startPlayback()
-                    }
-                }
-            }
-            awtComponent.addHierarchyListener(listener)
-        }
-
+    DisposableEffect(Unit) {
         onDispose {
             try {
                 mp.controls().stop()
@@ -83,4 +56,16 @@ fun LoopingVideoBackground(
             } catch (_: Throwable) { }
         }
     }
+
+    LaunchedEffect(videoPath) {
+        delay(200) // let SwingPanel attach to window
+        SwingUtilities.invokeLater {
+            try {
+                mp.audio().setVolume(0)
+                mp.media().play(file.absolutePath, ":input-repeat=65535")
+            } catch (_: Throwable) { }
+        }
+    }
+
+    SwingPanel(factory = { component as Component }, modifier = modifier)
 }
