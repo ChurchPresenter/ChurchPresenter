@@ -352,6 +352,36 @@ curl -k -o img001.jpg \
 
 ---
 
+### `GET /api/pictures/{id}`
+
+Returns catalog metadata for **any** picture folder by its ID — no need to load or project it first.
+
+The `{id}` is either:
+- The schedule item `id` from `GET /api/schedule` (works for every picture item as soon as the schedule is received), or
+- The `folder-id` from `GET /api/pictures` (the currently active folder in the Pictures tab).
+
+```bash
+# Using a schedule item id directly
+curl -k https://192.168.1.10:8765/api/pictures/56337f54-3b4f-4b05-92d2-c99ea2b2a50b
+```
+
+```json
+{
+  "folder-id": "56337f54-3b4f-4b05-92d2-c99ea2b2a50b",
+  "folder-name": "For grandma",
+  "folder-path": "/Users/andreichernyshev/Desktop/For grandma",
+  "image-total": 132,
+  "images": [
+    { "index": 0, "file-name": "IMG_0001.jpg", "thumbnail-url": "/api/pictures/56337f54-3b4f-4b05-92d2-c99ea2b2a50b/images/0" },
+    { "index": 1, "file-name": "IMG_0002.jpg", "thumbnail-url": "/api/pictures/56337f54-3b4f-4b05-92d2-c99ea2b2a50b/images/1" }
+  ]
+}
+```
+
+> The catalog is indexed in the background when the schedule is loaded. A request made in the first few milliseconds after receiving `schedule_updated` may briefly return `404` — simply retry.
+
+---
+
 ## Action Endpoints (POST)
 
 All action endpoints **suspend** until the desktop user clicks **Allow** or **Deny** in the permission dialog.  
