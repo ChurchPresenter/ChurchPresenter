@@ -506,6 +506,10 @@ class CompanionServer {
     private val _pictureCatalog = MutableStateFlow<PictureFolderResponse?>(null)
     /** folderId → ordered list of image Files (index = image order) */
     private val _pictureFiles = ConcurrentHashMap<String, List<File>>()
+    /** folderId → catalog metadata (covers both the active folder and all schedule picture items) */
+    private val _pictureCatalogs = ConcurrentHashMap<String, PictureFolderResponse>()
+    /** Recognised image extensions — matches PicturesViewModel */
+    private val IMAGE_EXTENSIONS = setOf("jpg", "jpeg", "png", "gif", "bmp", "webp", "heic", "heif")
 
     // API key config (updated from settings without restart)
     private val _apiKeyEnabled = MutableStateFlow(false)
@@ -713,10 +717,41 @@ class CompanionServer {
             }
         )
         _pictureCatalog.value = catalog
+        _pictureCatalogs[folderId] = catalog
         broadcast(WebSocketMessage(
             type = Constants.WS_EVENT_PICTURES_UPDATED,
             payload = json.encodeToString(PictureFolderResponse.serializer(), catalog)
         ))
+    }
+
+    /**
+     * Scans [folderPath] for image files, then caches them in [_pictureFiles] and [_pictureCatalogs]
+     * under [id] (the schedule item's UUID).  Skipped if [id] is already registered.
+     * Must be called on an IO thread.
+     */
+    private fun registerPictureItem(id: String, folderPath: String, folderName: String) {
+        if (_pictureFiles.containsKey(id)) return          // already cached
+        val folder = File(folderPath)
+        if (!folder.exists() || !folder.isDirectory) return
+        val imageFiles = folder.listFiles()
+            ?.filter { it.isFile && it.extension.lowercase() in IMAGE_EXTENSIONS }
+            ?.sortedBy { it.name }
+            ?: return
+        if (imageFiles.isEmpty()) return
+        _pictureFiles[id] = imageFiles
+        _pictureCatalogs[id] = PictureFolderResponse(
+            folderId   = id,
+            folderName = folderName,
+            folderPath = folderPath,
+            imageTotal = imageFiles.size,
+            images     = imageFiles.mapIndexed { index, file ->
+                PictureFileDto(
+                    index        = index,
+                    fileName     = file.name,
+                    thumbnailUrl = "${Constants.ENDPOINT_PICTURES}/$id/images/$index"
+                )
+            }
+        )
     }
 
     /** Feed all schedule items — maps every type to ScheduleItemDto and broadcasts to WS clients. */
@@ -737,10 +772,17 @@ class CompanionServer {
                     id = item.id, type = "label", displayText = item.displayText,
                     text = item.text, textColor = item.textColor, backgroundColor = item.backgroundColor
                 )
-                is ScheduleItem.PictureItem -> ScheduleItemDto(
-                    id = item.id, type = "picture", displayText = item.displayText,
-                    folderPath = item.folderPath, folderName = item.folderName, imageCount = item.imageCount
-                )
+                is ScheduleItem.PictureItem -> {
+                    // Register folder on IO thread so GET /api/pictures/{id} works for every
+                    // schedule picture item without requiring the user to load it first.
+                    scope.launch(Dispatchers.IO) {
+                        registerPictureItem(item.id, item.folderPath, item.folderName)
+                    }
+                    ScheduleItemDto(
+                        id = item.id, type = "picture", displayText = item.displayText,
+                        folderPath = item.folderPath, folderName = item.folderName, imageCount = item.imageCount
+                    )
+                }
                 is ScheduleItem.PresentationItem -> ScheduleItemDto(
                     id = item.id, type = "presentation", displayText = item.displayText,
                     filePath = item.filePath, fileName = item.fileName,
@@ -1194,6 +1236,23 @@ class CompanionServer {
                     val catalog = _pictureCatalog.value
                     if (catalog == null) {
                         call.respond(io.ktor.http.HttpStatusCode.ServiceUnavailable, "No picture folder loaded")
+                        return@get
+                    }
+                    call.respond(catalog)
+                }
+
+                /**
+                 * GET /api/pictures/{id}
+                 * Returns catalog metadata for the picture folder with {id}.
+                 * Works for any schedule picture item (by its schedule UUID) as well as the
+                 * currently active folder loaded via the Pictures tab.
+                 */
+                get("${Constants.ENDPOINT_PICTURES}/{id}") {
+                    if (!checkApiKey(call)) return@get
+                    val id = call.parameters["id"] ?: run { call.respond(io.ktor.http.HttpStatusCode.BadRequest, "Missing id"); return@get }
+                    val catalog = _pictureCatalogs[id]
+                    if (catalog == null) {
+                        call.respond(io.ktor.http.HttpStatusCode.NotFound, "Picture folder not found")
                         return@get
                     }
                     call.respond(catalog)
