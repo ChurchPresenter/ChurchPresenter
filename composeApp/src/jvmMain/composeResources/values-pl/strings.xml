@@ -789,5 +789,48 @@
     <string name="client_label_edit_tooltip">Ustaw przyjazną nazwę</string>
     <string name="client_label_save">Zapisz</string>
     <string name="client_label_cancel">Anuluj</string>
+
+    <!-- Edit Song Dialog - Secondary Content -->
+    <string name="new_songbook">Nowy śpiewnik</string>
+    <string name="add_new">Dodaj nowy...</string>
+    <string name="secondary_title">Tytuł pomocniczy</string>
+    <string name="duplicate_song_error">Piosenka z tym numerem i tytułem już istnieje w tym śpiewniku</string>
+    <string name="secondary_lyrics">Tekst pomocniczy</string>
+    <string name="enter_secondary_lyrics_here">Wprowadź tekst pomocniczy...</string>
+
+    <!-- System Settings - Song Samples and File Conversion -->
+    <string name="song_samples">Przykładowe piosenki</string>
+    <string name="folder_already_exists">Folder już istnieje</string>
+    <string name="song_samples_overwrite_confirm">Folder \"Przykładowe piosenki\" już istnieje. Spowoduje to nadpisanie istniejących plików.\nKontynuować?</string>
+    <string name="song_samples_copied">Skopiowano %1$d przykładowych piosenek do folderu \"Przykładowe piosenki\".</string>
+    <string name="add_song_samples">Dodaj przykładowe piosenki</string>
+    <string name="sps_file_not_supported">%1$s (nieobsługiwany)</string>
+    <string name="folder_overwrite_confirm">Folder \"%1$s\" już istnieje. Spowoduje to nadpisanie istniejących plików piosenek.\nKontynuować?</string>
+    <string name="conversion_complete">Konwersja zakończona</string>
+    <string name="conversion_complete_message">Skonwertowano %1$d piosenek do folderu: %2$s</string>
+    <string name="conversion_complete_with_errors">Skonwertowano %1$d piosenek.\nBłędy:\n%2$s</string>
+    <string name="convert">Konwertuj</string>
+    <string name="tooltip_directory_writable">Katalog jest zapisywalny</string>
+    <string name="tooltip_directory_not_found">Katalog nie został znaleziony. Utwórz go lub wybierz inną lokalizację.</string>
+    <string name="tooltip_directory_not_writable">Brak uprawnień do zapisu w tym katalogu. Wybierz inną lokalizację lub zmień uprawnienia.</string>
+    <string name="song_folder_with_count">%1$s (%2$d piosenek)</string>
+
+    <!-- Song Settings - Display Modes and Language Options -->
+    <string name="number_before_title">Numer przed tytułem</string>
+    <string name="fullscreen_display">Wyświetlanie pełnoekranowe</string>
+    <string name="display_mode_label">Tryb wyświetlania:</string>
+    <string name="display_mode_one_verse">1 zwrotka</string>
+    <string name="display_mode_one_line">1 wiersz</string>
+    <string name="song_language_both">Oba</string>
+    <string name="song_language_primary">Podstawowy</string>
+    <string name="song_language_secondary">Pomocniczy</string>
+    <string name="lower_third_display">Wyświetlanie dolnej trzeciej</string>
+    <string name="bilingual_layout">Układ dwujęzyczny:</string>
+    <string name="bilingual_left_right">Lewo / Prawo</string>
+    <string name="bilingual_top_bottom">Góra / Dół</string>
+    <string name="look_ahead_fullscreen">Podgląd (pełny ekran)</string>
+    <string name="look_ahead_next_fullscreen">Następna sekcja (pełny ekran)</string>
+    <string name="look_ahead_lower_third">Podgląd (dolna trzecia)</string>
+    <string name="look_ahead_next_lower_third">Następna sekcja (dolna trzecia)</string>
 </resources>
 

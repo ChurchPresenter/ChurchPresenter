@@ -789,5 +789,48 @@
     <string name="client_label_edit_tooltip">Anzeigenamen festlegen</string>
     <string name="client_label_save">Speichern</string>
     <string name="client_label_cancel">Abbrechen</string>
+
+    <!-- Edit Song Dialog - Secondary Content -->
+    <string name="new_songbook">Neues Liederbuch</string>
+    <string name="add_new">Neu hinzufügen...</string>
+    <string name="secondary_title">Sekundärtitel</string>
+    <string name="duplicate_song_error">Ein Lied mit dieser Nummer und diesem Titel existiert bereits in diesem Liederbuch</string>
+    <string name="secondary_lyrics">Sekundärer Liedtext</string>
+    <string name="enter_secondary_lyrics_here">Sekundären Liedtext hier eingeben...</string>
+
+    <!-- System Settings - Song Samples and File Conversion -->
+    <string name="song_samples">Liedbeispiele</string>
+    <string name="folder_already_exists">Ordner existiert bereits</string>
+    <string name="song_samples_overwrite_confirm">Ordner \"Liedbeispiele\" existiert bereits. Vorhandene Dateien werden überschrieben.\nFortfahren?</string>
+    <string name="song_samples_copied">%1$d Beispiellieder in den Ordner \"Liedbeispiele\" kopiert.</string>
+    <string name="add_song_samples">Liedbeispiele hinzufügen</string>
+    <string name="sps_file_not_supported">%1$s (nicht unterstützt)</string>
+    <string name="folder_overwrite_confirm">Ordner \"%1$s\" existiert bereits. Vorhandene Liederdateien werden überschrieben.\nFortfahren?</string>
+    <string name="conversion_complete">Konvertierung abgeschlossen</string>
+    <string name="conversion_complete_message">%1$d Lieder in Ordner konvertiert: %2$s</string>
+    <string name="conversion_complete_with_errors">%1$d Lieder konvertiert.\nFehler:\n%2$s</string>
+    <string name="convert">Konvertieren</string>
+    <string name="tooltip_directory_writable">Verzeichnis ist beschreibbar</string>
+    <string name="tooltip_directory_not_found">Verzeichnis nicht gefunden. Erstellen Sie es oder wählen Sie einen anderen Speicherort.</string>
+    <string name="tooltip_directory_not_writable">Kein Schreibzugriff auf dieses Verzeichnis. Wählen Sie einen anderen Speicherort oder ändern Sie die Berechtigungen.</string>
+    <string name="song_folder_with_count">%1$s (%2$d Lieder)</string>
+
+    <!-- Song Settings - Display Modes and Language Options -->
+    <string name="number_before_title">Nummer vor dem Titel</string>
+    <string name="fullscreen_display">Vollbildanzeige</string>
+    <string name="display_mode_label">Anzeigemodus:</string>
+    <string name="display_mode_one_verse">1 Strophe</string>
+    <string name="display_mode_one_line">1 Zeile</string>
+    <string name="song_language_both">Beide</string>
+    <string name="song_language_primary">Primär</string>
+    <string name="song_language_secondary">Sekundär</string>
+    <string name="lower_third_display">Unteres-Drittel-Anzeige</string>
+    <string name="bilingual_layout">Zweisprachiges Layout:</string>
+    <string name="bilingual_left_right">Links / Rechts</string>
+    <string name="bilingual_top_bottom">Oben / Unten</string>
+    <string name="look_ahead_fullscreen">Vorschau (Vollbild)</string>
+    <string name="look_ahead_next_fullscreen">Nächster Abschnitt (Vollbild)</string>
+    <string name="look_ahead_lower_third">Vorschau (Unteres Drittel)</string>
+    <string name="look_ahead_next_lower_third">Nächster Abschnitt (Unteres Drittel)</string>
 </resources>
 

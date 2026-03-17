@@ -875,5 +875,48 @@
     <string name="client_label_edit_tooltip">Nastavit popisné jméno</string>
     <string name="client_label_save">Uložit</string>
     <string name="client_label_cancel">Zrušit</string>
+
+    <!-- Edit Song Dialog - Secondary Content -->
+    <string name="new_songbook">Nový zpěvník</string>
+    <string name="add_new">Přidat nový...</string>
+    <string name="secondary_title">Vedlejší název</string>
+    <string name="duplicate_song_error">Píseň s tímto číslem a názvem již v tomto zpěvníku existuje</string>
+    <string name="secondary_lyrics">Vedlejší text</string>
+    <string name="enter_secondary_lyrics_here">Zadejte vedlejší text zde...</string>
+
+    <!-- System Settings - Song Samples and File Conversion -->
+    <string name="song_samples">Ukázkové písně</string>
+    <string name="folder_already_exists">Složka již existuje</string>
+    <string name="song_samples_overwrite_confirm">Složka \"Ukázkové písně\" již existuje. Tím se přepíší existující soubory.\nPokračovat?</string>
+    <string name="song_samples_copied">Zkopírováno %1$d ukázkových písní do složky \"Ukázkové písně\".</string>
+    <string name="add_song_samples">Přidat ukázkové písně</string>
+    <string name="sps_file_not_supported">%1$s (není podporováno)</string>
+    <string name="folder_overwrite_confirm">Složka \"%1$s\" již existuje. Tím se přepíší existující soubory písní.\nPokračovat?</string>
+    <string name="conversion_complete">Převod dokončen</string>
+    <string name="conversion_complete_message">Převedeno %1$d písní do složky: %2$s</string>
+    <string name="conversion_complete_with_errors">Převedeno %1$d písní.\nChyby:\n%2$s</string>
+    <string name="convert">Převést</string>
+    <string name="tooltip_directory_writable">Adresář je zapisovatelný</string>
+    <string name="tooltip_directory_not_found">Adresář nebyl nalezen. Vytvořte ho nebo zvolte jiné umístění.</string>
+    <string name="tooltip_directory_not_writable">Do tohoto adresáře nelze zapisovat. Zvolte jiné umístění nebo změňte oprávnění.</string>
+    <string name="song_folder_with_count">%1$s (%2$d písní)</string>
+
+    <!-- Song Settings - Display Modes and Language Options -->
+    <string name="number_before_title">Číslo před názvem</string>
+    <string name="fullscreen_display">Zobrazení na celou obrazovku</string>
+    <string name="display_mode_label">Režim zobrazení:</string>
+    <string name="display_mode_one_verse">1 sloka</string>
+    <string name="display_mode_one_line">1 řádek</string>
+    <string name="song_language_both">Obojí</string>
+    <string name="song_language_primary">Primární</string>
+    <string name="song_language_secondary">Sekundární</string>
+    <string name="lower_third_display">Zobrazení dolní třetiny</string>
+    <string name="bilingual_layout">Dvojjazyčné rozložení:</string>
+    <string name="bilingual_left_right">Vlevo / Vpravo</string>
+    <string name="bilingual_top_bottom">Nahoře / Dole</string>
+    <string name="look_ahead_fullscreen">Náhled (celá obrazovka)</string>
+    <string name="look_ahead_next_fullscreen">Další sekce (celá obrazovka)</string>
+    <string name="look_ahead_lower_third">Náhled (dolní třetina)</string>
+    <string name="look_ahead_next_lower_third">Další sekce (dolní třetina)</string>
 </resources>
 

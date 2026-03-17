@@ -789,5 +789,48 @@
     <string name="client_label_edit_tooltip">Атауды орнату</string>
     <string name="client_label_save">Сақтау</string>
     <string name="client_label_cancel">Бас тарту</string>
+
+    <!-- Edit Song Dialog - Secondary Content -->
+    <string name="new_songbook">Жаңа жырнама</string>
+    <string name="add_new">Жаңа қосу...</string>
+    <string name="secondary_title">Қосымша тақырып</string>
+    <string name="duplicate_song_error">Осы нөмірі мен атауы бар ән бұл жырнамада бар</string>
+    <string name="secondary_lyrics">Қосымша мәтін</string>
+    <string name="enter_secondary_lyrics_here">Қосымша мәтінді осында енгізіңіз...</string>
+
+    <!-- System Settings - Song Samples and File Conversion -->
+    <string name="song_samples">Ән үлгілері</string>
+    <string name="folder_already_exists">Қалта бар</string>
+    <string name="song_samples_overwrite_confirm">\"Ән үлгілері\" қалтасы бар. Бұл бар файлдарды қайта жазады.\nЖалғастыру ма?</string>
+    <string name="song_samples_copied">%1$d ән үлгісі \"Ән үлгілері\" қалтасына көшірілді.</string>
+    <string name="add_song_samples">Ән үлгілерін қосу</string>
+    <string name="sps_file_not_supported">%1$s (қолданылмайды)</string>
+    <string name="folder_overwrite_confirm">\"%1$s\" қалтасы бар. Бұл бар ән файлдарын қайта жазады.\nЖалғастыру ма?</string>
+    <string name="conversion_complete">Түрлендіру аяқталды</string>
+    <string name="conversion_complete_message">%1$d ән қалтаға түрлендірілді: %2$s</string>
+    <string name="conversion_complete_with_errors">%1$d ән түрлендірілді.\nҚателер:\n%2$s</string>
+    <string name="convert">Түрлендіру</string>
+    <string name="tooltip_directory_writable">Каталог жазуға болады</string>
+    <string name="tooltip_directory_not_found">Каталог табылмады. Оны жасаңыз немесе басқа орынды таңдаңыз.</string>
+    <string name="tooltip_directory_not_writable">Бұл каталогқа жазу мүмкін емес. Басқа орынды таңдаңыз немесе рұқсаттарды өзгертіңіз.</string>
+    <string name="song_folder_with_count">%1$s (%2$d ән)</string>
+
+    <!-- Song Settings - Display Modes and Language Options -->
+    <string name="number_before_title">Тақырыптың алдындағы нөмір</string>
+    <string name="fullscreen_display">Толық экран режимі</string>
+    <string name="display_mode_label">Көрсету режимі:</string>
+    <string name="display_mode_one_verse">1 шумақ</string>
+    <string name="display_mode_one_line">1 жол</string>
+    <string name="song_language_both">Екеуі де</string>
+    <string name="song_language_primary">Негізгі</string>
+    <string name="song_language_secondary">Қосымша</string>
+    <string name="lower_third_display">Төменгі үштен бір бөлік</string>
+    <string name="bilingual_layout">Екітілді орналасу:</string>
+    <string name="bilingual_left_right">Солға / Оңға</string>
+    <string name="bilingual_top_bottom">Жоғары / Төмен</string>
+    <string name="look_ahead_fullscreen">Алдын ала қарау (толық экран)</string>
+    <string name="look_ahead_next_fullscreen">Келесі бөлім (толық экран)</string>
+    <string name="look_ahead_lower_third">Алдын ала қарау (төменгі үштен бір)</string>
+    <string name="look_ahead_next_lower_third">Келесі бөлім (төменгі үштен бір)</string>
 </resources>
 
