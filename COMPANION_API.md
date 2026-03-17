@@ -317,6 +317,37 @@ let image = UIImage(data: data)
 
 ---
 
+### `GET /api/presentations/{id}`
+
+Returns metadata for **any** presentation by its ID — no need to open it in the Presentations tab first.
+
+The `{id}` is either:
+- The schedule item `id` from `GET /api/schedule` (works for every presentation item; slides are rendered in the background when the schedule is loaded), or
+- The presentation ID (`"id"` field) returned by `GET /api/presentations`.
+
+```bash
+# Using a schedule item id directly
+curl -k https://192.168.1.10:8765/api/presentations/550e8400-e29b-41d4-a716-446655440000
+```
+
+```json
+{
+  "id": "3f2a1b4c",
+  "file-name": "EasterSermon",
+  "file-type": "pptx",
+  "slide-total": 5,
+  "slides": [
+    { "slide-index": 0, "thumbnail-url": "/api/presentations/3f2a1b4c/slides/0" },
+    { "slide-index": 1, "thumbnail-url": "/api/presentations/3f2a1b4c/slides/1" },
+    { "slide-index": 2, "thumbnail-url": "/api/presentations/3f2a1b4c/slides/2" }
+  ]
+}
+```
+
+> Slides are rendered in the background when the schedule is received. A request made in the first few seconds after `schedule_updated` may briefly return `404` while rendering is in progress — simply retry.
+
+---
+
 ### `GET /api/pictures`
 
 Returns the loaded picture folder metadata.

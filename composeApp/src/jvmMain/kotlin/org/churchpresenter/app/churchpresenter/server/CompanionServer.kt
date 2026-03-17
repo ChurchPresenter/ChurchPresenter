@@ -501,6 +501,12 @@ class CompanionServer {
     private val _presentationCatalog = MutableStateFlow(PresentationCatalogResponse(emptyList(), 0))
     /** presentationId → list of JPEG-encoded slide bytes (index = slide number) */
     private val _slideBytes = ConcurrentHashMap<String, List<ByteArray>>()
+    /** presentationId (file hash) → PresentationDto — covers tab-loaded and background-rendered items */
+    private val _presentationCatalogs = ConcurrentHashMap<String, PresentationDto>()
+    /** schedule item UUID → presentation file hash — populated when schedule is updated */
+    private val _scheduleItemToPresentationId = ConcurrentHashMap<String, String>()
+    /** Set of presentation IDs currently being background-rendered (avoids duplicate renders) */
+    private val _renderingPresentations = ConcurrentHashMap<String, Unit>()
 
     // Picture catalog — metadata + file references stored per folder
     private val _pictureCatalog = MutableStateFlow<PictureFolderResponse?>(null)
@@ -676,6 +682,8 @@ class CompanionServer {
             _slideBytes[id] = jpegSlides
 
             val catalog = buildPresentationCatalog(id, fileName, fileType, jpegSlides.size)
+            // Cache the dto so GET /api/presentations/{id} works for tab-loaded presentations
+            _presentationCatalogs[id] = catalog.presentations.first()
             _presentationCatalog.value = catalog
             broadcast(WebSocketMessage(
                 type = Constants.WS_EVENT_PRESENTATION_UPDATED,
@@ -754,6 +762,167 @@ class CompanionServer {
         )
     }
 
+    /**
+     * Background-renders a presentation file to JPEG slides, then stores them in [_slideBytes]
+     * and [_presentationCatalogs] so GET /api/presentations/{id} and
+     * GET /api/presentations/{id}/slides/{index} work for every schedule presentation item
+     * without the user needing to open it in PresentationTab first.
+     *
+     * Mirrors [registerPictureItem] — called on the IO dispatcher; does NOT affect UI state.
+     */
+    private fun renderPresentationForServer(presentationId: String, filePath: String) {
+        val file = File(filePath)
+        if (!file.exists()) return
+        try {
+            val images: List<BufferedImage> = when (file.extension.lowercase()) {
+                "pdf"        -> renderPdfForServer(file)
+                "pptx", "ppt" -> renderPowerPointForServer(file)
+                "key"        -> renderKeynoteForServer(file)
+                else         -> return
+            }
+            if (images.isEmpty()) return
+            val jpegSlides = images.map { img ->
+                ByteArrayOutputStream().also { baos -> ImageIO.write(img, "jpg", baos) }.toByteArray()
+            }
+            _slideBytes[presentationId] = jpegSlides
+            val slideDtos = jpegSlides.indices.map { i ->
+                SlideDto(slideIndex = i, thumbnailUrl = "${Constants.ENDPOINT_PRESENTATIONS}/$presentationId/slides/$i")
+            }
+            _presentationCatalogs[presentationId] = PresentationDto(
+                id        = presentationId,
+                fileName  = file.nameWithoutExtension,
+                fileType  = file.extension.lowercase(),
+                slideTotal = jpegSlides.size,
+                slides    = slideDtos
+            )
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    private fun renderPdfForServer(file: File): List<BufferedImage> {
+        val result = mutableListOf<BufferedImage>()
+        try {
+            val docClass  = Class.forName("org.apache.pdfbox.pdmodel.PDDocument")
+            val rendClass = Class.forName("org.apache.pdfbox.rendering.PDFRenderer")
+            val doc   = docClass.getMethod("load", File::class.java).invoke(null, file)
+            val pages = docClass.getMethod("getNumberOfPages").invoke(doc) as Int
+            val rend  = rendClass.getConstructor(docClass).newInstance(doc)
+            val renderDpi = rendClass.getMethod("renderImageWithDPI", Int::class.java, Float::class.java)
+            for (p in 0 until pages) {
+                result.add(renderDpi.invoke(rend, p, 150f) as BufferedImage)
+            }
+            docClass.getMethod("close").invoke(doc)
+        } catch (_: ClassNotFoundException) {
+        } catch (e: Exception) { e.printStackTrace() }
+        return result
+    }
+
+    private fun renderPowerPointForServer(file: File): List<BufferedImage> {
+        val result = mutableListOf<BufferedImage>()
+        val className = if (file.extension.lowercase() == "pptx")
+            "org.apache.poi.xslf.usermodel.XMLSlideShow"
+        else
+            "org.apache.poi.hslf.usermodel.HSLFSlideShow"
+        try {
+            val clazz = Class.forName(className)
+            val fis   = java.io.FileInputStream(file)
+            val ppt   = clazz.getConstructor(java.io.InputStream::class.java).newInstance(fis)
+            val slides = clazz.getMethod("getSlides").invoke(ppt) as List<*>
+            val size   = clazz.getMethod("getPageSize").invoke(ppt) as java.awt.Dimension
+            slides.forEach { slide ->
+                val s = slide ?: return@forEach
+                val img = BufferedImage(size.width, size.height, BufferedImage.TYPE_INT_RGB)
+                val g = img.createGraphics()
+                g.setRenderingHint(java.awt.RenderingHints.KEY_ANTIALIASING, java.awt.RenderingHints.VALUE_ANTIALIAS_ON)
+                g.setRenderingHint(java.awt.RenderingHints.KEY_RENDERING, java.awt.RenderingHints.VALUE_RENDER_QUALITY)
+                g.paint = java.awt.Color.WHITE
+                g.fillRect(0, 0, size.width, size.height)
+                s::class.java.getMethod("draw", java.awt.Graphics2D::class.java).invoke(s, g)
+                g.dispose()
+                result.add(img)
+            }
+            clazz.getMethod("close").invoke(ppt)
+            fis.close()
+        } catch (_: ClassNotFoundException) {
+        } catch (e: Exception) { e.printStackTrace() }
+        return result
+    }
+
+    /**
+     * Renders Keynote slides by extracting the .key bundle and reading the pre-rendered
+     * st- thumbnail images that Keynote embeds in every package.
+     */
+    private fun renderKeynoteForServer(file: File): List<BufferedImage> {
+        val result = mutableListOf<BufferedImage>()
+        // Read zip entry order so we can recreate presentation order
+        val slideIwaOrder = mutableListOf<Long>()
+        if (!file.isDirectory) {
+            try {
+                java.util.zip.ZipFile(file).use { zip ->
+                    zip.entries().asSequence()
+                        .map { it.name }
+                        .filter { n ->
+                            val base = n.substringAfterLast("/")
+                            base.startsWith("Slide-") && base.endsWith(".iwa") && base != "Slide.iwa"
+                        }
+                        .forEach { n ->
+                            val base = n.substringAfterLast("/")
+                            base.removePrefix("Slide-").removeSuffix(".iwa").split("-")[0]
+                                .toLongOrNull()?.let { slideIwaOrder.add(it) }
+                        }
+                }
+            } catch (_: Exception) {}
+        }
+        var tempDir: File? = null
+        val keynoteDir: File
+        if (file.isDirectory) {
+            keynoteDir = file
+        } else if (file.name.endsWith(".key")) {
+            tempDir = File(System.getProperty("java.io.tmpdir"), "keynote_server_${System.currentTimeMillis()}")
+            tempDir.mkdirs()
+            try {
+                java.util.zip.ZipInputStream(java.io.BufferedInputStream(java.io.FileInputStream(file))).use { zip ->
+                    var entry = zip.nextEntry
+                    while (entry != null) {
+                        val out = File(tempDir, entry.name)
+                        if (entry.isDirectory) out.mkdirs()
+                        else {
+                            out.parentFile?.mkdirs()
+                            java.io.BufferedOutputStream(java.io.FileOutputStream(out)).use { zip.copyTo(it) }
+                        }
+                        zip.closeEntry(); entry = zip.nextEntry
+                    }
+                }
+                keynoteDir = tempDir
+            } catch (e: Exception) { tempDir.deleteRecursively(); return result }
+        } else return result
+
+        try {
+            val dataDir = File(keynoteDir, "Data")
+            if (!dataDir.exists()) return result
+            val stFiles = dataDir.listFiles()?.filter { f ->
+                f.isFile && f.extension.lowercase() in listOf("jpg", "jpeg", "png", "tiff", "tif") &&
+                    f.name.lowercase().startsWith("st-")
+            } ?: return result
+            val stSortedByStId = stFiles.sortedBy { f ->
+                f.nameWithoutExtension.split("-").lastOrNull()?.toLongOrNull() ?: Long.MAX_VALUE
+            }
+            val ordered: List<File> = if (slideIwaOrder.isNotEmpty()) {
+                val iwaOrderSorted = slideIwaOrder.sorted()
+                val rankToSt = stSortedByStId.mapIndexed { rank, f -> rank to f }.toMap()
+                val main = slideIwaOrder.mapNotNull { id ->
+                    rankToSt[iwaOrderSorted.indexOf(id)]
+                }.distinct()
+                main + stFiles.filter { it !in main }
+            } else stSortedByStId
+            ordered.forEach { f -> ImageIO.read(f)?.let { result.add(it) } }
+        } finally {
+            tempDir?.deleteRecursively()
+        }
+        return result
+    }
+
     /** Feed all schedule items — maps every type to ScheduleItemDto and broadcasts to WS clients. */
     fun updateSchedule(items: List<ScheduleItem>) {
         val dtos = items.map { item ->
@@ -783,11 +952,27 @@ class CompanionServer {
                         folderPath = item.folderPath, folderName = item.folderName, imageCount = item.imageCount
                     )
                 }
-                is ScheduleItem.PresentationItem -> ScheduleItemDto(
-                    id = item.id, type = "presentation", displayText = item.displayText,
-                    filePath = item.filePath, fileName = item.fileName,
-                    slideCount = item.slideCount, fileType = item.fileType
-                )
+                is ScheduleItem.PresentationItem -> {
+                    // Map schedule UUID → stable file hash so GET /api/presentations/{id} resolves correctly.
+                    val presentationId = item.filePath.hashCode().toUInt().toString(16)
+                    _scheduleItemToPresentationId[item.id] = presentationId
+                    // Render slides in the background if not already done / in-progress.
+                    if (!_slideBytes.containsKey(presentationId) &&
+                        _renderingPresentations.putIfAbsent(presentationId, Unit) == null) {
+                        scope.launch(Dispatchers.IO) {
+                            try {
+                                renderPresentationForServer(presentationId, item.filePath)
+                            } finally {
+                                _renderingPresentations.remove(presentationId)
+                            }
+                        }
+                    }
+                    ScheduleItemDto(
+                        id = item.id, type = "presentation", displayText = item.displayText,
+                        filePath = item.filePath, fileName = item.fileName,
+                        slideCount = item.slideCount, fileType = item.fileType
+                    )
+                }
                 is ScheduleItem.MediaItem -> ScheduleItemDto(
                     id = item.id, type = "media", displayText = item.displayText,
                     mediaUrl = item.mediaUrl, mediaTitle = item.mediaTitle, mediaType = item.mediaType
@@ -1206,6 +1391,32 @@ class CompanionServer {
                 }
 
                 /**
+                 * GET /api/presentations/{id}
+                 * Returns metadata for a specific presentation by its ID.
+                 *
+                 * The {id} is either:
+                 *  - the schedule item UUID from GET /api/schedule (works for every presentation
+                 *    item as soon as the schedule is received — slides are rendered in the background), or
+                 *  - the presentation file hash returned by GET /api/presentations.
+                 *
+                 * Returns 404 while background rendering is still in progress — retry after a moment.
+                 */
+                get("${Constants.ENDPOINT_PRESENTATIONS}/{id}") {
+                    if (!checkApiKey(call)) return@get
+                    val id = call.parameters["id"] ?: run {
+                        call.respond(io.ktor.http.HttpStatusCode.BadRequest, "Missing id")
+                        return@get
+                    }
+                    val resolvedId = _scheduleItemToPresentationId[id] ?: id
+                    val dto = _presentationCatalogs[resolvedId]
+                    if (dto == null) {
+                        call.respond(io.ktor.http.HttpStatusCode.NotFound, "Presentation not found or not yet rendered")
+                        return@get
+                    }
+                    call.respond(dto)
+                }
+
+                /**
                  * GET /api/presentations/{id}/slides/{index}
                  * Returns the slide at {index} as a JPEG image for the presentation with {id}.
                  */
@@ -1213,7 +1424,8 @@ class CompanionServer {
                     if (!checkApiKey(call)) return@get
                     val id    = call.parameters["id"]    ?: run { call.respond(io.ktor.http.HttpStatusCode.BadRequest, "Missing id"); return@get }
                     val index = call.parameters["index"]?.toIntOrNull() ?: run { call.respond(io.ktor.http.HttpStatusCode.BadRequest, "Invalid index"); return@get }
-                    val slides = _slideBytes[id]
+                    val resolvedId = _scheduleItemToPresentationId[id] ?: id
+                    val slides = _slideBytes[resolvedId]
                     if (slides == null) {
                         call.respond(io.ktor.http.HttpStatusCode.NotFound, "Presentation not found")
                         return@get

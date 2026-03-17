@@ -273,11 +273,20 @@ This document tracks coding standards, common mistakes, and debugging notes for 
 3. `CompanionServer` JPEG-encodes each slide on the IO thread and stores them in `_slideBytes: ConcurrentHashMap<String, List<ByteArray>>`.
 4. The metadata is stored in `_presentationCatalog` and broadcast to WebSocket clients via `presentation_updated`.
 
+### Background rendering (schedule items)
+When `updateSchedule` is called with a `PresentationItem`, `CompanionServer` immediately:
+1. Computes the stable file-hash ID and stores the mapping `scheduleUUID → fileHash` in `_scheduleItemToPresentationId`.
+2. Launches a coroutine on `Dispatchers.IO` that renders the file using reflection-based POI/PDFBox (same libraries as `PresentationViewModel` but without touching UI state).
+3. On completion the JPEG bytes go into `_slideBytes[fileHash]` and metadata into `_presentationCatalogs[fileHash]`.
+
+`GET /api/presentations/{scheduleUUID}` resolves the UUID via the map and returns the `PresentationDto` immediately when rendering finishes. While still rendering, it returns `404` — the client should retry.
+
 ### New Endpoints
 | Endpoint | Description |
 |---|---|
 | `GET /api/presentations` | Returns `PresentationCatalogResponse` with slide metadata |
-| `GET /api/presentations/{id}/slides/{index}` | Returns JPEG image bytes for slide at index |
+| `GET /api/presentations/{id}` | Returns `PresentationDto` for a specific presentation by schedule UUID **or** file hash — slides rendered in background |
+| `GET /api/presentations/{id}/slides/{index}` | Returns JPEG image bytes for slide at index (resolves schedule UUID automatically) |
 
 ### Presentation ID
 Derived from `file.absolutePath.hashCode().toUInt().toString(16)` — stable per file path.
@@ -286,6 +295,11 @@ Derived from `file.absolutePath.hashCode().toUInt().toString(16)` — stable per
 - `SlideDto` — `slide-index` + `thumbnail-url`
 - `PresentationDto` — `id`, `file-name`, `file-type`, `slide-total`, `slides[]`
 - `PresentationCatalogResponse` — `presentations[]`, `total`
+
+### New CompanionServer state
+- `_presentationCatalogs: ConcurrentHashMap<String, PresentationDto>` — keyed by file hash; populated both by `updatePresentation` (tab-load) and `renderPresentationForServer` (background)
+- `_scheduleItemToPresentationId: ConcurrentHashMap<String, String>` — maps schedule UUID → file hash
+- `_renderingPresentations: ConcurrentHashMap<String, Unit>` — in-progress render guard (putIfAbsent pattern)
 
 ### New WS Event
 `presentation_updated` — broadcast whenever a new presentation is loaded; also sent to newly-connected WS clients.
