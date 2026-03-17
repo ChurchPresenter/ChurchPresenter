@@ -42,21 +42,37 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.bilingual_layout
+import churchpresenter.composeapp.generated.resources.bilingual_left_right
+import churchpresenter.composeapp.generated.resources.bilingual_top_bottom
 import churchpresenter.composeapp.generated.resources.bottom_left
 import churchpresenter.composeapp.generated.resources.bottom_right
 import churchpresenter.composeapp.generated.resources.color
+import churchpresenter.composeapp.generated.resources.display_mode_label
+import churchpresenter.composeapp.generated.resources.display_mode_one_line
+import churchpresenter.composeapp.generated.resources.display_mode_one_verse
 import churchpresenter.composeapp.generated.resources.every_page
 import churchpresenter.composeapp.generated.resources.first_page
 import churchpresenter.composeapp.generated.resources.font_size
 import churchpresenter.composeapp.generated.resources.font_type
 import churchpresenter.composeapp.generated.resources.full_screen
+import churchpresenter.composeapp.generated.resources.fullscreen_display
+import churchpresenter.composeapp.generated.resources.look_ahead_fullscreen
+import churchpresenter.composeapp.generated.resources.look_ahead_lower_third
+import churchpresenter.composeapp.generated.resources.look_ahead_next_fullscreen
+import churchpresenter.composeapp.generated.resources.look_ahead_next_lower_third
+import churchpresenter.composeapp.generated.resources.lower_third_display
 import churchpresenter.composeapp.generated.resources.lower_third_size
 import churchpresenter.composeapp.generated.resources.horizontal_alignment
 import churchpresenter.composeapp.generated.resources.lyrics
 import churchpresenter.composeapp.generated.resources.none
+import churchpresenter.composeapp.generated.resources.number_before_title
 import churchpresenter.composeapp.generated.resources.position_on_screen
 import churchpresenter.composeapp.generated.resources.show_number
 import churchpresenter.composeapp.generated.resources.show_title
+import churchpresenter.composeapp.generated.resources.song_language_both
+import churchpresenter.composeapp.generated.resources.song_language_primary
+import churchpresenter.composeapp.generated.resources.song_language_secondary
 import churchpresenter.composeapp.generated.resources.song_number
 import churchpresenter.composeapp.generated.resources.title
 import churchpresenter.composeapp.generated.resources.top_left
@@ -323,7 +339,7 @@ private fun LeftColumn(
                 checked = settings.songSettings.songNumberBeforeTitle,
                 onCheckedChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(songNumberBeforeTitle = it)) } }
             )
-            Text("Number before title", style = MaterialTheme.typography.bodyMedium)
+            Text(stringResource(Res.string.number_before_title), style = MaterialTheme.typography.bodyMedium)
         }
     }
 
@@ -607,7 +623,7 @@ private fun LeftColumn(
     Spacer(modifier = Modifier.height(12.dp))
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(
-            text = "Bilingual Layout:",
+            text = stringResource(Res.string.bilingual_layout),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurface,
             modifier = Modifier.width(160.dp)
@@ -624,7 +640,7 @@ private fun LeftColumn(
                 modifier = Modifier.size(24.dp)
             )
             Text(
-                text = "Left / Right",
+                text = stringResource(Res.string.bilingual_left_right),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.padding(start = 4.dp)
@@ -641,7 +657,7 @@ private fun LeftColumn(
                 modifier = Modifier.size(24.dp)
             )
             Text(
-                text = "Top / Bottom",
+                text = stringResource(Res.string.bilingual_top_bottom),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.padding(start = 4.dp)
@@ -807,24 +823,24 @@ private fun RightColumn(
     Spacer(modifier = Modifier.height(20.dp))
 
     // ── Fullscreen Display ──
-    SectionHeader("Fullscreen Display")
+    SectionHeader(stringResource(Res.string.fullscreen_display))
     Spacer(modifier = Modifier.height(8.dp))
     Column {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text(text = "Display Mode:", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.width(120.dp))
+            Text(text = stringResource(Res.string.display_mode_label), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.width(120.dp))
             val fsDisplayMode = settings.songSettings.fullscreenDisplayMode
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Checkbox(checked = fsDisplayMode == Constants.SONG_DISPLAY_MODE_VERSE, onCheckedChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(fullscreenDisplayMode = Constants.SONG_DISPLAY_MODE_VERSE)) } }, modifier = Modifier.size(24.dp))
-                Text(text = "1 Verse", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.padding(start = 4.dp))
+                Text(text = stringResource(Res.string.display_mode_one_verse), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.padding(start = 4.dp))
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Checkbox(checked = fsDisplayMode == Constants.SONG_DISPLAY_MODE_LINE, onCheckedChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(fullscreenDisplayMode = Constants.SONG_DISPLAY_MODE_LINE)) } }, modifier = Modifier.size(24.dp))
-                Text(text = "1 Line", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.padding(start = 4.dp))
+                Text(text = stringResource(Res.string.display_mode_one_line), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.padding(start = 4.dp))
             }
         }
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 2.dp)) {
             Spacer(modifier = Modifier.width(120.dp))
-            listOf(Constants.SONG_LANG_BOTH to "Both", Constants.SONG_LANG_PRIMARY to "Primary", Constants.SONG_LANG_SECONDARY to "Secondary").forEach { (mode, label) ->
+            listOf(Constants.SONG_LANG_BOTH to stringResource(Res.string.song_language_both), Constants.SONG_LANG_PRIMARY to stringResource(Res.string.song_language_primary), Constants.SONG_LANG_SECONDARY to stringResource(Res.string.song_language_secondary)).forEach { (mode, label) ->
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Checkbox(checked = settings.songSettings.fullscreenLanguageDisplay == mode, onCheckedChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(fullscreenLanguageDisplay = mode)) } }, modifier = Modifier.size(24.dp))
                     Text(text = label, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.padding(start = 4.dp))
@@ -952,24 +968,24 @@ private fun RightColumn(
     Spacer(modifier = Modifier.height(20.dp))
 
     // ── Lower Third Display ──
-    SectionHeader("Lower Third Display")
+    SectionHeader(stringResource(Res.string.lower_third_display))
     Spacer(modifier = Modifier.height(8.dp))
     Column {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text(text = "Display Mode:", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.width(120.dp))
+            Text(text = stringResource(Res.string.display_mode_label), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.width(120.dp))
             val ltDisplayMode = settings.songSettings.lowerThirdDisplayMode
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Checkbox(checked = ltDisplayMode == Constants.SONG_DISPLAY_MODE_VERSE, onCheckedChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lowerThirdDisplayMode = Constants.SONG_DISPLAY_MODE_VERSE)) } }, modifier = Modifier.size(24.dp))
-                Text(text = "1 Verse", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.padding(start = 4.dp))
+                Text(text = stringResource(Res.string.display_mode_one_verse), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.padding(start = 4.dp))
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Checkbox(checked = ltDisplayMode == Constants.SONG_DISPLAY_MODE_LINE, onCheckedChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lowerThirdDisplayMode = Constants.SONG_DISPLAY_MODE_LINE)) } }, modifier = Modifier.size(24.dp))
-                Text(text = "1 Line", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.padding(start = 4.dp))
+                Text(text = stringResource(Res.string.display_mode_one_line), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.padding(start = 4.dp))
             }
         }
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 2.dp)) {
             Spacer(modifier = Modifier.width(120.dp))
-            listOf(Constants.SONG_LANG_BOTH to "Both", Constants.SONG_LANG_PRIMARY to "Primary", Constants.SONG_LANG_SECONDARY to "Secondary").forEach { (mode, label) ->
+            listOf(Constants.SONG_LANG_BOTH to stringResource(Res.string.song_language_both), Constants.SONG_LANG_PRIMARY to stringResource(Res.string.song_language_primary), Constants.SONG_LANG_SECONDARY to stringResource(Res.string.song_language_secondary)).forEach { (mode, label) ->
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Checkbox(checked = settings.songSettings.lowerThirdLanguageDisplay == mode, onCheckedChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lowerThirdLanguageDisplay = mode)) } }, modifier = Modifier.size(24.dp))
                     Text(text = label, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.padding(start = 4.dp))
@@ -1105,7 +1121,7 @@ private fun LookAheadColumn(
     availableFonts: List<String>
 ) {
     // ── Look Ahead — Fullscreen ──
-    SectionHeader("Look Ahead (Fullscreen)")
+    SectionHeader(stringResource(Res.string.look_ahead_fullscreen))
     Spacer(modifier = Modifier.height(8.dp))
     val laFsDisplayMode = settings.songSettings.lookAheadDisplayMode
     Column {
@@ -1113,16 +1129,16 @@ private fun LookAheadColumn(
             Spacer(modifier = Modifier.width(160.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Checkbox(checked = laFsDisplayMode == Constants.SONG_DISPLAY_MODE_VERSE, onCheckedChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lookAheadDisplayMode = Constants.SONG_DISPLAY_MODE_VERSE)) } }, modifier = Modifier.size(24.dp))
-                Text(text = "1 Verse", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.padding(start = 4.dp))
+                Text(text = stringResource(Res.string.display_mode_one_verse), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.padding(start = 4.dp))
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Checkbox(checked = laFsDisplayMode == Constants.SONG_DISPLAY_MODE_LINE, onCheckedChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lookAheadDisplayMode = Constants.SONG_DISPLAY_MODE_LINE)) } }, modifier = Modifier.size(24.dp))
-                Text(text = "1 Line", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.padding(start = 4.dp))
+                Text(text = stringResource(Res.string.display_mode_one_line), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.padding(start = 4.dp))
             }
         }
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 2.dp)) {
             Spacer(modifier = Modifier.width(160.dp))
-            listOf(Constants.SONG_LANG_BOTH to "Both", Constants.SONG_LANG_PRIMARY to "Primary", Constants.SONG_LANG_SECONDARY to "Secondary").forEach { (mode, label) ->
+            listOf(Constants.SONG_LANG_BOTH to stringResource(Res.string.song_language_both), Constants.SONG_LANG_PRIMARY to stringResource(Res.string.song_language_primary), Constants.SONG_LANG_SECONDARY to stringResource(Res.string.song_language_secondary)).forEach { (mode, label) ->
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Checkbox(checked = settings.songSettings.lookAheadLanguageDisplay == mode, onCheckedChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lookAheadLanguageDisplay = mode)) } }, modifier = Modifier.size(24.dp))
                     Text(text = label, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.padding(start = 4.dp))
@@ -1204,7 +1220,7 @@ private fun LookAheadColumn(
 
     // ── Look Ahead Next Section — Fullscreen ──
     Spacer(modifier = Modifier.height(20.dp))
-    SectionHeader("Look Ahead Next Section (Fullscreen)")
+    SectionHeader(stringResource(Res.string.look_ahead_next_fullscreen))
     Spacer(modifier = Modifier.height(8.dp))
     SettingRow(stringResource(Res.string.font_size)) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -1269,7 +1285,7 @@ private fun LookAheadColumn(
 
     // ── Look Ahead — Lower Third ──
     Spacer(modifier = Modifier.height(20.dp))
-    SectionHeader("Look Ahead (Lower Third)")
+    SectionHeader(stringResource(Res.string.look_ahead_lower_third))
     Spacer(modifier = Modifier.height(8.dp))
     val laLtDisplayMode = settings.songSettings.lowerThirdLookAheadDisplayMode
     Column {
@@ -1277,16 +1293,16 @@ private fun LookAheadColumn(
             Spacer(modifier = Modifier.width(160.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Checkbox(checked = laLtDisplayMode == Constants.SONG_DISPLAY_MODE_VERSE, onCheckedChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lowerThirdLookAheadDisplayMode = Constants.SONG_DISPLAY_MODE_VERSE)) } }, modifier = Modifier.size(24.dp))
-                Text(text = "1 Verse", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.padding(start = 4.dp))
+                Text(text = stringResource(Res.string.display_mode_one_verse), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.padding(start = 4.dp))
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Checkbox(checked = laLtDisplayMode == Constants.SONG_DISPLAY_MODE_LINE, onCheckedChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lowerThirdLookAheadDisplayMode = Constants.SONG_DISPLAY_MODE_LINE)) } }, modifier = Modifier.size(24.dp))
-                Text(text = "1 Line", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.padding(start = 4.dp))
+                Text(text = stringResource(Res.string.display_mode_one_line), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.padding(start = 4.dp))
             }
         }
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 2.dp)) {
             Spacer(modifier = Modifier.width(160.dp))
-            listOf(Constants.SONG_LANG_BOTH to "Both", Constants.SONG_LANG_PRIMARY to "Primary", Constants.SONG_LANG_SECONDARY to "Secondary").forEach { (mode, label) ->
+            listOf(Constants.SONG_LANG_BOTH to stringResource(Res.string.song_language_both), Constants.SONG_LANG_PRIMARY to stringResource(Res.string.song_language_primary), Constants.SONG_LANG_SECONDARY to stringResource(Res.string.song_language_secondary)).forEach { (mode, label) ->
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Checkbox(checked = settings.songSettings.lowerThirdLookAheadLanguageDisplay == mode, onCheckedChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lowerThirdLookAheadLanguageDisplay = mode)) } }, modifier = Modifier.size(24.dp))
                     Text(text = label, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.padding(start = 4.dp))
@@ -1368,7 +1384,7 @@ private fun LookAheadColumn(
 
     // ── Look Ahead Next Section — Lower Third ──
     Spacer(modifier = Modifier.height(20.dp))
-    SectionHeader("Look Ahead Next Section (Lower Third)")
+    SectionHeader(stringResource(Res.string.look_ahead_next_lower_third))
     Spacer(modifier = Modifier.height(8.dp))
     SettingRow(stringResource(Res.string.font_size)) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {

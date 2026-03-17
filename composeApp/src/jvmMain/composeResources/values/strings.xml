@@ -808,4 +808,47 @@
     <string name="client_label_edit_tooltip">Set friendly name</string>
     <string name="client_label_save">Save</string>
     <string name="client_label_cancel">Cancel</string>
+
+    <!-- Edit Song Dialog - Secondary Content -->
+    <string name="new_songbook">New Songbook</string>
+    <string name="add_new">Add New...</string>
+    <string name="secondary_title">Secondary Title</string>
+    <string name="duplicate_song_error">A song with this number and title already exists in this songbook</string>
+    <string name="secondary_lyrics">Secondary Lyrics</string>
+    <string name="enter_secondary_lyrics_here">Enter secondary lyrics here...</string>
+
+    <!-- System Settings - Song Samples and File Conversion -->
+    <string name="song_samples">Song Samples</string>
+    <string name="folder_already_exists">Folder Already Exists</string>
+    <string name="song_samples_overwrite_confirm">\"Song Samples\" folder already exists. This will overwrite existing files.\nContinue?</string>
+    <string name="song_samples_copied">Copied %1$d sample songs to \"Song Samples\" folder.</string>
+    <string name="add_song_samples">Add Song Samples</string>
+    <string name="sps_file_not_supported">%1$s (not supported)</string>
+    <string name="folder_overwrite_confirm">Folder \"%1$s\" already exists. This will overwrite existing song files.\nContinue?</string>
+    <string name="conversion_complete">Conversion Complete</string>
+    <string name="conversion_complete_message">Converted %1$d songs to folder: %2$s</string>
+    <string name="conversion_complete_with_errors">Converted %1$d songs.\nErrors:\n%2$s</string>
+    <string name="convert">Convert</string>
+    <string name="tooltip_directory_writable">Directory is writable</string>
+    <string name="tooltip_directory_not_found">Directory not found. Create it or choose a different location.</string>
+    <string name="tooltip_directory_not_writable">Cannot write to this directory. Choose a different location or change permissions.</string>
+    <string name="song_folder_with_count">%1$s (%2$d songs)</string>
+
+    <!-- Song Settings - Display Modes and Language Options -->
+    <string name="number_before_title">Number before title</string>
+    <string name="fullscreen_display">Fullscreen Display</string>
+    <string name="display_mode_label">Display Mode:</string>
+    <string name="display_mode_one_verse">1 Verse</string>
+    <string name="display_mode_one_line">1 Line</string>
+    <string name="song_language_both">Both</string>
+    <string name="song_language_primary">Primary</string>
+    <string name="song_language_secondary">Secondary</string>
+    <string name="lower_third_display">Lower Third Display</string>
+    <string name="bilingual_layout">Bilingual Layout:</string>
+    <string name="bilingual_left_right">Left / Right</string>
+    <string name="bilingual_top_bottom">Top / Bottom</string>
+    <string name="look_ahead_fullscreen">Look Ahead (Fullscreen)</string>
+    <string name="look_ahead_next_fullscreen">Look Ahead Next Section (Fullscreen)</string>
+    <string name="look_ahead_lower_third">Look Ahead (Lower Third)</string>
+    <string name="look_ahead_next_lower_third">Look Ahead Next Section (Lower Third)</string>
 </resources>

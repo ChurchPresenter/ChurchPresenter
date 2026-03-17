@@ -41,8 +41,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.add_song_samples
 import churchpresenter.composeapp.generated.resources.bible_storage_directory
 import churchpresenter.composeapp.generated.resources.browse_directory
+import churchpresenter.composeapp.generated.resources.conversion_complete
+import churchpresenter.composeapp.generated.resources.conversion_complete_message
+import churchpresenter.composeapp.generated.resources.conversion_complete_with_errors
+import churchpresenter.composeapp.generated.resources.convert
+import churchpresenter.composeapp.generated.resources.folder_already_exists
+import churchpresenter.composeapp.generated.resources.folder_overwrite_confirm
 import churchpresenter.composeapp.generated.resources.set_all_directories
 import churchpresenter.composeapp.generated.resources.lower_third_storage_directory
 import churchpresenter.composeapp.generated.resources.media_storage_directory
@@ -61,7 +68,15 @@ import churchpresenter.composeapp.generated.resources.reset_settings_confirm
 import churchpresenter.composeapp.generated.resources.settings_export_failed
 import churchpresenter.composeapp.generated.resources.settings_exported
 import churchpresenter.composeapp.generated.resources.settings_import_failed
+import churchpresenter.composeapp.generated.resources.song_folder_with_count
+import churchpresenter.composeapp.generated.resources.song_samples
+import churchpresenter.composeapp.generated.resources.song_samples_copied
+import churchpresenter.composeapp.generated.resources.song_samples_overwrite_confirm
 import churchpresenter.composeapp.generated.resources.songs_storage_directory
+import churchpresenter.composeapp.generated.resources.sps_file_not_supported
+import churchpresenter.composeapp.generated.resources.tooltip_directory_not_found
+import churchpresenter.composeapp.generated.resources.tooltip_directory_not_writable
+import churchpresenter.composeapp.generated.resources.tooltip_directory_writable
 import org.churchpresenter.app.churchpresenter.composables.ThemeSegmentedButton
 import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.data.SettingsManager
@@ -93,6 +108,14 @@ fun SystemSettingsTab(
 ) {
     val fileManager = FileManager()
     val setAllText = stringResource(Res.string.set_all_directories)
+    val folderAlreadyExistsTitle = stringResource(Res.string.folder_already_exists)
+    val songSamplesTitle = stringResource(Res.string.song_samples)
+    val songSamplesOverwriteMsg = stringResource(Res.string.song_samples_overwrite_confirm)
+    val songSamplesCopiedFmt = stringResource(Res.string.song_samples_copied)
+    val folderOverwriteConfirmFmt = stringResource(Res.string.folder_overwrite_confirm)
+    val conversionCompleteTitle = stringResource(Res.string.conversion_complete)
+    val conversionCompleteMsgFmt = stringResource(Res.string.conversion_complete_message)
+    val conversionCompleteErrorsFmt = stringResource(Res.string.conversion_complete_with_errors)
 
     val setAllDirectories: (String) -> Unit = { dir ->
         onSettingsChange { s ->
@@ -187,39 +210,39 @@ fun SystemSettingsTab(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
-                TextButton(
-                    onClick = {
-                        val samplesDir = java.io.File(settings.songSettings.storageDirectory, "Song Samples")
-                        val proceed = if (samplesDir.exists()) {
-                            JOptionPane.showConfirmDialog(
-                                null,
-                                "\"Song Samples\" folder already exists. This will overwrite existing files.\nContinue?",
-                                "Folder Already Exists",
-                                JOptionPane.YES_NO_OPTION,
-                                JOptionPane.WARNING_MESSAGE
-                            ) == JOptionPane.YES_OPTION
-                        } else true
-                        if (proceed) {
-                            copyingSamples = true
-                            sampleScope.launch {
-                                val count = withContext(Dispatchers.IO) {
-                                    copySongSamples(settings.songSettings.storageDirectory)
-                                }
-                                copyingSamples = false
-                                JOptionPane.showMessageDialog(
+                    TextButton(
+                        onClick = {
+                            val samplesDir = java.io.File(settings.songSettings.storageDirectory, "Song Samples")
+                            val proceed = if (samplesDir.exists()) {
+                                JOptionPane.showConfirmDialog(
                                     null,
-                                    "Copied $count sample songs to \"Song Samples\" folder.",
-                                    "Song Samples",
-                                    JOptionPane.INFORMATION_MESSAGE
-                                )
+                                    songSamplesOverwriteMsg,
+                                    folderAlreadyExistsTitle,
+                                    JOptionPane.YES_NO_OPTION,
+                                    JOptionPane.WARNING_MESSAGE
+                                ) == JOptionPane.YES_OPTION
+                            } else true
+                            if (proceed) {
+                                copyingSamples = true
+                                sampleScope.launch {
+                                    val count = withContext(Dispatchers.IO) {
+                                        copySongSamples(settings.songSettings.storageDirectory)
+                                    }
+                                    copyingSamples = false
+                                    JOptionPane.showMessageDialog(
+                                        null,
+                                        String.format(songSamplesCopiedFmt, count),
+                                        songSamplesTitle,
+                                        JOptionPane.INFORMATION_MESSAGE
+                                    )
+                                }
                             }
-                        }
-                    },
-                    enabled = !copyingSamples,
-                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp)
-                ) {
-                    Text("Add Song Samples", style = MaterialTheme.typography.labelSmall)
-                }
+                        },
+                        enabled = !copyingSamples,
+                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp)
+                    ) {
+                        Text(stringResource(Res.string.add_song_samples), style = MaterialTheme.typography.labelSmall)
+                    }
                 if (copyingSamples) {
                     CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
                 }
@@ -231,7 +254,7 @@ fun SystemSettingsTab(
                     modifier = Modifier.padding(start = 2.dp, top = 2.dp).height(32.dp)
                 ) {
                     Text(
-                        text = "$spsFile (not supported)",
+                        text = stringResource(Res.string.sps_file_not_supported, spsFile),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.error.copy(alpha = 0.7f)
                     )
@@ -251,8 +274,8 @@ fun SystemSettingsTab(
                                     val folderName = converter.getTargetFolderName(spsPath, settings.songSettings.storageDirectory) ?: spsFile
                                     val confirm = JOptionPane.showConfirmDialog(
                                         null,
-                                        "Folder \"$folderName\" already exists. This will overwrite existing song files.\nContinue?",
-                                        "Folder Already Exists",
+                                        String.format(folderOverwriteConfirmFmt, folderName),
+                                        folderAlreadyExistsTitle,
                                         JOptionPane.YES_NO_OPTION,
                                         JOptionPane.WARNING_MESSAGE
                                     )
@@ -268,15 +291,15 @@ fun SystemSettingsTab(
                                     if (result.errors.isEmpty()) {
                                         JOptionPane.showMessageDialog(
                                             null,
-                                            "Converted ${result.songsConverted} songs to folder: ${java.io.File(result.songbookFolder).name}",
-                                            "Conversion Complete",
+                                            String.format(conversionCompleteMsgFmt, result.songsConverted, java.io.File(result.songbookFolder).name),
+                                            conversionCompleteTitle,
                                             JOptionPane.INFORMATION_MESSAGE
                                         )
                                     } else {
                                         JOptionPane.showMessageDialog(
                                             null,
-                                            "Converted ${result.songsConverted} songs.\nErrors:\n${result.errors.joinToString("\n")}",
-                                            "Conversion Complete",
+                                            String.format(conversionCompleteErrorsFmt, result.songsConverted, result.errors.joinToString("\n")),
+                                            conversionCompleteTitle,
                                             JOptionPane.WARNING_MESSAGE
                                         )
                                     }
@@ -284,7 +307,7 @@ fun SystemSettingsTab(
                             },
                             contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp)
                         ) {
-                            Text("Convert", style = MaterialTheme.typography.labelSmall)
+                            Text(stringResource(Res.string.convert), style = MaterialTheme.typography.labelSmall)
                         }
                     }
                 }
@@ -292,7 +315,7 @@ fun SystemSettingsTab(
 
             for (folder in songFolders) {
                 Text(
-                    text = "${folder.first} (${folder.second} songs)",
+                    text = stringResource(Res.string.song_folder_with_count, folder.first, folder.second),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(top = 2.dp, start = 2.dp)
@@ -581,9 +604,9 @@ private fun DirectoryPicker(
                     Surface(shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
                         Text(
                             when {
-                                isWritable -> "Directory is writable"
-                                !dirExists -> "Directory not found. Create it or choose a different location."
-                                else -> "Cannot write to this directory. Choose a different location or change permissions."
+                                isWritable -> stringResource(Res.string.tooltip_directory_writable)
+                                !dirExists -> stringResource(Res.string.tooltip_directory_not_found)
+                                else -> stringResource(Res.string.tooltip_directory_not_writable)
                             },
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                             style = MaterialTheme.typography.bodySmall

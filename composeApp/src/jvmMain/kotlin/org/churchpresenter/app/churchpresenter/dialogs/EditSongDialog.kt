@@ -42,11 +42,18 @@ import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.author
 import churchpresenter.composeapp.generated.resources.cancel
 import churchpresenter.composeapp.generated.resources.composer
+import churchpresenter.composeapp.generated.resources.add_new
+import churchpresenter.composeapp.generated.resources.duplicate_song_error
 import churchpresenter.composeapp.generated.resources.edit_song
 import churchpresenter.composeapp.generated.resources.enter_lyrics_here
+import churchpresenter.composeapp.generated.resources.enter_secondary_lyrics_here
 import churchpresenter.composeapp.generated.resources.lyrics
 import churchpresenter.composeapp.generated.resources.lyrics_format_help
+import churchpresenter.composeapp.generated.resources.new_song
+import churchpresenter.composeapp.generated.resources.new_songbook
 import churchpresenter.composeapp.generated.resources.save
+import churchpresenter.composeapp.generated.resources.secondary_lyrics
+import churchpresenter.composeapp.generated.resources.secondary_title
 import churchpresenter.composeapp.generated.resources.song_book
 import churchpresenter.composeapp.generated.resources.song_number
 import churchpresenter.composeapp.generated.resources.song_title
@@ -96,7 +103,7 @@ fun EditSongDialog(
     Dialog(
         onCloseRequest = onDismiss,
         state = rememberDialogState(width = 800.dp, height = 700.dp),
-        title = if (isNewSong) "New Song" else stringResource(Res.string.edit_song),
+        title = if (isNewSong) stringResource(Res.string.new_song) else stringResource(Res.string.edit_song),
         resizable = true
     ) {
         AppThemeWrapper(theme = theme) {
@@ -140,7 +147,7 @@ fun EditSongDialog(
                                 OutlinedTextField(
                                     value = editedSongbook,
                                     onValueChange = { editedSongbook = it },
-                                    label = { Text("New Songbook", style = MaterialTheme.typography.bodySmall) },
+                                    label = { Text(stringResource(Res.string.new_songbook), style = MaterialTheme.typography.bodySmall) },
                                     modifier = Modifier.weight(0.5f),
                                     singleLine = true,
                                     textStyle = MaterialTheme.typography.bodyMedium,
@@ -187,7 +194,7 @@ fun EditSongDialog(
                                         }
                                         HorizontalDivider()
                                         DropdownMenuItem(
-                                            text = { Text("Add New...") },
+                                            text = { Text(stringResource(Res.string.add_new)) },
                                             onClick = {
                                                 songbookExpanded = false
                                                 editedSongbook = ""
@@ -228,7 +235,7 @@ fun EditSongDialog(
                             OutlinedTextField(
                                 value = editedSecondaryTitle,
                                 onValueChange = { editedSecondaryTitle = it },
-                                label = { Text("Secondary Title", style = MaterialTheme.typography.bodySmall) },
+                                label = { Text(stringResource(Res.string.secondary_title), style = MaterialTheme.typography.bodySmall) },
                                 modifier = Modifier.weight(0.5f),
                                 singleLine = true,
                                 textStyle = MaterialTheme.typography.bodyMedium
@@ -237,7 +244,7 @@ fun EditSongDialog(
 
                         if (isDuplicate) {
                             Text(
-                                text = "A song with this number and title already exists in this songbook",
+                                text = stringResource(Res.string.duplicate_song_error),
                                 color = MaterialTheme.colorScheme.error,
                                 style = MaterialTheme.typography.bodySmall,
                                 modifier = Modifier.padding(bottom = 4.dp)
@@ -279,7 +286,7 @@ fun EditSongDialog(
                                 modifier = Modifier.weight(1f).padding(bottom = 4.dp)
                             )
                             Text(
-                                text = "Secondary Lyrics",
+                                text = stringResource(Res.string.secondary_lyrics),
                                 style = MaterialTheme.typography.titleMedium,
                                 modifier = Modifier.weight(1f).padding(bottom = 4.dp)
                             )
@@ -309,7 +316,7 @@ fun EditSongDialog(
                                 value = editedSecondaryLyrics,
                                 onValueChange = { editedSecondaryLyrics = it },
                                 modifier = Modifier.weight(1f).heightIn(min = 400.dp),
-                                placeholder = { Text("Enter secondary lyrics here...") },
+                                placeholder = { Text(stringResource(Res.string.enter_secondary_lyrics_here)) },
                                 maxLines = Int.MAX_VALUE
                             )
                         }
