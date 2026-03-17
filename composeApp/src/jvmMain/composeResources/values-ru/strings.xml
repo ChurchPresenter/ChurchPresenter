@@ -790,5 +790,48 @@
     <string name="client_label_edit_tooltip">Задать понятное имя</string>
     <string name="client_label_save">Сохранить</string>
     <string name="client_label_cancel">Отмена</string>
+
+    <!-- Edit Song Dialog - Secondary Content -->
+    <string name="new_songbook">Новый сборник</string>
+    <string name="add_new">Добавить новый...</string>
+    <string name="secondary_title">Дополнительное название</string>
+    <string name="duplicate_song_error">Песня с таким номером и названием уже существует в этом сборнике</string>
+    <string name="secondary_lyrics">Дополнительный текст</string>
+    <string name="enter_secondary_lyrics_here">Введите дополнительный текст...</string>
+
+    <!-- System Settings - Song Samples and File Conversion -->
+    <string name="song_samples">Образцы песен</string>
+    <string name="folder_already_exists">Папка уже существует</string>
+    <string name="song_samples_overwrite_confirm">Папка \"Образцы песен\" уже существует. Это перезапишет существующие файлы.\nПродолжить?</string>
+    <string name="song_samples_copied">Скопировано %1$d образцов песен в папку \"Образцы песен\".</string>
+    <string name="add_song_samples">Добавить образцы песен</string>
+    <string name="sps_file_not_supported">%1$s (не поддерживается)</string>
+    <string name="folder_overwrite_confirm">Папка \"%1$s\" уже существует. Это перезапишет существующие файлы песен.\nПродолжить?</string>
+    <string name="conversion_complete">Конвертация завершена</string>
+    <string name="conversion_complete_message">Конвертировано %1$d песен в папку: %2$s</string>
+    <string name="conversion_complete_with_errors">Конвертировано %1$d песен.\nОшибки:\n%2$s</string>
+    <string name="convert">Конвертировать</string>
+    <string name="tooltip_directory_writable">Папка доступна для записи</string>
+    <string name="tooltip_directory_not_found">Папка не найдена. Создайте её или выберите другое место.</string>
+    <string name="tooltip_directory_not_writable">Нет прав на запись в эту папку. Выберите другое место или измените права доступа.</string>
+    <string name="song_folder_with_count">%1$s (%2$d песен)</string>
+
+    <!-- Song Settings - Display Modes and Language Options -->
+    <string name="number_before_title">Номер перед названием</string>
+    <string name="fullscreen_display">Полноэкранный режим</string>
+    <string name="display_mode_label">Режим отображения:</string>
+    <string name="display_mode_one_verse">1 куплет</string>
+    <string name="display_mode_one_line">1 строка</string>
+    <string name="song_language_both">Оба</string>
+    <string name="song_language_primary">Основной</string>
+    <string name="song_language_secondary">Дополнительный</string>
+    <string name="lower_third_display">Нижняя треть</string>
+    <string name="bilingual_layout">Двуязычный макет:</string>
+    <string name="bilingual_left_right">Слева / Справа</string>
+    <string name="bilingual_top_bottom">Сверху / Снизу</string>
+    <string name="look_ahead_fullscreen">Предпросмотр (полный экран)</string>
+    <string name="look_ahead_next_fullscreen">Следующий раздел (полный экран)</string>
+    <string name="look_ahead_lower_third">Предпросмотр (нижняя треть)</string>
+    <string name="look_ahead_next_lower_third">Следующий раздел (нижняя треть)</string>
 </resources>
 

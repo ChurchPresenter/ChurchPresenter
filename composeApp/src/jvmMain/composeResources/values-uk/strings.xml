@@ -794,5 +794,48 @@
     <string name="client_label_edit_tooltip">Задати зрозуміле ім'я</string>
     <string name="client_label_save">Зберегти</string>
     <string name="client_label_cancel">Скасувати</string>
+
+    <!-- Edit Song Dialog - Secondary Content -->
+    <string name="new_songbook">Новий збірник</string>
+    <string name="add_new">Додати новий...</string>
+    <string name="secondary_title">Додаткова назва</string>
+    <string name="duplicate_song_error">Пісня з таким номером та назвою вже існує в цьому збірнику</string>
+    <string name="secondary_lyrics">Додатковий текст</string>
+    <string name="enter_secondary_lyrics_here">Введіть додатковий текст...</string>
+
+    <!-- System Settings - Song Samples and File Conversion -->
+    <string name="song_samples">Зразки пісень</string>
+    <string name="folder_already_exists">Папка вже існує</string>
+    <string name="song_samples_overwrite_confirm">Папка \"Зразки пісень\" вже існує. Це перезапише існуючі файли.\nПродовжити?</string>
+    <string name="song_samples_copied">Скопійовано %1$d зразків пісень у папку \"Зразки пісень\".</string>
+    <string name="add_song_samples">Додати зразки пісень</string>
+    <string name="sps_file_not_supported">%1$s (не підтримується)</string>
+    <string name="folder_overwrite_confirm">Папка \"%1$s\" вже існує. Це перезапише існуючі файли пісень.\nПродовжити?</string>
+    <string name="conversion_complete">Конвертацію завершено</string>
+    <string name="conversion_complete_message">Конвертовано %1$d пісень у папку: %2$s</string>
+    <string name="conversion_complete_with_errors">Конвертовано %1$d пісень.\nПомилки:\n%2$s</string>
+    <string name="convert">Конвертувати</string>
+    <string name="tooltip_directory_writable">Папка доступна для запису</string>
+    <string name="tooltip_directory_not_found">Папку не знайдено. Створіть її або виберіть інше місце.</string>
+    <string name="tooltip_directory_not_writable">Немає прав запису в цю папку. Виберіть інше місце або змініть права доступу.</string>
+    <string name="song_folder_with_count">%1$s (%2$d пісень)</string>
+
+    <!-- Song Settings - Display Modes and Language Options -->
+    <string name="number_before_title">Номер перед назвою</string>
+    <string name="fullscreen_display">Повноекранний режим</string>
+    <string name="display_mode_label">Режим відображення:</string>
+    <string name="display_mode_one_verse">1 куплет</string>
+    <string name="display_mode_one_line">1 рядок</string>
+    <string name="song_language_both">Обидві</string>
+    <string name="song_language_primary">Основна</string>
+    <string name="song_language_secondary">Додаткова</string>
+    <string name="lower_third_display">Нижня третина</string>
+    <string name="bilingual_layout">Двомовний макет:</string>
+    <string name="bilingual_left_right">Ліворуч / Праворуч</string>
+    <string name="bilingual_top_bottom">Зверху / Знизу</string>
+    <string name="look_ahead_fullscreen">Попередній перегляд (повний екран)</string>
+    <string name="look_ahead_next_fullscreen">Наступний розділ (повний екран)</string>
+    <string name="look_ahead_lower_third">Попередній перегляд (нижня третина)</string>
+    <string name="look_ahead_next_lower_third">Наступний розділ (нижня третина)</string>
 </resources>
 
