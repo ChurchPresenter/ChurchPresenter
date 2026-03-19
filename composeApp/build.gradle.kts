@@ -118,9 +118,6 @@ kotlin {
             val jfxClassifier = currentOsClassifier()
             val jfxModules = listOf("javafx-base", "javafx-graphics", "javafx-media", "javafx-swing", "javafx-controls", "javafx-web")
             jfxModules.forEach { module ->
-                // Platform-neutral jar (contains the Java classes)
-                implementation("org.openjfx:$module:21")
-                // Platform-specific jar (contains the native libraries)
                 implementation("org.openjfx:$module:21:$jfxClassifier")
             }
             // Windows-specific: also pull win natives when building on Windows
