@@ -1,36 +1,45 @@
 package org.churchpresenter.app.churchpresenter.presenter
 
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.repeatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.geometry.Offset
 import org.churchpresenter.app.churchpresenter.data.AppSettings
+import org.churchpresenter.app.churchpresenter.utils.calculateAutoFitFontSize
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
 import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDefault
@@ -42,6 +51,7 @@ fun AnnouncementsPresenter(
     appSettings: AppSettings,
     outputRole: String = Constants.OUTPUT_ROLE_NORMAL,
     transitionAlpha: Float = 1f,
+    onFinished: () -> Unit = {},
 ) {
     val isFillOrKey = outputRole == Constants.OUTPUT_ROLE_FILL || outputRole == Constants.OUTPUT_ROLE_KEY
     val settings   = appSettings.announcementsSettings
@@ -105,59 +115,110 @@ fun AnnouncementsPresenter(
 
     val scrollDurationMs = settings.animationDuration.coerceAtLeast(500)
 
-    val textBlock: @Composable (Boolean) -> Unit = { fullWidth ->
-        Box(
-            modifier = Modifier
-                .then(if (fullWidth) Modifier.fillMaxWidth() else Modifier)
-                .wrapContentHeight()
-                .background(bgColor)
-                .padding(horizontal = 32.dp, vertical = 16.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text     = text,
-                style    = textStyle,
-                fontSize = settings.fontSize.sp,
-                modifier = if (fullWidth) Modifier.fillMaxWidth() else Modifier
-            )
-        }
-    }
+    val textMeasurer = rememberTextMeasurer()
 
-    Box(
+    BoxWithConstraints(
         modifier = modifier
             .fillMaxSize()
             .background(Color.Transparent)
             .graphicsLayer { alpha = transitionAlpha }
     ) {
-        if (isDirectional) {
-            key(scrollDurationMs, movesPositive, settings.animationType) {
-                val infiniteTransition = rememberInfiniteTransition(label = "presenterScroll")
-                val offsetFraction by infiniteTransition.animateFloat(
-                    initialValue = if (movesPositive) -1f else 1f,
-                    targetValue  = if (movesPositive) 1f else -1f,
-                    animationSpec = infiniteRepeatable(
-                        animation  = tween(durationMillis = scrollDurationMs, easing = LinearEasing),
-                        repeatMode = RepeatMode.Restart
-                    ),
-                    label = "presenterOffset"
-                )
+        val density = LocalDensity.current
+        val horizontalPaddingPx = with(density) { (32.dp * 2).roundToPx() }
+        val availableWidthPx = constraints.maxWidth - horizontalPaddingPx
 
-                if (isHorizontal) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .align(slideAlignment)
-                            .graphicsLayer { translationX = size.width * offsetFraction },
-                        contentAlignment = Alignment.Center
-                    ) { textBlock(true) }
+        val verticalPaddingPx = with(density) { (16.dp * 2).roundToPx() }
+        val availableHeightPx = constraints.maxHeight - verticalPaddingPx
+
+        val effectiveFontSize = if (!isDirectional) {
+            // Static/fade: fit to both width and height
+            remember(text, settings.fontSize, availableWidthPx, availableHeightPx, textStyle.fontFamily, textStyle.fontWeight) {
+                calculateAutoFitFontSize(textMeasurer, text, textStyle, availableWidthPx, availableHeightPx)
+                    .coerceAtMost(settings.fontSize)
+            }
+        } else if (!isHorizontal) {
+            // Vertical slide: fit to width only (scrolls vertically)
+            remember(text, settings.fontSize, availableWidthPx, textStyle.fontFamily, textStyle.fontWeight) {
+                calculateAutoFitFontSize(textMeasurer, text, textStyle, availableWidthPx, Int.MAX_VALUE)
+                    .coerceAtMost(settings.fontSize)
+            }
+        } else {
+            // Horizontal slide: no auto-fit (scrolls horizontally)
+            settings.fontSize
+        }
+
+        val textBlock: @Composable (Boolean) -> Unit = { wrap ->
+            Box(
+                modifier = Modifier
+                    .then(if (!wrap) Modifier.wrapContentWidth(unbounded = true) else Modifier)
+                    .wrapContentHeight()
+                    .background(bgColor)
+                    .padding(horizontal = 32.dp, vertical = 16.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text     = text,
+                    style    = textStyle,
+                    fontSize = effectiveFontSize.sp,
+                    softWrap = wrap,
+                )
+            }
+        }
+
+        val loopCount = settings.loopCount
+
+        val slideContent: @Composable (Float) -> Unit = { fraction ->
+            if (isHorizontal) {
+                Box(
+                    modifier = Modifier
+                        .align(slideAlignment)
+                        .graphicsLayer { translationX = size.width * fraction },
+                    contentAlignment = Alignment.Center
+                ) { textBlock(false) }
+            } else {
+                Box(
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .align(slideAlignment)
+                        .graphicsLayer { translationY = size.height * fraction },
+                    contentAlignment = Alignment.Center
+                ) { textBlock(true) }
+            }
+        }
+
+        if (isDirectional) {
+            key(scrollDurationMs, movesPositive, settings.animationType, loopCount) {
+                if (loopCount > 0) {
+                    val startVal = if (movesPositive) -1f else 1f
+                    val endVal   = if (movesPositive) 1f else -1f
+                    val animatable = remember { Animatable(startVal) }
+
+                    LaunchedEffect(Unit) {
+                        animatable.animateTo(
+                            targetValue = endVal,
+                            animationSpec = repeatable(
+                                iterations = loopCount,
+                                animation = tween(durationMillis = scrollDurationMs, easing = LinearEasing),
+                                repeatMode = RepeatMode.Restart
+                            )
+                        )
+                        onFinished()
+                    }
+
+                    slideContent(animatable.value)
                 } else {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxHeight()
-                            .align(slideAlignment)
-                            .graphicsLayer { translationY = size.height * offsetFraction },
-                        contentAlignment = Alignment.Center
-                    ) { textBlock(false) }
+                    val infiniteTransition = rememberInfiniteTransition(label = "presenterScroll")
+                    val offsetFraction by infiniteTransition.animateFloat(
+                        initialValue = if (movesPositive) -1f else 1f,
+                        targetValue  = if (movesPositive) 1f else -1f,
+                        animationSpec = infiniteRepeatable(
+                            animation  = tween(durationMillis = scrollDurationMs, easing = LinearEasing),
+                            repeatMode = RepeatMode.Restart
+                        ),
+                        label = "presenterOffset"
+                    )
+
+                    slideContent(offsetFraction)
                 }
             }
         } else {
@@ -166,7 +227,7 @@ fun AnnouncementsPresenter(
             Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = boxAlignment
-            ) { textBlock(false) }
+            ) { textBlock(true) }
         }
     }
 }
