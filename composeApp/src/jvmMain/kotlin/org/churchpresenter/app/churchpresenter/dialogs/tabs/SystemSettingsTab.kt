@@ -21,10 +21,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Surface
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -33,38 +33,34 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.add_song_samples
 import churchpresenter.composeapp.generated.resources.bible_storage_directory
 import churchpresenter.composeapp.generated.resources.browse_directory
+import churchpresenter.composeapp.generated.resources.clear_lottie_cache_confirm
 import churchpresenter.composeapp.generated.resources.conversion_complete
 import churchpresenter.composeapp.generated.resources.conversion_complete_message
 import churchpresenter.composeapp.generated.resources.conversion_complete_with_errors
 import churchpresenter.composeapp.generated.resources.convert
+import churchpresenter.composeapp.generated.resources.detected_files_label
+import churchpresenter.composeapp.generated.resources.export_settings
 import churchpresenter.composeapp.generated.resources.folder_already_exists
 import churchpresenter.composeapp.generated.resources.folder_overwrite_confirm
-import churchpresenter.composeapp.generated.resources.set_all_directories
-import churchpresenter.composeapp.generated.resources.lower_third_storage_directory
-import churchpresenter.composeapp.generated.resources.media_storage_directory
-import churchpresenter.composeapp.generated.resources.pictures_storage_directory
-import churchpresenter.composeapp.generated.resources.presentation_storage_directory
-import churchpresenter.composeapp.generated.resources.theme
-import churchpresenter.composeapp.generated.resources.detected_files_label
-import churchpresenter.composeapp.generated.resources.no_directory_selected
-import churchpresenter.composeapp.generated.resources.no_files_detected
-import churchpresenter.composeapp.generated.resources.reset_settings
-import churchpresenter.composeapp.generated.resources.clear_lottie_cache_confirm
-import churchpresenter.composeapp.generated.resources.export_settings
 import churchpresenter.composeapp.generated.resources.import_settings
 import churchpresenter.composeapp.generated.resources.import_settings_confirm
+import churchpresenter.composeapp.generated.resources.lower_third_storage_directory
+import churchpresenter.composeapp.generated.resources.media_storage_directory
+import churchpresenter.composeapp.generated.resources.no_directory_selected
+import churchpresenter.composeapp.generated.resources.no_files_detected
+import churchpresenter.composeapp.generated.resources.pictures_storage_directory
+import churchpresenter.composeapp.generated.resources.presentation_storage_directory
+import churchpresenter.composeapp.generated.resources.reset_settings
 import churchpresenter.composeapp.generated.resources.reset_settings_confirm
+import churchpresenter.composeapp.generated.resources.set_all_directories
 import churchpresenter.composeapp.generated.resources.settings_export_failed
 import churchpresenter.composeapp.generated.resources.settings_exported
 import churchpresenter.composeapp.generated.resources.settings_import_failed
@@ -77,18 +73,24 @@ import churchpresenter.composeapp.generated.resources.sps_file_not_supported
 import churchpresenter.composeapp.generated.resources.tooltip_directory_not_found
 import churchpresenter.composeapp.generated.resources.tooltip_directory_not_writable
 import churchpresenter.composeapp.generated.resources.tooltip_directory_writable
-import org.churchpresenter.app.churchpresenter.composables.ThemeSegmentedButton
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.data.SettingsManager
 import org.churchpresenter.app.churchpresenter.data.SpsConverter
+import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
 import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
 import org.churchpresenter.app.churchpresenter.viewmodel.FileManager
 import org.jetbrains.compose.resources.stringResource
 import java.awt.Window
-import javax.swing.JFileChooser
 import javax.swing.JOptionPane
 import javax.swing.SwingUtilities
 import javax.swing.filechooser.FileNameExtensionFilter
+import kotlin.io.path.extension
+import kotlin.io.path.nameWithoutExtension
+import kotlin.io.path.readText
+import kotlin.io.path.writeText
 
 private val exportJsonFormat = kotlinx.serialization.json.Json {
     encodeDefaults = true
@@ -106,6 +108,7 @@ fun SystemSettingsTab(
     settings: AppSettings = AppSettings(),
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit = {}
 ) {
+    val scope = rememberCoroutineScope()
     val fileManager = FileManager()
     val setAllText = stringResource(Res.string.set_all_directories)
     val folderAlreadyExistsTitle = stringResource(Res.string.folder_already_exists)
@@ -416,21 +419,20 @@ fun SystemSettingsTab(
             // Export Settings
             Button(
                 onClick = {
-                    SwingUtilities.invokeLater {
-                        val chooser = JFileChooser().apply {
-                            dialogTitle = exportTitle
-                            fileFilter = FileNameExtensionFilter("JSON (*.json)", "json")
-                            selectedFile = java.io.File("churchpresenter-settings.json")
-                        }
-                        val result = chooser.showSaveDialog(Window.getWindows().firstOrNull { it.isActive })
-                        if (result == JFileChooser.APPROVE_OPTION) {
+                    scope.launch {
+                        var file = FileChooser.platformInstance.save(
+                            location = null,
+                            suggestedName = "churchpresenter-settings.json",
+                            title = exportTitle,
+                            filters = listOf(FileNameExtensionFilter("JSON (*.json)", "json"))
+                        )
+                        if (file != null) {
                             try {
                                 val settingsManager = SettingsManager()
                                 val currentSettings = settingsManager.loadSettings()
                                 val json = exportJsonFormat.encodeToString(AppSettings.serializer(), currentSettings)
-                                var file = chooser.selectedFile
-                                if (!file.name.endsWith(".json")) {
-                                    file = java.io.File(file.absolutePath + ".json")
+                                if (file.extension != "json") {
+                                    file = file.resolveSibling("${file.nameWithoutExtension}.json")
                                 }
                                 file.writeText(json)
                                 JOptionPane.showMessageDialog(
@@ -463,13 +465,14 @@ fun SystemSettingsTab(
             // Import Settings
             Button(
                 onClick = {
-                    SwingUtilities.invokeLater {
-                        val chooser = JFileChooser().apply {
-                            dialogTitle = importTitle
-                            fileFilter = FileNameExtensionFilter("JSON (*.json)", "json")
-                        }
-                        val result = chooser.showOpenDialog(Window.getWindows().firstOrNull { it.isActive })
-                        if (result == JFileChooser.APPROVE_OPTION) {
+                    scope.launch {
+                        val file = FileChooser.platformInstance.chooseSingle(
+                            path = null,
+                            filters = listOf(FileNameExtensionFilter("JSON (*.json)", "json")),
+                            title = importTitle,
+                            selectDirectory = false
+                        )
+                        if (file != null) {
                             val confirmResult = JOptionPane.showConfirmDialog(
                                 Window.getWindows().firstOrNull { it.isActive },
                                 importConfirmMsg,
@@ -479,7 +482,7 @@ fun SystemSettingsTab(
                             )
                             if (confirmResult == JOptionPane.YES_OPTION) {
                                 try {
-                                    val json = chooser.selectedFile.readText()
+                                    val json = file.readText()
                                     val imported = importJsonFormat.decodeFromString(AppSettings.serializer(), json)
                                     val settingsManager = SettingsManager()
                                     settingsManager.saveSettings(imported)

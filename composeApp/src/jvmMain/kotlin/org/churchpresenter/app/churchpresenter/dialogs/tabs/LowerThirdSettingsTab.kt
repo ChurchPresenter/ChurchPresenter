@@ -105,6 +105,8 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.ui.awt.ComposePanel
+import kotlin.io.path.extension
+import kotlin.io.path.readBytes
 import io.github.alexzhirkevich.compottie.LottieCompositionSpec as LottieSpec2
 
 @Composable
@@ -613,20 +615,20 @@ internal fun openLottieGeneratorDialog(
                             targetFile.writeText(jsonContent, Charsets.UTF_8)
                             LottieGeneratorCache.onFileSavedCallback?.invoke()
                         } else {
-                            javax.swing.JOptionPane.showMessageDialog(
+                            JOptionPane.showMessageDialog(
                                 dialog,
                                 noFolderMessage,
                                 noFolderTitle,
-                                javax.swing.JOptionPane.WARNING_MESSAGE
+                                JOptionPane.WARNING_MESSAGE
                             )
                         }
                     } catch (e: Exception) {
                         System.err.println("Lower third save error: $e")
-                        javax.swing.JOptionPane.showMessageDialog(
+                        JOptionPane.showMessageDialog(
                             dialog,
                             "Failed to save: ${e.message}",
                             "Save Error",
-                            javax.swing.JOptionPane.ERROR_MESSAGE
+                            JOptionPane.ERROR_MESSAGE
                         )
                     }
                 }
@@ -644,28 +646,27 @@ internal fun openLottieGeneratorDialog(
 
             @Suppress("unused")
             fun chooseLogo() {
-                SwingUtilities.invokeLater {
+                parentScope.launch {
                     val folder = LottieGeneratorCache.lowerThirdFolderRef
                     if (folder.isEmpty()) {
-                        javax.swing.JOptionPane.showMessageDialog(
+                        JOptionPane.showMessageDialog(
                             dialog,
                             noFolderMessage,
                             noFolderTitle,
-                            javax.swing.JOptionPane.WARNING_MESSAGE
+                            JOptionPane.WARNING_MESSAGE
                         )
                         Platform.runLater {
                             engine.executeScript("document.getElementById('logoSelect').value='';")
                         }
-                        return@invokeLater
+                        return@launch
                     }
-                    val chooser = javax.swing.JFileChooser().apply {
-                        dialogTitle = chooseLogoTitle
-                        fileFilter = javax.swing.filechooser.FileNameExtensionFilter(
-                            imagesFilterText, "png", "jpg", "jpeg", "gif", "svg", "webp"
-                        )
-                    }
-                    if (chooser.showOpenDialog(dialog) == javax.swing.JFileChooser.APPROVE_OPTION) {
-                        val file = chooser.selectedFile
+                    val file = FileChooser.platformInstance.chooseSingle(
+                        path = null,
+                        title = chooseLogoTitle,
+                        filters = listOf(FileNameExtensionFilter(imagesFilterText, "png", "jpg", "jpeg", "gif", "svg", "webp")),
+                        selectDirectory = false
+                    )
+                    if (file != null) {
                         val bytes = file.readBytes()
                         val mime = when (file.extension.lowercase()) {
                             "png" -> "image/png"
