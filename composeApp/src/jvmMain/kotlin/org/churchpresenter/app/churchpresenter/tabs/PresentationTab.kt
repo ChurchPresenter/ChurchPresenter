@@ -73,6 +73,7 @@ import java.io.File
 import javax.swing.filechooser.FileNameExtensionFilter
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlin.io.path.Path
 
 @Composable
 fun PresentationTab(
@@ -159,44 +160,31 @@ fun PresentationTab(
         ) {
             Button(
                 onClick = {
-                    SwingUtilities.invokeLater {
-                        val chooser = createFileChooser {
-                            fileSelectionMode = JFileChooser.FILES_ONLY
-                            dialogTitle = presentationFileDialogTitle
-                            isMultiSelectionEnabled = true
-                            val defaultDir = appSettings.presentationStorageDirectory
-                            if (defaultDir.isNotEmpty()) {
-                                currentDirectory = File(defaultDir)
-                            }
-
-                            val pptFilter = FileNameExtensionFilter(
-                                "PowerPoint Files (*.ppt, *.pptx)",
-                                "ppt", "pptx"
-                            )
-                            val keynoteFilter = FileNameExtensionFilter(
-                                "Keynote Files (*.key)",
-                                "key"
-                            )
-                            val pdfFilter = FileNameExtensionFilter(
-                                "PDF Files (*.pdf)",
-                                "pdf"
-                            )
-                            val allFilter = FileNameExtensionFilter(
-                                "All Presentation Files",
-                                "ppt", "pptx", "key", "pdf"
-                            )
-
-                            addChoosableFileFilter(allFilter)
-                            addChoosableFileFilter(pptFilter)
-                            addChoosableFileFilter(keynoteFilter)
-                            addChoosableFileFilter(pdfFilter)
-                            fileFilter = allFilter
-                        }
-                        val result = chooser.showOpenDialog(null)
-                        if (result == JFileChooser.APPROVE_OPTION) {
-                            chooser.selectedFiles.forEach { file ->
-                                viewModel.addPresentation(file)
-                            }
+                    scope.launch {
+                        val pptFilter = FileNameExtensionFilter(
+                            "PowerPoint Files (*.ppt, *.pptx)",
+                            "ppt", "pptx"
+                        )
+                        val keynoteFilter = FileNameExtensionFilter(
+                            "Keynote Files (*.key)",
+                            "key"
+                        )
+                        val pdfFilter = FileNameExtensionFilter(
+                            "PDF Files (*.pdf)",
+                            "pdf"
+                        )
+                        val allFilter = FileNameExtensionFilter(
+                            "All Presentation Files",
+                            "ppt", "pptx", "key", "pdf"
+                        )
+                        val files = FileChooser.platformInstance.chooseMultiple(
+                            path = Path(appSettings.presentationStorageDirectory),
+                            filters = listOf(pptFilter, keynoteFilter, pdfFilter, allFilter),
+                            title = presentationFileDialogTitle,
+                            selectDirectory = false
+                        )
+                        files?.forEach { file ->
+                            viewModel.addPresentation(file.toFile())
                         }
                     }
                 }

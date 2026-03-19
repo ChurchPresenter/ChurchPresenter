@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -41,8 +40,6 @@ import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.file_chooser_open_schedule
 import churchpresenter.composeapp.generated.resources.file_chooser_save_schedule
 import churchpresenter.composeapp.generated.resources.file_filter_schedule
-import churchpresenter.composeapp.generated.resources.schedule_add_files
-import churchpresenter.composeapp.generated.resources.schedule_drop_hint
 import churchpresenter.composeapp.generated.resources.ic_add
 import churchpresenter.composeapp.generated.resources.ic_arrow_down
 import churchpresenter.composeapp.generated.resources.ic_arrow_down_double
@@ -56,11 +53,12 @@ import churchpresenter.composeapp.generated.resources.ic_label
 import churchpresenter.composeapp.generated.resources.ic_play
 import churchpresenter.composeapp.generated.resources.ic_playlist_add
 import churchpresenter.composeapp.generated.resources.ic_save
-import churchpresenter.composeapp.generated.resources.ic_web
+import churchpresenter.composeapp.generated.resources.pause_duration_ms
 import churchpresenter.composeapp.generated.resources.schedule
+import churchpresenter.composeapp.generated.resources.schedule_add_files
+import churchpresenter.composeapp.generated.resources.schedule_drop_hint
 import churchpresenter.composeapp.generated.resources.tooltip_add_label
 import churchpresenter.composeapp.generated.resources.tooltip_add_to_schedule
-import churchpresenter.composeapp.generated.resources.tooltip_add_website
 import churchpresenter.composeapp.generated.resources.tooltip_clear_schedule
 import churchpresenter.composeapp.generated.resources.tooltip_edit_label
 import churchpresenter.composeapp.generated.resources.tooltip_go_live
@@ -73,24 +71,22 @@ import churchpresenter.composeapp.generated.resources.tooltip_open_schedule
 import churchpresenter.composeapp.generated.resources.tooltip_remove
 import churchpresenter.composeapp.generated.resources.tooltip_remove_from_schedule
 import churchpresenter.composeapp.generated.resources.tooltip_save_schedule
-import churchpresenter.composeapp.generated.resources.pause_duration_ms
+import kotlinx.coroutines.launch
+import org.churchpresenter.app.churchpresenter.composables.TooltipIconButton
+import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
+import org.churchpresenter.app.churchpresenter.models.ScheduleItem
+import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.app.churchpresenter.utils.Utils
+import org.churchpresenter.app.churchpresenter.viewmodel.ScheduleViewModel
+import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import java.awt.datatransfer.DataFlavor
 import java.awt.dnd.DnDConstants
 import java.awt.dnd.DropTarget
 import java.awt.dnd.DropTargetAdapter
 import java.awt.dnd.DropTargetDropEvent
 import java.io.File
-import javax.swing.JFileChooser
-import javax.swing.SwingUtilities
-import org.churchpresenter.app.churchpresenter.composables.TooltipIconButton
-import org.churchpresenter.app.churchpresenter.models.ScheduleItem
-import org.churchpresenter.app.churchpresenter.presenter.Presenting
-import org.churchpresenter.app.churchpresenter.utils.createFileChooser
-import org.churchpresenter.app.churchpresenter.utils.Utils
-import org.churchpresenter.app.churchpresenter.viewmodel.ScheduleViewModel
-import org.jetbrains.compose.resources.painterResource
-import org.jetbrains.compose.resources.stringResource
-import kotlinx.coroutines.launch
+import java.nio.file.Path
 
 /**
  * Actions exposed to the parent composable so toolbar/menu can drive the schedule
@@ -210,14 +206,14 @@ fun ScheduleTab(
             TooltipIconButton(
                 painter = painterResource(Res.drawable.ic_folder),
                 text = stringResource(Res.string.tooltip_open_schedule),
-                onClick = { viewModel.loadSchedule(strOpenSchedule.value, strFileFilter.value) },
+                onClick = { scope.launch { viewModel.loadSchedule(strOpenSchedule.value, strFileFilter.value) } },
                 buttonSize = 32.dp,
                 iconTint = MaterialTheme.colorScheme.onSurface
             )
             TooltipIconButton(
                 painter = painterResource(Res.drawable.ic_save),
                 text = stringResource(Res.string.tooltip_save_schedule),
-                onClick = { viewModel.saveSchedule(strSaveScheduleAs.value, strFileFilter.value) },
+                onClick = { scope.launch { viewModel.saveSchedule(strSaveScheduleAs.value, strFileFilter.value) } },
                 buttonSize = 32.dp,
                 iconTint = MaterialTheme.colorScheme.onSurface
             )
@@ -409,14 +405,15 @@ fun ScheduleTab(
         Box(modifier = Modifier.fillMaxWidth().padding(top = 4.dp), contentAlignment = Alignment.Center) {
             Button(
                 onClick = {
-                    SwingUtilities.invokeLater {
-                        val chooser = createFileChooser {
-                            fileSelectionMode = JFileChooser.FILES_AND_DIRECTORIES
-                            isMultiSelectionEnabled = true
-                            dialogTitle = "Add Files to Schedule"
-                        }
-                        if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
-                            handleDroppedFiles(chooser.selectedFiles.toList(), viewModel)
+                    scope.launch {
+                        val files = FileChooser.platformInstance.chooseMultiple(
+                            path = null,
+                            title = "Add Files to Schedule",
+                            filters = emptyList(),
+                            selectDirectory = false
+                        )
+                        if (files != null) {
+                            handleDroppedFiles(files.map(Path::toFile), viewModel)
                         }
                     }
                 },

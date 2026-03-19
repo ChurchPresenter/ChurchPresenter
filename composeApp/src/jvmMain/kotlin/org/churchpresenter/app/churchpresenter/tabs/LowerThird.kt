@@ -322,7 +322,8 @@ fun LowerThirdTab(
                             noFolderTitle = nfTitle,
                             noFolderMessage = nfMsg,
                             chooseLogoTitle = logoTitle,
-                            imagesFilterText = imgFilter
+                            imagesFilterText = imgFilter,
+                            parentScope = scope
                         )
                     }
                 },

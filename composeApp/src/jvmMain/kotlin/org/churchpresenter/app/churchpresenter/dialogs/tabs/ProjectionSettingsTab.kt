@@ -4,8 +4,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -32,14 +32,16 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import java.awt.GraphicsEnvironment
-import java.awt.GraphicsDevice
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.audio_output
+import churchpresenter.composeapp.generated.resources.audio_output_default
+import churchpresenter.composeapp.generated.resources.audio_output_device
 import churchpresenter.composeapp.generated.resources.bottom
 import churchpresenter.composeapp.generated.resources.content_announcements
 import churchpresenter.composeapp.generated.resources.content_bible
@@ -52,11 +54,13 @@ import churchpresenter.composeapp.generated.resources.display_fullscreen
 import churchpresenter.composeapp.generated.resources.display_lower_third
 import churchpresenter.composeapp.generated.resources.display_mode
 import churchpresenter.composeapp.generated.resources.identify_screen
+import churchpresenter.composeapp.generated.resources.key_output
+import churchpresenter.composeapp.generated.resources.key_output_none
 import churchpresenter.composeapp.generated.resources.left
 import churchpresenter.composeapp.generated.resources.lower_third_height
-import churchpresenter.composeapp.generated.resources.num_screens_label
+import churchpresenter.composeapp.generated.resources.media_vlc_install
+import churchpresenter.composeapp.generated.resources.media_vlc_required
 import churchpresenter.composeapp.generated.resources.presenter_windows_count
-import churchpresenter.composeapp.generated.resources.projection_display_label
 import churchpresenter.composeapp.generated.resources.projection_position_help
 import churchpresenter.composeapp.generated.resources.projection_target_display
 import churchpresenter.composeapp.generated.resources.right
@@ -64,32 +68,27 @@ import churchpresenter.composeapp.generated.resources.screen
 import churchpresenter.composeapp.generated.resources.screen_assignment
 import churchpresenter.composeapp.generated.resources.screen_col_label
 import churchpresenter.composeapp.generated.resources.top
-import churchpresenter.composeapp.generated.resources.window_position
-import churchpresenter.composeapp.generated.resources.audio_output
-import churchpresenter.composeapp.generated.resources.audio_output_default
-import churchpresenter.composeapp.generated.resources.audio_output_device
-import churchpresenter.composeapp.generated.resources.key_output
-import churchpresenter.composeapp.generated.resources.key_output_none
-import churchpresenter.composeapp.generated.resources.media_vlc_required
-import churchpresenter.composeapp.generated.resources.media_vlc_install
-import churchpresenter.composeapp.generated.resources.vlc_custom_path
 import churchpresenter.composeapp.generated.resources.vlc_browse
+import churchpresenter.composeapp.generated.resources.vlc_custom_path
 import churchpresenter.composeapp.generated.resources.vlc_path_hint
 import churchpresenter.composeapp.generated.resources.vlc_path_invalid
+import churchpresenter.composeapp.generated.resources.window_position
+import kotlinx.coroutines.launch
 import org.churchpresenter.app.churchpresenter.composables.DeckLinkManager
 import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
-import org.churchpresenter.app.churchpresenter.composables.VlcAudioDevice
+import org.churchpresenter.app.churchpresenter.composables.detectVlcInstallPath
 import org.churchpresenter.app.churchpresenter.composables.isVlcAvailable
 import org.churchpresenter.app.churchpresenter.composables.listVlcAudioDevices
-import org.churchpresenter.app.churchpresenter.composables.detectVlcInstallPath
 import org.churchpresenter.app.churchpresenter.composables.recheckVlcAvailability
 import org.churchpresenter.app.churchpresenter.composables.vlcCustomPath
-import org.churchpresenter.app.churchpresenter.utils.createFileChooser
-import javax.swing.JFileChooser
 import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.data.ScreenAssignment
+import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.jetbrains.compose.resources.stringResource
+import java.awt.GraphicsEnvironment
+import kotlin.io.path.Path
+import kotlin.io.path.absolutePathString
 
 @Composable
 fun ProjectionSettingsTab(
@@ -97,6 +96,7 @@ fun ProjectionSettingsTab(
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
     onIdentifyScreen: () -> Unit = {}
 ) {
+    val scope = rememberCoroutineScope()
     val proj = settings.projectionSettings
 
     // Detect physical screens; exclude the primary monitor from presenter targets.
@@ -725,23 +725,24 @@ fun ProjectionSettingsTab(
                 modifier = Modifier.weight(1f)
             )
             Button(onClick = {
-                val chooser = createFileChooser {
-                    fileSelectionMode = JFileChooser.DIRECTORIES_ONLY
-                    dialogTitle = "Select VLC installation directory"
-                    if (vlcPathText.isNotBlank()) {
-                        currentDirectory = java.io.File(vlcPathText)
+                scope.launch {
+                    val file = FileChooser.platformInstance.chooseSingle(
+                        path = Path(vlcPathText),
+                        title = "Select VLC installation directory",
+                        selectDirectory = true,
+                        filters = emptyList()
+                    )
+                    if (file != null) {
+                        val selectedPath = file.absolutePathString()
+                        vlcPathText = selectedPath
+                        vlcCustomPath = selectedPath
+                        onSettingsChange { s ->
+                            s.copy(projectionSettings = s.projectionSettings.copy(vlcPath = selectedPath))
+                        }
+                        val detected = recheckVlcAvailability()
+                        vlcDetected = detected
+                        vlcPathError = !detected && selectedPath.isNotBlank()
                     }
-                }
-                if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
-                    val selectedPath = chooser.selectedFile.absolutePath
-                    vlcPathText = selectedPath
-                    vlcCustomPath = selectedPath
-                    onSettingsChange { s ->
-                        s.copy(projectionSettings = s.projectionSettings.copy(vlcPath = selectedPath))
-                    }
-                    val detected = recheckVlcAvailability()
-                    vlcDetected = detected
-                    vlcPathError = !detected && selectedPath.isNotBlank()
                 }
             }) {
                 Text(
