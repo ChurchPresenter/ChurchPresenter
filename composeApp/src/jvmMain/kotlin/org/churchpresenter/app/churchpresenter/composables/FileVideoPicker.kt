@@ -40,7 +40,6 @@ fun FileVideoPicker(
             .height(32.dp)
             .clickable {
                 scope.launch {
-                    val parentWindow = Window.getWindows().firstOrNull { it.isActive }
                     val file = FileChooser.platformInstance.chooseSingle(
                         path = Path(videoPath),
                         filters = listOf(FileNameExtensionFilter(videoFilesFilterStr, "mp4", "mov", "avi", "mkv", "webm")),
