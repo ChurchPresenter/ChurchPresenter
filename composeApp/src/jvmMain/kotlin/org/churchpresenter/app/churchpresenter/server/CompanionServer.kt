@@ -40,6 +40,7 @@ import kotlinx.serialization.json.Json
 import org.churchpresenter.app.churchpresenter.data.SongItem
 import org.churchpresenter.app.churchpresenter.models.ScheduleItem
 import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.app.churchpresenter.utils.HeicDecoder
 import org.churchpresenter.app.churchpresenter.utils.isChorusHeader
 import org.churchpresenter.app.churchpresenter.utils.isHeaderLine
 import java.awt.image.BufferedImage
@@ -1492,7 +1493,18 @@ class CompanionServer {
                         call.respond(io.ktor.http.HttpStatusCode.NotFound, "Image file not found on disk")
                         return@get
                     }
-                    call.respondBytes(file.readBytes(), contentTypeForExtension(file.extension))
+                    // HEIC/HEIF are not displayable by browsers — convert to JPEG first
+                    val ext = file.extension.lowercase()
+                    if (ext == "heic" || ext == "heif") {
+                        val jpegBytes = HeicDecoder.toJpegBytes(file)
+                        if (jpegBytes != null) {
+                            call.respondBytes(jpegBytes, ContentType.Image.JPEG)
+                        } else {
+                            call.respond(io.ktor.http.HttpStatusCode.InternalServerError, "Failed to convert HEIC image")
+                        }
+                    } else {
+                        call.respondBytes(file.readBytes(), contentTypeForExtension(ext))
+                    }
                 }
 
                 /**

@@ -23,9 +23,8 @@ import churchpresenter.composeapp.generated.resources.presented_image
 import churchpresenter.composeapp.generated.resources.presented_slide
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.skia.Image
-import java.io.ByteArrayOutputStream
 import java.io.File
-import javax.imageio.ImageIO
+import org.churchpresenter.app.churchpresenter.utils.HeicDecoder
 
 @Composable
 fun PicturePresenter(
@@ -91,13 +90,9 @@ private fun loadAndDownscaleImage(imagePath: String, maxWidth: Int = 1920, maxHe
             Image.makeFromEncoded(bytes)
         } catch (e: Exception) {
             if (file.extension.lowercase() in listOf("heic", "heif")) {
+                val jpegBytes = HeicDecoder.toJpegBytes(file) ?: return null
                 try {
-                    val bufferedImage = ImageIO.read(file)
-                    if (bufferedImage != null) {
-                        val outputStream = ByteArrayOutputStream()
-                        ImageIO.write(bufferedImage, "jpg", outputStream)
-                        Image.makeFromEncoded(outputStream.toByteArray())
-                    } else return null
+                    Image.makeFromEncoded(jpegBytes)
                 } catch (_: Exception) { return null }
             } else return null
         }

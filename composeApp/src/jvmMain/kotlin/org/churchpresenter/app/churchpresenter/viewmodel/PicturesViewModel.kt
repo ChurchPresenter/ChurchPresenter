@@ -20,12 +20,11 @@ import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
 import org.churchpresenter.app.churchpresenter.models.AnimationType
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.app.churchpresenter.utils.HeicDecoder
 import org.jetbrains.skia.Image
-import java.io.ByteArrayOutputStream
 import java.io.File
 import java.nio.file.FileSystems
 import java.nio.file.StandardWatchEventKinds
-import javax.imageio.ImageIO
 import kotlin.io.path.Path
 import kotlin.io.path.absolutePathString
 
@@ -234,29 +233,15 @@ class PicturesViewModel(
     private fun loadImageBitmap(file: File): ImageBitmap {
         val bytes = file.readBytes()
 
-        // Try to decode with Skia first
+        // Try to decode directly with Skia (handles jpg, png, webp, gif, bmp…)
         val originalImage = try {
             Image.makeFromEncoded(bytes)
         } catch (e: Exception) {
-            // If it's a HEIC file, try converting with ImageIO
+            // Skia can't decode HEIC/HEIF natively — convert via platform tool first
             if (file.extension.lowercase() in listOf("heic", "heif")) {
-                try {
-                    // Use ImageIO to read HEIC and convert to JPEG bytes
-                    val bufferedImage = ImageIO.read(file)
-                    if (bufferedImage != null) {
-                        // Convert BufferedImage to JPEG bytes
-                        val outputStream = ByteArrayOutputStream()
-                        ImageIO.write(bufferedImage, "jpg", outputStream)
-                        val jpegBytes = outputStream.toByteArray()
-
-                        // Try decoding the JPEG with Skia
-                        Image.makeFromEncoded(jpegBytes)
-                    } else {
-                        throw Exception("ImageIO could not read HEIC file")
-                    }
-                } catch (heicError: Exception) {
-                    throw Exception("Failed to decode image ${file.name}: Cannot decode HEIC format. Original error: ${e.message}, Conversion error: ${heicError.message}", e)
-                }
+                val jpegBytes = HeicDecoder.toJpegBytes(file)
+                    ?: throw Exception("Failed to convert HEIC file ${file.name} — sips/ImageIO returned no data")
+                Image.makeFromEncoded(jpegBytes)
             } else {
                 throw Exception("Failed to decode image ${file.name}: ${e.message}", e)
             }
