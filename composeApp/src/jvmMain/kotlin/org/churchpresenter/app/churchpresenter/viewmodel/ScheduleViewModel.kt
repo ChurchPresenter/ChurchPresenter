@@ -24,9 +24,15 @@ import kotlin.io.path.writeText
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 
-class ScheduleViewModel {
+class ScheduleViewModel(
+    private val onScheduleChanged: ((List<ScheduleItem>) -> Unit)? = null
+) {
     private val _scheduleItems: SnapshotStateList<ScheduleItem> = mutableStateListOf()
     val scheduleItems: List<ScheduleItem> get() = _scheduleItems
+
+    private fun notifyChanged() {
+        onScheduleChanged?.invoke(_scheduleItems.toList())
+    }
 
     private val _selectedItemId = mutableStateOf<String?>(null)
     val selectedItemId get() = _selectedItemId.value
@@ -131,6 +137,7 @@ class ScheduleViewModel {
                 _scheduleItems.clear()
                 _scheduleItems.addAll(items)
                 currentFilePath = file.absolutePathString()
+                notifyChanged()
             }
         }
     }
@@ -139,88 +146,51 @@ class ScheduleViewModel {
     fun newSchedule() {
         _scheduleItems.clear()
         currentFilePath = null
+        notifyChanged()
     }
 
     // ── Existing methods ──────────────────────────────────────────────────────
 
-    fun addSong(songNumber: Int, title: String, songbook: String) {
-        val id = UUID.randomUUID().toString()
-        val item = ScheduleItem.SongItem(
-            id = id,
-            songNumber = songNumber,
-            title = title,
-            songbook = songbook
-        )
-        _scheduleItems.add(item)
+    fun addSong(songNumber: Int, title: String, songbook: String, songId: String = "") {
+        _scheduleItems.add(ScheduleItem.SongItem(id = UUID.randomUUID().toString(), songNumber = songNumber, title = title, songbook = songbook, songId = songId))
+        notifyChanged()
     }
 
-    fun addBibleVerse(bookName: String, chapter: Int, verseNumber: Int, verseText: String) {
-        val id = UUID.randomUUID().toString()
-        val item = ScheduleItem.BibleVerseItem(
-            id = id,
+    fun addBibleVerse(bookName: String, chapter: Int, verseNumber: Int, verseText: String, verseRange: String = "") {
+        _scheduleItems.add(ScheduleItem.BibleVerseItem(
+            id = UUID.randomUUID().toString(),
             bookName = bookName,
             chapter = chapter,
             verseNumber = verseNumber,
-            verseText = verseText
-        )
-        _scheduleItems.add(item)
+            verseText = verseText,
+            verseRange = verseRange
+        ))
+        notifyChanged()
     }
 
     fun addLabel(text: String, textColor: String, backgroundColor: String) {
-        val id = UUID.randomUUID().toString()
-        val item = ScheduleItem.LabelItem(
-            id = id,
-            text = text,
-            textColor = textColor,
-            backgroundColor = backgroundColor
-        )
-        _scheduleItems.add(item)
+        _scheduleItems.add(ScheduleItem.LabelItem(id = UUID.randomUUID().toString(), text = text, textColor = textColor, backgroundColor = backgroundColor))
+        notifyChanged()
     }
 
     fun addPicture(folderPath: String, folderName: String, imageCount: Int) {
-        val id = UUID.randomUUID().toString()
-        val item = ScheduleItem.PictureItem(
-            id = id,
-            folderPath = folderPath,
-            folderName = folderName,
-            imageCount = imageCount
-        )
-        _scheduleItems.add(item)
+        _scheduleItems.add(ScheduleItem.PictureItem(id = UUID.randomUUID().toString(), folderPath = folderPath, folderName = folderName, imageCount = imageCount))
+        notifyChanged()
     }
 
     fun addPresentation(filePath: String, fileName: String, slideCount: Int, fileType: String) {
-        val id = UUID.randomUUID().toString()
-        val item = ScheduleItem.PresentationItem(
-            id = id,
-            filePath = filePath,
-            fileName = fileName,
-            slideCount = slideCount,
-            fileType = fileType
-        )
-        _scheduleItems.add(item)
+        _scheduleItems.add(ScheduleItem.PresentationItem(id = UUID.randomUUID().toString(), filePath = filePath, fileName = fileName, slideCount = slideCount, fileType = fileType))
+        notifyChanged()
     }
 
     fun addMedia(mediaUrl: String, mediaTitle: String, mediaType: String) {
-        val id = UUID.randomUUID().toString()
-        val item = ScheduleItem.MediaItem(
-            id = id,
-            mediaUrl = mediaUrl,
-            mediaTitle = mediaTitle,
-            mediaType = mediaType
-        )
-        _scheduleItems.add(item)
+        _scheduleItems.add(ScheduleItem.MediaItem(id = UUID.randomUUID().toString(), mediaUrl = mediaUrl, mediaTitle = mediaTitle, mediaType = mediaType))
+        notifyChanged()
     }
 
     fun addLowerThird(presetId: String, presetLabel: String, pauseAtFrame: Boolean, pauseDurationMs: Long) {
-        val id = UUID.randomUUID().toString()
-        val item = ScheduleItem.LowerThirdItem(
-            id = id,
-            presetId = presetId,
-            presetLabel = presetLabel,
-            pauseAtFrame = pauseAtFrame,
-            pauseDurationMs = pauseDurationMs
-        )
-        _scheduleItems.add(item)
+        _scheduleItems.add(ScheduleItem.LowerThirdItem(id = UUID.randomUUID().toString(), presetId = presetId, presetLabel = presetLabel, pauseAtFrame = pauseAtFrame, pauseDurationMs = pauseDurationMs))
+        notifyChanged()
     }
 
     fun addAnnouncement(
@@ -233,9 +203,16 @@ class ScheduleViewModel {
         italic: Boolean = false,
         underline: Boolean = false,
         shadow: Boolean = false,
+        horizontalAlignment: String = "center",
         position: String = "center",
         animationType: String = "SLIDE_FROM_BOTTOM",
-        animationDuration: Int = 500
+        animationDuration: Int = 500,
+        isTimer: Boolean = false,
+        timerHours: Int = 0,
+        timerMinutes: Int = 0,
+        timerSeconds: Int = 0,
+        timerTextColor: String = "#FFFFFF",
+        timerExpiredText: String = ""
     ) {
         val id = UUID.randomUUID().toString()
         _scheduleItems.add(
@@ -250,33 +227,50 @@ class ScheduleViewModel {
                 italic = italic,
                 underline = underline,
                 shadow = shadow,
+                horizontalAlignment = horizontalAlignment,
                 position = position,
                 animationType = animationType,
-                animationDuration = animationDuration
+                animationDuration = animationDuration,
+                isTimer = isTimer,
+                timerHours = timerHours,
+                timerMinutes = timerMinutes,
+                timerSeconds = timerSeconds,
+                timerTextColor = timerTextColor,
+                timerExpiredText = timerExpiredText
             )
         )
+        notifyChanged()
     }
 
     fun addWebsite(url: String, title: String) {
-        val id = UUID.randomUUID().toString()
-        _scheduleItems.add(ScheduleItem.WebsiteItem(id = id, url = url, title = title.ifBlank { url }))
+        _scheduleItems.add(ScheduleItem.WebsiteItem(id = UUID.randomUUID().toString(), url = url, title = title.ifBlank { url }))
+        notifyChanged()
+    }
+
+    fun updateWebsiteTitle(url: String, title: String) {
+        if (title.isBlank()) return
+        val index = _scheduleItems.indexOfFirst { it is ScheduleItem.WebsiteItem && it.url == url }
+        if (index >= 0) {
+            val existing = _scheduleItems[index] as ScheduleItem.WebsiteItem
+            // Only update if the current title is still the URL (i.e. no real title was set yet)
+            if (existing.title == existing.url || existing.title.isBlank()) {
+                _scheduleItems[index] = existing.copy(title = title)
+                notifyChanged()
+            }
+        }
     }
 
     fun updateLabel(id: String, text: String, textColor: String, backgroundColor: String) {
         val index = _scheduleItems.indexOfFirst { it.id == id }
         if (index >= 0 && _scheduleItems[index] is ScheduleItem.LabelItem) {
-            val updatedItem = ScheduleItem.LabelItem(
-                id = id,
-                text = text,
-                textColor = textColor,
-                backgroundColor = backgroundColor
-            )
-            _scheduleItems[index] = updatedItem
+            _scheduleItems[index] = ScheduleItem.LabelItem(id = id, text = text, textColor = textColor, backgroundColor = backgroundColor)
+            notifyChanged()
         }
     }
 
     fun removeItem(id: String) {
         _scheduleItems.removeAll { it.id == id }
+        notifyChanged()
     }
 
     fun moveItemUp(id: String): Int {
@@ -284,6 +278,7 @@ class ScheduleViewModel {
         if (index > 0) {
             val item = _scheduleItems.removeAt(index)
             _scheduleItems.add(index - 1, item)
+            notifyChanged()
             return index - 1
         }
         return index
@@ -294,6 +289,7 @@ class ScheduleViewModel {
         if (index >= 0 && index < _scheduleItems.size - 1) {
             val item = _scheduleItems.removeAt(index)
             _scheduleItems.add(index + 1, item)
+            notifyChanged()
             return index + 1
         }
         return index
@@ -304,6 +300,7 @@ class ScheduleViewModel {
         if (index > 0) {
             val item = _scheduleItems.removeAt(index)
             _scheduleItems.add(0, item)
+            notifyChanged()
             return 0
         }
         return index
@@ -314,6 +311,7 @@ class ScheduleViewModel {
         if (index >= 0 && index < _scheduleItems.size - 1) {
             val item = _scheduleItems.removeAt(index)
             _scheduleItems.add(item)
+            notifyChanged()
             return _scheduleItems.size - 1
         }
         return index
@@ -321,6 +319,7 @@ class ScheduleViewModel {
 
     fun clearSchedule() {
         _scheduleItems.clear()
+        notifyChanged()
     }
 
     fun selectItem(id: String) {
@@ -342,7 +341,10 @@ class ScheduleViewModel {
         onPresentBible: ((ScheduleItem.BibleVerseItem) -> Unit)? = null,
         onPresentPresentation: ((ScheduleItem.PresentationItem) -> Unit)? = null,
         onPresentPictures: ((ScheduleItem.PictureItem) -> Unit)? = null,
-        onPresentMedia: ((ScheduleItem.MediaItem) -> Unit)? = null
+        onPresentMedia: ((ScheduleItem.MediaItem) -> Unit)? = null,
+        onPresentAnnouncement: ((ScheduleItem.AnnouncementItem) -> Unit)? = null,
+        onPresentLowerThird: ((ScheduleItem.LowerThirdItem) -> Unit)? = null,
+        onPresentWebsite: ((ScheduleItem.WebsiteItem) -> Unit)? = null
     ) {
         when (item) {
             is ScheduleItem.SongItem -> onPresentSong?.invoke(item) ?: onPresenting(Presenting.LYRICS)
@@ -351,9 +353,9 @@ class ScheduleViewModel {
             is ScheduleItem.PictureItem -> onPresentPictures?.invoke(item) ?: onPresenting(Presenting.PICTURES)
             is ScheduleItem.PresentationItem -> onPresentPresentation?.invoke(item) ?: onPresenting(Presenting.PRESENTATION)
             is ScheduleItem.MediaItem -> onPresentMedia?.invoke(item) ?: onPresenting(Presenting.MEDIA)
-            is ScheduleItem.LowerThirdItem -> { /* lower third shown via LowerThirdTab */ }
-            is ScheduleItem.AnnouncementItem -> onPresenting(Presenting.ANNOUNCEMENTS)
-            is ScheduleItem.WebsiteItem -> onPresenting(Presenting.WEBSITE)
+            is ScheduleItem.LowerThirdItem -> onPresentLowerThird?.invoke(item)
+            is ScheduleItem.AnnouncementItem -> onPresentAnnouncement?.invoke(item) ?: onPresenting(Presenting.ANNOUNCEMENTS)
+            is ScheduleItem.WebsiteItem -> onPresentWebsite?.invoke(item) ?: onPresenting(Presenting.WEBSITE)
         }
     }
 }

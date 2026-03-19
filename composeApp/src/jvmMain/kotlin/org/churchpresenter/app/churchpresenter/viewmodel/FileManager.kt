@@ -35,6 +35,26 @@ class FileManager {
     }
 
     /**
+     * Get list of songbook folders (subdirectories containing .song files) from a directory
+     */
+    fun getSongFoldersInDirectory(directory: String): List<Pair<String, Int>> {
+        if (directory.isEmpty()) return emptyList()
+
+        val dir = File(directory)
+        if (!dir.exists() || !dir.isDirectory) return emptyList()
+
+        return dir.listFiles { file -> file.isDirectory }
+            ?.mapNotNull { subdir ->
+                val songCount = subdir.listFiles { file ->
+                    file.extension.lowercase() == Constants.EXTENSION_SONG
+                }?.size ?: 0
+                if (songCount > 0) Pair(subdir.name, songCount) else null
+            }
+            ?.sortedBy { it.first }
+            ?: emptyList()
+    }
+
+    /**
      * Get list of Bible files (*.spb) from a directory
      */
     fun getBibleFilesInDirectory(directory: String): List<String> {

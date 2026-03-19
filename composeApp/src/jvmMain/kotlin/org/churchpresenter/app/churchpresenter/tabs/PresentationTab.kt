@@ -80,7 +80,8 @@ fun PresentationTab(
     appSettings: AppSettings,
     onAddToSchedule: ((filePath: String, fileName: String, slideCount: Int, fileType: String) -> Unit)? = null,
     selectedPresentationItem: ScheduleItem.PresentationItem? = null,
-    presenterManager: PresenterManager? = null
+    presenterManager: PresenterManager? = null,
+    onSlidesLoaded: ((id: String, fileName: String, fileType: String, slides: List<java.awt.image.BufferedImage>) -> Unit)? = null
 ) {
     val scope = rememberCoroutineScope()
     val viewModel = remember { PresentationViewModel(appSettings) }
@@ -94,6 +95,19 @@ fun PresentationTab(
         selectedPresentationItem?.let { viewModel.loadPresentationByPath(it.filePath) }
     }
     val presentationFileDialogTitle = stringResource(Res.string.select_presentation_file)
+
+    // Notify server when slides finish loading
+    LaunchedEffect(viewModel.slides.size) {
+        val file = viewModel.selectedPresentation
+        if (file != null && viewModel.slides.isNotEmpty()) {
+            onSlidesLoaded?.invoke(
+                file.absolutePath.hashCode().toUInt().toString(16),
+                file.nameWithoutExtension,
+                file.extension.lowercase(),
+                viewModel.bufferedSlides
+            )
+        }
+    }
 
     // Auto-play effect using media settings (same as PicturesTab)
     LaunchedEffect(viewModel.isPlaying, viewModel.selectedSlideIndex, viewModel.autoScrollInterval) {
@@ -145,37 +159,49 @@ fun PresentationTab(
         ) {
             Button(
                 onClick = {
-                    scope.launch {
-                        val files = FileChooser.platformInstance.chooseMultiple(
-                            path = null,
-                            filters = listOf(
-                                FileNameExtensionFilter(
-                                    "All Presentation Files (*.ppt, *.pptx, *.key, *.pdf)",
-                                    "ppt", "pptx", "key", "pdf"
-                                ),
-                                FileNameExtensionFilter(
-                                    "PowerPoint Files (*.ppt, *.pptx)",
-                                    "ppt", "pptx"
-                                ),
-                                FileNameExtensionFilter(
-                                    "Keynote Files (*.key)",
-                                    "key"
-                                ),
-                                FileNameExtensionFilter(
-                                    "PDF Files (*.pdf)",
-                                    "pdf"
-                                )
-                            ),
-                            title = presentationFileDialogTitle,
-                            selectDirectory = false
-                        )
-                        for (file in files.orEmpty()) {
-                            viewModel.addPresentation(file.toFile())
+                    SwingUtilities.invokeLater {
+                        val chooser = createFileChooser {
+                            fileSelectionMode = JFileChooser.FILES_ONLY
+                            dialogTitle = presentationFileDialogTitle
+                            isMultiSelectionEnabled = true
+                            val defaultDir = appSettings.presentationStorageDirectory
+                            if (defaultDir.isNotEmpty()) {
+                                currentDirectory = File(defaultDir)
+                            }
+
+                            val pptFilter = FileNameExtensionFilter(
+                                "PowerPoint Files (*.ppt, *.pptx)",
+                                "ppt", "pptx"
+                            )
+                            val keynoteFilter = FileNameExtensionFilter(
+                                "Keynote Files (*.key)",
+                                "key"
+                            )
+                            val pdfFilter = FileNameExtensionFilter(
+                                "PDF Files (*.pdf)",
+                                "pdf"
+                            )
+                            val allFilter = FileNameExtensionFilter(
+                                "All Presentation Files",
+                                "ppt", "pptx", "key", "pdf"
+                            )
+
+                            addChoosableFileFilter(allFilter)
+                            addChoosableFileFilter(pptFilter)
+                            addChoosableFileFilter(keynoteFilter)
+                            addChoosableFileFilter(pdfFilter)
+                            fileFilter = allFilter
+                        }
+                        val result = chooser.showOpenDialog(null)
+                        if (result == JFileChooser.APPROVE_OPTION) {
+                            chooser.selectedFiles.forEach { file ->
+                                viewModel.addPresentation(file)
+                            }
                         }
                     }
                 }
             ) {
-                Text(stringResource(Res.string.select_presentation_file_button))
+                Text(stringResource(Res.string.select_presentation_file_button), style = MaterialTheme.typography.labelMedium)
             }
 
             Text(
@@ -285,7 +311,7 @@ fun PresentationTab(
                         ) {
                             Text(
                                 text = stringResource(Res.string.go_live),
-                                style = MaterialTheme.typography.labelSmall
+                                style = MaterialTheme.typography.labelMedium
                             )
                         }
                     }
@@ -294,7 +320,7 @@ fun PresentationTab(
                     if (onAddToSchedule != null && viewModel.selectedPresentation != null) {
                         Button(
                             onClick = {
-                                val file = viewModel.selectedPresentation!!
+                                val file = viewModel.selectedPresentation ?: return@Button
                                 onAddToSchedule(
                                     file.absolutePath,
                                     file.nameWithoutExtension,
@@ -308,7 +334,7 @@ fun PresentationTab(
                         ) {
                             Text(
                                 text = stringResource(Res.string.add_to_schedule),
-                                style = MaterialTheme.typography.labelSmall
+                                style = MaterialTheme.typography.labelMedium
                             )
                         }
                     }

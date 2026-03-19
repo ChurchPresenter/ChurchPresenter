@@ -17,6 +17,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.symbol_dropdown
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun DropdownSelector(
@@ -44,8 +47,9 @@ fun DropdownSelector(
             value = selected,
             onValueChange = { /* read-only */ },
             readOnly = true,
-            label = { Text(text = label) },
-            trailingIcon = { Text("▾") },
+            textStyle = MaterialTheme.typography.bodyMedium,
+            label = { Text(text = label, style = MaterialTheme.typography.bodyMedium) },
+            trailingIcon = { Text(stringResource(Res.string.symbol_dropdown)) },
             singleLine = true,
             colors = OutlinedTextFieldDefaults.colors().copy(
                 unfocusedContainerColor = MaterialTheme.colorScheme.surface,
@@ -59,7 +63,7 @@ fun DropdownSelector(
         ) {
             items.forEach { item ->
                 DropdownMenuItem(
-                    text = { Text(item) },
+                    text = { Text(item, style = MaterialTheme.typography.bodyMedium) },
                     onClick = {
                         onSelectedChange(item)
                         expanded.value = false

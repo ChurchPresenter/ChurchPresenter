@@ -14,8 +14,7 @@ object Utils {
     @OptIn(ExperimentalTextApi::class)
     fun systemFontFamilyOrDefault(fontName: String): FontFamily {
         return try {
-            val name = GraphicsEnvironment.getLocalGraphicsEnvironment().allFonts.first { it.name == fontName }.name
-            FontFamily(name)
+            FontFamily(fontName)
         } catch (e: Exception) {
             FontFamily.Default
         }

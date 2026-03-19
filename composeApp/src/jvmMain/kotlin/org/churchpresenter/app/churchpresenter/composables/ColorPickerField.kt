@@ -43,9 +43,9 @@ fun ColorPickerField(
                     // Get the parent window to ensure dialog appears on top
                     val parentWindow = Window.getWindows().firstOrNull { it.isActive }
                     val initialColor = java.awt.Color(
-                        currentColor.red.toInt(),
-                        currentColor.green.toInt(),
-                        currentColor.blue.toInt()
+                        currentColor.red,
+                        currentColor.green,
+                        currentColor.blue
                     )
                     val selectedColor = JColorChooser.showDialog(
                         parentWindow,

@@ -4,23 +4,26 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -62,17 +65,30 @@ import churchpresenter.composeapp.generated.resources.media_now_presenting
 import churchpresenter.composeapp.generated.resources.media_preview
 import churchpresenter.composeapp.generated.resources.media_seek_backward
 import churchpresenter.composeapp.generated.resources.media_seek_forward
+import churchpresenter.composeapp.generated.resources.media_audio_continues
+import churchpresenter.composeapp.generated.resources.media_files_filter
+import churchpresenter.composeapp.generated.resources.media_load
+import churchpresenter.composeapp.generated.resources.media_local_file
+import churchpresenter.composeapp.generated.resources.media_network_url
 import churchpresenter.composeapp.generated.resources.media_select_file
 import churchpresenter.composeapp.generated.resources.media_select_to_begin
-import churchpresenter.composeapp.generated.resources.media_source
+
+import churchpresenter.composeapp.generated.resources.media_url_placeholder
+import churchpresenter.composeapp.generated.resources.media_vlc_install
+import churchpresenter.composeapp.generated.resources.media_vlc_required
 import churchpresenter.composeapp.generated.resources.media_unmute
 import churchpresenter.composeapp.generated.resources.pause
 import churchpresenter.composeapp.generated.resources.play
+import org.churchpresenter.app.churchpresenter.composables.SegmentedButton
+import org.churchpresenter.app.churchpresenter.composables.SegmentedButtonItem
 import org.churchpresenter.app.churchpresenter.composables.VideoPlayer
+import org.churchpresenter.app.churchpresenter.data.AppSettings
+import org.churchpresenter.app.churchpresenter.composables.isVlcAvailable
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
 import org.churchpresenter.app.churchpresenter.models.ScheduleItem
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.app.churchpresenter.utils.presenterAspectRatio
 import org.churchpresenter.app.churchpresenter.viewmodel.LocalMediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.jetbrains.compose.resources.painterResource
@@ -84,23 +100,69 @@ import kotlinx.coroutines.launch
 @Composable
 fun MediaTab(
     modifier: Modifier = Modifier,
+    appSettings: AppSettings = AppSettings(),
     onAddToSchedule: ((mediaUrl: String, mediaTitle: String, mediaType: String) -> Unit)? = null,
     selectedMediaItem: ScheduleItem.MediaItem? = null,
     presenterManager: PresenterManager? = null
 ) {
+    // Check if VLC is available
+    if (!isVlcAvailable) {
+        Column(
+            modifier = modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text("🎬", style = MaterialTheme.typography.displayLarge)
+            Spacer(modifier = Modifier.size(16.dp))
+            Text(
+                text = stringResource(Res.string.media_vlc_required),
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Spacer(modifier = Modifier.size(8.dp))
+            Text(
+                text = stringResource(Res.string.media_vlc_install),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+        return
+    }
+
     // Consume the app-scope MediaViewModel provided by main.kt via CompositionLocalProvider.
     // Do NOT create a local instance — that would disconnect MediaTab controls from MediaPresenter.
     val viewModel = LocalMediaViewModel.current ?: return
     val focusRequester = remember { FocusRequester() }
     var volumeExpanded by remember { mutableStateOf(false) }
 
-    val scope = rememberCoroutineScope()
-    // can't access stringResource without composable scope, so preload it here
-    val mediaSelectFileString = stringResource(Res.string.media_select_file)
+    // Source type selector state
+    val localFileLabel = stringResource(Res.string.media_local_file)
+    val networkUrlLabel = stringResource(Res.string.media_network_url)
+    val sourceTypeItems = remember(localFileLabel, networkUrlLabel) {
+        listOf(
+            SegmentedButtonItem(Constants.MEDIA_TYPE_LOCAL, localFileLabel),
+            SegmentedButtonItem(Constants.MEDIA_TYPE_URL, networkUrlLabel)
+        )
+    }
+    var selectedSourceType by remember { mutableStateOf(Constants.MEDIA_TYPE_LOCAL) }
+    var urlInput by remember { mutableStateOf("") }
 
     // React to schedule item selection
     LaunchedEffect(selectedMediaItem) {
         selectedMediaItem?.let {
+            if (presenterManager?.presentingMode?.value == Presenting.MEDIA) {
+                presenterManager.setPresentingMode(Presenting.NONE)
+            }
+            // Sync source type selector with loaded item
+            when (it.mediaType) {
+                Constants.MEDIA_TYPE_URL -> {
+                    selectedSourceType = Constants.MEDIA_TYPE_URL
+                    urlInput = it.mediaUrl
+                }
+                else -> selectedSourceType = Constants.MEDIA_TYPE_LOCAL
+            }
             viewModel.loadMediaFromSchedule(url = it.mediaUrl, title = it.mediaTitle, type = it.mediaType)
         }
     }
@@ -134,55 +196,107 @@ fun MediaTab(
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         // ── Source row ──────────────────────────────────────────────────
-        Text(
-            text = stringResource(Res.string.media_source),
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.primary
-        )
-        HorizontalDivider()
-
-        // Single source row: file picker + URL field + Load button
+        val selectFileLabel = stringResource(Res.string.media_select_file)
+        val mediaFilesLabel = stringResource(Res.string.media_files_filter)
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().height(48.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Local file picker
-            Button(
-                onClick = {
-                     scope.launch {
-                        val file = FileChooser.platformInstance.chooseSingle(
-                            path = null,
-                            filters = listOf(
-                                FileNameExtensionFilter(
-                                    "Video Files",
-                                    "mp4", "mov", "avi", "mkv", "wmv", "flv", "webm", "m4v"
-                                )
-                            ),
-                            title = mediaSelectFileString,
-                            selectDirectory = false
-                        )
-                        if (file != null) {
-                            viewModel.loadMedia(file.absolutePathString(), Constants.MEDIA_TYPE_LOCAL)
+            // Source type toggle
+            SegmentedButton(
+                items = sourceTypeItems,
+                selectedValue = selectedSourceType,
+                onValueChange = { selectedSourceType = it },
+                buttonWidth = 90.dp,
+                buttonHeight = 36.dp,
+                fontSize = MaterialTheme.typography.labelMedium.fontSize
+            )
+
+            // Per-type input controls
+            when (selectedSourceType) {
+                Constants.MEDIA_TYPE_LOCAL -> {
+                    // Local file picker button
+                    Button(
+                        onClick = {
+                            SwingUtilities.invokeLater {
+                                val chooser = createFileChooser {
+                                    fileSelectionMode = JFileChooser.FILES_ONLY
+                                    dialogTitle = selectFileLabel
+                                    val defaultDir = appSettings.mediaStorageDirectory
+                                    if (defaultDir.isNotEmpty()) {
+                                        currentDirectory = java.io.File(defaultDir)
+                                    }
+                                    fileFilter = FileNameExtensionFilter(
+                                        mediaFilesLabel,
+                                        "mp4", "mov", "avi", "mkv", "wmv", "flv", "webm", "m4v",
+                                        "mp3", "wav", "flac", "aac", "ogg", "wma", "m4a", "aiff", "opus"
+                                    )
+                                }
+                                if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+                                    val file = chooser.selectedFile
+                                    val ext = file.extension.lowercase()
+                                    val type = if (ext in Constants.AUDIO_EXTENSIONS)
+                                        Constants.MEDIA_TYPE_AUDIO else Constants.MEDIA_TYPE_LOCAL
+                                    if (presenterManager?.presentingMode?.value == Presenting.MEDIA) {
+                                        presenterManager.setPresentingMode(Presenting.NONE)
+                                    }
+                                    viewModel.loadMedia(file.absolutePath, type)
+                                }
+                            }
                         }
+                    ) {
+                        Text(
+                            text = stringResource(Res.string.media_select_file),
+                            style = MaterialTheme.typography.labelMedium
+                        )
+                    }
+                    Text(
+                        text = if (viewModel.isLoaded && viewModel.mediaType != Constants.MEDIA_TYPE_URL)
+                            viewModel.mediaTitle
+                        else stringResource(Res.string.media_no_source),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                        modifier = Modifier.weight(1f),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+
+                Constants.MEDIA_TYPE_URL -> {
+                    // Network URL text field + Load button
+                    OutlinedTextField(
+                        value = urlInput,
+                        onValueChange = { urlInput = it },
+                        placeholder = {
+                            Text(
+                                text = stringResource(Res.string.media_url_placeholder),
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        },
+                        singleLine = true,
+                        textStyle = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.weight(1f).heightIn(max = 52.dp)
+                    )
+                    Button(
+                        onClick = {
+                            if (urlInput.isNotBlank()) {
+                                if (presenterManager?.presentingMode?.value == Presenting.MEDIA) {
+                                    presenterManager.setPresentingMode(Presenting.NONE)
+                                }
+                                viewModel.loadMedia(urlInput.trim(), Constants.MEDIA_TYPE_URL)
+                            }
+                        },
+                        enabled = urlInput.isNotBlank()
+                    ) {
+                        Text(
+                            text = stringResource(Res.string.media_load),
+                            style = MaterialTheme.typography.labelMedium
+                        )
                     }
                 }
-            ) {
-                Text(
-                    text = stringResource(Res.string.media_select_file),
-                    style = MaterialTheme.typography.labelSmall
-                )
-            }
 
-            Text(
-                text = if (viewModel.isLoaded) viewModel.mediaTitle
-                       else stringResource(Res.string.media_no_source),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-                modifier = Modifier.weight(1f),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
+            }
         }
 
         // Now playing label
@@ -334,7 +448,7 @@ fun MediaTab(
                                     )
                                     Text(
                                         text = "${(viewModel.effectiveVolume * 100).toInt()}%",
-                                        style = MaterialTheme.typography.labelSmall,
+                                        style = MaterialTheme.typography.labelMedium,
                                         modifier = Modifier.width(32.dp)
                                     )
                                 }
@@ -362,7 +476,7 @@ fun MediaTab(
                     ) {
                         Text(
                             text = stringResource(Res.string.go_live),
-                            style = MaterialTheme.typography.labelSmall
+                            style = MaterialTheme.typography.labelMedium
                         )
                     }
                 }
@@ -378,7 +492,7 @@ fun MediaTab(
                     ) {
                         Text(
                             text = stringResource(Res.string.add_to_schedule),
-                            style = MaterialTheme.typography.labelSmall
+                            style = MaterialTheme.typography.labelMedium
                         )
                     }
                 }
@@ -398,68 +512,92 @@ fun MediaTab(
         }
 
 
-        // ── Preview panel ───────────────────────────────────────────────
-        Text(
-            text = stringResource(Res.string.media_preview),
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.primary
-        )
-
+        // ── Preview / Screen content panel ──────────────────────────────
         val isPresenting = presenterManager?.presentingMode?.value == Presenting.MEDIA
                 && presenterManager.showPresenterWindow.value
 
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f)
-                .background(Color.Black, RoundedCornerShape(8.dp))
-                .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(8.dp)),
-            contentAlignment = Alignment.Center
-        ) {
-            when {
-                isPresenting -> {
-                    // Presenter window is active — don't run a second player here
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Text("📽️", style = MaterialTheme.typography.displayMedium)
-                        Text(
-                            text = stringResource(Res.string.media_now_presenting),
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = Color.White.copy(alpha = 0.8f)
-                        )
-                        Text(
-                            text = viewModel.mediaTitle,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = Color.White.copy(alpha = 0.5f),
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
-                }
-                viewModel.isLoaded -> {
-                    VideoPlayer(
-                        viewModel = viewModel,
-                        modifier = Modifier.fillMaxSize()
-                    )
-                }
-                else -> {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Text("🎬", style = MaterialTheme.typography.displayMedium)
-                        Text(
-                            text = stringResource(Res.string.media_no_source),
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = Color.White.copy(alpha = 0.6f)
-                        )
-                        Text(
-                            text = stringResource(Res.string.media_select_to_begin),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = Color.White.copy(alpha = 0.4f)
-                        )
+        if (viewModel.isLoaded && viewModel.isAudioFile) {
+            // Hidden VLCJ player to drive audio playback while on this tab.
+            // When the user switches away, MainDesktop's hidden player takes over.
+            VideoPlayer(
+                viewModel = viewModel,
+                modifier = Modifier.size(0.dp)
+            )
+
+            // Audio file: info text
+            Text(
+                text = stringResource(Res.string.media_audio_continues),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            Spacer(modifier = Modifier.weight(1f))
+        } else {
+            // Video file or no media: show video preview
+            Text(
+                text = stringResource(Res.string.media_preview),
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.primary
+            )
+
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ) {
+                Box(
+                    modifier = Modifier
+                        .aspectRatio(presenterAspectRatio())
+                        .background(Color.Black, RoundedCornerShape(8.dp))
+                        .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(8.dp)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    when {
+                        isPresenting -> {
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Text("📽️", style = MaterialTheme.typography.displayMedium)
+                                Text(
+                                    text = stringResource(Res.string.media_now_presenting),
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = Color.White.copy(alpha = 0.8f)
+                                )
+                                Text(
+                                    text = viewModel.mediaTitle,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = Color.White.copy(alpha = 0.5f),
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
+                        }
+                        viewModel.isLoaded -> {
+                            VideoPlayer(
+                                viewModel = viewModel,
+                                modifier = Modifier.fillMaxSize()
+                            )
+                        }
+                        else -> {
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Text("🎬", style = MaterialTheme.typography.displayMedium)
+                                Text(
+                                    text = stringResource(Res.string.media_no_source),
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = Color.White.copy(alpha = 0.6f)
+                                )
+                                Text(
+                                    text = stringResource(Res.string.media_select_to_begin),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = Color.White.copy(alpha = 0.4f)
+                                )
+                            }
+                        }
                     }
                 }
             }

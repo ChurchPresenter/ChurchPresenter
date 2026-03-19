@@ -47,6 +47,11 @@ class MediaViewModel {
     /** Effective volume sent to the player (0 when muted). */
     val effectiveVolume: Float get() = if (_isMuted.value) 0f else _volume.value
 
+    // Audio file detection
+    private val _isAudioFile = mutableStateOf(false)
+    val isAudioFile: Boolean get() = _isAudioFile.value
+
+
     fun loadMedia(url: String, type: String) {
         _mediaUrl.value = url
         _mediaType.value = type
@@ -55,6 +60,8 @@ class MediaViewModel {
         _isPlaying.value = false
         _currentPosition.value = 0L
         _duration.value = 0L
+        _isAudioFile.value = type == Constants.MEDIA_TYPE_AUDIO ||
+            url.substringAfterLast('.').lowercase() in Constants.AUDIO_EXTENSIONS
     }
 
     fun loadMediaFromSchedule(url: String, title: String, type: String) {
@@ -64,6 +71,8 @@ class MediaViewModel {
         _isLoaded.value = url.isNotBlank()
         _isPlaying.value = false
         _currentPosition.value = 0L
+        _isAudioFile.value = type == Constants.MEDIA_TYPE_AUDIO ||
+            url.substringAfterLast('.').lowercase() in Constants.AUDIO_EXTENSIONS
     }
 
     fun togglePlayPause() {
@@ -116,9 +125,16 @@ class MediaViewModel {
     }
 
     private fun deriveTitleFromUrl(url: String): String {
-        val file = java.io.File(url)
-        return if (file.exists()) file.nameWithoutExtension
-               else url.substringAfterLast("/").ifBlank { url }
+        return when {
+            url.startsWith("http://") || url.startsWith("https://") || url.startsWith("rtsp://") ||
+                url.startsWith("rtp://") || url.startsWith("mms://") || url.startsWith("udp://") ->
+                url.substringAfterLast("/").ifBlank { url }
+            else -> {
+                val file = java.io.File(url)
+                if (file.exists()) file.nameWithoutExtension
+                else url.substringAfterLast("/").ifBlank { url }
+            }
+        }
     }
 
     fun formatTime(ms: Long): String {

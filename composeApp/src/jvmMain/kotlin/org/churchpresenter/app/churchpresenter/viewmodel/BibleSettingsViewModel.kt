@@ -58,7 +58,7 @@ class BibleSettingsViewModel {
                     val line = reader.readLine() ?: return@use (title ?: File(filePath).nameWithoutExtension)
                     if (line.startsWith("##Title:")) {
                         title = line.substring(8).trim()
-                        return@use title!!
+                        return@use title ?: ""
                     }
                 }
                 title ?: File(filePath).nameWithoutExtension

@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.ImageBitmap
 import org.churchpresenter.app.churchpresenter.models.AnimationType
 import org.churchpresenter.app.churchpresenter.models.LyricSection
+import org.cef.browser.CefBrowser
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.models.SelectedVerse
 
@@ -18,6 +19,17 @@ class PresenterManager {
     private val _selectedVerses = mutableStateOf<List<SelectedVerse>>(emptyList())
     val selectedVerses: State<List<SelectedVerse>> = _selectedVerses
 
+    // Shared Bible transition state — driven by a single animation so all windows stay in sync
+    private val _displayedVerses = mutableStateOf<List<SelectedVerse>>(emptyList())
+    val displayedVerses: State<List<SelectedVerse>> = _displayedVerses
+
+    private val _bibleTransitionAlpha = mutableStateOf(1f)
+    val bibleTransitionAlpha: State<Float> = _bibleTransitionAlpha
+
+    // Hold mode — when active, verse selection changes are staged but not sent to display
+    private val _bibleHold = mutableStateOf(false)
+    val bibleHold: State<Boolean> = _bibleHold
+
     private val _lyricSection = mutableStateOf(LyricSection())
     val lyricSection: State<LyricSection> = _lyricSection
 
@@ -27,8 +39,32 @@ class PresenterManager {
     private val _lyricSectionVersion = mutableStateOf(0)
     val lyricSectionVersion: State<Int> = _lyricSectionVersion
 
+    // Shared Song transition state
+    private val _displayedLyricSection = mutableStateOf(LyricSection())
+    val displayedLyricSection: State<LyricSection> = _displayedLyricSection
+
+    private val _songTransitionAlpha = mutableStateOf(1f)
+    val songTransitionAlpha: State<Float> = _songTransitionAlpha
+
+    private val _songDisplayLineIndex = mutableStateOf(-1)
+    val songDisplayLineIndex: State<Int> = _songDisplayLineIndex
+
+    private val _songDisplaySectionIndex = mutableStateOf(-1)
+    val songDisplaySectionIndex: State<Int> = _songDisplaySectionIndex
+
+    // All sections of the currently selected song — used for auto-fit font sizing
+    private val _allLyricSections = mutableStateOf<List<LyricSection>>(emptyList())
+    val allLyricSections: State<List<LyricSection>> = _allLyricSections
+
     private val _selectedImagePath = mutableStateOf<String?>(null)
     val selectedImagePath: State<String?> = _selectedImagePath
+
+    // Shared Picture transition state
+    private val _displayedImagePath = mutableStateOf<String?>(null)
+    val displayedImagePath: State<String?> = _displayedImagePath
+
+    private val _pictureTransitionAlpha = mutableStateOf(1f)
+    val pictureTransitionAlpha: State<Float> = _pictureTransitionAlpha
 
     private val _animationType = mutableStateOf(AnimationType.CROSSFADE)
     val animationType: State<AnimationType> = _animationType
@@ -41,6 +77,28 @@ class PresenterManager {
 
     private val _selectedSlide = mutableStateOf<ImageBitmap?>(null)
     val selectedSlide: State<ImageBitmap?> = _selectedSlide
+
+    // Shared Slide transition state
+    private val _displayedSlide = mutableStateOf<ImageBitmap?>(null)
+    val displayedSlide: State<ImageBitmap?> = _displayedSlide
+
+    private val _slideTransitionAlpha = mutableStateOf(1f)
+    val slideTransitionAlpha: State<Float> = _slideTransitionAlpha
+
+    // Shared Announcements transition state
+    private val _displayedAnnouncementText = mutableStateOf("")
+    val displayedAnnouncementText: State<String> = _displayedAnnouncementText
+
+    private val _announcementTransitionAlpha = mutableStateOf(1f)
+    val announcementTransitionAlpha: State<Float> = _announcementTransitionAlpha
+
+    // Shared Lottie (lower third) animation progress — driven centrally
+    private val _lottieProgress = mutableStateOf(0f)
+    val lottieProgress: State<Float> = _lottieProgress
+
+    // Shared Media transition alpha
+    private val _mediaTransitionAlpha = mutableStateOf(1f)
+    val mediaTransitionAlpha: State<Float> = _mediaTransitionAlpha
 
     fun setPresentingMode(mode: Presenting) {
         _presentingMode.value = mode
@@ -57,13 +115,53 @@ class PresenterManager {
         }
     }
 
+    fun setDisplayedVerses(verses: List<SelectedVerse>) {
+        _displayedVerses.value = verses
+    }
+
+    fun setBibleTransitionAlpha(alpha: Float) {
+        _bibleTransitionAlpha.value = alpha
+    }
+
+    fun setBibleHold(hold: Boolean) {
+        _bibleHold.value = hold
+    }
+
     fun setLyricSection(section: LyricSection) {
         _lyricSection.value = section
         _lyricSectionVersion.value++
     }
 
+    fun setDisplayedLyricSection(section: LyricSection) {
+        _displayedLyricSection.value = section
+    }
+
+    fun setSongTransitionAlpha(alpha: Float) {
+        _songTransitionAlpha.value = alpha
+    }
+
+    fun setSongDisplayLineIndex(index: Int) {
+        _songDisplayLineIndex.value = index
+    }
+
+    fun setSongDisplaySectionIndex(index: Int) {
+        _songDisplaySectionIndex.value = index
+    }
+
+    fun setAllLyricSections(sections: List<LyricSection>) {
+        _allLyricSections.value = sections
+    }
+
     fun setSelectedImagePath(imagePath: String?) {
         _selectedImagePath.value = imagePath
+    }
+
+    fun setDisplayedImagePath(path: String?) {
+        _displayedImagePath.value = path
+    }
+
+    fun setPictureTransitionAlpha(alpha: Float) {
+        _pictureTransitionAlpha.value = alpha
     }
 
     fun setAnimationType(type: AnimationType) {
@@ -84,6 +182,30 @@ class PresenterManager {
 
     fun setSelectedSlide(slide: ImageBitmap?) {
         _selectedSlide.value = slide
+    }
+
+    fun setDisplayedSlide(slide: ImageBitmap?) {
+        _displayedSlide.value = slide
+    }
+
+    fun setSlideTransitionAlpha(alpha: Float) {
+        _slideTransitionAlpha.value = alpha
+    }
+
+    fun setDisplayedAnnouncementText(text: String) {
+        _displayedAnnouncementText.value = text
+    }
+
+    fun setAnnouncementTransitionAlpha(alpha: Float) {
+        _announcementTransitionAlpha.value = alpha
+    }
+
+    fun setLottieProgress(progress: Float) {
+        _lottieProgress.value = progress
+    }
+
+    fun setMediaTransitionAlpha(alpha: Float) {
+        _mediaTransitionAlpha.value = alpha
     }
 
     private val _lottieJsonContent = mutableStateOf("")
@@ -121,5 +243,29 @@ class PresenterManager {
 
     fun setWebsiteUrl(url: String) {
         _websiteUrl.value = url
+    }
+
+    private val _webPageTitle = mutableStateOf("")
+    val webPageTitle: State<String> = _webPageTitle
+
+    fun setWebPageTitle(title: String) {
+        _webPageTitle.value = title
+    }
+
+    // Periodically-updated screenshot of the live WebView — used by LivePreviewPanel
+    // to mirror the exact visible content without needing a second WebView instance.
+    private val _webSnapshot = mutableStateOf<ImageBitmap?>(null)
+    val webSnapshot: State<ImageBitmap?> = _webSnapshot
+
+    fun setWebSnapshot(bitmap: ImageBitmap?) {
+        _webSnapshot.value = bitmap
+    }
+
+    // Reference to the presenter's live CefBrowser — used by WebTab to forward input events
+    private val _liveBrowser = mutableStateOf<CefBrowser?>(null)
+    val liveBrowser: State<CefBrowser?> = _liveBrowser
+
+    fun setLiveBrowser(browser: CefBrowser?) {
+        _liveBrowser.value = browser
     }
 }

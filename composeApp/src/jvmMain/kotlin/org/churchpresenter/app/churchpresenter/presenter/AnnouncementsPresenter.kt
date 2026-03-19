@@ -1,15 +1,11 @@
 package org.churchpresenter.app.churchpresenter.presenter
 
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -43,24 +39,38 @@ import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDef
 fun AnnouncementsPresenter(
     modifier: Modifier = Modifier,
     text: String,
-    appSettings: AppSettings
+    appSettings: AppSettings,
+    outputRole: String = Constants.OUTPUT_ROLE_NORMAL,
+    transitionAlpha: Float = 1f,
 ) {
+    val isFillOrKey = outputRole == Constants.OUTPUT_ROLE_FILL || outputRole == Constants.OUTPUT_ROLE_KEY
     val settings   = appSettings.announcementsSettings
     val textColor  = parseHexColor(settings.textColor)
-    val bgColor    = parseHexColor(settings.backgroundColor)
+    val bgColor    = if (isFillOrKey) Color.Transparent
+                     else if (settings.backgroundColor == "transparent") Color.Transparent
+                     else parseHexColor(settings.backgroundColor)
     val fontFamily = systemFontFamilyOrDefault(settings.fontType)
+
+    val shadowColorBase = parseHexColor(settings.shadowColor)
+    val shadowSizeMul = settings.shadowSize / 100f
+    val shadowAlpha = (settings.shadowOpacity / 100f).coerceIn(0f, 1f)
+    val announcementShadow = Shadow(
+        color = shadowColorBase.copy(alpha = shadowAlpha),
+        offset = Offset(6f * shadowSizeMul, 6f * shadowSizeMul),
+        blurRadius = 12f * shadowSizeMul
+    )
 
     val textStyle = TextStyle(
         fontFamily     = fontFamily,
         fontWeight     = if (settings.bold) FontWeight.Bold else FontWeight.Normal,
         fontStyle      = if (settings.italic) FontStyle.Italic else FontStyle.Normal,
         textDecoration = if (settings.underline) TextDecoration.Underline else TextDecoration.None,
-        shadow         = if (settings.shadow) Shadow(
-            color      = Color.Black.copy(alpha = 0.7f),
-            offset     = Offset(2f, 2f),
-            blurRadius = 4f
-        ) else null,
-        textAlign = TextAlign.Center,
+        shadow         = if (settings.shadow) announcementShadow else null,
+        textAlign = when (settings.horizontalAlignment) {
+            Constants.LEFT -> TextAlign.Left
+            Constants.RIGHT -> TextAlign.Right
+            else -> TextAlign.Center
+        },
         color     = textColor
     )
 
@@ -68,35 +78,37 @@ fun AnnouncementsPresenter(
         Constants.ANIMATION_SLIDE_FROM_LEFT,
         Constants.ANIMATION_SLIDE_FROM_RIGHT,
         Constants.ANIMATION_SLIDE_FROM_TOP,
-        Constants.ANIMATION_SLIDE_FROM_BOTTOM,
-        Constants.ANIMATION_SLIDE_ALONG_TOP_LTR,
-        Constants.ANIMATION_SLIDE_ALONG_TOP_RTL,
-        Constants.ANIMATION_SLIDE_ALONG_BOTTOM_LTR,
-        Constants.ANIMATION_SLIDE_ALONG_BOTTOM_RTL
+        Constants.ANIMATION_SLIDE_FROM_BOTTOM
     )
 
-    val isHorizontal = settings.animationType != Constants.ANIMATION_SLIDE_FROM_TOP &&
-                       settings.animationType != Constants.ANIMATION_SLIDE_FROM_BOTTOM
+    val isHorizontal = settings.animationType == Constants.ANIMATION_SLIDE_FROM_LEFT ||
+                       settings.animationType == Constants.ANIMATION_SLIDE_FROM_RIGHT
 
     val movesPositive = settings.animationType == Constants.ANIMATION_SLIDE_FROM_LEFT ||
-                        settings.animationType == Constants.ANIMATION_SLIDE_FROM_TOP  ||
-                        settings.animationType == Constants.ANIMATION_SLIDE_ALONG_TOP_LTR ||
-                        settings.animationType == Constants.ANIMATION_SLIDE_ALONG_BOTTOM_LTR
+                        settings.animationType == Constants.ANIMATION_SLIDE_FROM_TOP
 
-    val verticalAnchor: Alignment = when (settings.animationType) {
-        Constants.ANIMATION_SLIDE_ALONG_TOP_LTR,
-        Constants.ANIMATION_SLIDE_ALONG_TOP_RTL    -> Alignment.TopCenter
-        Constants.ANIMATION_SLIDE_ALONG_BOTTOM_LTR,
-        Constants.ANIMATION_SLIDE_ALONG_BOTTOM_RTL -> Alignment.BottomCenter
-        else                                        -> Alignment.Center
+    // For horizontal slides: use position's vertical component (top/center/bottom)
+    // For vertical slides: use position's horizontal component (left/center/right)
+    val slideAlignment: Alignment = if (isHorizontal) {
+        when {
+            settings.position.startsWith("Top")    -> Alignment.TopCenter
+            settings.position.startsWith("Bottom") -> Alignment.BottomCenter
+            else                                   -> Alignment.Center
+        }
+    } else {
+        when {
+            settings.position.endsWith("Left")  -> Alignment.CenterStart
+            settings.position.endsWith("Right") -> Alignment.CenterEnd
+            else                                -> Alignment.Center
+        }
     }
 
     val scrollDurationMs = settings.animationDuration.coerceAtLeast(500)
 
-    val textBlock: @Composable () -> Unit = {
+    val textBlock: @Composable (Boolean) -> Unit = { fullWidth ->
         Box(
             modifier = Modifier
-                .fillMaxWidth()
+                .then(if (fullWidth) Modifier.fillMaxWidth() else Modifier)
                 .wrapContentHeight()
                 .background(bgColor)
                 .padding(horizontal = 32.dp, vertical = 16.dp),
@@ -106,7 +118,7 @@ fun AnnouncementsPresenter(
                 text     = text,
                 style    = textStyle,
                 fontSize = settings.fontSize.sp,
-                modifier = Modifier.fillMaxWidth()
+                modifier = if (fullWidth) Modifier.fillMaxWidth() else Modifier
             )
         }
     }
@@ -115,6 +127,7 @@ fun AnnouncementsPresenter(
         modifier = modifier
             .fillMaxSize()
             .background(Color.Transparent)
+            .graphicsLayer { alpha = transitionAlpha }
     ) {
         if (isDirectional) {
             key(scrollDurationMs, movesPositive, settings.animationType) {
@@ -133,43 +146,27 @@ fun AnnouncementsPresenter(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .align(verticalAnchor)
+                            .align(slideAlignment)
                             .graphicsLayer { translationX = size.width * offsetFraction },
                         contentAlignment = Alignment.Center
-                    ) { textBlock() }
+                    ) { textBlock(true) }
                 } else {
                     Box(
                         modifier = Modifier
                             .fillMaxHeight()
-                            .align(Alignment.Center)
+                            .align(slideAlignment)
                             .graphicsLayer { translationY = size.height * offsetFraction },
                         contentAlignment = Alignment.Center
-                    ) { textBlock() }
+                    ) { textBlock(false) }
                 }
             }
-        } else if (settings.animationType == Constants.ANIMATION_FADE) {
-            val fadeDuration = settings.animationDuration.coerceAtLeast(50)
-            AnimatedContent(
-                targetState = text,
-                transitionSpec = {
-                    fadeIn(tween(fadeDuration)) togetherWith fadeOut(tween(fadeDuration))
-                },
-                modifier = Modifier.fillMaxSize(),
-                label = "presenterFade"
-            ) { _ ->
-                val boxAlignment = positionToAlignment(settings.position)
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = boxAlignment
-                ) { textBlock() }
-            }
         } else {
-            // NONE — static, respect position
+            // Static or fade — animation driven centrally via transitionAlpha
             val boxAlignment = positionToAlignment(settings.position)
             Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = boxAlignment
-            ) { textBlock() }
+            ) { textBlock(false) }
         }
     }
 }
