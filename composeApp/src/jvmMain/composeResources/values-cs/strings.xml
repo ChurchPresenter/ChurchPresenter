@@ -499,6 +499,9 @@
     <string name="animation_slide_to_center">Do středu</string>
     <string name="announcement_animation">Animace</string>
     <string name="announcement_animation_duration">Trvání (ms)</string>
+    <string name="announcement_animation_speed">Rychlost</string>
+    <string name="announcement_loop_count">Počet opakování</string>
+    <string name="announcement_loop_tooltip">0 = nekonečná smyčka</string>
     <string name="announcement_background_color_label">Barva pozadí</string>
     <string name="announcement_text">Text oznámení</string>
     <string name="announcement_text_hint">Zadejte text oznámení…</string>
