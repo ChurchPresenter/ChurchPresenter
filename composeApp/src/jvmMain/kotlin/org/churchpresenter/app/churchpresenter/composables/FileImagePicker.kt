@@ -16,15 +16,14 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.launch
-import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
-import org.churchpresenter.app.churchpresenter.utils.Constants
-import javax.swing.filechooser.FileNameExtensionFilter
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.image_files_filter
 import churchpresenter.composeapp.generated.resources.no_image_selected
-import org.churchpresenter.app.churchpresenter.utils.createFileChooser
+import kotlinx.coroutines.launch
+import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
+import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.jetbrains.compose.resources.stringResource
+import javax.swing.filechooser.FileNameExtensionFilter
 import kotlin.io.path.Path
 
 @Composable

@@ -574,6 +574,7 @@ private fun DirectoryPicker(
     onDirectorySelected: (String) -> Unit,
     onSetAll: (String) -> Unit
 ) {
+    val scope = rememberCoroutineScope()
     Text(
         text = label,
         style = MaterialTheme.typography.titleMedium,
@@ -627,11 +628,10 @@ private fun DirectoryPicker(
         }
         Button(
             onClick = {
-                SwingUtilities.invokeLater {
+                scope.launch {
                     val parentWindow = Window.getWindows().firstOrNull { it.isActive }
                     val selectedDir = fileManager.chooseDirectory(
-                        currentDirectory = currentPath,
-                        parentWindow = parentWindow
+                        currentDirectory = currentPath
                     )
                     selectedDir?.let { onDirectorySelected(it) }
                 }

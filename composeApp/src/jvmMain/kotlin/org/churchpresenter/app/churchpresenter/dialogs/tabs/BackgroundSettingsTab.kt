@@ -5,9 +5,9 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,8 +15,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.RadioButtonDefaults
-import androidx.compose.material3.Slider
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -24,6 +22,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -36,6 +35,7 @@ import churchpresenter.composeapp.generated.resources.background_color_option
 import churchpresenter.composeapp.generated.resources.background_default
 import churchpresenter.composeapp.generated.resources.background_image
 import churchpresenter.composeapp.generated.resources.background_image_option
+import churchpresenter.composeapp.generated.resources.background_transparent_option
 import churchpresenter.composeapp.generated.resources.background_type
 import churchpresenter.composeapp.generated.resources.background_video
 import churchpresenter.composeapp.generated.resources.background_video_option
@@ -46,21 +46,20 @@ import churchpresenter.composeapp.generated.resources.default_background_color_h
 import churchpresenter.composeapp.generated.resources.default_lower_third_background
 import churchpresenter.composeapp.generated.resources.default_lower_third_background_help
 import churchpresenter.composeapp.generated.resources.display_lower_third
-import churchpresenter.composeapp.generated.resources.gradient_enabled
-import churchpresenter.composeapp.generated.resources.gradient_top_color
+import churchpresenter.composeapp.generated.resources.full_screen
 import churchpresenter.composeapp.generated.resources.gradient_bottom_color
+import churchpresenter.composeapp.generated.resources.gradient_enabled
 import churchpresenter.composeapp.generated.resources.gradient_opacity
 import churchpresenter.composeapp.generated.resources.gradient_position
-import churchpresenter.composeapp.generated.resources.full_screen
-import churchpresenter.composeapp.generated.resources.background_transparent_option
+import churchpresenter.composeapp.generated.resources.gradient_top_color
 import churchpresenter.composeapp.generated.resources.songs
 import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
 import org.churchpresenter.app.churchpresenter.composables.FileImagePicker
 import org.churchpresenter.app.churchpresenter.composables.FileVideoPicker
+import org.churchpresenter.app.churchpresenter.composables.isVlcAvailable
 import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.data.BackgroundConfig
 import org.churchpresenter.app.churchpresenter.utils.Constants
-import org.churchpresenter.app.churchpresenter.composables.isVlcAvailable
 import org.churchpresenter.app.churchpresenter.viewmodel.BackgroundSettingsViewModel
 import org.jetbrains.compose.resources.stringResource
 

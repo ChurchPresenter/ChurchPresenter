@@ -12,18 +12,20 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import java.awt.Window
-import javax.swing.JFileChooser
-import javax.swing.SwingUtilities
-import javax.swing.filechooser.FileNameExtensionFilter
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.no_video_selected
 import churchpresenter.composeapp.generated.resources.video_files_filter
-import org.churchpresenter.app.churchpresenter.utils.createFileChooser
+import kotlinx.coroutines.launch
+import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
 import org.jetbrains.compose.resources.stringResource
+import java.awt.Window
+import javax.swing.filechooser.FileNameExtensionFilter
+import kotlin.io.path.Path
+import kotlin.io.path.absolutePathString
 
 @Composable
 fun FileVideoPicker(
@@ -31,30 +33,22 @@ fun FileVideoPicker(
     onVideoPathChange: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val scope = rememberCoroutineScope()
     val videoFilesFilterStr = stringResource(Res.string.video_files_filter)
     Row(
         modifier = modifier
             .height(32.dp)
             .clickable {
-                SwingUtilities.invokeLater {
+                scope.launch {
                     val parentWindow = Window.getWindows().firstOrNull { it.isActive }
-                    val fileChooser = createFileChooser {
-                        fileSelectionMode = JFileChooser.FILES_ONLY
-                        isMultiSelectionEnabled = false
-                        fileFilter = FileNameExtensionFilter(
-                            videoFilesFilterStr,
-                            "mp4", "mov", "avi", "mkv", "webm"
-                        )
-                        if (videoPath.isNotEmpty()) {
-                            val file = java.io.File(videoPath)
-                            if (file.exists()) {
-                                selectedFile = file
-                            }
-                        }
-                    }
-                    val result = fileChooser.showOpenDialog(parentWindow)
-                    if (result == JFileChooser.APPROVE_OPTION) {
-                        onVideoPathChange(fileChooser.selectedFile.absolutePath)
+                    val file = FileChooser.platformInstance.chooseSingle(
+                        path = Path(videoPath),
+                        filters = listOf(FileNameExtensionFilter(videoFilesFilterStr, "mp4", "mov", "avi", "mkv", "webm")),
+                        title = "",
+                        selectDirectory = false
+                    )
+                    if (file != null) {
+                        onVideoPathChange(file.absolutePathString())
                     }
                 }
             }

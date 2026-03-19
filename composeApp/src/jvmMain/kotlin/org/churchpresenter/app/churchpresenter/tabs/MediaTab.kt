@@ -29,6 +29,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.currentRecomposeScope
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -96,6 +97,8 @@ import org.jetbrains.compose.resources.stringResource
 import javax.swing.filechooser.FileNameExtensionFilter
 import kotlin.io.path.absolutePathString
 import kotlinx.coroutines.launch
+import kotlin.io.path.Path
+import kotlin.io.path.extension
 
 @Composable
 fun MediaTab(
@@ -105,6 +108,7 @@ fun MediaTab(
     selectedMediaItem: ScheduleItem.MediaItem? = null,
     presenterManager: PresenterManager? = null
 ) {
+    val scope = rememberCoroutineScope()
     // Check if VLC is available
     if (!isVlcAvailable) {
         Column(
@@ -219,29 +223,27 @@ fun MediaTab(
                     // Local file picker button
                     Button(
                         onClick = {
-                            SwingUtilities.invokeLater {
-                                val chooser = createFileChooser {
-                                    fileSelectionMode = JFileChooser.FILES_ONLY
-                                    dialogTitle = selectFileLabel
-                                    val defaultDir = appSettings.mediaStorageDirectory
-                                    if (defaultDir.isNotEmpty()) {
-                                        currentDirectory = java.io.File(defaultDir)
-                                    }
-                                    fileFilter = FileNameExtensionFilter(
-                                        mediaFilesLabel,
-                                        "mp4", "mov", "avi", "mkv", "wmv", "flv", "webm", "m4v",
-                                        "mp3", "wav", "flac", "aac", "ogg", "wma", "m4a", "aiff", "opus"
-                                    )
-                                }
-                                if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
-                                    val file = chooser.selectedFile
+                            scope.launch {
+                                val file = FileChooser.platformInstance.chooseSingle(
+                                    path = Path(appSettings.mediaStorageDirectory),
+                                    title = selectFileLabel,
+                                    filters = listOf(
+                                        FileNameExtensionFilter(
+                                            mediaFilesLabel,
+                                            "mp4", "mov", "avi", "mkv", "wmv", "flv", "webm", "m4v",
+                                            "mp3", "wav", "flac", "aac", "ogg", "wma", "m4a", "aiff", "opus"
+                                        )
+                                    ),
+                                    selectDirectory = false
+                                )
+                                if (file != null) {
                                     val ext = file.extension.lowercase()
                                     val type = if (ext in Constants.AUDIO_EXTENSIONS)
                                         Constants.MEDIA_TYPE_AUDIO else Constants.MEDIA_TYPE_LOCAL
                                     if (presenterManager?.presentingMode?.value == Presenting.MEDIA) {
                                         presenterManager.setPresentingMode(Presenting.NONE)
                                     }
-                                    viewModel.loadMedia(file.absolutePath, type)
+                                    viewModel.loadMedia(file.absolutePathString(), type)
                                 }
                             }
                         }

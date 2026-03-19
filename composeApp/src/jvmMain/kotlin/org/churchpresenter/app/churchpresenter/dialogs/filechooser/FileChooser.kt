@@ -6,6 +6,7 @@ import javax.swing.filechooser.FileNameExtensionFilter
 import kotlin.io.path.Path
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlin.io.path.exists
 
 abstract class FileChooser {
 
@@ -67,7 +68,7 @@ abstract class FileChooser {
         selectDirectory: Boolean,
         multiple: Boolean
     ): List<Path>? {
-        val initialPath = path ?: Path(System.getProperty(Constants.SystemProperties.USER_HOME))
+        val initialPath = path?.takeIf { it.exists() } ?: Path(System.getProperty(Constants.SystemProperties.USER_HOME))
         return withContext(Dispatchers.IO) { chooseImpl(initialPath, filters, title, selectDirectory, multiple) }
     }
 

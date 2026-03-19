@@ -7,14 +7,14 @@ import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.toComposeImageBitmap
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import java.nio.file.FileSystems
-import java.nio.file.StandardWatchEventKinds
 import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
 import org.churchpresenter.app.churchpresenter.models.AnimationType
@@ -23,12 +23,11 @@ import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.jetbrains.skia.Image
 import java.io.ByteArrayOutputStream
 import java.io.File
+import java.nio.file.FileSystems
+import java.nio.file.StandardWatchEventKinds
 import javax.imageio.ImageIO
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.launch
+import kotlin.io.path.Path
+import kotlin.io.path.absolutePathString
 
 class PicturesViewModel(
     appSettings: AppSettings? = null
@@ -185,18 +184,18 @@ class PicturesViewModel(
     /**
      * Opens a native folder chooser dialog and loads images from the selected folder.
      */
-    fun openFolderChooser(dialogTitle: String, onFolderSelected: ((String) -> Unit)? = null) {
-        SwingUtilities.invokeLater {
-            val chooser = createFileChooser {
-                fileSelectionMode = JFileChooser.DIRECTORIES_ONLY
-                this.dialogTitle = dialogTitle
-                if (defaultDirectory.isNotEmpty()) {
-                    currentDirectory = File(defaultDirectory)
-                }
-            }
-            if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
-                selectFolder(chooser.selectedFile)
-                onFolderSelected?.invoke(chooser.selectedFile.absolutePath)
+    @OptIn(DelicateCoroutinesApi::class)
+    fun openFolderChooser(dialogTitle: String, onFolderSelected: ((String) -> Unit) = {}) {
+        GlobalScope.launch {
+            val dir = FileChooser.platformInstance.chooseSingle(
+                path = Path(defaultDirectory),
+                title = dialogTitle,
+                selectDirectory = true,
+                filters = emptyList()
+            )
+            if (dir != null) {
+                selectFolder(dir.toFile())
+                onFolderSelected(dir.absolutePathString())
             }
         }
     }
