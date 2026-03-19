@@ -629,7 +629,6 @@ private fun DirectoryPicker(
         Button(
             onClick = {
                 scope.launch {
-                    val parentWindow = Window.getWindows().firstOrNull { it.isActive }
                     val selectedDir = fileManager.chooseDirectory(
                         currentDirectory = currentPath
                     )
