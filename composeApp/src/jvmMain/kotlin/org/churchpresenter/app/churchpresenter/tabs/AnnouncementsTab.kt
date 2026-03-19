@@ -1,5 +1,9 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.TooltipArea
+import androidx.compose.foundation.TooltipPlacement
+import androidx.compose.material3.Surface
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.EnterTransition
@@ -35,10 +39,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -80,7 +87,9 @@ import churchpresenter.composeapp.generated.resources.anim_slide_from_top
 import churchpresenter.composeapp.generated.resources.animation_fade
 import churchpresenter.composeapp.generated.resources.animation_none
 import churchpresenter.composeapp.generated.resources.announcement_animation
-import churchpresenter.composeapp.generated.resources.announcement_animation_duration
+import churchpresenter.composeapp.generated.resources.announcement_animation_speed
+import churchpresenter.composeapp.generated.resources.announcement_loop_count
+import churchpresenter.composeapp.generated.resources.announcement_loop_tooltip
 import churchpresenter.composeapp.generated.resources.preview
 import churchpresenter.composeapp.generated.resources.time_separator
 import churchpresenter.composeapp.generated.resources.announcement_background_color_label
@@ -119,6 +128,7 @@ import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
 import org.churchpresenter.app.churchpresenter.composables.FontSettingsDropdown
 import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
 import org.churchpresenter.app.churchpresenter.composables.ShadowDetailRow
+import org.churchpresenter.app.churchpresenter.composables.HorizontalAlignmentButtons
 import org.churchpresenter.app.churchpresenter.composables.TextStyleButtons
 import org.churchpresenter.app.churchpresenter.data.AnnouncementsSettings
 import org.churchpresenter.app.churchpresenter.data.AppSettings
@@ -133,6 +143,7 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import java.awt.GraphicsEnvironment
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun AnnouncementsTab(
     modifier: Modifier = Modifier,
@@ -236,7 +247,8 @@ fun AnnouncementsTab(
                                 },
                                 modifier = mod,
                                 textStyle = MaterialTheme.typography.bodyMedium,
-                                singleLine = true
+                                singleLine = false,
+                                maxLines = 3
                             )
                         }
 
@@ -310,6 +322,16 @@ fun AnnouncementsTab(
                                 onItalicChange    = { viewModel.setItalic(it);    viewModel.saveToSettings(onSettingsChange) },
                                 onUnderlineChange = { viewModel.setUnderline(it); viewModel.saveToSettings(onSettingsChange) },
                                 onShadowChange    = { viewModel.setShadow(it);    viewModel.saveToSettings(onSettingsChange) }
+                            )
+                            HorizontalAlignmentButtons(
+                                selectedAlignment = viewModel.horizontalAlignment,
+                                onAlignmentChange = {
+                                    viewModel.setHorizontalAlignment(it)
+                                    viewModel.saveToSettings(onSettingsChange)
+                                },
+                                leftValue = Constants.LEFT,
+                                centerValue = Constants.CENTER,
+                                rightValue = Constants.RIGHT
                             )
                         }
                         AnimatedVisibility(visible = viewModel.shadow) {
@@ -499,6 +521,11 @@ fun AnnouncementsTab(
                             }
                         }
                         val scrollDurationMs = durationMs.coerceAtLeast(500)
+                        val previewTextAlign = when (viewModel.horizontalAlignment) {
+                            Constants.LEFT -> androidx.compose.ui.text.style.TextAlign.Left
+                            Constants.RIGHT -> androidx.compose.ui.text.style.TextAlign.Right
+                            else -> androidx.compose.ui.text.style.TextAlign.Center
+                        }
                         key(scrollDurationMs, movesPositive) {
                             val infiniteTransition = rememberInfiniteTransition(label = "previewScroll")
                             val offsetFraction by infiniteTransition.animateFloat(
@@ -512,25 +539,31 @@ fun AnnouncementsTab(
                             )
                             if (isDirectional) {
                                 val textComposable: @Composable () -> Unit = {
-                                    Text(
-                                        text = viewModel.text.ifBlank { stringResource(Res.string.preview) },
-                                        fontSize = scaledFontSize,
-                                        color = Utils.parseHexColor(viewModel.textColor),
-                                        maxLines = if (isHorizontal) 1 else 3,
+                                    Box(
                                         modifier = Modifier
+                                            .then(if (isHorizontal) Modifier.wrapContentWidth(unbounded = true) else Modifier)
+                                            .wrapContentHeight()
                                             .background(
                                                 if (viewModel.backgroundColor == "transparent") Color.Transparent
                                                 else Utils.parseHexColor(viewModel.backgroundColor),
                                                 RoundedCornerShape(2.dp)
                                             )
-                                            .padding(horizontal = scaledPadH, vertical = scaledPadV)
-                                    )
+                                            .padding(horizontal = scaledPadH, vertical = scaledPadV),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            text = viewModel.text.ifBlank { stringResource(Res.string.preview) },
+                                            fontSize = scaledFontSize,
+                                            color = Utils.parseHexColor(viewModel.textColor),
+                                            textAlign = previewTextAlign,
+                                            softWrap = !isHorizontal,
+                                        )
+                                    }
                                 }
-                                Box(modifier = Modifier.fillMaxSize()) {
+                                Box(modifier = Modifier.fillMaxSize().clipToBounds()) {
                                     if (isHorizontal) {
                                         Box(
                                             modifier = Modifier
-                                                .fillMaxWidth()
                                                 .align(slideAlignment)
                                                 .graphicsLayer { translationX = size.width * offsetFraction },
                                             contentAlignment = Alignment.Center
@@ -572,56 +605,97 @@ fun AnnouncementsTab(
                                     label = "AnnouncementPreview"
                                 ) { (text, _, _) ->
                                     Box(
-                                        modifier = Modifier.fillMaxSize().padding(scaledPadH),
+                                        modifier = Modifier.fillMaxSize(),
                                         contentAlignment = previewAlignment
                                     ) {
-                                        Text(
-                                            text = text.ifBlank { stringResource(Res.string.preview) },
-                                            fontSize = scaledFontSize,
-                                            color = Utils.parseHexColor(viewModel.textColor),
-                                            maxLines = 3,
+                                        Box(
                                             modifier = Modifier
+                                                .wrapContentHeight()
                                                 .background(
                                                     if (viewModel.backgroundColor == "transparent") Color.Transparent
                                                     else Utils.parseHexColor(viewModel.backgroundColor),
                                                     RoundedCornerShape(2.dp)
                                                 )
-                                                .padding(horizontal = scaledPadH, vertical = scaledPadV)
-                                        )
+                                                .padding(horizontal = scaledPadH, vertical = scaledPadV),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Text(
+                                                text = text.ifBlank { stringResource(Res.string.preview) },
+                                                fontSize = scaledFontSize,
+                                                color = Utils.parseHexColor(viewModel.textColor),
+                                                textAlign = previewTextAlign,
+                                            )
+                                        }
                                     }
                                 }
                             }
                         }
                     } // end BoxWithConstraints
 
-                    // Animation + duration below preview
-                    SectionLabel(stringResource(Res.string.announcement_animation))
-                    AnnouncementAnimationDropdown(
+                    // Animation + loop count on same line
+                    Row(
                         modifier = Modifier.fillMaxWidth(),
-                        items = animItems,
-                        selected = selectedAnim,
-                        onSelectedChange = { sel ->
-                            val key = when (sel) {
-                                slideFromLeftText       -> Constants.ANIMATION_SLIDE_FROM_LEFT
-                                slideFromRightText      -> Constants.ANIMATION_SLIDE_FROM_RIGHT
-                                slideFromTopText        -> Constants.ANIMATION_SLIDE_FROM_TOP
-                                slideFromBottomText     -> Constants.ANIMATION_SLIDE_FROM_BOTTOM
-                                fadeText                -> Constants.ANIMATION_FADE
-                                else                    -> Constants.ANIMATION_NONE
-                            }
-                            viewModel.setAnimationType(key)
-                            viewModel.saveToSettings(onSettingsChange)
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            SectionLabel(stringResource(Res.string.announcement_animation))
+                            AnnouncementAnimationDropdown(
+                                modifier = Modifier.fillMaxWidth(),
+                                items = animItems,
+                                selected = selectedAnim,
+                                onSelectedChange = { sel ->
+                                    val key = when (sel) {
+                                        slideFromLeftText       -> Constants.ANIMATION_SLIDE_FROM_LEFT
+                                        slideFromRightText      -> Constants.ANIMATION_SLIDE_FROM_RIGHT
+                                        slideFromTopText        -> Constants.ANIMATION_SLIDE_FROM_TOP
+                                        slideFromBottomText     -> Constants.ANIMATION_SLIDE_FROM_BOTTOM
+                                        fadeText                -> Constants.ANIMATION_FADE
+                                        else                    -> Constants.ANIMATION_NONE
+                                    }
+                                    viewModel.setAnimationType(key)
+                                    viewModel.saveToSettings(onSettingsChange)
+                                }
+                            )
                         }
-                    )
-                    SectionLabel("${stringResource(Res.string.announcement_animation_duration)}: ${durationMs}ms")
+                        TooltipArea(
+                            tooltip = {
+                                Surface(shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
+                                    Text(
+                                        stringResource(Res.string.announcement_loop_tooltip),
+                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                        style = MaterialTheme.typography.bodySmall
+                                    )
+                                }
+                            },
+                            tooltipPlacement = TooltipPlacement.CursorPoint()
+                        ) {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                SectionLabel(stringResource(Res.string.announcement_loop_count))
+                                NumberSettingsTextField(
+                                    initialText = viewModel.loopCount,
+                                    range = 0..99,
+                                    onValueChange = { v ->
+                                        viewModel.setLoopCount(v)
+                                        viewModel.saveToSettings(onSettingsChange)
+                                    }
+                                )
+                            }
+                        }
+                    }
+                    val sliderMin = 500f
+                    val sliderMax = 30000f
+                    val sliderSum = sliderMin + sliderMax
+                    SectionLabel("${stringResource(Res.string.announcement_animation_speed)}: ${"%.2f".format((sliderSum - durationMs) / 1000f)}")
                     androidx.compose.material3.Slider(
-                        value = durationMs.toFloat(),
+                        value = (sliderSum - durationMs.toFloat()),
                         onValueChange = { v ->
-                            val snapped = (v / 500f).toInt() * 500
-                            viewModel.setAnimationDuration(snapped.coerceAtLeast(500))
+                            val dur = (sliderSum - v)
+                            val snapped = (dur / sliderMin).toInt() * sliderMin.toInt()
+                            viewModel.setAnimationDuration(snapped.coerceIn(sliderMin.toInt(), sliderMax.toInt()))
                             viewModel.saveToSettings(onSettingsChange)
                         },
-                        valueRange = 500f..30000f,
+                        valueRange = sliderMin..sliderMax,
                         steps = 58,
                         modifier = Modifier.fillMaxWidth()
                     )

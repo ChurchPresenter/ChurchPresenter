@@ -413,6 +413,9 @@
     <string name="animation_slide_to_center">Ортаға</string>
     <string name="announcement_animation">Анимация</string>
     <string name="announcement_animation_duration">Ұзақтығы (мс)</string>
+    <string name="announcement_animation_speed">Жылдамдық</string>
+    <string name="announcement_loop_count">Қайталау саны</string>
+    <string name="announcement_loop_tooltip">0 = шексіз қайталау</string>
     <string name="announcement_background_color_label">Фон түсі</string>
     <string name="announcement_text">Хабарландыру мәтіні</string>
     <string name="announcement_text_hint">Хабарландыру мәтінін енгізіңіз…</string>
