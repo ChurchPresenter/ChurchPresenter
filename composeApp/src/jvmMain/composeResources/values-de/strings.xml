@@ -413,6 +413,9 @@
     <string name="animation_slide_to_center">Zur Mitte</string>
     <string name="announcement_animation">Animation</string>
     <string name="announcement_animation_duration">Dauer (ms)</string>
+    <string name="announcement_animation_speed">Geschwindigkeit</string>
+    <string name="announcement_loop_count">Anzahl der Wiederholungen</string>
+    <string name="announcement_loop_tooltip">0 = unendliche Schleife</string>
     <string name="announcement_background_color_label">Hintergrundfarbe</string>
     <string name="announcement_text">Ankündigungstext</string>
     <string name="announcement_text_hint">Ankündigungstext eingeben…</string>
