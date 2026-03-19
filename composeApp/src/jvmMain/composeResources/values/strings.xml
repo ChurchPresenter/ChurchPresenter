@@ -604,6 +604,9 @@
     <string name="animation_slide_left_to_right">Slide Left to Right</string>
     <string name="animation_slide_to_center">Slide to Center</string>
     <string name="announcement_animation_duration">Duration (ms)</string>
+    <string name="announcement_animation_speed">Speed</string>
+    <string name="announcement_loop_count">Loop Count</string>
+    <string name="announcement_loop_tooltip">0 = infinite loop</string>
     <string name="license_title">License Agreement — GNU General Public License v3</string>
     <string name="license_accept_button">I Accept</string>
     <string name="license_decline_button">Decline &amp; Exit</string>

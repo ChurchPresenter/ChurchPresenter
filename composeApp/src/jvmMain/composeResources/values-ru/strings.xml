@@ -414,6 +414,9 @@
     <string name="animation_slide_to_center">К центру</string>
     <string name="announcement_animation">Анимация</string>
     <string name="announcement_animation_duration">Длительность (мс)</string>
+    <string name="announcement_animation_speed">Скорость</string>
+    <string name="announcement_loop_count">Количество повторов</string>
+    <string name="announcement_loop_tooltip">0 = бесконечный повтор</string>
     <string name="announcement_background_color_label">Цвет фона</string>
     <string name="announcement_text">Текст объявления</string>
     <string name="announcement_text_hint">Введите текст объявления…</string>
