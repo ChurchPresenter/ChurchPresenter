@@ -2,26 +2,50 @@ This is a Kotlin Multiplatform project targeting Desktop (JVM).
 
 * [/composeApp](./composeApp/src) is for code that will be shared across your Compose Multiplatform applications.
   It contains several subfolders:
-    - [commonMain](./composeApp/src/commonMain/kotlin) is for code that’s common for all targets.
+    - [commonMain](./composeApp/src/commonMain/kotlin) is for code that's common for all targets.
     - Other folders are for Kotlin code that will be compiled for only the platform indicated in the folder name.
-      For example, if you want to use Apple’s CoreCrypto for the iOS part of your Kotlin app,
+      For example, if you want to use Apple's CoreCrypto for the iOS part of your Kotlin app,
       the [iosMain](./composeApp/src/iosMain/kotlin) folder would be the right place for such calls.
       Similarly, if you want to edit the Desktop (JVM) specific part, the [jvmMain](./composeApp/src/jvmMain/kotlin)
       folder is the appropriate location.
 
+---
+
+## 🚀 Getting Started
+
+This project uses Git submodules. Clone with:
+```shell
+git clone --recurse-submodules https://github.com/ChurchPresenter/ChurchPresenter
+```
+
+If you already cloned without submodules, run:
+```shell
+git submodule update --init --recursive
+```
+
+To pull the latest changes for all submodules:
+```shell
+git submodule update --remote --merge
+```
+
+> This will include [Lottie-Gen](https://github.com/ChurchPresenter/Lottie-Gen), a standalone tool for generating Lottie animations, located at `composeApp/src/jvmMain/appResources/common/Lottie-Gen`.
+
+
+---
+
 ### Build and Run Desktop (JVM) Application
 
 To build and run the development version of the desktop app, use the run configuration from the run widget
-in your IDE’s toolbar or run it directly from the terminal:
+in your IDE's toolbar or run it directly from the terminal:
 
 - on macOS/Linux
-  ```shell
+```shell
   ./gradlew :composeApp:run
-  ```
+```
 - on Windows
-  ```shell
+```shell
   .\gradlew.bat :composeApp:run
-  ```
+```
 
 ---
 

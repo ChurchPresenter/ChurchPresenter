@@ -17,6 +17,17 @@ class Songs {
 
     fun loadFromSpsAppend(resourcePath: String) {
         try {
+            // Detect SQLite format (Mac SongPresenter uses SQLite databases for .sps files)
+            val spsFile = java.io.File(resourcePath)
+            if (spsFile.exists() && spsFile.length() >= 16) {
+                val header = ByteArray(16)
+                spsFile.inputStream().use { it.read(header) }
+                if (String(header, Charsets.US_ASCII).startsWith("SQLite format 3")) {
+                    loadFromSpsSqlite(spsFile)
+                    return
+                }
+            }
+
             // Extract database name from the file path (without extension) as fallback
             val fileBaseName = resourcePath.substringAfterLast('/').substringAfterLast('\\').substringBeforeLast('.')
 
@@ -93,6 +104,54 @@ class Songs {
         }
     }
 
+    /**
+     * Load songs from a SQLite-format .sps file (Mac SongPresenter).
+     */
+    private fun loadFromSpsSqlite(file: java.io.File) {
+        val conn = JdbcDatabase.openConnection(file.absolutePath)
+        conn.use { c ->
+            // Get songbook name from SongBook table
+            val songbookName = try {
+                val sbResult = JdbcDatabase.executeQuery(c, "SELECT title FROM SongBook LIMIT 1")
+                sbResult.firstOrNull()?.getString(0)?.ifEmpty { null }
+            } catch (_: Exception) { null } ?: file.nameWithoutExtension
+
+            // Load all songs
+            val result = JdbcDatabase.executeQuery(c,
+                "SELECT number, title, category, tune, words, music, song_text FROM Songs ORDER BY number")
+            for (row in result) {
+                val songText = row.getString(6)
+                val lyrics = parseSqliteLyrics(songText)
+                songs.add(
+                    SongItem(
+                        number = row.getString(0).trim(),
+                        title = row.getString(1).trim(),
+                        songbook = songbookName,
+                        tune = row.getString(3).trim(),
+                        author = row.getString(4).trim(),
+                        composer = row.getString(5).trim(),
+                        lyrics = lyrics
+                    )
+                )
+            }
+        }
+    }
+
+    /**
+     * Parse lyrics from SQLite song_text format.
+     * Uses newlines to separate lines and blank lines to separate sections.
+     * Section headers like "Куплет 1", "Припев" appear on their own lines.
+     */
+    private fun parseSqliteLyrics(songText: String): List<String> {
+        if (songText.isBlank()) return emptyList()
+        // The song_text uses plain newlines — just split and return as-is
+        // Section headers and empty line separators are already in the correct format
+        val lines = songText.split("\n").map { wrapSectionHeader(it.trimEnd('\r')) }
+        // Remove trailing empty lines
+        val trimmed = lines.dropLastWhile { it.isBlank() }
+        return trimmed
+    }
+
     private fun parseLyrics(lyricsText: String): List<String> {
         if (lyricsText.isBlank()) return emptyList()
 
@@ -119,11 +178,12 @@ class Songs {
             }
 
             if (sectionLines.isNotEmpty()) {
+                sectionLines[0] = wrapSectionHeader(sectionLines[0])
                 val firstLine = sectionLines[0]
                 val section = LyricSection(
                     type = when {
-                        firstLine.startsWith(Constants.VERSE_RUS) -> Constants.VERSE_RUS
-                        firstLine.startsWith(Constants.CHORUS_RUS) -> Constants.CHORUS
+                        firstLine.startsWith("[") -> Constants.SECTION_TYPE_VERSE
+                        firstLine.startsWith("{") -> Constants.SECTION_TYPE_CHORUS
                         else -> Constants.OTHER
                     },
                     lines = sectionLines
@@ -132,7 +192,7 @@ class Songs {
                 sections.add(section)
 
                 // Store chorus for later use
-                if (section.type == Constants.CHORUS) {
+                if (section.type == Constants.SECTION_TYPE_CHORUS) {
                     chorusSection = section
                 }
             }
@@ -143,7 +203,7 @@ class Songs {
             val section = sections[i]
 
             // Skip the original chorus section - we'll add it after each verse instead
-            if (section.type == Constants.CHORUS) {
+            if (section.type == Constants.SECTION_TYPE_CHORUS) {
                 continue
             }
 
@@ -151,13 +211,13 @@ class Songs {
             lyrics.addAll(section.lines)
 
             // If this is a verse and we have a chorus, add the chorus after it
-            if (section.type == "verse" && chorusSection != null) {
+            if (section.type == Constants.SECTION_TYPE_VERSE && chorusSection != null) {
                 lyrics.add("") // Empty line separator before chorus
                 lyrics.addAll(chorusSection.lines)
             }
 
             // Add empty line after current section if there are more non-chorus sections coming
-            val hasMoreSections = sections.subList(i + 1, sections.size).any { it.type != Constants.CHORUS }
+            val hasMoreSections = sections.subList(i + 1, sections.size).any { it.type != Constants.SECTION_TYPE_CHORUS }
             if (hasMoreSections) {
                 lyrics.add("") // Empty line separator after section
             }
@@ -171,10 +231,23 @@ class Songs {
         return lyrics
     }
 
+    private fun wrapSectionHeader(line: String): String {
+        val t = line.trim()
+        return when {
+            t.matches(Regex("^(Припев|Chorus|Refrain).*", RegexOption.IGNORE_CASE)) -> "{$t}"
+            t.matches(Regex("^(Куплет|Verse|Bridge).*", RegexOption.IGNORE_CASE)) -> "[$t]"
+            else -> line
+        }
+    }
+
     private data class LyricSection(
         val type: String, // "verse", "chorus", "other"
         val lines: List<String>
     )
+
+    fun addSongs(newSongs: List<SongItem>) {
+        songs.addAll(newSongs)
+    }
 
     fun getSongs(): List<SongItem> {
         return songs.toList()
@@ -224,6 +297,18 @@ class Songs {
         try {
             if (storageDirectory.isEmpty()) {
                 return false
+            }
+
+            // If the song has a sourceFile (.song format), save directly to that file
+            if (updatedSong.sourceFile.isNotEmpty()) {
+                val parser = SongFileParser()
+                parser.writeSongFile(updatedSong, updatedSong.sourceFile)
+                return true
+            }
+            if (originalSong.sourceFile.isNotEmpty()) {
+                val parser = SongFileParser()
+                parser.writeSongFile(updatedSong.copy(sourceFile = originalSong.sourceFile), originalSong.sourceFile)
+                return true
             }
 
             val dir = java.io.File(storageDirectory)
@@ -307,16 +392,17 @@ class Songs {
         for (line in lyrics) {
             val trimmedLine = line.trim()
 
-            // Check if this is a section marker (Куплет, Припев, etc.)
-            if (trimmedLine.matches(Regex("^(Куплет|Припев|Verse|Chorus|Bridge).*", RegexOption.IGNORE_CASE))) {
+            // Check if this is a section marker ([Куплет], {Припев}, etc.)
+            if (trimmedLine.matches(Regex("^[\\[{](Куплет|Припев|Verse|Chorus|Refrain|Bridge).*[\\]}]$", RegexOption.IGNORE_CASE))) {
                 // If we have accumulated lines, save them as a section
                 if (currentSection.isNotEmpty()) {
                     if (result.isNotEmpty()) result.append("@\$")
                     result.append(currentSection)
                     currentSection = StringBuilder()
                 }
-                // Start new section with the marker
-                currentSection.append(trimmedLine)
+                // Start new section with the marker (strip [] or {} wrapping for SPS format)
+                val unwrapped = trimmedLine.removePrefix("[").removePrefix("{").removeSuffix("]").removeSuffix("}")
+                currentSection.append(unwrapped)
             } else if (trimmedLine.isNotEmpty()) {
                 // Add line to current section
                 if (currentSection.isNotEmpty()) {

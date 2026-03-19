@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -18,14 +19,22 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import java.awt.GraphicsEnvironment
+import java.awt.GraphicsDevice
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
@@ -44,16 +53,39 @@ import churchpresenter.composeapp.generated.resources.display_lower_third
 import churchpresenter.composeapp.generated.resources.display_mode
 import churchpresenter.composeapp.generated.resources.identify_screen
 import churchpresenter.composeapp.generated.resources.left
+import churchpresenter.composeapp.generated.resources.lower_third_height
 import churchpresenter.composeapp.generated.resources.num_screens_label
 import churchpresenter.composeapp.generated.resources.presenter_windows_count
+import churchpresenter.composeapp.generated.resources.projection_display_label
 import churchpresenter.composeapp.generated.resources.projection_position_help
+import churchpresenter.composeapp.generated.resources.projection_target_display
 import churchpresenter.composeapp.generated.resources.right
 import churchpresenter.composeapp.generated.resources.screen
 import churchpresenter.composeapp.generated.resources.screen_assignment
 import churchpresenter.composeapp.generated.resources.screen_col_label
 import churchpresenter.composeapp.generated.resources.top
 import churchpresenter.composeapp.generated.resources.window_position
+import churchpresenter.composeapp.generated.resources.audio_output
+import churchpresenter.composeapp.generated.resources.audio_output_default
+import churchpresenter.composeapp.generated.resources.audio_output_device
+import churchpresenter.composeapp.generated.resources.key_output
+import churchpresenter.composeapp.generated.resources.key_output_none
+import churchpresenter.composeapp.generated.resources.media_vlc_required
+import churchpresenter.composeapp.generated.resources.media_vlc_install
+import churchpresenter.composeapp.generated.resources.vlc_custom_path
+import churchpresenter.composeapp.generated.resources.vlc_browse
+import churchpresenter.composeapp.generated.resources.vlc_path_hint
+import churchpresenter.composeapp.generated.resources.vlc_path_invalid
+import org.churchpresenter.app.churchpresenter.composables.DeckLinkManager
 import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
+import org.churchpresenter.app.churchpresenter.composables.VlcAudioDevice
+import org.churchpresenter.app.churchpresenter.composables.isVlcAvailable
+import org.churchpresenter.app.churchpresenter.composables.listVlcAudioDevices
+import org.churchpresenter.app.churchpresenter.composables.detectVlcInstallPath
+import org.churchpresenter.app.churchpresenter.composables.recheckVlcAvailability
+import org.churchpresenter.app.churchpresenter.composables.vlcCustomPath
+import org.churchpresenter.app.churchpresenter.utils.createFileChooser
+import javax.swing.JFileChooser
 import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.data.ScreenAssignment
 import org.churchpresenter.app.churchpresenter.utils.Constants
@@ -67,29 +99,130 @@ fun ProjectionSettingsTab(
 ) {
     val proj = settings.projectionSettings
 
-    // Detect physical screens once; derive presenter window count automatically.
-    val detectedScreens = remember {
-        GraphicsEnvironment.getLocalGraphicsEnvironment().screenDevices.size
+    // Detect physical screens; exclude the primary monitor from presenter targets.
+    val screenDevicesAll = remember {
+        GraphicsEnvironment.getLocalGraphicsEnvironment().screenDevices
     }
-    val presenterWindowCount = (detectedScreens - 1).coerceIn(1, 4)
+    val primaryDevice = remember {
+        GraphicsEnvironment.getLocalGraphicsEnvironment().defaultScreenDevice
+    }
+    val detectedScreens = screenDevicesAll.size
+    val deckLinkDeviceCount = remember { if (DeckLinkManager.isAvailable()) DeckLinkManager.listDevices().size else 0 }
+    val presenterWindowCount = (screenDevicesAll.count { it != primaryDevice } + deckLinkDeviceCount).coerceAtLeast(0)
 
-    // Auto-save whenever the detected count differs from what's stored.
-    LaunchedEffect(presenterWindowCount) {
-        if (proj.numberOfWindows != presenterWindowCount) {
+    // Extend the assignments list and resolve any unassigned (-1 auto) to actual non-primary displays.
+    val nonPrimaryDevices = remember(screenDevicesAll, primaryDevice) {
+        screenDevicesAll.filter { it != primaryDevice }
+    }
+    LaunchedEffect(presenterWindowCount, nonPrimaryDevices) {
+        var changed = false
+        val assignments = proj.screenAssignments.toMutableList()
+        while (assignments.size < presenterWindowCount) {
+            val npIdx = assignments.size
+            val device = nonPrimaryDevices.getOrNull(npIdx)
+            val deviceIdx = if (device != null) screenDevicesAll.indexOf(device) else Constants.KEY_TARGET_NONE
+            val bounds = device?.defaultConfiguration?.bounds
+            assignments.add(ScreenAssignment(
+                targetDisplay = deviceIdx,
+                targetBoundsX = bounds?.x ?: Int.MIN_VALUE,
+                targetBoundsY = bounds?.y ?: Int.MIN_VALUE,
+                targetBoundsW = bounds?.width ?: 0,
+                targetBoundsH = bounds?.height ?: 0
+            ))
+            changed = true
+        }
+        for (idx in assignments.indices) {
+            // Only resolve auto (-1) to actual display; preserve none (-2)
+            if (assignments[idx].targetDisplay == -1) {
+                val device = nonPrimaryDevices.getOrNull(idx)
+                if (device != null) {
+                    val deviceIdx = screenDevicesAll.indexOf(device)
+                    val bounds = device.defaultConfiguration.bounds
+                    assignments[idx] = assignments[idx].copy(
+                        targetDisplay = deviceIdx,
+                        targetBoundsX = bounds.x,
+                        targetBoundsY = bounds.y,
+                        targetBoundsW = bounds.width,
+                        targetBoundsH = bounds.height
+                    )
+                } else {
+                    // No physical display available for this slot (e.g. DeckLink-only) — set to None
+                    assignments[idx] = assignments[idx].copy(targetDisplay = Constants.KEY_TARGET_NONE)
+                }
+                changed = true
+            }
+        }
+        if (changed) {
             onSettingsChange { s ->
-                s.copy(projectionSettings = s.projectionSettings.copy(numberOfWindows = presenterWindowCount))
+                s.copy(projectionSettings = s.projectionSettings.copy(screenAssignments = assignments))
             }
         }
     }
 
     val numScreens = presenterWindowCount
-    val screenAssignments = listOf(proj.screen1Assignment, proj.screen2Assignment, proj.screen3Assignment, proj.screen4Assignment)
+    val screenAssignments = (0 until numScreens).map { proj.getAssignment(it) }
 
+    // Build display target options: None + non-primary physical displays + DeckLink devices
+    data class DisplayOption(
+        val label: String,
+        val targetDisplay: Int,  // -2 = none, 0+ = display/device index
+        val targetType: String,  // "screen" or "decklink"
+        val boundsX: Int = Int.MIN_VALUE,
+        val boundsY: Int = Int.MIN_VALUE,
+        val boundsW: Int = 0,
+        val boundsH: Int = 0
+    )
+
+    val noneLabel = stringResource(Res.string.key_output_none)
+    val displayOptions = remember(screenDevicesAll, noneLabel) {
+        val options = mutableListOf<DisplayOption>()
+        options.add(DisplayOption(noneLabel, Constants.KEY_TARGET_NONE, "screen"))
+        // Add physical displays, skipping the primary monitor
+        var displayNum = 1
+        for (idx in screenDevicesAll.indices) {
+            if (screenDevicesAll[idx] == primaryDevice) continue
+            val bounds = screenDevicesAll[idx].defaultConfiguration.bounds
+            options.add(
+                DisplayOption(
+                    "Display $displayNum (${bounds.width}x${bounds.height} @ ${bounds.x},${bounds.y})",
+                    idx,
+                    "screen",
+                    boundsX = bounds.x,
+                    boundsY = bounds.y,
+                    boundsW = bounds.width,
+                    boundsH = bounds.height
+                )
+            )
+            displayNum++
+        }
+        // Add DeckLink devices if available
+        if (DeckLinkManager.isAvailable()) {
+            DeckLinkManager.listDevices().forEachIndexed { i, device ->
+                options.add(
+                    DisplayOption(
+                        "DeckLink ${i + 1}: ${device.name}",
+                        device.index,
+                        "decklink"
+                    )
+                )
+            }
+        }
+        options.toList()
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.surfaceVariant)
+            .padding(5.dp)
+    ) {
     Column(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(12.dp),
+            .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(4.dp))
+            .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f), RoundedCornerShape(4.dp))
+            .padding(start = 15.dp, end = 15.dp, top = 8.dp, bottom = 15.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         // ── Screen Assignment Grid ──────────────────────────────────────────
@@ -126,8 +259,9 @@ fun ProjectionSettingsTab(
         Spacer(modifier = Modifier.height(4.dp))
 
         // Grid table — screens are rows (left), content types are columns (top)
-        val screenLabelWidth = 70.dp
-        val cellWidth = 80.dp
+        val screenLabelWidth = 58.dp
+        val displayDropdownWidth = 100.dp
+        val displayModeColWidth = 70.dp
 
         val bibleLabel = stringResource(Res.string.content_bible)
         val songsLabel = stringResource(Res.string.content_songs)
@@ -138,6 +272,8 @@ fun ProjectionSettingsTab(
         val fullScreenLabel = stringResource(Res.string.display_fullscreen)
         val lowerThirdLabel = stringResource(Res.string.display_lower_third)
 
+        val cellWidth = 82.dp
+
         data class ContentCol(
             val label: String,
             val getter: (ScreenAssignment) -> Boolean,
@@ -146,7 +282,14 @@ fun ProjectionSettingsTab(
 
         val contentCols = listOf(
             ContentCol(bibleLabel, { it.showBible }, { a, v -> a.copy(showBible = v) }),
-            ContentCol(songsLabel, { it.showSongs }, { a, v -> a.copy(showSongs = v) }),
+            ContentCol(songsLabel, { it.showSongs && !it.songLookAhead }, { a, v ->
+                if (v) a.copy(showSongs = true, songLookAhead = false)
+                else a.copy(showSongs = false, songLookAhead = false)
+            }),
+            ContentCol("Song with Look Ahead", { it.songLookAhead }, { a, v ->
+                if (v) a.copy(showSongs = true, songLookAhead = true)
+                else a.copy(showSongs = false, songLookAhead = false)
+            }),
             ContentCol(picturesLabel, { it.showPictures }, { a, v -> a.copy(showPictures = v) }),
             ContentCol(mediaLabel, { it.showMedia }, { a, v -> a.copy(showMedia = v) }),
             ContentCol(streamingLabel, { it.showStreaming }, { a, v -> a.copy(showStreaming = v) }),
@@ -158,13 +301,27 @@ fun ProjectionSettingsTab(
             lowerThirdLabel to Constants.DISPLAY_MODE_LOWER_THIRD
         )
 
-        // Header row: blank screen label cell + content column headers + display mode headers + identify
+        // Header row: Screen label + Display + Key Output + content columns + display mode
         Row(verticalAlignment = Alignment.CenterVertically) {
             Spacer(modifier = Modifier.width(screenLabelWidth))
+            Text(
+                text = stringResource(Res.string.projection_target_display),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.primary,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.width(displayDropdownWidth)
+            )
+            Text(
+                text = stringResource(Res.string.key_output),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.primary,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.width(displayDropdownWidth)
+            )
             contentCols.forEach { col ->
                 Text(
                     text = col.label,
-                    style = MaterialTheme.typography.labelSmall,
+                    style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.primary,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.width(cellWidth)
@@ -172,23 +329,23 @@ fun ProjectionSettingsTab(
             }
             Text(
                 text = stringResource(Res.string.display_mode),
-                style = MaterialTheme.typography.labelSmall,
+                style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.primary,
                 textAlign = TextAlign.Center,
-                modifier = Modifier.width(cellWidth * 2)
+                modifier = Modifier.width(displayModeColWidth * 2)
             )
         }
 
         // Sub-header for display mode columns
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Spacer(modifier = Modifier.width(screenLabelWidth + cellWidth * contentCols.size))
+            Spacer(modifier = Modifier.width(screenLabelWidth + displayDropdownWidth * 2 + cellWidth * contentCols.size))
             displayModes.forEach { (modeLabel, _) ->
                 Text(
                     text = modeLabel,
-                    style = MaterialTheme.typography.labelSmall,
+                    style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center,
-                    modifier = Modifier.width(cellWidth)
+                    modifier = Modifier.width(displayModeColWidth)
                 )
             }
         }
@@ -208,6 +365,190 @@ fun ProjectionSettingsTab(
                     modifier = Modifier.width(screenLabelWidth)
                 )
 
+                // Display target dropdown
+                Box(modifier = Modifier.width(displayDropdownWidth), contentAlignment = Alignment.Center) {
+                    var dropdownExpanded by remember { mutableStateOf(false) }
+                    // Match by bounds first (reliable), fall back to index
+                    val currentOption = displayOptions.find {
+                        it.targetType == assignment.targetType &&
+                        it.boundsX == assignment.targetBoundsX && it.boundsY == assignment.targetBoundsY &&
+                        it.boundsW == assignment.targetBoundsW && it.boundsH == assignment.targetBoundsH
+                    } ?: displayOptions.find {
+                        it.targetDisplay == assignment.targetDisplay && it.targetType == assignment.targetType
+                    } ?: displayOptions.first()
+
+                    OutlinedButton(
+                        onClick = { dropdownExpanded = true },
+                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
+                    ) {
+                        Text(
+                            text = currentOption.label,
+                            style = MaterialTheme.typography.labelSmall,
+                            maxLines = 1
+                        )
+                    }
+                    DropdownMenu(
+                        expanded = dropdownExpanded,
+                        onDismissRequest = { dropdownExpanded = false }
+                    ) {
+                        displayOptions.forEach { option ->
+                            DropdownMenuItem(
+                                text = { Text(option.label, style = MaterialTheme.typography.bodySmall) },
+                                onClick = {
+                                    dropdownExpanded = false
+                                    val updated = assignment.copy(
+                                        targetDisplay = option.targetDisplay,
+                                        targetType = option.targetType,
+                                        targetBoundsX = option.boundsX,
+                                        targetBoundsY = option.boundsY,
+                                        targetBoundsW = option.boundsW,
+                                        targetBoundsH = option.boundsH
+                                    )
+                                    onSettingsChange { s ->
+                                        var newProj = s.projectionSettings.withAssignment(i, updated)
+                                        // If selecting a specific display, clear it from other assignments (match by bounds)
+                                        if (option.targetDisplay >= 0 && option.boundsX != Int.MIN_VALUE) {
+                                            for (j in 0 until numScreens) {
+                                                val other = newProj.getAssignment(j)
+                                                // Clear from other primary displays that target the same screen
+                                                if (j != i && other.targetBoundsX == option.boundsX && other.targetBoundsY == option.boundsY &&
+                                                    other.targetBoundsW == option.boundsW && other.targetBoundsH == option.boundsH) {
+                                                    newProj = newProj.withAssignment(j, other.copy(
+                                                        targetDisplay = Constants.KEY_TARGET_NONE, targetType = "screen",
+                                                        targetBoundsX = Int.MIN_VALUE, targetBoundsY = Int.MIN_VALUE, targetBoundsW = 0, targetBoundsH = 0
+                                                    ))
+                                                }
+                                                // Clear from key outputs that target the same screen
+                                                val otherLatest = newProj.getAssignment(j)
+                                                if (otherLatest.keyTargetBoundsX == option.boundsX && otherLatest.keyTargetBoundsY == option.boundsY &&
+                                                    otherLatest.keyTargetBoundsW == option.boundsW && otherLatest.keyTargetBoundsH == option.boundsH) {
+                                                    newProj = newProj.withAssignment(j, otherLatest.copy(
+                                                        keyTargetDisplay = Constants.KEY_TARGET_NONE, keyTargetType = "screen",
+                                                        keyTargetBoundsX = Int.MIN_VALUE, keyTargetBoundsY = Int.MIN_VALUE, keyTargetBoundsW = 0, keyTargetBoundsH = 0
+                                                    ))
+                                                }
+                                            }
+                                        }
+                                        s.copy(projectionSettings = newProj)
+                                    }
+                                }
+                            )
+                        }
+                    }
+                }
+
+                // Key output target dropdown (None + display options)
+                Box(modifier = Modifier.width(displayDropdownWidth), contentAlignment = Alignment.Center) {
+                    var keyExpanded by remember { mutableStateOf(false) }
+                    val noneLabel = stringResource(Res.string.key_output_none)
+
+                    data class KeyOutputOption(
+                        val label: String,
+                        val targetDisplay: Int,
+                        val targetType: String,
+                        val boundsX: Int = Int.MIN_VALUE,
+                        val boundsY: Int = Int.MIN_VALUE,
+                        val boundsW: Int = 0,
+                        val boundsH: Int = 0
+                    )
+                    val keyOutputOptions = remember(screenDevicesAll, noneLabel) {
+                        val opts = mutableListOf(KeyOutputOption(noneLabel, Constants.KEY_TARGET_NONE, "screen"))
+                        var keyDisplayNum = 1
+                        for (idx in screenDevicesAll.indices) {
+                            if (screenDevicesAll[idx] == primaryDevice) continue
+                            val bounds = screenDevicesAll[idx].defaultConfiguration.bounds
+                            opts.add(KeyOutputOption(
+                                "Display $keyDisplayNum (${bounds.width}x${bounds.height} @ ${bounds.x},${bounds.y})",
+                                idx, "screen",
+                                boundsX = bounds.x, boundsY = bounds.y, boundsW = bounds.width, boundsH = bounds.height
+                            ))
+                            keyDisplayNum++
+                        }
+                        if (DeckLinkManager.isAvailable()) {
+                            DeckLinkManager.listDevices().forEachIndexed { di, device ->
+                                opts.add(KeyOutputOption("DeckLink ${di + 1}: ${device.name}", device.index, "decklink"))
+                            }
+                        }
+                        opts.toList()
+                    }
+
+                    // Match by bounds first (reliable), fall back to index
+                    val currentKeyOption = keyOutputOptions.find {
+                        it.targetType == assignment.keyTargetType &&
+                        it.boundsX == assignment.keyTargetBoundsX && it.boundsY == assignment.keyTargetBoundsY &&
+                        it.boundsW == assignment.keyTargetBoundsW && it.boundsH == assignment.keyTargetBoundsH
+                    } ?: keyOutputOptions.find {
+                        it.targetDisplay == assignment.keyTargetDisplay && it.targetType == assignment.keyTargetType
+                    } ?: keyOutputOptions.first()
+
+                    OutlinedButton(
+                        onClick = { keyExpanded = true },
+                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
+                    ) {
+                        Text(
+                            text = currentKeyOption.label,
+                            style = MaterialTheme.typography.labelSmall,
+                            maxLines = 1
+                        )
+                    }
+                    DropdownMenu(
+                        expanded = keyExpanded,
+                        onDismissRequest = { keyExpanded = false }
+                    ) {
+                        keyOutputOptions.forEach { option ->
+                            DropdownMenuItem(
+                                text = { Text(option.label, style = MaterialTheme.typography.bodySmall) },
+                                onClick = {
+                                    keyExpanded = false
+                                    val updated = assignment.copy(
+                                        keyTargetDisplay = option.targetDisplay,
+                                        keyTargetType = option.targetType,
+                                        keyTargetBoundsX = option.boundsX,
+                                        keyTargetBoundsY = option.boundsY,
+                                        keyTargetBoundsW = option.boundsW,
+                                        keyTargetBoundsH = option.boundsH
+                                    )
+                                    onSettingsChange { s ->
+                                        var newProj = s.projectionSettings.withAssignment(i, updated)
+                                        if (option.targetDisplay >= 0 && option.boundsX != Int.MIN_VALUE) {
+                                            for (j in 0 until numScreens) {
+                                                val other = newProj.getAssignment(j)
+                                                // Clear from other primary displays that target the same screen
+                                                if (j != i && other.targetBoundsX == option.boundsX && other.targetBoundsY == option.boundsY &&
+                                                    other.targetBoundsW == option.boundsW && other.targetBoundsH == option.boundsH) {
+                                                    newProj = newProj.withAssignment(j, other.copy(
+                                                        targetDisplay = Constants.KEY_TARGET_NONE, targetType = "screen",
+                                                        targetBoundsX = Int.MIN_VALUE, targetBoundsY = Int.MIN_VALUE, targetBoundsW = 0, targetBoundsH = 0
+                                                    ))
+                                                }
+                                                // Clear from other key outputs that target the same screen
+                                                val otherLatest = newProj.getAssignment(j)
+                                                if (j != i && otherLatest.keyTargetBoundsX == option.boundsX && otherLatest.keyTargetBoundsY == option.boundsY &&
+                                                    otherLatest.keyTargetBoundsW == option.boundsW && otherLatest.keyTargetBoundsH == option.boundsH) {
+                                                    newProj = newProj.withAssignment(j, otherLatest.copy(
+                                                        keyTargetDisplay = Constants.KEY_TARGET_NONE, keyTargetType = "screen",
+                                                        keyTargetBoundsX = Int.MIN_VALUE, keyTargetBoundsY = Int.MIN_VALUE, keyTargetBoundsW = 0, keyTargetBoundsH = 0
+                                                    ))
+                                                }
+                                            }
+                                            // Also clear if same slot's primary display targets the same screen
+                                            val self = newProj.getAssignment(i)
+                                            if (self.targetBoundsX == option.boundsX && self.targetBoundsY == option.boundsY &&
+                                                self.targetBoundsW == option.boundsW && self.targetBoundsH == option.boundsH) {
+                                                newProj = newProj.withAssignment(i, self.copy(
+                                                    targetDisplay = Constants.KEY_TARGET_NONE, targetType = "screen",
+                                                    targetBoundsX = Int.MIN_VALUE, targetBoundsY = Int.MIN_VALUE, targetBoundsW = 0, targetBoundsH = 0
+                                                ))
+                                            }
+                                        }
+                                        s.copy(projectionSettings = newProj)
+                                    }
+                                }
+                            )
+                        }
+                    }
+                }
+
                 // Checkbox cells for each content type
                 contentCols.forEach { col ->
                     Box(modifier = Modifier.width(cellWidth), contentAlignment = Alignment.Center) {
@@ -216,12 +557,7 @@ fun ProjectionSettingsTab(
                             onCheckedChange = { checked ->
                                 val updated = col.setter(assignment, checked)
                                 onSettingsChange { s ->
-                                    when (i) {
-                                        0 -> s.copy(projectionSettings = s.projectionSettings.copy(screen1Assignment = updated))
-                                        1 -> s.copy(projectionSettings = s.projectionSettings.copy(screen2Assignment = updated))
-                                        2 -> s.copy(projectionSettings = s.projectionSettings.copy(screen3Assignment = updated))
-                                        else -> s.copy(projectionSettings = s.projectionSettings.copy(screen4Assignment = updated))
-                                    }
+                                    s.copy(projectionSettings = s.projectionSettings.withAssignment(i, updated))
                                 }
                             }
                         )
@@ -230,27 +566,188 @@ fun ProjectionSettingsTab(
 
                 // Radio button cells for display mode
                 displayModes.forEach { (_, modeValue) ->
-                    Box(modifier = Modifier.width(cellWidth), contentAlignment = Alignment.Center) {
+                    Box(modifier = Modifier.width(displayModeColWidth), contentAlignment = Alignment.Center) {
                         RadioButton(
                             selected = assignment.displayMode == modeValue,
                             onClick = {
                                 val updated = assignment.copy(displayMode = modeValue)
                                 onSettingsChange { s ->
-                                    when (i) {
-                                        0 -> s.copy(projectionSettings = s.projectionSettings.copy(screen1Assignment = updated))
-                                        1 -> s.copy(projectionSettings = s.projectionSettings.copy(screen2Assignment = updated))
-                                        2 -> s.copy(projectionSettings = s.projectionSettings.copy(screen3Assignment = updated))
-                                        else -> s.copy(projectionSettings = s.projectionSettings.copy(screen4Assignment = updated))
-                                    }
+                                    s.copy(projectionSettings = s.projectionSettings.withAssignment(i, updated))
                                 }
                             }
                         )
                     }
                 }
+
             }
 
             if (i < numScreens - 1) {
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f), thickness = 1.dp)
+            }
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // Lower third height
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Text(
+                text = stringResource(Res.string.lower_third_height),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            NumberSettingsTextField(
+                initialText = proj.lowerThirdHeightPercent,
+                onValueChange = { value ->
+                    onSettingsChange { s ->
+                        s.copy(projectionSettings = s.projectionSettings.copy(lowerThirdHeightPercent = value))
+                    }
+                },
+                range = 10..60
+            )
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // ── Audio Output ────────────────────────────────────────────────────
+        SectionHeader(stringResource(Res.string.audio_output))
+        Spacer(modifier = Modifier.height(4.dp))
+
+        var vlcDetected by remember { mutableStateOf(isVlcAvailable) }
+        var vlcPathText by remember { mutableStateOf(proj.vlcPath.ifBlank { detectVlcInstallPath() }) }
+        var vlcPathError by remember { mutableStateOf(false) }
+
+        if (vlcDetected) {
+            val audioDevices = remember(vlcDetected) { listVlcAudioDevices() }
+            val defaultLabel = stringResource(Res.string.audio_output_default)
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Text(
+                    text = stringResource(Res.string.audio_output_device),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+
+                Box {
+                    var expanded by remember { mutableStateOf(false) }
+                    val currentDevice = audioDevices.find { it.id == proj.audioOutputDeviceId }
+                    val currentLabel = currentDevice?.description ?: defaultLabel
+
+                    OutlinedButton(onClick = { expanded = true }) {
+                        Text(
+                            text = currentLabel,
+                            style = MaterialTheme.typography.labelSmall,
+                            maxLines = 1
+                        )
+                    }
+                    DropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false }
+                    ) {
+                        // System default option
+                        DropdownMenuItem(
+                            text = { Text(defaultLabel, style = MaterialTheme.typography.bodySmall) },
+                            onClick = {
+                                expanded = false
+                                onSettingsChange { s ->
+                                    s.copy(projectionSettings = s.projectionSettings.copy(audioOutputDeviceId = ""))
+                                }
+                            }
+                        )
+                        // VLC-detected devices
+                        audioDevices.forEach { device ->
+                            DropdownMenuItem(
+                                text = { Text(device.description, style = MaterialTheme.typography.bodySmall) },
+                                onClick = {
+                                    expanded = false
+                                    onSettingsChange { s ->
+                                        s.copy(projectionSettings = s.projectionSettings.copy(audioOutputDeviceId = device.id))
+                                    }
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+        } else {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(
+                        MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f),
+                        RoundedCornerShape(4.dp)
+                    )
+                    .padding(12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Column {
+                    Text(
+                        text = stringResource(Res.string.media_vlc_required),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Text(
+                        text = stringResource(Res.string.media_vlc_install),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        }
+
+        // Custom VLC path picker
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = stringResource(Res.string.vlc_custom_path),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            OutlinedTextField(
+                value = vlcPathText,
+                onValueChange = {},
+                readOnly = true,
+                placeholder = { Text(stringResource(Res.string.vlc_path_hint), style = MaterialTheme.typography.bodySmall) },
+                isError = vlcPathError,
+                supportingText = if (vlcPathError) {{ Text(stringResource(Res.string.vlc_path_invalid)) }} else null,
+                singleLine = true,
+                textStyle = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.weight(1f)
+            )
+            Button(onClick = {
+                val chooser = createFileChooser {
+                    fileSelectionMode = JFileChooser.DIRECTORIES_ONLY
+                    dialogTitle = "Select VLC installation directory"
+                    if (vlcPathText.isNotBlank()) {
+                        currentDirectory = java.io.File(vlcPathText)
+                    }
+                }
+                if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+                    val selectedPath = chooser.selectedFile.absolutePath
+                    vlcPathText = selectedPath
+                    vlcCustomPath = selectedPath
+                    onSettingsChange { s ->
+                        s.copy(projectionSettings = s.projectionSettings.copy(vlcPath = selectedPath))
+                    }
+                    val detected = recheckVlcAvailability()
+                    vlcDetected = detected
+                    vlcPathError = !detected && selectedPath.isNotBlank()
+                }
+            }) {
+                Text(
+                    text = stringResource(Res.string.vlc_browse),
+                    style = MaterialTheme.typography.labelSmall
+                )
             }
         }
 
@@ -384,6 +881,8 @@ fun ProjectionSettingsTab(
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
             modifier = Modifier.fillMaxWidth()
         )
+
+    }
     }
 }
 

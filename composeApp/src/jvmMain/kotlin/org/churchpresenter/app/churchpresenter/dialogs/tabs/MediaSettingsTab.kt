@@ -1,6 +1,9 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -11,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
@@ -45,11 +49,19 @@ fun MediaSettingsTab(
     settings: AppSettings,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit
 ) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.surfaceVariant)
+            .padding(5.dp)
+    ) {
     Column(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(12.dp),
+            .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(4.dp))
+            .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f), RoundedCornerShape(4.dp))
+            .padding(start = 15.dp, end = 15.dp, top = 8.dp, bottom = 15.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         SectionHeader(stringResource(Res.string.slideshow_settings))
@@ -186,6 +198,7 @@ fun MediaSettingsTab(
                 }
             )
         }
+    }
     }
 }
 

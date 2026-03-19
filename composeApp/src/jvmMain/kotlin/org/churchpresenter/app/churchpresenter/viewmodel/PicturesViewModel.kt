@@ -6,6 +6,15 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.toComposeImageBitmap
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
+import java.nio.file.FileSystems
+import java.nio.file.StandardWatchEventKinds
 import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
 import org.churchpresenter.app.churchpresenter.models.AnimationType
@@ -24,6 +33,8 @@ import kotlinx.coroutines.launch
 class PicturesViewModel(
     appSettings: AppSettings? = null
 ) {
+    private val defaultDirectory = appSettings?.pictureSettings?.storageDirectory ?: ""
+
     // State
     private val _selectedFolder = mutableStateOf<File?>(null)
     val selectedFolder: File? get() = _selectedFolder.value
@@ -73,6 +84,19 @@ class PicturesViewModel(
         set(value) { _animationType.value = value }
 
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    private var watchJob: Job? = null
+
+    private val imageExtensions = listOf("jpg", "jpeg", "png", "gif", "bmp", "webp", "heic", "heif")
+
+    init {
+        val savedFolder = appSettings?.pictureSettings?.storageDirectory.orEmpty()
+        if (savedFolder.isNotEmpty()) {
+            val folder = File(savedFolder)
+            if (folder.exists() && folder.isDirectory) {
+                selectFolder(folder)
+            }
+        }
+    }
 
     // Business Logic Methods
 
@@ -80,20 +104,19 @@ class PicturesViewModel(
         _selectedFolder.value = folder
         clearImages()
         loadImagesFromFolder(folder)
+        startWatching(folder)
     }
 
     fun loadImagesFromFolder(folder: File) {
         if (!folder.exists() || !folder.isDirectory) {
-            println("PicturesViewModel: Folder not found or not a directory: ${folder.absolutePath}")
             return
         }
 
         // Load images from folder
         val imageFiles = folder.listFiles { file ->
-            file.isFile && file.extension.lowercase() in listOf("jpg", "jpeg", "png", "gif", "bmp", "webp", "heic", "heif")
+            file.isFile && file.extension.lowercase() in imageExtensions
         }?.sortedBy { it.name } ?: emptyList()
 
-        println("PicturesViewModel: Found ${imageFiles.size} images in folder")
         _images.addAll(imageFiles)
 
         // Load thumbnails in background
@@ -102,9 +125,7 @@ class PicturesViewModel(
                 try {
                     val bitmap = loadImageBitmap(file)
                     _thumbnails[file] = bitmap
-                    println("Successfully loaded: ${file.name}")
                 } catch (e: Exception) {
-                    println("Failed to load ${file.name}: ${e.message}")
                     e.printStackTrace()
                 }
             }
@@ -112,6 +133,8 @@ class PicturesViewModel(
     }
 
     fun clearImages() {
+        watchJob?.cancel()
+        watchJob = null
         _images.clear()
         _thumbnails.clear()
         _selectedImageIndex.value = 0
@@ -162,15 +185,19 @@ class PicturesViewModel(
     /**
      * Opens a native folder chooser dialog and loads images from the selected folder.
      */
-    suspend fun openFolderChooser(dialogTitle: String) {
-        val file = FileChooser.platformInstance.chooseSingle(
-            path = null,
-            filters = emptyList(),
-            title = dialogTitle,
-            selectDirectory = true
-        )
-        if (file != null) {
-            selectFolder(file.toFile())
+    fun openFolderChooser(dialogTitle: String, onFolderSelected: ((String) -> Unit)? = null) {
+        SwingUtilities.invokeLater {
+            val chooser = createFileChooser {
+                fileSelectionMode = JFileChooser.DIRECTORIES_ONLY
+                this.dialogTitle = dialogTitle
+                if (defaultDirectory.isNotEmpty()) {
+                    currentDirectory = File(defaultDirectory)
+                }
+            }
+            if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+                selectFolder(chooser.selectedFile)
+                onFolderSelected?.invoke(chooser.selectedFile.absolutePath)
+            }
         }
     }
 
@@ -206,41 +233,29 @@ class PicturesViewModel(
     }
 
     private fun loadImageBitmap(file: File): ImageBitmap {
-        println("Loading image: ${file.name}, extension: ${file.extension}, size: ${file.length()} bytes")
-
         val bytes = file.readBytes()
-        println("Read ${bytes.size} bytes from ${file.name}")
 
         // Try to decode with Skia first
         val originalImage = try {
             Image.makeFromEncoded(bytes)
         } catch (e: Exception) {
-            println("Skia failed to decode ${file.name}: ${e.message}")
-
             // If it's a HEIC file, try converting with ImageIO
             if (file.extension.lowercase() in listOf("heic", "heif")) {
-                println("Attempting HEIC conversion using ImageIO for ${file.name}")
                 try {
                     // Use ImageIO to read HEIC and convert to JPEG bytes
                     val bufferedImage = ImageIO.read(file)
                     if (bufferedImage != null) {
-                        println("ImageIO successfully read HEIC: ${file.name}")
-
                         // Convert BufferedImage to JPEG bytes
                         val outputStream = ByteArrayOutputStream()
                         ImageIO.write(bufferedImage, "jpg", outputStream)
                         val jpegBytes = outputStream.toByteArray()
 
-                        println("Converted HEIC to JPEG: ${jpegBytes.size} bytes")
-
                         // Try decoding the JPEG with Skia
                         Image.makeFromEncoded(jpegBytes)
                     } else {
-                        println("ImageIO returned null for ${file.name}")
                         throw Exception("ImageIO could not read HEIC file")
                     }
                 } catch (heicError: Exception) {
-                    println("HEIC conversion also failed for ${file.name}: ${heicError.message}")
                     throw Exception("Failed to decode image ${file.name}: Cannot decode HEIC format. Original error: ${e.message}, Conversion error: ${heicError.message}", e)
                 }
             } else {
@@ -248,36 +263,106 @@ class PicturesViewModel(
             }
         }
 
-        println("Decoded ${file.name}: ${originalImage.width}x${originalImage.height}")
-
-        // Downscale to thumbnail size (300px max dimension) for better performance
-        val maxThumbnailSize = 300
+        // Downscale to thumbnail size (400px max dimension) for grid display
+        val maxThumbnailSize = 400
         val scale = maxThumbnailSize.toFloat() / maxOf(originalImage.width, originalImage.height)
 
         return if (scale < 1.0f) {
-            println("Downscaling ${file.name} with scale factor: $scale")
-            // Image is larger than thumbnail size, downscale it
             val newWidth = (originalImage.width * scale).toInt()
             val newHeight = (originalImage.height * scale).toInt()
 
-            // Create a scaled bitmap
             val surface = org.jetbrains.skia.Surface.makeRasterN32Premul(newWidth, newHeight)
             val canvas = surface.canvas
 
-            // Scale and draw the image
-            canvas.scale(scale, scale)
-            canvas.drawImage(originalImage, 0f, 0f)
+            // High-quality downscale using Mitchell filter
+            val srcRect = org.jetbrains.skia.Rect.makeWH(originalImage.width.toFloat(), originalImage.height.toFloat())
+            val dstRect = org.jetbrains.skia.Rect.makeWH(newWidth.toFloat(), newHeight.toFloat())
+            canvas.drawImageRect(
+                originalImage,
+                srcRect,
+                dstRect,
+                org.jetbrains.skia.SamplingMode.MITCHELL,
+                org.jetbrains.skia.Paint(),
+                true
+            )
 
-            // Get the resulting bitmap
             surface.makeImageSnapshot().toComposeImageBitmap()
         } else {
-            println("Using original size for ${file.name}")
-            // Image is already small enough, use as-is
             originalImage.toComposeImageBitmap()
         }
     }
 
+    private fun startWatching(folder: File) {
+        watchJob?.cancel()
+        watchJob = scope.launch {
+            try {
+                val watchService = FileSystems.getDefault().newWatchService()
+                folder.toPath().register(
+                    watchService,
+                    StandardWatchEventKinds.ENTRY_CREATE,
+                    StandardWatchEventKinds.ENTRY_DELETE
+                )
+                while (isActive) {
+                    val key = watchService.take()
+                    var changed = false
+                    for (event in key.pollEvents()) {
+                        val kind = event.kind()
+                        if (kind == StandardWatchEventKinds.OVERFLOW) continue
+                        val fileName = event.context().toString()
+                        val ext = fileName.substringAfterLast('.', "").lowercase()
+                        if (ext !in imageExtensions) continue
+
+                        val file = File(folder, fileName)
+                        when (kind) {
+                            StandardWatchEventKinds.ENTRY_CREATE -> {
+                                if (file.exists() && file.isFile && file !in _images) {
+                                    // Insert in sorted order, keep selected image stable
+                                    val insertIndex = _images.indexOfFirst { it.name > file.name }
+                                    if (insertIndex >= 0) {
+                                        _images.add(insertIndex, file)
+                                        if (insertIndex <= _selectedImageIndex.value) {
+                                            _selectedImageIndex.value++
+                                        }
+                                    } else {
+                                        _images.add(file)
+                                    }
+                                    // Load thumbnail
+                                    launch {
+                                        try {
+                                            _thumbnails[file] = loadImageBitmap(file)
+                                        } catch (_: Exception) {}
+                                    }
+                                    changed = true
+                                }
+                            }
+                            StandardWatchEventKinds.ENTRY_DELETE -> {
+                                val idx = _images.indexOf(file)
+                                if (idx >= 0) {
+                                    _images.removeAt(idx)
+                                    _thumbnails.remove(file)
+                                    if (idx < _selectedImageIndex.value) {
+                                        _selectedImageIndex.value--
+                                    } else if (_selectedImageIndex.value >= _images.size && _images.isNotEmpty()) {
+                                        _selectedImageIndex.value = _images.size - 1
+                                    }
+                                    changed = true
+                                }
+                            }
+                        }
+                    }
+                    if (!key.reset()) break
+                }
+                watchService.close()
+            } catch (_: java.nio.file.ClosedWatchServiceException) {
+                // Expected on dispose
+            } catch (_: InterruptedException) {
+                // Expected on cancel
+            }
+        }
+    }
+
     fun dispose() {
+        watchJob?.cancel()
         scope.cancel()
     }
 }

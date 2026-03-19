@@ -13,6 +13,8 @@ sealed class ScheduleItem {
         val songNumber: Int,
         val title: String,
         val songbook: String,
+        /** Stable unique ID = "songbook::number". Empty on old saved schedules — fall back to title+number matching. */
+        val songId: String = "",
         override val displayText: String = "$songNumber - $title"
     ) : ScheduleItem()
 
@@ -23,7 +25,14 @@ sealed class ScheduleItem {
         val chapter: Int,
         val verseNumber: Int,
         val verseText: String,
-        override val displayText: String = "$bookName $chapter:$verseNumber"
+        /**
+         * Formatted range string for multi-verse items, e.g. "16-18" or "16,18,20".
+         * Empty for a single verse — [verseNumber] is used for display in that case.
+         */
+        val verseRange: String = "",
+        override val displayText: String =
+            if (verseRange.isNotEmpty()) "$bookName $chapter:$verseRange"
+            else "$bookName $chapter:$verseNumber"
     ) : ScheduleItem()
 
     @Serializable
@@ -74,7 +83,8 @@ sealed class ScheduleItem {
     ) : ScheduleItem()
 
     @Serializable
-    data class AnnouncementItem(        override val id: String,
+    data class AnnouncementItem(
+        override val id: String,
         val text: String,
         val textColor: String = "#FFFFFF",
         val backgroundColor: String = "#000000",
@@ -84,10 +94,23 @@ sealed class ScheduleItem {
         val italic: Boolean = false,
         val underline: Boolean = false,
         val shadow: Boolean = false,
+        val horizontalAlignment: String = "center",
         val position: String = "center",
         val animationType: String = "SLIDE_FROM_BOTTOM",
         val animationDuration: Int = 500,
-        override val displayText: String = "${text.take(50)}${if (text.length > 50) "…" else ""}"
+        val isTimer: Boolean = false,
+        val timerHours: Int = 0,
+        val timerMinutes: Int = 0,
+        val timerSeconds: Int = 0,
+        val timerTextColor: String = "#FFFFFF",
+        val timerExpiredText: String = "",
+        override val displayText: String = if (isTimer) {
+            val total = timerHours * 3600 + timerMinutes * 60 + timerSeconds
+            if (timerHours > 0) "Timer %d:%02d:%02d".format(timerHours, timerMinutes, timerSeconds)
+            else "Timer %02d:%02d".format(timerMinutes, timerSeconds)
+        } else {
+            "${text.take(50)}${if (text.length > 50) "…" else ""}"
+        }
     ) : ScheduleItem()
 
     @Serializable

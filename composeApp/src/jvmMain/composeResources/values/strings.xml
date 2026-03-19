@@ -35,8 +35,18 @@
     <string name="chapter">Chapter</string>
     <string name="verse">Verse</string>
     <string name="options">Options</string>
+    <string name="appearance">System</string>
+    <string name="bible_storage_directory">Bible Storage Directory</string>
+    <string name="songs_storage_directory">Songs Storage Directory</string>
+    <string name="lower_third_storage_directory">Lower Third Storage Directory</string>
+    <string name="pictures_storage_directory">Pictures Storage Directory</string>
+    <string name="presentation_storage_directory">Presentation Storage Directory</string>
+    <string name="media_storage_directory">Media Storage Directory</string>
+    <string name="screen_number">Screen %1$d</string>
+    <string name="font_preview_text">ABCDabcd1234</string>
     <string name="cancel">Cancel</string>
     <string name="ok">OK</string>
+    <string name="apply">Apply</string>
     <string name="none">None</string>
     <string name="first_page">First Page</string>
     <string name="every_page">Every Page</string>
@@ -52,6 +62,12 @@
     <string name="tooltip_italic">Italic</string>
     <string name="tooltip_underline">Underline</string>
     <string name="tooltip_shadow">Shadow</string>
+    <string name="shadow_settings">Shadow</string>
+    <string name="shadow_size">Size (%)</string>
+    <string name="shadow_opacity">Intensity (%)</string>
+    <string name="hold_live">Hold Live</string>
+    <string name="fade_in">Fade In</string>
+    <string name="fade_out">Fade Out</string>
     <string name="menu_file">File</string>
     <string name="menu_new_schedule">New Schedule</string>
     <string name="menu_open_schedule">Open Schedule</string>
@@ -81,6 +97,9 @@
 
     <string name="menu_help">Help</string>
     <string name="menu_about">About</string>
+    <string name="about_title">About Church Presenter</string>
+    <string name="open_crash_logs">Open Crash Logs</string>
+    <string name="action_ok">OK</string>
     <string name="menu_help_item">Help</string>
     <string name="menu_keyboard_shortcuts">Keyboard Shortcuts</string>
     <string name="keyboard_shortcuts_title">Keyboard Shortcuts</string>
@@ -181,7 +200,10 @@
     <string name="song_files">Song Files</string>
     <string name="storage_directory">Storage Directory</string>
     <string name="browse_directory">Browse...</string>
+    <string name="set_all_directories">Set All</string>
     <string name="no_directory_selected">No directory selected</string>
+    <string name="no_files_detected">No files detected</string>
+    <string name="detected_files_label">Detected:</string>
     <string name="files_in_directory">Files in Directory</string>
     <string name="import_song_file">Import Song File</string>
     <string name="remove_song_file">Remove Song File</string>
@@ -301,7 +323,7 @@
     <string name="please_select_file_first">Please select a file from the list first.</string>
     <string name="no_file_selected_title">No File Selected</string>
     <string name="confirm_delete">Confirm Delete</string>
-    <string name="confirm_delete_file">Are you sure you want to delete \'%s\'?</string>
+    <string name="confirm_delete_file">Are you sure you want to delete "%1$s"?</string>
     <string name="import_error">Import Error</string>
     <string name="delete_error">Delete Error</string>
 
@@ -309,6 +331,9 @@
     <string name="background_default">Default</string>
     <string name="background_color_option">Color</string>
     <string name="background_image_option">Image</string>
+    <string name="background_video_option">Video Loop</string>
+    <string name="background_transparent_option">Transparent</string>
+    <string name="background_video">Background Video:</string>
 
     <!-- Position Options -->
     <string name="position_above">Above</string>
@@ -333,10 +358,10 @@
     <string name="no_results_found">No results found for "%1$s"</string>
 
     <!-- File Manager Error Messages -->
-    <string name="error_target_directory_not_exist">Target directory does not exist: %s</string>
-    <string name="error_copying_file">Error copying %s: %s</string>
+    <string name="error_target_directory_not_exist">Target directory does not exist: %1$s</string>
+    <string name="error_copying_file">Error copying %1$s: %2$s</string>
     <string name="error_failed_delete">Failed to delete file</string>
-    <string name="error_deleting_file">Error deleting file: %s</string>
+    <string name="error_deleting_file">Error deleting file: %1$s</string>
     <string name="warning">Warning</string>
 
     <!-- Edit Song Dialog -->
@@ -345,7 +370,7 @@
     <string name="author">Author</string>
     <string name="composer">Composer</string>
     <string name="enter_lyrics_here">Enter lyrics here...</string>
-    <string name="lyrics_format_help">Format: Use line breaks to separate verses. Start verse lines with "Куплет" or "Припев".</string>
+    <string name="lyrics_format_help">Format: Use [Verse 1], [Verse 2] etc. for verse headers and {Chorus} for chorus. Separate sections with blank lines.</string>
     <string name="save">Save</string>
 
     <!-- Tooltips -->
@@ -359,12 +384,21 @@
     <string name="tooltip_add_to_schedule">Add to Schedule</string>
     <string name="tooltip_remove_from_schedule">Remove from Schedule</string>
     <string name="tooltip_clear_schedule">Clear Schedule</string>
+    <string name="tooltip_clear_display">Clear Display</string>
+    <string name="tooltip_toggle_displays">Toggle Presenter Displays</string>
     <string name="tooltip_settings">Settings</string>
+    <string name="tooltip_theme_light">Light Theme</string>
+    <string name="tooltip_theme_dark">Dark Theme</string>
+    <string name="tooltip_theme_system">System Theme</string>
     <string name="tooltip_remove">Remove</string>
     <string name="tooltip_edit">Edit</string>
     <string name="tooltip_edit_label">Edit Label</string>
     <string name="tooltip_go_live">Go Live</string>
     <string name="tooltip_add_label">Add Label</string>
+    <string name="tooltip_collapse_schedule">Collapse Schedule</string>
+    <string name="tooltip_expand_schedule">Expand Schedule</string>
+    <string name="schedule_drop_hint">Drag files here to add to schedule</string>
+    <string name="schedule_add_files">Add Files…</string>
 
     <!-- Add Label Dialog -->
     <string name="add_label">Add Label</string>
@@ -390,6 +424,8 @@
     <string name="select_folder_to_view">Select a folder to view images</string>
     <string name="select_image_folder_dialog">Select Image Folder</string>
     <string name="loop">Loop</string>
+    <string name="loop_on">Loop On</string>
+    <string name="loop_off">Loop Off</string>
     <string name="transition_duration">Transition Duration:</string>
     <string name="animation_type">Animation Type:</string>
     <string name="animation_crossfade">Crossfade</string>
@@ -420,6 +456,10 @@
     <string name="number_of_projection_windows">Number of Projection Windows</string>
     <string name="windows_count_label">Windows (1-3)</string>
     <string name="window_position">Window Position</string>
+    <string name="text_margins">Text Margins</string>
+    <string name="auto_fit">Auto</string>
+    <string name="auto_fit_checkbox_tooltip">Automatically fit text to screen, using font size as maximum</string>
+    <string name="auto_fit_button_tooltip">Calculate optimal font size for current verse</string>
     <string name="screen">Screen</string>
     <string name="projection_position_help">Position values represent pixel offsets from screen edges. Use these to adjust projection window placement on secondary displays.</string>
     <string name="screen_assignment">Screen Assignment</string>
@@ -436,25 +476,58 @@
     <string name="display_mode">Display Mode</string>
     <string name="display_fullscreen">Full Screen</string>
     <string name="display_lower_third">Lower Third</string>
+    <string name="lower_third_height">Lower Third Height % (for Bible and Songs)</string>
     <string name="full_screen">Full Screen</string>
     <string name="lower_third_size">Lower Third</string>
     <string name="identify_screen">Identify</string>
+    <string name="projection_target_display">Display</string>
+    <string name="projection_auto_display">Auto</string>
+    <string name="projection_display_label">Display %1$d (%2$dx%3$d)</string>
 
     <!-- Background Settings Tab -->
-    <string name="default_background_color">Default Background Color</string>
-    <string name="default_background_color_help">This color is used when 'Default' background type is selected for Bible or Songs</string>
+    <string name="default_background_color">Default Background</string>
+    <string name="default_background_color_help">Used when 'Default' is selected for Bible or Songs</string>
+    <string name="default_lower_third_background">Default Lower Third Background</string>
+    <string name="default_lower_third_background_help">Used when 'Default' is selected for Bible or Songs in lower third display mode</string>
+    <!-- Gradient Settings -->
+    <string name="gradient_enabled">Gradient</string>
+    <string name="gradient_top_color">Top Color:</string>
+    <string name="gradient_bottom_color">Bottom Color:</string>
+    <string name="gradient_opacity">Opacity</string>
+    <string name="gradient_position">Transition Position</string>
+
+    <!-- System Settings -->
+    <string name="reset_settings">Reset All Settings</string>
+    <string name="reset_settings_confirm">Are you sure you want to reset all settings to defaults?\n\nThe application will restart.</string>
+    <string name="clear_lottie_cache_confirm">Do you also want to clear the Lottie generator cache?\n\nThis will remove saved presets, color themes, and uploaded logos.</string>
+    <string name="export_settings">Export Settings</string>
+    <string name="import_settings">Import Settings</string>
+    <string name="import_settings_confirm">Are you sure you want to import settings?\n\nThis will overwrite your current settings and the application will restart.</string>
+    <string name="settings_exported">Settings exported successfully.</string>
+    <string name="settings_export_failed">Failed to export settings.</string>
+    <string name="settings_import_failed">Failed to import settings. The file may be invalid.</string>
 
     <!-- Media Tab Strings -->
     <string name="media_tab_title">Media</string>
     <string name="media_source">Media Source</string>
     <string name="media_local_file">Local File</string>
-    <string name="media_youtube">YouTube</string>
-    <string name="media_vimeo">Vimeo</string>
-    <string name="media_url_hint">Enter YouTube or Vimeo URL...</string>
+    <string name="media_network_url">Network URL</string>
+    <string name="media_url_placeholder">Enter URL (http://, rtsp://, ...)</string>
     <string name="media_load">Load</string>
-    <string name="media_select_file">Select Video File</string>
+    <string name="media_select_file">Select File</string>
+    <string name="media_files_filter">Media Files</string>
     <string name="media_no_source">No media loaded</string>
-    <string name="media_select_to_begin">Select a local video file or enter a YouTube / Vimeo URL</string>
+    <string name="media_select_to_begin">Select a local audio or video file to begin</string>
+    <string name="audio_output">Audio Output</string>
+    <string name="audio_output_device">Output device</string>
+    <string name="audio_output_default">System Default</string>
+    <string name="media_vlc_required">VLC media player is required for media playback</string>
+    <string name="media_vlc_install">Please install VLC from videolan.org and restart the application</string>
+    <string name="vlc_custom_path">Custom VLC path</string>
+    <string name="vlc_browse">Browse</string>
+    <string name="vlc_path_hint">Select VLC installation directory</string>
+    <string name="vlc_path_invalid">Directory does not contain VLC libraries</string>
+    <string name="media_audio_continues">Audio will continue playing in the background when switching tabs or displaying other content</string>
     <string name="media_now_playing">Now playing:</string>
     <string name="media_now_presenting">Now presenting on screen</string>
     <string name="media_seek_backward">Seek Backward 10s</string>
@@ -517,6 +590,7 @@
     <string name="center_right">Center Right</string>
     <string name="bottom_center">Bottom Center</string>
     <string name="announcement_background_color_label">Background Color</string>
+    <string name="transparent_default">Transparent (Default)</string>
     <string name="announcement_animation">Animation</string>
     <string name="animation_slide_up">Slide Up (Bottom to Top)</string>
     <string name="anim_slide_from_left">Slide From Left</string>
@@ -535,7 +609,60 @@
     <string name="license_decline_button">Decline &amp; Exit</string>
     <string name="license_prompt">You must accept the GNU GPL v3 license to use Church Presenter.</string>
 
-    <!-- Website -->
+    <!-- Announcements timer -->
+    <string name="timer_title">Timer</string>
+    <string name="timer_hours">hr</string>
+    <string name="timer_minutes">min</string>
+    <string name="timer_seconds">sec</string>
+    <string name="timer_start">Start</string>
+    <string name="timer_pause">Pause</string>
+    <string name="timer_resume">Resume</string>
+    <string name="timer_reset">Reset</string>
+    <string name="timer_text_color">Timer Color</string>
+    <string name="timer_expired_text_label">Text when timer expires</string>
+    <string name="timer_expired_text_hint">Enter message to show when done…</string>
+    <string name="timer_expired">Time's up!</string>
+
+    <!-- Bible history -->
+    <string name="bible_history">History</string>
+    <string name="bible_history_clear">Clear</string>
+
+    <!-- Output role (fill+key) -->
+    <string name="output_role_normal">Normal</string>
+    <string name="output_role_fill">Fill</string>
+    <string name="output_role_key">Key</string>
+    <string name="key_output">Key Output</string>
+    <string name="key_output_none">None</string>
+
+    <!-- Live preview -->
+    <string name="live_preview_title">Live</string>
+    <string name="live_preview_nothing">Nothing is live</string>
+    <string name="live_preview_bible">Bible</string>
+    <string name="live_preview_song">Song</string>
+    <string name="live_preview_picture">Picture</string>
+    <string name="live_preview_presentation">Presentation</string>
+    <string name="live_preview_media">Media</string>
+    <string name="live_preview_lower_third">Lower Third</string>
+    <string name="live_preview_announcement">Announcement</string>
+    <string name="live_preview_website">Website</string>
+
+    <!-- Website / Web Tab -->
+    <string name="web_url_label">URL</string>
+    <string name="web_url_hint">https://example.com</string>
+    <string name="web_go_live">Go Live</string>
+    <string name="web_add_to_schedule">Add to Schedule</string>
+    <string name="web_preview_label">Preview</string>
+    <string name="web_preview_hint">Enter a URL above and tap Go Live</string>
+    <string name="web_live_badge">LIVE</string>
+    <string name="web_bookmark_add">Bookmark</string>
+    <string name="web_bookmark_remove">Remove</string>
+    <string name="web_bookmarks">Bookmarks</string>
+    <string name="web_clear_cache">Clear Cache</string>
+    <string name="web_back">Back</string>
+    <string name="web_forward">Forward</string>
+    <string name="web_refresh">Refresh</string>
+    <string name="web_zoom_in">Zoom In</string>
+    <string name="web_zoom_out">Zoom Out</string>
     <string name="tooltip_add_website">Add Website</string>
     <string name="website_dialog_title">Add Website</string>
     <string name="website_url_label">URL</string>
@@ -543,4 +670,186 @@
     <string name="website_title_label">Title (optional)</string>
     <string name="website_title_hint">Enter a display name…</string>
     <string name="website_go_live">Go Live</string>
+    <string name="website_disclaimer">We are not responsible for any advertisements or content that may appear on the displayed website.</string>
+    <string name="tab_web">Web</string>
+    <string name="web_under_construction">This feature is under construction.</string>
+
+    <!-- Server Settings -->
+    <string name="server_settings">Server</string>
+    <string name="companion_server">Companion Server</string>
+    <string name="server_description">Allows mobile devices and remote clients to receive song and bible data from this app.</string>
+    <string name="enable_server">Enable Server</string>
+    <string name="server_running">Running</string>
+    <string name="server_stopped">Stopped</string>
+    <string name="server_port">Port</string>
+    <string name="server_port_hint">8765</string>
+    <string name="server_port_note">Change port before starting the server.</string>
+    <string name="api_key_protection">API Key Protection</string>
+    <string name="api_key_label">API Key</string>
+    <string name="api_key_hint">Enter a secret key…</string>
+    <string name="generate_api_key">Generate</string>
+    <string name="copy_api_key">Copy</string>
+    <string name="server_url_label">Server URL</string>
+    <string name="copy_url">Copy URL</string>
+    <string name="server_endpoints">Available Endpoints</string>
+    <string name="server_restart">Restart</string>
+    <string name="server_endpoints_read">Read</string>
+    <string name="server_endpoints_actions">Actions</string>
+    <string name="server_endpoints_websocket">WebSocket</string>
+    <string name="server_payload_reference">Payload reference (item field)</string>
+    <!-- Endpoint descriptions -->
+    <string name="endpoint_desc_server_info">server info</string>
+    <string name="endpoint_desc_song_catalog">song catalog</string>
+    <string name="endpoint_desc_song_detail">full song details with lyrics</string>
+    <string name="endpoint_desc_filter_songbook">filter by songbook</string>
+    <string name="endpoint_desc_bible_catalog">bible catalog</string>
+    <string name="endpoint_desc_filter_book">filter by book</string>
+    <string name="endpoint_desc_filter_chapter">filter by chapter</string>
+    <string name="endpoint_desc_schedule">current schedule</string>
+    <string name="endpoint_desc_presentation_catalog">presentation catalog</string>
+    <string name="endpoint_desc_slide_image">slide image (JPEG)</string>
+    <string name="endpoint_desc_picture_catalog">picture folder catalog</string>
+    <string name="endpoint_desc_picture_image">picture image (JPEG)</string>
+    <string name="endpoint_desc_select_picture">select image by index</string>
+    <string name="endpoint_desc_ws_select_picture">select picture image (WS)</string>
+    <string name="endpoint_desc_bible_chapter">full chapter with verse text</string>
+    <string name="endpoint_desc_add_to_schedule">add item to schedule</string>
+    <string name="endpoint_desc_add_batch_to_schedule">add multiple items to schedule in one call</string>
+    <string name="endpoint_desc_project">send item directly to projection</string>
+    <string name="endpoint_desc_ws_realtime">real-time updates</string>
+    <string name="endpoint_desc_ws_add_to_schedule">add item to schedule (WS)</string>
+    <string name="endpoint_desc_ws_project">project item directly (WS)</string>
+
+    <!-- Hardcoded strings moved to resources -->
+    <string name="no_image_selected">No image selected</string>
+    <string name="no_video_selected">No video selected</string>
+    <string name="align_left">Align Left</string>
+    <string name="align_center">Align Center</string>
+    <string name="align_right">Align Right</string>
+    <string name="align_top">Align Top</string>
+    <string name="align_middle">Align Middle</string>
+    <string name="align_bottom">Align Bottom</string>
+    <string name="position_above_desc">Above</string>
+    <string name="position_below_desc">Below</string>
+    <string name="increment">Increment</string>
+    <string name="decrement">Decrement</string>
+    <string name="presented_image">Presented Image</string>
+    <string name="presented_slide">Presented Slide</string>
+    <string name="preview">Preview</string>
+    <string name="fill_badge">FILL</string>
+    <string name="presenter_view_title">Presenter View %1$d</string>
+    <string name="key_output_title">Key Output %1$d</string>
+    <string name="lower_third_generator">Lower Third Generator</string>
+    <string name="loading_generator">Loading generator...</string>
+    <string name="preview_will_appear_here">Preview will appear here</string>
+    <string name="pause_duration_ms">Pause %1$dms</string>
+    <string name="aspect_ratio_mismatch">Aspect ratio mismatch: file is %1$dx%2$d (%3$s) but output is %4$dx%5$d (%6$s)</string>
+    <string name="mobile_view">Mobile</string>
+    <string name="desktop_view">Desktop</string>
+    <string name="interactive_mode">Interactive</string>
+    <string name="mirror_mode">Mirror</string>
+    <string name="time_separator">:</string>
+
+    <!-- Misc UI -->
+    <string name="theme">Theme</string>
+    <string name="menu_view">View</string>
+    <string name="symbol_ok">✓</string>
+    <string name="symbol_cancel">✗</string>
+    <string name="symbol_dropdown">▾</string>
+
+    <!-- Generator dialog messages -->
+    <string name="server_not_running_title">Server Not Running</string>
+    <string name="server_not_running_message">Please start the API server to generate lower thirds.\nGenerated files will be saved to the folder configured in Settings.</string>
+    <string name="no_folder_title">No Folder</string>
+    <string name="no_folder_message">No folder configured.\nSet a Lower Third folder in Settings first.</string>
+    <string name="choose_logo_image">Choose Logo Image</string>
+    <string name="image_files_filter">Image Files (*.jpg, *.jpeg, *.png, *.gif, *.bmp)</string>
+    <string name="video_files_filter">Video Files (*.mp4, *.mov, *.avi, *.mkv, *.webm)</string>
+    <string name="images_filter">Images</string>
+    <string name="swap_bibles">Swap</string>
+    <string name="multi_verse">Multi-verse</string>
+    <string name="new_song">New Song</string>
+    <string name="back_to_live">Back to Live</string>
+    <string name="line_navigation_hint">Use ← → to navigate lines, ↑ ↓ for verses</string>
+
+    <!-- Statistics -->
+    <string name="statistics">Statistics</string>
+    <string name="top_songs">Top Songs</string>
+    <string name="top_verses">Top Verses</string>
+    <string name="clear_statistics">Clear Statistics</string>
+    <string name="times_displayed">times</string>
+
+    <!-- Remote API event dialog -->
+    <string name="remote_api_add_to_schedule">Add to Schedule</string>
+    <string name="remote_api_project">Project (Go Live)</string>
+    <string name="remote_api_request_title">Remote API Request</string>
+    <string name="remote_api_request_title_queued">Remote API Request (%1$d pending)</string>
+    <string name="remote_client_label">Client:</string>
+    <string name="remote_client_allowed_badge">✓ allowed</string>
+    <string name="remote_client_blocked_badge">⛔ blocked</string>
+    <string name="remote_queue_waiting_one">1 more request waiting in queue</string>
+    <string name="remote_queue_waiting_many">%1$d more requests waiting in queue</string>
+    <string name="allow">Allow</string>
+    <string name="allow_for_session">Allow for Session</string>
+    <string name="allow_permanently">Allow Permanently</string>
+    <string name="deny">Deny</string>
+    <string name="block_for_session">Block for Session</string>
+    <string name="block_permanently">Block Permanently</string>
+
+    <!-- Remote Clients settings section (Server Settings tab) -->
+    <string name="remote_clients_title">Remote Clients</string>
+    <string name="remote_clients_description">Manage permanently allowed and blocked companion clients. Clients are identified by the X-Device-Id header sent with each request.</string>
+    <string name="allowed_clients">✓  Allowed Clients</string>
+    <string name="allowed_clients_description">Requests from these clients are automatically approved without showing a dialog.</string>
+    <string name="blocked_clients">⛔  Blocked Clients</string>
+    <string name="blocked_clients_description">Requests from these clients are automatically rejected without showing a dialog.</string>
+    <string name="no_allowed_clients">No permanently allowed clients.</string>
+    <string name="no_blocked_clients">No permanently blocked clients.</string>
+    <string name="client_label_placeholder">Enter a friendly name…</string>
+    <string name="client_label_edit_tooltip">Set friendly name</string>
+    <string name="client_label_save">Save</string>
+    <string name="client_label_cancel">Cancel</string>
+
+    <!-- Edit Song Dialog - Secondary Content -->
+    <string name="new_songbook">New Songbook</string>
+    <string name="add_new">Add New...</string>
+    <string name="secondary_title">Secondary Title</string>
+    <string name="duplicate_song_error">A song with this number and title already exists in this songbook</string>
+    <string name="secondary_lyrics">Secondary Lyrics</string>
+    <string name="enter_secondary_lyrics_here">Enter secondary lyrics here...</string>
+
+    <!-- System Settings - Song Samples and File Conversion -->
+    <string name="song_samples">Song Samples</string>
+    <string name="folder_already_exists">Folder Already Exists</string>
+    <string name="song_samples_overwrite_confirm">\"Song Samples\" folder already exists. This will overwrite existing files.\nContinue?</string>
+    <string name="song_samples_copied">Copied %1$d sample songs to \"Song Samples\" folder.</string>
+    <string name="add_song_samples">Add Song Samples</string>
+    <string name="sps_file_not_supported">%1$s (not supported)</string>
+    <string name="folder_overwrite_confirm">Folder \"%1$s\" already exists. This will overwrite existing song files.\nContinue?</string>
+    <string name="conversion_complete">Conversion Complete</string>
+    <string name="conversion_complete_message">Converted %1$d songs to folder: %2$s</string>
+    <string name="conversion_complete_with_errors">Converted %1$d songs.\nErrors:\n%2$s</string>
+    <string name="convert">Convert</string>
+    <string name="tooltip_directory_writable">Directory is writable</string>
+    <string name="tooltip_directory_not_found">Directory not found. Create it or choose a different location.</string>
+    <string name="tooltip_directory_not_writable">Cannot write to this directory. Choose a different location or change permissions.</string>
+    <string name="song_folder_with_count">%1$s (%2$d songs)</string>
+
+    <!-- Song Settings - Display Modes and Language Options -->
+    <string name="number_before_title">Number before title</string>
+    <string name="fullscreen_display">Fullscreen Display</string>
+    <string name="display_mode_label">Display Mode:</string>
+    <string name="display_mode_one_verse">1 Verse</string>
+    <string name="display_mode_one_line">1 Line</string>
+    <string name="song_language_both">Both</string>
+    <string name="song_language_primary">Primary</string>
+    <string name="song_language_secondary">Secondary</string>
+    <string name="lower_third_display">Lower Third Display</string>
+    <string name="bilingual_layout">Bilingual Layout:</string>
+    <string name="bilingual_left_right">Left / Right</string>
+    <string name="bilingual_top_bottom">Top / Bottom</string>
+    <string name="look_ahead_fullscreen">Look Ahead (Fullscreen)</string>
+    <string name="look_ahead_next_fullscreen">Look Ahead Next Section (Fullscreen)</string>
+    <string name="look_ahead_lower_third">Look Ahead (Lower Third)</string>
+    <string name="look_ahead_next_lower_third">Look Ahead Next Section (Lower Third)</string>
 </resources>

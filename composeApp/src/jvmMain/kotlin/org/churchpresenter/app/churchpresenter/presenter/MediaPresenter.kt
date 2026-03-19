@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import org.churchpresenter.app.churchpresenter.composables.VideoPlayer
 import org.churchpresenter.app.churchpresenter.viewmodel.LocalMediaViewModel
@@ -14,7 +15,9 @@ import org.churchpresenter.app.churchpresenter.viewmodel.LocalMediaViewModel
 fun MediaPresenter(
     modifier: Modifier = Modifier,
     isVisible: Boolean = true,
-    audioEnabled: Boolean = true
+    audioEnabled: Boolean = true,
+    audioDeviceId: String = "",
+    transitionAlpha: Float = 1f
 ) {
     val viewModel = LocalMediaViewModel.current ?: return
 
@@ -28,12 +31,14 @@ fun MediaPresenter(
         modifier = modifier
             .fillMaxSize()
             .background(Color.Black)
+            .alpha(transitionAlpha)
     ) {
         if (viewModel.isLoaded && isVisible) {
             VideoPlayer(
                 viewModel = viewModel,
                 modifier = Modifier.fillMaxSize(),
-                audioEnabled = audioEnabled
+                audioEnabled = audioEnabled,
+                audioDeviceId = audioDeviceId
             )
         }
     }

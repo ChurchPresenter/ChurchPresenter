@@ -20,6 +20,11 @@ import kotlinx.coroutines.launch
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import javax.swing.filechooser.FileNameExtensionFilter
+import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.image_files_filter
+import churchpresenter.composeapp.generated.resources.no_image_selected
+import org.churchpresenter.app.churchpresenter.utils.createFileChooser
+import org.jetbrains.compose.resources.stringResource
 import kotlin.io.path.Path
 
 @Composable
@@ -28,6 +33,7 @@ fun FileImagePicker(
     onImagePathChange: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val imageFilesFilterStr = stringResource(Res.string.image_files_filter)
     val scope = rememberCoroutineScope()
     Row(
         modifier = modifier
@@ -39,7 +45,7 @@ fun FileImagePicker(
                         path = path,
                         filters = listOf(
                             FileNameExtensionFilter(
-                                "Image Files (*.jpg, *.jpeg, *.png, *.gif, *.bmp)",
+                                imageFilesFilterStr,
                                 "jpg", "jpeg", "png", "gif", "bmp"
                             )
                         ),
@@ -65,7 +71,7 @@ fun FileImagePicker(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text = if (imagePath.isEmpty()) "No image selected" else imagePath.substringAfterLast('/').substringAfterLast('\\'),
+            text = if (imagePath.isEmpty()) stringResource(Res.string.no_image_selected) else imagePath.substringAfterLast('/').substringAfterLast('\\'),
             style = MaterialTheme.typography.bodySmall,
             color = if (imagePath.isEmpty())
                 MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)

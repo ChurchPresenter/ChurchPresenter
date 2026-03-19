@@ -36,10 +36,12 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.rememberWindowState
 import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.ic_app_icon
 import churchpresenter.composeapp.generated.resources.license_accept_button
 import churchpresenter.composeapp.generated.resources.license_decline_button
 import churchpresenter.composeapp.generated.resources.license_prompt
 import churchpresenter.composeapp.generated.resources.license_title
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -62,6 +64,7 @@ fun LicenseDialog(
     Window(
         onCloseRequest = onDecline,
         title = stringResource(Res.string.license_title),
+        icon = painterResource(Res.drawable.ic_app_icon),
         state = windowState,
         resizable = true,
         alwaysOnTop = true

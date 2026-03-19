@@ -1,25 +1,30 @@
 package org.churchpresenter.app.churchpresenter
 
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.Crossfade
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.togetherWith
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,24 +36,46 @@ import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.WindowState
 import androidx.compose.ui.window.WindowPlacement
 import androidx.compose.ui.window.WindowPosition
-import java.awt.GraphicsEnvironment
+import org.churchpresenter.app.churchpresenter.composables.DeckLinkManager
+import org.churchpresenter.app.churchpresenter.utils.findScreenIndexByBounds
+import org.churchpresenter.app.churchpresenter.utils.rememberScreenDevices
 import androidx.compose.ui.window.rememberWindowState
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.app_name
+import churchpresenter.composeapp.generated.resources.ic_app_icon
+import churchpresenter.composeapp.generated.resources.loading
+import churchpresenter.composeapp.generated.resources.presenter_view_title
+import churchpresenter.composeapp.generated.resources.key_output_title
+import churchpresenter.composeapp.generated.resources.screen_number
+import org.jetbrains.compose.resources.painterResource
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import org.churchpresenter.app.churchpresenter.data.AppSettings
+import org.churchpresenter.app.churchpresenter.data.ScreenAssignment
 import org.churchpresenter.app.churchpresenter.data.Language
+import org.churchpresenter.app.churchpresenter.data.RemoteClientManager
 import org.churchpresenter.app.churchpresenter.data.SettingsManager
-import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.app.churchpresenter.data.StatisticsManager
+import org.churchpresenter.app.churchpresenter.dialogs.AboutDialog
 import org.churchpresenter.app.churchpresenter.dialogs.KeyboardShortcutsDialog
 import org.churchpresenter.app.churchpresenter.dialogs.LicenseDialog
+import org.churchpresenter.app.churchpresenter.dialogs.RemoteEvent
+import org.churchpresenter.app.churchpresenter.dialogs.RemoteEventDialog
+import org.churchpresenter.app.churchpresenter.dialogs.RemoteEventType
 import org.churchpresenter.app.churchpresenter.dialogs.OptionsDialog
 import org.churchpresenter.app.churchpresenter.presenter.AnnouncementsPresenter
+import org.churchpresenter.app.churchpresenter.presenter.CefManager
 import org.churchpresenter.app.churchpresenter.presenter.WebsitePresenter
 import org.churchpresenter.app.churchpresenter.presenter.BiblePresenter
 import org.churchpresenter.app.churchpresenter.presenter.LowerThirdPresenter
@@ -58,33 +85,116 @@ import org.churchpresenter.app.churchpresenter.presenter.SlidePresenter
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.presenter.SongPresenter
 import org.churchpresenter.app.churchpresenter.models.AnimationType
-import org.churchpresenter.app.churchpresenter.ui.theme.AppThemeWrapper
+import org.churchpresenter.app.churchpresenter.models.LyricSection
+import org.churchpresenter.app.churchpresenter.models.ScheduleItem
 import org.churchpresenter.app.churchpresenter.ui.theme.LanguageProvider
 import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
 import org.churchpresenter.app.churchpresenter.viewmodel.LocalMediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.MediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.app.churchpresenter.composables.preWarmJavaFX
+import io.github.alexzhirkevich.compottie.LottieCompositionSpec
+import io.github.alexzhirkevich.compottie.rememberLottieComposition
+import org.churchpresenter.app.churchpresenter.composables.vlcCustomPath
+import org.churchpresenter.app.churchpresenter.data.Bible
+import org.churchpresenter.app.churchpresenter.server.CompanionServer
+import org.churchpresenter.app.churchpresenter.server.AddToScheduleRequest
+import org.churchpresenter.app.churchpresenter.server.PendingRemoteRequest
+import org.churchpresenter.app.churchpresenter.server.ProjectRequest
+import org.churchpresenter.app.churchpresenter.ui.theme.AppThemeWrapper
+import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.app.churchpresenter.utils.CrashReporter
 import org.jetbrains.compose.resources.stringResource
+import java.awt.GraphicsDevice
+import java.awt.GraphicsEnvironment
 import java.util.Locale
 
 
 fun main() {
+    // Install crash reporting before anything else
+    CrashReporter.initialize()
+
+    // Catch exceptions thrown inside coroutines / Compose lambdas —
+    // these never reach Thread.setDefaultUncaughtExceptionHandler on their own.
+    val coroutineExceptionHandler = kotlinx.coroutines.CoroutineExceptionHandler { _, throwable ->
+        CrashReporter.reportException(throwable, context = "CoroutineExceptionHandler")
+    }
+
     // Pre-warm JavaFX on a background thread before UI starts
     preWarmJavaFX()
 
-    application {
+    // Initialize JCEF (Chromium) for embedded web browsing
+    CefManager.init()
+
+    // Set custom VLC path from saved settings before any composable checks isVlcAvailable
+    vlcCustomPath = SettingsManager().loadSettings().projectionSettings.vlcPath
+
+    application(exitProcessOnExit = true) {
+        var appReady by remember { mutableStateOf(false) }
         // Business logic layer
         val settingsManager = remember { SettingsManager() }
+        val statisticsManager = remember { StatisticsManager() }
         var appSettings by remember { mutableStateOf(settingsManager.loadSettings()) }
+
+        // Resolve any unassigned (-1 auto) screen assignments at startup so that
+        // DeckLink-only slots are set to None before the UI renders.
+        remember {
+            val screenDevicesAll = GraphicsEnvironment.getLocalGraphicsEnvironment().screenDevices
+            val primaryDevice = GraphicsEnvironment.getLocalGraphicsEnvironment().defaultScreenDevice
+            val nonPrimaryDevices = screenDevicesAll.filter { it != primaryDevice }
+            val deckLinkCount = if (DeckLinkManager.isAvailable()) DeckLinkManager.listDevices().size else 0
+            val slotCount = (nonPrimaryDevices.size + deckLinkCount).coerceAtLeast(0)
+
+            val proj = appSettings.projectionSettings
+            var changed = false
+            val assignments = proj.screenAssignments.toMutableList()
+            while (assignments.size < slotCount) {
+                val npIdx = assignments.size
+                val device = nonPrimaryDevices.getOrNull(npIdx)
+                val deviceIdx = if (device != null) screenDevicesAll.indexOf(device) else Constants.KEY_TARGET_NONE
+                val bounds = device?.defaultConfiguration?.bounds
+                assignments.add(
+                    ScreenAssignment(
+                        targetDisplay = deviceIdx,
+                        targetBoundsX = bounds?.x ?: Int.MIN_VALUE,
+                        targetBoundsY = bounds?.y ?: Int.MIN_VALUE,
+                        targetBoundsW = bounds?.width ?: 0,
+                        targetBoundsH = bounds?.height ?: 0
+                    )
+                )
+                changed = true
+            }
+            for (idx in assignments.indices) {
+                if (assignments[idx].targetDisplay == -1) {
+                    val device = nonPrimaryDevices.getOrNull(idx)
+                    if (device != null) {
+                        val deviceIdx = screenDevicesAll.indexOf(device)
+                        val bounds = device.defaultConfiguration.bounds
+                        assignments[idx] = assignments[idx].copy(
+                            targetDisplay = deviceIdx,
+                            targetBoundsX = bounds.x,
+                            targetBoundsY = bounds.y,
+                            targetBoundsW = bounds.width,
+                            targetBoundsH = bounds.height
+                        )
+                    } else {
+                        assignments[idx] = assignments[idx].copy(targetDisplay = Constants.KEY_TARGET_NONE)
+                    }
+                    changed = true
+                }
+            }
+            if (changed) {
+                appSettings = appSettings.copy(
+                    projectionSettings = proj.copy(screenAssignments = assignments)
+                )
+                settingsManager.saveSettings(appSettings)
+            }
+        }
+
         val presenterManager = remember { PresenterManager() }
 
-        // Show GPL3 license on first run — block main window until accepted.
-        // All remember blocks are always evaluated to avoid state loss on recomposition.
         var licenseAccepted by remember { mutableStateOf(appSettings.licenseAccepted) }
 
-        // Load saved language and set locale — always initialised so state survives
-        // the licenseAccepted transition without being reset.
         var currentLanguage by remember {
             val savedLanguageCode = appSettings.language
             val language = Language.entries.find { it.code == savedLanguageCode } ?: Language.ENGLISH
@@ -92,23 +202,14 @@ fun main() {
             mutableStateOf(language)
         }
 
-
-        // Schedule actions are registered by MainDesktop — no ScheduleViewModel reference held here.
-        // rememberUpdatedState ensures NavigationTopBar lambdas always read the latest actions
-        // without being recreated on every scheduleActions update.
         var scheduleActions by remember { mutableStateOf(ScheduleActions()) }
         val currentScheduleActions by rememberUpdatedState(scheduleActions)
 
-        // MediaViewModel lives at application scope — shared between MediaTab (controls)
-        // and the presenter Window via LocalMediaViewModel CompositionLocal.
-        // Documented legitimate exception: cross-Window JFX/Swing bridge.
         val mediaViewModel = remember { MediaViewModel() }
 
-        // false = not identifying; true = all screens showing their number for 5 seconds
         var identifyingScreen by remember { mutableStateOf(false) }
-        val coroutineScope = rememberCoroutineScope()
+        val coroutineScope = rememberCoroutineScope { coroutineExceptionHandler }
 
-        // UI state — restore saved theme so toolbar/icons have the correct colors on first frame
         var theme by remember {
             val savedTheme = when (appSettings.theme.uppercase()) {
                 "LIGHT" -> ThemeMode.LIGHT
@@ -117,287 +218,635 @@ fun main() {
             }
             mutableStateOf(savedTheme)
         }
+        val companionServer = remember { CompanionServer() }
+        val remoteSelectSongFlow =
+            remember { kotlinx.coroutines.flow.MutableSharedFlow<ScheduleItem.SongItem>(extraBufferCapacity = 8) }
         var showOptionsDialog by remember { mutableStateOf(false) }
         var showKeyboardShortcutsDialog by remember { mutableStateOf(false) }
+        var showAboutDialog by remember { mutableStateOf(false) }
         var selectedScheduleItemId by remember { mutableStateOf<String?>(null) }
 
-        // Queried once — screen layout doesn't change at runtime.
-        val screens = remember { GraphicsEnvironment.getLocalGraphicsEnvironment().screenDevices }
-        val state = rememberWindowState(
-            placement = WindowPlacement.Maximized
-        )
-
-        val showPresenterWindow by presenterManager.showPresenterWindow
-        val presentingMode by presenterManager.presentingMode
-        val selectedVerses by presenterManager.selectedVerses
-        val lyricSection by presenterManager.lyricSection
-        val lyricSectionVersion by presenterManager.lyricSectionVersion
-        val selectedImagePath by presenterManager.selectedImagePath
-        val selectedSlide by presenterManager.selectedSlide
-        val animationType by presenterManager.animationType
-        val transitionDuration by presenterManager.transitionDuration
-        val lottieJsonContent by presenterManager.lottieJsonContent
-        val lottiePauseAtFrame by presenterManager.lottiePauseAtFrame
-        val lottiePauseFrame by presenterManager.lottiePauseFrame
-        val lottiePauseDurationMs by presenterManager.lottiePauseDurationMs
-        val lottieTrigger by presenterManager.lottieTrigger
-        val websiteUrl by presenterManager.websiteUrl
-
-        if (licenseAccepted) {
-        Window(
-            onCloseRequest = ::exitApplication,
-            title = stringResource(Res.string.app_name),
-            state = state
-        ) {
-            LanguageProvider(language = currentLanguage) {
-                AppThemeWrapper(theme = theme) {
-                    CompositionLocalProvider(LocalMediaViewModel provides mediaViewModel) {
-
-                        NavigationTopBar(
-                            onAbout = { presenterManager.setShowPresenterWindow(true) },
-                            onKeyboardShortcuts = { showKeyboardShortcutsDialog = true },
-                            theme = {
-                                appSettings = appSettings.copy(theme = it.toString())
-                                theme = it
-                                settingsManager.saveSettings(appSettings)
-                            },
-                            onLanguageChange = { language ->
-                                currentLanguage = language
-                                appSettings = appSettings.copy(language = language.code)
-                                settingsManager.saveSettings(appSettings)
-                                Locale.setDefault(Locale.forLanguageTag(language.code))
-                            },
-                            onSettings = {
-                                showOptionsDialog = true
-                            },
-                            onExit = { exitApplication() },
-                            onAddToSchedule = {
-                                // Handled by MainDesktop via BibleTab/SongsTab callbacks
-                            },
-                            onNewSchedule = { currentScheduleActions.newSchedule() },
-                            onOpenSchedule = { currentScheduleActions.openSchedule() },
-                            onSaveSchedule = { currentScheduleActions.saveSchedule() },
-                            onSaveScheduleAs = { currentScheduleActions.saveScheduleAs() },
-                            onCloseSchedule = { currentScheduleActions.newSchedule() },
-                            onRemoveFromSchedule = {
-                                selectedScheduleItemId?.let { currentScheduleActions.removeSelected(); selectedScheduleItemId = null }
-                            },
-                            onClearSchedule = {
-                                currentScheduleActions.clearSchedule()
-                                selectedScheduleItemId = null
-                            },
-                        )
-                        MainDesktop(
-                            onVerseSelected = { verses -> presenterManager.setSelectedVerses(verses) },
-                            onSongItemSelected = { presenterManager.setLyricSection(it) },
-                            appSettings = appSettings,
-                            presenterManager = presenterManager,
-                            onScheduleActionsReady = { scheduleActions = it },
-                            presenting = { presenterManager.setPresentingMode(it) },
-                            onScheduleItemSelected = { itemId -> selectedScheduleItemId = itemId },
-                            onShowSettings = { showOptionsDialog = true },
-                            onThemeChange = { newTheme ->
-                                appSettings = appSettings.copy(theme = newTheme.toString())
-                                theme = newTheme
-                                settingsManager.saveSettings(appSettings)
-                            },
-                            onSettingsChange = { updateFn ->
-                                appSettings = updateFn(appSettings)
-                                settingsManager.saveSettings(appSettings)
-                            },
-                            theme = theme
-                        )
-                        OptionsDialog(
-                            isVisible = showOptionsDialog,
-                            theme = theme,
-                            settingsManager = settingsManager,
-                            onDismiss = { showOptionsDialog = false },
-                            onSave = { updated ->
-                                appSettings = updated
-                                settingsManager.saveSettings(updated)
-                            },
-                            onIdentifyScreen = {
-                                identifyingScreen = true
-                                coroutineScope.launch {
-                                    delay(5_000L)
-                                    identifyingScreen = false
-                                }
-                            }
-                        )
-                        KeyboardShortcutsDialog(
-                            isVisible = showKeyboardShortcutsDialog,
-                            onDismiss = { showKeyboardShortcutsDialog = false }
-                        )
-                    } // end CompositionLocalProvider
+        // Preload songs and bible at startup, then signal ready
+        LaunchedEffect(Unit) {
+            withContext(Dispatchers.IO) {
+                companionServer.preloadData(
+                    songStorageDir = appSettings.songSettings.storageDirectory,
+                    bibleStorageDir = appSettings.bibleSettings.storageDirectory,
+                    primaryBibleFileName = appSettings.bibleSettings.primaryBible
+                )
+                companionServer.updateLowerThirdFolder(appSettings.streamingSettings.lowerThirdFolder)
+                // Seed API key from saved settings before starting, so the first
+                // request is already checked against the correct key.
+                companionServer.updateApiKey(
+                    enabled = appSettings.serverSettings.apiKeyEnabled,
+                    key = appSettings.serverSettings.apiKey
+                )
+                // Auto-start server if user previously enabled it
+                if (appSettings.serverSettings.enabled) {
+                    companionServer.start(appSettings.serverSettings.port)
                 }
             }
+            appReady = true
         }
 
-        // Presenter windows — always composed (never destroyed) so the native HWND
-        // is created once and stays alive. Visibility is controlled via the visible=
-        // parameter — toggling it just hides/shows the existing window rather than
-        // destroying and recreating the native window, which is expensive on Windows.
-        // Always derive window count from physically detected screens (screens[0] is the app screen).
-        // 2 screens → 1 presenter window, 3 screens → 2 presenter windows, etc.
-        val windowCount = (screens.size - 1).coerceIn(1, 4)
-        val proj = appSettings.projectionSettings
-        for (i in 0 until windowCount) {
-            val targetScreenIndex = i + 1
-            val windowState = if (targetScreenIndex < screens.size) {
-                val screenBounds = screens[targetScreenIndex].defaultConfiguration.bounds
-                remember(i, proj.windowLeft, proj.windowRight, proj.windowTop, proj.windowBottom) {
-                    WindowState(
-                        placement = WindowPlacement.Fullscreen,
-                        position = WindowPosition(
-                            (screenBounds.x + proj.windowLeft).dp,
-                            (screenBounds.y + proj.windowTop).dp
-                        ),
-                        width  = (screenBounds.width  - proj.windowLeft - proj.windowRight).dp,
-                        height = (screenBounds.height - proj.windowTop  - proj.windowBottom).dp
-                    )
-                }
-            } else {
-                remember(i) { WindowState(placement = WindowPlacement.Fullscreen) }
-            }
 
-            // Resolve the screen assignment for this window index
-            val screenAssignment = when (i) {
-                0 -> proj.screen1Assignment
-                1 -> proj.screen2Assignment
-                2 -> proj.screen3Assignment
-                else -> proj.screen4Assignment
-            }
+        val screens = rememberScreenDevices()
+        val savedPlacement = when (appSettings.windowPlacement) {
+            "floating" -> WindowPlacement.Floating
+            "fullscreen" -> WindowPlacement.Fullscreen
+            else -> WindowPlacement.Maximized
+        }
+        // Use OS primary monitor bounds so maximized/fullscreen stays on one screen
+        val primaryBounds = GraphicsEnvironment.getLocalGraphicsEnvironment()
+            .defaultScreenDevice.defaultConfiguration.bounds
+        val state = rememberWindowState(
+            placement = savedPlacement,
+            position = if (savedPlacement == WindowPlacement.Floating && appSettings.windowX >= 0)
+                WindowPosition(appSettings.windowX.dp, appSettings.windowY.dp)
+            else WindowPosition(primaryBounds.x.dp, primaryBounds.y.dp),
+            size = if (savedPlacement == WindowPlacement.Floating)
+                DpSize(appSettings.windowWidth.dp, appSettings.windowHeight.dp)
+            else DpSize(primaryBounds.width.dp, primaryBounds.height.dp)
+        )
 
+        // Splash screen while app is loading
+        if (!appReady) {
+            SplashWindow()
+        }
+
+        if (appReady && licenseAccepted) {
             Window(
-                visible = showPresenterWindow,
-                title = "Presenter View ${i + 1}",
-                onCloseRequest = { presenterManager.setShowPresenterWindow(false) },
-                state = windowState,
+                onCloseRequest = {
+                    val placementStr = when (state.placement) {
+                        WindowPlacement.Floating -> "floating"
+                        WindowPlacement.Fullscreen -> "fullscreen"
+                        WindowPlacement.Maximized -> "maximized"
+                    }
+                    val isFloating = state.placement == WindowPlacement.Floating
+                    appSettings = appSettings.copy(
+                        windowPlacement = placementStr,
+                        windowWidth = if (isFloating) state.size.width.value.toInt() else appSettings.windowWidth,
+                        windowHeight = if (isFloating) state.size.height.value.toInt() else appSettings.windowHeight,
+                        windowX = if (isFloating) state.position.x.value.toInt() else -1,
+                        windowY = if (isFloating) state.position.y.value.toInt() else -1
+                    )
+                    settingsManager.saveSettings(appSettings)
+                    exitApplication()
+                },
+                title = stringResource(Res.string.app_name),
+                icon = painterResource(Res.drawable.ic_app_icon),
+                state = state
             ) {
-                CompositionLocalProvider(LocalMediaViewModel provides mediaViewModel) {
-                    PresenterScreen(modifier = Modifier.fillMaxSize(), appSettings = appSettings) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .onPreviewKeyEvent { keyEvent ->
-                                    if (keyEvent.type == KeyEventType.KeyDown && keyEvent.key == Key.Escape) {
-                                        mediaViewModel.pause()
-                                        presenterManager.setPresentingMode(Presenting.NONE)
-                                        true
-                                    } else false
-                                }
-                        ) {
-                            when (presentingMode) {
-                                Presenting.BIBLE ->
-                                    if (screenAssignment.showBible) {
-                                        val bibleAnimType = when (appSettings.bibleSettings.animationType) {
-                                            Constants.ANIMATION_FADE -> AnimationType.FADE
-                                            Constants.ANIMATION_SLIDE_LEFT -> AnimationType.SLIDE_LEFT
-                                            Constants.ANIMATION_SLIDE_RIGHT -> AnimationType.SLIDE_RIGHT
-                                            Constants.ANIMATION_NONE -> AnimationType.NONE
-                                            else -> AnimationType.CROSSFADE
-                                        }
-                                        val bibleDuration = appSettings.bibleSettings.transitionDuration.toInt()
-                                        when (bibleAnimType) {
-                                            AnimationType.CROSSFADE -> Crossfade(targetState = selectedVerses, animationSpec = tween(bibleDuration), label = "BibleCrossfade") { verses ->
-                                                BiblePresenter(selectedVerses = verses, appSettings = appSettings, isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD)
-                                            }
-                                            AnimationType.FADE -> AnimatedContent(targetState = selectedVerses, transitionSpec = { fadeIn(tween(bibleDuration)) togetherWith fadeOut(tween(bibleDuration)) }, label = "BibleFade") { verses ->
-                                                BiblePresenter(selectedVerses = verses, appSettings = appSettings, isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD)
-                                            }
-                                            AnimationType.SLIDE_LEFT -> AnimatedContent(targetState = selectedVerses, transitionSpec = { slideInHorizontally(tween(bibleDuration)) { it } togetherWith slideOutHorizontally(tween(bibleDuration)) { -it } }, label = "BibleSlideLeft") { verses ->
-                                                BiblePresenter(selectedVerses = verses, appSettings = appSettings, isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD)
-                                            }
-                                            AnimationType.SLIDE_RIGHT -> AnimatedContent(targetState = selectedVerses, transitionSpec = { slideInHorizontally(tween(bibleDuration)) { -it } togetherWith slideOutHorizontally(tween(bibleDuration)) { it } }, label = "BibleSlideRight") { verses ->
-                                                BiblePresenter(selectedVerses = verses, appSettings = appSettings, isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD)
-                                            }
-                                            AnimationType.NONE -> BiblePresenter(selectedVerses = selectedVerses, appSettings = appSettings, isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD)
-                                        }
-                                    }
-                                Presenting.LYRICS ->
-                                    if (screenAssignment.showSongs) {
-                                        val songAnimType = when (appSettings.songSettings.animationType) {
-                                            Constants.ANIMATION_FADE -> AnimationType.FADE
-                                            Constants.ANIMATION_SLIDE_LEFT -> AnimationType.SLIDE_LEFT
-                                            Constants.ANIMATION_SLIDE_RIGHT -> AnimationType.SLIDE_RIGHT
-                                            Constants.ANIMATION_NONE -> AnimationType.NONE
-                                            else -> AnimationType.CROSSFADE
-                                        }
-                                        val songDuration = appSettings.songSettings.transitionDuration.toInt()
-                                        val songKey = lyricSection to lyricSectionVersion
-                                        when (songAnimType) {
-                                            AnimationType.CROSSFADE -> Crossfade(targetState = songKey, animationSpec = tween(songDuration), label = "SongCrossfade") { (section, _) ->
-                                                SongPresenter(lyricSection = section, appSettings = appSettings, isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD)
-                                            }
-                                            AnimationType.FADE -> AnimatedContent(targetState = songKey, transitionSpec = { fadeIn(tween(songDuration)) togetherWith fadeOut(tween(songDuration)) }, label = "SongFade") { (section, _) ->
-                                                SongPresenter(lyricSection = section, appSettings = appSettings, isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD)
-                                            }
-                                            AnimationType.SLIDE_LEFT -> AnimatedContent(targetState = songKey, transitionSpec = { slideInHorizontally(tween(songDuration)) { it } togetherWith slideOutHorizontally(tween(songDuration)) { -it } }, label = "SongSlideLeft") { (section, _) ->
-                                                SongPresenter(lyricSection = section, appSettings = appSettings, isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD)
-                                            }
-                                            AnimationType.SLIDE_RIGHT -> AnimatedContent(targetState = songKey, transitionSpec = { slideInHorizontally(tween(songDuration)) { -it } togetherWith slideOutHorizontally(tween(songDuration)) { it } }, label = "SongSlideRight") { (section, _) ->
-                                                SongPresenter(lyricSection = section, appSettings = appSettings, isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD)
-                                            }
-                                            AnimationType.NONE -> SongPresenter(lyricSection = lyricSection, appSettings = appSettings, isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD)
-                                        }
-                                    }
-                                Presenting.PICTURES ->
-                                    if (screenAssignment.showPictures)
-                                        PicturePresenter(imagePath = selectedImagePath, animationType = animationType, transitionDuration = transitionDuration)
-                                Presenting.PRESENTATION ->
-                                    if (screenAssignment.showPictures)
-                                        SlidePresenter(slide = selectedSlide, animationType = animationType, transitionDuration = transitionDuration)
-                                Presenting.MEDIA ->
-                                    if (screenAssignment.showMedia)
-                                        MediaPresenter(modifier = Modifier.fillMaxSize())
-                                Presenting.LOWER_THIRD ->
-                                    if (screenAssignment.showStreaming)
-                                        LowerThirdPresenter(
-                                            jsonContent = lottieJsonContent,
-                                            pauseAtFrame = lottiePauseAtFrame,
-                                            pauseFrame = lottiePauseFrame,
-                                            pauseDurationMs = lottiePauseDurationMs,
-                                            trigger = lottieTrigger,
-                                            appSettings = appSettings
-                                        )
-                                Presenting.ANNOUNCEMENTS ->
-                                    if (screenAssignment.showAnnouncements)
-                                        AnnouncementsPresenter(
-                                            text = presenterManager.announcementText.value,
-                                            appSettings = appSettings
-                                        )
-                                Presenting.WEBSITE ->
-                                    WebsitePresenter(
-                                        url = websiteUrl,
-                                        modifier = Modifier.fillMaxSize()
-                                    )
-                                Presenting.NONE -> { /* nothing */ }
-                            }
+                LanguageProvider(language = currentLanguage) {
+                    AppThemeWrapper(theme = theme) {
+                        CompositionLocalProvider(LocalMediaViewModel provides mediaViewModel) {
+                            Box(modifier = Modifier.fillMaxSize()) {
 
-                            // Identify overlay — shown for 5 seconds when Identify is pressed
-                            if (identifyingScreen) {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .background(Color.Black.copy(alpha = 0.75f)),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text(
-                                        text = "Screen ${i + 1}",
-                                        color = Color.White,
-                                        fontSize = 96.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        textAlign = TextAlign.Center
-                                    )
+                                // ── Remote API permission state (inside Window so schedule actions are live) ──
+                                // Each entry: Triple(RemoteEvent, allowAction, denyAction)
+                                val remoteEventQueue =
+                                    remember { androidx.compose.runtime.mutableStateListOf<Triple<RemoteEvent, () -> Unit, () -> Unit>>() }
+
+                                // Persistent allow/block lists (survive app restarts)
+                                val remoteClientManager = remember { RemoteClientManager() }
+                                // Session-only sets (cleared on app restart)
+                                val sessionAllowedClients =
+                                    remember { androidx.compose.runtime.mutableStateListOf<String>() }
+                                val sessionBlockedClients =
+                                    remember { androidx.compose.runtime.mutableStateListOf<String>() }
+
+                                // ── Remote add-to-schedule requests ──────────────────────────────────────────
+                                LaunchedEffect(Unit) {
+                                    companionServer.onAddToSchedule.collect { pending ->
+                                        val clientId = pending.clientId
+                                        // Permanent block → auto-reject
+                                        if (remoteClientManager.isBlocked(clientId)) {
+                                            pending.decision.complete(false)
+                                            return@collect
+                                        }
+                                        // Session block → auto-reject
+                                        if (clientId.isNotBlank() && sessionBlockedClients.contains(clientId)) {
+                                            pending.decision.complete(false)
+                                            return@collect
+                                        }
+                                        // Permanent allow or session allow → auto-approve
+                                        if (remoteClientManager.isAllowed(clientId) ||
+                                            (clientId.isNotBlank() && sessionAllowedClients.contains(clientId))
+                                        ) {
+                                            val item = pending.item
+                                            when (item) {
+                                                is ScheduleItem.SongItem -> {
+                                                    currentScheduleActions.addSong(
+                                                        item.songNumber,
+                                                        item.title,
+                                                        item.songbook,
+                                                        item.songId
+                                                    )
+                                                    coroutineScope.launch { remoteSelectSongFlow.emit(item) }
+                                                }
+
+                                                is ScheduleItem.BibleVerseItem ->
+                                                    currentScheduleActions.addBibleVerse(
+                                                        item.bookName,
+                                                        item.chapter,
+                                                        item.verseNumber,
+                                                        item.verseText,
+                                                        item.verseRange
+                                                    )
+
+                                                is ScheduleItem.PresentationItem ->
+                                                    currentScheduleActions.addPresentation(
+                                                        item.filePath,
+                                                        item.fileName,
+                                                        item.slideCount,
+                                                        item.fileType
+                                                    )
+
+                                                is ScheduleItem.PictureItem ->
+                                                    currentScheduleActions.addPicture(
+                                                        item.folderPath,
+                                                        item.folderName,
+                                                        item.imageCount
+                                                    )
+
+                                                is ScheduleItem.MediaItem ->
+                                                    currentScheduleActions.addMedia(
+                                                        item.mediaUrl,
+                                                        item.mediaTitle,
+                                                        item.mediaType
+                                                    )
+
+                                                else -> Unit
+                                            }
+                                            pending.decision.complete(true)
+                                            return@collect
+                                        }
+                                        val item = pending.item
+                                        val (eventTitle, eventDetail) = remoteEventLabel(item)
+                                        val event = RemoteEvent(
+                                            type = RemoteEventType.ADD_TO_SCHEDULE,
+                                            title = eventTitle,
+                                            detail = eventDetail,
+                                            clientId = clientId,
+                                            clientLabel = remoteClientManager.getLabel(clientId)
+                                        )
+                                        val allow: () -> Unit = {
+                                            when (item) {
+                                                is ScheduleItem.SongItem -> {
+                                                    currentScheduleActions.addSong(
+                                                        item.songNumber,
+                                                        item.title,
+                                                        item.songbook,
+                                                        item.songId
+                                                    )
+                                                    coroutineScope.launch { remoteSelectSongFlow.emit(item) }
+                                                }
+
+                                                is ScheduleItem.BibleVerseItem ->
+                                                    currentScheduleActions.addBibleVerse(
+                                                        item.bookName,
+                                                        item.chapter,
+                                                        item.verseNumber,
+                                                        item.verseText,
+                                                        item.verseRange
+                                                    )
+
+                                                is ScheduleItem.PresentationItem ->
+                                                    currentScheduleActions.addPresentation(
+                                                        item.filePath,
+                                                        item.fileName,
+                                                        item.slideCount,
+                                                        item.fileType
+                                                    )
+
+                                                is ScheduleItem.PictureItem ->
+                                                    currentScheduleActions.addPicture(
+                                                        item.folderPath,
+                                                        item.folderName,
+                                                        item.imageCount
+                                                    )
+
+                                                is ScheduleItem.MediaItem ->
+                                                    currentScheduleActions.addMedia(
+                                                        item.mediaUrl,
+                                                        item.mediaTitle,
+                                                        item.mediaType
+                                                    )
+
+                                                else -> Unit
+                                            }
+                                            pending.decision.complete(true)
+                                        }
+                                        val deny: () -> Unit = { pending.decision.complete(false) }
+                                        remoteEventQueue.add(Triple(event, allow, deny))
+                                    }
                                 }
-                            }
+
+                                // ── Remote add-batch-to-schedule requests ─────────────────────────────────────
+                                LaunchedEffect(Unit) {
+                                    companionServer.onAddBatchToSchedule.collect { pending ->
+                                        val clientId = pending.clientId
+                                        // Permanent block or session block → auto-reject
+                                        if (remoteClientManager.isBlocked(clientId) ||
+                                            (clientId.isNotBlank() && sessionBlockedClients.contains(clientId))
+                                        ) {
+                                            pending.decision.complete(false)
+                                            return@collect
+                                        }
+                                        // Permanent allow or session allow → auto-approve
+                                        if (remoteClientManager.isAllowed(clientId) ||
+                                            (clientId.isNotBlank() && sessionAllowedClients.contains(clientId))
+                                        ) {
+                                            for (item in pending.items) {
+                                                when (item) {
+                                                    is ScheduleItem.SongItem -> {
+                                                        currentScheduleActions.addSong(
+                                                            item.songNumber,
+                                                            item.title,
+                                                            item.songbook,
+                                                            item.songId
+                                                        )
+                                                        coroutineScope.launch { remoteSelectSongFlow.emit(item) }
+                                                    }
+
+                                                    is ScheduleItem.BibleVerseItem ->
+                                                        currentScheduleActions.addBibleVerse(
+                                                            item.bookName,
+                                                            item.chapter,
+                                                            item.verseNumber,
+                                                            item.verseText,
+                                                            item.verseRange
+                                                        )
+
+                                                    is ScheduleItem.PresentationItem ->
+                                                        currentScheduleActions.addPresentation(
+                                                            item.filePath,
+                                                            item.fileName,
+                                                            item.slideCount,
+                                                            item.fileType
+                                                        )
+
+                                                    is ScheduleItem.PictureItem ->
+                                                        currentScheduleActions.addPicture(
+                                                            item.folderPath,
+                                                            item.folderName,
+                                                            item.imageCount
+                                                        )
+
+                                                    is ScheduleItem.MediaItem ->
+                                                        currentScheduleActions.addMedia(
+                                                            item.mediaUrl,
+                                                            item.mediaTitle,
+                                                            item.mediaType
+                                                        )
+
+                                                    else -> Unit
+                                                }
+                                            }
+                                            pending.decision.complete(true)
+                                            return@collect
+                                        }
+                                        val count = pending.items.size
+                                        // Build a human-readable summary: first 3 items joined, then "…" if more
+                                        val summaryTitle = if (count == 1) {
+                                            remoteEventLabel(pending.items.first()).first
+                                        } else {
+                                            "$count items"
+                                        }
+                                        val summaryDetail = pending.items.take(3).joinToString(" · ") { item ->
+                                            when (item) {
+                                                is ScheduleItem.BibleVerseItem ->
+                                                    "${item.bookName} ${item.chapter}:${item.verseNumber}"
+
+                                                is ScheduleItem.SongItem ->
+                                                    "${item.songNumber} – ${item.title}"
+
+                                                else -> item.displayText.take(30)
+                                            }
+                                        }.let { if (count > 3) "$it …" else it }
+                                        val event = RemoteEvent(
+                                            type = RemoteEventType.ADD_TO_SCHEDULE,
+                                            title = summaryTitle,
+                                            detail = summaryDetail,
+                                            clientId = clientId,
+                                            clientLabel = remoteClientManager.getLabel(clientId)
+                                        )
+                                        val allow: () -> Unit = {
+                                            for (item in pending.items) {
+                                                when (item) {
+                                                    is ScheduleItem.SongItem -> {
+                                                        currentScheduleActions.addSong(
+                                                            item.songNumber,
+                                                            item.title,
+                                                            item.songbook,
+                                                            item.songId
+                                                        )
+                                                        coroutineScope.launch { remoteSelectSongFlow.emit(item) }
+                                                    }
+
+                                                    is ScheduleItem.BibleVerseItem ->
+                                                        currentScheduleActions.addBibleVerse(
+                                                            item.bookName,
+                                                            item.chapter,
+                                                            item.verseNumber,
+                                                            item.verseText,
+                                                            item.verseRange
+                                                        )
+
+                                                    is ScheduleItem.PresentationItem ->
+                                                        currentScheduleActions.addPresentation(
+                                                            item.filePath,
+                                                            item.fileName,
+                                                            item.slideCount,
+                                                            item.fileType
+                                                        )
+
+                                                    is ScheduleItem.PictureItem ->
+                                                        currentScheduleActions.addPicture(
+                                                            item.folderPath,
+                                                            item.folderName,
+                                                            item.imageCount
+                                                        )
+
+                                                    is ScheduleItem.MediaItem ->
+                                                        currentScheduleActions.addMedia(
+                                                            item.mediaUrl,
+                                                            item.mediaTitle,
+                                                            item.mediaType
+                                                        )
+
+                                                    else -> Unit
+                                                }
+                                            }
+                                            pending.decision.complete(true)
+                                        }
+                                        val deny: () -> Unit = { pending.decision.complete(false) }
+                                        remoteEventQueue.add(Triple(event, allow, deny))
+                                    }
+                                }
+
+                                // ── Remote project requests ──────────────────────────────────────────────────
+                                LaunchedEffect(Unit) {
+                                    companionServer.onProject.collect { pending ->
+                                        val clientId = pending.clientId
+                                        // Permanent block or session block → auto-reject
+                                        if (remoteClientManager.isBlocked(clientId) ||
+                                            (clientId.isNotBlank() && sessionBlockedClients.contains(clientId))
+                                        ) {
+                                            pending.decision.complete(false)
+                                            return@collect
+                                        }
+                                        // Permanent allow or session allow → auto-approve
+                                        if (remoteClientManager.isAllowed(clientId) ||
+                                            (clientId.isNotBlank() && sessionAllowedClients.contains(clientId))
+                                        ) {
+                                            val item = pending.item
+                                            executeProjectItem(
+                                                item,
+                                                currentScheduleActions,
+                                                presenterManager,
+                                                statisticsManager
+                                            )
+                                            if (item is ScheduleItem.SongItem) {
+                                                coroutineScope.launch { remoteSelectSongFlow.emit(item) }
+                                            }
+                                            pending.decision.complete(true)
+                                            return@collect
+                                        }
+                                        val item = pending.item
+                                        val (eventTitle, eventDetail) = remoteEventLabel(item)
+                                        val event = RemoteEvent(
+                                            type = RemoteEventType.PROJECT,
+                                            title = eventTitle,
+                                            detail = eventDetail,
+                                            clientId = clientId,
+                                            clientLabel = remoteClientManager.getLabel(clientId)
+                                        )
+                                        val allow: () -> Unit = {
+                                            executeProjectItem(
+                                                item,
+                                                currentScheduleActions,
+                                                presenterManager,
+                                                statisticsManager
+                                            )
+                                            // Also drive Songs tab selection for song items
+                                            if (item is ScheduleItem.SongItem) {
+                                                coroutineScope.launch { remoteSelectSongFlow.emit(item) }
+                                            }
+                                            pending.decision.complete(true)
+                                        }
+                                        val deny: () -> Unit = { pending.decision.complete(false) }
+                                        remoteEventQueue.add(Triple(event, allow, deny))
+                                    }
+                                }
+
+                                NavigationTopBar(
+                                    onAbout = { showAboutDialog = true },
+                                    onHelp = {
+                                        java.awt.Desktop.getDesktop()
+                                            .browse(java.net.URI("https://github.com/ChurchPresenter/ChurchPresenter/"))
+                                    },
+                                    onKeyboardShortcuts = { showKeyboardShortcutsDialog = true },
+                                    theme = {
+                                        appSettings = appSettings.copy(theme = it.toString())
+                                        theme = it
+                                        settingsManager.saveSettings(appSettings)
+                                    },
+                                    onLanguageChange = { language ->
+                                        currentLanguage = language
+                                        appSettings = appSettings.copy(language = language.code)
+                                        settingsManager.saveSettings(appSettings)
+                                        Locale.setDefault(Locale.forLanguageTag(language.code))
+                                    },
+                                    onSettings = {
+                                        showOptionsDialog = true
+                                    },
+                                    onExit = { exitApplication() },
+                                    onAddToSchedule = { },
+                                    onNewSchedule = { currentScheduleActions.newSchedule() },
+                                    onOpenSchedule = { currentScheduleActions.openSchedule() },
+                                    onSaveSchedule = { currentScheduleActions.saveSchedule() },
+                                    onSaveScheduleAs = { currentScheduleActions.saveScheduleAs() },
+                                    onCloseSchedule = { currentScheduleActions.newSchedule() },
+                                    onRemoveFromSchedule = {
+                                        selectedScheduleItemId?.let {
+                                            currentScheduleActions.removeSelected()
+                                            selectedScheduleItemId = null
+                                        }
+                                    },
+                                    onClearSchedule = {
+                                        currentScheduleActions.clearSchedule()
+                                        selectedScheduleItemId = null
+                                    },
+                                )
+                                MainDesktop(
+                                    onVerseSelected = { verses -> presenterManager.setSelectedVerses(verses) },
+                                    onSongItemSelected = { presenterManager.setLyricSection(it) },
+                                    onAllSectionsChanged = { presenterManager.setAllLyricSections(it) },
+                                    onSectionIndexChanged = { presenterManager.setSongDisplaySectionIndex(it) },
+                                    onLineIndexChanged = { presenterManager.setSongDisplayLineIndex(it) },
+                                    appSettings = appSettings,
+                                    presenterManager = presenterManager,
+                                    statisticsManager = statisticsManager,
+                                    onScheduleActionsReady = { scheduleActions = it },
+                                    presenting = { mode ->
+                                        presenterManager.setPresentingMode(mode)
+                                        if (mode != Presenting.NONE) presenterManager.setShowPresenterWindow(true)
+                                    },
+                                    onScheduleItemSelected = { itemId -> selectedScheduleItemId = itemId },
+                                    onShowSettings = { showOptionsDialog = true },
+                                    onSettingsChange = { updateFn ->
+                                        appSettings = updateFn(appSettings)
+                                        settingsManager.saveSettings(appSettings)
+                                    },
+                                    theme = theme,
+                                    onSongsLoaded = { songs -> companionServer.updateSongs(songs) },
+                                    onBibleLoaded = { bible, translation ->
+                                        companionServer.updateBible(
+                                            bible,
+                                            translation
+                                        )
+                                    },
+                                    onScheduleChanged = { items -> companionServer.updateSchedule(items) },
+                                    onPresentationSlidesLoaded = { id, fileName, fileType, slides ->
+                                        companionServer.updatePresentation(id, fileName, fileType, slides)
+                                    },
+                                    onPicturesLoaded = { folderId, folderName, folderPath, imageFiles ->
+                                        companionServer.updatePictures(folderId, folderName, folderPath, imageFiles)
+                                    },
+                                    selectPictureImageFlow = kotlinx.coroutines.flow.flow {
+                                        companionServer.onSelectPicture.collect { req ->
+                                            emit(req.folderId to req.index)
+                                        }
+                                    },
+                                    remoteSelectSongFlow = remoteSelectSongFlow,
+                                    serverUrl = companionServer.serverUrl.collectAsState().value
+                                )
+                                OptionsDialog(
+                                    isVisible = showOptionsDialog,
+                                    theme = theme,
+                                    settingsManager = settingsManager,
+                                    statisticsManager = statisticsManager,
+                                    companionServer = companionServer,
+                                    remoteClientManager = remoteClientManager,
+                                    presenterManager = presenterManager,
+                                    onDismiss = { showOptionsDialog = false },
+                                    onSave = { updated ->
+                                        appSettings = updated
+                                        settingsManager.saveSettings(updated)
+                                        // Re-preload in case bible/song directories changed
+                                        companionServer.preloadData(
+                                            songStorageDir = updated.songSettings.storageDirectory,
+                                            bibleStorageDir = updated.bibleSettings.storageDirectory,
+                                            primaryBibleFileName = updated.bibleSettings.primaryBible
+                                        )
+                                        companionServer.updateLowerThirdFolder(updated.streamingSettings.lowerThirdFolder)
+                                        // Keep API key enforcement in sync with saved settings
+                                        companionServer.updateApiKey(
+                                            enabled = updated.serverSettings.apiKeyEnabled,
+                                            key = updated.serverSettings.apiKey
+                                        )
+                                    },
+                                    onThemeChange = { newTheme ->
+                                        appSettings = appSettings.copy(theme = newTheme.toString())
+                                        theme = newTheme
+                                        settingsManager.saveSettings(appSettings)
+                                    },
+                                    onIdentifyScreen = {
+                                        identifyingScreen = true
+                                        coroutineScope.launch {
+                                            delay(5_000L)
+                                            identifyingScreen = false
+                                        }
+                                    }
+                                )
+                                KeyboardShortcutsDialog(
+                                    isVisible = showKeyboardShortcutsDialog,
+                                    onDismiss = { showKeyboardShortcutsDialog = false }
+                                )
+                                AboutDialog(
+                                    isVisible = showAboutDialog,
+                                    onDismiss = { showAboutDialog = false }
+                                )
+
+                                // ── Remote API event dialog ───────────────────────
+                                val currentRemote = remoteEventQueue.firstOrNull()
+                                val currentClientId = currentRemote?.first?.clientId ?: ""
+                                RemoteEventDialog(
+                                    event = currentRemote?.first,
+                                    queueSize = remoteEventQueue.size,
+                                    isClientKnownAllowed = remoteClientManager.isAllowed(currentClientId),
+                                    isClientKnownBlocked = remoteClientManager.isBlocked(currentClientId),
+                                    onAllow = {
+                                        currentRemote?.second?.invoke()
+                                        if (remoteEventQueue.isNotEmpty()) remoteEventQueue.removeAt(0)
+                                    },
+                                    onAllowForSession = {
+                                        // Mark this client as session-allowed, then silently approve
+                                        // the current item AND every other queued item from the same client
+                                        if (currentClientId.isNotBlank() && !sessionAllowedClients.contains(
+                                                currentClientId
+                                            )
+                                        ) {
+                                            sessionAllowedClients.add(currentClientId)
+                                        }
+                                        val clientToAllow = currentClientId
+                                        val toApprove =
+                                            remoteEventQueue.filter { it.first.clientId == clientToAllow || clientToAllow.isBlank() }
+                                        toApprove.forEach { it.second.invoke() }
+                                        remoteEventQueue.removeAll(toApprove)
+                                    },
+                                    onAllowPermanently = {
+                                        // Permanently allow and silently approve all queued items from this client
+                                        remoteClientManager.allowPermanently(currentClientId)
+                                        val clientToAllow = currentClientId
+                                        val toApprove =
+                                            remoteEventQueue.filter { it.first.clientId == clientToAllow || clientToAllow.isBlank() }
+                                        toApprove.forEach { it.second.invoke() }
+                                        remoteEventQueue.removeAll(toApprove)
+                                    },
+                                    onBlockForSession = {
+                                        // Deny all queued items from this client; mark session-blocked
+                                        if (currentClientId.isNotBlank() && !sessionBlockedClients.contains(
+                                                currentClientId
+                                            )
+                                        ) {
+                                            sessionBlockedClients.add(currentClientId)
+                                        }
+                                        val clientToBlock = currentClientId
+                                        val toRemove =
+                                            remoteEventQueue.filter { it.first.clientId == clientToBlock || clientToBlock.isBlank() }
+                                        toRemove.forEach { it.third.invoke() }
+                                        remoteEventQueue.removeAll(toRemove)
+                                    },
+                                    onBlockPermanently = {
+                                        remoteClientManager.blockPermanently(currentClientId)
+                                        // Deny all queued items from this client
+                                        val clientToBlock = currentClientId
+                                        val toRemove =
+                                            remoteEventQueue.filter { it.first.clientId == clientToBlock || clientToBlock.isBlank() }
+                                        toRemove.forEach { it.third.invoke() }
+                                        remoteEventQueue.removeAll(toRemove)
+                                    },
+                                    onDeny = {
+                                        currentRemote?.third?.invoke()
+                                        if (remoteEventQueue.isNotEmpty()) remoteEventQueue.removeAt(0)
+                                    }
+                                )
+                            } // end Box (window content)
                         }
                     }
                 }
             }
-        }
-        } else {
-            // License not yet accepted — show the agreement window and block the rest of the app
+
+            PresenterWindows(
+                screens = screens,
+                presenterManager = presenterManager,
+                mediaViewModel = mediaViewModel,
+                appSettings = appSettings,
+                identifyingScreen = identifyingScreen,
+            )
+        } else if (appReady) {
             LicenseDialog(
                 onAccept = {
                     val updated = appSettings.copy(licenseAccepted = true)
@@ -408,5 +857,716 @@ fun main() {
                 onDecline = { exitApplication() }
             )
         }
-    } // end application
+    }
+}
+
+/** Returns a (title, detail) pair describing a ScheduleItem for the remote event banner. */
+private fun remoteEventLabel(item: ScheduleItem): Pair<String, String> = when (item) {
+    is ScheduleItem.SongItem -> "${item.songNumber} - ${item.title}" to item.songbook
+    is ScheduleItem.BibleVerseItem -> {
+        val ref = if (item.verseRange.isNotEmpty()) "${item.bookName} ${item.chapter}:${item.verseRange}"
+        else "${item.bookName} ${item.chapter}:${item.verseNumber}"
+        ref to item.verseText.take(60)
+    }
+
+    is ScheduleItem.PictureItem -> item.folderName to "${item.imageCount} images"
+    is ScheduleItem.PresentationItem -> item.fileName to item.fileType.uppercase()
+    is ScheduleItem.MediaItem -> item.mediaTitle to item.mediaType
+    is ScheduleItem.LabelItem -> item.text.take(60) to ""
+    is ScheduleItem.AnnouncementItem -> item.text.take(60) to ""
+    is ScheduleItem.LowerThirdItem -> item.presetLabel to ""
+    is ScheduleItem.WebsiteItem -> item.title to item.url
+}
+
+/**
+ * Executes a project request — adds to schedule and sets presenter state.
+ * Fixes the original bug where SongItem projection never selected the song in the Songs tab.
+ */
+private fun executeProjectItem(
+    item: ScheduleItem,
+    scheduleActions: ScheduleActions,
+    presenterManager: PresenterManager,
+    statisticsManager: StatisticsManager? = null
+) {
+    when (item) {
+        is ScheduleItem.SongItem -> {
+            // Add to schedule AND select the song so the Songs tab navigates to it
+            scheduleActions.addSong(item.songNumber, item.title, item.songbook, item.songId)
+            presenterManager.setLyricSection(
+                LyricSection(
+                    title = item.title,
+                    songNumber = item.songNumber,
+                    lines = emptyList(),
+                    type = Constants.SECTION_TYPE_SONG
+                )
+            )
+            statisticsManager?.recordSongDisplay(item.songNumber, item.title, item.songbook)
+            presenterManager.setPresentingMode(Presenting.LYRICS)
+            presenterManager.setShowPresenterWindow(true)
+        }
+
+        is ScheduleItem.BibleVerseItem -> {
+            scheduleActions.addBibleVerse(
+                item.bookName,
+                item.chapter,
+                item.verseNumber,
+                item.verseText,
+                item.verseRange
+            )
+            presenterManager.setSelectedVerses(
+                listOf(
+                    org.churchpresenter.app.churchpresenter.models.SelectedVerse(
+                        bookName = item.bookName,
+                        chapter = item.chapter,
+                        verseNumber = item.verseNumber,
+                        verseText = item.verseText,
+                        verseRange = item.verseRange
+                    )
+                )
+            )
+            presenterManager.setPresentingMode(Presenting.BIBLE)
+            presenterManager.setShowPresenterWindow(true)
+        }
+
+        is ScheduleItem.PictureItem -> {
+            scheduleActions.addPicture(item.folderPath, item.folderName, item.imageCount)
+            presenterManager.setSelectedImagePath(item.folderPath)
+            presenterManager.setPresentingMode(Presenting.PICTURES)
+            presenterManager.setShowPresenterWindow(true)
+        }
+
+        is ScheduleItem.PresentationItem -> {
+            scheduleActions.addPresentation(item.filePath, item.fileName, item.slideCount, item.fileType)
+            presenterManager.setPresentingMode(Presenting.PRESENTATION)
+            presenterManager.setShowPresenterWindow(true)
+        }
+
+        is ScheduleItem.MediaItem -> {
+            scheduleActions.addMedia(item.mediaUrl, item.mediaTitle, item.mediaType)
+            presenterManager.setPresentingMode(Presenting.MEDIA)
+            presenterManager.setShowPresenterWindow(true)
+        }
+
+        else -> Unit
+    }
+}
+
+@Composable
+private fun SplashWindow() {
+    Window(
+        onCloseRequest = {},
+        title = stringResource(Res.string.app_name),
+        icon = painterResource(Res.drawable.ic_app_icon),
+        state = rememberWindowState(
+            width = 400.dp,
+            height = 300.dp,
+            position = WindowPosition(Alignment.Center)
+        ),
+        undecorated = true,
+        resizable = false,
+        alwaysOnTop = true
+    ) {
+        AppThemeWrapper(theme = ThemeMode.SYSTEM) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.surface),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Image(
+                        painter = painterResource(Res.drawable.ic_app_icon),
+                        contentDescription = null,
+                        modifier = Modifier.size(96.dp)
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = stringResource(Res.string.app_name),
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Spacer(modifier = Modifier.height(24.dp))
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(32.dp),
+                        color = MaterialTheme.colorScheme.primary,
+                        strokeWidth = 3.dp
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Text(
+                        text = stringResource(Res.string.loading),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun PresenterWindows(
+    screens: Array<GraphicsDevice>,
+    presenterManager: PresenterManager,
+    mediaViewModel: MediaViewModel,
+    appSettings: AppSettings,
+    identifyingScreen: Boolean,
+) {
+    val showPresenterWindow by presenterManager.showPresenterWindow
+    val presentingMode by presenterManager.presentingMode
+    val selectedVerses by presenterManager.selectedVerses
+    val displayedVerses by presenterManager.displayedVerses
+    val bibleTransitionAlpha by presenterManager.bibleTransitionAlpha
+    val lyricSection by presenterManager.lyricSection
+    val lyricSectionVersion by presenterManager.lyricSectionVersion
+    val displayedLyricSection by presenterManager.displayedLyricSection
+    val songTransitionAlpha by presenterManager.songTransitionAlpha
+    val songDisplayLineIndex by presenterManager.songDisplayLineIndex
+    val allLyricSections by presenterManager.allLyricSections
+    val songDisplaySectionIndex by presenterManager.songDisplaySectionIndex
+    val selectedImagePath by presenterManager.selectedImagePath
+    val displayedImagePath by presenterManager.displayedImagePath
+    val pictureTransitionAlpha by presenterManager.pictureTransitionAlpha
+    val selectedSlide by presenterManager.selectedSlide
+    val displayedSlide by presenterManager.displayedSlide
+    val slideTransitionAlpha by presenterManager.slideTransitionAlpha
+    val animationType by presenterManager.animationType
+    val transitionDuration by presenterManager.transitionDuration
+    val announcementText by presenterManager.announcementText
+    val displayedAnnouncementText by presenterManager.displayedAnnouncementText
+    val announcementTransitionAlpha by presenterManager.announcementTransitionAlpha
+    val lottieJsonContent by presenterManager.lottieJsonContent
+    val lottiePauseAtFrame by presenterManager.lottiePauseAtFrame
+    val lottiePauseFrame by presenterManager.lottiePauseFrame
+    val lottiePauseDurationMs by presenterManager.lottiePauseDurationMs
+    val lottieTrigger by presenterManager.lottieTrigger
+    val lottieProgress by presenterManager.lottieProgress
+    val mediaTransitionAlpha by presenterManager.mediaTransitionAlpha
+    val websiteUrl by presenterManager.websiteUrl
+
+    val proj = appSettings.projectionSettings
+
+    // Centralized Bible transition: one animation drives all windows so they stay in sync
+    // When hold is active, skip updating displayedVerses so the user can browse freely
+    val bibleHold by presenterManager.bibleHold
+    LaunchedEffect(selectedVerses, bibleHold) {
+        if (bibleHold) return@LaunchedEffect
+        val bs = appSettings.bibleSettings
+        if (presenterManager.displayedVerses.value.isEmpty() || (!bs.fadeIn && !bs.fadeOut)) {
+            presenterManager.setDisplayedVerses(selectedVerses)
+            presenterManager.setBibleTransitionAlpha(1f)
+        } else {
+            val duration = bs.transitionDuration.toInt()
+            val anim = androidx.compose.animation.core.Animatable(1f)
+            // Fade out (or instant)
+            if (bs.fadeOut) {
+                anim.animateTo(0f, androidx.compose.animation.core.tween(duration / 2)) {
+                    presenterManager.setBibleTransitionAlpha(value)
+                }
+            } else {
+                presenterManager.setBibleTransitionAlpha(0f)
+            }
+            // Swap content at alpha=0
+            presenterManager.setDisplayedVerses(selectedVerses)
+            // Fade in (or instant)
+            if (bs.fadeIn) {
+                anim.snapTo(0f)
+                anim.animateTo(1f, androidx.compose.animation.core.tween(duration / 2)) {
+                    presenterManager.setBibleTransitionAlpha(value)
+                }
+            } else {
+                presenterManager.setBibleTransitionAlpha(1f)
+            }
+        }
+    }
+
+    // Centralized Song transition
+    LaunchedEffect(lyricSection, lyricSectionVersion) {
+        val ss = appSettings.songSettings
+        // Skip animation when section content hasn't changed (e.g. line navigation within same verse)
+        if (lyricSection == presenterManager.displayedLyricSection.value) {
+            presenterManager.setSongTransitionAlpha(1f)
+            return@LaunchedEffect
+        }
+        // Skip fade in line mode — only one line visible, instant swap is cleaner
+        val isLineMode = ss.fullscreenDisplayMode == Constants.SONG_DISPLAY_MODE_LINE ||
+                ss.lowerThirdDisplayMode == Constants.SONG_DISPLAY_MODE_LINE ||
+                ss.lookAheadDisplayMode == Constants.SONG_DISPLAY_MODE_LINE ||
+                ss.lowerThirdLookAheadDisplayMode == Constants.SONG_DISPLAY_MODE_LINE
+        if (isLineMode) {
+            presenterManager.setDisplayedLyricSection(lyricSection)
+            presenterManager.setSongTransitionAlpha(1f)
+            return@LaunchedEffect
+        }
+        if (presenterManager.displayedLyricSection.value.lines.isEmpty() || (!ss.fadeIn && !ss.fadeOut)) {
+            presenterManager.setDisplayedLyricSection(lyricSection)
+            presenterManager.setSongTransitionAlpha(1f)
+        } else {
+            val duration = ss.transitionDuration.toInt()
+            val anim = androidx.compose.animation.core.Animatable(1f)
+            if (ss.fadeOut) {
+                anim.animateTo(0f, androidx.compose.animation.core.tween(duration / 2)) {
+                    presenterManager.setSongTransitionAlpha(value)
+                }
+            } else {
+                presenterManager.setSongTransitionAlpha(0f)
+            }
+            presenterManager.setDisplayedLyricSection(lyricSection)
+            if (ss.fadeIn) {
+                anim.snapTo(0f)
+                anim.animateTo(1f, androidx.compose.animation.core.tween(duration / 2)) {
+                    presenterManager.setSongTransitionAlpha(value)
+                }
+            } else {
+                presenterManager.setSongTransitionAlpha(1f)
+            }
+        }
+    }
+
+    // Centralized Picture transition
+    LaunchedEffect(selectedImagePath) {
+        if (presenterManager.displayedImagePath.value == null ||
+            animationType == AnimationType.NONE
+        ) {
+            presenterManager.setDisplayedImagePath(selectedImagePath)
+            presenterManager.setPictureTransitionAlpha(1f)
+        } else {
+            val halfDuration = transitionDuration / 2
+            val anim = androidx.compose.animation.core.Animatable(1f)
+            anim.animateTo(0f, androidx.compose.animation.core.tween(halfDuration)) {
+                presenterManager.setPictureTransitionAlpha(value)
+            }
+            presenterManager.setDisplayedImagePath(selectedImagePath)
+            anim.animateTo(1f, androidx.compose.animation.core.tween(halfDuration)) {
+                presenterManager.setPictureTransitionAlpha(value)
+            }
+        }
+    }
+
+    // Centralized Slide transition
+    LaunchedEffect(selectedSlide) {
+        if (presenterManager.displayedSlide.value == null ||
+            animationType == AnimationType.NONE
+        ) {
+            presenterManager.setDisplayedSlide(selectedSlide)
+            presenterManager.setSlideTransitionAlpha(1f)
+        } else {
+            val halfDuration = transitionDuration / 2
+            val anim = androidx.compose.animation.core.Animatable(1f)
+            anim.animateTo(0f, androidx.compose.animation.core.tween(halfDuration)) {
+                presenterManager.setSlideTransitionAlpha(value)
+            }
+            presenterManager.setDisplayedSlide(selectedSlide)
+            anim.animateTo(1f, androidx.compose.animation.core.tween(halfDuration)) {
+                presenterManager.setSlideTransitionAlpha(value)
+            }
+        }
+    }
+
+    // Centralized Announcements transition
+    LaunchedEffect(announcementText) {
+        if (presenterManager.displayedAnnouncementText.value.isEmpty() ||
+            appSettings.announcementsSettings.animationType == Constants.ANIMATION_NONE
+        ) {
+            presenterManager.setDisplayedAnnouncementText(announcementText)
+            presenterManager.setAnnouncementTransitionAlpha(1f)
+        } else {
+            val duration = appSettings.announcementsSettings.animationDuration.coerceAtLeast(50)
+            val halfDuration = duration / 2
+            val anim = androidx.compose.animation.core.Animatable(1f)
+            anim.animateTo(0f, androidx.compose.animation.core.tween(halfDuration)) {
+                presenterManager.setAnnouncementTransitionAlpha(value)
+            }
+            presenterManager.setDisplayedAnnouncementText(announcementText)
+            anim.animateTo(1f, androidx.compose.animation.core.tween(halfDuration)) {
+                presenterManager.setAnnouncementTransitionAlpha(value)
+            }
+        }
+    }
+
+    // Centralized Lottie (lower third) animation — one animation drives all windows
+    val lottieComposition by rememberLottieComposition(key = lottieJsonContent) {
+        LottieCompositionSpec.JsonString(lottieJsonContent)
+    }
+    LaunchedEffect(lottieComposition, lottiePauseAtFrame, lottiePauseFrame, lottiePauseDurationMs, lottieTrigger) {
+        val comp = lottieComposition ?: return@LaunchedEffect
+        val totalDurMs = ((comp.durationFrames / comp.frameRate) * 1000f).toLong().coerceAtLeast(1L)
+        val hasPause = lottiePauseAtFrame && lottiePauseFrame in 0f..1f
+
+        presenterManager.setLottieProgress(0f)
+
+        if (hasPause) {
+            val toPauseDur = (totalDurMs * lottiePauseFrame).toInt().coerceAtLeast(1)
+            val anim = androidx.compose.animation.core.Animatable(0f)
+            anim.animateTo(
+                targetValue = lottiePauseFrame,
+                animationSpec = androidx.compose.animation.core.tween(
+                    durationMillis = toPauseDur,
+                    easing = androidx.compose.animation.core.LinearEasing
+                )
+            ) { presenterManager.setLottieProgress(value) }
+            if (lottiePauseDurationMs > 0) {
+                delay(lottiePauseDurationMs)
+                val remainDur = (totalDurMs * (1f - lottiePauseFrame)).toInt().coerceAtLeast(1)
+                anim.animateTo(
+                    targetValue = 1f,
+                    animationSpec = androidx.compose.animation.core.tween(
+                        durationMillis = remainDur,
+                        easing = androidx.compose.animation.core.LinearEasing
+                    )
+                ) { presenterManager.setLottieProgress(value) }
+            }
+        } else {
+            val anim = androidx.compose.animation.core.Animatable(0f)
+            anim.animateTo(
+                targetValue = 1f,
+                animationSpec = androidx.compose.animation.core.tween(
+                    durationMillis = totalDurMs.toInt(),
+                    easing = androidx.compose.animation.core.LinearEasing
+                )
+            ) { presenterManager.setLottieProgress(value) }
+        }
+    }
+
+    // Identify the OS primary monitor and build list of non-primary screens
+    val defaultDevice = GraphicsEnvironment.getLocalGraphicsEnvironment().defaultScreenDevice
+    val availableScreens = screens.indices.filter { screens[it] != defaultDevice }
+
+    // Create windows for non-primary screens + DeckLink device slots
+    val deckLinkDeviceCount = if (DeckLinkManager.isAvailable()) DeckLinkManager.listDevices().size else 0
+    val windowCount = availableScreens.size + deckLinkDeviceCount
+
+    for (i in 0 until windowCount) {
+        val screenAssignment = proj.getAssignment(i)
+
+        // DeckLink outputs are handled separately — no Compose window needed
+        if (screenAssignment.targetType == "decklink") {
+            // DeckLink rendering is managed by DeckLinkPresenter (launched externally)
+            continue
+        }
+
+        // Skip "None" — user disabled this output
+        if (screenAssignment.targetDisplay == Constants.KEY_TARGET_NONE) continue
+
+        // Resolve target display: try bounds first (reliable), fall back to index, then auto-assign
+        val targetScreenIndex = findScreenIndexByBounds(
+            screens,
+            screenAssignment.targetBoundsX,
+            screenAssignment.targetBoundsY,
+            screenAssignment.targetBoundsW,
+            screenAssignment.targetBoundsH
+        ) ?: if (screenAssignment.targetDisplay >= 0 && screenAssignment.targetDisplay < screens.size) {
+            screenAssignment.targetDisplay
+        } else {
+            // Auto-assign to next available non-primary screen
+            availableScreens.getOrNull(i) ?: continue
+        }
+
+        // Skip if the target screen doesn't exist
+        if (targetScreenIndex < 0 || targetScreenIndex >= screens.size) continue
+
+        // Derive output role from key target configuration
+        val primaryRole = screenAssignment.primaryOutputRole
+
+        val windowState = remember(i) {
+            val b = screens[targetScreenIndex].defaultConfiguration.bounds
+            WindowState(
+                placement = WindowPlacement.Floating,
+                position = WindowPosition(b.x.dp, b.y.dp),
+                width = b.width.dp,
+                height = b.height.dp
+            )
+        }
+
+        // Reposition window when target display changes
+        LaunchedEffect(targetScreenIndex) {
+            val b = screens[targetScreenIndex].defaultConfiguration.bounds
+            windowState.position = WindowPosition(b.x.dp, b.y.dp)
+            windowState.size = DpSize(b.width.dp, b.height.dp)
+        }
+
+        // Primary window (fill or normal)
+        val presenterTitle = stringResource(Res.string.presenter_view_title, i + 1)
+        Window(
+            visible = showPresenterWindow,
+            title = presenterTitle,
+            icon = painterResource(Res.drawable.ic_app_icon),
+            onCloseRequest = { presenterManager.setShowPresenterWindow(false) },
+            state = windowState,
+            undecorated = true,
+            resizable = false,
+            alwaysOnTop = true,
+        ) {
+            CompositionLocalProvider(LocalMediaViewModel provides mediaViewModel) {
+                PresenterScreen(
+                    modifier = Modifier.fillMaxSize(),
+                    appSettings = appSettings,
+                    outputRole = primaryRole,
+                    isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .onPreviewKeyEvent { keyEvent ->
+                                if (keyEvent.type == KeyEventType.KeyDown && keyEvent.key == Key.Escape) {
+                                    mediaViewModel.pause()
+                                    presenterManager.setPresentingMode(Presenting.NONE)
+                                    true
+                                } else false
+                            }
+                    ) {
+                        when (presentingMode) {
+                            Presenting.BIBLE ->
+                                if (screenAssignment.showBible) {
+                                    BiblePresenter(
+                                        selectedVerses = displayedVerses,
+                                        appSettings = appSettings,
+                                        isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD,
+                                        outputRole = primaryRole,
+                                        transitionAlpha = bibleTransitionAlpha
+                                    )
+                                }
+
+                            Presenting.LYRICS ->
+                                if (screenAssignment.showSongs) {
+                                    SongPresenter(
+                                        lyricSection = displayedLyricSection,
+                                        appSettings = appSettings,
+                                        isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD,
+                                        outputRole = primaryRole,
+                                        transitionAlpha = songTransitionAlpha,
+                                        displayLineIndex = songDisplayLineIndex,
+                                        lookAheadEnabled = screenAssignment.songLookAhead,
+                                        allLyricSections = allLyricSections,
+                                        displaySectionIndex = songDisplaySectionIndex
+                                    )
+                                }
+
+                            Presenting.PICTURES ->
+                                if (screenAssignment.showPictures)
+                                    PicturePresenter(
+                                        imagePath = displayedImagePath,
+                                        transitionAlpha = pictureTransitionAlpha
+                                    )
+
+                            Presenting.PRESENTATION ->
+                                if (screenAssignment.showPictures)
+                                    SlidePresenter(slide = displayedSlide, transitionAlpha = slideTransitionAlpha)
+
+                            Presenting.MEDIA ->
+                                if (screenAssignment.showMedia) {
+                                    if (mediaViewModel.isAudioFile) {
+                                        // Audio: playback handled by hidden VideoPlayer in MainDesktop
+                                        // Projection shows background only
+                                    } else {
+                                        MediaPresenter(
+                                            modifier = Modifier.fillMaxSize(),
+                                            audioDeviceId = appSettings.projectionSettings.audioOutputDeviceId,
+                                            transitionAlpha = mediaTransitionAlpha
+                                        )
+                                    }
+                                }
+
+                            Presenting.LOWER_THIRD ->
+                                if (screenAssignment.showStreaming)
+                                    LowerThirdPresenter(
+                                        jsonContent = lottieJsonContent,
+                                        progress = lottieProgress,
+                                        appSettings = appSettings
+                                    )
+
+                            Presenting.ANNOUNCEMENTS ->
+                                if (screenAssignment.showAnnouncements)
+                                    AnnouncementsPresenter(
+                                        text = displayedAnnouncementText,
+                                        appSettings = appSettings,
+                                        outputRole = primaryRole,
+                                        transitionAlpha = announcementTransitionAlpha
+                                    )
+
+                            Presenting.WEBSITE ->
+                                WebsitePresenter(
+                                    url = websiteUrl,
+                                    modifier = Modifier.fillMaxSize(),
+                                    onSnapshot = { bitmap -> presenterManager.setWebSnapshot(bitmap) },
+                                    onBrowserCreated = { browser -> presenterManager.setLiveBrowser(browser) },
+                                    onUrlChanged = { newUrl -> presenterManager.setWebsiteUrl(newUrl) },
+                                    onTitleChanged = { title -> presenterManager.setWebPageTitle(title) },
+                                    audioDeviceId = appSettings.projectionSettings.audioOutputDeviceId
+                                )
+
+                            Presenting.NONE -> { /* nothing */
+                            }
+                        }
+
+                        // Clear live browser ref when leaving WEBSITE mode
+                        androidx.compose.runtime.LaunchedEffect(presentingMode) {
+                            if (presentingMode != Presenting.WEBSITE) {
+                                presenterManager.setLiveBrowser(null)
+                            }
+                        }
+
+                        if (identifyingScreen) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(Color.Black.copy(alpha = 0.75f)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = stringResource(Res.string.screen_number, i + 1),
+                                    color = Color.White,
+                                    fontSize = 96.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    textAlign = TextAlign.Center
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Key output window — spawned when a key target is configured
+        if (screenAssignment.hasKeyOutput && screenAssignment.keyTargetType != "decklink") {
+            val keyScreenIndex = findScreenIndexByBounds(
+                screens,
+                screenAssignment.keyTargetBoundsX,
+                screenAssignment.keyTargetBoundsY,
+                screenAssignment.keyTargetBoundsW,
+                screenAssignment.keyTargetBoundsH
+            ) ?: screenAssignment.keyTargetDisplay
+            if (keyScreenIndex in screens.indices) {
+                val keyWindowState = remember(i, keyScreenIndex) {
+                    val b = screens[keyScreenIndex].defaultConfiguration.bounds
+                    WindowState(
+                        placement = WindowPlacement.Floating,
+                        position = WindowPosition(b.x.dp, b.y.dp),
+                        width = b.width.dp,
+                        height = b.height.dp
+                    )
+                }
+
+                val keyOutputTitle = stringResource(Res.string.key_output_title, i + 1)
+                Window(
+                    visible = showPresenterWindow,
+                    title = keyOutputTitle,
+                    icon = painterResource(Res.drawable.ic_app_icon),
+                    onCloseRequest = { presenterManager.setShowPresenterWindow(false) },
+                    state = keyWindowState,
+                    undecorated = true,
+                    resizable = false,
+                    alwaysOnTop = true,
+                ) {
+                    CompositionLocalProvider(LocalMediaViewModel provides mediaViewModel) {
+                        PresenterScreen(
+                            modifier = Modifier.fillMaxSize(),
+                            appSettings = appSettings,
+                            outputRole = Constants.OUTPUT_ROLE_KEY
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .onPreviewKeyEvent { keyEvent ->
+                                        if (keyEvent.type == KeyEventType.KeyDown && keyEvent.key == Key.Escape) {
+                                            mediaViewModel.pause()
+                                            presenterManager.setPresentingMode(Presenting.NONE)
+                                            true
+                                        } else false
+                                    }
+                            ) {
+                                when (presentingMode) {
+                                    Presenting.BIBLE ->
+                                        if (screenAssignment.showBible) {
+                                            BiblePresenter(
+                                                selectedVerses = displayedVerses,
+                                                appSettings = appSettings,
+                                                isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD,
+                                                outputRole = Constants.OUTPUT_ROLE_KEY,
+                                                transitionAlpha = bibleTransitionAlpha
+                                            )
+                                        }
+
+                                    Presenting.LYRICS ->
+                                        if (screenAssignment.showSongs) {
+                                            SongPresenter(
+                                                lyricSection = displayedLyricSection,
+                                                appSettings = appSettings,
+                                                isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD,
+                                                outputRole = Constants.OUTPUT_ROLE_KEY,
+                                                transitionAlpha = songTransitionAlpha,
+                                                displayLineIndex = songDisplayLineIndex,
+                                                lookAheadEnabled = screenAssignment.songLookAhead,
+                                                allLyricSections = allLyricSections,
+                                                displaySectionIndex = songDisplaySectionIndex
+                                            )
+                                        }
+
+                                    Presenting.PICTURES ->
+                                        if (screenAssignment.showPictures)
+                                            PicturePresenter(
+                                                imagePath = displayedImagePath,
+                                                transitionAlpha = pictureTransitionAlpha
+                                            )
+
+                                    Presenting.PRESENTATION ->
+                                        if (screenAssignment.showPictures)
+                                            SlidePresenter(
+                                                slide = displayedSlide,
+                                                transitionAlpha = slideTransitionAlpha
+                                            )
+
+                                    Presenting.MEDIA ->
+                                        if (screenAssignment.showMedia) {
+                                            if (mediaViewModel.isAudioFile) {
+                                                // Audio: background only
+                                            } else {
+                                                MediaPresenter(
+                                                    modifier = Modifier.fillMaxSize(),
+                                                    audioDeviceId = appSettings.projectionSettings.audioOutputDeviceId,
+                                                    transitionAlpha = mediaTransitionAlpha
+                                                )
+                                            }
+                                        }
+
+                                    Presenting.LOWER_THIRD ->
+                                        if (screenAssignment.showStreaming)
+                                            LowerThirdPresenter(
+                                                jsonContent = lottieJsonContent,
+                                                progress = lottieProgress,
+                                                appSettings = appSettings
+                                            )
+
+                                    Presenting.ANNOUNCEMENTS ->
+                                        if (screenAssignment.showAnnouncements)
+                                            AnnouncementsPresenter(
+                                                text = displayedAnnouncementText,
+                                                appSettings = appSettings,
+                                                outputRole = Constants.OUTPUT_ROLE_KEY,
+                                                transitionAlpha = announcementTransitionAlpha
+                                            )
+
+                                    Presenting.WEBSITE ->
+                                        WebsitePresenter(
+                                            url = websiteUrl,
+                                            modifier = Modifier.fillMaxSize(),
+                                            onSnapshot = { bitmap -> presenterManager.setWebSnapshot(bitmap) },
+                                            onUrlChanged = { newUrl -> presenterManager.setWebsiteUrl(newUrl) },
+                                            onTitleChanged = { title -> presenterManager.setWebPageTitle(title) },
+                                            audioDeviceId = appSettings.projectionSettings.audioOutputDeviceId
+                                        )
+
+                                    Presenting.NONE -> { /* nothing */
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 }

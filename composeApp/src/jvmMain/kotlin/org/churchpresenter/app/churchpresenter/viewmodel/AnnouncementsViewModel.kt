@@ -1,6 +1,13 @@
 package org.churchpresenter.app.churchpresenter.viewmodel
 
 import androidx.compose.runtime.mutableStateOf
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.churchpresenter.app.churchpresenter.data.AnnouncementsSettings
 import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
@@ -37,6 +44,10 @@ class AnnouncementsViewModel {
     private val _shadow = mutableStateOf(false)
     val shadow: Boolean get() = _shadow.value
 
+    private val _shadowColor = mutableStateOf("#000000")
+    private val _shadowSize = mutableStateOf(100)
+    private val _shadowOpacity = mutableStateOf(78)
+
     private val _horizontalAlignment = mutableStateOf(Constants.CENTER)
     val horizontalAlignment: String get() = _horizontalAlignment.value
 
@@ -49,6 +60,38 @@ class AnnouncementsViewModel {
     private val _animationDuration = mutableStateOf(500)
     val animationDuration: Int get() = _animationDuration.value
 
+    // ── Timer state ──────────────────────────────────────────────────
+    private val _timerHours = mutableStateOf(0)
+    val timerHours: Int get() = _timerHours.value
+
+    private val _timerMinutes = mutableStateOf(0)
+    val timerMinutes: Int get() = _timerMinutes.value
+
+    private val _timerSeconds = mutableStateOf(0)
+    val timerSeconds: Int get() = _timerSeconds.value
+
+    /** Remaining time in whole seconds while the timer is running */
+    private val _timerRemaining = mutableStateOf(0)
+    val timerRemaining: Int get() = _timerRemaining.value
+
+    private val _timerRunning = mutableStateOf(false)
+    val timerRunning: Boolean get() = _timerRunning.value
+
+    /** true once the countdown has reached 0 */
+    private val _timerExpired = mutableStateOf(false)
+    val timerExpired: Boolean get() = _timerExpired.value
+
+    /** Message to show on screen when the timer expires */
+    private val _timerExpiredText = mutableStateOf("")
+    val timerExpiredText: String get() = _timerExpiredText.value
+
+    /** Color of the countdown display text */
+    private val _timerTextColor = mutableStateOf("#FFFFFF")
+    val timerTextColor: String get() = _timerTextColor.value
+
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    private var timerJob: Job? = null
+
     // ── Sync from settings ───────────────────────────────────────────
     fun syncFromSettings(settings: AnnouncementsSettings) {
         _text.value = settings.text
@@ -60,10 +103,21 @@ class AnnouncementsViewModel {
         _italic.value = settings.italic
         _underline.value = settings.underline
         _shadow.value = settings.shadow
+        _shadowColor.value = settings.shadowColor
+        _shadowSize.value = settings.shadowSize
+        _shadowOpacity.value = settings.shadowOpacity
         _horizontalAlignment.value = settings.horizontalAlignment
         _position.value = settings.position
         _animationType.value = settings.animationType
         _animationDuration.value = settings.animationDuration
+        _timerHours.value = settings.timerHours
+        _timerMinutes.value = settings.timerMinutes
+        _timerSeconds.value = settings.timerSeconds
+        _timerTextColor.value = settings.timerTextColor
+        _timerExpiredText.value = settings.timerExpiredText
+        if (!_timerRunning.value) {
+            _timerRemaining.value = totalSeconds()
+        }
     }
 
     // ── Mutations ────────────────────────────────────────────────────
@@ -81,6 +135,129 @@ class AnnouncementsViewModel {
     fun setAnimationType(value: String) { _animationType.value = value }
     fun setAnimationDuration(value: Int) { _animationDuration.value = value }
 
+    private fun totalSeconds(): Int =
+        _timerHours.value * 3600 + _timerMinutes.value * 60 + _timerSeconds.value
+
+    fun setTimerHours(value: Int) {
+        _timerHours.value = value.coerceAtLeast(0)
+        if (!_timerRunning.value) {
+            _timerRemaining.value = totalSeconds()
+        }
+    }
+
+    fun stepTimerHours(delta: Int) {
+        setTimerHours((_timerHours.value + delta).coerceAtLeast(0))
+    }
+
+    fun setTimerMinutes(value: Int) {
+        _timerMinutes.value = value.coerceIn(0, 59)
+        if (!_timerRunning.value) {
+            _timerRemaining.value = totalSeconds()
+        }
+    }
+
+    fun setTimerSeconds(value: Int) {
+        _timerSeconds.value = value.coerceIn(0, 59)
+        if (!_timerRunning.value) {
+            _timerRemaining.value = totalSeconds()
+        }
+    }
+
+    fun stepTimerMinutes(delta: Int) {
+        val cur = _timerMinutes.value
+        if (delta > 0) {
+            if (cur >= 59) {
+                _timerMinutes.value = 0
+                setTimerHours(_timerHours.value + 1)
+            } else {
+                setTimerMinutes(cur + 1)
+            }
+        } else {
+            if (cur <= 0) {
+                if (_timerHours.value > 0) {
+                    _timerMinutes.value = 59
+                    setTimerHours(_timerHours.value - 1)
+                }
+            } else {
+                setTimerMinutes(cur - 1)
+            }
+        }
+    }
+
+    fun stepTimerSeconds(delta: Int) {
+        val cur = _timerSeconds.value
+        if (delta > 0) {
+            val next = if (cur >= 45) 0 else ((cur / 15) + 1) * 15
+            if (next == 0) {
+                _timerSeconds.value = 0
+                stepTimerMinutes(1)
+            } else {
+                setTimerSeconds(next)
+            }
+        } else {
+            val next = if (cur <= 0) 45 else ((cur - 1) / 15) * 15
+            if (cur <= 0) {
+                if (_timerHours.value > 0 || _timerMinutes.value > 0) {
+                    _timerSeconds.value = 45
+                    stepTimerMinutes(-1)
+                }
+            } else {
+                setTimerSeconds(next)
+            }
+        }
+    }
+
+    fun setTimerExpiredText(value: String) { _timerExpiredText.value = value }
+    fun setTimerTextColor(value: String) { _timerTextColor.value = value }
+
+    // ── Timer control ────────────────────────────────────────────────
+    fun startPauseTimer(
+        onTick: ((remaining: Int) -> Unit)? = null,
+        onExpired: (String) -> Unit
+    ) {
+        if (_timerExpired.value) {
+            resetTimer()
+            return
+        }
+        if (_timerRunning.value) {
+            // Pause
+            timerJob?.cancel()
+            timerJob = null
+            _timerRunning.value = false
+        } else {
+            // Start / resume
+            if (_timerRemaining.value <= 0) {
+                val total = totalSeconds()
+                if (total <= 0) return
+                _timerRemaining.value = total
+            }
+            _timerRunning.value = true
+            _timerExpired.value = false
+            timerJob = scope.launch {
+                while (_timerRemaining.value > 0) {
+                    delay(1000L)
+                    _timerRemaining.value--
+                    onTick?.invoke(_timerRemaining.value)
+                }
+                _timerRunning.value = false
+                _timerExpired.value = true
+                onExpired(_timerExpiredText.value)
+            }
+        }
+    }
+
+    fun resetTimer() {
+        timerJob?.cancel()
+        timerJob = null
+        _timerRunning.value = false
+        _timerExpired.value = false
+        _timerRemaining.value = totalSeconds()
+    }
+
+    fun dispose() {
+        scope.cancel()
+    }
+
     // ── Persist to AppSettings ───────────────────────────────────────
     fun saveToSettings(onSettingsChange: ((AppSettings) -> AppSettings) -> Unit) {
         val snap = buildSettings()
@@ -97,16 +274,34 @@ class AnnouncementsViewModel {
         italic = _italic.value,
         underline = _underline.value,
         shadow = _shadow.value,
+        shadowColor = _shadowColor.value,
+        shadowSize = _shadowSize.value,
+        shadowOpacity = _shadowOpacity.value,
         horizontalAlignment = _horizontalAlignment.value,
         position = _position.value,
         animationType = _animationType.value,
-        animationDuration = _animationDuration.value
+        animationDuration = _animationDuration.value,
+        timerHours = _timerHours.value,
+        timerMinutes = _timerMinutes.value,
+        timerSeconds = _timerSeconds.value,
+        timerTextColor = _timerTextColor.value,
+        timerExpiredText = _timerExpiredText.value
     )
 
+    companion object {
+        fun formatTimer(remaining: Int): String {
+            val h = remaining / 3600
+            val m = (remaining % 3600) / 60
+            val s = remaining % 60
+            return if (h > 0) "%d:%02d:%02d".format(h, m, s)
+            else "%02d:%02d".format(m, s)
+        }
+    }
+
     // ── Go Live ──────────────────────────────────────────────────────
-    fun goLive(presenterManager: PresenterManager) {
+    fun goLive(presenterManager: PresenterManager, onSettingsChange: ((AppSettings) -> AppSettings) -> Unit) {
+        saveToSettings(onSettingsChange)
         presenterManager.setAnnouncementText(_text.value)
         presenterManager.setPresentingMode(Presenting.ANNOUNCEMENTS)
     }
 }
-

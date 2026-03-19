@@ -1,4 +1,28 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
+import org.gradle.jvm.toolchain.JavaLanguageVersion
+import java.util.Calendar
+
+val versionYear = Calendar.getInstance().get(Calendar.YEAR) % 100
+
+fun gitCommitCount(): Int {
+    return try {
+        val process = ProcessBuilder("git", "rev-list", "--count", "HEAD")
+            .directory(rootProject.projectDir)
+            .redirectErrorStream(true)
+            .start()
+        process.inputStream.bufferedReader().readText().trim().toInt()
+    } catch (_: Exception) { 0 }
+}
+
+fun gitCommitHash(): String {
+    return try {
+        val process = ProcessBuilder("git", "rev-parse", "--short", "HEAD")
+            .directory(rootProject.projectDir)
+            .redirectErrorStream(true)
+            .start()
+        process.inputStream.bufferedReader().readText().trim()
+    } catch (_: Exception) { "unknown" }
+}
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -19,6 +43,25 @@ fun currentOsClassifier(): String {
     }
 }
 
+// Detect current OS+arch for JCEF native binaries
+fun currentJcefPlatform(): String {
+    val os = System.getProperty("os.name").lowercase()
+    val arch = System.getProperty("os.arch").lowercase()
+    return when {
+        os.contains("mac") -> if (arch.contains("aarch64")) "macosx-arm64" else "macosx-amd64"
+        os.contains("win") -> when {
+            arch.contains("aarch64") -> "windows-arm64"
+            arch.contains("x86") && !arch.contains("64") -> "windows-i386"
+            else -> "windows-amd64"
+        }
+        else -> when {
+            arch.contains("aarch64") -> "linux-arm64"
+            arch.contains("arm") -> "linux-arm"
+            else -> "linux-amd64"
+        }
+    }
+}
+
 configurations.all {
     resolutionStrategy {
         // Force ktx coroutines version to prevent cast exception
@@ -32,6 +75,8 @@ configurations.all {
 kotlin {
     jvm()
 
+    jvmToolchain(21)
+
     sourceSets {
         commonMain.dependencies {
             implementation(libs.compose.runtime)
@@ -39,6 +84,7 @@ kotlin {
             implementation(libs.compose.components.resources)
             implementation(libs.compose.foundation)
             implementation(libs.compose.material3)
+            implementation(compose.materialIconsExtended)
             implementation(libs.compose.ui)
             implementation(libs.compose.uiToolingPreview)
             implementation(libs.androidx.lifecycle.viewmodelCompose)
@@ -53,6 +99,8 @@ kotlin {
         }
         jvmMain.dependencies {
             implementation(libs.kotlinx.coroutines.swing)
+            // Sentry crash reporting
+            implementation(libs.sentry)
             implementation("com.twelvemonkeys.imageio:imageio-core:3.10.1")
             implementation("com.twelvemonkeys.imageio:imageio-jpeg:3.10.1")
             // Apache PDFBox for PDF slide extraction
@@ -61,14 +109,33 @@ kotlin {
             implementation("org.apache.poi:poi:5.2.5")
             implementation("org.apache.poi:poi-ooxml:5.2.5")
             implementation("org.apache.poi:poi-scratchpad:5.2.5")
-            // JavaFX for video playback — bundle all platforms so the installer works on any OS
+            // Ktor server for companion API
+            implementation(libs.ktor.server.core)
+            implementation(libs.ktor.server.netty)
+            implementation(libs.ktor.server.content.negotiation)
+            implementation(libs.ktor.server.cors)
+            implementation(libs.ktor.server.websockets)
+            implementation(libs.ktor.serialization.kotlinx.json)
+            implementation(libs.ktor.server.status.pages)
+            // VLCJ for media playback (requires VLC installed on system)
+            implementation("uk.co.caprica:vlcj:4.8.3")
+            // JCEF — embedded Chromium browser for web presenter
+            implementation("me.friwi:jcefmaven:143.0.14")
+            // Bundle platform-specific Chromium binaries so no runtime download is needed
+            val jcefNativesVersion = "jcef-cffac27+cef-143.0.14+gdd46a37+chromium-143.0.7499.193"
+            runtimeOnly("me.friwi:jcef-natives-${currentJcefPlatform()}:$jcefNativesVersion")
+            // JavaFX for WebView (website presenter, Lottie settings)
             val jfxClassifier = currentOsClassifier()
-            listOf("javafx-base", "javafx-graphics", "javafx-media", "javafx-swing", "javafx-controls", "javafx-web").forEach { module ->
+            val jfxModules = listOf("javafx-base", "javafx-graphics", "javafx-media", "javafx-swing", "javafx-controls", "javafx-web")
+            jfxModules.forEach { module ->
+                // Platform-neutral jar (contains the Java classes)
+                implementation("org.openjfx:$module:21")
+                // Platform-specific jar (contains the native libraries)
                 implementation("org.openjfx:$module:21:$jfxClassifier")
             }
-            // Windows-specific: also pull win-x86_64 natives when building on Windows
+            // Windows-specific: also pull win natives when building on Windows
             if (jfxClassifier == "win") {
-                listOf("javafx-base", "javafx-graphics", "javafx-media", "javafx-swing", "javafx-controls", "javafx-web").forEach { module ->
+                jfxModules.forEach { module ->
                     runtimeOnly("org.openjfx:$module:21:win")
                 }
             }
@@ -79,10 +146,39 @@ kotlin {
     }
 }
 
+// Resolve Java 21 home for both the run task and packaging tasks.
+// Java 24 breaks jlink/jpackage used by Compose Desktop — always use Java 21.
+// 1. Try Gradle's toolchain API (works on any machine with JDK 21 registered).
+// 2. Fall back to a manual path scan for common macOS install locations.
+val resolvedJdk21Home: String? = run {
+    try {
+        val launcher = javaToolchains.launcherFor {
+            languageVersion.set(JavaLanguageVersion.of(21))
+        }.get()
+        // executablePath is …/bin/java; go up two levels to get JAVA_HOME
+        launcher.executablePath.asFile.parentFile?.parentFile?.absolutePath
+    } catch (_: Exception) {
+        null
+    }
+} ?: run {
+    val jdk21Paths = listOf(
+        "${System.getProperty("user.home")}/Library/Java/JavaVirtualMachines/temurin-21.jdk/Contents/Home",
+        "${System.getProperty("user.home")}/Library/Java/JavaVirtualMachines/jdk-21.0.6+7/Contents/Home",
+        "${System.getProperty("user.home")}/Library/Java/JavaVirtualMachines/temurin-21.0.6/Contents/Home",
+        "/Library/Java/JavaVirtualMachines/temurin-21.jdk/Contents/Home",
+        "/Library/Java/JavaVirtualMachines/jdk-21.jdk/Contents/Home",
+        "/Library/Java/JavaVirtualMachines/temurin-21.0.6.jdk/Contents/Home"
+    )
+    jdk21Paths.firstOrNull { path -> File("$path/bin/java").exists() }
+}
 
 compose.desktop {
     application {
         mainClass = "org.churchpresenter.app.churchpresenter.MainKt"
+
+        if (resolvedJdk21Home != null) {
+            javaHome = resolvedJdk21Home
+        }
 
         jvmArgs(
             // Memory
@@ -95,12 +191,9 @@ compose.desktop {
             "-XX:G1ReservePercent=20",
             "-XX:MaxGCPauseMillis=50",
             "-XX:+UseStringDeduplication",
-            // Rendering
-            "-Dskiko.renderApi=OPENGL",
+            // Rendering - macOS requires Metal, other platforms use OpenGL
             "-Dawt.useSystemAAFontSettings=on",
             "-Dswing.aatext=true",
-            // JavaFX modules required at runtime
-            "--add-modules=javafx.base,javafx.graphics,javafx.media,javafx.swing,javafx.controls,javafx.web",
             // Reflective access needed by Apache POI, PDFBox, and JavaFX internals
             "--add-opens=java.base/java.lang=ALL-UNNAMED",
             "--add-opens=java.base/java.lang.reflect=ALL-UNNAMED",
@@ -109,8 +202,10 @@ compose.desktop {
             "--add-opens=java.base/java.io=ALL-UNNAMED",
             "--add-opens=java.base/java.nio=ALL-UNNAMED",
             "--add-opens=java.base/sun.nio.ch=ALL-UNNAMED",
-            "--add-opens=javafx.graphics/com.sun.javafx.application=ALL-UNNAMED",
-            "--add-opens=javafx.graphics/com.sun.glass.ui=ALL-UNNAMED"
+            // JCEF on macOS needs access to sun.awt internals
+            "--add-opens=java.desktop/sun.awt=ALL-UNNAMED",
+            "--add-opens=java.desktop/sun.lwawt=ALL-UNNAMED",
+            "--add-opens=java.desktop/sun.lwawt.macosx=ALL-UNNAMED"
         )
 
         buildTypes.release.proguard {
@@ -120,62 +215,106 @@ compose.desktop {
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Exe, TargetFormat.Deb)
             packageName = "ChurchPresenter"
-            val buildNumber = System.getenv("GITHUB_RUN_NUMBER") ?: "0"
-            packageVersion = "1.0.$buildNumber"
+            val commits = gitCommitCount()
+            // Windows MSI limits each version segment to 0-255, so split commit count across minor.patch
+            packageVersion = "$versionYear.${commits / 256}.${commits % 256}"
             description = "Church Presenter - Presentation software for worship services"
             copyright = "© 2025 Church Presenter. All rights reserved."
             vendor = "Church Presenter"
 
+            // Bundle app resources (Lottie-Gen) alongside the packaged app.
+            // These land in Contents/app/resources/ on macOS.
+            appResourcesRootDir.set(project.layout.projectDirectory.dir("src/jvmMain/appResources"))
+
             // Bundle ALL dependency JARs into the distribution — critical for standalone mode
             includeAllModules = true
 
+            val commonJvmArgs = listOf(
+                "-Xms512m",
+                "-Xmx1536m",
+                "-XX:+UseG1GC",
+                "-XX:+UnlockExperimentalVMOptions",
+                "-XX:G1NewSizePercent=20",
+                "-XX:G1ReservePercent=20",
+                "-XX:MaxGCPauseMillis=50",
+                "-XX:+UseStringDeduplication",
+                "-Dawt.useSystemAAFontSettings=on",
+                "-Dswing.aatext=true",
+                "--add-opens=java.base/java.lang=ALL-UNNAMED",
+                "--add-opens=java.base/java.lang.reflect=ALL-UNNAMED",
+                "--add-opens=java.base/java.util=ALL-UNNAMED",
+                "--add-opens=java.base/java.util.concurrent=ALL-UNNAMED",
+                "--add-opens=java.base/java.io=ALL-UNNAMED",
+                "--add-opens=java.base/java.nio=ALL-UNNAMED",
+                "--add-opens=java.base/sun.nio.ch=ALL-UNNAMED",
+                "--add-opens=java.desktop/sun.awt=ALL-UNNAMED",
+                "--add-opens=java.desktop/sun.lwawt=ALL-UNNAMED",
+                "--add-opens=java.desktop/sun.lwawt.macosx=ALL-UNNAMED"
+            )
+
             macOS {
                 bundleID = "org.churchpresenter.app"
-                jvmArgs(
-                    "--add-modules=javafx.base,javafx.graphics,javafx.media,javafx.swing,javafx.controls,javafx.web",
-                    "--add-opens=java.base/java.lang=ALL-UNNAMED",
-                    "--add-opens=java.base/java.io=ALL-UNNAMED",
-                    "--add-opens=java.base/java.nio=ALL-UNNAMED",
-                    "--add-opens=javafx.graphics/com.sun.javafx.application=ALL-UNNAMED"
-                )
+                iconFile.set(project.file("src/jvmMain/appResources/macos/icon.png"))
+                jvmArgs(*commonJvmArgs.toTypedArray())
             }
 
             windows {
                 menuGroup = "ChurchPresenter"
-                perUserInstall = true
+                perUserInstall = false
                 dirChooser = true
                 upgradeUuid = "A1B2C3D4-E5F6-4789-A012-3456789ABCDE"
-                // Windows-specific JVM args added to the launcher script
-                jvmArgs(
-                    "--add-modules=javafx.base,javafx.graphics,javafx.media,javafx.swing,javafx.controls,javafx.web",
-                    "--add-opens=java.base/java.lang=ALL-UNNAMED",
-                    "--add-opens=java.base/java.lang.reflect=ALL-UNNAMED",
-                    "--add-opens=java.base/java.util=ALL-UNNAMED",
-                    "--add-opens=java.base/java.io=ALL-UNNAMED",
-                    "--add-opens=java.base/java.nio=ALL-UNNAMED",
-                    "--add-opens=java.base/sun.nio.ch=ALL-UNNAMED",
-                    "--add-opens=javafx.graphics/com.sun.javafx.application=ALL-UNNAMED",
-                    "--add-opens=javafx.graphics/com.sun.glass.ui=ALL-UNNAMED"
-                )
+                iconFile.set(project.file("src/jvmMain/appResources/windows/icon.ico"))
+                jvmArgs(*commonJvmArgs.toTypedArray())
             }
 
             linux {
-                jvmArgs(
-                    "--add-modules=javafx.base,javafx.graphics,javafx.media,javafx.swing,javafx.controls,javafx.web",
-                    "--add-opens=java.base/java.lang=ALL-UNNAMED",
-                    "--add-opens=java.base/java.io=ALL-UNNAMED",
-                    "--add-opens=java.base/java.nio=ALL-UNNAMED",
-                    "--add-opens=javafx.graphics/com.sun.javafx.application=ALL-UNNAMED"
-                )
+                iconFile.set(project.file("src/jvmMain/appResources/linux/icon.png"))
+                jvmArgs(*commonJvmArgs.toTypedArray())
             }
         }
     }
 }
 
-// Workaround: avoid Gradle incremental state tracking on Compose resource generation tasks
-// These tasks sometimes fail snapshotting when build outputs are OneDrive placeholders. This
-// marks them as untracked (preferred) or falls back to disabling up-to-date checking.
+// Generate BuildConfig with version info accessible at runtime
+val generateBuildConfig by tasks.registering {
+    val commitHash = gitCommitHash()
+    val commits = gitCommitCount()
+    val appVersion = "$versionYear.${commits / 256}.${commits % 256}"
+    val outputDir = layout.buildDirectory.dir("generated/buildconfig")
 
+    outputs.dir(outputDir)
+
+    doLast {
+        val dir = outputDir.get().asFile.resolve("org/churchpresenter/app/churchpresenter")
+        dir.mkdirs()
+        dir.resolve("BuildConfig.kt").writeText(
+            """
+            |package org.churchpresenter.app.churchpresenter
+            |
+            |object BuildConfig {
+            |    const val APP_VERSION = "$appVersion"
+            |    const val COMMIT_HASH = "$commitHash"
+            |    const val COMMIT_COUNT = "$commits"
+            |    const val VERSION_DISPLAY = "$appVersion ($commitHash)"
+            |}
+            """.trimMargin()
+        )
+    }
+}
+
+kotlin {
+    sourceSets {
+        jvmMain {
+            kotlin.srcDir(generateBuildConfig.map { layout.buildDirectory.dir("generated/buildconfig") })
+        }
+    }
+}
+
+tasks.named("compileKotlinJvm") {
+    dependsOn(generateBuildConfig)
+}
+
+// Workaround: avoid Gradle incremental state tracking on Compose resource generation tasks
 val problematicTasks = setOf(
     "generateResourceAccessorsForJvmMain",
     "generateComposeResClass",
@@ -185,3 +324,23 @@ val problematicTasks = setOf(
 tasks.matching { it.name in problematicTasks }.configureEach {
     doNotTrackState("Temporary workaround: OneDrive placeholder snapshot errors")
 }
+
+// Copy Lottie-Gen into appResources so it gets bundled with the packaged app.
+val copyLottieGen by tasks.registering(Copy::class) {
+    from(rootProject.file("Lottie-Gen"))
+    into(layout.projectDirectory.dir("src/jvmMain/appResources/common/Lottie-Gen"))
+}
+
+afterEvaluate {
+    tasks.matching { t ->
+        t.name == "prepareAppResources" ||
+        t.name.startsWith("createDistributable") ||
+        t.name.startsWith("packageDmg") ||
+        t.name.startsWith("packageMsi") ||
+        t.name.startsWith("packageExe") ||
+        t.name.startsWith("packageDeb")
+    }.configureEach {
+        dependsOn(copyLottieGen)
+    }
+}
+

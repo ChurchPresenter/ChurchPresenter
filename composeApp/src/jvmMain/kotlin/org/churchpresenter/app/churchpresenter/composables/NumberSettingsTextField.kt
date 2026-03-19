@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -31,7 +32,10 @@ import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.arrow_down
 import churchpresenter.composeapp.generated.resources.arrow_up
 import org.churchpresenter.app.churchpresenter.extensions.errorShake
+import churchpresenter.composeapp.generated.resources.decrement
+import churchpresenter.composeapp.generated.resources.increment
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun NumberSettingsTextField(
@@ -40,7 +44,7 @@ fun NumberSettingsTextField(
     range: IntRange,
     onValueChange: (Int) -> Unit,
 ) {
-    var value by rememberSaveable { mutableStateOf(initialText) }
+    var value by rememberSaveable(initialText) { mutableStateOf(initialText) }
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
     var isError by remember { mutableStateOf(false) }
@@ -83,9 +87,9 @@ fun NumberSettingsTextField(
             singleLine = true,
             value = value.toString(),
             decorationBox = { innerTextField ->
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier.fillMaxWidth()
                 ) { innerTextField() }
             },
             onValueChange = { newValue ->
@@ -124,7 +128,7 @@ fun NumberSettingsTextField(
             ) {
                 Image(
                     painter = painterResource(Res.drawable.arrow_up),
-                    contentDescription = "Increment",
+                    contentDescription = stringResource(Res.string.increment),
                     colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface),
                     modifier = Modifier.size(12.dp)
                 )
@@ -147,7 +151,7 @@ fun NumberSettingsTextField(
             ) {
                 Image(
                     painter = painterResource(Res.drawable.arrow_down),
-                    contentDescription = "Decrement",
+                    contentDescription = stringResource(Res.string.decrement),
                     colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface),
                     modifier = Modifier.size(12.dp)
                 )

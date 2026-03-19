@@ -1,11 +1,17 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.TooltipArea
+import androidx.compose.foundation.TooltipPlacement
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.focusable
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -14,17 +20,23 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -32,17 +44,23 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import kotlinx.coroutines.flow.first
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.pointerHoverIcon
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -52,8 +70,14 @@ import churchpresenter.composeapp.generated.resources.all_song_books
 import churchpresenter.composeapp.generated.resources.contains
 import churchpresenter.composeapp.generated.resources.edit_song
 import churchpresenter.composeapp.generated.resources.exact_match
-import churchpresenter.composeapp.generated.resources.filter_type_colon
+import churchpresenter.composeapp.generated.resources.back_to_live
 import churchpresenter.composeapp.generated.resources.go_live
+import churchpresenter.composeapp.generated.resources.ic_add
+import churchpresenter.composeapp.generated.resources.line_navigation_hint
+import churchpresenter.composeapp.generated.resources.new_song
+import churchpresenter.composeapp.generated.resources.ic_cast
+import churchpresenter.composeapp.generated.resources.ic_edit
+import churchpresenter.composeapp.generated.resources.ic_playlist_add
 import churchpresenter.composeapp.generated.resources.no_lyrics_available
 import churchpresenter.composeapp.generated.resources.number
 import churchpresenter.composeapp.generated.resources.search
@@ -72,20 +96,30 @@ import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.viewmodel.SongsViewModel
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun SongsTab(
     modifier: Modifier = Modifier,
     appSettings: AppSettings,
-    onAddToSchedule: ((songNumber: Int, title: String, songbook: String) -> Unit)? = null,
+    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit = {},
+    onAddToSchedule: ((songNumber: Int, title: String, songbook: String, songId: String) -> Unit)? = null,
     selectedSongItem: ScheduleItem.SongItem? = null,
+    selectedSongItemVersion: Int = 0,
     onSongItemSelected: (LyricSection) -> Unit,
+    onAllSectionsChanged: (List<LyricSection>) -> Unit = {},
+    onSectionIndexChanged: (Int) -> Unit = {},
+    onLineIndexChanged: (Int) -> Unit = {},
     onPresenting: (Presenting) -> Unit = { Presenting.NONE },
     isPresenting: Boolean = false,
-    theme: ThemeMode = ThemeMode.SYSTEM
+    theme: ThemeMode = ThemeMode.SYSTEM,
+    onSongsLoaded: ((List<SongItem>) -> Unit)? = null,
+    statisticsManager: org.churchpresenter.app.churchpresenter.data.StatisticsManager? = null
 ) {
-    val viewModel = remember { SongsViewModel(appSettings) }
+    val onSongsLoadedState by rememberUpdatedState(onSongsLoaded)
+    val viewModel = remember { SongsViewModel(appSettings, onSongsLoaded = { songs -> onSongsLoadedState?.invoke(songs) }) }
 
     // Reload songs whenever the storage directory changes (e.g. after settings are saved)
     LaunchedEffect(appSettings.songSettings.storageDirectory) {
@@ -99,19 +133,6 @@ fun SongsTab(
     // React to schedule item selection.
     // If data is still loading when the item arrives, wait for loading to finish
     // then retry — no fixed delay, no polling, no race condition.
-    LaunchedEffect(selectedSongItem) {
-        selectedSongItem?.let { item ->
-            // Wait until data is ready if currently loading
-            if (viewModel.isLoading.value) {
-                snapshotFlow { viewModel.isLoading.value }
-                    .first { !it }
-            }
-            val found = viewModel.selectSongByDetails(item.songNumber, item.title, item.songbook)
-            if (found) {
-                viewModel.getSelectedLyricSection()?.let { section -> onSongItemSelected(section) }
-            }
-        }
-    }
     // Observe ViewModel state
     val songbooks by viewModel.songbooks
     val searchQuery by viewModel.searchQuery
@@ -124,8 +145,57 @@ fun SongsTab(
     // Edit Song Dialog state (pure UI state — fine to keep here)
     var showEditDialog by remember { mutableStateOf(false) }
     var songToEdit by remember { mutableStateOf<SongItem?>(null) }
+    var showNewSongDialog by remember { mutableStateOf(false) }
+
+    // Track which song/section/line is currently live on the presenter
+    var liveSongIndex by remember { mutableStateOf(-1) }
+    var liveSectionIndex by remember { mutableStateOf(0) }
+    var liveLineIndex by remember { mutableStateOf(0) }
+
+    // Helper: push current viewModel selection to presenter and track as live
+    fun sendToPresenter() {
+        onAllSectionsChanged(viewModel.getLyricSections())
+        onSectionIndexChanged(viewModel.selectedSectionIndex.value)
+        onLineIndexChanged(viewModel.selectedLineIndex.value)
+        viewModel.getSelectedLyricSection()?.let { onSongItemSelected(it) }
+        // Record song display for statistics — only when a different song is presented
+        val idx = viewModel.selectedSongIndex.value
+        if (idx != liveSongIndex) {
+            val items = viewModel.filteredSongItems.value
+            if (idx in items.indices) {
+                val song = items[idx]
+                statisticsManager?.recordSongDisplay(
+                    songNumber = song.number.toIntOrNull() ?: 0,
+                    title = song.title,
+                    songbook = song.songbook
+                )
+            }
+        }
+        liveSongIndex = viewModel.selectedSongIndex.value
+        liveSectionIndex = viewModel.selectedSectionIndex.value
+        liveLineIndex = viewModel.selectedLineIndex.value
+    }
+
+    // React to schedule item selection
+    // Uses selectedSongItemVersion as a key so clicking the same song twice always re-fires
+    LaunchedEffect(selectedSongItem, selectedSongItemVersion) {
+        selectedSongItem?.let { item ->
+            // Wait until data is ready if currently loading
+            if (viewModel.isLoading.value) {
+                snapshotFlow { viewModel.isLoading.value }
+                    .first { !it }
+            }
+            val found = viewModel.selectSongByDetails(item.songNumber, item.title, item.songbook, item.songId)
+            if (found) {
+                sendToPresenter()
+            }
+        }
+    }
 
     // String resources
+    val newSongStr = stringResource(Res.string.new_song)
+    val backToLiveStr = stringResource(Res.string.back_to_live)
+    val lineNavHintStr = stringResource(Res.string.line_navigation_hint)
     val allSongBooksText = stringResource(Res.string.all_song_books)
 
     // Prepend "All" option to songbooks
@@ -149,34 +219,100 @@ fun SongsTab(
         Constants.EXACT_MATCH to exactMatchText
     )
 
+    val density = LocalDensity.current
+    val onSettingsChangeState = rememberUpdatedState(onSettingsChange)
+
+    // Column widths driven by settings; local state for smooth dragging
+    var colWNumber by remember(appSettings.songSettings.colWidthNumber) {
+        mutableStateOf(with(density) { appSettings.songSettings.colWidthNumber.dp.toPx() })
+    }
+    var colWTitle by remember(appSettings.songSettings.colWidthTitle) {
+        mutableStateOf(with(density) { appSettings.songSettings.colWidthTitle.dp.toPx() })
+    }
+    var colWSongbook by remember(appSettings.songSettings.colWidthSongbook) {
+        mutableStateOf(with(density) { appSettings.songSettings.colWidthSongbook.dp.toPx() })
+    }
+    var colWTune by remember(appSettings.songSettings.colWidthTune) {
+        mutableStateOf(with(density) { appSettings.songSettings.colWidthTune.dp.toPx() })
+    }
+
+    // Panel split — lyrics panel width in px; 0 means "not yet set, use half of row"
+    var lyricsPanelPx by remember(appSettings.songSettings.lyricsPanelWidthDp) {
+        val saved = appSettings.songSettings.lyricsPanelWidthDp
+        mutableStateOf(if (saved > 0) with(density) { saved.dp.toPx() } else 0f)
+    }
+    var rowTotalWidth by remember { mutableStateOf(0f) }
+
+    fun saveColWidths() {
+        onSettingsChangeState.value { s ->
+            s.copy(songSettings = s.songSettings.copy(
+                colWidthNumber      = with(density) { colWNumber.toDp().value.toInt() },
+                colWidthTitle       = with(density) { colWTitle.toDp().value.toInt() },
+                colWidthSongbook    = with(density) { colWSongbook.toDp().value.toInt() },
+                colWidthTune        = with(density) { colWTune.toDp().value.toInt() },
+                lyricsPanelWidthDp  = with(density) { lyricsPanelPx.toDp().value.toInt() }
+            ))
+        }
+    }
+
+    @Composable
+    fun DragHandle(onDrag: (Float) -> Unit, onDragEnd: () -> Unit) {
+        Box(
+            modifier = Modifier
+                .width(6.dp)
+                .fillMaxHeight()
+                .background(MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f))
+                .pointerHoverIcon(PointerIcon.Hand)
+                .pointerInput(Unit) {
+                    detectHorizontalDragGestures(onDragEnd = onDragEnd) { _, amount ->
+                        onDrag(amount)
+                    }
+                }
+        )
+    }
+
     Row(
         modifier = modifier
             .fillMaxSize()
+            .onSizeChanged { size ->
+                rowTotalWidth = size.width.toFloat()
+                if (lyricsPanelPx == 0f) {
+                    lyricsPanelPx = rowTotalWidth / 2f
+                }
+            }
             .onKeyEvent { keyEvent ->
                 if (keyEvent.type == KeyEventType.KeyDown) {
+                    val isLineMode = appSettings.songSettings.fullscreenDisplayMode != Constants.SONG_DISPLAY_MODE_VERSE ||
+                        appSettings.songSettings.lowerThirdDisplayMode != Constants.SONG_DISPLAY_MODE_VERSE ||
+                        appSettings.songSettings.lookAheadDisplayMode != Constants.SONG_DISPLAY_MODE_VERSE ||
+                        appSettings.songSettings.lowerThirdLookAheadDisplayMode != Constants.SONG_DISPLAY_MODE_VERSE
                     when (keyEvent.key) {
                         Key.DirectionLeft -> {
-                            if (!isPresenting) {
+                            if (isLineMode) {
+                                viewModel.navigatePreviousLine()
+                                sendToPresenter()
+                            } else if (!isPresenting) {
                                 viewModel.navigatePreviousSong()
-                                viewModel.getSelectedLyricSection()?.let { onSongItemSelected(it) }
                             }
                             true
                         }
                         Key.DirectionRight -> {
-                            if (!isPresenting) {
+                            if (isLineMode) {
+                                viewModel.navigateNextLine()
+                                sendToPresenter()
+                            } else if (!isPresenting) {
                                 viewModel.navigateNextSong()
-                                viewModel.getSelectedLyricSection()?.let { onSongItemSelected(it) }
                             }
                             true
                         }
                         Key.DirectionUp -> {
                             if (!viewModel.navigatePreviousSection() && !isPresenting) viewModel.navigatePreviousSong()
-                            viewModel.getSelectedLyricSection()?.let { onSongItemSelected(it) }
+                            sendToPresenter()
                             true
                         }
                         Key.DirectionDown -> {
                             if (!viewModel.navigateNextSection() && !isPresenting) viewModel.navigateNextSong()
-                            viewModel.getSelectedLyricSection()?.let { onSongItemSelected(it) }
+                            sendToPresenter()
                             true
                         }
                         else -> false
@@ -185,101 +321,119 @@ fun SongsTab(
             }
             .focusable()
     ) {
-        // Left panel — Search and song list
-        Column(modifier = Modifier.weight(0.6f).fillMaxHeight()) {
-            // Search controls
-            Column(modifier = Modifier.padding(8.dp)) {
-                DropdownSelector(
-                    modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp),
-                    label = "",
-                    items = songbookOptions,
-                    selected = selectedSongbook.ifEmpty { allSongBooksText },
-                    onSelectedChange = { viewModel.updateSelectedSongbook(it) }
-                )
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        stringResource(Res.string.filter_type_colon),
-                        color = MaterialTheme.colorScheme.primary,
-                        style = MaterialTheme.typography.labelMedium
-                    )
-                    DropdownSelector(
-                        modifier = Modifier.weight(1f),
-                        label = "",
-                        items = filterTypes,
-                        selected = filterTypeDisplayMap[filterType] ?: containsText,
-                        onSelectedChange = { displayText ->
-                            val internalKey = filterTypeMap[displayText] ?: Constants.CONTAINS
-                            viewModel.updateFilterType(internalKey)
-                        }
-                    )
-                    Button(
-                        onClick = { /* Search action */ },
-                        modifier = Modifier.height(40.dp)
-                    ) {
-                        Text(stringResource(Res.string.search), style = MaterialTheme.typography.labelMedium)
-                    }
-                }
-
+        // Left panel — Search and song list (fills remaining space)
+        Column(modifier = Modifier.weight(1f).fillMaxHeight()) {
+            // Search controls — wraps to new line if not enough space
+            @OptIn(ExperimentalLayoutApi::class)
+            FlowRow(
+                modifier = Modifier.fillMaxWidth().padding(all = 4.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+                itemVerticalAlignment = Alignment.CenterVertically
+            ) {
                 OutlinedTextField(
+                    modifier = Modifier.weight(1f).widthIn(min = 120.dp),
                     value = searchQuery,
                     onValueChange = { viewModel.updateSearchQuery(it) },
+                    textStyle = MaterialTheme.typography.bodyMedium,
                     label = {
-                        Text(stringResource(Res.string.search_songs), style = MaterialTheme.typography.labelMedium)
+                        Text(stringResource(Res.string.search_songs), style = MaterialTheme.typography.bodyMedium)
                     },
-                    modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
                     singleLine = true,
                     colors = OutlinedTextFieldDefaults.colors().copy(
                         unfocusedContainerColor = MaterialTheme.colorScheme.surface,
                         focusedContainerColor = MaterialTheme.colorScheme.surface,
                     )
                 )
+
+                DropdownSelector(
+                    modifier = Modifier.width(160.dp),
+                    label = "",
+                    items = songbookOptions,
+                    selected = selectedSongbook.ifEmpty { allSongBooksText },
+                    onSelectedChange = { viewModel.updateSelectedSongbook(it) }
+                )
+
+                DropdownSelector(
+                    modifier = Modifier.width(160.dp),
+                    label = "",
+                    items = filterTypes,
+                    selected = filterTypeDisplayMap[filterType] ?: containsText,
+                    onSelectedChange = { displayText ->
+                        val internalKey = filterTypeMap[displayText] ?: Constants.CONTAINS
+                        viewModel.updateFilterType(internalKey)
+                    }
+                )
+
+                Button(onClick = { /* Search action */ }) {
+                    Text(stringResource(Res.string.search), style = MaterialTheme.typography.labelMedium)
+                }
             }
 
             // Column header row
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(Color.Gray.copy(alpha = 0.2f))
-                    .padding(8.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    .height(32.dp)
+                    .background(Color.Gray.copy(alpha = 0.2f)),
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
                     text = stringResource(Res.string.number) + viewModel.getSortIndicator(Constants.SORT_NUMBER),
                     style = MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.secondary,
-                    modifier = Modifier.width(70.dp).clickable { viewModel.updateSort(Constants.SORT_NUMBER) }
+                    modifier = Modifier
+                        .width(with(density) { colWNumber.toDp() })
+                        .padding(horizontal = 8.dp)
+                        .clickable { viewModel.updateSort(Constants.SORT_NUMBER) }
+                )
+                DragHandle(
+                    onDrag = { colWNumber = (colWNumber + it).coerceIn(with(density) { 30.dp.toPx() }, with(density) { 200.dp.toPx() }) },
+                    onDragEnd = ::saveColWidths
                 )
                 Text(
                     text = stringResource(Res.string.title) + viewModel.getSortIndicator(Constants.SORT_TITLE),
                     style = MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.secondary,
-                    modifier = Modifier.weight(1f).clickable { viewModel.updateSort(Constants.SORT_TITLE) }
+                    modifier = Modifier
+                        .width(with(density) { colWTitle.toDp() })
+                        .padding(horizontal = 8.dp)
+                        .clickable { viewModel.updateSort(Constants.SORT_TITLE) }
+                )
+                DragHandle(
+                    onDrag = { colWTitle = (colWTitle + it).coerceIn(with(density) { 60.dp.toPx() }, with(density) { 600.dp.toPx() }) },
+                    onDragEnd = ::saveColWidths
                 )
                 Text(
                     text = stringResource(Res.string.song_book) + viewModel.getSortIndicator(Constants.SORT_SONGBOOK),
                     style = MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.secondary,
-                    modifier = Modifier.width(100.dp).clickable { viewModel.updateSort(Constants.SORT_SONGBOOK) }
+                    modifier = Modifier
+                        .width(with(density) { colWSongbook.toDp() })
+                        .padding(horizontal = 8.dp)
+                        .clickable { viewModel.updateSort(Constants.SORT_SONGBOOK) }
+                )
+                DragHandle(
+                    onDrag = { colWSongbook = (colWSongbook + it).coerceIn(with(density) { 40.dp.toPx() }, with(density) { 300.dp.toPx() }) },
+                    onDragEnd = ::saveColWidths
                 )
                 Text(
                     text = stringResource(Res.string.tune) + viewModel.getSortIndicator(Constants.SORT_TUNE),
                     style = MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.secondary,
-                    modifier = Modifier.width(60.dp).clickable { viewModel.updateSort(Constants.SORT_TUNE) }
+                    modifier = Modifier
+                        .width(with(density) { colWTune.toDp() })
+                        .padding(horizontal = 8.dp)
+                        .clickable { viewModel.updateSort(Constants.SORT_TUNE) }
                 )
             }
 
             Box(modifier = Modifier.weight(1f)) {
-                val lazyListState = androidx.compose.foundation.lazy.rememberLazyListState()
+                val lazyListState = rememberLazyListState()
 
                 LaunchedEffect(selectedSongIndex, filteredSongs.size) {
                     if (selectedSongIndex >= 0 && selectedSongIndex < filteredSongs.size) {
@@ -304,18 +458,51 @@ fun SongsTab(
                                     if (index == selectedSongIndex) MaterialTheme.colorScheme.surfaceVariant
                                     else MaterialTheme.colorScheme.surface
                                 )
-                                .clickable { viewModel.selectSong(index) }
-                                .padding(8.dp),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                .clickable {
+                                    viewModel.selectSong(index)
+                                    if (isPresenting && liveSongIndex >= 0) {
+                                        viewModel.selectSection(-1)
+                                    }
+                                }
+                                .padding(vertical = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
                             val textColor = if (index == selectedSongIndex)
                                 MaterialTheme.colorScheme.onSurfaceVariant
                             else
                                 MaterialTheme.colorScheme.onSurface
-                            Text(song.number, style = MaterialTheme.typography.bodySmall, modifier = Modifier.width(70.dp), color = textColor)
-                            Text(song.title, style = MaterialTheme.typography.bodySmall, modifier = Modifier.weight(1f), maxLines = 1, overflow = TextOverflow.Ellipsis, color = textColor)
-                            Text(song.songbook, style = MaterialTheme.typography.bodySmall, modifier = Modifier.width(100.dp), maxLines = 1, overflow = TextOverflow.Ellipsis, color = textColor)
-                            Text(song.tune, style = MaterialTheme.typography.bodySmall, modifier = Modifier.width(60.dp), maxLines = 1, color = textColor)
+                            Text(
+                                song.number,
+                                style = MaterialTheme.typography.bodySmall,
+                                modifier = Modifier.width(with(density) { colWNumber.toDp() }).padding(horizontal = 8.dp),
+                                color = textColor
+                            )
+                            Box(modifier = Modifier.width(6.dp)) // spacer matching drag handle
+                            Text(
+                                song.title,
+                                style = MaterialTheme.typography.bodySmall,
+                                modifier = Modifier.width(with(density) { colWTitle.toDp() }).padding(horizontal = 8.dp),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                color = textColor
+                            )
+                            Box(modifier = Modifier.width(6.dp))
+                            Text(
+                                song.songbook,
+                                style = MaterialTheme.typography.bodySmall,
+                                modifier = Modifier.width(with(density) { colWSongbook.toDp() }).padding(horizontal = 8.dp),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                color = textColor
+                            )
+                            Box(modifier = Modifier.width(6.dp))
+                            Text(
+                                song.tune,
+                                style = MaterialTheme.typography.bodySmall,
+                                modifier = Modifier.width(with(density) { colWTune.toDp() }).padding(horizontal = 8.dp),
+                                maxLines = 1,
+                                color = textColor
+                            )
                         }
                         HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
                     }
@@ -327,60 +514,210 @@ fun SongsTab(
             }
         }
 
-        // Right panel — Lyrics display
-        Column(
+        // Vertical drag handle — resize lyrics panel
+        Box(
             modifier = Modifier
-                .weight(0.4f)
+                .width(6.dp)
                 .fillMaxHeight()
-                .background(MaterialTheme.colorScheme.surfaceVariant)
-                .padding(8.dp)
-        ) {
-            // Header row with action buttons
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                if (selectedSongIndex >= 0 && selectedSongIndex < filteredSongs.size) {
-                    Button(
-                        modifier = Modifier.wrapContentSize().padding(end = 4.dp),
-                        onClick = {
-                            songToEdit = filteredSongs[selectedSongIndex]
-                            showEditDialog = true
-                        },
-                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary)
-                    ) {
-                        Text(stringResource(Res.string.edit_song), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onTertiary, maxLines = 1)
+                .background(MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f))
+                .pointerHoverIcon(PointerIcon.Hand)
+                .pointerInput(Unit) {
+                    detectHorizontalDragGestures(
+                        onDragEnd = { saveColWidths() }
+                    ) { _, amount ->
+                        lyricsPanelPx = (lyricsPanelPx - amount)
+                            .coerceIn(
+                                with(density) { 150.dp.toPx() },
+                                with(density) { 800.dp.toPx() }
+                            )
                     }
                 }
+        )
 
-                Button(
-                    modifier = Modifier.wrapContentSize(),
-                    onClick = { onPresenting(Presenting.LYRICS) },
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+        // Right panel — Lyrics display (fixed width, resizable via drag handle)
+        Column(
+            modifier = Modifier
+                .width(with(density) { lyricsPanelPx.toDp() })
+                .fillMaxHeight()
+                .padding(8.dp)
+        ) {
+            // Header row with action buttons — switches to icon-only when width is tight
+            val editSongStr    = stringResource(Res.string.edit_song)
+            val goLiveStr      = stringResource(Res.string.go_live)
+            val addScheduleStr = stringResource(Res.string.add_to_schedule)
+
+            androidx.compose.foundation.layout.BoxWithConstraints(
+                modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
+            ) {
+                val useIcons = maxWidth < 220.dp
+                val hasSongSelected = selectedSongIndex >= 0 && selectedSongIndex < filteredSongs.size && selectedSectionIndex >= 0
+                @OptIn(ExperimentalLayoutApi::class)
+                FlowRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
-                    Text(stringResource(Res.string.go_live), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onPrimary, maxLines = 2)
-                }
-
-                if (onAddToSchedule != null && selectedSongIndex >= 0 && selectedSongIndex < filteredSongs.size) {
-                    Button(
-                        modifier = Modifier.wrapContentSize().padding(start = 4.dp),
-                        onClick = {
-                            val item = filteredSongs.getOrNull(selectedSongIndex)
-                            if (item != null) {
-                                onAddToSchedule(item.number.toIntOrNull() ?: 0, item.title, item.songbook)
+                    if (useIcons) {
+                        TooltipArea(
+                            tooltip = {
+                                Surface(shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
+                                    Text(goLiveStr, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
+                                }
+                            },
+                            tooltipPlacement = TooltipPlacement.CursorPoint()
+                        ) {
+                            IconButton(
+                                onClick = { sendToPresenter(); onPresenting(Presenting.LYRICS) },
+                                enabled = hasSongSelected,
+                                colors = IconButtonDefaults.iconButtonColors(
+                                    containerColor = MaterialTheme.colorScheme.primary,
+                                    contentColor = MaterialTheme.colorScheme.onPrimary
+                                )
+                            ) {
+                                Icon(painter = painterResource(Res.drawable.ic_cast), contentDescription = goLiveStr, modifier = Modifier.size(20.dp))
                             }
-                        },
-                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
-                    ) {
-                        Text(stringResource(Res.string.add_to_schedule), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSecondary, maxLines = 2)
+                        }
+                    } else {
+                        Button(
+                            onClick = { sendToPresenter(); onPresenting(Presenting.LYRICS) },
+                            enabled = hasSongSelected,
+                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                        ) {
+                            Text(goLiveStr, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onPrimary, maxLines = 1)
+                        }
+                    }
+
+                    if (selectedSongIndex >= 0 && selectedSongIndex < filteredSongs.size) {
+                        if (useIcons) {
+                            TooltipArea(
+                                tooltip = {
+                                    Surface(shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
+                                        Text(editSongStr, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
+                                    }
+                                },
+                                tooltipPlacement = TooltipPlacement.CursorPoint()
+                            ) {
+                                IconButton(
+                                    onClick = { songToEdit = filteredSongs[selectedSongIndex]; showEditDialog = true },
+                                    colors = IconButtonDefaults.iconButtonColors(
+                                        containerColor = MaterialTheme.colorScheme.tertiary,
+                                        contentColor = MaterialTheme.colorScheme.onTertiary
+                                    )
+                                ) {
+                                    Icon(painter = painterResource(Res.drawable.ic_edit), contentDescription = editSongStr, modifier = Modifier.size(20.dp))
+                                }
+                            }
+                        } else {
+                            Button(
+                                onClick = { songToEdit = filteredSongs[selectedSongIndex]; showEditDialog = true },
+                                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary)
+                            ) {
+                                Text(editSongStr, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onTertiary, maxLines = 1)
+                            }
+                        }
+                    }
+
+                    // New Song button
+                    if (useIcons) {
+                        TooltipArea(
+                            tooltip = {
+                                Surface(shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
+                                    Text(newSongStr, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
+                                }
+                            },
+                            tooltipPlacement = TooltipPlacement.CursorPoint()
+                        ) {
+                            IconButton(
+                                onClick = { showNewSongDialog = true },
+                                colors = IconButtonDefaults.iconButtonColors(
+                                    containerColor = MaterialTheme.colorScheme.tertiary,
+                                    contentColor = MaterialTheme.colorScheme.onTertiary
+                                )
+                            ) {
+                                Icon(painter = painterResource(Res.drawable.ic_add), contentDescription = newSongStr, modifier = Modifier.size(20.dp))
+                            }
+                        }
+                    } else {
+                        Button(
+                            onClick = { showNewSongDialog = true },
+                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary)
+                        ) {
+                            Text(newSongStr, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onTertiary, maxLines = 1)
+                        }
+                    }
+
+                    if (onAddToSchedule != null && selectedSongIndex >= 0 && selectedSongIndex < filteredSongs.size) {
+                        if (useIcons) {
+                            TooltipArea(
+                                tooltip = {
+                                    Surface(shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
+                                        Text(addScheduleStr, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
+                                    }
+                                },
+                                tooltipPlacement = TooltipPlacement.CursorPoint()
+                            ) {
+                                IconButton(
+                                    onClick = {
+                                        filteredSongs.getOrNull(selectedSongIndex)?.let { item ->
+                                            onAddToSchedule(item.number.toIntOrNull() ?: 0, item.title, item.songbook, item.songId)
+                                        }
+                                    },
+                                    colors = IconButtonDefaults.iconButtonColors(
+                                        containerColor = MaterialTheme.colorScheme.secondary,
+                                        contentColor = MaterialTheme.colorScheme.onSecondary
+                                    )
+                                ) {
+                                    Icon(painter = painterResource(Res.drawable.ic_playlist_add), contentDescription = addScheduleStr, modifier = Modifier.size(20.dp))
+                                }
+                            }
+                        } else {
+                            Button(
+                                onClick = {
+                                    filteredSongs.getOrNull(selectedSongIndex)?.let { item ->
+                                        onAddToSchedule(item.number.toIntOrNull() ?: 0, item.title, item.songbook, item.songId)
+                                    }
+                                },
+                                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
+                            ) {
+                                Text(addScheduleStr, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSecondary, maxLines = 1)
+                            }
+                        }
                     }
                 }
             }
 
+            // "Back to Live" button — shown when browsing a different song than what's live
+            if (isPresenting && liveSongIndex >= 0 && selectedSongIndex != liveSongIndex) {
+                Button(
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = {
+                        viewModel.selectSong(liveSongIndex)
+                        viewModel.selectSection(liveSectionIndex)
+                        viewModel.setLineIndex(liveLineIndex)
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                ) {
+                    Text(backToLiveStr, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onError, maxLines = 1)
+                }
+            }
+
+            // Arrow key navigation hint — only in line mode
+            val isLineModeHint = appSettings.songSettings.fullscreenDisplayMode != Constants.SONG_DISPLAY_MODE_VERSE ||
+                    appSettings.songSettings.lowerThirdDisplayMode != Constants.SONG_DISPLAY_MODE_VERSE ||
+                    appSettings.songSettings.lookAheadDisplayMode != Constants.SONG_DISPLAY_MODE_VERSE ||
+                    appSettings.songSettings.lowerThirdLookAheadDisplayMode != Constants.SONG_DISPLAY_MODE_VERSE
+            if (isLineModeHint) {
+                Text(
+                    text = lineNavHintStr,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                    modifier = Modifier.padding(bottom = 4.dp)
+                )
+            }
+
             // Lyrics content
             Box {
-                val lyricsListState = androidx.compose.foundation.lazy.rememberLazyListState()
+                val lyricsListState = rememberLazyListState()
 
                 LaunchedEffect(selectedSectionIndex) {
                     if (selectedSectionIndex >= 0) {
@@ -413,41 +750,63 @@ fun SongsTab(
                                     .combinedClickable(
                                         onClick = {
                                             viewModel.selectSection(sectionIndex)
-                                            onSongItemSelected(section)
+                                            sendToPresenter()
                                         },
                                         onDoubleClick = {
                                             viewModel.selectSection(sectionIndex)
-                                            onSongItemSelected(section)
+                                            sendToPresenter()
                                             onPresenting(Presenting.LYRICS)
                                         }
                                     )
                                     .padding(8.dp)
                             ) {
-                                section.lines.forEachIndexed { lineIndex, line ->
-                                    val isHeader = lineIndex == 0 && (
-                                        line.startsWith(Constants.VERSE_RUS) || line.startsWith(Constants.CHORUS_RUS) ||
-                                        line.startsWith(Constants.VERSE) || line.startsWith(Constants.CHORUS)
+                                val textColor = if (sectionIndex == selectedSectionIndex)
+                                    MaterialTheme.colorScheme.onSurfaceVariant
+                                else
+                                    MaterialTheme.colorScheme.onSurface
+
+                                val isPerLineMode = appSettings.songSettings.fullscreenDisplayMode != Constants.SONG_DISPLAY_MODE_VERSE ||
+                                    appSettings.songSettings.lowerThirdDisplayMode != Constants.SONG_DISPLAY_MODE_VERSE ||
+                                    appSettings.songSettings.lookAheadDisplayMode != Constants.SONG_DISPLAY_MODE_VERSE ||
+                                    appSettings.songSettings.lowerThirdLookAheadDisplayMode != Constants.SONG_DISPLAY_MODE_VERSE
+                                val activeLineIndex = if (isPerLineMode && sectionIndex == selectedSectionIndex)
+                                    viewModel.selectedLineIndex.value else -1
+
+                                // Render section header if present
+                                section.header?.let { header ->
+                                    Text(
+                                        text = header,
+                                        style = MaterialTheme.typography.titleSmall,
+                                        fontWeight = FontWeight.Bold,
+                                        color = textColor,
+                                        modifier = Modifier.padding(vertical = 4.dp)
                                     )
-                                    val textColor = if (sectionIndex == selectedSectionIndex)
-                                        MaterialTheme.colorScheme.onSurfaceVariant
-                                    else
-                                        MaterialTheme.colorScheme.onSurface
-                                    if (isHeader) {
-                                        Text(
-                                            text = line,
-                                            style = MaterialTheme.typography.titleSmall,
-                                            fontWeight = FontWeight.Bold,
-                                            color = textColor,
-                                            modifier = Modifier.padding(vertical = 4.dp)
-                                        )
-                                    } else {
-                                        Text(
-                                            text = line,
-                                            style = MaterialTheme.typography.bodyMedium,
-                                            color = textColor,
-                                            modifier = Modifier.padding(vertical = 2.dp)
-                                        )
+                                }
+
+                                // Lyrics panel always shows both — language filtering only applies to presenter
+                                val langDisplay = Constants.SONG_LANG_BOTH
+                                val showPrimary = langDisplay != Constants.SONG_LANG_SECONDARY
+                                val showSecondary = langDisplay != Constants.SONG_LANG_PRIMARY && section.secondaryLines.isNotEmpty()
+
+                                val lineClickHandler: ((Int) -> Unit)? = if (isPerLineMode) { lineIdx ->
+                                    viewModel.selectSection(sectionIndex)
+                                    viewModel.setLineIndex(lineIdx)
+                                    sendToPresenter()
+                                } else null
+
+                                if (showPrimary && showSecondary) {
+                                    Row(modifier = Modifier.fillMaxWidth()) {
+                                        Column(modifier = Modifier.weight(1f)) {
+                                            LyricLines(section.lines, textColor, activeLineIndex, lineClickHandler)
+                                        }
+                                        Column(modifier = Modifier.weight(1f)) {
+                                            LyricLines(section.secondaryLines, textColor, activeLineIndex, lineClickHandler)
+                                        }
                                     }
+                                } else if (showSecondary) {
+                                    LyricLines(section.secondaryLines, textColor, activeLineIndex, lineClickHandler)
+                                } else {
+                                    LyricLines(section.lines, textColor, activeLineIndex, lineClickHandler)
                                 }
                             }
                         }
@@ -473,6 +832,8 @@ fun SongsTab(
     EditSongDialog(
         isVisible = showEditDialog,
         song = songToEdit,
+        songbooks = viewModel.songbooks.value,
+        existingSongs = viewModel.songsData.value.getSongs(),
         theme = theme,
         onDismiss = { showEditDialog = false },
         onSave = { updatedSong ->
@@ -485,5 +846,47 @@ fun SongsTab(
             }
         }
     )
+
+    // New Song Dialog
+    val newSongTemplate = remember {
+        val templateLyrics = listOf("[Verse 1]", "", "", "[Chorus]", "", "", "[Verse 2]", "", "", "[Verse 3]", "", "")
+        SongItem(
+            number = "",
+            title = "",
+            songbook = "",
+            lyrics = templateLyrics,
+            secondaryLyrics = templateLyrics
+        )
+    }
+    EditSongDialog(
+        isVisible = showNewSongDialog,
+        song = newSongTemplate,
+        songbooks = viewModel.songbooks.value,
+        existingSongs = viewModel.songsData.value.getSongs(),
+        isNewSong = true,
+        theme = theme,
+        onDismiss = { showNewSongDialog = false },
+        onSave = { newSong ->
+            val success = viewModel.createSong(newSong)
+            if (success) {
+                showNewSongDialog = false
+            }
+        }
+    )
 }
 
+@Composable
+private fun LyricLines(lines: List<String>, textColor: Color, activeLineIndex: Int = -1, onLineClick: ((Int) -> Unit)? = null) {
+    lines.forEachIndexed { lineIndex, line ->
+        val isActiveLine = activeLineIndex >= 0 && lineIndex == activeLineIndex
+        Text(
+            text = line,
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = if (isActiveLine) FontWeight.Bold else FontWeight.Normal,
+            color = if (isActiveLine) MaterialTheme.colorScheme.primary else textColor,
+            modifier = Modifier
+                .padding(vertical = 2.dp)
+                .then(if (onLineClick != null) Modifier.clickable { onLineClick(lineIndex) } else Modifier)
+        )
+    }
+}

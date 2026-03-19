@@ -1,5 +1,8 @@
 package org.churchpresenter.app.churchpresenter.data
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class SongItem(
     val number: String,
     val title: String,
@@ -7,5 +10,11 @@ data class SongItem(
     val tune: String = "",
     val author: String = "",
     val composer: String = "",
-    val lyrics: List<String> = emptyList()
-)
+    val lyrics: List<String> = emptyList(),
+    val secondaryTitle: String = "",
+    val secondaryLyrics: List<String> = emptyList(),
+    val sourceFile: String = ""
+) {
+    /** Stable unique ID across songbooks: "songbook::number" */
+    val songId: String get() = "$songbook::$number"
+}

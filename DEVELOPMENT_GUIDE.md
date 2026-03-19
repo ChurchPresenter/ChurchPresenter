@@ -2,7 +2,7 @@
 
 > **Comprehensive documentation for coding standards, cleanup tasks, and development practices**
 >
-> Last Updated: February 18, 2026
+> Last Updated: March 8, 2026
 
 ---
 
@@ -15,6 +15,8 @@
 5. [Cleanup TODO List](#-cleanup-todo-list)
 6. [Verification Commands](#-verification-commands)
 7. [Development Workflow](#-development-workflow)
+8. [Crash Reporting](#-crash-reporting)
+9. [Contributing](#-contributing)
 
 ---
 
@@ -193,61 +195,33 @@ object Constants {
 
 ## 🧹 Cleanup TODO List
 
-### High Priority - Unused Code
+> Last audited: March 8, 2026
 
-#### PresenterManager.kt
-- [ ] **Unused Property**: `selectedVerse: State<SelectedVerse>` (line 14)
-  - Currently using `selectedVerses` list instead
-  - Consider removing or document reason for keeping
-  
-- [ ] **Unused Function**: `setSelectedVerse(verse: SelectedVerse)` (line 29)
-  - Now using `setSelectedVerses(verses: List<SelectedVerse>)`
-  - Safe to remove if single verse mode not needed
-  
-- [ ] **Unused Function**: `togglePresenterWindow()` (line 44)
-  - May be needed for future toggle functionality
-  - Either implement or remove
+### Previously Flagged — Now Resolved ✅
 
-**Action:** Review if single-verse mode is needed for future features
-
-#### BibleSettingsTab.kt
-- [ ] **Unused Parameter**: `availableFonts: List<String>` in multiple functions
-  - Parameter passed through chain but never used
-  - Either implement font selection or remove parameter
-
-#### Placeholder Tabs
-- [ ] **MediaTab.kt**: Unused `modifier` parameter (acceptable - placeholder)
-- [ ] **PicturesTab.kt**: Unused `modifier` parameter (acceptable - placeholder)
-- [ ] **AnnouncementsTab.kt**: Unused `modifier` parameter (acceptable - placeholder)
-
-### General Cleanup Tasks
-
-#### Completed ✅
-- [x] Removed all wildcard imports (`import ... .*`)
-- [x] Fixed Material 2 to Material 3 imports
+- [x] **PresenterManager.kt** — `selectedVerse`, `setSelectedVerse`, `togglePresenterWindow` are all actively used. Singular/plural verse API is intentional (singular derived from first element of plural list).
+- [x] **BibleSettingsTab.kt** — `availableFonts` parameter is actively used, passed to `FontSettingsDropdown`.
+- [x] **MediaTab.kt, PicturesTab.kt, AnnouncementsTab.kt** — All fully implemented. `modifier` parameter is actively used in each.
+- [x] Removed all Material 2 imports
 - [x] Most user-facing strings moved to strings.xml
 - [x] Technical strings moved to Constants.kt
+- [x] No significant commented-out code blocks found
 
-#### Pending ⚠️
-- [ ] Run IDE "Optimize Imports" on entire project
-- [ ] Check for remaining hardcoded UI strings
-- [ ] Verify all strings.xml entries are used
-- [ ] Audit Constants.kt for unused constants
-- [ ] Replace unnecessary non-null assertions (`!!`)
+### Pending ⚠️
+
+| Item | Count | Files | Notes |
+|------|-------|-------|-------|
+| Wildcard imports | 0 | — | All expanded to explicit imports ✅ |
+| Debug prints | ~8 | VideoPlayer.kt, LowerThirdSettingsTab.kt, WebsitePresenter.kt | All `System.err.println` for error diagnostics — kept intentionally |
+| Non-null assertions (`!!`) | 0 | — | Replaced with smart casts and `getValue()` ✅ |
+| Hardcoded UI strings | 0 | — | "OK" moved to strings.xml; emojis kept (not translatable) ✅ |
 
 ### Decision Log
 
-**Why some "unused" code is kept:**
-- API methods may be unused now but needed for completeness
-- Placeholder tabs kept for future implementation
-- Some properties exposed as State for potential future reactive UI needs
-- Single-verse mode in PresenterManager might be needed later
-
-**What should be removed:**
-- Truly dead code with no future purpose
-- Duplicate implementations
-- Old commented-out code blocks
-- Debug logging statements
+**Kept intentionally:**
+- Singular/plural verse API in PresenterManager — convenience accessors
+- `System.err.println` in VideoPlayer/WebsitePresenter/LowerThirdSettingsTab — error diagnostics for VLC/JCEF/WebView issues
+- Emoji strings — not translatable, no benefit to moving to resources
 
 ---
 
@@ -344,6 +318,68 @@ Run with: `bash cleanup_check.sh`
 
 ---
 
+## 🛡️ Crash Reporting
+
+ChurchPresenter includes a built-in crash reporter that writes crash logs to disk.
+
+### How It Works
+
+- A global uncaught exception handler is installed at startup via `CrashReporter.initialize()`
+- Crash logs are saved to `~/.churchpresenter/crash-reports/`
+- Each log contains: timestamp, app version, OS, Java version, and full stack trace
+- Logs older than 30 days are automatically deleted on startup
+
+### Reporting Non-Fatal Errors
+
+Use `CrashReporter.reportException()` for important caught exceptions that should be tracked:
+
+```kotlin
+try {
+    // risky operation
+} catch (e: Exception) {
+    CrashReporter.reportException(e, "Loading song file")
+    // handle gracefully
+}
+```
+
+### For Users
+
+If the app crashes, the crash log is saved automatically. Users can find it at:
+- **Windows:** `C:\Users\<username>\.churchpresenter\crash-reports\`
+- **macOS/Linux:** `~/.churchpresenter/crash-reports/`
+
+Submit crash logs by opening a GitHub Issue and attaching the file.
+
+---
+
+## 🤝 Contributing
+
+### Getting Started
+
+1. Fork and clone the repository
+2. Install JDK 21 (Temurin recommended)
+3. Run `./gradlew :composeApp:run` to verify the build works
+4. Read this entire guide before making changes
+
+### Pull Request Guidelines
+
+- Keep PRs focused on a single feature or fix
+- Follow all coding standards documented above
+- Add string resources for any new UI text (no hardcoded strings)
+- Run the verification commands before submitting
+- Test on your platform before submitting
+
+### Credential Files
+
+**Never commit credential or config files** to the repository. The `.gitignore` excludes:
+- `firebase-config.json`, `google-services.json`, `serviceAccountKey.json`
+- `.env` files
+- `.p12` certificates
+
+If you need access to project credentials, contact the maintainer directly.
+
+---
+
 ## 💡 Developer Mantras
 
 > **"If it's unused, remove it or document why it stays"**
@@ -377,17 +413,10 @@ Run with: `bash cleanup_check.sh`
 
 | Area | Status | Notes |
 |------|--------|-------|
-| Wildcard Imports | ✅ Complete | All removed |
+| Wildcard Imports | ✅ Complete | All expanded to explicit imports |
 | Material 3 | ✅ Complete | All Material 2 converted |
-| String Resources | ✅ Mostly Complete | Few technical strings remain |
+| String Resources | ✅ Complete | All UI strings in strings.xml |
 | Constants | ✅ Complete | All magic strings eliminated |
-| Unused Code | 🟡 In Progress | See cleanup TODO list |
+| Non-null Assertions | ✅ Complete | Replaced with smart casts |
 | Code Style | ✅ Complete | Fully qualified names fixed |
-
----
-
-**Document Version:** 1.0  
-**Last Updated:** February 18, 2026  
-**Maintained By:** Development Team  
-**Status:** 📘 Active Reference Document
 

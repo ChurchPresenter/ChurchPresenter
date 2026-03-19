@@ -28,6 +28,10 @@ class PresentationViewModel(appSettings: AppSettings? = null) {
     private val _slides = mutableStateListOf<ImageBitmap>()
     val slides: SnapshotStateList<ImageBitmap> = _slides
 
+    /** Raw BufferedImages kept in parallel with [slides] for server-side JPEG encoding. */
+    private val _bufferedSlides = mutableListOf<BufferedImage>()
+    val bufferedSlides: List<BufferedImage> get() = _bufferedSlides.toList()
+
     private val _selectedSlideIndex = mutableStateOf(0)
     val selectedSlideIndex: Int
         get() = _selectedSlideIndex.value
@@ -123,6 +127,7 @@ class PresentationViewModel(appSettings: AppSettings? = null) {
         _presentations.clear()
         _selectedPresentation.value = null
         _slides.clear()
+        _bufferedSlides.clear()
         _selectedSlideIndex.value = 0
     }
 
@@ -134,7 +139,10 @@ class PresentationViewModel(appSettings: AppSettings? = null) {
     private fun loadSlides(file: File) {
         activeLoadJob = scope.launch {
             try {
-                withContext(Dispatchers.Main) { _slides.clear() }
+                withContext(Dispatchers.Main) {
+                    _slides.clear()
+                    _bufferedSlides.clear()
+                }
                 when (file.extension.lowercase()) {
                     "pdf" -> loadPdfSlides(file)
                     "pptx", "ppt" -> loadPowerPointSlides(file)
@@ -158,7 +166,10 @@ class PresentationViewModel(appSettings: AppSettings? = null) {
             for (page in 0 until numberOfPages) {
                 val image = renderMethod.invoke(renderer, page, 150f) as BufferedImage
                 val imageBitmap = bufferedImageToImageBitmap(image)
-                withContext(Dispatchers.Main) { _slides.add(imageBitmap) }
+                withContext(Dispatchers.Main) {
+                    _bufferedSlides.add(image)
+                    _slides.add(imageBitmap)
+                }
             }
             pdDocumentClass.getMethod("close").invoke(document)
         } catch (e: ClassNotFoundException) {
@@ -179,6 +190,7 @@ class PresentationViewModel(appSettings: AppSettings? = null) {
                     val slides = xmlSlideShowClass.getMethod("getSlides").invoke(ppt) as List<*>
                     val pageSize = xmlSlideShowClass.getMethod("getPageSize").invoke(ppt) as java.awt.Dimension
                     slides.forEach { slide ->
+                        val s = slide ?: return@forEach
                         try {
                             val img = BufferedImage(pageSize.width, pageSize.height, BufferedImage.TYPE_INT_RGB)
                             val graphics = img.createGraphics()
@@ -188,10 +200,13 @@ class PresentationViewModel(appSettings: AppSettings? = null) {
                             graphics.setRenderingHint(java.awt.RenderingHints.KEY_FRACTIONALMETRICS, java.awt.RenderingHints.VALUE_FRACTIONALMETRICS_ON)
                             graphics.paint = java.awt.Color.WHITE
                             graphics.fillRect(0, 0, pageSize.width, pageSize.height)
-                            slide!!::class.java.getMethod("draw", java.awt.Graphics2D::class.java).invoke(slide, graphics)
+                            s::class.java.getMethod("draw", java.awt.Graphics2D::class.java).invoke(s, graphics)
                             graphics.dispose()
                             val imageBitmap = bufferedImageToImageBitmap(img)
-                            withContext(Dispatchers.Main) { _slides.add(imageBitmap) }
+                            withContext(Dispatchers.Main) {
+                                _bufferedSlides.add(img)
+                                _slides.add(imageBitmap)
+                            }
                         } catch (e: Exception) {
                             e.printStackTrace()
                         }
@@ -209,6 +224,7 @@ class PresentationViewModel(appSettings: AppSettings? = null) {
                     val slides = hslfSlideShowClass.getMethod("getSlides").invoke(ppt) as List<*>
                     val pageSize = hslfSlideShowClass.getMethod("getPageSize").invoke(ppt) as java.awt.Dimension
                     slides.forEach { slide ->
+                        val s = slide ?: return@forEach
                         try {
                             val img = BufferedImage(pageSize.width, pageSize.height, BufferedImage.TYPE_INT_RGB)
                             val graphics = img.createGraphics()
@@ -216,10 +232,13 @@ class PresentationViewModel(appSettings: AppSettings? = null) {
                             graphics.setRenderingHint(java.awt.RenderingHints.KEY_RENDERING, java.awt.RenderingHints.VALUE_RENDER_QUALITY)
                             graphics.paint = java.awt.Color.WHITE
                             graphics.fillRect(0, 0, pageSize.width, pageSize.height)
-                            slide!!::class.java.getMethod("draw", java.awt.Graphics2D::class.java).invoke(slide, graphics)
+                            s::class.java.getMethod("draw", java.awt.Graphics2D::class.java).invoke(s, graphics)
                             graphics.dispose()
                             val imageBitmap = bufferedImageToImageBitmap(img)
-                            withContext(Dispatchers.Main) { _slides.add(imageBitmap) }
+                            withContext(Dispatchers.Main) {
+                                _bufferedSlides.add(img)
+                                _slides.add(imageBitmap)
+                            }
                         } catch (e: Exception) {
                             e.printStackTrace()
                         }
@@ -301,7 +320,10 @@ class PresentationViewModel(appSettings: AppSettings? = null) {
                         val bufferedImage = ImageIO.read(slideFile)
                         if (bufferedImage != null) {
                             val imageBitmap = bufferedImageToImageBitmap(bufferedImage)
-                            withContext(Dispatchers.Main) { _slides.add(imageBitmap) }
+                            withContext(Dispatchers.Main) {
+                                _bufferedSlides.add(bufferedImage)
+                                _slides.add(imageBitmap)
+                            }
                         }
                     } catch (e: Exception) {
                         e.printStackTrace()

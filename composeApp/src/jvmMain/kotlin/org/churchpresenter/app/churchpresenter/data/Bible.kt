@@ -11,9 +11,12 @@ import androidx.compose.runtime.mutableStateListOf
 
 class Bible {
     private var bibleId: String = ""
-    private var bibleAbbreviation: String = "" // Store Bible translation abbreviation (e.g., "RSV", "KJV")
+    private var bibleAbbreviation: String = ""
+    private var bibleTitle: String = ""
     private val books = mutableStateListOf<BibleBook>()
     private val operatorBible = mutableStateListOf<BibleVerse>()
+    // Index: (bookId, chapterNum) -> ordered list of verses — built at load time for O(1) lookup
+    private val chapterIndex = HashMap<Long, List<BibleVerse>>()
     val previewIdList = mutableListOf<String>()
     val verseList = mutableListOf<String>()
 
@@ -73,6 +76,55 @@ class Bible {
 
         // Fallback to filename without extension
         return filename.substringBeforeLast(".").substringAfterLast("/").substringAfterLast("\\")
+    }
+
+    /**
+     * Fast path: reads ONLY the header section of an SPB file to populate book names.
+     * Stops as soon as the separator line or first verse is encountered.
+     * Call this first to show the book list immediately, then call loadFromSpb() for full data.
+     */
+    fun loadBooksOnly(resourcePath: String) {
+        books.clear()
+        try {
+            val inputStream = Thread.currentThread().contextClassLoader.getResourceAsStream(resourcePath)
+            val reader = if (inputStream != null) {
+                inputStream.bufferedReader(StandardCharsets.UTF_8)
+            } else {
+                val path = Paths.get(resourcePath)
+                if (!Files.exists(path)) return
+                Files.newBufferedReader(path, StandardCharsets.UTF_8)
+            }
+            val bookHeaderRegex = Regex("^(\\d+)\\s+(.+?)\\s+(\\d+)$")
+            val parsedBookNames = mutableMapOf<Int, String>()
+            val parsedChapterCounts = mutableMapOf<Int, Int>()
+            reader.use { r ->
+                for (rawLine in r.lineSequence()) {
+                    val line = rawLine.trimEnd('\r', '\n')
+                    if (line.startsWith("##")) continue
+                    if (line.startsWith("-----") || line.startsWith("B")) break
+                    if (line.isNotEmpty()) {
+                        val m = bookHeaderRegex.matchEntire(line)
+                        if (m != null) {
+                            val bookId = m.groupValues[1].toInt()
+                            parsedBookNames[bookId] = m.groupValues[2].trim()
+                            parsedChapterCounts[bookId] = m.groupValues[3].toInt()
+                        }
+                    }
+                }
+            }
+            if (parsedBookNames.isNotEmpty()) {
+                val maxBook = parsedBookNames.keys.maxOrNull() ?: 0
+                for (b in 1..maxBook) {
+                    val name = parsedBookNames[b] ?: "Book $b"
+                    books.add(BibleBook(
+                        book = name,
+                        bookId = b.toString(),
+                        chapterCount = parsedChapterCounts[b] ?: 0,
+                        abbreviation = generateAbbreviation(name)
+                    ))
+                }
+            }
+        } catch (_: Exception) {}
     }
 
     // New: load from a BibleQuote .spb plain text module
@@ -176,15 +228,16 @@ class Bible {
                     // Fallback for older SPB format
                     val m = codeRegex.matchEntire(line)
                     if (m != null) {
-                        if (currentCode != null) {
-                            val prev = codeRegex.matchEntire(currentCode!!)!!
+                        val code = currentCode
+                        if (code != null) {
+                            val prev = codeRegex.matchEntire(code) ?: error("Invalid verse code: $code")
                             val bPrev = prev.groupValues[1].toInt()
                             val chPrev = prev.groupValues[2].toInt()
                             val vnumPrev = prev.groupValues[3].toInt()
                             val textPrev = sb.toString().trim()
                             operatorBible.add(
                                 BibleVerse(
-                                    verseId = currentCode!!,
+                                    verseId = code,
                                     book = bPrev,
                                     chapter = chPrev,
                                     verseNumber = vnumPrev,
@@ -202,15 +255,16 @@ class Bible {
                 }
 
                 // Flush last verse if using multiline format
-                if (currentCode != null) {
-                    val prev = codeRegex.matchEntire(currentCode!!)!!
+                val lastCode = currentCode
+                if (lastCode != null) {
+                    val prev = codeRegex.matchEntire(lastCode) ?: error("Invalid verse code: $lastCode")
                     val b = prev.groupValues[1].toInt()
                     val ch = prev.groupValues[2].toInt()
                     val vnum = prev.groupValues[3].toInt()
                     val text = sb.toString().trim()
                     operatorBible.add(
                         BibleVerse(
-                            verseId = currentCode!!,
+                            verseId = lastCode,
                             book = b,
                             chapter = ch,
                             verseNumber = vnum,
@@ -226,7 +280,7 @@ class Bible {
             for (b in 1..maxBook) {
                 val chapterCount = bookChapterMap[b]?.maxOrNull() ?: 0
                 val name = when {
-                    parsedBookNames.containsKey(b) -> parsedBookNames[b]!!
+                    parsedBookNames.containsKey(b) -> parsedBookNames.getValue(b)
                     bookNames.size >= b -> bookNames[b - 1]
                     else -> "Book $b"
                 }
@@ -239,12 +293,29 @@ class Bible {
                 ))
             }
 
-            // Extract and store Bible abbreviation from title or filename
+            // Store full title and abbreviation
+            this.bibleTitle = bibleTitle ?: resourcePath.substringBeforeLast(".").substringAfterLast("/").substringAfterLast("\\")
             bibleAbbreviation = extractBibleAbbreviation(bibleTitle, resourcePath)
+
+            // Build chapter index for O(1) lookup in getChapter()
+            buildChapterIndex()
 
         } catch (e: Exception) {
             throw e
         }
+    }
+
+    /** Encodes (bookId, chapterNum) as a single Long key for the HashMap. */
+    private fun chapterKey(book: Int, chapter: Int): Long = book.toLong().shl(20) or chapter.toLong()
+
+    private fun buildChapterIndex() {
+        chapterIndex.clear()
+        // Group verses by (book, chapter) preserving their parsed order
+        val grouped = LinkedHashMap<Long, MutableList<BibleVerse>>()
+        for (verse in operatorBible) {
+            grouped.getOrPut(chapterKey(verse.book, verse.chapter)) { mutableListOf() }.add(verse)
+        }
+        chapterIndex.putAll(grouped)
     }
 
     private fun retrieveBooks() {
@@ -278,33 +349,31 @@ class Bible {
     }
 
     fun getChapter(book: Int, chapter: Int): List<String> {
-        var verseText: String
-        var id: String
-        var verseOld = 0
-
         previewIdList.clear()
         verseList.clear()
 
-        operatorBible.filter { it.book == book && it.chapter == chapter }
-            .forEach { bv ->
-                val verse = bv.verseNumber
+        // O(1) lookup via pre-built index — no full scan needed
+        val verses = chapterIndex[chapterKey(book, chapter)] ?: emptyList()
 
-                if (verse == verseOld) {
-                    verseText = "${verseList.last().substringAfter(". ")} ${bv.verseText}".trim()
-                    id = "${previewIdList.last()},${bv.verseId}"
-                    verseList.removeLast()
-                    previewIdList.removeLast()
-                } else {
-                    verseText = bv.verseText
-                    id = bv.verseId
-                }
-
-                verseList.add("$verse. $verseText")
-                previewIdList.add(id)
-                verseOld = verse
+        var verseOld = 0
+        for (bv in verses) {
+            val verse = bv.verseNumber
+            val verseText: String
+            val id: String
+            if (verse == verseOld) {
+                verseText = "${verseList.last().substringAfter(". ")} ${bv.verseText}".trim()
+                id = "${previewIdList.last()},${bv.verseId}"
+                verseList.removeLast()
+                previewIdList.removeLast()
+            } else {
+                verseText = bv.verseText
+                id = bv.verseId
             }
+            verseList.add("$verse. $verseText")
+            previewIdList.add(id)
+            verseOld = verse
+        }
 
-        // Return a new list instance so Compose can detect changes
         return verseList.toList()
     }
 
@@ -378,18 +447,33 @@ class Bible {
         return b?.chapterCount ?: 0
     }
 
+    /**
+     * Returns the number of distinct verses for a given book+chapter.
+     * O(1) via chapterIndex — safe to call from any thread.
+     */
+    fun getVerseCountForChapter(book: Int, chapter: Int): Int =
+        chapterIndex[chapterKey(book, chapter)]?.size ?: 0
+
     // Get verse details for presenter screen
     fun getVerseDetails(book: Int, chapter: Int, verseNumber: Int): Triple<String, String, String>? {
-        // Find the verse
-        val bibleVerse = operatorBible.firstOrNull {
-            it.book == book && it.chapter == chapter && it.verseNumber == verseNumber
-        } ?: return null
-
-        // Get book name
-        val bookName = books.firstOrNull { it.bookId == book.toString() }?.book ?: "Book $book"
-
+        // O(1) lookup via chapterIndex, then find specific verse number
+        val bibleVerse = chapterIndex[chapterKey(book, chapter)]
+            ?.firstOrNull { it.verseNumber == verseNumber } ?: return null
+        val bookName = books.getOrNull(book - 1)?.book ?: "Book $book"
         return Triple(bookName, bibleVerse.verseText, bibleVerse.verseId)
     }
+
+    /**
+     * Returns the raw list of [BibleVerse] objects for the given book+chapter.
+     * O(1) via chapterIndex — safe to call from any thread and does NOT mutate any state.
+     */
+    fun getChapterVerses(book: Int, chapter: Int): List<BibleVerse> =
+        chapterIndex[chapterKey(book, chapter)] ?: emptyList()
+
+    /**
+     * Returns the book name for the given 1-based book id, or null if out of range.
+     */
+    fun getBookName(bookId: Int): String? = books.getOrNull(bookId - 1)?.book
 
     // Diagnostic helper: number of parsed verses from SPB
     fun getVerseCount(): Int {
@@ -401,5 +485,9 @@ class Bible {
      */
     fun getBibleAbbreviation(): String {
         return bibleAbbreviation
+    }
+
+    fun getBibleTitle(): String {
+        return bibleTitle
     }
 }
