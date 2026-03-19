@@ -1038,6 +1038,11 @@ private fun PresenterWindows(
     val announcementText by presenterManager.announcementText
     val displayedAnnouncementText by presenterManager.displayedAnnouncementText
     val announcementTransitionAlpha by presenterManager.announcementTransitionAlpha
+    val clearAnnouncementOnFinish = {
+        presenterManager.setAnnouncementText("")
+        presenterManager.setDisplayedAnnouncementText("")
+        presenterManager.setPresentingMode(Presenting.NONE)
+    }
     val lottieJsonContent by presenterManager.lottieJsonContent
     val lottiePauseAtFrame by presenterManager.lottiePauseAtFrame
     val lottiePauseFrame by presenterManager.lottiePauseFrame
@@ -1168,22 +1173,61 @@ private fun PresenterWindows(
 
     // Centralized Announcements transition
     LaunchedEffect(announcementText) {
-        if (presenterManager.displayedAnnouncementText.value.isEmpty() ||
-            appSettings.announcementsSettings.animationType == Constants.ANIMATION_NONE
-        ) {
+        val annSettings = appSettings.announcementsSettings
+        val isFade = annSettings.animationType == Constants.ANIMATION_FADE
+        val isNone = annSettings.animationType == Constants.ANIMATION_NONE
+        val wasEmpty = presenterManager.displayedAnnouncementText.value.isEmpty()
+        val fadeDuration = 500
+        val sliderSum = 30500L // 500 + 30000, matches AnnouncementsTab speed slider
+        val displayDuration = (sliderSum - annSettings.animationDuration).coerceAtLeast(500)
+        val loopCount = annSettings.loopCount
+
+        if (!isFade && !isNone) {
+            // Directional slides — just swap text, animation handled in AnnouncementsPresenter
             presenterManager.setDisplayedAnnouncementText(announcementText)
             presenterManager.setAnnouncementTransitionAlpha(1f)
+        } else if (announcementText.isEmpty()) {
+            // Cleared by user or loop finished — fade out if fade, instant if none
+            if (isFade && !wasEmpty) {
+                val anim = androidx.compose.animation.core.Animatable(1f)
+                anim.animateTo(0f, androidx.compose.animation.core.tween(fadeDuration)) {
+                    presenterManager.setAnnouncementTransitionAlpha(value)
+                }
+            }
+            presenterManager.setDisplayedAnnouncementText("")
+            presenterManager.setAnnouncementTransitionAlpha(1f)
         } else {
-            val duration = appSettings.announcementsSettings.animationDuration.coerceAtLeast(50)
-            val halfDuration = duration / 2
-            val anim = androidx.compose.animation.core.Animatable(1f)
-            anim.animateTo(0f, androidx.compose.animation.core.tween(halfDuration)) {
-                presenterManager.setAnnouncementTransitionAlpha(value)
-            }
+            // Show text with timed display
             presenterManager.setDisplayedAnnouncementText(announcementText)
-            anim.animateTo(1f, androidx.compose.animation.core.tween(halfDuration)) {
-                presenterManager.setAnnouncementTransitionAlpha(value)
+
+            // Fade in (only for fade animation)
+            if (isFade) {
+                presenterManager.setAnnouncementTransitionAlpha(0f)
+                val anim = androidx.compose.animation.core.Animatable(0f)
+                anim.animateTo(1f, androidx.compose.animation.core.tween(fadeDuration)) {
+                    presenterManager.setAnnouncementTransitionAlpha(value)
+                }
+            } else {
+                presenterManager.setAnnouncementTransitionAlpha(1f)
             }
+
+            if (loopCount > 0) {
+                // Finite loops: display for duration × loopCount, then clear
+                delay(displayDuration * loopCount)
+
+                // Fade out (only for fade animation)
+                if (isFade) {
+                    val anim = androidx.compose.animation.core.Animatable(1f)
+                    anim.animateTo(0f, androidx.compose.animation.core.tween(fadeDuration)) {
+                        presenterManager.setAnnouncementTransitionAlpha(value)
+                    }
+                }
+                // Clear display and exit presenting mode
+                presenterManager.setAnnouncementText("")
+                presenterManager.setDisplayedAnnouncementText("")
+                presenterManager.setPresentingMode(Presenting.NONE)
+            }
+            // loopCount == 0: infinite — stay visible until user manually stops
         }
     }
 
@@ -1384,7 +1428,8 @@ private fun PresenterWindows(
                                         text = displayedAnnouncementText,
                                         appSettings = appSettings,
                                         outputRole = primaryRole,
-                                        transitionAlpha = announcementTransitionAlpha
+                                        transitionAlpha = announcementTransitionAlpha,
+                                        onFinished = clearAnnouncementOnFinish
                                     )
 
                             Presenting.WEBSITE ->
@@ -1546,7 +1591,11 @@ private fun PresenterWindows(
                                                 text = displayedAnnouncementText,
                                                 appSettings = appSettings,
                                                 outputRole = Constants.OUTPUT_ROLE_KEY,
-                                                transitionAlpha = announcementTransitionAlpha
+                                                transitionAlpha = announcementTransitionAlpha,
+                                                onFinished = {
+                                                    presenterManager.setAnnouncementText("")
+                                                    presenterManager.setDisplayedAnnouncementText("")
+                                                }
                                             )
 
                                     Presenting.WEBSITE ->

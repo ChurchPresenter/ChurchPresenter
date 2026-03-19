@@ -60,6 +60,9 @@ class AnnouncementsViewModel {
     private val _animationDuration = mutableStateOf(500)
     val animationDuration: Int get() = _animationDuration.value
 
+    private val _loopCount = mutableStateOf(0)
+    val loopCount: Int get() = _loopCount.value
+
     // ── Timer state ──────────────────────────────────────────────────
     private val _timerHours = mutableStateOf(0)
     val timerHours: Int get() = _timerHours.value
@@ -110,6 +113,7 @@ class AnnouncementsViewModel {
         _position.value = settings.position
         _animationType.value = settings.animationType
         _animationDuration.value = settings.animationDuration
+        _loopCount.value = settings.loopCount
         _timerHours.value = settings.timerHours
         _timerMinutes.value = settings.timerMinutes
         _timerSeconds.value = settings.timerSeconds
@@ -134,6 +138,7 @@ class AnnouncementsViewModel {
     fun setPosition(value: String) { _position.value = value }
     fun setAnimationType(value: String) { _animationType.value = value }
     fun setAnimationDuration(value: Int) { _animationDuration.value = value }
+    fun setLoopCount(value: Int) { _loopCount.value = value.coerceAtLeast(0) }
 
     private fun totalSeconds(): Int =
         _timerHours.value * 3600 + _timerMinutes.value * 60 + _timerSeconds.value
@@ -281,6 +286,7 @@ class AnnouncementsViewModel {
         position = _position.value,
         animationType = _animationType.value,
         animationDuration = _animationDuration.value,
+        loopCount = _loopCount.value,
         timerHours = _timerHours.value,
         timerMinutes = _timerMinutes.value,
         timerSeconds = _timerSeconds.value,
