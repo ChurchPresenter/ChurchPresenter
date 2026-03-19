@@ -640,6 +640,32 @@ fun main() {
                                     }
                                 }
 
+                                // ── Remote song-section navigation ───────────────────────────────────────────
+                                // Fires when a mobile client calls POST /api/songs/{n}/select or sends
+                                // WS "select_song_section".  No approval required — applied instantly.
+                                LaunchedEffect(Unit) {
+                                    companionServer.onSelectSongSection.collect { req ->
+                                        val sections = presenterManager.allLyricSections.value
+                                        val section = sections.getOrNull(req.section) ?: return@collect
+                                        presenterManager.setLyricSection(section)
+                                        presenterManager.setSongDisplaySectionIndex(req.section)
+                                        // Make sure the presenter is showing lyrics
+                                        if (presenterManager.presentingMode.value != Presenting.LYRICS) {
+                                            presenterManager.setPresentingMode(Presenting.LYRICS)
+                                            presenterManager.setShowPresenterWindow(true)
+                                        }
+                                    }
+                                }
+
+                                // ── Remote clear / display-off ────────────────────────────────────────────────
+                                // Fires when a mobile client calls POST /api/clear or sends WS "clear".
+                                LaunchedEffect(Unit) {
+                                    companionServer.onClear.collect {
+                                        mediaViewModel.pause()
+                                        presenterManager.setPresentingMode(Presenting.NONE)
+                                    }
+                                }
+
                                 NavigationTopBar(
                                     onAbout = { showAboutDialog = true },
                                     onHelp = {
@@ -717,6 +743,16 @@ fun main() {
                                     selectPictureImageFlow = kotlinx.coroutines.flow.flow {
                                         companionServer.onSelectPicture.collect { req ->
                                             emit(req.folderId to req.index)
+                                        }
+                                    },
+                                    selectSlideFlow = kotlinx.coroutines.flow.flow {
+                                        companionServer.onSelectSlide.collect { req ->
+                                            emit(req.id to req.index)
+                                        }
+                                    },
+                                    selectBibleVerseFlow = kotlinx.coroutines.flow.flow {
+                                        companionServer.onSelectBibleVerse.collect { req ->
+                                            emit(req)
                                         }
                                     },
                                     remoteSelectSongFlow = remoteSelectSongFlow,

@@ -26,7 +26,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -73,6 +72,7 @@ import java.io.File
 import javax.swing.filechooser.FileNameExtensionFilter
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.awt.image.BufferedImage
 import kotlin.io.path.Path
 
 @Composable
@@ -82,14 +82,11 @@ fun PresentationTab(
     onAddToSchedule: ((filePath: String, fileName: String, slideCount: Int, fileType: String) -> Unit)? = null,
     selectedPresentationItem: ScheduleItem.PresentationItem? = null,
     presenterManager: PresenterManager? = null,
-    onSlidesLoaded: ((id: String, fileName: String, fileType: String, slides: List<java.awt.image.BufferedImage>) -> Unit)? = null
+    onSlidesLoaded: ((id: String, fileName: String, fileType: String, slides: List<BufferedImage>) -> Unit)? = null,
+    /** Externally managed viewModel — hoisted to MainDesktop so remote slide selection works across tab switches. */
+    viewModel: PresentationViewModel = remember { PresentationViewModel(appSettings) }
 ) {
     val scope = rememberCoroutineScope()
-    val viewModel = remember { PresentationViewModel(appSettings) }
-
-    DisposableEffect(Unit) {
-        onDispose { viewModel.dispose() }
-    }
 
     // React to schedule item selection
     LaunchedEffect(selectedPresentationItem) {

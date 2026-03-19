@@ -222,6 +222,7 @@ object Constants {
     const val ENDPOINT_SCHEDULE_ADD       = "/api/schedule/add"
     const val ENDPOINT_SCHEDULE_ADD_BATCH = "/api/schedule/add-batch"
     const val ENDPOINT_PROJECT            = "/api/project"
+    const val ENDPOINT_CLEAR              = "/api/clear"
     const val ENDPOINT_PRESENTATIONS     = "/api/presentations"
     const val ENDPOINT_PICTURES          = "/api/pictures"
     const val ENDPOINT_WS                = "/ws"
@@ -243,9 +244,16 @@ object Constants {
     // WebSocket command types (client → server)
     const val WS_CMD_SELECT_SONG            = "select_song"
     const val WS_CMD_SELECT_PICTURE         = "select_picture"
+    const val WS_CMD_SELECT_SONG_SECTION    = "select_song_section"
+    const val WS_CMD_SELECT_SLIDE           = "select_slide"
+    const val WS_CMD_SELECT_BIBLE_VERSE     = "select_bible_verse"
     const val WS_CMD_ADD_TO_SCHEDULE        = "add_to_schedule"
     const val WS_CMD_ADD_BATCH_TO_SCHEDULE  = "add_batch_to_schedule"
     const val WS_CMD_PROJECT                = "project"
+    const val WS_CMD_CLEAR                  = "clear"
+
+    // Instant-select endpoints (no approval dialog)
+    const val ENDPOINT_BIBLE_SELECT         = "/api/bible/select"
 
     // Item type strings shared by REST and WS payloads
     const val ITEM_TYPE_SONG         = "song"

@@ -320,6 +320,40 @@ data class SelectPictureRequest(
     val index: Int
 )
 
+/**
+ * Payload for POST /api/presentations/{id}/select and WS "select_slide".
+ * [id] is the presentation ID (file hash or schedule item UUID).
+ * [index] is the 0-based slide index to display immediately (no approval).
+ */
+@Serializable
+data class SelectSlideRequest(
+    val id: String = "",
+    val index: Int
+)
+
+/**
+ * Payload for POST /api/bible/select and WS "select_bible_verse".
+ * Instantly displays the given verse on the presentation output with no approval dialog.
+ */
+@Serializable
+data class SelectBibleVerseRequest(
+    val bookName: String,
+    val chapter: Int,
+    val verseNumber: Int,
+    val verseText: String = "",
+    val verseRange: String = ""
+)
+
+/**
+ * Payload for POST /api/songs/{number}/select and WS "select_song_section".
+ * [section] is the 0-based index into the song's section list (as returned by GET /api/songs/{number}).
+ */
+@Serializable
+data class SelectSongSectionRequest(
+    val number: String,
+    val section: Int
+)
+
 // ── ServerInfoResponse / WebSocketMessage / etc. ──────────────────────────────
 
 @Serializable
@@ -552,9 +586,44 @@ class CompanionServer {
         onBufferOverflow = BufferOverflow.DROP_OLDEST
     )
 
+    /**
+     * Emitted when a remote client navigates to a specific song section while live
+     * (POST /api/songs/{number}/select or WS "select_song_section").
+     */
+    val onSelectSongSection = MutableSharedFlow<SelectSongSectionRequest>(
+        extraBufferCapacity = 8,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
+
+    /**
+     * Emitted when a remote client selects a specific slide to display
+     * (POST /api/presentations/{id}/select or WS "select_slide").
+     * No approval required — applied instantly.
+     */
+    val onSelectSlide = MutableSharedFlow<SelectSlideRequest>(
+        extraBufferCapacity = 8,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
+
+    /**
+     * Emitted when a remote client selects a Bible verse to display instantly
+     * (POST /api/bible/select or WS "select_bible_verse").
+     * No approval required — applied instantly.
+     */
+    val onSelectBibleVerse = MutableSharedFlow<SelectBibleVerseRequest>(
+        extraBufferCapacity = 8,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
+
     /** Emitted when a remote client requests an item to be sent directly to projection. */
     val onProject = MutableSharedFlow<PendingRemoteRequest>(
         extraBufferCapacity = 16,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
+
+    /** Emitted when a remote client calls POST /api/clear or sends WS "clear". Clears the display instantly. */
+    val onClear = MutableSharedFlow<Unit>(
+        extraBufferCapacity = 4,
         onBufferOverflow = BufferOverflow.DROP_OLDEST
     )
 
@@ -1232,6 +1301,34 @@ class CompanionServer {
                     call.respond(buildSongDetail(song))
                 }
 
+                /**
+                 * POST /api/songs/{number}/select
+                 * Body: { "section": 2 }   — OR —   ?section=2 as query param
+                 *
+                 * Navigates the live presenter to section [section] (0-based) of the currently
+                 * projected song.  No approval required — fires instantly.
+                 *
+                 * Response: {"ok":true}
+                 */
+                post("${Constants.ENDPOINT_SONGS}/{number}/select") {
+                    if (!checkApiKey(call)) return@post
+                    val number = call.parameters["number"] ?: run {
+                        call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":"missing number"}""")
+                        return@post
+                    }
+                    // Accept section from query param OR JSON body
+                    val sectionIndex = call.request.queryParameters["section"]?.toIntOrNull()
+                        ?: runCatching {
+                            json.decodeFromString(SelectSongSectionRequest.serializer(), call.receiveText()).section
+                        }.getOrNull()
+                    if (sectionIndex == null || sectionIndex < 0) {
+                        call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":"missing or invalid section index"}""")
+                        return@post
+                    }
+                    scope.launch { onSelectSongSection.emit(SelectSongSectionRequest(number, sectionIndex)) }
+                    call.respondText("""{"ok":true}""", ContentType.Application.Json)
+                }
+
                 get(Constants.ENDPOINT_SCHEDULE) {
                     if (!checkApiKey(call)) return@get
                     val schedule = _schedule.value
@@ -1329,6 +1426,18 @@ class CompanionServer {
                     }
                 }
 
+                /**
+                 * POST /api/clear
+                 * Instantly switches the presenter to display-none (Presenting.NONE).
+                 * No request body or approval needed.
+                 * Response: {"ok":true}
+                 */
+                post(Constants.ENDPOINT_CLEAR) {
+                    if (!checkApiKey(call)) return@post
+                    scope.launch { onClear.emit(Unit) }
+                    call.respondText("""{"ok":true}""", ContentType.Application.Json)
+                }
+
                 get(Constants.ENDPOINT_BIBLE) {
                     if (!checkApiKey(call)) return@get
                     val catalog = _bibleCatalog.value
@@ -1385,6 +1494,30 @@ class CompanionServer {
 
                 // ── Presentation endpoints ────────────────────────────────────
 
+                /**
+                 * POST /api/bible/select
+                 * Body: { "bookName": "John", "chapter": 3, "verseNumber": 16,
+                 *         "verseText": "For God so loved…", "verseRange": "" }
+                 *
+                 * Instantly displays the given verse on the presentation output.
+                 * No approval dialog — fires immediately like select_picture / select_song_section.
+                 * Response: {"ok":true}
+                 */
+                post(Constants.ENDPOINT_BIBLE_SELECT) {
+                    if (!checkApiKey(call)) return@post
+                    val body = call.receiveText()
+                    val req = try {
+                        json.decodeFromString(SelectBibleVerseRequest.serializer(), body)
+                    } catch (_: Exception) {
+                        call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":"invalid request body"}""")
+                        return@post
+                    }
+                    scope.launch { onSelectBibleVerse.emit(req) }
+                    call.respondText("""{"ok":true}""", ContentType.Application.Json)
+                }
+
+                // ── Presentation endpoints ────────────────────────────────────
+
                 /** GET /api/presentations — list all loaded presentations with slide metadata */
                 get(Constants.ENDPOINT_PRESENTATIONS) {
                     if (!checkApiKey(call)) return@get
@@ -1436,6 +1569,33 @@ class CompanionServer {
                         return@get
                     }
                     call.respondBytes(slides[index], ContentType.Image.JPEG)
+                }
+
+                /**
+                 * POST /api/presentations/{id}/select
+                 * Body: { "index": 2 }
+                 *
+                 * Instantly navigates the live presentation to slide [index] (0-based).
+                 * No approval dialog — fires immediately like select_picture.
+                 * The {id} is the presentation file hash or schedule item UUID.
+                 * Response: {"ok":true}
+                 */
+                post("${Constants.ENDPOINT_PRESENTATIONS}/{id}/select") {
+                    if (!checkApiKey(call)) return@post
+                    val id = call.parameters["id"] ?: run {
+                        call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":"missing id"}""")
+                        return@post
+                    }
+                    val index = call.request.queryParameters["index"]?.toIntOrNull()
+                        ?: runCatching {
+                            json.decodeFromString(SelectSlideRequest.serializer(), call.receiveText()).index
+                        }.getOrNull()
+                    if (index == null || index < 0) {
+                        call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":"missing or invalid index"}""")
+                        return@post
+                    }
+                    scope.launch { onSelectSlide.emit(SelectSlideRequest(id = id, index = index)) }
+                    call.respondText("""{"ok":true}""", ContentType.Application.Json)
                 }
 
                 // ── Picture endpoints ─────────────────────────────────────────
@@ -1575,6 +1735,21 @@ class CompanionServer {
                                     Constants.WS_CMD_SELECT_PICTURE -> {
                                         val req = json.decodeFromString(SelectPictureRequest.serializer(), msg.payload)
                                         scope.launch { onSelectPicture.emit(req) }
+                                    }
+                                    Constants.WS_CMD_SELECT_SONG_SECTION -> {
+                                        val req = json.decodeFromString(SelectSongSectionRequest.serializer(), msg.payload)
+                                        scope.launch { onSelectSongSection.emit(req) }
+                                    }
+                                    Constants.WS_CMD_SELECT_SLIDE -> {
+                                        val req = json.decodeFromString(SelectSlideRequest.serializer(), msg.payload)
+                                        scope.launch { onSelectSlide.emit(req) }
+                                    }
+                                    Constants.WS_CMD_SELECT_BIBLE_VERSE -> {
+                                        val req = json.decodeFromString(SelectBibleVerseRequest.serializer(), msg.payload)
+                                        scope.launch { onSelectBibleVerse.emit(req) }
+                                    }
+                                    Constants.WS_CMD_CLEAR -> {
+                                        scope.launch { onClear.emit(Unit) }
                                     }
                                     Constants.WS_CMD_ADD_TO_SCHEDULE -> {
                                         val item = parseRemoteItem(msg.payload)

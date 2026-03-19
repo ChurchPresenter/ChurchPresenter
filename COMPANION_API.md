@@ -38,6 +38,17 @@ curl -k -H "X-Api-Key: mysecretkey" https://192.168.1.10:8765/api/info
 curl -k "https://192.168.1.10:8765/api/info?apiKey=mysecretkey"
 ```
 
+### Device Identification (Optional)
+
+Pass `X-Device-Id` on action requests (`/api/schedule/add`, `/api/schedule/add-batch`, `/api/project`) to identify your device in the approval dialog shown on the desktop.
+
+```bash
+curl -k -X POST https://192.168.1.10:8765/api/schedule/add \
+  -H "X-Device-Id: MyiPhone" \
+  -H "Content-Type: application/json" \
+  -d '{"item":{"songNumber":42,"title":"Great Is Thy Faithfulness","songbook":"Hymns"}}'
+```
+
 ---
 
 ## Read Endpoints (GET)
@@ -585,6 +596,116 @@ curl -k -X POST https://192.168.1.10:8765/api/pictures/select \
 
 ---
 
+### `POST /api/songs/{number}/select`
+
+Navigates the live presenter to a specific **section** (0-based index) of the currently projected song. No approval required — takes effect immediately.
+
+`{number}` is the song number (e.g. `42`). The section index maps directly to the `sections` array returned by `GET /api/songs/{number}` — `0` is the first verse/chorus, `1` is the second, and so on.
+
+```bash
+# Navigate to section 2 via JSON body
+curl -k -X POST https://192.168.1.10:8765/api/songs/42/select \
+  -H "Content-Type: application/json" \
+  -d '{"section":2}'
+
+# Or via query param
+curl -k -X POST "https://192.168.1.10:8765/api/songs/42/select?section=2"
+```
+
+**Success:**
+```json
+{ "ok": true }
+```
+
+**Bad request** (missing / negative section):
+```
+HTTP 400
+{ "error": "missing or invalid section index" }
+```
+
+---
+
+### `POST /api/clear`
+
+Instantly hides the projection display (equivalent to pressing **Clear** in the app). No body or approval required.
+
+```bash
+curl -k -X POST https://192.168.1.10:8765/api/clear
+```
+
+```json
+{ "ok": true }
+```
+
+---
+
+### `POST /api/bible/select`
+
+Instantly displays a Bible verse on the projection output. **No approval dialog** — fires immediately like `select_picture`.
+
+Fetch the verse text first with `GET /api/bible?book={id}&chapter={num}`, then send the verse data here.
+
+```bash
+curl -k -X POST https://192.168.1.10:8765/api/bible/select \
+  -H "Content-Type: application/json" \
+  -d '{"bookName":"John","chapter":3,"verseNumber":16,"verseText":"For God so loved the world…"}'
+
+# Multi-verse range
+curl -k -X POST https://192.168.1.10:8765/api/bible/select \
+  -H "Content-Type: application/json" \
+  -d '{"bookName":"Genesis","chapter":1,"verseNumber":1,"verseText":"In the beginning…","verseRange":"1-3"}'
+```
+
+| Field | Type | Required |
+|-------|------|----------|
+| **`bookName`** | `String` | ✅ |
+| **`chapter`** | `Int` | ✅ |
+| **`verseNumber`** | `Int` | ✅ |
+| `verseText` | `String` | optional — displayed text (fetch from `GET /api/bible?book=…&chapter=…`) |
+| `verseRange` | `String` | optional — e.g. `"1-3"` for multi-verse |
+
+**Success:**
+```json
+{ "ok": true }
+```
+
+**Bad body:**
+```
+HTTP 400
+{ "error": "invalid request body" }
+```
+
+---
+
+### `POST /api/presentations/{id}/select`
+
+Instantly navigates the live presentation to a specific slide. **No approval dialog.**
+
+`{id}` is the schedule item UUID (from `GET /api/schedule`) or the presentation file hash (from `GET /api/presentations`). Body accepts `index` as JSON **or** as a query param.
+
+```bash
+# JSON body
+curl -k -X POST https://192.168.1.10:8765/api/presentations/abc123/select \
+  -H "Content-Type: application/json" \
+  -d '{"index":2}'
+
+# Or via query param
+curl -k -X POST "https://192.168.1.10:8765/api/presentations/abc123/select?index=2"
+```
+
+**Success:**
+```json
+{ "ok": true }
+```
+
+**Bad request** (missing / negative index):
+```
+HTTP 400
+{ "error": "missing or invalid index" }
+```
+
+---
+
 ## WebSocket
 
 ### Connection
@@ -599,7 +720,15 @@ With API key:
 wss://192.168.1.10:8765/ws?apiKey=mysecretkey
 ```
 
-On connect the server immediately pushes the current state of **all catalogs and the schedule** as a burst of events (see Server → Client below).
+On connect the server immediately pushes the current state as a burst of up to **5 events**:
+
+| Sent on connect | Condition |
+|-----------------|-----------|
+| `songs_updated` | Always |
+| `bible_updated` | If a Bible translation is loaded |
+| `schedule_updated` | Always |
+| `presentation_updated` | If a presentation is currently loaded in the Presentations tab |
+| `pictures_updated` | If a picture folder is currently loaded in the Pictures tab |
 
 ```javascript
 // JavaScript / React Native
@@ -633,10 +762,10 @@ All messages (both directions) share the same envelope:
 | `type` | `payload` decoded type | When fired |
 |--------|------------------------|------------|
 | `songs_updated` | `SongCatalogResponse` | On connect + whenever songs are reloaded |
-| `bible_updated` | `BibleCatalogResponse` | On connect + whenever Bible is reloaded |
+| `bible_updated` | `BibleCatalogResponse` | On connect (if loaded) + whenever Bible is reloaded |
 | `schedule_updated` | `ScheduleResponse` | On connect + every schedule change |
-| `presentation_updated` | `PresentationCatalogResponse` | When a presentation is loaded |
-| `pictures_updated` | `PictureFolderResponse` | When a picture folder is opened |
+| `presentation_updated` | `PresentationCatalogResponse` | On connect (if loaded) + when a presentation is loaded |
+| `pictures_updated` | `PictureFolderResponse` | On connect (if loaded) + when a picture folder is opened |
 
 ```javascript
 // Handle schedule updates
@@ -655,6 +784,18 @@ ws.onmessage = (e) => {
 
 Send a command with `ws.send(JSON.stringify({ type, payload }))`.  
 `payload` must be **JSON-encoded as a string**.
+
+| `type` | Action | Approval needed |
+|--------|--------|----------------|
+| `select_song` | Navigate schedule to a song | No |
+| `select_song_section` | Jump to a section within current song | No |
+| `select_slide` | Jump to a slide in current presentation | No |
+| `select_bible_verse` | Display a Bible verse immediately | No |
+| `select_picture` | Select an image in the current picture folder | No |
+| `clear` | Clear / hide the projection display | No |
+| `add_to_schedule` | Add a single item to the schedule | ✅ Yes |
+| `add_batch_to_schedule` | Add multiple items to the schedule | ✅ Yes |
+| `project` | Project an item immediately | ✅ Yes |
 
 ---
 
@@ -767,6 +908,80 @@ ws.send(JSON.stringify({
 
 ---
 
+#### `select_song_section`
+
+Navigates the live presenter to a specific section (0-based) of the currently projected song. No approval required — takes effect immediately.
+
+`number` is the song number as a string. `section` is the 0-based section index matching the `sections` array from `GET /api/songs/{number}`.
+
+```javascript
+ws.send(JSON.stringify({
+  type: 'select_song_section',
+  payload: JSON.stringify({ number: '42', section: 2 })
+}));
+```
+
+---
+
+#### `select_slide`
+
+Instantly navigates the live presentation to a specific slide. No approval required.
+
+`id` is the presentation file hash or schedule item UUID. `index` is the 0-based slide index.
+
+```javascript
+ws.send(JSON.stringify({
+  type: 'select_slide',
+  payload: JSON.stringify({ id: 'abc123', index: 2 })
+}));
+```
+
+---
+
+#### `select_bible_verse`
+
+Instantly displays a Bible verse on the projection output. No approval required.
+
+```javascript
+// Single verse
+ws.send(JSON.stringify({
+  type: 'select_bible_verse',
+  payload: JSON.stringify({
+    bookName: 'John',
+    chapter: 3,
+    verseNumber: 16,
+    verseText: 'For God so loved the world…'
+  })
+}));
+
+// Multi-verse range
+ws.send(JSON.stringify({
+  type: 'select_bible_verse',
+  payload: JSON.stringify({
+    bookName: 'Genesis',
+    chapter: 1,
+    verseNumber: 1,
+    verseText: 'In the beginning…',
+    verseRange: '1-3'
+  })
+}));
+```
+
+---
+
+#### `clear`
+
+Instantly hides the projection display.
+
+```javascript
+ws.send(JSON.stringify({
+  type: 'clear',
+  payload: ''
+}));
+```
+
+---
+
 ## Item Type Reference
 
 The server auto-detects item type from which fields are present. Required fields are **bold**.
@@ -813,6 +1028,276 @@ The server auto-detects item type from which fields are present. Required fields
 
 ---
 
+> **Schedule-only types** — The following types appear in `GET /api/schedule` responses but **cannot** be added remotely via `POST /api/schedule/add` or `POST /api/project`.
+
+### Label
+| Field | Type | Notes |
+|-------|------|-------|
+| `text` | `String` | Label text content |
+| `textColor` | `String` | CSS-style hex colour, e.g. `"#ffffff"` |
+| `backgroundColor` | `String` | CSS-style hex colour, e.g. `"#000000"` |
+
+### Lower Third
+| Field | Type | Notes |
+|-------|------|-------|
+| `presetId` | `String` | Preset identifier |
+| `presetLabel` | `String` | Display name of the preset |
+
+### Announcement
+| Field | Type | Notes |
+|-------|------|-------|
+| `text` | `String` | Announcement text content |
+| `textColor` | `String` | CSS-style hex colour, e.g. `"#ffffff"` |
+| `backgroundColor` | `String` | CSS-style hex colour, e.g. `"#000000"` |
+
+### Website
+| Field | Type | Notes |
+|-------|------|-------|
+| `url` | `String` | URL to display in the presenter |
+| `title` | `String` | Display title for the item |
+
+---
+
+---
+
+## Mobile Workflows
+
+Complete step-by-step flows for the most common mobile use cases.
+
+---
+
+### Display a Bible Verse
+
+**Goal:** browse the Bible on mobile, pick a verse, and show it live on the projection screen.
+
+```
+1. GET  /api/bible                          → get all books with chapter counts
+2. GET  /api/bible?book=43&chapter=3        → get all verses in John 3 with text
+3. POST /api/bible/select                   → display verse immediately (no approval)
+   body: { bookName, chapter, verseNumber, verseText, verseRange? }
+```
+
+```javascript
+// 1. Load chapter
+const chapResp = await fetch('https://host:8765/api/bible?book=43&chapter=3');
+const chapter = await chapResp.json();
+// chapter.verses = [ { verse: 1, text: "…" }, … ]
+
+// 2. User picks verse 16 — display it instantly
+const verse = chapter.verses.find(v => v.verse === 16);
+await fetch('https://host:8765/api/bible/select', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    bookName: chapter['book-name'],
+    chapter: chapter.chapter,
+    verseNumber: verse.verse,
+    verseText: verse.text
+  })
+});
+```
+
+> To **add to schedule** instead of displaying instantly, use `POST /api/schedule/add` (requires desktop approval). To display with approval, use `POST /api/project`.
+
+---
+
+### Pick a Picture to Show
+
+**Goal:** browse a picture folder loaded in the schedule and show a specific image live.
+
+```
+1. GET  /api/schedule                                → find picture items, note their id
+2. GET  /api/pictures/{id}                           → get image catalog for that folder
+3. GET  /api/pictures/{id}/images/{index}            → fetch thumbnail to preview on mobile
+4. POST /api/pictures/select                         → show image on screen (no approval)
+   body: { "folder-id": "{id}", "index": N }
+```
+
+```javascript
+// 1. Get schedule, find a picture item
+const schedResp = await fetch('https://host:8765/api/schedule');
+const { items } = await schedResp.json();
+const picItem = items.find(i => i.type === 'picture');
+
+// 2. Load the folder catalog
+const catResp = await fetch(`https://host:8765/api/pictures/${picItem.id}`);
+const catalog = await catResp.json();
+// catalog.images = [ { index: 0, "file-name": "…", "thumbnail-url": "…" }, … ]
+
+// 3. User browses thumbnails: fetch each via catalog.images[n]["thumbnail-url"]
+
+// 4. User picks index 3 — show it live
+await fetch('https://host:8765/api/pictures/select', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ 'folder-id': picItem.id, index: 3 })
+});
+```
+
+> Use the WS command `select_picture` for the same effect over an open WebSocket connection.
+
+---
+
+### Navigate Presentation Slides
+
+**Goal:** browse a loaded presentation on mobile and switch to a specific slide live.
+
+```
+1. GET  /api/schedule                                     → find presentation items, note id
+2. GET  /api/presentations/{id}                           → get slide list with thumbnail URLs
+3. GET  /api/presentations/{id}/slides/{index}            → fetch JPEG thumbnail for mobile preview
+4. POST /api/presentations/{id}/select                    → show slide on screen (no approval)
+   body: { "index": N }
+```
+
+```javascript
+// 1. Find presentation in schedule
+const schedResp = await fetch('https://host:8765/api/schedule');
+const { items } = await schedResp.json();
+const presItem = items.find(i => i.type === 'presentation');
+
+// 2. Load slide catalog
+const presResp = await fetch(`https://host:8765/api/presentations/${presItem.id}`);
+const pres = await presResp.json();
+// pres.slides = [ { "slide-index": 0, "thumbnail-url": "/api/presentations/…/slides/0" }, … ]
+
+// 3. User browses slides: each thumbnail-url returns a JPEG
+//    e.g. fetch(`https://host:8765${pres.slides[0]["thumbnail-url"]}`)
+
+// 4. User picks slide 2 — switch live
+await fetch(`https://host:8765/api/presentations/${presItem.id}/select`, {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ index: 2 })
+});
+```
+
+> Slides are rendered in the background when the schedule loads. If `GET /api/presentations/{id}` returns `404` in the first few seconds after `schedule_updated`, retry after a short delay.  
+> Use the WS command `select_slide` for the same effect over an open WebSocket connection.
+
+---
+
+### Instant vs. Approval-Required Actions
+
+| Action | Instant (no dialog) | With approval dialog |
+|--------|--------------------|--------------------|
+| Show a Bible verse | `POST /api/bible/select` · WS `select_bible_verse` | `POST /api/project` |
+| Show a picture | `POST /api/pictures/select` · WS `select_picture` | `POST /api/project` |
+| Navigate to a slide | `POST /api/presentations/{id}/select` · WS `select_slide` | — |
+| Navigate to a song section | `POST /api/songs/{number}/select` · WS `select_song_section` | — |
+| Add Bible verse to schedule | — | `POST /api/schedule/add` |
+| Add song to schedule | — | `POST /api/schedule/add` |
+| Clear projection | `POST /api/clear` · WS `clear` | — |
+
+---
+
+## Lottie Generator (Lower Third Editor)
+
+The server also hosts an embedded **browser-based Lower Third / Lottie Generator** editor. These endpoints are used by the generator page itself and are available to custom tooling.
+
+### `GET /lottie-generator.html`
+
+Serves the generator HTML page. Open this URL in a browser to use the editor.
+
+```bash
+open https://192.168.1.10:8765/lottie-generator.html
+```
+
+---
+
+### `GET /api/presets`
+
+Returns saved generator presets as a JSON array.
+
+```bash
+curl -k https://192.168.1.10:8765/api/presets
+```
+
+```json
+[ { "name": "Announcement", "color": "#ffffff" }, … ]
+```
+
+---
+
+### `POST /api/presets`
+
+Saves (overwrites) the full presets array. Body is a raw JSON array.
+
+```bash
+curl -k -X POST https://192.168.1.10:8765/api/presets \
+  -H "Content-Type: application/json" \
+  -d '[{ "name": "Announcement", "color": "#ffffff" }]'
+```
+
+```json
+{ "ok": true }
+```
+
+---
+
+### `GET /api/color-themes`
+
+Returns saved color themes as a JSON array. Falls back to bundled defaults if no custom themes have been saved.
+
+```bash
+curl -k https://192.168.1.10:8765/api/color-themes
+```
+
+```json
+[ { "name": "Dark", "primary": "#000000", "text": "#ffffff" }, … ]
+```
+
+---
+
+### `POST /api/color-themes`
+
+Saves (overwrites) the full color themes array.
+
+```bash
+curl -k -X POST https://192.168.1.10:8765/api/color-themes \
+  -H "Content-Type: application/json" \
+  -d '[{ "name": "Dark", "primary": "#000000", "text": "#ffffff" }]'
+```
+
+```json
+{ "ok": true }
+```
+
+---
+
+### `GET /api/logos`
+
+Returns an array of available logo filenames (merged from the user-configured lower-third folder and bundled assets).
+
+```bash
+curl -k https://192.168.1.10:8765/api/logos
+```
+
+```json
+["church-logo.png", "cross.svg", "dove.png"]
+```
+
+---
+
+### `POST /api/logos`
+
+Uploads a new logo image. Body is a JSON object with `name` and `data` (a base64 data URL).
+
+```bash
+curl -k -X POST https://192.168.1.10:8765/api/logos \
+  -H "Content-Type: application/json" \
+  -d '{ "name": "my-logo.png", "data": "data:image/png;base64,iVBORw0KGgo…" }'
+```
+
+```json
+{ "file": "my-logo.png" }
+```
+
+**Errors:**
+- `400 Bad Request` — No lower third folder configured in Settings, or body is malformed / missing `name` / `data`.
+
+---
+
 ## Error Reference
 
 | HTTP status | Meaning |
@@ -821,6 +1306,7 @@ The server auto-detects item type from which fields are present. Required fields
 | `400 Bad Request` | Body could not be parsed or required fields missing |
 | `401 Unauthorized` | API key is wrong or missing (when auth is enabled) |
 | `403 Forbidden` | Desktop user clicked **Deny** |
-| `404 Not Found` | Resource (song, slide, image) does not exist |
-| `503 Service Unavailable` | Data not yet loaded (e.g. Bible not loaded) |
+| `404 Not Found` | Resource (song, slide, image, presentation) does not exist |
+| `500 Internal Server Error` | Unexpected server-side error |
+| `503 Service Unavailable` | Data not yet loaded (e.g. Bible not loaded, no picture folder open) |
 

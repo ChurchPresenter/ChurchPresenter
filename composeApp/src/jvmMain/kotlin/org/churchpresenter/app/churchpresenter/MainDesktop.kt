@@ -56,18 +56,23 @@ import churchpresenter.composeapp.generated.resources.tooltip_toggle_displays
 import churchpresenter.composeapp.generated.resources.tooltip_settings
 import churchpresenter.composeapp.generated.resources.ic_cast
 import churchpresenter.composeapp.generated.resources.ic_close
+import kotlinx.coroutines.flow.Flow
 import org.churchpresenter.app.churchpresenter.composables.LivePreviewPanel
 import org.churchpresenter.app.churchpresenter.composables.VideoPlayer
 import org.churchpresenter.app.churchpresenter.composables.TooltipIconButton
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.app.churchpresenter.data.AppSettings
+import org.churchpresenter.app.churchpresenter.data.Bible
+import org.churchpresenter.app.churchpresenter.data.SongItem
+import org.churchpresenter.app.churchpresenter.data.StatisticsManager
 import org.churchpresenter.app.churchpresenter.dialogs.AddLabelDialog
 import org.churchpresenter.app.churchpresenter.dialogs.AddWebsiteDialog
 import org.churchpresenter.app.churchpresenter.models.LyricSection
 import org.churchpresenter.app.churchpresenter.models.ScheduleItem
 import org.churchpresenter.app.churchpresenter.models.SelectedVerse
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.app.churchpresenter.server.SelectBibleVerseRequest
 import org.churchpresenter.app.churchpresenter.tabs.AnnouncementsTab
 import org.churchpresenter.app.churchpresenter.tabs.BibleTab
 import org.churchpresenter.app.churchpresenter.tabs.MediaTab
@@ -85,7 +90,10 @@ import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.viewmodel.LocalMediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.BibleViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PicturesViewModel
+import org.churchpresenter.app.churchpresenter.viewmodel.PresentationViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
+import java.awt.image.BufferedImage
+import java.io.File
 
 // Kept for NavigationTopBar / menu — wraps ScheduleTabActions
 data class ScheduleActions(
@@ -108,7 +116,7 @@ fun MainDesktop(
     modifier: Modifier = Modifier,
     appSettings: AppSettings,
     presenterManager: PresenterManager,
-    statisticsManager: org.churchpresenter.app.churchpresenter.data.StatisticsManager? = null,
+    statisticsManager: StatisticsManager? = null,
     presenting: (Presenting) -> Unit,
     onVerseSelected: (List<SelectedVerse>) -> Unit,
     onSongItemSelected: (LyricSection) -> Unit,
@@ -121,13 +129,17 @@ fun MainDesktop(
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit = {},
     onScheduleActionsReady: (ScheduleActions) -> Unit = {},
     theme: ThemeMode = ThemeMode.SYSTEM,
-    onSongsLoaded: ((List<org.churchpresenter.app.churchpresenter.data.SongItem>) -> Unit)? = null,
-    onBibleLoaded: ((bible: org.churchpresenter.app.churchpresenter.data.Bible, translation: String) -> Unit)? = null,
-    onScheduleChanged: ((List<org.churchpresenter.app.churchpresenter.models.ScheduleItem>) -> Unit)? = null,
-    onPresentationSlidesLoaded: ((id: String, fileName: String, fileType: String, slides: List<java.awt.image.BufferedImage>) -> Unit)? = null,
-    onPicturesLoaded: ((folderId: String, folderName: String, folderPath: String, imageFiles: List<java.io.File>) -> Unit)? = null,
-    selectPictureImageFlow: kotlinx.coroutines.flow.Flow<Pair<String, Int>>? = null,
-    remoteSelectSongFlow: kotlinx.coroutines.flow.Flow<ScheduleItem.SongItem>? = null,
+    onSongsLoaded: ((List<SongItem>) -> Unit)? = null,
+    onBibleLoaded: ((bible: Bible, translation: String) -> Unit)? = null,
+    onScheduleChanged: ((List<ScheduleItem>) -> Unit)? = null,
+    onPresentationSlidesLoaded: ((id: String, fileName: String, fileType: String, slides: List<BufferedImage>) -> Unit)? = null,
+    onPicturesLoaded: ((folderId: String, folderName: String, folderPath: String, imageFiles: List<File>) -> Unit)? = null,
+    selectPictureImageFlow: Flow<Pair<String, Int>>? = null,
+    /** Emits (presentationId, slideIndex) — instantly navigates to that slide without approval. */
+    selectSlideFlow: Flow<Pair<String, Int>>? = null,
+    /** Emits a verse to display instantly without approval. */
+    selectBibleVerseFlow: Flow<SelectBibleVerseRequest>? = null,
+    remoteSelectSongFlow: Flow<ScheduleItem.SongItem>? = null,
     serverUrl: String = ""
 ) {
     val isDarkTheme = when (theme) {
@@ -177,6 +189,9 @@ fun MainDesktop(
     val picturesViewModel = remember { PicturesViewModel(appSettings) }
     DisposableEffect(Unit) { onDispose { picturesViewModel.dispose() } }
 
+    val presentationViewModel = remember { PresentationViewModel(appSettings) }
+    DisposableEffect(Unit) { onDispose { presentationViewModel.dispose() } }
+
     val currentOnPicturesLoaded by rememberUpdatedState(onPicturesLoaded)
     val currentOnBibleLoaded by rememberUpdatedState(onBibleLoaded)
     val bibleViewModel = remember { BibleViewModel(appSettings, onBibleLoaded = { bible, translation -> currentOnBibleLoaded?.invoke(bible, translation) }) }
@@ -213,6 +228,42 @@ fun MainDesktop(
                 picturesViewModel.selectedImageIndex = index
                 picturesViewModel.syncWithPresenter(presenterManager)
             }
+        }
+    }
+
+    // Handle remote slide selection (POST /api/presentations/{id}/select or WS select_slide)
+    // No approval required — navigates the live presentation instantly.
+    LaunchedEffect(selectSlideFlow) {
+        selectSlideFlow?.collect { (_, index) ->
+            if (index in presentationViewModel.slides.indices) {
+                presentationViewModel.selectSlide(index)
+                val slide = presentationViewModel.slides.getOrNull(index)
+                presenterManager.setSelectedSlide(slide)
+                if (presenterManager.presentingMode.value != Presenting.PRESENTATION) {
+                    presenterManager.setPresentingMode(Presenting.PRESENTATION)
+                    presenterManager.setShowPresenterWindow(true)
+                }
+            }
+        }
+    }
+
+    // Handle remote Bible verse instant display (POST /api/bible/select or WS select_bible_verse)
+    // No approval required — displays the verse immediately like select_picture.
+    LaunchedEffect(selectBibleVerseFlow) {
+        selectBibleVerseFlow?.collect { req ->
+            presenterManager.setSelectedVerses(
+                listOf(
+                    SelectedVerse(
+                        bookName    = req.bookName,
+                        chapter     = req.chapter,
+                        verseNumber = req.verseNumber,
+                        verseText   = req.verseText,
+                        verseRange  = req.verseRange
+                    )
+                )
+            )
+            presenterManager.setPresentingMode(Presenting.BIBLE)
+            presenterManager.setShowPresenterWindow(true)
         }
     }
 
@@ -624,7 +675,8 @@ fun MainDesktop(
                                 },
                                 selectedPresentationItem = selectedPresentationItem,
                                 presenterManager = presenterManager,
-                                onSlidesLoaded = onPresentationSlidesLoaded
+                                onSlidesLoaded = onPresentationSlidesLoaded,
+                                viewModel = presentationViewModel
                             )
 
                             Tabs.MEDIA -> MediaTab(
