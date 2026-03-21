@@ -74,6 +74,7 @@ import org.churchpresenter.app.churchpresenter.dialogs.RemoteEvent
 import org.churchpresenter.app.churchpresenter.dialogs.RemoteEventDialog
 import org.churchpresenter.app.churchpresenter.dialogs.RemoteEventType
 import org.churchpresenter.app.churchpresenter.dialogs.OptionsDialog
+import org.churchpresenter.app.churchpresenter.presenter.DeckLinkComposeOutput
 import org.churchpresenter.app.churchpresenter.presenter.AnnouncementsPresenter
 import org.churchpresenter.app.churchpresenter.presenter.CefManager
 import org.churchpresenter.app.churchpresenter.presenter.WebsitePresenter
@@ -1322,9 +1323,197 @@ private fun PresenterWindows(
     for (i in 0 until windowCount) {
         val screenAssignment = proj.getAssignment(i)
 
-        // DeckLink outputs are handled separately — no Compose window needed
+        // DeckLink outputs: render via offscreen Window + pixel capture
         if (screenAssignment.targetType == "decklink") {
-            // DeckLink rendering is managed by DeckLinkPresenter (launched externally)
+            if (showPresenterWindow && screenAssignment.targetDisplay >= 0) {
+                val deckLinkRole = screenAssignment.primaryOutputRole
+                DeckLinkComposeOutput(
+                    deviceIndex = screenAssignment.targetDisplay,
+                    outputRole = deckLinkRole,
+                    appSettings = appSettings,
+                    mediaViewModel = mediaViewModel,
+                    isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD,
+                ) {
+                    when (presentingMode) {
+                        Presenting.BIBLE ->
+                            if (screenAssignment.showBible) {
+                                BiblePresenter(
+                                    selectedVerses = displayedVerses,
+                                    appSettings = appSettings,
+                                    isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD,
+                                    outputRole = deckLinkRole,
+                                    transitionAlpha = bibleTransitionAlpha
+                                )
+                            }
+
+                        Presenting.LYRICS ->
+                            if (screenAssignment.showSongs) {
+                                SongPresenter(
+                                    lyricSection = displayedLyricSection,
+                                    appSettings = appSettings,
+                                    isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD,
+                                    outputRole = deckLinkRole,
+                                    transitionAlpha = songTransitionAlpha,
+                                    displayLineIndex = songDisplayLineIndex,
+                                    lookAheadEnabled = screenAssignment.songLookAhead,
+                                    allLyricSections = allLyricSections,
+                                    displaySectionIndex = songDisplaySectionIndex
+                                )
+                            }
+
+                        Presenting.PICTURES ->
+                            if (screenAssignment.showPictures)
+                                PicturePresenter(
+                                    imagePath = displayedImagePath,
+                                    transitionAlpha = pictureTransitionAlpha
+                                )
+
+                        Presenting.PRESENTATION ->
+                            if (screenAssignment.showPictures)
+                                SlidePresenter(slide = displayedSlide, transitionAlpha = slideTransitionAlpha)
+
+                        Presenting.MEDIA ->
+                            if (screenAssignment.showMedia) {
+                                if (mediaViewModel.isAudioFile) {
+                                    // Audio: background only
+                                } else {
+                                    MediaPresenter(
+                                        modifier = Modifier.fillMaxSize(),
+                                        audioDeviceId = appSettings.projectionSettings.audioOutputDeviceId,
+                                        transitionAlpha = mediaTransitionAlpha
+                                    )
+                                }
+                            }
+
+                        Presenting.LOWER_THIRD ->
+                            if (screenAssignment.showStreaming)
+                                LowerThirdPresenter(
+                                    jsonContent = lottieJsonContent,
+                                    progress = lottieProgress,
+                                    appSettings = appSettings
+                                )
+
+                        Presenting.ANNOUNCEMENTS ->
+                            if (screenAssignment.showAnnouncements)
+                                AnnouncementsPresenter(
+                                    text = displayedAnnouncementText,
+                                    appSettings = appSettings,
+                                    outputRole = deckLinkRole,
+                                    transitionAlpha = announcementTransitionAlpha,
+                                    onFinished = clearAnnouncementOnFinish
+                                )
+
+                        Presenting.WEBSITE ->
+                            WebsitePresenter(
+                                url = websiteUrl,
+                                modifier = Modifier.fillMaxSize(),
+                                onSnapshot = { bitmap -> presenterManager.setWebSnapshot(bitmap) },
+                                onUrlChanged = { newUrl -> presenterManager.setWebsiteUrl(newUrl) },
+                                onTitleChanged = { title -> presenterManager.setWebPageTitle(title) },
+                                audioDeviceId = appSettings.projectionSettings.audioOutputDeviceId
+                            )
+
+                        Presenting.NONE -> { /* nothing */ }
+                    }
+                }
+            }
+
+            // DeckLink key output
+            if (showPresenterWindow && screenAssignment.hasKeyOutput && screenAssignment.keyTargetType == "decklink" && screenAssignment.keyTargetDisplay >= 0) {
+                DeckLinkComposeOutput(
+                    deviceIndex = screenAssignment.keyTargetDisplay,
+                    outputRole = Constants.OUTPUT_ROLE_KEY,
+                    appSettings = appSettings,
+                    mediaViewModel = mediaViewModel,
+                    isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD,
+                ) {
+                    when (presentingMode) {
+                        Presenting.BIBLE ->
+                            if (screenAssignment.showBible) {
+                                BiblePresenter(
+                                    selectedVerses = displayedVerses,
+                                    appSettings = appSettings,
+                                    isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD,
+                                    outputRole = Constants.OUTPUT_ROLE_KEY,
+                                    transitionAlpha = bibleTransitionAlpha
+                                )
+                            }
+
+                        Presenting.LYRICS ->
+                            if (screenAssignment.showSongs) {
+                                SongPresenter(
+                                    lyricSection = displayedLyricSection,
+                                    appSettings = appSettings,
+                                    isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD,
+                                    outputRole = Constants.OUTPUT_ROLE_KEY,
+                                    transitionAlpha = songTransitionAlpha,
+                                    displayLineIndex = songDisplayLineIndex,
+                                    lookAheadEnabled = screenAssignment.songLookAhead,
+                                    allLyricSections = allLyricSections,
+                                    displaySectionIndex = songDisplaySectionIndex
+                                )
+                            }
+
+                        Presenting.PICTURES ->
+                            if (screenAssignment.showPictures)
+                                PicturePresenter(
+                                    imagePath = displayedImagePath,
+                                    transitionAlpha = pictureTransitionAlpha
+                                )
+
+                        Presenting.PRESENTATION ->
+                            if (screenAssignment.showPictures)
+                                SlidePresenter(slide = displayedSlide, transitionAlpha = slideTransitionAlpha)
+
+                        Presenting.MEDIA ->
+                            if (screenAssignment.showMedia) {
+                                if (mediaViewModel.isAudioFile) {
+                                    // Audio: background only
+                                } else {
+                                    MediaPresenter(
+                                        modifier = Modifier.fillMaxSize(),
+                                        audioDeviceId = appSettings.projectionSettings.audioOutputDeviceId,
+                                        transitionAlpha = mediaTransitionAlpha
+                                    )
+                                }
+                            }
+
+                        Presenting.LOWER_THIRD ->
+                            if (screenAssignment.showStreaming)
+                                LowerThirdPresenter(
+                                    jsonContent = lottieJsonContent,
+                                    progress = lottieProgress,
+                                    appSettings = appSettings
+                                )
+
+                        Presenting.ANNOUNCEMENTS ->
+                            if (screenAssignment.showAnnouncements)
+                                AnnouncementsPresenter(
+                                    text = displayedAnnouncementText,
+                                    appSettings = appSettings,
+                                    outputRole = Constants.OUTPUT_ROLE_KEY,
+                                    transitionAlpha = announcementTransitionAlpha,
+                                    onFinished = {
+                                        presenterManager.setAnnouncementText("")
+                                        presenterManager.setDisplayedAnnouncementText("")
+                                    }
+                                )
+
+                        Presenting.WEBSITE ->
+                            WebsitePresenter(
+                                url = websiteUrl,
+                                modifier = Modifier.fillMaxSize(),
+                                onSnapshot = { bitmap -> presenterManager.setWebSnapshot(bitmap) },
+                                onUrlChanged = { newUrl -> presenterManager.setWebsiteUrl(newUrl) },
+                                onTitleChanged = { title -> presenterManager.setWebPageTitle(title) },
+                                audioDeviceId = appSettings.projectionSettings.audioOutputDeviceId
+                            )
+
+                        Presenting.NONE -> { /* nothing */ }
+                    }
+                }
+            }
+
             continue
         }
 
@@ -1649,6 +1838,104 @@ private fun PresenterWindows(
                                 }
                             }
                         }
+                    }
+                }
+            }
+        }
+
+        // Key output on DeckLink when primary is a regular screen
+        if (screenAssignment.targetType != "decklink" && screenAssignment.hasKeyOutput && screenAssignment.keyTargetType == "decklink" && screenAssignment.keyTargetDisplay >= 0) {
+            if (showPresenterWindow) {
+                DeckLinkComposeOutput(
+                    deviceIndex = screenAssignment.keyTargetDisplay,
+                    outputRole = Constants.OUTPUT_ROLE_KEY,
+                    appSettings = appSettings,
+                    mediaViewModel = mediaViewModel,
+                    isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD,
+                ) {
+                    when (presentingMode) {
+                        Presenting.BIBLE ->
+                            if (screenAssignment.showBible) {
+                                BiblePresenter(
+                                    selectedVerses = displayedVerses,
+                                    appSettings = appSettings,
+                                    isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD,
+                                    outputRole = Constants.OUTPUT_ROLE_KEY,
+                                    transitionAlpha = bibleTransitionAlpha
+                                )
+                            }
+
+                        Presenting.LYRICS ->
+                            if (screenAssignment.showSongs) {
+                                SongPresenter(
+                                    lyricSection = displayedLyricSection,
+                                    appSettings = appSettings,
+                                    isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD,
+                                    outputRole = Constants.OUTPUT_ROLE_KEY,
+                                    transitionAlpha = songTransitionAlpha,
+                                    displayLineIndex = songDisplayLineIndex,
+                                    lookAheadEnabled = screenAssignment.songLookAhead,
+                                    allLyricSections = allLyricSections,
+                                    displaySectionIndex = songDisplaySectionIndex
+                                )
+                            }
+
+                        Presenting.PICTURES ->
+                            if (screenAssignment.showPictures)
+                                PicturePresenter(
+                                    imagePath = displayedImagePath,
+                                    transitionAlpha = pictureTransitionAlpha
+                                )
+
+                        Presenting.PRESENTATION ->
+                            if (screenAssignment.showPictures)
+                                SlidePresenter(slide = displayedSlide, transitionAlpha = slideTransitionAlpha)
+
+                        Presenting.MEDIA ->
+                            if (screenAssignment.showMedia) {
+                                if (mediaViewModel.isAudioFile) {
+                                    // Audio: background only
+                                } else {
+                                    MediaPresenter(
+                                        modifier = Modifier.fillMaxSize(),
+                                        audioDeviceId = appSettings.projectionSettings.audioOutputDeviceId,
+                                        transitionAlpha = mediaTransitionAlpha
+                                    )
+                                }
+                            }
+
+                        Presenting.LOWER_THIRD ->
+                            if (screenAssignment.showStreaming)
+                                LowerThirdPresenter(
+                                    jsonContent = lottieJsonContent,
+                                    progress = lottieProgress,
+                                    appSettings = appSettings
+                                )
+
+                        Presenting.ANNOUNCEMENTS ->
+                            if (screenAssignment.showAnnouncements)
+                                AnnouncementsPresenter(
+                                    text = displayedAnnouncementText,
+                                    appSettings = appSettings,
+                                    outputRole = Constants.OUTPUT_ROLE_KEY,
+                                    transitionAlpha = announcementTransitionAlpha,
+                                    onFinished = {
+                                        presenterManager.setAnnouncementText("")
+                                        presenterManager.setDisplayedAnnouncementText("")
+                                    }
+                                )
+
+                        Presenting.WEBSITE ->
+                            WebsitePresenter(
+                                url = websiteUrl,
+                                modifier = Modifier.fillMaxSize(),
+                                onSnapshot = { bitmap -> presenterManager.setWebSnapshot(bitmap) },
+                                onUrlChanged = { newUrl -> presenterManager.setWebsiteUrl(newUrl) },
+                                onTitleChanged = { title -> presenterManager.setWebPageTitle(title) },
+                                audioDeviceId = appSettings.projectionSettings.audioOutputDeviceId
+                            )
+
+                        Presenting.NONE -> { /* nothing */ }
                     }
                 }
             }

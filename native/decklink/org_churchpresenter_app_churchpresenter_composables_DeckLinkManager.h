@@ -7,61 +7,30 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-/*
- * Class:     org_churchpresenter_app_churchpresenter_composables_DeckLinkManager
- * Method:    nativeListDevices
- * Signature: ()[Ljava/lang/String;
- */
+
 JNIEXPORT jobjectArray JNICALL Java_org_churchpresenter_app_churchpresenter_composables_DeckLinkManager_nativeListDevices
   (JNIEnv *, jclass);
 
-/*
- * Class:     org_churchpresenter_app_churchpresenter_composables_DeckLinkManager
- * Method:    nativeOpen
- * Signature: (III)Z
- */
 JNIEXPORT jboolean JNICALL Java_org_churchpresenter_app_churchpresenter_composables_DeckLinkManager_nativeOpen
   (JNIEnv *, jclass, jint, jint, jint);
 
-/*
- * Class:     org_churchpresenter_app_churchpresenter_composables_DeckLinkManager
- * Method:    nativeSendFrame
- * Signature: ([III)V
- */
 JNIEXPORT void JNICALL Java_org_churchpresenter_app_churchpresenter_composables_DeckLinkManager_nativeSendFrame
-  (JNIEnv *, jclass, jintArray, jint, jint);
+  (JNIEnv *, jclass, jint, jintArray, jint, jint);
 
-/*
- * Class:     org_churchpresenter_app_churchpresenter_composables_DeckLinkManager
- * Method:    nativeStartScheduledPlayback
- * Signature: (ID)Z
- */
 JNIEXPORT jboolean JNICALL Java_org_churchpresenter_app_churchpresenter_composables_DeckLinkManager_nativeStartScheduledPlayback
   (JNIEnv *, jclass, jint, jdouble);
 
-/*
- * Class:     org_churchpresenter_app_churchpresenter_composables_DeckLinkManager
- * Method:    nativeScheduleFrame
- * Signature: ([III)V
- */
 JNIEXPORT void JNICALL Java_org_churchpresenter_app_churchpresenter_composables_DeckLinkManager_nativeScheduleFrame
-  (JNIEnv *, jclass, jintArray, jint, jint);
+  (JNIEnv *, jclass, jint, jintArray, jint, jint);
 
-/*
- * Class:     org_churchpresenter_app_churchpresenter_composables_DeckLinkManager
- * Method:    nativeStopPlayback
- * Signature: ()V
- */
 JNIEXPORT void JNICALL Java_org_churchpresenter_app_churchpresenter_composables_DeckLinkManager_nativeStopPlayback
-  (JNIEnv *, jclass);
+  (JNIEnv *, jclass, jint);
 
-/*
- * Class:     org_churchpresenter_app_churchpresenter_composables_DeckLinkManager
- * Method:    nativeClose
- * Signature: ()V
- */
 JNIEXPORT void JNICALL Java_org_churchpresenter_app_churchpresenter_composables_DeckLinkManager_nativeClose
-  (JNIEnv *, jclass);
+  (JNIEnv *, jclass, jint);
+
+JNIEXPORT jintArray JNICALL Java_org_churchpresenter_app_churchpresenter_composables_DeckLinkManager_nativeGetOutputInfo
+  (JNIEnv *, jclass, jint);
 
 #ifdef __cplusplus
 }

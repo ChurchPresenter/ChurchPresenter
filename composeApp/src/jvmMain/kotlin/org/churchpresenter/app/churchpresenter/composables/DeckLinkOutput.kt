@@ -2,6 +2,7 @@ package org.churchpresenter.app.churchpresenter.composables
 
 /**
  * Kotlin wrapper for BlackMagic DeckLink JNI native library.
+ * Supports multiple simultaneous device outputs.
  * All operations are optional — if the native library is not installed,
  * isAvailable() returns false and all other methods are no-ops.
  */
@@ -9,23 +10,25 @@ object DeckLinkManager {
 
     data class DeckLinkDevice(val index: Int, val name: String)
 
+    data class OutputInfo(val width: Int, val height: Int, val fpsNumerator: Int, val fpsDenominator: Int) {
+        val fps: Double get() = if (fpsDenominator > 0) fpsNumerator.toDouble() / fpsDenominator else 30.0
+    }
+
     private var available: Boolean? = null
 
     // ── JNI native methods ──────────────────────────────────────────────
 
     private external fun nativeListDevices(): Array<String>
     private external fun nativeOpen(deviceIndex: Int, width: Int, height: Int): Boolean
-    private external fun nativeSendFrame(pixels: IntArray, width: Int, height: Int)
+    private external fun nativeSendFrame(deviceIndex: Int, pixels: IntArray, width: Int, height: Int)
     private external fun nativeStartScheduledPlayback(deviceIndex: Int, fps: Double): Boolean
-    private external fun nativeScheduleFrame(pixels: IntArray, width: Int, height: Int)
-    private external fun nativeStopPlayback()
-    private external fun nativeClose()
+    private external fun nativeScheduleFrame(deviceIndex: Int, pixels: IntArray, width: Int, height: Int)
+    private external fun nativeStopPlayback(deviceIndex: Int)
+    private external fun nativeClose(deviceIndex: Int)
+    private external fun nativeGetOutputInfo(deviceIndex: Int): IntArray
 
     // ── Public API ──────────────────────────────────────────────────────
 
-    /**
-     * Returns true if the native decklink_jni library is loaded and functional.
-     */
     fun isAvailable(): Boolean {
         if (available == null) {
             available = try {
@@ -49,10 +52,6 @@ object DeckLinkManager {
         return available ?: false
     }
 
-    /**
-     * Enumerates connected DeckLink devices.
-     * Returns empty list if native lib is not available or no devices found.
-     */
     fun listDevices(): List<DeckLinkDevice> {
         if (!isAvailable()) return emptyList()
         return try {
@@ -64,9 +63,6 @@ object DeckLinkManager {
         }
     }
 
-    /**
-     * Opens a DeckLink device for output at the specified resolution.
-     */
     fun open(deviceIndex: Int, width: Int = 1920, height: Int = 1080): Boolean {
         if (!isAvailable()) return false
         return try {
@@ -76,23 +72,27 @@ object DeckLinkManager {
         }
     }
 
-    /**
-     * Sends a single frame immediately to the opened DeckLink output.
-     * Pixel format: BGRA IntArray (one int per pixel).
-     */
-    fun sendFrame(pixels: IntArray, width: Int, height: Int) {
+    fun getOutputInfo(deviceIndex: Int): OutputInfo? {
+        if (!isAvailable()) return null
+        return try {
+            val info = nativeGetOutputInfo(deviceIndex)
+            if (info.size >= 4 && info[0] > 0 && info[1] > 0) {
+                OutputInfo(info[0], info[1], info[2], info[3])
+            } else null
+        } catch (_: Throwable) {
+            null
+        }
+    }
+
+    fun sendFrame(deviceIndex: Int, pixels: IntArray, width: Int, height: Int) {
         if (!isAvailable()) return
         try {
-            nativeSendFrame(pixels, width, height)
+            nativeSendFrame(deviceIndex, pixels, width, height)
         } catch (_: Exception) {
             // silently ignore
         }
     }
 
-    /**
-     * Starts scheduled playback on the given device at the specified FPS.
-     * After calling this, use [scheduleFrame] to queue frames.
-     */
     fun startScheduledPlayback(deviceIndex: Int, fps: Double = 30.0): Boolean {
         if (!isAvailable()) return false
         return try {
@@ -102,38 +102,28 @@ object DeckLinkManager {
         }
     }
 
-    /**
-     * Queues a frame for scheduled playback output.
-     * Pixel format: BGRA IntArray (one int per pixel).
-     */
-    fun scheduleFrame(pixels: IntArray, width: Int, height: Int) {
+    fun scheduleFrame(deviceIndex: Int, pixels: IntArray, width: Int, height: Int) {
         if (!isAvailable()) return
         try {
-            nativeScheduleFrame(pixels, width, height)
+            nativeScheduleFrame(deviceIndex, pixels, width, height)
         } catch (_: Exception) {
             // silently ignore
         }
     }
 
-    /**
-     * Stops scheduled playback.
-     */
-    fun stopPlayback() {
+    fun stopPlayback(deviceIndex: Int) {
         if (!isAvailable()) return
         try {
-            nativeStopPlayback()
+            nativeStopPlayback(deviceIndex)
         } catch (_: Exception) {
             // silently ignore
         }
     }
 
-    /**
-     * Closes the currently opened DeckLink device and releases resources.
-     */
-    fun close() {
+    fun close(deviceIndex: Int) {
         if (!isAvailable()) return
         try {
-            nativeClose()
+            nativeClose(deviceIndex)
         } catch (_: Exception) {
             // silently ignore
         }
