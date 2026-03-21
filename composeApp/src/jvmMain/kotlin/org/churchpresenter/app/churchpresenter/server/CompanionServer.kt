@@ -1190,54 +1190,92 @@ class CompanionServer {
 
     fun start(port: Int = Constants.SERVER_DEFAULT_PORT) {
         if (_isRunning.value) return
-        currentPort = port
+
+        // Find the first pair of consecutive free ports starting from the requested one.
+        // The server needs port N (HTTPS/HTTP) and port N+1 (plain-HTTP localhost connector).
+        val actualPort = findFreePortPair(port)
+        currentPort = actualPort
 
         val keyStore = try {
             SslCertificateManager.getOrCreateKeyStore()
         } catch (e: Exception) {
-            startPlainHttp(port)
+            startPlainHttp(actualPort)
             return
         }
 
-        server = embeddedServer(Netty, configure = {
-            // HTTPS for external clients
-            sslConnector(
-                keyStore = keyStore,
-                keyAlias = Constants.SSL_KEY_ALIAS,
-                keyStorePassword = { Constants.SSL_KEYSTORE_PASSWORD.toCharArray() },
-                privateKeyPassword = { Constants.SSL_KEYSTORE_PASSWORD.toCharArray() }
-            ) {
-                host = "0.0.0.0"
-                this.port = port
-            }
-            // Plain HTTP on localhost for embedded WebView (avoids SSL handshake issues)
-            connector {
-                host = "127.0.0.1"
-                this.port = port + 1
-            }
-        }) { configurePipeline() }
+        try {
+            server = embeddedServer(Netty, configure = {
+                // HTTPS for external clients
+                sslConnector(
+                    keyStore = keyStore,
+                    keyAlias = Constants.SSL_KEY_ALIAS,
+                    keyStorePassword = { Constants.SSL_KEYSTORE_PASSWORD.toCharArray() },
+                    privateKeyPassword = { Constants.SSL_KEYSTORE_PASSWORD.toCharArray() }
+                ) {
+                    host = "0.0.0.0"
+                    this.port = actualPort
+                }
+                // Plain HTTP on localhost for embedded WebView (avoids SSL handshake issues)
+                connector {
+                    host = "127.0.0.1"
+                    this.port = actualPort + 1
+                }
+            }) { configurePipeline() }
 
-        server?.start(wait = false)
-        _isRunning.value = true
-        _serverUrl.value = "https://${localIpAddress()}:$port"
+            server?.start(wait = false)
+            _isRunning.value = true
+            _serverUrl.value = "https://${localIpAddress()}:$actualPort"
+        } catch (e: java.net.BindException) {
+            System.err.println("[CompanionServer] BindException on port $actualPort: ${e.message}. Server not started.")
+            server = null
+        } catch (e: Exception) {
+            System.err.println("[CompanionServer] Failed to start: ${e.message}")
+            server = null
+        }
     }
 
     /** Fallback plain-HTTP start used only if SSL cert generation fails. */
     private fun startPlainHttp(port: Int) {
-        server = embeddedServer(Netty, configure = {
-            connector {
-                host = "0.0.0.0"
-                this.port = port
-            }
-            // Plain HTTP on localhost for embedded WebView (mirrors the SSL dual-connector setup)
-            connector {
-                host = "127.0.0.1"
-                this.port = port + 1
-            }
-        }) { configurePipeline() }
-        server?.start(wait = false)
-        _isRunning.value = true
-        _serverUrl.value = "http://${localIpAddress()}:$port"
+        try {
+            server = embeddedServer(Netty, configure = {
+                connector {
+                    host = "0.0.0.0"
+                    this.port = port
+                }
+                // Plain HTTP on localhost for embedded WebView (mirrors the SSL dual-connector setup)
+                connector {
+                    host = "127.0.0.1"
+                    this.port = port + 1
+                }
+            }) { configurePipeline() }
+            server?.start(wait = false)
+            _isRunning.value = true
+            _serverUrl.value = "http://${localIpAddress()}:$port"
+        } catch (e: java.net.BindException) {
+            System.err.println("[CompanionServer] BindException on port $port (plain HTTP): ${e.message}. Server not started.")
+            server = null
+        } catch (e: Exception) {
+            System.err.println("[CompanionServer] Failed to start plain HTTP: ${e.message}")
+            server = null
+        }
+    }
+
+    /**
+     * Finds the first port >= [startPort] where BOTH [port] and [port]+1 are free.
+     * The server requires two consecutive free ports (HTTPS + plain-HTTP localhost connector).
+     * Scans up to 20 candidates before giving up and returning [startPort] as-is.
+     */
+    private fun findFreePortPair(startPort: Int): Int {
+        for (candidate in startPort until startPort + 40 step 2) {
+            if (isPortFree(candidate) && isPortFree(candidate + 1)) return candidate
+        }
+        return startPort  // give up — let Netty surface the real error
+    }
+
+    private fun isPortFree(port: Int): Boolean = try {
+        java.net.ServerSocket(port).use { true }
+    } catch (_: java.io.IOException) {
+        false
     }
 
     private fun io.ktor.server.application.Application.configurePipeline() {

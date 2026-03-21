@@ -27,6 +27,7 @@ import org.cef.handler.CefResourceRequestHandler
 import org.cef.misc.BoolRef
 import org.cef.network.CefRequest
 import java.io.File
+import java.lang.invoke.MethodHandles
 
 /**
  * Manages a single CefApp instance for the entire application.
@@ -37,8 +38,74 @@ object CefManager {
     var initialized = false
         private set
 
+    /**
+     * Programmatically export internal java.desktop packages required by JCEF on macOS.
+     *
+     * CefBrowserWindowMac.getWindowHandle() directly references sun.awt.AWTAccessor in
+     * compiled bytecode.  The JVM module system blocks this unless java.desktop exports
+     * sun.awt to the unnamed module (equivalent to --add-exports=java.desktop/sun.awt=ALL-UNNAMED).
+     *
+     * Two approaches are tried in order:
+     *
+     * 1. setAccessible path — fast, requires --add-opens=java.base/java.lang=ALL-UNNAMED
+     *    (supplied by tasks.withType<JavaExec> in build.gradle.kts when running via Gradle).
+     *
+     * 2. Trusted IMPL_LOOKUP path — works with ZERO JVM flags.
+     *    MethodHandles.Lookup.IMPL_LOOKUP is the JDK's own fully-trusted lookup (used
+     *    internally by java.lang.invoke).  Reading it via sun.misc.Unsafe bypasses all
+     *    Java access checks, yielding a MethodHandle that can invoke any method in any
+     *    module — including Module.implAddExportsToAllUnnamed.
+     *    This is the same technique used by ByteBuddy and Mockito for JDK 9–21.
+     */
+    private fun patchJcefModuleAccess() {
+        val packages = listOf("sun.awt", "sun.lwawt", "sun.lwawt.macosx")
+        val javaDesktop = ModuleLayer.boot().findModule("java.desktop").orElse(null) ?: return
+
+        // --- Approach 1: plain setAccessible ---
+        runCatching {
+            val m = Module::class.java
+                .getDeclaredMethod("implAddExportsToAllUnnamed", String::class.java)
+            m.isAccessible = true
+            packages.forEach { m.invoke(javaDesktop, it) }
+        }.onSuccess { return }
+
+        // --- Approach 2: IMPL_LOOKUP via sun.misc.Unsafe ---
+        runCatching {
+            // jdk.unsupported opens sun.misc → isAccessible=true works on theUnsafe
+            val unsafeField = sun.misc.Unsafe::class.java.getDeclaredField("theUnsafe")
+            unsafeField.isAccessible = true
+            val unsafe = unsafeField.get(null) as sun.misc.Unsafe
+
+            // Read IMPL_LOOKUP directly from memory — no Java access check involved.
+            // MethodHandles.lookup().javaClass gives us java.lang.invoke.MethodHandles$Lookup.
+            val implLookupField = MethodHandles.lookup().javaClass
+                .getDeclaredField("IMPL_LOOKUP")
+            @Suppress("DEPRECATION")
+            val trustedLookup = unsafe.getObject(
+                unsafe.staticFieldBase(implLookupField),
+                unsafe.staticFieldOffset(implLookupField)
+            ) as MethodHandles.Lookup
+
+            // IMPL_LOOKUP is fully trusted — findVirtual succeeds on package-private methods
+            val mt = java.lang.invoke.MethodType.methodType(Void.TYPE, String::class.java)
+            val mh = trustedLookup.findVirtual(
+                Module::class.java, "implAddExportsToAllUnnamed", mt
+            )
+            packages.forEach { pkg -> mh.invokeWithArguments(javaDesktop, pkg) }
+        }.onSuccess { return }
+
+        System.err.println(
+            "[CefManager] patchJcefModuleAccess: all approaches failed. " +
+            "Run via ./gradlew :composeApp:run, or add " +
+            "--add-exports=java.desktop/sun.awt=ALL-UNNAMED to the JVM args."
+        )
+    }
+
     fun init() {
         if (initialized) return
+        // Must run before any JCEF class is loaded — CefBrowserWindowMac.getWindowHandle()
+        // directly references sun.awt.AWTAccessor which the JVM module system blocks by default.
+        patchJcefModuleAccess()
         try {
             val installDir = File(System.getProperty("user.home"), ".churchpresenter/jcef")
             installDir.mkdirs()

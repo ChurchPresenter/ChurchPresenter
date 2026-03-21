@@ -1,0 +1,33 @@
+<!-- Shared IntelliJ IDEA run configuration for ChurchPresenter.
+     Uses ./gradlew :composeApp:run which correctly applies all required JVM flags:
+       --add-exports=java.desktop/sun.awt=ALL-UNNAMED   (required by JCEF/CefBrowserWindowMac)
+       --add-exports=java.desktop/sun.lwawt=ALL-UNNAMED
+       --add-exports=java.desktop/sun.lwawt.macosx=ALL-UNNAMED
+     These are set in compose.desktop { application { jvmArgs(...) } } and
+     tasks.withType<JavaExec> in composeApp/build.gradle.kts.
+     If IntelliJ's auto-generated "MainKt" run config still crashes, use THIS one instead. -->
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="ChurchPresenter" type="GradleRunConfiguration" factoryName="Gradle">
+    <ExternalSystemSettings>
+      <option name="executionName" />
+      <option name="externalProjectPath" value="$PROJECT_DIR$" />
+      <option name="externalSystemIdString" value="GRADLE" />
+      <option name="scriptParameters" value="" />
+      <option name="taskDescriptions">
+        <list />
+      </option>
+      <option name="taskNames">
+        <list>
+          <option value=":composeApp:run" />
+        </list>
+      </option>
+      <option name="vmOptions" value="" />
+    </ExternalSystemSettings>
+    <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
+    <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+    <DebugAllEnabled>false</DebugAllEnabled>
+    <ForceTestExec>false</ForceTestExec>
+    <method v="2" />
+  </configuration>
+</component>
+

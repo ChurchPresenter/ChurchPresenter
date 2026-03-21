@@ -199,7 +199,12 @@ compose.desktop {
             "--add-opens=java.base/java.io=ALL-UNNAMED",
             "--add-opens=java.base/java.nio=ALL-UNNAMED",
             "--add-opens=java.base/sun.nio.ch=ALL-UNNAMED",
-            // JCEF on macOS needs access to sun.awt internals
+            // JCEF on macOS needs access to sun.awt internals.
+            // --add-exports is required for direct bytecode access (CefBrowserWindowMac references
+            // sun.awt.AWTAccessor directly, not via reflection, so --add-opens alone is insufficient).
+            "--add-exports=java.desktop/sun.awt=ALL-UNNAMED",
+            "--add-exports=java.desktop/sun.lwawt=ALL-UNNAMED",
+            "--add-exports=java.desktop/sun.lwawt.macosx=ALL-UNNAMED",
             "--add-opens=java.desktop/sun.awt=ALL-UNNAMED",
             "--add-opens=java.desktop/sun.lwawt=ALL-UNNAMED",
             "--add-opens=java.desktop/sun.lwawt.macosx=ALL-UNNAMED"
@@ -244,6 +249,9 @@ compose.desktop {
                 "--add-opens=java.base/java.io=ALL-UNNAMED",
                 "--add-opens=java.base/java.nio=ALL-UNNAMED",
                 "--add-opens=java.base/sun.nio.ch=ALL-UNNAMED",
+                "--add-exports=java.desktop/sun.awt=ALL-UNNAMED",
+                "--add-exports=java.desktop/sun.lwawt=ALL-UNNAMED",
+                "--add-exports=java.desktop/sun.lwawt.macosx=ALL-UNNAMED",
                 "--add-opens=java.desktop/sun.awt=ALL-UNNAMED",
                 "--add-opens=java.desktop/sun.lwawt=ALL-UNNAMED",
                 "--add-opens=java.desktop/sun.lwawt.macosx=ALL-UNNAMED"
@@ -270,6 +278,29 @@ compose.desktop {
             }
         }
     }
+}
+
+// Apply JCEF-required JVM args to every JavaExec task in this subproject.
+// This covers:
+//   • ./gradlew :composeApp:run  (Compose Desktop run task)
+//   • IntelliJ's auto-generated run configuration for fun main()
+//     (task name: org.churchpresenter.app.churchpresenter.MainKt.main())
+//   • Any other direct Java execution task
+// Without this, IntelliJ's run button bypasses compose.desktop.application.jvmArgs
+// entirely, causing CefBrowserWindowMac to crash with IllegalAccessError on sun.awt.
+val jcefJvmArgs = listOf(
+    "--add-exports=java.desktop/sun.awt=ALL-UNNAMED",
+    "--add-exports=java.desktop/sun.lwawt=ALL-UNNAMED",
+    "--add-exports=java.desktop/sun.lwawt.macosx=ALL-UNNAMED",
+    "--add-opens=java.desktop/sun.awt=ALL-UNNAMED",
+    "--add-opens=java.desktop/sun.lwawt=ALL-UNNAMED",
+    "--add-opens=java.desktop/sun.lwawt.macosx=ALL-UNNAMED",
+    "--add-opens=java.base/java.lang=ALL-UNNAMED",
+    "--add-opens=java.base/java.lang.reflect=ALL-UNNAMED"
+)
+
+tasks.withType<JavaExec>().configureEach {
+    jvmArgs(jcefJvmArgs)
 }
 
 // Generate BuildConfig with version info accessible at runtime
