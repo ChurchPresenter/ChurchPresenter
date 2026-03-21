@@ -333,6 +333,7 @@
     <string name="background_image_option">Image</string>
     <string name="background_video_option">Video Loop</string>
     <string name="background_transparent_option">Transparent</string>
+    <string name="background_follow_default_option">Follow Default</string>
     <string name="background_video">Background Video:</string>
 
     <!-- Position Options -->

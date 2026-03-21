@@ -195,11 +195,13 @@ fun BackgroundSettingsTab(
                             s.copy(backgroundSettings = s.backgroundSettings.copy(defaultLowerThirdBackgroundType = type))
                         }
                     },
-                    defaultLabel = stringResource(Res.string.background_color_option),
-                    colorLabel = stringResource(Res.string.background_image_option),
-                    imageLabel = stringResource(Res.string.background_video_option),
-                    videoLabel = stringResource(Res.string.background_transparent_option),
+                    defaultLabel = "Follow Default",
+                    colorLabel = stringResource(Res.string.background_color_option),
+                    imageLabel = stringResource(Res.string.background_image_option),
+                    videoLabel = stringResource(Res.string.background_video_option),
+                    transparentLabel = stringResource(Res.string.background_transparent_option),
                     types = listOf(
+                        Constants.BACKGROUND_FOLLOW_DEFAULT,
                         Constants.BACKGROUND_COLOR,
                         Constants.BACKGROUND_IMAGE,
                         Constants.BACKGROUND_VIDEO,
@@ -487,7 +489,7 @@ private fun BackgroundTypeRadioGroup(
 ) {
     val entries = if (types != null) {
         // Custom types list with labels mapped positionally
-        val labels = listOfNotNull(defaultLabel, colorLabel, imageLabel, videoLabel)
+        val labels = listOfNotNull(defaultLabel, colorLabel, imageLabel, videoLabel, transparentLabel, gradientLabel)
         types.zip(labels)
     } else {
         // Standard: Default, Color, Image + optional Video + optional Transparent + optional Gradient

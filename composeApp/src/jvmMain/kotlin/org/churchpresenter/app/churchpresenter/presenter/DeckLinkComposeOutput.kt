@@ -5,37 +5,37 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawWithContent
-import androidx.compose.ui.graphics.layer.drawLayer
-import androidx.compose.ui.graphics.rememberGraphicsLayer
-import androidx.compose.ui.unit.DpSize
-import androidx.compose.ui.unit.IntSize
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Window
-import androidx.compose.ui.window.WindowPosition
-import androidx.compose.ui.window.WindowState
+import androidx.compose.ui.awt.ComposePanel
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.isActive
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.launch
 import org.churchpresenter.app.churchpresenter.PresenterScreen
 import org.churchpresenter.app.churchpresenter.composables.DeckLinkManager
 import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.viewmodel.LocalMediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.MediaViewModel
+import org.jetbrains.skiko.SkiaLayer
+import java.awt.Component
+import java.awt.Container
+import java.awt.Dimension
+import javax.swing.JFrame
+import javax.swing.SwingUtilities
 
 /**
- * Renders Compose content to a DeckLink device via an offscreen Window.
+ * Renders Compose content to a DeckLink device using ComposePanel + SkiaLayer.screenshot().
  *
- * Uses GraphicsLayer to capture rendered pixels from the Compose draw pipeline,
- * then pushes them to the DeckLink device via DisplayVideoFrameSync.
- * Each instance drives one DeckLink device independently.
+ * Uses ComposePanel in an offscreen JFrame for rendering, then captures frames
+ * via SkiaLayer.screenshot() which safely reads the Skia backing surface
+ * without the race conditions that affect GraphicsLayer.toImageBitmap().
  */
 @Composable
 fun DeckLinkComposeOutput(
@@ -47,10 +47,9 @@ fun DeckLinkComposeOutput(
     content: @Composable BoxScope.() -> Unit
 ) {
     val isKeyRole = outputRole == Constants.OUTPUT_ROLE_KEY
-
-    var outputWidth by remember { mutableStateOf(0) }
-    var outputHeight by remember { mutableStateOf(0) }
-    var deviceReady by remember { mutableStateOf(false) }
+    val currentAppSettings by androidx.compose.runtime.rememberUpdatedState(appSettings)
+    val currentOutputRole by androidx.compose.runtime.rememberUpdatedState(outputRole)
+    val currentIsLowerThird by androidx.compose.runtime.rememberUpdatedState(isLowerThird)
 
     DisposableEffect(deviceIndex) {
         if (!DeckLinkManager.isAvailable()) return@DisposableEffect onDispose {}
@@ -58,91 +57,126 @@ fun DeckLinkComposeOutput(
         if (!opened) return@DisposableEffect onDispose {}
 
         val info = DeckLinkManager.getOutputInfo(deviceIndex)
-        outputWidth = info?.width ?: 1920
-        outputHeight = info?.height ?: 1080
-        System.err.println("[DeckLink] Device $deviceIndex: ${outputWidth}x${outputHeight} @ ${info?.fps} fps")
-        deviceReady = true
+        val w = info?.width ?: 1920
+        val h = info?.height ?: 1080
+        System.err.println("[DeckLink] Device $deviceIndex: ${w}x${h} @ ${info?.fps} fps")
 
-        onDispose {
-            deviceReady = false
-            DeckLinkManager.close(deviceIndex)
+        // Create offscreen JFrame with ComposePanel
+        val jframe = JFrame("DeckLink Output $deviceIndex").apply {
+            isUndecorated = true
+            setSize(w, h)
+            // Position just outside visible area — close enough for DWM to render
+            val ge = java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment()
+            val virtualBounds = ge.screenDevices.fold(java.awt.Rectangle()) { acc, sd ->
+                acc.union(sd.defaultConfiguration.bounds)
+            }
+            setLocation(virtualBounds.x - w, virtualBounds.y)
         }
-    }
 
-    if (!deviceReady || outputWidth <= 0 || outputHeight <= 0) return
-
-    val w = outputWidth
-    val h = outputHeight
-
-    // Position the window just outside the total virtual screen bounds.
-    // We find the leftmost edge across ALL monitors and place it one pixel further left.
-    // Windows DWM still renders windows near the visible area but not at extreme offsets.
-    val windowState = remember(w, h) {
-        val ge = java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment()
-        val virtualBounds = ge.screenDevices.fold(java.awt.Rectangle()) { acc, sd ->
-            acc.union(sd.defaultConfiguration.bounds)
+        val composePanel = ComposePanel().apply {
+            preferredSize = Dimension(w, h)
+            setSize(w, h)
         }
-        // Place just outside the leftmost edge of all monitors
-        WindowState(
-            position = WindowPosition((virtualBounds.x - w).dp, virtualBounds.y.dp),
-            size = DpSize(w.dp, h.dp)
-        )
-    }
 
-    Window(
-        visible = true,
-        onCloseRequest = {},
-        state = windowState,
-        undecorated = true,
-        resizable = false,
-        alwaysOnTop = false,
-        focusable = false,
-        title = "DeckLink Output $deviceIndex"
-    ) {
-        val graphicsLayer = rememberGraphicsLayer()
-
-        // Capture loop: toImageBitmap() reads the recorded GraphicsLayer content.
-        // sendFrame (DisplayVideoFrameSync) blocks until the frame is displayed,
-        // providing natural pacing at the device's configured frame rate.
-        LaunchedEffect(graphicsLayer, w, h) {
-            val pixels = IntArray(w * h)
-
-            while (isActive) {
-                try {
-                    val bitmap = graphicsLayer.toImageBitmap()
-                    bitmap.readPixels(pixels)
-
-                    if (isKeyRole) {
-                        convertToKeySignal(pixels)
-                    }
-
-                    withContext(Dispatchers.IO) {
-                        DeckLinkManager.sendFrame(deviceIndex, pixels, w, h)
-                    }
-                } catch (_: Throwable) {
-                    // GraphicsLayer not ready yet on first frames
-                    kotlinx.coroutines.delay(16)
+        composePanel.setContent {
+            CompositionLocalProvider(LocalMediaViewModel provides mediaViewModel) {
+                PresenterScreen(
+                    modifier = Modifier.fillMaxSize(),
+                    appSettings = currentAppSettings,
+                    outputRole = currentOutputRole,
+                    isLowerThird = currentIsLowerThird
+                ) {
+                    content()
                 }
             }
         }
 
-        CompositionLocalProvider(LocalMediaViewModel provides mediaViewModel) {
-            PresenterScreen(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .drawWithContent {
-                        graphicsLayer.record(
-                            size = IntSize(size.width.toInt(), size.height.toInt())
-                        ) {
-                            this@drawWithContent.drawContent()
+        jframe.contentPane.add(composePanel)
+        jframe.isVisible = true
+
+        // Find the SkiaLayer inside the ComposePanel
+        fun findSkiaLayer(container: Container): SkiaLayer? {
+            for (comp in container.components) {
+                if (comp is SkiaLayer) return comp
+                if (comp is Container) {
+                    val found = findSkiaLayer(comp)
+                    if (found != null) return found
+                }
+            }
+            return null
+        }
+
+        val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
+        val captureJob = scope.launch {
+            // Wait for ComposePanel to initialize and create SkiaLayer
+            Thread.sleep(1000)
+
+            var skiaLayer: SkiaLayer? = null
+            // Try to find SkiaLayer (may take a moment to be added)
+            repeat(20) {
+                skiaLayer = findSkiaLayer(composePanel)
+                if (skiaLayer != null) return@repeat
+                Thread.sleep(100)
+            }
+
+            if (skiaLayer == null) {
+                System.err.println("[DeckLink] Device $deviceIndex: Could not find SkiaLayer")
+                return@launch
+            }
+            System.err.println("[DeckLink] Device $deviceIndex: SkiaLayer found, starting capture")
+
+            val pixels = IntArray(w * h)
+            val byteBuf = ByteArray(w * h * 4)
+
+            while (isActive) {
+                try {
+                    // screenshot() safely reads the Skia backing surface
+                    val bitmap = skiaLayer!!.screenshot()
+                    if (bitmap != null && bitmap.width > 0 && bitmap.height > 0) {
+                        // peekPixels gives direct access to the bitmap buffer
+                        val pixmap = bitmap.peekPixels()
+                        if (pixmap != null) {
+                            val data = pixmap.buffer
+                            val bytes = data.getBytes(0, (w * h * 4).coerceAtMost(data.size))
+                            System.arraycopy(bytes, 0, byteBuf, 0, bytes.size)
+
+                            // Convert BGRA/RGBA bytes to ARGB IntArray for the JNI bridge
+                            // Skia on Windows uses BGRA_8888 natively
+                            for (i in 0 until w * h) {
+                                val off = i * 4
+                                val b = byteBuf[off].toInt() and 0xFF
+                                val g = byteBuf[off + 1].toInt() and 0xFF
+                                val r = byteBuf[off + 2].toInt() and 0xFF
+                                val a = byteBuf[off + 3].toInt() and 0xFF
+                                pixels[i] = (a shl 24) or (r shl 16) or (g shl 8) or b
+                            }
+
+                            if (isKeyRole) {
+                                convertToKeySignal(pixels)
+                            }
+
+                            DeckLinkManager.sendFrame(deviceIndex, pixels, w, h)
+                        } else {
+                            Thread.sleep(16)
                         }
-                        drawLayer(graphicsLayer)
-                    },
-                appSettings = appSettings,
-                outputRole = outputRole,
-                isLowerThird = isLowerThird
-            ) {
-                content()
+                        bitmap.close()
+                    } else {
+                        bitmap?.close()
+                        Thread.sleep(16)
+                    }
+                } catch (_: Throwable) {
+                    Thread.sleep(16)
+                }
+            }
+        }
+
+        onDispose {
+            captureJob.cancel()
+            scope.cancel()
+            DeckLinkManager.close(deviceIndex)
+            SwingUtilities.invokeLater {
+                jframe.isVisible = false
+                jframe.dispose()
             }
         }
     }

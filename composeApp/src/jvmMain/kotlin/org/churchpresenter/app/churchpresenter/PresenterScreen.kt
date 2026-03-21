@@ -32,12 +32,20 @@ fun PresenterScreen(
     val isKey = outputRole == Constants.OUTPUT_ROLE_KEY
 
     val bgSettings = appSettings.backgroundSettings
-    // Use lower third defaults when screen is in lower third mode
-    val bgType = if (isLowerThird) bgSettings.defaultLowerThirdBackgroundType else bgSettings.defaultBackgroundType
-    val bgColorHex = if (isLowerThird) bgSettings.defaultLowerThirdBackgroundColor else bgSettings.defaultBackgroundColor
-    val bgImagePath = if (isLowerThird) bgSettings.defaultLowerThirdBackgroundImage else bgSettings.defaultBackgroundImage
-    val bgVideoPath = if (isLowerThird) bgSettings.defaultLowerThirdBackgroundVideo else bgSettings.defaultBackgroundVideo
-    val bgOpacity = if (isLowerThird) bgSettings.defaultLowerThirdBackgroundOpacity else bgSettings.defaultBackgroundOpacity
+    // Use lower third defaults when screen is in lower third mode.
+    // "FollowDefault" means lower third uses the same background as fullscreen.
+    // "Transparent" means no background at all (fully transparent).
+    val lowerThirdType = bgSettings.defaultLowerThirdBackgroundType
+    val useDefault = isLowerThird && lowerThirdType == Constants.BACKGROUND_FOLLOW_DEFAULT
+    val bgType = when {
+        useDefault -> bgSettings.defaultBackgroundType
+        isLowerThird -> lowerThirdType
+        else -> bgSettings.defaultBackgroundType
+    }
+    val bgColorHex = if (isLowerThird && !useDefault) bgSettings.defaultLowerThirdBackgroundColor else bgSettings.defaultBackgroundColor
+    val bgImagePath = if (isLowerThird && !useDefault) bgSettings.defaultLowerThirdBackgroundImage else bgSettings.defaultBackgroundImage
+    val bgVideoPath = if (isLowerThird && !useDefault) bgSettings.defaultLowerThirdBackgroundVideo else bgSettings.defaultBackgroundVideo
+    val bgOpacity = if (isLowerThird && !useDefault) bgSettings.defaultLowerThirdBackgroundOpacity else bgSettings.defaultBackgroundOpacity
     val backgroundColor = if (isFillOrKey) Color.Black else parseHexColor(bgColorHex)
 
     val backgroundImageBitmap = remember(bgType, bgImagePath, isFillOrKey) {
@@ -79,6 +87,10 @@ fun PresenterScreen(
                         videoPath = bgVideoPath,
                         modifier = Modifier.fillMaxSize().alpha(bgOpacity)
                     )
+                }
+                Constants.BACKGROUND_TRANSPARENT -> {
+                    // No visible background — black (appears as "nothing" on a projector/display)
+                    Box(modifier = Modifier.fillMaxSize().background(Color.Black))
                 }
                 else -> {
                     Box(modifier = Modifier.fillMaxSize().background(backgroundColor.copy(alpha = bgOpacity)))

@@ -120,6 +120,7 @@ object Constants {
     const val BACKGROUND_VIDEO = "Video"
     const val BACKGROUND_TRANSPARENT = "Transparent"
     const val BACKGROUND_GRADIENT = "Gradient"
+    const val BACKGROUND_FOLLOW_DEFAULT = "FollowDefault" // Lower third follows the default background
 
     // Position Options
     const val POSITION_ABOVE = "Above"

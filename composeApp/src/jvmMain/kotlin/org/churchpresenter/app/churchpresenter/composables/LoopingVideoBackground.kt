@@ -16,7 +16,7 @@ import uk.co.caprica.vlcj.factory.MediaPlayerFactory
 import uk.co.caprica.vlcj.player.base.MediaPlayer as VlcMediaPlayer
 import uk.co.caprica.vlcj.player.embedded.videosurface.callback.BufferFormatCallback
 import uk.co.caprica.vlcj.player.embedded.videosurface.callback.BufferFormat
-import uk.co.caprica.vlcj.player.embedded.videosurface.callback.RenderCallbackAdapter
+import uk.co.caprica.vlcj.player.embedded.videosurface.callback.RenderCallback
 import uk.co.caprica.vlcj.player.embedded.videosurface.callback.format.RV32BufferFormat
 import java.awt.image.BufferedImage
 import java.awt.image.DataBufferInt
@@ -61,16 +61,18 @@ fun LoopingVideoBackground(
             override fun allocatedBuffers(buffers: Array<out ByteBuffer>) { }
         }
 
-        val renderCallback = object : RenderCallbackAdapter() {
-            override fun onDisplay(player: VlcMediaPlayer?, rgbBuffer: IntArray) {
-                val img = bufferedImage ?: return
-                val pixelData = (img.raster.dataBuffer as DataBufferInt).data
-                // RV32 adapter gives us ARGB int[] — copy directly
-                System.arraycopy(rgbBuffer, 0, pixelData, 0, rgbBuffer.size.coerceAtMost(pixelData.size))
-                try {
-                    currentFrame.value = img.toComposeImageBitmap()
-                } catch (_: Throwable) { }
-            }
+        // Use RenderCallback directly (not RenderCallbackAdapter) to avoid
+        // the adapter's null dst crash when VLC fires display before buffer allocation.
+        val renderCallback = RenderCallback { player, nativeBuffers, bufferFormat ->
+            val img = bufferedImage ?: return@RenderCallback
+            if (nativeBuffers == null || nativeBuffers.isEmpty()) return@RenderCallback
+            val pixelData = (img.raster.dataBuffer as? DataBufferInt)?.data ?: return@RenderCallback
+            try {
+                val buf = nativeBuffers[0] ?: return@RenderCallback
+                buf.rewind()
+                buf.asIntBuffer().get(pixelData, 0, pixelData.size.coerceAtMost(buf.remaining() / 4))
+                currentFrame.value = img.toComposeImageBitmap()
+            } catch (_: Throwable) { }
         }
 
         mediaPlayer.videoSurface().set(
@@ -86,26 +88,18 @@ fun LoopingVideoBackground(
         }
     }
 
-    // Start playback and handle seamless looping
+    // Start playback with VLC input-level repeat (loops at demuxer level, no gap)
     LaunchedEffect(videoPath) {
         delay(100) // let video surface attach
         try {
             mediaPlayer.audio().setVolume(0)
-            mediaPlayer.media().play(file.absolutePath, ":file-caching=10000", ":network-caching=10000")
+            mediaPlayer.media().play(
+                file.absolutePath,
+                ":file-caching=10000",
+                ":network-caching=10000",
+                ":input-repeat=65535"
+            )
         } catch (_: Throwable) { }
-
-        // Poll position and seek to 0 just before end for seamless looping
-        delay(500)
-        while (isActive) {
-            delay(100)
-            try {
-                val duration = mediaPlayer.status().length()
-                val position = mediaPlayer.status().time()
-                if (duration > 0 && position > 0 && duration - position < 250) {
-                    mediaPlayer.controls().setTime(0)
-                }
-            } catch (_: Throwable) { }
-        }
     }
 
     // Render current frame as a regular Compose Image (respects z-order)

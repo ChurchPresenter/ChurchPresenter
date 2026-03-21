@@ -406,22 +406,34 @@ fun ProjectionSettingsTab(
                                     )
                                     onSettingsChange { s ->
                                         var newProj = s.projectionSettings.withAssignment(i, updated)
-                                        // If selecting a specific display, clear it from other assignments (match by bounds)
-                                        if (option.targetDisplay >= 0 && option.boundsX != Int.MIN_VALUE) {
+                                        if (option.targetDisplay >= 0) {
+                                            val isDeckLink = option.targetType == "decklink"
                                             for (j in 0 until numScreens) {
                                                 val other = newProj.getAssignment(j)
-                                                // Clear from other primary displays that target the same screen
-                                                if (j != i && other.targetBoundsX == option.boundsX && other.targetBoundsY == option.boundsY &&
-                                                    other.targetBoundsW == option.boundsW && other.targetBoundsH == option.boundsH) {
+                                                // Clear from other primary displays that target the same output
+                                                val primaryMatch = if (isDeckLink) {
+                                                    j != i && other.targetType == "decklink" && other.targetDisplay == option.targetDisplay
+                                                } else {
+                                                    j != i && option.boundsX != Int.MIN_VALUE &&
+                                                    other.targetBoundsX == option.boundsX && other.targetBoundsY == option.boundsY &&
+                                                    other.targetBoundsW == option.boundsW && other.targetBoundsH == option.boundsH
+                                                }
+                                                if (primaryMatch) {
                                                     newProj = newProj.withAssignment(j, other.copy(
                                                         targetDisplay = Constants.KEY_TARGET_NONE, targetType = "screen",
                                                         targetBoundsX = Int.MIN_VALUE, targetBoundsY = Int.MIN_VALUE, targetBoundsW = 0, targetBoundsH = 0
                                                     ))
                                                 }
-                                                // Clear from key outputs that target the same screen
+                                                // Clear from key outputs that target the same output
                                                 val otherLatest = newProj.getAssignment(j)
-                                                if (otherLatest.keyTargetBoundsX == option.boundsX && otherLatest.keyTargetBoundsY == option.boundsY &&
-                                                    otherLatest.keyTargetBoundsW == option.boundsW && otherLatest.keyTargetBoundsH == option.boundsH) {
+                                                val keyMatch = if (isDeckLink) {
+                                                    otherLatest.keyTargetType == "decklink" && otherLatest.keyTargetDisplay == option.targetDisplay
+                                                } else {
+                                                    option.boundsX != Int.MIN_VALUE &&
+                                                    otherLatest.keyTargetBoundsX == option.boundsX && otherLatest.keyTargetBoundsY == option.boundsY &&
+                                                    otherLatest.keyTargetBoundsW == option.boundsW && otherLatest.keyTargetBoundsH == option.boundsH
+                                                }
+                                                if (keyMatch) {
                                                     newProj = newProj.withAssignment(j, otherLatest.copy(
                                                         keyTargetDisplay = Constants.KEY_TARGET_NONE, keyTargetType = "screen",
                                                         keyTargetBoundsX = Int.MIN_VALUE, keyTargetBoundsY = Int.MIN_VALUE, keyTargetBoundsW = 0, keyTargetBoundsH = 0
@@ -510,31 +522,50 @@ fun ProjectionSettingsTab(
                                     )
                                     onSettingsChange { s ->
                                         var newProj = s.projectionSettings.withAssignment(i, updated)
-                                        if (option.targetDisplay >= 0 && option.boundsX != Int.MIN_VALUE) {
+                                        if (option.targetDisplay >= 0) {
+                                            val isDeckLink = option.targetType == "decklink"
                                             for (j in 0 until numScreens) {
                                                 val other = newProj.getAssignment(j)
-                                                // Clear from other primary displays that target the same screen
-                                                if (j != i && other.targetBoundsX == option.boundsX && other.targetBoundsY == option.boundsY &&
-                                                    other.targetBoundsW == option.boundsW && other.targetBoundsH == option.boundsH) {
+                                                // Clear from other primary displays that target the same output
+                                                val primaryMatch = if (isDeckLink) {
+                                                    j != i && other.targetType == "decklink" && other.targetDisplay == option.targetDisplay
+                                                } else {
+                                                    j != i && option.boundsX != Int.MIN_VALUE &&
+                                                    other.targetBoundsX == option.boundsX && other.targetBoundsY == option.boundsY &&
+                                                    other.targetBoundsW == option.boundsW && other.targetBoundsH == option.boundsH
+                                                }
+                                                if (primaryMatch) {
                                                     newProj = newProj.withAssignment(j, other.copy(
                                                         targetDisplay = Constants.KEY_TARGET_NONE, targetType = "screen",
                                                         targetBoundsX = Int.MIN_VALUE, targetBoundsY = Int.MIN_VALUE, targetBoundsW = 0, targetBoundsH = 0
                                                     ))
                                                 }
-                                                // Clear from other key outputs that target the same screen
+                                                // Clear from other key outputs that target the same output
                                                 val otherLatest = newProj.getAssignment(j)
-                                                if (j != i && otherLatest.keyTargetBoundsX == option.boundsX && otherLatest.keyTargetBoundsY == option.boundsY &&
-                                                    otherLatest.keyTargetBoundsW == option.boundsW && otherLatest.keyTargetBoundsH == option.boundsH) {
+                                                val keyMatch = if (isDeckLink) {
+                                                    j != i && otherLatest.keyTargetType == "decklink" && otherLatest.keyTargetDisplay == option.targetDisplay
+                                                } else {
+                                                    j != i && option.boundsX != Int.MIN_VALUE &&
+                                                    otherLatest.keyTargetBoundsX == option.boundsX && otherLatest.keyTargetBoundsY == option.boundsY &&
+                                                    otherLatest.keyTargetBoundsW == option.boundsW && otherLatest.keyTargetBoundsH == option.boundsH
+                                                }
+                                                if (keyMatch) {
                                                     newProj = newProj.withAssignment(j, otherLatest.copy(
                                                         keyTargetDisplay = Constants.KEY_TARGET_NONE, keyTargetType = "screen",
                                                         keyTargetBoundsX = Int.MIN_VALUE, keyTargetBoundsY = Int.MIN_VALUE, keyTargetBoundsW = 0, keyTargetBoundsH = 0
                                                     ))
                                                 }
                                             }
-                                            // Also clear if same slot's primary display targets the same screen
+                                            // Also clear if same slot's primary display targets the same output
                                             val self = newProj.getAssignment(i)
-                                            if (self.targetBoundsX == option.boundsX && self.targetBoundsY == option.boundsY &&
-                                                self.targetBoundsW == option.boundsW && self.targetBoundsH == option.boundsH) {
+                                            val selfMatch = if (isDeckLink) {
+                                                self.targetType == "decklink" && self.targetDisplay == option.targetDisplay
+                                            } else {
+                                                option.boundsX != Int.MIN_VALUE &&
+                                                self.targetBoundsX == option.boundsX && self.targetBoundsY == option.boundsY &&
+                                                self.targetBoundsW == option.boundsW && self.targetBoundsH == option.boundsH
+                                            }
+                                            if (selfMatch) {
                                                 newProj = newProj.withAssignment(i, self.copy(
                                                     targetDisplay = Constants.KEY_TARGET_NONE, targetType = "screen",
                                                     targetBoundsX = Int.MIN_VALUE, targetBoundsY = Int.MIN_VALUE, targetBoundsW = 0, targetBoundsH = 0
