@@ -595,7 +595,10 @@ data class ServerSettings(
     val enabled: Boolean = false,
     val port: Int = Constants.SERVER_DEFAULT_PORT,
     val apiKeyEnabled: Boolean = false,
-    val apiKey: String = ""
+    val apiKey: String = "",
+    /** Optional fixed hostname/IP shown in the Server URL.
+     *  Leave blank to auto-detect from the active network interface. */
+    val serverHost: String = ""
 )
 
 @Serializable

@@ -1198,7 +1198,15 @@ class CompanionServer {
         )
     }
 
-    fun start(port: Int = Constants.SERVER_DEFAULT_PORT) {
+    /**
+     * Starts the companion server on [port].
+     *
+     * @param hostOverride  When non-blank, this hostname/IP is used in the displayed
+     *   Server URL instead of the auto-detected local address.  Set it to the
+     *   machine's static IP or mDNS name (e.g. "192.168.1.50" or "church-mac.local")
+     *   so the URL never changes between restarts.
+     */
+    fun start(port: Int = Constants.SERVER_DEFAULT_PORT, hostOverride: String = "") {
         if (_isRunning.value) return
 
         // Find the first pair of consecutive free ports starting from the requested one.
@@ -1206,10 +1214,12 @@ class CompanionServer {
         val actualPort = findFreePortPair(port)
         currentPort = actualPort
 
+        val displayHost = hostOverride.trim().ifEmpty { localIpAddress() }
+
         val keyStore = try {
             SslCertificateManager.getOrCreateKeyStore()
         } catch (e: Exception) {
-            startPlainHttp(actualPort)
+            startPlainHttp(actualPort, displayHost)
             return
         }
 
@@ -1234,7 +1244,7 @@ class CompanionServer {
 
             server?.start(wait = false)
             _isRunning.value = true
-            _serverUrl.value = "https://${localIpAddress()}:$actualPort"
+            _serverUrl.value = "https://$displayHost:$actualPort"
         } catch (e: java.net.BindException) {
             System.err.println("[CompanionServer] BindException on port $actualPort: ${e.message}. Server not started.")
             server = null
@@ -1245,7 +1255,7 @@ class CompanionServer {
     }
 
     /** Fallback plain-HTTP start used only if SSL cert generation fails. */
-    private fun startPlainHttp(port: Int) {
+    private fun startPlainHttp(port: Int, displayHost: String = localIpAddress()) {
         try {
             server = embeddedServer(Netty, configure = {
                 connector {
@@ -1260,7 +1270,7 @@ class CompanionServer {
             }) { configurePipeline() }
             server?.start(wait = false)
             _isRunning.value = true
-            _serverUrl.value = "http://${localIpAddress()}:$port"
+            _serverUrl.value = "http://$displayHost:$port"
         } catch (e: java.net.BindException) {
             System.err.println("[CompanionServer] BindException on port $port (plain HTTP): ${e.message}. Server not started.")
             server = null
@@ -2069,11 +2079,35 @@ class CompanionServer {
         ).firstOrNull { File(it, "lottie-generator.html").exists() }
     }
 
+    /**
+     * Returns the best local IPv4 address for display in the Server URL.
+     *
+     * Preference order (most-stable first):
+     *   1. Wired Ethernet  — eth*, en0 (macOS primary)
+     *   2. Other en* interfaces (macOS: en1 = WiFi, etc.)
+     *   3. wlan* / wifi*
+     *   4. Everything else (non-loopback, non-virtual, non-VPN)
+     *
+     * Configure a static IP or use [start]'s hostOverride parameter to bypass
+     * this entirely and always display a fixed address.
+     */
     private fun localIpAddress(): String {
         return try {
             NetworkInterface.getNetworkInterfaces().asSequence()
-                .flatMap { it.inetAddresses.asSequence() }
-                .firstOrNull { !it.isLoopbackAddress && it.hostAddress.contains('.') }
+                .filter { iface -> iface.isUp && !iface.isLoopback && !iface.isVirtual }
+                .sortedWith(compareBy { iface ->
+                    val name = iface.name.lowercase()
+                    when {
+                        name.startsWith("eth")  -> 0   // Linux wired
+                        name == "en0"           -> 1   // macOS primary (usually wired on desktops)
+                        name.startsWith("en")   -> 2   // macOS secondary (WiFi is typically en1+)
+                        name.startsWith("wlan") -> 3   // Linux WiFi
+                        name.startsWith("wifi") -> 3
+                        else                    -> 10  // VPNs, bridges, docker, etc.
+                    }
+                })
+                .flatMap { iface -> iface.inetAddresses.asSequence() }
+                .firstOrNull { addr -> !addr.isLoopbackAddress && addr.hostAddress.contains('.') }
                 ?.hostAddress ?: "localhost"
         } catch (_: Exception) {
             "localhost"

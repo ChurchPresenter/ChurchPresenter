@@ -708,6 +708,9 @@
     <string name="copy_api_key">Copy</string>
     <string name="server_url_label">Server URL</string>
     <string name="copy_url">Copy URL</string>
+    <string name="server_host_label">Host Override</string>
+    <string name="server_host_hint">e.g. 192.168.1.50 or church-mac.local</string>
+    <string name="server_host_note">Fixed IP or hostname shown in the URL. Leave blank to auto-detect.</string>
     <string name="server_endpoints">Available Endpoints</string>
     <string name="server_restart">Restart</string>
     <string name="server_endpoints_read">Read</string>

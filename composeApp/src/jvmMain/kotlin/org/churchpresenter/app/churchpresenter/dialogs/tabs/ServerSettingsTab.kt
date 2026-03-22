@@ -76,6 +76,9 @@ import churchpresenter.composeapp.generated.resources.server_port_note
 import churchpresenter.composeapp.generated.resources.server_restart
 import churchpresenter.composeapp.generated.resources.server_running
 import churchpresenter.composeapp.generated.resources.server_stopped
+import churchpresenter.composeapp.generated.resources.server_host_hint
+import churchpresenter.composeapp.generated.resources.server_host_label
+import churchpresenter.composeapp.generated.resources.server_host_note
 import churchpresenter.composeapp.generated.resources.server_url_label
 import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.data.RemoteClientManager
@@ -97,6 +100,9 @@ fun ServerSettingsTab(
 
     var portText by remember(settings.serverSettings.port) {
         mutableStateOf(settings.serverSettings.port.toString())
+    }
+    var hostText by remember(settings.serverSettings.serverHost) {
+        mutableStateOf(settings.serverSettings.serverHost)
     }
     var apiKeyText by remember(settings.serverSettings.apiKey) {
         mutableStateOf(settings.serverSettings.apiKey)
@@ -155,7 +161,7 @@ fun ServerSettingsTab(
                         onCheckedChange = { enable ->
                             val port = portText.toIntOrNull() ?: Constants.SERVER_DEFAULT_PORT
                             if (enable) {
-                                companionServer.start(port)
+                                companionServer.start(port, hostText.trim())
                                 onSettingsChange { s ->
                                     s.copy(serverSettings = s.serverSettings.copy(enabled = true, port = port))
                                 }
@@ -207,7 +213,7 @@ fun ServerSettingsTab(
                                 onClick = {
                                     val port = portText.toIntOrNull() ?: Constants.SERVER_DEFAULT_PORT
                                     companionServer.stop()
-                                    companionServer.start(port)
+                                    companionServer.start(port, hostText.trim())
                                 },
                                 contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
                                 colors = ButtonDefaults.buttonColors(
@@ -223,6 +229,36 @@ fun ServerSettingsTab(
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
+                    }
+                }
+
+                // ── Host Override ─────────────────────────────────────────────
+                SettingRow(label = stringResource(Res.string.server_host_label)) {
+                    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                        OutlinedTextField(
+                            value = hostText,
+                            onValueChange = { v ->
+                                hostText = v
+                                onSettingsChange { s ->
+                                    s.copy(serverSettings = s.serverSettings.copy(serverHost = v.trim()))
+                                }
+                            },
+                            modifier = Modifier.width(280.dp),
+                            singleLine = true,
+                            enabled = !isRunning,
+                            textStyle = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
+                            placeholder = {
+                                Text(
+                                    stringResource(Res.string.server_host_hint),
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                            }
+                        )
+                        Text(
+                            text = stringResource(Res.string.server_host_note),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     }
                 }
 

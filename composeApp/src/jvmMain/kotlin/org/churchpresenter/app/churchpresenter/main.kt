@@ -252,7 +252,10 @@ fun main() {
                 )
                 // Auto-start server if user previously enabled it
                 if (appSettings.serverSettings.enabled) {
-                    companionServer.start(appSettings.serverSettings.port)
+                    companionServer.start(
+                        port = appSettings.serverSettings.port,
+                        hostOverride = appSettings.serverSettings.serverHost
+                    )
                 }
             }
             appReady = true
