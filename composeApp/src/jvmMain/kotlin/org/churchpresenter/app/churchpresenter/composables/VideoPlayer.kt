@@ -3,7 +3,9 @@ package org.churchpresenter.app.churchpresenter.composables
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.awt.SwingPanel
 import androidx.compose.ui.graphics.toComposeImageBitmap
@@ -324,7 +326,7 @@ fun SoftwareVideoPlayer(
 ) {
     if (!isVlcAvailable) return
 
-    val currentFrame = remember { androidx.compose.runtime.mutableStateOf<androidx.compose.ui.graphics.ImageBitmap?>(null) }
+    val currentFrame = remember { mutableStateOf<ImageBitmap?>(null) }
 
     val factory = remember {
         try { MediaPlayerFactory() } catch (_: Throwable) { null }

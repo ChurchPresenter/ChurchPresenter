@@ -24,8 +24,6 @@ import churchpresenter.composeapp.generated.resources.presented_slide
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.skia.Image
 import java.io.File
-import org.churchpresenter.app.churchpresenter.composables.keyColorFilter
-import org.churchpresenter.app.churchpresenter.composables.opaqueColorFilter
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.HeicDecoder
 

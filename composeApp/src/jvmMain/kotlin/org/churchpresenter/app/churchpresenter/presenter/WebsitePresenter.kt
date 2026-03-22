@@ -10,6 +10,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.awt.SwingPanel
 import androidx.compose.ui.graphics.Color
+import org.churchpresenter.app.churchpresenter.utils.Constants
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.toComposeImageBitmap
 import me.friwi.jcefmaven.CefAppBuilder
@@ -341,11 +342,11 @@ fun WebsitePresenter(
     onUrlChanged: ((String) -> Unit)? = null,
     onTitleChanged: ((String) -> Unit)? = null,
     audioDeviceId: String = "",
-    outputRole: String = org.churchpresenter.app.churchpresenter.utils.Constants.OUTPUT_ROLE_NORMAL
+    outputRole: String = Constants.OUTPUT_ROLE_NORMAL
 ) {
     // Key mode: solid white frame (mixer sees "fully visible")
-    if (outputRole == org.churchpresenter.app.churchpresenter.utils.Constants.OUTPUT_ROLE_KEY) {
-        Box(modifier = modifier.fillMaxSize().background(androidx.compose.ui.graphics.Color.White))
+    if (outputRole == Constants.OUTPUT_ROLE_KEY) {
+        Box(modifier = modifier.fillMaxSize().background(Color.White))
         return
     }
     // Periodically route CEF audio streams to the configured device.

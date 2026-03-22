@@ -1,6 +1,11 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.foundation.TooltipArea
 import androidx.compose.foundation.TooltipPlacement
 import androidx.compose.material3.Surface
@@ -510,11 +515,11 @@ fun AnnouncementsTab(
                         val previewFontFamily = remember(viewModel.fontType) {
                             Utils.systemFontFamilyOrDefault(viewModel.fontType)
                         }
-                        val previewTextStyle = androidx.compose.ui.text.TextStyle(
+                        val previewTextStyle = TextStyle(
                             fontFamily = previewFontFamily,
-                            fontWeight = if (viewModel.bold) androidx.compose.ui.text.font.FontWeight.Bold else androidx.compose.ui.text.font.FontWeight.Normal,
-                            fontStyle = if (viewModel.italic) androidx.compose.ui.text.font.FontStyle.Italic else androidx.compose.ui.text.font.FontStyle.Normal,
-                            textDecoration = if (viewModel.underline) androidx.compose.ui.text.style.TextDecoration.Underline else androidx.compose.ui.text.style.TextDecoration.None,
+                            fontWeight = if (viewModel.bold) FontWeight.Bold else FontWeight.Normal,
+                            fontStyle = if (viewModel.italic) FontStyle.Italic else FontStyle.Normal,
+                            textDecoration = if (viewModel.underline) TextDecoration.Underline else TextDecoration.None,
                         )
                         val isDirectional = viewModel.animationType in listOf(
                             Constants.ANIMATION_SLIDE_FROM_LEFT,
@@ -543,9 +548,9 @@ fun AnnouncementsTab(
                         }
                         val scrollDurationMs = durationMs.coerceAtLeast(500)
                         val previewTextAlign = when (viewModel.horizontalAlignment) {
-                            Constants.LEFT -> androidx.compose.ui.text.style.TextAlign.Left
-                            Constants.RIGHT -> androidx.compose.ui.text.style.TextAlign.Right
-                            else -> androidx.compose.ui.text.style.TextAlign.Center
+                            Constants.LEFT -> TextAlign.Left
+                            Constants.RIGHT -> TextAlign.Right
+                            else -> TextAlign.Center
                         }
                         key(scrollDurationMs, movesPositive) {
                             val infiniteTransition = rememberInfiniteTransition(label = "previewScroll")

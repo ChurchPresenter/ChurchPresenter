@@ -3,7 +3,6 @@ package org.churchpresenter.app.churchpresenter.composables
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
-import androidx.compose.ui.graphics.graphicsLayer
 
 /**
  * Modifier for key output mode (no-op).
@@ -25,18 +24,5 @@ val keyColorFilter: ColorFilter = ColorFilter.colorMatrix(
         0f, 0f, 0f, 0f, 255f,  // G = 255
         0f, 0f, 0f, 0f, 255f,  // B = 255
         0f, 0f, 0f, 1f, 0f     // A = unchanged (preserves transparency)
-    ))
-)
-
-/**
- * ColorFilter that removes transparency from images (forces alpha to 1.0).
- * Used for key/fill mode to ensure images render fully opaque on black background.
- */
-val opaqueColorFilter: ColorFilter = ColorFilter.colorMatrix(
-    ColorMatrix(floatArrayOf(
-        1f, 0f, 0f, 0f, 0f,   // R unchanged
-        0f, 1f, 0f, 0f, 0f,   // G unchanged
-        0f, 0f, 1f, 0f, 0f,   // B unchanged
-        0f, 0f, 0f, 0f, 255f  // A = 255 (fully opaque)
     ))
 )

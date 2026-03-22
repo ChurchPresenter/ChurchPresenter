@@ -336,6 +336,19 @@
     <string name="background_follow_default_option">Follow Default</string>
     <string name="background_video">Background Video:</string>
 
+    <!-- Projection Settings -->
+    <string name="projection_content_web">Web</string>
+    <string name="projection_content_background">Background</string>
+    <string name="projection_content_lt_background">Lower Third Background</string>
+    <string name="projection_web_decklink_tooltip">Web browser cannot render on DeckLink outputs</string>
+    <string name="projection_web_go_live_tooltip">Requires a regular display (non-DeckLink) with Web enabled in projection settings</string>
+
+    <!-- Bible Tab -->
+    <string name="bible_multi_select_help">Ctrl+Click to toggle verses, Shift+Click for range</string>
+
+    <!-- Crash Recovery -->
+    <string name="crash_video_bg_disabled">Video backgrounds disabled after %1$d consecutive crashes.  [Re-enable]  [Dismiss]</string>
+
     <!-- Position Options -->
     <string name="position_above">Above</string>
     <string name="position_below">Below</string>

@@ -1,6 +1,7 @@
 package org.churchpresenter.app.churchpresenter.composables
 
 import androidx.compose.foundation.Image
+import org.churchpresenter.app.churchpresenter.utils.CrashReporter
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -38,8 +39,7 @@ fun LoopingVideoBackground(
     val file = remember(videoPath) { File(videoPath) }
     if (!file.exists()) return
     if (!isVlcAvailable) return
-    // Skip video backgrounds if disabled due to previous crash
-    if (org.churchpresenter.app.churchpresenter.utils.CrashReporter.videoBackgroundsDisabled) return
+    if (CrashReporter.videoBackgroundsDisabled) return
 
     val currentFrame = remember { mutableStateOf<ImageBitmap?>(null) }
 

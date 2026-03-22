@@ -27,6 +27,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import androidx.compose.runtime.rememberUpdatedState
 import org.churchpresenter.app.churchpresenter.PresenterScreen
 import org.churchpresenter.app.churchpresenter.composables.DeckLinkManager
 import org.churchpresenter.app.churchpresenter.data.AppSettings
@@ -56,9 +57,9 @@ fun DeckLinkComposeOutput(
     isLowerThird: Boolean = false,
     content: @Composable BoxScope.() -> Unit
 ) {
-    val currentAppSettings by androidx.compose.runtime.rememberUpdatedState(appSettings)
-    val currentOutputRole by androidx.compose.runtime.rememberUpdatedState(outputRole)
-    val currentIsLowerThird by androidx.compose.runtime.rememberUpdatedState(isLowerThird)
+    val currentAppSettings by rememberUpdatedState(appSettings)
+    val currentOutputRole by rememberUpdatedState(outputRole)
+    val currentIsLowerThird by rememberUpdatedState(isLowerThird)
 
     // Render the same vector icon used by all Compose Windows to a BufferedImage for the JFrame
     val iconPainter = painterResource(Res.drawable.ic_app_icon)
