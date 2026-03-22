@@ -1,6 +1,8 @@
 package org.churchpresenter.app.churchpresenter.dialogs.filechooser
 
+import java.io.File
 import java.nio.file.Path
+import javax.imageio.ImageIO
 import javax.swing.JFileChooser
 import javax.swing.JFrame
 import javax.swing.SwingUtilities
@@ -16,18 +18,28 @@ object SwingFileChooser : FileChooser() {
             setSize(0, 0)
             setLocationRelativeTo(null)
             try {
-                // Try to load icon from app resources directory
-                val resDir = System.getProperty("compose.application.resources.dir")
-                val iconFile = if (resDir != null) {
-                    listOf("icon-32.png", "icon-48.png", "icon.png")
-                        .map { java.io.File(resDir, it) }
-                        .firstOrNull { it.exists() }
-                } else null
-                if (iconFile != null) {
-                    iconImage = javax.imageio.ImageIO.read(iconFile)
-                }
+                iconImage = loadAppIcon()
             } catch (_: Exception) {}
         }
+    }
+
+    /** Loads the app icon from appResources (packaged) or the source tree (IDE run). */
+    private fun loadAppIcon(): java.awt.Image? {
+        // 1. Packaged app: compose.application.resources.dir is set
+        System.getProperty("compose.application.resources.dir")?.let { resDir ->
+            listOf("icon-32.png", "icon-48.png", "icon.png")
+                .map { File(resDir, it) }
+                .firstOrNull { it.exists() }
+                ?.let { return ImageIO.read(it) }
+        }
+        // 2. IDE / development run: walk up from working directory to find appResources
+        var dir = File(System.getProperty("user.dir"))
+        repeat(6) {
+            val candidate = File(dir, "composeApp/src/jvmMain/appResources/common/icon-32.png")
+            if (candidate.exists()) return ImageIO.read(candidate)
+            dir = dir.parentFile ?: return@repeat
+        }
+        return null
     }
 
     @Suppress("BlockingMethodInNonBlockingContext")
