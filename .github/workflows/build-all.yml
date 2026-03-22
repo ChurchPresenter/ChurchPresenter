@@ -38,7 +38,14 @@ jobs:
           retention-days: 2
 
   build-macos:
-    runs-on: macos-latest
+    strategy:
+      matrix:
+        include:
+          - runner: macos-latest
+            arch: arm64
+          - runner: macos-13
+            arch: x64
+    runs-on: ${{ matrix.runner }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -69,7 +76,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ChurchPresenter-macOS-${{ steps.vars.outputs.SHORT_SHA }}
+          name: ChurchPresenter-macOS-${{ matrix.arch }}-${{ steps.vars.outputs.SHORT_SHA }}
           path: composeApp/build/compose/binaries/main/dmg
           retention-days: 2
 
