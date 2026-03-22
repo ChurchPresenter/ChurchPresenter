@@ -78,6 +78,7 @@ import churchpresenter.composeapp.generated.resources.media_select_file
 import churchpresenter.composeapp.generated.resources.media_select_to_begin
 
 import churchpresenter.composeapp.generated.resources.media_url_placeholder
+import churchpresenter.composeapp.generated.resources.media_vlc_arch_mismatch
 import churchpresenter.composeapp.generated.resources.media_vlc_install
 import churchpresenter.composeapp.generated.resources.media_vlc_required
 import churchpresenter.composeapp.generated.resources.media_unmute
@@ -87,6 +88,7 @@ import org.churchpresenter.app.churchpresenter.composables.SegmentedButton
 import org.churchpresenter.app.churchpresenter.composables.SegmentedButtonItem
 import org.churchpresenter.app.churchpresenter.composables.VideoPlayer
 import org.churchpresenter.app.churchpresenter.data.AppSettings
+import org.churchpresenter.app.churchpresenter.composables.isVlcArchMismatch
 import org.churchpresenter.app.churchpresenter.composables.isVlcAvailable
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
 import org.churchpresenter.app.churchpresenter.models.ScheduleItem
@@ -121,7 +123,7 @@ fun MediaTab(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text("🎬", style = MaterialTheme.typography.displayLarge)
+            Text(if (isVlcArchMismatch) "⚠️" else "🎬", style = MaterialTheme.typography.displayLarge)
             Spacer(modifier = Modifier.size(16.dp))
             Text(
                 text = stringResource(Res.string.media_vlc_required),
@@ -130,7 +132,10 @@ fun MediaTab(
             )
             Spacer(modifier = Modifier.size(8.dp))
             Text(
-                text = stringResource(Res.string.media_vlc_install),
+                text = if (isVlcArchMismatch)
+                    stringResource(Res.string.media_vlc_arch_mismatch)
+                else
+                    stringResource(Res.string.media_vlc_install),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

@@ -78,6 +78,7 @@ class MediaViewModel {
         _isLoaded.value = url.isNotBlank()
         _isPlaying.value = false
         _currentPosition.value = 0L
+        _duration.value = 0L
         _isAudioFile.value = type == Constants.MEDIA_TYPE_AUDIO ||
             url.substringAfterLast('.').lowercase() in Constants.AUDIO_EXTENSIONS
     }

@@ -65,12 +65,26 @@ var vlcCustomPath: String = ""
 
 private var _vlcAvailable: Boolean? = null
 
+/**
+ * Human-readable reason VLC is unavailable; empty when VLC loaded successfully.
+ * Populated by checkVlcAvailable() so the UI can show a targeted error message.
+ */
+var vlcUnavailableReason: String = ""
+
 /** Returns true if VLC is installed and VLCJ can initialise. */
 val isVlcAvailable: Boolean get() = _vlcAvailable ?: checkVlcAvailable().also { _vlcAvailable = it }
+
+/**
+ * True when VLC is present on disk but is the wrong CPU architecture
+ * (e.g. x86_64 VLC on an Apple-Silicon Mac running an arm64 JVM).
+ */
+val isVlcArchMismatch: Boolean
+    get() = !isVlcAvailable && "incompatible architecture" in vlcUnavailableReason.lowercase()
 
 /** Clears the cached result and re-checks VLC availability. */
 fun recheckVlcAvailability(): Boolean {
     _vlcAvailable = null
+    vlcUnavailableReason = ""
     return isVlcAvailable
 }
 
@@ -79,16 +93,24 @@ private fun checkVlcAvailable(): Boolean {
         applyCustomVlcPath()
         if (!isVlcInstalledOnSystem()) {
             System.err.println("VLCJ: VLC not found on this system. Skipping initialisation.")
+            vlcUnavailableReason = "not_found"
             return false
         }
-        createMediaPlayerComponent()?.let {
-            when (it) {
-                is CallbackMediaPlayerComponent -> it.release()
-                is EmbeddedMediaPlayerComponent -> it.release()
-            }
+        // Try to actually load the native library by creating a player component.
+        val component = createMediaPlayerComponent()
+        if (component == null) {
+            // createMediaPlayerComponent() already logged the error and set vlcUnavailableReason.
+            return false
+        }
+        when (component) {
+            is CallbackMediaPlayerComponent -> component.release()
+            is EmbeddedMediaPlayerComponent -> component.release()
         }
         true
-    } catch (_: Throwable) { false }
+    } catch (e: Throwable) {
+        vlcUnavailableReason = e.message ?: "unknown error"
+        false
+    }
 }
 
 /** If a custom VLC path is set and valid, adds it to jna.library.path so VLCJ/JNA can find native libs. */
@@ -191,7 +213,9 @@ private fun createMediaPlayerComponent(): Component? {
         if (isMacOS()) CallbackMediaPlayerComponent()
         else EmbeddedMediaPlayerComponent()
     } catch (e: Throwable) {
-        System.err.println("VLCJ: Could not initialise. Is VLC installed? ${e.message}")
+        val msg = e.message ?: e.toString()
+        vlcUnavailableReason = msg
+        System.err.println("VLCJ: Could not initialise. Is VLC installed? $msg")
         null
     }
 }
@@ -228,13 +252,22 @@ fun VideoPlayer(
     DisposableEffect(Unit) {
         mp.events().addMediaPlayerEventListener(object : MediaPlayerEventAdapter() {
             override fun lengthChanged(mediaPlayer: MediaPlayer, newLength: Long) {
-                viewModel.setDuration(newLength)
+                if (newLength > 0) viewModel.setDuration(newLength)
+            }
+            override fun playing(mediaPlayer: MediaPlayer) {
+                // Reliable replacement for the 150 ms delay hack:
+                // if ViewModel says we should be paused, pause the moment VLC reports it is playing.
+                if (!viewModel.isPlaying) {
+                    SwingUtilities.invokeLater { mediaPlayer.controls().pause() }
+                }
             }
             override fun finished(mediaPlayer: MediaPlayer) {
                 viewModel.markFinished()
             }
             override fun error(mediaPlayer: MediaPlayer) {
-                System.err.println("VLCJ: Playback error")
+                System.err.println("VLCJ: Playback error for: ${viewModel.mediaUrl}")
+                // Reset playing state so the spinner stops and controls are consistent.
+                SwingUtilities.invokeLater { viewModel.pause() }
             }
         })
         onDispose {
@@ -265,15 +298,9 @@ fun VideoPlayer(
         else mp.audio().setVolume((viewModel.effectiveVolume * 100).toInt())
 
         mp.media().play(mrl)
-        // If viewModel says paused, pause after a brief start
-        if (!viewModel.isPlaying) {
-            delay(150)
-            SwingUtilities.invokeLater {
-                if (!viewModel.isPlaying && mp.status().isPlaying) {
-                    mp.controls().pause()
-                }
-            }
-        }
+        // Auto-pause is now handled by the playing() event listener above,
+        // which fires only when VLC actually reaches the "playing" state —
+        // no more unreliable fixed delay.
     }
 
     // Play / pause sync
@@ -301,13 +328,18 @@ fun VideoPlayer(
         }
     }
 
-    // Poll position for progress bar updates
+    // Poll position and, as a fallback, duration (in case lengthChanged fired too early).
     if (audioEnabled) {
         LaunchedEffect(viewModel.mediaUrl) {
             while (isActive) {
                 delay(250)
                 if (mp.status().isPlaying) {
                     viewModel.setCurrentPosition(mp.status().time())
+                    // Fallback: pick up duration if the lengthChanged event was missed.
+                    if (viewModel.duration == 0L) {
+                        val len = mp.status().length()
+                        if (len > 0) viewModel.setDuration(len)
+                    }
                 }
             }
         }
@@ -370,13 +402,19 @@ fun SoftwareVideoPlayer(
 
         mp.events().addMediaPlayerEventListener(object : MediaPlayerEventAdapter() {
             override fun lengthChanged(mediaPlayer: MediaPlayer, newLength: Long) {
-                viewModel.setDuration(newLength)
+                if (newLength > 0) viewModel.setDuration(newLength)
+            }
+            override fun playing(mediaPlayer: MediaPlayer) {
+                if (!viewModel.isPlaying) {
+                    SwingUtilities.invokeLater { mediaPlayer.controls().pause() }
+                }
             }
             override fun finished(mediaPlayer: MediaPlayer) {
                 viewModel.markFinished()
             }
             override fun error(mediaPlayer: MediaPlayer) {
-                System.err.println("VLCJ (software): Playback error")
+                System.err.println("VLCJ (software): Playback error for: ${viewModel.mediaUrl}")
+                SwingUtilities.invokeLater { viewModel.pause() }
             }
         })
 
@@ -411,14 +449,7 @@ fun SoftwareVideoPlayer(
         else mp.audio().setVolume((viewModel.effectiveVolume * 100).toInt())
 
         mp.media().play(mrl)
-        if (!viewModel.isPlaying) {
-            delay(150)
-            SwingUtilities.invokeLater {
-                if (!viewModel.isPlaying && mp.status().isPlaying) {
-                    mp.controls().pause()
-                }
-            }
-        }
+        // Auto-pause is handled by the playing() event listener above.
     }
 
     // Play / pause sync
@@ -453,6 +484,11 @@ fun SoftwareVideoPlayer(
                 delay(250)
                 if (mp.status().isPlaying) {
                     viewModel.setCurrentPosition(mp.status().time())
+                    // Fallback: pick up duration if lengthChanged was missed.
+                    if (viewModel.duration == 0L) {
+                        val len = mp.status().length()
+                        if (len > 0) viewModel.setDuration(len)
+                    }
                 }
             }
         }
