@@ -259,7 +259,7 @@ compose.desktop {
 
             macOS {
                 bundleID = "org.churchpresenter.app"
-                iconFile.set(project.file("src/jvmMain/appResources/macos/icon.png"))
+                iconFile.set(project.file("src/jvmMain/appResources/macos/icon.icns"))
                 jvmArgs(*commonJvmArgs.toTypedArray())
             }
 
