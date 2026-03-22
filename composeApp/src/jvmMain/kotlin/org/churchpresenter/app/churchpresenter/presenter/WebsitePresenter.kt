@@ -340,8 +340,14 @@ fun WebsitePresenter(
     onBrowserCreated: ((CefBrowser) -> Unit)? = null,
     onUrlChanged: ((String) -> Unit)? = null,
     onTitleChanged: ((String) -> Unit)? = null,
-    audioDeviceId: String = ""
+    audioDeviceId: String = "",
+    outputRole: String = org.churchpresenter.app.churchpresenter.utils.Constants.OUTPUT_ROLE_NORMAL
 ) {
+    // Key mode: solid white frame (mixer sees "fully visible")
+    if (outputRole == org.churchpresenter.app.churchpresenter.utils.Constants.OUTPUT_ROLE_KEY) {
+        Box(modifier = modifier.fillMaxSize().background(androidx.compose.ui.graphics.Color.White))
+        return
+    }
     // Periodically route CEF audio streams to the configured device.
     // New streams may appear as the user navigates to pages with audio/video.
     LaunchedEffect(audioDeviceId) {

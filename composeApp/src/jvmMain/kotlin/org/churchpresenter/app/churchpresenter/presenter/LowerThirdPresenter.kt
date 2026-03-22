@@ -14,6 +14,8 @@ import androidx.compose.ui.layout.ContentScale
 import io.github.alexzhirkevich.compottie.LottieCompositionSpec
 import io.github.alexzhirkevich.compottie.rememberLottieComposition
 import io.github.alexzhirkevich.compottie.rememberLottiePainter
+import org.churchpresenter.app.churchpresenter.composables.keyColorFilter
+import org.churchpresenter.app.churchpresenter.utils.Constants
 
 /**
  * Displays a Lottie animation in the presenter window.
@@ -25,8 +27,10 @@ import io.github.alexzhirkevich.compottie.rememberLottiePainter
 fun LowerThirdPresenter(
     jsonContent: String,
     progress: Float,
-    appSettings: AppSettings
+    appSettings: AppSettings,
+    outputRole: String = Constants.OUTPUT_ROLE_NORMAL
 ) {
+    val isKey = outputRole == Constants.OUTPUT_ROLE_KEY
     if (jsonContent.isBlank()) return
 
     val composition by rememberLottieComposition(key = jsonContent) {
@@ -45,6 +49,7 @@ fun LowerThirdPresenter(
             ),
             contentDescription = null,
             contentScale = ContentScale.Fit,
+            colorFilter = if (isKey) keyColorFilter else null,
             modifier = Modifier
                 .padding(
                     start = s.windowLeft.dp,

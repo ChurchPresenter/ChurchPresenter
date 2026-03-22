@@ -21,8 +21,25 @@ import java.time.format.DateTimeFormatter
 object CrashReporter {
 
     private val crashDir = File(System.getProperty("user.home"), ".churchpresenter/crash-reports")
+    private val runningFile = File(System.getProperty("user.home"), ".churchpresenter/.running")
+    private val crashCountFile = File(System.getProperty("user.home"), ".churchpresenter/.crash_count")
     private val timestampFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd_HHmmss")
     private const val MAX_AGE_DAYS = 30L
+    private const val CRASH_THRESHOLD = 2 // disable video backgrounds after this many consecutive crashes
+
+    /** True if the previous run crashed (lock file wasn't cleaned up). */
+    @Volatile
+    var didCrashLastRun: Boolean = false
+        private set
+
+    /** Number of consecutive crashes. */
+    @Volatile
+    var consecutiveCrashes: Int = 0
+        private set
+
+    /** True when video backgrounds are disabled due to repeated crashes. */
+    @Volatile
+    var videoBackgroundsDisabled: Boolean = false
 
     /**
      * Install the global uncaught exception handler, initialise Sentry,
@@ -43,6 +60,31 @@ object CrashReporter {
         }
 
         cleanOldLogs()
+
+        // Check if previous run crashed (lock file still exists)
+        didCrashLastRun = runningFile.exists()
+        if (didCrashLastRun) {
+            consecutiveCrashes = readCrashCount() + 1
+            writeCrashCount(consecutiveCrashes)
+            if (consecutiveCrashes >= CRASH_THRESHOLD) {
+                videoBackgroundsDisabled = true
+                System.err.println("[CrashReporter] $consecutiveCrashes consecutive crashes — video backgrounds disabled for this session")
+            } else {
+                System.err.println("[CrashReporter] Previous run crashed ($consecutiveCrashes/$CRASH_THRESHOLD before disabling video backgrounds)")
+            }
+        } else {
+            // Clean run — reset crash counter
+            consecutiveCrashes = 0
+            writeCrashCount(0)
+        }
+
+        // Create lock file for this run
+        try { runningFile.parentFile?.mkdirs(); runningFile.createNewFile() } catch (_: Exception) {}
+
+        // Delete lock file on clean exit
+        Runtime.getRuntime().addShutdownHook(Thread {
+            try { runningFile.delete() } catch (_: Exception) {}
+        })
     }
 
     /**
@@ -52,6 +94,22 @@ object CrashReporter {
     fun reportException(throwable: Throwable, context: String = "") {
         writeCrashLog(throwable, context, fatal = false)
     }
+
+    /** Re-enable video backgrounds (user override from the warning banner). */
+    fun reEnableVideoBackgrounds() {
+        videoBackgroundsDisabled = false
+        writeCrashCount(0)
+        System.err.println("[CrashReporter] Video backgrounds re-enabled by user")
+    }
+
+    private fun readCrashCount(): Int = try {
+        if (crashCountFile.exists()) crashCountFile.readText().trim().toIntOrNull() ?: 0 else 0
+    } catch (_: Exception) { 0 }
+
+    private fun writeCrashCount(count: Int) = try {
+        crashCountFile.parentFile?.mkdirs()
+        crashCountFile.writeText(count.toString())
+    } catch (_: Exception) { }
 
     /** True when Sentry is initialised with a valid DSN. */
     fun isEnabled(): Boolean = try { Sentry.isEnabled() } catch (_: Exception) { false }

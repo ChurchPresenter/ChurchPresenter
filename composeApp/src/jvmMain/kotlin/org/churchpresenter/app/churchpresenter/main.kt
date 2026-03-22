@@ -706,6 +706,31 @@ fun main() {
                                         selectedScheduleItemId = null
                                     },
                                 )
+                                // Crash recovery warning banner
+                                if (CrashReporter.didCrashLastRun && CrashReporter.videoBackgroundsDisabled) {
+                                    var showBanner by remember { mutableStateOf(true) }
+                                    if (showBanner) {
+                                        Box(
+                                            modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.errorContainer),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Text(
+                                                text = "Video backgrounds disabled after ${CrashReporter.consecutiveCrashes} consecutive crashes.  [Re-enable]  [Dismiss]",
+                                                style = MaterialTheme.typography.bodySmall,
+                                                color = MaterialTheme.colorScheme.onErrorContainer,
+                                                modifier = Modifier.onPreviewKeyEvent {
+                                                    showBanner = false; true
+                                                }
+                                            )
+                                        }
+                                        // Auto-dismiss after 15 seconds
+                                        LaunchedEffect(Unit) {
+                                            kotlinx.coroutines.delay(15_000)
+                                            showBanner = false
+                                        }
+                                    }
+                                }
+
                                 MainDesktop(
                                     onVerseSelected = { verses -> presenterManager.setSelectedVerses(verses) },
                                     onSongItemSelected = { presenterManager.setLyricSection(it) },
@@ -873,6 +898,14 @@ fun main() {
                             } // end Box (window content)
                         }
                     }
+                }
+            }
+
+            // Auto-clear presenting mode when media finishes playing
+            LaunchedEffect(mediaViewModel.mediaFinished) {
+                if (mediaViewModel.mediaFinished) {
+                    presenterManager.setPresentingMode(Presenting.NONE)
+                    mediaViewModel.clearFinished()
                 }
             }
 
@@ -1404,13 +1437,14 @@ private fun PresenterWindows(
                                 )
 
                         Presenting.WEBSITE ->
-                            WebsitePresenter(
+                            if (screenAssignment.showWebsite) WebsitePresenter(
                                 url = websiteUrl,
                                 modifier = Modifier.fillMaxSize(),
                                 onSnapshot = { bitmap -> presenterManager.setWebSnapshot(bitmap) },
                                 onUrlChanged = { newUrl -> presenterManager.setWebsiteUrl(newUrl) },
                                 onTitleChanged = { title -> presenterManager.setWebPageTitle(title) },
-                                audioDeviceId = appSettings.projectionSettings.audioOutputDeviceId
+                                audioDeviceId = appSettings.projectionSettings.audioOutputDeviceId,
+                                outputRole = Constants.OUTPUT_ROLE_KEY
                             )
 
                         Presenting.NONE -> { /* nothing */ }
@@ -1458,12 +1492,13 @@ private fun PresenterWindows(
                             if (screenAssignment.showPictures)
                                 PicturePresenter(
                                     imagePath = displayedImagePath,
-                                    transitionAlpha = pictureTransitionAlpha
+                                    transitionAlpha = pictureTransitionAlpha,
+                                    outputRole = Constants.OUTPUT_ROLE_KEY
                                 )
 
                         Presenting.PRESENTATION ->
                             if (screenAssignment.showPictures)
-                                SlidePresenter(slide = displayedSlide, transitionAlpha = slideTransitionAlpha)
+                                SlidePresenter(slide = displayedSlide, transitionAlpha = slideTransitionAlpha, outputRole = Constants.OUTPUT_ROLE_KEY)
 
                         Presenting.MEDIA ->
                             if (screenAssignment.showMedia) {
@@ -1473,7 +1508,8 @@ private fun PresenterWindows(
                                     MediaPresenter(
                                         modifier = Modifier.fillMaxSize(),
                                         audioDeviceId = appSettings.projectionSettings.audioOutputDeviceId,
-                                        transitionAlpha = mediaTransitionAlpha
+                                        transitionAlpha = mediaTransitionAlpha,
+                                        outputRole = Constants.OUTPUT_ROLE_KEY
                                     )
                                 }
                             }
@@ -1483,7 +1519,8 @@ private fun PresenterWindows(
                                 LowerThirdPresenter(
                                     jsonContent = lottieJsonContent,
                                     progress = lottieProgress,
-                                    appSettings = appSettings
+                                    appSettings = appSettings,
+                                    outputRole = Constants.OUTPUT_ROLE_KEY
                                 )
 
                         Presenting.ANNOUNCEMENTS ->
@@ -1500,16 +1537,149 @@ private fun PresenterWindows(
                                 )
 
                         Presenting.WEBSITE ->
-                            WebsitePresenter(
+                            if (screenAssignment.showWebsite) WebsitePresenter(
                                 url = websiteUrl,
                                 modifier = Modifier.fillMaxSize(),
                                 onSnapshot = { bitmap -> presenterManager.setWebSnapshot(bitmap) },
                                 onUrlChanged = { newUrl -> presenterManager.setWebsiteUrl(newUrl) },
                                 onTitleChanged = { title -> presenterManager.setWebPageTitle(title) },
-                                audioDeviceId = appSettings.projectionSettings.audioOutputDeviceId
+                                audioDeviceId = appSettings.projectionSettings.audioOutputDeviceId,
+                                outputRole = Constants.OUTPUT_ROLE_KEY
                             )
 
                         Presenting.NONE -> { /* nothing */ }
+                    }
+                }
+            }
+
+            // Key output on a regular screen when primary is DeckLink
+            if (showPresenterWindow && screenAssignment.hasKeyOutput && screenAssignment.keyTargetType == "screen") {
+                val keyScreenIndex = findScreenIndexByBounds(
+                    screens,
+                    screenAssignment.keyTargetBoundsX,
+                    screenAssignment.keyTargetBoundsY,
+                    screenAssignment.keyTargetBoundsW,
+                    screenAssignment.keyTargetBoundsH
+                ) ?: screenAssignment.keyTargetDisplay
+                if (keyScreenIndex in screens.indices) {
+                    val keyWindowState = remember(i, keyScreenIndex) {
+                        val b = screens[keyScreenIndex].defaultConfiguration.bounds
+                        WindowState(
+                            placement = WindowPlacement.Floating,
+                            position = WindowPosition(b.x.dp, b.y.dp),
+                            width = b.width.dp,
+                            height = b.height.dp
+                        )
+                    }
+
+                    Window(
+                        visible = true,
+                        title = "Key Output ${i + 1}",
+                        icon = painterResource(Res.drawable.ic_app_icon),
+                        onCloseRequest = { presenterManager.setShowPresenterWindow(false) },
+                        state = keyWindowState,
+                        undecorated = true,
+                        resizable = false,
+                        alwaysOnTop = true,
+                    ) {
+                        CompositionLocalProvider(LocalMediaViewModel provides mediaViewModel) {
+                            PresenterScreen(
+                                modifier = Modifier.fillMaxSize(),
+                                appSettings = appSettings,
+                                outputRole = Constants.OUTPUT_ROLE_KEY
+                            ) {
+                                Box(modifier = Modifier.fillMaxSize()) {
+                                    when (presentingMode) {
+                                        Presenting.BIBLE ->
+                                            if (screenAssignment.showBible) {
+                                                BiblePresenter(
+                                                    selectedVerses = displayedVerses,
+                                                    appSettings = appSettings,
+                                                    isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD,
+                                                    outputRole = Constants.OUTPUT_ROLE_KEY,
+                                                    transitionAlpha = bibleTransitionAlpha
+                                                )
+                                            }
+
+                                        Presenting.LYRICS ->
+                                            if (screenAssignment.showSongs) {
+                                                SongPresenter(
+                                                    lyricSection = displayedLyricSection,
+                                                    appSettings = appSettings,
+                                                    isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD,
+                                                    outputRole = Constants.OUTPUT_ROLE_KEY,
+                                                    transitionAlpha = songTransitionAlpha,
+                                                    displayLineIndex = songDisplayLineIndex,
+                                                    lookAheadEnabled = screenAssignment.songLookAhead,
+                                                    allLyricSections = allLyricSections,
+                                                    displaySectionIndex = songDisplaySectionIndex
+                                                )
+                                            }
+
+                                        Presenting.PICTURES ->
+                                            if (screenAssignment.showPictures)
+                                                PicturePresenter(
+                                                    imagePath = displayedImagePath,
+                                                    transitionAlpha = pictureTransitionAlpha,
+                                                    outputRole = Constants.OUTPUT_ROLE_KEY
+                                                )
+
+                                        Presenting.PRESENTATION ->
+                                            if (screenAssignment.showPictures)
+                                                SlidePresenter(slide = displayedSlide, transitionAlpha = slideTransitionAlpha, outputRole = Constants.OUTPUT_ROLE_KEY)
+
+                                        Presenting.MEDIA ->
+                                            if (screenAssignment.showMedia) {
+                                                if (mediaViewModel.isAudioFile) {
+                                                    // Audio: background only
+                                                } else {
+                                                    MediaPresenter(
+                                                        modifier = Modifier.fillMaxSize(),
+                                                        audioDeviceId = appSettings.projectionSettings.audioOutputDeviceId,
+                                                        transitionAlpha = mediaTransitionAlpha,
+                                                        outputRole = Constants.OUTPUT_ROLE_KEY
+                                                    )
+                                                }
+                                            }
+
+                                        Presenting.LOWER_THIRD ->
+                                            if (screenAssignment.showStreaming)
+                                                LowerThirdPresenter(
+                                                    jsonContent = lottieJsonContent,
+                                                    progress = lottieProgress,
+                                                    appSettings = appSettings,
+                                                    outputRole = Constants.OUTPUT_ROLE_KEY
+                                                )
+
+                                        Presenting.ANNOUNCEMENTS ->
+                                            if (screenAssignment.showAnnouncements)
+                                                AnnouncementsPresenter(
+                                                    text = displayedAnnouncementText,
+                                                    appSettings = appSettings,
+                                                    outputRole = Constants.OUTPUT_ROLE_KEY,
+                                                    transitionAlpha = announcementTransitionAlpha,
+                                                    onFinished = {
+                                                        presenterManager.setAnnouncementText("")
+                                                        presenterManager.setDisplayedAnnouncementText("")
+                                                    }
+                                                )
+
+                                        Presenting.WEBSITE ->
+                                            if (screenAssignment.showWebsite) WebsitePresenter(
+                                                url = websiteUrl,
+                                                modifier = Modifier.fillMaxSize(),
+                                                onSnapshot = { bitmap -> presenterManager.setWebSnapshot(bitmap) },
+                                                onUrlChanged = { newUrl -> presenterManager.setWebsiteUrl(newUrl) },
+                                                onTitleChanged = { title -> presenterManager.setWebPageTitle(title) },
+                                                audioDeviceId = appSettings.projectionSettings.audioOutputDeviceId,
+                                                outputRole = Constants.OUTPUT_ROLE_KEY
+                                            )
+
+                                        Presenting.NONE -> { /* nothing */ }
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -1536,6 +1706,9 @@ private fun PresenterWindows(
 
         // Skip if the target screen doesn't exist
         if (targetScreenIndex < 0 || targetScreenIndex >= screens.size) continue
+
+        // Per-output background toggle
+        val showBg = if (screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD) screenAssignment.showLowerThirdBackground else screenAssignment.showFullscreenBackground
 
         // Derive output role from key target configuration
         val primaryRole = screenAssignment.primaryOutputRole
@@ -1574,7 +1747,8 @@ private fun PresenterWindows(
                     modifier = Modifier.fillMaxSize(),
                     appSettings = appSettings,
                     outputRole = primaryRole,
-                    isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD
+                    isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD,
+                    showBackground = if (screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD) screenAssignment.showLowerThirdBackground else screenAssignment.showFullscreenBackground
                 ) {
                     Box(
                         modifier = Modifier
@@ -1595,7 +1769,8 @@ private fun PresenterWindows(
                                         appSettings = appSettings,
                                         isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD,
                                         outputRole = primaryRole,
-                                        transitionAlpha = bibleTransitionAlpha
+                                        transitionAlpha = bibleTransitionAlpha,
+                                        showBackground = showBg
                                     )
                                 }
 
@@ -1610,7 +1785,8 @@ private fun PresenterWindows(
                                         displayLineIndex = songDisplayLineIndex,
                                         lookAheadEnabled = screenAssignment.songLookAhead,
                                         allLyricSections = allLyricSections,
-                                        displaySectionIndex = songDisplaySectionIndex
+                                        displaySectionIndex = songDisplaySectionIndex,
+                                        showBackground = showBg
                                     )
                                 }
 
@@ -1654,11 +1830,12 @@ private fun PresenterWindows(
                                         appSettings = appSettings,
                                         outputRole = primaryRole,
                                         transitionAlpha = announcementTransitionAlpha,
-                                        onFinished = clearAnnouncementOnFinish
+                                        onFinished = clearAnnouncementOnFinish,
+                                        showBackground = showBg
                                     )
 
                             Presenting.WEBSITE ->
-                                WebsitePresenter(
+                                if (screenAssignment.showWebsite) WebsitePresenter(
                                     url = websiteUrl,
                                     modifier = Modifier.fillMaxSize(),
                                     onSnapshot = { bitmap -> presenterManager.setWebSnapshot(bitmap) },
@@ -1779,14 +1956,16 @@ private fun PresenterWindows(
                                         if (screenAssignment.showPictures)
                                             PicturePresenter(
                                                 imagePath = displayedImagePath,
-                                                transitionAlpha = pictureTransitionAlpha
+                                                transitionAlpha = pictureTransitionAlpha,
+                                                outputRole = Constants.OUTPUT_ROLE_KEY
                                             )
 
                                     Presenting.PRESENTATION ->
                                         if (screenAssignment.showPictures)
                                             SlidePresenter(
                                                 slide = displayedSlide,
-                                                transitionAlpha = slideTransitionAlpha
+                                                transitionAlpha = slideTransitionAlpha,
+                                                outputRole = Constants.OUTPUT_ROLE_KEY
                                             )
 
                                     Presenting.MEDIA ->
@@ -1797,7 +1976,8 @@ private fun PresenterWindows(
                                                 MediaPresenter(
                                                     modifier = Modifier.fillMaxSize(),
                                                     audioDeviceId = appSettings.projectionSettings.audioOutputDeviceId,
-                                                    transitionAlpha = mediaTransitionAlpha
+                                                    transitionAlpha = mediaTransitionAlpha,
+                                                    outputRole = Constants.OUTPUT_ROLE_KEY
                                                 )
                                             }
                                         }
@@ -1807,7 +1987,8 @@ private fun PresenterWindows(
                                             LowerThirdPresenter(
                                                 jsonContent = lottieJsonContent,
                                                 progress = lottieProgress,
-                                                appSettings = appSettings
+                                                appSettings = appSettings,
+                                                outputRole = Constants.OUTPUT_ROLE_KEY
                                             )
 
                                     Presenting.ANNOUNCEMENTS ->
@@ -1824,13 +2005,14 @@ private fun PresenterWindows(
                                             )
 
                                     Presenting.WEBSITE ->
-                                        WebsitePresenter(
+                                        if (screenAssignment.showWebsite) WebsitePresenter(
                                             url = websiteUrl,
                                             modifier = Modifier.fillMaxSize(),
                                             onSnapshot = { bitmap -> presenterManager.setWebSnapshot(bitmap) },
                                             onUrlChanged = { newUrl -> presenterManager.setWebsiteUrl(newUrl) },
                                             onTitleChanged = { title -> presenterManager.setWebPageTitle(title) },
-                                            audioDeviceId = appSettings.projectionSettings.audioOutputDeviceId
+                                            audioDeviceId = appSettings.projectionSettings.audioOutputDeviceId,
+                                            outputRole = Constants.OUTPUT_ROLE_KEY
                                         )
 
                                     Presenting.NONE -> { /* nothing */
@@ -1884,12 +2066,13 @@ private fun PresenterWindows(
                             if (screenAssignment.showPictures)
                                 PicturePresenter(
                                     imagePath = displayedImagePath,
-                                    transitionAlpha = pictureTransitionAlpha
+                                    transitionAlpha = pictureTransitionAlpha,
+                                    outputRole = Constants.OUTPUT_ROLE_KEY
                                 )
 
                         Presenting.PRESENTATION ->
                             if (screenAssignment.showPictures)
-                                SlidePresenter(slide = displayedSlide, transitionAlpha = slideTransitionAlpha)
+                                SlidePresenter(slide = displayedSlide, transitionAlpha = slideTransitionAlpha, outputRole = Constants.OUTPUT_ROLE_KEY)
 
                         Presenting.MEDIA ->
                             if (screenAssignment.showMedia) {
@@ -1899,7 +2082,8 @@ private fun PresenterWindows(
                                     MediaPresenter(
                                         modifier = Modifier.fillMaxSize(),
                                         audioDeviceId = appSettings.projectionSettings.audioOutputDeviceId,
-                                        transitionAlpha = mediaTransitionAlpha
+                                        transitionAlpha = mediaTransitionAlpha,
+                                        outputRole = Constants.OUTPUT_ROLE_KEY
                                     )
                                 }
                             }
@@ -1909,7 +2093,8 @@ private fun PresenterWindows(
                                 LowerThirdPresenter(
                                     jsonContent = lottieJsonContent,
                                     progress = lottieProgress,
-                                    appSettings = appSettings
+                                    appSettings = appSettings,
+                                    outputRole = Constants.OUTPUT_ROLE_KEY
                                 )
 
                         Presenting.ANNOUNCEMENTS ->
@@ -1926,13 +2111,14 @@ private fun PresenterWindows(
                                 )
 
                         Presenting.WEBSITE ->
-                            WebsitePresenter(
+                            if (screenAssignment.showWebsite) WebsitePresenter(
                                 url = websiteUrl,
                                 modifier = Modifier.fillMaxSize(),
                                 onSnapshot = { bitmap -> presenterManager.setWebSnapshot(bitmap) },
                                 onUrlChanged = { newUrl -> presenterManager.setWebsiteUrl(newUrl) },
                                 onTitleChanged = { title -> presenterManager.setWebPageTitle(title) },
-                                audioDeviceId = appSettings.projectionSettings.audioOutputDeviceId
+                                audioDeviceId = appSettings.projectionSettings.audioOutputDeviceId,
+                                outputRole = Constants.OUTPUT_ROLE_KEY
                             )
 
                         Presenting.NONE -> { /* nothing */ }

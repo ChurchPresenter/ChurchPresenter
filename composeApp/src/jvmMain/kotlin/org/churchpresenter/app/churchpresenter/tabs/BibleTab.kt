@@ -12,8 +12,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -24,6 +27,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -34,6 +38,8 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -82,6 +88,12 @@ import churchpresenter.composeapp.generated.resources.bible_history_clear
 import churchpresenter.composeapp.generated.resources.go_live
 import churchpresenter.composeapp.generated.resources.ic_arrow_down
 import churchpresenter.composeapp.generated.resources.ic_arrow_up
+import churchpresenter.composeapp.generated.resources.ic_cast
+import churchpresenter.composeapp.generated.resources.ic_close
+import churchpresenter.composeapp.generated.resources.ic_pause
+import churchpresenter.composeapp.generated.resources.ic_search
+import churchpresenter.composeapp.generated.resources.ic_playlist_add
+import churchpresenter.composeapp.generated.resources.ic_swap
 import churchpresenter.composeapp.generated.resources.mode
 import churchpresenter.composeapp.generated.resources.no_results_found
 import churchpresenter.composeapp.generated.resources.primary_bible
@@ -280,7 +292,7 @@ fun BibleTab(
     ) {
         // ── Search row — wraps to two lines when window is narrow ──
         BoxWithConstraints(modifier = Modifier.fillMaxWidth().padding(all = 4.dp)) {
-            val searchIsNarrow = maxWidth < 700.dp
+            val searchIsNarrow = maxWidth < 550.dp
 
             if (searchIsNarrow) {
                 // Narrow: search field on its own line, controls below
@@ -300,7 +312,7 @@ fun BibleTab(
                     )
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         DropdownSelector(
-                            modifier = Modifier.weight(1f).padding(end = 8.dp),
+                            modifier = Modifier.weight(1f, fill = false).widthIn(max = 160.dp).padding(end = 8.dp),
                             label = stringResource(Res.string.scope),
                             items = scopeOptions,
                             selected = selectedScope,
@@ -310,7 +322,7 @@ fun BibleTab(
                             }
                         )
                         DropdownSelector(
-                            modifier = Modifier.weight(1f).padding(end = 8.dp),
+                            modifier = Modifier.weight(1f, fill = false).widthIn(max = 160.dp).padding(end = 8.dp),
                             label = stringResource(Res.string.mode),
                             items = modeOptions,
                             selected = selectedMode,
@@ -319,16 +331,25 @@ fun BibleTab(
                                 viewModel.updateSelectedModeIndex(newIndex)
                             }
                         )
-                        Button(onClick = { viewModel.performSearch() }) {
-                            Text(text = stringResource(Res.string.search), style = MaterialTheme.typography.labelMedium)
+                        IconButton(
+                            onClick = { viewModel.performSearch() },
+                            colors = IconButtonDefaults.iconButtonColors(
+                                containerColor = MaterialTheme.colorScheme.primary,
+                                contentColor = MaterialTheme.colorScheme.onPrimary
+                            )
+                        ) {
+                            Icon(painter = painterResource(Res.drawable.ic_search), contentDescription = stringResource(Res.string.search), modifier = Modifier.size(20.dp))
                         }
                         if (isSearchMode) {
-                            Button(
-                                modifier = Modifier.padding(start = 8.dp),
+                            IconButton(
+                                modifier = Modifier.padding(start = 4.dp),
                                 onClick = { viewModel.clearSearch() },
-                                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
+                                colors = IconButtonDefaults.iconButtonColors(
+                                    containerColor = MaterialTheme.colorScheme.secondary,
+                                    contentColor = MaterialTheme.colorScheme.onSecondary
+                                )
                             ) {
-                                Text(stringResource(Res.string.clear), style = MaterialTheme.typography.labelMedium)
+                                Icon(painter = painterResource(Res.drawable.ic_close), contentDescription = stringResource(Res.string.clear), modifier = Modifier.size(20.dp))
                             }
                         }
                     }
@@ -369,16 +390,25 @@ fun BibleTab(
                             viewModel.updateSelectedModeIndex(newIndex)
                         }
                     )
-                    Button(onClick = { viewModel.performSearch() }) {
-                        Text(text = stringResource(Res.string.search), style = MaterialTheme.typography.labelMedium)
+                    IconButton(
+                        onClick = { viewModel.performSearch() },
+                        colors = IconButtonDefaults.iconButtonColors(
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = MaterialTheme.colorScheme.onPrimary
+                        )
+                    ) {
+                        Icon(painter = painterResource(Res.drawable.ic_search), contentDescription = stringResource(Res.string.search), modifier = Modifier.size(20.dp))
                     }
                     if (isSearchMode) {
-                        Button(
-                            modifier = Modifier.padding(start = 8.dp),
+                        IconButton(
+                            modifier = Modifier.padding(start = 4.dp),
                             onClick = { viewModel.clearSearch() },
-                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
+                            colors = IconButtonDefaults.iconButtonColors(
+                                containerColor = MaterialTheme.colorScheme.secondary,
+                                contentColor = MaterialTheme.colorScheme.onSecondary
+                            )
                         ) {
-                            Text(stringResource(Res.string.clear), style = MaterialTheme.typography.labelMedium)
+                            Icon(painter = painterResource(Res.drawable.ic_close), contentDescription = stringResource(Res.string.clear), modifier = Modifier.size(20.dp))
                         }
                     }
                 }
@@ -453,112 +483,199 @@ fun BibleTab(
         } else {
             // ── Toolbar: swap, bible labels, go live, add to schedule ─
             // Multi-verse selection is keyboard-driven: Ctrl/Cmd+Click to toggle, Shift+Click for range
-            val toolbarContent: @Composable () -> Unit = {
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp),
-                    verticalAlignment = Alignment.CenterVertically
+            val holdLiveStr = stringResource(Res.string.hold_live)
+            val swapBiblesStr = stringResource(Res.string.swap_bibles)
+            val goLiveStr = stringResource(Res.string.go_live)
+            val addScheduleStr = stringResource(Res.string.add_to_schedule)
+
+            val toolbarContent: @Composable (useIcons: Boolean) -> Unit = { useIcons ->
+                @OptIn(ExperimentalLayoutApi::class)
+                FlowRow(
+                    modifier = Modifier.fillMaxWidth()
+                        .padding(horizontal = 4.dp),
+                    horizontalArrangement = Arrangement.End,
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                    itemVerticalAlignment = Alignment.CenterVertically
                 ) {
-                    if (presenterManager != null) {
-                        val holdLive by presenterManager.bibleHold
-                        Button(
-                            onClick = { presenterManager.setBibleHold(!holdLive) },
-                            modifier = Modifier.wrapContentSize().padding(end = 8.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = if (holdLive) MaterialTheme.colorScheme.error
-                                else MaterialTheme.colorScheme.surfaceVariant
-                            )
+                        if (presenterManager != null) {
+                            val holdLive by presenterManager.bibleHold
+                            if (useIcons) {
+                                TooltipArea(
+                                    tooltip = {
+                                        Surface(shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
+                                            Text(holdLiveStr, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
+                                        }
+                                    },
+                                    tooltipPlacement = TooltipPlacement.CursorPoint()
+                                ) {
+                                    IconButton(
+                                        onClick = { presenterManager.setBibleHold(!holdLive) },
+                                        colors = IconButtonDefaults.iconButtonColors(
+                                            containerColor = if (holdLive) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.surfaceVariant,
+                                            contentColor = if (holdLive) MaterialTheme.colorScheme.onError else MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    ) {
+                                        Icon(painter = painterResource(Res.drawable.ic_pause), contentDescription = holdLiveStr, modifier = Modifier.size(20.dp))
+                                    }
+                                }
+                            } else {
+                                Button(
+                                    onClick = { presenterManager.setBibleHold(!holdLive) },
+                                    modifier = Modifier.wrapContentSize(),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = if (holdLive) MaterialTheme.colorScheme.error
+                                        else MaterialTheme.colorScheme.surfaceVariant
+                                    )
+                                ) {
+                                    Text(
+                                        text = holdLiveStr,
+                                        style = MaterialTheme.typography.labelMedium,
+                                        color = if (holdLive) MaterialTheme.colorScheme.onError
+                                        else MaterialTheme.colorScheme.onSurfaceVariant,
+                                        maxLines = 1
+                                    )
+                                }
+                            }
+                        }
+                        TooltipArea(
+                            tooltip = {
+                                Surface(shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
+                                    Text(
+                                        "Ctrl+Click to toggle verses, Shift+Click for range",
+                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                        style = MaterialTheme.typography.bodySmall
+                                    )
+                                }
+                            },
+                            tooltipPlacement = TooltipPlacement.CursorPoint()
                         ) {
                             Text(
-                                text = stringResource(Res.string.hold_live),
-                                style = MaterialTheme.typography.labelMedium,
-                                color = if (holdLive) MaterialTheme.colorScheme.onError
-                                else MaterialTheme.colorScheme.onSurfaceVariant,
-                                maxLines = 1
+                                text = "⌘/Ctrl · Shift",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(end = 8.dp)
                             )
                         }
-                    }
-                    // Multi-verse hint — Ctrl/Cmd+Click to toggle, Shift+Click to range-select
-                    Text(
-                        text = "⌘/Ctrl · Shift",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(end = 8.dp)
-                    )
-                    TooltipArea(
-                        tooltip = {
-                            Surface(
-                                color = MaterialTheme.colorScheme.inverseSurface,
-                                shape = MaterialTheme.shapes.extraSmall,
-                                tonalElevation = 4.dp
+                        // Swap Bibles — always wrapped in tooltip showing bible names
+                        TooltipArea(
+                            tooltip = {
+                                Surface(
+                                    color = MaterialTheme.colorScheme.inverseSurface,
+                                    shape = MaterialTheme.shapes.extraSmall,
+                                    tonalElevation = 4.dp
+                                ) {
+                                    Column(modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) {
+                                        Text(
+                                            text = "${stringResource(Res.string.primary_bible)} ${appSettings.bibleSettings.primaryBible.substringBeforeLast('.').ifEmpty { "-" }}",
+                                            color = MaterialTheme.colorScheme.inverseOnSurface,
+                                            style = MaterialTheme.typography.bodySmall
+                                        )
+                                        Text(
+                                            text = "${stringResource(Res.string.secondary_bible)} ${appSettings.bibleSettings.secondaryBible.substringBeforeLast('.').ifEmpty { "-" }}",
+                                            color = MaterialTheme.colorScheme.inverseOnSurface,
+                                            style = MaterialTheme.typography.bodySmall
+                                        )
+                                    }
+                                }
+                            },
+                            tooltipPlacement = TooltipPlacement.CursorPoint(
+                                offset = DpOffset(0.dp, 16.dp)
+                            )
+                        ) {
+                            if (useIcons) {
+                                IconButton(
+                                    onClick = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.swapped()) } },
+                                    colors = IconButtonDefaults.iconButtonColors(
+                                        containerColor = MaterialTheme.colorScheme.tertiary,
+                                        contentColor = MaterialTheme.colorScheme.onTertiary
+                                    )
+                                ) {
+                                    Icon(painter = painterResource(Res.drawable.ic_swap), contentDescription = swapBiblesStr, modifier = Modifier.size(20.dp))
+                                }
+                            } else {
+                                TextButton(
+                                    onClick = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.swapped()) } }
+                                ) {
+                                    Text(text = swapBiblesStr, style = MaterialTheme.typography.labelMedium)
+                                }
+                            }
+                        }
+                        // Add to Schedule
+                        if (useIcons) {
+                            TooltipArea(
+                                tooltip = {
+                                    Surface(shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
+                                        Text(addScheduleStr, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
+                                    }
+                                },
+                                tooltipPlacement = TooltipPlacement.CursorPoint()
                             ) {
-                                Column(modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) {
-                                    Text(
-                                        text = "${stringResource(Res.string.primary_bible)} ${appSettings.bibleSettings.primaryBible.substringBeforeLast('.').ifEmpty { "-" }}",
-                                        color = MaterialTheme.colorScheme.inverseOnSurface,
-                                        style = MaterialTheme.typography.bodySmall
+                                IconButton(
+                                    onClick = {
+                                        viewModel.addCurrentVerseToSchedule { bookName, chapter, verseNumber, verseText, verseRange ->
+                                            onAddToSchedule?.invoke(bookName, chapter, verseNumber, verseText, verseRange)
+                                        }
+                                    },
+                                    colors = IconButtonDefaults.iconButtonColors(
+                                        containerColor = MaterialTheme.colorScheme.secondary,
+                                        contentColor = MaterialTheme.colorScheme.onSecondary
                                     )
-                                    Text(
-                                        text = "${stringResource(Res.string.secondary_bible)} ${appSettings.bibleSettings.secondaryBible.substringBeforeLast('.').ifEmpty { "-" }}",
-                                        color = MaterialTheme.colorScheme.inverseOnSurface,
-                                        style = MaterialTheme.typography.bodySmall
-                                    )
+                                ) {
+                                    Icon(painter = painterResource(Res.drawable.ic_playlist_add), contentDescription = addScheduleStr, modifier = Modifier.size(20.dp))
                                 }
                             }
-                        },
-                        tooltipPlacement = TooltipPlacement.CursorPoint(
-                            offset = DpOffset(0.dp, 16.dp)
-                        )
-                    ) {
-                        TextButton(
-                            onClick = {
-                                onSettingsChange { s ->
-                                    s.copy(bibleSettings = s.bibleSettings.swapped())
-                                }
+                        } else {
+                            Button(
+                                modifier = Modifier.wrapContentSize(),
+                                onClick = {
+                                    viewModel.addCurrentVerseToSchedule { bookName, chapter, verseNumber, verseText, verseRange ->
+                                        onAddToSchedule?.invoke(bookName, chapter, verseNumber, verseText, verseRange)
+                                    }
+                                },
+                                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
+                            ) {
+                                Text(text = addScheduleStr, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSecondary, maxLines = 1)
                             }
-                        ) {
-                            Text(
-                                text = stringResource(Res.string.swap_bibles),
-                                style = MaterialTheme.typography.labelMedium
-                            )
                         }
-                    }
-                    Button(
-                        modifier = Modifier.wrapContentSize().padding(start = 8.dp),
-                        onClick = { goLiveWithHistory() },
-                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
-                    ) {
-                        Text(
-                            text = stringResource(Res.string.go_live),
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onPrimary,
-                            maxLines = 1
-                        )
-                    }
-                    Button(
-                        modifier = Modifier.wrapContentSize().padding(start = 8.dp, end = 8.dp),
-                        onClick = {
-                            viewModel.addCurrentVerseToSchedule { bookName, chapter, verseNumber, verseText, verseRange ->
-                                onAddToSchedule?.invoke(bookName, chapter, verseNumber, verseText, verseRange)
+                        // Go Live
+                        if (useIcons) {
+                            TooltipArea(
+                                tooltip = {
+                                    Surface(shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
+                                        Text(goLiveStr, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
+                                    }
+                                },
+                                tooltipPlacement = TooltipPlacement.CursorPoint()
+                            ) {
+                                IconButton(
+                                    onClick = { goLiveWithHistory() },
+                                    colors = IconButtonDefaults.iconButtonColors(
+                                        containerColor = MaterialTheme.colorScheme.primary,
+                                        contentColor = MaterialTheme.colorScheme.onPrimary
+                                    )
+                                ) {
+                                    Icon(painter = painterResource(Res.drawable.ic_cast), contentDescription = goLiveStr, modifier = Modifier.size(20.dp))
+                                }
                             }
-                        },
-                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
-                    ) {
-                        Text(
-                            text = stringResource(Res.string.add_to_schedule),
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onSecondary,
-                            maxLines = 1
-                        )
+                        } else {
+                            Button(
+                                modifier = Modifier.wrapContentSize(),
+                                onClick = { goLiveWithHistory() },
+                                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                            ) {
+                                Text(text = goLiveStr, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onPrimary, maxLines = 1)
+                            }
+                        }
                     }
                 }
-            }
 
             BoxWithConstraints(modifier = Modifier.fillMaxWidth().fillMaxHeight()) {
                 val isNarrow = maxWidth < 800.dp
+                val useIcons = maxWidth < 1100.dp
 
                 Column(modifier = Modifier.fillMaxSize()) {
                     if (isNarrow) {
-                        toolbarContent()
+                        toolbarContent(useIcons)
                     }
 
                     // ── Book / Chapter / Verse columns ───────────────────────
@@ -623,7 +740,7 @@ fun BibleTab(
                                 }
                                 if (!isNarrow) {
                                     Spacer(modifier = Modifier.width(8.dp))
-                                    toolbarContent()
+                                    toolbarContent(useIcons)
                                 } else {
                                     Spacer(modifier = Modifier.weight(1f))
                                 }

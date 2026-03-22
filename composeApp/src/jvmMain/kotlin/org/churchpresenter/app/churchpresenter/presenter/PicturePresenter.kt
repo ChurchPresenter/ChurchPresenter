@@ -24,6 +24,9 @@ import churchpresenter.composeapp.generated.resources.presented_slide
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.skia.Image
 import java.io.File
+import org.churchpresenter.app.churchpresenter.composables.keyColorFilter
+import org.churchpresenter.app.churchpresenter.composables.opaqueColorFilter
+import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.HeicDecoder
 
 @Composable
@@ -31,7 +34,14 @@ fun PicturePresenter(
     modifier: Modifier = Modifier,
     imagePath: String?,
     transitionAlpha: Float = 1f,
+    outputRole: String = Constants.OUTPUT_ROLE_NORMAL,
 ) {
+    val isKey = outputRole == Constants.OUTPUT_ROLE_KEY
+    // Key mode: solid white frame (mixer sees "fully visible")
+    if (isKey) {
+        Box(modifier = modifier.fillMaxSize().background(Color.White).alpha(transitionAlpha))
+        return
+    }
     Box(
         modifier = modifier
             .fillMaxSize()
@@ -61,7 +71,8 @@ private fun ImageContent(currentImagePath: String?) {
                 bitmap = imageBitmap,
                 contentDescription = stringResource(Res.string.presented_image),
                 modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Fit
+                contentScale = ContentScale.Fit,
+                colorFilter = null
             )
         } else {
             Text(
@@ -140,7 +151,14 @@ fun SlidePresenter(
     modifier: Modifier = Modifier,
     slide: ImageBitmap?,
     transitionAlpha: Float = 1f,
+    outputRole: String = Constants.OUTPUT_ROLE_NORMAL,
 ) {
+    val isKey = outputRole == Constants.OUTPUT_ROLE_KEY
+    // Key mode: solid white frame (mixer sees "fully visible")
+    if (isKey) {
+        Box(modifier = modifier.fillMaxSize().background(Color.White).alpha(transitionAlpha))
+        return
+    }
     Box(
         modifier = modifier
             .fillMaxSize()

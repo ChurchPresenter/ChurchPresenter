@@ -61,7 +61,9 @@ import churchpresenter.composeapp.generated.resources.add_to_schedule
 import churchpresenter.composeapp.generated.resources.confirm_delete
 import churchpresenter.composeapp.generated.resources.confirm_delete_file
 import churchpresenter.composeapp.generated.resources.go_live
+import churchpresenter.composeapp.generated.resources.ic_cast
 import churchpresenter.composeapp.generated.resources.ic_close
+import churchpresenter.composeapp.generated.resources.ic_playlist_add
 import churchpresenter.composeapp.generated.resources.lottie_no_presets
 import churchpresenter.composeapp.generated.resources.lottie_select_preset
 import churchpresenter.composeapp.generated.resources.pause
@@ -401,6 +403,90 @@ fun LowerThirdTab(
                 }
             }
 
+            // Controls row — moved to top
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Play / Pause
+                Tooltip(stringResource(if (isPlaying) Res.string.pause else Res.string.play)) {
+                    IconButton(
+                        onClick = {
+                            if (canPlay) {
+                                if (isPlaying) {
+                                    val job = animJob
+                                    animJob = null
+                                    isPlaying = false
+                                    job?.cancel()
+                                } else if (animatedProgress.value >= 1f) {
+                                    scope.launch {
+                                        animatedProgress.snapTo(0f)
+                                        startPlaying()
+                                    }
+                                } else {
+                                    startPlaying()
+                                }
+                            }
+                        },
+                        enabled = canPlay,
+                        colors = IconButtonDefaults.iconButtonColors(
+                            containerColor = if (isPlaying) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
+                            contentColor = MaterialTheme.colorScheme.onPrimary,
+                            disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                            disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                        )
+                    ) {
+                        Icon(
+                            painter = painterResource(if (isPlaying) Res.drawable.ic_pause else Res.drawable.ic_play),
+                            contentDescription = null,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                }
+
+                // Add to Schedule
+                val hasFile = selectedFile != null
+                Tooltip(stringResource(Res.string.add_to_schedule)) {
+                    IconButton(
+                        onClick = {
+                            val file = selectedFile ?: return@IconButton
+                            onAddToSchedule(
+                                file.nameWithoutExtension,
+                                file.nameWithoutExtension,
+                                false,
+                                0L
+                            )
+                        },
+                        enabled = hasFile,
+                        colors = IconButtonDefaults.iconButtonColors(
+                            containerColor = MaterialTheme.colorScheme.secondary,
+                            contentColor = MaterialTheme.colorScheme.onSecondary,
+                            disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                            disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                        )
+                    ) {
+                        Icon(painter = painterResource(Res.drawable.ic_playlist_add), contentDescription = stringResource(Res.string.add_to_schedule), modifier = Modifier.size(20.dp))
+                    }
+                }
+
+                // Go Live
+                Tooltip(stringResource(Res.string.go_live)) {
+                    IconButton(
+                        onClick = { onGoLive(jsonContent, false, -1f, 0L) },
+                        enabled = canPlay,
+                        colors = IconButtonDefaults.iconButtonColors(
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = MaterialTheme.colorScheme.onPrimary,
+                            disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                            disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                        )
+                    ) {
+                        Icon(painter = painterResource(Res.drawable.ic_cast), contentDescription = stringResource(Res.string.go_live), modifier = Modifier.size(20.dp))
+                    }
+                }
+            }
+
             // Lottie preview — weight(1f) fills remaining space, aspectRatio inside
             Box(
                 modifier = Modifier
@@ -425,77 +511,6 @@ fun LowerThirdTab(
                         )
                     } else if (selectedFile != null) {
                         Text("⚠", style = MaterialTheme.typography.headlineLarge, color = MaterialTheme.colorScheme.error.copy(alpha = 0.5f))
-                    }
-                }
-            }
-
-            // Controls row
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // Play / Pause
-                Tooltip(stringResource(if (isPlaying) Res.string.pause else Res.string.play)) {
-                    ImageIconButton(
-                        onClick = {
-                            if (canPlay) {
-                                if (isPlaying) {
-                                    val job = animJob
-                                    animJob = null
-                                    isPlaying = false
-                                    job?.cancel()
-                                } else if (animatedProgress.value >= 1f) {
-                                    scope.launch {
-                                        animatedProgress.snapTo(0f)
-                                        startPlaying()
-                                    }
-                                } else {
-                                    startPlaying()
-                                }
-                            }
-                        },
-                        size = 36.dp,
-                        modifier = Modifier.background(
-                            color = if (canPlay) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
-                            shape = CircleShape
-                        )
-                    ) {
-                        Icon(
-                            painter = painterResource(if (isPlaying) Res.drawable.ic_pause else Res.drawable.ic_play),
-                            contentDescription = null,
-                            modifier = Modifier.size(18.dp),
-                            tint = if (canPlay) Color.White else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                        )
-                    }
-                }
-
-
-                // Add to Schedule button
-                if (selectedFile != null) {
-                    Button(
-                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
-                        onClick = {
-                            val file = selectedFile ?: return@Button
-                            onAddToSchedule(
-                                file.nameWithoutExtension,
-                                file.nameWithoutExtension,
-                                false,
-                                0L
-                            )
-                        }
-                    ) {
-                        Text(text = stringResource(Res.string.add_to_schedule), style = MaterialTheme.typography.labelMedium)
-                    }
-
-                    // Go Live button
-                    Button(
-                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
-                        onClick = {
-                            onGoLive(jsonContent, false, -1f, 0L)
-                        },
-                        enabled = canPlay
-                    ) {
-                        Text(text = stringResource(Res.string.go_live), style = MaterialTheme.typography.labelMedium)
                     }
                 }
             }

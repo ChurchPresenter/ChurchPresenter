@@ -467,12 +467,12 @@ private fun LeftColumn(
             }
             AnimatedVisibility(visible = settings.songSettings.titleShadow) {
                 ShadowDetailRow(
-                    shadowColor = settings.songSettings.shadowColor,
-                    shadowSize = settings.songSettings.shadowSize,
-                    shadowOpacity = settings.songSettings.shadowOpacity,
-                    onColorChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(shadowColor = it)) } },
-                    onSizeChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(shadowSize = it)) } },
-                    onOpacityChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(shadowOpacity = it)) } }
+                    shadowColor = settings.songSettings.titleShadowColor,
+                    shadowSize = settings.songSettings.titleShadowSize,
+                    shadowOpacity = settings.songSettings.titleShadowOpacity,
+                    onColorChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleShadowColor = it)) } },
+                    onSizeChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleShadowSize = it)) } },
+                    onOpacityChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleShadowOpacity = it)) } }
                 )
             }
             // Lower Third
@@ -495,12 +495,12 @@ private fun LeftColumn(
             }
             AnimatedVisibility(visible = settings.songSettings.titleLowerThirdShadow) {
                 ShadowDetailRow(
-                    shadowColor = settings.songSettings.lowerThirdShadowColor,
-                    shadowSize = settings.songSettings.lowerThirdShadowSize,
-                    shadowOpacity = settings.songSettings.lowerThirdShadowOpacity,
-                    onColorChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lowerThirdShadowColor = it)) } },
-                    onSizeChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lowerThirdShadowSize = it)) } },
-                    onOpacityChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lowerThirdShadowOpacity = it)) } }
+                    shadowColor = settings.songSettings.titleLowerThirdShadowColor,
+                    shadowSize = settings.songSettings.titleLowerThirdShadowSize,
+                    shadowOpacity = settings.songSettings.titleLowerThirdShadowOpacity,
+                    onColorChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleLowerThirdShadowColor = it)) } },
+                    onSizeChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleLowerThirdShadowSize = it)) } },
+                    onOpacityChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleLowerThirdShadowOpacity = it)) } }
                 )
             }
         }
@@ -958,12 +958,12 @@ private fun RightColumn(
             }
             AnimatedVisibility(visible = settings.songSettings.lyricsShadow) {
                 ShadowDetailRow(
-                    shadowColor = settings.songSettings.shadowColor,
-                    shadowSize = settings.songSettings.shadowSize,
-                    shadowOpacity = settings.songSettings.shadowOpacity,
-                    onColorChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(shadowColor = it)) } },
-                    onSizeChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(shadowSize = it)) } },
-                    onOpacityChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(shadowOpacity = it)) } }
+                    shadowColor = settings.songSettings.lyricsShadowColor,
+                    shadowSize = settings.songSettings.lyricsShadowSize,
+                    shadowOpacity = settings.songSettings.lyricsShadowOpacity,
+                    onColorChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsShadowColor = it)) } },
+                    onSizeChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsShadowSize = it)) } },
+                    onOpacityChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsShadowOpacity = it)) } }
                 )
             }
         }
@@ -1104,12 +1104,12 @@ private fun RightColumn(
             }
             AnimatedVisibility(visible = settings.songSettings.lyricsLowerThirdShadow) {
                 ShadowDetailRow(
-                    shadowColor = settings.songSettings.lowerThirdShadowColor,
-                    shadowSize = settings.songSettings.lowerThirdShadowSize,
-                    shadowOpacity = settings.songSettings.lowerThirdShadowOpacity,
-                    onColorChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lowerThirdShadowColor = it)) } },
-                    onSizeChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lowerThirdShadowSize = it)) } },
-                    onOpacityChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lowerThirdShadowOpacity = it)) } }
+                    shadowColor = settings.songSettings.lyricsLowerThirdShadowColor,
+                    shadowSize = settings.songSettings.lyricsLowerThirdShadowSize,
+                    shadowOpacity = settings.songSettings.lyricsLowerThirdShadowOpacity,
+                    onColorChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsLowerThirdShadowColor = it)) } },
+                    onSizeChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsLowerThirdShadowSize = it)) } },
+                    onOpacityChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsLowerThirdShadowOpacity = it)) } }
                 )
             }
         }

@@ -8,7 +8,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
-import org.churchpresenter.app.churchpresenter.composables.VideoPlayer
+import org.churchpresenter.app.churchpresenter.composables.SoftwareVideoPlayer
+import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.viewmodel.LocalMediaViewModel
 
 @Composable
@@ -17,8 +18,14 @@ fun MediaPresenter(
     isVisible: Boolean = true,
     audioEnabled: Boolean = true,
     audioDeviceId: String = "",
-    transitionAlpha: Float = 1f
+    transitionAlpha: Float = 1f,
+    outputRole: String = Constants.OUTPUT_ROLE_NORMAL
 ) {
+    // Key mode: solid white frame (mixer sees "fully visible")
+    if (outputRole == Constants.OUTPUT_ROLE_KEY) {
+        Box(modifier = modifier.fillMaxSize().background(Color.White).alpha(transitionAlpha))
+        return
+    }
     val viewModel = LocalMediaViewModel.current ?: return
 
     LaunchedEffect(isVisible) {
@@ -34,7 +41,7 @@ fun MediaPresenter(
             .alpha(transitionAlpha)
     ) {
         if (viewModel.isLoaded && isVisible) {
-            VideoPlayer(
+            SoftwareVideoPlayer(
                 viewModel = viewModel,
                 modifier = Modifier.fillMaxSize(),
                 audioEnabled = audioEnabled,

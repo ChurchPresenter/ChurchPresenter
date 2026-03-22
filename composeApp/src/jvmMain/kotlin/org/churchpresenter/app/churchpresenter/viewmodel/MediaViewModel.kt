@@ -51,6 +51,13 @@ class MediaViewModel {
     private val _isAudioFile = mutableStateOf(false)
     val isAudioFile: Boolean get() = _isAudioFile.value
 
+    // Playback finished flag — observed by PresenterWindows to auto-clear the screen
+    private val _mediaFinished = mutableStateOf(false)
+    val mediaFinished: Boolean get() = _mediaFinished.value
+
+    fun markFinished() { _mediaFinished.value = true; _isPlaying.value = false; _currentPosition.value = 0L; _seekVersion.intValue++ }
+    fun clearFinished() { _mediaFinished.value = false }
+
 
     fun loadMedia(url: String, type: String) {
         _mediaUrl.value = url

@@ -1,6 +1,9 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.TooltipArea
+import androidx.compose.foundation.TooltipPlacement
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
@@ -24,7 +27,9 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -43,7 +48,9 @@ import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.add_to_schedule
 import churchpresenter.composeapp.generated.resources.go_live
+import churchpresenter.composeapp.generated.resources.ic_cast
 import churchpresenter.composeapp.generated.resources.ic_pause
+import churchpresenter.composeapp.generated.resources.ic_playlist_add
 import churchpresenter.composeapp.generated.resources.ic_play
 import churchpresenter.composeapp.generated.resources.ic_skip_next
 import churchpresenter.composeapp.generated.resources.ic_skip_previous
@@ -70,6 +77,7 @@ import java.io.File
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun PicturesTab(
     modifier: Modifier = Modifier,
@@ -259,38 +267,52 @@ fun PicturesTab(
 
                 // Right: action buttons
                 Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    horizontalArrangement = Arrangement.End,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    if (presenterManager != null) {
-                        Button(
-                            onClick = { viewModel.goLive(presenterManager) },
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.primary
-                            )
+                    if (onAddToSchedule != null && viewModel.selectedFolder != null) {
+                        TooltipArea(
+                            tooltip = {
+                                Surface(shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
+                                    Text(stringResource(Res.string.add_to_schedule), modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
+                                }
+                            },
+                            tooltipPlacement = TooltipPlacement.CursorPoint()
                         ) {
-                            Text(
-                                text = stringResource(Res.string.go_live),
-                                style = MaterialTheme.typography.labelMedium
-                            )
+                            IconButton(
+                                onClick = {
+                                    viewModel.getScheduleData()?.let { (path, name, count) ->
+                                        onAddToSchedule(path, name, count)
+                                    }
+                                },
+                                colors = IconButtonDefaults.iconButtonColors(
+                                    containerColor = MaterialTheme.colorScheme.secondary,
+                                    contentColor = MaterialTheme.colorScheme.onSecondary
+                                )
+                            ) {
+                                Icon(painter = painterResource(Res.drawable.ic_playlist_add), contentDescription = stringResource(Res.string.add_to_schedule), modifier = Modifier.size(20.dp))
+                            }
                         }
                     }
 
-                    if (onAddToSchedule != null && viewModel.selectedFolder != null) {
-                        Button(
-                            onClick = {
-                                viewModel.getScheduleData()?.let { (path, name, count) ->
-                                    onAddToSchedule(path, name, count)
+                    if (presenterManager != null) {
+                        TooltipArea(
+                            tooltip = {
+                                Surface(shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
+                                    Text(stringResource(Res.string.go_live), modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
                                 }
                             },
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.secondary
-                            )
+                            tooltipPlacement = TooltipPlacement.CursorPoint()
                         ) {
-                            Text(
-                                text = stringResource(Res.string.add_to_schedule),
-                                style = MaterialTheme.typography.labelMedium
-                            )
+                            IconButton(
+                                onClick = { viewModel.goLive(presenterManager) },
+                                colors = IconButtonDefaults.iconButtonColors(
+                                    containerColor = MaterialTheme.colorScheme.primary,
+                                    contentColor = MaterialTheme.colorScheme.onPrimary
+                                )
+                            ) {
+                                Icon(painter = painterResource(Res.drawable.ic_cast), contentDescription = stringResource(Res.string.go_live), modifier = Modifier.size(20.dp))
+                            }
                         }
                     }
                 }

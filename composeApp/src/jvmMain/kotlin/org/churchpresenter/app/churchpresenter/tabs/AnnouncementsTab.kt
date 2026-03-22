@@ -37,6 +37,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
@@ -107,6 +108,9 @@ import churchpresenter.composeapp.generated.resources.center_right
 import churchpresenter.composeapp.generated.resources.font_size
 import churchpresenter.composeapp.generated.resources.font_type
 import churchpresenter.composeapp.generated.resources.go_live
+import churchpresenter.composeapp.generated.resources.ic_cast
+import churchpresenter.composeapp.generated.resources.ic_playlist_add
+import churchpresenter.composeapp.generated.resources.ic_refresh
 import churchpresenter.composeapp.generated.resources.ic_pause
 import churchpresenter.composeapp.generated.resources.ic_play
 import churchpresenter.composeapp.generated.resources.position_on_screen
@@ -253,18 +257,8 @@ fun AnnouncementsTab(
                         }
 
                         val buttons: @Composable () -> Unit = {
-                            if (presenterManager != null) {
-                                Button(
-                                    onClick = { viewModel.goLive(presenterManager, onSettingsChange) },
-                                    enabled = viewModel.text.isNotBlank(),
-                                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
-                                    contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp)
-                                ) {
-                                    Text(stringResource(Res.string.go_live), style = MaterialTheme.typography.labelMedium)
-                                }
-                            }
                             if (onAddToSchedule != null) {
-                                Button(
+                                IconButton(
                                     onClick = {
                                         onAddToSchedule.invoke(
                                             viewModel.buildSettings().copy(
@@ -276,10 +270,28 @@ fun AnnouncementsTab(
                                         )
                                     },
                                     enabled = viewModel.text.isNotBlank(),
-                                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
-                                    contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp)
+                                    colors = IconButtonDefaults.iconButtonColors(
+                                        containerColor = MaterialTheme.colorScheme.secondary,
+                                        contentColor = MaterialTheme.colorScheme.onSecondary,
+                                        disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                        disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                                    )
                                 ) {
-                                    Text(stringResource(Res.string.add_to_schedule), style = MaterialTheme.typography.labelMedium)
+                                    Icon(painter = painterResource(Res.drawable.ic_playlist_add), contentDescription = stringResource(Res.string.add_to_schedule), modifier = Modifier.size(20.dp))
+                                }
+                            }
+                            if (presenterManager != null) {
+                                IconButton(
+                                    onClick = { viewModel.goLive(presenterManager, onSettingsChange) },
+                                    enabled = viewModel.text.isNotBlank(),
+                                    colors = IconButtonDefaults.iconButtonColors(
+                                        containerColor = MaterialTheme.colorScheme.primary,
+                                        contentColor = MaterialTheme.colorScheme.onPrimary,
+                                        disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                        disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                                    )
+                                ) {
+                                    Icon(painter = painterResource(Res.drawable.ic_cast), contentDescription = stringResource(Res.string.go_live), modifier = Modifier.size(20.dp))
                                 }
                             }
                         }
@@ -495,6 +507,15 @@ fun AnnouncementsTab(
                         val scaledFontSize = (viewModel.fontSize * scaleFactor).coerceAtLeast(4f).sp
                         val scaledPadH = (32 * scaleFactor).coerceAtLeast(1f).dp
                         val scaledPadV = (16 * scaleFactor).coerceAtLeast(1f).dp
+                        val previewFontFamily = remember(viewModel.fontType) {
+                            Utils.systemFontFamilyOrDefault(viewModel.fontType)
+                        }
+                        val previewTextStyle = androidx.compose.ui.text.TextStyle(
+                            fontFamily = previewFontFamily,
+                            fontWeight = if (viewModel.bold) androidx.compose.ui.text.font.FontWeight.Bold else androidx.compose.ui.text.font.FontWeight.Normal,
+                            fontStyle = if (viewModel.italic) androidx.compose.ui.text.font.FontStyle.Italic else androidx.compose.ui.text.font.FontStyle.Normal,
+                            textDecoration = if (viewModel.underline) androidx.compose.ui.text.style.TextDecoration.Underline else androidx.compose.ui.text.style.TextDecoration.None,
+                        )
                         val isDirectional = viewModel.animationType in listOf(
                             Constants.ANIMATION_SLIDE_FROM_LEFT,
                             Constants.ANIMATION_SLIDE_FROM_RIGHT,
@@ -553,6 +574,7 @@ fun AnnouncementsTab(
                                     ) {
                                         Text(
                                             text = viewModel.text.ifBlank { stringResource(Res.string.preview) },
+                                            style = previewTextStyle,
                                             fontSize = scaledFontSize,
                                             color = Utils.parseHexColor(viewModel.textColor),
                                             textAlign = previewTextAlign,
@@ -560,12 +582,14 @@ fun AnnouncementsTab(
                                         )
                                     }
                                 }
+                                val previewContainerWidthPx = constraints.maxWidth.toFloat()
+                                val previewContainerHeightPx = constraints.maxHeight.toFloat()
                                 Box(modifier = Modifier.fillMaxSize().clipToBounds()) {
                                     if (isHorizontal) {
                                         Box(
                                             modifier = Modifier
                                                 .align(slideAlignment)
-                                                .graphicsLayer { translationX = size.width * offsetFraction },
+                                                .graphicsLayer { translationX = previewContainerWidthPx * offsetFraction },
                                             contentAlignment = Alignment.Center
                                         ) { textComposable() }
                                     } else {
@@ -573,7 +597,7 @@ fun AnnouncementsTab(
                                             modifier = Modifier
                                                 .fillMaxHeight()
                                                 .align(slideAlignment)
-                                                .graphicsLayer { translationY = size.height * offsetFraction },
+                                                .graphicsLayer { translationY = previewContainerHeightPx * offsetFraction },
                                             contentAlignment = Alignment.Center
                                         ) { textComposable() }
                                     }
@@ -621,6 +645,7 @@ fun AnnouncementsTab(
                                         ) {
                                             Text(
                                                 text = text.ifBlank { stringResource(Res.string.preview) },
+                                                style = previewTextStyle,
                                                 fontSize = scaledFontSize,
                                                 color = Utils.parseHexColor(viewModel.textColor),
                                                 textAlign = previewTextAlign,
@@ -829,7 +854,7 @@ fun AnnouncementsTab(
                         @OptIn(ExperimentalLayoutApi::class)
                         FlowRow(
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+                            horizontalArrangement = Arrangement.End,
                             verticalArrangement = Arrangement.spacedBy(8.dp),
                             itemVerticalAlignment = Alignment.CenterVertically
                         ) {
@@ -855,7 +880,9 @@ fun AnnouncementsTab(
                                 enabled = total > 0 || viewModel.timerRunning,
                                 colors = IconButtonDefaults.iconButtonColors(
                                     containerColor = if (viewModel.timerRunning) MaterialTheme.colorScheme.secondaryContainer
-                                                     else MaterialTheme.colorScheme.primaryContainer
+                                                     else MaterialTheme.colorScheme.primaryContainer,
+                                    disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                    disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
                                 )
                             ) {
                                 Icon(
@@ -865,33 +892,43 @@ fun AnnouncementsTab(
                                            else MaterialTheme.colorScheme.onPrimaryContainer
                                 )
                             }
-                            Button(
+                            IconButton(
                                 onClick = { viewModel.resetTimer() },
-                                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-                                contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp)
+                                colors = IconButtonDefaults.iconButtonColors(
+                                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                    contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
                             ) {
-                                Text(resetLabel, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Icon(painter = painterResource(Res.drawable.ic_refresh), contentDescription = resetLabel, modifier = Modifier.size(20.dp))
+                            }
+                            if (onAddToSchedule != null) {
+                                IconButton(
+                                    onClick = { onAddToSchedule.invoke(viewModel.buildSettings()) },
+                                    enabled = viewModel.text.isNotBlank() || viewModel.timerHours > 0 || viewModel.timerMinutes > 0 || viewModel.timerSeconds > 0,
+                                    colors = IconButtonDefaults.iconButtonColors(
+                                        containerColor = MaterialTheme.colorScheme.secondary,
+                                        contentColor = MaterialTheme.colorScheme.onSecondary,
+                                        disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                        disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                                    )
+                                ) {
+                                    Icon(painter = painterResource(Res.drawable.ic_playlist_add), contentDescription = stringResource(Res.string.add_to_schedule), modifier = Modifier.size(20.dp))
+                                }
                             }
                             if (presenterManager != null) {
-                                Button(
+                                IconButton(
                                     onClick = {
                                         presenterManager.setAnnouncementText(AnnouncementsViewModel.formatTimer(viewModel.timerRemaining))
                                         presenterManager.setPresentingMode(Presenting.ANNOUNCEMENTS)
                                     },
-                                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
-                                    contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp)
+                                    colors = IconButtonDefaults.iconButtonColors(
+                                        containerColor = MaterialTheme.colorScheme.primary,
+                                        contentColor = MaterialTheme.colorScheme.onPrimary,
+                                        disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                        disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                                    )
                                 ) {
-                                    Text(stringResource(Res.string.go_live), style = MaterialTheme.typography.labelMedium)
-                                }
-                            }
-                            if (onAddToSchedule != null) {
-                                Button(
-                                    onClick = { onAddToSchedule.invoke(viewModel.buildSettings()) },
-                                    enabled = viewModel.text.isNotBlank() || viewModel.timerHours > 0 || viewModel.timerMinutes > 0 || viewModel.timerSeconds > 0,
-                                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
-                                    contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp)
-                                ) {
-                                    Text(stringResource(Res.string.add_to_schedule), style = MaterialTheme.typography.labelMedium)
+                                    Icon(painter = painterResource(Res.drawable.ic_cast), contentDescription = stringResource(Res.string.go_live), modifier = Modifier.size(20.dp))
                                 }
                             }
                         }

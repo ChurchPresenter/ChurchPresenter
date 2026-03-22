@@ -21,6 +21,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -53,7 +54,9 @@ import androidx.compose.ui.window.PopupProperties
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.add_to_schedule
 import churchpresenter.composeapp.generated.resources.go_live
+import churchpresenter.composeapp.generated.resources.ic_cast
 import churchpresenter.composeapp.generated.resources.ic_fast_forward
+import churchpresenter.composeapp.generated.resources.ic_playlist_add
 import churchpresenter.composeapp.generated.resources.ic_fast_rewind
 import churchpresenter.composeapp.generated.resources.ic_pause
 import churchpresenter.composeapp.generated.resources.ic_play
@@ -462,40 +465,42 @@ fun MediaTab(
 
             // Action buttons
             Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalArrangement = Arrangement.End,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                if (presenterManager != null) {
-                    Button(
-                        onClick = {
-                            presenterManager.setPresentingMode(Presenting.MEDIA)
-                            presenterManager.setShowPresenterWindow(true)
-                        },
-                        enabled = viewModel.isLoaded,
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.primary
-                        )
-                    ) {
-                        Text(
-                            text = stringResource(Res.string.go_live),
-                            style = MaterialTheme.typography.labelMedium
-                        )
-                    }
-                }
-
-                if (onAddToSchedule != null && viewModel.isLoaded) {
-                    Button(
+                if (onAddToSchedule != null) {
+                    IconButton(
                         onClick = {
                             onAddToSchedule(viewModel.mediaUrl, viewModel.mediaTitle, viewModel.mediaType)
                         },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.secondary
+                        enabled = viewModel.isLoaded,
+                        colors = IconButtonDefaults.iconButtonColors(
+                            containerColor = MaterialTheme.colorScheme.secondary,
+                            contentColor = MaterialTheme.colorScheme.onSecondary,
+                            disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                            disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
                         )
                     ) {
-                        Text(
-                            text = stringResource(Res.string.add_to_schedule),
-                            style = MaterialTheme.typography.labelMedium
+                        Icon(painter = painterResource(Res.drawable.ic_playlist_add), contentDescription = stringResource(Res.string.add_to_schedule), modifier = Modifier.size(20.dp))
+                    }
+                }
+
+                if (presenterManager != null) {
+                    IconButton(
+                        onClick = {
+                            presenterManager.setPresentingMode(Presenting.MEDIA)
+                            presenterManager.setShowPresenterWindow(true)
+                            viewModel.play()
+                        },
+                        enabled = viewModel.isLoaded,
+                        colors = IconButtonDefaults.iconButtonColors(
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = MaterialTheme.colorScheme.onPrimary,
+                            disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                            disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
                         )
+                    ) {
+                        Icon(painter = painterResource(Res.drawable.ic_cast), contentDescription = stringResource(Res.string.go_live), modifier = Modifier.size(20.dp))
                     }
                 }
             }

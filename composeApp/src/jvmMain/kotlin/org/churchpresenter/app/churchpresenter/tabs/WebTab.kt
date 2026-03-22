@@ -22,8 +22,15 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.PlainTooltip
+import androidx.compose.material3.TooltipBox
+import androidx.compose.material3.TooltipDefaults
+import androidx.compose.material3.rememberTooltipState
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
@@ -65,6 +72,8 @@ import churchpresenter.composeapp.generated.resources.web_add_to_schedule
 import churchpresenter.composeapp.generated.resources.web_back
 import churchpresenter.composeapp.generated.resources.web_clear_cache
 import churchpresenter.composeapp.generated.resources.web_forward
+import churchpresenter.composeapp.generated.resources.ic_cast
+import churchpresenter.composeapp.generated.resources.ic_playlist_add
 import churchpresenter.composeapp.generated.resources.web_go_live
 import churchpresenter.composeapp.generated.resources.web_live_badge
 import churchpresenter.composeapp.generated.resources.web_preview_hint
@@ -205,6 +214,12 @@ fun WebTab(
         val minUrlWidth = 200.dp
 
         val hasSecondaryDisplay = rememberScreenDevices().size > 1
+        // Web can only go live if at least one regular (non-DeckLink) fill output has showWebsite enabled
+        val hasWebCapableOutput = remember(appSettings.projectionSettings) {
+            val proj = appSettings.projectionSettings
+            val assignments = (0 until proj.screenAssignments.size).map { proj.getAssignment(it) }
+            assignments.any { it.targetType != "decklink" && it.targetDisplay >= 0 && it.showWebsite }
+        }
 
         // Shared composables for URL bar and action buttons
         val urlBar: @Composable RowScope.() -> Unit = {
@@ -267,21 +282,27 @@ fun WebTab(
 
             // Add to Schedule
             if (onAddToSchedule != null) {
-                Button(
+                IconButton(
                     onClick = {
                         val url = normaliseUrl(urlInput)
                         val title = pageTitle.ifBlank { url }
                         onAddToSchedule(url, title)
                     },
                     enabled = urlInput.isNotBlank(),
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
+                    colors = IconButtonDefaults.iconButtonColors(
+                        containerColor = MaterialTheme.colorScheme.secondary,
+                        contentColor = MaterialTheme.colorScheme.onSecondary,
+                        disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                        disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                    )
                 ) {
-                    Text(stringResource(Res.string.web_add_to_schedule), style = MaterialTheme.typography.labelMedium)
+                    Icon(painter = painterResource(Res.drawable.ic_playlist_add), contentDescription = stringResource(Res.string.web_add_to_schedule), modifier = Modifier.size(20.dp))
                 }
             }
 
             // Go Live
-            Button(
+            val goLiveEnabled = urlInput.isNotBlank() && hasSecondaryDisplay && hasWebCapableOutput
+            IconButton(
                 onClick = {
                     val url = normaliseUrl(urlInput)
                     urlInput = url
@@ -289,10 +310,15 @@ fun WebTab(
                     presenterManager?.setWebsiteUrl(url)
                     presenterManager?.setPresentingMode(Presenting.WEBSITE)
                 },
-                enabled = urlInput.isNotBlank() && hasSecondaryDisplay,
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                enabled = goLiveEnabled,
+                colors = IconButtonDefaults.iconButtonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                    disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                )
             ) {
-                Text(stringResource(Res.string.web_go_live), style = MaterialTheme.typography.labelMedium)
+                Icon(painter = painterResource(Res.drawable.ic_cast), contentDescription = stringResource(Res.string.web_go_live), modifier = Modifier.size(20.dp))
             }
         }
 

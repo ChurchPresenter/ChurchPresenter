@@ -23,6 +23,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -42,8 +43,10 @@ import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.add_to_schedule
 import churchpresenter.composeapp.generated.resources.go_live
+import churchpresenter.composeapp.generated.resources.ic_cast
 import churchpresenter.composeapp.generated.resources.ic_close
 import churchpresenter.composeapp.generated.resources.ic_pause
+import churchpresenter.composeapp.generated.resources.ic_playlist_add
 import churchpresenter.composeapp.generated.resources.ic_play
 import churchpresenter.composeapp.generated.resources.ic_skip_next
 import churchpresenter.composeapp.generated.resources.ic_skip_previous
@@ -205,8 +208,60 @@ fun PresentationTab(
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        // Action buttons — always visible
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.End,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Add to Schedule button
+            if (onAddToSchedule != null) {
+                IconButton(
+                    onClick = {
+                        val file = viewModel.selectedPresentation ?: return@IconButton
+                        onAddToSchedule(
+                            file.absolutePath,
+                            file.nameWithoutExtension,
+                            viewModel.slides.size,
+                            file.extension.lowercase()
+                        )
+                    },
+                    enabled = viewModel.selectedPresentation != null,
+                    colors = IconButtonDefaults.iconButtonColors(
+                        containerColor = MaterialTheme.colorScheme.secondary,
+                        contentColor = MaterialTheme.colorScheme.onSecondary,
+                        disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                        disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                    )
+                ) {
+                    Icon(painter = painterResource(Res.drawable.ic_playlist_add), contentDescription = stringResource(Res.string.add_to_schedule), modifier = Modifier.size(20.dp))
+                }
+            }
+
+            // Go Live button
+            if (presenterManager != null) {
+                IconButton(
+                    onClick = {
+                        val slide = viewModel.slides.getOrNull(viewModel.selectedSlideIndex)
+                        presenterManager.setSelectedSlide(slide)
+                        presenterManager.setPresentingMode(Presenting.PRESENTATION)
+                        presenterManager.setShowPresenterWindow(true)
+                    },
+                    enabled = viewModel.slides.isNotEmpty(),
+                    colors = IconButtonDefaults.iconButtonColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary,
+                        disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                        disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                    )
+                ) {
+                    Icon(painter = painterResource(Res.drawable.ic_cast), contentDescription = stringResource(Res.string.go_live), modifier = Modifier.size(20.dp))
+                }
+            }
+        }
+
         if (viewModel.slides.isNotEmpty()) {
-            // Playback Controls - Similar to PicturesTab
+            // Playback Controls
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -273,56 +328,6 @@ fun PresentationTab(
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                }
-
-                // Right side: Action buttons
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    // Go Live button
-                    if (presenterManager != null) {
-                        Button(
-                            onClick = {
-                                val slide = viewModel.slides.getOrNull(viewModel.selectedSlideIndex)
-                                presenterManager.setSelectedSlide(slide)
-                                presenterManager.setPresentingMode(Presenting.PRESENTATION)
-                                presenterManager.setShowPresenterWindow(true)
-                            },
-                            enabled = viewModel.slides.isNotEmpty(),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.primary
-                            )
-                        ) {
-                            Text(
-                                text = stringResource(Res.string.go_live),
-                                style = MaterialTheme.typography.labelMedium
-                            )
-                        }
-                    }
-
-                    // Add to Schedule button
-                    if (onAddToSchedule != null && viewModel.selectedPresentation != null) {
-                        Button(
-                            onClick = {
-                                val file = viewModel.selectedPresentation ?: return@Button
-                                onAddToSchedule(
-                                    file.absolutePath,
-                                    file.nameWithoutExtension,
-                                    viewModel.slides.size,
-                                    file.extension.lowercase()
-                                )
-                            },
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.secondary
-                            )
-                        ) {
-                            Text(
-                                text = stringResource(Res.string.add_to_schedule),
-                                style = MaterialTheme.typography.labelMedium
-                            )
-                        }
-                    }
                 }
             }
 

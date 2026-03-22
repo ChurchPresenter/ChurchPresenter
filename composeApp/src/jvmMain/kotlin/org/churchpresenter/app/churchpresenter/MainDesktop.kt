@@ -140,7 +140,7 @@ fun MainDesktop(
     /** Emits a verse to display instantly without approval. */
     selectBibleVerseFlow: Flow<SelectBibleVerseRequest>? = null,
     remoteSelectSongFlow: Flow<ScheduleItem.SongItem>? = null,
-    serverUrl: String = ""
+    serverUrl: String = "",
 ) {
     val isDarkTheme = when (theme) {
         ThemeMode.LIGHT -> false
@@ -559,7 +559,7 @@ fun MainDesktop(
                         .width(16.dp)
                         .fillMaxHeight()
                         .background(MaterialTheme.colorScheme.surfaceVariant)
-                        .pointerInput(scheduleCollapsed) {
+                        .pointerInput(scheduleCollapsed, appSettings.schedulePanelWidthDp) {
                             if (!scheduleCollapsed) {
                                 detectHorizontalDragGestures(
                                     onDragEnd = ::saveScheduleWidth
@@ -760,7 +760,7 @@ fun MainDesktop(
                         .width(16.dp)
                         .fillMaxHeight()
                         .background(MaterialTheme.colorScheme.surfaceVariant)
-                        .pointerInput(previewCollapsed) {
+                        .pointerInput(previewCollapsed, appSettings.previewPanelWidthDp) {
                             if (!previewCollapsed) {
                                 detectHorizontalDragGestures(
                                     onDragEnd = ::savePreviewWidth

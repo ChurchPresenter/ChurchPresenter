@@ -464,12 +464,12 @@ private fun PrimaryBibleColumn(
             }
             AnimatedVisibility(visible = settings.bibleSettings.primaryBibleShadow) {
                 ShadowDetailRow(
-                    shadowColor = settings.bibleSettings.shadowColor,
-                    shadowSize = settings.bibleSettings.shadowSize,
-                    shadowOpacity = settings.bibleSettings.shadowOpacity,
-                    onColorChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(shadowColor = it)) } },
-                    onSizeChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(shadowSize = it)) } },
-                    onOpacityChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(shadowOpacity = it)) } }
+                    shadowColor = settings.bibleSettings.primaryBibleShadowColor,
+                    shadowSize = settings.bibleSettings.primaryBibleShadowSize,
+                    shadowOpacity = settings.bibleSettings.primaryBibleShadowOpacity,
+                    onColorChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(primaryBibleShadowColor = it)) } },
+                    onSizeChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(primaryBibleShadowSize = it)) } },
+                    onOpacityChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(primaryBibleShadowOpacity = it)) } }
                 )
             }
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -493,12 +493,12 @@ private fun PrimaryBibleColumn(
             }
             AnimatedVisibility(visible = settings.bibleSettings.primaryBibleLowerThirdShadow) {
                 ShadowDetailRow(
-                    shadowColor = settings.bibleSettings.lowerThirdShadowColor,
-                    shadowSize = settings.bibleSettings.lowerThirdShadowSize,
-                    shadowOpacity = settings.bibleSettings.lowerThirdShadowOpacity,
-                    onColorChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(lowerThirdShadowColor = it)) } },
-                    onSizeChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(lowerThirdShadowSize = it)) } },
-                    onOpacityChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(lowerThirdShadowOpacity = it)) } }
+                    shadowColor = settings.bibleSettings.primaryBibleLowerThirdShadowColor,
+                    shadowSize = settings.bibleSettings.primaryBibleLowerThirdShadowSize,
+                    shadowOpacity = settings.bibleSettings.primaryBibleLowerThirdShadowOpacity,
+                    onColorChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(primaryBibleLowerThirdShadowColor = it)) } },
+                    onSizeChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(primaryBibleLowerThirdShadowSize = it)) } },
+                    onOpacityChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(primaryBibleLowerThirdShadowOpacity = it)) } }
                 )
             }
         }
@@ -683,12 +683,12 @@ private fun PrimaryBibleColumn(
             }
             AnimatedVisibility(visible = settings.bibleSettings.primaryReferenceShadow) {
                 ShadowDetailRow(
-                    shadowColor = settings.bibleSettings.shadowColor,
-                    shadowSize = settings.bibleSettings.shadowSize,
-                    shadowOpacity = settings.bibleSettings.shadowOpacity,
-                    onColorChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(shadowColor = it)) } },
-                    onSizeChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(shadowSize = it)) } },
-                    onOpacityChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(shadowOpacity = it)) } }
+                    shadowColor = settings.bibleSettings.primaryReferenceShadowColor,
+                    shadowSize = settings.bibleSettings.primaryReferenceShadowSize,
+                    shadowOpacity = settings.bibleSettings.primaryReferenceShadowOpacity,
+                    onColorChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(primaryReferenceShadowColor = it)) } },
+                    onSizeChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(primaryReferenceShadowSize = it)) } },
+                    onOpacityChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(primaryReferenceShadowOpacity = it)) } }
                 )
             }
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -712,12 +712,12 @@ private fun PrimaryBibleColumn(
             }
             AnimatedVisibility(visible = settings.bibleSettings.primaryReferenceLowerThirdShadow) {
                 ShadowDetailRow(
-                    shadowColor = settings.bibleSettings.lowerThirdShadowColor,
-                    shadowSize = settings.bibleSettings.lowerThirdShadowSize,
-                    shadowOpacity = settings.bibleSettings.lowerThirdShadowOpacity,
-                    onColorChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(lowerThirdShadowColor = it)) } },
-                    onSizeChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(lowerThirdShadowSize = it)) } },
-                    onOpacityChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(lowerThirdShadowOpacity = it)) } }
+                    shadowColor = settings.bibleSettings.primaryReferenceLowerThirdShadowColor,
+                    shadowSize = settings.bibleSettings.primaryReferenceLowerThirdShadowSize,
+                    shadowOpacity = settings.bibleSettings.primaryReferenceLowerThirdShadowOpacity,
+                    onColorChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(primaryReferenceLowerThirdShadowColor = it)) } },
+                    onSizeChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(primaryReferenceLowerThirdShadowSize = it)) } },
+                    onOpacityChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(primaryReferenceLowerThirdShadowOpacity = it)) } }
                 )
             }
         }
@@ -863,12 +863,12 @@ private fun SecondaryBibleColumn(
             }
             AnimatedVisibility(visible = settings.bibleSettings.secondaryBibleShadow) {
                 ShadowDetailRow(
-                    shadowColor = settings.bibleSettings.shadowColor,
-                    shadowSize = settings.bibleSettings.shadowSize,
-                    shadowOpacity = settings.bibleSettings.shadowOpacity,
-                    onColorChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(shadowColor = it)) } },
-                    onSizeChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(shadowSize = it)) } },
-                    onOpacityChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(shadowOpacity = it)) } }
+                    shadowColor = settings.bibleSettings.secondaryBibleShadowColor,
+                    shadowSize = settings.bibleSettings.secondaryBibleShadowSize,
+                    shadowOpacity = settings.bibleSettings.secondaryBibleShadowOpacity,
+                    onColorChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(secondaryBibleShadowColor = it)) } },
+                    onSizeChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(secondaryBibleShadowSize = it)) } },
+                    onOpacityChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(secondaryBibleShadowOpacity = it)) } }
                 )
             }
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -892,12 +892,12 @@ private fun SecondaryBibleColumn(
             }
             AnimatedVisibility(visible = settings.bibleSettings.secondaryBibleLowerThirdShadow) {
                 ShadowDetailRow(
-                    shadowColor = settings.bibleSettings.lowerThirdShadowColor,
-                    shadowSize = settings.bibleSettings.lowerThirdShadowSize,
-                    shadowOpacity = settings.bibleSettings.lowerThirdShadowOpacity,
-                    onColorChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(lowerThirdShadowColor = it)) } },
-                    onSizeChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(lowerThirdShadowSize = it)) } },
-                    onOpacityChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(lowerThirdShadowOpacity = it)) } }
+                    shadowColor = settings.bibleSettings.secondaryBibleLowerThirdShadowColor,
+                    shadowSize = settings.bibleSettings.secondaryBibleLowerThirdShadowSize,
+                    shadowOpacity = settings.bibleSettings.secondaryBibleLowerThirdShadowOpacity,
+                    onColorChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(secondaryBibleLowerThirdShadowColor = it)) } },
+                    onSizeChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(secondaryBibleLowerThirdShadowSize = it)) } },
+                    onOpacityChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(secondaryBibleLowerThirdShadowOpacity = it)) } }
                 )
             }
         }
@@ -1081,12 +1081,12 @@ private fun SecondaryBibleColumn(
             }
             AnimatedVisibility(visible = settings.bibleSettings.secondaryReferenceShadow) {
                 ShadowDetailRow(
-                    shadowColor = settings.bibleSettings.shadowColor,
-                    shadowSize = settings.bibleSettings.shadowSize,
-                    shadowOpacity = settings.bibleSettings.shadowOpacity,
-                    onColorChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(shadowColor = it)) } },
-                    onSizeChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(shadowSize = it)) } },
-                    onOpacityChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(shadowOpacity = it)) } }
+                    shadowColor = settings.bibleSettings.secondaryReferenceShadowColor,
+                    shadowSize = settings.bibleSettings.secondaryReferenceShadowSize,
+                    shadowOpacity = settings.bibleSettings.secondaryReferenceShadowOpacity,
+                    onColorChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(secondaryReferenceShadowColor = it)) } },
+                    onSizeChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(secondaryReferenceShadowSize = it)) } },
+                    onOpacityChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(secondaryReferenceShadowOpacity = it)) } }
                 )
             }
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -1110,12 +1110,12 @@ private fun SecondaryBibleColumn(
             }
             AnimatedVisibility(visible = settings.bibleSettings.secondaryReferenceLowerThirdShadow) {
                 ShadowDetailRow(
-                    shadowColor = settings.bibleSettings.lowerThirdShadowColor,
-                    shadowSize = settings.bibleSettings.lowerThirdShadowSize,
-                    shadowOpacity = settings.bibleSettings.lowerThirdShadowOpacity,
-                    onColorChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(lowerThirdShadowColor = it)) } },
-                    onSizeChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(lowerThirdShadowSize = it)) } },
-                    onOpacityChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(lowerThirdShadowOpacity = it)) } }
+                    shadowColor = settings.bibleSettings.secondaryReferenceLowerThirdShadowColor,
+                    shadowSize = settings.bibleSettings.secondaryReferenceLowerThirdShadowSize,
+                    shadowOpacity = settings.bibleSettings.secondaryReferenceLowerThirdShadowOpacity,
+                    onColorChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(secondaryReferenceLowerThirdShadowColor = it)) } },
+                    onSizeChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(secondaryReferenceLowerThirdShadowSize = it)) } },
+                    onOpacityChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(secondaryReferenceLowerThirdShadowOpacity = it)) } }
                 )
             }
         }

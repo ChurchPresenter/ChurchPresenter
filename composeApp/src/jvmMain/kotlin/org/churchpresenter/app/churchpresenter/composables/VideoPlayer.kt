@@ -6,6 +6,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.awt.SwingPanel
+import androidx.compose.ui.graphics.toComposeImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import javafx.embed.swing.JFXPanel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
@@ -223,7 +225,7 @@ fun VideoPlayer(
                 viewModel.setDuration(newLength)
             }
             override fun finished(mediaPlayer: MediaPlayer) {
-                if (audioEnabled) viewModel.pause()
+                viewModel.markFinished()
             }
             override fun error(mediaPlayer: MediaPlayer) {
                 System.err.println("VLCJ: Playback error")
@@ -306,4 +308,157 @@ fun VideoPlayer(
     }
 
     SwingPanel(factory = { component }, modifier = modifier)
+}
+
+/**
+ * Software-rendering video player that works in any context (including offscreen DeckLink).
+ * Uses VLCJ's CallbackVideoSurface to capture frames as BufferedImage → Compose Image.
+ * Integrates with MediaViewModel for full playback control.
+ */
+@Composable
+fun SoftwareVideoPlayer(
+    viewModel: MediaViewModel,
+    modifier: Modifier = Modifier,
+    audioEnabled: Boolean = true,
+    audioDeviceId: String = ""
+) {
+    if (!isVlcAvailable) return
+
+    val currentFrame = remember { androidx.compose.runtime.mutableStateOf<androidx.compose.ui.graphics.ImageBitmap?>(null) }
+
+    val factory = remember {
+        try { MediaPlayerFactory() } catch (_: Throwable) { null }
+    } ?: return
+
+    val mp = remember(factory) {
+        try { factory.mediaPlayers().newEmbeddedMediaPlayer() } catch (_: Throwable) { null }
+    } ?: return
+
+    // Set up callback video surface for software rendering
+    DisposableEffect(Unit) {
+        var bufferedImage: java.awt.image.BufferedImage? = null
+
+        val bufferFormatCallback = object : uk.co.caprica.vlcj.player.embedded.videosurface.callback.BufferFormatCallback {
+            override fun getBufferFormat(sourceWidth: Int, sourceHeight: Int): uk.co.caprica.vlcj.player.embedded.videosurface.callback.BufferFormat {
+                bufferedImage = java.awt.image.BufferedImage(sourceWidth, sourceHeight, java.awt.image.BufferedImage.TYPE_INT_ARGB)
+                return uk.co.caprica.vlcj.player.embedded.videosurface.callback.format.RV32BufferFormat(sourceWidth, sourceHeight)
+            }
+            override fun allocatedBuffers(buffers: Array<out java.nio.ByteBuffer>) { }
+        }
+
+        val renderCallback = uk.co.caprica.vlcj.player.embedded.videosurface.callback.RenderCallback { _, nativeBuffers, _ ->
+            val img = bufferedImage ?: return@RenderCallback
+            if (nativeBuffers == null || nativeBuffers.isEmpty()) return@RenderCallback
+            val pixelData = (img.raster.dataBuffer as? java.awt.image.DataBufferInt)?.data ?: return@RenderCallback
+            try {
+                val buf = nativeBuffers[0] ?: return@RenderCallback
+                buf.rewind()
+                buf.asIntBuffer().get(pixelData, 0, pixelData.size.coerceAtMost(buf.remaining() / 4))
+                currentFrame.value = img.toComposeImageBitmap()
+            } catch (_: Throwable) { }
+        }
+
+        mp.videoSurface().set(
+            factory.videoSurfaces().newVideoSurface(bufferFormatCallback, renderCallback, true)
+        )
+
+        mp.events().addMediaPlayerEventListener(object : MediaPlayerEventAdapter() {
+            override fun lengthChanged(mediaPlayer: MediaPlayer, newLength: Long) {
+                viewModel.setDuration(newLength)
+            }
+            override fun finished(mediaPlayer: MediaPlayer) {
+                viewModel.markFinished()
+            }
+            override fun error(mediaPlayer: MediaPlayer) {
+                System.err.println("VLCJ (software): Playback error")
+            }
+        })
+
+        onDispose {
+            try {
+                mp.controls().stop()
+                mp.release()
+                factory.release()
+            } catch (_: Throwable) { }
+        }
+    }
+
+    // Apply audio output device
+    LaunchedEffect(audioDeviceId) {
+        if (audioDeviceId.isNotBlank()) {
+            mp.audio().setOutputDevice(null, audioDeviceId)
+        }
+    }
+
+    // Load media when URL changes
+    LaunchedEffect(viewModel.mediaUrl) {
+        val url = viewModel.mediaUrl
+        mp.controls().stop()
+        if (url.isBlank()) return@LaunchedEffect
+
+        val mrl = try {
+            val f = File(url)
+            if (f.exists()) f.absolutePath else url
+        } catch (_: Exception) { url }
+
+        if (!audioEnabled) mp.audio().setVolume(0)
+        else mp.audio().setVolume((viewModel.effectiveVolume * 100).toInt())
+
+        mp.media().play(mrl)
+        if (!viewModel.isPlaying) {
+            delay(150)
+            SwingUtilities.invokeLater {
+                if (!viewModel.isPlaying && mp.status().isPlaying) {
+                    mp.controls().pause()
+                }
+            }
+        }
+    }
+
+    // Play / pause sync
+    LaunchedEffect(viewModel.isPlaying) {
+        SwingUtilities.invokeLater {
+            if (viewModel.isPlaying) {
+                if (!mp.status().isPlaying) mp.controls().play()
+            } else {
+                if (mp.status().isPlaying) mp.controls().pause()
+            }
+        }
+    }
+
+    // Volume sync
+    LaunchedEffect(viewModel.effectiveVolume) {
+        if (audioEnabled) {
+            mp.audio().setVolume((viewModel.effectiveVolume * 100).toInt())
+        }
+    }
+
+    // Seek sync
+    LaunchedEffect(viewModel.seekVersion) {
+        if (viewModel.currentPosition >= 0) {
+            mp.controls().setTime(viewModel.currentPosition)
+        }
+    }
+
+    // Poll position for progress bar updates
+    if (audioEnabled) {
+        LaunchedEffect(viewModel.mediaUrl) {
+            while (isActive) {
+                delay(250)
+                if (mp.status().isPlaying) {
+                    viewModel.setCurrentPosition(mp.status().time())
+                }
+            }
+        }
+    }
+
+    // Render current frame as Compose Image
+    currentFrame.value?.let { frame ->
+        androidx.compose.foundation.Image(
+            bitmap = frame,
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = modifier
+        )
+    }
 }

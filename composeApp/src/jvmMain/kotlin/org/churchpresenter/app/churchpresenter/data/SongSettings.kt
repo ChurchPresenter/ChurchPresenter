@@ -132,11 +132,26 @@ data class SongSettings(
     val marginLeft: Int = 96,
     val marginRight: Int = 96,
 
-    // Shadow customization — fullscreen
+    // Shadow customization — per-element (title)
+    val titleShadowColor: String = "#000000",
+    val titleShadowSize: Int = 100,
+    val titleShadowOpacity: Int = 90,
+    val titleLowerThirdShadowColor: String = "#000000",
+    val titleLowerThirdShadowSize: Int = 100,
+    val titleLowerThirdShadowOpacity: Int = 90,
+
+    // Shadow customization — per-element (lyrics)
+    val lyricsShadowColor: String = "#000000",
+    val lyricsShadowSize: Int = 100,
+    val lyricsShadowOpacity: Int = 90,
+    val lyricsLowerThirdShadowColor: String = "#000000",
+    val lyricsLowerThirdShadowSize: Int = 100,
+    val lyricsLowerThirdShadowOpacity: Int = 90,
+
+    // Legacy shared shadow properties (kept for backward compatibility)
     val shadowColor: String = "#000000",
-    val shadowSize: Int = 100,      // percentage multiplier for offset & blur (10–500)
-    val shadowOpacity: Int = 90,    // percentage for shadow alpha (10–100)
-    // Shadow customization — lower third
+    val shadowSize: Int = 100,
+    val shadowOpacity: Int = 90,
     val lowerThirdShadowColor: String = "#000000",
     val lowerThirdShadowSize: Int = 100,
     val lowerThirdShadowOpacity: Int = 90,
@@ -321,14 +336,34 @@ data class BibleSettings(
     val marginLeft: Int = 96,
     val marginRight: Int = 96,
 
-    // Shadow customization — fullscreen
-    val shadowColor: String = "#000000",
-    val shadowSize: Int = 100,      // percentage multiplier for offset & blur (10–500)
-    val shadowOpacity: Int = 90,    // percentage for shadow alpha (10–100)
-    // Shadow customization — lower third
-    val lowerThirdShadowColor: String = "#000000",
-    val lowerThirdShadowSize: Int = 100,
-    val lowerThirdShadowOpacity: Int = 90,
+    // Shadow customization — per-element
+    val primaryBibleShadowColor: String = "#000000",
+    val primaryBibleShadowSize: Int = 100,
+    val primaryBibleShadowOpacity: Int = 90,
+    val primaryBibleLowerThirdShadowColor: String = "#000000",
+    val primaryBibleLowerThirdShadowSize: Int = 100,
+    val primaryBibleLowerThirdShadowOpacity: Int = 90,
+
+    val primaryReferenceShadowColor: String = "#000000",
+    val primaryReferenceShadowSize: Int = 100,
+    val primaryReferenceShadowOpacity: Int = 90,
+    val primaryReferenceLowerThirdShadowColor: String = "#000000",
+    val primaryReferenceLowerThirdShadowSize: Int = 100,
+    val primaryReferenceLowerThirdShadowOpacity: Int = 90,
+
+    val secondaryBibleShadowColor: String = "#000000",
+    val secondaryBibleShadowSize: Int = 100,
+    val secondaryBibleShadowOpacity: Int = 90,
+    val secondaryBibleLowerThirdShadowColor: String = "#000000",
+    val secondaryBibleLowerThirdShadowSize: Int = 100,
+    val secondaryBibleLowerThirdShadowOpacity: Int = 90,
+
+    val secondaryReferenceShadowColor: String = "#000000",
+    val secondaryReferenceShadowSize: Int = 100,
+    val secondaryReferenceShadowOpacity: Int = 90,
+    val secondaryReferenceLowerThirdShadowColor: String = "#000000",
+    val secondaryReferenceLowerThirdShadowSize: Int = 100,
+    val secondaryReferenceLowerThirdShadowOpacity: Int = 90,
 
     // Transition animation
     val fadeIn: Boolean = true,
@@ -349,6 +384,12 @@ data class BibleSettings(
         primaryBibleItalic = secondaryBibleItalic,
         primaryBibleUnderline = secondaryBibleUnderline,
         primaryBibleShadow = secondaryBibleShadow,
+        primaryBibleShadowColor = secondaryBibleShadowColor,
+        primaryBibleShadowSize = secondaryBibleShadowSize,
+        primaryBibleShadowOpacity = secondaryBibleShadowOpacity,
+        primaryBibleLowerThirdShadowColor = secondaryBibleLowerThirdShadowColor,
+        primaryBibleLowerThirdShadowSize = secondaryBibleLowerThirdShadowSize,
+        primaryBibleLowerThirdShadowOpacity = secondaryBibleLowerThirdShadowOpacity,
         primaryBibleLowerThirdColor = secondaryBibleLowerThirdColor,
         primaryBibleLowerThirdFontType = secondaryBibleLowerThirdFontType,
         primaryBibleLowerThirdBold = secondaryBibleLowerThirdBold,
@@ -368,6 +409,12 @@ data class BibleSettings(
         primaryReferenceItalic = secondaryReferenceItalic,
         primaryReferenceUnderline = secondaryReferenceUnderline,
         primaryReferenceShadow = secondaryReferenceShadow,
+        primaryReferenceShadowColor = secondaryReferenceShadowColor,
+        primaryReferenceShadowSize = secondaryReferenceShadowSize,
+        primaryReferenceShadowOpacity = secondaryReferenceShadowOpacity,
+        primaryReferenceLowerThirdShadowColor = secondaryReferenceLowerThirdShadowColor,
+        primaryReferenceLowerThirdShadowSize = secondaryReferenceLowerThirdShadowSize,
+        primaryReferenceLowerThirdShadowOpacity = secondaryReferenceLowerThirdShadowOpacity,
         primaryReferenceLowerThirdColor = secondaryReferenceLowerThirdColor,
         primaryReferenceLowerThirdFontType = secondaryReferenceLowerThirdFontType,
         primaryReferenceLowerThirdBold = secondaryReferenceLowerThirdBold,
@@ -384,6 +431,12 @@ data class BibleSettings(
         secondaryBibleItalic = primaryBibleItalic,
         secondaryBibleUnderline = primaryBibleUnderline,
         secondaryBibleShadow = primaryBibleShadow,
+        secondaryBibleShadowColor = primaryBibleShadowColor,
+        secondaryBibleShadowSize = primaryBibleShadowSize,
+        secondaryBibleShadowOpacity = primaryBibleShadowOpacity,
+        secondaryBibleLowerThirdShadowColor = primaryBibleLowerThirdShadowColor,
+        secondaryBibleLowerThirdShadowSize = primaryBibleLowerThirdShadowSize,
+        secondaryBibleLowerThirdShadowOpacity = primaryBibleLowerThirdShadowOpacity,
         secondaryBibleLowerThirdColor = primaryBibleLowerThirdColor,
         secondaryBibleLowerThirdFontType = primaryBibleLowerThirdFontType,
         secondaryBibleLowerThirdBold = primaryBibleLowerThirdBold,
@@ -403,6 +456,12 @@ data class BibleSettings(
         secondaryReferenceItalic = primaryReferenceItalic,
         secondaryReferenceUnderline = primaryReferenceUnderline,
         secondaryReferenceShadow = primaryReferenceShadow,
+        secondaryReferenceShadowColor = primaryReferenceShadowColor,
+        secondaryReferenceShadowSize = primaryReferenceShadowSize,
+        secondaryReferenceShadowOpacity = primaryReferenceShadowOpacity,
+        secondaryReferenceLowerThirdShadowColor = primaryReferenceLowerThirdShadowColor,
+        secondaryReferenceLowerThirdShadowSize = primaryReferenceLowerThirdShadowSize,
+        secondaryReferenceLowerThirdShadowOpacity = primaryReferenceLowerThirdShadowOpacity,
         secondaryReferenceLowerThirdColor = primaryReferenceLowerThirdColor,
         secondaryReferenceLowerThirdFontType = primaryReferenceLowerThirdFontType,
         secondaryReferenceLowerThirdBold = primaryReferenceLowerThirdBold,
@@ -432,8 +491,11 @@ data class ScreenAssignment(
     val showMedia: Boolean = true,
     val showStreaming: Boolean = true,
     val showAnnouncements: Boolean = true,
+    val showWebsite: Boolean = true,
     val displayMode: String = "fullscreen", // Constants.DISPLAY_MODE_FULLSCREEN or DISPLAY_MODE_LOWER_THIRD
-    val songLookAhead: Boolean = false // enable look-ahead for songs on this output
+    val songLookAhead: Boolean = false, // enable look-ahead for songs on this output
+    val showFullscreenBackground: Boolean = true, // show configured background in fullscreen mode
+    val showLowerThirdBackground: Boolean = true  // show configured background in lower third mode
 ) {
     /** Whether a key output target is configured */
     val hasKeyOutput: Boolean get() = keyTargetDisplay >= 0

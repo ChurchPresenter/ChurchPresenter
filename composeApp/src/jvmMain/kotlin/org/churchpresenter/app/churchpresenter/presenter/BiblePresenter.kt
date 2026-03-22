@@ -17,6 +17,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.draw.paint
@@ -46,7 +47,7 @@ import java.io.File
 import kotlin.math.min
 
 private fun binarySearchFitScale(
-    minScale: Float = 0.3f,
+    minScale: Float = 0.15f,
     iterations: Int = 8,
     fits: (scale: Float) -> Boolean
 ): Float {
@@ -67,8 +68,10 @@ fun BiblePresenter(
     isLowerThird: Boolean = false,
     outputRole: String = Constants.OUTPUT_ROLE_NORMAL,
     transitionAlpha: Float = 1f,
+    showBackground: Boolean = true,
 ) {
     val isFillOrKey = outputRole == Constants.OUTPUT_ROLE_FILL || outputRole == Constants.OUTPUT_ROLE_KEY
+    val isKey = outputRole == Constants.OUTPUT_ROLE_KEY
     val bs = appSettings.bibleSettings
 
     // Resolve font families — use lower-third-specific values when applicable
@@ -96,26 +99,30 @@ fun BiblePresenter(
     val primaryBible = selectedVerses.first()
     val secondaryBible = selectedVerses.getOrNull(1)
 
-    // Resolve colors — use lower-third-specific values when applicable
+    // Resolve colors — key mode forces white for a proper key signal
     val primaryBibleTextColor = remember(
-        if (isLowerThird) bs.primaryBibleLowerThirdColor else bs.primaryBibleColor
+        if (isLowerThird) bs.primaryBibleLowerThirdColor else bs.primaryBibleColor, isKey
     ) {
-        parseHexColor(if (isLowerThird) bs.primaryBibleLowerThirdColor else bs.primaryBibleColor)
+        if (isKey) Color.White
+        else parseHexColor(if (isLowerThird) bs.primaryBibleLowerThirdColor else bs.primaryBibleColor)
     }
     val primaryBibleReferenceTextColor = remember(
-        if (isLowerThird) bs.primaryReferenceLowerThirdColor else bs.primaryReferenceColor
+        if (isLowerThird) bs.primaryReferenceLowerThirdColor else bs.primaryReferenceColor, isKey
     ) {
-        parseHexColor(if (isLowerThird) bs.primaryReferenceLowerThirdColor else bs.primaryReferenceColor)
+        if (isKey) Color.White
+        else parseHexColor(if (isLowerThird) bs.primaryReferenceLowerThirdColor else bs.primaryReferenceColor)
     }
     val secondaryBibleTextColor = remember(
-        if (isLowerThird) bs.secondaryBibleLowerThirdColor else bs.secondaryBibleColor
+        if (isLowerThird) bs.secondaryBibleLowerThirdColor else bs.secondaryBibleColor, isKey
     ) {
-        parseHexColor(if (isLowerThird) bs.secondaryBibleLowerThirdColor else bs.secondaryBibleColor)
+        if (isKey) Color.White
+        else parseHexColor(if (isLowerThird) bs.secondaryBibleLowerThirdColor else bs.secondaryBibleColor)
     }
     val secondaryBibleReferenceTextColor = remember(
-        if (isLowerThird) bs.secondaryReferenceLowerThirdColor else bs.secondaryReferenceColor
+        if (isLowerThird) bs.secondaryReferenceLowerThirdColor else bs.secondaryReferenceColor, isKey
     ) {
-        parseHexColor(if (isLowerThird) bs.secondaryReferenceLowerThirdColor else bs.secondaryReferenceColor)
+        if (isKey) Color.White
+        else parseHexColor(if (isLowerThird) bs.secondaryReferenceLowerThirdColor else bs.secondaryReferenceColor)
     }
 
     // Resolve bold/italic/underline/shadow — use lower-third-specific values when applicable
@@ -136,13 +143,37 @@ fun BiblePresenter(
     val srUnderline = if (isLowerThird) bs.secondaryReferenceLowerThirdUnderline else bs.secondaryReferenceUnderline
     val srShadow = if (isLowerThird) bs.secondaryReferenceLowerThirdShadow else bs.secondaryReferenceShadow
 
-    val shadowColorBase = parseHexColor(if (isLowerThird) bs.lowerThirdShadowColor else bs.shadowColor)
-    val shadowSizeMul = (if (isLowerThird) bs.lowerThirdShadowSize else bs.shadowSize) / 100f
-    val shadowAlpha = ((if (isLowerThird) bs.lowerThirdShadowOpacity else bs.shadowOpacity) / 100f).coerceIn(0f, 1f)
-    val defaultShadow = Shadow(
-        color = shadowColorBase.copy(alpha = shadowAlpha * 0.78f),
-        offset = Offset(2f * shadowSizeMul, 2f * shadowSizeMul),
-        blurRadius = 4f * shadowSizeMul
+    // Per-element shadow helpers
+    fun makeShadow(color: String, size: Int, opacity: Int, alphaScale: Float = 0.78f): Shadow {
+        val base = parseHexColor(color)
+        val mul = size / 100f
+        val alpha = (opacity / 100f).coerceIn(0f, 1f)
+        return Shadow(
+            color = base.copy(alpha = alpha * alphaScale),
+            offset = Offset(2f * mul, 2f * mul),
+            blurRadius = 4f * mul
+        )
+    }
+
+    val pBibleShadowVal = makeShadow(
+        if (isLowerThird) bs.primaryBibleLowerThirdShadowColor else bs.primaryBibleShadowColor,
+        if (isLowerThird) bs.primaryBibleLowerThirdShadowSize else bs.primaryBibleShadowSize,
+        if (isLowerThird) bs.primaryBibleLowerThirdShadowOpacity else bs.primaryBibleShadowOpacity
+    )
+    val pRefShadowVal = makeShadow(
+        if (isLowerThird) bs.primaryReferenceLowerThirdShadowColor else bs.primaryReferenceShadowColor,
+        if (isLowerThird) bs.primaryReferenceLowerThirdShadowSize else bs.primaryReferenceShadowSize,
+        if (isLowerThird) bs.primaryReferenceLowerThirdShadowOpacity else bs.primaryReferenceShadowOpacity
+    )
+    val sBibleShadowVal = makeShadow(
+        if (isLowerThird) bs.secondaryBibleLowerThirdShadowColor else bs.secondaryBibleShadowColor,
+        if (isLowerThird) bs.secondaryBibleLowerThirdShadowSize else bs.secondaryBibleShadowSize,
+        if (isLowerThird) bs.secondaryBibleLowerThirdShadowOpacity else bs.secondaryBibleShadowOpacity
+    )
+    val sRefShadowVal = makeShadow(
+        if (isLowerThird) bs.secondaryReferenceLowerThirdShadowColor else bs.secondaryReferenceShadowColor,
+        if (isLowerThird) bs.secondaryReferenceLowerThirdShadowSize else bs.secondaryReferenceShadowSize,
+        if (isLowerThird) bs.secondaryReferenceLowerThirdShadowOpacity else bs.secondaryReferenceShadowOpacity
     )
 
     // Text styles from settings
@@ -150,25 +181,25 @@ fun BiblePresenter(
         fontWeight = if (pBold) FontWeight.Bold else FontWeight.Normal,
         fontStyle = if (pItalic) FontStyle.Italic else FontStyle.Normal,
         textDecoration = if (pUnderline) TextDecoration.Underline else TextDecoration.None,
-        shadow = if (pShadow) defaultShadow else null
+        shadow = if (pShadow) pBibleShadowVal else null
     )
     val primaryReferenceTextStyle = TextStyle(
         fontWeight = if (prBold) FontWeight.Bold else FontWeight.Normal,
         fontStyle = if (prItalic) FontStyle.Italic else FontStyle.Normal,
         textDecoration = if (prUnderline) TextDecoration.Underline else TextDecoration.None,
-        shadow = if (prShadow) defaultShadow else null
+        shadow = if (prShadow) pRefShadowVal else null
     )
     val secondaryBibleTextStyle = TextStyle(
         fontWeight = if (sBold) FontWeight.Bold else FontWeight.Normal,
         fontStyle = if (sItalic) FontStyle.Italic else FontStyle.Normal,
         textDecoration = if (sUnderline) TextDecoration.Underline else TextDecoration.None,
-        shadow = if (sShadow) defaultShadow else null
+        shadow = if (sShadow) sBibleShadowVal else null
     )
     val secondaryReferenceTextStyle = TextStyle(
         fontWeight = if (srBold) FontWeight.Bold else FontWeight.Normal,
         fontStyle = if (srItalic) FontStyle.Italic else FontStyle.Normal,
         textDecoration = if (srUnderline) TextDecoration.Underline else TextDecoration.None,
-        shadow = if (srShadow) defaultShadow else null
+        shadow = if (srShadow) sRefShadowVal else null
     )
 
     val primaryBibleHorizontalAlignment = when (
@@ -228,7 +259,7 @@ fun BiblePresenter(
     var backgroundColor: Color
     val effectiveOpacity: Float
 
-    if (isFillOrKey) {
+    if (!showBackground) {
         effectiveType = Constants.BACKGROUND_COLOR
         effectiveImagePath = ""
         effectiveVideoPath = ""
@@ -301,19 +332,40 @@ fun BiblePresenter(
         val scaleFactor = min(widthScale, heightScale).coerceIn(0.5f, 3.0f)
 
         // Scale shadow to be visible at projection resolution
-        val scaledShadow = Shadow(
-            color = shadowColorBase.copy(alpha = shadowAlpha),
-            offset = Offset(6f * scaleFactor * shadowSizeMul, 6f * scaleFactor * shadowSizeMul),
-            blurRadius = 12f * scaleFactor * shadowSizeMul
-        )
+        fun scaleElementShadow(color: String, size: Int, opacity: Int): Shadow {
+            val base = parseHexColor(color)
+            val mul = size / 100f
+            val alpha = (opacity / 100f).coerceIn(0f, 1f)
+            return Shadow(
+                color = base.copy(alpha = alpha),
+                offset = Offset(6f * scaleFactor * mul, 6f * scaleFactor * mul),
+                blurRadius = 12f * scaleFactor * mul
+            )
+        }
         val primaryBibleTextStyleScaled = if (pShadow)
-            primaryBibleTextStyle.copy(shadow = scaledShadow) else primaryBibleTextStyle
+            primaryBibleTextStyle.copy(shadow = scaleElementShadow(
+                if (isLowerThird) bs.primaryBibleLowerThirdShadowColor else bs.primaryBibleShadowColor,
+                if (isLowerThird) bs.primaryBibleLowerThirdShadowSize else bs.primaryBibleShadowSize,
+                if (isLowerThird) bs.primaryBibleLowerThirdShadowOpacity else bs.primaryBibleShadowOpacity
+            )) else primaryBibleTextStyle
         val primaryReferenceTextStyleScaled = if (prShadow)
-            primaryReferenceTextStyle.copy(shadow = scaledShadow) else primaryReferenceTextStyle
+            primaryReferenceTextStyle.copy(shadow = scaleElementShadow(
+                if (isLowerThird) bs.primaryReferenceLowerThirdShadowColor else bs.primaryReferenceShadowColor,
+                if (isLowerThird) bs.primaryReferenceLowerThirdShadowSize else bs.primaryReferenceShadowSize,
+                if (isLowerThird) bs.primaryReferenceLowerThirdShadowOpacity else bs.primaryReferenceShadowOpacity
+            )) else primaryReferenceTextStyle
         val secondaryBibleTextStyleScaled = if (sShadow)
-            secondaryBibleTextStyle.copy(shadow = scaledShadow) else secondaryBibleTextStyle
+            secondaryBibleTextStyle.copy(shadow = scaleElementShadow(
+                if (isLowerThird) bs.secondaryBibleLowerThirdShadowColor else bs.secondaryBibleShadowColor,
+                if (isLowerThird) bs.secondaryBibleLowerThirdShadowSize else bs.secondaryBibleShadowSize,
+                if (isLowerThird) bs.secondaryBibleLowerThirdShadowOpacity else bs.secondaryBibleShadowOpacity
+            )) else secondaryBibleTextStyle
         val secondaryReferenceTextStyleScaled = if (srShadow)
-            secondaryReferenceTextStyle.copy(shadow = scaledShadow) else secondaryReferenceTextStyle
+            secondaryReferenceTextStyle.copy(shadow = scaleElementShadow(
+                if (isLowerThird) bs.secondaryReferenceLowerThirdShadowColor else bs.secondaryReferenceShadowColor,
+                if (isLowerThird) bs.secondaryReferenceLowerThirdShadowSize else bs.secondaryReferenceShadowSize,
+                if (isLowerThird) bs.secondaryReferenceLowerThirdShadowOpacity else bs.secondaryReferenceShadowOpacity
+            )) else secondaryReferenceTextStyle
 
         val effectivePrimaryBibleSize =
             if (isLowerThird) appSettings.bibleSettings.primaryBibleLowerThirdFontSize else appSettings.bibleSettings.primaryBibleFontSize
@@ -389,6 +441,7 @@ fun BiblePresenter(
                     .fillMaxWidth()
                     .fillMaxHeight(appSettings.projectionSettings.lowerThirdHeightPercent / 100f)
                     .align(Alignment.BottomCenter)
+                    .clipToBounds()
             else
                 Modifier.align(Alignment.Center)
 
@@ -421,29 +474,35 @@ fun BiblePresenter(
                         // Pre-compute fit scales for both halves, then use the min so fonts match
                         val halfWidth = (constraints.maxWidth - with(density) { 16.dp.roundToPx() }) / 2
                         val halfConstraint = Constraints(maxWidth = halfWidth.coerceAtLeast(1))
-                        val availH = constraints.maxHeight
+                        // Use 90% of available height as safety margin for line spacing/shadow/padding offsets
+                        val availH = (constraints.maxHeight * 0.90f).toInt()
 
                         val primaryRefText = buildRefText(primary, appSettings.bibleSettings.primaryShowAbbreviation)
-                        val primaryRefH = textMeasurer.measure(primaryRefText, primaryReferenceTextStyle.copy(fontFamily = primaryBibleReferenceFontStyle, fontSize = scaledPrimaryReferenceSize), constraints = halfConstraint).size.height
                         val secondaryRefText = buildRefText(sec, appSettings.bibleSettings.secondaryShowAbbreviation)
-                        val secondaryRefH = textMeasurer.measure(secondaryRefText, secondaryReferenceTextStyle.copy(fontFamily = secondaryBibleReferenceFontStyle, fontSize = scaledSecondaryReferenceSize), constraints = halfConstraint).size.height
 
                         // Binary search for the largest scale where both primary and secondary fit
+                        // Scale both verse AND reference text together so everything shrinks proportionally
+                        val initialPRefH = textMeasurer.measure(primaryRefText, primaryReferenceTextStyle.copy(fontFamily = primaryBibleReferenceFontStyle, fontSize = scaledPrimaryReferenceSize), constraints = halfConstraint).size.height
+                        val initialSRefH = textMeasurer.measure(secondaryRefText, secondaryReferenceTextStyle.copy(fontFamily = secondaryBibleReferenceFontStyle, fontSize = scaledSecondaryReferenceSize), constraints = halfConstraint).size.height
                         val initialPH = textMeasurer.measure(primary.verseText, primaryBibleTextStyle.copy(fontFamily = primaryBibleFontStyle, fontSize = scaledPrimaryBibleSize), constraints = halfConstraint).size.height
                         val initialSH = textMeasurer.measure(sec.verseText, secondaryBibleTextStyle.copy(fontFamily = secondaryBibleFontStyle, fontSize = scaledSecondaryBibleSize), constraints = halfConstraint).size.height
-                        val needsScaling = (primaryRefH + initialPH > availH) || (secondaryRefH + initialSH > availH)
+                        val needsScaling = (initialPRefH + initialPH > availH) || (initialSRefH + initialSH > availH)
 
                         val matchedScale = if (needsScaling) {
                             binarySearchFitScale { scale ->
+                                val pRefH = textMeasurer.measure(primaryRefText, primaryReferenceTextStyle.copy(fontFamily = primaryBibleReferenceFontStyle, fontSize = scaledPrimaryReferenceSize * scale), constraints = halfConstraint).size.height
+                                val sRefH = textMeasurer.measure(secondaryRefText, secondaryReferenceTextStyle.copy(fontFamily = secondaryBibleReferenceFontStyle, fontSize = scaledSecondaryReferenceSize * scale), constraints = halfConstraint).size.height
                                 val pH = textMeasurer.measure(primary.verseText, primaryBibleTextStyle.copy(fontFamily = primaryBibleFontStyle, fontSize = scaledPrimaryBibleSize * scale), constraints = halfConstraint).size.height
                                 val sH = textMeasurer.measure(sec.verseText, secondaryBibleTextStyle.copy(fontFamily = secondaryBibleFontStyle, fontSize = scaledSecondaryBibleSize * scale), constraints = halfConstraint).size.height
-                                (primaryRefH + pH <= availH) && (secondaryRefH + sH <= availH)
+                                (pRefH + pH <= availH) && (sRefH + sH <= availH)
                             }
                         } else 1f
                         val pBibleSize = scaledPrimaryBibleSize * matchedScale
                         val sBibleSize = scaledSecondaryBibleSize * matchedScale
                         // Use the smaller of the two so both sides display at the same visual size
                         val matchedBibleSize = if (pBibleSize.value <= sBibleSize.value) pBibleSize else sBibleSize
+                        val scaledPrimaryRefSize = scaledPrimaryReferenceSize * matchedScale
+                        val scaledSecondaryRefSize = scaledSecondaryReferenceSize * matchedScale
 
                         Row(
                             modifier = Modifier.fillMaxSize(),
@@ -452,21 +511,21 @@ fun BiblePresenter(
                             // Left half: primary bible
                             Column(Modifier.weight(1f).fillMaxHeight().wrapContentHeight(Alignment.Bottom)) {
                                 if (primaryBibleReferencePosition == Constants.POSITION_ABOVE) {
-                                    Text(modifier = Modifier.fillMaxWidth(), textAlign = primaryBibleReferenceHorizontalAlignment, fontFamily = primaryBibleReferenceFontStyle, fontSize = scaledPrimaryReferenceSize, text = primaryRefText, color = primaryBibleReferenceTextColor, style = primaryReferenceTextStyleScaled)
+                                    Text(modifier = Modifier.fillMaxWidth(), textAlign = primaryBibleReferenceHorizontalAlignment, fontFamily = primaryBibleReferenceFontStyle, fontSize = scaledPrimaryRefSize, text = primaryRefText, color = primaryBibleReferenceTextColor, style = primaryReferenceTextStyleScaled)
                                 }
                                 Text(modifier = Modifier.fillMaxWidth(), textAlign = primaryBibleHorizontalAlignment, fontFamily = primaryBibleFontStyle, fontSize = matchedBibleSize, text = primary.verseText, color = primaryBibleTextColor, style = primaryBibleTextStyleScaled)
                                 if (primaryBibleReferencePosition == Constants.POSITION_BELOW) {
-                                    Text(modifier = Modifier.fillMaxWidth(), textAlign = primaryBibleReferenceHorizontalAlignment, fontFamily = primaryBibleReferenceFontStyle, fontSize = scaledPrimaryReferenceSize, text = primaryRefText, color = primaryBibleReferenceTextColor, style = primaryReferenceTextStyleScaled)
+                                    Text(modifier = Modifier.fillMaxWidth(), textAlign = primaryBibleReferenceHorizontalAlignment, fontFamily = primaryBibleReferenceFontStyle, fontSize = scaledPrimaryRefSize, text = primaryRefText, color = primaryBibleReferenceTextColor, style = primaryReferenceTextStyleScaled)
                                 }
                             }
                             // Right half: secondary bible
                             Column(Modifier.weight(1f).fillMaxHeight().wrapContentHeight(Alignment.Bottom)) {
                                 if (secondaryBibleReferencePosition == Constants.POSITION_ABOVE) {
-                                    Text(modifier = Modifier.fillMaxWidth(), textAlign = secondaryBibleReferenceHorizontalAlignment, fontFamily = secondaryBibleReferenceFontStyle, fontSize = scaledSecondaryReferenceSize, text = secondaryRefText, color = secondaryBibleReferenceTextColor, style = secondaryReferenceTextStyleScaled)
+                                    Text(modifier = Modifier.fillMaxWidth(), textAlign = secondaryBibleReferenceHorizontalAlignment, fontFamily = secondaryBibleReferenceFontStyle, fontSize = scaledSecondaryRefSize, text = secondaryRefText, color = secondaryBibleReferenceTextColor, style = secondaryReferenceTextStyleScaled)
                                 }
                                 Text(modifier = Modifier.fillMaxWidth(), textAlign = secondaryBibleHorizontalAlignment, fontFamily = secondaryBibleFontStyle, fontSize = matchedBibleSize, text = sec.verseText, color = secondaryBibleTextColor, style = secondaryBibleTextStyleScaled)
                                 if (secondaryBibleReferencePosition == Constants.POSITION_BELOW) {
-                                    Text(modifier = Modifier.fillMaxWidth(), textAlign = secondaryBibleReferenceHorizontalAlignment, fontFamily = secondaryBibleReferenceFontStyle, fontSize = scaledSecondaryReferenceSize, text = secondaryRefText, color = secondaryBibleReferenceTextColor, style = secondaryReferenceTextStyleScaled)
+                                    Text(modifier = Modifier.fillMaxWidth(), textAlign = secondaryBibleReferenceHorizontalAlignment, fontFamily = secondaryBibleReferenceFontStyle, fontSize = scaledSecondaryRefSize, text = secondaryRefText, color = secondaryBibleReferenceTextColor, style = secondaryReferenceTextStyleScaled)
                                 }
                             }
                         }

@@ -14,11 +14,20 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.HorizontalScrollbar
+import androidx.compose.foundation.LocalScrollbarStyle
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.PlainTooltip
+import androidx.compose.material3.TooltipBox
+import androidx.compose.material3.TooltipDefaults
+import androidx.compose.material3.rememberTooltipState
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
@@ -294,12 +303,17 @@ fun ProjectionSettingsTab(
             ContentCol(mediaLabel, { it.showMedia }, { a, v -> a.copy(showMedia = v) }),
             ContentCol(streamingLabel, { it.showStreaming }, { a, v -> a.copy(showStreaming = v) }),
             ContentCol(announcementsLabel, { it.showAnnouncements }, { a, v -> a.copy(showAnnouncements = v) }),
+            ContentCol("Web", { it.showWebsite }, { a, v -> a.copy(showWebsite = v) }),
+            ContentCol("Background", { it.showFullscreenBackground }, { a, v -> a.copy(showFullscreenBackground = v) }),
+            ContentCol("Lower Third Background", { it.showLowerThirdBackground }, { a, v -> a.copy(showLowerThirdBackground = v) }),
         )
 
         val displayModes = listOf(
             fullScreenLabel to Constants.DISPLAY_MODE_FULLSCREEN,
             lowerThirdLabel to Constants.DISPLAY_MODE_LOWER_THIRD
         )
+
+        val contentScrollState = rememberScrollState()
 
         // Header row: Screen label + Display + Key Output + content columns + display mode
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -318,14 +332,16 @@ fun ProjectionSettingsTab(
                 textAlign = TextAlign.Center,
                 modifier = Modifier.width(displayDropdownWidth)
             )
-            contentCols.forEach { col ->
-                Text(
-                    text = col.label,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.primary,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.width(cellWidth)
-                )
+            Row(modifier = Modifier.weight(1f).horizontalScroll(contentScrollState)) {
+                contentCols.forEach { col ->
+                    Text(
+                        text = col.label,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.primary,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.width(cellWidth)
+                    )
+                }
             }
             Text(
                 text = stringResource(Res.string.display_mode),
@@ -338,7 +354,8 @@ fun ProjectionSettingsTab(
 
         // Sub-header for display mode columns
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Spacer(modifier = Modifier.width(screenLabelWidth + displayDropdownWidth * 2 + cellWidth * contentCols.size))
+            Spacer(modifier = Modifier.width(screenLabelWidth + displayDropdownWidth * 2))
+            Spacer(modifier = Modifier.weight(1f))
             displayModes.forEach { (modeLabel, _) ->
                 Text(
                     text = modeLabel,
@@ -580,22 +597,36 @@ fun ProjectionSettingsTab(
                     }
                 }
 
-                // Checkbox cells for each content type
-                contentCols.forEach { col ->
-                    Box(modifier = Modifier.width(cellWidth), contentAlignment = Alignment.Center) {
-                        Checkbox(
-                            checked = col.getter(assignment),
-                            onCheckedChange = { checked ->
-                                val updated = col.setter(assignment, checked)
-                                onSettingsChange { s ->
-                                    s.copy(projectionSettings = s.projectionSettings.withAssignment(i, updated))
+                // Scrollable content: checkboxes only
+                @OptIn(ExperimentalMaterial3Api::class)
+                Row(modifier = Modifier.weight(1f).horizontalScroll(contentScrollState)) {
+                    contentCols.forEach { col ->
+                        val isWebOnDeckLink = col.label == "Web" && assignment.targetType == "decklink"
+                        Box(modifier = Modifier.width(cellWidth), contentAlignment = Alignment.Center) {
+                            if (isWebOnDeckLink) {
+                                TooltipBox(
+                                    positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
+                                    tooltip = { PlainTooltip { Text("Web browser cannot render on DeckLink outputs") } },
+                                    state = rememberTooltipState()
+                                ) {
+                                    Checkbox(checked = false, enabled = false, onCheckedChange = {})
                                 }
+                            } else {
+                                Checkbox(
+                                    checked = col.getter(assignment),
+                                    onCheckedChange = { checked ->
+                                        val updated = col.setter(assignment, checked)
+                                        onSettingsChange { s ->
+                                            s.copy(projectionSettings = s.projectionSettings.withAssignment(i, updated))
+                                        }
+                                    }
+                                )
                             }
-                        )
+                        }
                     }
-                }
+                } // end scrollable Row
 
-                // Radio button cells for display mode
+                // Radio buttons for display mode (outside scroll)
                 displayModes.forEach { (_, modeValue) ->
                     Box(modifier = Modifier.width(displayModeColWidth), contentAlignment = Alignment.Center) {
                         RadioButton(
@@ -610,11 +641,28 @@ fun ProjectionSettingsTab(
                     }
                 }
 
-            }
+            } // end data Row
 
             if (i < numScreens - 1) {
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f), thickness = 1.dp)
             }
+        }
+
+        // Scrollbar for content columns
+        Row {
+            Spacer(modifier = Modifier.width(screenLabelWidth + displayDropdownWidth * 2))
+            Box(modifier = Modifier.weight(1f)) {
+                HorizontalScrollbar(
+                    adapter = rememberScrollbarAdapter(contentScrollState),
+                    modifier = Modifier.fillMaxWidth().height(12.dp),
+                    style = LocalScrollbarStyle.current.copy(
+                        thickness = 10.dp,
+                        unhoverColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
+                        hoverColor = MaterialTheme.colorScheme.primary
+                    )
+                )
+            }
+            Spacer(modifier = Modifier.width(displayModeColWidth * 2))
         }
 
         Spacer(modifier = Modifier.height(8.dp))

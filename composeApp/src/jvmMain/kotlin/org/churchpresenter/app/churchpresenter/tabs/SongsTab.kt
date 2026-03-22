@@ -76,6 +76,7 @@ import churchpresenter.composeapp.generated.resources.ic_add
 import churchpresenter.composeapp.generated.resources.line_navigation_hint
 import churchpresenter.composeapp.generated.resources.new_song
 import churchpresenter.composeapp.generated.resources.ic_cast
+import churchpresenter.composeapp.generated.resources.ic_search
 import churchpresenter.composeapp.generated.resources.ic_edit
 import churchpresenter.composeapp.generated.resources.ic_playlist_add
 import churchpresenter.composeapp.generated.resources.no_lyrics_available
@@ -365,8 +366,14 @@ fun SongsTab(
                     }
                 )
 
-                Button(onClick = { /* Search action */ }) {
-                    Text(stringResource(Res.string.search), style = MaterialTheme.typography.labelMedium)
+                IconButton(
+                    onClick = { /* Search action */ },
+                    colors = IconButtonDefaults.iconButtonColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary
+                    )
+                ) {
+                    Icon(painter = painterResource(Res.drawable.ic_search), contentDescription = stringResource(Res.string.search), modifier = Modifier.size(20.dp))
                 }
             }
 
@@ -549,12 +556,12 @@ fun SongsTab(
             androidx.compose.foundation.layout.BoxWithConstraints(
                 modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
             ) {
-                val useIcons = maxWidth < 220.dp
+                val useIcons = maxWidth < 1100.dp
                 val hasSongSelected = selectedSongIndex >= 0 && selectedSongIndex < filteredSongs.size && selectedSectionIndex >= 0
                 @OptIn(ExperimentalLayoutApi::class)
                 FlowRow(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    horizontalArrangement = Arrangement.End,
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     if (useIcons) {
@@ -571,7 +578,9 @@ fun SongsTab(
                                 enabled = hasSongSelected,
                                 colors = IconButtonDefaults.iconButtonColors(
                                     containerColor = MaterialTheme.colorScheme.primary,
-                                    contentColor = MaterialTheme.colorScheme.onPrimary
+                                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                                    disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                    disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
                                 )
                             ) {
                                 Icon(painter = painterResource(Res.drawable.ic_cast), contentDescription = goLiveStr, modifier = Modifier.size(20.dp))

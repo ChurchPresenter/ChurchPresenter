@@ -52,11 +52,13 @@ fun AnnouncementsPresenter(
     outputRole: String = Constants.OUTPUT_ROLE_NORMAL,
     transitionAlpha: Float = 1f,
     onFinished: () -> Unit = {},
+    showBackground: Boolean = true,
 ) {
     val isFillOrKey = outputRole == Constants.OUTPUT_ROLE_FILL || outputRole == Constants.OUTPUT_ROLE_KEY
+    val isKey = outputRole == Constants.OUTPUT_ROLE_KEY
     val settings   = appSettings.announcementsSettings
-    val textColor  = parseHexColor(settings.textColor)
-    val bgColor    = if (isFillOrKey) Color.Transparent
+    val textColor  = if (isKey) Color.White else parseHexColor(settings.textColor)
+    val bgColor    = if (!showBackground) Color.Transparent
                      else if (settings.backgroundColor == "transparent") Color.Transparent
                      else parseHexColor(settings.backgroundColor)
     val fontFamily = systemFontFamilyOrDefault(settings.fontType)
@@ -167,12 +169,16 @@ fun AnnouncementsPresenter(
 
         val loopCount = settings.loopCount
 
+        // Use the full container size for slide distance, not the text's own size
+        val containerWidthPx = constraints.maxWidth.toFloat()
+        val containerHeightPx = constraints.maxHeight.toFloat()
+
         val slideContent: @Composable (Float) -> Unit = { fraction ->
             if (isHorizontal) {
                 Box(
                     modifier = Modifier
                         .align(slideAlignment)
-                        .graphicsLayer { translationX = size.width * fraction },
+                        .graphicsLayer { translationX = containerWidthPx * fraction },
                     contentAlignment = Alignment.Center
                 ) { textBlock(false) }
             } else {
@@ -180,7 +186,7 @@ fun AnnouncementsPresenter(
                     modifier = Modifier
                         .fillMaxHeight()
                         .align(slideAlignment)
-                        .graphicsLayer { translationY = size.height * fraction },
+                        .graphicsLayer { translationY = containerHeightPx * fraction },
                     contentAlignment = Alignment.Center
                 ) { textBlock(true) }
             }

@@ -38,6 +38,8 @@ fun LoopingVideoBackground(
     val file = remember(videoPath) { File(videoPath) }
     if (!file.exists()) return
     if (!isVlcAvailable) return
+    // Skip video backgrounds if disabled due to previous crash
+    if (org.churchpresenter.app.churchpresenter.utils.CrashReporter.videoBackgroundsDisabled) return
 
     val currentFrame = remember { mutableStateOf<ImageBitmap?>(null) }
 

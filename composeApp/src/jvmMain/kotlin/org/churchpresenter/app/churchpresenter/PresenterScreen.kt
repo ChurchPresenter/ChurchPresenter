@@ -26,6 +26,7 @@ fun PresenterScreen(
     appSettings: AppSettings,
     outputRole: String = Constants.OUTPUT_ROLE_NORMAL,
     isLowerThird: Boolean = false,
+    showBackground: Boolean = true,
     content: @Composable BoxScope.() -> Unit
 ) {
     val isFillOrKey = outputRole == Constants.OUTPUT_ROLE_FILL || outputRole == Constants.OUTPUT_ROLE_KEY
@@ -46,10 +47,10 @@ fun PresenterScreen(
     val bgImagePath = if (isLowerThird && !useDefault) bgSettings.defaultLowerThirdBackgroundImage else bgSettings.defaultBackgroundImage
     val bgVideoPath = if (isLowerThird && !useDefault) bgSettings.defaultLowerThirdBackgroundVideo else bgSettings.defaultBackgroundVideo
     val bgOpacity = if (isLowerThird && !useDefault) bgSettings.defaultLowerThirdBackgroundOpacity else bgSettings.defaultBackgroundOpacity
-    val backgroundColor = if (isFillOrKey) Color.Black else parseHexColor(bgColorHex)
+    val backgroundColor = if (!showBackground) Color.Black else parseHexColor(bgColorHex)
 
-    val backgroundImageBitmap = remember(bgType, bgImagePath, isFillOrKey) {
-        if (!isFillOrKey && bgType == Constants.BACKGROUND_IMAGE && bgImagePath.isNotEmpty()) {
+    val backgroundImageBitmap = remember(bgType, bgImagePath, showBackground) {
+        if (showBackground && bgType == Constants.BACKGROUND_IMAGE && bgImagePath.isNotEmpty()) {
             try {
                 val file = File(bgImagePath)
                 if (file.exists()) Image.makeFromEncoded(file.readBytes()).toComposeImageBitmap()
@@ -59,8 +60,8 @@ fun PresenterScreen(
     }
 
     Box(modifier = modifier.fillMaxSize()) {
-        // Background layer — always black for fill/key
-        if (isFillOrKey) {
+        // Background layer — black when backgrounds disabled
+        if (!showBackground) {
             Box(modifier = Modifier.fillMaxSize().background(Color.Black))
         } else {
             when (bgType) {

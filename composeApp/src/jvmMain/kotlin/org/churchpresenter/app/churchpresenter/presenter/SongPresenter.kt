@@ -62,8 +62,10 @@ fun SongPresenter(
     lookAheadEnabled: Boolean = false,
     allLyricSections: List<LyricSection> = emptyList(),
     displaySectionIndex: Int = -1,
+    showBackground: Boolean = true,
 ) {
     val isFillOrKey = outputRole == Constants.OUTPUT_ROLE_FILL || outputRole == Constants.OUTPUT_ROLE_KEY
+    val isKey = outputRole == Constants.OUTPUT_ROLE_KEY
     val ss = appSettings.songSettings
 
     // Resolve font families per fullscreen / lower third
@@ -79,21 +81,24 @@ fun SongPresenter(
         }
     }
 
-    // Resolve colors per fullscreen / lower third
-    val titleColor = remember(ss.titleColor, ss.titleLowerThirdColor, isLowerThird) {
-        parseHexColor(if (isLowerThird) ss.titleLowerThirdColor else ss.titleColor)
+    // Resolve colors — key mode forces white for a proper key signal
+    val titleColor = remember(ss.titleColor, ss.titleLowerThirdColor, isLowerThird, isKey) {
+        if (isKey) Color.White
+        else parseHexColor(if (isLowerThird) ss.titleLowerThirdColor else ss.titleColor)
     }
     val lyricsColor = remember(ss.lyricsColor, ss.lyricsLowerThirdColor,
-        ss.lookAheadColor, ss.lowerThirdLookAheadColor, isLowerThird, lookAheadEnabled) {
-        if (lookAheadEnabled) {
+        ss.lookAheadColor, ss.lowerThirdLookAheadColor, isLowerThird, lookAheadEnabled, isKey) {
+        if (isKey) Color.White
+        else if (lookAheadEnabled) {
             parseHexColor(if (isLowerThird) ss.lowerThirdLookAheadColor else ss.lookAheadColor)
         } else {
             parseHexColor(if (isLowerThird) ss.lyricsLowerThirdColor else ss.lyricsColor)
         }
     }
     // Look-ahead next section preview font settings (resolved per fullscreen / lower third)
-    val laColor = remember(ss.lookAheadNextColor, ss.lowerThirdLookAheadNextColor, isLowerThird) {
-        parseHexColor(if (isLowerThird) ss.lowerThirdLookAheadNextColor else ss.lookAheadNextColor)
+    val laColor = remember(ss.lookAheadNextColor, ss.lowerThirdLookAheadNextColor, isLowerThird, isKey) {
+        if (isKey) Color.White
+        else parseHexColor(if (isLowerThird) ss.lowerThirdLookAheadNextColor else ss.lookAheadNextColor)
     }
     val laFontFamily = remember(ss.lookAheadNextFontType, ss.lowerThirdLookAheadNextFontType, isLowerThird) {
         systemFontFamilyOrDefault(if (isLowerThird) ss.lowerThirdLookAheadNextFontType else ss.lookAheadNextFontType)
@@ -107,14 +112,26 @@ fun SongPresenter(
     val laShadowSizeMul = (if (isLowerThird) ss.lowerThirdLookAheadNextShadowSize else ss.lookAheadNextShadowSize) / 100f
     val laShadowAlpha = ((if (isLowerThird) ss.lowerThirdLookAheadNextShadowOpacity else ss.lookAheadNextShadowOpacity) / 100f).coerceIn(0f, 1f)
 
-    // Shadow customization (resolved per fullscreen / lower third)
-    val songShadowColor = parseHexColor(if (isLowerThird) ss.lowerThirdShadowColor else ss.shadowColor)
-    val songShadowSizeMul = (if (isLowerThird) ss.lowerThirdShadowSize else ss.shadowSize) / 100f
-    val songShadowAlpha = ((if (isLowerThird) ss.lowerThirdShadowOpacity else ss.shadowOpacity) / 100f).coerceIn(0f, 1f)
-    val baseShadow = Shadow(
-        color = songShadowColor.copy(alpha = songShadowAlpha * 0.78f),
-        offset = Offset(2f * songShadowSizeMul, 2f * songShadowSizeMul),
-        blurRadius = 4f * songShadowSizeMul
+    // Per-element shadow customization (resolved per fullscreen / lower third)
+    fun makeSongShadow(color: String, size: Int, opacity: Int, alphaScale: Float = 0.78f): Shadow {
+        val base = parseHexColor(color)
+        val mul = size / 100f
+        val alpha = (opacity / 100f).coerceIn(0f, 1f)
+        return Shadow(
+            color = base.copy(alpha = alpha * alphaScale),
+            offset = Offset(2f * mul, 2f * mul),
+            blurRadius = 4f * mul
+        )
+    }
+    val titleBaseShadow = makeSongShadow(
+        if (isLowerThird) ss.titleLowerThirdShadowColor else ss.titleShadowColor,
+        if (isLowerThird) ss.titleLowerThirdShadowSize else ss.titleShadowSize,
+        if (isLowerThird) ss.titleLowerThirdShadowOpacity else ss.titleShadowOpacity
+    )
+    val lyricsBaseShadow = makeSongShadow(
+        if (isLowerThird) ss.lyricsLowerThirdShadowColor else ss.lyricsShadowColor,
+        if (isLowerThird) ss.lyricsLowerThirdShadowSize else ss.lyricsShadowSize,
+        if (isLowerThird) ss.lyricsLowerThirdShadowOpacity else ss.lyricsShadowOpacity
     )
 
     // Text styles derived from settings (resolved per fullscreen / lower third)
@@ -126,7 +143,7 @@ fun SongPresenter(
         fontWeight = if (effectiveTitleBold) FontWeight.Bold else FontWeight.Normal,
         fontStyle = if (effectiveTitleItalic) FontStyle.Italic else FontStyle.Normal,
         textDecoration = if (effectiveTitleUnderline) TextDecoration.Underline else TextDecoration.None,
-        shadow = if (effectiveTitleShadow) baseShadow else null
+        shadow = if (effectiveTitleShadow) titleBaseShadow else null
     )
     val effectiveLyricsBold = if (lookAheadEnabled) {
         if (isLowerThird) ss.lowerThirdLookAheadBold else ss.lookAheadBold
@@ -144,7 +161,7 @@ fun SongPresenter(
         fontWeight = if (effectiveLyricsBold) FontWeight.Bold else FontWeight.Normal,
         fontStyle = if (effectiveLyricsItalic) FontStyle.Italic else FontStyle.Normal,
         textDecoration = if (effectiveLyricsUnderline) TextDecoration.Underline else TextDecoration.None,
-        shadow = if (effectiveLyricsShadow) baseShadow else null
+        shadow = if (effectiveLyricsShadow) lyricsBaseShadow else null
     )
     val contentAlignment = when (appSettings.songSettings.lyricsAlignment) {
         Constants.TOP -> Alignment.TopCenter
@@ -175,7 +192,7 @@ fun SongPresenter(
     var backgroundColor: Color
     val effectiveOpacity: Float
 
-    if (isFillOrKey) {
+    if (!showBackground) {
         effectiveType = Constants.BACKGROUND_COLOR
         effectiveImagePath = ""
         effectiveVideoPath = ""
@@ -249,15 +266,28 @@ fun SongPresenter(
         val scaleFactor = min(widthScale, heightScale).coerceIn(0.5f, 3.0f)
 
         // Scale shadow to be visible at projection resolution
-        val scaledShadow = Shadow(
-            color = songShadowColor.copy(alpha = songShadowAlpha),
-            offset = Offset(6f * scaleFactor * songShadowSizeMul, 6f * scaleFactor * songShadowSizeMul),
-            blurRadius = 12f * scaleFactor * songShadowSizeMul
-        )
+        fun scaleElementShadow(color: String, size: Int, opacity: Int): Shadow {
+            val base = parseHexColor(color)
+            val mul = size / 100f
+            val alpha = (opacity / 100f).coerceIn(0f, 1f)
+            return Shadow(
+                color = base.copy(alpha = alpha),
+                offset = Offset(6f * scaleFactor * mul, 6f * scaleFactor * mul),
+                blurRadius = 12f * scaleFactor * mul
+            )
+        }
         val titleTextStyleScaled = if (effectiveTitleShadow)
-            titleTextStyle.copy(shadow = scaledShadow) else titleTextStyle
+            titleTextStyle.copy(shadow = scaleElementShadow(
+                if (isLowerThird) ss.titleLowerThirdShadowColor else ss.titleShadowColor,
+                if (isLowerThird) ss.titleLowerThirdShadowSize else ss.titleShadowSize,
+                if (isLowerThird) ss.titleLowerThirdShadowOpacity else ss.titleShadowOpacity
+            )) else titleTextStyle
         val lyricsTextStyleScaled = if (effectiveLyricsShadow)
-            lyricsTextStyle.copy(shadow = scaledShadow) else lyricsTextStyle
+            lyricsTextStyle.copy(shadow = scaleElementShadow(
+                if (isLowerThird) ss.lyricsLowerThirdShadowColor else ss.lyricsShadowColor,
+                if (isLowerThird) ss.lyricsLowerThirdShadowSize else ss.lyricsShadowSize,
+                if (isLowerThird) ss.lyricsLowerThirdShadowOpacity else ss.lyricsShadowOpacity
+            )) else lyricsTextStyle
         val effectiveTitleFontSize = if (isLowerThird) ss.titleLowerThirdFontSize else ss.titleFontSize
         val scaledTitleFontSize = (effectiveTitleFontSize * scaleFactor).sp
         val settingsLyricsFontSize = if (lookAheadEnabled) {
