@@ -28,6 +28,14 @@ hs_err_pid*.log
 jcefmaven_build_meta.json.template
 /org/
 native/decklink/*.class
+native/decklink/*.obj
+native/decklink/*.lib
+native/decklink/*.exp
+native/decklink/*.tlb
+native/decklink/*.dll
+native/decklink/DeckLinkAPI_h.h
+native/decklink/DeckLinkAPI_i.c
+native/decklink/build/
 
 
 # Credential / config files
