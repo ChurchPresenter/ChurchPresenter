@@ -671,13 +671,9 @@ fun BibleTab(
                 }
 
             BoxWithConstraints(modifier = Modifier.fillMaxWidth().fillMaxHeight()) {
-                val isNarrow = maxWidth < 800.dp
                 val useIcons = maxWidth < 1100.dp
 
                 Column(modifier = Modifier.fillMaxSize()) {
-                    if (isNarrow) {
-                        toolbarContent(useIcons)
-                    }
 
                     // ── Book / Chapter / Verse columns ───────────────────────
                     Row(modifier = Modifier.fillMaxWidth().weight(1f).padding(start = 4.dp)) {
@@ -739,12 +735,8 @@ fun BibleTab(
                                 ) { query ->
                                     viewModel.updateVerseSearchQuery(query)
                                 }
-                                if (!isNarrow) {
-                                    Spacer(modifier = Modifier.width(8.dp))
-                                    toolbarContent(useIcons)
-                                } else {
-                                    Spacer(modifier = Modifier.weight(1f))
-                                }
+                                Spacer(modifier = Modifier.width(8.dp))
+                                toolbarContent(useIcons)
                             }
                     Box(modifier = Modifier.weight(1f)) {
                         // Always map multi-verse indices into the filtered verse list
