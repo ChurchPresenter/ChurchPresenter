@@ -44,6 +44,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
@@ -423,7 +424,7 @@ private fun ClientRow(
     clientId: String,
     label: String,
     onSetLabel: (String) -> Unit,
-    statusColor: androidx.compose.ui.graphics.Color,
+    statusColor: Color,
     statusLabel: String,
     onRemove: () -> Unit
 ) {

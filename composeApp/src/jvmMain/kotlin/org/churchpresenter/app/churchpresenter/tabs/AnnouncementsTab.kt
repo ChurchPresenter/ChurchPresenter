@@ -48,7 +48,6 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.draw.clipToBounds
@@ -64,6 +63,7 @@ import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -502,7 +502,7 @@ fun AnnouncementsTab(
                             .fillMaxWidth()
                             .aspectRatio(presenterAspectRatio())
                             .clip(RoundedCornerShape(4.dp))
-                            .background(androidx.compose.ui.graphics.Color.Black)
+                            .background(Color.Black)
                             .border(
                                 BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)),
                                 RoundedCornerShape(4.dp)
@@ -717,7 +717,7 @@ fun AnnouncementsTab(
                     val sliderMax = 30000f
                     val sliderSum = sliderMin + sliderMax
                     SectionLabel("${stringResource(Res.string.announcement_animation_speed)}: ${"%.2f".format((sliderSum - durationMs) / 1000f)}")
-                    androidx.compose.material3.Slider(
+                    Slider(
                         value = (sliderSum - durationMs.toFloat()),
                         onValueChange = { v ->
                             val dur = (sliderSum - v)
@@ -763,7 +763,7 @@ fun AnnouncementsTab(
                             color = if (viewModel.timerExpired) MaterialTheme.colorScheme.error
                                     else MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.fillMaxWidth(),
-                            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                            textAlign = TextAlign.Center
                         )
 
                         // Steppers row — hours : minutes : seconds, centered
@@ -789,7 +789,7 @@ fun AnnouncementsTab(
                                         },
                                         modifier = Modifier.width(64.dp),
                                         singleLine = true,
-                                        textStyle = MaterialTheme.typography.bodyLarge.copy(textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+                                        textStyle = MaterialTheme.typography.bodyLarge.copy(textAlign = TextAlign.Center)
                                     )
                                     Text(hrLabel, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                 }
@@ -818,7 +818,7 @@ fun AnnouncementsTab(
                                         },
                                         modifier = Modifier.width(64.dp),
                                         singleLine = true,
-                                        textStyle = MaterialTheme.typography.bodyLarge.copy(textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+                                        textStyle = MaterialTheme.typography.bodyLarge.copy(textAlign = TextAlign.Center)
                                     )
                                     Text(minLabel, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                 }
@@ -847,7 +847,7 @@ fun AnnouncementsTab(
                                         },
                                         modifier = Modifier.width(64.dp),
                                         singleLine = true,
-                                        textStyle = MaterialTheme.typography.bodyLarge.copy(textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+                                        textStyle = MaterialTheme.typography.bodyLarge.copy(textAlign = TextAlign.Center)
                                     )
                                     Text(secLabel, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                 }
@@ -1055,7 +1055,7 @@ private fun SectionLabel(text: String) {
 private fun TimerStepButton(label: String, onClick: () -> Unit) {
     Button(
         onClick = onClick,
-        contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp),
+        contentPadding = PaddingValues(0.dp),
         modifier = Modifier.width(28.dp).height(28.dp),
         colors = ButtonDefaults.buttonColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant,

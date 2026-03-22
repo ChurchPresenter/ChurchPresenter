@@ -38,6 +38,7 @@ import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
@@ -429,7 +430,7 @@ fun PresentationTab(
 
 @Composable
 private fun SlideThumbnail(
-    slide: androidx.compose.ui.graphics.ImageBitmap,
+    slide: ImageBitmap,
     slideNumber: Int,
     isSelected: Boolean,
     onClick: () -> Unit,

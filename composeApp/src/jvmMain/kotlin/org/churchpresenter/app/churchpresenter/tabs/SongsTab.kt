@@ -58,12 +58,15 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.pointer.PointerIcon
+import org.churchpresenter.app.churchpresenter.data.StatisticsManager
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.delay
+import androidx.compose.foundation.layout.BoxWithConstraints
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.add_to_schedule
 import churchpresenter.composeapp.generated.resources.all_song_books
@@ -117,7 +120,7 @@ fun SongsTab(
     isPresenting: Boolean = false,
     theme: ThemeMode = ThemeMode.SYSTEM,
     onSongsLoaded: ((List<SongItem>) -> Unit)? = null,
-    statisticsManager: org.churchpresenter.app.churchpresenter.data.StatisticsManager? = null
+    statisticsManager: StatisticsManager? = null
 ) {
     val onSongsLoadedState by rememberUpdatedState(onSongsLoaded)
     val viewModel = remember { SongsViewModel(appSettings, onSongsLoaded = { songs -> onSongsLoadedState?.invoke(songs) }) }
@@ -444,7 +447,7 @@ fun SongsTab(
 
                 LaunchedEffect(selectedSongIndex, filteredSongs.size) {
                     if (selectedSongIndex >= 0 && selectedSongIndex < filteredSongs.size) {
-                        kotlinx.coroutines.delay(100)
+                        delay(100)
                         lazyListState.animateScrollToItem(selectedSongIndex)
                     }
                 }
@@ -553,7 +556,7 @@ fun SongsTab(
             val goLiveStr      = stringResource(Res.string.go_live)
             val addScheduleStr = stringResource(Res.string.add_to_schedule)
 
-            androidx.compose.foundation.layout.BoxWithConstraints(
+            BoxWithConstraints(
                 modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
             ) {
                 val useIcons = maxWidth < 1100.dp

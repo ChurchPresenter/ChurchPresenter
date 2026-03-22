@@ -14,6 +14,10 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -106,9 +110,13 @@ import org.churchpresenter.app.churchpresenter.ui.theme.AppThemeWrapper
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.CrashReporter
 import org.jetbrains.compose.resources.stringResource
+import java.awt.Desktop
 import java.awt.GraphicsDevice
 import java.awt.GraphicsEnvironment
+import java.net.URI
 import java.util.Locale
+import kotlinx.coroutines.CoroutineExceptionHandler
+import org.churchpresenter.app.churchpresenter.models.SelectedVerse
 
 
 fun main() {
@@ -117,7 +125,7 @@ fun main() {
 
     // Catch exceptions thrown inside coroutines / Compose lambdas —
     // these never reach Thread.setDefaultUncaughtExceptionHandler on their own.
-    val coroutineExceptionHandler = kotlinx.coroutines.CoroutineExceptionHandler { _, throwable ->
+    val coroutineExceptionHandler = CoroutineExceptionHandler { _, throwable ->
         CrashReporter.reportException(throwable, context = "CoroutineExceptionHandler")
     }
 
@@ -306,15 +314,15 @@ fun main() {
                                 // ── Remote API permission state (inside Window so schedule actions are live) ──
                                 // Each entry: Triple(RemoteEvent, allowAction, denyAction)
                                 val remoteEventQueue =
-                                    remember { androidx.compose.runtime.mutableStateListOf<Triple<RemoteEvent, () -> Unit, () -> Unit>>() }
+                                    remember { mutableStateListOf<Triple<RemoteEvent, () -> Unit, () -> Unit>>() }
 
                                 // Persistent allow/block lists (survive app restarts)
                                 val remoteClientManager = remember { RemoteClientManager() }
                                 // Session-only sets (cleared on app restart)
                                 val sessionAllowedClients =
-                                    remember { androidx.compose.runtime.mutableStateListOf<String>() }
+                                    remember { mutableStateListOf<String>() }
                                 val sessionBlockedClients =
-                                    remember { androidx.compose.runtime.mutableStateListOf<String>() }
+                                    remember { mutableStateListOf<String>() }
 
                                 // ── Remote add-to-schedule requests ──────────────────────────────────────────
                                 LaunchedEffect(Unit) {
@@ -670,8 +678,8 @@ fun main() {
                                 NavigationTopBar(
                                     onAbout = { showAboutDialog = true },
                                     onHelp = {
-                                        java.awt.Desktop.getDesktop()
-                                            .browse(java.net.URI("https://github.com/ChurchPresenter/ChurchPresenter/"))
+                                        Desktop.getDesktop()
+                                            .browse(URI("https://github.com/ChurchPresenter/ChurchPresenter/"))
                                     },
                                     onKeyboardShortcuts = { showKeyboardShortcutsDialog = true },
                                     theme = {
@@ -725,7 +733,7 @@ fun main() {
                                         }
                                         // Auto-dismiss after 15 seconds
                                         LaunchedEffect(Unit) {
-                                            kotlinx.coroutines.delay(15_000)
+                                            delay(15_000)
                                             showBanner = false
                                         }
                                     }
@@ -985,7 +993,7 @@ private fun executeProjectItem(
             )
             presenterManager.setSelectedVerses(
                 listOf(
-                    org.churchpresenter.app.churchpresenter.models.SelectedVerse(
+                    SelectedVerse(
                         bookName = item.bookName,
                         chapter = item.chapter,
                         verseNumber = item.verseNumber,
@@ -1135,10 +1143,10 @@ private fun PresenterWindows(
             presenterManager.setBibleTransitionAlpha(1f)
         } else {
             val duration = bs.transitionDuration.toInt()
-            val anim = androidx.compose.animation.core.Animatable(1f)
+            val anim = Animatable(1f)
             // Fade out (or instant)
             if (bs.fadeOut) {
-                anim.animateTo(0f, androidx.compose.animation.core.tween(duration / 2)) {
+                anim.animateTo(0f, tween(duration / 2)) {
                     presenterManager.setBibleTransitionAlpha(value)
                 }
             } else {
@@ -1149,7 +1157,7 @@ private fun PresenterWindows(
             // Fade in (or instant)
             if (bs.fadeIn) {
                 anim.snapTo(0f)
-                anim.animateTo(1f, androidx.compose.animation.core.tween(duration / 2)) {
+                anim.animateTo(1f, tween(duration / 2)) {
                     presenterManager.setBibleTransitionAlpha(value)
                 }
             } else {
@@ -1181,9 +1189,9 @@ private fun PresenterWindows(
             presenterManager.setSongTransitionAlpha(1f)
         } else {
             val duration = ss.transitionDuration.toInt()
-            val anim = androidx.compose.animation.core.Animatable(1f)
+            val anim = Animatable(1f)
             if (ss.fadeOut) {
-                anim.animateTo(0f, androidx.compose.animation.core.tween(duration / 2)) {
+                anim.animateTo(0f, tween(duration / 2)) {
                     presenterManager.setSongTransitionAlpha(value)
                 }
             } else {
@@ -1192,7 +1200,7 @@ private fun PresenterWindows(
             presenterManager.setDisplayedLyricSection(lyricSection)
             if (ss.fadeIn) {
                 anim.snapTo(0f)
-                anim.animateTo(1f, androidx.compose.animation.core.tween(duration / 2)) {
+                anim.animateTo(1f, tween(duration / 2)) {
                     presenterManager.setSongTransitionAlpha(value)
                 }
             } else {
@@ -1210,12 +1218,12 @@ private fun PresenterWindows(
             presenterManager.setPictureTransitionAlpha(1f)
         } else {
             val halfDuration = transitionDuration / 2
-            val anim = androidx.compose.animation.core.Animatable(1f)
-            anim.animateTo(0f, androidx.compose.animation.core.tween(halfDuration)) {
+            val anim = Animatable(1f)
+            anim.animateTo(0f, tween(halfDuration)) {
                 presenterManager.setPictureTransitionAlpha(value)
             }
             presenterManager.setDisplayedImagePath(selectedImagePath)
-            anim.animateTo(1f, androidx.compose.animation.core.tween(halfDuration)) {
+            anim.animateTo(1f, tween(halfDuration)) {
                 presenterManager.setPictureTransitionAlpha(value)
             }
         }
@@ -1230,12 +1238,12 @@ private fun PresenterWindows(
             presenterManager.setSlideTransitionAlpha(1f)
         } else {
             val halfDuration = transitionDuration / 2
-            val anim = androidx.compose.animation.core.Animatable(1f)
-            anim.animateTo(0f, androidx.compose.animation.core.tween(halfDuration)) {
+            val anim = Animatable(1f)
+            anim.animateTo(0f, tween(halfDuration)) {
                 presenterManager.setSlideTransitionAlpha(value)
             }
             presenterManager.setDisplayedSlide(selectedSlide)
-            anim.animateTo(1f, androidx.compose.animation.core.tween(halfDuration)) {
+            anim.animateTo(1f, tween(halfDuration)) {
                 presenterManager.setSlideTransitionAlpha(value)
             }
         }
@@ -1259,8 +1267,8 @@ private fun PresenterWindows(
         } else if (announcementText.isEmpty()) {
             // Cleared by user or loop finished — fade out if fade, instant if none
             if (isFade && !wasEmpty) {
-                val anim = androidx.compose.animation.core.Animatable(1f)
-                anim.animateTo(0f, androidx.compose.animation.core.tween(fadeDuration)) {
+                val anim = Animatable(1f)
+                anim.animateTo(0f, tween(fadeDuration)) {
                     presenterManager.setAnnouncementTransitionAlpha(value)
                 }
             }
@@ -1273,8 +1281,8 @@ private fun PresenterWindows(
             // Fade in (only for fade animation)
             if (isFade) {
                 presenterManager.setAnnouncementTransitionAlpha(0f)
-                val anim = androidx.compose.animation.core.Animatable(0f)
-                anim.animateTo(1f, androidx.compose.animation.core.tween(fadeDuration)) {
+                val anim = Animatable(0f)
+                anim.animateTo(1f, tween(fadeDuration)) {
                     presenterManager.setAnnouncementTransitionAlpha(value)
                 }
             } else {
@@ -1287,8 +1295,8 @@ private fun PresenterWindows(
 
                 // Fade out (only for fade animation)
                 if (isFade) {
-                    val anim = androidx.compose.animation.core.Animatable(1f)
-                    anim.animateTo(0f, androidx.compose.animation.core.tween(fadeDuration)) {
+                    val anim = Animatable(1f)
+                    anim.animateTo(0f, tween(fadeDuration)) {
                         presenterManager.setAnnouncementTransitionAlpha(value)
                     }
                 }
@@ -1314,12 +1322,12 @@ private fun PresenterWindows(
 
         if (hasPause) {
             val toPauseDur = (totalDurMs * lottiePauseFrame).toInt().coerceAtLeast(1)
-            val anim = androidx.compose.animation.core.Animatable(0f)
+            val anim = Animatable(0f)
             anim.animateTo(
                 targetValue = lottiePauseFrame,
-                animationSpec = androidx.compose.animation.core.tween(
+                animationSpec = tween(
                     durationMillis = toPauseDur,
-                    easing = androidx.compose.animation.core.LinearEasing
+                    easing = LinearEasing
                 )
             ) { presenterManager.setLottieProgress(value) }
             if (lottiePauseDurationMs > 0) {
@@ -1327,19 +1335,19 @@ private fun PresenterWindows(
                 val remainDur = (totalDurMs * (1f - lottiePauseFrame)).toInt().coerceAtLeast(1)
                 anim.animateTo(
                     targetValue = 1f,
-                    animationSpec = androidx.compose.animation.core.tween(
+                    animationSpec = tween(
                         durationMillis = remainDur,
-                        easing = androidx.compose.animation.core.LinearEasing
+                        easing = LinearEasing
                     )
                 ) { presenterManager.setLottieProgress(value) }
             }
         } else {
-            val anim = androidx.compose.animation.core.Animatable(0f)
+            val anim = Animatable(0f)
             anim.animateTo(
                 targetValue = 1f,
-                animationSpec = androidx.compose.animation.core.tween(
+                animationSpec = tween(
                     durationMillis = totalDurMs.toInt(),
-                    easing = androidx.compose.animation.core.LinearEasing
+                    easing = LinearEasing
                 )
             ) { presenterManager.setLottieProgress(value) }
         }
@@ -1850,7 +1858,7 @@ private fun PresenterWindows(
                         }
 
                         // Clear live browser ref when leaving WEBSITE mode
-                        androidx.compose.runtime.LaunchedEffect(presentingMode) {
+                        LaunchedEffect(presentingMode) {
                             if (presentingMode != Presenting.WEBSITE) {
                                 presenterManager.setLiveBrowser(null)
                             }

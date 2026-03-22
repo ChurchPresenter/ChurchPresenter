@@ -22,11 +22,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.PlainTooltip
-import androidx.compose.material3.TooltipBox
-import androidx.compose.material3.TooltipDefaults
-import androidx.compose.material3.rememberTooltipState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -54,6 +49,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.text.style.TextAlign
+import org.churchpresenter.app.churchpresenter.models.ScheduleItem
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
@@ -95,12 +91,18 @@ import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.app.churchpresenter.composables.TooltipIconButton
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import java.awt.event.InputEvent
+import java.awt.event.KeyEvent as AwtKeyEvent
+import java.awt.event.MouseEvent
+import java.awt.event.MouseWheelEvent
+import javax.swing.SwingUtilities
+import kotlinx.coroutines.delay
 
 @Composable
 fun WebTab(
     modifier: Modifier = Modifier,
     presenterManager: PresenterManager? = null,
-    selectedWebsiteItem: org.churchpresenter.app.churchpresenter.models.ScheduleItem.WebsiteItem? = null,
+    selectedWebsiteItem: ScheduleItem.WebsiteItem? = null,
     appSettings: AppSettings = AppSettings(),
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit = {},
     onAddToSchedule: ((url: String, title: String) -> Unit)? = null,
@@ -522,38 +524,38 @@ fun WebTab(
                                         when (event.type) {
                                             PointerEventType.Press -> {
                                                 val now = System.currentTimeMillis()
-                                                javax.swing.SwingUtilities.invokeLater {
+                                                SwingUtilities.invokeLater {
                                                     try {
                                                         if (!comp.isShowing) return@invokeLater
-                                                        sendMouse.invoke(liveBrowser, java.awt.event.MouseEvent(
-                                                            comp, java.awt.event.MouseEvent.MOUSE_ENTERED,
+                                                        sendMouse.invoke(liveBrowser, MouseEvent(
+                                                            comp, MouseEvent.MOUSE_ENTERED,
                                                             now, 0, bx, by, 0, false
                                                         ))
-                                                        sendMouse.invoke(liveBrowser, java.awt.event.MouseEvent(
-                                                            comp, java.awt.event.MouseEvent.MOUSE_MOVED,
+                                                        sendMouse.invoke(liveBrowser, MouseEvent(
+                                                            comp, MouseEvent.MOUSE_MOVED,
                                                             now, 0, bx, by, 0, false
                                                         ))
-                                                        sendMouse.invoke(liveBrowser, java.awt.event.MouseEvent(
-                                                            comp, java.awt.event.MouseEvent.MOUSE_PRESSED,
+                                                        sendMouse.invoke(liveBrowser, MouseEvent(
+                                                            comp, MouseEvent.MOUSE_PRESSED,
                                                             now,
-                                                            java.awt.event.InputEvent.BUTTON1_DOWN_MASK,
-                                                            bx, by, 1, false, java.awt.event.MouseEvent.BUTTON1
+                                                            InputEvent.BUTTON1_DOWN_MASK,
+                                                            bx, by, 1, false, MouseEvent.BUTTON1
                                                         ))
                                                     } catch (_: Exception) {}
                                                 }
                                             }
                                             PointerEventType.Release -> {
                                                 val now = System.currentTimeMillis()
-                                                javax.swing.SwingUtilities.invokeLater {
+                                                SwingUtilities.invokeLater {
                                                     try {
                                                         if (!comp.isShowing) return@invokeLater
-                                                        sendMouse.invoke(liveBrowser, java.awt.event.MouseEvent(
-                                                            comp, java.awt.event.MouseEvent.MOUSE_RELEASED,
-                                                            now, 0, bx, by, 1, false, java.awt.event.MouseEvent.BUTTON1
+                                                        sendMouse.invoke(liveBrowser, MouseEvent(
+                                                            comp, MouseEvent.MOUSE_RELEASED,
+                                                            now, 0, bx, by, 1, false, MouseEvent.BUTTON1
                                                         ))
-                                                        sendMouse.invoke(liveBrowser, java.awt.event.MouseEvent(
-                                                            comp, java.awt.event.MouseEvent.MOUSE_CLICKED,
-                                                            now, 0, bx, by, 1, false, java.awt.event.MouseEvent.BUTTON1
+                                                        sendMouse.invoke(liveBrowser, MouseEvent(
+                                                            comp, MouseEvent.MOUSE_CLICKED,
+                                                            now, 0, bx, by, 1, false, MouseEvent.BUTTON1
                                                         ))
                                                     } catch (_: Exception) {}
                                                 }
@@ -562,11 +564,11 @@ fun WebTab(
                                                 val now = System.currentTimeMillis()
                                                 if (now - lastMoveTime < 50) continue // Throttle to ~20fps
                                                 lastMoveTime = now
-                                                javax.swing.SwingUtilities.invokeLater {
+                                                SwingUtilities.invokeLater {
                                                     try {
                                                         if (!comp.isShowing) return@invokeLater
-                                                        sendMouse.invoke(liveBrowser, java.awt.event.MouseEvent(
-                                                            comp, java.awt.event.MouseEvent.MOUSE_MOVED,
+                                                        sendMouse.invoke(liveBrowser, MouseEvent(
+                                                            comp, MouseEvent.MOUSE_MOVED,
                                                             now, 0, bx, by, 0, false
                                                         ))
                                                     } catch (_: Exception) {}
@@ -599,24 +601,24 @@ fun WebTab(
                                         val vRotation = -(scroll.y * 15).toInt().coerceIn(-100, 100)
                                         val hRotation = -(scroll.x * 15).toInt().coerceIn(-100, 100)
                                         if (vRotation == 0 && hRotation == 0) continue
-                                        javax.swing.SwingUtilities.invokeLater {
+                                        SwingUtilities.invokeLater {
                                             try {
                                                 if (!comp.isShowing) return@invokeLater
                                                 if (vRotation != 0) {
-                                                    sendWheel.invoke(liveBrowser, java.awt.event.MouseWheelEvent(
-                                                        comp, java.awt.event.MouseWheelEvent.MOUSE_WHEEL,
+                                                    sendWheel.invoke(liveBrowser, MouseWheelEvent(
+                                                        comp, MouseWheelEvent.MOUSE_WHEEL,
                                                         System.currentTimeMillis(), 0, bx, by,
-                                                        0, false, java.awt.event.MouseWheelEvent.WHEEL_UNIT_SCROLL,
+                                                        0, false, MouseWheelEvent.WHEEL_UNIT_SCROLL,
                                                         1, vRotation
                                                     ))
                                                 }
                                                 if (hRotation != 0) {
-                                                    sendWheel.invoke(liveBrowser, java.awt.event.MouseWheelEvent(
-                                                        comp, java.awt.event.MouseWheelEvent.MOUSE_WHEEL,
+                                                    sendWheel.invoke(liveBrowser, MouseWheelEvent(
+                                                        comp, MouseWheelEvent.MOUSE_WHEEL,
                                                         System.currentTimeMillis(),
-                                                        java.awt.event.InputEvent.SHIFT_DOWN_MASK,
+                                                        InputEvent.SHIFT_DOWN_MASK,
                                                         bx, by,
-                                                        0, false, java.awt.event.MouseWheelEvent.WHEEL_UNIT_SCROLL,
+                                                        0, false, MouseWheelEvent.WHEEL_UNIT_SCROLL,
                                                         1, hRotation
                                                     ))
                                                 }
@@ -627,21 +629,21 @@ fun WebTab(
                             }
                             .onKeyEvent { keyEvent ->
                                 if (liveBrowser == null) return@onKeyEvent false
-                                val sendKey = findMethod(liveBrowser, "sendKeyEvent", java.awt.event.KeyEvent::class.java)
+                                val sendKey = findMethod(liveBrowser, "sendKeyEvent", AwtKeyEvent::class.java)
                                     ?: return@onKeyEvent false
                                 val awtType = when (keyEvent.type) {
-                                    KeyEventType.KeyDown -> java.awt.event.KeyEvent.KEY_PRESSED
-                                    KeyEventType.KeyUp -> java.awt.event.KeyEvent.KEY_RELEASED
+                                    KeyEventType.KeyDown -> AwtKeyEvent.KEY_PRESSED
+                                    KeyEventType.KeyUp -> AwtKeyEvent.KEY_RELEASED
                                     else -> return@onKeyEvent false
                                 }
                                 val nativeCode = keyEvent.key.nativeKeyCode
                                 val comp = liveBrowser.getUIComponent()
                                 if (!comp.isShowing) return@onKeyEvent false
                                 val now = System.currentTimeMillis()
-                                javax.swing.SwingUtilities.invokeLater {
+                                SwingUtilities.invokeLater {
                                     try {
                                         if (!comp.isShowing) return@invokeLater
-                                        sendKey.invoke(liveBrowser, java.awt.event.KeyEvent(
+                                        sendKey.invoke(liveBrowser, AwtKeyEvent(
                                             comp, awtType, now, 0,
                                             nativeCode, nativeCode.toChar()
                                         ))
@@ -655,7 +657,7 @@ fun WebTab(
                     // Show spinner while waiting for first snapshot; after 3s show help text
                     var showHint by remember { mutableStateOf(false) }
                     LaunchedEffect(Unit) {
-                        kotlinx.coroutines.delay(7000)
+                        delay(7000)
                         showHint = true
                     }
                     Box(

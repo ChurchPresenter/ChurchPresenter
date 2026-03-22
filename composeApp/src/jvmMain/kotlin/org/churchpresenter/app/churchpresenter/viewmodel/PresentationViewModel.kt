@@ -14,7 +14,13 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.churchpresenter.app.churchpresenter.data.AppSettings
 import java.awt.image.BufferedImage
+import java.io.BufferedInputStream
+import java.io.BufferedOutputStream
 import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.util.zip.ZipFile
+import java.util.zip.ZipInputStream
 import javax.imageio.ImageIO
 
 class PresentationViewModel(appSettings: AppSettings? = null) {
@@ -277,7 +283,7 @@ class PresentationViewModel(appSettings: AppSettings? = null) {
                 tempDir = File(System.getProperty("java.io.tmpdir"), "keynote_extract_${System.currentTimeMillis()}")
                 tempDir.mkdirs()
                 try {
-                    java.util.zip.ZipInputStream(java.io.BufferedInputStream(java.io.FileInputStream(file))).use { zip ->
+                    ZipInputStream(BufferedInputStream(FileInputStream(file))).use { zip ->
                         var entry = zip.nextEntry
                         while (entry != null) {
                             val outFile = File(tempDir, entry.name)
@@ -285,7 +291,7 @@ class PresentationViewModel(appSettings: AppSettings? = null) {
                                 outFile.mkdirs()
                             } else {
                                 outFile.parentFile?.mkdirs()
-                                java.io.BufferedOutputStream(java.io.FileOutputStream(outFile)).use { out ->
+                                BufferedOutputStream(FileOutputStream(outFile)).use { out ->
                                     zip.copyTo(out)
                                 }
                             }
@@ -345,7 +351,7 @@ class PresentationViewModel(appSettings: AppSettings? = null) {
     private fun readSlideOrderFromZip(file: File): List<Long> {
         val ordered = mutableListOf<Long>()
         try {
-            java.util.zip.ZipFile(file).use { zip ->
+            ZipFile(file).use { zip ->
                 zip.entries().asSequence()
                     .map { it.name }
                     .filter { name ->

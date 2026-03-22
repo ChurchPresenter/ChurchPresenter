@@ -1,9 +1,18 @@
 package org.churchpresenter.app.churchpresenter.viewmodel
 
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import java.io.File
-import java.nio.file.*
+import java.nio.file.ClosedWatchServiceException
+import java.nio.file.FileSystems
+import java.nio.file.Path
+import java.nio.file.StandardWatchEventKinds
 
 class SongFolderWatcher(
     private val scope: CoroutineScope,

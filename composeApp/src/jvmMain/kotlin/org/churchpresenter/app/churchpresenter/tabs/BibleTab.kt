@@ -64,6 +64,7 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.pointer.PointerIcon
+import org.churchpresenter.app.churchpresenter.data.StatisticsManager
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
@@ -128,7 +129,7 @@ fun BibleTab(
     onPresenting: (Presenting) -> Unit = { Presenting.NONE },
     isPresenting: Boolean = false,
     presenterManager: PresenterManager? = null,
-    statisticsManager: org.churchpresenter.app.churchpresenter.data.StatisticsManager? = null,
+    statisticsManager: StatisticsManager? = null,
 ) {
     // Update settings when bible paths change
     val isFirstComposition = remember { mutableStateOf(true) }

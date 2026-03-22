@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.presenter
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -395,7 +396,7 @@ fun BiblePresenter(
                     .then(if (effectiveType == Constants.BACKGROUND_IMAGE && backgroundImageBitmap != null) Modifier else bgModifier)
             ) {
                 if (effectiveType == Constants.BACKGROUND_IMAGE && backgroundImageBitmap != null) {
-                    androidx.compose.foundation.Image(
+                    Image(
                         painter = BitmapPainter(backgroundImageBitmap),
                         contentDescription = null,
                         contentScale = ContentScale.Crop,

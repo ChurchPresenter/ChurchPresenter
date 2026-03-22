@@ -43,12 +43,22 @@ import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.HeicDecoder
 import org.churchpresenter.app.churchpresenter.utils.isChorusHeader
 import org.churchpresenter.app.churchpresenter.utils.isHeaderLine
+import org.churchpresenter.app.churchpresenter.data.Bible
+import org.churchpresenter.app.churchpresenter.data.Songs
 import java.awt.image.BufferedImage
+import java.io.BufferedInputStream
+import java.io.BufferedOutputStream
 import java.io.ByteArrayOutputStream
 import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.io.IOException
 import java.net.NetworkInterface
+import java.net.ServerSocket
 import java.util.Base64
 import java.util.concurrent.ConcurrentHashMap
+import java.util.zip.ZipFile
+import java.util.zip.ZipInputStream
 import javax.imageio.ImageIO
 
 // ── API DTOs ─────────────────────────────────────────────────────────────────
@@ -529,7 +539,7 @@ class CompanionServer {
     /** Raw song list kept in sync with _catalog for per-number detail lookups */
     @Volatile private var _songs: List<SongItem> = emptyList()
     private val _bibleCatalog = MutableStateFlow<BibleCatalogResponse?>(null)
-    private val _bible = MutableStateFlow<org.churchpresenter.app.churchpresenter.data.Bible?>(null)
+    private val _bible = MutableStateFlow<Bible?>(null)
     private val _schedule = MutableStateFlow<List<ScheduleItemDto>>(emptyList())
 
     // Presentation catalog — metadata only; raw JPEG bytes stored per-slide in _slideBytes
@@ -680,7 +690,7 @@ class CompanionServer {
                 try {
                     val dir = java.io.File(songStorageDir)
                     if (dir.exists() && dir.isDirectory) {
-                        val songs = org.churchpresenter.app.churchpresenter.data.Songs()
+                        val songs = Songs()
                         dir.listFiles { f -> f.extension.lowercase() == Constants.EXTENSION_SPS }
                             ?.sortedBy { it.name }
                             ?.forEach { file ->
@@ -698,7 +708,7 @@ class CompanionServer {
                 try {
                     val file = java.io.File(bibleStorageDir, primaryBibleFileName)
                     if (file.exists()) {
-                        val bible = org.churchpresenter.app.churchpresenter.data.Bible()
+                        val bible = Bible()
                         bible.loadFromSpb(file.absolutePath)
                         updateBible(bible, primaryBibleFileName)
                     }
@@ -719,7 +729,7 @@ class CompanionServer {
     }
 
     /** Feed the primary Bible — builds full nested catalog and broadcasts to WS clients. */
-    fun updateBible(bible: org.churchpresenter.app.churchpresenter.data.Bible, translation: String) {
+    fun updateBible(bible: Bible, translation: String) {
         _bible.value = bible
         val catalog = buildBibleCatalog(bible, translation)
         _bibleCatalog.value = catalog
@@ -929,7 +939,7 @@ class CompanionServer {
         val slideIwaOrder = mutableListOf<Long>()
         if (!file.isDirectory) {
             try {
-                java.util.zip.ZipFile(file).use { zip ->
+                ZipFile(file).use { zip ->
                     zip.entries().asSequence()
                         .map { it.name }
                         .filter { n ->
@@ -952,14 +962,14 @@ class CompanionServer {
             tempDir = File(System.getProperty("java.io.tmpdir"), "keynote_server_${System.currentTimeMillis()}")
             tempDir.mkdirs()
             try {
-                java.util.zip.ZipInputStream(java.io.BufferedInputStream(java.io.FileInputStream(file))).use { zip ->
+                ZipInputStream(BufferedInputStream(FileInputStream(file))).use { zip ->
                     var entry = zip.nextEntry
                     while (entry != null) {
                         val out = File(tempDir, entry.name)
                         if (entry.isDirectory) out.mkdirs()
                         else {
                             out.parentFile?.mkdirs()
-                            java.io.BufferedOutputStream(java.io.FileOutputStream(out)).use { zip.copyTo(it) }
+                            BufferedOutputStream(FileOutputStream(out)).use { zip.copyTo(it) }
                         }
                         zip.closeEntry(); entry = zip.nextEntry
                     }
@@ -1130,7 +1140,7 @@ class CompanionServer {
     }
 
     private fun buildBibleCatalog(
-        bible: org.churchpresenter.app.churchpresenter.data.Bible,
+        bible: Bible,
         translation: String
     ): BibleCatalogResponse {
         val bookNames = bible.getBooks()
@@ -1273,8 +1283,8 @@ class CompanionServer {
     }
 
     private fun isPortFree(port: Int): Boolean = try {
-        java.net.ServerSocket(port).use { true }
-    } catch (_: java.io.IOException) {
+        ServerSocket(port).use { true }
+    } catch (_: IOException) {
         false
     }
 

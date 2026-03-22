@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -72,7 +73,7 @@ fun PresenterScreen(
                                 .fillMaxSize()
                                 .then(Modifier.background(Color.Black))
                         ) {
-                            androidx.compose.foundation.Image(
+                            Image(
                                 painter = BitmapPainter(backgroundImageBitmap),
                                 contentDescription = null,
                                 contentScale = ContentScale.Crop,

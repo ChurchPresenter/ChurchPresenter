@@ -1,7 +1,9 @@
 package org.churchpresenter.app.churchpresenter.utils
 
+import java.io.ByteArrayOutputStream
 import java.io.File
 import java.nio.file.Files
+import javax.imageio.ImageIO
 
 /**
  * Decodes HEIC/HEIF image files into JPEG bytes.
@@ -51,9 +53,9 @@ object HeicDecoder {
 
     private fun convertWithImageIO(heicFile: File): ByteArray? {
         return try {
-            val bufferedImage = javax.imageio.ImageIO.read(heicFile) ?: return null
-            val out = java.io.ByteArrayOutputStream()
-            javax.imageio.ImageIO.write(bufferedImage, "jpg", out)
+            val bufferedImage = ImageIO.read(heicFile) ?: return null
+            val out = ByteArrayOutputStream()
+            ImageIO.write(bufferedImage, "jpg", out)
             out.toByteArray()
         } catch (e: Exception) {
             e.printStackTrace()

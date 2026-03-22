@@ -26,6 +26,8 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -38,6 +40,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.lower_third_generator
@@ -693,11 +696,11 @@ internal fun openLottieGeneratorDialog(
                 System.err.println("WebView FAILED to load: ${engine.loadWorker.exception}")
                 SwingUtilities.invokeLater {
                     cards.show(cardPanel, "content")
-                    javax.swing.JOptionPane.showMessageDialog(
+                    JOptionPane.showMessageDialog(
                         dialog,
                         "Failed to load the generator.\n${engine.loadWorker.exception?.message ?: "Unknown error"}",
                         generatorDialogTitle,
-                        javax.swing.JOptionPane.ERROR_MESSAGE
+                        JOptionPane.ERROR_MESSAGE
                     )
                 }
             }
@@ -859,7 +862,7 @@ private fun GeneratorPreviewContent() {
                 }
 
                 // Seek bar
-                androidx.compose.material3.Slider(
+                Slider(
                     value = progress.value,
                     onValueChange = {
                         isPlaying = false
@@ -867,7 +870,7 @@ private fun GeneratorPreviewContent() {
                     },
                     onValueChangeFinished = { isPlaying = true },
                     modifier = Modifier.weight(1f),
-                    colors = androidx.compose.material3.SliderDefaults.colors(
+                    colors = SliderDefaults.colors(
                         thumbColor = accentColor,
                         activeTrackColor = accentColor,
                         inactiveTrackColor = trackColor
@@ -889,7 +892,7 @@ private fun GeneratorPreviewContent() {
                     text = statusText,
                     color = frameTextColor,
                     style = MaterialTheme.typography.labelSmall,
-                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                    textAlign = TextAlign.Center,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp, vertical = 4.dp)

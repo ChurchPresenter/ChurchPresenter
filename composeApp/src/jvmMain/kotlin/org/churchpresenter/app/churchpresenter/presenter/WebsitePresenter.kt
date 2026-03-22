@@ -27,7 +27,11 @@ import org.cef.handler.CefResourceRequestHandlerAdapter
 import org.cef.handler.CefResourceRequestHandler
 import org.cef.misc.BoolRef
 import org.cef.network.CefRequest
+import java.awt.Rectangle
+import java.awt.Robot
 import java.io.File
+import javax.swing.Timer
+import kotlinx.coroutines.delay
 import java.lang.invoke.MethodHandles
 
 /**
@@ -285,14 +289,14 @@ fun EmbeddedWebView(
         client.addRequestHandler(requestHandler)
 
         // Snapshot timer — captures browser via Robot screen capture
-        val robot = try { java.awt.Robot() } catch (_: Exception) { null }
+        val robot = try { Robot() } catch (_: Exception) { null }
         val timer = if (onSnapshot != null && robot != null) {
-            javax.swing.Timer(150) {
+            Timer(150) {
                 try {
                     val comp = browser.getUIComponent()
                     if (comp.width > 0 && comp.height > 0 && comp.isShowing) {
                         val loc = comp.locationOnScreen
-                        val rect = java.awt.Rectangle(loc.x, loc.y, comp.width, comp.height)
+                        val rect = Rectangle(loc.x, loc.y, comp.width, comp.height)
                         val img = robot.createScreenCapture(rect)
                         onSnapshot(img.toComposeImageBitmap())
                     }
@@ -353,10 +357,10 @@ fun WebsitePresenter(
     // New streams may appear as the user navigates to pages with audio/video.
     LaunchedEffect(audioDeviceId) {
         if (audioDeviceId.isNotBlank()) {
-            kotlinx.coroutines.delay(2000) // Wait for initial audio streams
+            delay(2000) // Wait for initial audio streams
             while (true) {
                 CefManager.routeAudioToDevice(audioDeviceId)
-                kotlinx.coroutines.delay(5000)
+                delay(5000)
             }
         }
     }
