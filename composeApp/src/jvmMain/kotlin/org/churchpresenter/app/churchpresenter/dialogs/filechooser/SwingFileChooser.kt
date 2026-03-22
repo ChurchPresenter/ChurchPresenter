@@ -2,11 +2,33 @@ package org.churchpresenter.app.churchpresenter.dialogs.filechooser
 
 import java.nio.file.Path
 import javax.swing.JFileChooser
+import javax.swing.JFrame
 import javax.swing.SwingUtilities
 import javax.swing.filechooser.FileNameExtensionFilter
 
 
 object SwingFileChooser : FileChooser() {
+
+    /** Hidden owner frame that provides the app icon to file chooser dialogs. */
+    private val ownerFrame: JFrame by lazy {
+        JFrame().apply {
+            isUndecorated = true
+            setSize(0, 0)
+            setLocationRelativeTo(null)
+            try {
+                // Try to load icon from app resources directory
+                val resDir = System.getProperty("compose.application.resources.dir")
+                val iconFile = if (resDir != null) {
+                    listOf("icon-32.png", "icon-48.png", "icon.png")
+                        .map { java.io.File(resDir, it) }
+                        .firstOrNull { it.exists() }
+                } else null
+                if (iconFile != null) {
+                    iconImage = javax.imageio.ImageIO.read(iconFile)
+                }
+            } catch (_: Exception) {}
+        }
+    }
 
     @Suppress("BlockingMethodInNonBlockingContext")
     override suspend fun chooseImpl(
@@ -24,7 +46,9 @@ object SwingFileChooser : FileChooser() {
                 isMultiSelectionEnabled = multiple
                 filters.forEach { addChoosableFileFilter(it) }
             }
-            val returnCode = chooser.showOpenDialog(null)
+            ownerFrame.isVisible = true
+            val returnCode = chooser.showOpenDialog(ownerFrame)
+            ownerFrame.isVisible = false
             result = if (returnCode == JFileChooser.APPROVE_OPTION) {
                 if (multiple) chooser.selectedFiles.map { it.toPath() } else listOf(chooser.selectedFile.toPath())
             } else {
@@ -48,7 +72,9 @@ object SwingFileChooser : FileChooser() {
                 selectedFile = location.resolve(suggestedName).toFile()
                 filters.forEach { addChoosableFileFilter(it) }
             }
-            val returnCode = chooser.showSaveDialog(null)
+            ownerFrame.isVisible = true
+            val returnCode = chooser.showSaveDialog(ownerFrame)
+            ownerFrame.isVisible = false
             result = if (returnCode == JFileChooser.APPROVE_OPTION) {
                 chooser.selectedFile.toPath()
             } else {
