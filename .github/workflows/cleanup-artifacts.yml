@@ -97,6 +97,7 @@ jobs:
             }
             if (dryRun) console.log('DRY RUN — nothing will be deleted');
 
+            const currentRunId = context.runId;
             let deleted = 0;
 
             while (true) {
@@ -111,6 +112,7 @@ jobs:
 
               let deletedThisPage = false;
               for (const run of workflow_runs) {
+                if (run.id === currentRunId) continue;
                 const createdAt = new Date(run.created_at);
                 if (deleteAll || createdAt < cutoff) {
                   console.log(`${dryRun ? '[DRY RUN] Would delete' : 'Deleting'}: ${run.name} #${run.run_number} (${run.status}, created ${run.created_at})`);
