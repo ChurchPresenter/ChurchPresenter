@@ -36,4 +36,4 @@ jobs:
         with:
           name: ChurchPresenter-Windows-${{ steps.vars.outputs.SHORT_SHA }}
           path: composeApp/build/compose/binaries/main/msi
-          retention-days: 30
+          retention-days: 2

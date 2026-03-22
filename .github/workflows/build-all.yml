@@ -35,7 +35,7 @@ jobs:
         with:
           name: ChurchPresenter-Windows-${{ steps.vars.outputs.SHORT_SHA }}
           path: composeApp/build/compose/binaries/main/msi
-          retention-days: 30
+          retention-days: 2
 
   build-macos:
     runs-on: macos-latest
@@ -71,7 +71,7 @@ jobs:
         with:
           name: ChurchPresenter-macOS-${{ steps.vars.outputs.SHORT_SHA }}
           path: composeApp/build/compose/binaries/main/dmg
-          retention-days: 30
+          retention-days: 2
 
   build-linux:
     runs-on: ubuntu-latest
@@ -107,4 +107,4 @@ jobs:
         with:
           name: ChurchPresenter-Linux-${{ steps.vars.outputs.SHORT_SHA }}
           path: composeApp/build/compose/binaries/main/deb
-          retention-days: 30
+          retention-days: 2

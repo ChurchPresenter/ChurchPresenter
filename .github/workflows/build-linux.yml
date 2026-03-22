@@ -39,4 +39,4 @@ jobs:
         with:
           name: ChurchPresenter-Linux-${{ steps.vars.outputs.SHORT_SHA }}
           path: composeApp/build/compose/binaries/main/deb
-          retention-days: 30
+          retention-days: 2

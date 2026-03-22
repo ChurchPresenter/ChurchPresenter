@@ -39,4 +39,4 @@ jobs:
         with:
           name: ChurchPresenter-macOS-${{ steps.vars.outputs.SHORT_SHA }}
           path: composeApp/build/compose/binaries/main/dmg
-          retention-days: 30
+          retention-days: 2
