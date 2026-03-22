@@ -1,15 +1,20 @@
-name: Cleanup Artifacts
+name: Cleanup Storage
 
 on:
   workflow_dispatch:
     inputs:
-      max_age_days:
-        description: 'Delete artifacts older than this many days'
+      delete_all:
+        description: 'Delete ALL artifacts and runs (ignore age filter)'
         required: false
-        default: '14'
+        default: false
+        type: boolean
+      max_age_days:
+        description: 'Delete items older than this many days (ignored if delete_all is true)'
+        required: false
+        default: '2'
         type: number
       dry_run:
-        description: 'List artifacts without deleting'
+        description: 'List items without deleting'
         required: false
         default: false
         type: boolean
@@ -20,34 +25,39 @@ jobs:
     permissions:
       actions: write
     steps:
-      - name: Delete old artifacts
+      - name: Delete artifacts
         uses: actions/github-script@v7
         with:
           script: |
-            const maxAgeDays = ${{ inputs.max_age_days || 14 }};
+            const deleteAll = ${{ inputs.delete_all || false }};
+            const maxAgeDays = ${{ inputs.max_age_days || 2 }};
             const dryRun = ${{ inputs.dry_run || false }};
             const cutoff = new Date(Date.now() - maxAgeDays * 24 * 60 * 60 * 1000);
 
-            console.log(`Cleaning artifacts older than ${maxAgeDays} days (before ${cutoff.toISOString()})`);
-            if (dryRun) console.log('DRY RUN — no artifacts will be deleted');
+            if (deleteAll) {
+              console.log('Deleting ALL artifacts');
+            } else {
+              console.log(`Deleting artifacts older than ${maxAgeDays} days (before ${cutoff.toISOString()})`);
+            }
+            if (dryRun) console.log('DRY RUN — nothing will be deleted');
 
             let deleted = 0;
             let totalSize = 0;
-            let page = 1;
 
             while (true) {
-              const { data: { artifacts, total_count } } = await github.rest.actions.listArtifactsForRepo({
+              const { data: { artifacts } } = await github.rest.actions.listArtifactsForRepo({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 per_page: 100,
-                page,
+                page: 1,
               });
 
               if (artifacts.length === 0) break;
 
+              let deletedThisPage = false;
               for (const artifact of artifacts) {
                 const createdAt = new Date(artifact.created_at);
-                if (createdAt < cutoff) {
+                if (deleteAll || createdAt < cutoff) {
                   const sizeMB = (artifact.size_in_bytes / 1024 / 1024).toFixed(2);
                   console.log(`${dryRun ? '[DRY RUN] Would delete' : 'Deleting'}: ${artifact.name} (${sizeMB} MB, created ${artifact.created_at})`);
 
@@ -57,6 +67,7 @@ jobs:
                       repo: context.repo.repo,
                       artifact_id: artifact.id,
                     });
+                    deletedThisPage = true;
                   }
 
                   deleted++;
@@ -64,40 +75,44 @@ jobs:
                 }
               }
 
-              if (artifacts.length < 100) break;
-              page++;
+              if (dryRun || !deletedThisPage) break;
             }
 
             const totalMB = (totalSize / 1024 / 1024).toFixed(2);
             console.log(`\n${dryRun ? 'Would delete' : 'Deleted'} ${deleted} artifact(s), freeing ${totalMB} MB`);
 
-      - name: Delete old workflow run logs
+      - name: Delete workflow run logs
         uses: actions/github-script@v7
         with:
           script: |
-            const maxAgeDays = ${{ inputs.max_age_days || 14 }};
+            const deleteAll = ${{ inputs.delete_all || false }};
+            const maxAgeDays = ${{ inputs.max_age_days || 2 }};
             const dryRun = ${{ inputs.dry_run || false }};
             const cutoff = new Date(Date.now() - maxAgeDays * 24 * 60 * 60 * 1000);
 
-            console.log(`\nCleaning workflow runs older than ${maxAgeDays} days (before ${cutoff.toISOString()})`);
-            if (dryRun) console.log('DRY RUN — no runs will be deleted');
+            if (deleteAll) {
+              console.log('Deleting ALL workflow runs');
+            } else {
+              console.log(`Deleting workflow runs older than ${maxAgeDays} days (before ${cutoff.toISOString()})`);
+            }
+            if (dryRun) console.log('DRY RUN — nothing will be deleted');
 
             let deleted = 0;
-            let page = 1;
 
             while (true) {
               const { data: { workflow_runs } } = await github.rest.actions.listWorkflowRunsForRepo({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 per_page: 100,
-                page,
+                page: 1,
               });
 
               if (workflow_runs.length === 0) break;
 
+              let deletedThisPage = false;
               for (const run of workflow_runs) {
                 const createdAt = new Date(run.created_at);
-                if (createdAt < cutoff) {
+                if (deleteAll || createdAt < cutoff) {
                   console.log(`${dryRun ? '[DRY RUN] Would delete' : 'Deleting'}: ${run.name} #${run.run_number} (${run.status}, created ${run.created_at})`);
 
                   if (!dryRun) {
@@ -106,14 +121,59 @@ jobs:
                       repo: context.repo.repo,
                       run_id: run.id,
                     });
+                    deletedThisPage = true;
                   }
 
                   deleted++;
                 }
               }
 
-              if (workflow_runs.length < 100) break;
-              page++;
+              if (dryRun || !deletedThisPage) break;
             }
 
             console.log(`\n${dryRun ? 'Would delete' : 'Deleted'} ${deleted} workflow run(s)`);
+
+      - name: Clear action caches
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const dryRun = ${{ inputs.dry_run || false }};
+
+            console.log('Clearing action caches');
+            if (dryRun) console.log('DRY RUN — nothing will be deleted');
+
+            let deleted = 0;
+            let totalSize = 0;
+
+            while (true) {
+              const { data: { actions_caches } } = await github.rest.actions.getActionsCacheList({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                per_page: 100,
+              });
+
+              if (actions_caches.length === 0) break;
+
+              let deletedThisPage = false;
+              for (const cache of actions_caches) {
+                const sizeMB = (cache.size_in_bytes / 1024 / 1024).toFixed(2);
+                console.log(`${dryRun ? '[DRY RUN] Would delete' : 'Deleting'}: ${cache.key} (${sizeMB} MB)`);
+
+                if (!dryRun) {
+                  await github.rest.actions.deleteActionsCacheById({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    cache_id: cache.id,
+                  });
+                  deletedThisPage = true;
+                }
+
+                deleted++;
+                totalSize += cache.size_in_bytes;
+              }
+
+              if (dryRun || !deletedThisPage) break;
+            }
+
+            const totalMB = (totalSize / 1024 / 1024).toFixed(2);
+            console.log(`\n${dryRun ? 'Would delete' : 'Deleted'} ${deleted} cache(s), freeing ${totalMB} MB`);
