@@ -873,4 +873,8 @@
     <string name="look_ahead_next_fullscreen">Look Ahead Next Section (Fullscreen)</string>
     <string name="look_ahead_lower_third">Look Ahead (Lower Third)</string>
     <string name="look_ahead_next_lower_third">Look Ahead Next Section (Lower Third)</string>
+
+    <!-- Color Picker Dialog -->
+    <string name="dialog_choose_color">Choose Color</string>
+    <string name="label_hex">Hex</string>
 </resources>

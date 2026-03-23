@@ -835,5 +835,9 @@
     <string name="look_ahead_next_fullscreen">Келесі бөлім (толық экран)</string>
     <string name="look_ahead_lower_third">Алдын ала қарау (төменгі үштен бір)</string>
     <string name="look_ahead_next_lower_third">Келесі бөлім (төменгі үштен бір)</string>
+
+    <!-- Color Picker Dialog -->
+    <string name="dialog_choose_color">Түс таңдау</string>
+    <string name="label_hex">Hex</string>
 </resources>
 

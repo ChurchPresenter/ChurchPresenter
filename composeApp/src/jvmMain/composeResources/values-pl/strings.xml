@@ -835,5 +835,9 @@
     <string name="look_ahead_next_fullscreen">Następna sekcja (pełny ekran)</string>
     <string name="look_ahead_lower_third">Podgląd (dolna trzecia)</string>
     <string name="look_ahead_next_lower_third">Następna sekcja (dolna trzecia)</string>
+
+    <!-- Color Picker Dialog -->
+    <string name="dialog_choose_color">Wybierz kolor</string>
+    <string name="label_hex">Hex</string>
 </resources>
 

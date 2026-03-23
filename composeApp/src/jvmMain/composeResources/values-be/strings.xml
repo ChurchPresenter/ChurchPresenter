@@ -835,5 +835,9 @@
     <string name="look_ahead_next_fullscreen">Наступны раздзел (поўны экран)</string>
     <string name="look_ahead_lower_third">Папярэдні прагляд (ніжняя трэць)</string>
     <string name="look_ahead_next_lower_third">Наступны раздзел (ніжняя трэць)</string>
+
+    <!-- Color Picker Dialog -->
+    <string name="dialog_choose_color">Выбраць колер</string>
+    <string name="label_hex">Hex</string>
 </resources>
 

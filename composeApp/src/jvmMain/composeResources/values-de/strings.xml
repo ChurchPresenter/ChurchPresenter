@@ -834,6 +834,10 @@
     <string name="look_ahead_fullscreen">Vorschau (Vollbild)</string>
     <string name="look_ahead_next_fullscreen">Nächster Abschnitt (Vollbild)</string>
     <string name="look_ahead_lower_third">Vorschau (Unteres Drittel)</string>
-    <string name="look_ahead_next_lower_third">Nächster Abschnitt (Unteres Drittel)</string>
+    <string name="look_ahead_next_lower_third">Nchster Abschnitt (Unteres Drittel)</string>
+
+    <!-- Color Picker Dialog -->
+    <string name="dialog_choose_color">Farbe wählen</string>
+    <string name="label_hex">Hex</string>
 </resources>
 
