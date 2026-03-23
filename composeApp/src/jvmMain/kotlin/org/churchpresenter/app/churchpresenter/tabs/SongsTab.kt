@@ -64,6 +64,10 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.style.TextAlign
+import churchpresenter.composeapp.generated.resources.songs_no_db_title
+import churchpresenter.composeapp.generated.resources.songs_no_db_hint
+import churchpresenter.composeapp.generated.resources.songs_no_db_step
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -689,6 +693,52 @@ fun SongsTab(
             }
 
             // Lyrics content
+            val noSongsLoaded = filteredSongs.isEmpty() && searchQuery.isBlank()
+            if (noSongsLoaded) {
+                // ── Empty state: no song database configured ──────────────
+                Box(
+                    modifier = Modifier.fillMaxSize().padding(16.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Surface(
+                        modifier = Modifier.widthIn(max = 320.dp),
+                        shape = MaterialTheme.shapes.large,
+                        tonalElevation = 3.dp,
+                        color = MaterialTheme.colorScheme.surfaceVariant
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(horizontal = 24.dp, vertical = 20.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Text(
+                                text = "🎵",
+                                style = MaterialTheme.typography.displaySmall
+                            )
+                            Text(
+                                text = stringResource(Res.string.songs_no_db_title),
+                                style = MaterialTheme.typography.titleMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                textAlign = TextAlign.Center
+                            )
+                            HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+                            Text(
+                                text = stringResource(Res.string.songs_no_db_hint),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                textAlign = TextAlign.Center
+                            )
+                            Text(
+                                text = stringResource(Res.string.songs_no_db_step),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
+                    }
+                }
+            } else {
+            // ── Normal lyrics view ────────────────────────────────────
             Box {
                 val lyricsListState = rememberLazyListState()
                 val titleSlideEnabled = appSettings.songSettings.titleSlideEnabled
@@ -883,6 +933,7 @@ fun SongsTab(
                     adapter = rememberScrollbarAdapter(scrollState = lyricsListState)
                 )
             }
+            } // end else (songs loaded)
         }
     }
 
