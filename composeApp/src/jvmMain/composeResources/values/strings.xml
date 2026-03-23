@@ -646,6 +646,10 @@
     <!-- Bible history -->
     <string name="bible_history">History</string>
     <string name="bible_history_clear">Clear</string>
+    <string name="bible_no_primary_title">No Primary Bible Configured</string>
+    <string name="bible_no_primary_hint">Open ⚙ Settings and go to the Bible tab, then:</string>
+    <string name="bible_no_primary_step1">1. Set the Bible storage directory</string>
+    <string name="bible_no_primary_step2">2. Select a Primary Bible file</string>
 
     <!-- Output role (fill+key) -->
     <string name="output_role_normal">Normal</string>

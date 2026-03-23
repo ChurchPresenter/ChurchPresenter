@@ -71,7 +71,12 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import churchpresenter.composeapp.generated.resources.bible_no_primary_title
+import churchpresenter.composeapp.generated.resources.bible_no_primary_hint
+import churchpresenter.composeapp.generated.resources.bible_no_primary_step1
+import churchpresenter.composeapp.generated.resources.bible_no_primary_step2
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
@@ -418,7 +423,59 @@ fun BibleTab(
         }
 
         // ── Main content ─────────────────────────────────────────────
-        if (isSearchMode && searchResults.isNotEmpty()) {
+        if (appSettings.bibleSettings.primaryBible.isBlank()) {
+            // ── Empty state: primary bible not configured ─────────────
+            Box(
+                modifier = Modifier.fillMaxSize().padding(32.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Surface(
+                    modifier = Modifier.widthIn(max = 360.dp),
+                    shape = MaterialTheme.shapes.large,
+                    tonalElevation = 3.dp,
+                    color = MaterialTheme.colorScheme.surfaceVariant
+                ) {
+                    Column(
+                        modifier = Modifier.padding(horizontal = 28.dp, vertical = 24.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            text = "📖",
+                            style = MaterialTheme.typography.displaySmall
+                        )
+                        Text(
+                            text = stringResource(Res.string.bible_no_primary_title),
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            textAlign = TextAlign.Center
+                        )
+                        HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+                        Text(
+                            text = stringResource(Res.string.bible_no_primary_hint),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            textAlign = TextAlign.Center
+                        )
+                        // Show step 1 only when the directory is also missing
+                        if (appSettings.bibleSettings.storageDirectory.isBlank()) {
+                            Text(
+                                text = stringResource(Res.string.bible_no_primary_step1),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
+                        Text(
+                            text = stringResource(Res.string.bible_no_primary_step2),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+                }
+            }
+        } else if (isSearchMode && searchResults.isNotEmpty()) {
             Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
                 Text(
                     text = stringResource(Res.string.found_results, searchResults.size),
