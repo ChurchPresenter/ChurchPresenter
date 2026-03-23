@@ -120,6 +120,10 @@ data class ScheduleTabActions(
 @Composable
 fun ScheduleTab(
     modifier: Modifier = Modifier,
+    /** Optional pre-created view model. Pass one from a parent composable to survive panel
+     *  collapse/expand (i.e. when this composable leaves the composition inside AnimatedVisibility).
+     *  If null a local view model is created and owned by this composable. */
+    scheduleViewModel: ScheduleViewModel? = null,
     onPresenting: (Presenting) -> Unit = { Presenting.NONE },
     onItemClick: (ScheduleItem) -> Unit = {},
     onEditLabel: (ScheduleItem.LabelItem) -> Unit = {},
@@ -139,7 +143,8 @@ fun ScheduleTab(
     onAddToSchedule: () -> Unit = {}
 ) {
     val onScheduleChangedState = rememberUpdatedState(onScheduleChanged)
-    val viewModel = remember { ScheduleViewModel(onScheduleChanged = { items -> onScheduleChangedState.value?.invoke(items) }) }
+    // Use the provided view model, or fall back to a locally-owned one.
+    val viewModel = scheduleViewModel ?: remember { ScheduleViewModel(onScheduleChanged = { items -> onScheduleChangedState.value?.invoke(items) }) }
     val scope = rememberCoroutineScope()
 
     // State holders — lambdas capture the State object, not the string value,

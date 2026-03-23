@@ -92,6 +92,7 @@ import org.churchpresenter.app.churchpresenter.viewmodel.BibleViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PicturesViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresentationViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
+import org.churchpresenter.app.churchpresenter.viewmodel.ScheduleViewModel
 import java.awt.image.BufferedImage
 import java.io.File
 
@@ -196,6 +197,11 @@ fun MainDesktop(
     val currentOnBibleLoaded by rememberUpdatedState(onBibleLoaded)
     val bibleViewModel = remember { BibleViewModel(appSettings, onBibleLoaded = { bible, translation -> currentOnBibleLoaded?.invoke(bible, translation) }) }
     DisposableEffect(Unit) { onDispose { bibleViewModel.dispose() } }
+
+    // ScheduleViewModel is hoisted here (outside AnimatedVisibility) so that collapsing/
+    // expanding the schedule panel does NOT destroy the schedule items.
+    val onScheduleChangedState = rememberUpdatedState(onScheduleChanged)
+    val scheduleViewModel = remember { ScheduleViewModel(onScheduleChanged = { items -> onScheduleChangedState.value?.invoke(items) }) }
 
     val presentingMode by presenterManager.presentingMode
     val mainFocusRequester = remember { FocusRequester() }
@@ -366,6 +372,7 @@ fun MainDesktop(
                 ) {
                     Column(modifier = Modifier.width(with(density) { schedulePanelPx.toDp() }).fillMaxHeight()) {
                     ScheduleTab(
+                        scheduleViewModel = scheduleViewModel,
                         onPresenting = presenting,
                         onAddLabel = { showAddLabelDialog = true },
                         onAddWebsite = { showAddWebsiteDialog = true },
