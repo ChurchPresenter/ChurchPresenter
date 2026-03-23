@@ -622,6 +622,8 @@
     <string name="announcement_animation_speed">Speed</string>
     <string name="announcement_loop_count">Loop Count</string>
     <string name="announcement_loop_tooltip">0 = infinite loop</string>
+    <string name="tooltip_announcement_show">Show Announcement on Display</string>
+    <string name="tooltip_announcement_hide">Hide Announcement from Display</string>
     <string name="license_title">License Agreement — GNU General Public License v3</string>
     <string name="license_accept_button">I Accept</string>
     <string name="license_decline_button">Decline &amp; Exit</string>
@@ -667,13 +669,12 @@
     <!-- Website / Web Tab -->
     <string name="web_url_label">URL</string>
     <string name="web_url_hint">https://example.com</string>
-    <string name="web_go_live">Go Live</string>
     <string name="web_add_to_schedule">Add to Schedule</string>
-    <string name="web_preview_label">Preview</string>
+    <string name="web_go_live">Go Live</string>
+    <string name="web_bookmark_add">Add Bookmark</string>
+    <string name="web_bookmark_remove">Remove Bookmark</string>
     <string name="web_preview_hint">Enter a URL above and tap Go Live</string>
     <string name="web_live_badge">LIVE</string>
-    <string name="web_bookmark_add">Bookmark</string>
-    <string name="web_bookmark_remove">Remove</string>
     <string name="web_bookmarks">Bookmarks</string>
     <string name="web_clear_cache">Clear Cache</string>
     <string name="web_back">Back</string>

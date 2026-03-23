@@ -251,6 +251,14 @@ class AnnouncementsViewModel {
         }
     }
 
+    fun pauseTimer() {
+        if (_timerRunning.value) {
+            timerJob?.cancel()
+            timerJob = null
+            _timerRunning.value = false
+        }
+    }
+
     fun resetTimer() {
         timerJob?.cancel()
         timerJob = null

@@ -45,8 +45,6 @@ import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.bilingual_layout
 import churchpresenter.composeapp.generated.resources.bilingual_left_right
 import churchpresenter.composeapp.generated.resources.bilingual_top_bottom
-import churchpresenter.composeapp.generated.resources.bottom_left
-import churchpresenter.composeapp.generated.resources.bottom_right
 import churchpresenter.composeapp.generated.resources.color
 import churchpresenter.composeapp.generated.resources.display_mode_label
 import churchpresenter.composeapp.generated.resources.display_mode_one_line
@@ -67,7 +65,6 @@ import churchpresenter.composeapp.generated.resources.horizontal_alignment
 import churchpresenter.composeapp.generated.resources.lyrics
 import churchpresenter.composeapp.generated.resources.none
 import churchpresenter.composeapp.generated.resources.number_before_title
-import churchpresenter.composeapp.generated.resources.position_on_screen
 import churchpresenter.composeapp.generated.resources.show_number
 import churchpresenter.composeapp.generated.resources.show_title
 import churchpresenter.composeapp.generated.resources.song_language_both
@@ -77,8 +74,6 @@ import churchpresenter.composeapp.generated.resources.enabled
 import churchpresenter.composeapp.generated.resources.song_number
 import churchpresenter.composeapp.generated.resources.song_title_slide
 import churchpresenter.composeapp.generated.resources.title
-import churchpresenter.composeapp.generated.resources.top_left
-import churchpresenter.composeapp.generated.resources.top_right
 import churchpresenter.composeapp.generated.resources.vertical_alignment
 import churchpresenter.composeapp.generated.resources.word_wrap
 import androidx.compose.foundation.layout.size
@@ -101,7 +96,6 @@ import churchpresenter.composeapp.generated.resources.milliseconds_suffix
 import churchpresenter.composeapp.generated.resources.song_transition_settings
 import churchpresenter.composeapp.generated.resources.transition_duration
 import androidx.compose.material3.Slider
-import androidx.compose.runtime.rememberCoroutineScope
 import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
 import org.churchpresenter.app.churchpresenter.composables.ShadowDetailRow
 import org.churchpresenter.app.churchpresenter.composables.DropdownSettingsField
@@ -119,9 +113,6 @@ import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.utils.calculateAutoFitFontSize
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.jetbrains.compose.resources.stringResource
-import java.awt.Window
-import javax.swing.SwingUtilities
-import kotlinx.coroutines.launch
 
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -247,10 +238,6 @@ private fun LeftColumn(
     val noneStr = stringResource(Res.string.none)
     val firstPageStr = stringResource(Res.string.first_page)
     val everyPageStr = stringResource(Res.string.every_page)
-    val topLeftStr = stringResource(Res.string.top_left)
-    val topRightStr = stringResource(Res.string.top_right)
-    val bottomLeftStr = stringResource(Res.string.bottom_left)
-    val bottomRightStr = stringResource(Res.string.bottom_right)
 
 
     // Song Number Section
@@ -808,14 +795,6 @@ private fun RightColumn(
     availableFonts: List<String>,
     presenterManager: PresenterManager? = null
 ) {
-    // Store string resources to avoid calling stringResource in callbacks
-    val topLeftStr = stringResource(Res.string.top_left)
-    val topRightStr = stringResource(Res.string.top_right)
-    val bottomLeftStr = stringResource(Res.string.bottom_left)
-    val bottomRightStr = stringResource(Res.string.bottom_right)
-    val noneStr = stringResource(Res.string.none)
-    val firstPageStr = stringResource(Res.string.first_page)
-    val everyPageStr = stringResource(Res.string.every_page)
 
     // Lyrics Section (shared settings)
     SectionHeader(stringResource(Res.string.lyrics))

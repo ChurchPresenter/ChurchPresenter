@@ -1,6 +1,9 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.TooltipArea
+import androidx.compose.foundation.TooltipPlacement
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -64,6 +67,8 @@ import churchpresenter.composeapp.generated.resources.ic_refresh
 import churchpresenter.composeapp.generated.resources.interactive_mode
 import churchpresenter.composeapp.generated.resources.mirror_mode
 import churchpresenter.composeapp.generated.resources.mobile_view
+import churchpresenter.composeapp.generated.resources.web_bookmark_add
+import churchpresenter.composeapp.generated.resources.web_bookmark_remove
 import churchpresenter.composeapp.generated.resources.web_add_to_schedule
 import churchpresenter.composeapp.generated.resources.web_back
 import churchpresenter.composeapp.generated.resources.web_clear_cache
@@ -98,6 +103,7 @@ import java.awt.event.MouseWheelEvent
 import javax.swing.SwingUtilities
 import kotlinx.coroutines.delay
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun WebTab(
     modifier: Modifier = Modifier,
@@ -258,69 +264,108 @@ fun WebTab(
 
         val actionButtons: @Composable RowScope.() -> Unit = {
             // Star bookmark toggle
-            IconButton(
-                onClick = {
-                    val url = normaliseUrl(urlInput)
-                    if (isBookmarked) {
-                        onSettingsChange { s ->
-                            s.copy(webBookmarks = s.webBookmarks.filter { it.url != url })
-                        }
-                    } else {
-                        val title = pageTitle.ifBlank { url }
-                        onSettingsChange { s ->
-                            s.copy(webBookmarks = s.webBookmarks + WebBookmark(url = url, title = title))
-                        }
+            TooltipArea(
+                tooltip = {
+                    Surface(shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
+                        Text(
+                            stringResource(if (isBookmarked) Res.string.web_bookmark_remove else Res.string.web_bookmark_add),
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                            style = MaterialTheme.typography.bodySmall
+                        )
                     }
                 },
-                enabled = urlInput.isNotBlank() && urlInput != "https://"
+                tooltipPlacement = TooltipPlacement.CursorPoint()
             ) {
-                Text(
-                    text = if (isBookmarked) "\u2605" else "\u2606",
-                    style = MaterialTheme.typography.titleLarge,
-                    color = if (isBookmarked) MaterialTheme.colorScheme.primary
-                    else MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                IconButton(
+                    onClick = {
+                        val url = normaliseUrl(urlInput)
+                        if (isBookmarked) {
+                            onSettingsChange { s ->
+                                s.copy(webBookmarks = s.webBookmarks.filter { it.url != url })
+                            }
+                        } else {
+                            val title = pageTitle.ifBlank { url }
+                            onSettingsChange { s ->
+                                s.copy(webBookmarks = s.webBookmarks + WebBookmark(url = url, title = title))
+                            }
+                        }
+                    },
+                    enabled = urlInput.isNotBlank() && urlInput != "https://"
+                ) {
+                    Text(
+                        text = if (isBookmarked) "\u2605" else "\u2606",
+                        style = MaterialTheme.typography.titleLarge,
+                        color = if (isBookmarked) MaterialTheme.colorScheme.primary
+                        else MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
 
             // Add to Schedule
             if (onAddToSchedule != null) {
-                IconButton(
-                    onClick = {
-                        val url = normaliseUrl(urlInput)
-                        val title = pageTitle.ifBlank { url }
-                        onAddToSchedule(url, title)
+                TooltipArea(
+                    tooltip = {
+                        Surface(shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
+                            Text(
+                                stringResource(Res.string.web_add_to_schedule),
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        }
                     },
-                    enabled = urlInput.isNotBlank(),
-                    colors = IconButtonDefaults.iconButtonColors(
-                        containerColor = MaterialTheme.colorScheme.secondary,
-                        contentColor = MaterialTheme.colorScheme.onSecondary,
-                        disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                        disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                    )
+                    tooltipPlacement = TooltipPlacement.CursorPoint()
                 ) {
-                    Icon(painter = painterResource(Res.drawable.ic_playlist_add), contentDescription = stringResource(Res.string.web_add_to_schedule), modifier = Modifier.size(20.dp))
+                    IconButton(
+                        onClick = {
+                            val url = normaliseUrl(urlInput)
+                            val title = pageTitle.ifBlank { url }
+                            onAddToSchedule(url, title)
+                        },
+                        enabled = urlInput.isNotBlank(),
+                        colors = IconButtonDefaults.iconButtonColors(
+                            containerColor = MaterialTheme.colorScheme.secondary,
+                            contentColor = MaterialTheme.colorScheme.onSecondary,
+                            disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                            disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                        )
+                    ) {
+                        Icon(painter = painterResource(Res.drawable.ic_playlist_add), contentDescription = stringResource(Res.string.web_add_to_schedule), modifier = Modifier.size(20.dp))
+                    }
                 }
             }
 
             // Go Live
             val goLiveEnabled = urlInput.isNotBlank() && hasSecondaryDisplay && hasWebCapableOutput
-            IconButton(
-                onClick = {
-                    val url = normaliseUrl(urlInput)
-                    urlInput = url
-                    liveUrl = url
-                    presenterManager?.setWebsiteUrl(url)
-                    presenterManager?.setPresentingMode(Presenting.WEBSITE)
+            TooltipArea(
+                tooltip = {
+                    Surface(shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
+                        Text(
+                            stringResource(Res.string.web_go_live),
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
                 },
-                enabled = goLiveEnabled,
-                colors = IconButtonDefaults.iconButtonColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary,
-                    disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                    disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                )
+                tooltipPlacement = TooltipPlacement.CursorPoint()
             ) {
-                Icon(painter = painterResource(Res.drawable.ic_cast), contentDescription = stringResource(Res.string.web_go_live), modifier = Modifier.size(20.dp))
+                IconButton(
+                    onClick = {
+                        val url = normaliseUrl(urlInput)
+                        urlInput = url
+                        liveUrl = url
+                        presenterManager?.setWebsiteUrl(url)
+                        presenterManager?.setPresentingMode(Presenting.WEBSITE)
+                    },
+                    enabled = goLiveEnabled,
+                    colors = IconButtonDefaults.iconButtonColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary,
+                        disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                        disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                    )
+                ) {
+                    Icon(painter = painterResource(Res.drawable.ic_cast), contentDescription = stringResource(Res.string.web_go_live), modifier = Modifier.size(20.dp))
+                }
             }
         }
 
