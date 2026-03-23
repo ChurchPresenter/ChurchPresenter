@@ -87,6 +87,7 @@ import churchpresenter.composeapp.generated.resources.number
 import churchpresenter.composeapp.generated.resources.search
 import churchpresenter.composeapp.generated.resources.search_songs
 import churchpresenter.composeapp.generated.resources.song_book
+import churchpresenter.composeapp.generated.resources.song_title_slide
 import churchpresenter.composeapp.generated.resources.starts_with
 import churchpresenter.composeapp.generated.resources.title
 import churchpresenter.composeapp.generated.resources.tune
@@ -155,6 +156,12 @@ fun SongsTab(
     var liveSongIndex by remember { mutableStateOf(-1) }
     var liveSectionIndex by remember { mutableStateOf(0) }
     var liveLineIndex by remember { mutableStateOf(0) }
+
+    // Track whether the title slide entry is currently selected in the lyrics panel
+    var isTitleSlideSelected by remember { mutableStateOf(false) }
+
+    // Reset title-slide selection whenever the active song changes
+    LaunchedEffect(selectedSongIndex) { isTitleSlideSelected = false }
 
     // Helper: push current viewModel selection to presenter and track as live
     fun sendToPresenter() {
@@ -730,10 +737,15 @@ fun SongsTab(
             // Lyrics content
             Box {
                 val lyricsListState = rememberLazyListState()
+                val titleSlideEnabled = appSettings.songSettings.titleSlideEnabled
+                val currentSong = filteredSongs.getOrNull(selectedSongIndex)
 
-                LaunchedEffect(selectedSectionIndex) {
-                    if (selectedSectionIndex >= 0) {
-                        lyricsListState.animateScrollToItem(selectedSectionIndex)
+                LaunchedEffect(selectedSectionIndex, isTitleSlideSelected) {
+                    if (isTitleSlideSelected) {
+                        lyricsListState.animateScrollToItem(0)
+                    } else if (selectedSectionIndex >= 0) {
+                        val offset = if (titleSlideEnabled && currentSong != null) 1 else 0
+                        lyricsListState.animateScrollToItem(selectedSectionIndex + offset)
                     }
                 }
 
@@ -749,30 +761,109 @@ fun SongsTab(
                         .background(MaterialTheme.colorScheme.surface)
                         .padding(12.dp)
                 ) {
+                    // ── Title slide entry ────────────────────────────────────
+                    if (titleSlideEnabled && currentSong != null && sections.isNotEmpty()) {
+                        item {
+                            val titleLine = listOf(currentSong.number, currentSong.title)
+                                .filter { it.isNotBlank() }.joinToString(" – ")
+                            val creditLine = listOf(currentSong.author, currentSong.composer)
+                                .filter { it.isNotBlank() }.joinToString(" / ")
+
+                            fun buildTitleSection() = LyricSection(
+                                type = "title_slide",
+                                title = currentSong.title,
+                                secondaryTitle = currentSong.secondaryTitle,
+                                songNumber = currentSong.number.toIntOrNull() ?: 0,
+                                lines = buildList {
+                                    add(titleLine)
+                                    if (creditLine.isNotBlank()) add(creditLine)
+                                }
+                            )
+
+                            fun sendTitleSlide() {
+                                val ts = buildTitleSection()
+                                val allSections = listOf(ts) + viewModel.getLyricSections()
+                                onAllSectionsChanged(allSections)
+                                onSectionIndexChanged(0)
+                                onLineIndexChanged(0)
+                                onSongItemSelected(ts)
+                                isTitleSlideSelected = true
+                                liveSongIndex = selectedSongIndex
+                                liveSectionIndex = -1
+                                liveLineIndex = 0
+                            }
+
+                            val contentColor = if (isTitleSlideSelected)
+                                MaterialTheme.colorScheme.onSurfaceVariant
+                            else
+                                MaterialTheme.colorScheme.onSurface
+
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .background(
+                                        if (isTitleSlideSelected)
+                                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
+                                        else Color.Transparent
+                                    )
+                                    .combinedClickable(
+                                        onClick = { sendTitleSlide() },
+                                        onDoubleClick = { sendTitleSlide(); onPresenting(Presenting.LYRICS) }
+                                    )
+                                    .padding(8.dp)
+                            ) {
+                                Text(
+                                    text = stringResource(Res.string.song_title_slide),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.secondary,
+                                    modifier = Modifier.padding(bottom = 2.dp)
+                                )
+                                Text(
+                                    text = titleLine,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = contentColor
+                                )
+                                if (creditLine.isNotBlank()) {
+                                    Text(
+                                        text = creditLine,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = contentColor.copy(alpha = 0.7f),
+                                        modifier = Modifier.padding(top = 2.dp)
+                                    )
+                                }
+                            }
+                            HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
+                        }
+                    }
+
+                    // ── Regular lyric sections ───────────────────────────────
                     if (sections.isNotEmpty()) {
                         itemsIndexed(sections) { sectionIndex, section ->
                             Column(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .background(
-                                        if (sectionIndex == selectedSectionIndex)
+                                        if (!isTitleSlideSelected && sectionIndex == selectedSectionIndex)
                                             MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
                                         else Color.Transparent
                                     )
                                     .combinedClickable(
                                         onClick = {
                                             viewModel.selectSection(sectionIndex)
+                                            isTitleSlideSelected = false
                                             sendToPresenter()
                                         },
                                         onDoubleClick = {
                                             viewModel.selectSection(sectionIndex)
+                                            isTitleSlideSelected = false
                                             sendToPresenter()
                                             onPresenting(Presenting.LYRICS)
                                         }
                                     )
                                     .padding(8.dp)
                             ) {
-                                val textColor = if (sectionIndex == selectedSectionIndex)
+                                val textColor = if (!isTitleSlideSelected && sectionIndex == selectedSectionIndex)
                                     MaterialTheme.colorScheme.onSurfaceVariant
                                 else
                                     MaterialTheme.colorScheme.onSurface
@@ -803,6 +894,7 @@ fun SongsTab(
                                 val lineClickHandler: ((Int) -> Unit)? = if (isPerLineMode) { lineIdx ->
                                     viewModel.selectSection(sectionIndex)
                                     viewModel.setLineIndex(lineIdx)
+                                    isTitleSlideSelected = false
                                     sendToPresenter()
                                 } else null
 

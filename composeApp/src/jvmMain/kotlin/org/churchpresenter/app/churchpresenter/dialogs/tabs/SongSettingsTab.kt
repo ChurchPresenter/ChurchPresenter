@@ -73,7 +73,9 @@ import churchpresenter.composeapp.generated.resources.show_title
 import churchpresenter.composeapp.generated.resources.song_language_both
 import churchpresenter.composeapp.generated.resources.song_language_primary
 import churchpresenter.composeapp.generated.resources.song_language_secondary
+import churchpresenter.composeapp.generated.resources.enabled
 import churchpresenter.composeapp.generated.resources.song_number
+import churchpresenter.composeapp.generated.resources.song_title_slide
 import churchpresenter.composeapp.generated.resources.title
 import churchpresenter.composeapp.generated.resources.top_left
 import churchpresenter.composeapp.generated.resources.top_right
@@ -141,21 +143,42 @@ fun SongSettingsTab(
             modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()),
             horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            // Left Column
+            // Left Column — two stacked cards
             Column(
                 modifier = Modifier
                     .weight(0.48f)
-                    .widthIn(min = 400.dp, max = 450.dp)
-                    .heightIn(min = 600.dp)
-                    .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(4.dp))
-                    .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f), RoundedCornerShape(4.dp))
-                    .padding(start = 15.dp, end = 15.dp, top = 8.dp, bottom = 15.dp)
+                    .widthIn(min = 400.dp, max = 450.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                LeftColumn(
-                    settings = settings,
-                    onSettingsChange = onSettingsChange,
-                    availableFonts = availableFonts
-                )
+                // Song Title Slide card
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(4.dp))
+                        .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f), RoundedCornerShape(4.dp))
+                        .padding(start = 15.dp, end = 15.dp, top = 8.dp, bottom = 15.dp)
+                ) {
+                    TitleSlideColumn(
+                        settings = settings,
+                        onSettingsChange = onSettingsChange,
+                    )
+                }
+
+                // Song Number + Title + Transition card
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(min = 600.dp)
+                        .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(4.dp))
+                        .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f), RoundedCornerShape(4.dp))
+                        .padding(start = 15.dp, end = 15.dp, top = 8.dp, bottom = 15.dp)
+                ) {
+                    LeftColumn(
+                        settings = settings,
+                        onSettingsChange = onSettingsChange,
+                        availableFonts = availableFonts
+                    )
+                }
             }
 
             // Right Column + Look Ahead Column stacked vertically
@@ -191,6 +214,29 @@ fun SongSettingsTab(
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
+private fun TitleSlideColumn(
+    settings: AppSettings,
+    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
+) {
+    SectionHeader(stringResource(Res.string.song_title_slide))
+
+    Spacer(modifier = Modifier.height(8.dp))
+
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Checkbox(
+            checked = settings.songSettings.titleSlideEnabled,
+            onCheckedChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleSlideEnabled = it)) } },
+            modifier = Modifier.size(24.dp)
+        )
+        Text(stringResource(Res.string.enabled), style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(start = 8.dp))
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
 private fun LeftColumn(
     settings: AppSettings,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
@@ -205,6 +251,7 @@ private fun LeftColumn(
     val topRightStr = stringResource(Res.string.top_right)
     val bottomLeftStr = stringResource(Res.string.bottom_left)
     val bottomRightStr = stringResource(Res.string.bottom_right)
+
 
     // Song Number Section
     SectionHeader(stringResource(Res.string.song_number))

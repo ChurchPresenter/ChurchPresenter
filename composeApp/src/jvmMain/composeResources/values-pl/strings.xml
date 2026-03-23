@@ -839,5 +839,9 @@
     <!-- Color Picker Dialog -->
     <string name="dialog_choose_color">Wybierz kolor</string>
     <string name="label_hex">Hex</string>
+
+    <!-- Song Title Slide -->
+    <string name="song_title_slide">Slajd tytułu pieśni</string>
+    <string name="enabled">Włączone</string>
 </resources>
 

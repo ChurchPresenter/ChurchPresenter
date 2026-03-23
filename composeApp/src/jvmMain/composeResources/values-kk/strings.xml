@@ -839,5 +839,9 @@
     <!-- Color Picker Dialog -->
     <string name="dialog_choose_color">Түс таңдау</string>
     <string name="label_hex">Hex</string>
+
+    <!-- Song Title Slide -->
+    <string name="song_title_slide">Ән атауының слайды</string>
+    <string name="enabled">Қосулы</string>
 </resources>
 

@@ -877,4 +877,8 @@
     <!-- Color Picker Dialog -->
     <string name="dialog_choose_color">Choose Color</string>
     <string name="label_hex">Hex</string>
+
+    <!-- Song Title Slide -->
+    <string name="song_title_slide">Song Title Slide</string>
+    <string name="enabled">Enabled</string>
 </resources>

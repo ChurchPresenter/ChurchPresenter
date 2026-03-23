@@ -839,5 +839,9 @@
     <!-- Color Picker Dialog -->
     <string name="dialog_choose_color">Выбраць колер</string>
     <string name="label_hex">Hex</string>
+
+    <!-- Song Title Slide -->
+    <string name="song_title_slide">Слайд з назвай песні</string>
+    <string name="enabled">Уключана</string>
 </resources>
 

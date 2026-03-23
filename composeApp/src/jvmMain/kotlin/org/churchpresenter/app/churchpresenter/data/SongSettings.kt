@@ -103,6 +103,9 @@ data class SongSettings(
     val lyricsLowerThirdUnderline: Boolean = false,
     val lyricsLowerThirdShadow: Boolean = false,
 
+    // Song Title Slide settings
+    val titleSlideEnabled: Boolean = false,
+
     // Song number settings
     val songNumberFontSize: Int = 70,
     val songNumberLowerThirdFontSize: Int = 28,
