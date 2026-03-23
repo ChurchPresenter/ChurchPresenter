@@ -304,15 +304,7 @@ fun WebTab(
             // Add to Schedule
             if (onAddToSchedule != null) {
                 TooltipArea(
-                    tooltip = {
-                        Surface(shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
-                            Text(
-                                stringResource(Res.string.web_add_to_schedule),
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                                style = MaterialTheme.typography.bodySmall
-                            )
-                        }
-                    },
+                    tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.web_add_to_schedule), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
                     tooltipPlacement = TooltipPlacement.CursorPoint()
                 ) {
                     IconButton(
@@ -337,15 +329,7 @@ fun WebTab(
             // Go Live
             val goLiveEnabled = urlInput.isNotBlank() && hasSecondaryDisplay && hasWebCapableOutput
             TooltipArea(
-                tooltip = {
-                    Surface(shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
-                        Text(
-                            stringResource(Res.string.web_go_live),
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                            style = MaterialTheme.typography.bodySmall
-                        )
-                    }
-                },
+                tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.web_go_live), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
                 tooltipPlacement = TooltipPlacement.CursorPoint()
             ) {
                 IconButton(

@@ -563,144 +563,98 @@ fun SongsTab(
             val goLiveStr      = stringResource(Res.string.go_live)
             val addScheduleStr = stringResource(Res.string.add_to_schedule)
 
-            BoxWithConstraints(
-                modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
+            val hasSongSelected = selectedSongIndex >= 0 && selectedSongIndex < filteredSongs.size && selectedSectionIndex >= 0
+            @OptIn(ExperimentalLayoutApi::class)
+            FlowRow(
+                modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+                horizontalArrangement = Arrangement.End,
+                verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                val useIcons = maxWidth < 1100.dp
-                val hasSongSelected = selectedSongIndex >= 0 && selectedSongIndex < filteredSongs.size && selectedSectionIndex >= 0
-                @OptIn(ExperimentalLayoutApi::class)
-                FlowRow(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End,
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                if (selectedSongIndex >= 0 && selectedSongIndex < filteredSongs.size) {
+                    TooltipArea(
+                        tooltip = {
+                            Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
+                                Text(editSongStr, color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
+                            }
+                        },
+                        tooltipPlacement = TooltipPlacement.CursorPoint()
+                    ) {
+                        IconButton(
+                            onClick = { songToEdit = filteredSongs[selectedSongIndex]; showEditDialog = true },
+                            colors = IconButtonDefaults.iconButtonColors(
+                                containerColor = MaterialTheme.colorScheme.tertiary,
+                                contentColor = MaterialTheme.colorScheme.onTertiary
+                            )
+                        ) {
+                            Icon(painter = painterResource(Res.drawable.ic_edit), contentDescription = editSongStr, modifier = Modifier.size(20.dp))
+                        }
+                    }
+                }
+
+                // New Song button
+                TooltipArea(
+                    tooltip = {
+                        Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
+                            Text(newSongStr, color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
+                        }
+                    },
+                    tooltipPlacement = TooltipPlacement.CursorPoint()
                 ) {
-                    if (useIcons) {
-                        TooltipArea(
-                            tooltip = {
-                                Surface(shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
-                                    Text(goLiveStr, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
+                    IconButton(
+                        onClick = { showNewSongDialog = true },
+                        colors = IconButtonDefaults.iconButtonColors(
+                            containerColor = MaterialTheme.colorScheme.tertiary,
+                            contentColor = MaterialTheme.colorScheme.onTertiary
+                        )
+                    ) {
+                        Icon(painter = painterResource(Res.drawable.ic_add), contentDescription = newSongStr, modifier = Modifier.size(20.dp))
+                    }
+                }
+
+                if (onAddToSchedule != null && selectedSongIndex >= 0 && selectedSongIndex < filteredSongs.size) {
+                    TooltipArea(
+                        tooltip = {
+                            Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
+                                Text(addScheduleStr, color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
+                            }
+                        },
+                        tooltipPlacement = TooltipPlacement.CursorPoint()
+                    ) {
+                        IconButton(
+                            onClick = {
+                                filteredSongs.getOrNull(selectedSongIndex)?.let { item ->
+                                    onAddToSchedule(item.number.toIntOrNull() ?: 0, item.title, item.songbook, item.songId)
                                 }
                             },
-                            tooltipPlacement = TooltipPlacement.CursorPoint()
+                            colors = IconButtonDefaults.iconButtonColors(
+                                containerColor = MaterialTheme.colorScheme.secondary,
+                                contentColor = MaterialTheme.colorScheme.onSecondary
+                            )
                         ) {
-                            IconButton(
-                                onClick = { sendToPresenter(); onPresenting(Presenting.LYRICS) },
-                                enabled = hasSongSelected,
-                                colors = IconButtonDefaults.iconButtonColors(
-                                    containerColor = MaterialTheme.colorScheme.primary,
-                                    contentColor = MaterialTheme.colorScheme.onPrimary,
-                                    disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                                    disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                                )
-                            ) {
-                                Icon(painter = painterResource(Res.drawable.ic_cast), contentDescription = goLiveStr, modifier = Modifier.size(20.dp))
-                            }
-                        }
-                    } else {
-                        Button(
-                            onClick = { sendToPresenter(); onPresenting(Presenting.LYRICS) },
-                            enabled = hasSongSelected,
-                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
-                        ) {
-                            Text(goLiveStr, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onPrimary, maxLines = 1)
+                            Icon(painter = painterResource(Res.drawable.ic_playlist_add), contentDescription = addScheduleStr, modifier = Modifier.size(20.dp))
                         }
                     }
+                }
 
-                    if (selectedSongIndex >= 0 && selectedSongIndex < filteredSongs.size) {
-                        if (useIcons) {
-                            TooltipArea(
-                                tooltip = {
-                                    Surface(shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
-                                        Text(editSongStr, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
-                                    }
-                                },
-                                tooltipPlacement = TooltipPlacement.CursorPoint()
-                            ) {
-                                IconButton(
-                                    onClick = { songToEdit = filteredSongs[selectedSongIndex]; showEditDialog = true },
-                                    colors = IconButtonDefaults.iconButtonColors(
-                                        containerColor = MaterialTheme.colorScheme.tertiary,
-                                        contentColor = MaterialTheme.colorScheme.onTertiary
-                                    )
-                                ) {
-                                    Icon(painter = painterResource(Res.drawable.ic_edit), contentDescription = editSongStr, modifier = Modifier.size(20.dp))
-                                }
-                            }
-                        } else {
-                            Button(
-                                onClick = { songToEdit = filteredSongs[selectedSongIndex]; showEditDialog = true },
-                                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary)
-                            ) {
-                                Text(editSongStr, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onTertiary, maxLines = 1)
-                            }
+                TooltipArea(
+                    tooltip = {
+                        Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
+                            Text(goLiveStr, color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
                         }
-                    }
-
-                    // New Song button
-                    if (useIcons) {
-                        TooltipArea(
-                            tooltip = {
-                                Surface(shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
-                                    Text(newSongStr, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
-                                }
-                            },
-                            tooltipPlacement = TooltipPlacement.CursorPoint()
-                        ) {
-                            IconButton(
-                                onClick = { showNewSongDialog = true },
-                                colors = IconButtonDefaults.iconButtonColors(
-                                    containerColor = MaterialTheme.colorScheme.tertiary,
-                                    contentColor = MaterialTheme.colorScheme.onTertiary
-                                )
-                            ) {
-                                Icon(painter = painterResource(Res.drawable.ic_add), contentDescription = newSongStr, modifier = Modifier.size(20.dp))
-                            }
-                        }
-                    } else {
-                        Button(
-                            onClick = { showNewSongDialog = true },
-                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary)
-                        ) {
-                            Text(newSongStr, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onTertiary, maxLines = 1)
-                        }
-                    }
-
-                    if (onAddToSchedule != null && selectedSongIndex >= 0 && selectedSongIndex < filteredSongs.size) {
-                        if (useIcons) {
-                            TooltipArea(
-                                tooltip = {
-                                    Surface(shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
-                                        Text(addScheduleStr, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
-                                    }
-                                },
-                                tooltipPlacement = TooltipPlacement.CursorPoint()
-                            ) {
-                                IconButton(
-                                    onClick = {
-                                        filteredSongs.getOrNull(selectedSongIndex)?.let { item ->
-                                            onAddToSchedule(item.number.toIntOrNull() ?: 0, item.title, item.songbook, item.songId)
-                                        }
-                                    },
-                                    colors = IconButtonDefaults.iconButtonColors(
-                                        containerColor = MaterialTheme.colorScheme.secondary,
-                                        contentColor = MaterialTheme.colorScheme.onSecondary
-                                    )
-                                ) {
-                                    Icon(painter = painterResource(Res.drawable.ic_playlist_add), contentDescription = addScheduleStr, modifier = Modifier.size(20.dp))
-                                }
-                            }
-                        } else {
-                            Button(
-                                onClick = {
-                                    filteredSongs.getOrNull(selectedSongIndex)?.let { item ->
-                                        onAddToSchedule(item.number.toIntOrNull() ?: 0, item.title, item.songbook, item.songId)
-                                    }
-                                },
-                                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
-                            ) {
-                                Text(addScheduleStr, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSecondary, maxLines = 1)
-                            }
-                        }
+                    },
+                    tooltipPlacement = TooltipPlacement.CursorPoint()
+                ) {
+                    IconButton(
+                        onClick = { sendToPresenter(); onPresenting(Presenting.LYRICS) },
+                        enabled = hasSongSelected,
+                        colors = IconButtonDefaults.iconButtonColors(
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = MaterialTheme.colorScheme.onPrimary,
+                            disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                            disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                        )
+                    ) {
+                        Icon(painter = painterResource(Res.drawable.ic_cast), contentDescription = goLiveStr, modifier = Modifier.size(20.dp))
                     }
                 }
             }

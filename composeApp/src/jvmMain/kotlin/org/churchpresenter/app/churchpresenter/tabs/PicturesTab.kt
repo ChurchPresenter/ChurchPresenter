@@ -46,6 +46,7 @@ import androidx.compose.ui.input.key.type
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.ic_refresh
 import churchpresenter.composeapp.generated.resources.add_to_schedule
 import churchpresenter.composeapp.generated.resources.go_live
 import churchpresenter.composeapp.generated.resources.ic_cast
@@ -163,8 +164,7 @@ fun PicturesTab(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        if (viewModel.images.isNotEmpty()) {
-            // Playback controls row
+        // Playback controls row
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -175,57 +175,72 @@ fun PicturesTab(
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    IconButton(
-                        onClick = { viewModel.previousImage() },
-                        enabled = viewModel.images.isNotEmpty()
+                    TooltipArea(
+                        tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.previous_image), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
+                        tooltipPlacement = TooltipPlacement.CursorPoint()
                     ) {
-                        Icon(
-                            painter = painterResource(Res.drawable.ic_skip_previous),
-                            contentDescription = stringResource(Res.string.previous_image),
-                            modifier = Modifier.size(32.dp),
-                            tint = if (viewModel.images.isNotEmpty())
-                                MaterialTheme.colorScheme.onSurface
-                            else
-                                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                        )
-                    }
-
-                    IconButton(
-                        onClick = { viewModel.togglePlayPause() },
-                        enabled = viewModel.images.isNotEmpty(),
-                        modifier = Modifier
-                            .size(48.dp)
-                            .background(
-                                if (viewModel.isPlaying) MaterialTheme.colorScheme.error
-                                else MaterialTheme.colorScheme.primary,
-                                RoundedCornerShape(24.dp)
+                        IconButton(
+                            onClick = { viewModel.previousImage() },
+                            enabled = viewModel.images.isNotEmpty()
+                        ) {
+                            Icon(
+                                painter = painterResource(Res.drawable.ic_skip_previous),
+                                contentDescription = stringResource(Res.string.previous_image),
+                                modifier = Modifier.size(32.dp),
+                                tint = if (viewModel.images.isNotEmpty())
+                                    MaterialTheme.colorScheme.onSurface
+                                else
+                                    MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
                             )
-                    ) {
-                        Icon(
-                            painter = painterResource(
-                                if (viewModel.isPlaying) Res.drawable.ic_pause else Res.drawable.ic_play
-                            ),
-                            contentDescription = stringResource(
-                                if (viewModel.isPlaying) Res.string.pause else Res.string.play
-                            ),
-                            modifier = Modifier.size(28.dp),
-                            tint = Color.White
-                        )
+                        }
                     }
 
-                    IconButton(
-                        onClick = { viewModel.nextImage() },
-                        enabled = viewModel.images.isNotEmpty()
+                    TooltipArea(
+                        tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(if (viewModel.isPlaying) Res.string.pause else Res.string.play), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
+                        tooltipPlacement = TooltipPlacement.CursorPoint()
                     ) {
-                        Icon(
-                            painter = painterResource(Res.drawable.ic_skip_next),
-                            contentDescription = stringResource(Res.string.next_image),
-                            modifier = Modifier.size(32.dp),
-                            tint = if (viewModel.images.isNotEmpty())
-                                MaterialTheme.colorScheme.onSurface
-                            else
-                                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                        )
+                        IconButton(
+                            onClick = { viewModel.togglePlayPause() },
+                            enabled = viewModel.images.isNotEmpty(),
+                            modifier = Modifier
+                                .size(48.dp)
+                                .background(
+                                    if (viewModel.isPlaying) MaterialTheme.colorScheme.error
+                                    else MaterialTheme.colorScheme.primary,
+                                    RoundedCornerShape(24.dp)
+                                )
+                        ) {
+                            Icon(
+                                painter = painterResource(
+                                    if (viewModel.isPlaying) Res.drawable.ic_pause else Res.drawable.ic_play
+                                ),
+                                contentDescription = stringResource(
+                                    if (viewModel.isPlaying) Res.string.pause else Res.string.play
+                                ),
+                                modifier = Modifier.size(28.dp),
+                                tint = Color.White
+                            )
+                        }
+                    }
+
+                    TooltipArea(
+                        tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.next_image), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
+                        tooltipPlacement = TooltipPlacement.CursorPoint()
+                    ) {
+                        IconButton(
+                            onClick = { viewModel.nextImage() },
+                            enabled = viewModel.images.isNotEmpty()
+                        ) {
+                            Icon(
+                                painter = painterResource(Res.drawable.ic_skip_next),
+                                contentDescription = stringResource(Res.string.next_image),
+                                modifier = Modifier.size(32.dp),
+                                tint = if (viewModel.images.isNotEmpty())
+                                    MaterialTheme.colorScheme.onSurface
+                                else
+                                    MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                            )
+                        }
                     }
 
                     Text(
@@ -238,30 +253,42 @@ fun PicturesTab(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
 
-                    Button(
-                        onClick = {
-                            viewModel.isLooping = !viewModel.isLooping
-                            onSettingsChange { s ->
-                                s.copy(pictureSettings = s.pictureSettings.copy(isLooping = viewModel.isLooping))
+                    TooltipArea(
+                        tooltip = {
+                            Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
+                                Text(
+                                    stringResource(if (viewModel.isLooping) Res.string.loop_on else Res.string.loop_off),
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                    style = MaterialTheme.typography.bodySmall
+                                )
                             }
                         },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = if (viewModel.isLooping)
-                                MaterialTheme.colorScheme.primary
-                            else
-                                MaterialTheme.colorScheme.surfaceVariant,
-                            contentColor = if (viewModel.isLooping)
-                                MaterialTheme.colorScheme.onPrimary
-                            else
-                                MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                        tooltipPlacement = TooltipPlacement.CursorPoint()
                     ) {
-                        Text(
-                            text = stringResource(
-                                if (viewModel.isLooping) Res.string.loop_on else Res.string.loop_off
-                            ),
-                            style = MaterialTheme.typography.labelMedium
-                        )
+                        IconButton(
+                            onClick = {
+                                viewModel.isLooping = !viewModel.isLooping
+                                onSettingsChange { s ->
+                                    s.copy(pictureSettings = s.pictureSettings.copy(isLooping = viewModel.isLooping))
+                                }
+                            },
+                            colors = IconButtonDefaults.iconButtonColors(
+                                containerColor = if (viewModel.isLooping)
+                                    MaterialTheme.colorScheme.primary
+                                else
+                                    MaterialTheme.colorScheme.surfaceVariant,
+                                contentColor = if (viewModel.isLooping)
+                                    MaterialTheme.colorScheme.onPrimary
+                                else
+                                    MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        ) {
+                            Icon(
+                                painter = painterResource(Res.drawable.ic_refresh),
+                                contentDescription = stringResource(if (viewModel.isLooping) Res.string.loop_on else Res.string.loop_off),
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
                     }
                 }
 
@@ -270,11 +297,11 @@ fun PicturesTab(
                     horizontalArrangement = Arrangement.End,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    if (onAddToSchedule != null && viewModel.selectedFolder != null) {
+                    if (onAddToSchedule != null) {
                         TooltipArea(
                             tooltip = {
-                                Surface(shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
-                                    Text(stringResource(Res.string.add_to_schedule), modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
+                                Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
+                                    Text(stringResource(Res.string.add_to_schedule), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
                                 }
                             },
                             tooltipPlacement = TooltipPlacement.CursorPoint()
@@ -285,9 +312,12 @@ fun PicturesTab(
                                         onAddToSchedule(path, name, count)
                                     }
                                 },
+                                enabled = viewModel.images.isNotEmpty(),
                                 colors = IconButtonDefaults.iconButtonColors(
                                     containerColor = MaterialTheme.colorScheme.secondary,
-                                    contentColor = MaterialTheme.colorScheme.onSecondary
+                                    contentColor = MaterialTheme.colorScheme.onSecondary,
+                                    disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                    disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
                                 )
                             ) {
                                 Icon(painter = painterResource(Res.drawable.ic_playlist_add), contentDescription = stringResource(Res.string.add_to_schedule), modifier = Modifier.size(20.dp))
@@ -298,17 +328,20 @@ fun PicturesTab(
                     if (presenterManager != null) {
                         TooltipArea(
                             tooltip = {
-                                Surface(shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
-                                    Text(stringResource(Res.string.go_live), modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
+                                Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
+                                    Text(stringResource(Res.string.go_live), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
                                 }
                             },
                             tooltipPlacement = TooltipPlacement.CursorPoint()
                         ) {
                             IconButton(
                                 onClick = { viewModel.goLive(presenterManager) },
+                                enabled = viewModel.images.isNotEmpty(),
                                 colors = IconButtonDefaults.iconButtonColors(
                                     containerColor = MaterialTheme.colorScheme.primary,
-                                    contentColor = MaterialTheme.colorScheme.onPrimary
+                                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                                    disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                    disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
                                 )
                             ) {
                                 Icon(painter = painterResource(Res.drawable.ic_cast), contentDescription = stringResource(Res.string.go_live), modifier = Modifier.size(20.dp))
@@ -318,8 +351,9 @@ fun PicturesTab(
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
+        if (viewModel.images.isNotEmpty()) {
             // Image grid
             val gridState = rememberLazyGridState()
 

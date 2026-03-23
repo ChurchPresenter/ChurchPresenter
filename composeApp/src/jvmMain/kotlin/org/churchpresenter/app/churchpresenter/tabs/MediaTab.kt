@@ -1,5 +1,8 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.TooltipArea
+import androidx.compose.foundation.TooltipPlacement
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.focusable
@@ -105,6 +108,7 @@ import kotlinx.coroutines.launch
 import kotlin.io.path.Path
 import kotlin.io.path.extension
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun MediaTab(
     modifier: Modifier = Modifier,
@@ -339,56 +343,71 @@ fun MediaTab(
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                IconButton(
-                    onClick = { viewModel.seekBackward() },
-                    enabled = viewModel.isLoaded
+                TooltipArea(
+                    tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.media_seek_backward), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
+                    tooltipPlacement = TooltipPlacement.CursorPoint()
                 ) {
-                    Icon(
-                        painter = painterResource(Res.drawable.ic_fast_rewind),
-                        contentDescription = stringResource(Res.string.media_seek_backward),
-                        modifier = Modifier.size(28.dp),
-                        tint = if (viewModel.isLoaded) MaterialTheme.colorScheme.onSurface
-                               else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                    )
-                }
-
-                IconButton(
-                    onClick = { viewModel.togglePlayPause() },
-                    enabled = viewModel.isLoaded,
-                    modifier = Modifier
-                        .size(48.dp)
-                        .background(
-                            color = if (viewModel.isLoaded) {
-                                if (viewModel.isPlaying) MaterialTheme.colorScheme.error
-                                else MaterialTheme.colorScheme.primary
-                            } else MaterialTheme.colorScheme.surfaceVariant,
-                            shape = RoundedCornerShape(24.dp)
+                    IconButton(
+                        onClick = { viewModel.seekBackward() },
+                        enabled = viewModel.isLoaded
+                    ) {
+                        Icon(
+                            painter = painterResource(Res.drawable.ic_fast_rewind),
+                            contentDescription = stringResource(Res.string.media_seek_backward),
+                            modifier = Modifier.size(28.dp),
+                            tint = if (viewModel.isLoaded) MaterialTheme.colorScheme.onSurface
+                                   else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
                         )
-                ) {
-                    Icon(
-                        painter = painterResource(
-                            if (viewModel.isPlaying) Res.drawable.ic_pause else Res.drawable.ic_play
-                        ),
-                        contentDescription = stringResource(
-                            if (viewModel.isPlaying) Res.string.pause else Res.string.play
-                        ),
-                        modifier = Modifier.size(28.dp),
-                        tint = if (viewModel.isLoaded) Color.White
-                               else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                    )
+                    }
                 }
 
-                IconButton(
-                    onClick = { viewModel.seekForward() },
-                    enabled = viewModel.isLoaded
+                TooltipArea(
+                    tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(if (viewModel.isPlaying) Res.string.pause else Res.string.play), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
+                    tooltipPlacement = TooltipPlacement.CursorPoint()
                 ) {
-                    Icon(
-                        painter = painterResource(Res.drawable.ic_fast_forward),
-                        contentDescription = stringResource(Res.string.media_seek_forward),
-                        modifier = Modifier.size(28.dp),
-                        tint = if (viewModel.isLoaded) MaterialTheme.colorScheme.onSurface
-                               else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                    )
+                    IconButton(
+                        onClick = { viewModel.togglePlayPause() },
+                        enabled = viewModel.isLoaded,
+                        modifier = Modifier
+                            .size(48.dp)
+                            .background(
+                                color = if (viewModel.isLoaded) {
+                                    if (viewModel.isPlaying) MaterialTheme.colorScheme.error
+                                    else MaterialTheme.colorScheme.primary
+                                } else MaterialTheme.colorScheme.surfaceVariant,
+                                shape = RoundedCornerShape(24.dp)
+                            )
+                    ) {
+                        Icon(
+                            painter = painterResource(
+                                if (viewModel.isPlaying) Res.drawable.ic_pause else Res.drawable.ic_play
+                            ),
+                            contentDescription = stringResource(
+                                if (viewModel.isPlaying) Res.string.pause else Res.string.play
+                            ),
+                            modifier = Modifier.size(28.dp),
+                            tint = if (viewModel.isLoaded) Color.White
+                                   else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                        )
+                    }
+                }
+
+                TooltipArea(
+                    tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.media_seek_forward), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
+                    tooltipPlacement = TooltipPlacement.CursorPoint()
+                ) {
+                    IconButton(
+                        onClick = { viewModel.seekForward() },
+                        enabled = viewModel.isLoaded
+                    ) {
+                        Icon(
+                            painter = painterResource(Res.drawable.ic_fast_forward),
+                            contentDescription = stringResource(Res.string.media_seek_forward),
+                            modifier = Modifier.size(28.dp),
+                            tint = if (viewModel.isLoaded) MaterialTheme.colorScheme.onSurface
+                                   else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                        )
+                    }
                 }
 
                 if (viewModel.duration > 0) {
@@ -401,22 +420,27 @@ fun MediaTab(
 
                 // Volume button with popup slider
                 Box {
-                    IconButton(
-                        onClick = { volumeExpanded = !volumeExpanded },
-                        enabled = viewModel.isLoaded
+                    TooltipArea(
+                        tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(if (viewModel.isMuted) Res.string.media_unmute else Res.string.media_mute), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
+                        tooltipPlacement = TooltipPlacement.CursorPoint()
                     ) {
-                        Icon(
-                            painter = painterResource(
-                                if (viewModel.isMuted || viewModel.volume == 0f) Res.drawable.ic_volume_off
-                                else Res.drawable.ic_volume_up
-                            ),
-                            contentDescription = stringResource(
-                                if (viewModel.isMuted) Res.string.media_unmute else Res.string.media_mute
-                            ),
-                            modifier = Modifier.size(24.dp),
-                            tint = if (viewModel.isLoaded) MaterialTheme.colorScheme.onSurface
-                                   else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                        )
+                        IconButton(
+                            onClick = { volumeExpanded = !volumeExpanded },
+                            enabled = viewModel.isLoaded
+                        ) {
+                            Icon(
+                                painter = painterResource(
+                                    if (viewModel.isMuted || viewModel.volume == 0f) Res.drawable.ic_volume_off
+                                    else Res.drawable.ic_volume_up
+                                ),
+                                contentDescription = stringResource(
+                                    if (viewModel.isMuted) Res.string.media_unmute else Res.string.media_mute
+                                ),
+                                modifier = Modifier.size(24.dp),
+                                tint = if (viewModel.isLoaded) MaterialTheme.colorScheme.onSurface
+                                       else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                            )
+                        }
                     }
                     if (volumeExpanded) {
                         Popup(
@@ -474,38 +498,48 @@ fun MediaTab(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 if (onAddToSchedule != null) {
-                    IconButton(
-                        onClick = {
-                            onAddToSchedule(viewModel.mediaUrl, viewModel.mediaTitle, viewModel.mediaType)
-                        },
-                        enabled = viewModel.isLoaded,
-                        colors = IconButtonDefaults.iconButtonColors(
-                            containerColor = MaterialTheme.colorScheme.secondary,
-                            contentColor = MaterialTheme.colorScheme.onSecondary,
-                            disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                            disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                        )
+                    TooltipArea(
+                        tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.add_to_schedule), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
+                        tooltipPlacement = TooltipPlacement.CursorPoint()
                     ) {
-                        Icon(painter = painterResource(Res.drawable.ic_playlist_add), contentDescription = stringResource(Res.string.add_to_schedule), modifier = Modifier.size(20.dp))
+                        IconButton(
+                            onClick = {
+                                onAddToSchedule(viewModel.mediaUrl, viewModel.mediaTitle, viewModel.mediaType)
+                            },
+                            enabled = viewModel.isLoaded,
+                            colors = IconButtonDefaults.iconButtonColors(
+                                containerColor = MaterialTheme.colorScheme.secondary,
+                                contentColor = MaterialTheme.colorScheme.onSecondary,
+                                disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                            )
+                        ) {
+                            Icon(painter = painterResource(Res.drawable.ic_playlist_add), contentDescription = stringResource(Res.string.add_to_schedule), modifier = Modifier.size(20.dp))
+                        }
                     }
                 }
 
                 if (presenterManager != null) {
-                    IconButton(
-                        onClick = {
-                            presenterManager.setPresentingMode(Presenting.MEDIA)
-                            presenterManager.setShowPresenterWindow(true)
-                            viewModel.play()
-                        },
-                        enabled = viewModel.isLoaded,
-                        colors = IconButtonDefaults.iconButtonColors(
-                            containerColor = MaterialTheme.colorScheme.primary,
-                            contentColor = MaterialTheme.colorScheme.onPrimary,
-                            disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                            disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                        )
+                    TooltipArea(
+                        tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.go_live), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
+                        tooltipPlacement = TooltipPlacement.CursorPoint()
                     ) {
-                        Icon(painter = painterResource(Res.drawable.ic_cast), contentDescription = stringResource(Res.string.go_live), modifier = Modifier.size(20.dp))
+                        IconButton(
+                            onClick = {
+                                presenterManager.setPresentingMode(Presenting.MEDIA)
+                                presenterManager.setShowPresenterWindow(true)
+                                viewModel.play()
+                            },
+                            enabled = viewModel.isLoaded,
+                            colors = IconButtonDefaults.iconButtonColors(
+                                containerColor = MaterialTheme.colorScheme.primary,
+                                contentColor = MaterialTheme.colorScheme.onPrimary,
+                                disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                            )
+                        ) {
+                            Icon(painter = painterResource(Res.drawable.ic_cast), contentDescription = stringResource(Res.string.go_live), modifier = Modifier.size(20.dp))
+                        }
                     }
                 }
             }

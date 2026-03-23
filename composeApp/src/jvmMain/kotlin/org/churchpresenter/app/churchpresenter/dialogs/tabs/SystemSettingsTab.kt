@@ -606,13 +606,14 @@ private fun DirectoryPicker(
             val isWritable = remember(currentPath) { dirExists && dirFile.canWrite() }
             TooltipArea(
                 tooltip = {
-                    Surface(shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
+                    Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
                         Text(
                             when {
                                 isWritable -> stringResource(Res.string.tooltip_directory_writable)
                                 !dirExists -> stringResource(Res.string.tooltip_directory_not_found)
                                 else -> stringResource(Res.string.tooltip_directory_not_writable)
                             },
+                            color = MaterialTheme.colorScheme.inverseOnSurface,
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                             style = MaterialTheme.typography.bodySmall
                         )

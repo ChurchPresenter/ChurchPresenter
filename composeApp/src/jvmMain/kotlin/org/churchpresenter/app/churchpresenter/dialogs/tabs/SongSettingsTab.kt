@@ -887,7 +887,7 @@ private fun RightColumn(
                 range = 8..150
             )
             TooltipArea(
-                tooltip = { Surface(shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.auto_fit_checkbox_tooltip), modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
+                tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.auto_fit_checkbox_tooltip), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
                 tooltipPlacement = TooltipPlacement.CursorPoint()
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -901,7 +901,7 @@ private fun RightColumn(
             }
             if (presenterManager != null) {
                 TooltipArea(
-                    tooltip = { Surface(shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.auto_fit_button_tooltip), modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
+                    tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.auto_fit_button_tooltip), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
                     tooltipPlacement = TooltipPlacement.CursorPoint()
                 ) {
                     TextButton(
@@ -1032,7 +1032,7 @@ private fun RightColumn(
                 range = 8..150
             )
             TooltipArea(
-                tooltip = { Surface(shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.auto_fit_checkbox_tooltip), modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
+                tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.auto_fit_checkbox_tooltip), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
                 tooltipPlacement = TooltipPlacement.CursorPoint()
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -1046,7 +1046,7 @@ private fun RightColumn(
             }
             if (presenterManager != null) {
                 TooltipArea(
-                    tooltip = { Surface(shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.auto_fit_button_tooltip), modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
+                    tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.auto_fit_button_tooltip), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
                     tooltipPlacement = TooltipPlacement.CursorPoint()
                 ) {
                 TextButton(
@@ -1195,7 +1195,7 @@ private fun LookAheadColumn(
                 range = 8..150
             )
             TooltipArea(
-                tooltip = { Surface(shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.auto_fit_checkbox_tooltip), modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
+                tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.auto_fit_checkbox_tooltip), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
                 tooltipPlacement = TooltipPlacement.CursorPoint()
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -1260,7 +1260,7 @@ private fun LookAheadColumn(
                 range = 8..150
             )
             TooltipArea(
-                tooltip = { Surface(shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.auto_fit_checkbox_tooltip), modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
+                tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.auto_fit_checkbox_tooltip), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
                 tooltipPlacement = TooltipPlacement.CursorPoint()
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -1359,7 +1359,7 @@ private fun LookAheadColumn(
                 range = 8..150
             )
             TooltipArea(
-                tooltip = { Surface(shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.auto_fit_checkbox_tooltip), modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
+                tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.auto_fit_checkbox_tooltip), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
                 tooltipPlacement = TooltipPlacement.CursorPoint()
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -1424,7 +1424,7 @@ private fun LookAheadColumn(
                 range = 8..150
             )
             TooltipArea(
-                tooltip = { Surface(shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.auto_fit_checkbox_tooltip), modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
+                tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.auto_fit_checkbox_tooltip), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
                 tooltipPlacement = TooltipPlacement.CursorPoint()
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {

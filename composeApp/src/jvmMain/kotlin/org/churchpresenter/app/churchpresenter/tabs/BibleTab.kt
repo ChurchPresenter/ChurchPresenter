@@ -75,6 +75,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.ic_delete
 import churchpresenter.composeapp.generated.resources.add_to_schedule
 import churchpresenter.composeapp.generated.resources.book
 import churchpresenter.composeapp.generated.resources.chapter
@@ -489,7 +490,7 @@ fun BibleTab(
             val goLiveStr = stringResource(Res.string.go_live)
             val addScheduleStr = stringResource(Res.string.add_to_schedule)
 
-            val toolbarContent: @Composable (useIcons: Boolean) -> Unit = { useIcons ->
+            val toolbarContent: @Composable () -> Unit = {
                 @OptIn(ExperimentalLayoutApi::class)
                 FlowRow(
                     modifier = Modifier.fillMaxWidth()
@@ -500,11 +501,10 @@ fun BibleTab(
                 ) {
                         if (presenterManager != null) {
                             val holdLive by presenterManager.bibleHold
-                            if (useIcons) {
-                                TooltipArea(
+                            TooltipArea(
                                     tooltip = {
-                                        Surface(shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
-                                            Text(holdLiveStr, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
+                                        Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
+                                            Text(holdLiveStr, color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
                                         }
                                     },
                                     tooltipPlacement = TooltipPlacement.CursorPoint()
@@ -519,30 +519,13 @@ fun BibleTab(
                                         Icon(painter = painterResource(Res.drawable.ic_pause), contentDescription = holdLiveStr, modifier = Modifier.size(20.dp))
                                     }
                                 }
-                            } else {
-                                Button(
-                                    onClick = { presenterManager.setBibleHold(!holdLive) },
-                                    modifier = Modifier.wrapContentSize(),
-                                    colors = ButtonDefaults.buttonColors(
-                                        containerColor = if (holdLive) MaterialTheme.colorScheme.error
-                                        else MaterialTheme.colorScheme.surfaceVariant
-                                    )
-                                ) {
-                                    Text(
-                                        text = holdLiveStr,
-                                        style = MaterialTheme.typography.labelMedium,
-                                        color = if (holdLive) MaterialTheme.colorScheme.onError
-                                        else MaterialTheme.colorScheme.onSurfaceVariant,
-                                        maxLines = 1
-                                    )
-                                }
-                            }
                         }
                         TooltipArea(
                             tooltip = {
-                                Surface(shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
+                                Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
                                     Text(
                                         "Ctrl+Click to toggle verses, Shift+Click for range",
+                                        color = MaterialTheme.colorScheme.inverseOnSurface,
                                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                                         style = MaterialTheme.typography.bodySmall
                                     )
@@ -583,7 +566,6 @@ fun BibleTab(
                                 offset = DpOffset(0.dp, 16.dp)
                             )
                         ) {
-                            if (useIcons) {
                                 IconButton(
                                     onClick = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.swapped()) } },
                                     colors = IconButtonDefaults.iconButtonColors(
@@ -593,20 +575,12 @@ fun BibleTab(
                                 ) {
                                     Icon(painter = painterResource(Res.drawable.ic_swap), contentDescription = swapBiblesStr, modifier = Modifier.size(20.dp))
                                 }
-                            } else {
-                                TextButton(
-                                    onClick = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.swapped()) } }
-                                ) {
-                                    Text(text = swapBiblesStr, style = MaterialTheme.typography.labelMedium)
-                                }
-                            }
                         }
                         // Add to Schedule
-                        if (useIcons) {
-                            TooltipArea(
+                        TooltipArea(
                                 tooltip = {
-                                    Surface(shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
-                                        Text(addScheduleStr, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
+                                    Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
+                                        Text(addScheduleStr, color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
                                     }
                                 },
                                 tooltipPlacement = TooltipPlacement.CursorPoint()
@@ -625,25 +599,11 @@ fun BibleTab(
                                     Icon(painter = painterResource(Res.drawable.ic_playlist_add), contentDescription = addScheduleStr, modifier = Modifier.size(20.dp))
                                 }
                             }
-                        } else {
-                            Button(
-                                modifier = Modifier.wrapContentSize(),
-                                onClick = {
-                                    viewModel.addCurrentVerseToSchedule { bookName, chapter, verseNumber, verseText, verseRange ->
-                                        onAddToSchedule?.invoke(bookName, chapter, verseNumber, verseText, verseRange)
-                                    }
-                                },
-                                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
-                            ) {
-                                Text(text = addScheduleStr, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSecondary, maxLines = 1)
-                            }
-                        }
                         // Go Live
-                        if (useIcons) {
-                            TooltipArea(
+                        TooltipArea(
                                 tooltip = {
-                                    Surface(shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
-                                        Text(goLiveStr, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
+                                    Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
+                                        Text(goLiveStr, color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
                                     }
                                 },
                                 tooltipPlacement = TooltipPlacement.CursorPoint()
@@ -658,21 +618,10 @@ fun BibleTab(
                                     Icon(painter = painterResource(Res.drawable.ic_cast), contentDescription = goLiveStr, modifier = Modifier.size(20.dp))
                                 }
                             }
-                        } else {
-                            Button(
-                                modifier = Modifier.wrapContentSize(),
-                                onClick = { goLiveWithHistory() },
-                                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
-                            ) {
-                                Text(text = goLiveStr, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onPrimary, maxLines = 1)
-                            }
-                        }
                     }
                 }
 
             BoxWithConstraints(modifier = Modifier.fillMaxWidth().fillMaxHeight()) {
-                val useIcons = maxWidth < 1100.dp
-
                 Column(modifier = Modifier.fillMaxSize()) {
 
                     // ── Book / Chapter / Verse columns ───────────────────────
@@ -736,7 +685,7 @@ fun BibleTab(
                                     viewModel.updateVerseSearchQuery(query)
                                 }
                                 Spacer(modifier = Modifier.width(8.dp))
-                                toolbarContent(useIcons)
+                                toolbarContent()
                             }
                     Box(modifier = Modifier.weight(1f)) {
                         // Always map multi-verse indices into the filtered verse list
@@ -804,11 +753,17 @@ fun BibleTab(
                                 modifier = Modifier.padding(start = 4.dp)
                             )
                             Spacer(modifier = Modifier.weight(1f))
-                            TextButton(onClick = { viewModel.clearHistory() }) {
-                                Text(
-                                    text = stringResource(Res.string.bible_history_clear),
-                                    style = MaterialTheme.typography.labelSmall
-                                )
+                            TooltipArea(
+                                tooltip = {
+                                    Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
+                                        Text(stringResource(Res.string.bible_history_clear), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
+                                    }
+                                },
+                                tooltipPlacement = TooltipPlacement.CursorPoint()
+                            ) {
+                                IconButton(onClick = { viewModel.clearHistory() }) {
+                                    Icon(painter = painterResource(Res.drawable.ic_delete), contentDescription = stringResource(Res.string.bible_history_clear), modifier = Modifier.size(20.dp))
+                                }
                             }
                         }
                         AnimatedVisibility(visible = historyExpanded) {
