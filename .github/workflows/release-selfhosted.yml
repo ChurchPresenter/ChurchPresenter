@@ -1,0 +1,145 @@
+name: Release (Self-Hosted)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  version:
+    runs-on: [self-hosted, Linux]
+    outputs:
+      version: ${{ steps.version.outputs.VERSION }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get version from commit count
+        id: version
+        run: |
+          YEAR=$(date +%y)
+          COMMITS=$(git rev-list --count HEAD)
+          MAJOR=$YEAR
+          MINOR=$((COMMITS / 256))
+          PATCH=$((COMMITS % 256))
+          VERSION="v${MAJOR}.${MINOR}.${PATCH}"
+          echo "VERSION=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Version: $VERSION"
+
+  build-windows:
+    needs: version
+    runs-on: [self-hosted, Windows]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+          fetch-depth: 0
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Build installer
+        run: ./gradlew :composeApp:clean :composeApp:packageMsi --no-daemon --no-build-cache
+
+      - name: Upload to Release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION="${{ needs.version.outputs.version }}"
+          gh release create "$VERSION" --title "ChurchPresenter $VERSION" --generate-notes || true
+          for f in composeApp/build/compose/binaries/main/msi/*.msi; do
+            gh release upload "$VERSION" "$f" --clobber
+          done
+
+  build-macos:
+    needs: version
+    runs-on: [self-hosted, macOS]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+          fetch-depth: 0
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build installer
+        run: ./gradlew :composeApp:clean :composeApp:packageDmg --no-daemon --no-build-cache
+
+      - name: Rename DMG with architecture
+        run: |
+          ARCH=$(uname -m)
+          if [ "$ARCH" = "arm64" ]; then
+            SUFFIX="arm64"
+          else
+            SUFFIX="x64"
+          fi
+          for f in composeApp/build/compose/binaries/main/dmg/*.dmg; do
+            mv "$f" "${f%.dmg}-${SUFFIX}.dmg"
+          done
+
+      - name: Upload to Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION="${{ needs.version.outputs.version }}"
+          gh release create "$VERSION" --title "ChurchPresenter $VERSION" --generate-notes || true
+          for f in composeApp/build/compose/binaries/main/dmg/*.dmg; do
+            gh release upload "$VERSION" "$f" --clobber
+          done
+
+  build-linux:
+    needs: version
+    runs-on: [self-hosted, Linux]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+          fetch-depth: 0
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build installer
+        run: ./gradlew :composeApp:clean :composeApp:packageDeb --no-daemon --no-build-cache
+
+      - name: Upload to Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION="${{ needs.version.outputs.version }}"
+          gh release create "$VERSION" --title "ChurchPresenter $VERSION" --generate-notes || true
+          for f in composeApp/build/compose/binaries/main/deb/*.deb; do
+            gh release upload "$VERSION" "$f" --clobber
+          done
