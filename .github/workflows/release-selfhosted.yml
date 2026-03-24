@@ -11,6 +11,7 @@ jobs:
     runs-on: [self-hosted, Linux]
     outputs:
       version: ${{ steps.version.outputs.VERSION }}
+      prev_tag: ${{ steps.version.outputs.PREV_TAG }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -28,9 +29,11 @@ jobs:
           VERSION="v${MAJOR}.${MINOR}.${PATCH}"
           echo "VERSION=$VERSION" >> "$GITHUB_OUTPUT"
           echo "Version: $VERSION"
+          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          echo "PREV_TAG=$PREV_TAG" >> "$GITHUB_OUTPUT"
 
   build-windows:
-    needs: version
+    needs: [version]
     runs-on: [self-hosted, Windows]
     steps:
       - name: Checkout
@@ -52,18 +55,22 @@ jobs:
         run: ./gradlew :composeApp:clean :composeApp:packageMsi --no-daemon --no-build-cache
 
       - name: Upload to Release
-        shell: bash
+        shell: cmd
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          VERSION="${{ needs.version.outputs.version }}"
-          gh release create "$VERSION" --title "ChurchPresenter $VERSION" --generate-notes || true
-          for f in composeApp/build/compose/binaries/main/msi/*.msi; do
-            gh release upload "$VERSION" "$f" --clobber
-          done
+          set VERSION=${{ needs.version.outputs.version }}
+          set PREV_TAG=${{ needs.version.outputs.prev_tag }}
+          if "%PREV_TAG%"=="" (
+            set NOTES=**Full Changelog**: https://github.com/ChurchPresenter/ChurchPresenter/releases/tag/%VERSION%
+          ) else (
+            set NOTES=**Full Changelog**: https://github.com/ChurchPresenter/ChurchPresenter/compare/%PREV_TAG%...%VERSION%
+          )
+          gh release create "%VERSION%" --title "ChurchPresenter %VERSION%" --notes "%NOTES%" || ver >nul
+          for %%f in (composeApp\build\compose\binaries\main\msi\*.msi) do gh release upload "%VERSION%" "%%f" --clobber
 
   build-macos:
-    needs: version
+    needs: [version]
     runs-on: [self-hosted, macOS]
     steps:
       - name: Checkout
@@ -104,13 +111,19 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           VERSION="${{ needs.version.outputs.version }}"
-          gh release create "$VERSION" --title "ChurchPresenter $VERSION" --generate-notes || true
+          PREV_TAG="${{ needs.version.outputs.prev_tag }}"
+          if [ -n "$PREV_TAG" ]; then
+            NOTES="**Full Changelog**: https://github.com/ChurchPresenter/ChurchPresenter/compare/${PREV_TAG}...${VERSION}"
+          else
+            NOTES="**Full Changelog**: https://github.com/ChurchPresenter/ChurchPresenter/releases/tag/${VERSION}"
+          fi
+          gh release create "$VERSION" --title "ChurchPresenter $VERSION" --notes "$NOTES" || true
           for f in composeApp/build/compose/binaries/main/dmg/*.dmg; do
             gh release upload "$VERSION" "$f" --clobber
           done
 
   build-linux:
-    needs: version
+    needs: [version]
     runs-on: [self-hosted, Linux]
     steps:
       - name: Checkout
@@ -139,7 +152,13 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           VERSION="${{ needs.version.outputs.version }}"
-          gh release create "$VERSION" --title "ChurchPresenter $VERSION" --generate-notes || true
+          PREV_TAG="${{ needs.version.outputs.prev_tag }}"
+          if [ -n "$PREV_TAG" ]; then
+            NOTES="**Full Changelog**: https://github.com/ChurchPresenter/ChurchPresenter/compare/${PREV_TAG}...${VERSION}"
+          else
+            NOTES="**Full Changelog**: https://github.com/ChurchPresenter/ChurchPresenter/releases/tag/${VERSION}"
+          fi
+          gh release create "$VERSION" --title "ChurchPresenter $VERSION" --notes "$NOTES" || true
           for f in composeApp/build/compose/binaries/main/deb/*.deb; do
             gh release upload "$VERSION" "$f" --clobber
           done

@@ -124,6 +124,8 @@ jobs:
           VERSION="v${MAJOR}.${MINOR}.${PATCH}"
           echo "VERSION=$VERSION" >> "$GITHUB_OUTPUT"
           echo "Version: $VERSION"
+          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          echo "PREV_TAG=$PREV_TAG" >> "$GITHUB_OUTPUT"
 
       - name: Download Windows artifact
         uses: actions/download-artifact@v4
@@ -166,7 +168,8 @@ jobs:
         with:
           tag_name: ${{ steps.version.outputs.VERSION }}
           name: ChurchPresenter ${{ steps.version.outputs.VERSION }}
-          generate_release_notes: true
+          body: |
+            **Full Changelog**: https://github.com/ChurchPresenter/ChurchPresenter/compare/${{ steps.version.outputs.PREV_TAG }}...${{ steps.version.outputs.VERSION }}
           files: |
             release/windows/*.msi
             release/macos-arm64/*.dmg
