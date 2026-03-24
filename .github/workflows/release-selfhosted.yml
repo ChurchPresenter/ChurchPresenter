@@ -55,19 +55,30 @@ jobs:
         run: ./gradlew :composeApp:clean :composeApp:packageMsi --no-daemon --no-build-cache
 
       - name: Upload to Release
-        shell: cmd
+        shell: pwsh
         env:
           GH_TOKEN: ${{ secrets.RELEASE_PAT }}
         run: |
-          set VERSION=${{ needs.version.outputs.version }}
-          set PREV_TAG=${{ needs.version.outputs.prev_tag }}
-          if "%PREV_TAG%"=="" (
-            set NOTES=**Full Changelog**: https://github.com/ChurchPresenter/ChurchPresenter/releases/tag/%VERSION%
-          ) else (
-            set NOTES=**Full Changelog**: https://github.com/ChurchPresenter/ChurchPresenter/compare/%PREV_TAG%...%VERSION%
-          )
-          gh release create "%VERSION%" --repo ChurchPresenter/Releases --title "ChurchPresenter %VERSION%" --notes "%NOTES%" || ver >nul
-          for %%f in (composeApp\build\compose\binaries\main\msi\*.msi) do gh release upload "%VERSION%" "%%f" --clobber --repo ChurchPresenter/Releases
+          $VERSION = "${{ needs.version.outputs.version }}"
+          $PREV_TAG = "${{ needs.version.outputs.prev_tag }}"
+          if ($PREV_TAG) {
+            $NOTES = "**Full Changelog**: https://github.com/ChurchPresenter/ChurchPresenter/compare/${PREV_TAG}...${VERSION}"
+          } else {
+            $NOTES = "**Full Changelog**: https://github.com/ChurchPresenter/ChurchPresenter/releases/tag/${VERSION}"
+          }
+          $headers = @{ Authorization = "token $env:GH_TOKEN"; Accept = "application/vnd.github+json" }
+          $body = @{ tag_name = $VERSION; name = "ChurchPresenter $VERSION"; body = $NOTES } | ConvertTo-Json
+          try {
+            Invoke-RestMethod -Uri "https://api.github.com/repos/ChurchPresenter/Releases/releases" -Method Post -Headers $headers -Body $body -ContentType "application/json"
+          } catch {
+            Write-Host "Release may already exist, continuing..."
+          }
+          $release = Invoke-RestMethod -Uri "https://api.github.com/repos/ChurchPresenter/Releases/releases/tags/$VERSION" -Headers $headers
+          $uploadUrl = $release.upload_url -replace '\{\?.*\}', ''
+          foreach ($f in Get-ChildItem "composeApp\build\compose\binaries\main\msi\*.msi") {
+            $uploadHeaders = @{ Authorization = "token $env:GH_TOKEN"; Accept = "application/vnd.github+json"; "Content-Type" = "application/octet-stream" }
+            Invoke-RestMethod -Uri "${uploadUrl}?name=$($f.Name)" -Method Post -Headers $uploadHeaders -InFile $f.FullName
+          }
 
   build-macos:
     needs: [version]
@@ -94,12 +105,6 @@ jobs:
       - name: Build installer
         run: ./gradlew :composeApp:clean :composeApp:packageDmg --no-daemon --no-build-cache
 
-      - name: Install gh CLI
-        run: |
-          if ! command -v gh &> /dev/null; then
-            brew install gh
-          fi
-
       - name: Rename DMG with architecture
         run: |
           ARCH=$(uname -m)
@@ -123,9 +128,20 @@ jobs:
           else
             NOTES="**Full Changelog**: https://github.com/ChurchPresenter/ChurchPresenter/releases/tag/${VERSION}"
           fi
-          gh release create "$VERSION" --repo ChurchPresenter/Releases --title "ChurchPresenter $VERSION" --notes "$NOTES" || true
+          # Create release (ignore error if already exists)
+          curl -s -X POST "https://api.github.com/repos/ChurchPresenter/Releases/releases" \
+            -H "Authorization: token $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            -d "{\"tag_name\":\"$VERSION\",\"name\":\"ChurchPresenter $VERSION\",\"body\":\"$NOTES\"}" || true
+          # Get upload URL
+          UPLOAD_URL=$(curl -s "https://api.github.com/repos/ChurchPresenter/Releases/releases/tags/$VERSION" \
+            -H "Authorization: token $GH_TOKEN" | python3 -c "import sys,json; print(json.load(sys.stdin)['upload_url'].split('{')[0])")
           for f in composeApp/build/compose/binaries/main/dmg/*.dmg; do
-            gh release upload "$VERSION" "$f" --clobber --repo ChurchPresenter/Releases
+            FILENAME=$(basename "$f")
+            curl -s -X POST "${UPLOAD_URL}?name=${FILENAME}" \
+              -H "Authorization: token $GH_TOKEN" \
+              -H "Content-Type: application/octet-stream" \
+              --data-binary "@$f"
           done
 
   build-linux:
@@ -164,7 +180,18 @@ jobs:
           else
             NOTES="**Full Changelog**: https://github.com/ChurchPresenter/ChurchPresenter/releases/tag/${VERSION}"
           fi
-          gh release create "$VERSION" --repo ChurchPresenter/Releases --title "ChurchPresenter $VERSION" --notes "$NOTES" || true
+          # Create release (ignore error if already exists)
+          curl -s -X POST "https://api.github.com/repos/ChurchPresenter/Releases/releases" \
+            -H "Authorization: token $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            -d "{\"tag_name\":\"$VERSION\",\"name\":\"ChurchPresenter $VERSION\",\"body\":\"$NOTES\"}" || true
+          # Get upload URL
+          UPLOAD_URL=$(curl -s "https://api.github.com/repos/ChurchPresenter/Releases/releases/tags/$VERSION" \
+            -H "Authorization: token $GH_TOKEN" | python3 -c "import sys,json; print(json.load(sys.stdin)['upload_url'].split('{')[0])")
           for f in composeApp/build/compose/binaries/main/deb/*.deb; do
-            gh release upload "$VERSION" "$f" --clobber --repo ChurchPresenter/Releases
+            FILENAME=$(basename "$f")
+            curl -s -X POST "${UPLOAD_URL}?name=${FILENAME}" \
+              -H "Authorization: token $GH_TOKEN" \
+              -H "Content-Type: application/octet-stream" \
+              --data-binary "@$f"
           done
