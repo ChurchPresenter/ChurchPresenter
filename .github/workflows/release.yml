@@ -166,6 +166,7 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
+          repository: ChurchPresenter/Releases
           tag_name: ${{ steps.version.outputs.VERSION }}
           name: ChurchPresenter ${{ steps.version.outputs.VERSION }}
           body: |
@@ -175,3 +176,5 @@ jobs:
             release/macos-arm64/*.dmg
             release/macos-x64/*.dmg
             release/linux/*.deb
+        env:
+          GITHUB_TOKEN: ${{ secrets.RELEASE_PAT }}

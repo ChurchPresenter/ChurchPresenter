@@ -57,7 +57,7 @@ jobs:
       - name: Upload to Release
         shell: cmd
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.RELEASE_PAT }}
         run: |
           set VERSION=${{ needs.version.outputs.version }}
           set PREV_TAG=${{ needs.version.outputs.prev_tag }}
@@ -66,8 +66,8 @@ jobs:
           ) else (
             set NOTES=**Full Changelog**: https://github.com/ChurchPresenter/ChurchPresenter/compare/%PREV_TAG%...%VERSION%
           )
-          gh release create "%VERSION%" --title "ChurchPresenter %VERSION%" --notes "%NOTES%" || ver >nul
-          for %%f in (composeApp\build\compose\binaries\main\msi\*.msi) do gh release upload "%VERSION%" "%%f" --clobber
+          gh release create "%VERSION%" --repo ChurchPresenter/Releases --title "ChurchPresenter %VERSION%" --notes "%NOTES%" || ver >nul
+          for %%f in (composeApp\build\compose\binaries\main\msi\*.msi) do gh release upload "%VERSION%" "%%f" --clobber --repo ChurchPresenter/Releases
 
   build-macos:
     needs: [version]
@@ -94,6 +94,12 @@ jobs:
       - name: Build installer
         run: ./gradlew :composeApp:clean :composeApp:packageDmg --no-daemon --no-build-cache
 
+      - name: Install gh CLI
+        run: |
+          if ! command -v gh &> /dev/null; then
+            brew install gh
+          fi
+
       - name: Rename DMG with architecture
         run: |
           ARCH=$(uname -m)
@@ -108,7 +114,7 @@ jobs:
 
       - name: Upload to Release
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.RELEASE_PAT }}
         run: |
           VERSION="${{ needs.version.outputs.version }}"
           PREV_TAG="${{ needs.version.outputs.prev_tag }}"
@@ -117,9 +123,9 @@ jobs:
           else
             NOTES="**Full Changelog**: https://github.com/ChurchPresenter/ChurchPresenter/releases/tag/${VERSION}"
           fi
-          gh release create "$VERSION" --title "ChurchPresenter $VERSION" --notes "$NOTES" || true
+          gh release create "$VERSION" --repo ChurchPresenter/Releases --title "ChurchPresenter $VERSION" --notes "$NOTES" || true
           for f in composeApp/build/compose/binaries/main/dmg/*.dmg; do
-            gh release upload "$VERSION" "$f" --clobber
+            gh release upload "$VERSION" "$f" --clobber --repo ChurchPresenter/Releases
           done
 
   build-linux:
@@ -149,7 +155,7 @@ jobs:
 
       - name: Upload to Release
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.RELEASE_PAT }}
         run: |
           VERSION="${{ needs.version.outputs.version }}"
           PREV_TAG="${{ needs.version.outputs.prev_tag }}"
@@ -158,7 +164,7 @@ jobs:
           else
             NOTES="**Full Changelog**: https://github.com/ChurchPresenter/ChurchPresenter/releases/tag/${VERSION}"
           fi
-          gh release create "$VERSION" --title "ChurchPresenter $VERSION" --notes "$NOTES" || true
+          gh release create "$VERSION" --repo ChurchPresenter/Releases --title "ChurchPresenter $VERSION" --notes "$NOTES" || true
           for f in composeApp/build/compose/binaries/main/deb/*.deb; do
-            gh release upload "$VERSION" "$f" --clobber
+            gh release upload "$VERSION" "$f" --clobber --repo ChurchPresenter/Releases
           done
