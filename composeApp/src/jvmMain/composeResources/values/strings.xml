@@ -699,6 +699,25 @@
     <string name="website_disclaimer">We are not responsible for any advertisements or content that may appear on the displayed website.</string>
     <string name="tab_web">Web</string>
     <string name="tab_canvas">Canvas</string>
+    <string name="canvas_scenes">Scenes</string>
+    <string name="canvas_sources">Sources</string>
+    <string name="canvas_properties">Properties</string>
+    <string name="canvas_new_scene">New</string>
+    <string name="canvas_create_scene">Create Scene</string>
+    <string name="canvas_no_scene_selected">No scene selected</string>
+    <string name="canvas_select_source">Select a source to edit properties</string>
+    <string name="canvas_image_not_found">Image not found</string>
+    <string name="canvas_source_image">Image</string>
+    <string name="canvas_source_text">Text</string>
+    <string name="canvas_source_color">Color</string>
+    <string name="canvas_source_video">Video</string>
+    <string name="canvas_transform">Transform</string>
+    <string name="canvas_font_color">Font Color</string>
+    <string name="canvas_bg_color">Bg Color</string>
+    <string name="canvas_transparent_bg">Transparent background</string>
+    <string name="canvas_color_1">Color 1</string>
+    <string name="canvas_color_2">Color 2</string>
+    <string name="canvas_gradient">Gradient</string>
     <string name="web_under_construction">This feature is under construction.</string>
 
     <!-- Server Settings -->

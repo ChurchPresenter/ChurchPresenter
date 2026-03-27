@@ -55,6 +55,16 @@ import churchpresenter.composeapp.generated.resources.ic_delete
 import churchpresenter.composeapp.generated.resources.ic_edit
 import churchpresenter.composeapp.generated.resources.ic_playlist_add
 import churchpresenter.composeapp.generated.resources.add_to_schedule
+import churchpresenter.composeapp.generated.resources.canvas_create_scene
+import churchpresenter.composeapp.generated.resources.canvas_new_scene
+import churchpresenter.composeapp.generated.resources.canvas_no_scene_selected
+import churchpresenter.composeapp.generated.resources.canvas_scenes
+import churchpresenter.composeapp.generated.resources.canvas_select_source
+import churchpresenter.composeapp.generated.resources.canvas_source_color
+import churchpresenter.composeapp.generated.resources.canvas_source_image
+import churchpresenter.composeapp.generated.resources.canvas_source_text
+import churchpresenter.composeapp.generated.resources.canvas_source_video
+import churchpresenter.composeapp.generated.resources.canvas_sources
 import churchpresenter.composeapp.generated.resources.go_live
 import org.churchpresenter.app.churchpresenter.composables.SceneCanvas
 import org.churchpresenter.app.churchpresenter.composables.SourcePropertiesPanel
@@ -94,7 +104,7 @@ fun CanvasTab(
         ) {
             // Scene selector section
             Text(
-                "Scenes",
+                stringResource(Res.string.canvas_scenes),
                 style = MaterialTheme.typography.titleSmall,
                 color = MaterialTheme.colorScheme.onSurface
             )
@@ -186,7 +196,7 @@ fun CanvasTab(
                 ) {
                     Icon(painterResource(Res.drawable.ic_add), null, modifier = Modifier.size(16.dp))
                     Spacer(Modifier.width(4.dp))
-                    Text("New", style = MaterialTheme.typography.labelSmall)
+                    Text(stringResource(Res.string.canvas_new_scene), style = MaterialTheme.typography.labelSmall)
                 }
             }
 
@@ -194,7 +204,7 @@ fun CanvasTab(
 
             // Source list section
             Text(
-                "Sources",
+                stringResource(Res.string.canvas_sources),
                 style = MaterialTheme.typography.titleSmall,
                 color = MaterialTheme.colorScheme.onSurface
             )
@@ -277,7 +287,7 @@ fun CanvasTab(
                             onDismissRequest = { showAddMenu = false }
                         ) {
                             DropdownMenuItem(
-                                text = { Text("Image") },
+                                text = { Text(stringResource(Res.string.canvas_source_image)) },
                                 onClick = {
                                     showAddMenu = false
                                     sceneViewModel.addSource(
@@ -291,7 +301,7 @@ fun CanvasTab(
                                 }
                             )
                             DropdownMenuItem(
-                                text = { Text("Text") },
+                                text = { Text(stringResource(Res.string.canvas_source_text)) },
                                 onClick = {
                                     showAddMenu = false
                                     sceneViewModel.addSource(
@@ -307,7 +317,7 @@ fun CanvasTab(
                                 }
                             )
                             DropdownMenuItem(
-                                text = { Text("Color") },
+                                text = { Text(stringResource(Res.string.canvas_source_color)) },
                                 onClick = {
                                     showAddMenu = false
                                     sceneViewModel.addSource(
@@ -320,7 +330,7 @@ fun CanvasTab(
                                 }
                             )
                             DropdownMenuItem(
-                                text = { Text("Video") },
+                                text = { Text(stringResource(Res.string.canvas_source_video)) },
                                 onClick = {
                                     showAddMenu = false
                                     sceneViewModel.addSource(
@@ -336,9 +346,10 @@ fun CanvasTab(
                         }
                     }
 
-                    if (selectedSourceId != null) {
+                    val currentSelectedId = selectedSourceId
+                    if (currentSelectedId != null) {
                         IconButton(
-                            onClick = { sceneViewModel.removeSource(selectedSourceId!!) },
+                            onClick = { sceneViewModel.removeSource(currentSelectedId) },
                             modifier = Modifier.size(28.dp)
                         ) {
                             Icon(
@@ -349,7 +360,7 @@ fun CanvasTab(
                             )
                         }
                         IconButton(
-                            onClick = { sceneViewModel.moveSourceDown(selectedSourceId!!) },
+                            onClick = { sceneViewModel.moveSourceDown(currentSelectedId) },
                             modifier = Modifier.size(28.dp)
                         ) {
                             Icon(
@@ -360,7 +371,7 @@ fun CanvasTab(
                             )
                         }
                         IconButton(
-                            onClick = { sceneViewModel.moveSourceUp(selectedSourceId!!) },
+                            onClick = { sceneViewModel.moveSourceUp(currentSelectedId) },
                             modifier = Modifier.size(28.dp)
                         ) {
                             Icon(
@@ -466,13 +477,13 @@ fun CanvasTab(
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
-                            "No scene selected",
+                            stringResource(Res.string.canvas_no_scene_selected),
                             style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Spacer(Modifier.height(8.dp))
                         Button(onClick = { sceneViewModel.addScene() }) {
-                            Text("Create Scene")
+                            Text(stringResource(Res.string.canvas_create_scene))
                         }
                     }
                 }
@@ -502,7 +513,7 @@ fun CanvasTab(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        "Select a source to edit properties",
+                        stringResource(Res.string.canvas_select_source),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )

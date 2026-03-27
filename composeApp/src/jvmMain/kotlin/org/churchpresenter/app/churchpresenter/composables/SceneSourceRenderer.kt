@@ -22,9 +22,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.canvas_image_not_found
 import org.churchpresenter.app.churchpresenter.models.SceneSource
 import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
 import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDefault
+import org.jetbrains.compose.resources.stringResource
 import kotlin.math.cos
 import kotlin.math.sin
 import org.jetbrains.skia.Image
@@ -73,7 +76,7 @@ private fun ImageSourceContent(source: SceneSource.ImageSource, modifier: Modifi
             modifier = modifier.fillMaxSize().background(Color.DarkGray),
             contentAlignment = Alignment.Center
         ) {
-            Text("Image not found", color = Color.White, fontSize = 12.sp)
+            Text(stringResource(Res.string.canvas_image_not_found), color = Color.White, fontSize = 12.sp)
         }
     }
 }
@@ -135,7 +138,7 @@ private fun VideoSourceContent(
 ) {
     // In preview mode, show a placeholder. In presenter mode, a real VideoPlayer would be used.
     Box(
-        modifier = modifier.fillMaxSize().background(Color(0xFF1A1A2E)),
+        modifier = modifier.fillMaxSize().background(Color.DarkGray),
         contentAlignment = Alignment.Center
     ) {
         Text(
@@ -154,7 +157,7 @@ private fun BrowserSourceContent(
 ) {
     // In preview mode, show a placeholder. In presenter mode, a real CefBrowser would be used.
     Box(
-        modifier = modifier.fillMaxSize().background(Color(0xFF0D1117)),
+        modifier = modifier.fillMaxSize().background(Color.DarkGray),
         contentAlignment = Alignment.Center
     ) {
         Text(

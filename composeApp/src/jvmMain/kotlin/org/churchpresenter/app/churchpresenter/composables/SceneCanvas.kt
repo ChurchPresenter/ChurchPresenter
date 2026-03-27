@@ -297,7 +297,7 @@ private fun RotateHandle(
         modifier = Modifier
             .offset(hxDp, hyDp)
             .size(handleSize)
-            .background(Color(0xFF4FC3F7), CircleShape)
+            .background(Color.Cyan, CircleShape)
             .border(1.dp, Color.White, CircleShape)
             .pointerHoverIcon(PointerIcon(Cursor(Cursor.HAND_CURSOR)))
             .pointerInput(Unit) {

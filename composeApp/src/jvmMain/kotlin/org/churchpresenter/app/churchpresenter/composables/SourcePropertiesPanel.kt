@@ -45,6 +45,19 @@ import churchpresenter.composeapp.generated.resources.symbol_dropdown
 import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDefault
 import org.jetbrains.compose.resources.stringResource
 import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.canvas_bg_color
+import churchpresenter.composeapp.generated.resources.canvas_color_1
+import churchpresenter.composeapp.generated.resources.canvas_color_2
+import churchpresenter.composeapp.generated.resources.canvas_font_color
+import churchpresenter.composeapp.generated.resources.canvas_gradient
+import churchpresenter.composeapp.generated.resources.canvas_image_not_found
+import churchpresenter.composeapp.generated.resources.canvas_properties
+import churchpresenter.composeapp.generated.resources.canvas_source_color
+import churchpresenter.composeapp.generated.resources.canvas_source_image
+import churchpresenter.composeapp.generated.resources.canvas_source_text
+import churchpresenter.composeapp.generated.resources.canvas_source_video
+import churchpresenter.composeapp.generated.resources.canvas_transform
+import churchpresenter.composeapp.generated.resources.canvas_transparent_bg
 import churchpresenter.composeapp.generated.resources.ic_folder
 import kotlinx.coroutines.launch
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
@@ -69,7 +82,7 @@ fun SourcePropertiesPanel(
         verticalArrangement = Arrangement.spacedBy(6.dp)
     ) {
         Text(
-            text = "Properties",
+            text = stringResource(Res.string.canvas_properties),
             style = MaterialTheme.typography.titleSmall,
             color = MaterialTheme.colorScheme.onSurface
         )
@@ -82,7 +95,7 @@ fun SourcePropertiesPanel(
         HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
 
         // Transform
-        Text("Transform", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(stringResource(Res.string.canvas_transform), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
 
         val t = source.transform
         Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -125,7 +138,7 @@ fun SourcePropertiesPanel(
 @Composable
 private fun ImageProperties(source: SceneSource.ImageSource, onUpdate: (SceneSource) -> Unit) {
     val scope = rememberCoroutineScope()
-    Text("Image", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    Text(stringResource(Res.string.canvas_source_image), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(4.dp)
@@ -181,7 +194,7 @@ private fun TextProperties(source: SceneSource.TextSource, onUpdate: (SceneSourc
 
     val availableFonts = remember { Utils.getAvailableSystemFonts() }
 
-    Text("Text", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    Text(stringResource(Res.string.canvas_source_text), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
     PropertyTextField("Text", source.text) { v ->
         onUpdate(source.copy(text = v))
     }
@@ -199,7 +212,7 @@ private fun TextProperties(source: SceneSource.TextSource, onUpdate: (SceneSourc
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Text("Font Color", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(stringResource(Res.string.canvas_font_color), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         ColorPickerField(
             color = source.fontColor,
             onColorChange = { onUpdate(source.copy(fontColor = it)) }
@@ -217,14 +230,14 @@ private fun TextProperties(source: SceneSource.TextSource, onUpdate: (SceneSourc
                 ))
             }
         )
-        Text("Transparent background", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(stringResource(Res.string.canvas_transparent_bg), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
     if (!isTransparentBg) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Text("Bg Color", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(stringResource(Res.string.canvas_bg_color), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             ColorPickerField(
                 color = source.backgroundColor,
                 onColorChange = { onUpdate(source.copy(backgroundColor = it)) }
@@ -235,12 +248,12 @@ private fun TextProperties(source: SceneSource.TextSource, onUpdate: (SceneSourc
 
 @Composable
 private fun ColorProperties(source: SceneSource.ColorSource, onUpdate: (SceneSource) -> Unit) {
-    Text("Color", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    Text(stringResource(Res.string.canvas_source_color), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Text("Color 1", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(stringResource(Res.string.canvas_color_1), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         ColorPickerField(
             color = source.color,
             onColorChange = { onUpdate(source.copy(color = it)) }
@@ -254,14 +267,14 @@ private fun ColorProperties(source: SceneSource.ColorSource, onUpdate: (SceneSou
             checked = source.isGradient,
             onCheckedChange = { onUpdate(source.copy(isGradient = it)) }
         )
-        Text("Gradient", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(stringResource(Res.string.canvas_gradient), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
     if (source.isGradient) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Text("Color 2", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(stringResource(Res.string.canvas_color_2), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             ColorPickerField(
                 color = source.gradientColor2,
                 onColorChange = { onUpdate(source.copy(gradientColor2 = it)) }
@@ -282,7 +295,7 @@ private fun ColorProperties(source: SceneSource.ColorSource, onUpdate: (SceneSou
 @Composable
 private fun VideoProperties(source: SceneSource.VideoSource, onUpdate: (SceneSource) -> Unit) {
     val scope = rememberCoroutineScope()
-    Text("Video", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    Text(stringResource(Res.string.canvas_source_video), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(4.dp)

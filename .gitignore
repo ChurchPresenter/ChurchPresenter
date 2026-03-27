@@ -27,7 +27,8 @@ DMG_BUILD_SUCCESS.md
 hs_err_pid*.log
 jcefmaven_build_meta.json.template
 /org/
-native/decklink/*.class
+/uk/
+*.class
 native/decklink/*.obj
 native/decklink/*.lib
 native/decklink/*.exp
