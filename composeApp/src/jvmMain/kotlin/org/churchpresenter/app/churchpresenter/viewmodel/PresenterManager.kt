@@ -6,6 +6,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import org.churchpresenter.app.churchpresenter.models.AnimationType
 import org.churchpresenter.app.churchpresenter.models.LyricSection
 import org.cef.browser.CefBrowser
+import org.churchpresenter.app.churchpresenter.models.Scene
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.models.SelectedVerse
 
@@ -267,5 +268,13 @@ class PresenterManager {
 
     fun setLiveBrowser(browser: CefBrowser?) {
         _liveBrowser.value = browser
+    }
+
+    // Scene compositor state
+    private val _activeScene = mutableStateOf<Scene?>(null)
+    val activeScene: State<Scene?> = _activeScene
+
+    fun setActiveScene(scene: Scene?) {
+        _activeScene.value = scene
     }
 }

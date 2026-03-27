@@ -678,6 +678,7 @@
     <string name="symbol_dropdown">▾</string>
     <string name="symbol_ok">✓</string>
     <string name="tab_web">Веб</string>
+    <string name="tab_canvas">Кенеп</string>
     <string name="text_margins">Мәтін жиектері</string>
     <string name="theme">Тақырып</string>
     <string name="timer_expired">Уақыт бітті!</string>

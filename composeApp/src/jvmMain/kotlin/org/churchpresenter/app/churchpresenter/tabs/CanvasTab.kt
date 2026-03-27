@@ -1,0 +1,513 @@
+package org.churchpresenter.app.churchpresenter.tabs
+
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.TooltipArea
+import androidx.compose.foundation.TooltipPlacement
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.VerticalDivider
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.ic_add
+import churchpresenter.composeapp.generated.resources.ic_arrow_down
+import churchpresenter.composeapp.generated.resources.ic_arrow_up
+import churchpresenter.composeapp.generated.resources.ic_cast
+import churchpresenter.composeapp.generated.resources.ic_close
+import churchpresenter.composeapp.generated.resources.ic_delete
+import churchpresenter.composeapp.generated.resources.ic_edit
+import churchpresenter.composeapp.generated.resources.ic_playlist_add
+import churchpresenter.composeapp.generated.resources.add_to_schedule
+import churchpresenter.composeapp.generated.resources.go_live
+import org.churchpresenter.app.churchpresenter.composables.SceneCanvas
+import org.churchpresenter.app.churchpresenter.composables.SourcePropertiesPanel
+import org.churchpresenter.app.churchpresenter.data.AppSettings
+import org.churchpresenter.app.churchpresenter.models.SceneSource
+import org.churchpresenter.app.churchpresenter.models.SourceTransform
+import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
+import org.churchpresenter.app.churchpresenter.viewmodel.SceneViewModel
+import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
+import java.util.UUID
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun CanvasTab(
+    modifier: Modifier = Modifier,
+    appSettings: AppSettings,
+    presenterManager: PresenterManager,
+    sceneViewModel: SceneViewModel,
+    onAddToSchedule: (sceneId: String, sceneName: String) -> Unit
+) {
+    var renamingSceneId by remember { mutableStateOf<String?>(null) }
+    var renameText by remember { mutableStateOf("") }
+    val currentScene = sceneViewModel.currentScene
+    val selectedSourceId by sceneViewModel.selectedSourceId
+    val selectedSource = sceneViewModel.selectedSource
+
+    Row(modifier = modifier.fillMaxSize()) {
+        // Left panel: Scene selector + Source list
+        Column(
+            modifier = Modifier
+                .width(220.dp)
+                .fillMaxHeight()
+                .background(MaterialTheme.colorScheme.surface)
+                .padding(8.dp)
+        ) {
+            // Scene selector section
+            Text(
+                "Scenes",
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Spacer(Modifier.height(4.dp))
+
+            @OptIn(ExperimentalFoundationApi::class)
+            LazyColumn(modifier = Modifier.weight(0.4f).fillMaxWidth()) {
+                items(sceneViewModel.scenes) { scene ->
+                    val isSelected = scene.id == sceneViewModel.currentSceneId.value
+                    val isRenaming = renamingSceneId == scene.id
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .combinedClickable(
+                                onClick = { sceneViewModel.selectScene(scene.id) },
+                                onDoubleClick = {
+                                    renamingSceneId = scene.id
+                                    renameText = scene.name
+                                }
+                            )
+                            .background(
+                                if (isSelected) MaterialTheme.colorScheme.primaryContainer
+                                else Color.Transparent,
+                                shape = RoundedCornerShape(4.dp)
+                            )
+                            .padding(horizontal = 8.dp, vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        if (isRenaming) {
+                            OutlinedTextField(
+                                value = renameText,
+                                onValueChange = { renameText = it },
+                                singleLine = true,
+                                textStyle = MaterialTheme.typography.bodySmall,
+                                modifier = Modifier.weight(1f)
+                            )
+                            IconButton(
+                                onClick = {
+                                    sceneViewModel.renameScene(scene.id, renameText)
+                                    renamingSceneId = null
+                                },
+                                modifier = Modifier.size(20.dp)
+                            ) {
+                                Text("✓", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
+                            }
+                        } else {
+                            Text(
+                                scene.name,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer
+                                else MaterialTheme.colorScheme.onSurface,
+                                modifier = Modifier.weight(1f)
+                            )
+                            IconButton(
+                                onClick = {
+                                    renamingSceneId = scene.id
+                                    renameText = scene.name
+                                },
+                                modifier = Modifier.size(20.dp)
+                            ) {
+                                Icon(
+                                    painterResource(Res.drawable.ic_edit),
+                                    contentDescription = "Rename",
+                                    modifier = Modifier.size(14.dp),
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                            IconButton(
+                                onClick = { sceneViewModel.removeScene(scene.id) },
+                                modifier = Modifier.size(20.dp)
+                            ) {
+                                Icon(
+                                    painterResource(Res.drawable.ic_close),
+                                    contentDescription = "Remove",
+                                    modifier = Modifier.size(14.dp),
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
+            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                Button(
+                    onClick = { sceneViewModel.addScene() },
+                    modifier = Modifier.weight(1f),
+                    contentPadding = ButtonDefaults.ContentPadding
+                ) {
+                    Icon(painterResource(Res.drawable.ic_add), null, modifier = Modifier.size(16.dp))
+                    Spacer(Modifier.width(4.dp))
+                    Text("New", style = MaterialTheme.typography.labelSmall)
+                }
+            }
+
+            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+
+            // Source list section
+            Text(
+                "Sources",
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Spacer(Modifier.height(4.dp))
+
+            if (currentScene != null) {
+                LazyColumn(modifier = Modifier.weight(0.6f).fillMaxWidth()) {
+                    // Render in reverse order so top item = front
+                    items(currentScene.sources.reversed()) { source ->
+                        val isSelected = source.id == selectedSourceId
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { sceneViewModel.selectSource(source.id) }
+                                .background(
+                                    if (isSelected) MaterialTheme.colorScheme.secondaryContainer
+                                    else Color.Transparent,
+                                    shape = RoundedCornerShape(4.dp)
+                                )
+                                .padding(horizontal = 4.dp, vertical = 2.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            // Visibility toggle
+                            IconButton(
+                                onClick = { sceneViewModel.toggleSourceVisibility(source.id) },
+                                modifier = Modifier.size(20.dp)
+                            ) {
+                                Text(
+                                    if (source.visible) "\uD83D\uDC41" else "\u2014",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+
+                            // Lock toggle
+                            IconButton(
+                                onClick = { sceneViewModel.toggleSourceLock(source.id) },
+                                modifier = Modifier.size(20.dp)
+                            ) {
+                                Text(
+                                    if (source.locked) "\uD83D\uDD12" else "\uD83D\uDD13",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+
+                            Text(
+                                source.name,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = if (isSelected) MaterialTheme.colorScheme.onSecondaryContainer
+                                else MaterialTheme.colorScheme.onSurface,
+                                modifier = Modifier.weight(1f).alpha(if (source.visible) 1f else 0.5f)
+                            )
+                        }
+                    }
+                }
+
+                // Source toolbar
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(2.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    var showAddMenu by remember { mutableStateOf(false) }
+
+                    Box {
+                        IconButton(
+                            onClick = { showAddMenu = true },
+                            modifier = Modifier.size(28.dp)
+                        ) {
+                            Icon(
+                                painterResource(Res.drawable.ic_add),
+                                contentDescription = "Add source",
+                                modifier = Modifier.size(16.dp),
+                                tint = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+
+                        DropdownMenu(
+                            expanded = showAddMenu,
+                            onDismissRequest = { showAddMenu = false }
+                        ) {
+                            DropdownMenuItem(
+                                text = { Text("Image") },
+                                onClick = {
+                                    showAddMenu = false
+                                    sceneViewModel.addSource(
+                                        SceneSource.ImageSource(
+                                            id = UUID.randomUUID().toString(),
+                                            name = "Image",
+                                            filePath = "",
+                                            transform = SourceTransform(width = 0.5f, height = 0.5f)
+                                        )
+                                    )
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = { Text("Text") },
+                                onClick = {
+                                    showAddMenu = false
+                                    sceneViewModel.addSource(
+                                        SceneSource.TextSource(
+                                            id = UUID.randomUUID().toString(),
+                                            name = "Text",
+                                            transform = SourceTransform(
+                                                x = 0.25f, y = 0.4f,
+                                                width = 0.5f, height = 0.2f
+                                            )
+                                        )
+                                    )
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = { Text("Color") },
+                                onClick = {
+                                    showAddMenu = false
+                                    sceneViewModel.addSource(
+                                        SceneSource.ColorSource(
+                                            id = UUID.randomUUID().toString(),
+                                            name = "Color",
+                                            transform = SourceTransform()
+                                        )
+                                    )
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = { Text("Video") },
+                                onClick = {
+                                    showAddMenu = false
+                                    sceneViewModel.addSource(
+                                        SceneSource.VideoSource(
+                                            id = UUID.randomUUID().toString(),
+                                            name = "Video",
+                                            filePath = "",
+                                            transform = SourceTransform()
+                                        )
+                                    )
+                                }
+                            )
+                        }
+                    }
+
+                    if (selectedSourceId != null) {
+                        IconButton(
+                            onClick = { sceneViewModel.removeSource(selectedSourceId!!) },
+                            modifier = Modifier.size(28.dp)
+                        ) {
+                            Icon(
+                                painterResource(Res.drawable.ic_delete),
+                                contentDescription = "Delete source",
+                                modifier = Modifier.size(16.dp),
+                                tint = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                        IconButton(
+                            onClick = { sceneViewModel.moveSourceDown(selectedSourceId!!) },
+                            modifier = Modifier.size(28.dp)
+                        ) {
+                            Icon(
+                                painterResource(Res.drawable.ic_arrow_up),
+                                contentDescription = "Move forward",
+                                modifier = Modifier.size(16.dp),
+                                tint = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                        IconButton(
+                            onClick = { sceneViewModel.moveSourceUp(selectedSourceId!!) },
+                            modifier = Modifier.size(28.dp)
+                        ) {
+                            Icon(
+                                painterResource(Res.drawable.ic_arrow_down),
+                                contentDescription = "Move backward",
+                                modifier = Modifier.size(16.dp),
+                                tint = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
+        VerticalDivider(color = MaterialTheme.colorScheme.outlineVariant, thickness = 1.dp)
+
+        // Center panel: Toolbar + Canvas
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxHeight()
+                .background(MaterialTheme.colorScheme.surfaceContainerLow)
+                .padding(8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            if (currentScene != null) {
+                // Top toolbar with action buttons on the right
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // Add to Schedule
+                    TooltipArea(
+                        tooltip = {
+                            Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
+                                Text(stringResource(Res.string.add_to_schedule), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
+                            }
+                        },
+                        tooltipPlacement = TooltipPlacement.CursorPoint()
+                    ) {
+                        IconButton(
+                            onClick = { onAddToSchedule(currentScene.id, currentScene.name) },
+                            colors = IconButtonDefaults.iconButtonColors(
+                                containerColor = MaterialTheme.colorScheme.secondary,
+                                contentColor = MaterialTheme.colorScheme.onSecondary
+                            )
+                        ) {
+                            Icon(painter = painterResource(Res.drawable.ic_playlist_add), contentDescription = stringResource(Res.string.add_to_schedule), modifier = Modifier.size(20.dp))
+                        }
+                    }
+
+                    Spacer(Modifier.width(4.dp))
+
+                    // Go Live
+                    TooltipArea(
+                        tooltip = {
+                            Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
+                                Text(stringResource(Res.string.go_live), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
+                            }
+                        },
+                        tooltipPlacement = TooltipPlacement.CursorPoint()
+                    ) {
+                        IconButton(
+                            onClick = {
+                                presenterManager.setActiveScene(currentScene)
+                                presenterManager.setPresentingMode(Presenting.CANVAS)
+                                presenterManager.setShowPresenterWindow(true)
+                            },
+                            colors = IconButtonDefaults.iconButtonColors(
+                                containerColor = MaterialTheme.colorScheme.primary,
+                                contentColor = MaterialTheme.colorScheme.onPrimary
+                            )
+                        ) {
+                            Icon(painter = painterResource(Res.drawable.ic_cast), contentDescription = stringResource(Res.string.go_live), modifier = Modifier.size(20.dp))
+                        }
+                    }
+                }
+
+                // Canvas preview
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                        .padding(top = 4.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    SceneCanvas(
+                        modifier = Modifier.fillMaxSize(),
+                        scene = currentScene,
+                        selectedSourceId = selectedSourceId,
+                        onSourceSelected = { sceneViewModel.selectSource(it) },
+                        onTransformChanged = { sourceId, transform ->
+                            sceneViewModel.updateTransform(sourceId, transform)
+                        },
+                        isInteractive = true
+                    )
+                }
+            } else {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            "No scene selected",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Spacer(Modifier.height(8.dp))
+                        Button(onClick = { sceneViewModel.addScene() }) {
+                            Text("Create Scene")
+                        }
+                    }
+                }
+            }
+        }
+
+        VerticalDivider(color = MaterialTheme.colorScheme.outlineVariant, thickness = 1.dp)
+
+        // Right panel: Properties
+        Column(
+            modifier = Modifier
+                .width(220.dp)
+                .fillMaxHeight()
+                .background(MaterialTheme.colorScheme.surface)
+        ) {
+            if (selectedSource != null) {
+                SourcePropertiesPanel(
+                    source = selectedSource,
+                    modifier = Modifier.fillMaxSize(),
+                    onSourceUpdate = { updatedSource ->
+                        sceneViewModel.updateSource(updatedSource.id) { updatedSource }
+                    }
+                )
+            } else {
+                Box(
+                    modifier = Modifier.fillMaxSize().padding(16.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        "Select a source to edit properties",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        }
+    }
+}

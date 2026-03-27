@@ -27,6 +27,7 @@ import churchpresenter.composeapp.generated.resources.pictures
 import churchpresenter.composeapp.generated.resources.presentation
 import churchpresenter.composeapp.generated.resources.songs
 import churchpresenter.composeapp.generated.resources.tab_web
+import churchpresenter.composeapp.generated.resources.tab_canvas
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -125,5 +126,6 @@ private fun getStringName(tabs: Tabs): String {
         Tabs.LOWER_THIRD -> stringResource(Res.string.display_lower_third)
         Tabs.ANNOUNCEMENTS -> stringResource(Res.string.announcements)
         Tabs.WEB -> stringResource(Res.string.tab_web)
+        Tabs.CANVAS -> stringResource(Res.string.tab_canvas)
     }
 }

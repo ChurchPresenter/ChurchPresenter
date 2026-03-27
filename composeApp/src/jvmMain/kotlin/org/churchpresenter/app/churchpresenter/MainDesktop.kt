@@ -83,6 +83,7 @@ import org.churchpresenter.app.churchpresenter.tabs.ScheduleTabActions
 import org.churchpresenter.app.churchpresenter.tabs.SongsTab
 import org.churchpresenter.app.churchpresenter.tabs.WebTab
 import org.churchpresenter.app.churchpresenter.tabs.LowerThirdTab
+import org.churchpresenter.app.churchpresenter.tabs.CanvasTab
 import org.churchpresenter.app.churchpresenter.tabs.TabSection
 import org.churchpresenter.app.churchpresenter.tabs.Tabs
 import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
@@ -92,6 +93,7 @@ import org.churchpresenter.app.churchpresenter.viewmodel.BibleViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PicturesViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresentationViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
+import org.churchpresenter.app.churchpresenter.viewmodel.SceneViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.ScheduleViewModel
 import java.awt.image.BufferedImage
 import java.io.File
@@ -109,7 +111,8 @@ data class ScheduleActions(
     val addBibleVerse: (bookName: String, chapter: Int, verseNumber: Int, verseText: String, verseRange: String) -> Unit = { _, _, _, _, _ -> },
     val addPicture: (folderPath: String, folderName: String, imageCount: Int) -> Unit = { _, _, _ -> },
     val addPresentation: (filePath: String, fileName: String, slideCount: Int, fileType: String) -> Unit = { _, _, _, _ -> },
-    val addMedia: (mediaUrl: String, mediaTitle: String, mediaType: String) -> Unit = { _, _, _ -> }
+    val addMedia: (mediaUrl: String, mediaTitle: String, mediaType: String) -> Unit = { _, _, _ -> },
+    val addScene: (sceneId: String, sceneName: String) -> Unit = { _, _ -> }
 )
 
 @Composable
@@ -192,6 +195,8 @@ fun MainDesktop(
 
     val presentationViewModel = remember { PresentationViewModel(appSettings) }
     DisposableEffect(Unit) { onDispose { presentationViewModel.dispose() } }
+
+    val sceneViewModel = remember { SceneViewModel() }
 
     val currentOnPicturesLoaded by rememberUpdatedState(onPicturesLoaded)
     val currentOnBibleLoaded by rememberUpdatedState(onBibleLoaded)
@@ -528,6 +533,11 @@ fun MainDesktop(
                                     selectedWebsiteItem = item
                                     selectedTabIndex = Tabs.WEB.ordinal
                                 }
+
+                                is ScheduleItem.SceneItem -> {
+                                    sceneViewModel.selectScene(item.sceneId)
+                                    selectedTabIndex = Tabs.CANVAS.ordinal
+                                }
                             }
                         },
                         onEditLabel = { labelItem ->
@@ -548,7 +558,8 @@ fun MainDesktop(
                                     addBibleVerse = actions.addBibleVerse,
                                     addPicture = actions.addPicture,
                                     addPresentation = actions.addPresentation,
-                                    addMedia = actions.addMedia
+                                    addMedia = actions.addMedia,
+                                    addScene = actions.addScene
                                 )
                             )
                         },
@@ -755,6 +766,16 @@ fun MainDesktop(
                                 },
                                 onUpdateScheduleTitle = { url, title ->
                                     currentScheduleActions.updateWebsiteTitle(url, title)
+                                }
+                            )
+
+                            Tabs.CANVAS -> CanvasTab(
+                                modifier = Modifier.fillMaxSize(),
+                                appSettings = appSettings,
+                                presenterManager = presenterManager,
+                                sceneViewModel = sceneViewModel,
+                                onAddToSchedule = { sceneId, sceneName ->
+                                    currentScheduleActions.addScene(sceneId, sceneName)
                                 }
                             )
                         }

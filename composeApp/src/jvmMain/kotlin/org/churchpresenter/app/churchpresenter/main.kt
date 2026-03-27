@@ -88,6 +88,7 @@ import org.churchpresenter.app.churchpresenter.presenter.MediaPresenter
 import org.churchpresenter.app.churchpresenter.presenter.PicturePresenter
 import org.churchpresenter.app.churchpresenter.presenter.SlidePresenter
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.app.churchpresenter.presenter.ScenePresenter
 import org.churchpresenter.app.churchpresenter.presenter.SongPresenter
 import org.churchpresenter.app.churchpresenter.models.AnimationType
 import org.churchpresenter.app.churchpresenter.models.LyricSection
@@ -957,6 +958,7 @@ private fun remoteEventLabel(item: ScheduleItem): Pair<String, String> = when (i
     is ScheduleItem.AnnouncementItem -> item.text.take(60) to ""
     is ScheduleItem.LowerThirdItem -> item.presetLabel to ""
     is ScheduleItem.WebsiteItem -> item.title to item.url
+    is ScheduleItem.SceneItem -> item.sceneName to "Scene"
 }
 
 /**
@@ -1132,6 +1134,7 @@ private fun PresenterWindows(
     val lottieProgress by presenterManager.lottieProgress
     val mediaTransitionAlpha by presenterManager.mediaTransitionAlpha
     val websiteUrl by presenterManager.websiteUrl
+    val activeScene by presenterManager.activeScene
 
     val proj = appSettings.projectionSettings
 
@@ -1458,6 +1461,8 @@ private fun PresenterWindows(
                                 outputRole = Constants.OUTPUT_ROLE_KEY
                             )
 
+                        Presenting.CANVAS -> ScenePresenter(scene = activeScene)
+
                         Presenting.NONE -> { /* nothing */ }
                     }
                 }
@@ -1557,6 +1562,8 @@ private fun PresenterWindows(
                                 audioDeviceId = appSettings.projectionSettings.audioOutputDeviceId,
                                 outputRole = Constants.OUTPUT_ROLE_KEY
                             )
+
+                        Presenting.CANVAS -> ScenePresenter(scene = activeScene)
 
                         Presenting.NONE -> { /* nothing */ }
                     }
@@ -1685,6 +1692,8 @@ private fun PresenterWindows(
                                                 audioDeviceId = appSettings.projectionSettings.audioOutputDeviceId,
                                                 outputRole = Constants.OUTPUT_ROLE_KEY
                                             )
+
+                                        Presenting.CANVAS -> ScenePresenter(scene = activeScene)
 
                                         Presenting.NONE -> { /* nothing */ }
                                     }
@@ -1856,6 +1865,8 @@ private fun PresenterWindows(
                                     audioDeviceId = appSettings.projectionSettings.audioOutputDeviceId
                                 )
 
+                            Presenting.CANVAS -> ScenePresenter(scene = activeScene)
+
                             Presenting.NONE -> { /* nothing */
                             }
                         }
@@ -2026,6 +2037,8 @@ private fun PresenterWindows(
                                             outputRole = Constants.OUTPUT_ROLE_KEY
                                         )
 
+                                    Presenting.CANVAS -> ScenePresenter(scene = activeScene)
+
                                     Presenting.NONE -> { /* nothing */
                                     }
                                 }
@@ -2131,6 +2144,8 @@ private fun PresenterWindows(
                                 audioDeviceId = appSettings.projectionSettings.audioOutputDeviceId,
                                 outputRole = Constants.OUTPUT_ROLE_KEY
                             )
+
+                        Presenting.CANVAS -> ScenePresenter(scene = activeScene)
 
                         Presenting.NONE -> { /* nothing */ }
                     }

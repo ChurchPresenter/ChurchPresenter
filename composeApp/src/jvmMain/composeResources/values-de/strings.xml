@@ -678,6 +678,7 @@
     <string name="symbol_dropdown">▾</string>
     <string name="symbol_ok">✓</string>
     <string name="tab_web">Web</string>
+    <string name="tab_canvas">Leinwand</string>
     <string name="text_margins">Textränder</string>
     <string name="theme">Design</string>
     <string name="timer_expired">Zeit abgelaufen!</string>

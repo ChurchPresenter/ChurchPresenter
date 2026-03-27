@@ -3,12 +3,15 @@ package org.churchpresenter.app.churchpresenter.composables
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.drag
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -48,7 +51,44 @@ import churchpresenter.composeapp.generated.resources.dialog_choose_color
 import churchpresenter.composeapp.generated.resources.label_hex
 import churchpresenter.composeapp.generated.resources.ok
 import org.jetbrains.compose.resources.stringResource
+import androidx.compose.runtime.mutableStateListOf
 import kotlin.math.abs
+
+/** Stores recently used colors across all color picker instances, persisted to disk. */
+private object RecentColors {
+    private const val MAX = 12
+    private val file = java.io.File(System.getProperty("user.home"), ".churchpresenter/recent_colors.json")
+    val colors = mutableStateListOf<String>()
+
+    init { load() }
+
+    fun add(hex: String) {
+        val upper = hex.uppercase()
+        colors.remove(upper)
+        colors.add(0, upper)
+        while (colors.size > MAX) colors.removeLast()
+        save()
+    }
+
+    private fun load() {
+        try {
+            if (file.exists()) {
+                val json = kotlinx.serialization.json.Json { ignoreUnknownKeys = true }
+                val list = json.decodeFromString<List<String>>(file.readText())
+                colors.clear()
+                colors.addAll(list.take(MAX))
+            }
+        } catch (_: Exception) {}
+    }
+
+    private fun save() {
+        try {
+            file.parentFile?.mkdirs()
+            val json = kotlinx.serialization.json.Json { encodeDefaults = true }
+            file.writeText(json.encodeToString(colors.toList()))
+        } catch (_: Exception) {}
+    }
+}
 
 /**
  * A beautiful Compose-native color picker dialog.
@@ -171,6 +211,35 @@ fun ColorPickerDialog(
                     )
                 }
 
+                // ── Recent colors ─────────────────────────────────────────
+                if (RecentColors.colors.isNotEmpty()) {
+                    Text(
+                        "Recent",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    @OptIn(ExperimentalLayoutApi::class)
+                    FlowRow(
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                    ) {
+                        RecentColors.colors.forEach { recentHex ->
+                            val recentColor = cpTryParseHex(recentHex) ?: Color.White
+                            Box(
+                                modifier = Modifier
+                                    .size(24.dp)
+                                    .background(recentColor, RoundedCornerShape(4.dp))
+                                    .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.4f), RoundedCornerShape(4.dp))
+                                    .clickable {
+                                        val (h, s, v) = cpColorToHsv(recentColor)
+                                        hue = h; saturation = s; brightness = v
+                                        syncHex()
+                                    }
+                            )
+                        }
+                    }
+                }
+
                 // ── Buttons ─────────────────────────────────────────────────
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -181,7 +250,9 @@ fun ColorPickerDialog(
                     Spacer(Modifier.width(8.dp))
                     Button(
                         onClick = {
-                            onColorSelected(cpColorToHex(currentColor))
+                            val hex = cpColorToHex(currentColor)
+                            RecentColors.add(hex)
+                            onColorSelected(hex)
                             onDismiss()
                         },
                         enabled = !hexError && cpTryParseHex(hexText) != null,

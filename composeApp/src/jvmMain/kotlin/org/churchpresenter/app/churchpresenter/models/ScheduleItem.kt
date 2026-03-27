@@ -120,5 +120,13 @@ sealed class ScheduleItem {
         val title: String = url,
         override val displayText: String = "${title.take(60)}${if (title.length > 60) "…" else ""}"
     ) : ScheduleItem()
+
+    @Serializable
+    data class SceneItem(
+        override val id: String,
+        val sceneId: String,
+        val sceneName: String,
+        override val displayText: String = "Scene: $sceneName"
+    ) : ScheduleItem()
 }
 

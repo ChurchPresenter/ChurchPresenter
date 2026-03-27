@@ -1,0 +1,98 @@
+package org.churchpresenter.app.churchpresenter.models
+
+import kotlinx.serialization.Serializable
+import java.util.UUID
+
+@Serializable
+data class SourceTransform(
+    val x: Float = 0f,
+    val y: Float = 0f,
+    val width: Float = 1f,
+    val height: Float = 1f,
+    val rotation: Float = 0f,
+    val opacity: Float = 1f
+)
+
+@Serializable
+sealed class SceneSource {
+    abstract val id: String
+    abstract val name: String
+    abstract val transform: SourceTransform
+    abstract val visible: Boolean
+    abstract val locked: Boolean
+
+    @Serializable
+    data class ImageSource(
+        override val id: String,
+        override val name: String,
+        override val transform: SourceTransform = SourceTransform(),
+        override val visible: Boolean = true,
+        override val locked: Boolean = false,
+        val filePath: String,
+        val contentScale: String = "FIT"
+    ) : SceneSource()
+
+    @Serializable
+    data class TextSource(
+        override val id: String,
+        override val name: String,
+        override val transform: SourceTransform = SourceTransform(),
+        override val visible: Boolean = true,
+        override val locked: Boolean = false,
+        val text: String = "Text",
+        val fontFamily: String = "Arial",
+        val fontSize: Int = 48,
+        val fontColor: String = "#FFFFFF",
+        val backgroundColor: String = "#00000000",
+        val bold: Boolean = false,
+        val italic: Boolean = false,
+        val horizontalAlignment: String = "center"
+    ) : SceneSource()
+
+    @Serializable
+    data class ColorSource(
+        override val id: String,
+        override val name: String,
+        override val transform: SourceTransform = SourceTransform(),
+        override val visible: Boolean = true,
+        override val locked: Boolean = false,
+        val color: String = "#000000",
+        val sourceOpacity: Float = 1f,
+        val isGradient: Boolean = false,
+        val gradientColor2: String = "#FFFFFF",
+        val gradientAngle: Float = 0f,
+        val gradientPosition: Float = 0.5f
+    ) : SceneSource()
+
+    @Serializable
+    data class VideoSource(
+        override val id: String,
+        override val name: String,
+        override val transform: SourceTransform = SourceTransform(),
+        override val visible: Boolean = true,
+        override val locked: Boolean = false,
+        val filePath: String,
+        val loop: Boolean = false,
+        val volume: Float = 1f
+    ) : SceneSource()
+
+    @Serializable
+    data class BrowserSource(
+        override val id: String,
+        override val name: String,
+        override val transform: SourceTransform = SourceTransform(),
+        override val visible: Boolean = true,
+        override val locked: Boolean = false,
+        val url: String,
+        val refreshInterval: Int = 0
+    ) : SceneSource()
+}
+
+@Serializable
+data class Scene(
+    val id: String = UUID.randomUUID().toString(),
+    val name: String = "Scene",
+    val sources: List<SceneSource> = emptyList(),
+    val canvasWidth: Int = 1920,
+    val canvasHeight: Int = 1080
+)

@@ -678,6 +678,7 @@
     <string name="symbol_dropdown">▾</string>
     <string name="symbol_ok">✓</string>
     <string name="tab_web">Вэб</string>
+    <string name="tab_canvas">Палатно</string>
     <string name="text_margins">Водступы тэксту</string>
     <string name="theme">Тэма</string>
     <string name="timer_expired">Час выйшаў!</string>

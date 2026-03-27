@@ -113,7 +113,8 @@ data class ScheduleTabActions(
     val addLowerThird: (presetId: String, presetLabel: String, pauseAtFrame: Boolean, pauseDurationMs: Long) -> Unit = { _, _, _, _ -> },
     val addAnnouncement: (text: String, textColor: String, backgroundColor: String, fontSize: Int, fontType: String, bold: Boolean, italic: Boolean, underline: Boolean, shadow: Boolean, horizontalAlignment: String, position: String, animationType: String, animationDuration: Int, isTimer: Boolean, timerHours: Int, timerMinutes: Int, timerSeconds: Int, timerTextColor: String, timerExpiredText: String) -> Unit = { _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _ -> },
     val addWebsite: (url: String, title: String) -> Unit = { _, _ -> },
-    val updateWebsiteTitle: (url: String, title: String) -> Unit = { _, _ -> }
+    val updateWebsiteTitle: (url: String, title: String) -> Unit = { _, _ -> },
+    val addScene: (sceneId: String, sceneName: String) -> Unit = { _, _ -> }
 )
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -179,7 +180,8 @@ fun ScheduleTab(
                     viewModel.addAnnouncement(text, textColor, backgroundColor, fontSize, fontType, bold, italic, underline, shadow, horizontalAlignment, position, animationType, animationDuration, isTimer, timerHours, timerMinutes, timerSeconds, timerTextColor, timerExpiredText)
                 },
                 addWebsite       = { url, title -> viewModel.addWebsite(url, title) },
-                updateWebsiteTitle = { url, title -> viewModel.updateWebsiteTitle(url, title) }
+                updateWebsiteTitle = { url, title -> viewModel.updateWebsiteTitle(url, title) },
+                addScene         = { sceneId, sceneName -> viewModel.addScene(sceneId, sceneName) }
             )
         )
     }
@@ -521,6 +523,7 @@ private fun ScheduleItemRow(
                 is ScheduleItem.LowerThirdItem -> "▼"
                 is ScheduleItem.AnnouncementItem -> "📢"
                 is ScheduleItem.WebsiteItem -> "🌐"
+                is ScheduleItem.SceneItem -> "🎬"
             },
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.primary,
@@ -614,6 +617,7 @@ private fun ScheduleItemRow(
                     color = if (isSelected) MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                             else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                 )
+                is ScheduleItem.SceneItem -> { /* no secondary text */ }
             }
         }
 

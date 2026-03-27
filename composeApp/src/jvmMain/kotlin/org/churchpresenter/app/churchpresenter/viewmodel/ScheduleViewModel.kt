@@ -247,6 +247,11 @@ class ScheduleViewModel(
         notifyChanged()
     }
 
+    fun addScene(sceneId: String, sceneName: String) {
+        _scheduleItems.add(ScheduleItem.SceneItem(id = UUID.randomUUID().toString(), sceneId = sceneId, sceneName = sceneName))
+        notifyChanged()
+    }
+
     fun updateWebsiteTitle(url: String, title: String) {
         if (title.isBlank()) return
         val index = _scheduleItems.indexOfFirst { it is ScheduleItem.WebsiteItem && it.url == url }
@@ -344,7 +349,8 @@ class ScheduleViewModel(
         onPresentMedia: ((ScheduleItem.MediaItem) -> Unit)? = null,
         onPresentAnnouncement: ((ScheduleItem.AnnouncementItem) -> Unit)? = null,
         onPresentLowerThird: ((ScheduleItem.LowerThirdItem) -> Unit)? = null,
-        onPresentWebsite: ((ScheduleItem.WebsiteItem) -> Unit)? = null
+        onPresentWebsite: ((ScheduleItem.WebsiteItem) -> Unit)? = null,
+        onPresentScene: ((ScheduleItem.SceneItem) -> Unit)? = null
     ) {
         when (item) {
             is ScheduleItem.SongItem -> onPresentSong?.invoke(item) ?: onPresenting(Presenting.LYRICS)
@@ -356,6 +362,7 @@ class ScheduleViewModel(
             is ScheduleItem.LowerThirdItem -> onPresentLowerThird?.invoke(item)
             is ScheduleItem.AnnouncementItem -> onPresentAnnouncement?.invoke(item) ?: onPresenting(Presenting.ANNOUNCEMENTS)
             is ScheduleItem.WebsiteItem -> onPresentWebsite?.invoke(item) ?: onPresenting(Presenting.WEBSITE)
+            is ScheduleItem.SceneItem -> onPresentScene?.invoke(item) ?: onPresenting(Presenting.CANVAS)
         }
     }
 }

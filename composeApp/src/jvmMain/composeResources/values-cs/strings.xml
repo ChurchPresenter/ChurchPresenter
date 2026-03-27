@@ -764,6 +764,7 @@
     <string name="symbol_dropdown">▾</string>
     <string name="symbol_ok">✓</string>
     <string name="tab_web">Web</string>
+    <string name="tab_canvas">Plátno</string>
     <string name="text_margins">Okraje textu</string>
     <string name="theme">Motiv</string>
     <string name="timer_expired">Čas vypršel!</string>

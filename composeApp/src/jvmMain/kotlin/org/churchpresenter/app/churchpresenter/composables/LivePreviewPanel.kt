@@ -63,6 +63,7 @@ import org.churchpresenter.app.churchpresenter.presenter.LowerThirdPresenter
 import org.churchpresenter.app.churchpresenter.presenter.MediaPresenter
 import org.churchpresenter.app.churchpresenter.presenter.PicturePresenter
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.app.churchpresenter.presenter.ScenePresenter
 import org.churchpresenter.app.churchpresenter.presenter.SlidePresenter
 import org.churchpresenter.app.churchpresenter.presenter.SongPresenter
 import org.churchpresenter.app.churchpresenter.utils.Constants
@@ -146,6 +147,7 @@ private fun SingleDisplayPreview(
     val mediaTransitionAlpha by presenterManager.mediaTransitionAlpha
     val websiteUrl by presenterManager.websiteUrl
     val webSnapshot by presenterManager.webSnapshot
+    val activeScene by presenterManager.activeScene
     val mediaViewModel = LocalMediaViewModel.current
 
     val isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD
@@ -159,6 +161,7 @@ private fun SingleDisplayPreview(
         Presenting.LOWER_THIRD -> screenAssignment.showStreaming
         Presenting.ANNOUNCEMENTS -> screenAssignment.showAnnouncements
         Presenting.WEBSITE -> true
+        Presenting.CANVAS -> true
         Presenting.NONE -> false
     }
 
@@ -220,6 +223,8 @@ private fun SingleDisplayPreview(
                                     outputRole = primaryRole,
                                     transitionAlpha = announcementTransitionAlpha
                                 )
+                            Presenting.CANVAS ->
+                                ScenePresenter(scene = activeScene)
                             else -> {}
                         }
                     }

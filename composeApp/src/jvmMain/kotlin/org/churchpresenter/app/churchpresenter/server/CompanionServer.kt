@@ -1069,6 +1069,9 @@ class CompanionServer {
                     id = item.id, type = "website", displayText = item.displayText,
                     url = item.url, title = item.title
                 )
+                is ScheduleItem.SceneItem -> ScheduleItemDto(
+                    id = item.id, type = "scene", displayText = item.displayText
+                )
             }
         }
         _schedule.value = dtos
