@@ -79,6 +79,13 @@ elseif(APPLE AND NOT DECKLINK_FRAMEWORK)
         list(APPEND SOURCES "${DECKLINK_SDK_DIR}/DeckLinkAPIDispatch.cpp")
         message(STATUS "Using DeckLinkAPIDispatch.cpp for runtime linking (no framework)")
     endif()
+else()
+    # Linux: compile the dispatch source which provides CreateDeckLinkIteratorInstance
+    # via runtime dynamic loading (dlopen).
+    if(EXISTS "${DECKLINK_SDK_DIR}/DeckLinkAPIDispatch.cpp")
+        list(APPEND SOURCES "${DECKLINK_SDK_DIR}/DeckLinkAPIDispatch.cpp")
+        message(STATUS "Using DeckLinkAPIDispatch.cpp for runtime linking (Linux)")
+    endif()
 endif()
 
 add_library(decklink_jni SHARED ${SOURCES})
@@ -97,6 +104,9 @@ elseif(APPLE)
     if(DECKLINK_FRAMEWORK)
         target_link_libraries(decklink_jni PRIVATE ${DECKLINK_FRAMEWORK})
     endif()
+else()
+    # Linux: needs libdl for DeckLinkAPIDispatch.cpp (dlopen/dlsym)
+    target_link_libraries(decklink_jni PRIVATE dl)
 endif()
 
 # ---------- Output ----------
