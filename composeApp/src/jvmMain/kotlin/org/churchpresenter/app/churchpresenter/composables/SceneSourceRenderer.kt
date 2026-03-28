@@ -51,6 +51,7 @@ import kotlinx.coroutines.withContext
 import java.awt.Rectangle
 import java.awt.Robot
 import java.awt.image.BufferedImage
+import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import javax.imageio.ImageIO
 import java.time.LocalTime
@@ -557,7 +558,7 @@ private fun CameraSourceContent(
             } ?: break
 
             val img = withContext(Dispatchers.IO) {
-                ImageIO.read(java.io.ByteArrayInputStream(bmpData))
+                ImageIO.read(ByteArrayInputStream(bmpData))
             }
             if (img != null) {
                 frame = img.toComposeImageBitmap()
