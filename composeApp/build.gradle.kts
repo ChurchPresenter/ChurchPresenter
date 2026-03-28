@@ -119,6 +119,8 @@ kotlin {
             implementation(libs.ktor.server.status.pages)
             // VLCJ for media playback (requires VLC installed on system)
             implementation("uk.co.caprica:vlcj:4.8.3")
+            implementation("net.java.dev.jna:jna:5.16.0")
+            implementation("net.java.dev.jna:jna-platform:5.16.0")
             implementation("com.google.zxing:core:3.5.3")
             implementation("com.google.zxing:javase:3.5.3")
             // JCEF — embedded Chromium browser for web presenter

@@ -173,7 +173,8 @@ sealed class SceneSource {
         val captureWidth: Int = 1920,
         val captureHeight: Int = 1080,
         val captureInterval: Int = 100,
-        val windowTitle: String = ""
+        val windowTitle: String = "",
+        val windowId: String = ""
     ) : SceneSource()
 }
 

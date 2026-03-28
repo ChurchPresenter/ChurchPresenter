@@ -31,6 +31,7 @@ import churchpresenter.composeapp.generated.resources.canvas_placeholder_screen_
 import org.churchpresenter.app.churchpresenter.models.SceneSource
 import org.churchpresenter.app.churchpresenter.models.PathPoint
 import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
+import org.churchpresenter.app.churchpresenter.utils.X11WindowCapture
 import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDefault
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -41,8 +42,10 @@ import com.google.zxing.BarcodeFormat
 import com.google.zxing.EncodeHintType
 import com.google.zxing.qrcode.QRCodeWriter
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
+import kotlinx.coroutines.withContext
 import java.awt.Rectangle
 import java.awt.Robot
 import java.awt.image.BufferedImage
@@ -245,33 +248,43 @@ private fun ShapeSourceContent(source: SceneSource.ShapeSource, modifier: Modifi
                 drawOval(color = strokeColor, size = size, style = stroke)
             }
             "line" -> {
+                val p0 = source.points.getOrNull(0)
+                val p1 = source.points.getOrNull(1)
+                val startPt = if (p0 != null) Offset(p0.x * w, p0.y * h) else Offset(0f, 0f)
+                val endPt = if (p1 != null) Offset(p1.x * w, p1.y * h) else Offset(w, h)
                 drawLine(
                     color = strokeColor,
-                    start = Offset(0f, 0f),
-                    end = Offset(w, h),
+                    start = startPt,
+                    end = endPt,
                     strokeWidth = strokeWidth,
                     cap = StrokeCap.Round
                 )
             }
             "arrow" -> {
+                val p0 = source.points.getOrNull(0)
+                val p1 = source.points.getOrNull(1)
+                val startPt = if (p0 != null) Offset(p0.x * w, p0.y * h) else Offset(0f, 0f)
+                val endPt = if (p1 != null) Offset(p1.x * w, p1.y * h) else Offset(w, h)
                 drawLine(
                     color = strokeColor,
-                    start = Offset(0f, 0f),
-                    end = Offset(w, h),
+                    start = startPt,
+                    end = endPt,
                     strokeWidth = strokeWidth,
                     cap = StrokeCap.Round
                 )
                 // Arrowhead
                 val arrowSize = (strokeWidth * 4f).coerceAtLeast(12f)
-                val angle = kotlin.math.atan2(h, w)
-                val ax1 = w - arrowSize * kotlin.math.cos(angle - 0.4f)
-                val ay1 = h - arrowSize * kotlin.math.sin(angle - 0.4f)
-                val ax2 = w - arrowSize * kotlin.math.cos(angle + 0.4f)
-                val ay2 = h - arrowSize * kotlin.math.sin(angle + 0.4f)
+                val dx = endPt.x - startPt.x
+                val dy = endPt.y - startPt.y
+                val angle = kotlin.math.atan2(dy, dx)
+                val ax1 = endPt.x - arrowSize * kotlin.math.cos(angle - 0.4f)
+                val ay1 = endPt.y - arrowSize * kotlin.math.sin(angle - 0.4f)
+                val ax2 = endPt.x - arrowSize * kotlin.math.cos(angle + 0.4f)
+                val ay2 = endPt.y - arrowSize * kotlin.math.sin(angle + 0.4f)
                 val arrowPath = Path().apply {
-                    moveTo(w, h)
+                    moveTo(endPt.x, endPt.y)
                     lineTo(ax1, ay1)
-                    moveTo(w, h)
+                    moveTo(endPt.x, endPt.y)
                     lineTo(ax2, ay2)
                 }
                 drawPath(
@@ -459,17 +472,28 @@ private fun CameraSourceContent(
 private fun ScreenCaptureSourceContent(source: SceneSource.ScreenCaptureSource, modifier: Modifier) {
     var frame by remember { mutableStateOf<ImageBitmap?>(null) }
 
-    LaunchedEffect(source.captureMode, source.captureX, source.captureY, source.captureWidth, source.captureHeight, source.captureInterval, source.windowTitle) {
+    LaunchedEffect(source.captureMode, source.captureX, source.captureY, source.captureWidth, source.captureHeight, source.captureInterval, source.windowTitle, source.windowId) {
         try {
             val robot = Robot()
             while (isActive) {
-                val rect = if (source.captureMode == "window" && source.windowTitle.isNotBlank()) {
-                    findWindowBounds(source.windowTitle)
+                val capture: BufferedImage? = if (source.captureMode == "window" && source.windowId.isNotBlank()) {
+                    withContext(Dispatchers.IO) {
+                        val wid = source.windowId.removePrefix("0x").toLongOrNull(16) ?: 0L
+                        // Try X11 Composite (captures occluded windows), fall back to Robot + bounds
+                        X11WindowCapture.captureWindow(wid)
+                            ?: run {
+                                val rect = findWindowBounds(source.windowTitle)
+                                if (rect != null && rect.width > 0 && rect.height > 0) robot.createScreenCapture(rect) else null
+                            }
+                    }
+                } else if (source.captureMode == "window" && source.windowTitle.isNotBlank()) {
+                    val rect = withContext(Dispatchers.IO) { findWindowBounds(source.windowTitle) }
+                    if (rect != null && rect.width > 0 && rect.height > 0) robot.createScreenCapture(rect) else null
                 } else {
-                    Rectangle(source.captureX, source.captureY, source.captureWidth, source.captureHeight)
+                    val rect = Rectangle(source.captureX, source.captureY, source.captureWidth, source.captureHeight)
+                    if (rect.width > 0 && rect.height > 0) robot.createScreenCapture(rect) else null
                 }
-                if (rect != null && rect.width > 0 && rect.height > 0) {
-                    val capture = robot.createScreenCapture(rect)
+                if (capture != null) {
                     val skiaImage = SkiaImage.makeFromEncoded(
                         ByteArrayOutputStream().also {
                             ImageIO.write(capture, "PNG", it)
@@ -515,35 +539,43 @@ private fun findWindowBounds(windowTitle: String): Rectangle? {
 }
 
 private fun findLinuxWindowBounds(title: String): Rectangle? {
-    return try {
-        // Try xdotool first
-        val idProcess = ProcessBuilder("xdotool", "search", "--name", title)
+    // Primary: xprop + xwininfo (available on all X11 systems)
+    try {
+        // Find window ID by title using xprop on root's client list
+        val listProcess = ProcessBuilder("xprop", "-root", "_NET_CLIENT_LIST_STACKING")
             .redirectErrorStream(true).start()
-        val windowId = idProcess.inputStream.bufferedReader().readText().lines()
-            .firstOrNull { it.isNotBlank() } ?: return null
-        idProcess.waitFor()
+        val listOutput = listProcess.inputStream.bufferedReader().readText()
+        listProcess.waitFor()
+        val windowIds = Regex("0x[0-9a-fA-F]+").findAll(listOutput).map { it.value }.toList()
 
-        val geomProcess = ProcessBuilder("xdotool", "getwindowgeometry", "--shell", windowId)
-            .redirectErrorStream(true).start()
-        val geomOutput = geomProcess.inputStream.bufferedReader().readText()
-        geomProcess.waitFor()
+        for (wid in windowIds) {
+            val nameProcess = ProcessBuilder("xprop", "-id", wid, "_NET_WM_NAME")
+                .redirectErrorStream(true).start()
+            val nameOutput = nameProcess.inputStream.bufferedReader().readText()
+            nameProcess.waitFor()
+            val name = Regex("\"(.+)\"").find(nameOutput)?.groupValues?.get(1) ?: continue
+            if (name != title) continue
 
-        val sizeProcess = ProcessBuilder("xdotool", "getwindowfocus", "getwindowgeometry", "--shell", windowId)
-            .redirectErrorStream(true).start()
-        val sizeOutput = sizeProcess.inputStream.bufferedReader().readText()
-        sizeProcess.waitFor()
+            // Found the window, get bounds with xwininfo
+            val infoProcess = ProcessBuilder("xwininfo", "-id", wid)
+                .redirectErrorStream(true).start()
+            val infoOutput = infoProcess.inputStream.bufferedReader().readText()
+            infoProcess.waitFor()
 
-        var x = 0; var y = 0; var w = 0; var h = 0
-        for (line in (geomOutput + "\n" + sizeOutput).lines()) {
-            when {
-                line.startsWith("X=") -> x = line.substringAfter("=").toIntOrNull() ?: 0
-                line.startsWith("Y=") -> y = line.substringAfter("=").toIntOrNull() ?: 0
-                line.startsWith("WIDTH=") -> w = line.substringAfter("=").toIntOrNull() ?: 0
-                line.startsWith("HEIGHT=") -> h = line.substringAfter("=").toIntOrNull() ?: 0
+            var x = 0; var y = 0; var w = 0; var h = 0
+            for (line in infoOutput.lines()) {
+                val trimmed = line.trim()
+                when {
+                    trimmed.startsWith("Absolute upper-left X:") -> x = trimmed.substringAfter(":").trim().toIntOrNull() ?: 0
+                    trimmed.startsWith("Absolute upper-left Y:") -> y = trimmed.substringAfter(":").trim().toIntOrNull() ?: 0
+                    trimmed.startsWith("Width:") -> w = trimmed.substringAfter(":").trim().toIntOrNull() ?: 0
+                    trimmed.startsWith("Height:") -> h = trimmed.substringAfter(":").trim().toIntOrNull() ?: 0
+                }
             }
+            if (w > 0 && h > 0) return Rectangle(x, y, w, h)
         }
-        if (w > 0 && h > 0) Rectangle(x, y, w, h) else null
-    } catch (_: Exception) { null }
+    } catch (_: Exception) {}
+    return null
 }
 
 private fun findWindowsWindowBounds(title: String): Rectangle? {
@@ -602,3 +634,4 @@ private fun findMacWindowBounds(title: String): Rectangle? {
         } else null
     } catch (_: Exception) { null }
 }
+

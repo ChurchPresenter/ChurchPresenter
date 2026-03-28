@@ -787,7 +787,11 @@ private fun ScreenCaptureProperties(source: SceneSource.ScreenCaptureSource, onU
                 label = stringResource(Res.string.canvas_capture_window),
                 items = windowTitles,
                 selected = if (source.windowTitle in windowTitles) source.windowTitle else windowTitles.first(),
-                onSelectedChange = { onUpdate(source.copy(windowTitle = it)) },
+                onSelectedChange = { selected ->
+                    val win = windows.find { it.title == selected }
+                    val idStr = if (win != null && win.id != 0L) "0x%x".format(win.id) else ""
+                    onUpdate(source.copy(windowTitle = selected, windowId = idStr))
+                },
                 modifier = Modifier.fillMaxWidth()
             )
         }
@@ -823,7 +827,31 @@ private fun listOpenWindows(): List<WindowInfo> {
 }
 
 private fun listLinuxWindows(): List<WindowInfo> {
-    // Try wmctrl first (most reliable)
+    // Primary: xprop (available on all X11 systems)
+    try {
+        val listProcess = ProcessBuilder("xprop", "-root", "_NET_CLIENT_LIST_STACKING")
+            .redirectErrorStream(true).start()
+        val listOutput = listProcess.inputStream.bufferedReader().readText()
+        listProcess.waitFor()
+        val windowIds = Regex("0x[0-9a-fA-F]+").findAll(listOutput).map { it.value }.toList()
+        if (windowIds.isNotEmpty()) {
+            val windows = windowIds.mapNotNull { wid ->
+                try {
+                    val nameProcess = ProcessBuilder("xprop", "-id", wid, "_NET_WM_NAME")
+                        .redirectErrorStream(true).start()
+                    val nameOutput = nameProcess.inputStream.bufferedReader().readText()
+                    nameProcess.waitFor()
+                    val name = Regex("\"(.+)\"").find(nameOutput)?.groupValues?.get(1)
+                    if (!name.isNullOrBlank()) {
+                        WindowInfo(name, wid.removePrefix("0x").toLongOrNull(16) ?: 0L)
+                    } else null
+                } catch (_: Exception) { null }
+            }.filter { it.title.isNotBlank() }
+            if (windows.isNotEmpty()) return windows
+        }
+    } catch (_: Exception) {}
+
+    // Fallback: wmctrl
     try {
         val process = ProcessBuilder("wmctrl", "-l")
             .redirectErrorStream(true).start()
@@ -844,36 +872,7 @@ private fun listLinuxWindows(): List<WindowInfo> {
         }
     } catch (_: Exception) {}
 
-    // Fallback: xdotool search for visible windows, get each name
-    try {
-        val idProcess = ProcessBuilder("xdotool", "search", "--onlyvisible", "--name", "")
-            .redirectErrorStream(true).start()
-        val ids = idProcess.inputStream.bufferedReader().readText()
-        idProcess.waitFor()
-        val windows = ids.lines().filter { it.isNotBlank() }.mapNotNull { id ->
-            try {
-                val nameProcess = ProcessBuilder("xdotool", "getwindowname", id)
-                    .redirectErrorStream(true).start()
-                val name = nameProcess.inputStream.bufferedReader().readText().trim()
-                nameProcess.waitFor()
-                if (name.isNotBlank()) WindowInfo(name, id.toLongOrNull() ?: 0L) else null
-            } catch (_: Exception) { null }
-        }.distinctBy { it.title }
-        if (windows.isNotEmpty()) return windows
-    } catch (_: Exception) {}
-
-    // Last fallback: xprop on root window
-    try {
-        val process = ProcessBuilder("bash", "-c",
-            "xprop -root _NET_CLIENT_LIST_STACKING | grep -oP '0x[0-9a-fA-F]+' | while read wid; do xdotool getwindowname \"\$wid\" 2>/dev/null; done")
-            .redirectErrorStream(true).start()
-        val output = process.inputStream.bufferedReader().readText()
-        process.waitFor()
-        return output.lines()
-            .filter { it.isNotBlank() }
-            .distinct()
-            .map { WindowInfo(it, 0L) }
-    } catch (_: Exception) { return emptyList() }
+    return emptyList()
 }
 
 private fun listWindowsWindows(): List<WindowInfo> {

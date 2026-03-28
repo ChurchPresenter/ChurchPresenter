@@ -131,11 +131,17 @@ fun SceneCanvas(
                                         id = UUID.randomUUID().toString(),
                                         name = activeTool.replaceFirstChar { it.uppercase() },
                                         transform = when (activeTool) {
-                                            "line", "arrow" -> SourceTransform(
-                                                x = drawStartNorm.x, y = drawStartNorm.y,
-                                                width = drawCurrentNorm.x - drawStartNorm.x,
-                                                height = drawCurrentNorm.y - drawStartNorm.y
-                                            )
+                                            "line", "arrow" -> {
+                                                val minX = minOf(drawStartNorm.x, drawCurrentNorm.x)
+                                                val minY = minOf(drawStartNorm.y, drawCurrentNorm.y)
+                                                val maxX = maxOf(drawStartNorm.x, drawCurrentNorm.x)
+                                                val maxY = maxOf(drawStartNorm.y, drawCurrentNorm.y)
+                                                SourceTransform(
+                                                    x = minX, y = minY,
+                                                    width = (maxX - minX).coerceAtLeast(0.01f),
+                                                    height = (maxY - minY).coerceAtLeast(0.01f)
+                                                )
+                                            }
                                             "freehand" -> {
                                                 val minX = freehandPoints.minOf { it.x }
                                                 val minY = freehandPoints.minOf { it.y }
@@ -153,7 +159,17 @@ fun SceneCanvas(
                                         strokeColor = drawingStrokeColor,
                                         fillColor = drawingFillColor,
                                         strokeWidth = drawingStrokeWidth,
-                                        points = if (activeTool == "freehand") {
+                                        points = if (activeTool == "line" || activeTool == "arrow") {
+                                            // Store start/end as normalized points within bounding box
+                                            val minX = minOf(drawStartNorm.x, drawCurrentNorm.x)
+                                            val minY = minOf(drawStartNorm.y, drawCurrentNorm.y)
+                                            val rangeX = (maxOf(drawStartNorm.x, drawCurrentNorm.x) - minX).coerceAtLeast(0.01f)
+                                            val rangeY = (maxOf(drawStartNorm.y, drawCurrentNorm.y) - minY).coerceAtLeast(0.01f)
+                                            listOf(
+                                                PathPoint((drawStartNorm.x - minX) / rangeX, (drawStartNorm.y - minY) / rangeY),
+                                                PathPoint((drawCurrentNorm.x - minX) / rangeX, (drawCurrentNorm.y - minY) / rangeY)
+                                            )
+                                        } else if (activeTool == "freehand") {
                                             // Normalize points relative to bounding box
                                             val minX = freehandPoints.minOf { it.x }
                                             val minY = freehandPoints.minOf { it.y }
