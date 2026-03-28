@@ -111,6 +111,7 @@ import org.churchpresenter.app.churchpresenter.models.SceneSource
 import org.churchpresenter.app.churchpresenter.models.SourceTransform
 import org.churchpresenter.app.churchpresenter.utils.Utils
 import org.jetbrains.compose.resources.painterResource
+import java.io.File
 import javax.swing.filechooser.FileNameExtensionFilter
 import kotlin.io.path.Path
 import kotlin.io.path.absolutePathString
@@ -695,12 +696,12 @@ private fun listCameraDevices(): List<CameraDevice> {
 
 private fun listLinuxCameras(): List<CameraDevice> {
     return try {
-        val videoDir = java.io.File("/dev")
+        val videoDir = File("/dev")
         videoDir.listFiles { f -> f.name.startsWith("video") }
             ?.sorted()
             ?.map { file ->
                 val name = try {
-                    val nameFile = java.io.File("/sys/class/video4linux/${file.name}/name")
+                    val nameFile = File("/sys/class/video4linux/${file.name}/name")
                     if (nameFile.exists()) nameFile.readText().trim() else file.name
                 } catch (_: Exception) { file.name }
                 CameraDevice(

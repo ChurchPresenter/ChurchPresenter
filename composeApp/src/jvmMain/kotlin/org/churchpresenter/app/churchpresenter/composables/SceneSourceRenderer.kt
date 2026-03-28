@@ -24,6 +24,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.canvas_image_not_found
+import churchpresenter.composeapp.generated.resources.canvas_placeholder_qr
+import churchpresenter.composeapp.generated.resources.canvas_placeholder_camera
+import churchpresenter.composeapp.generated.resources.canvas_placeholder_camera_default
+import churchpresenter.composeapp.generated.resources.canvas_placeholder_screen_capture
 import org.churchpresenter.app.churchpresenter.models.SceneSource
 import org.churchpresenter.app.churchpresenter.models.PathPoint
 import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
@@ -42,12 +46,14 @@ import kotlinx.coroutines.isActive
 import java.awt.Rectangle
 import java.awt.Robot
 import java.awt.image.BufferedImage
+import java.io.ByteArrayOutputStream
+import javax.imageio.ImageIO
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import org.jetbrains.compose.resources.stringResource
 import kotlin.math.cos
 import kotlin.math.sin
-import org.jetbrains.skia.Image
+import org.jetbrains.skia.Image as SkiaImage
 import java.io.File
 import androidx.compose.foundation.Canvas
 import androidx.compose.ui.graphics.Path
@@ -81,7 +87,7 @@ private fun ImageSourceContent(source: SceneSource.ImageSource, modifier: Modifi
     val bitmap = remember(source.filePath) {
         try {
             val file = File(source.filePath)
-            if (file.exists()) Image.makeFromEncoded(file.readBytes()).toComposeImageBitmap()
+            if (file.exists()) SkiaImage.makeFromEncoded(file.readBytes()).toComposeImageBitmap()
             else null
         } catch (_: Exception) { null }
     }
@@ -403,9 +409,9 @@ private fun QRCodeSourceContent(source: SceneSource.QRCodeSource, modifier: Modi
                     img.setRGB(x, y, if (matrix.get(x, y)) fgArgb else bgArgb)
                 }
             }
-            org.jetbrains.skia.Image.makeFromEncoded(
-                java.io.ByteArrayOutputStream().also {
-                    javax.imageio.ImageIO.write(img, "PNG", it)
+            SkiaImage.makeFromEncoded(
+                ByteArrayOutputStream().also {
+                    ImageIO.write(img, "PNG", it)
                 }.toByteArray()
             ).toComposeImageBitmap()
         } catch (_: Exception) {
@@ -425,7 +431,7 @@ private fun QRCodeSourceContent(source: SceneSource.QRCodeSource, modifier: Modi
                 contentScale = ContentScale.Fit
             )
         } else {
-            Text("QR", color = Color.White, fontSize = 14.sp)
+            Text(stringResource(Res.string.canvas_placeholder_qr), color = Color.White, fontSize = 14.sp)
         }
     }
 }
@@ -441,7 +447,8 @@ private fun CameraSourceContent(
         contentAlignment = Alignment.Center
     ) {
         Text(
-            text = if (source.deviceName.isNotEmpty()) "Camera: ${source.deviceName}" else "Camera",
+            text = if (source.deviceName.isNotEmpty()) stringResource(Res.string.canvas_placeholder_camera, source.deviceName)
+                   else stringResource(Res.string.canvas_placeholder_camera_default),
             color = Color.White,
             fontSize = 14.sp
         )
@@ -463,9 +470,9 @@ private fun ScreenCaptureSourceContent(source: SceneSource.ScreenCaptureSource, 
                 }
                 if (rect != null && rect.width > 0 && rect.height > 0) {
                     val capture = robot.createScreenCapture(rect)
-                    val skiaImage = org.jetbrains.skia.Image.makeFromEncoded(
-                        java.io.ByteArrayOutputStream().also {
-                            javax.imageio.ImageIO.write(capture, "PNG", it)
+                    val skiaImage = SkiaImage.makeFromEncoded(
+                        ByteArrayOutputStream().also {
+                            ImageIO.write(capture, "PNG", it)
                         }.toByteArray()
                     )
                     frame = skiaImage.toComposeImageBitmap()
@@ -490,7 +497,7 @@ private fun ScreenCaptureSourceContent(source: SceneSource.ScreenCaptureSource, 
                 contentScale = ContentScale.Fit
             )
         } else {
-            Text("Screen Capture", color = Color.White, fontSize = 14.sp)
+            Text(stringResource(Res.string.canvas_placeholder_screen_capture), color = Color.White, fontSize = 14.sp)
         }
     }
 }
