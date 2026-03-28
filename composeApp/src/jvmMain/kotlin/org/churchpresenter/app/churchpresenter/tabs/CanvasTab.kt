@@ -66,6 +66,7 @@ import churchpresenter.composeapp.generated.resources.canvas_source_text
 import churchpresenter.composeapp.generated.resources.canvas_source_video
 import churchpresenter.composeapp.generated.resources.canvas_sources
 import churchpresenter.composeapp.generated.resources.go_live
+import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
 import org.churchpresenter.app.churchpresenter.composables.SceneCanvas
 import org.churchpresenter.app.churchpresenter.composables.SourcePropertiesPanel
 import org.churchpresenter.app.churchpresenter.data.AppSettings
@@ -77,6 +78,13 @@ import org.churchpresenter.app.churchpresenter.viewmodel.SceneViewModel
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import java.util.UUID
+import churchpresenter.composeapp.generated.resources.canvas_source_shape
+import churchpresenter.composeapp.generated.resources.canvas_tool_select
+import churchpresenter.composeapp.generated.resources.canvas_tool_rectangle
+import churchpresenter.composeapp.generated.resources.canvas_tool_ellipse
+import churchpresenter.composeapp.generated.resources.canvas_tool_line
+import churchpresenter.composeapp.generated.resources.canvas_tool_arrow
+import churchpresenter.composeapp.generated.resources.canvas_tool_freehand
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -92,6 +100,12 @@ fun CanvasTab(
     val currentScene = sceneViewModel.currentScene
     val selectedSourceId by sceneViewModel.selectedSourceId
     val selectedSource = sceneViewModel.selectedSource
+
+    // Drawing tool state
+    var activeTool by remember { mutableStateOf("select") }
+    var drawingStrokeColor by remember { mutableStateOf("#FFFFFF") }
+    var drawingFillColor by remember { mutableStateOf("#00000000") }
+    var drawingStrokeWidth by remember { mutableStateOf(3f) }
 
     Row(modifier = modifier.fillMaxSize()) {
         // Left panel: Scene selector + Source list
@@ -343,6 +357,19 @@ fun CanvasTab(
                                     )
                                 }
                             )
+                            DropdownMenuItem(
+                                text = { Text(stringResource(Res.string.canvas_source_shape)) },
+                                onClick = {
+                                    showAddMenu = false
+                                    sceneViewModel.addSource(
+                                        SceneSource.ShapeSource(
+                                            id = UUID.randomUUID().toString(),
+                                            name = "Shape",
+                                            transform = SourceTransform(width = 0.3f, height = 0.3f)
+                                        )
+                                    )
+                                }
+                            )
                         }
                     }
 
@@ -398,55 +425,128 @@ fun CanvasTab(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             if (currentScene != null) {
-                // Top toolbar with action buttons on the right
+                // Top toolbar
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End,
+                    horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Add to Schedule
-                    TooltipArea(
-                        tooltip = {
-                            Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
-                                Text(stringResource(Res.string.add_to_schedule), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
-                            }
-                        },
-                        tooltipPlacement = TooltipPlacement.CursorPoint()
+                    // Drawing tools (left)
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(2.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        IconButton(
-                            onClick = { onAddToSchedule(currentScene.id, currentScene.name) },
-                            colors = IconButtonDefaults.iconButtonColors(
-                                containerColor = MaterialTheme.colorScheme.secondary,
-                                contentColor = MaterialTheme.colorScheme.onSecondary
+                        data class ToolDef(val id: String, val label: String)
+                        val tools = listOf(
+                            ToolDef("select", stringResource(Res.string.canvas_tool_select)),
+                            ToolDef("rectangle", stringResource(Res.string.canvas_tool_rectangle)),
+                            ToolDef("ellipse", stringResource(Res.string.canvas_tool_ellipse)),
+                            ToolDef("line", stringResource(Res.string.canvas_tool_line)),
+                            ToolDef("arrow", stringResource(Res.string.canvas_tool_arrow)),
+                            ToolDef("freehand", stringResource(Res.string.canvas_tool_freehand))
+                        )
+
+                        tools.forEach { tool ->
+                            val isActive = activeTool == tool.id
+                            TooltipArea(
+                                tooltip = {
+                                    Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
+                                        Text(tool.label, color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
+                                    }
+                                },
+                                tooltipPlacement = TooltipPlacement.CursorPoint()
+                            ) {
+                                IconButton(
+                                    onClick = { activeTool = tool.id },
+                                    modifier = Modifier.size(32.dp),
+                                    colors = IconButtonDefaults.iconButtonColors(
+                                        containerColor = if (isActive) MaterialTheme.colorScheme.primaryContainer
+                                        else Color.Transparent,
+                                        contentColor = if (isActive) MaterialTheme.colorScheme.onPrimaryContainer
+                                        else MaterialTheme.colorScheme.onSurface
+                                    )
+                                ) {
+                                    Text(
+                                        when (tool.id) {
+                                            "select" -> "\u25C6"
+                                            "rectangle" -> "\u25A1"
+                                            "ellipse" -> "\u25CB"
+                                            "line" -> "\u2215"
+                                            "arrow" -> "\u2192"
+                                            "freehand" -> "\u270E"
+                                            else -> "?"
+                                        },
+                                        style = MaterialTheme.typography.titleSmall
+                                    )
+                                }
+                            }
+                        }
+
+                        // Drawing color/stroke controls when a drawing tool is active
+                        if (activeTool != "select") {
+                            VerticalDivider(
+                                modifier = Modifier.height(24.dp).padding(horizontal = 4.dp),
+                                color = MaterialTheme.colorScheme.outlineVariant
                             )
-                        ) {
-                            Icon(painter = painterResource(Res.drawable.ic_playlist_add), contentDescription = stringResource(Res.string.add_to_schedule), modifier = Modifier.size(20.dp))
+                            ColorPickerField(
+                                color = drawingStrokeColor,
+                                onColorChange = { drawingStrokeColor = it }
+                            )
+                            Spacer(Modifier.width(4.dp))
+                            ColorPickerField(
+                                color = drawingFillColor,
+                                onColorChange = { drawingFillColor = it }
+                            )
                         }
                     }
 
-                    Spacer(Modifier.width(4.dp))
-
-                    // Go Live
-                    TooltipArea(
-                        tooltip = {
-                            Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
-                                Text(stringResource(Res.string.go_live), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
-                            }
-                        },
-                        tooltipPlacement = TooltipPlacement.CursorPoint()
+                    // Action buttons (right)
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        IconButton(
-                            onClick = {
-                                presenterManager.setActiveScene(currentScene)
-                                presenterManager.setPresentingMode(Presenting.CANVAS)
-                                presenterManager.setShowPresenterWindow(true)
+                        // Add to Schedule
+                        TooltipArea(
+                            tooltip = {
+                                Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
+                                    Text(stringResource(Res.string.add_to_schedule), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
+                                }
                             },
-                            colors = IconButtonDefaults.iconButtonColors(
-                                containerColor = MaterialTheme.colorScheme.primary,
-                                contentColor = MaterialTheme.colorScheme.onPrimary
-                            )
+                            tooltipPlacement = TooltipPlacement.CursorPoint()
                         ) {
-                            Icon(painter = painterResource(Res.drawable.ic_cast), contentDescription = stringResource(Res.string.go_live), modifier = Modifier.size(20.dp))
+                            IconButton(
+                                onClick = { onAddToSchedule(currentScene.id, currentScene.name) },
+                                colors = IconButtonDefaults.iconButtonColors(
+                                    containerColor = MaterialTheme.colorScheme.secondary,
+                                    contentColor = MaterialTheme.colorScheme.onSecondary
+                                )
+                            ) {
+                                Icon(painter = painterResource(Res.drawable.ic_playlist_add), contentDescription = stringResource(Res.string.add_to_schedule), modifier = Modifier.size(20.dp))
+                            }
+                        }
+
+                        // Go Live
+                        TooltipArea(
+                            tooltip = {
+                                Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
+                                    Text(stringResource(Res.string.go_live), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
+                                }
+                            },
+                            tooltipPlacement = TooltipPlacement.CursorPoint()
+                        ) {
+                            IconButton(
+                                onClick = {
+                                    presenterManager.setActiveScene(currentScene)
+                                    presenterManager.setPresentingMode(Presenting.CANVAS)
+                                    presenterManager.setShowPresenterWindow(true)
+                                },
+                                colors = IconButtonDefaults.iconButtonColors(
+                                    containerColor = MaterialTheme.colorScheme.primary,
+                                    contentColor = MaterialTheme.colorScheme.onPrimary
+                                )
+                            ) {
+                                Icon(painter = painterResource(Res.drawable.ic_cast), contentDescription = stringResource(Res.string.go_live), modifier = Modifier.size(20.dp))
+                            }
                         }
                     }
                 }
@@ -467,7 +567,15 @@ fun CanvasTab(
                         onTransformChanged = { sourceId, transform ->
                             sceneViewModel.updateTransform(sourceId, transform)
                         },
-                        isInteractive = true
+                        isInteractive = true,
+                        activeTool = activeTool,
+                        drawingStrokeColor = drawingStrokeColor,
+                        drawingFillColor = drawingFillColor,
+                        drawingStrokeWidth = drawingStrokeWidth,
+                        onShapeDrawn = { shape ->
+                            sceneViewModel.addSource(shape)
+                            activeTool = "select"
+                        }
                     )
                 }
             } else {

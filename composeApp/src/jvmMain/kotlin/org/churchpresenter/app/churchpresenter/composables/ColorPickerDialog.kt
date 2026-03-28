@@ -37,6 +37,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -401,7 +402,16 @@ internal fun cpColorToHex(color: Color): String {
 
 internal fun cpTryParseHex(hex: String): Color? = try {
     val clean = hex.trim().removePrefix("#")
-    if (clean.length != 6) null
-    else Color(clean.substring(0, 2).toInt(16), clean.substring(2, 4).toInt(16), clean.substring(4, 6).toInt(16))
+    when (clean.length) {
+        8 -> {
+            val a = clean.substring(0, 2).toInt(16)
+            val r = clean.substring(2, 4).toInt(16)
+            val g = clean.substring(4, 6).toInt(16)
+            val b = clean.substring(6, 8).toInt(16)
+            Color(r, g, b, a)
+        }
+        6 -> Color(clean.substring(0, 2).toInt(16), clean.substring(2, 4).toInt(16), clean.substring(4, 6).toInt(16))
+        else -> null
+    }
 } catch (_: Exception) { null }
 

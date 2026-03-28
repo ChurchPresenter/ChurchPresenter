@@ -60,6 +60,7 @@ sealed class SceneSource {
         val sourceOpacity: Float = 1f,
         val isGradient: Boolean = false,
         val gradientColor2: String = "#FFFFFF",
+        val gradientColor2Opacity: Float = 1f,
         val gradientAngle: Float = 0f,
         val gradientPosition: Float = 0.5f
     ) : SceneSource()
@@ -86,7 +87,31 @@ sealed class SceneSource {
         val url: String,
         val refreshInterval: Int = 0
     ) : SceneSource()
+
+    @Serializable
+    data class ShapeSource(
+        override val id: String,
+        override val name: String,
+        override val transform: SourceTransform = SourceTransform(),
+        override val visible: Boolean = true,
+        override val locked: Boolean = false,
+        val shapeType: String = "rectangle",
+        val strokeColor: String = "#FFFFFF",
+        val fillColor: String = "#00000000",
+        val strokeWidth: Float = 3f,
+        val points: List<PathPoint> = emptyList(),
+        val fillOpacity: Float = 1f,
+        val strokeOpacity: Float = 1f,
+        val isGradient: Boolean = false,
+        val gradientColor2: String = "#FFFFFF",
+        val gradientColor2Opacity: Float = 1f,
+        val gradientAngle: Float = 0f,
+        val gradientPosition: Float = 0.5f
+    ) : SceneSource()
 }
+
+@Serializable
+data class PathPoint(val x: Float, val y: Float)
 
 @Serializable
 data class Scene(

@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.sp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.canvas_image_not_found
 import org.churchpresenter.app.churchpresenter.models.SceneSource
+import org.churchpresenter.app.churchpresenter.models.PathPoint
 import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
 import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDefault
 import org.jetbrains.compose.resources.stringResource
@@ -32,6 +33,12 @@ import kotlin.math.cos
 import kotlin.math.sin
 import org.jetbrains.skia.Image
 import java.io.File
+import androidx.compose.foundation.Canvas
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.StrokeJoin
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.geometry.Size
 
 @Composable
 fun SceneSourceRenderer(
@@ -45,6 +52,7 @@ fun SceneSourceRenderer(
         is SceneSource.ColorSource -> ColorSourceContent(source, modifier)
         is SceneSource.VideoSource -> VideoSourceContent(source, modifier, isPresenter)
         is SceneSource.BrowserSource -> BrowserSourceContent(source, modifier, isPresenter)
+        is SceneSource.ShapeSource -> ShapeSourceContent(source, modifier)
     }
 }
 
@@ -116,7 +124,7 @@ private fun TextSourceContent(source: SceneSource.TextSource, modifier: Modifier
 private fun ColorSourceContent(source: SceneSource.ColorSource, modifier: Modifier) {
     val color1 = parseHexColor(source.color).copy(alpha = source.sourceOpacity)
     if (source.isGradient) {
-        val color2 = parseHexColor(source.gradientColor2).copy(alpha = source.sourceOpacity)
+        val color2 = parseHexColor(source.gradientColor2).copy(alpha = source.gradientColor2Opacity)
         val angleRad = Math.toRadians(source.gradientAngle.toDouble())
         val pos = source.gradientPosition.coerceIn(0.001f, 0.999f)
         val brush = Brush.linearGradient(
@@ -165,5 +173,98 @@ private fun BrowserSourceContent(
             color = Color.White,
             fontSize = 14.sp
         )
+    }
+}
+
+@Composable
+private fun ShapeSourceContent(source: SceneSource.ShapeSource, modifier: Modifier) {
+    val strokeColor = parseHexColor(source.strokeColor).copy(alpha = source.strokeOpacity)
+    val fillColor = parseHexColor(source.fillColor).copy(alpha = source.fillOpacity)
+    val strokeWidth = source.strokeWidth
+    val stroke = Stroke(
+        width = strokeWidth,
+        cap = StrokeCap.Round,
+        join = StrokeJoin.Round
+    )
+
+    // Build fill brush (solid or gradient)
+    val fillBrush: Brush? = if (source.isGradient) {
+        val color2 = parseHexColor(source.gradientColor2).copy(alpha = source.gradientColor2Opacity)
+        val angleRad = Math.toRadians(source.gradientAngle.toDouble())
+        val pos = source.gradientPosition.coerceIn(0.001f, 0.999f)
+        Brush.linearGradient(
+            colorStops = arrayOf(0f to fillColor, pos to color2, 1f to color2),
+            start = Offset(0.5f - 0.5f * cos(angleRad).toFloat(), 0.5f - 0.5f * sin(angleRad).toFloat()) * 1000f,
+            end = Offset(0.5f + 0.5f * cos(angleRad).toFloat(), 0.5f + 0.5f * sin(angleRad).toFloat()) * 1000f
+        )
+    } else if (fillColor.alpha > 0f) {
+        Brush.linearGradient(listOf(fillColor, fillColor))
+    } else null
+
+    Canvas(modifier = modifier.fillMaxSize()) {
+        val w = size.width
+        val h = size.height
+
+        when (source.shapeType) {
+            "rectangle" -> {
+                if (fillBrush != null) {
+                    drawRect(brush = fillBrush, size = size)
+                }
+                drawRect(color = strokeColor, size = size, style = stroke)
+            }
+            "ellipse" -> {
+                if (fillBrush != null) {
+                    drawOval(brush = fillBrush, size = size)
+                }
+                drawOval(color = strokeColor, size = size, style = stroke)
+            }
+            "line" -> {
+                drawLine(
+                    color = strokeColor,
+                    start = Offset(0f, 0f),
+                    end = Offset(w, h),
+                    strokeWidth = strokeWidth,
+                    cap = StrokeCap.Round
+                )
+            }
+            "arrow" -> {
+                drawLine(
+                    color = strokeColor,
+                    start = Offset(0f, 0f),
+                    end = Offset(w, h),
+                    strokeWidth = strokeWidth,
+                    cap = StrokeCap.Round
+                )
+                // Arrowhead
+                val arrowSize = (strokeWidth * 4f).coerceAtLeast(12f)
+                val angle = kotlin.math.atan2(h, w)
+                val ax1 = w - arrowSize * kotlin.math.cos(angle - 0.4f)
+                val ay1 = h - arrowSize * kotlin.math.sin(angle - 0.4f)
+                val ax2 = w - arrowSize * kotlin.math.cos(angle + 0.4f)
+                val ay2 = h - arrowSize * kotlin.math.sin(angle + 0.4f)
+                val arrowPath = Path().apply {
+                    moveTo(w, h)
+                    lineTo(ax1, ay1)
+                    moveTo(w, h)
+                    lineTo(ax2, ay2)
+                }
+                drawPath(
+                    arrowPath,
+                    color = strokeColor,
+                    style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
+                )
+            }
+            "freehand" -> {
+                if (source.points.size >= 2) {
+                    val path = Path().apply {
+                        moveTo(source.points[0].x * w, source.points[0].y * h)
+                        for (i in 1 until source.points.size) {
+                            lineTo(source.points[i].x * w, source.points[i].y * h)
+                        }
+                    }
+                    drawPath(path, color = strokeColor, style = stroke)
+                }
+            }
+        }
     }
 }

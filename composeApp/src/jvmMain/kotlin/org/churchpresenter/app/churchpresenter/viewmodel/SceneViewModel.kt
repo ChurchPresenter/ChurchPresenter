@@ -148,6 +148,7 @@ class SceneViewModel {
                 is SceneSource.ColorSource -> source.copy(visible = !source.visible)
                 is SceneSource.VideoSource -> source.copy(visible = !source.visible)
                 is SceneSource.BrowserSource -> source.copy(visible = !source.visible)
+                is SceneSource.ShapeSource -> source.copy(visible = !source.visible)
             }
         }
     }
@@ -160,6 +161,7 @@ class SceneViewModel {
                 is SceneSource.ColorSource -> source.copy(locked = !source.locked)
                 is SceneSource.VideoSource -> source.copy(locked = !source.locked)
                 is SceneSource.BrowserSource -> source.copy(locked = !source.locked)
+                is SceneSource.ShapeSource -> source.copy(locked = !source.locked)
             }
         }
     }
@@ -172,6 +174,7 @@ class SceneViewModel {
                 is SceneSource.ColorSource -> source.copy(transform = transform)
                 is SceneSource.VideoSource -> source.copy(transform = transform)
                 is SceneSource.BrowserSource -> source.copy(transform = transform)
+                is SceneSource.ShapeSource -> source.copy(transform = transform)
             }
         }
     }

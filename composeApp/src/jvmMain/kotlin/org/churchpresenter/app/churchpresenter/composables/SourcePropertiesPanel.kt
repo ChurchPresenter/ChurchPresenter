@@ -50,6 +50,10 @@ import churchpresenter.composeapp.generated.resources.canvas_color_1
 import churchpresenter.composeapp.generated.resources.canvas_color_2
 import churchpresenter.composeapp.generated.resources.canvas_font_color
 import churchpresenter.composeapp.generated.resources.canvas_gradient
+import churchpresenter.composeapp.generated.resources.canvas_source_shape
+import churchpresenter.composeapp.generated.resources.canvas_shape_stroke_color
+import churchpresenter.composeapp.generated.resources.canvas_shape_fill_color
+import churchpresenter.composeapp.generated.resources.canvas_shape_stroke_width
 import churchpresenter.composeapp.generated.resources.canvas_image_not_found
 import churchpresenter.composeapp.generated.resources.canvas_properties
 import churchpresenter.composeapp.generated.resources.canvas_source_color
@@ -131,6 +135,7 @@ fun SourcePropertiesPanel(
             is SceneSource.ColorSource -> ColorProperties(source, onSourceUpdate)
             is SceneSource.VideoSource -> VideoProperties(source, onSourceUpdate)
             is SceneSource.BrowserSource -> BrowserProperties(source, onSourceUpdate)
+            is SceneSource.ShapeSource -> ShapeProperties(source, onSourceUpdate)
         }
     }
 }
@@ -269,6 +274,9 @@ private fun ColorProperties(source: SceneSource.ColorSource, onUpdate: (SceneSou
         )
         Text(stringResource(Res.string.canvas_gradient), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
+    PropertySlider("${stringResource(Res.string.canvas_color_1)} Opacity", source.sourceOpacity, 0f, 1f) { v ->
+        onUpdate(source.copy(sourceOpacity = v))
+    }
     if (source.isGradient) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -280,15 +288,15 @@ private fun ColorProperties(source: SceneSource.ColorSource, onUpdate: (SceneSou
                 onColorChange = { onUpdate(source.copy(gradientColor2 = it)) }
             )
         }
+        PropertySlider("${stringResource(Res.string.canvas_color_2)} Opacity", source.gradientColor2Opacity, 0f, 1f) { v ->
+            onUpdate(source.copy(gradientColor2Opacity = v))
+        }
         PropertySliderWithInput("Angle", source.gradientAngle, 0f, 360f, "°") { v ->
             onUpdate(source.copy(gradientAngle = v))
         }
         PropertySliderWithInput("Position", source.gradientPosition * 100f, 0f, 100f, "%") { v ->
             onUpdate(source.copy(gradientPosition = (v / 100f).coerceIn(0f, 1f)))
         }
-    }
-    PropertySlider("Opacity", source.sourceOpacity, 0f, 1f) { v ->
-        onUpdate(source.copy(sourceOpacity = v))
     }
 }
 
@@ -340,6 +348,105 @@ private fun BrowserProperties(source: SceneSource.BrowserSource, onUpdate: (Scen
     Text("Browser", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
     PropertyTextField("URL", source.url) { v ->
         onUpdate(source.copy(url = v))
+    }
+}
+
+@Composable
+private fun ShapeProperties(source: SceneSource.ShapeSource, onUpdate: (SceneSource) -> Unit) {
+    Text(
+        stringResource(Res.string.canvas_source_shape),
+        style = MaterialTheme.typography.labelMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant
+    )
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Text(
+            stringResource(Res.string.canvas_shape_stroke_color),
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        ColorPickerField(
+            color = source.strokeColor,
+            onColorChange = { onUpdate(source.copy(strokeColor = it)) }
+        )
+    }
+    PropertySlider("${stringResource(Res.string.canvas_shape_stroke_color)} Opacity", source.strokeOpacity, 0f, 1f) { v ->
+        onUpdate(source.copy(strokeOpacity = v))
+    }
+
+    val isStrokeOnly = source.shapeType in listOf("line", "arrow", "freehand")
+
+    if (!isStrokeOnly) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Text(
+                stringResource(Res.string.canvas_shape_fill_color),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            ColorPickerField(
+                color = source.fillColor,
+                onColorChange = { onUpdate(source.copy(fillColor = it)) }
+            )
+        }
+        PropertySlider("${stringResource(Res.string.canvas_shape_fill_color)} Opacity", source.fillOpacity, 0f, 1f) { v ->
+            onUpdate(source.copy(fillOpacity = v))
+        }
+    }
+
+    PropertySliderWithInput(
+        stringResource(Res.string.canvas_shape_stroke_width),
+        source.strokeWidth, 1f, 20f, "px"
+    ) { v ->
+        onUpdate(source.copy(strokeWidth = v))
+    }
+
+    if (!isStrokeOnly) {
+        HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            Checkbox(
+                checked = source.isGradient,
+                onCheckedChange = { onUpdate(source.copy(isGradient = it)) }
+            )
+            Text(
+                stringResource(Res.string.canvas_gradient),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+        if (source.isGradient) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Text(
+                    stringResource(Res.string.canvas_color_2),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                ColorPickerField(
+                    color = source.gradientColor2,
+                    onColorChange = { onUpdate(source.copy(gradientColor2 = it)) }
+                )
+            }
+            PropertySlider("${stringResource(Res.string.canvas_color_2)} Opacity", source.gradientColor2Opacity, 0f, 1f) { v ->
+                onUpdate(source.copy(gradientColor2Opacity = v))
+            }
+            PropertySliderWithInput("Angle", source.gradientAngle, 0f, 360f, "\u00B0") { v ->
+                onUpdate(source.copy(gradientAngle = v))
+            }
+            PropertySliderWithInput("Position", source.gradientPosition * 100f, 0f, 100f, "%") { v ->
+                onUpdate(source.copy(gradientPosition = (v / 100f).coerceIn(0f, 1f)))
+            }
+        }
     }
 }
 
@@ -439,6 +546,7 @@ private fun updateName(source: SceneSource, name: String): SceneSource = when (s
     is SceneSource.ColorSource -> source.copy(name = name)
     is SceneSource.VideoSource -> source.copy(name = name)
     is SceneSource.BrowserSource -> source.copy(name = name)
+    is SceneSource.ShapeSource -> source.copy(name = name)
 }
 
 private fun updateTransform(source: SceneSource, transform: SourceTransform): SceneSource = when (source) {
@@ -447,6 +555,7 @@ private fun updateTransform(source: SceneSource, transform: SourceTransform): Sc
     is SceneSource.ColorSource -> source.copy(transform = transform)
     is SceneSource.VideoSource -> source.copy(transform = transform)
     is SceneSource.BrowserSource -> source.copy(transform = transform)
+    is SceneSource.ShapeSource -> source.copy(transform = transform)
 }
 
 @Composable

@@ -23,10 +23,22 @@ object Utils {
     fun parseHexColor(hexColor: String): Color {
         return try {
             val cleanHex = hexColor.removePrefix("#")
-            val red = cleanHex.substring(0, 2).toInt(16)
-            val green = cleanHex.substring(2, 4).toInt(16)
-            val blue = cleanHex.substring(4, 6).toInt(16)
-            Color(red, green, blue)
+            when (cleanHex.length) {
+                8 -> {
+                    val alpha = cleanHex.substring(0, 2).toInt(16)
+                    val red = cleanHex.substring(2, 4).toInt(16)
+                    val green = cleanHex.substring(4, 6).toInt(16)
+                    val blue = cleanHex.substring(6, 8).toInt(16)
+                    Color(red, green, blue, alpha)
+                }
+                6 -> {
+                    val red = cleanHex.substring(0, 2).toInt(16)
+                    val green = cleanHex.substring(2, 4).toInt(16)
+                    val blue = cleanHex.substring(4, 6).toInt(16)
+                    Color(red, green, blue)
+                }
+                else -> Color.White
+            }
         } catch (e: Exception) {
             Color.White
         }
