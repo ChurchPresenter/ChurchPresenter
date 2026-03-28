@@ -83,6 +83,7 @@ import churchpresenter.composeapp.generated.resources.canvas_qr_wifi_hidden
 import churchpresenter.composeapp.generated.resources.canvas_qr_error_correction
 import churchpresenter.composeapp.generated.resources.canvas_camera_device
 import churchpresenter.composeapp.generated.resources.canvas_camera_name
+import churchpresenter.composeapp.generated.resources.canvas_camera_ffmpeg_hint
 import churchpresenter.composeapp.generated.resources.canvas_camera_none_found
 import churchpresenter.composeapp.generated.resources.canvas_camera_refresh
 import churchpresenter.composeapp.generated.resources.canvas_capture_x
@@ -681,9 +682,26 @@ private fun CameraProperties(source: SceneSource.CameraSource, onUpdate: (SceneS
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
+
+    val ffmpegAvailable by remember { mutableStateOf(isFfmpegAvailable()) }
+    if (!ffmpegAvailable) {
+        Text(
+            stringResource(Res.string.canvas_camera_ffmpeg_hint),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
 }
 
 private data class CameraDevice(val name: String, val path: String, val displayName: String)
+
+private fun isFfmpegAvailable(): Boolean {
+    return try {
+        val process = ProcessBuilder("ffmpeg", "-version").redirectErrorStream(true).start()
+        process.inputStream.bufferedReader().readText()
+        process.waitFor() == 0
+    } catch (_: Exception) { false }
+}
 
 private fun listCameraDevices(): List<CameraDevice> {
     val osName = System.getProperty("os.name", "").lowercase()
@@ -715,33 +733,35 @@ private fun listLinuxCameras(): List<CameraDevice> {
 }
 
 private fun listWindowsCameras(): List<CameraDevice> {
-    // Try Get-CimInstance (modern, works on all supported Windows)
+    val devices = mutableListOf<CameraDevice>()
+    val seenNames = mutableSetOf<String>()
+
+    // Get-CimInstance finds physical cameras (PnP devices)
     try {
         val process = ProcessBuilder("powershell", "-NoProfile", "-Command",
             "Get-CimInstance Win32_PnPEntity | Where-Object { \$_.PNPClass -eq 'Camera' -or \$_.PNPClass -eq 'Image' } | Select-Object -ExpandProperty Name")
             .redirectErrorStream(true).start()
         val output = process.inputStream.bufferedReader().readText()
         process.waitFor()
-        val devices = output.lines()
+        output.lines()
             .map { it.trim() }
             .filter { it.isNotBlank() }
-            .mapIndexed { index, name ->
-                CameraDevice(
+            .forEach { name ->
+                devices.add(CameraDevice(
                     name = name,
                     path = "dshow://:dshow-vdev=$name",
                     displayName = name
-                )
+                ))
+                seenNames.add(name.lowercase())
             }
-        if (devices.isNotEmpty()) return devices
     } catch (_: Exception) {}
 
-    // Fallback: ffmpeg device listing
+    // ffmpeg DirectShow listing finds virtual cameras (OBS, NDI, etc.)
     try {
         val process = ProcessBuilder("ffmpeg", "-list_devices", "true", "-f", "dshow", "-i", "dummy")
             .redirectErrorStream(true).start()
         val output = process.inputStream.bufferedReader().readText()
         process.waitFor()
-        val devices = mutableListOf<CameraDevice>()
         var isVideo = false
         for (line in output.lines()) {
             if (line.contains("DirectShow video devices")) isVideo = true
@@ -750,37 +770,74 @@ private fun listWindowsCameras(): List<CameraDevice> {
                 val match = Regex("\"(.+?)\"").find(line)
                 if (match != null) {
                     val name = match.groupValues[1]
-                    devices.add(CameraDevice(
-                        name = name,
-                        path = "dshow://:dshow-vdev=$name",
-                        displayName = name
-                    ))
+                    if (name.lowercase() !in seenNames) {
+                        devices.add(CameraDevice(
+                            name = name,
+                            path = "dshow://:dshow-vdev=$name",
+                            displayName = name
+                        ))
+                        seenNames.add(name.lowercase())
+                    }
                 }
             }
         }
-        if (devices.isNotEmpty()) return devices
     } catch (_: Exception) {}
 
-    return emptyList()
+    return devices
 }
 
 private fun listMacCameras(): List<CameraDevice> {
-    return try {
+    val devices = mutableListOf<CameraDevice>()
+    val seenNames = mutableSetOf<String>()
+
+    // system_profiler finds physical cameras
+    try {
         val process = ProcessBuilder("system_profiler", "SPCameraDataType", "-detailLevel", "mini")
             .redirectErrorStream(true).start()
         val output = process.inputStream.bufferedReader().readText()
         process.waitFor()
-        val names = output.lines()
+        output.lines()
             .filter { it.contains(":") && !it.trim().startsWith("Camera") && it.trim().endsWith(":") }
             .map { it.trim().removeSuffix(":") }
-        names.mapIndexed { index, name ->
-            CameraDevice(
-                name = name,
-                path = "avfoundation://$index",
-                displayName = name
-            )
+            .forEachIndexed { index, name ->
+                devices.add(CameraDevice(
+                    name = name,
+                    path = "avfoundation://$index",
+                    displayName = name
+                ))
+                seenNames.add(name.lowercase())
+            }
+    } catch (_: Exception) {}
+
+    // ffmpeg AVFoundation listing finds virtual cameras (OBS, NDI, etc.)
+    try {
+        val process = ProcessBuilder("ffmpeg", "-f", "avfoundation", "-list_devices", "true", "-i", "")
+            .redirectErrorStream(true).start()
+        val output = process.inputStream.bufferedReader().readText()
+        process.waitFor()
+        var isVideo = false
+        for (line in output.lines()) {
+            if (line.contains("AVFoundation video devices")) isVideo = true
+            else if (line.contains("AVFoundation audio devices")) isVideo = false
+            else if (isVideo) {
+                val match = Regex("\\[(\\d+)]\\s+(.+)").find(line)
+                if (match != null) {
+                    val index = match.groupValues[1]
+                    val name = match.groupValues[2].trim()
+                    if (name.lowercase() !in seenNames) {
+                        devices.add(CameraDevice(
+                            name = name,
+                            path = "avfoundation://$index",
+                            displayName = name
+                        ))
+                        seenNames.add(name.lowercase())
+                    }
+                }
+            }
         }
-    } catch (_: Exception) { emptyList() }
+    } catch (_: Exception) {}
+
+    return devices
 }
 
 @Composable
