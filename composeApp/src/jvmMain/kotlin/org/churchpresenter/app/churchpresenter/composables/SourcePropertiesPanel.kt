@@ -54,6 +54,10 @@ import churchpresenter.composeapp.generated.resources.canvas_source_shape
 import churchpresenter.composeapp.generated.resources.canvas_shape_stroke_color
 import churchpresenter.composeapp.generated.resources.canvas_shape_fill_color
 import churchpresenter.composeapp.generated.resources.canvas_shape_stroke_width
+import churchpresenter.composeapp.generated.resources.canvas_angle
+import churchpresenter.composeapp.generated.resources.canvas_opacity
+import churchpresenter.composeapp.generated.resources.canvas_source_browser
+import churchpresenter.composeapp.generated.resources.position
 import churchpresenter.composeapp.generated.resources.canvas_image_not_found
 import churchpresenter.composeapp.generated.resources.canvas_properties
 import churchpresenter.composeapp.generated.resources.canvas_source_color
@@ -274,7 +278,7 @@ private fun ColorProperties(source: SceneSource.ColorSource, onUpdate: (SceneSou
         )
         Text(stringResource(Res.string.canvas_gradient), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
-    PropertySlider("${stringResource(Res.string.canvas_color_1)} Opacity", source.sourceOpacity, 0f, 1f) { v ->
+    PropertySlider("${stringResource(Res.string.canvas_color_1)} ${stringResource(Res.string.canvas_opacity)}", source.sourceOpacity, 0f, 1f) { v ->
         onUpdate(source.copy(sourceOpacity = v))
     }
     if (source.isGradient) {
@@ -288,13 +292,13 @@ private fun ColorProperties(source: SceneSource.ColorSource, onUpdate: (SceneSou
                 onColorChange = { onUpdate(source.copy(gradientColor2 = it)) }
             )
         }
-        PropertySlider("${stringResource(Res.string.canvas_color_2)} Opacity", source.gradientColor2Opacity, 0f, 1f) { v ->
+        PropertySlider("${stringResource(Res.string.canvas_color_2)} ${stringResource(Res.string.canvas_opacity)}", source.gradientColor2Opacity, 0f, 1f) { v ->
             onUpdate(source.copy(gradientColor2Opacity = v))
         }
-        PropertySliderWithInput("Angle", source.gradientAngle, 0f, 360f, "°") { v ->
+        PropertySliderWithInput(stringResource(Res.string.canvas_angle), source.gradientAngle, 0f, 360f, "°") { v ->
             onUpdate(source.copy(gradientAngle = v))
         }
-        PropertySliderWithInput("Position", source.gradientPosition * 100f, 0f, 100f, "%") { v ->
+        PropertySliderWithInput(stringResource(Res.string.position), source.gradientPosition * 100f, 0f, 100f, "%") { v ->
             onUpdate(source.copy(gradientPosition = (v / 100f).coerceIn(0f, 1f)))
         }
     }
@@ -345,7 +349,7 @@ private fun VideoProperties(source: SceneSource.VideoSource, onUpdate: (SceneSou
 
 @Composable
 private fun BrowserProperties(source: SceneSource.BrowserSource, onUpdate: (SceneSource) -> Unit) {
-    Text("Browser", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    Text(stringResource(Res.string.canvas_source_browser), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
     PropertyTextField("URL", source.url) { v ->
         onUpdate(source.copy(url = v))
     }
@@ -372,7 +376,7 @@ private fun ShapeProperties(source: SceneSource.ShapeSource, onUpdate: (SceneSou
             onColorChange = { onUpdate(source.copy(strokeColor = it)) }
         )
     }
-    PropertySlider("${stringResource(Res.string.canvas_shape_stroke_color)} Opacity", source.strokeOpacity, 0f, 1f) { v ->
+    PropertySlider("${stringResource(Res.string.canvas_shape_stroke_color)} ${stringResource(Res.string.canvas_opacity)}", source.strokeOpacity, 0f, 1f) { v ->
         onUpdate(source.copy(strokeOpacity = v))
     }
 
@@ -393,7 +397,7 @@ private fun ShapeProperties(source: SceneSource.ShapeSource, onUpdate: (SceneSou
                 onColorChange = { onUpdate(source.copy(fillColor = it)) }
             )
         }
-        PropertySlider("${stringResource(Res.string.canvas_shape_fill_color)} Opacity", source.fillOpacity, 0f, 1f) { v ->
+        PropertySlider("${stringResource(Res.string.canvas_shape_fill_color)} ${stringResource(Res.string.canvas_opacity)}", source.fillOpacity, 0f, 1f) { v ->
             onUpdate(source.copy(fillOpacity = v))
         }
     }
@@ -437,13 +441,13 @@ private fun ShapeProperties(source: SceneSource.ShapeSource, onUpdate: (SceneSou
                     onColorChange = { onUpdate(source.copy(gradientColor2 = it)) }
                 )
             }
-            PropertySlider("${stringResource(Res.string.canvas_color_2)} Opacity", source.gradientColor2Opacity, 0f, 1f) { v ->
+            PropertySlider("${stringResource(Res.string.canvas_color_2)} ${stringResource(Res.string.canvas_opacity)}", source.gradientColor2Opacity, 0f, 1f) { v ->
                 onUpdate(source.copy(gradientColor2Opacity = v))
             }
-            PropertySliderWithInput("Angle", source.gradientAngle, 0f, 360f, "\u00B0") { v ->
+            PropertySliderWithInput(stringResource(Res.string.canvas_angle), source.gradientAngle, 0f, 360f, "\u00B0") { v ->
                 onUpdate(source.copy(gradientAngle = v))
             }
-            PropertySliderWithInput("Position", source.gradientPosition * 100f, 0f, 100f, "%") { v ->
+            PropertySliderWithInput(stringResource(Res.string.position), source.gradientPosition * 100f, 0f, 100f, "%") { v ->
                 onUpdate(source.copy(gradientPosition = (v / 100f).coerceIn(0f, 1f)))
             }
         }

@@ -728,6 +728,9 @@
     <string name="canvas_tool_line">Line</string>
     <string name="canvas_tool_arrow">Arrow</string>
     <string name="canvas_tool_freehand">Freehand</string>
+    <string name="canvas_angle">Angle</string>
+    <string name="canvas_opacity">Opacity</string>
+    <string name="canvas_source_browser">Browser</string>
     <string name="web_under_construction">This feature is under construction.</string>
 
     <!-- Server Settings -->
