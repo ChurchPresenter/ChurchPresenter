@@ -759,6 +759,7 @@
     <string name="canvas_camera_name">Device Name</string>
     <string name="canvas_camera_none_found">No cameras found</string>
     <string name="canvas_camera_ffmpeg_hint">Install ffmpeg to detect virtual cameras (OBS, NDI, etc.)</string>
+    <string name="canvas_camera_v4l2_hint">Install v4l2loopback for virtual cameras: sudo apt install v4l2loopback-dkms</string>
     <string name="canvas_camera_refresh">Refresh Cameras</string>
     <string name="canvas_capture_x">Capture X</string>
     <string name="canvas_capture_y">Capture Y</string>

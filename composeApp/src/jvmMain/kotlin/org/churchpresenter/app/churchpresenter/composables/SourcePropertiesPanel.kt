@@ -84,6 +84,7 @@ import churchpresenter.composeapp.generated.resources.canvas_qr_error_correction
 import churchpresenter.composeapp.generated.resources.canvas_camera_device
 import churchpresenter.composeapp.generated.resources.canvas_camera_name
 import churchpresenter.composeapp.generated.resources.canvas_camera_ffmpeg_hint
+import churchpresenter.composeapp.generated.resources.canvas_camera_v4l2_hint
 import churchpresenter.composeapp.generated.resources.canvas_camera_none_found
 import churchpresenter.composeapp.generated.resources.canvas_camera_refresh
 import churchpresenter.composeapp.generated.resources.canvas_capture_x
@@ -683,13 +684,23 @@ private fun CameraProperties(source: SceneSource.CameraSource, onUpdate: (SceneS
         )
     }
 
-    val ffmpegAvailable by remember { mutableStateOf(isFfmpegAvailable()) }
-    if (!ffmpegAvailable) {
+    val osName = System.getProperty("os.name", "").lowercase()
+    if (osName.contains("linux") && devices.isEmpty()) {
         Text(
-            stringResource(Res.string.canvas_camera_ffmpeg_hint),
+            stringResource(Res.string.canvas_camera_v4l2_hint),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
+    }
+    if (!osName.contains("linux")) {
+        val ffmpegAvailable by remember { mutableStateOf(isFfmpegAvailable()) }
+        if (!ffmpegAvailable) {
+            Text(
+                stringResource(Res.string.canvas_camera_ffmpeg_hint),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
     }
 }
 
@@ -764,6 +775,17 @@ private fun listWindowsCameras(): List<CameraDevice> {
         process.waitFor()
         var isVideo = false
         for (line in output.lines()) {
+            // New ffmpeg format (8.x+): "DeviceName" (video)
+            val newMatch = Regex("\"(.+?)\"\\s+\\(video\\)").find(line)
+            if (newMatch != null) {
+                val name = newMatch.groupValues[1]
+                if (name.lowercase() !in seenNames) {
+                    devices.add(CameraDevice(name = name, path = "dshow://:dshow-vdev=$name", displayName = name))
+                    seenNames.add(name.lowercase())
+                }
+                continue
+            }
+            // Old ffmpeg format: section headers then quoted names
             if (line.contains("DirectShow video devices")) isVideo = true
             else if (line.contains("DirectShow audio devices")) isVideo = false
             else if (isVideo) {
@@ -771,11 +793,7 @@ private fun listWindowsCameras(): List<CameraDevice> {
                 if (match != null) {
                     val name = match.groupValues[1]
                     if (name.lowercase() !in seenNames) {
-                        devices.add(CameraDevice(
-                            name = name,
-                            path = "dshow://:dshow-vdev=$name",
-                            displayName = name
-                        ))
+                        devices.add(CameraDevice(name = name, path = "dshow://:dshow-vdev=$name", displayName = name))
                         seenNames.add(name.lowercase())
                     }
                 }
@@ -816,7 +834,20 @@ private fun listMacCameras(): List<CameraDevice> {
         val output = process.inputStream.bufferedReader().readText()
         process.waitFor()
         var isVideo = false
+        var deviceIndex = devices.size
         for (line in output.lines()) {
+            // New ffmpeg format (8.x+): "DeviceName" (video)
+            val newMatch = Regex("\"(.+?)\"\\s+\\(video\\)").find(line)
+            if (newMatch != null) {
+                val name = newMatch.groupValues[1]
+                if (name.lowercase() !in seenNames) {
+                    devices.add(CameraDevice(name = name, path = "avfoundation://$deviceIndex", displayName = name))
+                    seenNames.add(name.lowercase())
+                    deviceIndex++
+                }
+                continue
+            }
+            // Old ffmpeg format: section headers then [index] name
             if (line.contains("AVFoundation video devices")) isVideo = true
             else if (line.contains("AVFoundation audio devices")) isVideo = false
             else if (isVideo) {
@@ -825,11 +856,7 @@ private fun listMacCameras(): List<CameraDevice> {
                     val index = match.groupValues[1]
                     val name = match.groupValues[2].trim()
                     if (name.lowercase() !in seenNames) {
-                        devices.add(CameraDevice(
-                            name = name,
-                            path = "avfoundation://$index",
-                            displayName = name
-                        ))
+                        devices.add(CameraDevice(name = name, path = "avfoundation://$index", displayName = name))
                         seenNames.add(name.lowercase())
                     }
                 }

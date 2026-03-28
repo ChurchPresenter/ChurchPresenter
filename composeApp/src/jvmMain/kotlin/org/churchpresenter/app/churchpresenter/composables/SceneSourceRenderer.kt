@@ -34,6 +34,7 @@ import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
 import org.churchpresenter.app.churchpresenter.utils.WindowsWindowCapture
 import org.churchpresenter.app.churchpresenter.utils.X11WindowCapture
 import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDefault
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -456,16 +457,135 @@ private fun CameraSourceContent(
     modifier: Modifier,
     isPresenter: Boolean
 ) {
-    Box(
-        modifier = modifier.fillMaxSize().background(Color.DarkGray),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = if (source.deviceName.isNotEmpty()) stringResource(Res.string.canvas_placeholder_camera, source.deviceName)
-                   else stringResource(Res.string.canvas_placeholder_camera_default),
-            color = Color.White,
-            fontSize = 14.sp
+    if (source.devicePath.isBlank()) {
+        Box(
+            modifier = modifier.fillMaxSize().background(Color.DarkGray),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = if (source.deviceName.isNotEmpty()) stringResource(Res.string.canvas_placeholder_camera, source.deviceName)
+                       else stringResource(Res.string.canvas_placeholder_camera_default),
+                color = Color.White,
+                fontSize = 14.sp
+            )
+        }
+        return
+    }
+
+    var frame by remember { mutableStateOf<ImageBitmap?>(null) }
+
+    val processRef = remember { mutableStateOf<Process?>(null) }
+
+    DisposableEffect(source.devicePath) {
+        onDispose {
+            processRef.value?.destroyForcibly()
+            processRef.value = null
+        }
+    }
+
+    LaunchedEffect(source.devicePath) {
+        val path = source.devicePath
+        val command = when {
+            path.startsWith("dshow://") -> {
+                val deviceName = path.removePrefix("dshow://").removePrefix(":dshow-vdev=")
+                listOf("ffmpeg", "-f", "dshow", "-i", "video=$deviceName",
+                    "-an", "-vf", "fps=30", "-f", "image2pipe", "-vcodec", "bmp", "-")
+            }
+            path.startsWith("v4l2://") -> {
+                val device = path.removePrefix("v4l2://")
+                listOf("ffmpeg", "-f", "v4l2", "-i", device,
+                    "-an", "-vf", "fps=30", "-f", "image2pipe", "-vcodec", "bmp", "-")
+            }
+            path.startsWith("avfoundation://") -> {
+                val index = path.removePrefix("avfoundation://")
+                listOf("ffmpeg", "-f", "avfoundation", "-i", "$index:none",
+                    "-an", "-vf", "fps=30", "-f", "image2pipe", "-vcodec", "bmp", "-")
+            }
+            else -> return@LaunchedEffect
+        }
+
+        val process = withContext(Dispatchers.IO) {
+            try {
+                ProcessBuilder(command).redirectErrorStream(false).start()
+            } catch (_: Throwable) { null }
+        } ?: return@LaunchedEffect
+        processRef.value = process
+
+        val inputStream = process.inputStream
+        val headerBuf = ByteArray(2)
+
+        while (isActive) {
+            val bmpData = withContext(Dispatchers.IO) {
+                try {
+                    // Read BMP magic bytes "BM"
+                    var read = 0
+                    while (read < 2) {
+                        val b = inputStream.read()
+                        if (b == -1) return@withContext null
+                        headerBuf[read++] = b.toByte()
+                    }
+                    if (headerBuf[0] != 'B'.code.toByte() || headerBuf[1] != 'M'.code.toByte()) return@withContext null
+
+                    // Read BMP file size (bytes 2-5, little-endian)
+                    val sizeBytes = ByteArray(4)
+                    read = 0
+                    while (read < 4) {
+                        val r = inputStream.read(sizeBytes, read, 4 - read)
+                        if (r == -1) return@withContext null
+                        read += r
+                    }
+                    val fileSize = (sizeBytes[0].toInt() and 0xFF) or
+                            ((sizeBytes[1].toInt() and 0xFF) shl 8) or
+                            ((sizeBytes[2].toInt() and 0xFF) shl 16) or
+                            ((sizeBytes[3].toInt() and 0xFF) shl 24)
+
+                    // Read full BMP
+                    val data = ByteArray(fileSize)
+                    data[0] = 'B'.code.toByte()
+                    data[1] = 'M'.code.toByte()
+                    System.arraycopy(sizeBytes, 0, data, 2, 4)
+                    var remaining = fileSize - 6
+                    var offset = 6
+                    while (remaining > 0) {
+                        val r = inputStream.read(data, offset, remaining)
+                        if (r == -1) return@withContext null
+                        offset += r
+                        remaining -= r
+                    }
+                    data
+                } catch (_: Throwable) { null }
+            } ?: break
+
+            val img = withContext(Dispatchers.IO) {
+                ImageIO.read(java.io.ByteArrayInputStream(bmpData))
+            }
+            if (img != null) {
+                frame = img.toComposeImageBitmap()
+            }
+        }
+
+        process.destroyForcibly()
+    }
+
+    if (frame != null) {
+        Image(
+            bitmap = frame!!,
+            contentDescription = source.deviceName,
+            contentScale = ContentScale.Crop,
+            modifier = modifier.fillMaxSize()
         )
+    } else {
+        Box(
+            modifier = modifier.fillMaxSize().background(Color.DarkGray),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = if (source.deviceName.isNotEmpty()) stringResource(Res.string.canvas_placeholder_camera, source.deviceName)
+                       else stringResource(Res.string.canvas_placeholder_camera_default),
+                color = Color.White,
+                fontSize = 14.sp
+            )
+        }
     }
 }
 
