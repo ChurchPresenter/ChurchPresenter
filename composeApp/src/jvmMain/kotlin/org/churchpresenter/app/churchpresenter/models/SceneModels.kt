@@ -108,6 +108,73 @@ sealed class SceneSource {
         val gradientAngle: Float = 0f,
         val gradientPosition: Float = 0.5f
     ) : SceneSource()
+
+    @Serializable
+    data class ClockSource(
+        override val id: String,
+        override val name: String,
+        override val transform: SourceTransform = SourceTransform(),
+        override val visible: Boolean = true,
+        override val locked: Boolean = false,
+        val mode: String = "clock",
+        val timeFormat: String = "24h",
+        val showHours: Boolean = true,
+        val showSeconds: Boolean = true,
+        val fontFamily: String = "Arial",
+        val fontSize: Int = 64,
+        val fontColor: String = "#FFFFFF",
+        val backgroundColor: String = "#00000000",
+        val bold: Boolean = true,
+        val targetHour: Int = 0,
+        val targetMinute: Int = 0,
+        val targetSecond: Int = 0
+    ) : SceneSource()
+
+    @Serializable
+    data class QRCodeSource(
+        override val id: String,
+        override val name: String,
+        override val transform: SourceTransform = SourceTransform(),
+        override val visible: Boolean = true,
+        override val locked: Boolean = false,
+        val contentType: String = "url",
+        val content: String = "https://example.com",
+        val wifiSsid: String = "",
+        val wifiPassword: String = "",
+        val wifiEncryption: String = "WPA",
+        val wifiHidden: Boolean = false,
+        val foregroundColor: String = "#000000",
+        val backgroundColor: String = "#FFFFFF",
+        val transparentBackground: Boolean = false,
+        val errorCorrection: String = "M"
+    ) : SceneSource()
+
+    @Serializable
+    data class CameraSource(
+        override val id: String,
+        override val name: String,
+        override val transform: SourceTransform = SourceTransform(),
+        override val visible: Boolean = true,
+        override val locked: Boolean = false,
+        val devicePath: String = "",
+        val deviceName: String = ""
+    ) : SceneSource()
+
+    @Serializable
+    data class ScreenCaptureSource(
+        override val id: String,
+        override val name: String,
+        override val transform: SourceTransform = SourceTransform(),
+        override val visible: Boolean = true,
+        override val locked: Boolean = false,
+        val captureMode: String = "region",
+        val captureX: Int = 0,
+        val captureY: Int = 0,
+        val captureWidth: Int = 1920,
+        val captureHeight: Int = 1080,
+        val captureInterval: Int = 100,
+        val windowTitle: String = ""
+    ) : SceneSource()
 }
 
 @Serializable

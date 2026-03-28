@@ -28,6 +28,22 @@ import org.churchpresenter.app.churchpresenter.models.SceneSource
 import org.churchpresenter.app.churchpresenter.models.PathPoint
 import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
 import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDefault
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.ImageBitmap
+import com.google.zxing.BarcodeFormat
+import com.google.zxing.EncodeHintType
+import com.google.zxing.qrcode.QRCodeWriter
+import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import java.awt.Rectangle
+import java.awt.Robot
+import java.awt.image.BufferedImage
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
 import org.jetbrains.compose.resources.stringResource
 import kotlin.math.cos
 import kotlin.math.sin
@@ -53,6 +69,10 @@ fun SceneSourceRenderer(
         is SceneSource.VideoSource -> VideoSourceContent(source, modifier, isPresenter)
         is SceneSource.BrowserSource -> BrowserSourceContent(source, modifier, isPresenter)
         is SceneSource.ShapeSource -> ShapeSourceContent(source, modifier)
+        is SceneSource.ClockSource -> ClockSourceContent(source, modifier)
+        is SceneSource.QRCodeSource -> QRCodeSourceContent(source, modifier)
+        is SceneSource.CameraSource -> CameraSourceContent(source, modifier, isPresenter)
+        is SceneSource.ScreenCaptureSource -> ScreenCaptureSourceContent(source, modifier)
     }
 }
 
@@ -267,4 +287,311 @@ private fun ShapeSourceContent(source: SceneSource.ShapeSource, modifier: Modifi
             }
         }
     }
+}
+
+@Composable
+private fun ClockSourceContent(source: SceneSource.ClockSource, modifier: Modifier) {
+    val bgColor = parseHexColor(source.backgroundColor)
+    val fontColor = parseHexColor(source.fontColor)
+    val fontFamily = systemFontFamilyOrDefault(source.fontFamily)
+
+    var displayText by remember { mutableStateOf("") }
+
+    LaunchedEffect(source.mode, source.timeFormat, source.showHours, source.showSeconds, source.targetHour, source.targetMinute, source.targetSecond) {
+        while (isActive) {
+            val now = LocalTime.now()
+            displayText = when (source.mode) {
+                "countdown" -> {
+                    val target = LocalTime.of(source.targetHour, source.targetMinute, source.targetSecond)
+                    val remaining = java.time.Duration.between(now, target)
+                    if (remaining.isNegative) {
+                        if (source.showHours && source.showSeconds) "00:00:00"
+                        else if (source.showHours) "00:00"
+                        else if (source.showSeconds) "00:00"
+                        else "00"
+                    } else {
+                        val h = remaining.toHours()
+                        val m = remaining.toMinutesPart()
+                        val s = remaining.toSecondsPart()
+                        buildString {
+                            if (source.showHours) { append("%02d:".format(h)) }
+                            append("%02d".format(m))
+                            if (source.showSeconds) { append(":%02d".format(s)) }
+                        }
+                    }
+                }
+                else -> {
+                    val pattern = buildString {
+                        if (source.showHours) {
+                            append(if (source.timeFormat == "12h") "hh:" else "HH:")
+                        }
+                        append("mm")
+                        if (source.showSeconds) append(":ss")
+                        if (source.timeFormat == "12h") append(" a")
+                    }
+                    now.format(DateTimeFormatter.ofPattern(pattern))
+                }
+            }
+            delay(1000)
+        }
+    }
+
+    Box(
+        modifier = modifier.fillMaxSize().background(bgColor),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = displayText,
+            color = fontColor,
+            fontSize = source.fontSize.sp,
+            fontFamily = fontFamily,
+            fontWeight = if (source.bold) FontWeight.Bold else FontWeight.Normal
+        )
+    }
+}
+
+@Composable
+private fun QRCodeSourceContent(source: SceneSource.QRCodeSource, modifier: Modifier) {
+    val bgColor = parseHexColor(source.backgroundColor)
+    val fgColor = parseHexColor(source.foregroundColor)
+
+    val qrContent = remember(source.contentType, source.content, source.wifiSsid, source.wifiPassword, source.wifiEncryption, source.wifiHidden) {
+        if (source.contentType == "wifi") {
+            val encType = when (source.wifiEncryption) {
+                "WPA", "WPA2", "WPA3" -> "WPA"
+                "WEP" -> "WEP"
+                else -> "nopass"
+            }
+            buildString {
+                append("WIFI:T:$encType;S:${source.wifiSsid};")
+                if (encType != "nopass") append("P:${source.wifiPassword};")
+                if (source.wifiHidden) append("H:true;")
+                append(";")
+            }
+        } else {
+            source.content
+        }
+    }
+
+    val bitmap = remember(qrContent, source.foregroundColor, source.backgroundColor, source.transparentBackground, source.errorCorrection) {
+        try {
+            val ecLevel = when (source.errorCorrection) {
+                "L" -> ErrorCorrectionLevel.L
+                "Q" -> ErrorCorrectionLevel.Q
+                "H" -> ErrorCorrectionLevel.H
+                else -> ErrorCorrectionLevel.M
+            }
+            val hints = mapOf(
+                EncodeHintType.ERROR_CORRECTION to ecLevel,
+                EncodeHintType.MARGIN to 1
+            )
+            val matrix = QRCodeWriter().encode(qrContent, BarcodeFormat.QR_CODE, 256, 256, hints)
+            val w = matrix.width
+            val h = matrix.height
+            val fgArgb = (((fgColor.alpha * 255).toInt() shl 24) or
+                    ((fgColor.red * 255).toInt() shl 16) or
+                    ((fgColor.green * 255).toInt() shl 8) or
+                    (fgColor.blue * 255).toInt())
+            val bgArgb = if (source.transparentBackground) 0x00000000
+            else (((bgColor.alpha * 255).toInt() shl 24) or
+                    ((bgColor.red * 255).toInt() shl 16) or
+                    ((bgColor.green * 255).toInt() shl 8) or
+                    (bgColor.blue * 255).toInt())
+            val img = BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB)
+            for (y in 0 until h) {
+                for (x in 0 until w) {
+                    img.setRGB(x, y, if (matrix.get(x, y)) fgArgb else bgArgb)
+                }
+            }
+            org.jetbrains.skia.Image.makeFromEncoded(
+                java.io.ByteArrayOutputStream().also {
+                    javax.imageio.ImageIO.write(img, "PNG", it)
+                }.toByteArray()
+            ).toComposeImageBitmap()
+        } catch (_: Exception) {
+            null
+        }
+    }
+
+    Box(
+        modifier = modifier.fillMaxSize().background(if (source.transparentBackground) Color.Transparent else bgColor),
+        contentAlignment = Alignment.Center
+    ) {
+        if (bitmap != null) {
+            Image(
+                painter = BitmapPainter(bitmap),
+                contentDescription = null,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Fit
+            )
+        } else {
+            Text("QR", color = Color.White, fontSize = 14.sp)
+        }
+    }
+}
+
+@Composable
+private fun CameraSourceContent(
+    source: SceneSource.CameraSource,
+    modifier: Modifier,
+    isPresenter: Boolean
+) {
+    Box(
+        modifier = modifier.fillMaxSize().background(Color.DarkGray),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = if (source.deviceName.isNotEmpty()) "Camera: ${source.deviceName}" else "Camera",
+            color = Color.White,
+            fontSize = 14.sp
+        )
+    }
+}
+
+@Composable
+private fun ScreenCaptureSourceContent(source: SceneSource.ScreenCaptureSource, modifier: Modifier) {
+    var frame by remember { mutableStateOf<ImageBitmap?>(null) }
+
+    LaunchedEffect(source.captureMode, source.captureX, source.captureY, source.captureWidth, source.captureHeight, source.captureInterval, source.windowTitle) {
+        try {
+            val robot = Robot()
+            while (isActive) {
+                val rect = if (source.captureMode == "window" && source.windowTitle.isNotBlank()) {
+                    findWindowBounds(source.windowTitle)
+                } else {
+                    Rectangle(source.captureX, source.captureY, source.captureWidth, source.captureHeight)
+                }
+                if (rect != null && rect.width > 0 && rect.height > 0) {
+                    val capture = robot.createScreenCapture(rect)
+                    val skiaImage = org.jetbrains.skia.Image.makeFromEncoded(
+                        java.io.ByteArrayOutputStream().also {
+                            javax.imageio.ImageIO.write(capture, "PNG", it)
+                        }.toByteArray()
+                    )
+                    frame = skiaImage.toComposeImageBitmap()
+                }
+                delay(source.captureInterval.toLong().coerceAtLeast(33))
+            }
+        } catch (_: Exception) {
+            // Robot may fail in headless/restricted environments
+        }
+    }
+
+    Box(
+        modifier = modifier.fillMaxSize().background(Color.Black),
+        contentAlignment = Alignment.Center
+    ) {
+        val currentFrame = frame
+        if (currentFrame != null) {
+            Image(
+                painter = BitmapPainter(currentFrame),
+                contentDescription = null,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Fit
+            )
+        } else {
+            Text("Screen Capture", color = Color.White, fontSize = 14.sp)
+        }
+    }
+}
+
+private fun findWindowBounds(windowTitle: String): Rectangle? {
+    val osName = System.getProperty("os.name", "").lowercase()
+    return try {
+        when {
+            osName.contains("linux") -> findLinuxWindowBounds(windowTitle)
+            osName.contains("win") -> findWindowsWindowBounds(windowTitle)
+            osName.contains("mac") -> findMacWindowBounds(windowTitle)
+            else -> null
+        }
+    } catch (_: Exception) { null }
+}
+
+private fun findLinuxWindowBounds(title: String): Rectangle? {
+    return try {
+        // Try xdotool first
+        val idProcess = ProcessBuilder("xdotool", "search", "--name", title)
+            .redirectErrorStream(true).start()
+        val windowId = idProcess.inputStream.bufferedReader().readText().lines()
+            .firstOrNull { it.isNotBlank() } ?: return null
+        idProcess.waitFor()
+
+        val geomProcess = ProcessBuilder("xdotool", "getwindowgeometry", "--shell", windowId)
+            .redirectErrorStream(true).start()
+        val geomOutput = geomProcess.inputStream.bufferedReader().readText()
+        geomProcess.waitFor()
+
+        val sizeProcess = ProcessBuilder("xdotool", "getwindowfocus", "getwindowgeometry", "--shell", windowId)
+            .redirectErrorStream(true).start()
+        val sizeOutput = sizeProcess.inputStream.bufferedReader().readText()
+        sizeProcess.waitFor()
+
+        var x = 0; var y = 0; var w = 0; var h = 0
+        for (line in (geomOutput + "\n" + sizeOutput).lines()) {
+            when {
+                line.startsWith("X=") -> x = line.substringAfter("=").toIntOrNull() ?: 0
+                line.startsWith("Y=") -> y = line.substringAfter("=").toIntOrNull() ?: 0
+                line.startsWith("WIDTH=") -> w = line.substringAfter("=").toIntOrNull() ?: 0
+                line.startsWith("HEIGHT=") -> h = line.substringAfter("=").toIntOrNull() ?: 0
+            }
+        }
+        if (w > 0 && h > 0) Rectangle(x, y, w, h) else null
+    } catch (_: Exception) { null }
+}
+
+private fun findWindowsWindowBounds(title: String): Rectangle? {
+    return try {
+        val script = """
+            Add-Type @"
+            using System;
+            using System.Runtime.InteropServices;
+            public class Win32 {
+                [DllImport("user32.dll")]
+                public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
+                [DllImport("user32.dll")]
+                public static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
+                [StructLayout(LayoutKind.Sequential)]
+                public struct RECT { public int Left, Top, Right, Bottom; }
+            }
+"@
+            ${"$"}hwnd = [Win32]::FindWindow(${"$"}null, "$title")
+            ${"$"}rect = New-Object Win32+RECT
+            [Win32]::GetWindowRect(${"$"}hwnd, [ref]${"$"}rect)
+            "${"$"}(${"$"}rect.Left),${"$"}(${"$"}rect.Top),${"$"}(${"$"}rect.Right - ${"$"}rect.Left),${"$"}(${"$"}rect.Bottom - ${"$"}rect.Top)"
+        """.trimIndent()
+        val process = ProcessBuilder("powershell", "-Command", script)
+            .redirectErrorStream(true).start()
+        val output = process.inputStream.bufferedReader().readText().trim()
+        process.waitFor()
+        val parts = output.split(",").mapNotNull { it.toIntOrNull() }
+        if (parts.size == 4 && parts[2] > 0 && parts[3] > 0) {
+            Rectangle(parts[0], parts[1], parts[2], parts[3])
+        } else null
+    } catch (_: Exception) { null }
+}
+
+private fun findMacWindowBounds(title: String): Rectangle? {
+    return try {
+        val script = """
+            tell application "System Events"
+                repeat with proc in (every process whose visible is true)
+                    repeat with win in (every window of proc)
+                        if name of win is "$title" then
+                            set {x, y} to position of win
+                            set {w, h} to size of win
+                            return "" & x & "," & y & "," & w & "," & h
+                        end if
+                    end repeat
+                end repeat
+            end tell
+        """.trimIndent()
+        val process = ProcessBuilder("osascript", "-e", script)
+            .redirectErrorStream(true).start()
+        val output = process.inputStream.bufferedReader().readText().trim()
+        process.waitFor()
+        val parts = output.split(",").mapNotNull { it.trim().toIntOrNull() }
+        if (parts.size == 4 && parts[2] > 0 && parts[3] > 0) {
+            Rectangle(parts[0], parts[1], parts[2], parts[3])
+        } else null
+    } catch (_: Exception) { null }
 }

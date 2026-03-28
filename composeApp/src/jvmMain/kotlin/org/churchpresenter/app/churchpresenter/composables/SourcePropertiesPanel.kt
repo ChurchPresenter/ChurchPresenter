@@ -57,6 +57,44 @@ import churchpresenter.composeapp.generated.resources.canvas_shape_stroke_width
 import churchpresenter.composeapp.generated.resources.canvas_angle
 import churchpresenter.composeapp.generated.resources.canvas_opacity
 import churchpresenter.composeapp.generated.resources.canvas_source_browser
+import churchpresenter.composeapp.generated.resources.canvas_source_clock
+import churchpresenter.composeapp.generated.resources.canvas_source_qrcode
+import churchpresenter.composeapp.generated.resources.canvas_source_camera
+import churchpresenter.composeapp.generated.resources.canvas_source_screen_capture
+import churchpresenter.composeapp.generated.resources.canvas_clock_mode
+import churchpresenter.composeapp.generated.resources.canvas_clock_format
+import churchpresenter.composeapp.generated.resources.canvas_clock_show_hours
+import churchpresenter.composeapp.generated.resources.canvas_clock_show_seconds
+import churchpresenter.composeapp.generated.resources.canvas_clock_font_size
+import churchpresenter.composeapp.generated.resources.canvas_clock_target_hour
+import churchpresenter.composeapp.generated.resources.canvas_clock_target_minute
+import churchpresenter.composeapp.generated.resources.canvas_clock_target_second
+import churchpresenter.composeapp.generated.resources.canvas_text_color
+import churchpresenter.composeapp.generated.resources.canvas_text_bg_color
+import churchpresenter.composeapp.generated.resources.canvas_text_bold
+import churchpresenter.composeapp.generated.resources.canvas_qr_type
+import churchpresenter.composeapp.generated.resources.canvas_qr_content
+import churchpresenter.composeapp.generated.resources.canvas_qr_foreground
+import churchpresenter.composeapp.generated.resources.canvas_qr_background
+import churchpresenter.composeapp.generated.resources.canvas_qr_wifi_ssid
+import churchpresenter.composeapp.generated.resources.canvas_qr_wifi_password
+import churchpresenter.composeapp.generated.resources.canvas_qr_wifi_encryption
+import churchpresenter.composeapp.generated.resources.canvas_qr_wifi_hidden
+import churchpresenter.composeapp.generated.resources.canvas_qr_error_correction
+import churchpresenter.composeapp.generated.resources.canvas_camera_device
+import churchpresenter.composeapp.generated.resources.canvas_camera_name
+import churchpresenter.composeapp.generated.resources.canvas_camera_none_found
+import churchpresenter.composeapp.generated.resources.canvas_camera_refresh
+import churchpresenter.composeapp.generated.resources.canvas_capture_x
+import churchpresenter.composeapp.generated.resources.canvas_capture_y
+import churchpresenter.composeapp.generated.resources.canvas_capture_width
+import churchpresenter.composeapp.generated.resources.canvas_capture_height
+import churchpresenter.composeapp.generated.resources.canvas_capture_mode
+import churchpresenter.composeapp.generated.resources.canvas_capture_mode_region
+import churchpresenter.composeapp.generated.resources.canvas_capture_mode_window
+import churchpresenter.composeapp.generated.resources.canvas_capture_window
+import churchpresenter.composeapp.generated.resources.canvas_capture_refresh_windows
+import churchpresenter.composeapp.generated.resources.canvas_capture_interval
 import churchpresenter.composeapp.generated.resources.position
 import churchpresenter.composeapp.generated.resources.canvas_image_not_found
 import churchpresenter.composeapp.generated.resources.canvas_properties
@@ -140,6 +178,10 @@ fun SourcePropertiesPanel(
             is SceneSource.VideoSource -> VideoProperties(source, onSourceUpdate)
             is SceneSource.BrowserSource -> BrowserProperties(source, onSourceUpdate)
             is SceneSource.ShapeSource -> ShapeProperties(source, onSourceUpdate)
+            is SceneSource.ClockSource -> ClockProperties(source, onSourceUpdate)
+            is SceneSource.QRCodeSource -> QRCodeProperties(source, onSourceUpdate)
+            is SceneSource.CameraSource -> CameraProperties(source, onSourceUpdate)
+            is SceneSource.ScreenCaptureSource -> ScreenCaptureProperties(source, onSourceUpdate)
         }
     }
 }
@@ -454,6 +496,425 @@ private fun ShapeProperties(source: SceneSource.ShapeSource, onUpdate: (SceneSou
     }
 }
 
+@Composable
+private fun ClockProperties(source: SceneSource.ClockSource, onUpdate: (SceneSource) -> Unit) {
+    Text(
+        stringResource(Res.string.canvas_source_clock),
+        style = MaterialTheme.typography.labelMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant
+    )
+    DropdownSelector(
+        label = stringResource(Res.string.canvas_clock_mode),
+        items = listOf("Clock", "Countdown"),
+        selected = if (source.mode == "countdown") "Countdown" else "Clock",
+        onSelectedChange = { onUpdate(source.copy(mode = if (it == "Countdown") "countdown" else "clock")) },
+        modifier = Modifier.fillMaxWidth()
+    )
+    DropdownSelector(
+        label = stringResource(Res.string.canvas_clock_format),
+        items = listOf("24h", "12h"),
+        selected = source.timeFormat,
+        onSelectedChange = { onUpdate(source.copy(timeFormat = it)) },
+        modifier = Modifier.fillMaxWidth()
+    )
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+        Checkbox(checked = source.showHours, onCheckedChange = { onUpdate(source.copy(showHours = it)) })
+        Text(stringResource(Res.string.canvas_clock_show_hours), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    }
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+        Checkbox(checked = source.showSeconds, onCheckedChange = { onUpdate(source.copy(showSeconds = it)) })
+        Text(stringResource(Res.string.canvas_clock_show_seconds), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    }
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+        Checkbox(checked = source.bold, onCheckedChange = { onUpdate(source.copy(bold = it)) })
+        Text(stringResource(Res.string.canvas_text_bold), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    }
+    PropertyTextField(stringResource(Res.string.canvas_clock_font_size), source.fontSize.toString()) { v ->
+        v.toIntOrNull()?.let { onUpdate(source.copy(fontSize = it.coerceIn(8, 500))) }
+    }
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(stringResource(Res.string.canvas_text_color), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        ColorPickerField(color = source.fontColor, onColorChange = { onUpdate(source.copy(fontColor = it)) })
+    }
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(stringResource(Res.string.canvas_text_bg_color), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        ColorPickerField(color = source.backgroundColor, onColorChange = { onUpdate(source.copy(backgroundColor = it)) })
+    }
+    if (source.mode == "countdown") {
+        PropertyTextField(stringResource(Res.string.canvas_clock_target_hour), source.targetHour.toString()) { v ->
+            v.toIntOrNull()?.let { onUpdate(source.copy(targetHour = it.coerceIn(0, 23))) }
+        }
+        PropertyTextField(stringResource(Res.string.canvas_clock_target_minute), source.targetMinute.toString()) { v ->
+            v.toIntOrNull()?.let { onUpdate(source.copy(targetMinute = it.coerceIn(0, 59))) }
+        }
+        PropertyTextField(stringResource(Res.string.canvas_clock_target_second), source.targetSecond.toString()) { v ->
+            v.toIntOrNull()?.let { onUpdate(source.copy(targetSecond = it.coerceIn(0, 59))) }
+        }
+    }
+}
+
+@Composable
+private fun QRCodeProperties(source: SceneSource.QRCodeSource, onUpdate: (SceneSource) -> Unit) {
+    Text(
+        stringResource(Res.string.canvas_source_qrcode),
+        style = MaterialTheme.typography.labelMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant
+    )
+    val typeOptions = listOf("URL", "Text", "Email", "Phone", "SMS", "WiFi", "vCard")
+    val typeMap = mapOf(
+        "url" to "URL", "text" to "Text", "email" to "Email", "phone" to "Phone",
+        "sms" to "SMS", "wifi" to "WiFi", "vcard" to "vCard"
+    )
+    val reverseTypeMap = mapOf(
+        "URL" to "url", "Text" to "text", "Email" to "email", "Phone" to "phone",
+        "SMS" to "sms", "WiFi" to "wifi", "vCard" to "vcard"
+    )
+    DropdownSelector(
+        label = stringResource(Res.string.canvas_qr_type),
+        items = typeOptions,
+        selected = typeMap[source.contentType] ?: "URL",
+        onSelectedChange = { newType ->
+            val type = reverseTypeMap[newType] ?: "url"
+            val prefill = when (type) {
+                "url" -> "https://example.com"
+                "text" -> "Your text here"
+                "email" -> "mailto:name@example.com"
+                "phone" -> "tel:+1234567890"
+                "sms" -> "smsto:+1234567890:Message"
+                "vcard" -> "BEGIN:VCARD\nVERSION:3.0\nFN:Name\nTEL:+1234567890\nEMAIL:name@example.com\nEND:VCARD"
+                else -> source.content
+            }
+            onUpdate(source.copy(contentType = type, content = if (type != "wifi") prefill else source.content))
+        },
+        modifier = Modifier.fillMaxWidth()
+    )
+
+    if (source.contentType == "wifi") {
+        PropertyTextField(stringResource(Res.string.canvas_qr_wifi_ssid), source.wifiSsid) { v ->
+            onUpdate(source.copy(wifiSsid = v))
+        }
+        PropertyTextField(stringResource(Res.string.canvas_qr_wifi_password), source.wifiPassword) { v ->
+            onUpdate(source.copy(wifiPassword = v))
+        }
+        DropdownSelector(
+            label = stringResource(Res.string.canvas_qr_wifi_encryption),
+            items = listOf("WPA", "WPA2", "WPA3", "WEP", "None"),
+            selected = source.wifiEncryption,
+            onSelectedChange = { onUpdate(source.copy(wifiEncryption = it)) },
+            modifier = Modifier.fillMaxWidth()
+        )
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            Checkbox(checked = source.wifiHidden, onCheckedChange = { onUpdate(source.copy(wifiHidden = it)) })
+            Text(stringResource(Res.string.canvas_qr_wifi_hidden), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+    } else {
+        PropertyTextField(stringResource(Res.string.canvas_qr_content), source.content) { v ->
+            onUpdate(source.copy(content = v))
+        }
+    }
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(stringResource(Res.string.canvas_qr_foreground), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        ColorPickerField(color = source.foregroundColor, onColorChange = { onUpdate(source.copy(foregroundColor = it)) })
+    }
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+        Checkbox(
+            checked = source.transparentBackground,
+            onCheckedChange = { onUpdate(source.copy(transparentBackground = it)) }
+        )
+        Text(stringResource(Res.string.canvas_transparent_bg), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    }
+    if (!source.transparentBackground) {
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(stringResource(Res.string.canvas_qr_background), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            ColorPickerField(color = source.backgroundColor, onColorChange = { onUpdate(source.copy(backgroundColor = it)) })
+        }
+    }
+    DropdownSelector(
+        label = stringResource(Res.string.canvas_qr_error_correction),
+        items = listOf("L", "M", "Q", "H"),
+        selected = source.errorCorrection,
+        onSelectedChange = { onUpdate(source.copy(errorCorrection = it)) },
+        modifier = Modifier.fillMaxWidth()
+    )
+}
+
+@Composable
+private fun CameraProperties(source: SceneSource.CameraSource, onUpdate: (SceneSource) -> Unit) {
+    Text(
+        stringResource(Res.string.canvas_source_camera),
+        style = MaterialTheme.typography.labelMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant
+    )
+
+    var devices by remember { mutableStateOf(listCameraDevices()) }
+    val noCamerasLabel = stringResource(Res.string.canvas_camera_none_found)
+
+    Button(
+        onClick = { devices = listCameraDevices() },
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Text(stringResource(Res.string.canvas_camera_refresh), style = MaterialTheme.typography.labelSmall)
+    }
+
+    if (devices.isNotEmpty()) {
+        val items = devices.map { it.displayName }
+        val selectedDisplay = devices.find { it.path == source.devicePath }?.displayName
+            ?: if (source.devicePath.isNotEmpty()) source.devicePath else items.first()
+        DropdownSelector(
+            label = stringResource(Res.string.canvas_camera_device),
+            items = items,
+            selected = selectedDisplay,
+            onSelectedChange = { selected ->
+                val device = devices.find { it.displayName == selected }
+                if (device != null) {
+                    onUpdate(source.copy(devicePath = device.path, deviceName = device.name))
+                }
+            },
+            modifier = Modifier.fillMaxWidth()
+        )
+    } else {
+        Text(
+            noCamerasLabel,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+}
+
+private data class CameraDevice(val name: String, val path: String, val displayName: String)
+
+private fun listCameraDevices(): List<CameraDevice> {
+    val osName = System.getProperty("os.name", "").lowercase()
+    return when {
+        osName.contains("linux") -> listLinuxCameras()
+        osName.contains("win") -> listWindowsCameras()
+        osName.contains("mac") -> listMacCameras()
+        else -> emptyList()
+    }
+}
+
+private fun listLinuxCameras(): List<CameraDevice> {
+    return try {
+        val videoDir = java.io.File("/dev")
+        videoDir.listFiles { f -> f.name.startsWith("video") }
+            ?.sorted()
+            ?.map { file ->
+                val name = try {
+                    val nameFile = java.io.File("/sys/class/video4linux/${file.name}/name")
+                    if (nameFile.exists()) nameFile.readText().trim() else file.name
+                } catch (_: Exception) { file.name }
+                CameraDevice(
+                    name = name,
+                    path = "v4l2://${file.absolutePath}",
+                    displayName = "$name (${file.name})"
+                )
+            } ?: emptyList()
+    } catch (_: Exception) { emptyList() }
+}
+
+private fun listWindowsCameras(): List<CameraDevice> {
+    return try {
+        val process = ProcessBuilder("wmic", "path", "Win32_PnPEntity", "where",
+            "PNPClass='Camera' OR PNPClass='Image'", "get", "Name", "/format:list")
+            .redirectErrorStream(true).start()
+        val output = process.inputStream.bufferedReader().readText()
+        process.waitFor()
+        output.lines()
+            .filter { it.startsWith("Name=") }
+            .mapIndexed { index, line ->
+                val name = line.removePrefix("Name=").trim()
+                CameraDevice(
+                    name = name,
+                    path = "dshow://",
+                    displayName = name
+                )
+            }
+    } catch (_: Exception) { emptyList() }
+}
+
+private fun listMacCameras(): List<CameraDevice> {
+    return try {
+        val process = ProcessBuilder("system_profiler", "SPCameraDataType", "-detailLevel", "mini")
+            .redirectErrorStream(true).start()
+        val output = process.inputStream.bufferedReader().readText()
+        process.waitFor()
+        val names = output.lines()
+            .filter { it.contains(":") && !it.trim().startsWith("Camera") && it.trim().endsWith(":") }
+            .map { it.trim().removeSuffix(":") }
+        names.mapIndexed { index, name ->
+            CameraDevice(
+                name = name,
+                path = "avfoundation://$index",
+                displayName = name
+            )
+        }
+    } catch (_: Exception) { emptyList() }
+}
+
+@Composable
+private fun ScreenCaptureProperties(source: SceneSource.ScreenCaptureSource, onUpdate: (SceneSource) -> Unit) {
+    Text(
+        stringResource(Res.string.canvas_source_screen_capture),
+        style = MaterialTheme.typography.labelMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant
+    )
+    val regionLabel = stringResource(Res.string.canvas_capture_mode_region)
+    val windowLabel = stringResource(Res.string.canvas_capture_mode_window)
+    DropdownSelector(
+        label = stringResource(Res.string.canvas_capture_mode),
+        items = listOf(regionLabel, windowLabel),
+        selected = if (source.captureMode == "window") windowLabel else regionLabel,
+        onSelectedChange = {
+            val mode = if (it == windowLabel) "window" else "region"
+            onUpdate(source.copy(captureMode = mode))
+        },
+        modifier = Modifier.fillMaxWidth()
+    )
+    if (source.captureMode == "window") {
+        var windows by remember { mutableStateOf(listOpenWindows()) }
+        val windowTitles = windows.map { it.title }
+
+        Button(
+            onClick = { windows = listOpenWindows() },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(stringResource(Res.string.canvas_capture_refresh_windows), style = MaterialTheme.typography.labelSmall)
+        }
+
+        if (windowTitles.isNotEmpty()) {
+            DropdownSelector(
+                label = stringResource(Res.string.canvas_capture_window),
+                items = windowTitles,
+                selected = if (source.windowTitle in windowTitles) source.windowTitle else windowTitles.first(),
+                onSelectedChange = { onUpdate(source.copy(windowTitle = it)) },
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+    } else {
+        PropertyTextField(stringResource(Res.string.canvas_capture_x), source.captureX.toString()) { v ->
+            v.toIntOrNull()?.let { onUpdate(source.copy(captureX = it.coerceAtLeast(0))) }
+        }
+        PropertyTextField(stringResource(Res.string.canvas_capture_y), source.captureY.toString()) { v ->
+            v.toIntOrNull()?.let { onUpdate(source.copy(captureY = it.coerceAtLeast(0))) }
+        }
+        PropertyTextField(stringResource(Res.string.canvas_capture_width), source.captureWidth.toString()) { v ->
+            v.toIntOrNull()?.let { onUpdate(source.copy(captureWidth = it.coerceAtLeast(1))) }
+        }
+        PropertyTextField(stringResource(Res.string.canvas_capture_height), source.captureHeight.toString()) { v ->
+            v.toIntOrNull()?.let { onUpdate(source.copy(captureHeight = it.coerceAtLeast(1))) }
+        }
+    }
+    PropertySliderWithInput(stringResource(Res.string.canvas_capture_interval), source.captureInterval.toFloat(), 33f, 1000f, "ms") { v ->
+        onUpdate(source.copy(captureInterval = v.toInt()))
+    }
+}
+
+private data class WindowInfo(val title: String, val id: Long)
+
+private fun listOpenWindows(): List<WindowInfo> {
+    val osName = System.getProperty("os.name", "").lowercase()
+    return when {
+        osName.contains("linux") -> listLinuxWindows()
+        osName.contains("win") -> listWindowsWindows()
+        osName.contains("mac") -> listMacWindows()
+        else -> emptyList()
+    }
+}
+
+private fun listLinuxWindows(): List<WindowInfo> {
+    // Try wmctrl first (most reliable)
+    try {
+        val process = ProcessBuilder("wmctrl", "-l")
+            .redirectErrorStream(true).start()
+        val output = process.inputStream.bufferedReader().readText()
+        process.waitFor()
+        if (process.exitValue() == 0) {
+            val windows = output.lines()
+                .filter { it.isNotBlank() }
+                .mapNotNull { line ->
+                    val parts = line.split(Regex("\\s+"), limit = 5)
+                    if (parts.size >= 5) {
+                        val id = parts[0].removePrefix("0x").toLongOrNull(16) ?: 0L
+                        val title = parts[4]
+                        if (title.isNotBlank()) WindowInfo(title, id) else null
+                    } else null
+                }
+            if (windows.isNotEmpty()) return windows
+        }
+    } catch (_: Exception) {}
+
+    // Fallback: xdotool search for visible windows, get each name
+    try {
+        val idProcess = ProcessBuilder("xdotool", "search", "--onlyvisible", "--name", "")
+            .redirectErrorStream(true).start()
+        val ids = idProcess.inputStream.bufferedReader().readText()
+        idProcess.waitFor()
+        val windows = ids.lines().filter { it.isNotBlank() }.mapNotNull { id ->
+            try {
+                val nameProcess = ProcessBuilder("xdotool", "getwindowname", id)
+                    .redirectErrorStream(true).start()
+                val name = nameProcess.inputStream.bufferedReader().readText().trim()
+                nameProcess.waitFor()
+                if (name.isNotBlank()) WindowInfo(name, id.toLongOrNull() ?: 0L) else null
+            } catch (_: Exception) { null }
+        }.distinctBy { it.title }
+        if (windows.isNotEmpty()) return windows
+    } catch (_: Exception) {}
+
+    // Last fallback: xprop on root window
+    try {
+        val process = ProcessBuilder("bash", "-c",
+            "xprop -root _NET_CLIENT_LIST_STACKING | grep -oP '0x[0-9a-fA-F]+' | while read wid; do xdotool getwindowname \"\$wid\" 2>/dev/null; done")
+            .redirectErrorStream(true).start()
+        val output = process.inputStream.bufferedReader().readText()
+        process.waitFor()
+        return output.lines()
+            .filter { it.isNotBlank() }
+            .distinct()
+            .map { WindowInfo(it, 0L) }
+    } catch (_: Exception) { return emptyList() }
+}
+
+private fun listWindowsWindows(): List<WindowInfo> {
+    return try {
+        val process = ProcessBuilder("powershell", "-Command",
+            "Get-Process | Where-Object {\$_.MainWindowTitle -ne ''} | Select-Object -Property MainWindowTitle | Format-List")
+            .redirectErrorStream(true).start()
+        val output = process.inputStream.bufferedReader().readText()
+        process.waitFor()
+        output.lines()
+            .filter { it.startsWith("MainWindowTitle") }
+            .mapNotNull { line ->
+                val title = line.substringAfter(":").trim()
+                if (title.isNotBlank()) WindowInfo(title, 0L) else null
+            }
+    } catch (_: Exception) { emptyList() }
+}
+
+private fun listMacWindows(): List<WindowInfo> {
+    return try {
+        val script = """
+            tell application "System Events"
+                set windowList to {}
+                repeat with proc in (every process whose visible is true)
+                    repeat with win in (every window of proc)
+                        set end of windowList to (name of win)
+                    end repeat
+                end repeat
+                return windowList
+            end tell
+        """.trimIndent()
+        val process = ProcessBuilder("osascript", "-e", script)
+            .redirectErrorStream(true).start()
+        val output = process.inputStream.bufferedReader().readText()
+        process.waitFor()
+        output.split(",")
+            .map { it.trim() }
+            .filter { it.isNotBlank() }
+            .map { WindowInfo(it, 0L) }
+    } catch (_: Exception) { emptyList() }
+}
+
 // --- Helper composables ---
 
 @Composable
@@ -551,6 +1012,10 @@ private fun updateName(source: SceneSource, name: String): SceneSource = when (s
     is SceneSource.VideoSource -> source.copy(name = name)
     is SceneSource.BrowserSource -> source.copy(name = name)
     is SceneSource.ShapeSource -> source.copy(name = name)
+    is SceneSource.ClockSource -> source.copy(name = name)
+    is SceneSource.QRCodeSource -> source.copy(name = name)
+    is SceneSource.CameraSource -> source.copy(name = name)
+    is SceneSource.ScreenCaptureSource -> source.copy(name = name)
 }
 
 private fun updateTransform(source: SceneSource, transform: SourceTransform): SceneSource = when (source) {
@@ -560,6 +1025,10 @@ private fun updateTransform(source: SceneSource, transform: SourceTransform): Sc
     is SceneSource.VideoSource -> source.copy(transform = transform)
     is SceneSource.BrowserSource -> source.copy(transform = transform)
     is SceneSource.ShapeSource -> source.copy(transform = transform)
+    is SceneSource.ClockSource -> source.copy(transform = transform)
+    is SceneSource.QRCodeSource -> source.copy(transform = transform)
+    is SceneSource.CameraSource -> source.copy(transform = transform)
+    is SceneSource.ScreenCaptureSource -> source.copy(transform = transform)
 }
 
 @Composable

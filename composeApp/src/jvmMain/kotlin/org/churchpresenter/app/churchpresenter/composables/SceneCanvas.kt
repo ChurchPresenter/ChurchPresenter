@@ -7,6 +7,7 @@ import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
@@ -79,6 +80,7 @@ fun SceneCanvas(
     Box(
         modifier = modifier
             .aspectRatio(scene.canvasWidth.toFloat() / scene.canvasHeight.toFloat())
+            .clipToBounds()
             .background(Color.Black)
             .onSizeChanged { canvasSize = it }
             .then(

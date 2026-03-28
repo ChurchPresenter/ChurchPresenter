@@ -149,6 +149,10 @@ class SceneViewModel {
                 is SceneSource.VideoSource -> source.copy(visible = !source.visible)
                 is SceneSource.BrowserSource -> source.copy(visible = !source.visible)
                 is SceneSource.ShapeSource -> source.copy(visible = !source.visible)
+                is SceneSource.ClockSource -> source.copy(visible = !source.visible)
+                is SceneSource.QRCodeSource -> source.copy(visible = !source.visible)
+                is SceneSource.CameraSource -> source.copy(visible = !source.visible)
+                is SceneSource.ScreenCaptureSource -> source.copy(visible = !source.visible)
             }
         }
     }
@@ -162,6 +166,10 @@ class SceneViewModel {
                 is SceneSource.VideoSource -> source.copy(locked = !source.locked)
                 is SceneSource.BrowserSource -> source.copy(locked = !source.locked)
                 is SceneSource.ShapeSource -> source.copy(locked = !source.locked)
+                is SceneSource.ClockSource -> source.copy(locked = !source.locked)
+                is SceneSource.QRCodeSource -> source.copy(locked = !source.locked)
+                is SceneSource.CameraSource -> source.copy(locked = !source.locked)
+                is SceneSource.ScreenCaptureSource -> source.copy(locked = !source.locked)
             }
         }
     }
@@ -175,6 +183,10 @@ class SceneViewModel {
                 is SceneSource.VideoSource -> source.copy(transform = transform)
                 is SceneSource.BrowserSource -> source.copy(transform = transform)
                 is SceneSource.ShapeSource -> source.copy(transform = transform)
+                is SceneSource.ClockSource -> source.copy(transform = transform)
+                is SceneSource.QRCodeSource -> source.copy(transform = transform)
+                is SceneSource.CameraSource -> source.copy(transform = transform)
+                is SceneSource.ScreenCaptureSource -> source.copy(transform = transform)
             }
         }
     }

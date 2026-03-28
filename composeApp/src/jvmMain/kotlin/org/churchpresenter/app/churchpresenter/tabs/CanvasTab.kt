@@ -4,6 +4,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.TooltipArea
 import androidx.compose.foundation.TooltipPlacement
 import androidx.compose.foundation.background
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
@@ -79,6 +80,10 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import java.util.UUID
 import churchpresenter.composeapp.generated.resources.canvas_source_shape
+import churchpresenter.composeapp.generated.resources.canvas_source_clock
+import churchpresenter.composeapp.generated.resources.canvas_source_qrcode
+import churchpresenter.composeapp.generated.resources.canvas_source_camera
+import churchpresenter.composeapp.generated.resources.canvas_source_screen_capture
 import churchpresenter.composeapp.generated.resources.canvas_tool_select
 import churchpresenter.composeapp.generated.resources.canvas_tool_rectangle
 import churchpresenter.composeapp.generated.resources.canvas_tool_ellipse
@@ -148,12 +153,17 @@ fun CanvasTab(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         if (isRenaming) {
-                            OutlinedTextField(
+                            BasicTextField(
                                 value = renameText,
                                 onValueChange = { renameText = it },
                                 singleLine = true,
-                                textStyle = MaterialTheme.typography.bodySmall,
-                                modifier = Modifier.weight(1f)
+                                textStyle = MaterialTheme.typography.bodySmall.copy(
+                                    color = MaterialTheme.colorScheme.onSurface
+                                ),
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .border(1.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(4.dp))
+                                    .padding(horizontal = 6.dp, vertical = 4.dp)
                             )
                             IconButton(
                                 onClick = {
@@ -358,14 +368,53 @@ fun CanvasTab(
                                 }
                             )
                             DropdownMenuItem(
-                                text = { Text(stringResource(Res.string.canvas_source_shape)) },
+                                text = { Text(stringResource(Res.string.canvas_source_clock)) },
                                 onClick = {
                                     showAddMenu = false
                                     sceneViewModel.addSource(
-                                        SceneSource.ShapeSource(
+                                        SceneSource.ClockSource(
                                             id = UUID.randomUUID().toString(),
-                                            name = "Shape",
-                                            transform = SourceTransform(width = 0.3f, height = 0.3f)
+                                            name = "Clock",
+                                            transform = SourceTransform(width = 0.4f, height = 0.15f)
+                                        )
+                                    )
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = { Text(stringResource(Res.string.canvas_source_qrcode)) },
+                                onClick = {
+                                    showAddMenu = false
+                                    sceneViewModel.addSource(
+                                        SceneSource.QRCodeSource(
+                                            id = UUID.randomUUID().toString(),
+                                            name = "QR Code",
+                                            transform = SourceTransform(width = 0.2f, height = 0.2f)
+                                        )
+                                    )
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = { Text(stringResource(Res.string.canvas_source_camera)) },
+                                onClick = {
+                                    showAddMenu = false
+                                    sceneViewModel.addSource(
+                                        SceneSource.CameraSource(
+                                            id = UUID.randomUUID().toString(),
+                                            name = "Camera",
+                                            transform = SourceTransform()
+                                        )
+                                    )
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = { Text(stringResource(Res.string.canvas_source_screen_capture)) },
+                                onClick = {
+                                    showAddMenu = false
+                                    sceneViewModel.addSource(
+                                        SceneSource.ScreenCaptureSource(
+                                            id = UUID.randomUUID().toString(),
+                                            name = "Screen Capture",
+                                            transform = SourceTransform()
                                         )
                                     )
                                 }
