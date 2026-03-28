@@ -31,6 +31,7 @@ import churchpresenter.composeapp.generated.resources.canvas_placeholder_screen_
 import org.churchpresenter.app.churchpresenter.models.SceneSource
 import org.churchpresenter.app.churchpresenter.models.PathPoint
 import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
+import org.churchpresenter.app.churchpresenter.utils.WindowsWindowCapture
 import org.churchpresenter.app.churchpresenter.utils.X11WindowCapture
 import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDefault
 import androidx.compose.runtime.LaunchedEffect
@@ -479,8 +480,9 @@ private fun ScreenCaptureSourceContent(source: SceneSource.ScreenCaptureSource, 
                 val capture: BufferedImage? = if (source.captureMode == "window" && source.windowId.isNotBlank()) {
                     withContext(Dispatchers.IO) {
                         val wid = source.windowId.removePrefix("0x").toLongOrNull(16) ?: 0L
-                        // Try X11 Composite (captures occluded windows), fall back to Robot + bounds
-                        X11WindowCapture.captureWindow(wid)
+                        // Try platform-specific occluded capture, fall back to Robot + bounds
+                        WindowsWindowCapture.captureWindow(wid)
+                            ?: X11WindowCapture.captureWindow(wid)
                             ?: run {
                                 val rect = findWindowBounds(source.windowTitle)
                                 if (rect != null && rect.width > 0 && rect.height > 0) robot.createScreenCapture(rect) else null
@@ -580,31 +582,11 @@ private fun findLinuxWindowBounds(title: String): Rectangle? {
 
 private fun findWindowsWindowBounds(title: String): Rectangle? {
     return try {
-        val script = """
-            Add-Type @"
-            using System;
-            using System.Runtime.InteropServices;
-            public class Win32 {
-                [DllImport("user32.dll")]
-                public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
-                [DllImport("user32.dll")]
-                public static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
-                [StructLayout(LayoutKind.Sequential)]
-                public struct RECT { public int Left, Top, Right, Bottom; }
-            }
-"@
-            ${"$"}hwnd = [Win32]::FindWindow(${"$"}null, "$title")
-            ${"$"}rect = New-Object Win32+RECT
-            [Win32]::GetWindowRect(${"$"}hwnd, [ref]${"$"}rect)
-            "${"$"}(${"$"}rect.Left),${"$"}(${"$"}rect.Top),${"$"}(${"$"}rect.Right - ${"$"}rect.Left),${"$"}(${"$"}rect.Bottom - ${"$"}rect.Top)"
-        """.trimIndent()
-        val process = ProcessBuilder("powershell", "-Command", script)
-            .redirectErrorStream(true).start()
-        val output = process.inputStream.bufferedReader().readText().trim()
-        process.waitFor()
-        val parts = output.split(",").mapNotNull { it.toIntOrNull() }
-        if (parts.size == 4 && parts[2] > 0 && parts[3] > 0) {
-            Rectangle(parts[0], parts[1], parts[2], parts[3])
+        // Find the window by title using JNA EnumWindows
+        val windows = WindowsWindowCapture.listWindows()
+        val win = windows.find { it.title == title }
+        if (win != null) {
+            WindowsWindowCapture.getWindowBounds(win.hwnd)
         } else null
     } catch (_: Exception) { null }
 }

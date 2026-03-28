@@ -110,6 +110,7 @@ import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
 import org.churchpresenter.app.churchpresenter.models.SceneSource
 import org.churchpresenter.app.churchpresenter.models.SourceTransform
 import org.churchpresenter.app.churchpresenter.utils.Utils
+import org.churchpresenter.app.churchpresenter.utils.WindowsWindowCapture
 import org.jetbrains.compose.resources.painterResource
 import java.io.File
 import javax.swing.filechooser.FileNameExtensionFilter
@@ -714,23 +715,53 @@ private fun listLinuxCameras(): List<CameraDevice> {
 }
 
 private fun listWindowsCameras(): List<CameraDevice> {
-    return try {
-        val process = ProcessBuilder("wmic", "path", "Win32_PnPEntity", "where",
-            "PNPClass='Camera' OR PNPClass='Image'", "get", "Name", "/format:list")
+    // Try Get-CimInstance (modern, works on all supported Windows)
+    try {
+        val process = ProcessBuilder("powershell", "-NoProfile", "-Command",
+            "Get-CimInstance Win32_PnPEntity | Where-Object { \$_.PNPClass -eq 'Camera' -or \$_.PNPClass -eq 'Image' } | Select-Object -ExpandProperty Name")
             .redirectErrorStream(true).start()
         val output = process.inputStream.bufferedReader().readText()
         process.waitFor()
-        output.lines()
-            .filter { it.startsWith("Name=") }
-            .mapIndexed { index, line ->
-                val name = line.removePrefix("Name=").trim()
+        val devices = output.lines()
+            .map { it.trim() }
+            .filter { it.isNotBlank() }
+            .mapIndexed { index, name ->
                 CameraDevice(
                     name = name,
-                    path = "dshow://",
+                    path = "dshow://:dshow-vdev=$name",
                     displayName = name
                 )
             }
-    } catch (_: Exception) { emptyList() }
+        if (devices.isNotEmpty()) return devices
+    } catch (_: Exception) {}
+
+    // Fallback: ffmpeg device listing
+    try {
+        val process = ProcessBuilder("ffmpeg", "-list_devices", "true", "-f", "dshow", "-i", "dummy")
+            .redirectErrorStream(true).start()
+        val output = process.inputStream.bufferedReader().readText()
+        process.waitFor()
+        val devices = mutableListOf<CameraDevice>()
+        var isVideo = false
+        for (line in output.lines()) {
+            if (line.contains("DirectShow video devices")) isVideo = true
+            else if (line.contains("DirectShow audio devices")) isVideo = false
+            else if (isVideo) {
+                val match = Regex("\"(.+?)\"").find(line)
+                if (match != null) {
+                    val name = match.groupValues[1]
+                    devices.add(CameraDevice(
+                        name = name,
+                        path = "dshow://:dshow-vdev=$name",
+                        displayName = name
+                    ))
+                }
+            }
+        }
+        if (devices.isNotEmpty()) return devices
+    } catch (_: Exception) {}
+
+    return emptyList()
 }
 
 private fun listMacCameras(): List<CameraDevice> {
@@ -877,17 +908,7 @@ private fun listLinuxWindows(): List<WindowInfo> {
 
 private fun listWindowsWindows(): List<WindowInfo> {
     return try {
-        val process = ProcessBuilder("powershell", "-Command",
-            "Get-Process | Where-Object {\$_.MainWindowTitle -ne ''} | Select-Object -Property MainWindowTitle | Format-List")
-            .redirectErrorStream(true).start()
-        val output = process.inputStream.bufferedReader().readText()
-        process.waitFor()
-        output.lines()
-            .filter { it.startsWith("MainWindowTitle") }
-            .mapNotNull { line ->
-                val title = line.substringAfter(":").trim()
-                if (title.isNotBlank()) WindowInfo(title, 0L) else null
-            }
+        WindowsWindowCapture.listWindows().map { WindowInfo(it.title, it.hwnd) }
     } catch (_: Exception) { emptyList() }
 }
 
