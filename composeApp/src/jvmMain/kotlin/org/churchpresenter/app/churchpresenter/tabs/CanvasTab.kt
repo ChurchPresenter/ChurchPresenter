@@ -125,6 +125,12 @@ fun CanvasTab(
     LaunchedEffect(Unit) {
         focusRequester.requestFocus()
     }
+    // Re-grab focus whenever a source is selected so Delete key works right after clicking canvas items
+    LaunchedEffect(selectedSourceId) {
+        if (selectedSourceId != null) {
+            focusRequester.requestFocus()
+        }
+    }
 
     Row(
         modifier = modifier
