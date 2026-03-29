@@ -78,6 +78,7 @@ import churchpresenter.composeapp.generated.resources.client_label_placeholder
 import churchpresenter.composeapp.generated.resources.client_label_save
 import churchpresenter.composeapp.generated.resources.companion_server
 import churchpresenter.composeapp.generated.resources.api_key_qr_title
+import churchpresenter.composeapp.generated.resources.close
 import churchpresenter.composeapp.generated.resources.copy_api_key
 import churchpresenter.composeapp.generated.resources.show_qr_code
 import churchpresenter.composeapp.generated.resources.copy_url
@@ -695,7 +696,7 @@ private fun ApiKeyQrDialog(apiKey: String, onDismiss: () -> Unit) {
                 color = MaterialTheme.colorScheme.onSurface
             )
             Button(onClick = onDismiss) {
-                Text("Close", style = MaterialTheme.typography.labelSmall)
+                Text(stringResource(Res.string.close), style = MaterialTheme.typography.labelSmall)
             }
         }
         }

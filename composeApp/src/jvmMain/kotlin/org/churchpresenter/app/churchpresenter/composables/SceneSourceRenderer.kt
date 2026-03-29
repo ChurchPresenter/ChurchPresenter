@@ -27,6 +27,10 @@ import churchpresenter.composeapp.generated.resources.canvas_image_not_found
 import churchpresenter.composeapp.generated.resources.canvas_placeholder_qr
 import churchpresenter.composeapp.generated.resources.canvas_placeholder_camera
 import churchpresenter.composeapp.generated.resources.canvas_placeholder_camera_default
+import churchpresenter.composeapp.generated.resources.canvas_video_vlc_not_found
+import churchpresenter.composeapp.generated.resources.canvas_video_no_selection
+import churchpresenter.composeapp.generated.resources.canvas_video_file_not_found
+import churchpresenter.composeapp.generated.resources.canvas_video_loading
 import churchpresenter.composeapp.generated.resources.canvas_placeholder_screen_capture
 import org.churchpresenter.app.churchpresenter.models.SceneSource
 import org.churchpresenter.app.churchpresenter.models.PathPoint
@@ -198,9 +202,9 @@ private fun VideoSourceContent(
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = if (!isVlcAvailable) "VLC not found"
-                       else if (file == null) "No video selected"
-                       else "File not found: ${source.filePath}",
+                text = if (!isVlcAvailable) stringResource(Res.string.canvas_video_vlc_not_found)
+                       else if (file == null) stringResource(Res.string.canvas_video_no_selection)
+                       else stringResource(Res.string.canvas_video_file_not_found, source.filePath),
                 color = Color.White,
                 fontSize = 14.sp
             )
@@ -277,7 +281,7 @@ private fun VideoSourceContent(
             modifier = modifier.fillMaxSize().background(Color.DarkGray),
             contentAlignment = Alignment.Center
         ) {
-            Text("Loading...", color = Color.White, fontSize = 14.sp)
+            Text(stringResource(Res.string.canvas_video_loading), color = Color.White, fontSize = 14.sp)
         }
     }
 }

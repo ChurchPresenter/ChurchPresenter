@@ -713,6 +713,10 @@
     <string name="canvas_source_video">Video</string>
     <string name="canvas_video_loop">Loop</string>
     <string name="canvas_video_volume">Volume</string>
+    <string name="canvas_video_vlc_not_found">VLC not found</string>
+    <string name="canvas_video_no_selection">No video selected</string>
+    <string name="canvas_video_file_not_found">File not found: %1$s</string>
+    <string name="canvas_video_loading">Loading…</string>
     <string name="canvas_transform">Transform</string>
     <string name="canvas_font_color">Font Color</string>
     <string name="canvas_bg_color">Bg Color</string>
@@ -797,6 +801,7 @@
     <string name="copy_api_key">Copy</string>
     <string name="show_qr_code">QR</string>
     <string name="api_key_qr_title">API Key QR Code</string>
+    <string name="close">Close</string>
     <string name="server_url_label">Server URL</string>
     <string name="copy_url">Copy URL</string>
     <string name="server_host_label">Host Override</string>
