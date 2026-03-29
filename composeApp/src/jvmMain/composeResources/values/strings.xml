@@ -711,6 +711,8 @@
     <string name="canvas_source_text">Text</string>
     <string name="canvas_source_color">Color</string>
     <string name="canvas_source_video">Video</string>
+    <string name="canvas_video_loop">Loop</string>
+    <string name="canvas_video_volume">Volume</string>
     <string name="canvas_transform">Transform</string>
     <string name="canvas_font_color">Font Color</string>
     <string name="canvas_bg_color">Bg Color</string>
@@ -720,6 +722,7 @@
     <string name="canvas_gradient">Gradient</string>
     <string name="canvas_source_shape">Shape</string>
     <string name="canvas_shape_stroke_color">Stroke</string>
+    <string name="canvas_shape_show_stroke">Show Stroke</string>
     <string name="canvas_shape_fill_color">Fill</string>
     <string name="canvas_shape_stroke_width">Stroke Width</string>
     <string name="canvas_tool_select">Select</string>
@@ -792,6 +795,8 @@
     <string name="api_key_hint">Enter a secret key…</string>
     <string name="generate_api_key">Generate</string>
     <string name="copy_api_key">Copy</string>
+    <string name="show_qr_code">QR</string>
+    <string name="api_key_qr_title">API Key QR Code</string>
     <string name="server_url_label">Server URL</string>
     <string name="copy_url">Copy URL</string>
     <string name="server_host_label">Host Override</string>

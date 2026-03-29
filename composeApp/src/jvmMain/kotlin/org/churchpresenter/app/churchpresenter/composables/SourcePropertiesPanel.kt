@@ -1,6 +1,11 @@
 package org.churchpresenter.app.churchpresenter.composables
 
 import androidx.compose.foundation.LocalScrollbarStyle
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
@@ -51,6 +56,7 @@ import churchpresenter.composeapp.generated.resources.canvas_color_2
 import churchpresenter.composeapp.generated.resources.canvas_font_color
 import churchpresenter.composeapp.generated.resources.canvas_gradient
 import churchpresenter.composeapp.generated.resources.canvas_source_shape
+import churchpresenter.composeapp.generated.resources.canvas_shape_show_stroke
 import churchpresenter.composeapp.generated.resources.canvas_shape_stroke_color
 import churchpresenter.composeapp.generated.resources.canvas_shape_fill_color
 import churchpresenter.composeapp.generated.resources.canvas_shape_stroke_width
@@ -104,6 +110,8 @@ import churchpresenter.composeapp.generated.resources.canvas_source_color
 import churchpresenter.composeapp.generated.resources.canvas_source_image
 import churchpresenter.composeapp.generated.resources.canvas_source_text
 import churchpresenter.composeapp.generated.resources.canvas_source_video
+import churchpresenter.composeapp.generated.resources.canvas_video_loop
+import churchpresenter.composeapp.generated.resources.canvas_video_volume
 import churchpresenter.composeapp.generated.resources.canvas_transform
 import churchpresenter.composeapp.generated.resources.canvas_transparent_bg
 import churchpresenter.composeapp.generated.resources.ic_folder
@@ -391,6 +399,25 @@ private fun VideoProperties(source: SceneSource.VideoSource, onUpdate: (SceneSou
             )
         }
     }
+
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        Checkbox(
+            checked = source.loop,
+            onCheckedChange = { onUpdate(source.copy(loop = it)) }
+        )
+        Text(
+            stringResource(Res.string.canvas_video_loop),
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+
+    PropertySlider(stringResource(Res.string.canvas_video_volume), source.volume, 0f, 1f) { v ->
+        onUpdate(source.copy(volume = v))
+    }
 }
 
 @Composable
@@ -408,25 +435,44 @@ private fun ShapeProperties(source: SceneSource.ShapeSource, onUpdate: (SceneSou
         style = MaterialTheme.typography.labelMedium,
         color = MaterialTheme.colorScheme.onSurfaceVariant
     )
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        Text(
-            stringResource(Res.string.canvas_shape_stroke_color),
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        ColorPickerField(
-            color = source.strokeColor,
-            onColorChange = { onUpdate(source.copy(strokeColor = it)) }
-        )
-    }
-    PropertySlider("${stringResource(Res.string.canvas_shape_stroke_color)} ${stringResource(Res.string.canvas_opacity)}", source.strokeOpacity, 0f, 1f) { v ->
-        onUpdate(source.copy(strokeOpacity = v))
+    val isStrokeOnly = source.shapeType in listOf("line", "arrow", "freehand")
+
+    if (!isStrokeOnly) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            Checkbox(
+                checked = source.showStroke,
+                onCheckedChange = { onUpdate(source.copy(showStroke = it)) }
+            )
+            Text(
+                stringResource(Res.string.canvas_shape_show_stroke),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
     }
 
-    val isStrokeOnly = source.shapeType in listOf("line", "arrow", "freehand")
+    if (isStrokeOnly || source.showStroke) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Text(
+                stringResource(Res.string.canvas_shape_stroke_color),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            ColorPickerField(
+                color = source.strokeColor,
+                onColorChange = { onUpdate(source.copy(strokeColor = it)) }
+            )
+        }
+        PropertySlider("${stringResource(Res.string.canvas_shape_stroke_color)} ${stringResource(Res.string.canvas_opacity)}", source.strokeOpacity, 0f, 1f) { v ->
+            onUpdate(source.copy(strokeOpacity = v))
+        }
+    }
 
     if (!isStrokeOnly) {
         Row(
@@ -448,11 +494,13 @@ private fun ShapeProperties(source: SceneSource.ShapeSource, onUpdate: (SceneSou
         }
     }
 
-    PropertySliderWithInput(
-        stringResource(Res.string.canvas_shape_stroke_width),
-        source.strokeWidth, 1f, 20f, "px"
-    ) { v ->
-        onUpdate(source.copy(strokeWidth = v))
+    if (isStrokeOnly || source.showStroke) {
+        PropertySliderWithInput(
+            stringResource(Res.string.canvas_shape_stroke_width),
+            source.strokeWidth, 1f, 20f, "px"
+        ) { v ->
+            onUpdate(source.copy(strokeWidth = v))
+        }
     }
 
     if (!isStrokeOnly) {
@@ -1041,16 +1089,25 @@ private fun PropertyTextField(label: String, value: String, modifier: Modifier =
 @Composable
 private fun PropertyFloatField(label: String, value: Float, modifier: Modifier = Modifier, onValueChange: (Float) -> Unit) {
     var text by remember(value) { mutableStateOf("%.3f".format(value)) }
+    var hasFocus by remember { mutableStateOf(false) }
     OutlinedTextField(
         value = text,
-        onValueChange = {
-            text = it
-            it.toFloatOrNull()?.let(onValueChange)
-        },
+        onValueChange = { text = it },
         label = { Text(label, style = MaterialTheme.typography.labelSmall) },
         singleLine = true,
-        modifier = modifier,
-        textStyle = MaterialTheme.typography.bodySmall
+        modifier = modifier.onFocusChanged { state ->
+            if (hasFocus && !state.isFocused) {
+                text.toFloatOrNull()?.let(onValueChange)
+                    ?: run { text = "%.3f".format(value) }
+            }
+            hasFocus = state.isFocused
+        },
+        textStyle = MaterialTheme.typography.bodySmall,
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal, imeAction = ImeAction.Done),
+        keyboardActions = KeyboardActions(onDone = {
+            text.toFloatOrNull()?.let(onValueChange)
+                ?: run { text = "%.3f".format(value) }
+        })
     )
 }
 
@@ -1093,16 +1150,23 @@ private fun PropertySliderWithInput(label: String, value: Float, min: Float, max
                 valueRange = min..max,
                 modifier = Modifier.weight(1f)
             )
+            var hasFocus by remember { mutableStateOf(false) }
+            val commitValue = {
+                textValue.toFloatOrNull()?.let { onValueChange(it.coerceIn(min, max)) }
+                    ?: run { textValue = value.toInt().toString() }
+            }
             OutlinedTextField(
                 value = textValue,
-                onValueChange = { input ->
-                    textValue = input
-                    input.toFloatOrNull()?.let { onValueChange(it.coerceIn(min, max)) }
-                },
+                onValueChange = { textValue = it },
                 singleLine = true,
-                modifier = Modifier.width(60.dp),
+                modifier = Modifier.width(60.dp).onFocusChanged { state ->
+                    if (hasFocus && !state.isFocused) commitValue()
+                    hasFocus = state.isFocused
+                },
                 textStyle = MaterialTheme.typography.bodySmall,
-                suffix = if (suffix.isNotEmpty()) { { Text(suffix, style = MaterialTheme.typography.bodySmall) } } else null
+                suffix = if (suffix.isNotEmpty()) { { Text(suffix, style = MaterialTheme.typography.bodySmall) } } else null,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal, imeAction = ImeAction.Done),
+                keyboardActions = KeyboardActions(onDone = { commitValue() })
             )
         }
     }

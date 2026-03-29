@@ -51,7 +51,14 @@ import kotlinx.coroutines.withContext
 import java.awt.Rectangle
 import java.awt.Robot
 import java.awt.image.BufferedImage
+import java.awt.image.DataBufferInt
 import java.io.ByteArrayInputStream
+import java.nio.ByteBuffer
+import uk.co.caprica.vlcj.factory.MediaPlayerFactory
+import uk.co.caprica.vlcj.player.embedded.videosurface.callback.BufferFormatCallback
+import uk.co.caprica.vlcj.player.embedded.videosurface.callback.BufferFormat
+import uk.co.caprica.vlcj.player.embedded.videosurface.callback.RenderCallback
+import uk.co.caprica.vlcj.player.embedded.videosurface.callback.format.RV32BufferFormat
 import java.io.ByteArrayOutputStream
 import javax.imageio.ImageIO
 import java.time.LocalTime
@@ -65,6 +72,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.geometry.Size
 
@@ -159,12 +167,19 @@ private fun ColorSourceContent(source: SceneSource.ColorSource, modifier: Modifi
         val color2 = parseHexColor(source.gradientColor2).copy(alpha = source.gradientColor2Opacity)
         val angleRad = Math.toRadians(source.gradientAngle.toDouble())
         val pos = source.gradientPosition.coerceIn(0.001f, 0.999f)
-        val brush = Brush.linearGradient(
-            colorStops = arrayOf(0f to color1, pos to color2, 1f to color2),
-            start = Offset(0.5f - 0.5f * cos(angleRad).toFloat(), 0.5f - 0.5f * sin(angleRad).toFloat()) * 1000f,
-            end = Offset(0.5f + 0.5f * cos(angleRad).toFloat(), 0.5f + 0.5f * sin(angleRad).toFloat()) * 1000f
-        )
-        Box(modifier = modifier.fillMaxSize().background(brush))
+        Box(modifier = modifier.fillMaxSize().drawBehind {
+            val cx = 0.5f * size.width
+            val cy = 0.5f * size.height
+            val dx = 0.5f * cos(angleRad).toFloat() * size.width
+            val dy = 0.5f * sin(angleRad).toFloat() * size.height
+            val shift = (pos - 0.5f) * 2f
+            val brush = Brush.linearGradient(
+                colors = listOf(color1, color2),
+                start = Offset(cx - dx + shift * dx, cy - dy + shift * dy),
+                end = Offset(cx + dx + shift * dx, cy + dy + shift * dy)
+            )
+            drawRect(brush = brush, size = size)
+        })
     } else {
         Box(modifier = modifier.fillMaxSize().background(color1))
     }
@@ -176,16 +191,94 @@ private fun VideoSourceContent(
     modifier: Modifier,
     isPresenter: Boolean
 ) {
-    // In preview mode, show a placeholder. In presenter mode, a real VideoPlayer would be used.
-    Box(
-        modifier = modifier.fillMaxSize().background(Color.DarkGray),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = if (isPresenter) "Video: ${source.name}" else "Video: ${File(source.filePath).name}",
-            color = Color.White,
-            fontSize = 14.sp
+    val file = remember(source.filePath) { if (source.filePath.isNotBlank()) File(source.filePath) else null }
+    if (file == null || !file.exists() || !isVlcAvailable) {
+        Box(
+            modifier = modifier.fillMaxSize().background(Color.DarkGray),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = if (!isVlcAvailable) "VLC not found"
+                       else if (file == null) "No video selected"
+                       else "File not found: ${source.filePath}",
+                color = Color.White,
+                fontSize = 14.sp
+            )
+        }
+        return
+    }
+
+    val currentFrame = remember { mutableStateOf<ImageBitmap?>(null) }
+
+    val factory = remember {
+        try { MediaPlayerFactory() } catch (_: Throwable) { null }
+    } ?: return
+
+    val mediaPlayer = remember(factory) {
+        try { factory.mediaPlayers().newEmbeddedMediaPlayer() } catch (_: Throwable) { null }
+    } ?: return
+
+    DisposableEffect(source.filePath) {
+        var bufferedImage: BufferedImage? = null
+
+        val bufferFormatCallback = object : BufferFormatCallback {
+            override fun getBufferFormat(sourceWidth: Int, sourceHeight: Int): BufferFormat {
+                bufferedImage = BufferedImage(sourceWidth, sourceHeight, BufferedImage.TYPE_INT_ARGB)
+                return RV32BufferFormat(sourceWidth, sourceHeight)
+            }
+            override fun allocatedBuffers(buffers: Array<out ByteBuffer>) { }
+        }
+
+        val renderCallback = RenderCallback { _, nativeBuffers, _ ->
+            val img = bufferedImage ?: return@RenderCallback
+            if (nativeBuffers == null || nativeBuffers.isEmpty()) return@RenderCallback
+            val pixelData = (img.raster.dataBuffer as? DataBufferInt)?.data ?: return@RenderCallback
+            try {
+                val buf = nativeBuffers[0] ?: return@RenderCallback
+                buf.rewind()
+                buf.asIntBuffer().get(pixelData, 0, pixelData.size.coerceAtMost(buf.remaining() / 4))
+                currentFrame.value = img.toComposeImageBitmap()
+            } catch (_: Throwable) { }
+        }
+
+        mediaPlayer.videoSurface().set(
+            factory.videoSurfaces().newVideoSurface(bufferFormatCallback, renderCallback, true)
         )
+
+        onDispose {
+            try {
+                mediaPlayer.controls().stop()
+                mediaPlayer.release()
+                factory.release()
+            } catch (_: Throwable) { }
+        }
+    }
+
+    LaunchedEffect(source.filePath, source.loop, source.volume) {
+        delay(100)
+        try {
+            mediaPlayer.audio().setVolume((source.volume * 100).toInt())
+            val options = mutableListOf<String>()
+            if (source.loop) options.add(":input-repeat=65535")
+            mediaPlayer.media().play(file.absolutePath, *options.toTypedArray())
+        } catch (_: Throwable) { }
+    }
+
+    val frame = currentFrame.value
+    if (frame != null) {
+        Image(
+            bitmap = frame,
+            contentDescription = source.name,
+            contentScale = ContentScale.Crop,
+            modifier = modifier.fillMaxSize()
+        )
+    } else {
+        Box(
+            modifier = modifier.fillMaxSize().background(Color.DarkGray),
+            contentAlignment = Alignment.Center
+        ) {
+            Text("Loading...", color = Color.White, fontSize = 14.sp)
+        }
     }
 }
 
@@ -219,36 +312,48 @@ private fun ShapeSourceContent(source: SceneSource.ShapeSource, modifier: Modifi
         join = StrokeJoin.Round
     )
 
-    // Build fill brush (solid or gradient)
-    val fillBrush: Brush? = if (source.isGradient) {
-        val color2 = parseHexColor(source.gradientColor2).copy(alpha = source.gradientColor2Opacity)
-        val angleRad = Math.toRadians(source.gradientAngle.toDouble())
-        val pos = source.gradientPosition.coerceIn(0.001f, 0.999f)
-        Brush.linearGradient(
-            colorStops = arrayOf(0f to fillColor, pos to color2, 1f to color2),
-            start = Offset(0.5f - 0.5f * cos(angleRad).toFloat(), 0.5f - 0.5f * sin(angleRad).toFloat()) * 1000f,
-            end = Offset(0.5f + 0.5f * cos(angleRad).toFloat(), 0.5f + 0.5f * sin(angleRad).toFloat()) * 1000f
-        )
-    } else if (fillColor.alpha > 0f) {
-        Brush.linearGradient(listOf(fillColor, fillColor))
-    } else null
+    // Pre-compute gradient parameters outside Canvas (composable context)
+    val gradientColor2 = if (source.isGradient) parseHexColor(source.gradientColor2).copy(alpha = source.gradientColor2Opacity) else null
+    val gradientAngleRad = if (source.isGradient) Math.toRadians(source.gradientAngle.toDouble()) else 0.0
+    val gradientPos = source.gradientPosition.coerceIn(0.001f, 0.999f)
 
     Canvas(modifier = modifier.fillMaxSize()) {
         val w = size.width
         val h = size.height
+        // Build fill brush using actual shape size
+        val fillBrush: Brush? = if (source.isGradient && gradientColor2 != null) {
+            // Position shifts the midpoint: 0% = all color2, 50% = even blend, 100% = all color1
+            val cx = 0.5f * w
+            val cy = 0.5f * h
+            val dx = 0.5f * cos(gradientAngleRad).toFloat() * w
+            val dy = 0.5f * sin(gradientAngleRad).toFloat() * h
+            // Shift start/end so the blend midpoint moves with gradientPos
+            val shift = (gradientPos - 0.5f) * 2f
+            Brush.linearGradient(
+                colors = listOf(fillColor, gradientColor2),
+                start = Offset(cx - dx + shift * dx, cy - dy + shift * dy),
+                end = Offset(cx + dx + shift * dx, cy + dy + shift * dy)
+            )
+        } else if (fillColor.alpha > 0f) {
+            Brush.linearGradient(listOf(fillColor, fillColor))
+        } else null
 
         when (source.shapeType) {
             "rectangle" -> {
                 if (fillBrush != null) {
                     drawRect(brush = fillBrush, size = size)
                 }
-                drawRect(color = strokeColor, size = size, style = stroke)
+                if (source.showStroke) {
+                    drawRect(color = strokeColor, size = size, style = stroke)
+                }
             }
             "ellipse" -> {
                 if (fillBrush != null) {
                     drawOval(brush = fillBrush, size = size)
                 }
-                drawOval(color = strokeColor, size = size, style = stroke)
+                if (source.showStroke) {
+                    drawOval(color = strokeColor, size = size, style = stroke)
+                }
             }
             "line" -> {
                 val p0 = source.points.getOrNull(0)

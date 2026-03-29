@@ -102,6 +102,7 @@ sealed class SceneSource {
         val points: List<PathPoint> = emptyList(),
         val fillOpacity: Float = 1f,
         val strokeOpacity: Float = 1f,
+        val showStroke: Boolean = true,
         val isGradient: Boolean = false,
         val gradientColor2: String = "#FFFFFF",
         val gradientColor2Opacity: Float = 1f,
