@@ -43,8 +43,25 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.foundation.Image
+import androidx.compose.ui.graphics.toComposeImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.material3.Surface
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
+import org.churchpresenter.app.churchpresenter.ui.theme.AppThemeWrapper
+import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.rememberDialogState
+import com.google.zxing.BarcodeFormat
+import com.google.zxing.EncodeHintType
+import com.google.zxing.qrcode.QRCodeWriter
+import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
+import java.awt.image.BufferedImage
+import java.io.ByteArrayOutputStream
+import javax.imageio.ImageIO
+import org.jetbrains.skia.Image as SkiaImage
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
@@ -60,7 +77,9 @@ import churchpresenter.composeapp.generated.resources.client_label_edit_tooltip
 import churchpresenter.composeapp.generated.resources.client_label_placeholder
 import churchpresenter.composeapp.generated.resources.client_label_save
 import churchpresenter.composeapp.generated.resources.companion_server
+import churchpresenter.composeapp.generated.resources.api_key_qr_title
 import churchpresenter.composeapp.generated.resources.copy_api_key
+import churchpresenter.composeapp.generated.resources.show_qr_code
 import churchpresenter.composeapp.generated.resources.copy_url
 import churchpresenter.composeapp.generated.resources.enable_server
 import churchpresenter.composeapp.generated.resources.generate_api_key
@@ -358,6 +377,21 @@ fun ServerSettingsTab(
                             ) {
                                 Text(stringResource(Res.string.copy_api_key), style = MaterialTheme.typography.labelSmall)
                             }
+                            var showQrDialog by remember { mutableStateOf(false) }
+                            Button(
+                                onClick = { showQrDialog = true },
+                                enabled = apiKeyText.isNotBlank(),
+                                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                                    contentColor = MaterialTheme.colorScheme.onTertiaryContainer
+                                )
+                            ) {
+                                Text(stringResource(Res.string.show_qr_code), style = MaterialTheme.typography.labelSmall)
+                            }
+                            if (showQrDialog) {
+                                ApiKeyQrDialog(apiKey = apiKeyText, onDismiss = { showQrDialog = false })
+                            }
                         }
                     }
                 }
@@ -602,5 +636,69 @@ private fun SettingRow(
             color = MaterialTheme.colorScheme.onSurface
         )
         content()
+    }
+}
+
+@Composable
+private fun ApiKeyQrDialog(apiKey: String, onDismiss: () -> Unit) {
+    val qrBitmap = remember(apiKey) {
+        try {
+            val hints = mapOf(
+                EncodeHintType.ERROR_CORRECTION to ErrorCorrectionLevel.M,
+                EncodeHintType.MARGIN to 1
+            )
+            val matrix = QRCodeWriter().encode(apiKey, BarcodeFormat.QR_CODE, 512, 512, hints)
+            val w = matrix.width
+            val h = matrix.height
+            val img = BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB)
+            val black = 0xFF000000.toInt()
+            val white = 0xFFFFFFFF.toInt()
+            for (y in 0 until h) {
+                for (x in 0 until w) {
+                    img.setRGB(x, y, if (matrix.get(x, y)) black else white)
+                }
+            }
+            SkiaImage.makeFromEncoded(
+                ByteArrayOutputStream().also { ImageIO.write(img, "PNG", it) }.toByteArray()
+            ).toComposeImageBitmap()
+        } catch (_: Exception) { null }
+    }
+
+    val isDark = MaterialTheme.colorScheme.background.luminance() < 0.5f
+    Dialog(
+        onCloseRequest = onDismiss,
+        state = rememberDialogState(width = 380.dp, height = 440.dp),
+        title = stringResource(Res.string.api_key_qr_title),
+        resizable = false
+    ) {
+        AppThemeWrapper(theme = if (isDark) ThemeMode.DARK else ThemeMode.LIGHT) {
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.background
+        ) {
+        Column(
+            modifier = Modifier.fillMaxSize().padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            if (qrBitmap != null) {
+                Image(
+                    bitmap = qrBitmap,
+                    contentDescription = null,
+                    modifier = Modifier.size(300.dp),
+                    contentScale = ContentScale.Fit
+                )
+            }
+            Text(
+                text = apiKey,
+                style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Button(onClick = onDismiss) {
+                Text("Close", style = MaterialTheme.typography.labelSmall)
+            }
+        }
+        }
+        }
     }
 }
