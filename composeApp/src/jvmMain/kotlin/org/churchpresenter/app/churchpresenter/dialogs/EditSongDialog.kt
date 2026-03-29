@@ -36,6 +36,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.OffsetMapping
+import androidx.compose.ui.text.input.TransformedText
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.rememberDialogState
@@ -277,6 +283,33 @@ fun EditSongDialog(
                         }
 
                         // Lyrics section - side by side
+                        val separatorColor = MaterialTheme.colorScheme.primary
+                        val separatorBg = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f)
+                        val lyricsHighlightTransformation = remember(separatorColor, separatorBg) {
+                            VisualTransformation { text ->
+                                val annotated = buildAnnotatedString {
+                                    val lines = text.text.split("\n")
+                                    lines.forEachIndexed { i, line ->
+                                        val trimmed = line.trim()
+                                        if (trimmed.startsWith("[") || trimmed.startsWith("{")) {
+                                            pushStyle(
+                                                SpanStyle(
+                                                    color = separatorColor,
+                                                    background = separatorBg,
+                                                    fontWeight = FontWeight.Bold
+                                                )
+                                            )
+                                            append(line)
+                                            pop()
+                                        } else {
+                                            append(line)
+                                        }
+                                        if (i < lines.size - 1) append("\n")
+                                    }
+                                }
+                                TransformedText(annotated, OffsetMapping.Identity)
+                            }
+                        }
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -311,18 +344,20 @@ fun EditSongDialog(
                                 },
                                 modifier = Modifier.weight(1f).heightIn(min = 400.dp),
                                 placeholder = { Text(stringResource(Res.string.enter_lyrics_here)) },
-                                maxLines = Int.MAX_VALUE
+                                maxLines = Int.MAX_VALUE,
+                                visualTransformation = lyricsHighlightTransformation
                             )
                             OutlinedTextField(
                                 value = editedSecondaryLyrics,
                                 onValueChange = { editedSecondaryLyrics = it },
                                 modifier = Modifier.weight(1f).heightIn(min = 400.dp),
                                 placeholder = { Text(stringResource(Res.string.enter_secondary_lyrics_here)) },
-                                maxLines = Int.MAX_VALUE
+                                maxLines = Int.MAX_VALUE,
+                                visualTransformation = lyricsHighlightTransformation
                             )
                         }
 
-                        // Help text
+        // Help text
                         Text(
                             text = stringResource(Res.string.lyrics_format_help),
                             style = MaterialTheme.typography.bodySmall,
