@@ -218,7 +218,7 @@ BlackMagic releases updated SDKs at [blackmagicdesign.com/support](https://www.b
 
 ## JNI Header Regeneration
 
-If you change native method signatures in `DeckLinkOutput.kt`, update the Java mirror and regenerate:
+If you change native method signatures in `DeckLinkIO.kt`, update the Java mirror and regenerate:
 ```
 javac -h . DeckLinkManager.java
 ```
