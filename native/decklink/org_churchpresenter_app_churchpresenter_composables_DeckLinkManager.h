@@ -7,29 +7,108 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
+/*
+ * Class:     org_churchpresenter_app_churchpresenter_composables_DeckLinkManager
+ * Method:    nativeListDevices
+ * Signature: ()[Ljava/lang/String;
+ */
 JNIEXPORT jobjectArray JNICALL Java_org_churchpresenter_app_churchpresenter_composables_DeckLinkManager_nativeListDevices
   (JNIEnv *, jclass);
 
+/*
+ * Class:     org_churchpresenter_app_churchpresenter_composables_DeckLinkManager
+ * Method:    nativeOpen
+ * Signature: (III)Z
+ */
 JNIEXPORT jboolean JNICALL Java_org_churchpresenter_app_churchpresenter_composables_DeckLinkManager_nativeOpen
   (JNIEnv *, jclass, jint, jint, jint);
 
+/*
+ * Class:     org_churchpresenter_app_churchpresenter_composables_DeckLinkManager
+ * Method:    nativeSendFrame
+ * Signature: (I[III)V
+ */
 JNIEXPORT void JNICALL Java_org_churchpresenter_app_churchpresenter_composables_DeckLinkManager_nativeSendFrame
   (JNIEnv *, jclass, jint, jintArray, jint, jint);
 
+/*
+ * Class:     org_churchpresenter_app_churchpresenter_composables_DeckLinkManager
+ * Method:    nativeStartScheduledPlayback
+ * Signature: (ID)Z
+ */
 JNIEXPORT jboolean JNICALL Java_org_churchpresenter_app_churchpresenter_composables_DeckLinkManager_nativeStartScheduledPlayback
   (JNIEnv *, jclass, jint, jdouble);
 
+/*
+ * Class:     org_churchpresenter_app_churchpresenter_composables_DeckLinkManager
+ * Method:    nativeScheduleFrame
+ * Signature: (I[III)V
+ */
 JNIEXPORT void JNICALL Java_org_churchpresenter_app_churchpresenter_composables_DeckLinkManager_nativeScheduleFrame
   (JNIEnv *, jclass, jint, jintArray, jint, jint);
 
+/*
+ * Class:     org_churchpresenter_app_churchpresenter_composables_DeckLinkManager
+ * Method:    nativeStopPlayback
+ * Signature: (I)V
+ */
 JNIEXPORT void JNICALL Java_org_churchpresenter_app_churchpresenter_composables_DeckLinkManager_nativeStopPlayback
   (JNIEnv *, jclass, jint);
 
+/*
+ * Class:     org_churchpresenter_app_churchpresenter_composables_DeckLinkManager
+ * Method:    nativeClose
+ * Signature: (I)V
+ */
 JNIEXPORT void JNICALL Java_org_churchpresenter_app_churchpresenter_composables_DeckLinkManager_nativeClose
   (JNIEnv *, jclass, jint);
 
+/*
+ * Class:     org_churchpresenter_app_churchpresenter_composables_DeckLinkManager
+ * Method:    nativeGetOutputInfo
+ * Signature: (I)[I
+ */
 JNIEXPORT jintArray JNICALL Java_org_churchpresenter_app_churchpresenter_composables_DeckLinkManager_nativeGetOutputInfo
+  (JNIEnv *, jclass, jint);
+
+/*
+ * Class:     org_churchpresenter_app_churchpresenter_composables_DeckLinkManager
+ * Method:    nativeListInputModes
+ * Signature: (I)[Ljava/lang/String;
+ */
+JNIEXPORT jobjectArray JNICALL Java_org_churchpresenter_app_churchpresenter_composables_DeckLinkManager_nativeListInputModes
+  (JNIEnv *, jclass, jint);
+
+/*
+ * Class:     org_churchpresenter_app_churchpresenter_composables_DeckLinkManager
+ * Method:    nativeListVideoConnections
+ * Signature: (I)[Ljava/lang/String;
+ */
+JNIEXPORT jobjectArray JNICALL Java_org_churchpresenter_app_churchpresenter_composables_DeckLinkManager_nativeListVideoConnections
+  (JNIEnv *, jclass, jint);
+
+/*
+ * Class:     org_churchpresenter_app_churchpresenter_composables_DeckLinkManager
+ * Method:    nativeOpenInput
+ * Signature: (ILjava/lang/String;I)Z
+ */
+JNIEXPORT jboolean JNICALL Java_org_churchpresenter_app_churchpresenter_composables_DeckLinkManager_nativeOpenInput
+  (JNIEnv *, jclass, jint, jstring, jint);
+
+/*
+ * Class:     org_churchpresenter_app_churchpresenter_composables_DeckLinkManager
+ * Method:    nativeGetInputFrame
+ * Signature: (I)[I
+ */
+JNIEXPORT jintArray JNICALL Java_org_churchpresenter_app_churchpresenter_composables_DeckLinkManager_nativeGetInputFrame
+  (JNIEnv *, jclass, jint);
+
+/*
+ * Class:     org_churchpresenter_app_churchpresenter_composables_DeckLinkManager
+ * Method:    nativeCloseInput
+ * Signature: (I)V
+ */
+JNIEXPORT void JNICALL Java_org_churchpresenter_app_churchpresenter_composables_DeckLinkManager_nativeCloseInput
   (JNIEnv *, jclass, jint);
 
 #ifdef __cplusplus
