@@ -211,7 +211,7 @@ BlackMagic releases updated SDKs at [blackmagicdesign.com/support](https://www.b
 
 **What changes between SDK versions?**
 - The `.idl` files may add new interfaces/methods, but existing ones stay the same
-- Our C++ code only uses core interfaces (`IDeckLinkIterator`, `IDeckLinkOutput`, `IDeckLinkDisplayMode`) which have been stable since SDK v10
+- Our C++ code uses core interfaces (`IDeckLinkIterator`, `IDeckLinkOutput`, `IDeckLinkInput`, `IDeckLinkDisplayMode`, `IDeckLinkConfiguration`, `IDeckLinkProfileAttributes`) which have been stable since SDK v10
 - If a new SDK changes these interfaces (rare), you'll get compile errors — fix by updating `decklink_jni.cpp` to match
 
 ---
@@ -222,3 +222,36 @@ If you change native method signatures in `DeckLinkOutput.kt`, update the Java m
 ```
 javac -h . DeckLinkManager.java
 ```
+
+---
+
+## What the Native Library Provides
+
+### Output (existing)
+- `nativeListDevices()` — enumerate all DeckLink devices
+- `nativeOpen(deviceIndex, width, height)` — open device for video output
+- `nativeGetOutputInfo(deviceIndex)` — get output resolution/fps
+- `nativeSendFrame(deviceIndex, pixels, width, height)` — send a single frame
+- `nativeStartScheduledPlayback(deviceIndex, fps)` — start timed playback
+- `nativeScheduleFrame(deviceIndex, pixels, width, height)` — schedule a frame
+- `nativeStopPlayback(deviceIndex)` — stop scheduled playback
+- `nativeClose(deviceIndex)` — close output
+
+### Input capture (added March 2026)
+- `nativeListInputModes(deviceIndex)` — list available input display modes (returns `"name|WxH@fps_scan"` strings)
+- `nativeListVideoConnections(deviceIndex)` — list available video input connections (SDI, HDMI, etc.) via `IDeckLinkProfileAttributes`
+- `nativeOpenInput(deviceIndex, modeStr, connectionType)` — open device for video capture:
+  - Sets video input connection via `IDeckLinkConfiguration` if `connectionType > 0`
+  - Enables format auto-detection (`bmdVideoInputEnableFormatDetection`)
+  - Uses `IDeckLinkInputCallback` to receive frames asynchronously
+  - Converts UYVY (8-bit YUV 4:2:2) and BGRA input to ARGB pixel data
+  - `VideoInputFormatChanged` callback handles auto-mode signal changes
+- `nativeGetInputFrame(deviceIndex)` — poll for latest frame (returns `IntArray` with `[width, height, ...pixels]` or null)
+- `nativeCloseInput(deviceIndex)` — stop streams, clean up callback and state
+
+### Input callback pixel format handling
+The `DeckLinkInputCallback::VideoInputFrameArrived` method handles:
+- **bmdFormat8BitBGRA** — direct BGRA→ARGB byte swap
+- **bmdFormat8BitYUV** — UYVY packed YUV 4:2:2 → ARGB (BT.601 conversion)
+- **bmdFormat10BitYUV** — v210 format (not yet supported, outputs black)
+- Unknown formats — attempts raw BGRA copy
