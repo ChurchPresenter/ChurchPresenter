@@ -175,9 +175,16 @@ public:
         int h = static_cast<int>(videoFrame->GetHeight());
         if (w <= 0 || h <= 0) return S_OK;
 
-        // Get raw frame bytes
+        // Get raw frame bytes via IDeckLinkVideoBuffer (SDK 15.3+)
         void* frameBytes = nullptr;
-        if (videoFrame->GetBytes(&frameBytes) != S_OK || !frameBytes) return S_OK;
+        IDeckLinkVideoBuffer* videoBuffer = nullptr;
+        if (videoFrame->QueryInterface(IID_IDeckLinkVideoBuffer, reinterpret_cast<void**>(&videoBuffer)) != S_OK || !videoBuffer) return S_OK;
+        videoBuffer->StartAccess(bmdBufferAccessRead);
+        if (videoBuffer->GetBytes(&frameBytes) != S_OK || !frameBytes) {
+            videoBuffer->EndAccess(bmdBufferAccessRead);
+            videoBuffer->Release();
+            return S_OK;
+        }
 
         int totalPixels = w * h;
         BMDPixelFormat pixFmt = videoFrame->GetPixelFormat();
@@ -185,7 +192,11 @@ public:
         // Allocate/resize buffer if needed
         std::lock_guard<std::mutex> lock(g_inputMutex);
         auto it = g_inputs.find(m_deviceIndex);
-        if (it == g_inputs.end()) return S_OK;
+        if (it == g_inputs.end()) {
+            videoBuffer->EndAccess(bmdBufferAccessRead);
+            videoBuffer->Release();
+            return S_OK;
+        }
         InputState* state = it->second;
 
         if (state->frameWidth != w || state->frameHeight != h) {
@@ -248,6 +259,8 @@ public:
         }
 
         state->hasNewFrame = true;
+        videoBuffer->EndAccess(bmdBufferAccessRead);
+        videoBuffer->Release();
         return S_OK;
     }
 
