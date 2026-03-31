@@ -27,19 +27,24 @@ Users with DeckLink hardware just need the BlackMagic Desktop Video drivers (whi
    cd path\to\ChurchPresenter\native\decklink
    ```
 
-3. Create a build directory and run CMake:
+3. Regenerate JNI headers (required after any native method changes in `DeckLinkIO.kt`):
+   ```
+   javac -h . DeckLinkManager.java
+   ```
+
+4. Create a build directory and run CMake:
    ```
    mkdir build
    cd build
    cmake .. -G "Visual Studio 17 2022" -A x64 -DDECKLINK_SDK_DIR="path\to\Blackmagic-DeckLink-SDK\Win\include"
    ```
 
-4. Build:
+5. Build:
    ```
    cmake --build . --config Release
    ```
 
-5. The output DLL will be at:
+6. The output DLL will be at:
    ```
    build\lib\Release\decklink_jni.dll
    ```
@@ -84,13 +89,18 @@ Output: `decklink_jni.dll` in the current directory.
    cd ~/Documents/GitHub/ChurchPresenter/native/decklink
    ```
 
-2. Run the build script:
+2. Regenerate JNI headers:
+   ```
+   javac -h . DeckLinkManager.java
+   ```
+
+3. Run the build script:
    ```
    chmod +x build_macos.sh
    ./build_macos.sh
    ```
 
-3. The output dylib will be at:
+4. The output dylib will be at:
    ```
    build/lib/libdecklink_jni.dylib
    ```
@@ -125,6 +135,7 @@ Output: `libdecklink_jni.dylib` in the current directory.
 
 ```
 cd ~/Documents/GitHub/ChurchPresenter/native/decklink
+javac -h . DeckLinkManager.java
 mkdir -p build && cd build
 cmake .. -DCMAKE_BUILD_TYPE=Release -DDECKLINK_SDK_DIR=/usr/include
 cmake --build .
