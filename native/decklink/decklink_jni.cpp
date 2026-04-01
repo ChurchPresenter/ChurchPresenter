@@ -109,6 +109,7 @@ static std::map<int, DeviceState> g_devices;
 struct InputState {
     IDeckLinkInput* input = nullptr;
     IDeckLink* device = nullptr;
+    IDeckLinkConfiguration* config = nullptr;  // kept alive so connection setting persists
     uint32_t* frameData = nullptr;
     int frameWidth = 0;
     int frameHeight = 0;
@@ -864,6 +865,7 @@ Java_org_churchpresenter_app_churchpresenter_composables_DeckLinkManager_nativeO
                 old->input->DisableVideoInput();
                 old->input->Release();
             }
+            if (old->config) old->config->Release();
             if (old->device) old->device->Release();
             delete[] old->frameData;
             delete old;
@@ -874,14 +876,14 @@ Java_org_churchpresenter_app_churchpresenter_composables_DeckLinkManager_nativeO
     IDeckLink* device = getDeviceByIndex(deviceIndex);
     if (!device) return JNI_FALSE;
 
-    // Set video connection BEFORE getting input interface
+    // Set video connection BEFORE getting input interface.
+    // Keep config alive — releasing it reverts the setting on some cards.
+    IDeckLinkConfiguration* config = nullptr;
     if (connectionType > 0) {
-        IDeckLinkConfiguration* config = nullptr;
         if (device->QueryInterface(IID_IDeckLinkConfiguration, reinterpret_cast<void**>(&config)) == S_OK && config) {
             // bmdDeckLinkConfigVideoInputConnection = 'vicn' = 0x7669636E
-            HRESULT hr = config->SetInt(static_cast<BMDDeckLinkConfigurationID>(0x7669636E),
+            config->SetInt(static_cast<BMDDeckLinkConfigurationID>(0x7669636E),
                            static_cast<int64_t>(connectionType));
-            config->Release();
         }
     }
 
@@ -946,6 +948,7 @@ Java_org_churchpresenter_app_churchpresenter_composables_DeckLinkManager_nativeO
     InputState* state = new InputState();
     state->input = input;
     state->device = device;
+    state->config = config;  // keep alive so connection setting persists
 
     DeckLinkInputCallback* callback = new DeckLinkInputCallback(deviceIndex);
     input->SetCallback(callback);
@@ -1032,9 +1035,9 @@ Java_org_churchpresenter_app_churchpresenter_composables_DeckLinkManager_nativeC
         state->input->DisableVideoInput();
         state->input->Release();
     }
+    if (state->config) state->config->Release();
     if (state->device) state->device->Release();
     delete[] state->frameData;
     delete state;
     g_inputs.erase(it);
-
 }
