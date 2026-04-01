@@ -215,28 +215,34 @@ fun SceneCanvas(
                         if (isInteractive && activeTool == "select" && isSelected && !source.locked) {
                             // Selected + unlocked: drag to move with snapping
                             Modifier.pointerInput(source.id, isSelected) {
+                                var rawX = 0f
+                                var rawY = 0f
                                 detectDragGestures(
+                                    onDragStart = {
+                                        rawX = currentTransform.x
+                                        rawY = currentTransform.y
+                                    },
                                     onDragEnd = { activeSnapLines = emptyList() },
                                     onDragCancel = { activeSnapLines = emptyList() },
                                     onDrag = { change, dragAmount ->
                                         change.consume()
                                         if (cw > 0 && ch > 0) {
                                             val ct = currentTransform
-                                            var newX = ct.x + dragAmount.x * scale / cw
-                                            var newY = ct.y + dragAmount.y * scale / ch
+                                            // Track raw (un-snapped) position so snap doesn't
+                                            // cause drift between cursor and element
+                                            rawX += dragAmount.x / cw
+                                            rawY += dragAmount.y / ch
 
                                             // Snap logic
                                             val snapResult = computeSnap(
-                                                newX, newY, ct.width, ct.height,
+                                                rawX, rawY, ct.width, ct.height,
                                                 scene.sources, source.id, cw, ch
                                             )
-                                            newX = snapResult.x
-                                            newY = snapResult.y
                                             activeSnapLines = snapResult.snapLines
 
                                             onTransformChanged(
                                                 source.id,
-                                                ct.copy(x = newX, y = newY)
+                                                ct.copy(x = snapResult.x, y = snapResult.y)
                                             )
                                         }
                                     }
@@ -522,7 +528,7 @@ private fun ResizeHandles(
                 .pointerInput(index) {
                     detectDragGestures { change, dragAmount ->
                         change.consume()
-                        val scaledDrag = Offset(dragAmount.x * scale, dragAmount.y * scale)
+                        val scaledDrag = Offset(dragAmount.x, dragAmount.y)
                         val newTransform = handle.onDrag(currentTransform, scaledDrag)
                         val minSize = 0.01f
                         onTransformChanged(
