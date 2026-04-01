@@ -14,6 +14,9 @@ object DeckLinkManager {
         val fps: Double get() = if (fpsDenominator > 0) fpsNumerator.toDouble() / fpsDenominator else 30.0
     }
 
+    data class InputMode(val name: String, val encodedValue: String)
+    data class VideoConnection(val name: String, val value: Int)
+
     private var available: Boolean? = null
 
     // ── JNI native methods ──────────────────────────────────────────────
@@ -26,6 +29,13 @@ object DeckLinkManager {
     private external fun nativeStopPlayback(deviceIndex: Int)
     private external fun nativeClose(deviceIndex: Int)
     private external fun nativeGetOutputInfo(deviceIndex: Int): IntArray
+
+    // Input capture
+    private external fun nativeListInputModes(deviceIndex: Int): Array<String>
+    private external fun nativeListVideoConnections(deviceIndex: Int): Array<String>
+    private external fun nativeOpenInput(deviceIndex: Int, mode: String, connection: Int): Boolean
+    private external fun nativeGetInputFrame(deviceIndex: Int): IntArray?
+    private external fun nativeCloseInput(deviceIndex: Int)
 
     // ── Public API ──────────────────────────────────────────────────────
 
@@ -124,6 +134,57 @@ object DeckLinkManager {
         if (!isAvailable()) return
         try {
             nativeClose(deviceIndex)
+        } catch (_: Exception) {
+            // silently ignore
+        }
+    }
+
+    // ── Input capture API ───────────────────────────────────────────────
+
+    fun listInputModes(deviceIndex: Int): List<InputMode> {
+        if (!isAvailable()) return emptyList()
+        return try {
+            nativeListInputModes(deviceIndex).map { encoded ->
+                val parts = encoded.split("|", limit = 2)
+                InputMode(
+                    name = parts.getOrElse(0) { encoded },
+                    encodedValue = parts.getOrElse(1) { "" }
+                )
+            }
+        } catch (_: Exception) { emptyList() }
+    }
+
+    fun listVideoConnections(deviceIndex: Int): List<VideoConnection> {
+        if (!isAvailable()) return emptyList()
+        return try {
+            nativeListVideoConnections(deviceIndex).map { encoded ->
+                val parts = encoded.split("|", limit = 2)
+                VideoConnection(
+                    name = parts.getOrElse(0) { encoded },
+                    value = parts.getOrElse(1) { "0" }.toIntOrNull() ?: 0
+                )
+            }
+        } catch (_: Exception) { emptyList() }
+    }
+
+    fun openInput(deviceIndex: Int, mode: String = "", connection: Int = 0): Boolean {
+        if (!isAvailable()) return false
+        return try {
+            nativeOpenInput(deviceIndex, mode, connection)
+        } catch (_: Exception) { false }
+    }
+
+    fun getInputFrame(deviceIndex: Int): IntArray? {
+        if (!isAvailable()) return null
+        return try {
+            nativeGetInputFrame(deviceIndex)
+        } catch (_: Exception) { null }
+    }
+
+    fun closeInput(deviceIndex: Int) {
+        if (!isAvailable()) return
+        try {
+            nativeCloseInput(deviceIndex)
         } catch (_: Exception) {
             // silently ignore
         }

@@ -93,6 +93,11 @@ import churchpresenter.composeapp.generated.resources.canvas_camera_ffmpeg_hint
 import churchpresenter.composeapp.generated.resources.canvas_camera_v4l2_hint
 import churchpresenter.composeapp.generated.resources.canvas_camera_none_found
 import churchpresenter.composeapp.generated.resources.canvas_camera_refresh
+import churchpresenter.composeapp.generated.resources.canvas_camera_format
+import churchpresenter.composeapp.generated.resources.canvas_camera_format_auto
+import churchpresenter.composeapp.generated.resources.canvas_camera_connection
+import churchpresenter.composeapp.generated.resources.canvas_camera_mode
+import churchpresenter.composeapp.generated.resources.canvas_camera_mode_auto
 import churchpresenter.composeapp.generated.resources.canvas_capture_x
 import churchpresenter.composeapp.generated.resources.canvas_capture_y
 import churchpresenter.composeapp.generated.resources.canvas_capture_width
@@ -115,7 +120,9 @@ import churchpresenter.composeapp.generated.resources.canvas_video_volume
 import churchpresenter.composeapp.generated.resources.canvas_transform
 import churchpresenter.composeapp.generated.resources.canvas_transparent_bg
 import churchpresenter.composeapp.generated.resources.ic_folder
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
 import org.churchpresenter.app.churchpresenter.models.SceneSource
 import org.churchpresenter.app.churchpresenter.models.SourceTransform
@@ -698,11 +705,12 @@ private fun CameraProperties(source: SceneSource.CameraSource, onUpdate: (SceneS
         color = MaterialTheme.colorScheme.onSurfaceVariant
     )
 
-    var devices by remember { mutableStateOf(listCameraDevices()) }
+    // Build unified device list: regular cameras + DeckLink devices
+    var devices by remember { mutableStateOf(listCameraDevicesWithDeckLink()) }
     val noCamerasLabel = stringResource(Res.string.canvas_camera_none_found)
 
     Button(
-        onClick = { devices = listCameraDevices() },
+        onClick = { devices = listCameraDevicesWithDeckLink() },
         modifier = Modifier.fillMaxWidth()
     ) {
         Text(stringResource(Res.string.canvas_camera_refresh), style = MaterialTheme.typography.labelSmall)
@@ -710,8 +718,13 @@ private fun CameraProperties(source: SceneSource.CameraSource, onUpdate: (SceneS
 
     if (devices.isNotEmpty()) {
         val items = devices.map { it.displayName }
-        val selectedDisplay = devices.find { it.path == source.devicePath }?.displayName
-            ?: if (source.devicePath.isNotEmpty()) source.devicePath else items.first()
+        val selectedDisplay = if (source.isDeckLink) {
+            devices.find { it.isDeckLink && it.deckLinkIndex == source.deckLinkIndex }?.displayName
+                ?: items.first()
+        } else {
+            devices.find { !it.isDeckLink && it.path == source.devicePath }?.displayName
+                ?: if (source.devicePath.isNotEmpty()) source.devicePath else items.first()
+        }
         DropdownSelector(
             label = stringResource(Res.string.canvas_camera_device),
             items = items,
@@ -719,11 +732,115 @@ private fun CameraProperties(source: SceneSource.CameraSource, onUpdate: (SceneS
             onSelectedChange = { selected ->
                 val device = devices.find { it.displayName == selected }
                 if (device != null) {
-                    onUpdate(source.copy(devicePath = device.path, deviceName = device.name))
+                    onUpdate(source.copy(
+                        devicePath = device.path,
+                        deviceName = device.name,
+                        videoFormat = "",
+                        videoConnection = 0,
+                        isDeckLink = device.isDeckLink,
+                        deckLinkIndex = device.deckLinkIndex
+                    ))
                 }
             },
             modifier = Modifier.fillMaxWidth()
         )
+
+        if (source.isDeckLink && source.deckLinkIndex >= 0) {
+            // DeckLink-specific controls: Video Connection + Mode
+            var connections by remember { mutableStateOf<List<DeckLinkManager.VideoConnection>>(emptyList()) }
+            var modes by remember { mutableStateOf<List<DeckLinkManager.InputMode>>(emptyList()) }
+
+            LaunchedEffect(source.deckLinkIndex) {
+                withContext(Dispatchers.IO) {
+                    connections = DeckLinkManager.listVideoConnections(source.deckLinkIndex)
+                    modes = DeckLinkManager.listInputModes(source.deckLinkIndex)
+                }
+            }
+
+            // Auto-select first connection if none set (DeckLink requires explicit connection)
+            LaunchedEffect(connections, source.videoConnection) {
+                if (source.videoConnection == 0 && connections.isNotEmpty()) {
+                    onUpdate(source.copy(videoConnection = connections.first().value))
+                }
+            }
+
+            // Video Connection dropdown
+            if (connections.isNotEmpty()) {
+                val connItems = connections.map { it.name }
+                val selectedConn = connections.find { it.value == source.videoConnection }?.name
+                    ?: connItems.first()
+                DropdownSelector(
+                    label = stringResource(Res.string.canvas_camera_connection),
+                    items = connItems,
+                    selected = selectedConn,
+                    onSelectedChange = { selected ->
+                        val conn = connections.find { it.name == selected }
+                        if (conn != null) {
+                            onUpdate(source.copy(videoConnection = conn.value))
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+
+            // Mode dropdown
+            val autoLabel = stringResource(Res.string.canvas_camera_mode_auto)
+            val modeItems = listOf(autoLabel) + modes.map { it.name }
+            val selectedMode = if (source.videoFormat.isEmpty()) {
+                autoLabel
+            } else {
+                modes.find { it.encodedValue == source.videoFormat }?.name ?: autoLabel
+            }
+            DropdownSelector(
+                label = stringResource(Res.string.canvas_camera_mode),
+                items = modeItems,
+                selected = selectedMode,
+                onSelectedChange = { selected ->
+                    if (selected == autoLabel) {
+                        onUpdate(source.copy(videoFormat = ""))
+                    } else {
+                        val mode = modes.find { it.name == selected }
+                        if (mode != null) {
+                            onUpdate(source.copy(videoFormat = mode.encodedValue))
+                        }
+                    }
+                },
+                modifier = Modifier.fillMaxWidth()
+            )
+        } else if (source.devicePath.isNotEmpty() && !source.isDeckLink) {
+            // Non-DeckLink camera: ffmpeg format selector
+            var formats by remember { mutableStateOf<List<CameraFormat>>(emptyList()) }
+            LaunchedEffect(source.devicePath) {
+                formats = withContext(Dispatchers.IO) {
+                    listCameraFormats(source.devicePath, source.deviceName)
+                }
+            }
+
+            val autoLabel = stringResource(Res.string.canvas_camera_format_auto)
+            val formatItems = listOf(autoLabel) + formats.map { it.displayName }
+            val selectedFormat = if (source.videoFormat.isEmpty()) {
+                autoLabel
+            } else {
+                formats.find { it.encodedValue == source.videoFormat }?.displayName ?: autoLabel
+            }
+
+            DropdownSelector(
+                label = stringResource(Res.string.canvas_camera_format),
+                items = formatItems,
+                selected = selectedFormat,
+                onSelectedChange = { selected ->
+                    if (selected == autoLabel) {
+                        onUpdate(source.copy(videoFormat = ""))
+                    } else {
+                        val fmt = formats.find { it.displayName == selected }
+                        if (fmt != null) {
+                            onUpdate(source.copy(videoFormat = fmt.encodedValue))
+                        }
+                    }
+                },
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
     } else {
         Text(
             noCamerasLabel,
@@ -752,7 +869,172 @@ private fun CameraProperties(source: SceneSource.CameraSource, onUpdate: (SceneS
     }
 }
 
-private data class CameraDevice(val name: String, val path: String, val displayName: String)
+private data class CameraDevice(
+    val name: String,
+    val path: String,
+    val displayName: String,
+    val isDeckLink: Boolean = false,
+    val deckLinkIndex: Int = -1
+)
+
+private fun listCameraDevicesWithDeckLink(): List<CameraDevice> {
+    val devices = mutableListOf<CameraDevice>()
+
+    // Add DeckLink devices (via SDK) — these provide proper capture card support
+    if (DeckLinkManager.isAvailable()) {
+        val deckLinkDevices = DeckLinkManager.listDevices()
+        for (device in deckLinkDevices) {
+            devices.add(CameraDevice(
+                name = device.name,
+                path = "decklink://${device.index}",
+                displayName = "DeckLink: ${device.name}",
+                isDeckLink = true,
+                deckLinkIndex = device.index
+            ))
+        }
+    }
+
+    // Add regular cameras (via ffmpeg/system), filtering out DeckLink devices
+    // already listed via SDK (dshow names like "Decklink Video Capture" contain "decklink")
+    val hasDeckLink = devices.any { it.isDeckLink }
+    listCameraDevices().filterNot { cam ->
+        hasDeckLink && cam.name.lowercase().contains("decklink")
+    }.let { devices.addAll(it) }
+
+    System.err.println("[Camera] Found ${devices.size} total device(s) (${devices.count { it.isDeckLink }} DeckLink)")
+    return devices
+}
+
+private data class CameraFormat(
+    val width: Int,
+    val height: Int,
+    val fps: Int,
+    val displayName: String = "${width}x${height} @ ${fps}fps",
+    val encodedValue: String = "${width}x${height}@${fps}"
+)
+
+private fun listCameraFormats(devicePath: String, deviceName: String): List<CameraFormat> {
+    val osName = System.getProperty("os.name", "").lowercase()
+    val formats = when {
+        osName.contains("win") && devicePath.startsWith("dshow://") -> listDshowFormats(deviceName)
+        osName.contains("linux") && devicePath.startsWith("v4l2://") -> listV4l2Formats(devicePath.removePrefix("v4l2://"))
+        osName.contains("mac") && devicePath.startsWith("avfoundation://") -> listAvfoundationFormats(devicePath.removePrefix("avfoundation://"))
+        else -> emptyList()
+    }
+    System.err.println("[Camera] Found ${formats.size} format(s) for $deviceName")
+    formats.forEach { System.err.println("[Camera]   ${it.displayName}") }
+    return formats
+}
+
+private fun listDshowFormats(deviceName: String): List<CameraFormat> {
+    val formats = mutableSetOf<Triple<Int, Int, Int>>()
+    try {
+        val name = deviceName.removePrefix(":dshow-vdev=")
+        val process = ProcessBuilder("ffmpeg", "-f", "dshow", "-list_options", "true", "-i", "video=$name")
+            .redirectErrorStream(true).start()
+        val output = process.inputStream.bufferedReader().readText()
+        process.waitFor()
+        // Match lines like: min s=1920x1080 fps=30 max s=1920x1080 fps=30
+        // or: s=1920x1080 min fps=30 max fps=30
+        val sizePattern = Regex("""s=(\d+)x(\d+)""")
+        val fpsPattern = Regex("""fps=(\d+)""")
+        for (line in output.lines()) {
+            if (!line.contains("s=")) continue
+            val sizeMatch = sizePattern.find(line) ?: continue
+            val fpsMatches = fpsPattern.findAll(line).toList()
+            if (fpsMatches.isEmpty()) continue
+            val w = sizeMatch.groupValues[1].toIntOrNull() ?: continue
+            val h = sizeMatch.groupValues[2].toIntOrNull() ?: continue
+            // Use the last fps value (typically the max)
+            for (fm in fpsMatches) {
+                val fps = fm.groupValues[1].toIntOrNull() ?: continue
+                formats.add(Triple(w, h, fps))
+            }
+        }
+    } catch (e: Exception) {
+        System.err.println("[Camera] Error listing dshow formats: ${e.message}")
+    }
+    return formats
+        .sortedWith(compareByDescending<Triple<Int, Int, Int>> { it.first * it.second }.thenByDescending { it.third })
+        .map { (w, h, fps) -> CameraFormat(w, h, fps) }
+}
+
+private fun listV4l2Formats(device: String): List<CameraFormat> {
+    val formats = mutableSetOf<Triple<Int, Int, Int>>()
+    try {
+        val process = ProcessBuilder("ffmpeg", "-f", "v4l2", "-list_formats", "all", "-i", device)
+            .redirectErrorStream(true).start()
+        val output = process.inputStream.bufferedReader().readText()
+        process.waitFor()
+        // Match lines like: 1920x1080 or similar, and fps values
+        val sizePattern = Regex("""(\d{3,5})x(\d{3,5})""")
+        for (line in output.lines()) {
+            val sizeMatch = sizePattern.find(line) ?: continue
+            val w = sizeMatch.groupValues[1].toIntOrNull() ?: continue
+            val h = sizeMatch.groupValues[2].toIntOrNull() ?: continue
+            // v4l2 format lines may include fps info
+            val fpsMatch = Regex("""(\d+(?:\.\d+)?)\s*fps""").find(line)
+            val fps = fpsMatch?.groupValues?.get(1)?.toDoubleOrNull()?.toInt() ?: 30
+            formats.add(Triple(w, h, fps))
+        }
+    } catch (e: Exception) {
+        System.err.println("[Camera] Error listing v4l2 formats: ${e.message}")
+    }
+    // Also try v4l2-ctl for more detailed info
+    if (formats.isEmpty()) {
+        try {
+            val process = ProcessBuilder("v4l2-ctl", "--list-formats-ext", "-d", device)
+                .redirectErrorStream(true).start()
+            val output = process.inputStream.bufferedReader().readText()
+            process.waitFor()
+            val sizePattern = Regex("""(\d{3,5})x(\d{3,5})""")
+            val fpsPattern = Regex("""(\d+(?:\.\d+)?)\s*fps""")
+            var lastW = 0
+            var lastH = 0
+            for (line in output.lines()) {
+                val sizeMatch = sizePattern.find(line)
+                if (sizeMatch != null) {
+                    lastW = sizeMatch.groupValues[1].toIntOrNull() ?: 0
+                    lastH = sizeMatch.groupValues[2].toIntOrNull() ?: 0
+                }
+                val fpsMatch = fpsPattern.find(line)
+                if (fpsMatch != null && lastW > 0 && lastH > 0) {
+                    val fps = fpsMatch.groupValues[1].toDoubleOrNull()?.toInt() ?: 30
+                    formats.add(Triple(lastW, lastH, fps))
+                }
+            }
+        } catch (_: Exception) {}
+    }
+    return formats
+        .sortedWith(compareByDescending<Triple<Int, Int, Int>> { it.first * it.second }.thenByDescending { it.third })
+        .map { (w, h, fps) -> CameraFormat(w, h, fps) }
+}
+
+private fun listAvfoundationFormats(deviceIndex: String): List<CameraFormat> {
+    val formats = mutableSetOf<Triple<Int, Int, Int>>()
+    try {
+        // avfoundation lists supported formats when opening with -list_formats
+        val process = ProcessBuilder("ffmpeg", "-f", "avfoundation", "-list_formats", "all", "-i", "$deviceIndex:none")
+            .redirectErrorStream(true).start()
+        val output = process.inputStream.bufferedReader().readText()
+        process.waitFor()
+        val sizePattern = Regex("""(\d{3,5})x(\d{3,5})""")
+        val fpsPattern = Regex("""(\d+(?:\.\d+)?)\s*fps""")
+        for (line in output.lines()) {
+            val sizeMatch = sizePattern.find(line) ?: continue
+            val w = sizeMatch.groupValues[1].toIntOrNull() ?: continue
+            val h = sizeMatch.groupValues[2].toIntOrNull() ?: continue
+            val fpsMatch = fpsPattern.find(line)
+            val fps = fpsMatch?.groupValues?.get(1)?.toDoubleOrNull()?.toInt() ?: 30
+            formats.add(Triple(w, h, fps))
+        }
+    } catch (e: Exception) {
+        System.err.println("[Camera] Error listing avfoundation formats: ${e.message}")
+    }
+    return formats
+        .sortedWith(compareByDescending<Triple<Int, Int, Int>> { it.first * it.second }.thenByDescending { it.third })
+        .map { (w, h, fps) -> CameraFormat(w, h, fps) }
+}
 
 private fun isFfmpegAvailable(): Boolean {
     return try {
@@ -764,12 +1046,15 @@ private fun isFfmpegAvailable(): Boolean {
 
 private fun listCameraDevices(): List<CameraDevice> {
     val osName = System.getProperty("os.name", "").lowercase()
-    return when {
+    val devices = when {
         osName.contains("linux") -> listLinuxCameras()
         osName.contains("win") -> listWindowsCameras()
         osName.contains("mac") -> listMacCameras()
         else -> emptyList()
     }
+    System.err.println("[Camera] Found ${devices.size} camera device(s):")
+    devices.forEach { System.err.println("[Camera]   ${it.displayName} -> ${it.path}") }
+    return devices
 }
 
 private fun listLinuxCameras(): List<CameraDevice> {
@@ -795,27 +1080,10 @@ private fun listWindowsCameras(): List<CameraDevice> {
     val devices = mutableListOf<CameraDevice>()
     val seenNames = mutableSetOf<String>()
 
-    // Get-CimInstance finds physical cameras (PnP devices)
-    try {
-        val process = ProcessBuilder("powershell", "-NoProfile", "-Command",
-            "Get-CimInstance Win32_PnPEntity | Where-Object { \$_.PNPClass -eq 'Camera' -or \$_.PNPClass -eq 'Image' } | Select-Object -ExpandProperty Name")
-            .redirectErrorStream(true).start()
-        val output = process.inputStream.bufferedReader().readText()
-        process.waitFor()
-        output.lines()
-            .map { it.trim() }
-            .filter { it.isNotBlank() }
-            .forEach { name ->
-                devices.add(CameraDevice(
-                    name = name,
-                    path = "dshow://:dshow-vdev=$name",
-                    displayName = name
-                ))
-                seenNames.add(name.lowercase())
-            }
-    } catch (_: Exception) {}
-
-    // ffmpeg DirectShow listing finds virtual cameras (OBS, NDI, etc.)
+    // ffmpeg DirectShow listing is the authoritative source for device names,
+    // since these are the exact names ffmpeg uses to open devices.
+    // This correctly handles capture cards (e.g. Blackmagic) whose DirectShow
+    // names differ from their PnP device names.
     try {
         val process = ProcessBuilder("ffmpeg", "-list_devices", "true", "-f", "dshow", "-i", "dummy")
             .redirectErrorStream(true).start()
@@ -847,6 +1115,28 @@ private fun listWindowsCameras(): List<CameraDevice> {
                 }
             }
         }
+    } catch (_: Exception) {}
+
+    // Get-CimInstance as fallback for devices not found by ffmpeg
+    try {
+        val process = ProcessBuilder("powershell", "-NoProfile", "-Command",
+            "Get-CimInstance Win32_PnPEntity | Where-Object { \$_.PNPClass -eq 'Camera' -or \$_.PNPClass -eq 'Image' } | Select-Object -ExpandProperty Name")
+            .redirectErrorStream(true).start()
+        val output = process.inputStream.bufferedReader().readText()
+        process.waitFor()
+        output.lines()
+            .map { it.trim() }
+            .filter { it.isNotBlank() }
+            .forEach { name ->
+                if (name.lowercase() !in seenNames) {
+                    devices.add(CameraDevice(
+                        name = name,
+                        path = "dshow://:dshow-vdev=$name",
+                        displayName = name
+                    ))
+                    seenNames.add(name.lowercase())
+                }
+            }
     } catch (_: Exception) {}
 
     return devices

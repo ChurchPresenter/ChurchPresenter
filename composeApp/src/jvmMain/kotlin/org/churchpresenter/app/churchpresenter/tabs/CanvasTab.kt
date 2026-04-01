@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -153,7 +154,8 @@ fun CanvasTab(
         // Left panel: Scene selector + Source list
         Column(
             modifier = Modifier
-                .width(220.dp)
+                .widthIn(min = 160.dp, max = 220.dp)
+                .weight(0.2f)
                 .fillMaxHeight()
                 .background(MaterialTheme.colorScheme.surface)
                 .padding(8.dp)
@@ -689,7 +691,8 @@ fun CanvasTab(
         // Right panel: Properties
         Column(
             modifier = Modifier
-                .width(220.dp)
+                .widthIn(min = 160.dp, max = 220.dp)
+                .weight(0.2f)
                 .fillMaxHeight()
                 .background(MaterialTheme.colorScheme.surface)
         ) {

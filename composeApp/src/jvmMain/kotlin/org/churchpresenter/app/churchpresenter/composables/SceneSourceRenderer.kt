@@ -51,6 +51,7 @@ import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.awt.Rectangle
 import java.awt.Robot
@@ -584,97 +585,214 @@ private fun CameraSourceContent(
 
     var frame by remember { mutableStateOf<ImageBitmap?>(null) }
 
-    val processRef = remember { mutableStateOf<Process?>(null) }
-
-    DisposableEffect(source.devicePath) {
-        onDispose {
-            processRef.value?.destroyForcibly()
-            processRef.value = null
-        }
-    }
-
-    LaunchedEffect(source.devicePath) {
-        val path = source.devicePath
-        val command = when {
-            path.startsWith("dshow://") -> {
-                val deviceName = path.removePrefix("dshow://").removePrefix(":dshow-vdev=")
-                listOf("ffmpeg", "-f", "dshow", "-i", "video=$deviceName",
-                    "-an", "-vf", "fps=30", "-f", "image2pipe", "-vcodec", "bmp", "-")
+    if (source.isDeckLink && source.deckLinkIndex >= 0 && DeckLinkManager.isAvailable()) {
+        // ── DeckLink SDK capture path ──
+        DisposableEffect(source.deckLinkIndex, source.videoFormat, source.videoConnection) {
+            onDispose {
+                DeckLinkManager.closeInput(source.deckLinkIndex)
             }
-            path.startsWith("v4l2://") -> {
-                val device = path.removePrefix("v4l2://")
-                listOf("ffmpeg", "-f", "v4l2", "-i", device,
-                    "-an", "-vf", "fps=30", "-f", "image2pipe", "-vcodec", "bmp", "-")
-            }
-            path.startsWith("avfoundation://") -> {
-                val index = path.removePrefix("avfoundation://")
-                listOf("ffmpeg", "-f", "avfoundation", "-i", "$index:none",
-                    "-an", "-vf", "fps=30", "-f", "image2pipe", "-vcodec", "bmp", "-")
-            }
-            else -> return@LaunchedEffect
         }
 
-        val process = withContext(Dispatchers.IO) {
-            try {
-                ProcessBuilder(command).redirectErrorStream(false).start()
-            } catch (_: Throwable) { null }
-        } ?: return@LaunchedEffect
-        processRef.value = process
+        LaunchedEffect(source.deckLinkIndex, source.videoFormat, source.videoConnection) {
+            frame = null  // clear previous frame when switching
+            System.err.println("[DeckLink Input] Opening device ${source.deckLinkIndex}, " +
+                "format: ${source.videoFormat.ifEmpty { "auto" }}, connection: ${source.videoConnection}")
 
-        val inputStream = process.inputStream
-        val headerBuf = ByteArray(2)
+            val opened = withContext(Dispatchers.IO) {
+                DeckLinkManager.openInput(source.deckLinkIndex, source.videoFormat, source.videoConnection)
+            }
+            if (!opened) {
+                System.err.println("[DeckLink Input] Failed to open input on device ${source.deckLinkIndex}")
+                return@LaunchedEffect
+            }
 
-        while (isActive) {
-            val bmpData = withContext(Dispatchers.IO) {
+            System.err.println("[DeckLink Input] Input opened, polling for frames...")
+            var frameCount = 0
+            var nullCount = 0
+
+            while (isActive) {
+                val frameData = withContext(Dispatchers.IO) {
+                    DeckLinkManager.getInputFrame(source.deckLinkIndex)
+                }
+
+                if (frameData != null && frameData.size > 2) {
+                    val w = frameData[0]
+                    val h = frameData[1]
+                    if (w > 0 && h > 0) {
+                        val img = withContext(Dispatchers.IO) {
+                            val bi = java.awt.image.BufferedImage(w, h, java.awt.image.BufferedImage.TYPE_INT_ARGB)
+                            bi.setRGB(0, 0, w, h, frameData, 2, w)
+                            bi
+                        }
+                        frame = img.toComposeImageBitmap()
+                        frameCount++
+                        nullCount = 0
+                        if (frameCount == 1) {
+                            System.err.println("[DeckLink Input] First frame: ${w}x${h}")
+                        }
+                    }
+                } else {
+                    nullCount++
+                    if (nullCount > 30 && frame != null) {
+                        frame = null  // no signal — clear display
+                    }
+                }
+
+                delay(16) // ~60fps polling
+            }
+        }
+    } else {
+        // ── FFmpeg capture path (regular cameras) ──
+        val processRef = remember { mutableStateOf<Process?>(null) }
+
+        DisposableEffect(source.devicePath, source.videoFormat) {
+            onDispose {
+                processRef.value?.destroyForcibly()
+                processRef.value = null
+            }
+        }
+
+        LaunchedEffect(source.devicePath, source.videoFormat) {
+            val path = source.devicePath
+            System.err.println("[Camera] Starting camera capture for device: $path, format: ${source.videoFormat.ifEmpty { "auto" }}")
+
+            // Parse video format into ffmpeg input args (must come before -i)
+            val formatArgs = if (source.videoFormat.isNotEmpty()) {
+                val match = Regex("""(\d+)x(\d+)@(\d+)""").find(source.videoFormat)
+                if (match != null) {
+                    val (w, h, fps) = match.destructured
+                    listOf("-video_size", "${w}x${h}", "-framerate", fps)
+                } else emptyList()
+            } else emptyList()
+
+            val command = when {
+                path.startsWith("dshow://") -> {
+                    val deviceName = path.removePrefix("dshow://").removePrefix(":dshow-vdev=")
+                    listOf("ffmpeg", "-f", "dshow") + formatArgs + listOf("-i", "video=$deviceName",
+                        "-an", "-vf", "fps=30", "-pix_fmt", "bgr24",
+                        "-f", "image2pipe", "-vcodec", "bmp", "-")
+                }
+                path.startsWith("v4l2://") -> {
+                    val device = path.removePrefix("v4l2://")
+                    listOf("ffmpeg", "-f", "v4l2") + formatArgs + listOf("-i", device,
+                        "-an", "-vf", "fps=30", "-pix_fmt", "bgr24",
+                        "-f", "image2pipe", "-vcodec", "bmp", "-")
+                }
+                path.startsWith("avfoundation://") -> {
+                    val index = path.removePrefix("avfoundation://")
+                    listOf("ffmpeg", "-f", "avfoundation") + formatArgs + listOf("-i", "$index:none",
+                        "-an", "-vf", "fps=30", "-pix_fmt", "bgr24",
+                        "-f", "image2pipe", "-vcodec", "bmp", "-")
+                }
+                else -> {
+                    System.err.println("[Camera] Unknown device path scheme: $path")
+                    return@LaunchedEffect
+                }
+            }
+
+            System.err.println("[Camera] Running command: ${command.joinToString(" ")}")
+            val process = withContext(Dispatchers.IO) {
                 try {
-                    // Read BMP magic bytes "BM"
-                    var read = 0
-                    while (read < 2) {
-                        val b = inputStream.read()
-                        if (b == -1) return@withContext null
-                        headerBuf[read++] = b.toByte()
-                    }
-                    if (headerBuf[0] != 'B'.code.toByte() || headerBuf[1] != 'M'.code.toByte()) return@withContext null
+                    ProcessBuilder(command).redirectErrorStream(false).start()
+                } catch (e: Throwable) {
+                    System.err.println("[Camera] Failed to start ffmpeg: ${e.message}")
+                    null
+                }
+            } ?: return@LaunchedEffect
+            processRef.value = process
 
-                    // Read BMP file size (bytes 2-5, little-endian)
-                    val sizeBytes = ByteArray(4)
-                    read = 0
-                    while (read < 4) {
-                        val r = inputStream.read(sizeBytes, read, 4 - read)
-                        if (r == -1) return@withContext null
-                        read += r
+            // Drain stderr to prevent pipe buffer from filling up and blocking ffmpeg
+            val stderrLines = mutableListOf<String>()
+            val stderrJob = launch(Dispatchers.IO) {
+                try {
+                    process.errorStream.bufferedReader().useLines { lines ->
+                        lines.forEach { line ->
+                            synchronized(stderrLines) {
+                                stderrLines.add(line)
+                                if (stderrLines.size > 50) stderrLines.removeAt(0)
+                            }
+                        }
                     }
-                    val fileSize = (sizeBytes[0].toInt() and 0xFF) or
-                            ((sizeBytes[1].toInt() and 0xFF) shl 8) or
-                            ((sizeBytes[2].toInt() and 0xFF) shl 16) or
-                            ((sizeBytes[3].toInt() and 0xFF) shl 24)
-
-                    // Read full BMP
-                    val data = ByteArray(fileSize)
-                    data[0] = 'B'.code.toByte()
-                    data[1] = 'M'.code.toByte()
-                    System.arraycopy(sizeBytes, 0, data, 2, 4)
-                    var remaining = fileSize - 6
-                    var offset = 6
-                    while (remaining > 0) {
-                        val r = inputStream.read(data, offset, remaining)
-                        if (r == -1) return@withContext null
-                        offset += r
-                        remaining -= r
-                    }
-                    data
-                } catch (_: Throwable) { null }
-            } ?: break
-
-            val img = withContext(Dispatchers.IO) {
-                ImageIO.read(ByteArrayInputStream(bmpData))
+                } catch (_: Throwable) {}
             }
-            if (img != null) {
-                frame = img.toComposeImageBitmap()
+
+            val inputStream = process.inputStream
+            val headerBuf = ByteArray(2)
+            var frameCount = 0
+
+            while (isActive) {
+                val bmpData = withContext(Dispatchers.IO) {
+                    try {
+                        var read = 0
+                        while (read < 2) {
+                            val b = inputStream.read()
+                            if (b == -1) return@withContext null
+                            headerBuf[read++] = b.toByte()
+                        }
+                        if (headerBuf[0] != 'B'.code.toByte() || headerBuf[1] != 'M'.code.toByte()) {
+                            System.err.println("[Camera] Invalid BMP magic bytes, got: ${headerBuf[0]}, ${headerBuf[1]}")
+                            return@withContext null
+                        }
+
+                        val sizeBytes = ByteArray(4)
+                        read = 0
+                        while (read < 4) {
+                            val r = inputStream.read(sizeBytes, read, 4 - read)
+                            if (r == -1) return@withContext null
+                            read += r
+                        }
+                        val fileSize = (sizeBytes[0].toInt() and 0xFF) or
+                                ((sizeBytes[1].toInt() and 0xFF) shl 8) or
+                                ((sizeBytes[2].toInt() and 0xFF) shl 16) or
+                                ((sizeBytes[3].toInt() and 0xFF) shl 24)
+
+                        val data = ByteArray(fileSize)
+                        data[0] = 'B'.code.toByte()
+                        data[1] = 'M'.code.toByte()
+                        System.arraycopy(sizeBytes, 0, data, 2, 4)
+                        var remaining = fileSize - 6
+                        var offset = 6
+                        while (remaining > 0) {
+                            val r = inputStream.read(data, offset, remaining)
+                            if (r == -1) return@withContext null
+                            offset += r
+                            remaining -= r
+                        }
+                        data
+                    } catch (e: Throwable) {
+                        System.err.println("[Camera] Error reading frame: ${e.message}")
+                        null
+                    }
+                } ?: break
+
+                val img = withContext(Dispatchers.IO) {
+                    ImageIO.read(ByteArrayInputStream(bmpData))
+                }
+                if (img != null) {
+                    frame = img.toComposeImageBitmap()
+                    frameCount++
+                    if (frameCount == 1) {
+                        val px = img.getRGB(img.width / 2, img.height / 2)
+                        System.err.println("[Camera] First frame received (${img.width}x${img.height}), " +
+                            "center pixel=0x${"%08X".format(px)}, type=${img.type}")
+                    }
+                }
             }
+
+            val exitCode = withContext(Dispatchers.IO) {
+                try { process.waitFor(); process.exitValue() } catch (_: Throwable) { -1 }
+            }
+            if (frameCount == 0) {
+                System.err.println("[Camera] ffmpeg exited with code $exitCode without producing any frames")
+                synchronized(stderrLines) {
+                    stderrLines.forEach { System.err.println("[Camera] ffmpeg stderr: $it") }
+                }
+            } else {
+                System.err.println("[Camera] ffmpeg stopped after $frameCount frames, exit code: $exitCode")
+            }
+            stderrJob.cancel()
+            process.destroyForcibly()
         }
-
-        process.destroyForcibly()
     }
 
     if (frame != null) {

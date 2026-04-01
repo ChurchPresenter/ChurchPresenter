@@ -158,7 +158,11 @@ sealed class SceneSource {
         override val visible: Boolean = true,
         override val locked: Boolean = false,
         val devicePath: String = "",
-        val deviceName: String = ""
+        val deviceName: String = "",
+        val videoFormat: String = "",
+        val videoConnection: Int = 0,
+        val isDeckLink: Boolean = false,
+        val deckLinkIndex: Int = -1
     ) : SceneSource()
 
     @Serializable
