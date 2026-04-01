@@ -1,6 +1,7 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.gradle.jvm.toolchain.JavaLanguageVersion
 import java.util.Calendar
+import java.util.Properties
 
 val versionYear = Calendar.getInstance().get(Calendar.YEAR) % 100
 
@@ -23,6 +24,41 @@ fun gitCommitHash(): String {
         process.inputStream.bufferedReader().readText().trim()
     } catch (_: Exception) { "unknown" }
 }
+
+// ── Desktop Signing helpers ───────────────────────────────────────────────────
+// Signing credentials are stored in the private ChurchPresenter-Signing repo.
+// The path to that repo's desktop/ folder is configured in local.properties:
+//   desktop.signing.repo.path=/absolute/path/to/ChurchPresenter-Signing/desktop
+// If the property is absent the build proceeds unsigned (safe for dev machines).
+
+fun loadPropsFile(path: String): Properties {
+    val props = Properties()
+    val f = File(path)
+    if (f.exists()) props.load(f.inputStream())
+    return props
+}
+
+val desktopSigningRepoPath: String? = run {
+    val localProps = Properties()
+    val localPropsFile = rootProject.file("local.properties")
+    if (localPropsFile.exists()) localProps.load(localPropsFile.inputStream())
+    localProps.getProperty("desktop.signing.repo.path")
+}
+
+val macSigningProps: Properties = if (desktopSigningRepoPath != null)
+    loadPropsFile("$desktopSigningRepoPath/macos/signing.properties")
+else Properties()
+
+val winSigningProps: Properties = if (desktopSigningRepoPath != null)
+    loadPropsFile("$desktopSigningRepoPath/windows/signing.properties")
+else Properties()
+
+val linuxSigningProps: Properties = if (desktopSigningRepoPath != null)
+    loadPropsFile("$desktopSigningRepoPath/linux/signing.properties")
+else Properties()
+
+/** Returns true when a signing.properties value looks like it has been filled in. */
+fun String?.isConfigured() = this != null && isNotBlank() && !contains("XXXXXXXXXX") && this != "CHANGE_ME" && !startsWith("YOUR_")
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -265,6 +301,35 @@ compose.desktop {
                 bundleID = "org.churchpresenter.app"
                 iconFile.set(project.file("src/jvmMain/appResources/macos/icon.icns"))
                 jvmArgs(*commonJvmArgs.toTypedArray())
+
+                // ── macOS Code Signing ────────────────────────────────────────
+                val macIdentity = macSigningProps.getProperty("identityName", "")
+                if (macIdentity.isConfigured()) {
+                    signing {
+                        sign.set(true)
+                        identity.set(macIdentity)
+                        val kc = macSigningProps.getProperty("keychain", "")
+                        if (!kc.isNullOrBlank()) keychain.set(kc)
+                    }
+                    logger.lifecycle("macOS signing ENABLED  identity=\"$macIdentity\"")
+
+                    // ── Notarization ──────────────────────────────────────────
+                    val macAppleId = macSigningProps.getProperty("appleId", "")
+                    val macPassword = macSigningProps.getProperty("notarizationPassword", "")
+                    val macTeamId = macSigningProps.getProperty("teamId", "")
+                    if (macAppleId.isConfigured() && macPassword.isConfigured() && macTeamId.isConfigured()) {
+                        notarization {
+                            appleID.set(macAppleId)
+                            password.set(macPassword)
+                            teamID.set(macTeamId)
+                        }
+                        logger.lifecycle("macOS notarization ENABLED  appleId=\"$macAppleId\"")
+                    } else {
+                        logger.lifecycle("macOS notarization SKIPPED  (fill appleId/notarizationPassword/teamId in desktop/macos/signing.properties)")
+                    }
+                } else {
+                    logger.lifecycle("macOS signing SKIPPED  (fill identityName in desktop/macos/signing.properties)")
+                }
             }
 
             windows {
@@ -373,6 +438,85 @@ afterEvaluate {
         t.name.startsWith("packageDeb")
     }.configureEach {
         dependsOn(copyLottieGen)
+    }
+}
+
+// ── Windows Code Signing ──────────────────────────────────────────────────────
+// Runs signtool.exe on the packaged .msi / .exe after Compose Desktop packaging.
+// Only executes on Windows with a configured certificate.
+val winCertFileRel = winSigningProps.getProperty("certFile", "")
+val winCertPath = if (desktopSigningRepoPath != null && winCertFileRel.isConfigured())
+    "$desktopSigningRepoPath/windows/$winCertFileRel" else null
+val winCertPassword = winSigningProps.getProperty("certPassword", "")
+val winTimestampUrl = winSigningProps.getProperty("timestampUrl", "http://timestamp.digicert.com")
+val winSubjectName = winSigningProps.getProperty("subjectName", "Church Presenter")
+
+fun registerWindowsSignTask(taskName: String, packagingTask: String, extension: String) =
+    tasks.register(taskName) {
+        description = "Sign Windows $extension installer with code signing certificate"
+        group = "signing"
+        dependsOn(packagingTask)
+        onlyIf {
+            val isWindows = System.getProperty("os.name").contains("Windows", ignoreCase = true)
+            val hasCert = winCertPath != null && File(winCertPath).exists() && winCertPassword.isConfigured()
+            if (!isWindows) logger.info("$taskName skipped: not running on Windows")
+            if (!hasCert) logger.info("$taskName skipped: certificate not configured")
+            isWindows && hasCert
+        }
+        doLast {
+            val outDir = layout.buildDirectory.dir("compose/binaries/main/$extension").get().asFile
+            outDir.listFiles { f -> f.extension.equals(extension, ignoreCase = true) }?.forEach { installer ->
+                val result = ProcessBuilder(
+                    "signtool", "sign",
+                    "/fd", "SHA256",
+                    "/f", winCertPath!!,
+                    "/p", winCertPassword,
+                    "/t", winTimestampUrl,
+                    "/d", winSubjectName,
+                    installer.absolutePath
+                ).inheritIO().start().waitFor()
+                if (result != 0) error("signtool failed with exit code $result for ${installer.name}")
+                logger.lifecycle("Windows signed: ${installer.name}")
+            }
+        }
+    }
+
+registerWindowsSignTask("signWindowsMsi", "packageMsi", "msi")
+registerWindowsSignTask("signWindowsExe", "packageExe", "exe")
+
+// ── Linux GPG Signing ─────────────────────────────────────────────────────────
+// GPG-signs the .deb package using dpkg-sig (must be installed on the build host).
+// Only executes on Linux with a configured GPG key.
+val linuxGpgKeyId = linuxSigningProps.getProperty("gpgKeyId", "")
+val linuxGpgPassphrase = linuxSigningProps.getProperty("gpgPassphrase", "")
+
+tasks.register("signLinuxDeb") {
+    description = "GPG-sign the Linux .deb package (requires dpkg-sig)"
+    group = "signing"
+    dependsOn("packageDeb")
+    onlyIf {
+        val isLinux = System.getProperty("os.name").contains("Linux", ignoreCase = true)
+        val hasKey = linuxGpgKeyId.isConfigured()
+        if (!isLinux) logger.info("signLinuxDeb skipped: not running on Linux")
+        if (!hasKey) logger.info("signLinuxDeb skipped: gpgKeyId not configured")
+        isLinux && hasKey
+    }
+    doLast {
+        val debDir = layout.buildDirectory.dir("compose/binaries/main/deb").get().asFile
+        debDir.listFiles { f -> f.extension.equals("deb", ignoreCase = true) }?.forEach { debFile ->
+            val cmd = buildList {
+                add("dpkg-sig")
+                add("--sign"); add("builder")
+                add("-k"); add(linuxGpgKeyId)
+                if (linuxGpgPassphrase.isConfigured()) {
+                    add("--gpg-options"); add("--passphrase $linuxGpgPassphrase")
+                }
+                add(debFile.absolutePath)
+            }
+            val result = ProcessBuilder(cmd).inheritIO().start().waitFor()
+            if (result != 0) error("dpkg-sig failed with exit code $result for ${debFile.name}")
+            logger.lifecycle("Linux signed: ${debFile.name}")
+        }
     }
 }
 
