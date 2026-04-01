@@ -147,7 +147,6 @@ public:
 
         int w = static_cast<int>(newMode->GetWidth());
         int h = static_cast<int>(newMode->GetHeight());
-        fprintf(stderr, "[DeckLink Input] Format changed on device %d: %dx%d\n", m_deviceIndex, w, h);
 
         // Determine pixel format based on detection flags
         BMDPixelFormat pixFmt = bmdFormat8BitYUV;
@@ -364,7 +363,6 @@ static IDeckLinkDisplayMode* getConfiguredDisplayMode(IDeckLink* device, IDeckLi
         // bmdDeckLinkConfigDefaultVideoOutputMode = 'dvom' = 0x64766F6D
         if (config->GetInt(static_cast<BMDDeckLinkConfigurationID>(0x64766F6D), &modeValue) == S_OK && modeValue != 0) {
             BMDDisplayMode configuredModeId = static_cast<BMDDisplayMode>(modeValue);
-            fprintf(stderr, "[DeckLink] Config default output mode: 0x%08lx\n", (unsigned long)configuredModeId);
             IDeckLinkDisplayModeIterator* modeIter = nullptr;
             if (output->GetDisplayModeIterator(&modeIter) == S_OK && modeIter) {
                 IDeckLinkDisplayMode* mode = nullptr;
@@ -379,7 +377,6 @@ static IDeckLinkDisplayMode* getConfiguredDisplayMode(IDeckLink* device, IDeckLi
                 modeIter->Release();
             }
         } else {
-            fprintf(stderr, "[DeckLink] Config query for default output mode failed\n");
         }
         config->Release();
     }
@@ -588,12 +585,9 @@ Java_org_churchpresenter_app_churchpresenter_composables_DeckLinkManager_nativeO
         return JNI_FALSE;
     }
 
-    fprintf(stderr, "[DeckLink] Opening device %d, requested %dx%d\n", deviceIndex, width, height);
     IDeckLinkDisplayMode* displayMode = getConfiguredDisplayMode(device, output);
     if (displayMode) {
-        fprintf(stderr, "[DeckLink] Using default mode from DeckLink Setup\n");
     } else {
-        fprintf(stderr, "[DeckLink] Config query failed, falling back to resolution match\n");
         displayMode = findDisplayMode(output, width, height);
     }
     if (!displayMode) {
@@ -610,8 +604,6 @@ Java_org_churchpresenter_app_churchpresenter_composables_DeckLinkManager_nativeO
         ? static_cast<double>(state.timeScale) / static_cast<double>(state.frameDuration) : 30.0;
     displayMode->Release();
 
-    fprintf(stderr, "[DeckLink] Device %d: %dx%d @ %.2f fps\n",
-            deviceIndex, state.outputWidth, state.outputHeight, state.fps);
 
     HRESULT enableResult = output->EnableVideoOutput(modeId, bmdVideoOutputFlagDefault);
     if (enableResult != S_OK) {
@@ -625,7 +617,6 @@ Java_org_churchpresenter_app_churchpresenter_composables_DeckLinkManager_nativeO
     state.device = device;
     g_devices[deviceIndex] = state;
 
-    fprintf(stderr, "[DeckLink] Device %d opened successfully\n", deviceIndex);
     return JNI_TRUE;
 }
 
@@ -728,7 +719,6 @@ Java_org_churchpresenter_app_churchpresenter_composables_DeckLinkManager_nativeC
     }
     g_devices.erase(it);
 
-    fprintf(stderr, "[DeckLink] Device %d closed\n", deviceIndex);
 }
 
 
@@ -812,7 +802,6 @@ Java_org_churchpresenter_app_churchpresenter_composables_DeckLinkManager_nativeL
     }
     device->Release();
 
-    fprintf(stderr, "[DeckLink Input] Device %d: %zu input modes\n", deviceIndex, modes.size());
     return toStringArray(env, modes);
 }
 
@@ -852,7 +841,6 @@ Java_org_churchpresenter_app_churchpresenter_composables_DeckLinkManager_nativeL
     }
     device->Release();
 
-    fprintf(stderr, "[DeckLink Input] Device %d: %zu video connections\n", deviceIndex, connections.size());
     return toStringArray(env, connections);
 }
 
@@ -886,23 +874,22 @@ Java_org_churchpresenter_app_churchpresenter_composables_DeckLinkManager_nativeO
     IDeckLink* device = getDeviceByIndex(deviceIndex);
     if (!device) return JNI_FALSE;
 
+    // Set video connection BEFORE getting input interface
+    if (connectionType > 0) {
+        IDeckLinkConfiguration* config = nullptr;
+        if (device->QueryInterface(IID_IDeckLinkConfiguration, reinterpret_cast<void**>(&config)) == S_OK && config) {
+            // bmdDeckLinkConfigVideoInputConnection = 'vicn' = 0x7669636E
+            HRESULT hr = config->SetInt(static_cast<BMDDeckLinkConfigurationID>(0x7669636E),
+                           static_cast<int64_t>(connectionType));
+            config->Release();
+        }
+    }
+
     IDeckLinkInput* input = nullptr;
     if (device->QueryInterface(IID_IDeckLinkInput, reinterpret_cast<void**>(&input)) != S_OK || !input) {
         device->Release();
         fprintf(stderr, "[DeckLink Input] Device %d: no input interface\n", deviceIndex);
         return JNI_FALSE;
-    }
-
-    // Set video connection if specified
-    if (connectionType > 0) {
-        IDeckLinkConfiguration* config = nullptr;
-        if (device->QueryInterface(IID_IDeckLinkConfiguration, reinterpret_cast<void**>(&config)) == S_OK && config) {
-            // bmdDeckLinkConfigVideoInputConnection = 'vicn' = 0x7669636E
-            config->SetInt(static_cast<BMDDeckLinkConfigurationID>(0x7669636E),
-                           static_cast<int64_t>(connectionType));
-            fprintf(stderr, "[DeckLink Input] Device %d: set video connection to %d\n", deviceIndex, connectionType);
-            config->Release();
-        }
     }
 
     // Parse mode string to find display mode, or use auto-detect
@@ -997,7 +984,6 @@ Java_org_churchpresenter_app_churchpresenter_composables_DeckLinkManager_nativeO
         return JNI_FALSE;
     }
 
-    fprintf(stderr, "[DeckLink Input] Device %d: input opened (auto=%d)\n", deviceIndex, autoMode);
     return JNI_TRUE;
 }
 
@@ -1051,5 +1037,4 @@ Java_org_churchpresenter_app_churchpresenter_composables_DeckLinkManager_nativeC
     delete state;
     g_inputs.erase(it);
 
-    fprintf(stderr, "[DeckLink Input] Device %d: input closed\n", deviceIndex);
 }
