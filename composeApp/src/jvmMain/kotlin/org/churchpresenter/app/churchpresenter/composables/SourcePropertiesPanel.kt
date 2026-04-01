@@ -913,7 +913,11 @@ private data class CameraFormat(
     val encodedValue: String = "${width}x${height}@${fps}"
 )
 
+/** Cache format listings so we don't re-open the device every time the source recomposes. */
+private val cameraFormatCache = mutableMapOf<String, List<CameraFormat>>()
+
 private fun listCameraFormats(devicePath: String, deviceName: String): List<CameraFormat> {
+    cameraFormatCache[devicePath]?.let { return it }
     val osName = System.getProperty("os.name", "").lowercase()
     val formats = when {
         osName.contains("win") && devicePath.startsWith("dshow://") -> listDshowFormats(deviceName)
@@ -923,6 +927,7 @@ private fun listCameraFormats(devicePath: String, deviceName: String): List<Came
     }
     System.err.println("[Camera] Found ${formats.size} format(s) for $deviceName")
     formats.forEach { System.err.println("[Camera]   ${it.displayName}") }
+    if (formats.isNotEmpty()) cameraFormatCache[devicePath] = formats
     return formats
 }
 
@@ -933,7 +938,9 @@ private fun listDshowFormats(deviceName: String): List<CameraFormat> {
         val process = ProcessBuilder("ffmpeg", "-f", "dshow", "-list_options", "true", "-i", "video=$name")
             .redirectErrorStream(true).start()
         val output = process.inputStream.bufferedReader().readText()
-        process.waitFor()
+        if (!process.waitFor(5, java.util.concurrent.TimeUnit.SECONDS)) {
+            process.destroyForcibly()
+        }
         // Match lines like: min s=1920x1080 fps=30 max s=1920x1080 fps=30
         // or: s=1920x1080 min fps=30 max fps=30
         val sizePattern = Regex("""s=(\d+)x(\d+)""")
@@ -1084,15 +1091,22 @@ private fun listWindowsCameras(): List<CameraDevice> {
     // since these are the exact names ffmpeg uses to open devices.
     // This correctly handles capture cards (e.g. Blackmagic) whose DirectShow
     // names differ from their PnP device names.
+    //
+    // ffmpeg 6.x+ lists per-device types: (video), (none), (audio).
+    // Devices marked (none) are typically USB capture cards whose pins don't
+    // report a specific media type.  We include both (video) and (none) devices
+    // since they can still be valid video sources.
     try {
         val process = ProcessBuilder("ffmpeg", "-list_devices", "true", "-f", "dshow", "-i", "dummy")
             .redirectErrorStream(true).start()
         val output = process.inputStream.bufferedReader().readText()
         process.waitFor()
+        val lines = output.lines()
+        val namePattern = Regex("\"(.+?)\"\\s+\\((video|none)\\)")
         var isVideo = false
-        for (line in output.lines()) {
-            // New ffmpeg format (8.x+): "DeviceName" (video)
-            val newMatch = Regex("\"(.+?)\"\\s+\\(video\\)").find(line)
+        for (line in lines) {
+            // New ffmpeg format (6.x+): "DeviceName" (video|none|audio)
+            val newMatch = namePattern.find(line)
             if (newMatch != null) {
                 val name = newMatch.groupValues[1]
                 if (name.lowercase() !in seenNames) {
