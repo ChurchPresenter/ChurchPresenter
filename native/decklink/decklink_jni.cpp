@@ -169,7 +169,21 @@ public:
         IDeckLinkVideoInputFrame* videoFrame,
         IDeckLinkAudioInputPacket*) override
     {
-        if (!videoFrame || (videoFrame->GetFlags() & bmdFrameHasNoInputSource)) return S_OK;
+        if (!videoFrame) return S_OK;
+
+        // No input signal — clear the frame so the UI goes blank
+        if (videoFrame->GetFlags() & bmdFrameHasNoInputSource) {
+            std::lock_guard<std::mutex> lock(g_inputMutex);
+            auto it = g_inputs.find(m_deviceIndex);
+            if (it != g_inputs.end()) {
+                it->second->hasNewFrame = false;
+                delete[] it->second->frameData;
+                it->second->frameData = nullptr;
+                it->second->frameWidth = 0;
+                it->second->frameHeight = 0;
+            }
+            return S_OK;
+        }
 
         int w = static_cast<int>(videoFrame->GetWidth());
         int h = static_cast<int>(videoFrame->GetHeight());
