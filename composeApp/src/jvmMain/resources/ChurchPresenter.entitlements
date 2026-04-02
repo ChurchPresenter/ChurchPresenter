@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- Required for Mac App Store sandbox -->
+    <key>com.apple.security.app-sandbox</key>
+    <true/>
+
+    <!-- File access: user picks files/folders (song DB, Bibles, media) -->
+    <key>com.apple.security.files.user-selected.read-write</key>
+    <true/>
+
+    <!-- Bookmarks so the app can re-open previously selected folders across launches -->
+    <key>com.apple.security.files.bookmarks.app-scope</key>
+    <true/>
+
+    <!-- Network: Ktor companion API server + QR code / web presenter -->
+    <key>com.apple.security.network.server</key>
+    <true/>
+    <key>com.apple.security.network.client</key>
+    <true/>
+
+    <!-- JCEF (embedded Chromium) requires JIT compilation -->
+    <key>com.apple.security.cs.allow-jit</key>
+    <true/>
+
+    <!-- Allow loading unsigned libraries (VLCJ, DeckLink JNI, JavaFX natives) -->
+    <key>com.apple.security.cs.disable-library-validation</key>
+    <true/>
+
+    <!-- Printing support (order of service sheets) -->
+    <key>com.apple.security.print</key>
+    <true/>
+</dict>
+</plist>
+
