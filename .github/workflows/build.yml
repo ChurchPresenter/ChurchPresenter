@@ -310,7 +310,16 @@ jobs:
           path: release/linux
 
       - name: List release files
-        run: find release -type f
+        run: |
+          mkdir -p release
+          find release -type f
+
+      - name: Fail if no artifacts
+        run: |
+          if [ -z "$(find release -type f)" ]; then
+            echo "No artifacts to release"
+            exit 1
+          fi
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
