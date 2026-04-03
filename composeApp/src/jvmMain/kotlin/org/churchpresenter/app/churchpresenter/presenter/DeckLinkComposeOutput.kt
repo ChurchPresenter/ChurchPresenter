@@ -193,13 +193,6 @@ fun DeckLinkComposeOutput(
                             }
 
                             framesSent++
-                            if (framesSent <= 3 || framesSent % 300 == 0L) {
-                                // Sample center pixel and corner pixel for debugging
-                                val center = pixels[w * (h / 2) + w / 2]
-                                val corner = pixels[0]
-                                System.err.println("[DeckLink] Device $deviceIndex frame #$framesSent: center=0x${center.toUInt().toString(16)}, corner=0x${corner.toUInt().toString(16)}")
-                            }
-
                             DeckLinkManager.sendFrame(deviceIndex, pixels, w, h)
                         } else {
                             Thread.sleep(16)
@@ -218,6 +211,16 @@ fun DeckLinkComposeOutput(
         onDispose {
             captureJob.cancel()
             scope.cancel()
+            // Send black frames to clear the output before closing.
+            // Multiple frames + delay ensures the device displays them
+            // before DisableVideoOutput is called.
+            try {
+                val blackPixels = IntArray(w * h)
+                repeat(3) {
+                    DeckLinkManager.sendFrame(deviceIndex, blackPixels, w, h)
+                }
+                Thread.sleep(100)
+            } catch (_: Exception) {}
             DeckLinkManager.close(deviceIndex)
             SwingUtilities.invokeLater {
                 jframe.isVisible = false

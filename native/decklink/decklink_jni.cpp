@@ -91,7 +91,9 @@
 struct DeviceState {
     IDeckLinkOutput* output = nullptr;
     IDeckLink* device = nullptr;
+    IDeckLinkKeyer* keyer = nullptr;
     bool playbackStarted = false;
+    bool audioEnabled = false;
     long frameCount = 0;
     double fps = 30.0;
     BMDTimeScale timeScale = 30000;
@@ -115,6 +117,14 @@ struct InputState {
     int frameHeight = 0;
     bool hasNewFrame = false;
     std::mutex frameMutex;
+    // Audio capture buffer (ring buffer of 16-bit PCM samples)
+    bool audioEnabled = false;
+    int audioChannels = 0;
+    int16_t* audioData = nullptr;
+    int audioCapacity = 0;     // max sample frames in buffer
+    int audioWritePos = 0;
+    int audioAvailable = 0;    // sample frames available for reading
+    bool hasNewAudio = false;
 };
 
 static std::mutex g_inputMutex;
@@ -167,8 +177,35 @@ public:
 
     HRESULT STDMETHODCALLTYPE VideoInputFrameArrived(
         IDeckLinkVideoInputFrame* videoFrame,
-        IDeckLinkAudioInputPacket*) override
+        IDeckLinkAudioInputPacket* audioPacket) override
     {
+        // ── Audio capture ──
+        if (audioPacket) {
+            std::lock_guard<std::mutex> lock(g_inputMutex);
+            auto it = g_inputs.find(m_deviceIndex);
+            if (it != g_inputs.end() && it->second->audioEnabled) {
+                InputState* state = it->second;
+                void* audioBytes = nullptr;
+                if (audioPacket->GetBytes(&audioBytes) == S_OK && audioBytes) {
+                    long sampleFrames = audioPacket->GetSampleFrameCount();
+                    int totalSamples = sampleFrames * state->audioChannels;
+                    const int16_t* src = reinterpret_cast<const int16_t*>(audioBytes);
+                    std::lock_guard<std::mutex> frameLock(state->frameMutex);
+                    // Write into ring buffer
+                    int capSamples = state->audioCapacity * state->audioChannels;
+                    for (int i = 0; i < totalSamples && capSamples > 0; i++) {
+                        int writeIdx = (state->audioWritePos * state->audioChannels + i) % capSamples;
+                        state->audioData[writeIdx] = src[i];
+                    }
+                    state->audioWritePos = (state->audioWritePos + sampleFrames) % state->audioCapacity;
+                    state->audioAvailable += sampleFrames;
+                    if (state->audioAvailable > state->audioCapacity)
+                        state->audioAvailable = state->audioCapacity;
+                    state->hasNewAudio = true;
+                }
+            }
+        }
+
         if (!videoFrame) return S_OK;
 
         // No input signal — clear the frame so the UI goes blank
@@ -189,14 +226,29 @@ public:
         int h = static_cast<int>(videoFrame->GetHeight());
         if (w <= 0 || h <= 0) return S_OK;
 
-        // Get raw frame bytes via IDeckLinkVideoBuffer (SDK 15.3+)
+        // Get raw frame bytes — try SDK 15.3+ IDeckLinkVideoBuffer first,
+        // fall back to legacy IDeckLinkVideoFrame_v14_2_1::GetBytes() for
+        // older devices (e.g. Intensity Shuttle) whose frames may not
+        // support the newer interface.
         void* frameBytes = nullptr;
         IDeckLinkVideoBuffer* videoBuffer = nullptr;
-        if (videoFrame->QueryInterface(IID_IDeckLinkVideoBuffer, reinterpret_cast<void**>(&videoBuffer)) != S_OK || !videoBuffer) return S_OK;
-        videoBuffer->StartAccess(bmdBufferAccessRead);
-        if (videoBuffer->GetBytes(&frameBytes) != S_OK || !frameBytes) {
-            videoBuffer->EndAccess(bmdBufferAccessRead);
-            videoBuffer->Release();
+        IDeckLinkVideoFrame_v14_2_1* legacyFrame = nullptr;
+        bool useLegacy = false;
+
+        if (videoFrame->QueryInterface(IID_IDeckLinkVideoBuffer, reinterpret_cast<void**>(&videoBuffer)) == S_OK && videoBuffer) {
+            videoBuffer->StartAccess(bmdBufferAccessRead);
+            if (videoBuffer->GetBytes(&frameBytes) != S_OK || !frameBytes) {
+                videoBuffer->EndAccess(bmdBufferAccessRead);
+                videoBuffer->Release();
+                return S_OK;
+            }
+        } else if (videoFrame->QueryInterface(IID_IDeckLinkVideoFrame_v14_2_1, reinterpret_cast<void**>(&legacyFrame)) == S_OK && legacyFrame) {
+            if (legacyFrame->GetBytes(&frameBytes) != S_OK || !frameBytes) {
+                legacyFrame->Release();
+                return S_OK;
+            }
+            useLegacy = true;
+        } else {
             return S_OK;
         }
 
@@ -207,8 +259,12 @@ public:
         std::lock_guard<std::mutex> lock(g_inputMutex);
         auto it = g_inputs.find(m_deviceIndex);
         if (it == g_inputs.end()) {
-            videoBuffer->EndAccess(bmdBufferAccessRead);
-            videoBuffer->Release();
+            if (useLegacy) {
+                legacyFrame->Release();
+            } else {
+                videoBuffer->EndAccess(bmdBufferAccessRead);
+                videoBuffer->Release();
+            }
             return S_OK;
         }
         InputState* state = it->second;
@@ -273,8 +329,12 @@ public:
         }
 
         state->hasNewFrame = true;
-        videoBuffer->EndAccess(bmdBufferAccessRead);
-        videoBuffer->Release();
+        if (useLegacy) {
+            legacyFrame->Release();
+        } else {
+            videoBuffer->EndAccess(bmdBufferAccessRead);
+            videoBuffer->Release();
+        }
         return S_OK;
     }
 
@@ -448,15 +508,29 @@ static IDeckLinkMutableVideoFrame* createFrame(IDeckLinkOutput* output, const ji
     );
     if (hr != S_OK || !frame) return nullptr;
 
+    // Get writable frame bytes — try SDK 15.3+ IDeckLinkVideoBuffer first,
+    // fall back to legacy IDeckLinkVideoFrame_v14_2_1::GetBytes() for
+    // older devices (e.g. Intensity Shuttle).
     void* frameBytes = nullptr;
     IDeckLinkVideoBuffer* buffer = nullptr;
+    IDeckLinkVideoFrame_v14_2_1* legacyFrame = nullptr;
+    bool useLegacy = false;
+
     if (frame->QueryInterface(IID_IDeckLinkVideoBuffer, reinterpret_cast<void**>(&buffer)) == S_OK && buffer) {
         buffer->StartAccess(bmdBufferAccessWrite);
         buffer->GetBytes(&frameBytes);
+    } else if (frame->QueryInterface(IID_IDeckLinkVideoFrame_v14_2_1, reinterpret_cast<void**>(&legacyFrame)) == S_OK && legacyFrame) {
+        legacyFrame->GetBytes(&frameBytes);
+        useLegacy = true;
     }
 
     if (!frameBytes) {
-        if (buffer) { buffer->EndAccess(bmdBufferAccessWrite); buffer->Release(); }
+        if (useLegacy) {
+            legacyFrame->Release();
+        } else if (buffer) {
+            buffer->EndAccess(bmdBufferAccessWrite);
+            buffer->Release();
+        }
         frame->Release();
         return nullptr;
     }
@@ -474,7 +548,9 @@ static IDeckLinkMutableVideoFrame* createFrame(IDeckLinkOutput* output, const ji
         }
     }
 
-    if (buffer) {
+    if (useLegacy) {
+        legacyFrame->Release();
+    } else if (buffer) {
         buffer->EndAccess(bmdBufferAccessWrite);
         buffer->Release();
     }
@@ -722,9 +798,16 @@ Java_org_churchpresenter_app_churchpresenter_composables_DeckLinkManager_nativeC
     auto it = g_devices.find(deviceIndex);
     if (it == g_devices.end()) return;
 
+    if (it->second.keyer) {
+        it->second.keyer->Disable();
+        it->second.keyer->Release();
+    }
     if (it->second.output) {
         if (it->second.playbackStarted) {
             it->second.output->StopScheduledPlayback(0, nullptr, 0);
+        }
+        if (it->second.audioEnabled) {
+            it->second.output->DisableAudioOutput();
         }
         it->second.output->DisableVideoOutput();
         it->second.output->Release();
@@ -1046,12 +1129,346 @@ Java_org_churchpresenter_app_churchpresenter_composables_DeckLinkManager_nativeC
     if (state->input) {
         state->input->StopStreams();
         state->input->SetCallback(nullptr);
+        if (state->audioEnabled) state->input->DisableAudioInput();
         state->input->DisableVideoInput();
         state->input->Release();
     }
     if (state->config) state->config->Release();
     if (state->device) state->device->Release();
     delete[] state->frameData;
+    delete[] state->audioData;
     delete state;
     g_inputs.erase(it);
+}
+
+
+// ═══════════════════════════════════════════════════════════════════
+// Audio input capture
+// ═══════════════════════════════════════════════════════════════════
+
+JNIEXPORT jboolean JNICALL
+Java_org_churchpresenter_app_churchpresenter_composables_DeckLinkManager_nativeEnableAudioInput(
+    JNIEnv* env, jclass, jint deviceIndex, jint channels)
+{
+    std::lock_guard<std::mutex> lock(g_inputMutex);
+    auto it = g_inputs.find(deviceIndex);
+    if (it == g_inputs.end() || !it->second->input) return JNI_FALSE;
+
+    InputState* state = it->second;
+    if (state->audioEnabled) return JNI_TRUE; // already enabled
+
+    int ch = (channels > 0) ? channels : 2;
+    HRESULT hr = state->input->EnableAudioInput(
+        bmdAudioSampleRate48kHz, bmdAudioSampleType16bitInteger, ch);
+    if (hr != S_OK) return JNI_FALSE;
+
+    // Allocate ring buffer for ~1 second of audio at 48kHz
+    state->audioChannels = ch;
+    state->audioCapacity = 48000;
+    state->audioData = new int16_t[state->audioCapacity * ch];
+    memset(state->audioData, 0, state->audioCapacity * ch * sizeof(int16_t));
+    state->audioWritePos = 0;
+    state->audioAvailable = 0;
+    state->audioEnabled = true;
+
+    return JNI_TRUE;
+}
+
+
+JNIEXPORT jshortArray JNICALL
+Java_org_churchpresenter_app_churchpresenter_composables_DeckLinkManager_nativeGetInputAudio(
+    JNIEnv* env, jclass, jint deviceIndex)
+{
+    std::lock_guard<std::mutex> lock(g_inputMutex);
+    auto it = g_inputs.find(deviceIndex);
+    if (it == g_inputs.end()) return nullptr;
+
+    InputState* state = it->second;
+    std::lock_guard<std::mutex> frameLock(state->frameMutex);
+
+    if (!state->hasNewAudio || !state->audioData || state->audioAvailable <= 0)
+        return nullptr;
+
+    int sampleFrames = state->audioAvailable;
+    int ch = state->audioChannels;
+    int totalSamples = sampleFrames * ch;
+    int capSamples = state->audioCapacity * ch;
+
+    // Read from ring buffer: data starts at (writePos - available)
+    int readStart = ((state->audioWritePos - sampleFrames + state->audioCapacity) % state->audioCapacity) * ch;
+
+    // Header: [sampleFrames, channels, ...samples...]
+    jshortArray result = env->NewShortArray(2 + totalSamples);
+    if (!result) return nullptr;
+
+    jshort header[2] = { static_cast<jshort>(sampleFrames > 32767 ? 32767 : sampleFrames),
+                         static_cast<jshort>(ch) };
+    env->SetShortArrayRegion(result, 0, 2, header);
+
+    // Copy from ring buffer handling wrap-around
+    if (readStart + totalSamples <= capSamples) {
+        env->SetShortArrayRegion(result, 2, totalSamples, &state->audioData[readStart]);
+    } else {
+        int firstPart = capSamples - readStart;
+        env->SetShortArrayRegion(result, 2, firstPart, &state->audioData[readStart]);
+        env->SetShortArrayRegion(result, 2 + firstPart, totalSamples - firstPart, &state->audioData[0]);
+    }
+
+    state->audioAvailable = 0;
+    state->hasNewAudio = false;
+
+    return result;
+}
+
+
+// ═══════════════════════════════════════════════════════════════════
+// Audio output
+// ═══════════════════════════════════════════════════════════════════
+
+JNIEXPORT jboolean JNICALL
+Java_org_churchpresenter_app_churchpresenter_composables_DeckLinkManager_nativeEnableAudioOutput(
+    JNIEnv* env, jclass, jint deviceIndex, jint channels)
+{
+    std::lock_guard<std::mutex> lock(g_mutex);
+    auto it = g_devices.find(deviceIndex);
+    if (it == g_devices.end() || !it->second.output) return JNI_FALSE;
+
+    int ch = (channels > 0) ? channels : 2;
+    HRESULT hr = it->second.output->EnableAudioOutput(
+        bmdAudioSampleRate48kHz, bmdAudioSampleType16bitInteger, ch,
+        bmdAudioOutputStreamContinuous);
+    if (hr != S_OK) return JNI_FALSE;
+
+    it->second.audioEnabled = true;
+    return JNI_TRUE;
+}
+
+
+JNIEXPORT jint JNICALL
+Java_org_churchpresenter_app_churchpresenter_composables_DeckLinkManager_nativeWriteAudioSamples(
+    JNIEnv* env, jclass, jint deviceIndex, jshortArray samples, jint sampleFrameCount)
+{
+    std::lock_guard<std::mutex> lock(g_mutex);
+    auto it = g_devices.find(deviceIndex);
+    if (it == g_devices.end() || !it->second.output || !it->second.audioEnabled) return 0;
+
+    jshort* data = env->GetShortArrayElements(samples, nullptr);
+    if (!data) return 0;
+
+    unsigned int written = 0;
+    it->second.output->WriteAudioSamplesSync(data, sampleFrameCount, &written);
+    env->ReleaseShortArrayElements(samples, data, JNI_ABORT);
+
+    return static_cast<jint>(written);
+}
+
+
+JNIEXPORT void JNICALL
+Java_org_churchpresenter_app_churchpresenter_composables_DeckLinkManager_nativeDisableAudioOutput(
+    JNIEnv* env, jclass, jint deviceIndex)
+{
+    std::lock_guard<std::mutex> lock(g_mutex);
+    auto it = g_devices.find(deviceIndex);
+    if (it == g_devices.end() || !it->second.output) return;
+
+    it->second.output->DisableAudioOutput();
+    it->second.audioEnabled = false;
+}
+
+
+// ═══════════════════════════════════════════════════════════════════
+// Keyer (hardware overlay)
+// ═══════════════════════════════════════════════════════════════════
+
+JNIEXPORT jboolean JNICALL
+Java_org_churchpresenter_app_churchpresenter_composables_DeckLinkManager_nativeEnableKeyer(
+    JNIEnv* env, jclass, jint deviceIndex, jboolean isExternal)
+{
+    std::lock_guard<std::mutex> lock(g_mutex);
+    auto it = g_devices.find(deviceIndex);
+    if (it == g_devices.end() || !it->second.device) return JNI_FALSE;
+
+    // Get keyer interface if not already cached
+    if (!it->second.keyer) {
+        IDeckLinkKeyer* keyer = nullptr;
+        if (it->second.device->QueryInterface(IID_IDeckLinkKeyer, reinterpret_cast<void**>(&keyer)) != S_OK || !keyer)
+            return JNI_FALSE;
+        it->second.keyer = keyer;
+    }
+
+    HRESULT hr = it->second.keyer->Enable(isExternal ? TRUE : FALSE);
+    if (hr != S_OK) return JNI_FALSE;
+
+    // Default to full opacity
+    it->second.keyer->SetLevel(255);
+
+    return JNI_TRUE;
+}
+
+
+JNIEXPORT void JNICALL
+Java_org_churchpresenter_app_churchpresenter_composables_DeckLinkManager_nativeSetKeyerLevel(
+    JNIEnv* env, jclass, jint deviceIndex, jint level)
+{
+    std::lock_guard<std::mutex> lock(g_mutex);
+    auto it = g_devices.find(deviceIndex);
+    if (it == g_devices.end() || !it->second.keyer) return;
+
+    unsigned char clampedLevel = static_cast<unsigned char>(level < 0 ? 0 : (level > 255 ? 255 : level));
+    it->second.keyer->SetLevel(clampedLevel);
+}
+
+
+JNIEXPORT void JNICALL
+Java_org_churchpresenter_app_churchpresenter_composables_DeckLinkManager_nativeKeyerRampUp(
+    JNIEnv* env, jclass, jint deviceIndex, jint frames)
+{
+    std::lock_guard<std::mutex> lock(g_mutex);
+    auto it = g_devices.find(deviceIndex);
+    if (it == g_devices.end() || !it->second.keyer) return;
+
+    it->second.keyer->RampUp(frames > 0 ? frames : 30);
+}
+
+
+JNIEXPORT void JNICALL
+Java_org_churchpresenter_app_churchpresenter_composables_DeckLinkManager_nativeKeyerRampDown(
+    JNIEnv* env, jclass, jint deviceIndex, jint frames)
+{
+    std::lock_guard<std::mutex> lock(g_mutex);
+    auto it = g_devices.find(deviceIndex);
+    if (it == g_devices.end() || !it->second.keyer) return;
+
+    it->second.keyer->RampDown(frames > 0 ? frames : 30);
+}
+
+
+JNIEXPORT void JNICALL
+Java_org_churchpresenter_app_churchpresenter_composables_DeckLinkManager_nativeDisableKeyer(
+    JNIEnv* env, jclass, jint deviceIndex)
+{
+    std::lock_guard<std::mutex> lock(g_mutex);
+    auto it = g_devices.find(deviceIndex);
+    if (it == g_devices.end() || !it->second.keyer) return;
+
+    it->second.keyer->Disable();
+}
+
+
+// ═══════════════════════════════════════════════════════════════════
+// Output connection selection
+// ═══════════════════════════════════════════════════════════════════
+
+JNIEXPORT jboolean JNICALL
+Java_org_churchpresenter_app_churchpresenter_composables_DeckLinkManager_nativeSetOutputConnection(
+    JNIEnv* env, jclass, jint deviceIndex, jint connectionType)
+{
+    std::lock_guard<std::mutex> lock(g_mutex);
+    auto it = g_devices.find(deviceIndex);
+    if (it == g_devices.end() || !it->second.device) return JNI_FALSE;
+
+    IDeckLinkConfiguration* config = nullptr;
+    if (it->second.device->QueryInterface(IID_IDeckLinkConfiguration, reinterpret_cast<void**>(&config)) != S_OK || !config)
+        return JNI_FALSE;
+
+    // bmdDeckLinkConfigVideoOutputConnection = 0x766F636E
+    HRESULT hr = config->SetInt(static_cast<BMDDeckLinkConfigurationID>(0x766F636E),
+                                static_cast<int64_t>(connectionType));
+    config->Release();
+
+    return (hr == S_OK) ? JNI_TRUE : JNI_FALSE;
+}
+
+
+JNIEXPORT jobjectArray JNICALL
+Java_org_churchpresenter_app_churchpresenter_composables_DeckLinkManager_nativeListOutputConnections(
+    JNIEnv* env, jclass, jint deviceIndex)
+{
+#ifdef _WIN32
+    ensureCOM();
+#endif
+
+    std::vector<std::string> connections;
+    IDeckLink* device = getDeviceByIndex(deviceIndex);
+    if (!device) return toStringArray(env, connections);
+
+    IDeckLinkProfileAttributes* attrs = nullptr;
+    if (device->QueryInterface(IID_IDeckLinkProfileAttributes, reinterpret_cast<void**>(&attrs)) == S_OK && attrs) {
+        int64_t availableConnections = 0;
+        // bmdDeckLinkVideoOutputConnections = 'vocn' = 0x766F636E
+        if (attrs->GetInt(static_cast<BMDDeckLinkAttributeID>(0x766F636E), &availableConnections) == S_OK) {
+            if (availableConnections & bmdVideoConnectionSDI)
+                connections.push_back("SDI|1");
+            if (availableConnections & bmdVideoConnectionHDMI)
+                connections.push_back("HDMI|2");
+            if (availableConnections & bmdVideoConnectionOpticalSDI)
+                connections.push_back("Optical SDI|4");
+            if (availableConnections & bmdVideoConnectionComponent)
+                connections.push_back("Component|8");
+            if (availableConnections & bmdVideoConnectionComposite)
+                connections.push_back("Composite|16");
+            if (availableConnections & bmdVideoConnectionSVideo)
+                connections.push_back("S-Video|32");
+        }
+        attrs->Release();
+    }
+    device->Release();
+
+    return toStringArray(env, connections);
+}
+
+
+// ═══════════════════════════════════════════════════════════════════
+// Status monitoring
+// ═══════════════════════════════════════════════════════════════════
+
+JNIEXPORT jintArray JNICALL
+Java_org_churchpresenter_app_churchpresenter_composables_DeckLinkManager_nativeGetDeviceStatus(
+    JNIEnv* env, jclass, jint deviceIndex)
+{
+#ifdef _WIN32
+    ensureCOM();
+#endif
+
+    // Returns [signalLocked, busy, detectedModeCode]
+    // signalLocked: 1 = locked, 0 = no signal
+    // busy: bitmask from bmdDeckLinkStatusBusy
+    // detectedModeCode: raw BMDDisplayMode fourcc value
+
+    jint status[3] = {0, 0, 0};
+
+    IDeckLink* device = getDeviceByIndex(deviceIndex);
+    if (!device) {
+        jintArray result = env->NewIntArray(3);
+        if (result) env->SetIntArrayRegion(result, 0, 3, status);
+        return result;
+    }
+
+    IDeckLinkStatus* deckStatus = nullptr;
+    if (device->QueryInterface(IID_IDeckLinkStatus, reinterpret_cast<void**>(&deckStatus)) == S_OK && deckStatus) {
+        // bmdDeckLinkStatusVideoInputSignalLocked = 0x7669736C
+        BOOL locked = FALSE;
+        if (deckStatus->GetFlag(static_cast<BMDDeckLinkStatusID>(0x7669736C), &locked) == S_OK) {
+            status[0] = locked ? 1 : 0;
+        }
+
+        // bmdDeckLinkStatusBusy = 0x62757379
+        LONGLONG busy = 0;
+        if (deckStatus->GetInt(static_cast<BMDDeckLinkStatusID>(0x62757379), &busy) == S_OK) {
+            status[1] = static_cast<jint>(busy);
+        }
+
+        // bmdDeckLinkStatusDetectedVideoInputMode = 0x6476696D
+        LONGLONG detectedMode = 0;
+        if (deckStatus->GetInt(static_cast<BMDDeckLinkStatusID>(0x6476696D), &detectedMode) == S_OK) {
+            status[2] = static_cast<jint>(detectedMode);
+        }
+
+        deckStatus->Release();
+    }
+    device->Release();
+
+    jintArray result = env->NewIntArray(3);
+    if (result) env->SetIntArrayRegion(result, 0, 3, status);
+    return result;
 }

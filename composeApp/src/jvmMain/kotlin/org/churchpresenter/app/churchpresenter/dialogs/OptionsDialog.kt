@@ -77,7 +77,8 @@ fun OptionsDialog(
     onDismiss: () -> Unit,
     onSave: (AppSettings) -> Unit = {},
     onIdentifyScreen: () -> Unit = {},
-    onThemeChange: (ThemeMode) -> Unit = {}
+    onThemeChange: (ThemeMode) -> Unit = {},
+    scenes: List<org.churchpresenter.app.churchpresenter.models.Scene> = emptyList()
 ) {
     if (!isVisible) return
 
@@ -201,7 +202,8 @@ fun OptionsDialog(
                                 onSettingsChange = { updateFn ->
                                     currentSettings = updateFn(currentSettings)
                                 },
-                                onIdentifyScreen = { onIdentifyScreen() }
+                                onIdentifyScreen = { onIdentifyScreen() },
+                                scenes = scenes
                             )
                             6 -> LowerThirdSettingsTab(
                                 settings = currentSettings,

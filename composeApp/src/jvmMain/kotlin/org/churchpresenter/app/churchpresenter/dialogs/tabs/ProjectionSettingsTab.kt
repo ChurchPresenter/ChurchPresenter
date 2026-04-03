@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -32,6 +33,7 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
@@ -103,7 +105,8 @@ import kotlin.io.path.absolutePathString
 fun ProjectionSettingsTab(
     settings: AppSettings,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
-    onIdentifyScreen: () -> Unit = {}
+    onIdentifyScreen: () -> Unit = {},
+    scenes: List<org.churchpresenter.app.churchpresenter.models.Scene> = emptyList()
 ) {
     val scope = rememberCoroutineScope()
     val proj = settings.projectionSettings
@@ -174,6 +177,7 @@ fun ProjectionSettingsTab(
     // Build display target options: None + non-primary physical displays + DeckLink devices
     data class DisplayOption(
         val label: String,
+        val shortLabel: String = label,
         val targetDisplay: Int,  // -2 = none, 0+ = display/device index
         val targetType: String,  // "screen" or "decklink"
         val boundsX: Int = Int.MIN_VALUE,
@@ -185,7 +189,7 @@ fun ProjectionSettingsTab(
     val noneLabel = stringResource(Res.string.key_output_none)
     val displayOptions = remember(screenDevicesAll, noneLabel) {
         val options = mutableListOf<DisplayOption>()
-        options.add(DisplayOption(noneLabel, Constants.KEY_TARGET_NONE, "screen"))
+        options.add(DisplayOption(label = noneLabel, targetDisplay = Constants.KEY_TARGET_NONE, targetType = "screen"))
         // Add physical displays, skipping the primary monitor
         var displayNum = 1
         for (idx in screenDevicesAll.indices) {
@@ -193,9 +197,10 @@ fun ProjectionSettingsTab(
             val bounds = screenDevicesAll[idx].defaultConfiguration.bounds
             options.add(
                 DisplayOption(
-                    "Display $displayNum (${bounds.width}x${bounds.height} @ ${bounds.x},${bounds.y})",
-                    idx,
-                    "screen",
+                    label = "Display $displayNum (${bounds.width}x${bounds.height} @ ${bounds.x},${bounds.y})",
+                    shortLabel = "D$displayNum (${bounds.width}x${bounds.height})",
+                    targetDisplay = idx,
+                    targetType = "screen",
                     boundsX = bounds.x,
                     boundsY = bounds.y,
                     boundsW = bounds.width,
@@ -209,9 +214,10 @@ fun ProjectionSettingsTab(
             DeckLinkManager.listDevices().forEachIndexed { i, device ->
                 options.add(
                     DisplayOption(
-                        "DeckLink ${i + 1}: ${device.name}",
-                        device.index,
-                        "decklink"
+                        label = "DeckLink ${i + 1}: ${device.name}",
+                        shortLabel = "DK${i + 1}: ${device.name}",
+                        targetDisplay = device.index,
+                        targetType = "decklink"
                     )
                 )
             }
@@ -385,8 +391,12 @@ fun ProjectionSettingsTab(
                 // Display target dropdown
                 Box(modifier = Modifier.width(displayDropdownWidth), contentAlignment = Alignment.Center) {
                     var dropdownExpanded by remember { mutableStateOf(false) }
-                    // Match by bounds first (reliable), fall back to index
+                    // Match by type+index first for DeckLink (no bounds), then by bounds for screens
                     val currentOption = displayOptions.find {
+                        it.targetType == assignment.targetType &&
+                        it.targetDisplay == assignment.targetDisplay &&
+                        it.targetType == "decklink"
+                    } ?: displayOptions.find {
                         it.targetType == assignment.targetType &&
                         it.boundsX == assignment.targetBoundsX && it.boundsY == assignment.targetBoundsY &&
                         it.boundsW == assignment.targetBoundsW && it.boundsH == assignment.targetBoundsH
@@ -394,16 +404,45 @@ fun ProjectionSettingsTab(
                         it.targetDisplay == assignment.targetDisplay && it.targetType == assignment.targetType
                     } ?: displayOptions.first()
 
-                    OutlinedButton(
-                        onClick = { dropdownExpanded = true },
-                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
-                    ) {
-                        Text(
-                            text = currentOption.label,
-                            style = MaterialTheme.typography.labelSmall,
-                            maxLines = 1
-                        )
+                    val hasInputConflict = currentOption.targetType == "decklink" && currentOption.targetDisplay >= 0 &&
+                        (DeckLinkManager.isInputActive(currentOption.targetDisplay) ||
+                         DeckLinkManager.isInputConfigured(currentOption.targetDisplay, scenes))
+
+                    @OptIn(ExperimentalMaterial3Api::class)
+                    if (hasInputConflict) {
+                        TooltipBox(
+                            positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
+                            tooltip = { PlainTooltip { Text("Also used for input — may not work on devices without simultaneous I/O") } },
+                            state = rememberTooltipState()
+                        ) {
+                            OutlinedButton(
+                                onClick = { dropdownExpanded = true },
+                                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+                                colors = ButtonDefaults.outlinedButtonColors(contentColor = androidx.compose.ui.graphics.Color(0xFFFF8888)),
+                                border = BorderStroke(1.dp, androidx.compose.ui.graphics.Color(0xFFFF8888))
+                            ) {
+                                Text(
+                                    text = currentOption.shortLabel,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    maxLines = 1,
+                                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                                )
+                            }
+                        }
+                    } else {
+                        OutlinedButton(
+                            onClick = { dropdownExpanded = true },
+                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
+                        ) {
+                            Text(
+                                text = currentOption.shortLabel,
+                                style = MaterialTheme.typography.labelSmall,
+                                maxLines = 1,
+                                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                            )
+                        }
                     }
+
                     DropdownMenu(
                         expanded = dropdownExpanded,
                         onDismissRequest = { dropdownExpanded = false }
@@ -473,6 +512,7 @@ fun ProjectionSettingsTab(
 
                     data class KeyOutputOption(
                         val label: String,
+                        val shortLabel: String = label,
                         val targetDisplay: Int,
                         val targetType: String,
                         val boundsX: Int = Int.MIN_VALUE,
@@ -481,28 +521,37 @@ fun ProjectionSettingsTab(
                         val boundsH: Int = 0
                     )
                     val keyOutputOptions = remember(screenDevicesAll, noneLabel) {
-                        val opts = mutableListOf(KeyOutputOption(noneLabel, Constants.KEY_TARGET_NONE, "screen"))
+                        val opts = mutableListOf(KeyOutputOption(label = noneLabel, targetDisplay = Constants.KEY_TARGET_NONE, targetType = "screen"))
                         var keyDisplayNum = 1
                         for (idx in screenDevicesAll.indices) {
                             if (screenDevicesAll[idx] == primaryDevice) continue
                             val bounds = screenDevicesAll[idx].defaultConfiguration.bounds
                             opts.add(KeyOutputOption(
-                                "Display $keyDisplayNum (${bounds.width}x${bounds.height} @ ${bounds.x},${bounds.y})",
-                                idx, "screen",
+                                label = "Display $keyDisplayNum (${bounds.width}x${bounds.height} @ ${bounds.x},${bounds.y})",
+                                shortLabel = "D$keyDisplayNum (${bounds.width}x${bounds.height})",
+                                targetDisplay = idx, targetType = "screen",
                                 boundsX = bounds.x, boundsY = bounds.y, boundsW = bounds.width, boundsH = bounds.height
                             ))
                             keyDisplayNum++
                         }
                         if (DeckLinkManager.isAvailable()) {
                             DeckLinkManager.listDevices().forEachIndexed { di, device ->
-                                opts.add(KeyOutputOption("DeckLink ${di + 1}: ${device.name}", device.index, "decklink"))
+                                opts.add(KeyOutputOption(
+                                    label = "DeckLink ${di + 1}: ${device.name}",
+                                    shortLabel = "DK${di + 1}: ${device.name}",
+                                    targetDisplay = device.index, targetType = "decklink"
+                                ))
                             }
                         }
                         opts.toList()
                     }
 
-                    // Match by bounds first (reliable), fall back to index
+                    // Match by type+index first for DeckLink (no bounds), then by bounds for screens
                     val currentKeyOption = keyOutputOptions.find {
+                        it.targetType == assignment.keyTargetType &&
+                        it.targetDisplay == assignment.keyTargetDisplay &&
+                        it.targetType == "decklink"
+                    } ?: keyOutputOptions.find {
                         it.targetType == assignment.keyTargetType &&
                         it.boundsX == assignment.keyTargetBoundsX && it.boundsY == assignment.keyTargetBoundsY &&
                         it.boundsW == assignment.keyTargetBoundsW && it.boundsH == assignment.keyTargetBoundsH
@@ -510,15 +559,43 @@ fun ProjectionSettingsTab(
                         it.targetDisplay == assignment.keyTargetDisplay && it.targetType == assignment.keyTargetType
                     } ?: keyOutputOptions.first()
 
-                    OutlinedButton(
-                        onClick = { keyExpanded = true },
-                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
-                    ) {
-                        Text(
-                            text = currentKeyOption.label,
-                            style = MaterialTheme.typography.labelSmall,
-                            maxLines = 1
-                        )
+                    val hasKeyInputConflict = currentKeyOption.targetType == "decklink" && currentKeyOption.targetDisplay >= 0 &&
+                        (DeckLinkManager.isInputActive(currentKeyOption.targetDisplay) ||
+                         DeckLinkManager.isInputConfigured(currentKeyOption.targetDisplay, scenes))
+
+                    @OptIn(ExperimentalMaterial3Api::class)
+                    if (hasKeyInputConflict) {
+                        TooltipBox(
+                            positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
+                            tooltip = { PlainTooltip { Text("Also used for input — may not work on devices without simultaneous I/O") } },
+                            state = rememberTooltipState()
+                        ) {
+                            OutlinedButton(
+                                onClick = { keyExpanded = true },
+                                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+                                colors = ButtonDefaults.outlinedButtonColors(contentColor = androidx.compose.ui.graphics.Color(0xFFFF8888)),
+                                border = BorderStroke(1.dp, androidx.compose.ui.graphics.Color(0xFFFF8888))
+                            ) {
+                                Text(
+                                    text = currentKeyOption.shortLabel,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    maxLines = 1,
+                                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                                )
+                            }
+                        }
+                    } else {
+                        OutlinedButton(
+                            onClick = { keyExpanded = true },
+                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
+                        ) {
+                            Text(
+                                text = currentKeyOption.shortLabel,
+                                style = MaterialTheme.typography.labelSmall,
+                                maxLines = 1,
+                                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                            )
+                        }
                     }
                     DropdownMenu(
                         expanded = keyExpanded,

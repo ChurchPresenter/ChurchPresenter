@@ -46,6 +46,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import churchpresenter.composeapp.generated.resources.symbol_dropdown
 import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDefault
 import org.jetbrains.compose.resources.stringResource
@@ -746,6 +747,16 @@ private fun CameraProperties(source: SceneSource.CameraSource, onUpdate: (SceneS
         )
 
         if (source.isDeckLink && source.deckLinkIndex >= 0) {
+            // Warn if device is already in use for output
+            if (DeckLinkManager.isOutputActive(source.deckLinkIndex)) {
+                Text(
+                    text = "This device is currently used for output. Input may not be available on devices that don't support simultaneous I/O.",
+                    color = Color(0xFFFF8888),
+                    fontSize = 12.sp,
+                    modifier = Modifier.padding(vertical = 4.dp)
+                )
+            }
+
             // DeckLink-specific controls: Video Connection + Mode
             var connections by remember { mutableStateOf<List<DeckLinkManager.VideoConnection>>(emptyList()) }
             var modes by remember { mutableStateOf<List<DeckLinkManager.InputMode>>(emptyList()) }
