@@ -1449,7 +1449,11 @@ Java_org_churchpresenter_app_churchpresenter_composables_DeckLinkManager_nativeG
     IDeckLinkStatus* deckStatus = nullptr;
     if (device->QueryInterface(IID_IDeckLinkStatus, reinterpret_cast<void**>(&deckStatus)) == S_OK && deckStatus) {
         // bmdDeckLinkStatusVideoInputSignalLocked = 0x7669736C
+#ifdef _WIN32
+        BOOL locked = FALSE;
+#else
         bool locked = false;
+#endif
         if (deckStatus->GetFlag(static_cast<BMDDeckLinkStatusID>(0x7669736C), &locked) == S_OK) {
             status[0] = locked ? 1 : 0;
         }
