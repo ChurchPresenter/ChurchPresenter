@@ -120,7 +120,14 @@ jobs:
 
   build-macos:
     if: ${{ inputs.platform == 'macOS' || inputs.platform == 'All' }}
-    runs-on: macos-latest
+    strategy:
+      matrix:
+        include:
+          - runner: macos-latest
+            arch: arm64
+          - runner: macos-13
+            arch: x64
+    runs-on: ${{ matrix.runner }}
     env:
       MACOS_SIGNING_ENABLED: ${{ secrets.MACOS_CERTIFICATE_P12 != '' && 'true' || 'false' }}
     steps:
@@ -202,16 +209,16 @@ jobs:
         if: ${{ env.MACOS_SIGNING_ENABLED == 'true' }}
         run: ./gradlew :composeApp:notarizeDmg --no-daemon
 
-      - name: Rename macOS DMG (add arm64 suffix)
+      - name: Rename macOS DMG (add arch suffix)
         run: |
           for f in composeApp/build/compose/binaries/main/dmg/*.dmg; do
-            mv "$f" "${f%.dmg}-arm64.dmg"
+            mv "$f" "${f%.dmg}-${{ matrix.arch }}.dmg"
           done
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: macos-dmg
+          name: macos-dmg-${{ matrix.arch }}
           path: composeApp/build/compose/binaries/main/dmg
           retention-days: 2
 
@@ -281,26 +288,33 @@ jobs:
           retention-days: 2
 
   release:
-    if: ${{ inputs.release && !cancelled() && !failure() }}
+    if: ${{ always() && inputs.release && needs.version.result == 'success' }}
     needs: [version, build-windows, build-macos, build-linux]
     runs-on: ubuntu-latest
     steps:
       - name: Download Windows artifact
-        if: ${{ inputs.platform == 'Windows' || inputs.platform == 'All' }}
+        if: ${{ (inputs.platform == 'Windows' || inputs.platform == 'All') && needs.build-windows.result == 'success' }}
         uses: actions/download-artifact@v4
         with:
           name: windows-msi
           path: release/windows
 
-      - name: Download macOS artifact
-        if: ${{ inputs.platform == 'macOS' || inputs.platform == 'All' }}
+      - name: Download macOS ARM64 artifact
+        if: ${{ (inputs.platform == 'macOS' || inputs.platform == 'All') && needs.build-macos.result == 'success' }}
         uses: actions/download-artifact@v4
         with:
-          name: macos-dmg
+          name: macos-dmg-arm64
+          path: release/macos
+
+      - name: Download macOS x64 artifact
+        if: ${{ (inputs.platform == 'macOS' || inputs.platform == 'All') && needs.build-macos.result == 'success' }}
+        uses: actions/download-artifact@v4
+        with:
+          name: macos-dmg-x64
           path: release/macos
 
       - name: Download Linux artifact
-        if: ${{ inputs.platform == 'Linux' || inputs.platform == 'All' }}
+        if: ${{ (inputs.platform == 'Linux' || inputs.platform == 'All') && needs.build-linux.result == 'success' }}
         uses: actions/download-artifact@v4
         with:
           name: linux-deb
