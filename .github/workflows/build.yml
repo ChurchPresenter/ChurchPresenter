@@ -120,14 +120,7 @@ jobs:
 
   build-macos:
     if: ${{ inputs.platform == 'macOS' || inputs.platform == 'All' }}
-    strategy:
-      matrix:
-        include:
-          - runner: macos-latest
-            arch: arm64
-          - runner: macos-13
-            arch: x64
-    runs-on: ${{ matrix.runner }}
+    runs-on: macos-latest
     env:
       MACOS_SIGNING_ENABLED: ${{ secrets.MACOS_CERTIFICATE_P12 != '' && 'true' || 'false' }}
     steps:
@@ -209,16 +202,16 @@ jobs:
         if: ${{ env.MACOS_SIGNING_ENABLED == 'true' }}
         run: ./gradlew :composeApp:notarizeDmg --no-daemon
 
-      - name: Rename macOS DMG (add arch suffix)
+      - name: Rename macOS DMG (add arm64 suffix)
         run: |
           for f in composeApp/build/compose/binaries/main/dmg/*.dmg; do
-            mv "$f" "${f%.dmg}-${{ matrix.arch }}.dmg"
+            mv "$f" "${f%.dmg}-arm64.dmg"
           done
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: macos-dmg-${{ matrix.arch }}
+          name: macos-dmg
           path: composeApp/build/compose/binaries/main/dmg
           retention-days: 2
 
@@ -299,18 +292,11 @@ jobs:
           name: windows-msi
           path: release/windows
 
-      - name: Download macOS ARM64 artifact
+      - name: Download macOS artifact
         if: ${{ (inputs.platform == 'macOS' || inputs.platform == 'All') && needs.build-macos.result == 'success' }}
         uses: actions/download-artifact@v4
         with:
-          name: macos-dmg-arm64
-          path: release/macos
-
-      - name: Download macOS x64 artifact
-        if: ${{ (inputs.platform == 'macOS' || inputs.platform == 'All') && needs.build-macos.result == 'success' }}
-        uses: actions/download-artifact@v4
-        with:
-          name: macos-dmg-x64
+          name: macos-dmg
           path: release/macos
 
       - name: Download Linux artifact
