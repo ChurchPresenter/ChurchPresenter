@@ -82,6 +82,7 @@
 
 #else
     #include "DeckLinkAPI.h"
+    #include "DeckLinkAPIVideoFrame_v14_2_1.h"
     // Linux: DeckLink SDK uses COM-like interfaces with AddRef/Release
 #endif
 
@@ -1296,7 +1297,7 @@ Java_org_churchpresenter_app_churchpresenter_composables_DeckLinkManager_nativeE
         it->second.keyer = keyer;
     }
 
-    HRESULT hr = it->second.keyer->Enable(isExternal ? TRUE : FALSE);
+    HRESULT hr = it->second.keyer->Enable(isExternal != 0);
     if (hr != S_OK) return JNI_FALSE;
 
     // Default to full opacity
@@ -1447,19 +1448,19 @@ Java_org_churchpresenter_app_churchpresenter_composables_DeckLinkManager_nativeG
     IDeckLinkStatus* deckStatus = nullptr;
     if (device->QueryInterface(IID_IDeckLinkStatus, reinterpret_cast<void**>(&deckStatus)) == S_OK && deckStatus) {
         // bmdDeckLinkStatusVideoInputSignalLocked = 0x7669736C
-        BOOL locked = FALSE;
+        bool locked = false;
         if (deckStatus->GetFlag(static_cast<BMDDeckLinkStatusID>(0x7669736C), &locked) == S_OK) {
             status[0] = locked ? 1 : 0;
         }
 
         // bmdDeckLinkStatusBusy = 0x62757379
-        LONGLONG busy = 0;
+        int64_t busy = 0;
         if (deckStatus->GetInt(static_cast<BMDDeckLinkStatusID>(0x62757379), &busy) == S_OK) {
             status[1] = static_cast<jint>(busy);
         }
 
         // bmdDeckLinkStatusDetectedVideoInputMode = 0x6476696D
-        LONGLONG detectedMode = 0;
+        int64_t detectedMode = 0;
         if (deckStatus->GetInt(static_cast<BMDDeckLinkStatusID>(0x6476696D), &detectedMode) == S_OK) {
             status[2] = static_cast<jint>(detectedMode);
         }

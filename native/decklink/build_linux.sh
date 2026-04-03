@@ -19,11 +19,23 @@ if [ -n "$1" ]; then
 elif [ -f "/usr/include/DeckLinkAPI.h" ]; then
     SDK_DIR="/usr/include"
 else
-    read -rp "Enter DeckLink SDK headers path: " SDK_DIR
+    read -rp "Enter DeckLink SDK path (root or Linux/include): " SDK_DIR
 fi
 
 if [ ! -d "$SDK_DIR" ]; then
     echo "ERROR: SDK directory not found: $SDK_DIR"
+    exit 1
+fi
+
+# Auto-detect Linux/include subdirectory if given the SDK root
+if [ ! -f "$SDK_DIR/DeckLinkAPI.h" ] && [ -f "$SDK_DIR/Linux/include/DeckLinkAPI.h" ]; then
+    SDK_DIR="$SDK_DIR/Linux/include"
+    echo "Auto-detected headers in: $SDK_DIR"
+fi
+
+if [ ! -f "$SDK_DIR/DeckLinkAPI.h" ]; then
+    echo "ERROR: DeckLinkAPI.h not found in $SDK_DIR"
+    echo "Pass the path containing DeckLinkAPI.h (e.g. /path/to/SDK/Linux/include)"
     exit 1
 fi
 
