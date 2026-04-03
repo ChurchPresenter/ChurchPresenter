@@ -22,7 +22,7 @@ on:
         description: 'Create a GitHub release'
         required: false
         type: boolean
-        default: false
+        default: true
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
