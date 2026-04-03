@@ -36,14 +36,7 @@ jobs:
           retention-days: 1
 
   build-macos:
-    strategy:
-      matrix:
-        include:
-          - runner: macos-latest
-            arch: arm64
-          - runner: macos-13
-            arch: x64
-    runs-on: ${{ matrix.runner }}
+    runs-on: macos-latest
     env:
       # Expose secret as env var so it can be used in step if: conditions
       # (secrets context is not allowed directly in if: expressions)
@@ -126,7 +119,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: macos-dmg-${{ matrix.arch }}
+          name: macos-dmg
           path: composeApp/build/compose/binaries/main/dmg
           retention-days: 1
 
@@ -198,17 +191,11 @@ jobs:
           name: windows-msi
           path: release/windows
 
-      - name: Download macOS ARM64 artifact
+      - name: Download macOS artifact
         uses: actions/download-artifact@v4
         with:
-          name: macos-dmg-arm64
-          path: release/macos-arm64
-
-      - name: Download macOS x64 artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: macos-dmg-x64
-          path: release/macos-x64
+          name: macos-dmg
+          path: release/macos
 
       - name: Download Linux artifact
         uses: actions/download-artifact@v4
@@ -216,13 +203,10 @@ jobs:
           name: linux-deb
           path: release/linux
 
-      - name: Rename macOS DMGs for architecture
+      - name: Rename macOS DMG (add arm64 suffix)
         run: |
-          for f in release/macos-arm64/*.dmg; do
+          for f in release/macos/*.dmg; do
             mv "$f" "${f%.dmg}-arm64.dmg"
-          done
-          for f in release/macos-x64/*.dmg; do
-            mv "$f" "${f%.dmg}-x64.dmg"
           done
 
       - name: List release files
@@ -238,8 +222,7 @@ jobs:
             Download the installer for your platform below.
           files: |
             release/windows/*.msi
-            release/macos-arm64/*.dmg
-            release/macos-x64/*.dmg
+            release/macos/*.dmg
             release/linux/*.deb
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_PAT }}

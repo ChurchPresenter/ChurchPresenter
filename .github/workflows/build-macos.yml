@@ -5,14 +5,7 @@ on:
 
 jobs:
   build:
-    strategy:
-      matrix:
-        include:
-          - runner: macos-latest
-            arch: arm64
-          - runner: macos-13
-            arch: x64
-    runs-on: ${{ matrix.runner }}
+    runs-on: macos-latest
     env:
       MACOS_SIGNING_ENABLED: ${{ secrets.MACOS_CERTIFICATE_P12 != '' && 'true' || 'false' }}
 
@@ -99,7 +92,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ChurchPresenter-macOS-${{ matrix.arch }}-${{ steps.vars.outputs.SHORT_SHA }}
+          name: ChurchPresenter-macOS-arm64-${{ steps.vars.outputs.SHORT_SHA }}
           path: composeApp/build/compose/binaries/main/dmg
           retention-days: 2
 
