@@ -65,6 +65,7 @@
 
 #elif defined(__APPLE__)
     #include "DeckLinkAPI.h"
+    #include "DeckLinkAPIVideoFrame_v14_2_1.h"
 
     // Helper: convert CFString to std::string
     static std::string cfStringToString(CFStringRef cfStr) {

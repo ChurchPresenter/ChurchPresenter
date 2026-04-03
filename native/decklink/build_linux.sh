@@ -13,11 +13,9 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 cd "$SCRIPT_DIR"
 REPO_DIR="$SCRIPT_DIR/../.."
 
-# SDK path: argument or default location, or prompt
+# SDK path: argument or prompt
 if [ -n "$1" ]; then
     SDK_DIR="$1"
-elif [ -f "/usr/include/DeckLinkAPI.h" ]; then
-    SDK_DIR="/usr/include"
 else
     read -rp "Enter DeckLink SDK path (root or Linux/include): " SDK_DIR
 fi

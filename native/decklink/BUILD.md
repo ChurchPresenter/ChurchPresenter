@@ -77,7 +77,7 @@ Output: `decklink_jni.dll` in the current directory.
 
 ### Prerequisites
 
-1. **BlackMagic Desktop Video drivers** — [download](https://www.blackmagicdesign.com/support) (installs `DeckLinkAPI.framework`)
+1. **BlackMagic DeckLink SDK** — [download](https://www.blackmagicdesign.com/support) (free, extract anywhere). The DeckLinkAPI.framework does NOT need to be installed — the build uses DeckLinkAPIDispatch.cpp for runtime dynamic loading.
 2. **Xcode command-line tools** — `xcode-select --install`
 3. **CMake** — `brew install cmake`
 4. **JDK 21** — `JAVA_HOME` must be set
@@ -110,13 +110,14 @@ Output: `decklink_jni.dll` in the current directory.
 ```
 cd ~/Documents/GitHub/ChurchPresenter/native/decklink
 
+SDK_DIR="/path/to/Blackmagic-DeckLink-SDK-15.3/Mac/include"
+
 clang++ -std=c++17 -shared -o libdecklink_jni.dylib \
     -I"$JAVA_HOME/include" -I"$JAVA_HOME/include/darwin" \
-    -I/Library/Frameworks/DeckLinkAPI.framework/Headers \
+    -I"$SDK_DIR" \
     -framework CoreFoundation \
-    -framework DeckLinkAPI \
-    -F/Library/Frameworks \
-    decklink_jni.cpp
+    decklink_jni.cpp \
+    "$SDK_DIR/DeckLinkAPIDispatch.cpp"
 ```
 
 Output: `libdecklink_jni.dylib` in the current directory.

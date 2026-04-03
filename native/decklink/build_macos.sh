@@ -2,27 +2,37 @@
 # Build libdecklink_jni.dylib on macOS (no-CMake quick build)
 # Prerequisites:
 #   - Xcode command-line tools
-#   - BlackMagic Desktop Video drivers installed (provides DeckLinkAPI.framework)
+#   - BlackMagic DeckLink SDK (framework install NOT required)
 #   - JDK 21 installed (JAVA_HOME set)
 #
-# Usage: ./build_macos.sh [path-to-decklink-sdk-headers]
+# Usage: ./build_macos.sh [path-to-decklink-sdk-or-headers]
 
 set -e
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 cd "$SCRIPT_DIR"
 REPO_DIR="$SCRIPT_DIR/../.."
 
-# SDK path: argument or default framework location, or prompt
+# SDK path: argument or prompt
 if [ -n "$1" ]; then
     SDK_DIR="$1"
-elif [ -d "/Library/Frameworks/DeckLinkAPI.framework/Headers" ]; then
-    SDK_DIR="/Library/Frameworks/DeckLinkAPI.framework/Headers"
 else
-    read -rp "Enter DeckLink SDK headers path: " SDK_DIR
+    read -rp "Enter DeckLink SDK path (root or Mac/include): " SDK_DIR
 fi
 
 if [ ! -d "$SDK_DIR" ]; then
     echo "ERROR: SDK directory not found: $SDK_DIR"
+    exit 1
+fi
+
+# Auto-detect Mac/include subdirectory if given the SDK root
+if [ ! -f "$SDK_DIR/DeckLinkAPI.h" ] && [ -f "$SDK_DIR/Mac/include/DeckLinkAPI.h" ]; then
+    SDK_DIR="$SDK_DIR/Mac/include"
+    echo "Auto-detected headers in: $SDK_DIR"
+fi
+
+if [ ! -f "$SDK_DIR/DeckLinkAPI.h" ]; then
+    echo "ERROR: DeckLinkAPI.h not found in $SDK_DIR"
+    echo "Pass the path containing DeckLinkAPI.h (e.g. /path/to/SDK/Mac/include)"
     exit 1
 fi
 
@@ -44,9 +54,8 @@ clang++ -std=c++17 -shared -o libdecklink_jni.dylib \
     -I"$JAVA_HOME/include" -I"$JAVA_HOME/include/darwin" \
     -I"$SDK_DIR" \
     -framework CoreFoundation \
-    -framework DeckLinkAPI \
-    -F/Library/Frameworks \
-    decklink_jni.cpp
+    decklink_jni.cpp \
+    "$SDK_DIR/DeckLinkAPIDispatch.cpp"
 
 if [ -f libdecklink_jni.dylib ]; then
     echo ""
