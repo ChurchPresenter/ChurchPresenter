@@ -39,12 +39,15 @@ fi
 
 # Detect JAVA_HOME if not set
 if [ -z "$JAVA_HOME" ]; then
-    if [ -d "/usr/lib/jvm/java-21" ]; then
-        JAVA_HOME="/usr/lib/jvm/java-21"
-    elif [ -d "/usr/lib/jvm/default-java" ]; then
-        JAVA_HOME="/usr/lib/jvm/default-java"
+    # Try javac location first
+    if command -v javac &>/dev/null; then
+        JAVA_HOME="$(dirname "$(dirname "$(readlink -f "$(command -v javac)")")")"
+    # Fallback: find any JDK 21 under /usr/lib/jvm
+    elif FOUND_JVM="$(find /usr/lib/jvm -maxdepth 1 -type d -name '*21*' 2>/dev/null | head -1)" && [ -n "$FOUND_JVM" ]; then
+        JAVA_HOME="$FOUND_JVM"
     else
         echo "ERROR: JAVA_HOME is not set and could not be auto-detected."
+        echo "Install a JDK or set JAVA_HOME before running this script."
         exit 1
     fi
     echo "Auto-detected JAVA_HOME: $JAVA_HOME"
