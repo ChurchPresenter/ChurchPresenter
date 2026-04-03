@@ -12,6 +12,8 @@ permissions:
 jobs:
   build-windows:
     runs-on: windows-latest
+    env:
+      WINDOWS_SIGNING_ENABLED: ${{ secrets.WINDOWS_CERTIFICATE_PFX != '' && 'true' || 'false' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -28,8 +30,32 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Build installer
-        run: ./gradlew :composeApp:clean :composeApp:packageMsi --no-daemon --no-build-cache
+      # ── Windows Code Signing ────────────────────────────────────────────────
+      # Skipped automatically if WINDOWS_CERTIFICATE_PFX secret is not set.
+
+      - name: Write Windows signing configuration
+        if: ${{ env.WINDOWS_SIGNING_ENABLED == 'true' }}
+        shell: bash
+        env:
+          CERTIFICATE_PFX: ${{ secrets.WINDOWS_CERTIFICATE_PFX }}
+          CERTIFICATE_PASSWORD: ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}
+        run: |
+          SIGNING_DIR="$RUNNER_TEMP/signing/windows"
+          mkdir -p "$SIGNING_DIR"
+          echo "$CERTIFICATE_PFX" | base64 --decode > "$SIGNING_DIR/churchpresenter-windows.pfx"
+          {
+            echo "certFile=churchpresenter-windows.pfx"
+            echo "certPassword=${CERTIFICATE_PASSWORD}"
+            echo "timestampUrl=http://timestamp.digicert.com"
+            echo "subjectName=Church Presenter"
+          } > "$SIGNING_DIR/signing.properties"
+          echo "desktop.signing.repo.path=$RUNNER_TEMP/signing" >> local.properties
+          echo "Windows signing configuration written"
+
+      # ── Build ───────────────────────────────────────────────────────────────
+
+      - name: Build and sign installer
+        run: ./gradlew :composeApp:clean :composeApp:signWindowsMsi --no-daemon --no-build-cache
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -142,6 +168,8 @@ jobs:
 
   build-linux:
     runs-on: ubuntu-latest
+    env:
+      LINUX_SIGNING_ENABLED: ${{ secrets.LINUX_GPG_PRIVATE_KEY != '' && 'true' || 'false' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -161,8 +189,27 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Build installer
-        run: ./gradlew :composeApp:clean :composeApp:packageDeb --no-daemon --no-build-cache
+      # ── Linux GPG Signing ──────────────────────────────────────────────────
+      - name: Import GPG key and write signing configuration
+        if: ${{ env.LINUX_SIGNING_ENABLED == 'true' }}
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.LINUX_GPG_PRIVATE_KEY }}
+          GPG_PASSPHRASE: ${{ secrets.LINUX_GPG_PASSPHRASE }}
+        run: |
+          echo "$GPG_PRIVATE_KEY" | gpg --batch --import
+          GPG_KEY_ID=$(gpg --list-secret-keys --keyid-format LONG 2>/dev/null | grep 'sec' | head -1 | awk '{print $2}' | cut -d'/' -f2)
+          sudo apt-get install -y dpkg-sig
+          SIGNING_DIR="$RUNNER_TEMP/signing/linux"
+          mkdir -p "$SIGNING_DIR"
+          {
+            echo "gpgKeyId=${GPG_KEY_ID}"
+            echo "gpgPassphrase=${GPG_PASSPHRASE}"
+          } > "$SIGNING_DIR/signing.properties"
+          echo "desktop.signing.repo.path=$RUNNER_TEMP/signing" >> local.properties
+          echo "Linux signing configuration written (key: $GPG_KEY_ID)"
+
+      - name: Build and sign installer
+        run: ./gradlew :composeApp:clean :composeApp:signLinuxDeb --no-daemon --no-build-cache
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4

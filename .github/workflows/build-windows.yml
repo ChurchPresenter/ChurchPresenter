@@ -9,6 +9,8 @@ env:
 jobs:
   build:
     runs-on: windows-latest
+    env:
+      WINDOWS_SIGNING_ENABLED: ${{ secrets.WINDOWS_CERTIFICATE_PFX != '' && 'true' || 'false' }}
 
     steps:
       - name: Checkout
@@ -31,8 +33,32 @@ jobs:
         shell: bash
         run: echo "SHORT_SHA=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
 
-      - name: Build installer
-        run: ./gradlew :composeApp:clean :composeApp:packageMsi --no-daemon --no-build-cache
+      # ── Windows Code Signing ────────────────────────────────────────────────
+      # Skipped automatically if WINDOWS_CERTIFICATE_PFX secret is not set.
+
+      - name: Write Windows signing configuration
+        if: ${{ env.WINDOWS_SIGNING_ENABLED == 'true' }}
+        shell: bash
+        env:
+          CERTIFICATE_PFX: ${{ secrets.WINDOWS_CERTIFICATE_PFX }}
+          CERTIFICATE_PASSWORD: ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}
+        run: |
+          SIGNING_DIR="$RUNNER_TEMP/signing/windows"
+          mkdir -p "$SIGNING_DIR"
+          echo "$CERTIFICATE_PFX" | base64 --decode > "$SIGNING_DIR/churchpresenter-windows.pfx"
+          {
+            echo "certFile=churchpresenter-windows.pfx"
+            echo "certPassword=${CERTIFICATE_PASSWORD}"
+            echo "timestampUrl=http://timestamp.digicert.com"
+            echo "subjectName=Church Presenter"
+          } > "$SIGNING_DIR/signing.properties"
+          echo "desktop.signing.repo.path=$RUNNER_TEMP/signing" >> local.properties
+          echo "Windows signing configuration written"
+
+      # ── Build ───────────────────────────────────────────────────────────────
+
+      - name: Build and sign installer
+        run: ./gradlew :composeApp:clean :composeApp:signWindowsMsi --no-daemon --no-build-cache
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
