@@ -47,6 +47,8 @@ jobs:
         run: |
           if [ -n "${{ inputs.version }}" ]; then
             VERSION="${{ inputs.version }}"
+            # Auto-add v prefix if missing
+            [[ "$VERSION" != v* ]] && VERSION="v$VERSION"
           else
             YEAR=$(date +%y)
             COMMITS=$(git rev-list --count HEAD)
