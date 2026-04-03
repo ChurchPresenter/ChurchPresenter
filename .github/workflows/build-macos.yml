@@ -1,4 +1,4 @@
-name: Build macOS
+name: Build & Sign macOS DMG
 
 on:
   workflow_dispatch:

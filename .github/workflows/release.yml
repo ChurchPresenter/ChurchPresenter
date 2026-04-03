@@ -1,4 +1,4 @@
-name: Release All Platforms
+name: Build, Sign & Release All Platforms
 
 on:
   workflow_dispatch:
