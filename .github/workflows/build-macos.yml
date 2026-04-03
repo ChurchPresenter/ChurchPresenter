@@ -13,6 +13,8 @@ jobs:
           - runner: macos-13
             arch: x64
     runs-on: ${{ matrix.runner }}
+    env:
+      MACOS_SIGNING_ENABLED: ${{ secrets.MACOS_CERTIFICATE_P12 != '' && 'true' || 'false' }}
 
     steps:
       - name: Checkout
@@ -42,7 +44,7 @@ jobs:
       # Skipped automatically if MACOS_CERTIFICATE_P12 secret is not set.
 
       - name: Import Developer ID certificate into temporary keychain
-        if: ${{ secrets.MACOS_CERTIFICATE_P12 != '' }}
+        if: ${{ env.MACOS_SIGNING_ENABLED == 'true' }}
         env:
           CERTIFICATE_P12: ${{ secrets.MACOS_CERTIFICATE_P12 }}
           CERTIFICATE_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
@@ -70,7 +72,7 @@ jobs:
           echo "Signing certificate imported ✅"
 
       - name: Write signing configuration
-        if: ${{ secrets.MACOS_CERTIFICATE_P12 != '' }}
+        if: ${{ env.MACOS_SIGNING_ENABLED == 'true' }}
         env:
           IDENTITY_NAME: ${{ secrets.MACOS_IDENTITY_NAME }}
           TEAM_ID: ${{ secrets.MACOS_NOTARIZATION_TEAM_ID }}
