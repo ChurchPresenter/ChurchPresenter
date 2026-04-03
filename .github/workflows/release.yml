@@ -116,8 +116,12 @@ jobs:
 
       # ── Build ──────────────────────────────────────────────────────────────
 
-      - name: Build installer (signed & notarized if secrets are set)
+      - name: Build signed DMG
         run: ./gradlew :composeApp:clean :composeApp:packageDmg --no-daemon --no-build-cache
+
+      - name: Notarize DMG (upload to Apple + wait for approval + staple ticket)
+        if: ${{ env.MACOS_SIGNING_ENABLED == 'true' }}
+        run: ./gradlew :composeApp:notarizeDmg --no-daemon
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
