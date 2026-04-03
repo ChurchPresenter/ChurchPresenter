@@ -261,9 +261,35 @@ javac -h . DeckLinkManager.java
 - `nativeGetInputFrame(deviceIndex)` — poll for latest frame (returns `IntArray` with `[width, height, ...pixels]` or null)
 - `nativeCloseInput(deviceIndex)` — stop streams, clean up callback and state
 
+### Audio input
+- `nativeEnableAudioInput(deviceIndex, channels)` — enable 48kHz 16-bit PCM capture (ring buffer, ~1s capacity)
+- `nativeGetInputAudio(deviceIndex)` — poll for buffered audio samples (returns `ShortArray` with `[sampleFrames, channels, ...samples]`)
+
+### Audio output
+- `nativeEnableAudioOutput(deviceIndex, channels)` — enable continuous 48kHz 16-bit PCM output
+- `nativeWriteAudioSamples(deviceIndex, samples, sampleFrameCount)` — write PCM samples synchronously
+- `nativeDisableAudioOutput(deviceIndex)` — stop audio output
+
+### Keyer (hardware overlay)
+- `nativeEnableKeyer(deviceIndex, isExternal)` — enable internal keying (overlay on input) or external keying
+- `nativeSetKeyerLevel(deviceIndex, level)` — set opacity 0–255
+- `nativeKeyerRampUp(deviceIndex, frames)` — smooth fade in over N frames
+- `nativeKeyerRampDown(deviceIndex, frames)` — smooth fade out over N frames
+- `nativeDisableKeyer(deviceIndex)` — disable the keyer
+
+### Output connection selection
+- `nativeSetOutputConnection(deviceIndex, connectionType)` — select output connector (SDI=1, HDMI=2, etc.)
+- `nativeListOutputConnections(deviceIndex)` — enumerate available output connectors
+
+### Status monitoring
+- `nativeGetDeviceStatus(deviceIndex)` — returns `[signalLocked, busy, detectedModeCode]`
+
 ### Input callback pixel format handling
 The `DeckLinkInputCallback::VideoInputFrameArrived` method handles:
 - **bmdFormat8BitBGRA** — direct BGRA→ARGB byte swap
 - **bmdFormat8BitYUV** — UYVY packed YUV 4:2:2 → ARGB (BT.601 conversion)
 - **bmdFormat10BitYUV** — v210 format (not yet supported, outputs black)
 - Unknown formats — attempts raw BGRA copy
+
+### Legacy device support
+Both input and output frame access fall back to `IDeckLinkVideoFrame_v14_2_1::GetBytes()` when the SDK 15.3+ `IDeckLinkVideoBuffer` interface is not available (e.g. Intensity Shuttle and other older devices).
