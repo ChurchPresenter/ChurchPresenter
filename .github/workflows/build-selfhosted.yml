@@ -1,14 +1,57 @@
-name: Build All Platforms
+name: Build Platforms (Self-Hosted)
 
 on:
   workflow_dispatch:
+    inputs:
+      platform:
+        description: 'Platform to build'
+        required: true
+        type: choice
+        default: 'All'
+        options:
+          - Windows
+          - macOS
+          - Linux
+          - All
+      release:
+        description: 'Create a GitHub release'
+        required: false
+        type: boolean
+        default: false
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
+permissions:
+  contents: write
+
 jobs:
+  version:
+    runs-on: [self-hosted, Linux]
+    outputs:
+      version: ${{ steps.version.outputs.VERSION }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get version from commit count
+        id: version
+        run: |
+          YEAR=$(date +%y)
+          COMMITS=$(git rev-list --count HEAD)
+          MAJOR=$YEAR
+          MINOR=$((COMMITS / 256))
+          PATCH=$((COMMITS % 256))
+          VERSION="v${MAJOR}.${MINOR}.${PATCH}"
+          echo "VERSION=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Version: $VERSION"
+
   build-windows:
-    runs-on: windows-latest
+    if: ${{ inputs.platform == 'Windows' || inputs.platform == 'All' }}
+    needs: [version]
+    runs-on: [self-hosted, Windows]
     env:
       WINDOWS_SIGNING_ENABLED: ${{ secrets.WINDOWS_CERTIFICATE_PFX != '' && 'true' || 'false' }}
     steps:
@@ -55,7 +98,23 @@ jobs:
       - name: Build and sign installer
         run: ./gradlew :composeApp:clean :composeApp:signWindowsMsi --no-daemon --no-build-cache
 
+      # ── Release ─────────────────────────────────────────────────────────────
+
+      - name: Upload to Release
+        if: ${{ inputs.release }}
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ needs.version.outputs.version }}
+          name: ChurchPresenter ${{ needs.version.outputs.version }}
+          body: |
+            Download the installer for your platform below.
+          files: |
+            composeApp/build/compose/binaries/main/msi/*.msi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Upload artifact
+        if: ${{ !inputs.release }}
         uses: actions/upload-artifact@v4
         with:
           name: ChurchPresenter-Windows-${{ steps.vars.outputs.SHORT_SHA }}
@@ -63,7 +122,9 @@ jobs:
           retention-days: 2
 
   build-macos:
-    runs-on: macos-latest
+    if: ${{ inputs.platform == 'macOS' || inputs.platform == 'All' }}
+    needs: [version]
+    runs-on: [self-hosted, macOS]
     env:
       MACOS_SIGNING_ENABLED: ${{ secrets.MACOS_CERTIFICATE_P12 != '' && 'true' || 'false' }}
     steps:
@@ -84,11 +145,6 @@ jobs:
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
-
-      - name: Get short commit hash
-        id: vars
-        shell: bash
-        run: echo "SHORT_SHA=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
 
       # ── macOS Code Signing & Notarization ──────────────────────────────────
       - name: Import Developer ID certificate into temporary keychain
@@ -146,13 +202,48 @@ jobs:
         if: ${{ env.MACOS_SIGNING_ENABLED == 'true' }}
         run: ./gradlew :composeApp:notarizeDmg --no-daemon
 
+      - name: Rename DMG with architecture
+        run: |
+          ARCH=$(uname -m)
+          if [ "$ARCH" = "arm64" ]; then
+            SUFFIX="arm64"
+          else
+            SUFFIX="x64"
+          fi
+          for f in composeApp/build/compose/binaries/main/dmg/*.dmg; do
+            mv "$f" "${f%.dmg}-${SUFFIX}.dmg"
+          done
+
+      # ── Release ─────────────────────────────────────────────────────────────
+
+      - name: Upload to Release
+        if: ${{ inputs.release }}
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ needs.version.outputs.version }}
+          name: ChurchPresenter ${{ needs.version.outputs.version }}
+          body: |
+            Download the installer for your platform below.
+          files: |
+            composeApp/build/compose/binaries/main/dmg/*.dmg
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Get short commit hash
+        if: ${{ !inputs.release }}
+        id: vars
+        shell: bash
+        run: echo "SHORT_SHA=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
+
       - name: Upload artifact
+        if: ${{ !inputs.release }}
         uses: actions/upload-artifact@v4
         with:
-          name: ChurchPresenter-macOS-arm64-${{ steps.vars.outputs.SHORT_SHA }}
+          name: ChurchPresenter-macOS-${{ steps.vars.outputs.SHORT_SHA }}
           path: composeApp/build/compose/binaries/main/dmg
           retention-days: 2
 
+      # ── Cleanup ────────────────────────────────────────────────────────────
       - name: Delete temporary keychain
         if: always()
         run: |
@@ -162,7 +253,9 @@ jobs:
           fi
 
   build-linux:
-    runs-on: ubuntu-latest
+    if: ${{ inputs.platform == 'Linux' || inputs.platform == 'All' }}
+    needs: [version]
+    runs-on: [self-hosted, Linux]
     env:
       LINUX_SIGNING_ENABLED: ${{ secrets.LINUX_GPG_PRIVATE_KEY != '' && 'true' || 'false' }}
     steps:
@@ -211,7 +304,23 @@ jobs:
       - name: Build and sign installer
         run: ./gradlew :composeApp:clean :composeApp:signLinuxDeb --no-daemon --no-build-cache
 
+      # ── Release ─────────────────────────────────────────────────────────────
+
+      - name: Upload to Release
+        if: ${{ inputs.release }}
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ needs.version.outputs.version }}
+          name: ChurchPresenter ${{ needs.version.outputs.version }}
+          body: |
+            Download the installer for your platform below.
+          files: |
+            composeApp/build/compose/binaries/main/deb/*.deb
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Upload artifact
+        if: ${{ !inputs.release }}
         uses: actions/upload-artifact@v4
         with:
           name: ChurchPresenter-Linux-${{ steps.vars.outputs.SHORT_SHA }}
