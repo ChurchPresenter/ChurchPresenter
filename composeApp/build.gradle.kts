@@ -509,7 +509,7 @@ tasks.register("signLinuxDeb") {
                 add("--sign"); add("builder")
                 add("-k"); add(linuxGpgKeyId)
                 if (linuxGpgPassphrase.isConfigured()) {
-                    add("--gpg-options"); add("--passphrase $linuxGpgPassphrase")
+                    add("--gpg-options"); add("--batch --pinentry-mode loopback --passphrase $linuxGpgPassphrase")
                 }
                 add(debFile.absolutePath)
             }
