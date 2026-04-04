@@ -806,6 +806,9 @@
     <string name="copy_api_key">Copy</string>
     <string name="show_qr_code">QR</string>
     <string name="api_key_qr_title">API Key QR Code</string>
+    <string name="connection_qr_title">Connection QR Code</string>
+    <string name="connection_qr_url_label">Server URL</string>
+    <string name="connection_qr_key_label">API Key</string>
     <string name="close">Close</string>
     <string name="server_url_label">Server URL</string>
     <string name="copy_url">Copy URL</string>

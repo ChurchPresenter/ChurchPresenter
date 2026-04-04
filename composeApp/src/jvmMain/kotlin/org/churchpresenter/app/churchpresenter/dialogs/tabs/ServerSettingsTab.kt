@@ -77,11 +77,11 @@ import churchpresenter.composeapp.generated.resources.client_label_edit_tooltip
 import churchpresenter.composeapp.generated.resources.client_label_placeholder
 import churchpresenter.composeapp.generated.resources.client_label_save
 import churchpresenter.composeapp.generated.resources.companion_server
-import churchpresenter.composeapp.generated.resources.api_key_qr_title
 import churchpresenter.composeapp.generated.resources.close
 import churchpresenter.composeapp.generated.resources.copy_api_key
 import churchpresenter.composeapp.generated.resources.show_qr_code
 import churchpresenter.composeapp.generated.resources.copy_url
+import churchpresenter.composeapp.generated.resources.connection_qr_title
 import churchpresenter.composeapp.generated.resources.enable_server
 import churchpresenter.composeapp.generated.resources.generate_api_key
 import churchpresenter.composeapp.generated.resources.no_allowed_clients
@@ -282,8 +282,9 @@ fun ServerSettingsTab(
                     }
                 }
 
-                // ── Server URL + Copy in one row (shown when running) ─────────
+                // ── Server URL + Copy + QR in one row (shown when running) ───
                 if (isRunning && serverUrl.isNotBlank()) {
+                    var showConnectionQrDialog by remember { mutableStateOf(false) }
                     SettingRow(label = stringResource(Res.string.server_url_label)) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
@@ -309,7 +310,24 @@ fun ServerSettingsTab(
                             ) {
                                 Text(stringResource(Res.string.copy_url), style = MaterialTheme.typography.labelSmall)
                             }
+                            Button(
+                                onClick = { showConnectionQrDialog = true },
+                                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                                    contentColor = MaterialTheme.colorScheme.onTertiaryContainer
+                                )
+                            ) {
+                                Text(stringResource(Res.string.show_qr_code), style = MaterialTheme.typography.labelSmall)
+                            }
                         }
+                    }
+                    if (showConnectionQrDialog) {
+                        ConnectionQrDialog(
+                            serverUrl = serverUrl,
+                            apiKey = if (settings.serverSettings.apiKeyEnabled && apiKeyText.isNotBlank()) apiKeyText else null,
+                            onDismiss = { showConnectionQrDialog = false }
+                        )
                     }
                 }
 
@@ -377,21 +395,6 @@ fun ServerSettingsTab(
                                 )
                             ) {
                                 Text(stringResource(Res.string.copy_api_key), style = MaterialTheme.typography.labelSmall)
-                            }
-                            var showQrDialog by remember { mutableStateOf(false) }
-                            Button(
-                                onClick = { showQrDialog = true },
-                                enabled = apiKeyText.isNotBlank(),
-                                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = MaterialTheme.colorScheme.tertiaryContainer,
-                                    contentColor = MaterialTheme.colorScheme.onTertiaryContainer
-                                )
-                            ) {
-                                Text(stringResource(Res.string.show_qr_code), style = MaterialTheme.typography.labelSmall)
-                            }
-                            if (showQrDialog) {
-                                ApiKeyQrDialog(apiKey = apiKeyText, onDismiss = { showQrDialog = false })
                             }
                         }
                     }
@@ -641,14 +644,31 @@ private fun SettingRow(
 }
 
 @Composable
-private fun ApiKeyQrDialog(apiKey: String, onDismiss: () -> Unit) {
-    val qrBitmap = remember(apiKey) {
+private fun ConnectionQrDialog(serverUrl: String, apiKey: String?, onDismiss: () -> Unit) {
+    // Parse host and port from serverUrl (e.g. "http://192.168.1.50:8765")
+    val (parsedHost, parsedPort) = remember(serverUrl) {
+        try {
+            val u = java.net.URI.create(serverUrl).toURL()
+            val host = u.host ?: serverUrl
+            val port = if (u.port != -1) u.port.toString() else ""
+            host to port
+        } catch (_: Exception) {
+            serverUrl to ""
+        }
+    }
+
+    val qrContent = buildString {
+        append("churchpresenter://connect?host=$parsedHost")
+        if (parsedPort.isNotBlank()) append("&port=$parsedPort")
+        if (!apiKey.isNullOrBlank()) append("&apikey=$apiKey")
+    }
+    val qrBitmap = remember(qrContent) {
         try {
             val hints = mapOf(
                 EncodeHintType.ERROR_CORRECTION to ErrorCorrectionLevel.M,
                 EncodeHintType.MARGIN to 1
             )
-            val matrix = QRCodeWriter().encode(apiKey, BarcodeFormat.QR_CODE, 512, 512, hints)
+            val matrix = QRCodeWriter().encode(qrContent, BarcodeFormat.QR_CODE, 512, 512, hints)
             val w = matrix.width
             val h = matrix.height
             val img = BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB)
@@ -668,38 +688,46 @@ private fun ApiKeyQrDialog(apiKey: String, onDismiss: () -> Unit) {
     val isDark = MaterialTheme.colorScheme.background.luminance() < 0.5f
     Dialog(
         onCloseRequest = onDismiss,
-        state = rememberDialogState(width = 380.dp, height = 440.dp),
-        title = stringResource(Res.string.api_key_qr_title),
+        state = rememberDialogState(width = 400.dp, height = 500.dp),
+        title = stringResource(Res.string.connection_qr_title),
         resizable = false
     ) {
         AppThemeWrapper(theme = if (isDark) ThemeMode.DARK else ThemeMode.LIGHT) {
-        Surface(
-            modifier = Modifier.fillMaxSize(),
-            color = MaterialTheme.colorScheme.background
-        ) {
-        Column(
-            modifier = Modifier.fillMaxSize().padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            if (qrBitmap != null) {
-                Image(
-                    bitmap = qrBitmap,
-                    contentDescription = null,
-                    modifier = Modifier.size(300.dp),
-                    contentScale = ContentScale.Fit
-                )
+            Surface(
+                modifier = Modifier.fillMaxSize(),
+                color = MaterialTheme.colorScheme.background
+            ) {
+                Column(
+                    modifier = Modifier.fillMaxSize().padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    if (qrBitmap != null) {
+                        Image(
+                            bitmap = qrBitmap,
+                            contentDescription = null,
+                            modifier = Modifier.size(300.dp),
+                            contentScale = ContentScale.Fit
+                        )
+                    }
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(4.dp))
+                            .padding(horizontal = 10.dp, vertical = 6.dp),
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Text(
+                            text = qrContent,
+                            style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                    Button(onClick = onDismiss) {
+                        Text(stringResource(Res.string.close), style = MaterialTheme.typography.labelSmall)
+                    }
+                }
             }
-            Text(
-                text = apiKey,
-                style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Button(onClick = onDismiss) {
-                Text(stringResource(Res.string.close), style = MaterialTheme.typography.labelSmall)
-            }
-        }
-        }
         }
     }
 }
