@@ -552,6 +552,8 @@ class CompanionServer {
     private val _slideBytes = ConcurrentHashMap<String, List<ByteArray>>()
     /** presentationId (file hash) → PresentationDto — covers tab-loaded and background-rendered items */
     private val _presentationCatalogs = ConcurrentHashMap<String, PresentationDto>()
+    /** presentationId (file hash) → absolute file path — populated by updatePresentation and updateSchedule */
+    private val _presentationFilePaths = ConcurrentHashMap<String, String>()
     /** schedule item UUID → presentation file hash — populated when schedule is updated */
     private val _scheduleItemToPresentationId = ConcurrentHashMap<String, String>()
     /** Set of presentation IDs currently being background-rendered (avoids duplicate renders) */
@@ -753,10 +755,14 @@ class CompanionServer {
      */
     fun updatePresentation(
         id: String,
+        filePath: String,
         fileName: String,
         fileType: String,
         slides: List<BufferedImage>
     ) {
+        if (filePath.isNotBlank()) {
+            _presentationFilePaths[id] = filePath
+        }
         scope.launch {
             val jpegSlides = slides.map { img ->
                 val baos = ByteArrayOutputStream()
@@ -869,6 +875,7 @@ class CompanionServer {
                 ByteArrayOutputStream().also { baos -> ImageIO.write(img, "jpg", baos) }.toByteArray()
             }
             _slideBytes[presentationId] = jpegSlides
+            _presentationFilePaths[presentationId] = filePath
             val slideDtos = jpegSlides.indices.map { i ->
                 SlideDto(slideIndex = i, thumbnailUrl = "${Constants.ENDPOINT_PRESENTATIONS}/$presentationId/slides/$i")
             }
@@ -1040,6 +1047,7 @@ class CompanionServer {
                     // Map schedule UUID → stable file hash so GET /api/presentations/{id} resolves correctly.
                     val presentationId = item.filePath.hashCode().toUInt().toString(16)
                     _scheduleItemToPresentationId[item.id] = presentationId
+                    _presentationFilePaths[presentationId] = item.filePath
                     // Render slides in the background if not already done / in-progress.
                     if (!_slideBytes.containsKey(presentationId) &&
                         _renderingPresentations.putIfAbsent(presentationId, Unit) == null) {
@@ -1252,11 +1260,9 @@ class CompanionServer {
             server?.start(wait = false)
             _isRunning.value = true
             _serverUrl.value = "https://$displayHost:$actualPort"
-        } catch (e: java.net.BindException) {
-            System.err.println("[CompanionServer] BindException on port $actualPort: ${e.message}. Server not started.")
+        } catch (_: java.net.BindException) {
             server = null
-        } catch (e: Exception) {
-            System.err.println("[CompanionServer] Failed to start: ${e.message}")
+        } catch (_: Exception) {
             server = null
         }
     }
@@ -1278,11 +1284,9 @@ class CompanionServer {
             server?.start(wait = false)
             _isRunning.value = true
             _serverUrl.value = "http://$displayHost:$port"
-        } catch (e: java.net.BindException) {
-            System.err.println("[CompanionServer] BindException on port $port (plain HTTP): ${e.message}. Server not started.")
+        } catch (_: java.net.BindException) {
             server = null
-        } catch (e: Exception) {
-            System.err.println("[CompanionServer] Failed to start plain HTTP: ${e.message}")
+        } catch (_: Exception) {
             server = null
         }
     }
@@ -1586,7 +1590,19 @@ class CompanionServer {
                 /** GET /api/presentations — list all loaded presentations with slide metadata */
                 get(Constants.ENDPOINT_PRESENTATIONS) {
                     if (!checkApiKey(call)) return@get
-                    call.respond(_presentationCatalog.value)
+                    // Merge all background-rendered/schedule presentations with the tab-loaded catalog.
+                    // _presentationCatalogs has every rendered presentation; _presentationCatalog.value
+                    // only has the currently tab-loaded one — merge so mobile sees everything.
+                    val allPresMap = LinkedHashMap<String, PresentationDto>()
+                    _presentationCatalogs.forEach { (id, dto) -> allPresMap[id] = dto }
+                    _presentationCatalog.value.presentations.forEach { dto ->
+                        allPresMap[dto.id] = dto
+                    }
+                    val merged = PresentationCatalogResponse(
+                        presentations = allPresMap.values.toList(),
+                        total = allPresMap.size
+                    )
+                    call.respond(merged)
                 }
 
                 /**
@@ -2035,13 +2051,42 @@ class CompanionServer {
                     )
                 }
             }
+            // Handle presentation identified by id/fileHash (companion app format).
+            // filePath is not sent — resolve via _presentationFilePaths (populated by
+            // updatePresentation and updateSchedule) then fall back to _schedule scan.
+            // NOTE: mobile may omit the "type" field when it equals the default ("presentation"),
+            // so also accept type==null as long as the id resolves in _presentationFilePaths.
+            if (dto.filePath == null && dto.folderId == null && dto.id.isNotBlank() &&
+                (dto.type == "presentation" || dto.type == null)) {
+                val filePath = _presentationFilePaths[dto.id]
+                    ?: _schedule.value.firstOrNull { s ->
+                        s.type == "presentation" && (
+                            s.id == dto.id ||
+                            s.filePath?.hashCode()?.toUInt()?.toString(16) == dto.id
+                        )
+                    }?.filePath
+                if (filePath != null) {
+                    val catalog = _presentationCatalogs[dto.id]
+                    return ScheduleItem.PresentationItem(
+                        id         = java.util.UUID.randomUUID().toString(),
+                        filePath   = filePath,
+                        fileName   = catalog?.fileName ?: dto.title ?: "",
+                        slideCount = catalog?.slideTotal ?: 0,
+                        fileType   = catalog?.fileType ?: ""
+                    )
+                }
+            }
             val item = dto.toScheduleItem()
             if (item != null) return item
-        } catch (_: Exception) {}
+        } catch (_: Exception) {
+            // ignore — try legacy format below
+        }
         // 2. Fall back to legacy sealed-class format with discriminator
         try {
             return json.decodeFromString(AddToScheduleRequest.serializer(), body).item
-        } catch (_: Exception) {}
+        } catch (_: Exception) {
+            // ignore
+        }
         return null
     }
 

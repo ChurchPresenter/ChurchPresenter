@@ -68,9 +68,8 @@ object CrashReporter {
             writeCrashCount(consecutiveCrashes)
             if (consecutiveCrashes >= CRASH_THRESHOLD) {
                 videoBackgroundsDisabled = true
-                System.err.println("[CrashReporter] $consecutiveCrashes consecutive crashes — video backgrounds disabled for this session")
             } else {
-                System.err.println("[CrashReporter] Previous run crashed ($consecutiveCrashes/$CRASH_THRESHOLD before disabling video backgrounds)")
+                // previous run crashed but threshold not yet reached
             }
         } else {
             // Clean run — reset crash counter
@@ -99,7 +98,6 @@ object CrashReporter {
     fun reEnableVideoBackgrounds() {
         videoBackgroundsDisabled = false
         writeCrashCount(0)
-        System.err.println("[CrashReporter] Video backgrounds re-enabled by user")
     }
 
     private fun readCrashCount(): Int = try {

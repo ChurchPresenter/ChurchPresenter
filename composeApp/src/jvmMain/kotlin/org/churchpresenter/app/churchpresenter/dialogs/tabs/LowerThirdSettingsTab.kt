@@ -592,10 +592,8 @@ internal fun openLottieGeneratorDialog(
         val webView = WebView()
         val engine = webView.engine
 
-        engine.setOnError { e -> System.err.println("WebView error: ${e.message}") }
-        engine.loadWorker.exceptionProperty().addListener { _, _, ex ->
-            if (ex != null) System.err.println("WebView load exception: $ex")
-        }
+        engine.setOnError { _ -> }
+        engine.loadWorker.exceptionProperty().addListener { _, _, _ -> }
 
         val bridge = object {
             @Suppress("unused")
@@ -625,8 +623,7 @@ internal fun openLottieGeneratorDialog(
                                 JOptionPane.WARNING_MESSAGE
                             )
                         }
-                    } catch (e: Exception) {
-                        System.err.println("Lower third save error: $e")
+                    } catch (_: Exception) {
                         JOptionPane.showMessageDialog(
                             dialog,
                             "Failed to save: ${e.message}",
@@ -693,7 +690,6 @@ internal fun openLottieGeneratorDialog(
 
         val stateListener = ChangeListener<Worker.State> { _, _, newState ->
             if (newState == Worker.State.FAILED) {
-                System.err.println("WebView FAILED to load: ${engine.loadWorker.exception}")
                 SwingUtilities.invokeLater {
                     cards.show(cardPanel, "content")
                     JOptionPane.showMessageDialog(

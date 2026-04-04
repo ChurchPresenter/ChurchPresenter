@@ -98,12 +98,6 @@ object CefManager {
             )
             packages.forEach { pkg -> mh.invokeWithArguments(javaDesktop, pkg) }
         }.onSuccess { return }
-
-        System.err.println(
-            "[CefManager] patchJcefModuleAccess: all approaches failed. " +
-            "Run via ./gradlew :composeApp:run, or add " +
-            "--add-exports=java.desktop/sun.awt=ALL-UNNAMED to the JVM args."
-        )
     }
 
     fun init() {
@@ -139,9 +133,7 @@ object CefManager {
 
             cefApp = builder.build()
             initialized = true
-        } catch (e: Exception) {
-            System.err.println("Failed to initialize JCEF: ${e.message}")
-            e.printStackTrace()
+        } catch (_: Exception) {
         }
     }
 
@@ -186,8 +178,7 @@ object CefManager {
                 ProcessBuilder("pactl", "move-sink-input", idx, deviceId)
                     .redirectErrorStream(true).start().waitFor()
             }
-        } catch (e: Exception) {
-            System.err.println("Failed to route audio: ${e.message}")
+        } catch (_: Exception) {
         }
     }
 }

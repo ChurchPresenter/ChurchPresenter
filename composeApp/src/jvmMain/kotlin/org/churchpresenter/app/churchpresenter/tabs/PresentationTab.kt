@@ -91,7 +91,7 @@ fun PresentationTab(
     onAddToSchedule: ((filePath: String, fileName: String, slideCount: Int, fileType: String) -> Unit)? = null,
     selectedPresentationItem: ScheduleItem.PresentationItem? = null,
     presenterManager: PresenterManager? = null,
-    onSlidesLoaded: ((id: String, fileName: String, fileType: String, slides: List<BufferedImage>) -> Unit)? = null,
+    onSlidesLoaded: ((id: String, filePath: String, fileName: String, fileType: String, slides: List<BufferedImage>) -> Unit)? = null,
     /** Externally managed viewModel — hoisted to MainDesktop so remote slide selection works across tab switches. */
     viewModel: PresentationViewModel = remember { PresentationViewModel(appSettings) }
 ) {
@@ -107,8 +107,10 @@ fun PresentationTab(
     LaunchedEffect(viewModel.slides.size) {
         val file = viewModel.selectedPresentation
         if (file != null && viewModel.slides.isNotEmpty()) {
+            val id = file.absolutePath.hashCode().toUInt().toString(16)
             onSlidesLoaded?.invoke(
-                file.absolutePath.hashCode().toUInt().toString(16),
+                id,
+                file.absolutePath,
                 file.nameWithoutExtension,
                 file.extension.lowercase(),
                 viewModel.bufferedSlides

@@ -136,7 +136,7 @@ fun MainDesktop(
     onSongsLoaded: ((List<SongItem>) -> Unit)? = null,
     onBibleLoaded: ((bible: Bible, translation: String) -> Unit)? = null,
     onScheduleChanged: ((List<ScheduleItem>) -> Unit)? = null,
-    onPresentationSlidesLoaded: ((id: String, fileName: String, fileType: String, slides: List<BufferedImage>) -> Unit)? = null,
+    onPresentationSlidesLoaded: ((id: String, filePath: String, fileName: String, fileType: String, slides: List<BufferedImage>) -> Unit)? = null,
     onPicturesLoaded: ((folderId: String, folderName: String, folderPath: String, imageFiles: List<File>) -> Unit)? = null,
     selectPictureImageFlow: Flow<Pair<String, Int>>? = null,
     /** Emits (presentationId, slideIndex) — instantly navigates to that slide without approval. */
