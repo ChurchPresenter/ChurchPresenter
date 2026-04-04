@@ -10,7 +10,8 @@ on:
         default: 'All'
         options:
           - Windows
-          - macOS
+          - macOS (ARM64)
+          - macOS (x64)
           - Linux
           - All
       version:
@@ -128,7 +129,7 @@ jobs:
           retention-days: 2
 
   build-macos:
-    if: ${{ inputs.platform == 'macOS' || inputs.platform == 'All' }}
+    if: ${{ inputs.platform == 'macOS (ARM64)' || inputs.platform == 'All' }}
     runs-on: macos-latest
     env:
       MACOS_SIGNING_ENABLED: ${{ secrets.MACOS_CERTIFICATE_P12 != '' && 'true' || 'false' }}
@@ -235,7 +236,7 @@ jobs:
           fi
 
   build-macos-x64:
-    if: ${{ inputs.platform == 'macOS' || inputs.platform == 'All' }}
+    if: ${{ inputs.platform == 'macOS (x64)' || inputs.platform == 'All' }}
     runs-on: [self-hosted, macOS, X64]
     env:
       MACOS_SIGNING_ENABLED: ${{ secrets.MACOS_CERTIFICATE_P12 != '' && 'true' || 'false' }}
@@ -417,14 +418,14 @@ jobs:
           path: release/windows
 
       - name: Download macOS artifact
-        if: ${{ (inputs.platform == 'macOS' || inputs.platform == 'All') && needs.build-macos.result == 'success' }}
+        if: ${{ (inputs.platform == 'macOS (ARM64)' || inputs.platform == 'All') && needs.build-macos.result == 'success' }}
         uses: actions/download-artifact@v4
         with:
           name: macos-dmg
           path: release/macos
 
       - name: Download macOS x64 artifact
-        if: ${{ (inputs.platform == 'macOS' || inputs.platform == 'All') && needs.build-macos-x64.result == 'success' }}
+        if: ${{ (inputs.platform == 'macOS (x64)' || inputs.platform == 'All') && needs.build-macos-x64.result == 'success' }}
         uses: actions/download-artifact@v4
         with:
           name: macos-dmg-x64
