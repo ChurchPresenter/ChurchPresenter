@@ -237,7 +237,12 @@ fun MainDesktop(
             val images = picturesViewModel.images
             if (index in images.indices) {
                 picturesViewModel.selectedImageIndex = index
-                picturesViewModel.syncWithPresenter(presenterManager)
+                val currentImage = picturesViewModel.getCurrentImageFile()
+                if (currentImage != null) {
+                    presenterManager.setSelectedImagePath(currentImage.absolutePath)
+                    presenterManager.setPresentingMode(Presenting.PICTURES)
+                    presenterManager.setShowPresenterWindow(true)
+                }
             }
         }
     }

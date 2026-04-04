@@ -391,6 +391,8 @@ data class WebSocketMessage(
 @Serializable
 data class RemoteItemDto(
     val id: String = "",
+    /** Item type discriminator sent by the companion app ("song", "presentation", "image", etc.). */
+    val type: String? = null,
     // song
     val songNumber: Int? = null,
     val title: String? = null,
@@ -402,7 +404,9 @@ data class RemoteItemDto(
     val verseText: String? = null,
     /** Optional multi-verse range, e.g. "1-3" or "2,4". When present the schedule item groups all those verses. */
     val verseRange: String? = null,
-    // picture
+    // picture (companion app uses folder-id/image-index; desktop uses folderPath)
+    @kotlinx.serialization.SerialName("folder-id") val folderId: String? = null,
+    @kotlinx.serialization.SerialName("image-index") val imageIndex: Int? = null,
     val folderPath: String? = null,
     val folderName: String? = null,
     val imageCount: Int? = null,
@@ -2016,7 +2020,22 @@ class CompanionServer {
         // 1. Try flat format: {"item":{"songNumber":42,"title":"…","songbook":"…"}}
         try {
             val req = json.decodeFromString(RemoteItemRequest.serializer(), body)
-            val item = req.item.toScheduleItem()
+            val dto = req.item
+            // Handle picture identified by folder-id (companion app format).
+            // folderPath is null in this case — resolve via the cached catalog.
+            if (dto.folderId != null && dto.folderPath == null) {
+                val catalog = _pictureCatalogs[dto.folderId]
+                if (catalog != null) {
+                    val safeId = dto.id.ifBlank { java.util.UUID.randomUUID().toString() }
+                    return ScheduleItem.PictureItem(
+                        id         = safeId,
+                        folderPath = catalog.folderPath,
+                        folderName = catalog.folderName,
+                        imageCount = catalog.imageTotal
+                    )
+                }
+            }
+            val item = dto.toScheduleItem()
             if (item != null) return item
         } catch (_: Exception) {}
         // 2. Fall back to legacy sealed-class format with discriminator
