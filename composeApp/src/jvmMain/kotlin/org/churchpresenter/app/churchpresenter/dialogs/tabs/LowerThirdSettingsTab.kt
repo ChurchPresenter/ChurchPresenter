@@ -623,7 +623,7 @@ internal fun openLottieGeneratorDialog(
                                 JOptionPane.WARNING_MESSAGE
                             )
                         }
-                    } catch (_: Exception) {
+                    } catch (e: Exception) {
                         JOptionPane.showMessageDialog(
                             dialog,
                             "Failed to save: ${e.message}",

@@ -56,7 +56,15 @@ object SwingFileChooser : FileChooser() {
                 dialogTitle = title
                 fileSelectionMode = if (selectDirectory) JFileChooser.DIRECTORIES_ONLY else JFileChooser.FILES_ONLY
                 isMultiSelectionEnabled = multiple
-                filters.forEach { addChoosableFileFilter(it) }
+                if (filters.isNotEmpty()) {
+                    // Disable "All Files" so only the supported types are selectable
+                    isAcceptAllFileFilterUsed = false
+                    filters.forEach { addChoosableFileFilter(it) }
+                    // Pre-select the first filter as the active one
+                    fileFilter = filters.first()
+                } else {
+                    filters.forEach { addChoosableFileFilter(it) }
+                }
             }
             ownerFrame.isVisible = true
             val returnCode = chooser.showOpenDialog(ownerFrame)
@@ -82,7 +90,13 @@ object SwingFileChooser : FileChooser() {
             val chooser = JFileChooser(location.toFile()).apply {
                 dialogTitle = title
                 selectedFile = location.resolve(suggestedName).toFile()
-                filters.forEach { addChoosableFileFilter(it) }
+                if (filters.isNotEmpty()) {
+                    isAcceptAllFileFilterUsed = false
+                    filters.forEach { addChoosableFileFilter(it) }
+                    fileFilter = filters.first()
+                } else {
+                    filters.forEach { addChoosableFileFilter(it) }
+                }
             }
             ownerFrame.isVisible = true
             val returnCode = chooser.showSaveDialog(ownerFrame)
