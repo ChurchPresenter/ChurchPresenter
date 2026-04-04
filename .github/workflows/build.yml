@@ -113,6 +113,13 @@ jobs:
       - name: Build and sign installer
         run: ./gradlew :composeApp:clean :composeApp:signWindowsMsi --no-daemon --no-build-cache
 
+      - name: Rename MSI (add WINDOWS-x64 label)
+        shell: bash
+        run: |
+          for f in composeApp/build/compose/binaries/main/msi/*.msi; do
+            mv "$f" "${f%.msi}-WINDOWS-x64.msi"
+          done
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
@@ -204,10 +211,10 @@ jobs:
         if: ${{ env.MACOS_SIGNING_ENABLED == 'true' }}
         run: ./gradlew :composeApp:notarizeDmg --no-daemon
 
-      - name: Rename macOS DMG (add arm64 suffix)
+      - name: Rename macOS DMG (add MACOS-arm64 label)
         run: |
           for f in composeApp/build/compose/binaries/main/dmg/*.dmg; do
-            mv "$f" "${f%.dmg}-arm64.dmg"
+            mv "$f" "${f%.dmg}-MACOS-arm64.dmg"
           done
 
       - name: Upload artifact
@@ -310,10 +317,10 @@ jobs:
         if: ${{ env.MACOS_SIGNING_ENABLED == 'true' }}
         run: ./gradlew :composeApp:notarizeDmg --no-daemon
 
-      - name: Rename macOS DMG (add x64 suffix)
+      - name: Rename macOS DMG (add MACOS-x64 label)
         run: |
           for f in composeApp/build/compose/binaries/main/dmg/*.dmg; do
-            mv "$f" "${f%.dmg}-x64.dmg"
+            mv "$f" "${f%.dmg}-MACOS-x64.dmg"
           done
 
       - name: Upload artifact
@@ -383,6 +390,13 @@ jobs:
       - name: Build and sign installer
         run: ./gradlew :composeApp:clean :composeApp:signLinuxDeb --no-daemon --no-build-cache
 
+      - name: Rename DEB (add DEBIAN-x64 label)
+        run: |
+          for f in composeApp/build/compose/binaries/main/deb/*.deb; do
+            BASENAME=$(basename "$f" .deb)
+            mv "$f" "composeApp/build/compose/binaries/main/deb/${BASENAME}-DEBIAN-x64.deb"
+          done
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
@@ -435,14 +449,39 @@ jobs:
             exit 1
           fi
 
+      - name: Build release body
+        id: body
+        run: |
+          BODY="Download the installer for your platform below."
+          BODY="$BODY"$'\n'
+          if ls release/windows/*.msi 1>/dev/null 2>&1; then
+            for f in release/windows/*.msi; do
+              BODY="$BODY"$'\n'"- **Windows:** $(basename "$f")"
+            done
+          fi
+          if ls release/macos/*.dmg 1>/dev/null 2>&1; then
+            for f in release/macos/*.dmg; do
+              BODY="$BODY"$'\n'"- **macOS:** $(basename "$f")"
+            done
+          fi
+          if ls release/linux/*.deb 1>/dev/null 2>&1; then
+            for f in release/linux/*.deb; do
+              BODY="$BODY"$'\n'"- **Linux:** $(basename "$f")"
+            done
+          fi
+          echo "BODY<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$BODY" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ needs.version.outputs.version }}
           name: ChurchPresenter ${{ needs.version.outputs.version }}
-          body: |
-            Download the installer for your platform below.
+          body: ${{ steps.body.outputs.BODY }}
           files: |
-            release/**/*
+            release/windows/*
+            release/macos/*
+            release/linux/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
