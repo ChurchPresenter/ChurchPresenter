@@ -745,7 +745,22 @@ fun main() {
 
                                 MainDesktop(
                                     onVerseSelected = { verses -> presenterManager.setSelectedVerses(verses) },
-                                    onSongItemSelected = { presenterManager.setLyricSection(it) },
+                                    onSongItemSelected = { section ->
+                                        presenterManager.setLyricSection(section)
+                                        // In line mode, sync displayedLyricSection immediately so it updates
+                                        // in the same Compose snapshot as songDisplayLineIndex. Without this,
+                                        // there is an intermediate recomposition where songDisplayLineIndex=0
+                                        // but displayedLyricSection still points to the old verse, causing the
+                                        // first line of the old verse to flash briefly on verse boundaries.
+                                        val ss = appSettings.songSettings
+                                        val inLineMode = ss.fullscreenDisplayMode == Constants.SONG_DISPLAY_MODE_LINE ||
+                                            ss.lowerThirdDisplayMode == Constants.SONG_DISPLAY_MODE_LINE ||
+                                            ss.lookAheadDisplayMode == Constants.SONG_DISPLAY_MODE_LINE ||
+                                            ss.lowerThirdLookAheadDisplayMode == Constants.SONG_DISPLAY_MODE_LINE
+                                        if (inLineMode) {
+                                            presenterManager.setDisplayedLyricSection(section)
+                                        }
+                                    },
                                     onAllSectionsChanged = { presenterManager.setAllLyricSections(it) },
                                     onSectionIndexChanged = { presenterManager.setSongDisplaySectionIndex(it) },
                                     onLineIndexChanged = { presenterManager.setSongDisplayLineIndex(it) },
