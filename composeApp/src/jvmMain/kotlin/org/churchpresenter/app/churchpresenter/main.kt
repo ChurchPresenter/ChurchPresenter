@@ -1751,7 +1751,7 @@ private fun PresenterWindows(
         val windowState = remember(i) {
             val b = screens[targetScreenIndex].defaultConfiguration.bounds
             WindowState(
-                placement = WindowPlacement.Fullscreen,
+                placement = WindowPlacement.Floating,
                 position = WindowPosition(b.x.dp, b.y.dp),
                 width = b.width.dp,
                 height = b.height.dp
@@ -1759,15 +1759,10 @@ private fun PresenterWindows(
         }
 
         // Reposition window when target display changes
-        // Must briefly return to Floating so the OS moves the window to the right screen,
-        // then go Fullscreen again to cover the menu bar.
         LaunchedEffect(targetScreenIndex) {
             val b = screens[targetScreenIndex].defaultConfiguration.bounds
-            windowState.placement = WindowPlacement.Floating
             windowState.position = WindowPosition(b.x.dp, b.y.dp)
             windowState.size = DpSize(b.width.dp, b.height.dp)
-            delay(50)
-            windowState.placement = WindowPlacement.Fullscreen
         }
 
         // Primary window (fill or normal)
@@ -1932,21 +1927,11 @@ private fun PresenterWindows(
                 val keyWindowState = remember(i, keyScreenIndex) {
                     val b = screens[keyScreenIndex].defaultConfiguration.bounds
                     WindowState(
-                        placement = WindowPlacement.Fullscreen,
+                        placement = WindowPlacement.Floating,
                         position = WindowPosition(b.x.dp, b.y.dp),
                         width = b.width.dp,
                         height = b.height.dp
                     )
-                }
-
-                // Reposition key window when target display changes
-                LaunchedEffect(keyScreenIndex) {
-                    val b = screens[keyScreenIndex].defaultConfiguration.bounds
-                    keyWindowState.placement = WindowPlacement.Floating
-                    keyWindowState.position = WindowPosition(b.x.dp, b.y.dp)
-                    keyWindowState.size = DpSize(b.width.dp, b.height.dp)
-                    delay(50)
-                    keyWindowState.placement = WindowPlacement.Fullscreen
                 }
 
                 val keyOutputTitle = stringResource(Res.string.key_output_title, i + 1)
