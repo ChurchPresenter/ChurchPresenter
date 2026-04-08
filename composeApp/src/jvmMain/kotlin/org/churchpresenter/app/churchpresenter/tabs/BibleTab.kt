@@ -819,7 +819,12 @@ fun BibleTab(
                                 tooltipPlacement = TooltipPlacement.CursorPoint()
                             ) {
                                 IconButton(onClick = { viewModel.clearHistory() }) {
-                                    Icon(painter = painterResource(Res.drawable.ic_delete), contentDescription = stringResource(Res.string.bible_history_clear), modifier = Modifier.size(20.dp))
+                                    Icon(
+                                        painter = painterResource(Res.drawable.ic_delete),
+                                        contentDescription = stringResource(Res.string.bible_history_clear),
+                                        modifier = Modifier.size(20.dp),
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
                                 }
                             }
                         }
