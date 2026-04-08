@@ -386,7 +386,7 @@ fun MainDesktop(
                         onPresenting = presenting,
                         onAddLabel = { showAddLabelDialog = true },
                         onAddWebsite = { showAddWebsiteDialog = true },
-                        onAddToSchedule = { /* handled per-tab */ },
+
                         onPresentBible = { item ->
                             selectedBibleVerseItem = item
                             presenting(Presenting.BIBLE)

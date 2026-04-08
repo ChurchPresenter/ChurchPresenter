@@ -51,14 +51,12 @@ import churchpresenter.composeapp.generated.resources.ic_edit
 import churchpresenter.composeapp.generated.resources.ic_folder
 import churchpresenter.composeapp.generated.resources.ic_label
 import churchpresenter.composeapp.generated.resources.ic_play
-import churchpresenter.composeapp.generated.resources.ic_playlist_add
 import churchpresenter.composeapp.generated.resources.ic_save
 import churchpresenter.composeapp.generated.resources.pause_duration_ms
 import churchpresenter.composeapp.generated.resources.schedule
 import churchpresenter.composeapp.generated.resources.schedule_add_files
 import churchpresenter.composeapp.generated.resources.schedule_drop_hint
 import churchpresenter.composeapp.generated.resources.tooltip_add_label
-import churchpresenter.composeapp.generated.resources.tooltip_add_to_schedule
 import churchpresenter.composeapp.generated.resources.tooltip_clear_schedule
 import churchpresenter.composeapp.generated.resources.tooltip_edit_label
 import churchpresenter.composeapp.generated.resources.tooltip_go_live
@@ -140,8 +138,7 @@ fun ScheduleTab(
     onSelectedItemChanged: (String?) -> Unit = {},
     onScheduleChanged: ((List<ScheduleItem>) -> Unit)? = null,
     onAddLabel: () -> Unit = {},
-    onAddWebsite: () -> Unit = {},
-    onAddToSchedule: () -> Unit = {}
+    onAddWebsite: () -> Unit = {}
 ) {
     val onScheduleChangedState = rememberUpdatedState(onScheduleChanged)
     // Use the provided view model, or fall back to a locally-owned one.
@@ -238,14 +235,7 @@ fun ScheduleTab(
 
             Spacer(modifier = Modifier.width(4.dp))
 
-            // Add / Remove / Clear
-            TooltipIconButton(
-                painter = painterResource(Res.drawable.ic_playlist_add),
-                text = stringResource(Res.string.tooltip_add_to_schedule),
-                onClick = onAddToSchedule,
-                buttonSize = 32.dp,
-                iconTint = MaterialTheme.colorScheme.onSurface
-            )
+            // Remove / Clear
             TooltipIconButton(
                 painter = painterResource(Res.drawable.ic_close),
                 text = stringResource(Res.string.tooltip_remove_from_schedule),
