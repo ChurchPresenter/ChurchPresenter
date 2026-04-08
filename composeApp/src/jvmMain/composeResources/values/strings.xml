@@ -984,4 +984,27 @@
     <!-- Song Title Slide -->
     <string name="song_title_slide">Song Title Slide</string>
     <string name="enabled">Enabled</string>
+
+    <!-- Stage Monitor Settings -->
+    <string name="stage_monitor">Stage Monitor</string>
+    <string name="stage_monitor_enable">Enable Stage Monitor</string>
+    <string name="stage_monitor_display">Target Display</string>
+    <string name="stage_monitor_display_none">None (disabled)</string>
+    <string name="stage_monitor_show_next_slide">Show Next Slide Preview</string>
+    <string name="stage_monitor_show_clock">Show Clock</string>
+    <string name="stage_monitor_show_timer">Show Countdown Timer</string>
+    <string name="stage_monitor_show_section_label">Show Section Label</string>
+    <string name="stage_monitor_show_notes">Show Presenter Notes</string>
+    <string name="stage_monitor_section_general">General</string>
+    <string name="stage_monitor_section_current">Current Slide</string>
+    <string name="stage_monitor_section_next">Next Slide Preview</string>
+    <string name="stage_monitor_section_label_style">Label Style</string>
+    <string name="stage_monitor_section_clock">Clock &amp; Timer</string>
+    <string name="stage_monitor_text_color">Text Color</string>
+    <string name="stage_monitor_font_size">Font Size</string>
+    <string name="stage_monitor_background_color">Background Color</string>
+    <string name="stage_monitor_layout">Layout</string>
+    <string name="stage_monitor_layout_vertical">Vertical</string>
+    <string name="stage_monitor_layout_horizontal">Horizontal</string>
+    <string name="stage_monitor_no_extra_displays">No secondary displays detected. Connect an additional monitor to use Stage Monitor.</string>
 </resources>
