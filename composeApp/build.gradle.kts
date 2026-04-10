@@ -313,20 +313,8 @@ compose.desktop {
                     }
                     logger.lifecycle("macOS signing ENABLED  identity=\"$macIdentity\"")
 
-                    // ── Notarization ──────────────────────────────────────────
-                    val macAppleId = macSigningProps.getProperty("appleId", "")
-                    val macPassword = macSigningProps.getProperty("notarizationPassword", "")
-                    val macTeamId = macSigningProps.getProperty("teamId", "")
-                    if (macAppleId.isConfigured() && macPassword.isConfigured() && macTeamId.isConfigured()) {
-                        notarization {
-                            appleID.set(macAppleId)
-                            password.set(macPassword)
-                            teamID.set(macTeamId)
-                        }
-                        logger.lifecycle("macOS notarization ENABLED  appleId=\"$macAppleId\"")
-                    } else {
-                        logger.lifecycle("macOS notarization SKIPPED  (fill appleId/notarizationPassword/teamId in desktop/macos/signing.properties)")
-                    }
+                    // Notarization is handled directly in CI via xcrun notarytool + xcrun stapler
+                    // (the built-in Gradle notarizeDmg task omits --password from the command line)
                 } else {
                     logger.lifecycle("macOS signing SKIPPED  (fill identityName in desktop/macos/signing.properties)")
                 }

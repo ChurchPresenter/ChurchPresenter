@@ -210,7 +210,21 @@ jobs:
 
       - name: Notarize DMG (upload to Apple + wait for approval + staple ticket)
         if: ${{ env.MACOS_SIGNING_ENABLED == 'true' }}
-        run: ./gradlew :composeApp:notarizeDmg --no-daemon
+        env:
+          NOTARIZATION_APPLE_ID: ${{ secrets.MACOS_NOTARIZATION_APPLE_ID }}
+          NOTARIZATION_PASSWORD: ${{ secrets.MACOS_NOTARIZATION_PASSWORD }}
+          NOTARIZATION_TEAM_ID: ${{ secrets.MACOS_NOTARIZATION_TEAM_ID }}
+        run: |
+          DMG=$(find composeApp/build/compose/binaries/main/dmg -name "*.dmg" | head -1)
+          echo "Submitting for notarization: $(basename "$DMG")"
+          xcrun notarytool submit "$DMG" \
+            --apple-id "$NOTARIZATION_APPLE_ID" \
+            --password "$NOTARIZATION_PASSWORD" \
+            --team-id "$NOTARIZATION_TEAM_ID" \
+            --wait
+          echo "Stapling notarization ticket..."
+          xcrun stapler staple "$DMG"
+          echo "Notarization complete"
 
       - name: Rename macOS DMG (add MACOS-arm64 label)
         run: |
@@ -316,7 +330,21 @@ jobs:
 
       - name: Notarize DMG (upload to Apple + wait for approval + staple ticket)
         if: ${{ env.MACOS_SIGNING_ENABLED == 'true' }}
-        run: ./gradlew :composeApp:notarizeDmg --no-daemon
+        env:
+          NOTARIZATION_APPLE_ID: ${{ secrets.MACOS_NOTARIZATION_APPLE_ID }}
+          NOTARIZATION_PASSWORD: ${{ secrets.MACOS_NOTARIZATION_PASSWORD }}
+          NOTARIZATION_TEAM_ID: ${{ secrets.MACOS_NOTARIZATION_TEAM_ID }}
+        run: |
+          DMG=$(find composeApp/build/compose/binaries/main/dmg -name "*.dmg" | head -1)
+          echo "Submitting for notarization: $(basename "$DMG")"
+          xcrun notarytool submit "$DMG" \
+            --apple-id "$NOTARIZATION_APPLE_ID" \
+            --password "$NOTARIZATION_PASSWORD" \
+            --team-id "$NOTARIZATION_TEAM_ID" \
+            --wait
+          echo "Stapling notarization ticket..."
+          xcrun stapler staple "$DMG"
+          echo "Notarization complete"
 
       - name: Rename macOS DMG (add MACOS-x64 label)
         run: |
