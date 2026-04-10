@@ -84,7 +84,7 @@ jobs:
 
       - name: Get short commit hash
         id: vars
-        shell: pwsh
+        shell: powershell
         run: |
           $shortSha = git rev-parse --short HEAD
           echo "SHORT_SHA=$shortSha" >> $env:GITHUB_OUTPUT
@@ -94,33 +94,33 @@ jobs:
 
       - name: Write Windows signing configuration
         if: ${{ env.WINDOWS_SIGNING_ENABLED == 'true' }}
-        shell: pwsh
+        shell: powershell
         env:
           CERTIFICATE_PFX: ${{ secrets.WINDOWS_CERTIFICATE_PFX }}
           CERTIFICATE_PASSWORD: ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}
         run: |
-          $signingDir = Join-Path $env:RUNNER_TEMP "signing/windows"
+          $signingDir = Join-Path $env:RUNNER_TEMP "signing\windows"
           New-Item -ItemType Directory -Force -Path $signingDir | Out-Null
-          [IO.File]::WriteAllBytes("$signingDir/churchpresenter-windows.pfx", [Convert]::FromBase64String($env:CERTIFICATE_PFX))
+          [IO.File]::WriteAllBytes("$signingDir\churchpresenter-windows.pfx", [Convert]::FromBase64String($env:CERTIFICATE_PFX))
           @(
             "certFile=churchpresenter-windows.pfx"
             "certPassword=$($env:CERTIFICATE_PASSWORD)"
             "timestampUrl=http://timestamp.digicert.com"
             "subjectName=Church Presenter"
-          ) | Set-Content "$signingDir/signing.properties"
+          ) | Set-Content "$signingDir\signing.properties"
           Add-Content "local.properties" "desktop.signing.repo.path=$($env:RUNNER_TEMP)/signing"
           Write-Host "Windows signing configuration written"
 
       # ── Build ───────────────────────────────────────────────────────────────
 
       - name: Build and sign installer
-        shell: pwsh
-        run: .\gradlew :composeApp:clean :composeApp:signWindowsMsi --no-daemon --no-build-cache
+        shell: cmd
+        run: gradlew.bat :composeApp:clean :composeApp:signWindowsMsi --no-daemon --no-build-cache
 
       - name: Rename MSI (add WINDOWS-x64 label)
-        shell: pwsh
+        shell: powershell
         run: |
-          Get-ChildItem "composeApp/build/compose/binaries/main/msi/*.msi" | ForEach-Object {
+          Get-ChildItem "composeApp\build\compose\binaries\main\msi\*.msi" | ForEach-Object {
             $newName = $_.FullName -replace '\.msi$', '-WINDOWS-x64.msi'
             Rename-Item $_.FullName $newName
           }
