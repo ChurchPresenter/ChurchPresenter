@@ -208,25 +208,19 @@ jobs:
       - name: Build signed DMG
         run: ./gradlew :composeApp:clean :composeApp:packageDmg --no-daemon --no-build-cache
 
-      - name: Decode App Store Connect API key
-        if: ${{ env.MACOS_SIGNING_ENABLED == 'true' }}
-        env:
-          API_KEY_P8: ${{ secrets.MACOS_NOTARIZATION_API_KEY_P8 }}
-        run: |
-          mkdir -p "$RUNNER_TEMP/private_keys"
-          echo "$API_KEY_P8" | base64 --decode > "$RUNNER_TEMP/private_keys/AuthKey_HBJS3Y79L2.p8"
-          echo "API key decoded"
-
       - name: Notarize DMG (upload to Apple + wait for approval + staple ticket)
         if: ${{ env.MACOS_SIGNING_ENABLED == 'true' }}
         env:
+          API_KEY_P8: ${{ secrets.MACOS_NOTARIZATION_API_KEY_P8 }}
           API_KEY_ID: ${{ secrets.MACOS_NOTARIZATION_API_KEY_ID }}
           API_ISSUER_ID: ${{ secrets.MACOS_NOTARIZATION_API_ISSUER_ID }}
         run: |
+          mkdir -p "$RUNNER_TEMP/private_keys"
+          echo "$API_KEY_P8" | base64 --decode > "$RUNNER_TEMP/private_keys/AuthKey.p8"
           DMG=$(find composeApp/build/compose/binaries/main/dmg -name "*.dmg" | head -1)
           echo "Submitting for notarization: $(basename "$DMG")"
           xcrun notarytool submit "$DMG" \
-            --key "$RUNNER_TEMP/private_keys/AuthKey_${API_KEY_ID}.p8" \
+            --key "$RUNNER_TEMP/private_keys/AuthKey.p8" \
             --key-id "$API_KEY_ID" \
             --issuer "$API_ISSUER_ID" \
             --wait
@@ -336,25 +330,19 @@ jobs:
       - name: Build signed DMG
         run: ./gradlew :composeApp:clean :composeApp:packageDmg --no-daemon --no-build-cache
 
-      - name: Decode App Store Connect API key
-        if: ${{ env.MACOS_SIGNING_ENABLED == 'true' }}
-        env:
-          API_KEY_P8: ${{ secrets.MACOS_NOTARIZATION_API_KEY_P8 }}
-        run: |
-          mkdir -p "$RUNNER_TEMP/private_keys"
-          echo "$API_KEY_P8" | base64 --decode > "$RUNNER_TEMP/private_keys/AuthKey_HBJS3Y79L2.p8"
-          echo "API key decoded"
-
       - name: Notarize DMG (upload to Apple + wait for approval + staple ticket)
         if: ${{ env.MACOS_SIGNING_ENABLED == 'true' }}
         env:
+          API_KEY_P8: ${{ secrets.MACOS_NOTARIZATION_API_KEY_P8 }}
           API_KEY_ID: ${{ secrets.MACOS_NOTARIZATION_API_KEY_ID }}
           API_ISSUER_ID: ${{ secrets.MACOS_NOTARIZATION_API_ISSUER_ID }}
         run: |
+          mkdir -p "$RUNNER_TEMP/private_keys"
+          echo "$API_KEY_P8" | base64 --decode > "$RUNNER_TEMP/private_keys/AuthKey.p8"
           DMG=$(find composeApp/build/compose/binaries/main/dmg -name "*.dmg" | head -1)
           echo "Submitting for notarization: $(basename "$DMG")"
           xcrun notarytool submit "$DMG" \
-            --key "$RUNNER_TEMP/private_keys/AuthKey_${API_KEY_ID}.p8" \
+            --key "$RUNNER_TEMP/private_keys/AuthKey.p8" \
             --key-id "$API_KEY_ID" \
             --issuer "$API_ISSUER_ID" \
             --wait
