@@ -406,11 +406,13 @@ jobs:
         run: |
           echo "$GPG_PRIVATE_KEY" | gpg --batch --import
           GPG_KEY_ID=$(gpg --list-secret-keys --keyid-format LONG 2>/dev/null | grep 'sec' | head -1 | awk '{print $2}' | cut -d'/' -f2)
-          # dpkg-sig was removed from Ubuntu 24.04 repos — install from archive
-          sudo apt-get install -y libconfig-file-perl
-          curl -sLO http://archive.ubuntu.com/ubuntu/pool/universe/d/dpkg-sig/dpkg-sig_0.13.1+nmu4_all.deb
-          sudo dpkg -i dpkg-sig_0.13.1+nmu4_all.deb
-          rm dpkg-sig_0.13.1+nmu4_all.deb
+          # dpkg-sig is needed for signing — install only if missing
+          if ! command -v dpkg-sig &>/dev/null; then
+            sudo apt-get install -y libconfig-file-perl
+            curl -sLO http://archive.ubuntu.com/ubuntu/pool/universe/d/dpkg-sig/dpkg-sig_0.13.1+nmu4_all.deb
+            sudo dpkg -i dpkg-sig_0.13.1+nmu4_all.deb
+            rm dpkg-sig_0.13.1+nmu4_all.deb
+          fi
           SIGNING_DIR="$RUNNER_TEMP/signing/linux"
           mkdir -p "$SIGNING_DIR"
           {
