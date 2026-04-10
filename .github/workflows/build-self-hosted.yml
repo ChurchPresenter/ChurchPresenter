@@ -84,42 +84,46 @@ jobs:
 
       - name: Get short commit hash
         id: vars
-        shell: bash
-        run: echo "SHORT_SHA=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
+        shell: pwsh
+        run: |
+          $shortSha = git rev-parse --short HEAD
+          echo "SHORT_SHA=$shortSha" >> $env:GITHUB_OUTPUT
 
       # ── Windows Code Signing ────────────────────────────────────────────────
       # Skipped automatically if WINDOWS_CERTIFICATE_PFX secret is not set.
 
       - name: Write Windows signing configuration
         if: ${{ env.WINDOWS_SIGNING_ENABLED == 'true' }}
-        shell: bash
+        shell: pwsh
         env:
           CERTIFICATE_PFX: ${{ secrets.WINDOWS_CERTIFICATE_PFX }}
           CERTIFICATE_PASSWORD: ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}
         run: |
-          SIGNING_DIR="$RUNNER_TEMP/signing/windows"
-          mkdir -p "$SIGNING_DIR"
-          echo "$CERTIFICATE_PFX" | base64 --decode > "$SIGNING_DIR/churchpresenter-windows.pfx"
-          {
-            echo "certFile=churchpresenter-windows.pfx"
-            echo "certPassword=${CERTIFICATE_PASSWORD}"
-            echo "timestampUrl=http://timestamp.digicert.com"
-            echo "subjectName=Church Presenter"
-          } > "$SIGNING_DIR/signing.properties"
-          echo "desktop.signing.repo.path=$RUNNER_TEMP/signing" >> local.properties
-          echo "Windows signing configuration written"
+          $signingDir = Join-Path $env:RUNNER_TEMP "signing/windows"
+          New-Item -ItemType Directory -Force -Path $signingDir | Out-Null
+          [IO.File]::WriteAllBytes("$signingDir/churchpresenter-windows.pfx", [Convert]::FromBase64String($env:CERTIFICATE_PFX))
+          @(
+            "certFile=churchpresenter-windows.pfx"
+            "certPassword=$($env:CERTIFICATE_PASSWORD)"
+            "timestampUrl=http://timestamp.digicert.com"
+            "subjectName=Church Presenter"
+          ) | Set-Content "$signingDir/signing.properties"
+          Add-Content "local.properties" "desktop.signing.repo.path=$($env:RUNNER_TEMP)/signing"
+          Write-Host "Windows signing configuration written"
 
       # ── Build ───────────────────────────────────────────────────────────────
 
       - name: Build and sign installer
-        run: ./gradlew :composeApp:clean :composeApp:signWindowsMsi --no-daemon --no-build-cache
+        shell: pwsh
+        run: .\gradlew :composeApp:clean :composeApp:signWindowsMsi --no-daemon --no-build-cache
 
       - name: Rename MSI (add WINDOWS-x64 label)
-        shell: bash
+        shell: pwsh
         run: |
-          for f in composeApp/build/compose/binaries/main/msi/*.msi; do
-            mv "$f" "${f%.msi}-WINDOWS-x64.msi"
-          done
+          Get-ChildItem "composeApp/build/compose/binaries/main/msi/*.msi" | ForEach-Object {
+            $newName = $_.FullName -replace '\.msi$', '-WINDOWS-x64.msi'
+            Rename-Item $_.FullName $newName
+          }
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -211,6 +215,14 @@ jobs:
       - name: Notarize DMG (upload to Apple + wait for approval + staple ticket)
         if: ${{ env.MACOS_SIGNING_ENABLED == 'true' }}
         run: ./gradlew :composeApp:notarizeDmg --no-daemon
+
+      - name: Print notarization logs on failure
+        if: failure()
+        run: |
+          for f in composeApp/build/compose/logs/notarizeDmg/*.txt; do
+            echo "=== $f ==="
+            cat "$f"
+          done
 
       - name: Rename macOS DMG (add MACOS-arm64 label)
         run: |
@@ -317,6 +329,14 @@ jobs:
       - name: Notarize DMG (upload to Apple + wait for approval + staple ticket)
         if: ${{ env.MACOS_SIGNING_ENABLED == 'true' }}
         run: ./gradlew :composeApp:notarizeDmg --no-daemon
+
+      - name: Print notarization logs on failure
+        if: failure()
+        run: |
+          for f in composeApp/build/compose/logs/notarizeDmg/*.txt; do
+            echo "=== $f ==="
+            cat "$f"
+          done
 
       - name: Rename macOS DMG (add MACOS-x64 label)
         run: |
