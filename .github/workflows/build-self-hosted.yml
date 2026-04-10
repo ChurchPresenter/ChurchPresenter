@@ -1,0 +1,488 @@
+name: Build Platforms (Self-Hosted)
+
+on:
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: 'Platform to build'
+        required: true
+        type: choice
+        default: 'All'
+        options:
+          - Windows
+          - macOS (ARM64)
+          - macOS (x64)
+          - Linux
+          - All
+      version:
+        description: 'Release version (e.g. v1.2.3) — leave empty to auto-generate from commit count'
+        required: false
+        type: string
+        default: ''
+      release:
+        description: 'Create a GitHub release'
+        required: false
+        type: boolean
+        default: true
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+permissions:
+  contents: write
+
+jobs:
+  version:
+    if: ${{ inputs.release }}
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.VERSION }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Determine version
+        id: version
+        run: |
+          if [ -n "${{ inputs.version }}" ]; then
+            VERSION="${{ inputs.version }}"
+            # Auto-add v prefix if missing
+            [[ "$VERSION" != v* ]] && VERSION="v$VERSION"
+          else
+            YEAR=$(date +%y)
+            COMMITS=$(git rev-list --count HEAD)
+            MAJOR=$YEAR
+            MINOR=$((COMMITS / 256))
+            PATCH=$((COMMITS % 256))
+            VERSION="v${MAJOR}.${MINOR}.${PATCH}"
+          fi
+          echo "VERSION=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Version: $VERSION"
+
+  build-windows:
+    if: ${{ inputs.platform == 'Windows' || inputs.platform == 'All' }}
+    runs-on: [self-hosted, Windows, X64]
+    env:
+      WINDOWS_SIGNING_ENABLED: ${{ secrets.WINDOWS_CERTIFICATE_PFX != '' && 'true' || 'false' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+          fetch-depth: 0
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Get short commit hash
+        id: vars
+        shell: bash
+        run: echo "SHORT_SHA=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
+
+      # ── Windows Code Signing ────────────────────────────────────────────────
+      # Skipped automatically if WINDOWS_CERTIFICATE_PFX secret is not set.
+
+      - name: Write Windows signing configuration
+        if: ${{ env.WINDOWS_SIGNING_ENABLED == 'true' }}
+        shell: bash
+        env:
+          CERTIFICATE_PFX: ${{ secrets.WINDOWS_CERTIFICATE_PFX }}
+          CERTIFICATE_PASSWORD: ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}
+        run: |
+          SIGNING_DIR="$RUNNER_TEMP/signing/windows"
+          mkdir -p "$SIGNING_DIR"
+          echo "$CERTIFICATE_PFX" | base64 --decode > "$SIGNING_DIR/churchpresenter-windows.pfx"
+          {
+            echo "certFile=churchpresenter-windows.pfx"
+            echo "certPassword=${CERTIFICATE_PASSWORD}"
+            echo "timestampUrl=http://timestamp.digicert.com"
+            echo "subjectName=Church Presenter"
+          } > "$SIGNING_DIR/signing.properties"
+          echo "desktop.signing.repo.path=$RUNNER_TEMP/signing" >> local.properties
+          echo "Windows signing configuration written"
+
+      # ── Build ───────────────────────────────────────────────────────────────
+
+      - name: Build and sign installer
+        run: ./gradlew :composeApp:clean :composeApp:signWindowsMsi --no-daemon --no-build-cache
+
+      - name: Rename MSI (add WINDOWS-x64 label)
+        shell: bash
+        run: |
+          for f in composeApp/build/compose/binaries/main/msi/*.msi; do
+            mv "$f" "${f%.msi}-WINDOWS-x64.msi"
+          done
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-msi
+          path: composeApp/build/compose/binaries/main/msi
+          retention-days: 2
+
+  build-macos:
+    if: ${{ inputs.platform == 'macOS (ARM64)' || inputs.platform == 'All' }}
+    runs-on: [self-hosted, macOS, ARM64]
+    env:
+      MACOS_SIGNING_ENABLED: ${{ secrets.MACOS_CERTIFICATE_P12 != '' && 'true' || 'false' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+          fetch-depth: 0
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      # ── macOS Code Signing & Notarization ──────────────────────────────────
+      # Skipped automatically if MACOS_CERTIFICATE_P12 secret is not set.
+
+      - name: Import Developer ID certificate into temporary keychain
+        if: ${{ env.MACOS_SIGNING_ENABLED == 'true' }}
+        env:
+          CERTIFICATE_P12: ${{ secrets.MACOS_CERTIFICATE_P12 }}
+          CERTIFICATE_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
+        run: |
+          KEYCHAIN_PATH="$RUNNER_TEMP/signing.keychain-db"
+          KEYCHAIN_PASSWORD=$(openssl rand -base64 32)
+
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+
+          echo "$CERTIFICATE_P12" | base64 --decode > "$RUNNER_TEMP/certificate.p12"
+          security import "$RUNNER_TEMP/certificate.p12" \
+            -k "$KEYCHAIN_PATH" \
+            -P "$CERTIFICATE_PASSWORD" \
+            -T /usr/bin/codesign \
+            -T /usr/bin/productbuild
+          security set-key-partition-list -S apple-tool:,apple: -s \
+            -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+
+          EXISTING=$(security list-keychains -d user | tr -d '"' | awk '{$1=$1};1')
+          security list-keychains -d user -s "$KEYCHAIN_PATH" $EXISTING
+
+          echo "KEYCHAIN_PATH=$KEYCHAIN_PATH" >> "$GITHUB_ENV"
+          echo "Signing certificate imported"
+
+      - name: Write signing configuration
+        if: ${{ env.MACOS_SIGNING_ENABLED == 'true' }}
+        env:
+          IDENTITY_NAME: ${{ secrets.MACOS_IDENTITY_NAME }}
+          TEAM_ID: ${{ secrets.MACOS_NOTARIZATION_TEAM_ID }}
+          APPLE_ID: ${{ secrets.MACOS_NOTARIZATION_APPLE_ID }}
+          NOTARIZATION_PASSWORD: ${{ secrets.MACOS_NOTARIZATION_PASSWORD }}
+        run: |
+          SIGNING_DIR="$RUNNER_TEMP/signing/macos"
+          mkdir -p "$SIGNING_DIR"
+          {
+            echo "identityName=${IDENTITY_NAME}"
+            echo "teamId=${TEAM_ID}"
+            echo "appleId=${APPLE_ID}"
+            echo "notarizationPassword=${NOTARIZATION_PASSWORD}"
+            echo "keychain=${KEYCHAIN_PATH}"
+          } > "$SIGNING_DIR/signing.properties"
+          echo "desktop.signing.repo.path=$RUNNER_TEMP/signing" >> local.properties
+          echo "Signing configuration written"
+
+      # ── Build ──────────────────────────────────────────────────────────────
+
+      - name: Build signed DMG
+        run: ./gradlew :composeApp:clean :composeApp:packageDmg --no-daemon --no-build-cache
+
+      - name: Notarize DMG (upload to Apple + wait for approval + staple ticket)
+        if: ${{ env.MACOS_SIGNING_ENABLED == 'true' }}
+        run: ./gradlew :composeApp:notarizeDmg --no-daemon
+
+      - name: Rename macOS DMG (add MACOS-arm64 label)
+        run: |
+          for f in composeApp/build/compose/binaries/main/dmg/*.dmg; do
+            mv "$f" "${f%.dmg}-MACOS-arm64.dmg"
+          done
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-dmg
+          path: composeApp/build/compose/binaries/main/dmg
+          retention-days: 2
+
+      # ── Cleanup ────────────────────────────────────────────────────────────
+
+      - name: Delete temporary keychain
+        if: always()
+        run: |
+          if [ -n "${KEYCHAIN_PATH:-}" ]; then
+            security delete-keychain "$KEYCHAIN_PATH" || true
+            echo "Keychain cleaned up"
+          fi
+
+  build-macos-x64:
+    if: ${{ inputs.platform == 'macOS (x64)' || inputs.platform == 'All' }}
+    runs-on: [self-hosted, macOS, X64]
+    env:
+      MACOS_SIGNING_ENABLED: ${{ secrets.MACOS_CERTIFICATE_P12 != '' && 'true' || 'false' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+          fetch-depth: 0
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      # ── macOS Code Signing & Notarization ──────────────────────────────────
+
+      - name: Import Developer ID certificate into temporary keychain
+        if: ${{ env.MACOS_SIGNING_ENABLED == 'true' }}
+        env:
+          CERTIFICATE_P12: ${{ secrets.MACOS_CERTIFICATE_P12 }}
+          CERTIFICATE_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
+        run: |
+          KEYCHAIN_PATH="$RUNNER_TEMP/signing.keychain-db"
+          KEYCHAIN_PASSWORD=$(openssl rand -base64 32)
+
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+
+          echo "$CERTIFICATE_P12" | base64 --decode > "$RUNNER_TEMP/certificate.p12"
+          security import "$RUNNER_TEMP/certificate.p12" \
+            -k "$KEYCHAIN_PATH" \
+            -P "$CERTIFICATE_PASSWORD" \
+            -T /usr/bin/codesign \
+            -T /usr/bin/productbuild
+          security set-key-partition-list -S apple-tool:,apple: -s \
+            -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+
+          EXISTING=$(security list-keychains -d user | tr -d '"' | awk '{$1=$1};1')
+          security list-keychains -d user -s "$KEYCHAIN_PATH" $EXISTING
+
+          echo "KEYCHAIN_PATH=$KEYCHAIN_PATH" >> "$GITHUB_ENV"
+          echo "Signing certificate imported"
+
+      - name: Write signing configuration
+        if: ${{ env.MACOS_SIGNING_ENABLED == 'true' }}
+        env:
+          IDENTITY_NAME: ${{ secrets.MACOS_IDENTITY_NAME }}
+          TEAM_ID: ${{ secrets.MACOS_NOTARIZATION_TEAM_ID }}
+          APPLE_ID: ${{ secrets.MACOS_NOTARIZATION_APPLE_ID }}
+          NOTARIZATION_PASSWORD: ${{ secrets.MACOS_NOTARIZATION_PASSWORD }}
+        run: |
+          SIGNING_DIR="$RUNNER_TEMP/signing/macos"
+          mkdir -p "$SIGNING_DIR"
+          {
+            echo "identityName=${IDENTITY_NAME}"
+            echo "teamId=${TEAM_ID}"
+            echo "appleId=${APPLE_ID}"
+            echo "notarizationPassword=${NOTARIZATION_PASSWORD}"
+            echo "keychain=${KEYCHAIN_PATH}"
+          } > "$SIGNING_DIR/signing.properties"
+          echo "desktop.signing.repo.path=$RUNNER_TEMP/signing" >> local.properties
+          echo "Signing configuration written"
+
+      # ── Build ──────────────────────────────────────────────────────────────
+
+      - name: Build signed DMG
+        run: ./gradlew :composeApp:clean :composeApp:packageDmg --no-daemon --no-build-cache
+
+      - name: Notarize DMG (upload to Apple + wait for approval + staple ticket)
+        if: ${{ env.MACOS_SIGNING_ENABLED == 'true' }}
+        run: ./gradlew :composeApp:notarizeDmg --no-daemon
+
+      - name: Rename macOS DMG (add MACOS-x64 label)
+        run: |
+          for f in composeApp/build/compose/binaries/main/dmg/*.dmg; do
+            mv "$f" "${f%.dmg}-MACOS-x64.dmg"
+          done
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-dmg-x64
+          path: composeApp/build/compose/binaries/main/dmg
+          retention-days: 2
+
+      # ── Cleanup ────────────────────────────────────────────────────────────
+
+      - name: Delete temporary keychain
+        if: always()
+        run: |
+          if [ -n "${KEYCHAIN_PATH:-}" ]; then
+            security delete-keychain "$KEYCHAIN_PATH" || true
+            echo "Keychain cleaned up"
+          fi
+
+  build-linux:
+    if: ${{ inputs.platform == 'Linux' || inputs.platform == 'All' }}
+    runs-on: [self-hosted, Linux, X64]
+    env:
+      LINUX_SIGNING_ENABLED: ${{ secrets.LINUX_GPG_PRIVATE_KEY != '' && 'true' || 'false' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+          fetch-depth: 0
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      # ── Linux GPG Signing ──────────────────────────────────────────────────
+      - name: Import GPG key and write signing configuration
+        if: ${{ env.LINUX_SIGNING_ENABLED == 'true' }}
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.LINUX_GPG_PRIVATE_KEY }}
+          GPG_PASSPHRASE: ${{ secrets.LINUX_GPG_PASSPHRASE }}
+        run: |
+          echo "$GPG_PRIVATE_KEY" | gpg --batch --import
+          GPG_KEY_ID=$(gpg --list-secret-keys --keyid-format LONG 2>/dev/null | grep 'sec' | head -1 | awk '{print $2}' | cut -d'/' -f2)
+          # dpkg-sig was removed from Ubuntu 24.04 repos — install from archive
+          sudo apt-get install -y libconfig-file-perl
+          curl -sLO http://archive.ubuntu.com/ubuntu/pool/universe/d/dpkg-sig/dpkg-sig_0.13.1+nmu4_all.deb
+          sudo dpkg -i dpkg-sig_0.13.1+nmu4_all.deb
+          rm dpkg-sig_0.13.1+nmu4_all.deb
+          SIGNING_DIR="$RUNNER_TEMP/signing/linux"
+          mkdir -p "$SIGNING_DIR"
+          {
+            echo "gpgKeyId=${GPG_KEY_ID}"
+            echo "gpgPassphrase=${GPG_PASSPHRASE}"
+          } > "$SIGNING_DIR/signing.properties"
+          echo "desktop.signing.repo.path=$RUNNER_TEMP/signing" >> local.properties
+          echo "Linux signing configuration written (key: $GPG_KEY_ID)"
+
+      - name: Build and sign installer
+        run: ./gradlew :composeApp:clean :composeApp:signLinuxDeb --no-daemon --no-build-cache
+
+      - name: Rename DEB (add DEBIAN-x64 label)
+        run: |
+          for f in composeApp/build/compose/binaries/main/deb/*.deb; do
+            BASENAME=$(basename "$f" .deb)
+            mv "$f" "composeApp/build/compose/binaries/main/deb/${BASENAME}-DEBIAN-x64.deb"
+          done
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-deb
+          path: composeApp/build/compose/binaries/main/deb
+          retention-days: 2
+
+  release:
+    if: ${{ always() && inputs.release && needs.version.result == 'success' }}
+    needs: [version, build-windows, build-macos, build-macos-x64, build-linux]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Windows artifact
+        if: ${{ (inputs.platform == 'Windows' || inputs.platform == 'All') && needs.build-windows.result == 'success' }}
+        uses: actions/download-artifact@v4
+        with:
+          name: windows-msi
+          path: release/windows
+
+      - name: Download macOS artifact
+        if: ${{ (inputs.platform == 'macOS (ARM64)' || inputs.platform == 'All') && needs.build-macos.result == 'success' }}
+        uses: actions/download-artifact@v4
+        with:
+          name: macos-dmg
+          path: release/macos
+
+      - name: Download macOS x64 artifact
+        if: ${{ (inputs.platform == 'macOS (x64)' || inputs.platform == 'All') && needs.build-macos-x64.result == 'success' }}
+        uses: actions/download-artifact@v4
+        with:
+          name: macos-dmg-x64
+          path: release/macos
+
+      - name: Download Linux artifact
+        if: ${{ (inputs.platform == 'Linux' || inputs.platform == 'All') && needs.build-linux.result == 'success' }}
+        uses: actions/download-artifact@v4
+        with:
+          name: linux-deb
+          path: release/linux
+
+      - name: List release files
+        run: |
+          mkdir -p release
+          find release -type f
+
+      - name: Fail if no artifacts
+        run: |
+          if [ -z "$(find release -type f)" ]; then
+            echo "No artifacts to release"
+            exit 1
+          fi
+
+      - name: Build release body
+        id: body
+        run: |
+          BODY="Download the installer for your platform below."
+          BODY="$BODY"$'\n'
+          if ls release/windows/*.msi 1>/dev/null 2>&1; then
+            for f in release/windows/*.msi; do
+              BODY="$BODY"$'\n'"- **Windows:** $(basename "$f")"
+            done
+          fi
+          if ls release/macos/*.dmg 1>/dev/null 2>&1; then
+            for f in release/macos/*.dmg; do
+              BODY="$BODY"$'\n'"- **macOS:** $(basename "$f")"
+            done
+          fi
+          if ls release/linux/*.deb 1>/dev/null 2>&1; then
+            for f in release/linux/*.deb; do
+              BODY="$BODY"$'\n'"- **Linux:** $(basename "$f")"
+            done
+          fi
+          echo "BODY<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$BODY" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ needs.version.outputs.version }}
+          name: ChurchPresenter ${{ needs.version.outputs.version }}
+          body: ${{ steps.body.outputs.BODY }}
+          files: |
+            release/windows/*
+            release/macos/*
+            release/linux/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
