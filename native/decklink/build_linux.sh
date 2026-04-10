@@ -61,6 +61,7 @@ g++ -std=c++17 -shared -fPIC -o libdecklink_jni.so \
     -I"$JAVA_HOME/include" -I"$JAVA_HOME/include/linux" \
     -I"$SDK_DIR" \
     decklink_jni.cpp \
+    "$SDK_DIR/DeckLinkAPIDispatch.cpp" \
     -ldl
 
 if [ -f libdecklink_jni.so ]; then
