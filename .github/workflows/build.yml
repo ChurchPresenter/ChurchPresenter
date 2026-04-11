@@ -29,7 +29,7 @@ env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   version:
@@ -45,9 +45,11 @@ jobs:
 
       - name: Determine version
         id: version
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
         run: |
-          if [ -n "${{ inputs.version }}" ]; then
-            VERSION="${{ inputs.version }}"
+          if [ -n "$INPUT_VERSION" ]; then
+            VERSION="$INPUT_VERSION"
             # Auto-add v prefix if missing
             [[ "$VERSION" != v* ]] && VERSION="v$VERSION"
           else
@@ -486,7 +488,7 @@ jobs:
           GPG_KEY_ID=$(gpg --list-secret-keys --keyid-format LONG 2>/dev/null | grep 'sec' | head -1 | awk '{print $2}' | cut -d'/' -f2)
           # dpkg-sig was removed from Ubuntu 24.04 repos — install from archive
           sudo apt-get install -y libconfig-file-perl
-          curl -sLO http://archive.ubuntu.com/ubuntu/pool/universe/d/dpkg-sig/dpkg-sig_0.13.1+nmu4_all.deb
+          curl -sLO https://archive.ubuntu.com/ubuntu/pool/universe/d/dpkg-sig/dpkg-sig_0.13.1+nmu4_all.deb
           sudo dpkg -i dpkg-sig_0.13.1+nmu4_all.deb
           rm dpkg-sig_0.13.1+nmu4_all.deb
           SIGNING_DIR="$RUNNER_TEMP/signing/linux"
@@ -519,6 +521,8 @@ jobs:
     if: ${{ always() && inputs.release && needs.version.result == 'success' }}
     needs: [version, build-windows, build-macos, build-macos-x64, build-linux]
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Download Windows artifact
         if: ${{ (inputs.platform == 'Windows' || inputs.platform == 'All') && needs.build-windows.result == 'success' }}

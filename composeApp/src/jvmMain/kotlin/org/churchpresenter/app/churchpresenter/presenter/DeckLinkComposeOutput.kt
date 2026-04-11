@@ -25,6 +25,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.rememberUpdatedState
@@ -143,14 +144,14 @@ fun DeckLinkComposeOutput(
         val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
         val captureJob = scope.launch {
             // Wait for ComposePanel to initialize and create SkiaLayer
-            Thread.sleep(1000)
+            delay(1000)
 
             var skiaLayer: SkiaLayer? = null
             // Try to find SkiaLayer (may take a moment to be added)
             repeat(20) {
                 skiaLayer = findSkiaLayer(composePanel)
                 if (skiaLayer != null) return@repeat
-                Thread.sleep(100)
+                delay(100)
             }
 
             if (skiaLayer == null) {
@@ -195,15 +196,15 @@ fun DeckLinkComposeOutput(
                             framesSent++
                             DeckLinkManager.sendFrame(deviceIndex, pixels, w, h)
                         } else {
-                            Thread.sleep(16)
+                            delay(16)
                         }
                         bitmap.close()
                     } else {
                         bitmap?.close()
-                        Thread.sleep(16)
+                        delay(16)
                     }
                 } catch (_: Throwable) {
-                    Thread.sleep(16)
+                    delay(16)
                 }
             }
         }

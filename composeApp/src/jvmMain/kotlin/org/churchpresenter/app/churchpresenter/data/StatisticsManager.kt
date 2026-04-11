@@ -30,6 +30,7 @@ data class VerseDisplayEntry(
 )
 
 class StatisticsManager {
+    private val lock = Any()
     private val userHome = System.getProperty("user.home")
     private val appDataDir = File(userHome, ".churchpresenter")
     private val statsFile = File(appDataDir, "statistics.json")
@@ -61,34 +62,38 @@ class StatisticsManager {
     }
 
     fun recordSongDisplay(songNumber: Int, title: String, songbook: String) {
-        val key = "$songbook::$songNumber"
-        val existing = statistics.songDisplayCounts[key]
-        val entry = SongDisplayEntry(
-            songNumber = songNumber,
-            title = title,
-            songbook = songbook,
-            count = (existing?.count ?: 0) + 1
-        )
-        statistics = statistics.copy(
-            songDisplayCounts = statistics.songDisplayCounts + (key to entry)
-        )
-        save()
+        synchronized(lock) {
+            val key = "$songbook::$songNumber"
+            val existing = statistics.songDisplayCounts[key]
+            val entry = SongDisplayEntry(
+                songNumber = songNumber,
+                title = title,
+                songbook = songbook,
+                count = (existing?.count ?: 0) + 1
+            )
+            statistics = statistics.copy(
+                songDisplayCounts = statistics.songDisplayCounts + (key to entry)
+            )
+            save()
+        }
     }
 
     fun recordVerseDisplay(bibleName: String, bookName: String, chapter: Int, verseNumber: Int) {
-        val key = "$bibleName::$bookName::$chapter::$verseNumber"
-        val existing = statistics.verseDisplayCounts[key]
-        val entry = VerseDisplayEntry(
-            bibleName = bibleName,
-            bookName = bookName,
-            chapter = chapter,
-            verseNumber = verseNumber,
-            count = (existing?.count ?: 0) + 1
-        )
-        statistics = statistics.copy(
-            verseDisplayCounts = statistics.verseDisplayCounts + (key to entry)
-        )
-        save()
+        synchronized(lock) {
+            val key = "$bibleName::$bookName::$chapter::$verseNumber"
+            val existing = statistics.verseDisplayCounts[key]
+            val entry = VerseDisplayEntry(
+                bibleName = bibleName,
+                bookName = bookName,
+                chapter = chapter,
+                verseNumber = verseNumber,
+                count = (existing?.count ?: 0) + 1
+            )
+            statistics = statistics.copy(
+                verseDisplayCounts = statistics.verseDisplayCounts + (key to entry)
+            )
+            save()
+        }
     }
 
     /** Returns top songs grouped by songbook, each list sorted by count descending. */

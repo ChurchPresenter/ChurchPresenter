@@ -191,7 +191,7 @@ class PresentationViewModel(appSettings: AppSettings? = null) {
             if (extension == "pptx") {
                 try {
                     val xmlSlideShowClass = Class.forName("org.apache.poi.xslf.usermodel.XMLSlideShow")
-                    val fileInputStream = java.io.FileInputStream(file)
+                    java.io.FileInputStream(file).use { fileInputStream ->
                     val ppt = xmlSlideShowClass.getConstructor(java.io.InputStream::class.java).newInstance(fileInputStream)
                     val slides = xmlSlideShowClass.getMethod("getSlides").invoke(ppt) as List<*>
                     val pageSize = xmlSlideShowClass.getMethod("getPageSize").invoke(ppt) as java.awt.Dimension
@@ -218,14 +218,14 @@ class PresentationViewModel(appSettings: AppSettings? = null) {
                         }
                     }
                     xmlSlideShowClass.getMethod("close").invoke(ppt)
-                    fileInputStream.close()
+                    }
                 } catch (e: ClassNotFoundException) {
                     // Apache POI not found
                 }
             } else if (extension == "ppt") {
                 try {
                     val hslfSlideShowClass = Class.forName("org.apache.poi.hslf.usermodel.HSLFSlideShow")
-                    val fileInputStream = java.io.FileInputStream(file)
+                    java.io.FileInputStream(file).use { fileInputStream ->
                     val ppt = hslfSlideShowClass.getConstructor(java.io.InputStream::class.java).newInstance(fileInputStream)
                     val slides = hslfSlideShowClass.getMethod("getSlides").invoke(ppt) as List<*>
                     val pageSize = hslfSlideShowClass.getMethod("getPageSize").invoke(ppt) as java.awt.Dimension
@@ -250,7 +250,7 @@ class PresentationViewModel(appSettings: AppSettings? = null) {
                         }
                     }
                     hslfSlideShowClass.getMethod("close").invoke(ppt)
-                    fileInputStream.close()
+                    }
                 } catch (e: ClassNotFoundException) {
                     // Apache POI not found
                 }
@@ -284,9 +284,16 @@ class PresentationViewModel(appSettings: AppSettings? = null) {
                 tempDir.mkdirs()
                 try {
                     ZipInputStream(BufferedInputStream(FileInputStream(file))).use { zip ->
+                        val tempCanonical = tempDir.canonicalPath
                         var entry = zip.nextEntry
                         while (entry != null) {
                             val outFile = File(tempDir, entry.name)
+                            if (!outFile.canonicalPath.startsWith(tempCanonical + File.separator) &&
+                                outFile.canonicalPath != tempCanonical) {
+                                zip.closeEntry()
+                                entry = zip.nextEntry
+                                continue
+                            }
                             if (entry.isDirectory) {
                                 outFile.mkdirs()
                             } else {

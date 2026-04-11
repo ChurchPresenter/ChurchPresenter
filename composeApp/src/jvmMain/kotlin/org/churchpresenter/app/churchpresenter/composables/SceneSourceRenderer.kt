@@ -702,12 +702,7 @@ private fun ScreenCaptureSourceContent(source: SceneSource.ScreenCaptureSource, 
                     if (rect.width > 0 && rect.height > 0) robot.createScreenCapture(rect) else null
                 }
                 if (capture != null) {
-                    val skiaImage = SkiaImage.makeFromEncoded(
-                        ByteArrayOutputStream().also {
-                            ImageIO.write(capture, "PNG", it)
-                        }.toByteArray()
-                    )
-                    frame = skiaImage.toComposeImageBitmap()
+                    frame = capture.toComposeImageBitmap()
                 }
                 delay(source.captureInterval.toLong().coerceAtLeast(33))
             }

@@ -22,7 +22,7 @@ import churchpresenter.composeapp.generated.resources.video_files_filter
 import kotlinx.coroutines.launch
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
 import org.jetbrains.compose.resources.stringResource
-import java.awt.Window
+
 import javax.swing.filechooser.FileNameExtensionFilter
 import kotlin.io.path.Path
 import kotlin.io.path.absolutePathString

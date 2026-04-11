@@ -85,9 +85,9 @@ object SslCertificateManager {
             "-storetype", Constants.SSL_KEYSTORE_TYPE
         ).redirectErrorStream(true).start()
 
+        val output = process.inputStream.bufferedReader().readText()
         val exitCode = process.waitFor()
         if (exitCode != 0 || !keystoreFile.exists()) {
-            val output = process.inputStream.bufferedReader().readText()
             throw RuntimeException("keytool failed (exit $exitCode): $output")
         }
 

@@ -3,22 +3,21 @@ package org.churchpresenter.app.churchpresenter.data
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.charset.StandardCharsets
-import androidx.compose.runtime.mutableStateListOf
 
 // Note: This conversion assumes you're using a Kotlin database library
 // You may need to adapt the SQL queries based on your specific database framework
 // (e.g., Room, Exposed, JDBC, etc.)
 
+data class ChapterResult(val previewIds: List<String>, val verses: List<String>)
+
 class Bible {
     private var bibleId: String = ""
     private var bibleAbbreviation: String = ""
     private var bibleTitle: String = ""
-    private val books = mutableStateListOf<BibleBook>()
-    private val operatorBible = mutableStateListOf<BibleVerse>()
+    private val books = mutableListOf<BibleBook>()
+    private val operatorBible = mutableListOf<BibleVerse>()
     // Index: (bookId, chapterNum) -> ordered list of verses — built at load time for O(1) lookup
     private val chapterIndex = HashMap<Long, List<BibleVerse>>()
-    val previewIdList = mutableListOf<String>()
-    val verseList = mutableListOf<String>()
 
     private var conn: java.sql.Connection? = null
 
@@ -26,6 +25,11 @@ class Bible {
     private fun executeQuery(sql: String): DatabaseResult {
         val c = conn ?: throw IllegalStateException("Database connection not set")
         return JdbcDatabase.executeQuery(c, sql)
+    }
+
+    private fun executeQueryParameterized(sql: String, params: List<Any?>): DatabaseResult {
+        val c = conn ?: throw IllegalStateException("Database connection not set")
+        return JdbcDatabase.executeQueryParameterized(c, sql, params)
     }
 
     /**
@@ -320,7 +324,7 @@ class Bible {
 
     private fun retrieveBooks() {
         books.clear()
-        val result = executeQuery("SELECT book_name, id, chapter_count FROM BibleBooks WHERE bible_id = $bibleId")
+        val result = executeQueryParameterized("SELECT book_name, id, chapter_count FROM BibleBooks WHERE bible_id = ?", listOf(bibleId))
 
         result.forEach { row ->
             val bookName = row.getString(0).trim()
@@ -348,9 +352,9 @@ class Bible {
         return emptyList()
     }
 
-    fun getChapter(book: Int, chapter: Int): List<String> {
-        previewIdList.clear()
-        verseList.clear()
+    fun getChapter(book: Int, chapter: Int): ChapterResult {
+        val previewIds = mutableListOf<String>()
+        val verseList = mutableListOf<String>()
 
         // O(1) lookup via pre-built index — no full scan needed
         val verses = chapterIndex[chapterKey(book, chapter)] ?: emptyList()
@@ -362,19 +366,19 @@ class Bible {
             val id: String
             if (verse == verseOld) {
                 verseText = "${verseList.last().substringAfter(". ")} ${bv.verseText}".trim()
-                id = "${previewIdList.last()},${bv.verseId}"
+                id = "${previewIds.last()},${bv.verseId}"
                 verseList.removeLast()
-                previewIdList.removeLast()
+                previewIds.removeLast()
             } else {
                 verseText = bv.verseText
                 id = bv.verseId
             }
             verseList.add("$verse. $verseText")
-            previewIdList.add(id)
+            previewIds.add(id)
             verseOld = verse
         }
 
-        return verseList.toList()
+        return ChapterResult(previewIds = previewIds.toList(), verses = verseList.toList())
     }
 
     fun searchBible(allWords: Boolean, searchExp: Regex): List<BibleSearch> {
@@ -410,7 +414,7 @@ class Bible {
                 if (allWords) {
                     val words = sw.split("|")
                     val hasAll = words.all { word ->
-                        Regex("\\b$word\\b", RegexOption.IGNORE_CASE).containsMatchIn(bv.verseText)
+                        Regex("\\b${Regex.escape(word)}\\b", RegexOption.IGNORE_CASE).containsMatchIn(bv.verseText)
                     }
                     if (hasAll) {
                         addSearchResult(bv, returnResults)
@@ -424,17 +428,16 @@ class Bible {
     }
 
     private fun addSearchResult(bv: BibleVerse, bsl: MutableList<BibleSearch>) {
-        val results = BibleSearch()
+        val bookName = books.firstOrNull { it.bookId == bv.book.toString() }?.book ?: ""
+        val chapter = bv.chapter.toString()
+        val verse = bv.verseNumber.toString()
 
-        books.firstOrNull { it.bookId == bv.book.toString() }?.let { bk ->
-            results.book = bk.book
-        }
-
-        results.chapter = bv.chapter.toString()
-        results.verse = bv.verseNumber.toString()
-        results.verseText = "${results.book} ${results.chapter}:${results.verse} ${bv.verseText}"
-
-        bsl.add(results)
+        bsl.add(BibleSearch(
+            book = bookName,
+            chapter = chapter,
+            verse = verse,
+            verseText = "$bookName $chapter:$verse ${bv.verseText}"
+        ))
     }
 
     fun getBookCount(): Int {

@@ -2,10 +2,27 @@ package org.churchpresenter.app.churchpresenter.composables
 
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.toComposeImageBitmap
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.serialization.json.*
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.intOrNull
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.put
 import java.awt.image.BufferedImage
 import java.io.ByteArrayInputStream
 import java.net.ServerSocket
@@ -68,8 +85,6 @@ object SharedBrowserFrameCache {
             entry.captureJob = scope.launch {
                 try {
                     startBrowser(entry, sourceId, url, renderWidth, renderHeight, customCss, fps, forceTransparent)
-                } catch (e: CancellationException) {
-                    throw e
                 } catch (e: CancellationException) {
                     throw e
                 } catch (e: Exception) {

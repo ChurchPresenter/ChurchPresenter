@@ -1,6 +1,5 @@
 package org.churchpresenter.app.churchpresenter.composables
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Box
@@ -16,7 +15,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.symbol_dropdown
 import org.jetbrains.compose.resources.stringResource

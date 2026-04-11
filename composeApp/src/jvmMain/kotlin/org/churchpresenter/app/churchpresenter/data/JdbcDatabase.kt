@@ -37,4 +37,22 @@ object JdbcDatabase {
         }
         return JdbcDatabaseResult(rows)
     }
+
+    fun executeQueryParameterized(conn: Connection, sql: String, params: List<Any?>): DatabaseResult {
+        val rows = mutableListOf<JdbcDatabaseRow>()
+        conn.prepareStatement(sql).use { stmt ->
+            params.forEachIndexed { index, param ->
+                stmt.setObject(index + 1, param)
+            }
+            val rs = stmt.executeQuery()
+            val meta = rs.metaData
+            val cols = meta.columnCount
+            while (rs.next()) {
+                val vals = (1..cols).map { i -> rs.getString(i) ?: "" }
+                rows.add(JdbcDatabaseRow(vals))
+            }
+            rs.close()
+        }
+        return JdbcDatabaseResult(rows)
+    }
 }

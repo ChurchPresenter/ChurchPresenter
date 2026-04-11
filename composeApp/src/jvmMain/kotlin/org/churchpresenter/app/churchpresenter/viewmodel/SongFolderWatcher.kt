@@ -25,9 +25,8 @@ class SongFolderWatcher(
         if (!rootDir.exists() || !rootDir.isDirectory) return
 
         watchJob = scope.launch(Dispatchers.IO) {
+            val watchService = FileSystems.getDefault().newWatchService()
             try {
-                val watchService = FileSystems.getDefault().newWatchService()
-
                 // Watch root directory for new/deleted subdirectories
                 rootDir.toPath().register(
                     watchService,
@@ -95,12 +94,12 @@ class SongFolderWatcher(
 
                     if (!key.reset()) break
                 }
-
-                watchService.close()
             } catch (_: ClosedWatchServiceException) {
                 // Expected on dispose
             } catch (_: InterruptedException) {
                 // Expected on cancel
+            } finally {
+                watchService.close()
             }
         }
     }

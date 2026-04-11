@@ -68,7 +68,13 @@ class LowerThirdSettingsViewModel {
         val folder = _lottieFolder.value
         if (folder.isEmpty()) return
         val src = File(sourcePath)
-        src.copyTo(File(folder, src.name), overwrite = true)
+        val target = File(folder, src.name)
+        val folderCanonical = File(folder).canonicalPath
+        if (!target.canonicalPath.startsWith(folderCanonical + File.separator) &&
+            target.canonicalPath != folderCanonical) {
+            return
+        }
+        src.copyTo(target, overwrite = true)
         _selectedFile.value = src.name
         _refreshTrigger.value++
     }

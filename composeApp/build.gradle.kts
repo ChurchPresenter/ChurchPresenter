@@ -140,11 +140,11 @@ kotlin {
             implementation("com.twelvemonkeys.imageio:imageio-core:3.10.1")
             implementation("com.twelvemonkeys.imageio:imageio-jpeg:3.10.1")
             // Apache PDFBox for PDF slide extraction
-            implementation("org.apache.pdfbox:pdfbox:2.0.30")
+            implementation("org.apache.pdfbox:pdfbox:2.0.33")
             // Apache POI for PowerPoint slide extraction
-            implementation("org.apache.poi:poi:5.2.5")
-            implementation("org.apache.poi:poi-ooxml:5.2.5")
-            implementation("org.apache.poi:poi-scratchpad:5.2.5")
+            implementation("org.apache.poi:poi:5.3.0")
+            implementation("org.apache.poi:poi-ooxml:5.3.0")
+            implementation("org.apache.poi:poi-scratchpad:5.3.0")
             // Ktor server for companion API
             implementation(libs.ktor.server.core)
             implementation(libs.ktor.server.netty)
@@ -261,7 +261,7 @@ compose.desktop {
             // Windows MSI limits each version segment to 0-255, so split commit count across minor.patch
             packageVersion = "$versionYear.${commits / 256}.${commits % 256}"
             description = "Church Presenter - Presentation software for worship services"
-            copyright = "© 2025 Church Presenter. All rights reserved."
+            copyright = "© ${Calendar.getInstance().get(Calendar.YEAR)} Church Presenter. All rights reserved."
             vendor = "Church Presenter"
 
             // Bundle app resources (Lottie-Gen) alongside the packaged app.
@@ -497,11 +497,15 @@ tasks.register("signLinuxDeb") {
                 add("--sign"); add("builder")
                 add("-k"); add(linuxGpgKeyId)
                 if (linuxGpgPassphrase.isConfigured()) {
-                    add("--gpg-options"); add("--batch --pinentry-mode loopback --passphrase $linuxGpgPassphrase")
+                    add("--gpg-options"); add("--batch --pinentry-mode loopback --passphrase-fd 0")
                 }
                 add(debFile.absolutePath)
             }
-            val result = ProcessBuilder(cmd).inheritIO().start().waitFor()
+            val process = ProcessBuilder(cmd).inheritIO().redirectInput(ProcessBuilder.Redirect.PIPE).start()
+            if (linuxGpgPassphrase.isConfigured()) {
+                process.outputStream.bufferedWriter().use { it.write(linuxGpgPassphrase) }
+            }
+            val result = process.waitFor()
             if (result != 0) error("dpkg-sig failed with exit code $result for ${debFile.name}")
             logger.lifecycle("Linux signed: ${debFile.name}")
         }

@@ -7,9 +7,7 @@ import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.toComposeImageBitmap
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
@@ -183,9 +181,8 @@ class PicturesViewModel(
     /**
      * Opens a native folder chooser dialog and loads images from the selected folder.
      */
-    @OptIn(DelicateCoroutinesApi::class)
     fun openFolderChooser(dialogTitle: String, onFolderSelected: ((String) -> Unit) = {}) {
-        GlobalScope.launch {
+        scope.launch {
             val dir = FileChooser.platformInstance.chooseSingle(
                 path = Path(defaultDirectory),
                 title = dialogTitle,

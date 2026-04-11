@@ -106,7 +106,7 @@ class BibleViewModel(
     // MutableStateFlow so coroutines can suspend on it with .first { it }
     private val _isFullyLoadedFlow = MutableStateFlow(false)
     val isFullyLoadedFlow: StateFlow<Boolean> = _isFullyLoadedFlow.asStateFlow()
-    val isFullyLoaded: State<Boolean> get() = mutableStateOf(_isFullyLoadedFlow.value)
+    val isFullyLoaded: Boolean get() = _isFullyLoadedFlow.value
 
     // History of presented verses (most recent first)
     data class HistoryEntry(
@@ -297,10 +297,10 @@ class BibleViewModel(
                 if (primary != null) {
                     _books.value = primary.getCanonicalBooks()
                     val bookId = _selectedBookIndex.value + 1
-                    val chapterVerses = withContext(Dispatchers.IO) {
+                    val chapterResult = withContext(Dispatchers.IO) {
                         primary.getChapter(bookId, _selectedChapter.value)
                     }
-                    _verses.value = chapterVerses
+                    _verses.value = chapterResult.verses
                     _selectedVerseIndex.value = 0
                     refreshFilteredLists()
                     onBibleLoaded?.invoke(primary, appSettings.bibleSettings.primaryBible)
@@ -326,10 +326,10 @@ class BibleViewModel(
                 _selectedVerseIndex.value = 0
                 viewModelScope.launch {
                     val bookId = clampedIndex + 1
-                    val chapterVerses = withContext(Dispatchers.IO) {
+                    val chapterResult = withContext(Dispatchers.IO) {
                         bible.getChapter(bookId, chapter)
                     }
-                    _verses.value = chapterVerses
+                    _verses.value = chapterResult.verses
                     refreshFilteredLists()
                 }
             }
@@ -410,9 +410,10 @@ class BibleViewModel(
             val clampedIndex = bookIndex.coerceIn(0, bookCount - 1)
             val bookId = clampedIndex + 1
 
-            val chapterVerses = withContext(Dispatchers.IO) {
+            val chapterResult = withContext(Dispatchers.IO) {
                 bible.getChapter(bookId, chapter)
             }
+            val chapterVerses = chapterResult.verses
             _verses.value = chapterVerses
 
             // Use "N. " (with trailing space) to avoid "3." matching "13." or "23."
@@ -819,9 +820,10 @@ class BibleViewModel(
         _selectedVerseIndex.value = 0
 
         viewModelScope.launch {
-            val chapterVerses = withContext(Dispatchers.IO) {
+            val chapterResult = withContext(Dispatchers.IO) {
                 bible.getChapter(bookId, chapter)
             }
+            val chapterVerses = chapterResult.verses
             _verses.value = chapterVerses
 
             val verseIndex = chapterVerses.indexOfFirst { it.startsWith("$verse. ") }

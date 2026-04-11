@@ -27,6 +27,7 @@ import io.ktor.websocket.Frame
 import io.ktor.websocket.readText
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import java.security.MessageDigest
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.BufferOverflow
@@ -974,9 +975,15 @@ class CompanionServer {
             tempDir.mkdirs()
             try {
                 ZipInputStream(BufferedInputStream(FileInputStream(file))).use { zip ->
+                    val tempCanonical = tempDir.canonicalPath
                     var entry = zip.nextEntry
                     while (entry != null) {
                         val out = File(tempDir, entry.name)
+                        if (!out.canonicalPath.startsWith(tempCanonical + File.separator) &&
+                            out.canonicalPath != tempCanonical) {
+                            zip.closeEntry(); entry = zip.nextEntry
+                            continue
+                        }
                         if (entry.isDirectory) out.mkdirs()
                         else {
                             out.parentFile?.mkdirs()
@@ -1322,7 +1329,8 @@ class CompanionServer {
             }
             install(StatusPages) {
                 exception<Throwable> { call, cause ->
-                    call.respondText("Internal error: ${cause.message}")
+                    cause.printStackTrace()
+                    call.respondText("Internal server error")
                 }
             }
             routing {
@@ -1804,6 +1812,7 @@ class CompanionServer {
                         broadcastChannel.collect { message -> send(Frame.Text(message)) }
                     }
 
+                    try {
                     for (frame in incoming) {
                         if (frame is Frame.Text) {
                             try {
@@ -1862,7 +1871,9 @@ class CompanionServer {
                             } catch (_: Exception) { /* ignore malformed frames */ }
                         }
                     }
-                    broadcastJob.cancel()
+                    } finally {
+                        broadcastJob.cancel()
+                    }
                 }
 
                 // ── Lottie Generator endpoints ────────────────────────────────
@@ -1900,9 +1911,12 @@ class CompanionServer {
 
                 // Serve font files from Lottie-Gen/fonts directory
                 get("/fonts/{filename}") {
-                    val filename = call.parameters["filename"] ?: return@get
-                    val file = lottieGenDir?.let { File(File(it, "fonts"), filename) }
-                    if (file == null || !file.exists()) {
+                    val rawFilename = call.parameters["filename"] ?: return@get
+                    val filename = File(rawFilename).name
+                    val fontsDir = lottieGenDir?.let { File(it, "fonts") }
+                    val file = fontsDir?.let { File(it, filename) }
+                    if (file == null || !file.exists() ||
+                        !file.canonicalPath.startsWith(fontsDir!!.canonicalPath + File.separator)) {
                         call.respond(io.ktor.http.HttpStatusCode.NotFound)
                         return@get
                     }
@@ -1917,10 +1931,14 @@ class CompanionServer {
 
                 // Serve logo image files
                 get("/logos/{filename}") {
-                    val filename = call.parameters["filename"] ?: return@get
-                    // Check user logos dir first, then fall back to bundled Lottie-Gen dir
-                    val file = lottieLogosDir?.let { File(it, filename) }?.takeIf { it.exists() }
-                        ?: lottieGenDir?.let { File(File(it, "logos"), filename) }?.takeIf { it.exists() }
+                    val rawFilename = call.parameters["filename"] ?: return@get
+                    val filename = File(rawFilename).name
+                    val userLogosDir = lottieLogosDir
+                    val bundledLogosDir = lottieGenDir?.let { File(it, "logos") }
+                    val file = userLogosDir?.let { File(it, filename) }
+                        ?.takeIf { it.exists() && it.canonicalPath.startsWith(userLogosDir.canonicalPath + File.separator) }
+                        ?: bundledLogosDir?.let { File(it, filename) }
+                            ?.takeIf { it.exists() && it.canonicalPath.startsWith(bundledLogosDir.canonicalPath + File.separator) }
                     if (file == null) {
                         call.respond(io.ktor.http.HttpStatusCode.NotFound, "Logo not found")
                         return@get
@@ -1937,12 +1955,14 @@ class CompanionServer {
 
                 // GET /api/presets — load saved generator presets
                 get(Constants.ENDPOINT_LOTTIE_PRESETS) {
+                    if (!checkApiKey(call)) return@get
                     val data = if (lottiePresetsFile.exists()) lottiePresetsFile.readText() else "[]"
                     call.respondText(data, ContentType.Application.Json)
                 }
 
                 // POST /api/presets — save generator presets
                 post(Constants.ENDPOINT_LOTTIE_PRESETS) {
+                    if (!checkApiKey(call)) return@post
                     val body = call.receiveText()
                     lottiePresetsFile.writeText(body)
                     call.respondText("""{"ok":true}""", ContentType.Application.Json)
@@ -1950,6 +1970,7 @@ class CompanionServer {
 
                 // GET /api/color-themes — load color themes
                 get(Constants.ENDPOINT_LOTTIE_COLOR_THEMES) {
+                    if (!checkApiKey(call)) return@get
                     // Fall back to bundled defaults if user hasn't saved custom themes
                     val data = when {
                         lottieColorThemesFile.exists() -> lottieColorThemesFile.readText()
@@ -1963,6 +1984,7 @@ class CompanionServer {
 
                 // POST /api/color-themes — save color themes
                 post(Constants.ENDPOINT_LOTTIE_COLOR_THEMES) {
+                    if (!checkApiKey(call)) return@post
                     val body = call.receiveText()
                     lottieColorThemesFile.writeText(body)
                     call.respondText("""{"ok":true}""", ContentType.Application.Json)
@@ -1982,7 +2004,9 @@ class CompanionServer {
                     lottieGenDir?.let { File(it, "logos") }?.listFiles()
                         ?.filter { it.extension.lowercase().matches(Regex("png|jpe?g|svg|webp")) }
                         ?.forEach { files.add(it.name) }
-                    val jsonArray = files.joinToString(",") { "\"$it\"" }
+                    val jsonArray = files.joinToString(",") { name ->
+                        "\"${name.replace("\\", "\\\\").replace("\"", "\\\"")}\""
+                    }
                     call.respondText("[$jsonArray]", ContentType.Application.Json)
                 }
 
@@ -2105,7 +2129,7 @@ class CompanionServer {
         val provided = call.request.headers[Constants.HEADER_API_KEY]
             ?: call.request.queryParameters[Constants.QUERY_PARAM_API_KEY]
             ?: ""
-        return if (provided == _apiKey.value) {
+        return if (MessageDigest.isEqual(provided.toByteArray(), _apiKey.value.toByteArray())) {
             true
         } else {
             call.respond(io.ktor.http.HttpStatusCode.Unauthorized, "Invalid API key")

@@ -30,8 +30,8 @@ object DeckLinkManager {
     )
 
     private var available: Boolean? = null
-    private val outputDevices = mutableSetOf<Int>()
-    private val inputDevices = mutableSetOf<Int>()
+    private val outputDevices: MutableSet<Int> = java.util.concurrent.ConcurrentHashMap.newKeySet()
+    private val inputDevices: MutableSet<Int> = java.util.concurrent.ConcurrentHashMap.newKeySet()
     private var shutdownHookRegistered = false
 
     // ── JNI native methods ──────────────────────────────────────────────

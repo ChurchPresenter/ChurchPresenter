@@ -143,6 +143,11 @@ class FileManager {
      */
     fun deleteFile(directory: String, fileName: String): String? {
         val fileToDelete = File(directory, fileName)
+        val dirCanonical = File(directory).canonicalPath
+        if (!fileToDelete.canonicalPath.startsWith(dirCanonical + File.separator) &&
+            fileToDelete.canonicalPath != dirCanonical) {
+            return "Invalid file path"
+        }
         return try {
             if (fileToDelete.delete()) {
                 null // Success

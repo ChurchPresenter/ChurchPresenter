@@ -46,7 +46,7 @@ class SongsViewModel(
     private val _filterType = mutableStateOf(Constants.CONTAINS)
     val filterType: State<String> = _filterType
 
-    private val _selectedSongIndex = mutableStateOf(2)
+    private val _selectedSongIndex = mutableStateOf(0)
     val selectedSongIndex: State<Int> = _selectedSongIndex
 
     private val _selectedSectionIndex = mutableStateOf(-1)
