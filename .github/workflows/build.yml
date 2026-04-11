@@ -230,11 +230,15 @@ jobs:
           mkdir -p "$RUNNER_TEMP/private_keys"
           echo "$API_KEY_P8" | base64 --decode > "$RUNNER_TEMP/private_keys/AuthKey.p8"
 
-          # Verify key decoded correctly
+          # Verify key decoded correctly (expected: 257 bytes for AuthKey_desktop.p8)
           if ! grep -q "BEGIN" "$RUNNER_TEMP/private_keys/AuthKey.p8"; then
-            echo "❌ Decoded key file does not look like a valid PEM key — check MACOS_NOTARIZATION_API_KEY_P8 encoding" && exit 1
+            echo "❌ Decoded key file is not a valid PEM — check MACOS_NOTARIZATION_API_KEY_P8" && exit 1
           fi
-          echo "✅ Key decoded (key-id: $API_KEY_ID, issuer: $API_ISSUER_ID)"
+          KEY_BYTES=$(wc -c < "$RUNNER_TEMP/private_keys/AuthKey.p8" | tr -d ' ')
+          echo "✅ Key decoded — ${KEY_BYTES} bytes (expected 257) | key-id: $API_KEY_ID | issuer: $API_ISSUER_ID"
+          if [ "$KEY_BYTES" != "257" ]; then
+            echo "⚠️  Size mismatch — MACOS_NOTARIZATION_API_KEY_P8 contains a different key than AuthKey_desktop.p8"
+          fi
 
           # Verify credentials against Apple before uploading
           echo "Verifying credentials with Apple..."
@@ -244,11 +248,9 @@ jobs:
             --issuer "$API_ISSUER_ID" \
             --output-format json 2>&1 )
           HISTORY_EXIT=$?
-          # Some Xcode versions return exit 0 even on 401 — also grep output
           if [ $HISTORY_EXIT -ne 0 ] || echo "$HISTORY_OUT" | grep -qiE "401|unauthenticated|invalid credentials"; then
-            echo "❌ Credential check failed (exit $HISTORY_EXIT) — output:"
+            echo "❌ Credential check failed (exit $HISTORY_EXIT):"
             echo "$HISTORY_OUT"
-            echo "Verify MACOS_NOTARIZATION_API_KEY_ID='$API_KEY_ID' and MACOS_NOTARIZATION_API_ISSUER_ID are set correctly in GitHub Secrets"
             exit 1
           fi
           echo "✅ Credentials verified"
@@ -388,11 +390,15 @@ jobs:
           mkdir -p "$RUNNER_TEMP/private_keys"
           echo "$API_KEY_P8" | base64 --decode > "$RUNNER_TEMP/private_keys/AuthKey.p8"
 
-          # Verify key decoded correctly
+          # Verify key decoded correctly (expected: 257 bytes for AuthKey_desktop.p8)
           if ! grep -q "BEGIN" "$RUNNER_TEMP/private_keys/AuthKey.p8"; then
-            echo "❌ Decoded key file does not look like a valid PEM key — check MACOS_NOTARIZATION_API_KEY_P8 encoding" && exit 1
+            echo "❌ Decoded key file is not a valid PEM — check MACOS_NOTARIZATION_API_KEY_P8" && exit 1
           fi
-          echo "✅ Key decoded (key-id: $API_KEY_ID, issuer: $API_ISSUER_ID)"
+          KEY_BYTES=$(wc -c < "$RUNNER_TEMP/private_keys/AuthKey.p8" | tr -d ' ')
+          echo "✅ Key decoded — ${KEY_BYTES} bytes (expected 257) | key-id: $API_KEY_ID | issuer: $API_ISSUER_ID"
+          if [ "$KEY_BYTES" != "257" ]; then
+            echo "⚠️  Size mismatch — MACOS_NOTARIZATION_API_KEY_P8 contains a different key than AuthKey_desktop.p8"
+          fi
 
           # Verify credentials against Apple before uploading
           echo "Verifying credentials with Apple..."
