@@ -497,15 +497,11 @@ tasks.register("signLinuxDeb") {
                 add("--sign"); add("builder")
                 add("-k"); add(linuxGpgKeyId)
                 if (linuxGpgPassphrase.isConfigured()) {
-                    add("--gpg-options"); add("--batch --pinentry-mode loopback --passphrase-fd 0")
+                    add("--gpg-options"); add("--batch --pinentry-mode loopback --passphrase $linuxGpgPassphrase")
                 }
                 add(debFile.absolutePath)
             }
-            val process = ProcessBuilder(cmd).inheritIO().redirectInput(ProcessBuilder.Redirect.PIPE).start()
-            if (linuxGpgPassphrase.isConfigured()) {
-                process.outputStream.bufferedWriter().use { it.write(linuxGpgPassphrase) }
-            }
-            val result = process.waitFor()
+            val result = ProcessBuilder(cmd).inheritIO().start().waitFor()
             if (result != 0) error("dpkg-sig failed with exit code $result for ${debFile.name}")
             logger.lifecycle("Linux signed: ${debFile.name}")
         }
