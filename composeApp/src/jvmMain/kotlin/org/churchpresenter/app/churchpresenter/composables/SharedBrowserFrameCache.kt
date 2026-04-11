@@ -50,6 +50,8 @@ object SharedBrowserFrameCache {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private val entries = mutableMapOf<String, CacheEntry>()
     private val httpClient = HttpClient.newHttpClient()
+    private val isWindows = System.getProperty("os.name", "").lowercase().contains("win")
+    @Volatile private var zombiesCleaned = false
 
     init {
         // Kill all browser processes on JVM shutdown to prevent orphaned Chrome/Edge windows
@@ -70,6 +72,7 @@ object SharedBrowserFrameCache {
         var captureJob: Job? = null,
         var cdpConnection: CdpConnection? = null,
         var debugPort: Int = 0,
+        var userDataDir: java.io.File? = null,
         @Volatile var captureIntervalMs: Long = 33
     )
 
@@ -243,16 +246,37 @@ object SharedBrowserFrameCache {
         return ServerSocket(0).use { it.localPort }
     }
 
-    /** Detect the major version of a Chrome/Edge binary, returns 0 if unknown. */
-    private fun detectChromeVersion(browserPath: String): Int {
-        return try {
-            val proc = ProcessBuilder(browserPath, "--version").redirectErrorStream(true).start()
-            val output = proc.inputStream.bufferedReader().readText().trim()
-            proc.waitFor(5, java.util.concurrent.TimeUnit.SECONDS)
-            // Output like "Google Chrome 120.0.6099.130" or "Microsoft Edge 119.0.2151.72"
-            val match = Regex("(\\d+)\\.").find(output)
-            match?.groupValues?.get(1)?.toIntOrNull() ?: 0
-        } catch (_: Exception) { 0 }
+    /**
+     * Kill orphaned headless Chrome/Edge processes from previous runs.
+     * Only runs once per app session, on the first acquire() call.
+     */
+    private fun killZombieBrowsers() {
+        if (zombiesCleaned) return
+        zombiesCleaned = true
+        try {
+            if (isWindows) {
+                // Find headless Chrome/Edge processes via wmic
+                val proc = ProcessBuilder(
+                    "wmic", "process", "where",
+                    "CommandLine like '%--headless%' and (Name='msedge.exe' or Name='chrome.exe')",
+                    "get", "ProcessId"
+                ).redirectErrorStream(true).start()
+                val output = proc.inputStream.bufferedReader().readText()
+                proc.waitFor(5, java.util.concurrent.TimeUnit.SECONDS)
+                val pids = Regex("\\d+").findAll(output).map { it.value }.toList()
+                for (pid in pids) {
+                    System.err.println("[BrowserSource] Killing zombie browser process: PID $pid")
+                    ProcessBuilder("taskkill", "/F", "/T", "/PID", pid)
+                        .redirectErrorStream(true).start()
+                        .waitFor(3, java.util.concurrent.TimeUnit.SECONDS)
+                }
+            } else {
+                // On Linux/macOS, kill headless chrome/edge processes
+                ProcessBuilder("pkill", "-f", "--headless.*--remote-debugging-port")
+                    .redirectErrorStream(true).start()
+                    .waitFor(3, java.util.concurrent.TimeUnit.SECONDS)
+            }
+        } catch (_: Exception) {}
     }
 
     // ── CDP Browser Lifecycle ──────────────────────────────────────
@@ -267,6 +291,9 @@ object SharedBrowserFrameCache {
         fps: Int,
         forceTransparent: Boolean
     ) {
+        // Kill any zombie browsers from previous runs (once per session)
+        withContext(Dispatchers.IO) { killZombieBrowsers() }
+
         val browserPath = findBrowserExecutable()
         if (browserPath == null) {
             System.err.println("[BrowserSource] No Chrome or Edge browser found on system")
@@ -276,17 +303,23 @@ object SharedBrowserFrameCache {
 
         val port = findFreePort()
         entry.debugPort = port
-        System.err.println("[BrowserSource] Launching headless browser: $browserPath on port $port")
 
-        // Launch headless browser
-        // Use --headless=new (Chrome 112+) with --headless fallback for older versions.
-        // --disable-gpu prevents white-window issues on machines without GPU acceleration.
-        // --window-position puts the window off-screen as a safety net if headless fails.
-        val headlessFlag = if (detectChromeVersion(browserPath) >= 112) "--headless=new" else "--headless"
+        // Create a unique temp user-data-dir to avoid profile lock conflicts
+        val userDataDir = withContext(Dispatchers.IO) {
+            java.io.File.createTempFile("cp-browser-", "").apply {
+                delete()
+                mkdirs()
+            }
+        }
+        entry.userDataDir = userDataDir
+
+        System.err.println("[BrowserSource] Launching headless browser: $browserPath on port $port (userData=$userDataDir)")
+
         val command = listOf(
             browserPath,
-            headlessFlag,
+            "--headless=new",
             "--remote-debugging-port=$port",
+            "--user-data-dir=${userDataDir.absolutePath}",
             "--no-first-run",
             "--no-default-browser-check",
             "--disable-extensions",
@@ -294,6 +327,7 @@ object SharedBrowserFrameCache {
             "--disable-translate",
             "--disable-gpu",
             "--disable-software-rasterizer",
+            "--no-sandbox",
             "--mute-audio",
             "--window-size=$renderWidth,$renderHeight",
             "--window-position=-32000,-32000",
@@ -503,12 +537,19 @@ object SharedBrowserFrameCache {
             entry.browserProcess = null
         }
 
+        // Clean up temp user-data-dir
+        val dataDir = entry.userDataDir
+        if (dataDir != null) {
+            try { dataDir.deleteRecursively() } catch (_: Throwable) {}
+            entry.userDataDir = null
+        }
+
         entry.frame.value = null
     }
 
     private fun killProcess(process: Process) {
         try {
-            if (System.getProperty("os.name", "").lowercase().contains("win")) {
+            if (isWindows) {
                 try {
                     val pid = process.pid()
                     ProcessBuilder("taskkill", "/F", "/T", "/PID", pid.toString())
