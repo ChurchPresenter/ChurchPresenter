@@ -120,7 +120,36 @@ import kotlinx.coroutines.CoroutineExceptionHandler
 import org.churchpresenter.app.churchpresenter.models.SelectedVerse
 
 
+private var singleInstanceSocket: java.net.ServerSocket? = null
+
+/**
+ * Attempt to bind a local port to enforce single-instance.
+ * Returns true if this is the first instance, false if another is already running.
+ */
+private fun acquireSingleInstanceLock(): Boolean {
+    return try {
+        // Bind to a fixed localhost port — if it's already taken, another instance is running
+        singleInstanceSocket = java.net.ServerSocket(Constants.SINGLE_INSTANCE_PORT, 1, java.net.InetAddress.getLoopbackAddress())
+        true
+    } catch (_: Exception) {
+        false
+    }
+}
+
 fun main() {
+    // Enforce single instance — exit immediately if another is already running
+    if (!acquireSingleInstanceLock()) {
+        System.err.println("ChurchPresenter is already running.")
+        javax.swing.JOptionPane.showMessageDialog(
+            null,
+            "ChurchPresenter is already running.",
+            "ChurchPresenter",
+            javax.swing.JOptionPane.WARNING_MESSAGE
+        )
+        System.exit(0)
+        return
+    }
+
     // Install crash reporting before anything else
     CrashReporter.initialize()
 
