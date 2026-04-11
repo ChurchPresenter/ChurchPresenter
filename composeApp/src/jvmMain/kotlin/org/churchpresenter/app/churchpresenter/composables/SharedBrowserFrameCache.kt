@@ -51,6 +51,16 @@ object SharedBrowserFrameCache {
     private val entries = mutableMapOf<String, CacheEntry>()
     private val httpClient = HttpClient.newHttpClient()
 
+    init {
+        // Kill all browser processes on JVM shutdown to prevent orphaned Chrome/Edge windows
+        Runtime.getRuntime().addShutdownHook(Thread {
+            synchronized(this@SharedBrowserFrameCache) {
+                entries.values.forEach { stopBrowser(it) }
+                entries.clear()
+            }
+        })
+    }
+
     private class CacheEntry(
         val frame: MutableStateFlow<ImageBitmap?> = MutableStateFlow(null),
         val error: MutableStateFlow<String?> = MutableStateFlow(null),
@@ -233,6 +243,18 @@ object SharedBrowserFrameCache {
         return ServerSocket(0).use { it.localPort }
     }
 
+    /** Detect the major version of a Chrome/Edge binary, returns 0 if unknown. */
+    private fun detectChromeVersion(browserPath: String): Int {
+        return try {
+            val proc = ProcessBuilder(browserPath, "--version").redirectErrorStream(true).start()
+            val output = proc.inputStream.bufferedReader().readText().trim()
+            proc.waitFor(5, java.util.concurrent.TimeUnit.SECONDS)
+            // Output like "Google Chrome 120.0.6099.130" or "Microsoft Edge 119.0.2151.72"
+            val match = Regex("(\\d+)\\.").find(output)
+            match?.groupValues?.get(1)?.toIntOrNull() ?: 0
+        } catch (_: Exception) { 0 }
+    }
+
     // ── CDP Browser Lifecycle ──────────────────────────────────────
 
     private suspend fun startBrowser(
@@ -257,17 +279,24 @@ object SharedBrowserFrameCache {
         System.err.println("[BrowserSource] Launching headless browser: $browserPath on port $port")
 
         // Launch headless browser
+        // Use --headless=new (Chrome 112+) with --headless fallback for older versions.
+        // --disable-gpu prevents white-window issues on machines without GPU acceleration.
+        // --window-position puts the window off-screen as a safety net if headless fails.
+        val headlessFlag = if (detectChromeVersion(browserPath) >= 112) "--headless=new" else "--headless"
         val command = listOf(
             browserPath,
-            "--headless=new",
+            headlessFlag,
             "--remote-debugging-port=$port",
             "--no-first-run",
             "--no-default-browser-check",
             "--disable-extensions",
             "--disable-popup-blocking",
             "--disable-translate",
+            "--disable-gpu",
+            "--disable-software-rasterizer",
             "--mute-audio",
             "--window-size=$renderWidth,$renderHeight",
+            "--window-position=-32000,-32000",
             "about:blank"
         )
 
