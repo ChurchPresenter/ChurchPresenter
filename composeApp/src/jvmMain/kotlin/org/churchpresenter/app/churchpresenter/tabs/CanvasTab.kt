@@ -82,6 +82,9 @@ import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
 import org.churchpresenter.app.churchpresenter.composables.SceneCanvas
 import org.churchpresenter.app.churchpresenter.composables.SourcePropertiesPanel
 import org.churchpresenter.app.churchpresenter.data.AppSettings
+import androidx.compose.ui.unit.sp
+import org.churchpresenter.app.churchpresenter.utils.presenterScreenBounds
+import org.churchpresenter.app.churchpresenter.utils.formatAspectRatio
 import org.churchpresenter.app.churchpresenter.models.SceneSource
 import org.churchpresenter.app.churchpresenter.models.SourceTransform
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
@@ -169,11 +172,32 @@ fun CanvasTab(
             )
             Spacer(Modifier.height(4.dp))
 
+            // Resolve live presentation display for aspect ratio checks
+            val presentationAssignment0 = appSettings.projectionSettings.getAssignment(0)
+            val presentationBounds0 = remember(presentationAssignment0.targetDisplay, presentationAssignment0.targetBoundsX, presentationAssignment0.targetBoundsY) {
+                val ge = java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment()
+                val screens = ge.screenDevices
+                val matched = if (presentationAssignment0.targetBoundsX != Int.MIN_VALUE) {
+                    screens.firstOrNull { sd ->
+                        val b = sd.defaultConfiguration.bounds
+                        b.x == presentationAssignment0.targetBoundsX && b.y == presentationAssignment0.targetBoundsY
+                    }
+                } else null
+                val device = matched
+                    ?: screens.getOrNull(presentationAssignment0.targetDisplay)
+                    ?: screens.firstOrNull { it != ge.defaultScreenDevice }
+                    ?: ge.defaultScreenDevice
+                device.defaultConfiguration.bounds
+            }
+            val displayAr0 = if (presentationBounds0.height > 0) presentationBounds0.width.toFloat() / presentationBounds0.height else 0f
+
             @OptIn(ExperimentalFoundationApi::class)
             LazyColumn(modifier = Modifier.weight(0.4f).fillMaxWidth()) {
                 items(sceneViewModel.scenes) { scene ->
                     val isSelected = scene.id == sceneViewModel.currentSceneId.value
                     val isRenaming = renamingSceneId == scene.id
+                    val sceneAr0 = if (scene.canvasHeight > 0) scene.canvasWidth.toFloat() / scene.canvasHeight else 0f
+                    val isMismatched = displayAr0 > 0f && kotlin.math.abs(displayAr0 - sceneAr0) > 0.01f
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -222,6 +246,9 @@ fun CanvasTab(
                                 else MaterialTheme.colorScheme.onSurface,
                                 modifier = Modifier.weight(1f)
                             )
+                            if (isMismatched) {
+                                Text("⚠", fontSize = 14.sp, color = MaterialTheme.colorScheme.error)
+                            }
                             IconButton(
                                 onClick = {
                                     renamingSceneId = scene.id
@@ -653,6 +680,58 @@ fun CanvasTab(
                             ) {
                                 Icon(painter = painterResource(Res.drawable.ic_cast), contentDescription = stringResource(Res.string.go_live), modifier = Modifier.size(20.dp))
                             }
+                        }
+                    }
+                }
+
+                // Aspect ratio mismatch warning
+                val presentationAssignment = appSettings.projectionSettings.getAssignment(0)
+                val presentationBounds = remember(presentationAssignment.targetDisplay, presentationAssignment.targetBoundsX, presentationAssignment.targetBoundsY) {
+                    val ge = java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment()
+                    val screens = ge.screenDevices
+                    val matched = if (presentationAssignment.targetBoundsX != Int.MIN_VALUE) {
+                        screens.firstOrNull { sd ->
+                            val b = sd.defaultConfiguration.bounds
+                            b.x == presentationAssignment.targetBoundsX && b.y == presentationAssignment.targetBoundsY
+                        }
+                    } else null
+                    val device = matched
+                        ?: screens.getOrNull(presentationAssignment.targetDisplay)
+                        ?: screens.firstOrNull { it != ge.defaultScreenDevice }
+                        ?: ge.defaultScreenDevice
+                    device.defaultConfiguration.bounds
+                }
+                val displayW = presentationBounds.width
+                val displayH = presentationBounds.height
+                val displayAr = if (displayH > 0) displayW.toFloat() / displayH else 0f
+                val sceneAr = if (currentScene.canvasHeight > 0) currentScene.canvasWidth.toFloat() / currentScene.canvasHeight else 0f
+                if (displayAr > 0f && kotlin.math.abs(displayAr - sceneAr) > 0.01f) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(MaterialTheme.colorScheme.errorContainer, RoundedCornerShape(4.dp))
+                            .padding(horizontal = 8.dp, vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            "Scene is ${formatAspectRatio(currentScene.canvasWidth, currentScene.canvasHeight)}" +
+                            " but display is ${formatAspectRatio(displayW, displayH)}",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onErrorContainer
+                        )
+                        Button(
+                            onClick = {
+                                sceneViewModel.updateCanvasSize(displayW, displayH)
+                            },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.error,
+                                contentColor = MaterialTheme.colorScheme.onError
+                            ),
+                            modifier = Modifier.height(28.dp),
+                            contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 12.dp, vertical = 0.dp)
+                        ) {
+                            Text("Fix", style = MaterialTheme.typography.labelSmall)
                         }
                     }
                 }

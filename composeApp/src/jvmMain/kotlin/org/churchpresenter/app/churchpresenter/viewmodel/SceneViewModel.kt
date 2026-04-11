@@ -46,12 +46,26 @@ class SceneViewModel {
     // --- Scene operations ---
 
     fun addScene(name: String = "Scene"): Scene {
-        val scene = Scene(name = name)
+        val bounds = org.churchpresenter.app.churchpresenter.utils.presenterScreenBounds()
+        val scene = Scene(
+            name = name,
+            canvasWidth = if (bounds.width > 0) bounds.width else 1920,
+            canvasHeight = if (bounds.height > 0) bounds.height else 1080
+        )
         _scenes.add(scene)
         _currentSceneId.value = scene.id
         _selectedSourceId.value = null
         saveScenes()
         return scene
+    }
+
+    fun updateCanvasSize(width: Int, height: Int) {
+        val id = _currentSceneId.value ?: return
+        val index = _scenes.indexOfFirst { it.id == id }
+        if (index >= 0) {
+            _scenes[index] = _scenes[index].copy(canvasWidth = width, canvasHeight = height)
+            saveScenes()
+        }
     }
 
     fun removeScene(sceneId: String) {
