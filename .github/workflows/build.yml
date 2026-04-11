@@ -238,12 +238,14 @@ jobs:
 
           # Verify credentials against Apple before uploading
           echo "Verifying credentials with Apple..."
-          xcrun notarytool history \
+          HISTORY_OUT=$( xcrun notarytool history \
             --key "$RUNNER_TEMP/private_keys/AuthKey.p8" \
             --key-id "$API_KEY_ID" \
             --issuer "$API_ISSUER_ID" \
-            --output-format json 2>&1 | head -5 || {
-            echo "❌ Credential check failed — verify MACOS_NOTARIZATION_API_KEY_ID and MACOS_NOTARIZATION_API_ISSUER_ID are correct"
+            --output-format json 2>&1 ) || {
+            echo "❌ Credential check failed — raw output:"
+            echo "$HISTORY_OUT"
+            echo "Verify MACOS_NOTARIZATION_API_KEY_ID='$API_KEY_ID' and MACOS_NOTARIZATION_API_ISSUER_ID are correct"
             exit 1
           }
           echo "✅ Credentials verified"
@@ -391,12 +393,14 @@ jobs:
 
           # Verify credentials against Apple before uploading
           echo "Verifying credentials with Apple..."
-          xcrun notarytool history \
+          HISTORY_OUT=$( xcrun notarytool history \
             --key "$RUNNER_TEMP/private_keys/AuthKey.p8" \
             --key-id "$API_KEY_ID" \
             --issuer "$API_ISSUER_ID" \
-            --output-format json 2>&1 | head -5 || {
-            echo "❌ Credential check failed — verify MACOS_NOTARIZATION_API_KEY_ID and MACOS_NOTARIZATION_API_ISSUER_ID are correct"
+            --output-format json 2>&1 ) || {
+            echo "❌ Credential check failed — raw output:"
+            echo "$HISTORY_OUT"
+            echo "Verify MACOS_NOTARIZATION_API_KEY_ID='$API_KEY_ID' and MACOS_NOTARIZATION_API_ISSUER_ID are correct"
             exit 1
           }
           echo "✅ Credentials verified"
