@@ -242,12 +242,15 @@ jobs:
             --key "$RUNNER_TEMP/private_keys/AuthKey.p8" \
             --key-id "$API_KEY_ID" \
             --issuer "$API_ISSUER_ID" \
-            --output-format json 2>&1 ) || {
-            echo "❌ Credential check failed — raw output:"
+            --output-format json 2>&1 )
+          HISTORY_EXIT=$?
+          # Some Xcode versions return exit 0 even on 401 — also grep output
+          if [ $HISTORY_EXIT -ne 0 ] || echo "$HISTORY_OUT" | grep -qiE "401|unauthenticated|invalid credentials"; then
+            echo "❌ Credential check failed (exit $HISTORY_EXIT) — output:"
             echo "$HISTORY_OUT"
-            echo "Verify MACOS_NOTARIZATION_API_KEY_ID='$API_KEY_ID' and MACOS_NOTARIZATION_API_ISSUER_ID are correct"
+            echo "Verify MACOS_NOTARIZATION_API_KEY_ID='$API_KEY_ID' and MACOS_NOTARIZATION_API_ISSUER_ID are set correctly in GitHub Secrets"
             exit 1
-          }
+          fi
           echo "✅ Credentials verified"
 
           DMG=$(find composeApp/build/compose/binaries/main/dmg -name "*.dmg" | head -1)
@@ -397,12 +400,15 @@ jobs:
             --key "$RUNNER_TEMP/private_keys/AuthKey.p8" \
             --key-id "$API_KEY_ID" \
             --issuer "$API_ISSUER_ID" \
-            --output-format json 2>&1 ) || {
-            echo "❌ Credential check failed — raw output:"
+            --output-format json 2>&1 )
+          HISTORY_EXIT=$?
+          # Some Xcode versions return exit 0 even on 401 — also grep output
+          if [ $HISTORY_EXIT -ne 0 ] || echo "$HISTORY_OUT" | grep -qiE "401|unauthenticated|invalid credentials"; then
+            echo "❌ Credential check failed (exit $HISTORY_EXIT) — output:"
             echo "$HISTORY_OUT"
-            echo "Verify MACOS_NOTARIZATION_API_KEY_ID='$API_KEY_ID' and MACOS_NOTARIZATION_API_ISSUER_ID are correct"
+            echo "Verify MACOS_NOTARIZATION_API_KEY_ID='$API_KEY_ID' and MACOS_NOTARIZATION_API_ISSUER_ID are set correctly in GitHub Secrets"
             exit 1
-          }
+          fi
           echo "✅ Credentials verified"
 
           DMG=$(find composeApp/build/compose/binaries/main/dmg -name "*.dmg" | head -1)
