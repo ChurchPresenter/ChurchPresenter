@@ -114,7 +114,7 @@ jobs:
       # ── Build ───────────────────────────────────────────────────────────────
 
       - name: Build and sign installer
-        run: ./gradlew :composeApp:clean :composeApp:signWindowsMsi --no-daemon --no-build-cache
+        run: ./gradlew :composeApp:signWindowsMsi
 
       - name: Rename MSI (add WINDOWS-x64 label)
         shell: bash
@@ -208,7 +208,7 @@ jobs:
       # ── Build ──────────────────────────────────────────────────────────────
 
       - name: Build signed DMG
-        run: ./gradlew :composeApp:clean :composeApp:packageDmg --no-daemon --no-build-cache
+        run: ./gradlew :composeApp:packageDmg
 
       - name: Notarize DMG (upload to Apple + wait for approval + staple ticket)
         if: ${{ env.MACOS_SIGNING_ENABLED == 'true' }}
@@ -368,7 +368,7 @@ jobs:
       # ── Build ──────────────────────────────────────────────────────────────
 
       - name: Build signed DMG
-        run: ./gradlew :composeApp:clean :composeApp:packageDmg --no-daemon --no-build-cache
+        run: ./gradlew :composeApp:packageDmg
 
       - name: Notarize DMG (upload to Apple + wait for approval + staple ticket)
         if: ${{ env.MACOS_SIGNING_ENABLED == 'true' }}
@@ -501,7 +501,7 @@ jobs:
           echo "Linux signing configuration written (key: $GPG_KEY_ID)"
 
       - name: Build and sign installer
-        run: ./gradlew :composeApp:clean :composeApp:signLinuxDeb --no-daemon --no-build-cache
+        run: ./gradlew :composeApp:signLinuxDeb
 
       - name: Rename DEB (add DEBIAN-x64 label)
         run: |
