@@ -85,7 +85,12 @@ sealed class SceneSource {
         override val visible: Boolean = true,
         override val locked: Boolean = false,
         val url: String,
-        val refreshInterval: Int = 0
+        val refreshInterval: Int = 0,
+        val renderWidth: Int = 1920,
+        val renderHeight: Int = 1080,
+        val customCss: String = "",
+        val fps: Int = 30,
+        val forceTransparent: Boolean = true
     ) : SceneSource()
 
     @Serializable

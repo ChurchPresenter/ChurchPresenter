@@ -71,6 +71,7 @@ import churchpresenter.composeapp.generated.resources.canvas_new_scene
 import churchpresenter.composeapp.generated.resources.canvas_no_scene_selected
 import churchpresenter.composeapp.generated.resources.canvas_scenes
 import churchpresenter.composeapp.generated.resources.canvas_select_source
+import churchpresenter.composeapp.generated.resources.canvas_source_browser
 import churchpresenter.composeapp.generated.resources.canvas_source_color
 import churchpresenter.composeapp.generated.resources.canvas_source_image
 import churchpresenter.composeapp.generated.resources.canvas_source_text
@@ -454,6 +455,23 @@ fun CanvasTab(
                                             id = UUID.randomUUID().toString(),
                                             name = "Screen Capture",
                                             transform = SourceTransform()
+                                        )
+                                    )
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = { Text(stringResource(Res.string.canvas_source_browser)) },
+                                onClick = {
+                                    showAddMenu = false
+                                    sceneViewModel.addSource(
+                                        SceneSource.BrowserSource(
+                                            id = UUID.randomUUID().toString(),
+                                            name = "Browser",
+                                            url = "",
+                                            transform = SourceTransform(
+                                                x = 0.1f, y = 0.1f,
+                                                width = 0.8f, height = 0.8f
+                                            )
                                         )
                                     )
                                 }

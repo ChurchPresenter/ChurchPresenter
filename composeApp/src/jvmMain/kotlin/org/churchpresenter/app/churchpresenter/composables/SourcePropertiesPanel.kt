@@ -35,6 +35,7 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -433,6 +434,41 @@ private fun BrowserProperties(source: SceneSource.BrowserSource, onUpdate: (Scen
     Text(stringResource(Res.string.canvas_source_browser), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
     PropertyTextField("URL", source.url) { v ->
         onUpdate(source.copy(url = v))
+    }
+    // Show the browser's actual current URL (after redirects, navigation, etc.)
+    val currentUrlFlow = remember(source.id) { SharedBrowserFrameCache.getCurrentUrl(source.id) }
+    if (currentUrlFlow != null) {
+        val currentUrl by currentUrlFlow.collectAsState()
+        if (currentUrl.isNotBlank() && currentUrl != source.url) {
+            Text(
+                text = currentUrl,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                maxLines = 1,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+    }
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        PropertyTextField("Width", source.renderWidth.toString(), Modifier.weight(1f)) { v ->
+            v.toIntOrNull()?.let { onUpdate(source.copy(renderWidth = it.coerceIn(320, 3840))) }
+        }
+        PropertyTextField("Height", source.renderHeight.toString(), Modifier.weight(1f)) { v ->
+            v.toIntOrNull()?.let { onUpdate(source.copy(renderHeight = it.coerceIn(240, 2160))) }
+        }
+    }
+    PropertyTextField("FPS", source.fps.toString()) { v ->
+        v.toIntOrNull()?.let { onUpdate(source.copy(fps = it.coerceIn(1, 60))) }
+    }
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+        Checkbox(
+            checked = source.forceTransparent,
+            onCheckedChange = { onUpdate(source.copy(forceTransparent = it)) }
+        )
+        Text(stringResource(Res.string.canvas_transparent_bg), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    }
+    PropertyTextField("Custom CSS", source.customCss) { v ->
+        onUpdate(source.copy(customCss = v))
     }
 }
 

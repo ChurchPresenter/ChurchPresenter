@@ -294,16 +294,69 @@ private fun BrowserSourceContent(
     modifier: Modifier,
     isPresenter: Boolean
 ) {
-    // In preview mode, show a placeholder. In presenter mode, a real CefBrowser would be used.
-    Box(
-        modifier = modifier.fillMaxSize().background(Color.DarkGray),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = "Browser: ${source.url}",
-            color = Color.White,
-            fontSize = 14.sp
+    if (source.url.isBlank()) {
+        Box(
+            modifier = modifier.fillMaxSize().background(Color.DarkGray),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(text = "Browser: no URL", color = Color.White, fontSize = 14.sp)
+        }
+        return
+    }
+
+    // Only re-create browser when id or viewport size changes
+    val browserFlows = remember(source.id, source.renderWidth, source.renderHeight) {
+        SharedBrowserFrameCache.acquire(
+            source.id, source.url, source.renderWidth, source.renderHeight,
+            source.customCss, source.fps, source.forceTransparent
         )
+    }
+    DisposableEffect(source.id) {
+        onDispose {
+            SharedBrowserFrameCache.release(source.id)
+        }
+    }
+
+    // Debounce URL and CSS changes — navigate in-place instead of restarting Chrome
+    LaunchedEffect(source.url, source.customCss, source.forceTransparent) {
+        delay(800) // debounce: wait for user to stop typing
+        if (source.url.isNotBlank()) {
+            SharedBrowserFrameCache.navigateTo(source.id, source.url, source.customCss, source.forceTransparent)
+        }
+    }
+
+    // Transparent background toggle — apply immediately without navigation
+    LaunchedEffect(source.forceTransparent) {
+        SharedBrowserFrameCache.setTransparent(source.id, source.forceTransparent)
+    }
+
+    // FPS change — update capture interval without restart
+    LaunchedEffect(source.fps) {
+        SharedBrowserFrameCache.setFps(source.id, source.fps)
+    }
+
+    val frame by browserFlows.frame.collectAsState()
+    val error by browserFlows.error.collectAsState()
+
+    if (frame != null) {
+        Image(
+            bitmap = frame!!,
+            contentDescription = source.name,
+            contentScale = ContentScale.Fit,
+            modifier = modifier.fillMaxSize()
+        )
+    } else {
+        Box(
+            modifier = modifier.fillMaxSize().background(Color.DarkGray),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = error ?: "Loading: ${source.url}",
+                color = if (error != null) Color(0xFFFF8888) else Color.White,
+                fontSize = 14.sp,
+                textAlign = TextAlign.Center
+            )
+        }
     }
 }
 
