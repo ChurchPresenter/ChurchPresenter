@@ -347,7 +347,7 @@ fun MainDesktop(
             }
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
-            var scheduleCollapsed by rememberSaveable { mutableStateOf(false) }
+            var scheduleCollapsed by remember { mutableStateOf(appSettings.schedulePanelCollapsed) }
 
             val density = LocalDensity.current
             val onSettingsChangeState = rememberUpdatedState(onSettingsChange)
@@ -356,7 +356,7 @@ fun MainDesktop(
             var schedulePanelPx by remember(appSettings.schedulePanelWidthDp) {
                 mutableStateOf(with(density) { appSettings.schedulePanelWidthDp.dp.toPx() })
             }
-            var previewCollapsed by rememberSaveable { mutableStateOf(false) }
+            var previewCollapsed by remember { mutableStateOf(appSettings.previewPanelCollapsed) }
             var previewPanelPx by remember(appSettings.previewPanelWidthDp) {
                 mutableStateOf(with(density) { appSettings.previewPanelWidthDp.dp.toPx() })
             }
@@ -600,7 +600,10 @@ fun MainDesktop(
                     contentAlignment = Alignment.Center
                 ) {
                     IconButton(
-                        onClick = { scheduleCollapsed = !scheduleCollapsed },
+                        onClick = {
+                            scheduleCollapsed = !scheduleCollapsed
+                            onSettingsChangeState.value { s -> s.copy(schedulePanelCollapsed = scheduleCollapsed) }
+                        },
                         modifier = Modifier.wrapContentHeight()
                     ) {
                         Icon(
@@ -812,7 +815,10 @@ fun MainDesktop(
                     contentAlignment = Alignment.Center
                 ) {
                     IconButton(
-                        onClick = { previewCollapsed = !previewCollapsed },
+                        onClick = {
+                            previewCollapsed = !previewCollapsed
+                            onSettingsChangeState.value { s -> s.copy(previewPanelCollapsed = previewCollapsed) }
+                        },
                         modifier = Modifier.wrapContentHeight()
                     ) {
                         Icon(
