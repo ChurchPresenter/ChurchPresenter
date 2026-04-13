@@ -46,7 +46,9 @@ sealed class SceneSource {
         val backgroundColor: String = "#00000000",
         val bold: Boolean = false,
         val italic: Boolean = false,
-        val horizontalAlignment: String = "center"
+        val horizontalAlignment: String = "center",
+        val verticalAlignment: String = "center",
+        val lineSpacing: Int = 100
     ) : SceneSource()
 
     @Serializable
