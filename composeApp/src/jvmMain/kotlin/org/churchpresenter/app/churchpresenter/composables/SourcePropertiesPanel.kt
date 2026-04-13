@@ -267,8 +267,30 @@ private fun TextProperties(source: SceneSource.TextSource, onUpdate: (SceneSourc
     val availableFonts = remember { Utils.getAvailableSystemFonts() }
 
     Text(stringResource(Res.string.canvas_source_text), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-    PropertyTextField("Text", source.text) { v ->
-        onUpdate(source.copy(text = v))
+    // Multiline text input — supports Enter for line breaks
+    var textValue by remember(source.text) { mutableStateOf(source.text) }
+    OutlinedTextField(
+        value = textValue,
+        onValueChange = {
+            textValue = it
+            onUpdate(source.copy(text = it))
+        },
+        label = { Text("Text", style = MaterialTheme.typography.labelSmall) },
+        singleLine = false,
+        minLines = 2,
+        maxLines = 5,
+        modifier = Modifier.fillMaxWidth(),
+        textStyle = MaterialTheme.typography.bodySmall
+    )
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text("Line Spacing", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Slider(
+            value = source.lineSpacing / 100f,
+            onValueChange = { onUpdate(source.copy(lineSpacing = (it * 100).toInt())) },
+            valueRange = 0.5f..3f,
+            modifier = Modifier.weight(1f)
+        )
+        Text("${source.lineSpacing}%", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(40.dp))
     }
     FontDropdown(
         label = "Font",
@@ -279,6 +301,31 @@ private fun TextProperties(source: SceneSource.TextSource, onUpdate: (SceneSourc
     )
     PropertyTextField("Font Size", source.fontSize.toString()) { v ->
         v.toIntOrNull()?.let { onUpdate(source.copy(fontSize = it)) }
+    }
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Column {
+            Text("Horizontal", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            HorizontalAlignmentButtons(
+                selectedAlignment = source.horizontalAlignment,
+                onAlignmentChange = { onUpdate(source.copy(horizontalAlignment = it)) },
+                leftValue = "left",
+                centerValue = "center",
+                rightValue = "right"
+            )
+        }
+        Column {
+            Text("Vertical", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            VerticalAlignmentButtons(
+                selectedAlignment = source.verticalAlignment,
+                onAlignmentChange = { onUpdate(source.copy(verticalAlignment = it)) },
+                topValue = "top",
+                middleValue = "center",
+                bottomValue = "bottom"
+            )
+        }
     }
     Row(
         verticalAlignment = Alignment.CenterVertically,

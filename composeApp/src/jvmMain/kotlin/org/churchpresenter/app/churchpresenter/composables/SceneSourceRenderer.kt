@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
+import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -148,10 +150,16 @@ private fun TextSourceContent(source: SceneSource.TextSource, modifier: Modifier
         "right" -> TextAlign.Right
         else -> TextAlign.Center
     }
+    val lineHeightMultiplier = source.lineSpacing / 100f
+    val verticalAlign = when (source.verticalAlignment) {
+        "top" -> Alignment.TopCenter
+        "bottom" -> Alignment.BottomCenter
+        else -> Alignment.Center
+    }
 
     Box(
-        modifier = modifier.fillMaxSize().background(bgColor),
-        contentAlignment = Alignment.Center
+        modifier = modifier.fillMaxSize().background(bgColor).clipToBounds(),
+        contentAlignment = verticalAlign
     ) {
         Text(
             text = source.text,
@@ -161,6 +169,8 @@ private fun TextSourceContent(source: SceneSource.TextSource, modifier: Modifier
             fontWeight = if (source.bold) FontWeight.Bold else FontWeight.Normal,
             fontStyle = if (source.italic) FontStyle.Italic else FontStyle.Normal,
             textAlign = align,
+            lineHeight = (source.fontSize * lineHeightMultiplier).sp,
+            overflow = TextOverflow.Ellipsis,
             modifier = Modifier.padding(4.dp)
         )
     }

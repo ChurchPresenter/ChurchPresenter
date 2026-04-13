@@ -57,11 +57,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
-import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.pointer.PointerIcon
 import org.churchpresenter.app.churchpresenter.data.StatisticsManager
@@ -243,8 +244,12 @@ fun BibleTab(
         onPresenting(Presenting.BIBLE)
     }
 
+    var searchFieldFocused by remember { mutableStateOf(false) }
+
     fun handleKeyEvent(event: KeyEvent): Boolean {
         if (event.type != KeyEventType.KeyDown) return false
+        // Don't intercept arrow keys when the search field has focus (cursor navigation)
+        if (searchFieldFocused) return false
         return when (event.key) {
             Key.DirectionUp    -> viewModel.navigatePreviousVerse()
             Key.DirectionDown  -> viewModel.navigateNextVerse()
@@ -295,7 +300,7 @@ fun BibleTab(
             .fillMaxWidth()
             .focusRequester(focusRequester)
             .focusable()
-            .onKeyEvent { handleKeyEvent(it) }
+            .onPreviewKeyEvent { handleKeyEvent(it) }
     ) {
         // ── Search row — wraps to two lines when window is narrow ──
         BoxWithConstraints(modifier = Modifier.fillMaxWidth().padding(all = 4.dp)) {
@@ -305,7 +310,8 @@ fun BibleTab(
                 // Narrow: search field on its own line, controls below
                 Column(modifier = Modifier.fillMaxWidth()) {
                     OutlinedTextField(
-                        modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp),
+                        modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp)
+                            .onFocusChanged { searchFieldFocused = it.isFocused },
                         value = searchQuery,
                         onValueChange = { viewModel.updateSearchQuery(it) },
                         textStyle = MaterialTheme.typography.bodyMedium,
@@ -365,7 +371,8 @@ fun BibleTab(
                 // Wide: everything on one line
                 Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
                     OutlinedTextField(
-                        modifier = Modifier.weight(1f).padding(end = 8.dp),
+                        modifier = Modifier.weight(1f).padding(end = 8.dp)
+                            .onFocusChanged { searchFieldFocused = it.isFocused },
                         value = searchQuery,
                         onValueChange = { viewModel.updateSearchQuery(it) },
                         textStyle = MaterialTheme.typography.bodyMedium,
