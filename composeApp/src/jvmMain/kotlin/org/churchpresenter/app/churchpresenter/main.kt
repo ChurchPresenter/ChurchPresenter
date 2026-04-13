@@ -1147,10 +1147,14 @@ private fun PresenterWindows(
     val selectedVerses by presenterManager.selectedVerses
     val displayedVerses by presenterManager.displayedVerses
     val bibleTransitionAlpha by presenterManager.bibleTransitionAlpha
+    val previousDisplayedVerses by presenterManager.previousDisplayedVerses
+    val previousBibleAlpha by presenterManager.previousBibleAlpha
     val lyricSection by presenterManager.lyricSection
     val lyricSectionVersion by presenterManager.lyricSectionVersion
     val displayedLyricSection by presenterManager.displayedLyricSection
     val songTransitionAlpha by presenterManager.songTransitionAlpha
+    val previousDisplayedLyricSection by presenterManager.previousDisplayedLyricSection
+    val previousSongAlpha by presenterManager.previousSongAlpha
     val songDisplayLineIndex by presenterManager.songDisplayLineIndex
     val allLyricSections by presenterManager.allLyricSections
     val songDisplaySectionIndex by presenterManager.songDisplaySectionIndex
@@ -1188,9 +1192,23 @@ private fun PresenterWindows(
     LaunchedEffect(selectedVerses, bibleHold) {
         if (bibleHold) return@LaunchedEffect
         val bs = appSettings.bibleSettings
-        if (presenterManager.displayedVerses.value.isEmpty() || (!bs.fadeIn && !bs.fadeOut)) {
+        if (presenterManager.displayedVerses.value.isEmpty() || (!bs.fadeIn && !bs.fadeOut && !bs.crossfade)) {
             presenterManager.setDisplayedVerses(selectedVerses)
             presenterManager.setBibleTransitionAlpha(1f)
+            presenterManager.setPreviousBibleAlpha(0f)
+        } else if (bs.crossfade) {
+            // True crossfade: old content fades out while new content fades in simultaneously
+            val duration = bs.transitionDuration.toInt()
+            presenterManager.setPreviousDisplayedVerses(presenterManager.displayedVerses.value)
+            presenterManager.setPreviousBibleAlpha(1f)
+            presenterManager.setDisplayedVerses(selectedVerses)
+            presenterManager.setBibleTransitionAlpha(0f)
+            val anim = Animatable(0f)
+            anim.animateTo(1f, tween(duration)) {
+                presenterManager.setBibleTransitionAlpha(value)
+                presenterManager.setPreviousBibleAlpha(1f - value)
+            }
+            presenterManager.setPreviousBibleAlpha(0f)
         } else {
             val duration = bs.transitionDuration.toInt()
             val anim = Animatable(1f)
@@ -1234,9 +1252,22 @@ private fun PresenterWindows(
             presenterManager.setSongTransitionAlpha(1f)
             return@LaunchedEffect
         }
-        if (presenterManager.displayedLyricSection.value.lines.isEmpty() || (!ss.fadeIn && !ss.fadeOut)) {
+        if (presenterManager.displayedLyricSection.value.lines.isEmpty() || (!ss.fadeIn && !ss.fadeOut && !ss.crossfade)) {
             presenterManager.setDisplayedLyricSection(lyricSection)
             presenterManager.setSongTransitionAlpha(1f)
+            presenterManager.setPreviousSongAlpha(0f)
+        } else if (ss.crossfade) {
+            val duration = ss.transitionDuration.toInt()
+            presenterManager.setPreviousDisplayedLyricSection(presenterManager.displayedLyricSection.value)
+            presenterManager.setPreviousSongAlpha(1f)
+            presenterManager.setDisplayedLyricSection(lyricSection)
+            presenterManager.setSongTransitionAlpha(0f)
+            val anim = Animatable(0f)
+            anim.animateTo(1f, tween(duration)) {
+                presenterManager.setSongTransitionAlpha(value)
+                presenterManager.setPreviousSongAlpha(1f - value)
+            }
+            presenterManager.setPreviousSongAlpha(0f)
         } else {
             val duration = ss.transitionDuration.toInt()
             val anim = Animatable(1f)
@@ -1433,7 +1464,9 @@ private fun PresenterWindows(
                                     appSettings = appSettings,
                                     isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD,
                                     outputRole = deckLinkRole,
-                                    transitionAlpha = bibleTransitionAlpha
+                                    transitionAlpha = bibleTransitionAlpha,
+                                    previousVerses = previousDisplayedVerses,
+                                    previousAlpha = previousBibleAlpha
                                 )
                             }
 
@@ -1448,7 +1481,9 @@ private fun PresenterWindows(
                                     displayLineIndex = songDisplayLineIndex,
                                     lookAheadEnabled = screenAssignment.songLookAhead,
                                     allLyricSections = allLyricSections,
-                                    displaySectionIndex = songDisplaySectionIndex
+                                    displaySectionIndex = songDisplaySectionIndex,
+                                    previousLyricSection = previousDisplayedLyricSection,
+                                    previousAlpha = previousSongAlpha
                                 )
                             }
 
@@ -1529,7 +1564,9 @@ private fun PresenterWindows(
                                     appSettings = appSettings,
                                     isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD,
                                     outputRole = Constants.OUTPUT_ROLE_KEY,
-                                    transitionAlpha = bibleTransitionAlpha
+                                    transitionAlpha = bibleTransitionAlpha,
+                                    previousVerses = previousDisplayedVerses,
+                                    previousAlpha = previousBibleAlpha
                                 )
                             }
 
@@ -1544,7 +1581,9 @@ private fun PresenterWindows(
                                     displayLineIndex = songDisplayLineIndex,
                                     lookAheadEnabled = screenAssignment.songLookAhead,
                                     allLyricSections = allLyricSections,
-                                    displaySectionIndex = songDisplaySectionIndex
+                                    displaySectionIndex = songDisplaySectionIndex,
+                                    previousLyricSection = previousDisplayedLyricSection,
+                                    previousAlpha = previousSongAlpha
                                 )
                             }
 
@@ -1674,7 +1713,9 @@ private fun PresenterWindows(
                                                     displayLineIndex = songDisplayLineIndex,
                                                     lookAheadEnabled = screenAssignment.songLookAhead,
                                                     allLyricSections = allLyricSections,
-                                                    displaySectionIndex = songDisplaySectionIndex
+                                                    displaySectionIndex = songDisplaySectionIndex,
+                                                    previousLyricSection = previousDisplayedLyricSection,
+                                                    previousAlpha = previousSongAlpha
                                                 )
                                             }
 
@@ -1850,7 +1891,9 @@ private fun PresenterWindows(
                                         lookAheadEnabled = screenAssignment.songLookAhead,
                                         allLyricSections = allLyricSections,
                                         displaySectionIndex = songDisplaySectionIndex,
-                                        showBackground = showBg
+                                        showBackground = showBg,
+                                        previousLyricSection = previousDisplayedLyricSection,
+                                        previousAlpha = previousSongAlpha
                                     )
                                 }
 
@@ -2014,7 +2057,9 @@ private fun PresenterWindows(
                                                 displayLineIndex = songDisplayLineIndex,
                                                 lookAheadEnabled = screenAssignment.songLookAhead,
                                                 allLyricSections = allLyricSections,
-                                                displaySectionIndex = songDisplaySectionIndex
+                                                displaySectionIndex = songDisplaySectionIndex,
+                                                previousLyricSection = previousDisplayedLyricSection,
+                                                previousAlpha = previousSongAlpha
                                             )
                                         }
 
@@ -2111,7 +2156,9 @@ private fun PresenterWindows(
                                     appSettings = appSettings,
                                     isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD,
                                     outputRole = Constants.OUTPUT_ROLE_KEY,
-                                    transitionAlpha = bibleTransitionAlpha
+                                    transitionAlpha = bibleTransitionAlpha,
+                                    previousVerses = previousDisplayedVerses,
+                                    previousAlpha = previousBibleAlpha
                                 )
                             }
 
@@ -2126,7 +2173,9 @@ private fun PresenterWindows(
                                     displayLineIndex = songDisplayLineIndex,
                                     lookAheadEnabled = screenAssignment.songLookAhead,
                                     allLyricSections = allLyricSections,
-                                    displaySectionIndex = songDisplaySectionIndex
+                                    displaySectionIndex = songDisplaySectionIndex,
+                                    previousLyricSection = previousDisplayedLyricSection,
+                                    previousAlpha = previousSongAlpha
                                 )
                             }
 

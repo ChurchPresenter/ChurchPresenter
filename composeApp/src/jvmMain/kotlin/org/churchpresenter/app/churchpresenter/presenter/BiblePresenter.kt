@@ -70,6 +70,8 @@ fun BiblePresenter(
     outputRole: String = Constants.OUTPUT_ROLE_NORMAL,
     transitionAlpha: Float = 1f,
     showBackground: Boolean = true,
+    previousVerses: List<SelectedVerse> = emptyList(),
+    previousAlpha: Float = 0f,
 ) {
     val isFillOrKey = outputRole == Constants.OUTPUT_ROLE_FILL || outputRole == Constants.OUTPUT_ROLE_KEY
     val isKey = outputRole == Constants.OUTPUT_ROLE_KEY
@@ -671,6 +673,13 @@ fun BiblePresenter(
                             }
                         }
                     }
+                }
+            }
+
+            // During crossfade, render previous content fading out behind new content fading in
+            if (previousAlpha > 0f && previousVerses.isNotEmpty()) {
+                Box(modifier = Modifier.alpha(previousAlpha)) {
+                    TextContent(previousVerses)
                 }
             }
 

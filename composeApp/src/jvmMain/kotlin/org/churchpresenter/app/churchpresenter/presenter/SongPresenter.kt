@@ -64,6 +64,8 @@ fun SongPresenter(
     allLyricSections: List<LyricSection> = emptyList(),
     displaySectionIndex: Int = -1,
     showBackground: Boolean = true,
+    previousLyricSection: LyricSection = LyricSection(),
+    previousAlpha: Float = 0f,
 ) {
     val isFillOrKey = outputRole == Constants.OUTPUT_ROLE_FILL || outputRole == Constants.OUTPUT_ROLE_KEY
     val isKey = outputRole == Constants.OUTPUT_ROLE_KEY
@@ -897,6 +899,13 @@ fun SongPresenter(
                         // Bottom section: items positioned "below verse"
                         TitleAndNumberRow(Constants.BELOW_VERSE)
                     }
+                }
+            }
+
+            // During crossfade, render previous content fading out behind new content fading in
+            if (previousAlpha > 0f && previousLyricSection.lines.isNotEmpty()) {
+                Box(modifier = Modifier.alpha(previousAlpha)) {
+                    TextContent(previousLyricSection)
                 }
             }
 

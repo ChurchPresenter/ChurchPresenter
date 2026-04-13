@@ -27,6 +27,12 @@ class PresenterManager {
     private val _bibleTransitionAlpha = mutableStateOf(1f)
     val bibleTransitionAlpha: State<Float> = _bibleTransitionAlpha
 
+    // Previous content for crossfade (both old and new visible simultaneously)
+    private val _previousDisplayedVerses = mutableStateOf<List<SelectedVerse>>(emptyList())
+    val previousDisplayedVerses: State<List<SelectedVerse>> = _previousDisplayedVerses
+    private val _previousBibleAlpha = mutableStateOf(0f)
+    val previousBibleAlpha: State<Float> = _previousBibleAlpha
+
     // Hold mode — when active, verse selection changes are staged but not sent to display
     private val _bibleHold = mutableStateOf(false)
     val bibleHold: State<Boolean> = _bibleHold
@@ -46,6 +52,12 @@ class PresenterManager {
 
     private val _songTransitionAlpha = mutableStateOf(1f)
     val songTransitionAlpha: State<Float> = _songTransitionAlpha
+
+    // Previous content for song crossfade
+    private val _previousDisplayedLyricSection = mutableStateOf(LyricSection())
+    val previousDisplayedLyricSection: State<LyricSection> = _previousDisplayedLyricSection
+    private val _previousSongAlpha = mutableStateOf(0f)
+    val previousSongAlpha: State<Float> = _previousSongAlpha
 
     private val _songDisplayLineIndex = mutableStateOf(-1)
     val songDisplayLineIndex: State<Int> = _songDisplayLineIndex
@@ -124,6 +136,14 @@ class PresenterManager {
         _bibleTransitionAlpha.value = alpha
     }
 
+    fun setPreviousDisplayedVerses(verses: List<SelectedVerse>) {
+        _previousDisplayedVerses.value = verses
+    }
+
+    fun setPreviousBibleAlpha(alpha: Float) {
+        _previousBibleAlpha.value = alpha
+    }
+
     fun setBibleHold(hold: Boolean) {
         _bibleHold.value = hold
     }
@@ -139,6 +159,14 @@ class PresenterManager {
 
     fun setSongTransitionAlpha(alpha: Float) {
         _songTransitionAlpha.value = alpha
+    }
+
+    fun setPreviousDisplayedLyricSection(section: LyricSection) {
+        _previousDisplayedLyricSection.value = section
+    }
+
+    fun setPreviousSongAlpha(alpha: Float) {
+        _previousSongAlpha.value = alpha
     }
 
     fun setSongDisplayLineIndex(index: Int) {
