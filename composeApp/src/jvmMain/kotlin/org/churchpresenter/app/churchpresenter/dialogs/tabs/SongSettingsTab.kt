@@ -84,6 +84,7 @@ import androidx.compose.material3.Surface
 import churchpresenter.composeapp.generated.resources.auto_fit
 import churchpresenter.composeapp.generated.resources.auto_fit_checkbox_tooltip
 import churchpresenter.composeapp.generated.resources.auto_fit_button_tooltip
+import churchpresenter.composeapp.generated.resources.animation_crossfade
 import churchpresenter.composeapp.generated.resources.fade_in
 import churchpresenter.composeapp.generated.resources.fade_out
 import churchpresenter.composeapp.generated.resources.bottom
@@ -650,6 +651,19 @@ private fun LeftColumn(
             )
             Text(
                 text = stringResource(Res.string.fade_out),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.padding(start = 4.dp)
+            )
+        }
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Checkbox(
+                checked = settings.songSettings.crossfade,
+                onCheckedChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(crossfade = it)) } },
+                modifier = Modifier.size(24.dp)
+            )
+            Text(
+                text = stringResource(Res.string.animation_crossfade),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.padding(start = 4.dp)
