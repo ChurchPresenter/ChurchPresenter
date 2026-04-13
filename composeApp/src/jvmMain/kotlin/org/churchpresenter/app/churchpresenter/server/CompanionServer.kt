@@ -857,53 +857,29 @@ class CompanionServer {
     }
 
     /**
-     * Scans ~/.churchpresenter/device_uploads/ on startup and pre-populates
-     * [_pictureFiles] / [_pictureCatalogs] so previously-uploaded device photos
-     * are available immediately without the user needing to upload again.
+     * Clears the device_uploads directory on server startup so that device photos
+     * are session-only — they disappear when the server is restarted.
+     * Also resets the in-memory catalog so no stale entries remain.
      * Called on the IO dispatcher from [start].
      */
-    private fun initDeviceUploadsCatalog() {
+    private fun clearDeviceUploads() {
         val uploadDir = File(System.getProperty("user.home"), ".churchpresenter/device_uploads")
-        if (!uploadDir.exists() || !uploadDir.isDirectory) return
-        val files = uploadDir.listFiles()
-            ?.filter { it.isFile && it.extension.lowercase() in IMAGE_EXTENSIONS }
-            ?.sortedBy { it.lastModified() }
-            ?: return
-        if (files.isEmpty()) return
-        _pictureFiles[DEVICE_UPLOADS_FOLDER_ID] = files
-        val catalog = PictureFolderResponse(
-            folderId   = DEVICE_UPLOADS_FOLDER_ID,
-            folderName = "Device Photos",
-            folderPath = uploadDir.absolutePath,
-            imageTotal = files.size,
-            images     = files.mapIndexed { idx, f ->
-                PictureFileDto(
-                    index        = idx,
-                    fileName     = f.name,
-                    thumbnailUrl = "${Constants.ENDPOINT_PICTURES}/$DEVICE_UPLOADS_FOLDER_ID/images/$idx"
-                )
-            }
-        )
-        _pictureCatalogs[DEVICE_UPLOADS_FOLDER_ID] = catalog
+        // Delete all files from the previous session
+        uploadDir.listFiles()?.forEach { it.delete() }
+        // Reset in-memory state — no photos at the start of a new session
+        _pictureFiles.remove(DEVICE_UPLOADS_FOLDER_ID)
+        _pictureCatalogs.remove(DEVICE_UPLOADS_FOLDER_ID)
     }
 
-    /**
-     * Background-renders a presentation file to JPEG slides, then stores them in [_slideBytes]
-     * and [_presentationCatalogs] so GET /api/presentations/{id} and
-     * GET /api/presentations/{id}/slides/{index} work for every schedule presentation item
-     * without the user needing to open it in PresentationTab first.
-     *
-     * Mirrors [registerPictureItem] — called on the IO dispatcher; does NOT affect UI state.
-     */
     private fun renderPresentationForServer(presentationId: String, filePath: String) {
         val file = File(filePath)
         if (!file.exists()) return
         try {
             val images: List<BufferedImage> = when (file.extension.lowercase()) {
-                "pdf"        -> renderPdfForServer(file)
+                "pdf"         -> renderPdfForServer(file)
                 "pptx", "ppt" -> renderPowerPointForServer(file)
-                "key"        -> renderKeynoteForServer(file)
-                else         -> return
+                "key"         -> renderKeynoteForServer(file)
+                else          -> return
             }
             if (images.isEmpty()) return
             val jpegSlides = images.map { img ->
@@ -915,11 +891,11 @@ class CompanionServer {
                 SlideDto(slideIndex = i, thumbnailUrl = "${Constants.ENDPOINT_PRESENTATIONS}/$presentationId/slides/$i")
             }
             _presentationCatalogs[presentationId] = PresentationDto(
-                id        = presentationId,
-                fileName  = file.nameWithoutExtension,
-                fileType  = file.extension.lowercase(),
+                id         = presentationId,
+                fileName   = file.nameWithoutExtension,
+                fileType   = file.extension.lowercase(),
                 slideTotal = jpegSlides.size,
-                slides    = slideDtos
+                slides     = slideDtos
             )
         } catch (e: Exception) {
             e.printStackTrace()
@@ -935,9 +911,7 @@ class CompanionServer {
             val pages = docClass.getMethod("getNumberOfPages").invoke(doc) as Int
             val rend  = rendClass.getConstructor(docClass).newInstance(doc)
             val renderDpi = rendClass.getMethod("renderImageWithDPI", Int::class.java, Float::class.java)
-            for (p in 0 until pages) {
-                result.add(renderDpi.invoke(rend, p, 150f) as BufferedImage)
-            }
+            for (p in 0 until pages) result.add(renderDpi.invoke(rend, p, 150f) as BufferedImage)
             docClass.getMethod("close").invoke(doc)
         } catch (_: ClassNotFoundException) {
         } catch (e: Exception) { e.printStackTrace() }
@@ -951,15 +925,15 @@ class CompanionServer {
         else
             "org.apache.poi.hslf.usermodel.HSLFSlideShow"
         try {
-            val clazz = Class.forName(className)
-            val fis   = java.io.FileInputStream(file)
-            val ppt   = clazz.getConstructor(java.io.InputStream::class.java).newInstance(fis)
+            val clazz  = Class.forName(className)
+            val fis    = java.io.FileInputStream(file)
+            val ppt    = clazz.getConstructor(java.io.InputStream::class.java).newInstance(fis)
             val slides = clazz.getMethod("getSlides").invoke(ppt) as List<*>
             val size   = clazz.getMethod("getPageSize").invoke(ppt) as java.awt.Dimension
             slides.forEach { slide ->
                 val s = slide ?: return@forEach
                 val img = BufferedImage(size.width, size.height, BufferedImage.TYPE_INT_RGB)
-                val g = img.createGraphics()
+                val g   = img.createGraphics()
                 g.setRenderingHint(java.awt.RenderingHints.KEY_ANTIALIASING, java.awt.RenderingHints.VALUE_ANTIALIAS_ON)
                 g.setRenderingHint(java.awt.RenderingHints.KEY_RENDERING, java.awt.RenderingHints.VALUE_RENDER_QUALITY)
                 g.paint = java.awt.Color.WHITE
@@ -981,7 +955,6 @@ class CompanionServer {
      */
     private fun renderKeynoteForServer(file: File): List<BufferedImage> {
         val result = mutableListOf<BufferedImage>()
-        // Read zip entry order so we can recreate presentation order
         val slideIwaOrder = mutableListOf<Long>()
         if (!file.isDirectory) {
             try {
@@ -1015,8 +988,7 @@ class CompanionServer {
                         val out = File(tempDir, entry.name)
                         if (!out.canonicalPath.startsWith(tempCanonical + File.separator) &&
                             out.canonicalPath != tempCanonical) {
-                            zip.closeEntry(); entry = zip.nextEntry
-                            continue
+                            zip.closeEntry(); entry = zip.nextEntry; continue
                         }
                         if (entry.isDirectory) out.mkdirs()
                         else {
@@ -1043,9 +1015,7 @@ class CompanionServer {
             val ordered: List<File> = if (slideIwaOrder.isNotEmpty()) {
                 val iwaOrderSorted = slideIwaOrder.sorted()
                 val rankToSt = stSortedByStId.mapIndexed { rank, f -> rank to f }.toMap()
-                val main = slideIwaOrder.mapNotNull { id ->
-                    rankToSt[iwaOrderSorted.indexOf(id)]
-                }.distinct()
+                val main = slideIwaOrder.mapNotNull { id -> rankToSt[iwaOrderSorted.indexOf(id)] }.distinct()
                 main + stFiles.filter { it !in main }
             } else stSortedByStId
             ordered.forEach { f -> ImageIO.read(f)?.let { result.add(it) } }
@@ -1055,7 +1025,6 @@ class CompanionServer {
         return result
     }
 
-    /** Feed all schedule items — maps every type to ScheduleItemDto and broadcasts to WS clients. */
     fun updateSchedule(items: List<ScheduleItem>) {
         val dtos = items.map { item ->
             when (item) {
@@ -1074,8 +1043,6 @@ class CompanionServer {
                     text = item.text, textColor = item.textColor, backgroundColor = item.backgroundColor
                 )
                 is ScheduleItem.PictureItem -> {
-                    // Register folder on IO thread so GET /api/pictures/{id} works for every
-                    // schedule picture item without requiring the user to load it first.
                     scope.launch(Dispatchers.IO) {
                         registerPictureItem(item.id, item.folderPath, item.folderName)
                     }
@@ -1085,11 +1052,9 @@ class CompanionServer {
                     )
                 }
                 is ScheduleItem.PresentationItem -> {
-                    // Map schedule UUID → stable file hash so GET /api/presentations/{id} resolves correctly.
                     val presentationId = item.filePath.hashCode().toUInt().toString(16)
                     _scheduleItemToPresentationId[item.id] = presentationId
                     _presentationFilePaths[presentationId] = item.filePath
-                    // Render slides in the background if not already done / in-progress.
                     if (!_slideBytes.containsKey(presentationId) &&
                         _renderingPresentations.putIfAbsent(presentationId, Unit) == null) {
                         scope.launch(Dispatchers.IO) {
@@ -1135,33 +1100,26 @@ class CompanionServer {
     }
 
     private fun buildSongDetail(song: SongItem): SongDetailDto {
-        // Split the flat lyrics list into typed sections by detecting section-header lines
         val sections = mutableListOf<SongSectionDto>()
         var currentType = Constants.SECTION_TYPE_VERSE
         var currentLines = mutableListOf<String>()
-
         for (line in song.lyrics) {
             val trimmed = line.trim()
             val isSectionHeader = isHeaderLine(trimmed)
             val isChorus = isChorusHeader(trimmed)
-
             if (isSectionHeader) {
-                // Flush previous section
                 if (currentLines.isNotEmpty()) {
                     sections.add(SongSectionDto(type = currentType, lines = currentLines.toList()))
                     currentLines = mutableListOf()
                 }
                 currentType = if (isChorus) Constants.SECTION_TYPE_CHORUS else Constants.SECTION_TYPE_VERSE
-                // Don't include the bare header line itself — it carries no lyric content
             } else if (trimmed.isNotEmpty()) {
                 currentLines.add(line)
             }
         }
-        // Flush last section
         if (currentLines.isNotEmpty()) {
             sections.add(SongSectionDto(type = currentType, lines = currentLines.toList()))
         }
-
         return SongDetailDto(
             number       = song.number,
             title        = song.title,
@@ -1188,70 +1146,37 @@ class CompanionServer {
                     }
                 )
             }
-        return SongCatalogResponse(
-            songBook = entries,
-            songBooks = entries.size,
-            total = songs.size
-        )
+        return SongCatalogResponse(songBook = entries, songBooks = entries.size, total = songs.size)
     }
 
-    private fun buildBibleCatalog(
-        bible: Bible,
-        translation: String
-    ): BibleCatalogResponse {
+    private fun buildBibleCatalog(bible: Bible, translation: String): BibleCatalogResponse {
         val bookNames = bible.getBooks()
         val bookDtos = mutableListOf<BibleBookDto>()
         var totalVerses = 0
-
         bookNames.forEachIndexed { bookIndex, bookName ->
             val bookId = bookIndex + 1
             val chapterCount = bible.getChapterCount(bookIndex)
-            // Count verses directly from the verse data without calling getChapter()
-            // which mutates Compose mutableStateListOf and requires the main thread.
             val chapterDtos = (1..chapterCount).map { chapterNum ->
                 val verseCount = bible.getVerseCountForChapter(bookId, chapterNum)
                 totalVerses += verseCount
                 BibleChapterDto(chapter = chapterNum, verseTotal = verseCount)
             }
-            bookDtos.add(BibleBookDto(
-                bookId = bookId,
-                bookName = bookName,
-                chapterTotal = chapterCount,
-                chapters = chapterDtos
-            ))
+            bookDtos.add(BibleBookDto(bookId = bookId, bookName = bookName,
+                chapterTotal = chapterCount, chapters = chapterDtos))
         }
-
-        return BibleCatalogResponse(
-            translation = translation,
-            books = bookDtos,
-            bookTotal = bookDtos.size,
-            verseTotal = totalVerses
-        )
+        return BibleCatalogResponse(translation = translation, books = bookDtos,
+            bookTotal = bookDtos.size, verseTotal = totalVerses)
     }
 
-    private fun buildPresentationCatalog(
-        id: String,
-        fileName: String,
-        fileType: String,
-        slideCount: Int
-    ): PresentationCatalogResponse {
+    private fun buildPresentationCatalog(id: String, fileName: String, fileType: String,
+                                         slideCount: Int): PresentationCatalogResponse {
         val slides = (0 until slideCount).map { index ->
-            SlideDto(
-                slideIndex = index,
-                thumbnailUrl = "${Constants.ENDPOINT_PRESENTATIONS}/$id/slides/$index"
-            )
+            SlideDto(slideIndex = index,
+                thumbnailUrl = "${Constants.ENDPOINT_PRESENTATIONS}/$id/slides/$index")
         }
-        val dto = PresentationDto(
-            id = id,
-            fileName = fileName,
-            fileType = fileType,
-            slideTotal = slideCount,
-            slides = slides
-        )
-        return PresentationCatalogResponse(
-            presentations = listOf(dto),
-            total = 1
-        )
+        val dto = PresentationDto(id = id, fileName = fileName, fileType = fileType,
+            slideTotal = slideCount, slides = slides)
+        return PresentationCatalogResponse(presentations = listOf(dto), total = 1)
     }
 
     /**
@@ -1302,7 +1227,7 @@ class CompanionServer {
             _isRunning.value = true
             _serverUrl.value = "https://$displayHost:$actualPort"
             // Restore previously uploaded device photos so they appear in the Pictures tab
-            scope.launch { initDeviceUploadsCatalog() }
+            scope.launch { clearDeviceUploads() }
         } catch (_: java.net.BindException) {
             server = null
         } catch (_: Exception) {
@@ -1327,7 +1252,7 @@ class CompanionServer {
             server?.start(wait = false)
             _isRunning.value = true
             _serverUrl.value = "http://$displayHost:$port"
-            scope.launch { initDeviceUploadsCatalog() }
+            scope.launch { clearDeviceUploads() }
         } catch (_: java.net.BindException) {
             server = null
         } catch (_: Exception) {
@@ -1865,7 +1790,9 @@ class CompanionServer {
                             }
                         )
                         _pictureCatalogs[DEVICE_UPLOADS_FOLDER_ID] = catalog
-                        _pictureCatalog.value = catalog
+                        // Do NOT update _pictureCatalog here — that would replace the desktop's
+                        // active folder with device_uploads, making GET /api/pictures return the
+                        // wrong folder to the mobile companion app.
                         broadcast(WebSocketMessage(
                             type    = Constants.WS_EVENT_PICTURES_UPDATED,
                             payload = json.encodeToString(PictureFolderResponse.serializer(), catalog)
@@ -2321,5 +2248,4 @@ fun SongItem.toDto() = SongDto(
     tune = tune,
     author = author
 )
-
 
