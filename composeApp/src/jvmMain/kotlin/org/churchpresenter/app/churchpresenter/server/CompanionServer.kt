@@ -560,6 +560,9 @@ class CompanionServer {
     /** Set of presentation IDs currently being background-rendered (avoids duplicate renders) */
     private val _renderingPresentations = ConcurrentHashMap<String, Unit>()
 
+    /** Stable folder ID used for all device-uploaded photos (accumulates across sessions). */
+    private val DEVICE_UPLOADS_FOLDER_ID = "device_uploads"
+
     // Picture catalog — metadata + file references stored per folder
     private val _pictureCatalog = MutableStateFlow<PictureFolderResponse?>(null)
     /** folderId → ordered list of image Files (index = image order) */
@@ -851,6 +854,37 @@ class CompanionServer {
                 )
             }
         )
+    }
+
+    /**
+     * Scans ~/.churchpresenter/device_uploads/ on startup and pre-populates
+     * [_pictureFiles] / [_pictureCatalogs] so previously-uploaded device photos
+     * are available immediately without the user needing to upload again.
+     * Called on the IO dispatcher from [start].
+     */
+    private fun initDeviceUploadsCatalog() {
+        val uploadDir = File(System.getProperty("user.home"), ".churchpresenter/device_uploads")
+        if (!uploadDir.exists() || !uploadDir.isDirectory) return
+        val files = uploadDir.listFiles()
+            ?.filter { it.isFile && it.extension.lowercase() in IMAGE_EXTENSIONS }
+            ?.sortedBy { it.lastModified() }
+            ?: return
+        if (files.isEmpty()) return
+        _pictureFiles[DEVICE_UPLOADS_FOLDER_ID] = files
+        val catalog = PictureFolderResponse(
+            folderId   = DEVICE_UPLOADS_FOLDER_ID,
+            folderName = "Device Photos",
+            folderPath = uploadDir.absolutePath,
+            imageTotal = files.size,
+            images     = files.mapIndexed { idx, f ->
+                PictureFileDto(
+                    index        = idx,
+                    fileName     = f.name,
+                    thumbnailUrl = "${Constants.ENDPOINT_PICTURES}/$DEVICE_UPLOADS_FOLDER_ID/images/$idx"
+                )
+            }
+        )
+        _pictureCatalogs[DEVICE_UPLOADS_FOLDER_ID] = catalog
     }
 
     /**
@@ -1267,6 +1301,8 @@ class CompanionServer {
             server?.start(wait = false)
             _isRunning.value = true
             _serverUrl.value = "https://$displayHost:$actualPort"
+            // Restore previously uploaded device photos so they appear in the Pictures tab
+            scope.launch { initDeviceUploadsCatalog() }
         } catch (_: java.net.BindException) {
             server = null
         } catch (_: Exception) {
@@ -1291,6 +1327,7 @@ class CompanionServer {
             server?.start(wait = false)
             _isRunning.value = true
             _serverUrl.value = "http://$displayHost:$port"
+            scope.launch { initDeviceUploadsCatalog() }
         } catch (_: java.net.BindException) {
             server = null
         } catch (_: Exception) {
@@ -1769,6 +1806,76 @@ class CompanionServer {
                         call.respondText("""{"ok":true}""", ContentType.Application.Json)
                     } catch (_: Exception) {
                         call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":"invalid request body"}""")
+                    }
+                }
+
+                /**
+                 * POST /api/pictures/upload
+                 * Body: { "name": "photo.jpg", "data": "data:image/jpeg;base64,…" }
+                 *
+                 * Saves the uploaded image to ~/.churchpresenter/device_uploads/,
+                 * registers it as a single-image folder so the other pictures endpoints
+                 * serve it, and returns { "ok": true, "folder-id": "…", "image-index": 0 }.
+                 */
+                post("${Constants.ENDPOINT_PICTURES}/upload") {
+                    if (!checkApiKey(call)) return@post
+                    try {
+                        val body = call.receiveText()
+                        val parsed = json.parseToJsonElement(body) as? kotlinx.serialization.json.JsonObject
+                        val name = (parsed?.get("name") as? kotlinx.serialization.json.JsonPrimitive)?.content
+                        val data = (parsed?.get("data") as? kotlinx.serialization.json.JsonPrimitive)?.content
+                        if (name.isNullOrBlank() || data.isNullOrBlank()) {
+                            call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":"name and data are required"}""")
+                            return@post
+                        }
+                        val safeName = File(name).name.ifBlank { "upload.jpg" }
+                        val base64Match = Regex("^data:[^;]+;base64,(.+)$").find(data)
+                        if (base64Match == null) {
+                            call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":"data must be a base64 data URI"}""")
+                            return@post
+                        }
+                        val imageBytes = Base64.getDecoder().decode(base64Match.groupValues[1])
+                        // Save to ~/.churchpresenter/device_uploads/
+                        val uploadDir = File(System.getProperty("user.home"), ".churchpresenter/device_uploads").also { it.mkdirs() }
+                        // Ensure the file name is unique by appending a timestamp if needed
+                        val uniqueName = if (File(uploadDir, safeName).exists()) {
+                            val ts = System.currentTimeMillis()
+                            val ext = safeName.substringAfterLast('.', "jpg")
+                            val base = safeName.substringBeforeLast('.', safeName)
+                            "${base}_$ts.$ext"
+                        } else safeName
+                        val file = File(uploadDir, uniqueName)
+                        file.writeBytes(imageBytes)
+                        // Accumulate into a single persistent "Device Photos" folder
+                        val existingFiles = (_pictureFiles[DEVICE_UPLOADS_FOLDER_ID] ?: emptyList()).toMutableList()
+                        existingFiles.add(file)
+                        val newIndex = existingFiles.size - 1
+                        _pictureFiles[DEVICE_UPLOADS_FOLDER_ID] = existingFiles
+                        val catalog = PictureFolderResponse(
+                            folderId   = DEVICE_UPLOADS_FOLDER_ID,
+                            folderName = "Device Photos",
+                            folderPath = uploadDir.absolutePath,
+                            imageTotal = existingFiles.size,
+                            images     = existingFiles.mapIndexed { idx, f ->
+                                PictureFileDto(
+                                    index        = idx,
+                                    fileName     = f.name,
+                                    thumbnailUrl = "${Constants.ENDPOINT_PICTURES}/$DEVICE_UPLOADS_FOLDER_ID/images/$idx"
+                                )
+                            }
+                        )
+                        _pictureCatalogs[DEVICE_UPLOADS_FOLDER_ID] = catalog
+                        _pictureCatalog.value = catalog
+                        broadcast(WebSocketMessage(
+                            type    = Constants.WS_EVENT_PICTURES_UPDATED,
+                            payload = json.encodeToString(PictureFolderResponse.serializer(), catalog)
+                        ))
+                        call.respondText(
+                            """{"ok":true,"folder-id":"$DEVICE_UPLOADS_FOLDER_ID","image-index":$newIndex}""",
+                            ContentType.Application.Json
+                        )
+                    } catch (e: Exception) {
+                        call.respond(io.ktor.http.HttpStatusCode.InternalServerError, """{"error":"upload failed: ${e.message?.replace("\"","\\\"")}"}""")
                     }
                 }
 
