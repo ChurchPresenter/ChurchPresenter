@@ -162,6 +162,7 @@ data class SongSettings(
     // Transition animation
     val fadeIn: Boolean = true,
     val fadeOut: Boolean = true,
+    val crossfade: Boolean = false,
     val transitionDuration: Float = 500f,
 
     // Fullscreen display
@@ -371,6 +372,7 @@ data class BibleSettings(
     // Transition animation
     val fadeIn: Boolean = true,
     val fadeOut: Boolean = true,
+    val crossfade: Boolean = false,
     val transitionDuration: Float = 500f
 ) {
     /** Returns a copy with primary and secondary bible settings swapped. */
@@ -623,7 +625,9 @@ data class AppSettings(
     val presentationStorageDirectory: String = "",
     val mediaStorageDirectory: String = "",
     val schedulePanelWidthDp: Int = 280,
+    val schedulePanelCollapsed: Boolean = false,
     val previewPanelWidthDp: Int = 280,
+    val previewPanelCollapsed: Boolean = false,
     val theme: String = Constants.SYSTEM,
     val language: String = "en",
     val licenseAccepted: Boolean = false,

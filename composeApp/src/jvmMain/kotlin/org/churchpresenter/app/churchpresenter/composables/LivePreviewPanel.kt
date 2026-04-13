@@ -188,7 +188,8 @@ private fun SingleDisplayPreview(
                                     appSettings = appSettings,
                                     isLowerThird = isLowerThird,
                                     outputRole = primaryRole,
-                                    transitionAlpha = bibleTransitionAlpha
+                                    transitionAlpha = bibleTransitionAlpha,
+                                    crossfadeEnabled = appSettings.bibleSettings.crossfade
                                 )
                             Presenting.LYRICS ->
                                 SongPresenter(
@@ -200,7 +201,8 @@ private fun SingleDisplayPreview(
                                     displayLineIndex = songDisplayLineIndex,
                                     lookAheadEnabled = screenAssignment.songLookAhead,
                                     allLyricSections = allLyricSections,
-                                    displaySectionIndex = songDisplaySectionIndex
+                                    displaySectionIndex = songDisplaySectionIndex,
+                                    crossfadeEnabled = appSettings.songSettings.crossfade
                                 )
                             Presenting.PICTURES ->
                                 PicturePresenter(imagePath = displayedImagePath, transitionAlpha = pictureTransitionAlpha)

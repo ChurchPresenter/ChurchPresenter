@@ -1,5 +1,12 @@
 package org.churchpresenter.app.churchpresenter.presenter
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
+import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -18,6 +25,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.Constraints
@@ -70,6 +78,7 @@ fun BiblePresenter(
     outputRole: String = Constants.OUTPUT_ROLE_NORMAL,
     transitionAlpha: Float = 1f,
     showBackground: Boolean = true,
+    crossfadeEnabled: Boolean = false,
 ) {
     val isFillOrKey = outputRole == Constants.OUTPUT_ROLE_FILL || outputRole == Constants.OUTPUT_ROLE_KEY
     val isKey = outputRole == Constants.OUTPUT_ROLE_KEY
@@ -674,10 +683,58 @@ fun BiblePresenter(
                 }
             }
 
-            // Animation is driven centrally via shared transitionAlpha so all
-            // presenter windows fade in/out in perfect sync.
-            Box(modifier = Modifier.alpha(transitionAlpha)) {
-                TextContent(selectedVerses)
+            if (crossfadeEnabled) {
+                // True crossfade with queued animations — if user changes verse
+                // mid-animation, the current animation finishes first, then the
+                // next one starts.
+                val duration = appSettings.bibleSettings.transitionDuration.toInt().coerceAtLeast(100)
+                var displayedCurrent by remember { mutableStateOf(selectedVerses) }
+                var displayedPrevious by remember { mutableStateOf<List<SelectedVerse>>(emptyList()) }
+                var crossfadeProgress by remember { mutableStateOf(1f) }
+                val pendingQueue = remember { kotlinx.coroutines.channels.Channel<List<SelectedVerse>>(kotlinx.coroutines.channels.Channel.CONFLATED) }
+
+                // Send new verses to the queue whenever they change
+                LaunchedEffect(selectedVerses) {
+                    if (displayedCurrent != selectedVerses) {
+                        pendingQueue.send(selectedVerses)
+                    }
+                }
+
+                // Single consumer coroutine — processes one crossfade at a time
+                LaunchedEffect(Unit) {
+                    for (nextVerses in pendingQueue) {
+                        if (displayedCurrent == nextVerses) continue
+                        // Set up crossfade layers
+                        displayedPrevious = displayedCurrent
+                        displayedCurrent = nextVerses
+                        crossfadeProgress = 0f
+                        // Animate
+                        val anim = Animatable(0f)
+                        anim.animateTo(1f, tween(durationMillis = duration)) {
+                            crossfadeProgress = this.value
+                        }
+                        crossfadeProgress = 1f
+                        displayedPrevious = emptyList()
+                    }
+                }
+
+                // Render both layers
+                Box(modifier = Modifier.matchParentSize()) {
+                    if (displayedPrevious.isNotEmpty()) {
+                        Box(modifier = Modifier.fillMaxSize().graphicsLayer { alpha = 1f - crossfadeProgress }) {
+                            TextContent(displayedPrevious)
+                        }
+                    }
+                    Box(modifier = Modifier.fillMaxSize().graphicsLayer { alpha = if (displayedPrevious.isEmpty()) 1f else crossfadeProgress }) {
+                        TextContent(displayedCurrent)
+                    }
+                }
+            } else {
+                // Fade in/out driven centrally via shared transitionAlpha so all
+                // presenter windows fade in/out in perfect sync.
+                Box(modifier = Modifier.matchParentSize().graphicsLayer { alpha = transitionAlpha }) {
+                    TextContent(selectedVerses)
+                }
             }
         }
     }

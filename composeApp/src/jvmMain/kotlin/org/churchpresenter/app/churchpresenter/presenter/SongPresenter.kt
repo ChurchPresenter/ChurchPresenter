@@ -1,5 +1,7 @@
 package org.churchpresenter.app.churchpresenter.presenter
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -16,10 +18,15 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.draw.paint
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -64,6 +71,7 @@ fun SongPresenter(
     allLyricSections: List<LyricSection> = emptyList(),
     displaySectionIndex: Int = -1,
     showBackground: Boolean = true,
+    crossfadeEnabled: Boolean = false,
 ) {
     val isFillOrKey = outputRole == Constants.OUTPUT_ROLE_FILL || outputRole == Constants.OUTPUT_ROLE_KEY
     val isKey = outputRole == Constants.OUTPUT_ROLE_KEY
@@ -900,10 +908,51 @@ fun SongPresenter(
                 }
             }
 
-            // Animation is driven centrally via shared transitionAlpha so all
-            // presenter windows fade in/out in perfect sync.
-            Box(modifier = Modifier.alpha(transitionAlpha)) {
-                TextContent(lyricSection)
+            if (crossfadeEnabled) {
+                // True crossfade with queued animations
+                val duration = appSettings.songSettings.transitionDuration.toInt().coerceAtLeast(100)
+                var displayedCurrent by remember { mutableStateOf(lyricSection) }
+                var displayedPrevious by remember { mutableStateOf(LyricSection()) }
+                var crossfadeProgress by remember { mutableStateOf(1f) }
+                val pendingQueue = remember { kotlinx.coroutines.channels.Channel<LyricSection>(kotlinx.coroutines.channels.Channel.CONFLATED) }
+
+                LaunchedEffect(lyricSection) {
+                    if (displayedCurrent != lyricSection) {
+                        pendingQueue.send(lyricSection)
+                    }
+                }
+
+                LaunchedEffect(Unit) {
+                    for (nextSection in pendingQueue) {
+                        if (displayedCurrent == nextSection) continue
+                        displayedPrevious = displayedCurrent
+                        displayedCurrent = nextSection
+                        crossfadeProgress = 0f
+                        val anim = Animatable(0f)
+                        anim.animateTo(1f, tween(durationMillis = duration)) {
+                            crossfadeProgress = this.value
+                        }
+                        crossfadeProgress = 1f
+                        displayedPrevious = LyricSection()
+                    }
+                }
+
+                Box(modifier = Modifier.matchParentSize()) {
+                    if (displayedPrevious.lines.isNotEmpty()) {
+                        Box(modifier = Modifier.fillMaxSize().graphicsLayer { alpha = 1f - crossfadeProgress }) {
+                            TextContent(displayedPrevious)
+                        }
+                    }
+                    Box(modifier = Modifier.fillMaxSize().graphicsLayer { alpha = if (displayedPrevious.lines.isEmpty()) 1f else crossfadeProgress }) {
+                        TextContent(displayedCurrent)
+                    }
+                }
+            } else {
+                // Fade in/out driven centrally via shared transitionAlpha so all
+                // presenter windows fade in/out in perfect sync.
+                Box(modifier = Modifier.matchParentSize().graphicsLayer { alpha = transitionAlpha }) {
+                    TextContent(lyricSection)
+                }
             }
         }
     }
