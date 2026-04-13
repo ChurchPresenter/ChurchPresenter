@@ -827,6 +827,9 @@ fun main() {
                                             emit(req.folderId to req.index)
                                         }
                                     },
+                                    resolveImageFile = { folderId, index ->
+                                        companionServer.getImageFile(folderId, index)
+                                    },
                                     selectSlideFlow = kotlinx.coroutines.flow.flow {
                                         companionServer.onSelectSlide.collect { req ->
                                             emit(req.id to req.index)

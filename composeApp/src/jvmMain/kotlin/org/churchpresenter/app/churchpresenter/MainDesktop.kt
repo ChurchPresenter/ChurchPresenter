@@ -139,6 +139,13 @@ fun MainDesktop(
     onPresentationSlidesLoaded: ((id: String, filePath: String, fileName: String, fileType: String, slides: List<BufferedImage>) -> Unit)? = null,
     onPicturesLoaded: ((folderId: String, folderName: String, folderPath: String, imageFiles: List<File>) -> Unit)? = null,
     selectPictureImageFlow: Flow<Pair<String, Int>>? = null,
+    /**
+     * Resolves an image [File] by folder-id and index from the companion server's file map.
+     * When non-null, remote picture selections are served from the correct folder even when
+     * the requested folder differs from the one currently loaded in the Pictures tab UI
+     * (e.g. session-only device_uploads photos).
+     */
+    resolveImageFile: ((folderId: String, index: Int) -> File?)? = null,
     /** Emits (presentationId, slideIndex) — instantly navigates to that slide without approval. */
     selectSlideFlow: Flow<Pair<String, Int>>? = null,
     /** Emits a verse to display instantly without approval. */
@@ -233,15 +240,42 @@ fun MainDesktop(
 
     // Handle remote picture selection (from REST POST /api/pictures/select or WS select_picture)
     LaunchedEffect(selectPictureImageFlow) {
-        selectPictureImageFlow?.collect { (_, index) ->
-            val images = picturesViewModel.images
-            if (index in images.indices) {
-                picturesViewModel.selectedImageIndex = index
-                val currentImage = picturesViewModel.getCurrentImageFile()
-                if (currentImage != null) {
-                    presenterManager.setSelectedImagePath(currentImage.absolutePath)
-                    presenterManager.setPresentingMode(Presenting.PICTURES)
-                    presenterManager.setShowPresenterWindow(true)
+        selectPictureImageFlow?.collect { (folderId, index) ->
+            // Derive the folderId of the currently loaded Pictures-tab folder (same hash as
+            // CompanionServer.updatePictures and the LaunchedEffect(pictureFolder, …) above).
+            val activeFolderId = picturesViewModel.selectedFolder
+                ?.absolutePath?.hashCode()?.toUInt()?.toString(16)
+
+            // Resolve the file from the server's file map so selections from any folder
+            // (including session-only device_uploads) go to the correct image.
+            val imageFile = resolveImageFile?.invoke(folderId, index)
+            if (imageFile != null && imageFile.exists()) {
+                // When the selection is from a DIFFERENT folder (e.g. device_uploads), load
+                // that folder into picturesViewModel NOW, before changing the presenting mode.
+                // This prevents PicturesTab's syncWithPresenter LaunchedEffect from firing with
+                // stale files and overwriting the correct image path in the presenter.
+                if (folderId != activeFolderId) {
+                    picturesViewModel.selectFolder(imageFile.parentFile)
+                }
+                // Set the selected index (images are synchronously populated by selectFolder).
+                if (index in picturesViewModel.images.indices) {
+                    picturesViewModel.selectedImageIndex = index
+                }
+                // Now syncWithPresenter will read the correct file via getCurrentImageFile().
+                presenterManager.setSelectedImagePath(imageFile.absolutePath)
+                presenterManager.setPresentingMode(Presenting.PICTURES)
+                presenterManager.setShowPresenterWindow(true)
+            } else {
+                // Fallback: resolveImageFile not wired or file not found — use VM directly.
+                val images = picturesViewModel.images
+                if (index in images.indices) {
+                    picturesViewModel.selectedImageIndex = index
+                    val currentImage = picturesViewModel.getCurrentImageFile()
+                    if (currentImage != null) {
+                        presenterManager.setSelectedImagePath(currentImage.absolutePath)
+                        presenterManager.setPresentingMode(Presenting.PICTURES)
+                        presenterManager.setShowPresenterWindow(true)
+                    }
                 }
             }
         }

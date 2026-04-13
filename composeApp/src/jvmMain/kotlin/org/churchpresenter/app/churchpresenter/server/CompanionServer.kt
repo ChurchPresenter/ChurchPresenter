@@ -328,7 +328,10 @@ data class PictureFolderResponse(
 @Serializable
 data class SelectPictureRequest(
     @kotlinx.serialization.SerialName("folder-id") val folderId: String,
-    val index: Int
+    val index: Int = -1,
+    /** When provided, the server looks up the file by name so the correct image is
+     *  displayed regardless of index-ordering differences between clients. */
+    @kotlinx.serialization.SerialName("file-name") val fileName: String? = null,
 )
 
 /**
@@ -827,6 +830,21 @@ class CompanionServer {
     }
 
     /**
+     * Returns the [File] for a specific image by folder ID and zero-based index, or null if not
+     * found.  Used by the remote-select handler in MainDesktop so the correct file is presented
+     * even when the requested folder differs from the currently loaded folder in the Pictures tab
+     * (e.g. when the mobile sends a `device_uploads` selection).
+     */
+    fun getImageFile(folderId: String, index: Int): File? =
+        _pictureFiles[folderId]?.getOrNull(index)
+
+    /**
+     * The folder-id of the currently active picture folder pushed to mobile companions via
+     * GET /api/pictures.  Null until a folder has been loaded in the Pictures tab.
+     */
+    val activeFolderId: String? get() = _pictureCatalog.value?.folderId
+
+    /**
      * Scans [folderPath] for image files, then caches them in [_pictureFiles] and [_pictureCatalogs]
      * under [id] (the schedule item's UUID).  Skipped if [id] is already registered.
      * Must be called on an IO thread.
@@ -857,18 +875,18 @@ class CompanionServer {
     }
 
     /**
-     * Clears the device_uploads directory on server startup so that device photos
+     * Clears the device_uploads directory tree on server startup so that device photos
      * are session-only — they disappear when the server is restarted.
-     * Also resets the in-memory catalog so no stale entries remain.
-     * Called on the IO dispatcher from [start].
+     * Deletes all dated subdirectories (e.g. device_uploads/2026-04-13/) and resets
+     * every in-memory catalog entry whose folder-id starts with [DEVICE_UPLOADS_FOLDER_ID].
      */
     private fun clearDeviceUploads() {
-        val uploadDir = File(System.getProperty("user.home"), ".churchpresenter/device_uploads")
-        // Delete all files from the previous session
-        uploadDir.listFiles()?.forEach { it.delete() }
-        // Reset in-memory state — no photos at the start of a new session
-        _pictureFiles.remove(DEVICE_UPLOADS_FOLDER_ID)
-        _pictureCatalogs.remove(DEVICE_UPLOADS_FOLDER_ID)
+        val baseDir = File(System.getProperty("user.home"), ".churchpresenter/device_uploads")
+        baseDir.deleteRecursively()   // removes dated subdirs and all files inside them
+        // Purge every device_uploads_* entry (handles any date or legacy flat entries)
+        _pictureFiles.keys
+            .filter { it == DEVICE_UPLOADS_FOLDER_ID || it.startsWith("${DEVICE_UPLOADS_FOLDER_ID}_") }
+            .forEach { id -> _pictureFiles.remove(id); _pictureCatalogs.remove(id) }
     }
 
     private fun renderPresentationForServer(presentationId: String, filePath: String) {
@@ -1720,14 +1738,19 @@ class CompanionServer {
 
                 /**
                  * POST /api/pictures/select
-                 * Body: { "folder-id": "…", "index": 3 }
-                 * Selects the image at {index} in the specified folder, triggering the [onSelectPicture] callback.
+                 * Body: { "folder-id": "…", "index": 3, "file-name": "photo.jpg" }
+                 * When "file-name" is provided the index is resolved by name so the correct
+                 * image is displayed regardless of sort-order differences between clients.
                  */
                 post("${Constants.ENDPOINT_PICTURES}/select") {
                     if (!checkApiKey(call)) return@post
                     try {
                         val req = json.decodeFromString(SelectPictureRequest.serializer(), call.receiveText())
-                        scope.launch { onSelectPicture.emit(req) }
+                        // Resolve index by filename when provided — immune to sort-order mismatch
+                        val resolvedIndex = req.fileName
+                            ?.let { name -> _pictureFiles[req.folderId]?.indexOfFirst { it.name == name }?.takeIf { it >= 0 } }
+                            ?: req.index
+                        scope.launch { onSelectPicture.emit(req.copy(index = resolvedIndex)) }
                         call.respondText("""{"ok":true}""", ContentType.Application.Json)
                     } catch (_: Exception) {
                         call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":"invalid request body"}""")
@@ -1760,8 +1783,12 @@ class CompanionServer {
                             return@post
                         }
                         val imageBytes = Base64.getDecoder().decode(base64Match.groupValues[1])
-                        // Save to ~/.churchpresenter/device_uploads/
-                        val uploadDir = File(System.getProperty("user.home"), ".churchpresenter/device_uploads").also { it.mkdirs() }
+                        // Save to ~/.churchpresenter/device_uploads/yyyy-MM-dd/
+                        // Each calendar day gets its own subfolder; the folderId includes the
+                        // date so uploads from different days are catalogued separately.
+                        val dateStr = java.time.LocalDate.now().toString()   // "yyyy-MM-dd"
+                        val dateFolderId = "${DEVICE_UPLOADS_FOLDER_ID}_$dateStr"
+                        val uploadDir = File(System.getProperty("user.home"), ".churchpresenter/device_uploads/$dateStr").also { it.mkdirs() }
                         // Ensure the file name is unique by appending a timestamp if needed
                         val uniqueName = if (File(uploadDir, safeName).exists()) {
                             val ts = System.currentTimeMillis()
@@ -1771,25 +1798,30 @@ class CompanionServer {
                         } else safeName
                         val file = File(uploadDir, uniqueName)
                         file.writeBytes(imageBytes)
-                        // Accumulate into a single persistent "Device Photos" folder
-                        val existingFiles = (_pictureFiles[DEVICE_UPLOADS_FOLDER_ID] ?: emptyList()).toMutableList()
+                        // Accumulate into today's dated "Device Photos" folder.
+                        // Sort by filename so the catalog index order matches the desktop's
+                        // PicturesViewModel.loadImagesFromFolder which also sorts by name.
+                        // Without this, upload order ≠ filename order, so index N on mobile
+                        // points to a different photo than index N on the desktop.
+                        val existingFiles = (_pictureFiles[dateFolderId] ?: emptyList()).toMutableList()
                         existingFiles.add(file)
-                        val newIndex = existingFiles.size - 1
-                        _pictureFiles[DEVICE_UPLOADS_FOLDER_ID] = existingFiles
+                        existingFiles.sortBy { it.name }          // ← match desktop sort order
+                        val newIndex = existingFiles.indexOf(file) // recalculate after sort
+                        _pictureFiles[dateFolderId] = existingFiles
                         val catalog = PictureFolderResponse(
-                            folderId   = DEVICE_UPLOADS_FOLDER_ID,
-                            folderName = "Device Photos",
+                            folderId   = dateFolderId,
+                            folderName = "Device Photos ($dateStr)",
                             folderPath = uploadDir.absolutePath,
                             imageTotal = existingFiles.size,
                             images     = existingFiles.mapIndexed { idx, f ->
                                 PictureFileDto(
                                     index        = idx,
                                     fileName     = f.name,
-                                    thumbnailUrl = "${Constants.ENDPOINT_PICTURES}/$DEVICE_UPLOADS_FOLDER_ID/images/$idx"
+                                    thumbnailUrl = "${Constants.ENDPOINT_PICTURES}/$dateFolderId/images/$idx"
                                 )
                             }
                         )
-                        _pictureCatalogs[DEVICE_UPLOADS_FOLDER_ID] = catalog
+                        _pictureCatalogs[dateFolderId] = catalog
                         // Do NOT update _pictureCatalog here — that would replace the desktop's
                         // active folder with device_uploads, making GET /api/pictures return the
                         // wrong folder to the mobile companion app.
@@ -1798,7 +1830,7 @@ class CompanionServer {
                             payload = json.encodeToString(PictureFolderResponse.serializer(), catalog)
                         ))
                         call.respondText(
-                            """{"ok":true,"folder-id":"$DEVICE_UPLOADS_FOLDER_ID","image-index":$newIndex}""",
+                            """{"ok":true,"folder-id":"$dateFolderId","image-index":$newIndex,"file-name":"${file.name}"}""",
                             ContentType.Application.Json
                         )
                     } catch (e: Exception) {
