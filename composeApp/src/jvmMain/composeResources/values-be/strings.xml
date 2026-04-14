@@ -653,6 +653,9 @@
     <string name="reset_settings">Скінуць усе налады</string>
     <string name="reset_settings_confirm">Вы ўпэўненыя, што хочаце скінуць усе налады да значэнняў па змаўчанні?\n\nПраграма будзе перазапушчана.</string>
     <string name="clear_lottie_cache_confirm">Вы таксама хочаце ачысціць кэш генератара Lottie?\n\nГэта выдаліць захаваныя прэсеты, каляровыя тэмы і загружаныя лагатыпы.</string>
+    <string name="clear_remote_uploads">Ачысціць аддаленыя загрузкі</string>
+    <string name="clear_remote_uploads_confirm">Вы ўпэўненыя, што хочаце выдаліць усе аддалена загружаныя файлы?\n\nГэта назаўсёды выдаліць усе файлы ў папцы загрузак прылад.</string>
+    <string name="remote_uploads_cleared">Папка аддаленых загрузак паспяхова ачышчана.</string>
     <string name="export_settings">Экспарт налад</string>
     <string name="import_settings">Імпарт налад</string>
     <string name="import_settings_confirm">Вы ўпэўненыя, што хочаце імпартаваць налады?\n\nГэта перазапіша бягучыя налады, і праграма будзе перазапушчана.</string>

@@ -653,6 +653,9 @@
     <string name="reset_settings">Alle Einstellungen zurücksetzen</string>
     <string name="reset_settings_confirm">Sind Sie sicher, dass Sie alle Einstellungen auf die Standardwerte zurücksetzen möchten?\n\nDie Anwendung wird neu gestartet.</string>
     <string name="clear_lottie_cache_confirm">Möchten Sie auch den Lottie-Generator-Cache leeren?\n\nDies entfernt gespeicherte Vorlagen, Farbthemen und hochgeladene Logos.</string>
+    <string name="clear_remote_uploads">Remote-Uploads löschen</string>
+    <string name="clear_remote_uploads_confirm">Sind Sie sicher, dass Sie alle remote hochgeladenen Dateien löschen möchten?\n\nDies löscht dauerhaft alle Dateien im Geräte-Upload-Ordner.</string>
+    <string name="remote_uploads_cleared">Ordner für Remote-Uploads erfolgreich geleert.</string>
     <string name="export_settings">Einstellungen exportieren</string>
     <string name="import_settings">Einstellungen importieren</string>
     <string name="import_settings_confirm">Sind Sie sicher, dass Sie die Einstellungen importieren möchten?\n\nDies überschreibt Ihre aktuellen Einstellungen und die Anwendung wird neu gestartet.</string>

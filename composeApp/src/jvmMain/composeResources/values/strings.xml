@@ -514,6 +514,9 @@
     <string name="reset_settings">Reset All Settings</string>
     <string name="reset_settings_confirm">Are you sure you want to reset all settings to defaults?\n\nThe application will restart.</string>
     <string name="clear_lottie_cache_confirm">Do you also want to clear the Lottie generator cache?\n\nThis will remove saved presets, color themes, and uploaded logos.</string>
+    <string name="clear_remote_uploads">Clear Remote Uploads</string>
+    <string name="clear_remote_uploads_confirm">Are you sure you want to delete all remotely uploaded files?\n\nThis will permanently delete all files in the device uploads folder.</string>
+    <string name="remote_uploads_cleared">Remote uploads folder cleared successfully.</string>
     <string name="export_settings">Export Settings</string>
     <string name="import_settings">Import Settings</string>
     <string name="import_settings_confirm">Are you sure you want to import settings?\n\nThis will overwrite your current settings and the application will restart.</string>

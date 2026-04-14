@@ -739,6 +739,9 @@
     <string name="reset_settings">Obnovit všechna nastavení</string>
     <string name="reset_settings_confirm">Opravdu chcete obnovit všechna nastavení na výchozí hodnoty?\n\nAplikace se restartuje.</string>
     <string name="clear_lottie_cache_confirm">Chcete také vymazat mezipaměť generátoru Lottie?\n\nTím se odstraní uložené předvolby, barevná témata a nahrané logotypy.</string>
+    <string name="clear_remote_uploads">Vymazat vzdálené nahrávky</string>
+    <string name="clear_remote_uploads_confirm">Opravdu chcete smazat všechny vzdáleně nahrané soubory?\n\nTím se trvale odstraní všechny soubory ve složce nahrávek zařízení.</string>
+    <string name="remote_uploads_cleared">Složka vzdálených nahrávek byla úspěšně vymazána.</string>
     <string name="export_settings">Exportovat nastavení</string>
     <string name="import_settings">Importovat nastavení</string>
     <string name="import_settings_confirm">Opravdu chcete importovat nastavení?\n\nTím se přepíší vaše aktuální nastavení a aplikace se restartuje.</string>

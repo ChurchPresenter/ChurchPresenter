@@ -43,6 +43,9 @@ import churchpresenter.composeapp.generated.resources.add_song_samples
 import churchpresenter.composeapp.generated.resources.bible_storage_directory
 import churchpresenter.composeapp.generated.resources.browse_directory
 import churchpresenter.composeapp.generated.resources.clear_lottie_cache_confirm
+import churchpresenter.composeapp.generated.resources.clear_remote_uploads
+import churchpresenter.composeapp.generated.resources.clear_remote_uploads_confirm
+import churchpresenter.composeapp.generated.resources.remote_uploads_cleared
 import churchpresenter.composeapp.generated.resources.conversion_complete
 import churchpresenter.composeapp.generated.resources.conversion_complete_message
 import churchpresenter.composeapp.generated.resources.conversion_complete_with_errors
@@ -407,6 +410,9 @@ fun SystemSettingsTab(
         val resetConfirmMsg = stringResource(Res.string.reset_settings_confirm)
         val resetTitle = stringResource(Res.string.reset_settings)
         val clearLottieCacheMsg = stringResource(Res.string.clear_lottie_cache_confirm)
+        val clearRemoteUploadsTitle = stringResource(Res.string.clear_remote_uploads)
+        val clearRemoteUploadsConfirmMsg = stringResource(Res.string.clear_remote_uploads_confirm)
+        val remoteUploadsClearedMsg = stringResource(Res.string.remote_uploads_cleared)
         val exportTitle = stringResource(Res.string.export_settings)
         val importTitle = stringResource(Res.string.import_settings)
         val importConfirmMsg = stringResource(Res.string.import_settings_confirm)
@@ -560,6 +566,39 @@ fun SystemSettingsTab(
                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
             ) {
                 Text(text = resetTitle, style = MaterialTheme.typography.labelMedium)
+            }
+
+            // Clear Remote Uploads
+            Button(
+                onClick = {
+                    SwingUtilities.invokeLater {
+                        val result = JOptionPane.showConfirmDialog(
+                            Window.getWindows().firstOrNull { it.isActive },
+                            clearRemoteUploadsConfirmMsg,
+                            clearRemoteUploadsTitle,
+                            JOptionPane.YES_NO_OPTION,
+                            JOptionPane.WARNING_MESSAGE
+                        )
+                        if (result == JOptionPane.YES_OPTION) {
+                            val uploadsDir = java.io.File(System.getProperty("user.home"), ".churchpresenter/device_uploads")
+                            uploadsDir.deleteRecursively()
+                            JOptionPane.showMessageDialog(
+                                Window.getWindows().firstOrNull { it.isActive },
+                                remoteUploadsClearedMsg,
+                                clearRemoteUploadsTitle,
+                                JOptionPane.INFORMATION_MESSAGE
+                            )
+                        }
+                    }
+                },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.errorContainer,
+                    contentColor = MaterialTheme.colorScheme.onErrorContainer
+                ),
+                shape = RoundedCornerShape(4.dp),
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+            ) {
+                Text(text = clearRemoteUploadsTitle, style = MaterialTheme.typography.labelMedium)
             }
         }
     }

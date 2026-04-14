@@ -658,6 +658,9 @@
     <string name="reset_settings">Скинути всі налаштування</string>
     <string name="reset_settings_confirm">Ви впевнені, що хочете скинути всі налаштування до значень за замовчуванням?\n\nПрограма буде перезапущена.</string>
     <string name="clear_lottie_cache_confirm">Ви також хочете очистити кеш генератора Lottie?\n\nЦе видалить збережені пресети, колірні теми та завантажені логотипи.</string>
+    <string name="clear_remote_uploads">Очистити віддалені завантаження</string>
+    <string name="clear_remote_uploads_confirm">Ви впевнені, що хочете видалити всі віддалено завантажені файли?\n\nЦе назавжди видалить усі файли у папці завантажень пристроїв.</string>
+    <string name="remote_uploads_cleared">Папка віддалених завантажень успішно очищена.</string>
     <string name="export_settings">Експорт налаштувань</string>
     <string name="import_settings">Імпорт налаштувань</string>
     <string name="import_settings_confirm">Ви впевнені, що хочете імпортувати налаштування?\n\nЦе перезапише поточні налаштування, і програма буде перезапущена.</string>

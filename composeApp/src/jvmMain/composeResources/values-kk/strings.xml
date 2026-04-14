@@ -653,6 +653,9 @@
     <string name="reset_settings">Барлық параметрлерді қалпына келтіру</string>
     <string name="reset_settings_confirm">Барлық параметрлерді әдепкі мәндерге қалпына келтіргіңіз келетініне сенімдісіз бе?\n\nҚосымша қайта іске қосылады.</string>
     <string name="clear_lottie_cache_confirm">Lottie генераторының кэшін де тазалағыңыз келе ме?\n\nБұл сақталған пресеттерді, түс тақырыптарын және жүктелген логотиптерді жояды.</string>
+    <string name="clear_remote_uploads">Қашықтан жүктеулерді тазалау</string>
+    <string name="clear_remote_uploads_confirm">Барлық қашықтан жүктелген файлдарды жойғыңыз келетініне сенімдісіз бе?\n\nБұл құрылғы жүктеулері қалтасындағы барлық файлдарды біржола жояды.</string>
+    <string name="remote_uploads_cleared">Қашықтан жүктеулер қалтасы сәтті тазаланды.</string>
     <string name="export_settings">Параметрлерді экспорттау</string>
     <string name="import_settings">Параметрлерді импорттау</string>
     <string name="import_settings_confirm">Параметрлерді импорттағыңыз келетініне сенімдісіз бе?\n\nБұл ағымдағы параметрлерді қайта жазады және қосымша қайта іске қосылады.</string>

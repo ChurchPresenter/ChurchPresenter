@@ -653,6 +653,9 @@
     <string name="reset_settings">Resetuj wszystkie ustawienia</string>
     <string name="reset_settings_confirm">Czy na pewno chcesz zresetować wszystkie ustawienia do wartości domyślnych?\n\nAplikacja zostanie ponownie uruchomiona.</string>
     <string name="clear_lottie_cache_confirm">Czy chcesz również wyczyścić pamięć podręczną generatora Lottie?\n\nSpowoduje to usunięcie zapisanych presetów, motywów kolorystycznych i przesłanych logotypów.</string>
+    <string name="clear_remote_uploads">Wyczyść zdalne przesyłanie</string>
+    <string name="clear_remote_uploads_confirm">Czy na pewno chcesz usunąć wszystkie zdalnie przesłane pliki?\n\nSpowoduje to trwałe usunięcie wszystkich plików w folderze przesyłania urządzeń.</string>
+    <string name="remote_uploads_cleared">Folder zdalnych przesyłań został pomyślnie wyczyszczony.</string>
     <string name="export_settings">Eksportuj ustawienia</string>
     <string name="import_settings">Importuj ustawienia</string>
     <string name="import_settings_confirm">Czy na pewno chcesz zaimportować ustawienia?\n\nSpowoduje to nadpisanie bieżących ustawień, a aplikacja zostanie ponownie uruchomiona.</string>
