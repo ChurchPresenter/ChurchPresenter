@@ -131,8 +131,12 @@ private fun SingleDisplayPreview(
     val presentingMode by presenterManager.presentingMode
     val displayedVerses by presenterManager.displayedVerses
     val bibleTransitionAlpha by presenterManager.bibleTransitionAlpha
+    val previousDisplayedVerses by presenterManager.previousDisplayedVerses
+    val previousBibleAlpha by presenterManager.previousBibleAlpha
     val displayedLyricSection by presenterManager.displayedLyricSection
     val songTransitionAlpha by presenterManager.songTransitionAlpha
+    val previousDisplayedLyricSection by presenterManager.previousDisplayedLyricSection
+    val previousSongAlpha by presenterManager.previousSongAlpha
     val songDisplayLineIndex by presenterManager.songDisplayLineIndex
     val allLyricSections by presenterManager.allLyricSections
     val songDisplaySectionIndex by presenterManager.songDisplaySectionIndex
@@ -189,7 +193,8 @@ private fun SingleDisplayPreview(
                                     isLowerThird = isLowerThird,
                                     outputRole = primaryRole,
                                     transitionAlpha = bibleTransitionAlpha,
-                                    crossfadeEnabled = appSettings.bibleSettings.crossfade
+                                    previousVerses = previousDisplayedVerses,
+                                    previousAlpha = previousBibleAlpha
                                 )
                             Presenting.LYRICS ->
                                 SongPresenter(
@@ -202,7 +207,8 @@ private fun SingleDisplayPreview(
                                     lookAheadEnabled = screenAssignment.songLookAhead,
                                     allLyricSections = allLyricSections,
                                     displaySectionIndex = songDisplaySectionIndex,
-                                    crossfadeEnabled = appSettings.songSettings.crossfade
+                                    previousLyricSection = previousDisplayedLyricSection,
+                                    previousAlpha = previousSongAlpha
                                 )
                             Presenting.PICTURES ->
                                 PicturePresenter(imagePath = displayedImagePath, transitionAlpha = pictureTransitionAlpha)
