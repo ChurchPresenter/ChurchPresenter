@@ -89,6 +89,8 @@
     <string name="menu_about">Аб праграме</string>
     <string name="about_title">Аб Church Presenter</string>
     <string name="open_crash_logs">Адкрыць журнал памылак</string>
+    <string name="report_bug">Паведаміць аб памылцы</string>
+    <string name="submit_feature_request">Прапанаваць функцыю</string>
     <string name="action_ok">OK</string>
     <string name="menu_help_item">Даведка</string>
     <string name="menu_check_for_updates">Праверыць абнаўленні…</string>

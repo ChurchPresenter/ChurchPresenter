@@ -24,6 +24,8 @@ import churchpresenter.composeapp.generated.resources.about_title
 import churchpresenter.composeapp.generated.resources.app_name
 import churchpresenter.composeapp.generated.resources.action_ok
 import churchpresenter.composeapp.generated.resources.open_crash_logs
+import churchpresenter.composeapp.generated.resources.report_bug
+import churchpresenter.composeapp.generated.resources.submit_feature_request
 import org.churchpresenter.app.churchpresenter.BuildConfig
 import org.jetbrains.compose.resources.stringResource
 import java.awt.Desktop
@@ -38,7 +40,7 @@ fun AboutDialog(
 
     DialogWindow(
         onCloseRequest = onDismiss,
-        state = rememberDialogState(width = 360.dp, height = 240.dp),
+        state = rememberDialogState(width = 360.dp, height = 300.dp),
         title = stringResource(Res.string.about_title),
         resizable = false
     ) {
@@ -69,6 +71,22 @@ fun AboutDialog(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Spacer(modifier = Modifier.height(16.dp))
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    OutlinedButton(onClick = {
+                        Desktop.getDesktop().browse(java.net.URI("https://github.com/ChurchPresenter/ChurchPresenter/issues/new?template=bug_report.md"))
+                    }) {
+                        Text(stringResource(Res.string.report_bug))
+                    }
+                    OutlinedButton(onClick = {
+                        Desktop.getDesktop().browse(java.net.URI("https://github.com/ChurchPresenter/ChurchPresenter/issues/new?template=feature_request.md"))
+                    }) {
+                        Text(stringResource(Res.string.submit_feature_request))
+                    }
+                }
+                Spacer(modifier = Modifier.height(8.dp))
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically

@@ -89,6 +89,8 @@
     <string name="menu_about">Про програму</string>
     <string name="about_title">Про Church Presenter</string>
     <string name="open_crash_logs">Відкрити журнал помилок</string>
+    <string name="report_bug">Повідомити про помилку</string>
+    <string name="submit_feature_request">Надіслати запит на функцію</string>
     <string name="action_ok">OK</string>
     <string name="menu_help_item">Довідка</string>
     <string name="menu_check_for_updates">Перевірити оновлення…</string>

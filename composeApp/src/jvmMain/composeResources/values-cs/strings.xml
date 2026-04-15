@@ -89,6 +89,8 @@
     <string name="menu_about">O programu</string>
     <string name="about_title">O Church Presenter</string>
     <string name="open_crash_logs">Otevřít protokoly chyb</string>
+    <string name="report_bug">Nahlásit chybu</string>
+    <string name="submit_feature_request">Navrhnout funkci</string>
     <string name="action_ok">OK</string>
     <string name="menu_help_item">Nápověda</string>
     <string name="menu_check_for_updates">Zkontrolovat aktualizace…</string>
