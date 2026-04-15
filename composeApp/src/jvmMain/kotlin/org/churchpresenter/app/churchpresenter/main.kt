@@ -845,6 +845,11 @@ fun main() {
                                         }
                                     },
                                     remoteSelectSongFlow = remoteSelectSongFlow,
+                                    uploadPresentationFlow = kotlinx.coroutines.flow.flow {
+                                        companionServer.onPresentationUploaded.collect { file ->
+                                            emit(file)
+                                        }
+                                    },
                                     serverUrl = companionServer.serverUrl.collectAsState().value
                                 )
                                 OptionsDialog(

@@ -566,6 +566,13 @@ class CompanionServer {
     /** Stable folder ID used for all device-uploaded photos (accumulates across sessions). */
     private val DEVICE_UPLOADS_FOLDER_ID = "device_uploads"
 
+    /**
+     * ID of the most recently device-uploaded presentation file.
+     * Cleared from [_presentationCatalogs], [_slideBytes], and [_presentationFilePaths] when a new
+     * upload replaces it, so the mobile's presentation list never accumulates stale entries.
+     */
+    @Volatile private var _lastDeviceUploadedPresentationId: String? = null
+
     // Picture catalog — metadata + file references stored per folder
     private val _pictureCatalog = MutableStateFlow<PictureFolderResponse?>(null)
     /** folderId → ordered list of image Files (index = image order) */
@@ -625,6 +632,16 @@ class CompanionServer {
      */
     val onSelectSlide = MutableSharedFlow<SelectSlideRequest>(
         extraBufferCapacity = 8,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
+
+    /**
+     * Emitted when a mobile client uploads a presentation file via POST /api/presentations/upload.
+     * The emitted [File] has already been saved to disk and is ready to be loaded by
+     * [PresentationViewModel.addPresentation].
+     */
+    val onPresentationUploaded = MutableSharedFlow<File>(
+        extraBufferCapacity = 4,
         onBufferOverflow = BufferOverflow.DROP_OLDEST
     )
 
@@ -1575,22 +1592,19 @@ class CompanionServer {
 
                 // ── Presentation endpoints ────────────────────────────────────
 
-                /** GET /api/presentations — list all loaded presentations with slide metadata */
+                /**
+                 * GET /api/presentations
+                 *
+                 * Returns only the presentation that is currently loaded in the desktop
+                 * Presentations tab ([_presentationCatalog]).  The mobile list should
+                 * mirror what the desktop shows — not accumulate every file that has ever
+                 * been opened.  Schedule-driven navigation uses
+                 * GET /api/presentations/{id} directly via [navigateTo], so individual
+                 * schedule items are still accessible without polluting this list.
+                 */
                 get(Constants.ENDPOINT_PRESENTATIONS) {
                     if (!checkApiKey(call)) return@get
-                    // Merge all background-rendered/schedule presentations with the tab-loaded catalog.
-                    // _presentationCatalogs has every rendered presentation; _presentationCatalog.value
-                    // only has the currently tab-loaded one — merge so mobile sees everything.
-                    val allPresMap = LinkedHashMap<String, PresentationDto>()
-                    _presentationCatalogs.forEach { (id, dto) -> allPresMap[id] = dto }
-                    _presentationCatalog.value.presentations.forEach { dto ->
-                        allPresMap[dto.id] = dto
-                    }
-                    val merged = PresentationCatalogResponse(
-                        presentations = allPresMap.values.toList(),
-                        total = allPresMap.size
-                    )
-                    call.respond(merged)
+                    call.respond(_presentationCatalog.value)
                 }
 
                 /**
@@ -1665,6 +1679,66 @@ class CompanionServer {
                     }
                     scope.launch { onSelectSlide.emit(SelectSlideRequest(id = id, index = index)) }
                     call.respondText("""{"ok":true}""", ContentType.Application.Json)
+                }
+
+                /**
+                 * POST /api/presentations/upload
+                 * Body: { "name": "slides.pdf", "data": "data:application/pdf;base64,…" }
+                 *
+                 * Decodes the base64 data-URI, saves the file to
+                 * ~/.churchpresenter/device_presentations/, and emits [onPresentationUploaded]
+                 * so the desktop can load it into PresentationViewModel.
+                 *
+                 * Response: { "ok": true, "id": "<hex-hash>", "name": "<fileName>" }
+                 */
+                post("${Constants.ENDPOINT_PRESENTATIONS}/upload") {
+                    if (!checkApiKey(call)) return@post
+                    try {
+                        val body   = call.receiveText()
+                        val parsed = json.parseToJsonElement(body) as? kotlinx.serialization.json.JsonObject
+                        val name   = (parsed?.get("name") as? kotlinx.serialization.json.JsonPrimitive)?.content
+                        val data   = (parsed?.get("data") as? kotlinx.serialization.json.JsonPrimitive)?.content
+                        if (name.isNullOrBlank() || data.isNullOrBlank()) {
+                            call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":"name and data are required"}""")
+                            return@post
+                        }
+                        val safeName = File(name).name.ifBlank { "upload.pdf" }
+                        val ext = safeName.substringAfterLast('.', "").lowercase()
+                        if (ext !in setOf("pdf", "ppt", "pptx", "key")) {
+                            call.respond(io.ktor.http.HttpStatusCode.UnsupportedMediaType, """{"error":"unsupported file type: $ext"}""")
+                            return@post
+                        }
+                        val base64Match = Regex("^data:[^;]+;base64,(.+)$").find(data)
+                        if (base64Match == null) {
+                            call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":"data must be a base64 data URI"}""")
+                            return@post
+                        }
+                        val fileBytes = Base64.getDecoder().decode(base64Match.groupValues[1])
+                        val uploadDir = File(System.getProperty("user.home"), ".churchpresenter/device_presentations").also { it.mkdirs() }
+                        val uniqueName = if (File(uploadDir, safeName).exists()) {
+                            val ts   = System.currentTimeMillis()
+                            val base = safeName.substringBeforeLast('.', safeName)
+                            "${base}_$ts.$ext"
+                        } else safeName
+                        val file = File(uploadDir, uniqueName)
+                        file.writeBytes(fileBytes)
+                        val id = file.absolutePath.hashCode().toUInt().toString(16)
+                        // Evict the previous device-uploaded presentation so the mobile list
+                        // never accumulates stale entries — only the latest upload is shown.
+                        _lastDeviceUploadedPresentationId?.let { oldId ->
+                            _presentationCatalogs.remove(oldId)
+                            _slideBytes.remove(oldId)
+                            _presentationFilePaths.remove(oldId)
+                        }
+                        _lastDeviceUploadedPresentationId = id
+                        scope.launch { onPresentationUploaded.emit(file) }
+                        call.respondText(
+                            """{"ok":true,"id":"$id","name":"${file.nameWithoutExtension.replace("\"", "\\\"")}"}""",
+                            ContentType.Application.Json
+                        )
+                    } catch (e: Exception) {
+                        call.respond(io.ktor.http.HttpStatusCode.InternalServerError, """{"error":"upload failed: ${e.message?.replace("\"", "\\\"")}"}""")
+                    }
                 }
 
                 // ── Picture endpoints ─────────────────────────────────────────

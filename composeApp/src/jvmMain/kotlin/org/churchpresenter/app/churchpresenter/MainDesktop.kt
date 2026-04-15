@@ -151,6 +151,8 @@ fun MainDesktop(
     /** Emits a verse to display instantly without approval. */
     selectBibleVerseFlow: Flow<SelectBibleVerseRequest>? = null,
     remoteSelectSongFlow: Flow<ScheduleItem.SongItem>? = null,
+    /** Emits a presentation [File] uploaded by a mobile client — loaded into [PresentationViewModel] automatically. */
+    uploadPresentationFlow: Flow<java.io.File>? = null,
     serverUrl: String = "",
 ) {
     val isDarkTheme = when (theme) {
@@ -323,6 +325,17 @@ fun MainDesktop(
             selectedSongItem = songItem
             selectedSongItemVersion++
             selectedTabIndex = Tabs.SONGS.ordinal
+        }
+    }
+
+    // Load a presentation file uploaded by a mobile client (POST /api/presentations/upload).
+    // addPresentation renders the slides and triggers onSlidesLoaded → companionServer.updatePresentation,
+    // which broadcasts WS_EVENT_PRESENTATION_UPDATED so the mobile's GET /api/presentations finds it.
+    LaunchedEffect(uploadPresentationFlow) {
+        uploadPresentationFlow?.collect { file ->
+            presentationViewModel.addPresentation(file)
+            // Switch to the Presentations tab so the user can see the newly loaded file
+            selectedTabIndex = Tabs.PRESENTATION.ordinal
         }
     }
 

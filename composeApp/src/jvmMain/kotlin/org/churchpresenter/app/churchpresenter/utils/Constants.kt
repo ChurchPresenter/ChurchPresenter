@@ -81,7 +81,7 @@ fun isChorusHeader(line: String): Boolean {
 object Constants {
     /** Localhost port used to enforce single-instance via ServerSocket lock. */
     const val SINGLE_INSTANCE_PORT = 47632
-
+    
     const val NONE = "None"
     const val FIRST_PAGE = "First Page"
     const val EVERY_PAGE = "Every Page"
@@ -227,8 +227,9 @@ object Constants {
     const val ENDPOINT_SCHEDULE_ADD_BATCH = "/api/schedule/add-batch"
     const val ENDPOINT_PROJECT            = "/api/project"
     const val ENDPOINT_CLEAR              = "/api/clear"
-    const val ENDPOINT_PRESENTATIONS     = "/api/presentations"
-    const val ENDPOINT_PICTURES          = "/api/pictures"
+    const val ENDPOINT_PRESENTATIONS          = "/api/presentations"
+    const val ENDPOINT_PRESENTATIONS_UPLOAD  = "/api/presentations/upload"
+    const val ENDPOINT_PICTURES               = "/api/pictures"
     const val ENDPOINT_WS                = "/ws"
 
     // Lottie Generator endpoints
