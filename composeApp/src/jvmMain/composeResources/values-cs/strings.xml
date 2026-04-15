@@ -1026,5 +1026,47 @@
     <string name="canvas_source_move_backward">Přesunout dozadu</string>
     <string name="canvas_aspect_ratio_warning">Scéna je %1$s, displej je %2$s</string>
     <string name="canvas_fix_aspect_ratio">Opravit</string>
+    <!-- Source Properties Panel -->
+    <string name="canvas_source_name">Název</string>
+    <string name="canvas_rotation">Rotace</string>
+    <string name="canvas_file_path">Cesta k souboru</string>
+    <string name="canvas_browse">Procházet</string>
+    <string name="canvas_scale">Měřítko</string>
+    <string name="canvas_scale_fit">Přizpůsobit</string>
+    <string name="canvas_scale_fill">Vyplnit</string>
+    <string name="canvas_scale_stretch">Roztáhnout</string>
+    <string name="canvas_scale_none">Původní</string>
+    <string name="canvas_text_content">Text</string>
+    <string name="canvas_line_spacing">Řádkování</string>
+    <string name="canvas_font">Písmo</string>
+    <string name="canvas_align_horizontal">Vodorovně</string>
+    <string name="canvas_align_vertical">Svisle</string>
+    <string name="canvas_render_width">Šířka</string>
+    <string name="canvas_render_height">Výška</string>
+    <string name="canvas_fps">FPS</string>
+    <string name="canvas_custom_css">Custom CSS</string>
+    <string name="canvas_browser_url">URL</string>
+    <string name="canvas_select_image_title">Vybrat obrázek</string>
+    <string name="canvas_select_video_title">Vybrat video</string>
+    <string name="canvas_image_files">Soubory obrázků</string>
+    <string name="canvas_video_files">Soubory videa</string>
+    <string name="canvas_qr_type_url">URL</string>
+    <string name="canvas_qr_type_text">Text</string>
+    <string name="canvas_qr_type_email">Email</string>
+    <string name="canvas_qr_type_phone">Telefon</string>
+    <string name="canvas_qr_type_sms">SMS</string>
+    <string name="canvas_qr_type_wifi">WiFi</string>
+    <string name="canvas_qr_type_vcard">vCard</string>
+    <string name="canvas_clock_mode_clock">Hodiny</string>
+    <string name="canvas_clock_mode_countdown">Odpočítávání</string>
+    <string name="canvas_decklink_io_warning">Toto zařízení se aktuálně používá pro výstup. Vstup nemusí být dostupný na zařízeních, která nepodporují současný I/O.</string>
+    <string name="canvas_transform_x">X</string>
+    <string name="canvas_transform_y">Y</string>
+    <string name="canvas_transform_w">Š</string>
+    <string name="canvas_transform_h">V</string>
+    <string name="canvas_qr_default_text">Váš text zde</string>
+    <string name="canvas_decklink_device">DeckLink: %1$s</string>
+    <string name="canvas_clock_format_24h">24h</string>
+    <string name="canvas_clock_format_12h">12h</string>
 </resources>
 

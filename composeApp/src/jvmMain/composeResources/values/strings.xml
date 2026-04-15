@@ -743,6 +743,40 @@
     <string name="canvas_toggle_lock">Toggle lock</string>
     <string name="canvas_aspect_ratio_warning">Scene is %1$s but display is %2$s</string>
     <string name="canvas_fix_aspect_ratio">Fix</string>
+    <!-- Source Properties Panel -->
+    <string name="canvas_source_name">Name</string>
+    <string name="canvas_rotation">Rotation</string>
+    <string name="canvas_file_path">File path</string>
+    <string name="canvas_browse">Browse</string>
+    <string name="canvas_scale">Scale</string>
+    <string name="canvas_scale_fit">Fit</string>
+    <string name="canvas_scale_fill">Fill</string>
+    <string name="canvas_scale_stretch">Stretch</string>
+    <string name="canvas_scale_none">None</string>
+    <string name="canvas_text_content">Text</string>
+    <string name="canvas_line_spacing">Line Spacing</string>
+    <string name="canvas_font">Font</string>
+    <string name="canvas_align_horizontal">Horizontal</string>
+    <string name="canvas_align_vertical">Vertical</string>
+    <string name="canvas_render_width">Width</string>
+    <string name="canvas_render_height">Height</string>
+    <string name="canvas_fps">FPS</string>
+    <string name="canvas_custom_css">Custom CSS</string>
+    <string name="canvas_browser_url">URL</string>
+    <string name="canvas_select_image_title">Select Image</string>
+    <string name="canvas_select_video_title">Select Video</string>
+    <string name="canvas_image_files">Image Files</string>
+    <string name="canvas_video_files">Video Files</string>
+    <string name="canvas_qr_type_url">URL</string>
+    <string name="canvas_qr_type_text">Text</string>
+    <string name="canvas_qr_type_email">Email</string>
+    <string name="canvas_qr_type_phone">Phone</string>
+    <string name="canvas_qr_type_sms">SMS</string>
+    <string name="canvas_qr_type_wifi">WiFi</string>
+    <string name="canvas_qr_type_vcard">vCard</string>
+    <string name="canvas_clock_mode_clock">Clock</string>
+    <string name="canvas_clock_mode_countdown">Countdown</string>
+    <string name="canvas_decklink_io_warning">This device is currently used for output. Input may not be available on devices that don\'t support simultaneous I/O.</string>
     <string name="canvas_tool_select">Select</string>
     <string name="canvas_tool_rectangle">Rectangle</string>
     <string name="canvas_tool_ellipse">Ellipse</string>
@@ -761,6 +795,8 @@
     <string name="canvas_text_bold">Bold</string>
     <string name="canvas_clock_mode">Mode</string>
     <string name="canvas_clock_format">Format</string>
+    <string name="canvas_clock_format_24h">24h</string>
+    <string name="canvas_clock_format_12h">12h</string>
     <string name="canvas_clock_show_hours">Show Hours</string>
     <string name="canvas_clock_show_seconds">Show Seconds</string>
     <string name="canvas_clock_font_size">Font Size</string>
@@ -801,6 +837,12 @@
     <string name="canvas_placeholder_camera">Camera: %1$s</string>
     <string name="canvas_placeholder_camera_default">Camera</string>
     <string name="canvas_placeholder_screen_capture">Screen Capture</string>
+    <string name="canvas_transform_x">X</string>
+    <string name="canvas_transform_y">Y</string>
+    <string name="canvas_transform_w">W</string>
+    <string name="canvas_transform_h">H</string>
+    <string name="canvas_qr_default_text">Your text here</string>
+    <string name="canvas_decklink_device">DeckLink: %1$s</string>
     <string name="web_under_construction">This feature is under construction.</string>
 
     <!-- Server Settings -->

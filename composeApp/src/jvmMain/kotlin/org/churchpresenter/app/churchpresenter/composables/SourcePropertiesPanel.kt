@@ -112,6 +112,41 @@ import churchpresenter.composeapp.generated.resources.canvas_capture_refresh_win
 import churchpresenter.composeapp.generated.resources.canvas_capture_interval
 import churchpresenter.composeapp.generated.resources.position
 import churchpresenter.composeapp.generated.resources.canvas_image_not_found
+import churchpresenter.composeapp.generated.resources.canvas_source_name
+import churchpresenter.composeapp.generated.resources.canvas_rotation
+import churchpresenter.composeapp.generated.resources.canvas_file_path
+import churchpresenter.composeapp.generated.resources.canvas_browse
+import churchpresenter.composeapp.generated.resources.canvas_scale
+import churchpresenter.composeapp.generated.resources.canvas_scale_fit
+import churchpresenter.composeapp.generated.resources.canvas_scale_fill
+import churchpresenter.composeapp.generated.resources.canvas_scale_stretch
+import churchpresenter.composeapp.generated.resources.canvas_scale_none
+import churchpresenter.composeapp.generated.resources.canvas_text_content
+import churchpresenter.composeapp.generated.resources.canvas_line_spacing
+import churchpresenter.composeapp.generated.resources.canvas_font
+import churchpresenter.composeapp.generated.resources.canvas_align_horizontal
+import churchpresenter.composeapp.generated.resources.canvas_align_vertical
+import churchpresenter.composeapp.generated.resources.canvas_render_width
+import churchpresenter.composeapp.generated.resources.canvas_render_height
+import churchpresenter.composeapp.generated.resources.canvas_fps
+import churchpresenter.composeapp.generated.resources.canvas_custom_css
+import churchpresenter.composeapp.generated.resources.canvas_browser_url
+import churchpresenter.composeapp.generated.resources.canvas_select_image_title
+import churchpresenter.composeapp.generated.resources.canvas_select_video_title
+import churchpresenter.composeapp.generated.resources.canvas_image_files
+import churchpresenter.composeapp.generated.resources.canvas_video_files
+import churchpresenter.composeapp.generated.resources.canvas_qr_type_url
+import churchpresenter.composeapp.generated.resources.canvas_qr_type_text
+import churchpresenter.composeapp.generated.resources.canvas_qr_type_email
+import churchpresenter.composeapp.generated.resources.canvas_qr_type_phone
+import churchpresenter.composeapp.generated.resources.canvas_qr_type_sms
+import churchpresenter.composeapp.generated.resources.canvas_qr_type_wifi
+import churchpresenter.composeapp.generated.resources.canvas_qr_type_vcard
+import churchpresenter.composeapp.generated.resources.canvas_clock_mode_clock
+import churchpresenter.composeapp.generated.resources.canvas_clock_mode_countdown
+import churchpresenter.composeapp.generated.resources.canvas_clock_format_24h
+import churchpresenter.composeapp.generated.resources.canvas_clock_format_12h
+import churchpresenter.composeapp.generated.resources.canvas_decklink_io_warning
 import churchpresenter.composeapp.generated.resources.canvas_properties
 import churchpresenter.composeapp.generated.resources.canvas_source_color
 import churchpresenter.composeapp.generated.resources.canvas_source_image
@@ -121,6 +156,12 @@ import churchpresenter.composeapp.generated.resources.canvas_video_loop
 import churchpresenter.composeapp.generated.resources.canvas_video_volume
 import churchpresenter.composeapp.generated.resources.canvas_transform
 import churchpresenter.composeapp.generated.resources.canvas_transparent_bg
+import churchpresenter.composeapp.generated.resources.canvas_transform_x
+import churchpresenter.composeapp.generated.resources.canvas_transform_y
+import churchpresenter.composeapp.generated.resources.canvas_transform_w
+import churchpresenter.composeapp.generated.resources.canvas_transform_h
+import churchpresenter.composeapp.generated.resources.canvas_qr_default_text
+import churchpresenter.composeapp.generated.resources.canvas_decklink_device
 import churchpresenter.composeapp.generated.resources.ic_folder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -155,7 +196,7 @@ fun SourcePropertiesPanel(
         )
 
         // Name
-        PropertyTextField("Name", source.name) { newName ->
+        PropertyTextField(stringResource(Res.string.canvas_source_name), source.name) { newName ->
             onSourceUpdate(updateName(source, newName))
         }
 
@@ -166,26 +207,26 @@ fun SourcePropertiesPanel(
 
         val t = source.transform
         Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-            PropertyFloatField("X", t.x, Modifier.weight(1f)) { v ->
+            PropertyFloatField(stringResource(Res.string.canvas_transform_x), t.x, Modifier.weight(1f)) { v ->
                 onSourceUpdate(updateTransform(source, t.copy(x = v)))
             }
-            PropertyFloatField("Y", t.y, Modifier.weight(1f)) { v ->
+            PropertyFloatField(stringResource(Res.string.canvas_transform_y), t.y, Modifier.weight(1f)) { v ->
                 onSourceUpdate(updateTransform(source, t.copy(y = v)))
             }
         }
         Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-            PropertyFloatField("W", t.width, Modifier.weight(1f)) { v ->
+            PropertyFloatField(stringResource(Res.string.canvas_transform_w), t.width, Modifier.weight(1f)) { v ->
                 onSourceUpdate(updateTransform(source, t.copy(width = v.coerceAtLeast(0.01f))))
             }
-            PropertyFloatField("H", t.height, Modifier.weight(1f)) { v ->
+            PropertyFloatField(stringResource(Res.string.canvas_transform_h), t.height, Modifier.weight(1f)) { v ->
                 onSourceUpdate(updateTransform(source, t.copy(height = v.coerceAtLeast(0.01f))))
             }
         }
 
-        PropertySliderWithInput("Rotation", t.rotation, -180f, 180f, "°") { v ->
+        PropertySliderWithInput(stringResource(Res.string.canvas_rotation), t.rotation, -180f, 180f, "°") { v ->
             onSourceUpdate(updateTransform(source, t.copy(rotation = v)))
         }
-        PropertySlider("Opacity", t.opacity, 0f, 1f) { v ->
+        PropertySlider(stringResource(Res.string.canvas_opacity), t.opacity, 0f, 1f) { v ->
             onSourceUpdate(updateTransform(source, t.copy(opacity = v)))
         }
 
@@ -210,19 +251,28 @@ fun SourcePropertiesPanel(
 @Composable
 private fun ImageProperties(source: SceneSource.ImageSource, onUpdate: (SceneSource) -> Unit) {
     val scope = rememberCoroutineScope()
+    val strFilePath = stringResource(Res.string.canvas_file_path)
+    val strSelectImage = stringResource(Res.string.canvas_select_image_title)
+    val strImageFiles = stringResource(Res.string.canvas_image_files)
+    val strBrowse = stringResource(Res.string.canvas_browse)
+    val fitLabel = stringResource(Res.string.canvas_scale_fit)
+    val fillLabel = stringResource(Res.string.canvas_scale_fill)
+    val stretchLabel = stringResource(Res.string.canvas_scale_stretch)
+    val noneLabel = stringResource(Res.string.canvas_scale_none)
+
     Text(stringResource(Res.string.canvas_source_image), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-        PropertyTextField("File Path", source.filePath, Modifier.weight(1f)) { v ->
+        PropertyTextField(strFilePath, source.filePath, Modifier.weight(1f)) { v ->
             onUpdate(source.copy(filePath = v))
         }
         Button(
             onClick = {
                 scope.launch {
                     val imageFilter = FileNameExtensionFilter(
-                        "Image Files",
+                        strImageFiles,
                         "png", "jpg", "jpeg", "gif", "bmp", "webp", "heic", "heif", "svg"
                     )
                     val startPath = if (source.filePath.isNotEmpty()) {
@@ -231,7 +281,7 @@ private fun ImageProperties(source: SceneSource.ImageSource, onUpdate: (SceneSou
                     val file = FileChooser.platformInstance.chooseSingle(
                         path = startPath,
                         filters = listOf(imageFilter),
-                        title = "Select Image",
+                        title = strSelectImage,
                         selectDirectory = false
                     )
                     if (file != null) {
@@ -243,18 +293,18 @@ private fun ImageProperties(source: SceneSource.ImageSource, onUpdate: (SceneSou
         ) {
             Icon(
                 painterResource(Res.drawable.ic_folder),
-                contentDescription = "Browse",
+                contentDescription = strBrowse,
                 modifier = Modifier.size(16.dp)
             )
         }
     }
-    val scaleOptions = listOf("Fit", "Fill", "Stretch", "None")
-    val scaleMap = mapOf("FIT" to "Fit", "FILL" to "Fill", "STRETCH" to "Stretch", "NONE" to "None")
-    val reverseMap = mapOf("Fit" to "FIT", "Fill" to "FILL", "Stretch" to "STRETCH", "None" to "NONE")
+    val scaleOptions = listOf(fitLabel, fillLabel, stretchLabel, noneLabel)
+    val scaleMap = mapOf("FIT" to fitLabel, "FILL" to fillLabel, "STRETCH" to stretchLabel, "NONE" to noneLabel)
+    val reverseMap = mapOf(fitLabel to "FIT", fillLabel to "FILL", stretchLabel to "STRETCH", noneLabel to "NONE")
     DropdownSelector(
-        label = "Scale",
+        label = stringResource(Res.string.canvas_scale),
         items = scaleOptions,
-        selected = scaleMap[source.contentScale] ?: "Fit",
+        selected = scaleMap[source.contentScale] ?: fitLabel,
         onSelectedChange = { onUpdate(source.copy(contentScale = reverseMap[it] ?: "FIT")) },
         modifier = Modifier.fillMaxWidth()
     )
@@ -275,7 +325,7 @@ private fun TextProperties(source: SceneSource.TextSource, onUpdate: (SceneSourc
             textValue = it
             onUpdate(source.copy(text = it))
         },
-        label = { Text("Text", style = MaterialTheme.typography.labelSmall) },
+        label = { Text(stringResource(Res.string.canvas_text_content), style = MaterialTheme.typography.labelSmall) },
         singleLine = false,
         minLines = 2,
         maxLines = 5,
@@ -283,7 +333,7 @@ private fun TextProperties(source: SceneSource.TextSource, onUpdate: (SceneSourc
         textStyle = MaterialTheme.typography.bodySmall
     )
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text("Line Spacing", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(stringResource(Res.string.canvas_line_spacing), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         Slider(
             value = source.lineSpacing / 100f,
             onValueChange = { onUpdate(source.copy(lineSpacing = (it * 100).toInt())) },
@@ -293,13 +343,13 @@ private fun TextProperties(source: SceneSource.TextSource, onUpdate: (SceneSourc
         Text("${source.lineSpacing}%", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(40.dp))
     }
     FontDropdown(
-        label = "Font",
+        label = stringResource(Res.string.canvas_font),
         selected = source.fontFamily,
         fonts = availableFonts,
         onSelectedChange = { onUpdate(source.copy(fontFamily = it)) },
         modifier = Modifier.fillMaxWidth()
     )
-    PropertyTextField("Font Size", source.fontSize.toString()) { v ->
+    PropertyTextField(stringResource(Res.string.canvas_clock_font_size), source.fontSize.toString()) { v ->
         v.toIntOrNull()?.let { onUpdate(source.copy(fontSize = it)) }
     }
     Row(
@@ -307,7 +357,7 @@ private fun TextProperties(source: SceneSource.TextSource, onUpdate: (SceneSourc
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Column {
-            Text("Horizontal", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(stringResource(Res.string.canvas_align_horizontal), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             HorizontalAlignmentButtons(
                 selectedAlignment = source.horizontalAlignment,
                 onAlignmentChange = { onUpdate(source.copy(horizontalAlignment = it)) },
@@ -317,7 +367,7 @@ private fun TextProperties(source: SceneSource.TextSource, onUpdate: (SceneSourc
             )
         }
         Column {
-            Text("Vertical", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(stringResource(Res.string.canvas_align_vertical), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             VerticalAlignmentButtons(
                 selectedAlignment = source.verticalAlignment,
                 onAlignmentChange = { onUpdate(source.copy(verticalAlignment = it)) },
@@ -417,19 +467,24 @@ private fun ColorProperties(source: SceneSource.ColorSource, onUpdate: (SceneSou
 @Composable
 private fun VideoProperties(source: SceneSource.VideoSource, onUpdate: (SceneSource) -> Unit) {
     val scope = rememberCoroutineScope()
+    val strFilePath = stringResource(Res.string.canvas_file_path)
+    val strSelectVideo = stringResource(Res.string.canvas_select_video_title)
+    val strVideoFiles = stringResource(Res.string.canvas_video_files)
+    val strBrowse = stringResource(Res.string.canvas_browse)
+
     Text(stringResource(Res.string.canvas_source_video), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-        PropertyTextField("File Path", source.filePath, Modifier.weight(1f)) { v ->
+        PropertyTextField(strFilePath, source.filePath, Modifier.weight(1f)) { v ->
             onUpdate(source.copy(filePath = v))
         }
         Button(
             onClick = {
                 scope.launch {
                     val videoFilter = FileNameExtensionFilter(
-                        "Video Files",
+                        strVideoFiles,
                         "mp4", "mov", "avi", "mkv", "wmv", "flv", "webm", "m4v"
                     )
                     val startPath = if (source.filePath.isNotEmpty()) {
@@ -438,7 +493,7 @@ private fun VideoProperties(source: SceneSource.VideoSource, onUpdate: (SceneSou
                     val file = FileChooser.platformInstance.chooseSingle(
                         path = startPath,
                         filters = listOf(videoFilter),
-                        title = "Select Video",
+                        title = strSelectVideo,
                         selectDirectory = false
                     )
                     if (file != null) {
@@ -450,7 +505,7 @@ private fun VideoProperties(source: SceneSource.VideoSource, onUpdate: (SceneSou
         ) {
             Icon(
                 painterResource(Res.drawable.ic_folder),
-                contentDescription = "Browse",
+                contentDescription = strBrowse,
                 modifier = Modifier.size(16.dp)
             )
         }
@@ -479,7 +534,7 @@ private fun VideoProperties(source: SceneSource.VideoSource, onUpdate: (SceneSou
 @Composable
 private fun BrowserProperties(source: SceneSource.BrowserSource, onUpdate: (SceneSource) -> Unit) {
     Text(stringResource(Res.string.canvas_source_browser), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-    PropertyTextField("URL", source.url) { v ->
+    PropertyTextField(stringResource(Res.string.canvas_browser_url), source.url) { v ->
         onUpdate(source.copy(url = v))
     }
     // Show the browser's actual current URL (after redirects, navigation, etc.)
@@ -497,14 +552,14 @@ private fun BrowserProperties(source: SceneSource.BrowserSource, onUpdate: (Scen
         }
     }
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        PropertyTextField("Width", source.renderWidth.toString(), Modifier.weight(1f)) { v ->
+        PropertyTextField(stringResource(Res.string.canvas_render_width), source.renderWidth.toString(), Modifier.weight(1f)) { v ->
             v.toIntOrNull()?.let { onUpdate(source.copy(renderWidth = it.coerceIn(320, 3840))) }
         }
-        PropertyTextField("Height", source.renderHeight.toString(), Modifier.weight(1f)) { v ->
+        PropertyTextField(stringResource(Res.string.canvas_render_height), source.renderHeight.toString(), Modifier.weight(1f)) { v ->
             v.toIntOrNull()?.let { onUpdate(source.copy(renderHeight = it.coerceIn(240, 2160))) }
         }
     }
-    PropertyTextField("FPS", source.fps.toString()) { v ->
+    PropertyTextField(stringResource(Res.string.canvas_fps), source.fps.toString()) { v ->
         v.toIntOrNull()?.let { onUpdate(source.copy(fps = it.coerceIn(1, 60))) }
     }
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -514,7 +569,7 @@ private fun BrowserProperties(source: SceneSource.BrowserSource, onUpdate: (Scen
         )
         Text(stringResource(Res.string.canvas_transparent_bg), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
-    PropertyTextField("Custom CSS", source.customCss) { v ->
+    PropertyTextField(stringResource(Res.string.canvas_custom_css), source.customCss) { v ->
         onUpdate(source.copy(customCss = v))
     }
 }
@@ -646,18 +701,22 @@ private fun ClockProperties(source: SceneSource.ClockSource, onUpdate: (SceneSou
         style = MaterialTheme.typography.labelMedium,
         color = MaterialTheme.colorScheme.onSurfaceVariant
     )
+    val clockLabel = stringResource(Res.string.canvas_clock_mode_clock)
+    val countdownLabel = stringResource(Res.string.canvas_clock_mode_countdown)
     DropdownSelector(
         label = stringResource(Res.string.canvas_clock_mode),
-        items = listOf("Clock", "Countdown"),
-        selected = if (source.mode == "countdown") "Countdown" else "Clock",
-        onSelectedChange = { onUpdate(source.copy(mode = if (it == "Countdown") "countdown" else "clock")) },
+        items = listOf(clockLabel, countdownLabel),
+        selected = if (source.mode == "countdown") countdownLabel else clockLabel,
+        onSelectedChange = { onUpdate(source.copy(mode = if (it == countdownLabel) "countdown" else "clock")) },
         modifier = Modifier.fillMaxWidth()
     )
+    val format24hLabel = stringResource(Res.string.canvas_clock_format_24h)
+    val format12hLabel = stringResource(Res.string.canvas_clock_format_12h)
     DropdownSelector(
         label = stringResource(Res.string.canvas_clock_format),
-        items = listOf("24h", "12h"),
-        selected = source.timeFormat,
-        onSelectedChange = { onUpdate(source.copy(timeFormat = it)) },
+        items = listOf(format24hLabel, format12hLabel),
+        selected = if (source.timeFormat == "12h") format12hLabel else format24hLabel,
+        onSelectedChange = { onUpdate(source.copy(timeFormat = if (it == format12hLabel) "12h" else "24h")) },
         modifier = Modifier.fillMaxWidth()
     )
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -703,14 +762,22 @@ private fun QRCodeProperties(source: SceneSource.QRCodeSource, onUpdate: (SceneS
         style = MaterialTheme.typography.labelMedium,
         color = MaterialTheme.colorScheme.onSurfaceVariant
     )
-    val typeOptions = listOf("URL", "Text", "Email", "Phone", "SMS", "WiFi", "vCard")
+    val urlLabel    = stringResource(Res.string.canvas_qr_type_url)
+    val textLabel   = stringResource(Res.string.canvas_qr_type_text)
+    val emailLabel  = stringResource(Res.string.canvas_qr_type_email)
+    val phoneLabel  = stringResource(Res.string.canvas_qr_type_phone)
+    val smsLabel    = stringResource(Res.string.canvas_qr_type_sms)
+    val wifiLabel   = stringResource(Res.string.canvas_qr_type_wifi)
+    val vcardLabel  = stringResource(Res.string.canvas_qr_type_vcard)
+    val defaultText = stringResource(Res.string.canvas_qr_default_text)
+    val typeOptions = listOf(urlLabel, textLabel, emailLabel, phoneLabel, smsLabel, wifiLabel, vcardLabel)
     val typeMap = mapOf(
-        "url" to "URL", "text" to "Text", "email" to "Email", "phone" to "Phone",
-        "sms" to "SMS", "wifi" to "WiFi", "vcard" to "vCard"
+        "url" to urlLabel, "text" to textLabel, "email" to emailLabel, "phone" to phoneLabel,
+        "sms" to smsLabel, "wifi" to wifiLabel, "vcard" to vcardLabel
     )
     val reverseTypeMap = mapOf(
-        "URL" to "url", "Text" to "text", "Email" to "email", "Phone" to "phone",
-        "SMS" to "sms", "WiFi" to "wifi", "vCard" to "vcard"
+        urlLabel to "url", textLabel to "text", emailLabel to "email", phoneLabel to "phone",
+        smsLabel to "sms", wifiLabel to "wifi", vcardLabel to "vcard"
     )
     DropdownSelector(
         label = stringResource(Res.string.canvas_qr_type),
@@ -720,7 +787,7 @@ private fun QRCodeProperties(source: SceneSource.QRCodeSource, onUpdate: (SceneS
             val type = reverseTypeMap[newType] ?: "url"
             val prefill = when (type) {
                 "url" -> "https://example.com"
-                "text" -> "Your text here"
+                "text" -> defaultText
                 "email" -> "mailto:name@example.com"
                 "phone" -> "tel:+1234567890"
                 "sms" -> "smsto:+1234567890:Message"
@@ -790,11 +857,12 @@ private fun CameraProperties(source: SceneSource.CameraSource, onUpdate: (SceneS
     )
 
     // Build unified device list: regular cameras + DeckLink devices
-    var devices by remember { mutableStateOf(listCameraDevicesWithDeckLink()) }
+    val deckLinkDeviceFormat = stringResource(Res.string.canvas_decklink_device)
+    var devices by remember { mutableStateOf(listCameraDevicesWithDeckLink(deckLinkDeviceFormat)) }
     val noCamerasLabel = stringResource(Res.string.canvas_camera_none_found)
 
     Button(
-        onClick = { devices = listCameraDevicesWithDeckLink() },
+        onClick = { devices = listCameraDevicesWithDeckLink(deckLinkDeviceFormat) },
         modifier = Modifier.fillMaxWidth()
     ) {
         Text(stringResource(Res.string.canvas_camera_refresh), style = MaterialTheme.typography.labelSmall)
@@ -833,7 +901,7 @@ private fun CameraProperties(source: SceneSource.CameraSource, onUpdate: (SceneS
             // Warn if device is already in use for output
             if (DeckLinkManager.isOutputActive(source.deckLinkIndex)) {
                 Text(
-                    text = "This device is currently used for output. Input may not be available on devices that don't support simultaneous I/O.",
+                    text = stringResource(Res.string.canvas_decklink_io_warning),
                     color = Color(0xFFFF8888),
                     fontSize = 12.sp,
                     modifier = Modifier.padding(vertical = 4.dp)
@@ -971,7 +1039,7 @@ private data class CameraDevice(
     val deckLinkIndex: Int = -1
 )
 
-private fun listCameraDevicesWithDeckLink(): List<CameraDevice> {
+private fun listCameraDevicesWithDeckLink(deckLinkDeviceFormat: String = "DeckLink: %1\$s"): List<CameraDevice> {
     val devices = mutableListOf<CameraDevice>()
 
     // Add DeckLink devices (via SDK) — these provide proper capture card support
@@ -981,7 +1049,7 @@ private fun listCameraDevicesWithDeckLink(): List<CameraDevice> {
             devices.add(CameraDevice(
                 name = device.name,
                 path = "decklink://${device.index}",
-                displayName = "DeckLink: ${device.name}",
+                displayName = deckLinkDeviceFormat.format(device.name),
                 isDeckLink = true,
                 deckLinkIndex = device.index
             ))

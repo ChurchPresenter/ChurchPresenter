@@ -948,5 +948,47 @@
     <string name="canvas_source_move_backward">На задні план</string>
     <string name="canvas_aspect_ratio_warning">Сцэна %1$s, дысплей %2$s</string>
     <string name="canvas_fix_aspect_ratio">Выправіць</string>
+    <!-- Source Properties Panel -->
+    <string name="canvas_source_name">Імя</string>
+    <string name="canvas_rotation">Паварот</string>
+    <string name="canvas_file_path">Шлях да файла</string>
+    <string name="canvas_browse">Агляд</string>
+    <string name="canvas_scale">Маштаб</string>
+    <string name="canvas_scale_fit">Упісаць</string>
+    <string name="canvas_scale_fill">Запоўніць</string>
+    <string name="canvas_scale_stretch">Расцягнуць</string>
+    <string name="canvas_scale_none">Арыгінал</string>
+    <string name="canvas_text_content">Тэкст</string>
+    <string name="canvas_line_spacing">Міжрадковы інтэрвал</string>
+    <string name="canvas_font">Шрыфт</string>
+    <string name="canvas_align_horizontal">Па гарызанталі</string>
+    <string name="canvas_align_vertical">Па вертыкалі</string>
+    <string name="canvas_render_width">Шырыня</string>
+    <string name="canvas_render_height">Вышыня</string>
+    <string name="canvas_fps">FPS</string>
+    <string name="canvas_custom_css">Custom CSS</string>
+    <string name="canvas_browser_url">URL</string>
+    <string name="canvas_select_image_title">Выбраць малюнак</string>
+    <string name="canvas_select_video_title">Выбраць відэа</string>
+    <string name="canvas_image_files">Файлы малюнкаў</string>
+    <string name="canvas_video_files">Відэафайлы</string>
+    <string name="canvas_qr_type_url">URL</string>
+    <string name="canvas_qr_type_text">Тэкст</string>
+    <string name="canvas_qr_type_email">Email</string>
+    <string name="canvas_qr_type_phone">Тэлефон</string>
+    <string name="canvas_qr_type_sms">SMS</string>
+    <string name="canvas_qr_type_wifi">WiFi</string>
+    <string name="canvas_qr_type_vcard">vCard</string>
+    <string name="canvas_clock_mode_clock">Гадзіннік</string>
+    <string name="canvas_clock_mode_countdown">Зваротны адлік</string>
+    <string name="canvas_decklink_io_warning">Гэта прылада выкарыстоўваецца для вываду. Уваход можа быць недаступны на прыладах без адначасовага ўводу-вываду.</string>
+    <string name="canvas_transform_x">X</string>
+    <string name="canvas_transform_y">Y</string>
+    <string name="canvas_transform_w">Ш</string>
+    <string name="canvas_transform_h">В</string>
+    <string name="canvas_qr_default_text">Ваш тэкст тут</string>
+    <string name="canvas_decklink_device">DeckLink: %1$s</string>
+    <string name="canvas_clock_format_24h">24h</string>
+    <string name="canvas_clock_format_12h">12h</string>
 </resources>
 

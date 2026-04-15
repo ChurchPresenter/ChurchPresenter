@@ -948,5 +948,47 @@
     <string name="canvas_source_move_backward">Nach hinten</string>
     <string name="canvas_aspect_ratio_warning">Szene ist %1$s, Anzeige ist %2$s</string>
     <string name="canvas_fix_aspect_ratio">Korrigieren</string>
+    <!-- Source Properties Panel -->
+    <string name="canvas_source_name">Name</string>
+    <string name="canvas_rotation">Drehung</string>
+    <string name="canvas_file_path">Dateipfad</string>
+    <string name="canvas_browse">Durchsuchen</string>
+    <string name="canvas_scale">Skalierung</string>
+    <string name="canvas_scale_fit">Anpassen</string>
+    <string name="canvas_scale_fill">Füllen</string>
+    <string name="canvas_scale_stretch">Strecken</string>
+    <string name="canvas_scale_none">Original</string>
+    <string name="canvas_text_content">Text</string>
+    <string name="canvas_line_spacing">Zeilenabstand</string>
+    <string name="canvas_font">Schrift</string>
+    <string name="canvas_align_horizontal">Horizontal</string>
+    <string name="canvas_align_vertical">Vertikal</string>
+    <string name="canvas_render_width">Breite</string>
+    <string name="canvas_render_height">Höhe</string>
+    <string name="canvas_fps">FPS</string>
+    <string name="canvas_custom_css">Custom CSS</string>
+    <string name="canvas_browser_url">URL</string>
+    <string name="canvas_select_image_title">Bild auswählen</string>
+    <string name="canvas_select_video_title">Video auswählen</string>
+    <string name="canvas_image_files">Bilddateien</string>
+    <string name="canvas_video_files">Videodateien</string>
+    <string name="canvas_qr_type_url">URL</string>
+    <string name="canvas_qr_type_text">Text</string>
+    <string name="canvas_qr_type_email">Email</string>
+    <string name="canvas_qr_type_phone">Telefon</string>
+    <string name="canvas_qr_type_sms">SMS</string>
+    <string name="canvas_qr_type_wifi">WiFi</string>
+    <string name="canvas_qr_type_vcard">vCard</string>
+    <string name="canvas_clock_mode_clock">Uhr</string>
+    <string name="canvas_clock_mode_countdown">Countdown</string>
+    <string name="canvas_decklink_io_warning">Dieses Gerät wird derzeit für die Ausgabe verwendet. Der Eingang ist möglicherweise nicht auf Geräten verfügbar, die kein gleichzeitiges I/O unterstützen.</string>
+    <string name="canvas_transform_x">X</string>
+    <string name="canvas_transform_y">Y</string>
+    <string name="canvas_transform_w">B</string>
+    <string name="canvas_transform_h">H</string>
+    <string name="canvas_qr_default_text">Ihr Text hier</string>
+    <string name="canvas_decklink_device">DeckLink: %1$s</string>
+    <string name="canvas_clock_format_24h">24h</string>
+    <string name="canvas_clock_format_12h">12h</string>
 </resources>
 

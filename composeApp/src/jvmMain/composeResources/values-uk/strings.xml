@@ -953,5 +953,47 @@
     <string name="canvas_source_move_backward">На задній план</string>
     <string name="canvas_aspect_ratio_warning">Сцена %1$s, дисплей %2$s</string>
     <string name="canvas_fix_aspect_ratio">Виправити</string>
+    <!-- Source Properties Panel -->
+    <string name="canvas_source_name">Ім\'я</string>
+    <string name="canvas_rotation">Поворот</string>
+    <string name="canvas_file_path">Шлях до файлу</string>
+    <string name="canvas_browse">Огляд</string>
+    <string name="canvas_scale">Масштаб</string>
+    <string name="canvas_scale_fit">Вписати</string>
+    <string name="canvas_scale_fill">Заповнити</string>
+    <string name="canvas_scale_stretch">Розтягнути</string>
+    <string name="canvas_scale_none">Оригінал</string>
+    <string name="canvas_text_content">Текст</string>
+    <string name="canvas_line_spacing">Міжрядковий інтервал</string>
+    <string name="canvas_font">Шрифт</string>
+    <string name="canvas_align_horizontal">По горизонталі</string>
+    <string name="canvas_align_vertical">По вертикалі</string>
+    <string name="canvas_render_width">Ширина</string>
+    <string name="canvas_render_height">Висота</string>
+    <string name="canvas_fps">FPS</string>
+    <string name="canvas_custom_css">Custom CSS</string>
+    <string name="canvas_browser_url">URL</string>
+    <string name="canvas_select_image_title">Вибрати зображення</string>
+    <string name="canvas_select_video_title">Вибрати відео</string>
+    <string name="canvas_image_files">Файли зображень</string>
+    <string name="canvas_video_files">Відеофайли</string>
+    <string name="canvas_qr_type_url">URL</string>
+    <string name="canvas_qr_type_text">Текст</string>
+    <string name="canvas_qr_type_email">Email</string>
+    <string name="canvas_qr_type_phone">Телефон</string>
+    <string name="canvas_qr_type_sms">SMS</string>
+    <string name="canvas_qr_type_wifi">WiFi</string>
+    <string name="canvas_qr_type_vcard">vCard</string>
+    <string name="canvas_clock_mode_clock">Годинник</string>
+    <string name="canvas_clock_mode_countdown">Зворотний відлік</string>
+    <string name="canvas_decklink_io_warning">Цей пристрій використовується для виведення. Введення може бути недоступне на пристроях без одночасного введення-виведення.</string>
+    <string name="canvas_transform_x">X</string>
+    <string name="canvas_transform_y">Y</string>
+    <string name="canvas_transform_w">Ш</string>
+    <string name="canvas_transform_h">В</string>
+    <string name="canvas_qr_default_text">Ваш текст тут</string>
+    <string name="canvas_decklink_device">DeckLink: %1$s</string>
+    <string name="canvas_clock_format_24h">24h</string>
+    <string name="canvas_clock_format_12h">12h</string>
 </resources>
 
