@@ -91,6 +91,7 @@
     <string name="open_crash_logs">Absturzberichte öffnen</string>
     <string name="action_ok">OK</string>
     <string name="menu_help_item">Hilfe</string>
+    <string name="menu_check_for_updates">Nach Updates suchen…</string>
 
     <!-- Options Dialog Strings -->
     <string name="text_settings_and_colors">Texteinstellungen und Farben</string>
@@ -847,5 +848,15 @@
     <!-- Song Title Slide -->
     <string name="song_title_slide">Liedtitel-Folie</string>
     <string name="enabled">Aktiviert</string>
+
+    <!-- Canvas Tab -->
+    <string name="canvas_rename_scene">Umbenennen</string>
+    <string name="canvas_remove_scene">Entfernen</string>
+    <string name="canvas_add_source">Quelle hinzufügen</string>
+    <string name="canvas_delete_source">Quelle löschen</string>
+    <string name="canvas_source_move_forward">Nach vorne</string>
+    <string name="canvas_source_move_backward">Nach hinten</string>
+    <string name="canvas_aspect_ratio_warning">Szene ist %1$s, Anzeige ist %2$s</string>
+    <string name="canvas_fix_aspect_ratio">Korrigieren</string>
 </resources>
 

@@ -714,6 +714,10 @@ fun main() {
                                         Desktop.getDesktop()
                                             .browse(URI("https://github.com/ChurchPresenter/ChurchPresenter/"))
                                     },
+                                    onCheckForUpdates = {
+                                        Desktop.getDesktop()
+                                            .browse(URI("https://github.com/ChurchPresenter/ChurchPresenter/releases/latest"))
+                                    },
                                     onKeyboardShortcuts = { showKeyboardShortcutsDialog = true },
                                     theme = {
                                         appSettings = appSettings.copy(theme = it.toString())

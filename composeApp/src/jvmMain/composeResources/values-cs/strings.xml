@@ -91,6 +91,7 @@
     <string name="open_crash_logs">Otevřít protokoly chyb</string>
     <string name="action_ok">OK</string>
     <string name="menu_help_item">Nápověda</string>
+    <string name="menu_check_for_updates">Zkontrolovat aktualizace…</string>
 
     <!-- Options Dialog Strings -->
     <string name="text_settings_and_colors">Nastavení textu a barvy</string>
@@ -924,6 +925,16 @@
     <string name="look_ahead_fullscreen">Náhled (celá obrazovka)</string>
     <string name="look_ahead_next_fullscreen">Další sekce (celá obrazovka)</string>
     <string name="look_ahead_lower_third">Náhled (dolní třetina)</string>
-    <string name="look_ahead_next_lower_third">Další sekce (dolní třetina)</string>
+    <string name="look_ahead_next_lower_third">Dalš sekce (doln třetina)</string>
+
+    <!-- Canvas Tab -->
+    <string name="canvas_rename_scene">Přejmenovat</string>
+    <string name="canvas_remove_scene">Odebrat</string>
+    <string name="canvas_add_source">Přidat zdroj</string>
+    <string name="canvas_delete_source">Smazat zdroj</string>
+    <string name="canvas_source_move_forward">Přesunout dopředu</string>
+    <string name="canvas_source_move_backward">Přesunout dozadu</string>
+    <string name="canvas_aspect_ratio_warning">Scéna je %1$s, displej je %2$s</string>
+    <string name="canvas_fix_aspect_ratio">Opravit</string>
 </resources>
 

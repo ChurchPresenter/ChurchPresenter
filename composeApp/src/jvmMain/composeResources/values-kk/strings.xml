@@ -91,6 +91,7 @@
     <string name="open_crash_logs">Қате журналын ашу</string>
     <string name="action_ok">OK</string>
     <string name="menu_help_item">Анықтама</string>
+    <string name="menu_check_for_updates">Жаңартуларды тексеру…</string>
 
     <!-- Options Dialog Strings -->
     <string name="text_settings_and_colors">Мәтін параметрлері мен түстер</string>
@@ -847,5 +848,15 @@
     <!-- Song Title Slide -->
     <string name="song_title_slide">Ән атауының слайды</string>
     <string name="enabled">Қосулы</string>
+
+    <!-- Canvas Tab -->
+    <string name="canvas_rename_scene">Атын өзгерту</string>
+    <string name="canvas_remove_scene">Жою</string>
+    <string name="canvas_add_source">Дерек көзін қосу</string>
+    <string name="canvas_delete_source">Дерек көзін жою</string>
+    <string name="canvas_source_move_forward">Алға жылжыту</string>
+    <string name="canvas_source_move_backward">Артқа жылжыту</string>
+    <string name="canvas_aspect_ratio_warning">Сахна %1$s, дисплей %2$s</string>
+    <string name="canvas_fix_aspect_ratio">Түзету</string>
 </resources>
 

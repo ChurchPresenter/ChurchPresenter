@@ -104,6 +104,14 @@ import churchpresenter.composeapp.generated.resources.canvas_tool_ellipse
 import churchpresenter.composeapp.generated.resources.canvas_tool_line
 import churchpresenter.composeapp.generated.resources.canvas_tool_arrow
 import churchpresenter.composeapp.generated.resources.canvas_tool_freehand
+import churchpresenter.composeapp.generated.resources.canvas_rename_scene
+import churchpresenter.composeapp.generated.resources.canvas_remove_scene
+import churchpresenter.composeapp.generated.resources.canvas_add_source
+import churchpresenter.composeapp.generated.resources.canvas_delete_source
+import churchpresenter.composeapp.generated.resources.canvas_source_move_forward
+import churchpresenter.composeapp.generated.resources.canvas_source_move_backward
+import churchpresenter.composeapp.generated.resources.canvas_aspect_ratio_warning
+import churchpresenter.composeapp.generated.resources.canvas_fix_aspect_ratio
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -119,6 +127,18 @@ fun CanvasTab(
     val currentScene = sceneViewModel.currentScene
     val selectedSourceId by sceneViewModel.selectedSourceId
     val selectedSource = sceneViewModel.selectedSource
+
+    // Localised default source names (resolved in composable scope so they
+    // can be captured by non-composable onClick lambdas below)
+    val strImage         = stringResource(Res.string.canvas_source_image)
+    val strText          = stringResource(Res.string.canvas_source_text)
+    val strColor         = stringResource(Res.string.canvas_source_color)
+    val strVideo         = stringResource(Res.string.canvas_source_video)
+    val strClock         = stringResource(Res.string.canvas_source_clock)
+    val strQrCode        = stringResource(Res.string.canvas_source_qrcode)
+    val strCamera        = stringResource(Res.string.canvas_source_camera)
+    val strScreenCapture = stringResource(Res.string.canvas_source_screen_capture)
+    val strBrowser       = stringResource(Res.string.canvas_source_browser)
 
     // Drawing tool state
     var activeTool by remember { mutableStateOf("select") }
@@ -258,7 +278,7 @@ fun CanvasTab(
                             ) {
                                 Icon(
                                     painterResource(Res.drawable.ic_edit),
-                                    contentDescription = "Rename",
+                                    contentDescription = stringResource(Res.string.canvas_rename_scene),
                                     modifier = Modifier.size(14.dp),
                                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
@@ -269,7 +289,7 @@ fun CanvasTab(
                             ) {
                                 Icon(
                                     painterResource(Res.drawable.ic_close),
-                                    contentDescription = "Remove",
+                                    contentDescription = stringResource(Res.string.canvas_remove_scene),
                                     modifier = Modifier.size(14.dp),
                                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
@@ -367,7 +387,7 @@ fun CanvasTab(
                         ) {
                             Icon(
                                 painterResource(Res.drawable.ic_add),
-                                contentDescription = "Add source",
+                                contentDescription = stringResource(Res.string.canvas_add_source),
                                 modifier = Modifier.size(16.dp),
                                 tint = MaterialTheme.colorScheme.onSurface
                             )
@@ -384,7 +404,7 @@ fun CanvasTab(
                                     sceneViewModel.addSource(
                                         SceneSource.ImageSource(
                                             id = UUID.randomUUID().toString(),
-                                            name = "Image",
+                                            name = strImage,
                                             filePath = "",
                                             transform = SourceTransform(width = 0.5f, height = 0.5f)
                                         )
@@ -398,7 +418,7 @@ fun CanvasTab(
                                     sceneViewModel.addSource(
                                         SceneSource.TextSource(
                                             id = UUID.randomUUID().toString(),
-                                            name = "Text",
+                                            name = strText,
                                             transform = SourceTransform(
                                                 x = 0.25f, y = 0.4f,
                                                 width = 0.5f, height = 0.2f
@@ -414,7 +434,7 @@ fun CanvasTab(
                                     sceneViewModel.addSource(
                                         SceneSource.ColorSource(
                                             id = UUID.randomUUID().toString(),
-                                            name = "Color",
+                                            name = strColor,
                                             transform = SourceTransform()
                                         )
                                     )
@@ -427,7 +447,7 @@ fun CanvasTab(
                                     sceneViewModel.addSource(
                                         SceneSource.VideoSource(
                                             id = UUID.randomUUID().toString(),
-                                            name = "Video",
+                                            name = strVideo,
                                             filePath = "",
                                             transform = SourceTransform()
                                         )
@@ -441,7 +461,7 @@ fun CanvasTab(
                                     sceneViewModel.addSource(
                                         SceneSource.ClockSource(
                                             id = UUID.randomUUID().toString(),
-                                            name = "Clock",
+                                            name = strClock,
                                             transform = SourceTransform(width = 0.4f, height = 0.15f)
                                         )
                                     )
@@ -454,7 +474,7 @@ fun CanvasTab(
                                     sceneViewModel.addSource(
                                         SceneSource.QRCodeSource(
                                             id = UUID.randomUUID().toString(),
-                                            name = "QR Code",
+                                            name = strQrCode,
                                             transform = SourceTransform(width = 0.2f, height = 0.2f)
                                         )
                                     )
@@ -467,7 +487,7 @@ fun CanvasTab(
                                     sceneViewModel.addSource(
                                         SceneSource.CameraSource(
                                             id = UUID.randomUUID().toString(),
-                                            name = "Camera",
+                                            name = strCamera,
                                             transform = SourceTransform()
                                         )
                                     )
@@ -480,7 +500,7 @@ fun CanvasTab(
                                     sceneViewModel.addSource(
                                         SceneSource.ScreenCaptureSource(
                                             id = UUID.randomUUID().toString(),
-                                            name = "Screen Capture",
+                                            name = strScreenCapture,
                                             transform = SourceTransform()
                                         )
                                     )
@@ -493,7 +513,7 @@ fun CanvasTab(
                                     sceneViewModel.addSource(
                                         SceneSource.BrowserSource(
                                             id = UUID.randomUUID().toString(),
-                                            name = "Browser",
+                                            name = strBrowser,
                                             url = "",
                                             transform = SourceTransform(
                                                 x = 0.1f, y = 0.1f,
@@ -514,7 +534,7 @@ fun CanvasTab(
                         ) {
                             Icon(
                                 painterResource(Res.drawable.ic_delete),
-                                contentDescription = "Delete source",
+                                contentDescription = stringResource(Res.string.canvas_delete_source),
                                 modifier = Modifier.size(16.dp),
                                 tint = MaterialTheme.colorScheme.onSurface
                             )
@@ -525,7 +545,7 @@ fun CanvasTab(
                         ) {
                             Icon(
                                 painterResource(Res.drawable.ic_arrow_up),
-                                contentDescription = "Move forward",
+                                contentDescription = stringResource(Res.string.canvas_source_move_forward),
                                 modifier = Modifier.size(16.dp),
                                 tint = MaterialTheme.colorScheme.onSurface
                             )
@@ -536,7 +556,7 @@ fun CanvasTab(
                         ) {
                             Icon(
                                 painterResource(Res.drawable.ic_arrow_down),
-                                contentDescription = "Move backward",
+                                contentDescription = stringResource(Res.string.canvas_source_move_backward),
                                 modifier = Modifier.size(16.dp),
                                 tint = MaterialTheme.colorScheme.onSurface
                             )
@@ -715,8 +735,11 @@ fun CanvasTab(
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text(
-                            "Scene is ${formatAspectRatio(currentScene.canvasWidth, currentScene.canvasHeight)}" +
-                            " but display is ${formatAspectRatio(displayW, displayH)}",
+                            stringResource(
+                                Res.string.canvas_aspect_ratio_warning,
+                                formatAspectRatio(currentScene.canvasWidth, currentScene.canvasHeight),
+                                formatAspectRatio(displayW, displayH)
+                            ),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onErrorContainer
                         )
@@ -731,7 +754,7 @@ fun CanvasTab(
                             modifier = Modifier.height(28.dp),
                             contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 12.dp, vertical = 0.dp)
                         ) {
-                            Text("Fix", style = MaterialTheme.typography.labelSmall)
+                            Text(stringResource(Res.string.canvas_fix_aspect_ratio), style = MaterialTheme.typography.labelSmall)
                         }
                     }
                 }

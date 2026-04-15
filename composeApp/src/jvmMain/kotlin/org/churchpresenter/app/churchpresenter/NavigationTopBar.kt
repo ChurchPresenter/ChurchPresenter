@@ -26,6 +26,7 @@ import churchpresenter.composeapp.generated.resources.menu_exit
 import churchpresenter.composeapp.generated.resources.menu_file
 import churchpresenter.composeapp.generated.resources.menu_help
 import churchpresenter.composeapp.generated.resources.menu_help_item
+import churchpresenter.composeapp.generated.resources.menu_check_for_updates
 import churchpresenter.composeapp.generated.resources.menu_language
 import churchpresenter.composeapp.generated.resources.menu_view
 import churchpresenter.composeapp.generated.resources.menu_new_schedule
@@ -56,7 +57,8 @@ fun FrameWindowScope.NavigationTopBar(
     onSettings: () -> Unit = {},
     onAbout: () -> Unit = {},
     onHelp: () -> Unit = {},
-    onKeyboardShortcuts: () -> Unit = {}
+    onKeyboardShortcuts: () -> Unit = {},
+    onCheckForUpdates: () -> Unit = {}
 ) {
 
     val fileLabel = stringResource(Res.string.menu_file)
@@ -186,6 +188,7 @@ fun FrameWindowScope.NavigationTopBar(
             Item(stringResource(Res.string.menu_keyboard_shortcuts), onClick = onKeyboardShortcuts, shortcut = KeyShortcut(key = Key.F1))
             Item(stringResource(Res.string.menu_about), onClick = onAbout)
             Item(stringResource(Res.string.menu_help_item), onClick = onHelp)
+            Item(stringResource(Res.string.menu_check_for_updates), onClick = onCheckForUpdates)
         }
     }
 }

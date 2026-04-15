@@ -91,6 +91,7 @@
     <string name="open_crash_logs">Адкрыць журнал памылак</string>
     <string name="action_ok">OK</string>
     <string name="menu_help_item">Даведка</string>
+    <string name="menu_check_for_updates">Праверыць абнаўленні…</string>
 
     <!-- Options Dialog Strings -->
     <string name="text_settings_and_colors">Налады тэксту і колеру</string>
@@ -847,5 +848,15 @@
     <!-- Song Title Slide -->
     <string name="song_title_slide">Слайд з назвай песні</string>
     <string name="enabled">Уключана</string>
+
+    <!-- Canvas Tab -->
+    <string name="canvas_rename_scene">Перайменаваць</string>
+    <string name="canvas_remove_scene">Выдаліць</string>
+    <string name="canvas_add_source">Дадаць крыніцу</string>
+    <string name="canvas_delete_source">Выдаліць крыніцу</string>
+    <string name="canvas_source_move_forward">На пярэдні план</string>
+    <string name="canvas_source_move_backward">На задні план</string>
+    <string name="canvas_aspect_ratio_warning">Сцэна %1$s, дысплей %2$s</string>
+    <string name="canvas_fix_aspect_ratio">Выправіць</string>
 </resources>
 
