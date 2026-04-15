@@ -739,6 +739,8 @@
     <string name="canvas_delete_source">Delete source</string>
     <string name="canvas_source_move_forward">Move forward</string>
     <string name="canvas_source_move_backward">Move backward</string>
+    <string name="canvas_toggle_visibility">Toggle visibility</string>
+    <string name="canvas_toggle_lock">Toggle lock</string>
     <string name="canvas_aspect_ratio_warning">Scene is %1$s but display is %2$s</string>
     <string name="canvas_fix_aspect_ratio">Fix</string>
     <string name="canvas_tool_select">Select</string>

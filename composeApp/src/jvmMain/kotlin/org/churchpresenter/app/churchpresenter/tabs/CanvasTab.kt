@@ -110,6 +110,8 @@ import churchpresenter.composeapp.generated.resources.canvas_add_source
 import churchpresenter.composeapp.generated.resources.canvas_delete_source
 import churchpresenter.composeapp.generated.resources.canvas_source_move_forward
 import churchpresenter.composeapp.generated.resources.canvas_source_move_backward
+import churchpresenter.composeapp.generated.resources.canvas_toggle_visibility
+import churchpresenter.composeapp.generated.resources.canvas_toggle_lock
 import churchpresenter.composeapp.generated.resources.canvas_aspect_ratio_warning
 import churchpresenter.composeapp.generated.resources.canvas_fix_aspect_ratio
 
@@ -269,30 +271,48 @@ fun CanvasTab(
                             if (isMismatched) {
                                 Text("⚠", fontSize = 14.sp, color = MaterialTheme.colorScheme.error)
                             }
-                            IconButton(
-                                onClick = {
-                                    renamingSceneId = scene.id
-                                    renameText = scene.name
+                            TooltipArea(
+                                tooltip = {
+                                    Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
+                                        Text(stringResource(Res.string.canvas_rename_scene), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
+                                    }
                                 },
-                                modifier = Modifier.size(20.dp)
+                                tooltipPlacement = TooltipPlacement.CursorPoint()
                             ) {
-                                Icon(
-                                    painterResource(Res.drawable.ic_edit),
-                                    contentDescription = stringResource(Res.string.canvas_rename_scene),
-                                    modifier = Modifier.size(14.dp),
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
+                                IconButton(
+                                    onClick = {
+                                        renamingSceneId = scene.id
+                                        renameText = scene.name
+                                    },
+                                    modifier = Modifier.size(20.dp)
+                                ) {
+                                    Icon(
+                                        painterResource(Res.drawable.ic_edit),
+                                        contentDescription = stringResource(Res.string.canvas_rename_scene),
+                                        modifier = Modifier.size(14.dp),
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
                             }
-                            IconButton(
-                                onClick = { sceneViewModel.removeScene(scene.id) },
-                                modifier = Modifier.size(20.dp)
+                            TooltipArea(
+                                tooltip = {
+                                    Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
+                                        Text(stringResource(Res.string.canvas_remove_scene), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
+                                    }
+                                },
+                                tooltipPlacement = TooltipPlacement.CursorPoint()
                             ) {
-                                Icon(
-                                    painterResource(Res.drawable.ic_close),
-                                    contentDescription = stringResource(Res.string.canvas_remove_scene),
-                                    modifier = Modifier.size(14.dp),
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
+                                IconButton(
+                                    onClick = { sceneViewModel.removeScene(scene.id) },
+                                    modifier = Modifier.size(20.dp)
+                                ) {
+                                    Icon(
+                                        painterResource(Res.drawable.ic_close),
+                                        contentDescription = stringResource(Res.string.canvas_remove_scene),
+                                        modifier = Modifier.size(14.dp),
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
                             }
                         }
                     }
@@ -339,27 +359,45 @@ fun CanvasTab(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             // Visibility toggle
-                            IconButton(
-                                onClick = { sceneViewModel.toggleSourceVisibility(source.id) },
-                                modifier = Modifier.size(20.dp)
+                            TooltipArea(
+                                tooltip = {
+                                    Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
+                                        Text(stringResource(Res.string.canvas_toggle_visibility), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
+                                    }
+                                },
+                                tooltipPlacement = TooltipPlacement.CursorPoint()
                             ) {
-                                Text(
-                                    if (source.visible) "\uD83D\uDC41" else "\u2014",
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
+                                IconButton(
+                                    onClick = { sceneViewModel.toggleSourceVisibility(source.id) },
+                                    modifier = Modifier.size(20.dp)
+                                ) {
+                                    Text(
+                                        if (source.visible) "\uD83D\uDC41" else "\u2014",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
                             }
 
                             // Lock toggle
-                            IconButton(
-                                onClick = { sceneViewModel.toggleSourceLock(source.id) },
-                                modifier = Modifier.size(20.dp)
+                            TooltipArea(
+                                tooltip = {
+                                    Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
+                                        Text(stringResource(Res.string.canvas_toggle_lock), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
+                                    }
+                                },
+                                tooltipPlacement = TooltipPlacement.CursorPoint()
                             ) {
-                                Text(
-                                    if (source.locked) "\uD83D\uDD12" else "\uD83D\uDD13",
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
+                                IconButton(
+                                    onClick = { sceneViewModel.toggleSourceLock(source.id) },
+                                    modifier = Modifier.size(20.dp)
+                                ) {
+                                    Text(
+                                        if (source.locked) "\uD83D\uDD12" else "\uD83D\uDD13",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
                             }
 
                             Text(
@@ -381,16 +419,25 @@ fun CanvasTab(
                     var showAddMenu by remember { mutableStateOf(false) }
 
                     Box {
-                        IconButton(
-                            onClick = { showAddMenu = true },
-                            modifier = Modifier.size(28.dp)
+                        TooltipArea(
+                            tooltip = {
+                                Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
+                                    Text(stringResource(Res.string.canvas_add_source), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
+                                }
+                            },
+                            tooltipPlacement = TooltipPlacement.CursorPoint()
                         ) {
-                            Icon(
-                                painterResource(Res.drawable.ic_add),
-                                contentDescription = stringResource(Res.string.canvas_add_source),
-                                modifier = Modifier.size(16.dp),
-                                tint = MaterialTheme.colorScheme.onSurface
-                            )
+                            IconButton(
+                                onClick = { showAddMenu = true },
+                                modifier = Modifier.size(28.dp)
+                            ) {
+                                Icon(
+                                    painterResource(Res.drawable.ic_add),
+                                    contentDescription = stringResource(Res.string.canvas_add_source),
+                                    modifier = Modifier.size(16.dp),
+                                    tint = MaterialTheme.colorScheme.onSurface
+                                )
+                            }
                         }
 
                         DropdownMenu(
@@ -528,38 +575,65 @@ fun CanvasTab(
 
                     val currentSelectedId = selectedSourceId
                     if (currentSelectedId != null) {
-                        IconButton(
-                            onClick = { sceneViewModel.removeSource(currentSelectedId) },
-                            modifier = Modifier.size(28.dp)
+                        TooltipArea(
+                            tooltip = {
+                                Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
+                                    Text(stringResource(Res.string.canvas_delete_source), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
+                                }
+                            },
+                            tooltipPlacement = TooltipPlacement.CursorPoint()
                         ) {
-                            Icon(
-                                painterResource(Res.drawable.ic_delete),
-                                contentDescription = stringResource(Res.string.canvas_delete_source),
-                                modifier = Modifier.size(16.dp),
-                                tint = MaterialTheme.colorScheme.onSurface
-                            )
+                            IconButton(
+                                onClick = { sceneViewModel.removeSource(currentSelectedId) },
+                                modifier = Modifier.size(28.dp)
+                            ) {
+                                Icon(
+                                    painterResource(Res.drawable.ic_delete),
+                                    contentDescription = stringResource(Res.string.canvas_delete_source),
+                                    modifier = Modifier.size(16.dp),
+                                    tint = MaterialTheme.colorScheme.onSurface
+                                )
+                            }
                         }
-                        IconButton(
-                            onClick = { sceneViewModel.moveSourceDown(currentSelectedId) },
-                            modifier = Modifier.size(28.dp)
+                        TooltipArea(
+                            tooltip = {
+                                Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
+                                    Text(stringResource(Res.string.canvas_source_move_forward), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
+                                }
+                            },
+                            tooltipPlacement = TooltipPlacement.CursorPoint()
                         ) {
-                            Icon(
-                                painterResource(Res.drawable.ic_arrow_up),
-                                contentDescription = stringResource(Res.string.canvas_source_move_forward),
-                                modifier = Modifier.size(16.dp),
-                                tint = MaterialTheme.colorScheme.onSurface
-                            )
+                            IconButton(
+                                onClick = { sceneViewModel.moveSourceDown(currentSelectedId) },
+                                modifier = Modifier.size(28.dp)
+                            ) {
+                                Icon(
+                                    painterResource(Res.drawable.ic_arrow_up),
+                                    contentDescription = stringResource(Res.string.canvas_source_move_forward),
+                                    modifier = Modifier.size(16.dp),
+                                    tint = MaterialTheme.colorScheme.onSurface
+                                )
+                            }
                         }
-                        IconButton(
-                            onClick = { sceneViewModel.moveSourceUp(currentSelectedId) },
-                            modifier = Modifier.size(28.dp)
+                        TooltipArea(
+                            tooltip = {
+                                Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
+                                    Text(stringResource(Res.string.canvas_source_move_backward), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
+                                }
+                            },
+                            tooltipPlacement = TooltipPlacement.CursorPoint()
                         ) {
-                            Icon(
-                                painterResource(Res.drawable.ic_arrow_down),
-                                contentDescription = stringResource(Res.string.canvas_source_move_backward),
-                                modifier = Modifier.size(16.dp),
-                                tint = MaterialTheme.colorScheme.onSurface
-                            )
+                            IconButton(
+                                onClick = { sceneViewModel.moveSourceUp(currentSelectedId) },
+                                modifier = Modifier.size(28.dp)
+                            ) {
+                                Icon(
+                                    painterResource(Res.drawable.ic_arrow_down),
+                                    contentDescription = stringResource(Res.string.canvas_source_move_backward),
+                                    modifier = Modifier.size(16.dp),
+                                    tint = MaterialTheme.colorScheme.onSurface
+                                )
+                            }
                         }
                     }
                 }
