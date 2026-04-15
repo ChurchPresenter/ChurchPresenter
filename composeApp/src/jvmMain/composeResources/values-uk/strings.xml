@@ -599,6 +599,8 @@
     <string name="api_key_hint">Введіть секретний ключ…</string>
     <string name="api_key_label">API-ключ</string>
     <string name="api_key_protection">Захист API-ключа</string>
+    <string name="allow_file_upload">Дозволити завантаження файлів</string>
+    <string name="allow_file_upload_description">Дозволити мобільним пристроям завантажувати файли (фото та презентації) на цей комп'ютер.</string>
     <string name="appearance">Система</string>
     <string name="apply">Застосувати</string>
     <string name="audio_output">Аудіовихід</string>

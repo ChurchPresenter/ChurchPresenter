@@ -680,6 +680,8 @@
     <string name="api_key_hint">Zadejte tajný klíč…</string>
     <string name="api_key_label">API klíč</string>
     <string name="api_key_protection">Ochrana API klíče</string>
+    <string name="allow_file_upload">Povolit nahravani souboru</string>
+    <string name="allow_file_upload_description">Povolit mobilnim zariizenim nahravat soubory (fotografie a prezentace) do tohoto pocitace.</string>
     <string name="appearance">Systém</string>
     <string name="apply">Použít</string>
     <string name="audio_output">Zvukový výstup</string>

@@ -594,6 +594,8 @@
     <string name="api_key_hint">Geheimschlüssel eingeben…</string>
     <string name="api_key_label">API-Schlüssel</string>
     <string name="api_key_protection">API-Schlüssel-Schutz</string>
+    <string name="allow_file_upload">Datei-Upload erlauben</string>
+    <string name="allow_file_upload_description">Mobilgerate duerfen Dateien (Fotos und Prasentationen) auf diesen Computer hochladen.</string>
     <string name="appearance">System</string>
     <string name="apply">Anwenden</string>
     <string name="audio_output">Audioausgabe</string>

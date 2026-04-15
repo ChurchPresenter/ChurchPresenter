@@ -70,6 +70,8 @@ import churchpresenter.composeapp.generated.resources.allowed_clients_descriptio
 import churchpresenter.composeapp.generated.resources.api_key_hint
 import churchpresenter.composeapp.generated.resources.api_key_label
 import churchpresenter.composeapp.generated.resources.api_key_protection
+import churchpresenter.composeapp.generated.resources.allow_file_upload
+import churchpresenter.composeapp.generated.resources.allow_file_upload_description
 import churchpresenter.composeapp.generated.resources.blocked_clients
 import churchpresenter.composeapp.generated.resources.blocked_clients_description
 import churchpresenter.composeapp.generated.resources.client_label_cancel
@@ -133,6 +135,10 @@ fun ServerSettingsTab(
             enabled = settings.serverSettings.apiKeyEnabled,
             key = settings.serverSettings.apiKey
         )
+    }
+
+    LaunchedEffect(settings.serverSettings.fileUploadEnabled) {
+        companionServer.updateFileUploadEnabled(settings.serverSettings.fileUploadEnabled)
     }
 
     Box(
@@ -399,6 +405,23 @@ fun ServerSettingsTab(
                         }
                     }
                 }
+
+                // ── Allow File Upload toggle ──────────────────────────────────
+                SettingRow(label = stringResource(Res.string.allow_file_upload)) {
+                    Switch(
+                        checked = settings.serverSettings.fileUploadEnabled,
+                        onCheckedChange = { enabled ->
+                            onSettingsChange { s ->
+                                s.copy(serverSettings = s.serverSettings.copy(fileUploadEnabled = enabled))
+                            }
+                        }
+                    )
+                }
+                Text(
+                    text = stringResource(Res.string.allow_file_upload_description),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
 
                 HorizontalDivider()
 

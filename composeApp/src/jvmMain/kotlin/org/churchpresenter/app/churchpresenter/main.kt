@@ -280,6 +280,7 @@ fun main() {
                     enabled = appSettings.serverSettings.apiKeyEnabled,
                     key = appSettings.serverSettings.apiKey
                 )
+                companionServer.updateFileUploadEnabled(appSettings.serverSettings.fileUploadEnabled)
                 // Auto-start server if user previously enabled it
                 if (appSettings.serverSettings.enabled) {
                     companionServer.start(
@@ -876,6 +877,7 @@ fun main() {
                                             enabled = updated.serverSettings.apiKeyEnabled,
                                             key = updated.serverSettings.apiKey
                                         )
+                                        companionServer.updateFileUploadEnabled(updated.serverSettings.fileUploadEnabled)
                                     },
                                     onThemeChange = { newTheme ->
                                         appSettings = appSettings.copy(theme = newTheme.toString())

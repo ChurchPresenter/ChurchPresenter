@@ -603,7 +603,10 @@ data class ServerSettings(
     val apiKey: String = "",
     /** Optional fixed hostname/IP shown in the Server URL.
      *  Leave blank to auto-detect from the active network interface. */
-    val serverHost: String = ""
+    val serverHost: String = "",
+    /** When false, POST /api/presentations/upload and POST /api/pictures/upload
+     *  return 403 and no files are written to disk. */
+    val fileUploadEnabled: Boolean = false
 )
 
 @Serializable

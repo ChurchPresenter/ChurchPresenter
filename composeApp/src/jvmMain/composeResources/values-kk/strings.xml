@@ -594,6 +594,8 @@
     <string name="api_key_hint">Құпия кілтті енгізіңіз…</string>
     <string name="api_key_label">API кілті</string>
     <string name="api_key_protection">API кілтін қорғау</string>
+    <string name="allow_file_upload">Файл жуктеуге рухсат бeru</string>
+    <string name="allow_file_upload_description">Мобильдi куралдарга файлдарды (фотосуреттер мен презентациялар) осы компьютерге жуктеуге рухсат бeру.</string>
     <string name="appearance">Жүйелік</string>
     <string name="apply">Қолдану</string>
     <string name="audio_output">Аудио шығыс</string>

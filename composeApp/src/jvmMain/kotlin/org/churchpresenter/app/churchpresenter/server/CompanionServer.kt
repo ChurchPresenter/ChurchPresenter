@@ -586,6 +586,9 @@ class CompanionServer {
     private val _apiKeyEnabled = MutableStateFlow(false)
     private val _apiKey = MutableStateFlow("")
 
+    // File upload permission (updated from settings without restart)
+    private val _fileUploadEnabled = MutableStateFlow(true)
+
     // Outgoing WebSocket broadcast channel
     private val broadcastChannel = MutableSharedFlow<String>(
         extraBufferCapacity = 16,
@@ -703,6 +706,11 @@ class CompanionServer {
     fun  updateApiKey(enabled: Boolean, key: String) {
         _apiKeyEnabled.value = enabled
         _apiKey.value = key
+    }
+
+    /** Allow or disallow file uploads from mobile devices without restarting the server. */
+    fun updateFileUploadEnabled(enabled: Boolean) {
+        _fileUploadEnabled.value = enabled
     }
 
     /**
@@ -1693,6 +1701,10 @@ class CompanionServer {
                  */
                 post("${Constants.ENDPOINT_PRESENTATIONS}/upload") {
                     if (!checkApiKey(call)) return@post
+                    if (!_fileUploadEnabled.value) {
+                        call.respond(io.ktor.http.HttpStatusCode.Forbidden, """{"error":"file upload is disabled"}""")
+                        return@post
+                    }
                     try {
                         val body   = call.receiveText()
                         val parsed = json.parseToJsonElement(body) as? kotlinx.serialization.json.JsonObject
@@ -1841,6 +1853,10 @@ class CompanionServer {
                  */
                 post("${Constants.ENDPOINT_PICTURES}/upload") {
                     if (!checkApiKey(call)) return@post
+                    if (!_fileUploadEnabled.value) {
+                        call.respond(io.ktor.http.HttpStatusCode.Forbidden, """{"error":"file upload is disabled"}""")
+                        return@post
+                    }
                     try {
                         val body = call.receiveText()
                         val parsed = json.parseToJsonElement(body) as? kotlinx.serialization.json.JsonObject

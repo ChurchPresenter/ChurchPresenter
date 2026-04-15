@@ -858,6 +858,8 @@
     <string name="server_port_hint">8765</string>
     <string name="server_port_note">Change port before starting the server.</string>
     <string name="api_key_protection">API Key Protection</string>
+    <string name="allow_file_upload">Allow File Upload</string>
+    <string name="allow_file_upload_description">Allow mobile devices to upload files (photos and presentations) to this computer.</string>
     <string name="api_key_label">API Key</string>
     <string name="api_key_hint">Enter a secret key…</string>
     <string name="generate_api_key">Generate</string>

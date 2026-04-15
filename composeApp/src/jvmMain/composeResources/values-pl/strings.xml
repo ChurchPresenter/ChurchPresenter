@@ -594,7 +594,8 @@
     <string name="api_key_hint">Wprowadź tajny klucz…</string>
     <string name="api_key_label">Klucz API</string>
     <string name="api_key_protection">Ochrona klucza API</string>
-    <string name="appearance">System</string>
+    <string name="allow_file_upload">Zezwól na przesyłanie plików</string>
+    <string name="allow_file_upload_description">Zezwól urządzeniom mobilnym na przesyłanie plików (zdjęć i prezentacji) na ten komputer.</string>
     <string name="apply">Zastosuj</string>
     <string name="audio_output">Wyjście audio</string>
     <string name="audio_output_default">Domyślne systemowe</string>
