@@ -860,9 +860,15 @@ private fun CertDownloadQrDialog(
     }
 
     val isDark = MaterialTheme.colorScheme.background.luminance() < 0.5f
+    val screenSize = remember {
+        val toolkit = java.awt.Toolkit.getDefaultToolkit()
+        toolkit.screenSize
+    }
+    val dialogWidth = (screenSize.width * 0.80).dp
+    val dialogHeight = (screenSize.height * 0.85).dp
     Dialog(
         onCloseRequest = onDismiss,
-        state = rememberDialogState(width = 500.dp, height = 780.dp),
+        state = rememberDialogState(width = dialogWidth, height = dialogHeight),
         title = stringResource(Res.string.cert_download_qr_title),
         resizable = true
     ) {
@@ -912,103 +918,110 @@ private fun CertDownloadQrDialog(
                         )
                     }
 
-                    // ── iOS instructions ──────────────────────────────────────
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(
-                                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.25f),
-                                RoundedCornerShape(6.dp)
-                            )
-                            .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f), RoundedCornerShape(6.dp))
-                            .padding(horizontal = 12.dp, vertical = 10.dp),
-                        verticalArrangement = Arrangement.spacedBy(6.dp)
+                    // ── iOS + Android side by side ────────────────────────────
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        verticalAlignment = Alignment.Top
                     ) {
-                        Text(
-                            text = stringResource(Res.string.cert_install_ios_title),
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.SemiBold,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                        InstallStep(number = 1, text = stringResource(Res.string.cert_install_ios_step1))
-                        InstallStep(number = 2, text = stringResource(Res.string.cert_install_ios_step2))
-                        InstallStep(number = 3, text = stringResource(Res.string.cert_install_ios_step3))
-
-                        // Critical trust step in its own warning box
+                        // ── iOS instructions ──────────────────────────────────
                         Column(
                             modifier = Modifier
-                                .fillMaxWidth()
+                                .weight(1f)
                                 .background(
-                                    MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.35f),
-                                    RoundedCornerShape(4.dp)
+                                    MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.25f),
+                                    RoundedCornerShape(6.dp)
                                 )
-                                .padding(horizontal = 10.dp, vertical = 8.dp),
-                            verticalArrangement = Arrangement.spacedBy(4.dp)
+                                .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f), RoundedCornerShape(6.dp))
+                                .padding(horizontal = 12.dp, vertical = 10.dp),
+                            verticalArrangement = Arrangement.spacedBy(6.dp)
                         ) {
                             Text(
-                                text = stringResource(Res.string.cert_install_ios_trust_title),
-                                style = MaterialTheme.typography.labelSmall,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.error
+                                text = stringResource(Res.string.cert_install_ios_title),
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.primary
                             )
-                            Text(
-                                text = stringResource(Res.string.cert_install_ios_trust_step),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onErrorContainer
-                            )
+                            InstallStep(number = 1, text = stringResource(Res.string.cert_install_ios_step1))
+                            InstallStep(number = 2, text = stringResource(Res.string.cert_install_ios_step2))
+                            InstallStep(number = 3, text = stringResource(Res.string.cert_install_ios_step3))
+
+                            // Critical trust step
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .background(
+                                        MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.35f),
+                                        RoundedCornerShape(4.dp)
+                                    )
+                                    .padding(horizontal = 10.dp, vertical = 8.dp),
+                                verticalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                Text(
+                                    text = stringResource(Res.string.cert_install_ios_trust_title),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.error
+                                )
+                                Text(
+                                    text = stringResource(Res.string.cert_install_ios_trust_step),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onErrorContainer
+                                )
+                            }
                         }
-                    }
 
-                    // ── Android instructions ──────────────────────────────────
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(
-                                MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.25f),
-                                RoundedCornerShape(6.dp)
-                            )
-                            .border(1.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f), RoundedCornerShape(6.dp))
-                            .padding(horizontal = 12.dp, vertical = 10.dp),
-                        verticalArrangement = Arrangement.spacedBy(6.dp)
-                    ) {
-                        Text(
-                            text = stringResource(Res.string.cert_install_android_title),
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.SemiBold,
-                            color = MaterialTheme.colorScheme.secondary
-                        )
-                        InstallStep(number = 1, text = stringResource(Res.string.cert_install_android_step1))
-                        InstallStep(number = 2, text = stringResource(Res.string.cert_install_android_step2))
-
-                        // "Can't install" workaround box
+                        // ── Android instructions ──────────────────────────────
                         Column(
                             modifier = Modifier
-                                .fillMaxWidth()
+                                .weight(1f)
                                 .background(
-                                    MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.4f),
-                                    RoundedCornerShape(4.dp)
+                                    MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.25f),
+                                    RoundedCornerShape(6.dp)
                                 )
-                                .border(1.dp, MaterialTheme.colorScheme.tertiary.copy(alpha = 0.4f), RoundedCornerShape(4.dp))
-                                .padding(horizontal = 10.dp, vertical = 8.dp),
-                            verticalArrangement = Arrangement.spacedBy(5.dp)
+                                .border(1.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f), RoundedCornerShape(6.dp))
+                                .padding(horizontal = 12.dp, vertical = 10.dp),
+                            verticalArrangement = Arrangement.spacedBy(6.dp)
                         ) {
                             Text(
-                                text = stringResource(Res.string.cert_install_android_cant_title),
-                                style = MaterialTheme.typography.labelSmall,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.tertiary
+                                text = stringResource(Res.string.cert_install_android_title),
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.secondary
                             )
-                            Text(
-                                text = stringResource(Res.string.cert_install_android_cant_intro),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onTertiaryContainer
-                            )
-                            InstallStep(number = 1, text = stringResource(Res.string.cert_install_android_cant_step1),
-                                textColor = MaterialTheme.colorScheme.onTertiaryContainer)
-                            InstallStep(number = 2, text = stringResource(Res.string.cert_install_android_cant_step2),
-                                textColor = MaterialTheme.colorScheme.onTertiaryContainer)
-                            InstallStep(number = 3, text = stringResource(Res.string.cert_install_android_cant_step3),
-                                textColor = MaterialTheme.colorScheme.onTertiaryContainer)
+                            InstallStep(number = 1, text = stringResource(Res.string.cert_install_android_step1))
+                            InstallStep(number = 2, text = stringResource(Res.string.cert_install_android_step2))
+
+                            // "Can't install" workaround box
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .background(
+                                        MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.4f),
+                                        RoundedCornerShape(4.dp)
+                                    )
+                                    .border(1.dp, MaterialTheme.colorScheme.tertiary.copy(alpha = 0.4f), RoundedCornerShape(4.dp))
+                                    .padding(horizontal = 10.dp, vertical = 8.dp),
+                                verticalArrangement = Arrangement.spacedBy(5.dp)
+                            ) {
+                                Text(
+                                    text = stringResource(Res.string.cert_install_android_cant_title),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.tertiary
+                                )
+                                Text(
+                                    text = stringResource(Res.string.cert_install_android_cant_intro),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onTertiaryContainer
+                                )
+                                InstallStep(number = 1, text = stringResource(Res.string.cert_install_android_cant_step1),
+                                    textColor = MaterialTheme.colorScheme.onTertiaryContainer)
+                                InstallStep(number = 2, text = stringResource(Res.string.cert_install_android_cant_step2),
+                                    textColor = MaterialTheme.colorScheme.onTertiaryContainer)
+                                InstallStep(number = 3, text = stringResource(Res.string.cert_install_android_cant_step3),
+                                    textColor = MaterialTheme.colorScheme.onTertiaryContainer)
+                            }
                         }
                     }
 
