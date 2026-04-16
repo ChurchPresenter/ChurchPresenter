@@ -153,6 +153,9 @@ kotlin {
             implementation(libs.ktor.server.websockets)
             implementation(libs.ktor.serialization.kotlinx.json)
             implementation(libs.ktor.server.status.pages)
+            // BouncyCastle for custom CA / PKI cert generation
+            implementation(libs.bouncycastle.pkix)
+            implementation(libs.bouncycastle.prov)
             // VLCJ for media playback (requires VLC installed on system)
             implementation("uk.co.caprica:vlcj:4.8.3")
             implementation("net.java.dev.jna:jna:5.16.0")

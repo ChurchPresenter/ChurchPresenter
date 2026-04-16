@@ -676,6 +676,9 @@ class CompanionServer {
     private val _serverUrl = MutableStateFlow("")
     val serverUrl: StateFlow<String> = _serverUrl.asStateFlow()
 
+    /** SHA-256 fingerprint of the CA certificate, available after the first server start. */
+    val caCertFingerprint: String? get() = SslCertificateManager.getCaCertFingerprint()
+
     private var server: EmbeddedServer<NettyApplicationEngine, NettyApplicationEngine.Configuration>? = null
     private var currentPort: Int = Constants.SERVER_DEFAULT_PORT
 
@@ -1241,7 +1244,7 @@ class CompanionServer {
         val displayHost = hostOverride.trim().ifEmpty { localIpAddress() }
 
         val keyStore = try {
-            SslCertificateManager.getOrCreateKeyStore()
+            SslCertificateManager.getOrCreateKeyStore(displayHost)
         } catch (e: Exception) {
             startPlainHttp(actualPort, displayHost)
             return
@@ -1339,6 +1342,71 @@ class CompanionServer {
                 }
             }
             routing {
+
+                // ── CA certificate download (no API key required) ──────────────────────────
+                //
+                // Mobile devices need to download and install the CA certificate BEFORE they
+                // can make authenticated API calls. These two endpoints must therefore be
+                // accessible without an API key.
+                //
+                // Trust-on-first-use flow:
+                //  1. The companion app (or the user's browser) fetches GET /ca.crt.
+                //     iOS: opening the URL in Safari triggers a "Download certificate profile"
+                //           dialog; the user then goes to Settings ▸ VPN & Device Management.
+                //     Android: the companion app installs the cert via the system
+                //           Certificate Installer API or includes it in NetworkSecurityConfig.
+                //  2. The user verifies the SHA-256 fingerprint shown in ChurchPresenter's UI.
+                //  3. After one-time installation all HTTPS API calls succeed transparently.
+
+                /**
+                 * GET /ca.crt
+                 * DER-encoded CA certificate (binary X.509).
+                 * The MIME type `application/x-x509-ca-cert` causes iOS Safari / Chrome to
+                 * present the system "Install Profile" dialog automatically.
+                 */
+                get("/ca.crt") {
+                    val bytes = SslCertificateManager.getCaCertBytes()
+                    if (bytes == null) {
+                        call.respond(
+                            io.ktor.http.HttpStatusCode.NotFound,
+                            "CA certificate is not available (server may be running in plain-HTTP fallback mode)"
+                        )
+                        return@get
+                    }
+                    call.response.headers.append(
+                        io.ktor.http.HttpHeaders.ContentDisposition,
+                        """attachment; filename="ChurchPresenter-CA.crt""""
+                    )
+                    call.respondBytes(bytes, ContentType("application", "x-x509-ca-cert"))
+                }
+
+                /**
+                 * GET /ca.pem
+                 * PEM-encoded CA certificate (Base64 text).
+                 * Used by:
+                 *  • Android NetworkSecurityConfig — embed in `res/raw/ca.pem` and reference
+                 *    via `<certificates src="@raw/ca"/>` in `network_security_config.xml`.
+                 *  • OpenSSL / curl verification:  `curl --cacert ca.pem https://…`
+                 *  • Any tool that expects PEM rather than DER format.
+                 */
+                get("/ca.pem") {
+                    val pem = SslCertificateManager.getCaCertPem()
+                    if (pem == null) {
+                        call.respond(
+                            io.ktor.http.HttpStatusCode.NotFound,
+                            "CA certificate is not available (server may be running in plain-HTTP fallback mode)"
+                        )
+                        return@get
+                    }
+                    call.response.headers.append(
+                        io.ktor.http.HttpHeaders.ContentDisposition,
+                        """attachment; filename="ChurchPresenter-CA.pem""""
+                    )
+                    call.respondText(pem, ContentType("application", "x-pem-file"))
+                }
+
+                // ── API endpoints (require API key when enabled) ────────────────────────────
+
                 get(Constants.ENDPOINT_INFO) {
                     if (!checkApiKey(call)) return@get
                     call.respond(ServerInfoResponse(port = currentPort))

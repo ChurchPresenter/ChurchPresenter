@@ -64,6 +64,7 @@ import javax.imageio.ImageIO
 import org.jetbrains.skia.Image as SkiaImage
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.allowed_clients
 import churchpresenter.composeapp.generated.resources.allowed_clients_description
@@ -82,6 +83,25 @@ import churchpresenter.composeapp.generated.resources.companion_server
 import churchpresenter.composeapp.generated.resources.close
 import churchpresenter.composeapp.generated.resources.copy_api_key
 import churchpresenter.composeapp.generated.resources.show_qr_code
+import churchpresenter.composeapp.generated.resources.cert_download_button
+import churchpresenter.composeapp.generated.resources.cert_download_qr_title
+import churchpresenter.composeapp.generated.resources.cert_download_scan_hint
+import churchpresenter.composeapp.generated.resources.cert_install_ios_title
+import churchpresenter.composeapp.generated.resources.cert_install_ios_step1
+import churchpresenter.composeapp.generated.resources.cert_install_ios_step2
+import churchpresenter.composeapp.generated.resources.cert_install_ios_step3
+import churchpresenter.composeapp.generated.resources.cert_install_ios_trust_title
+import churchpresenter.composeapp.generated.resources.cert_install_ios_trust_step
+import churchpresenter.composeapp.generated.resources.cert_install_android_title
+import churchpresenter.composeapp.generated.resources.cert_install_android_step1
+import churchpresenter.composeapp.generated.resources.cert_install_android_step2
+import churchpresenter.composeapp.generated.resources.cert_install_android_cant_title
+import churchpresenter.composeapp.generated.resources.cert_install_android_cant_intro
+import churchpresenter.composeapp.generated.resources.cert_install_android_cant_step1
+import churchpresenter.composeapp.generated.resources.cert_install_android_cant_step2
+import churchpresenter.composeapp.generated.resources.cert_install_android_cant_step3
+import churchpresenter.composeapp.generated.resources.cert_fingerprint_label
+import churchpresenter.composeapp.generated.resources.cert_fingerprint_verify
 import churchpresenter.composeapp.generated.resources.copy_url
 import churchpresenter.composeapp.generated.resources.connection_qr_title
 import churchpresenter.composeapp.generated.resources.enable_server
@@ -291,6 +311,7 @@ fun ServerSettingsTab(
                 // ── Server URL + Copy + QR in one row (shown when running) ───
                 if (isRunning && serverUrl.isNotBlank()) {
                     var showConnectionQrDialog by remember { mutableStateOf(false) }
+                    var showCertDownloadDialog by remember { mutableStateOf(false) }
                     SettingRow(label = stringResource(Res.string.server_url_label)) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
@@ -326,6 +347,16 @@ fun ServerSettingsTab(
                             ) {
                                 Text(stringResource(Res.string.show_qr_code), style = MaterialTheme.typography.labelSmall)
                             }
+                            Button(
+                                onClick = { showCertDownloadDialog = true },
+                                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                                )
+                            ) {
+                                Text(stringResource(Res.string.cert_download_button), style = MaterialTheme.typography.labelSmall)
+                            }
                         }
                     }
                     if (showConnectionQrDialog) {
@@ -335,7 +366,42 @@ fun ServerSettingsTab(
                             onDismiss = { showConnectionQrDialog = false }
                         )
                     }
-                }
+                    if (showCertDownloadDialog) {
+                        CertDownloadQrDialog(
+                            certUrl = "$serverUrl/ca.crt",
+                            fingerprint = companionServer.caCertFingerprint,
+                            onDismiss = { showCertDownloadDialog = false }
+                        )
+                    }
+
+                    // ── CA certificate fingerprint ────────────────────────────
+                    val fingerprint = companionServer.caCertFingerprint
+                    if (fingerprint != null) {
+                        SettingRow(label = "Certificate SHA-256") {
+                            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                Text(
+                                    text = fingerprint,
+                                    style = MaterialTheme.typography.bodySmall.copy(
+                                        fontFamily = FontFamily.Monospace,
+                                        fontSize = 10.sp
+                                    ),
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    modifier = Modifier
+                                        .background(
+                                            MaterialTheme.colorScheme.surfaceVariant,
+                                            RoundedCornerShape(4.dp)
+                                        )
+                                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                                )
+                                Text(
+                                    text = "Mobile first-launch: open $serverUrl/ca.crt in Safari (iOS) or use the app's certificate setup screen (Android) and verify the fingerprint above.",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                    }
+                } // end if (isRunning && serverUrl.isNotBlank())
 
                 HorizontalDivider()
 
@@ -754,3 +820,272 @@ private fun ConnectionQrDialog(serverUrl: String, apiKey: String?, onDismiss: ()
         }
     }
 }
+
+/**
+ * Shows a QR code that encodes [certUrl] (e.g. `https://192.168.1.50:8765/ca.crt`).
+ *
+ * Mobile flow:
+ *  - Point the stock camera app at the QR code — it shows a URL notification.
+ *  - iOS: tapping the notification opens Safari, which presents the system
+ *         "Install Profile" dialog automatically (MIME `application/x-x509-ca-cert`).
+ *         The user then must go to Settings → General → About → Certificate Trust Settings
+ *         and enable full trust — without this step HTTPS connections still fail.
+ *  - Android: tapping opens Chrome/browser, which downloads the .crt file;
+ *         the system Certificate Installer opens it. If blocked by "only from known
+ *         sources", the user can install manually via Settings → Security.
+ *
+ * [fingerprint] is shown so the user can verify the installed cert matches.
+ */
+@Composable
+private fun CertDownloadQrDialog(
+    certUrl: String,
+    fingerprint: String?,
+    onDismiss: () -> Unit
+) {
+    val qrBitmap = remember(certUrl) {
+        try {
+            val hints = mapOf(
+                EncodeHintType.ERROR_CORRECTION to ErrorCorrectionLevel.M,
+                EncodeHintType.MARGIN to 1
+            )
+            val matrix = QRCodeWriter().encode(certUrl, BarcodeFormat.QR_CODE, 512, 512, hints)
+            val w = matrix.width; val h = matrix.height
+            val img = BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB)
+            val black = 0xFF000000.toInt(); val white = 0xFFFFFFFF.toInt()
+            for (y in 0 until h) for (x in 0 until w) img.setRGB(x, y, if (matrix[x, y]) black else white)
+            SkiaImage.makeFromEncoded(
+                ByteArrayOutputStream().also { ImageIO.write(img, "PNG", it) }.toByteArray()
+            ).toComposeImageBitmap()
+        } catch (_: Exception) { null }
+    }
+
+    val isDark = MaterialTheme.colorScheme.background.luminance() < 0.5f
+    Dialog(
+        onCloseRequest = onDismiss,
+        state = rememberDialogState(width = 500.dp, height = 780.dp),
+        title = stringResource(Res.string.cert_download_qr_title),
+        resizable = true
+    ) {
+        AppThemeWrapper(theme = if (isDark) ThemeMode.DARK else ThemeMode.LIGHT) {
+            Surface(
+                modifier = Modifier.fillMaxSize(),
+                color = MaterialTheme.colorScheme.background
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState())
+                        .padding(horizontal = 20.dp, vertical = 16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+
+                    // ── QR code ───────────────────────────────────────────────
+                    if (qrBitmap != null) {
+                        Image(
+                            bitmap = qrBitmap,
+                            contentDescription = null,
+                            modifier = Modifier.size(260.dp),
+                            contentScale = ContentScale.Fit
+                        )
+                    }
+
+                    Text(
+                        text = stringResource(Res.string.cert_download_scan_hint),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+
+                    // ── Cert URL ──────────────────────────────────────────────
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(4.dp))
+                            .padding(horizontal = 10.dp, vertical = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = certUrl,
+                            style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
+                            color = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+
+                    // ── iOS instructions ──────────────────────────────────────
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(
+                                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.25f),
+                                RoundedCornerShape(6.dp)
+                            )
+                            .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f), RoundedCornerShape(6.dp))
+                            .padding(horizontal = 12.dp, vertical = 10.dp),
+                        verticalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Text(
+                            text = stringResource(Res.string.cert_install_ios_title),
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                        InstallStep(number = 1, text = stringResource(Res.string.cert_install_ios_step1))
+                        InstallStep(number = 2, text = stringResource(Res.string.cert_install_ios_step2))
+                        InstallStep(number = 3, text = stringResource(Res.string.cert_install_ios_step3))
+
+                        // Critical trust step in its own warning box
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(
+                                    MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.35f),
+                                    RoundedCornerShape(4.dp)
+                                )
+                                .padding(horizontal = 10.dp, vertical = 8.dp),
+                            verticalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Text(
+                                text = stringResource(Res.string.cert_install_ios_trust_title),
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.error
+                            )
+                            Text(
+                                text = stringResource(Res.string.cert_install_ios_trust_step),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onErrorContainer
+                            )
+                        }
+                    }
+
+                    // ── Android instructions ──────────────────────────────────
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(
+                                MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.25f),
+                                RoundedCornerShape(6.dp)
+                            )
+                            .border(1.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f), RoundedCornerShape(6.dp))
+                            .padding(horizontal = 12.dp, vertical = 10.dp),
+                        verticalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Text(
+                            text = stringResource(Res.string.cert_install_android_title),
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.secondary
+                        )
+                        InstallStep(number = 1, text = stringResource(Res.string.cert_install_android_step1))
+                        InstallStep(number = 2, text = stringResource(Res.string.cert_install_android_step2))
+
+                        // "Can't install" workaround box
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(
+                                    MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.4f),
+                                    RoundedCornerShape(4.dp)
+                                )
+                                .border(1.dp, MaterialTheme.colorScheme.tertiary.copy(alpha = 0.4f), RoundedCornerShape(4.dp))
+                                .padding(horizontal = 10.dp, vertical = 8.dp),
+                            verticalArrangement = Arrangement.spacedBy(5.dp)
+                        ) {
+                            Text(
+                                text = stringResource(Res.string.cert_install_android_cant_title),
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.tertiary
+                            )
+                            Text(
+                                text = stringResource(Res.string.cert_install_android_cant_intro),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onTertiaryContainer
+                            )
+                            InstallStep(number = 1, text = stringResource(Res.string.cert_install_android_cant_step1),
+                                textColor = MaterialTheme.colorScheme.onTertiaryContainer)
+                            InstallStep(number = 2, text = stringResource(Res.string.cert_install_android_cant_step2),
+                                textColor = MaterialTheme.colorScheme.onTertiaryContainer)
+                            InstallStep(number = 3, text = stringResource(Res.string.cert_install_android_cant_step3),
+                                textColor = MaterialTheme.colorScheme.onTertiaryContainer)
+                        }
+                    }
+
+                    // ── SHA-256 fingerprint ───────────────────────────────────
+                    if (fingerprint != null) {
+                        Column(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Text(
+                                text = stringResource(Res.string.cert_fingerprint_label),
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                            Text(
+                                text = fingerprint,
+                                style = MaterialTheme.typography.bodySmall.copy(
+                                    fontFamily = FontFamily.Monospace,
+                                    fontSize = 9.sp
+                                ),
+                                color = MaterialTheme.colorScheme.onSurface,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .background(
+                                        MaterialTheme.colorScheme.surfaceVariant,
+                                        RoundedCornerShape(4.dp)
+                                    )
+                                    .padding(horizontal = 8.dp, vertical = 6.dp)
+                            )
+                            Text(
+                                text = stringResource(Res.string.cert_fingerprint_verify),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+
+                    Button(onClick = onDismiss) {
+                        Text(stringResource(Res.string.close), style = MaterialTheme.typography.labelSmall)
+                    }
+                }
+            }
+        }
+    }
+}
+
+/** Numbered step row used inside install instruction sections. */
+@Composable
+private fun InstallStep(
+    number: Int,
+    text: String,
+    textColor: Color = MaterialTheme.colorScheme.onSurface
+) {
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.Top
+    ) {
+        Box(
+            modifier = Modifier
+                .size(18.dp)
+                .background(MaterialTheme.colorScheme.outline.copy(alpha = 0.25f), RoundedCornerShape(9.dp)),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "$number",
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+        }
+        Text(
+            text = text,
+            style = MaterialTheme.typography.bodySmall,
+            color = textColor,
+            modifier = Modifier.weight(1f)
+        )
+    }
+}
+
