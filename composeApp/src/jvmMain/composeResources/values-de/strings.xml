@@ -994,5 +994,29 @@
     <string name="canvas_decklink_device">DeckLink: %1$s</string>
     <string name="canvas_clock_format_24h">24h</string>
     <string name="canvas_clock_format_12h">12h</string>
+    <string name="show_qr_code">QR</string>
+    <string name="cert_download_button">Zertifikat herunterladen</string>
+    <string name="cert_download_qr_title">CA-Zertifikat installieren</string>
+    <string name="cert_download_scan_hint">Scannen Sie den QR-Code mit Ihrer Handykamera, um die Zertifikat-Downloadseite zu öffnen.</string>
+    <string name="cert_install_ios_title">🍎  iOS-Einrichtung</string>
+    <string name="cert_install_ios_step1">QR-Code scannen — die Kamera zeigt oben am Bildschirm ein URL-Banner.</string>
+    <string name="cert_install_ios_step2">Banner antippen, um die URL in Safari zu öffnen. Bei Aufforderung «Zulassen» tippen, um das Profil herunterzuladen.</string>
+    <string name="cert_install_ios_step3">Einstellungen → Allgemein → VPN &amp; Geräteverwaltung → ChurchPresenter CA antippen → Installieren → Passcode eingeben.</string>
+    <string name="cert_install_ios_trust_title">⚠️  Nach der Installation erforderlich</string>
+    <string name="cert_install_ios_trust_step">Einstellungen → Allgemein → Info → Zertifikatsvertrauen → vollständiges Vertrauen für ChurchPresenter CA aktivieren. Ohne diesen Schritt kann die App keine sichere Verbindung herstellen.</string>
+    <string name="cert_install_android_title">🤖  Android-Einrichtung</string>
+    <string name="cert_install_android_step1">QR-Code scannen — die von der Kamera angezeigte URL antippen, um sie in Chrome zu öffnen.</string>
+    <string name="cert_install_android_step2">Chrome lädt ChurchPresenter-CA.crt herunter. Die Datei in der Benachrichtigung oder unter Downloads antippen, um sie direkt zu installieren.</string>
+    <string name="cert_install_android_cant_title">🚫  Zertifikat kann nicht installiert werden / nur aus bekannten Quellen?</string>
+    <string name="cert_install_android_cant_intro">Einige Android-Versionen blockieren direkte Zertifikatsinstallationen. Alternativer Weg:</string>
+    <string name="cert_install_android_cant_step1">Einstellungen → Sicherheit (oder Biometrie &amp; Sicherheit bei Samsung).</string>
+    <string name="cert_install_android_cant_step2">Verschlüsselung &amp; Anmeldedaten → Zertifikat installieren → CA-Zertifikat antippen.</string>
+    <string name="cert_install_android_cant_step3">Downloads durchsuchen, ChurchPresenter-CA.crt auswählen und bestätigen.</string>
+    <string name="cert_fingerprint_label">SHA-256-Fingerabdruck</string>
+    <string name="cert_fingerprint_verify">Überprüfen Sie nach der Installation, ob dieser Fingerabdruck übereinstimmt — so stellen Sie sicher, dass das richtige Zertifikat installiert wurde.</string>
+    <string name="connection_qr_title">Verbindungs-QR-Code</string>
+    <string name="server_host_label">Host (überschreiben)</string>
+    <string name="server_host_hint">z. B. 192.168.1.50 oder church-mac.local</string>
+    <string name="server_host_note">Feste IP oder Hostname in der URL. Leer lassen für automatische Erkennung.</string>
 </resources>
 

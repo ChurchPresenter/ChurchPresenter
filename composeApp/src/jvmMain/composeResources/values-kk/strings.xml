@@ -994,5 +994,29 @@
     <string name="canvas_decklink_device">DeckLink: %1$s</string>
     <string name="canvas_clock_format_24h">24h</string>
     <string name="canvas_clock_format_12h">12h</string>
+    <string name="show_qr_code">QR</string>
+    <string name="cert_download_button">Сертификатты жүктеу</string>
+    <string name="cert_download_qr_title">CA сертификатын орнату</string>
+    <string name="cert_download_scan_hint">Сертификатты жүктеу бетін ашу үшін телефон камерасымен QR кодын сканерлеңіз.</string>
+    <string name="cert_install_ios_title">🍎  iOS-қа орнату</string>
+    <string name="cert_install_ios_step1">QR кодын сканерлеңіз — камера экранның жоғарғы жағында URL баннерін көрсетеді.</string>
+    <string name="cert_install_ios_step2">URL-ді Safari-де ашу үшін баннерді басыңыз. Профильді жүктеп алу үшін «Рұқсат ету» батырмасын басыңыз.</string>
+    <string name="cert_install_ios_step3">Параметрлер → Жалпы → VPN және құрылғы басқару → ChurchPresenter CA → Орнату → кіру кодын енгізіңіз.</string>
+    <string name="cert_install_ios_trust_title">⚠️  Орнатқаннан кейін міндетті</string>
+    <string name="cert_install_ios_trust_step">Параметрлер → Жалпы → Осы құрылғы туралы → Сертификаттарға сенім → ChurchPresenter CA үшін толық сенімді қосыңыз. Бұл қадамсыз қолданба қауіпсіз қосылым орната алмайды.</string>
+    <string name="cert_install_android_title">🤖  Android-қа орнату</string>
+    <string name="cert_install_android_step1">QR кодын сканерлеңіз — камера көрсеткен URL-ді Chrome-да ашу үшін басыңыз.</string>
+    <string name="cert_install_android_step2">Chrome ChurchPresenter-CA.crt файлын жүктейді. Оны тікелей орнату үшін хабарландыруда немесе «Жүктеулер» бөлімінде файлды басыңыз.</string>
+    <string name="cert_install_android_cant_title">🚫  Сертификатты орнату мүмкін емес / тек белгілі көздерден?</string>
+    <string name="cert_install_android_cant_intro">Кейбір Android нұсқалары сертификаттарды тікелей орнатуды блоктайды. Қолмен жолды пайдаланыңыз:</string>
+    <string name="cert_install_android_cant_step1">Параметрлер → Қауіпсіздік (Samsung-да Биометрия және қауіпсіздік).</string>
+    <string name="cert_install_android_cant_step2">Шифрлау және тіркелгі деректері → Сертификат орнату → CA сертификаты.</string>
+    <string name="cert_install_android_cant_step3">«Жүктеулер» бөліміне өтіп, ChurchPresenter-CA.crt файлын таңдап, растаңыз.</string>
+    <string name="cert_fingerprint_label">SHA-256 саусақ ізі</string>
+    <string name="cert_fingerprint_verify">Орнатқаннан кейін бұл саусақ ізінің сәйкес екенін тексеріңіз — бұл дұрыс сертификат орнатылғанына кепілдік береді.</string>
+    <string name="connection_qr_title">Қосылу QR коды</string>
+    <string name="server_host_label">Хост (қайта анықтау)</string>
+    <string name="server_host_hint">мысалы, 192.168.1.50 немесе church-mac.local</string>
+    <string name="server_host_note">URL-де көрсетілетін тіркелген IP немесе хост атауы. Автоматты анықтау үшін бос қалдырыңыз.</string>
 </resources>
 

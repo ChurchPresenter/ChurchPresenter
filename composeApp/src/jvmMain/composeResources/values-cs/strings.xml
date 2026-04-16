@@ -1072,5 +1072,29 @@
     <string name="canvas_decklink_device">DeckLink: %1$s</string>
     <string name="canvas_clock_format_24h">24h</string>
     <string name="canvas_clock_format_12h">12h</string>
+    <string name="show_qr_code">QR</string>
+    <string name="cert_download_button">Stáhnout certifikát</string>
+    <string name="cert_download_qr_title">Instalovat CA certifikát</string>
+    <string name="cert_download_scan_hint">Naskenujte QR kód fotoaparátem telefonu a otevřete stránku pro stažení certifikátu.</string>
+    <string name="cert_install_ios_title">🍎  Instalace na iOS</string>
+    <string name="cert_install_ios_step1">Naskenujte QR kód — fotoaparát zobrazí banner s URL v horní části obrazovky.</string>
+    <string name="cert_install_ios_step2">Klepněte na banner a otevřete URL v Safari. Po zobrazení výzvy klepněte na Povolit a stáhněte profil.</string>
+    <string name="cert_install_ios_step3">Otevřete Nastavení → Obecné → Správa VPN a zařízení → klepněte na ChurchPresenter CA → Instalovat → zadejte přístupový kód.</string>
+    <string name="cert_install_ios_trust_title">⚠️  Povinné po instalaci</string>
+    <string name="cert_install_ios_trust_step">Nastavení → Obecné → O telefonu → Důvěryhodnost certifikátů → zapněte plnou důvěru pro ChurchPresenter CA. Bez tohoto kroku se aplikace nemůže připojit přes zabezpečené spojení.</string>
+    <string name="cert_install_android_title">🤖  Instalace na Android</string>
+    <string name="cert_install_android_step1">Naskenujte QR kód — klepněte na URL zobrazenou fotoaparátem a otevřete ji v Chrome.</string>
+    <string name="cert_install_android_step2">Chrome stáhne ChurchPresenter-CA.crt. Klepněte na soubor v oznámení nebo ve Stažených souborech a nainstalujte jej přímo.</string>
+    <string name="cert_install_android_cant_title">🚫  Nelze nainstalovat certifikát / pouze ze známých zdrojů?</string>
+    <string name="cert_install_android_cant_intro">Některé verze Androidu blokují přímou instalaci certifikátů. Použijte ruční postup:</string>
+    <string name="cert_install_android_cant_step1">Nastavení → Zabezpečení (nebo Biometrie a zabezpečení u Samsung).</string>
+    <string name="cert_install_android_cant_step2">Klepněte na Šifrování a přihlašovací údaje → Instalovat certifikát → Certifikát CA.</string>
+    <string name="cert_install_android_cant_step3">Přejděte do Stažených souborů, vyberte ChurchPresenter-CA.crt a potvrďte.</string>
+    <string name="cert_fingerprint_label">Otisk SHA-256</string>
+    <string name="cert_fingerprint_verify">Po instalaci ověřte, že tento otisk odpovídá — zajišťuje, že byl nainstalován správný certifikát.</string>
+    <string name="connection_qr_title">QR kód připojení</string>
+    <string name="server_host_label">Hostitel (přepis)</string>
+    <string name="server_host_hint">např. 192.168.1.50 nebo church-mac.local</string>
+    <string name="server_host_note">Pevná IP nebo název hostitele zobrazený v URL. Ponechte prázdné pro automatické zjištění.</string>
 </resources>
 
