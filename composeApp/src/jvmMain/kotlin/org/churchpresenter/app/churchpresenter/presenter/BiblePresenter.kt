@@ -325,9 +325,22 @@ fun BiblePresenter(
             Modifier.background(backgroundColor.copy(alpha = effectiveOpacity))
     }
 
+    // Fade-in on first appearance (covers background + text)
+    val fadeInDuration = appSettings.bibleSettings.transitionDuration.toInt().coerceAtLeast(100)
+    var enterAlpha by remember { mutableStateOf(if (appSettings.bibleSettings.fadeIn) 0f else 1f) }
+    LaunchedEffect(Unit) {
+        if (appSettings.bibleSettings.fadeIn && enterAlpha < 1f) {
+            val anim = Animatable(0f)
+            anim.animateTo(1f, tween(durationMillis = fadeInDuration)) {
+                enterAlpha = this.value
+            }
+            enterAlpha = 1f
+        }
+    }
+
     BoxWithConstraints(
         modifier.fillMaxSize()
-            .graphicsLayer { alpha = transitionAlpha }
+            .graphicsLayer { alpha = transitionAlpha * enterAlpha }
             .then(if (!isLowerThird) bgModifier else Modifier)
     ) {
         if (useVideoBackground && !isLowerThird) {
@@ -693,20 +706,9 @@ fun BiblePresenter(
                 val isCrossfade = crossfadeEnabled
                 var displayedCurrent by remember { mutableStateOf(selectedVerses) }
                 var displayedPrevious by remember { mutableStateOf<List<SelectedVerse>>(emptyList()) }
-                var currentAlpha by remember { mutableStateOf(if (bs.fadeIn) 0f else 1f) }
+                var currentAlpha by remember { mutableStateOf(1f) }
                 var previousAlpha by remember { mutableStateOf(0f) }
                 val pendingQueue = remember { kotlinx.coroutines.channels.Channel<List<SelectedVerse>>(kotlinx.coroutines.channels.Channel.CONFLATED) }
-
-                // Fade in on first composition
-                LaunchedEffect(Unit) {
-                    if (bs.fadeIn && currentAlpha < 1f) {
-                        val anim = Animatable(0f)
-                        anim.animateTo(1f, tween(durationMillis = duration)) {
-                            currentAlpha = this.value
-                        }
-                        currentAlpha = 1f
-                    }
-                }
 
                 // Queue verse changes
                 LaunchedEffect(selectedVerses) {
