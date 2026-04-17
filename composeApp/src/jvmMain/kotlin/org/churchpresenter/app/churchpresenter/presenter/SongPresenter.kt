@@ -915,16 +915,29 @@ fun SongPresenter(
                 val isCrossfade = crossfadeEnabled
                 var displayedCurrent by remember { mutableStateOf(lyricSection) }
                 var displayedPrevious by remember { mutableStateOf(LyricSection()) }
-                var currentAlpha by remember { mutableStateOf(1f) }
+                var currentAlpha by remember { mutableStateOf(if (ss.fadeIn) 0f else 1f) }
                 var previousAlpha by remember { mutableStateOf(0f) }
                 val pendingQueue = remember { kotlinx.coroutines.channels.Channel<LyricSection>(kotlinx.coroutines.channels.Channel.CONFLATED) }
 
+                // Fade in on first composition
+                LaunchedEffect(Unit) {
+                    if (ss.fadeIn && currentAlpha < 1f) {
+                        val anim = Animatable(0f)
+                        anim.animateTo(1f, tween(durationMillis = duration)) {
+                            currentAlpha = this.value
+                        }
+                        currentAlpha = 1f
+                    }
+                }
+
+                // Queue section changes
                 LaunchedEffect(lyricSection) {
                     if (displayedCurrent != lyricSection) {
                         pendingQueue.send(lyricSection)
                     }
                 }
 
+                // Process section switches (crossfade between sections)
                 LaunchedEffect(Unit) {
                     for (nextSection in pendingQueue) {
                         if (displayedCurrent == nextSection) continue
@@ -940,20 +953,7 @@ fun SongPresenter(
                                 previousAlpha = 1f - this.value
                             }
                         } else {
-                            if (ss.fadeOut) {
-                                val anim = Animatable(1f)
-                                anim.animateTo(0f, tween(durationMillis = duration / 2)) {
-                                    currentAlpha = this.value
-                                }
-                            }
-                            currentAlpha = 0f
                             displayedCurrent = nextSection
-                            if (ss.fadeIn) {
-                                val anim = Animatable(0f)
-                                anim.animateTo(1f, tween(durationMillis = duration / 2)) {
-                                    currentAlpha = this.value
-                                }
-                            }
                         }
                         currentAlpha = 1f
                         previousAlpha = 0f
@@ -961,7 +961,7 @@ fun SongPresenter(
                     }
                 }
 
-                Box(modifier = Modifier.matchParentSize()) {
+                Box(modifier = Modifier.matchParentSize().graphicsLayer { alpha = transitionAlpha }) {
                     if (displayedPrevious.lines.isNotEmpty() && previousAlpha > 0f) {
                         Box(modifier = Modifier.fillMaxSize().graphicsLayer { alpha = previousAlpha }) {
                             TextContent(displayedPrevious)
@@ -972,7 +972,9 @@ fun SongPresenter(
                     }
                 }
             } else {
-                TextContent(lyricSection)
+                Box(modifier = Modifier.graphicsLayer { alpha = transitionAlpha }) {
+                    TextContent(lyricSection)
+                }
             }
         }
     }

@@ -683,28 +683,41 @@ fun BiblePresenter(
             }
 
             if (crossfadeEnabled || appSettings.bibleSettings.fadeIn || appSettings.bibleSettings.fadeOut) {
-                // Unified transition system — queued animations with CONFLATED channel.
-                // Crossfade: both layers visible simultaneously.
-                // Fade in/out: sequential fade out → swap → fade in.
+                // Transition system:
+                // - Fade in: first appearance fades from transparent
+                // - Crossfade: switching verses blends old/new simultaneously
+                // - Fade out: handled externally when clearing display
                 val bs = appSettings.bibleSettings
                 val duration = bs.transitionDuration.toInt().coerceAtLeast(100)
                 val isCrossfade = crossfadeEnabled
                 var displayedCurrent by remember { mutableStateOf(selectedVerses) }
                 var displayedPrevious by remember { mutableStateOf<List<SelectedVerse>>(emptyList()) }
-                var currentAlpha by remember { mutableStateOf(1f) }
+                var currentAlpha by remember { mutableStateOf(if (bs.fadeIn) 0f else 1f) }
                 var previousAlpha by remember { mutableStateOf(0f) }
                 val pendingQueue = remember { kotlinx.coroutines.channels.Channel<List<SelectedVerse>>(kotlinx.coroutines.channels.Channel.CONFLATED) }
 
+                // Fade in on first composition
+                LaunchedEffect(Unit) {
+                    if (bs.fadeIn && currentAlpha < 1f) {
+                        val anim = Animatable(0f)
+                        anim.animateTo(1f, tween(durationMillis = duration)) {
+                            currentAlpha = this.value
+                        }
+                        currentAlpha = 1f
+                    }
+                }
+
+                // Queue verse changes
                 LaunchedEffect(selectedVerses) {
                     if (displayedCurrent != selectedVerses) {
                         pendingQueue.send(selectedVerses)
                     }
                 }
 
+                // Process verse switches (crossfade between verses)
                 LaunchedEffect(Unit) {
                     for (nextVerses in pendingQueue) {
                         if (displayedCurrent == nextVerses) continue
-                        System.err.println("[Transition] isCrossfade=$isCrossfade fadeIn=${bs.fadeIn} fadeOut=${bs.fadeOut} duration=$duration")
 
                         if (isCrossfade) {
                             // Crossfade: both layers animate simultaneously
@@ -718,21 +731,8 @@ fun BiblePresenter(
                                 previousAlpha = 1f - this.value
                             }
                         } else {
-                            // Sequential fade out → swap → fade in
-                            if (bs.fadeOut) {
-                                val anim = Animatable(1f)
-                                anim.animateTo(0f, tween(durationMillis = duration / 2)) {
-                                    currentAlpha = this.value
-                                }
-                            }
-                            currentAlpha = 0f
+                            // No crossfade — just swap instantly
                             displayedCurrent = nextVerses
-                            if (bs.fadeIn) {
-                                val anim = Animatable(0f)
-                                anim.animateTo(1f, tween(durationMillis = duration / 2)) {
-                                    currentAlpha = this.value
-                                }
-                            }
                         }
                         currentAlpha = 1f
                         previousAlpha = 0f
@@ -740,7 +740,8 @@ fun BiblePresenter(
                     }
                 }
 
-                Box(modifier = Modifier.matchParentSize()) {
+                // transitionAlpha handles fade out (driven from main.kt when clearing display)
+                Box(modifier = Modifier.matchParentSize().graphicsLayer { alpha = transitionAlpha }) {
                     if (displayedPrevious.isNotEmpty() && previousAlpha > 0f) {
                         Box(modifier = Modifier.fillMaxSize().graphicsLayer { alpha = previousAlpha }) {
                             TextContent(displayedPrevious)
@@ -751,7 +752,9 @@ fun BiblePresenter(
                     }
                 }
             } else {
-                TextContent(selectedVerses)
+                Box(modifier = Modifier.graphicsLayer { alpha = transitionAlpha }) {
+                    TextContent(selectedVerses)
+                }
             }
         }
     }
