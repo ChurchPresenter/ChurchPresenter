@@ -121,6 +121,10 @@ class PresenterManager {
         _presentingMode.value = mode
         if (mode != Presenting.NONE) {
             _clearDisplayRequested.value = false
+            // Reset transition alphas so presenters are visible when going live
+            // (fade-in inside the presenter handles the actual animation)
+            _bibleTransitionAlpha.value = 1f
+            _songTransitionAlpha.value = 1f
         }
     }
 
