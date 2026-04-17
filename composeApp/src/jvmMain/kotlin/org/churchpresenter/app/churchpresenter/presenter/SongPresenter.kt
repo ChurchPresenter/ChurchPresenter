@@ -262,6 +262,7 @@ fun SongPresenter(
     BoxWithConstraints(
         modifier
             .fillMaxSize()
+            .graphicsLayer { alpha = transitionAlpha }
             .then(if (!isLowerThird) bgModifier else Modifier)
     ) {
         if (useVideoBackground && !isLowerThird) {
