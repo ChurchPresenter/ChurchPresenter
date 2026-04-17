@@ -16,6 +16,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.animate
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.foundation.Image
@@ -1211,10 +1212,9 @@ private fun PresenterWindows(
             presenterManager.setBibleTransitionAlpha(1f)
         } else {
             val duration = bs.transitionDuration.toInt()
-            val anim = Animatable(1f)
             // Fade out (or instant)
             if (bs.fadeOut) {
-                anim.animateTo(0f, tween(duration / 2)) {
+                animate(1f, 0f, animationSpec = tween(duration / 2)) { value, _ ->
                     presenterManager.setBibleTransitionAlpha(value)
                 }
             } else {
@@ -1224,8 +1224,7 @@ private fun PresenterWindows(
             presenterManager.setDisplayedVerses(selectedVerses)
             // Fade in (or instant)
             if (bs.fadeIn) {
-                anim.snapTo(0f)
-                anim.animateTo(1f, tween(duration / 2)) {
+                animate(0f, 1f, animationSpec = tween(duration / 2)) { value, _ ->
                     presenterManager.setBibleTransitionAlpha(value)
                 }
             } else {
@@ -1261,9 +1260,8 @@ private fun PresenterWindows(
             presenterManager.setSongTransitionAlpha(1f)
         } else {
             val duration = ss.transitionDuration.toInt()
-            val anim = Animatable(1f)
             if (ss.fadeOut) {
-                anim.animateTo(0f, tween(duration / 2)) {
+                animate(1f, 0f, animationSpec = tween(duration / 2)) { value, _ ->
                     presenterManager.setSongTransitionAlpha(value)
                 }
             } else {
@@ -1271,8 +1269,7 @@ private fun PresenterWindows(
             }
             presenterManager.setDisplayedLyricSection(lyricSection)
             if (ss.fadeIn) {
-                anim.snapTo(0f)
-                anim.animateTo(1f, tween(duration / 2)) {
+                animate(0f, 1f, animationSpec = tween(duration / 2)) { value, _ ->
                     presenterManager.setSongTransitionAlpha(value)
                 }
             } else {
