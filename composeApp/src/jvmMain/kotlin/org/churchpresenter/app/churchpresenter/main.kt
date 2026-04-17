@@ -15,6 +15,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.animate
 import androidx.compose.animation.core.tween
@@ -1197,6 +1198,13 @@ private fun PresenterWindows(
 
     val proj = appSettings.projectionSettings
 
+    // Mode-level crossfade (between Bible ↔ Song etc.)
+    val modeCrossfadeEnabled = appSettings.bibleSettings.crossfade || appSettings.songSettings.crossfade
+    val modeCrossfadeDuration = maxOf(
+        if (appSettings.bibleSettings.crossfade) appSettings.bibleSettings.transitionDuration.toInt() else 0,
+        if (appSettings.songSettings.crossfade) appSettings.songSettings.transitionDuration.toInt() else 0
+    ).coerceAtLeast(100)
+
     // Fade-out before clearing display
     val clearRequested by presenterManager.clearDisplayRequested
     LaunchedEffect(clearRequested) {
@@ -1428,7 +1436,11 @@ private fun PresenterWindows(
                     mediaViewModel = mediaViewModel,
                     isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD,
                 ) {
-                    when (presentingMode) {
+                    Crossfade(
+                        targetState = presentingMode,
+                        animationSpec = tween(if (modeCrossfadeEnabled) modeCrossfadeDuration else 0)
+                    ) { mode ->
+                    when (mode) {
                         Presenting.BIBLE ->
                             if (screenAssignment.showBible) {
                                 BiblePresenter(
@@ -1514,6 +1526,7 @@ private fun PresenterWindows(
 
                         Presenting.NONE -> { /* nothing */ }
                     }
+                    }
                 }
             }
 
@@ -1526,7 +1539,8 @@ private fun PresenterWindows(
                     mediaViewModel = mediaViewModel,
                     isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD,
                 ) {
-                    when (presentingMode) {
+                    Crossfade(targetState = presentingMode, animationSpec = tween(if (modeCrossfadeEnabled) modeCrossfadeDuration else 0)) { mode ->
+                    when (mode) {
                         Presenting.BIBLE ->
                             if (screenAssignment.showBible) {
                                 BiblePresenter(
@@ -1618,6 +1632,7 @@ private fun PresenterWindows(
 
                         Presenting.NONE -> { /* nothing */ }
                     }
+                    }
                 }
             }
 
@@ -1658,7 +1673,8 @@ private fun PresenterWindows(
                                 outputRole = Constants.OUTPUT_ROLE_KEY
                             ) {
                                 Box(modifier = Modifier.fillMaxSize()) {
-                                    when (presentingMode) {
+                                    Crossfade(targetState = presentingMode, animationSpec = tween(if (modeCrossfadeEnabled) modeCrossfadeDuration else 0)) { mode ->
+                    when (mode) {
                                         Presenting.BIBLE ->
                                             if (screenAssignment.showBible) {
                                                 BiblePresenter(
@@ -1750,6 +1766,7 @@ private fun PresenterWindows(
 
                                         Presenting.NONE -> { /* nothing */ }
                                     }
+                                    }
                                 }
                             }
                         }
@@ -1834,7 +1851,8 @@ private fun PresenterWindows(
                                 } else false
                             }
                     ) {
-                        when (presentingMode) {
+                        Crossfade(targetState = presentingMode, animationSpec = tween(if (modeCrossfadeEnabled) modeCrossfadeDuration else 0)) { mode ->
+                    when (mode) {
                             Presenting.BIBLE ->
                                 if (screenAssignment.showBible) {
                                     BiblePresenter(
@@ -1925,6 +1943,7 @@ private fun PresenterWindows(
                             Presenting.NONE -> { /* nothing */
                             }
                         }
+                        }
 
                         // Clear live browser ref when leaving WEBSITE mode
                         LaunchedEffect(presentingMode) {
@@ -2002,7 +2021,8 @@ private fun PresenterWindows(
                                         } else false
                                     }
                             ) {
-                                when (presentingMode) {
+                                Crossfade(targetState = presentingMode, animationSpec = tween(if (modeCrossfadeEnabled) modeCrossfadeDuration else 0)) { mode ->
+                    when (mode) {
                                     Presenting.BIBLE ->
                                         if (screenAssignment.showBible) {
                                             BiblePresenter(
@@ -2099,6 +2119,7 @@ private fun PresenterWindows(
                                     Presenting.NONE -> { /* nothing */
                                     }
                                 }
+                                }
                             }
                         }
                     }
@@ -2116,7 +2137,8 @@ private fun PresenterWindows(
                     mediaViewModel = mediaViewModel,
                     isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD,
                 ) {
-                    when (presentingMode) {
+                    Crossfade(targetState = presentingMode, animationSpec = tween(if (modeCrossfadeEnabled) modeCrossfadeDuration else 0)) { mode ->
+                    when (mode) {
                         Presenting.BIBLE ->
                             if (screenAssignment.showBible) {
                                 BiblePresenter(
@@ -2207,6 +2229,7 @@ private fun PresenterWindows(
                         Presenting.CANVAS -> ScenePresenter(scene = activeScene)
 
                         Presenting.NONE -> { /* nothing */ }
+                    }
                     }
                 }
             }

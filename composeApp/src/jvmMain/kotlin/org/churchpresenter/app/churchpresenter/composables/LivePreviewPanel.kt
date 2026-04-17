@@ -6,6 +6,7 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import org.churchpresenter.app.churchpresenter.utils.rememberScreenDevices
+import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -181,7 +182,13 @@ private fun SingleDisplayPreview(
             ScaledPresenterContent {
                 PresenterScreen(appSettings = appSettings, outputRole = primaryRole, isLowerThird = isLowerThird) {
                     if (presentingMode != Presenting.NONE && showsContent) {
-                        when (presentingMode) {
+                        val modeCrossfadeOn = appSettings.bibleSettings.crossfade || appSettings.songSettings.crossfade
+                        val modeCrossfadeDur = maxOf(
+                            if (appSettings.bibleSettings.crossfade) appSettings.bibleSettings.transitionDuration.toInt() else 0,
+                            if (appSettings.songSettings.crossfade) appSettings.songSettings.transitionDuration.toInt() else 0
+                        ).coerceAtLeast(100)
+                        Crossfade(targetState = presentingMode, animationSpec = tween(if (modeCrossfadeOn) modeCrossfadeDur else 0)) { mode ->
+                        when (mode) {
                             Presenting.BIBLE ->
                                 BiblePresenter(
                                     selectedVerses = displayedVerses,
@@ -228,6 +235,7 @@ private fun SingleDisplayPreview(
                             Presenting.CANVAS ->
                                 ScenePresenter(scene = activeScene)
                             else -> {}
+                        }
                         }
                     }
                 }
