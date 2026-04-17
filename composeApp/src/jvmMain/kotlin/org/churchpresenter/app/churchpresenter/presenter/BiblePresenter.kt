@@ -722,11 +722,50 @@ fun BiblePresenter(
                         TextContent(displayedCurrent)
                     }
                 }
-            } else {
-                // Fade in/out driven centrally via shared transitionAlpha
-                Box(modifier = Modifier.alpha(transitionAlpha)) {
-                    TextContent(selectedVerses)
+            } else if (appSettings.bibleSettings.fadeIn || appSettings.bibleSettings.fadeOut) {
+                // Fade in/out handled locally — same queued pattern as crossfade
+                val duration = appSettings.bibleSettings.transitionDuration.toInt().coerceAtLeast(100)
+                val doFadeOut = appSettings.bibleSettings.fadeOut
+                val doFadeIn = appSettings.bibleSettings.fadeIn
+                var displayedCurrent by remember { mutableStateOf(selectedVerses) }
+                var fadeAlpha by remember { mutableStateOf(1f) }
+                val pendingQueue = remember { kotlinx.coroutines.channels.Channel<List<SelectedVerse>>(kotlinx.coroutines.channels.Channel.CONFLATED) }
+
+                LaunchedEffect(selectedVerses) {
+                    if (displayedCurrent != selectedVerses) {
+                        pendingQueue.send(selectedVerses)
+                    }
                 }
+
+                LaunchedEffect(Unit) {
+                    for (nextVerses in pendingQueue) {
+                        if (displayedCurrent == nextVerses) continue
+                        // Fade out old content
+                        if (doFadeOut) {
+                            val anim = Animatable(1f)
+                            anim.animateTo(0f, tween(durationMillis = duration / 2)) {
+                                fadeAlpha = this.value
+                            }
+                        }
+                        fadeAlpha = 0f
+                        // Swap content
+                        displayedCurrent = nextVerses
+                        // Fade in new content
+                        if (doFadeIn) {
+                            val anim = Animatable(0f)
+                            anim.animateTo(1f, tween(durationMillis = duration / 2)) {
+                                fadeAlpha = this.value
+                            }
+                        }
+                        fadeAlpha = 1f
+                    }
+                }
+
+                Box(modifier = Modifier.graphicsLayer { alpha = fadeAlpha }) {
+                    TextContent(displayedCurrent)
+                }
+            } else {
+                TextContent(selectedVerses)
             }
         }
     }

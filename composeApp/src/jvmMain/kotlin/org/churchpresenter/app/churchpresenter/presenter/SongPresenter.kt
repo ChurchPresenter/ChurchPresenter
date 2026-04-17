@@ -947,10 +947,46 @@ fun SongPresenter(
                         TextContent(displayedCurrent)
                     }
                 }
-            } else {
-                Box(modifier = Modifier.alpha(transitionAlpha)) {
-                    TextContent(lyricSection)
+            } else if (appSettings.songSettings.fadeIn || appSettings.songSettings.fadeOut) {
+                val duration = appSettings.songSettings.transitionDuration.toInt().coerceAtLeast(100)
+                val doFadeOut = appSettings.songSettings.fadeOut
+                val doFadeIn = appSettings.songSettings.fadeIn
+                var displayedCurrent by remember { mutableStateOf(lyricSection) }
+                var fadeAlpha by remember { mutableStateOf(1f) }
+                val pendingQueue = remember { kotlinx.coroutines.channels.Channel<LyricSection>(kotlinx.coroutines.channels.Channel.CONFLATED) }
+
+                LaunchedEffect(lyricSection) {
+                    if (displayedCurrent != lyricSection) {
+                        pendingQueue.send(lyricSection)
+                    }
                 }
+
+                LaunchedEffect(Unit) {
+                    for (nextSection in pendingQueue) {
+                        if (displayedCurrent == nextSection) continue
+                        if (doFadeOut) {
+                            val anim = Animatable(1f)
+                            anim.animateTo(0f, tween(durationMillis = duration / 2)) {
+                                fadeAlpha = this.value
+                            }
+                        }
+                        fadeAlpha = 0f
+                        displayedCurrent = nextSection
+                        if (doFadeIn) {
+                            val anim = Animatable(0f)
+                            anim.animateTo(1f, tween(durationMillis = duration / 2)) {
+                                fadeAlpha = this.value
+                            }
+                        }
+                        fadeAlpha = 1f
+                    }
+                }
+
+                Box(modifier = Modifier.graphicsLayer { alpha = fadeAlpha }) {
+                    TextContent(displayedCurrent)
+                }
+            } else {
+                TextContent(lyricSection)
             }
         }
     }

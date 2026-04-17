@@ -1203,34 +1203,9 @@ private fun PresenterWindows(
     LaunchedEffect(selectedVerses, bibleHold) {
         if (bibleHold) return@LaunchedEffect
         val bs = appSettings.bibleSettings
-        if (presenterManager.displayedVerses.value.isEmpty() || (!bs.fadeIn && !bs.fadeOut && !bs.crossfade)) {
-            presenterManager.setDisplayedVerses(selectedVerses)
-            presenterManager.setBibleTransitionAlpha(1f)
-        } else if (bs.crossfade) {
-            // Crossfade handled inside BiblePresenter — just swap content
-            presenterManager.setDisplayedVerses(selectedVerses)
-            presenterManager.setBibleTransitionAlpha(1f)
-        } else {
-            val duration = bs.transitionDuration.toInt()
-            // Fade out (or instant)
-            if (bs.fadeOut) {
-                animate(1f, 0f, animationSpec = tween(duration / 2)) { value, _ ->
-                    presenterManager.setBibleTransitionAlpha(value)
-                }
-            } else {
-                presenterManager.setBibleTransitionAlpha(0f)
-            }
-            // Swap content at alpha=0
-            presenterManager.setDisplayedVerses(selectedVerses)
-            // Fade in (or instant)
-            if (bs.fadeIn) {
-                animate(0f, 1f, animationSpec = tween(duration / 2)) { value, _ ->
-                    presenterManager.setBibleTransitionAlpha(value)
-                }
-            } else {
-                presenterManager.setBibleTransitionAlpha(1f)
-            }
-        }
+        // All transitions (crossfade, fade in/out) are handled inside BiblePresenter
+        presenterManager.setDisplayedVerses(selectedVerses)
+        presenterManager.setBibleTransitionAlpha(1f)
     }
 
     // Centralized Song transition
@@ -1251,31 +1226,9 @@ private fun PresenterWindows(
             presenterManager.setSongTransitionAlpha(1f)
             return@LaunchedEffect
         }
-        if (presenterManager.displayedLyricSection.value.lines.isEmpty() || (!ss.fadeIn && !ss.fadeOut && !ss.crossfade)) {
-            presenterManager.setDisplayedLyricSection(lyricSection)
-            presenterManager.setSongTransitionAlpha(1f)
-        } else if (ss.crossfade) {
-            // Crossfade handled inside SongPresenter — just swap content
-            presenterManager.setDisplayedLyricSection(lyricSection)
-            presenterManager.setSongTransitionAlpha(1f)
-        } else {
-            val duration = ss.transitionDuration.toInt()
-            if (ss.fadeOut) {
-                animate(1f, 0f, animationSpec = tween(duration / 2)) { value, _ ->
-                    presenterManager.setSongTransitionAlpha(value)
-                }
-            } else {
-                presenterManager.setSongTransitionAlpha(0f)
-            }
-            presenterManager.setDisplayedLyricSection(lyricSection)
-            if (ss.fadeIn) {
-                animate(0f, 1f, animationSpec = tween(duration / 2)) { value, _ ->
-                    presenterManager.setSongTransitionAlpha(value)
-                }
-            } else {
-                presenterManager.setSongTransitionAlpha(1f)
-            }
-        }
+        // All transitions (crossfade, fade in/out) are handled inside SongPresenter
+        presenterManager.setDisplayedLyricSection(lyricSection)
+        presenterManager.setSongTransitionAlpha(1f)
     }
 
     // Centralized Picture transition
