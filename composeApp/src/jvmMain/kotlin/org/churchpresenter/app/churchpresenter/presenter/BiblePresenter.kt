@@ -704,6 +704,7 @@ fun BiblePresenter(
                 LaunchedEffect(Unit) {
                     for (nextVerses in pendingQueue) {
                         if (displayedCurrent == nextVerses) continue
+                        System.err.println("[Transition] isCrossfade=$isCrossfade fadeIn=${bs.fadeIn} fadeOut=${bs.fadeOut} duration=$duration")
 
                         if (isCrossfade) {
                             // Crossfade: both layers animate simultaneously
