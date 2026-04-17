@@ -1203,6 +1203,7 @@ private fun PresenterWindows(
     LaunchedEffect(selectedVerses, bibleHold) {
         if (bibleHold) return@LaunchedEffect
         val bs = appSettings.bibleSettings
+        System.err.println("[Transition] Bible: fadeIn=${bs.fadeIn} fadeOut=${bs.fadeOut} crossfade=${bs.crossfade} empty=${presenterManager.displayedVerses.value.isEmpty()}")
         if (presenterManager.displayedVerses.value.isEmpty() || (!bs.fadeIn && !bs.fadeOut && !bs.crossfade)) {
             presenterManager.setDisplayedVerses(selectedVerses)
             presenterManager.setBibleTransitionAlpha(1f)
