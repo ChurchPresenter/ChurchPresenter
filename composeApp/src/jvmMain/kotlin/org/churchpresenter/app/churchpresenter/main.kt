@@ -17,6 +17,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.animate
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.LinearEasing
@@ -1233,10 +1234,8 @@ private fun PresenterWindows(
                 }
             }
         }
+        // Set mode to NONE — alphas stay at 0 until next go-live triggers fade-in
         presenterManager.setPresentingMode(Presenting.NONE)
-        // Reset alphas for next time
-        presenterManager.setBibleTransitionAlpha(1f)
-        presenterManager.setSongTransitionAlpha(1f)
     }
 
     // Centralized Bible transition: one animation drives all windows so they stay in sync
@@ -1441,7 +1440,7 @@ private fun PresenterWindows(
                 ) {
                     Crossfade(
                         targetState = presentingMode,
-                        animationSpec = tween(if (modeCrossfadeActive) modeCrossfadeDuration else 0)
+                        animationSpec = if (modeCrossfadeActive) tween(modeCrossfadeDuration) else snap()
                     ) { mode ->
                     when (mode) {
                         Presenting.BIBLE ->
@@ -1542,7 +1541,7 @@ private fun PresenterWindows(
                     mediaViewModel = mediaViewModel,
                     isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD,
                 ) {
-                    Crossfade(targetState = presentingMode, animationSpec = tween(if (modeCrossfadeActive) modeCrossfadeDuration else 0)) { mode ->
+                    Crossfade(targetState = presentingMode, animationSpec = if (modeCrossfadeActive) tween(modeCrossfadeDuration) else snap()) { mode ->
                     when (mode) {
                         Presenting.BIBLE ->
                             if (screenAssignment.showBible) {
@@ -1676,7 +1675,7 @@ private fun PresenterWindows(
                                 outputRole = Constants.OUTPUT_ROLE_KEY
                             ) {
                                 Box(modifier = Modifier.fillMaxSize()) {
-                                    Crossfade(targetState = presentingMode, animationSpec = tween(if (modeCrossfadeActive) modeCrossfadeDuration else 0)) { mode ->
+                                    Crossfade(targetState = presentingMode, animationSpec = if (modeCrossfadeActive) tween(modeCrossfadeDuration) else snap()) { mode ->
                     when (mode) {
                                         Presenting.BIBLE ->
                                             if (screenAssignment.showBible) {
@@ -1854,7 +1853,7 @@ private fun PresenterWindows(
                                 } else false
                             }
                     ) {
-                        Crossfade(targetState = presentingMode, animationSpec = tween(if (modeCrossfadeActive) modeCrossfadeDuration else 0)) { mode ->
+                        Crossfade(targetState = presentingMode, animationSpec = if (modeCrossfadeActive) tween(modeCrossfadeDuration) else snap()) { mode ->
                     when (mode) {
                             Presenting.BIBLE ->
                                 if (screenAssignment.showBible) {
@@ -2024,7 +2023,7 @@ private fun PresenterWindows(
                                         } else false
                                     }
                             ) {
-                                Crossfade(targetState = presentingMode, animationSpec = tween(if (modeCrossfadeActive) modeCrossfadeDuration else 0)) { mode ->
+                                Crossfade(targetState = presentingMode, animationSpec = if (modeCrossfadeActive) tween(modeCrossfadeDuration) else snap()) { mode ->
                     when (mode) {
                                     Presenting.BIBLE ->
                                         if (screenAssignment.showBible) {
@@ -2140,7 +2139,7 @@ private fun PresenterWindows(
                     mediaViewModel = mediaViewModel,
                     isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD,
                 ) {
-                    Crossfade(targetState = presentingMode, animationSpec = tween(if (modeCrossfadeActive) modeCrossfadeDuration else 0)) { mode ->
+                    Crossfade(targetState = presentingMode, animationSpec = if (modeCrossfadeActive) tween(modeCrossfadeDuration) else snap()) { mode ->
                     when (mode) {
                         Presenting.BIBLE ->
                             if (screenAssignment.showBible) {
