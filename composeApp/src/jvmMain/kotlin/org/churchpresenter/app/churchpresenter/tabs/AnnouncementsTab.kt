@@ -298,7 +298,7 @@ fun AnnouncementsTab(
                                     IconButton(
                                         onClick = {
                                             if (announcementTextIsLive) {
-                                                presenterManager.setPresentingMode(Presenting.NONE)
+                                                presenterManager.requestClearDisplay()
                                             } else {
                                                 // Pause the timer if it is running so only one is active
                                                 if (viewModel.timerRunning) viewModel.pauseTimer()

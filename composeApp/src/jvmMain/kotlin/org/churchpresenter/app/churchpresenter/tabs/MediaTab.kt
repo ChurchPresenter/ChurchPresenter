@@ -169,7 +169,7 @@ fun MediaTab(
     LaunchedEffect(selectedMediaItem) {
         selectedMediaItem?.let {
             if (presenterManager?.presentingMode?.value == Presenting.MEDIA) {
-                presenterManager.setPresentingMode(Presenting.NONE)
+                presenterManager.requestClearDisplay()
             }
             // Sync source type selector with loaded item
             when (it.mediaType) {
@@ -194,7 +194,7 @@ fun MediaTab(
                     when {
                         keyEvent.key == Key.Escape && presenterManager != null -> {
                             viewModel.pause()
-                            presenterManager.setPresentingMode(Presenting.NONE)
+                            presenterManager.requestClearDisplay()
                             true
                         }
                         viewModel.isLoaded && keyEvent.key == Key.Spacebar -> {
@@ -253,7 +253,7 @@ fun MediaTab(
                                     val type = if (ext in Constants.AUDIO_EXTENSIONS)
                                         Constants.MEDIA_TYPE_AUDIO else Constants.MEDIA_TYPE_LOCAL
                                     if (presenterManager?.presentingMode?.value == Presenting.MEDIA) {
-                                        presenterManager.setPresentingMode(Presenting.NONE)
+                                        presenterManager.requestClearDisplay()
                                     }
                                     viewModel.loadMedia(file.absolutePathString(), type)
                                 }
@@ -296,7 +296,7 @@ fun MediaTab(
                         onClick = {
                             if (urlInput.isNotBlank()) {
                                 if (presenterManager?.presentingMode?.value == Presenting.MEDIA) {
-                                    presenterManager.setPresentingMode(Presenting.NONE)
+                                    presenterManager.requestClearDisplay()
                                 }
                                 viewModel.loadMedia(urlInput.trim(), Constants.MEDIA_TYPE_URL)
                             }

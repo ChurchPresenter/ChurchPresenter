@@ -706,7 +706,7 @@ fun main() {
                                 LaunchedEffect(Unit) {
                                     companionServer.onClear.collect {
                                         mediaViewModel.pause()
-                                        presenterManager.setPresentingMode(Presenting.NONE)
+                                        presenterManager.requestClearDisplay()
                                     }
                                 }
 
@@ -975,7 +975,7 @@ fun main() {
             // Auto-clear presenting mode when media finishes playing
             LaunchedEffect(mediaViewModel.mediaFinished) {
                 if (mediaViewModel.mediaFinished) {
-                    presenterManager.setPresentingMode(Presenting.NONE)
+                    presenterManager.requestClearDisplay()
                     mediaViewModel.clearFinished()
                 }
             }
@@ -1183,7 +1183,7 @@ private fun PresenterWindows(
     val clearAnnouncementOnFinish = {
         presenterManager.setAnnouncementText("")
         presenterManager.setDisplayedAnnouncementText("")
-        presenterManager.setPresentingMode(Presenting.NONE)
+        presenterManager.requestClearDisplay()
     }
     val lottieJsonContent by presenterManager.lottieJsonContent
     val lottiePauseAtFrame by presenterManager.lottiePauseAtFrame
@@ -1196,6 +1196,37 @@ private fun PresenterWindows(
     val activeScene by presenterManager.activeScene
 
     val proj = appSettings.projectionSettings
+
+    // Fade-out before clearing display
+    val clearRequested by presenterManager.clearDisplayRequested
+    LaunchedEffect(clearRequested) {
+        if (!clearRequested) return@LaunchedEffect
+        val mode = presenterManager.presentingMode.value
+        val shouldFade = when (mode) {
+            Presenting.BIBLE -> appSettings.bibleSettings.fadeOut
+            Presenting.LYRICS -> appSettings.songSettings.fadeOut
+            else -> false
+        }
+        if (shouldFade) {
+            val duration = when (mode) {
+                Presenting.BIBLE -> appSettings.bibleSettings.transitionDuration.toInt()
+                Presenting.LYRICS -> appSettings.songSettings.transitionDuration.toInt()
+                else -> 500
+            }.coerceAtLeast(100)
+            val anim = Animatable(1f)
+            anim.animateTo(0f, tween(durationMillis = duration)) {
+                when (mode) {
+                    Presenting.BIBLE -> presenterManager.setBibleTransitionAlpha(this.value)
+                    Presenting.LYRICS -> presenterManager.setSongTransitionAlpha(this.value)
+                    else -> {}
+                }
+            }
+        }
+        presenterManager.setPresentingMode(Presenting.NONE)
+        // Reset alphas for next time
+        presenterManager.setBibleTransitionAlpha(1f)
+        presenterManager.setSongTransitionAlpha(1f)
+    }
 
     // Centralized Bible transition: one animation drives all windows so they stay in sync
     // When hold is active, skip updating displayedVerses so the user can browse freely
@@ -1325,7 +1356,7 @@ private fun PresenterWindows(
                 // Clear display and exit presenting mode
                 presenterManager.setAnnouncementText("")
                 presenterManager.setDisplayedAnnouncementText("")
-                presenterManager.setPresentingMode(Presenting.NONE)
+                presenterManager.requestClearDisplay()
             }
             // loopCount == 0: infinite — stay visible until user manually stops
         }
@@ -1798,7 +1829,7 @@ private fun PresenterWindows(
                             .onPreviewKeyEvent { keyEvent ->
                                 if (keyEvent.type == KeyEventType.KeyDown && keyEvent.key == Key.Escape) {
                                     mediaViewModel.pause()
-                                    presenterManager.setPresentingMode(Presenting.NONE)
+                                    presenterManager.requestClearDisplay()
                                     true
                                 } else false
                             }
@@ -1966,7 +1997,7 @@ private fun PresenterWindows(
                                     .onPreviewKeyEvent { keyEvent ->
                                         if (keyEvent.type == KeyEventType.KeyDown && keyEvent.key == Key.Escape) {
                                             mediaViewModel.pause()
-                                            presenterManager.setPresentingMode(Presenting.NONE)
+                                            presenterManager.requestClearDisplay()
                                             true
                                         } else false
                                     }

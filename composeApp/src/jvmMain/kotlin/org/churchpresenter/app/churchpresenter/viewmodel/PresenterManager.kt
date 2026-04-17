@@ -14,6 +14,10 @@ class PresenterManager {
     private val _presentingMode = mutableStateOf(Presenting.NONE)
     val presentingMode: State<Presenting> = _presentingMode
 
+    // Flag to request fade-out before clearing display
+    private val _clearDisplayRequested = mutableStateOf(false)
+    val clearDisplayRequested: State<Boolean> = _clearDisplayRequested
+
     private val _selectedVerse = mutableStateOf(SelectedVerse())
     val selectedVerse: State<SelectedVerse> = _selectedVerse
 
@@ -115,6 +119,18 @@ class PresenterManager {
 
     fun setPresentingMode(mode: Presenting) {
         _presentingMode.value = mode
+        if (mode != Presenting.NONE) {
+            _clearDisplayRequested.value = false
+        }
+    }
+
+    /** Request a fade-out before clearing the display. The LaunchedEffect in main.kt
+     *  watches this flag, animates bibleTransitionAlpha/songTransitionAlpha to 0,
+     *  then sets presentingMode to NONE. */
+    fun requestClearDisplay() {
+        if (_presentingMode.value != Presenting.NONE) {
+            _clearDisplayRequested.value = true
+        }
     }
 
     fun setSelectedVerse(verse: SelectedVerse) {

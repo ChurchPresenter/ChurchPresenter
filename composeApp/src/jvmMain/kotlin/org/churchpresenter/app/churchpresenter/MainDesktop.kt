@@ -356,7 +356,7 @@ fun MainDesktop(
                     when (keyEvent.key) {
                         Key.Escape -> {
                             mediaViewModel?.pause()
-                            presenterManager.setPresentingMode(Presenting.NONE)
+                            presenterManager.requestClearDisplay()
                             true
                         }
 
@@ -910,7 +910,7 @@ fun MainDesktop(
                                 text = stringResource(Res.string.tooltip_clear_display),
                                 onClick = {
                                     mediaViewModel?.pause()
-                                    presenterManager.setPresentingMode(Presenting.NONE)
+                                    presenterManager.requestClearDisplay()
                                 },
                                 buttonSize = 36.dp,
                                 iconTint = MaterialTheme.colorScheme.error
