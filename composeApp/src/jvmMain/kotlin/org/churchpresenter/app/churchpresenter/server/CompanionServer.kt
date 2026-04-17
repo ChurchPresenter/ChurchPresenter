@@ -1970,6 +1970,9 @@ class CompanionServer {
                             return@webSocket
                         }
                     }
+                    val wsClientId = call.request.headers[Constants.HEADER_DEVICE_ID]
+                        ?: call.request.queryParameters[Constants.HEADER_DEVICE_ID]
+                        ?: ""
 
                     val catalog = _catalog.value
                     val schedule = _schedule.value
@@ -2032,7 +2035,7 @@ class CompanionServer {
                                     Constants.WS_CMD_ADD_TO_SCHEDULE -> {
                                         val item = parseRemoteItem(msg.payload)
                                             ?: json.decodeFromString(AddToScheduleRequest.serializer(), msg.payload).item
-                                        val pending = PendingRemoteRequest(item)
+                                        val pending = PendingRemoteRequest(item, wsClientId)
                                         scope.launch {
                                             onAddToSchedule.emit(pending)
                                             // WS is fire-and-forget — complete automatically after emit
@@ -2045,14 +2048,14 @@ class CompanionServer {
                                                 .items.mapNotNull { it.toScheduleItem() }
                                         } catch (_: Exception) { emptyList() }
                                         if (items.isNotEmpty()) {
-                                            val pending = PendingBatchRequest(items)
+                                            val pending = PendingBatchRequest(items, wsClientId)
                                             scope.launch { onAddBatchToSchedule.emit(pending) }
                                         }
                                     }
                                     Constants.WS_CMD_PROJECT -> {
                                         val item = parseRemoteItem(msg.payload)
                                             ?: json.decodeFromString(ProjectRequest.serializer(), msg.payload).item
-                                        val pending = PendingRemoteRequest(item)
+                                        val pending = PendingRemoteRequest(item, wsClientId)
                                         scope.launch { onProject.emit(pending) }
                                     }
                                 }
