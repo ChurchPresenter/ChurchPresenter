@@ -682,13 +682,17 @@ fun BiblePresenter(
                 }
             }
 
-            if (crossfadeEnabled) {
-                // True crossfade with queued animations — current animation finishes
-                // before the next one starts. CONFLATED channel skips intermediate values.
-                val duration = appSettings.bibleSettings.transitionDuration.toInt().coerceAtLeast(100)
+            if (crossfadeEnabled || appSettings.bibleSettings.fadeIn || appSettings.bibleSettings.fadeOut) {
+                // Unified transition system — queued animations with CONFLATED channel.
+                // Crossfade: both layers visible simultaneously.
+                // Fade in/out: sequential fade out → swap → fade in.
+                val bs = appSettings.bibleSettings
+                val duration = bs.transitionDuration.toInt().coerceAtLeast(100)
+                val isCrossfade = crossfadeEnabled
                 var displayedCurrent by remember { mutableStateOf(selectedVerses) }
                 var displayedPrevious by remember { mutableStateOf<List<SelectedVerse>>(emptyList()) }
-                var crossfadeProgress by remember { mutableStateOf(1f) }
+                var currentAlpha by remember { mutableStateOf(1f) }
+                var previousAlpha by remember { mutableStateOf(0f) }
                 val pendingQueue = remember { kotlinx.coroutines.channels.Channel<List<SelectedVerse>>(kotlinx.coroutines.channels.Channel.CONFLATED) }
 
                 LaunchedEffect(selectedVerses) {
@@ -700,69 +704,50 @@ fun BiblePresenter(
                 LaunchedEffect(Unit) {
                     for (nextVerses in pendingQueue) {
                         if (displayedCurrent == nextVerses) continue
-                        displayedPrevious = displayedCurrent
-                        displayedCurrent = nextVerses
-                        crossfadeProgress = 0f
-                        val anim = Animatable(0f)
-                        anim.animateTo(1f, tween(durationMillis = duration)) {
-                            crossfadeProgress = this.value
+
+                        if (isCrossfade) {
+                            // Crossfade: both layers animate simultaneously
+                            displayedPrevious = displayedCurrent
+                            displayedCurrent = nextVerses
+                            previousAlpha = 1f
+                            currentAlpha = 0f
+                            val anim = Animatable(0f)
+                            anim.animateTo(1f, tween(durationMillis = duration)) {
+                                currentAlpha = this.value
+                                previousAlpha = 1f - this.value
+                            }
+                        } else {
+                            // Sequential fade out → swap → fade in
+                            if (bs.fadeOut) {
+                                val anim = Animatable(1f)
+                                anim.animateTo(0f, tween(durationMillis = duration / 2)) {
+                                    currentAlpha = this.value
+                                }
+                            }
+                            currentAlpha = 0f
+                            displayedCurrent = nextVerses
+                            if (bs.fadeIn) {
+                                val anim = Animatable(0f)
+                                anim.animateTo(1f, tween(durationMillis = duration / 2)) {
+                                    currentAlpha = this.value
+                                }
+                            }
                         }
-                        crossfadeProgress = 1f
+                        currentAlpha = 1f
+                        previousAlpha = 0f
                         displayedPrevious = emptyList()
                     }
                 }
 
                 Box(modifier = Modifier.matchParentSize()) {
-                    if (displayedPrevious.isNotEmpty()) {
-                        Box(modifier = Modifier.fillMaxSize().graphicsLayer { alpha = 1f - crossfadeProgress }) {
+                    if (displayedPrevious.isNotEmpty() && previousAlpha > 0f) {
+                        Box(modifier = Modifier.fillMaxSize().graphicsLayer { alpha = previousAlpha }) {
                             TextContent(displayedPrevious)
                         }
                     }
-                    Box(modifier = Modifier.fillMaxSize().graphicsLayer { alpha = if (displayedPrevious.isEmpty()) 1f else crossfadeProgress }) {
+                    Box(modifier = Modifier.fillMaxSize().graphicsLayer { alpha = currentAlpha }) {
                         TextContent(displayedCurrent)
                     }
-                }
-            } else if (appSettings.bibleSettings.fadeIn || appSettings.bibleSettings.fadeOut) {
-                // Fade in/out handled locally — same queued pattern as crossfade
-                val duration = appSettings.bibleSettings.transitionDuration.toInt().coerceAtLeast(100)
-                val doFadeOut = appSettings.bibleSettings.fadeOut
-                val doFadeIn = appSettings.bibleSettings.fadeIn
-                var displayedCurrent by remember { mutableStateOf(selectedVerses) }
-                var fadeAlpha by remember { mutableStateOf(1f) }
-                val pendingQueue = remember { kotlinx.coroutines.channels.Channel<List<SelectedVerse>>(kotlinx.coroutines.channels.Channel.CONFLATED) }
-
-                LaunchedEffect(selectedVerses) {
-                    if (displayedCurrent != selectedVerses) {
-                        pendingQueue.send(selectedVerses)
-                    }
-                }
-
-                LaunchedEffect(Unit) {
-                    for (nextVerses in pendingQueue) {
-                        if (displayedCurrent == nextVerses) continue
-                        // Fade out old content
-                        if (doFadeOut) {
-                            val anim = Animatable(1f)
-                            anim.animateTo(0f, tween(durationMillis = duration / 2)) {
-                                fadeAlpha = this.value
-                            }
-                        }
-                        fadeAlpha = 0f
-                        // Swap content
-                        displayedCurrent = nextVerses
-                        // Fade in new content
-                        if (doFadeIn) {
-                            val anim = Animatable(0f)
-                            anim.animateTo(1f, tween(durationMillis = duration / 2)) {
-                                fadeAlpha = this.value
-                            }
-                        }
-                        fadeAlpha = 1f
-                    }
-                }
-
-                Box(modifier = Modifier.graphicsLayer { alpha = fadeAlpha }) {
-                    TextContent(displayedCurrent)
                 }
             } else {
                 TextContent(selectedVerses)

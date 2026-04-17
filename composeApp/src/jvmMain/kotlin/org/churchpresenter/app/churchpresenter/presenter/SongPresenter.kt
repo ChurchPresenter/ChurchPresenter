@@ -909,11 +909,14 @@ fun SongPresenter(
                 }
             }
 
-            if (crossfadeEnabled) {
-                val duration = appSettings.songSettings.transitionDuration.toInt().coerceAtLeast(100)
+            if (crossfadeEnabled || appSettings.songSettings.fadeIn || appSettings.songSettings.fadeOut) {
+                val ss = appSettings.songSettings
+                val duration = ss.transitionDuration.toInt().coerceAtLeast(100)
+                val isCrossfade = crossfadeEnabled
                 var displayedCurrent by remember { mutableStateOf(lyricSection) }
                 var displayedPrevious by remember { mutableStateOf(LyricSection()) }
-                var crossfadeProgress by remember { mutableStateOf(1f) }
+                var currentAlpha by remember { mutableStateOf(1f) }
+                var previousAlpha by remember { mutableStateOf(0f) }
                 val pendingQueue = remember { kotlinx.coroutines.channels.Channel<LyricSection>(kotlinx.coroutines.channels.Channel.CONFLATED) }
 
                 LaunchedEffect(lyricSection) {
@@ -925,65 +928,48 @@ fun SongPresenter(
                 LaunchedEffect(Unit) {
                     for (nextSection in pendingQueue) {
                         if (displayedCurrent == nextSection) continue
-                        displayedPrevious = displayedCurrent
-                        displayedCurrent = nextSection
-                        crossfadeProgress = 0f
-                        val anim = Animatable(0f)
-                        anim.animateTo(1f, tween(durationMillis = duration)) {
-                            crossfadeProgress = this.value
+
+                        if (isCrossfade) {
+                            displayedPrevious = displayedCurrent
+                            displayedCurrent = nextSection
+                            previousAlpha = 1f
+                            currentAlpha = 0f
+                            val anim = Animatable(0f)
+                            anim.animateTo(1f, tween(durationMillis = duration)) {
+                                currentAlpha = this.value
+                                previousAlpha = 1f - this.value
+                            }
+                        } else {
+                            if (ss.fadeOut) {
+                                val anim = Animatable(1f)
+                                anim.animateTo(0f, tween(durationMillis = duration / 2)) {
+                                    currentAlpha = this.value
+                                }
+                            }
+                            currentAlpha = 0f
+                            displayedCurrent = nextSection
+                            if (ss.fadeIn) {
+                                val anim = Animatable(0f)
+                                anim.animateTo(1f, tween(durationMillis = duration / 2)) {
+                                    currentAlpha = this.value
+                                }
+                            }
                         }
-                        crossfadeProgress = 1f
+                        currentAlpha = 1f
+                        previousAlpha = 0f
                         displayedPrevious = LyricSection()
                     }
                 }
 
                 Box(modifier = Modifier.matchParentSize()) {
-                    if (displayedPrevious.lines.isNotEmpty()) {
-                        Box(modifier = Modifier.fillMaxSize().graphicsLayer { alpha = 1f - crossfadeProgress }) {
+                    if (displayedPrevious.lines.isNotEmpty() && previousAlpha > 0f) {
+                        Box(modifier = Modifier.fillMaxSize().graphicsLayer { alpha = previousAlpha }) {
                             TextContent(displayedPrevious)
                         }
                     }
-                    Box(modifier = Modifier.fillMaxSize().graphicsLayer { alpha = if (displayedPrevious.lines.isEmpty()) 1f else crossfadeProgress }) {
+                    Box(modifier = Modifier.fillMaxSize().graphicsLayer { alpha = currentAlpha }) {
                         TextContent(displayedCurrent)
                     }
-                }
-            } else if (appSettings.songSettings.fadeIn || appSettings.songSettings.fadeOut) {
-                val duration = appSettings.songSettings.transitionDuration.toInt().coerceAtLeast(100)
-                val doFadeOut = appSettings.songSettings.fadeOut
-                val doFadeIn = appSettings.songSettings.fadeIn
-                var displayedCurrent by remember { mutableStateOf(lyricSection) }
-                var fadeAlpha by remember { mutableStateOf(1f) }
-                val pendingQueue = remember { kotlinx.coroutines.channels.Channel<LyricSection>(kotlinx.coroutines.channels.Channel.CONFLATED) }
-
-                LaunchedEffect(lyricSection) {
-                    if (displayedCurrent != lyricSection) {
-                        pendingQueue.send(lyricSection)
-                    }
-                }
-
-                LaunchedEffect(Unit) {
-                    for (nextSection in pendingQueue) {
-                        if (displayedCurrent == nextSection) continue
-                        if (doFadeOut) {
-                            val anim = Animatable(1f)
-                            anim.animateTo(0f, tween(durationMillis = duration / 2)) {
-                                fadeAlpha = this.value
-                            }
-                        }
-                        fadeAlpha = 0f
-                        displayedCurrent = nextSection
-                        if (doFadeIn) {
-                            val anim = Animatable(0f)
-                            anim.animateTo(1f, tween(durationMillis = duration / 2)) {
-                                fadeAlpha = this.value
-                            }
-                        }
-                        fadeAlpha = 1f
-                    }
-                }
-
-                Box(modifier = Modifier.graphicsLayer { alpha = fadeAlpha }) {
-                    TextContent(displayedCurrent)
                 }
             } else {
                 TextContent(lyricSection)
