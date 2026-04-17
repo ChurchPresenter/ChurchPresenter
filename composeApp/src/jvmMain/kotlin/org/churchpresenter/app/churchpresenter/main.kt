@@ -1212,11 +1212,14 @@ private fun PresenterWindows(
             presenterManager.setBibleTransitionAlpha(1f)
         } else {
             val duration = bs.transitionDuration.toInt()
+            System.err.println("[Fade] Bible fade: fadeIn=${bs.fadeIn} fadeOut=${bs.fadeOut} duration=$duration")
             // Fade out (or instant)
             if (bs.fadeOut) {
+                System.err.println("[Fade] Starting fade out")
                 animate(1f, 0f, animationSpec = tween(duration / 2)) { value, _ ->
                     presenterManager.setBibleTransitionAlpha(value)
                 }
+                System.err.println("[Fade] Fade out done, alpha=${presenterManager.bibleTransitionAlpha.value}")
             } else {
                 presenterManager.setBibleTransitionAlpha(0f)
             }
