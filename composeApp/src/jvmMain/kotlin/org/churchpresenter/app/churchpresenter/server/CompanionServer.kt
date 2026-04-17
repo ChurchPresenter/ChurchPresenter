@@ -8,7 +8,6 @@ import io.ktor.server.application.install
 import io.ktor.server.engine.EmbeddedServer
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.engine.connector
-import io.ktor.server.engine.sslConnector
 import io.ktor.server.netty.Netty
 import io.ktor.server.netty.NettyApplicationEngine
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
@@ -676,8 +675,6 @@ class CompanionServer {
     private val _serverUrl = MutableStateFlow("")
     val serverUrl: StateFlow<String> = _serverUrl.asStateFlow()
 
-    /** SHA-256 fingerprint of the CA certificate, available after the first server start. */
-    val caCertFingerprint: String? get() = SslCertificateManager.getCaCertFingerprint()
 
     private var server: EmbeddedServer<NettyApplicationEngine, NettyApplicationEngine.Configuration>? = null
     private var currentPort: Int = Constants.SERVER_DEFAULT_PORT
@@ -1237,48 +1234,15 @@ class CompanionServer {
         if (_isRunning.value) return
 
         // Find the first pair of consecutive free ports starting from the requested one.
-        // The server needs port N (HTTPS/HTTP) and port N+1 (plain-HTTP localhost connector).
+        // The server needs port N (plain-HTTP) and port N+1 (plain-HTTP localhost connector).
         val actualPort = findFreePortPair(port)
         currentPort = actualPort
 
         val displayHost = hostOverride.trim().ifEmpty { localIpAddress() }
 
-        val keyStore = try {
-            SslCertificateManager.getOrCreateKeyStore(displayHost)
-        } catch (e: Exception) {
-            startPlainHttp(actualPort, displayHost)
-            return
-        }
-
-        try {
-            server = embeddedServer(Netty, configure = {
-                // HTTPS for external clients
-                sslConnector(
-                    keyStore = keyStore,
-                    keyAlias = Constants.SSL_KEY_ALIAS,
-                    keyStorePassword = { Constants.SSL_KEYSTORE_PASSWORD.toCharArray() },
-                    privateKeyPassword = { Constants.SSL_KEYSTORE_PASSWORD.toCharArray() }
-                ) {
-                    host = "0.0.0.0"
-                    this.port = actualPort
-                }
-                // Plain HTTP on localhost for embedded WebView (avoids SSL handshake issues)
-                connector {
-                    host = "127.0.0.1"
-                    this.port = actualPort + 1
-                }
-            }) { configurePipeline() }
-
-            server?.start(wait = false)
-            _isRunning.value = true
-            _serverUrl.value = "https://$displayHost:$actualPort"
-            // Restore previously uploaded device photos so they appear in the Pictures tab
-            scope.launch { clearDeviceUploads() }
-        } catch (_: java.net.BindException) {
-            server = null
-        } catch (_: Exception) {
-            server = null
-        }
+        // Always use plain HTTP — no SSL certificate required.
+        // Mobile clients connect over the local network with ws:// and http://.
+        startPlainHttp(actualPort, displayHost)
     }
 
     /** Fallback plain-HTTP start used only if SSL cert generation fails. */

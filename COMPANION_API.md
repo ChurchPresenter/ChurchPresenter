@@ -8,13 +8,13 @@ REST + WebSocket API exposed by the desktop app for the mobile companion.
 
 | Protocol | Address | Notes |
 |----------|---------|-------|
-| HTTPS | `https://<desktop-ip>:<port>` | Default port **8765** — used by external devices |
+| HTTP | `http://<desktop-ip>:<port>` | Default port **8765** — used by all devices |
 | HTTP  | `http://127.0.0.1:<port+1>` | e.g. `8766` — localhost only (embedded WebView) |
 
 The server displays its full URL in **Settings → Server**.  
-Replace `https://192.168.1.10:8765` with the URL shown there in every sample below.
+Replace `http://192.168.1.10:8765` with the URL shown there in every sample below.
 
-> **Self-signed certificate** — mobile apps must accept the cert or pin it on first connect.
+> **No SSL certificate required** — the server uses plain HTTP and plain WebSocket (`ws://`) over the local network.
 
 ---
 
@@ -32,10 +32,10 @@ If the key is wrong the server responds `HTTP 401 Unauthorized`.
 
 ```bash
 # Header
-curl -k -H "X-Api-Key: mysecretkey" https://192.168.1.10:8765/api/info
+curl -H "X-Api-Key: mysecretkey" http://192.168.1.10:8765/api/info
 
 # Query param
-curl -k "https://192.168.1.10:8765/api/info?apiKey=mysecretkey"
+curl "http://192.168.1.10:8765/api/info?apiKey=mysecretkey"
 ```
 
 ### Device Identification (Optional)
@@ -711,13 +711,13 @@ HTTP 400
 ### Connection
 
 ```
-wss://192.168.1.10:8765/ws
+ws://192.168.1.10:8765/ws
 ```
 
 With API key:
 
 ```
-wss://192.168.1.10:8765/ws?apiKey=mysecretkey
+ws://192.168.1.10:8765/ws?apiKey=mysecretkey
 ```
 
 On connect the server immediately pushes the current state as a burst of up to **5 events**:
@@ -732,7 +732,7 @@ On connect the server immediately pushes the current state as a burst of up to *
 
 ```javascript
 // JavaScript / React Native
-const ws = new WebSocket('wss://192.168.1.10:8765/ws');
+const ws = new WebSocket('ws://192.168.1.10:8765/ws');
 
 ws.onopen = () => console.log('connected');
 
