@@ -724,7 +724,7 @@ fun BiblePresenter(
                 }
             } else {
                 // Fade in/out driven centrally via shared transitionAlpha
-                Box(modifier = Modifier.matchParentSize().graphicsLayer { alpha = transitionAlpha }) {
+                Box(modifier = Modifier.alpha(transitionAlpha)) {
                     TextContent(selectedVerses)
                 }
             }

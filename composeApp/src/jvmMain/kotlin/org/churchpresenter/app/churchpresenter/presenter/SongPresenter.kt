@@ -948,7 +948,7 @@ fun SongPresenter(
                     }
                 }
             } else {
-                Box(modifier = Modifier.matchParentSize().graphicsLayer { alpha = transitionAlpha }) {
+                Box(modifier = Modifier.alpha(transitionAlpha)) {
                     TextContent(lyricSection)
                 }
             }
