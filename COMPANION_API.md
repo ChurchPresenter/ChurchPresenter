@@ -71,6 +71,50 @@ curl -k https://192.168.1.10:8765/api/info
 
 ---
 
+### `GET /api/status`
+
+Returns server capability and per-device permission information.  
+Called by the mobile companion immediately after launch to warn users about limited functionality.
+
+The server resolves `permissions` based on the `X-Device-Id` header.  
+If the header is absent or the device has no explicit entry, global defaults are used.
+
+```bash
+curl -H "X-Device-Id: MyiPhone" http://192.168.1.10:8765/api/status
+```
+
+```json
+{
+  "appVersion": "1.4.2",
+  "apiKeyStatus": "none",
+  "endpoints": ["songs", "bible", "schedule", "project", "pictures", "presentations", "status"],
+  "bibles": ["KJV", "NIV"],
+  "songbooks": ["Hymns", "Contemporary"],
+  "features": ["scheduleApproval", "fileUpload"],
+  "permissions": {
+    "canPresent": true,
+    "canAddToSchedule": true,
+    "canUploadFiles": false
+  }
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `appVersion` | `string` | Desktop app version string, e.g. `"1.4.2"` |
+| `apiKeyStatus` | `string` | `"none"` when no API key is configured; `"set"` when one is active |
+| `endpoints` | `string[]` | List of API path segments this server exposes |
+| `bibles` | `string[]` | Translation names loaded in the app (empty array if none) |
+| `songbooks` | `string[]` | Song-book names loaded in the app (empty array if none) |
+| `features` | `string[]` | Advertised feature flags, e.g. `"scheduleApproval"`, `"fileUpload"` |
+| `permissions.canPresent` | `bool` | Whether this device may call `/api/project` and `/api/clear` |
+| `permissions.canAddToSchedule` | `bool` | Whether this device may call `/api/schedule/add` |
+| `permissions.canUploadFiles` | `bool` | Whether this device may call `/api/presentations/upload` or `/api/pictures/upload` |
+
+> All `permissions` fields default to `true` when absent so that older server versions that omit the object do not incorrectly restrict devices.
+
+---
+
 ### `GET /api/songs`
 
 Returns the full song catalog grouped by songbook.
