@@ -377,6 +377,22 @@ data class ServerInfoResponse(
 )
 
 @Serializable
+data class DevicePermissionsDto(
+    val canPresent: Boolean = true,
+    val canAddToSchedule: Boolean = true,
+    val canUploadFiles: Boolean = true,
+)
+
+@Serializable
+data class StatusResponse(
+    val appVersion: String = Constants.SERVER_VERSION,
+    val endpoints: List<String> = emptyList(),
+    val bibles: List<String> = emptyList(),
+    val songbooks: List<String> = emptyList(),
+    val permissions: DevicePermissionsDto = DevicePermissionsDto(),
+)
+
+@Serializable
 data class WebSocketMessage(
     val type: String,
     val payload: String = ""
@@ -1374,6 +1390,28 @@ class CompanionServer {
                 get(Constants.ENDPOINT_INFO) {
                     if (!checkApiKey(call)) return@get
                     call.respond(ServerInfoResponse(port = currentPort))
+                }
+
+                get(Constants.ENDPOINT_STATUS) {
+                    if (!checkApiKey(call)) return@get
+                    val bibleNames = _bibleCatalog.value?.translation?.let { listOf(it) } ?: emptyList()
+                    val songbookNames = _catalog.value.songBook.map { it.bookName }
+                    val exposedEndpoints = listOf(
+                        "songs", "bible", "schedule", "presentations", "pictures", "status"
+                    )
+                    call.respond(
+                        StatusResponse(
+                            appVersion  = Constants.SERVER_VERSION,
+                            endpoints   = exposedEndpoints,
+                            bibles      = bibleNames,
+                            songbooks   = songbookNames,
+                            permissions = DevicePermissionsDto(
+                                canPresent       = true,
+                                canAddToSchedule = true,
+                                canUploadFiles   = _fileUploadEnabled.value,
+                            ),
+                        )
+                    )
                 }
 
                 get(Constants.ENDPOINT_SONGS) {
