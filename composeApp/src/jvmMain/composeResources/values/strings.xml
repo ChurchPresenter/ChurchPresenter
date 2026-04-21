@@ -992,10 +992,19 @@
     <string name="remote_client_blocked_badge">⛔ blocked</string>
     <string name="remote_queue_waiting_one">1 more request waiting in queue</string>
     <string name="remote_queue_waiting_many">%1$d more requests waiting in queue</string>
+    <string name="remote_activity_added_to_schedule">Added to Schedule</string>
+    <string name="remote_activity_projected">Projected (Go Live)</string>
+    <string name="remote_activity_presented">Presenting</string>
+    <string name="remote_activity_uploaded">Uploaded</string>
+    <string name="remote_activity_cleared">Cleared Display</string>
+    <string name="remote_activity_by">by %1$s</string>
+    <string name="remote_activity_dismiss">Dismiss</string>
+    <string name="remote_activity_dismiss_all">Dismiss All</string>
     <string name="allow">Allow</string>
     <string name="allow_for_session">Allow for Session</string>
     <string name="allow_permanently">Allow Permanently</string>
     <string name="deny">Deny</string>
+    <string name="deny_all">Deny All</string>
     <string name="block_for_session">Block for Session</string>
     <string name="block_permanently">Block Permanently</string>
 

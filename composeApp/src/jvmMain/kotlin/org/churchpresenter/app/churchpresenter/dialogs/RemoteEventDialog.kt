@@ -78,7 +78,10 @@ data class RemoteEvent(
 
 enum class RemoteEventType {
     ADD_TO_SCHEDULE,
-    PROJECT
+    PROJECT,
+    PRESENT,    // instant: select_song_section / select_picture / select_slide / select_bible_verse
+    UPLOAD,     // instant: presentation or picture upload
+    CLEAR       // instant: POST /api/clear
 }
 
 /**
@@ -113,10 +116,12 @@ fun RemoteEventDialog(
     val actionLabel = when (event.type) {
         RemoteEventType.ADD_TO_SCHEDULE -> stringResource(Res.string.remote_api_add_to_schedule)
         RemoteEventType.PROJECT         -> stringResource(Res.string.remote_api_project)
+        else                            -> stringResource(Res.string.remote_api_request_title)
     }
     val icon = when (event.type) {
         RemoteEventType.ADD_TO_SCHEDULE -> "📋"
         RemoteEventType.PROJECT         -> "📡"
+        else                            -> "🔔"
     }
     val remaining = queueSize - 1  // items behind this one
 

@@ -685,6 +685,23 @@ class CompanionServer {
         onBufferOverflow = BufferOverflow.DROP_OLDEST
     )
 
+    /**
+     * Emitted for every instant (no-approval) action so the UI can show an activity toast.
+     * Carries enough info to build a [RemoteActivityNotification] without approval logic.
+     */
+    data class RemoteInstantAction(
+        /** One of: "present", "upload", "clear" — maps to RemoteEventType in the UI layer. */
+        val actionType: String,
+        val title: String,
+        val detail: String = "",
+        val clientId: String = ""
+    )
+
+    val onInstantAction = MutableSharedFlow<RemoteInstantAction>(
+        extraBufferCapacity = 32,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
+
     private val _isRunning = MutableStateFlow(false)
     val isRunning: StateFlow<Boolean> = _isRunning.asStateFlow()
 
@@ -1313,6 +1330,7 @@ class CompanionServer {
                 allowHeader(HttpHeaders.ContentType)
                 allowHeader(Constants.HEADER_API_KEY)
                 allowHeader(Constants.HEADER_DEVICE_ID)
+                allowHeader(Constants.HEADER_APP_VERSION)
                 anyHost()
             }
             install(StatusPages) {
@@ -1477,7 +1495,14 @@ class CompanionServer {
                         call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":"missing or invalid section index"}""")
                         return@post
                     }
+                    val clientId = call.request.headers[Constants.HEADER_DEVICE_ID] ?: ""
                     scope.launch { onSelectSongSection.emit(SelectSongSectionRequest(number, sectionIndex)) }
+                    scope.launch { onInstantAction.emit(RemoteInstantAction(
+                        actionType = "present",
+                        title = "Song $number",
+                        detail = "Section $sectionIndex",
+                        clientId = clientId
+                    )) }
                     call.respondText("""{"ok":true}""", ContentType.Application.Json)
                 }
 
@@ -1586,7 +1611,13 @@ class CompanionServer {
                  */
                 post(Constants.ENDPOINT_CLEAR) {
                     if (!checkApiKey(call)) return@post
+                    val clientId = call.request.headers[Constants.HEADER_DEVICE_ID] ?: ""
                     scope.launch { onClear.emit(Unit) }
+                    scope.launch { onInstantAction.emit(RemoteInstantAction(
+                        actionType = "clear",
+                        title = "Clear Display",
+                        clientId = clientId
+                    )) }
                     call.respondText("""{"ok":true}""", ContentType.Application.Json)
                 }
 
@@ -1664,7 +1695,16 @@ class CompanionServer {
                         call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":"invalid request body"}""")
                         return@post
                     }
+                    val clientId = call.request.headers[Constants.HEADER_DEVICE_ID] ?: ""
                     scope.launch { onSelectBibleVerse.emit(req) }
+                    val verseRef = if (req.verseRange.isNotEmpty()) "${req.bookName} ${req.chapter}:${req.verseRange}"
+                                   else "${req.bookName} ${req.chapter}:${req.verseNumber}"
+                    scope.launch { onInstantAction.emit(RemoteInstantAction(
+                        actionType = "present",
+                        title = verseRef,
+                        detail = req.verseText.take(60),
+                        clientId = clientId
+                    )) }
                     call.respondText("""{"ok":true}""", ContentType.Application.Json)
                 }
 
@@ -1755,7 +1795,15 @@ class CompanionServer {
                         call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":"missing or invalid index"}""")
                         return@post
                     }
+                    val clientId = call.request.headers[Constants.HEADER_DEVICE_ID] ?: ""
                     scope.launch { onSelectSlide.emit(SelectSlideRequest(id = id, index = index)) }
+                    val presentationName = _presentationCatalogs[_scheduleItemToPresentationId[id] ?: id]?.fileName ?: id
+                    scope.launch { onInstantAction.emit(RemoteInstantAction(
+                        actionType = "present",
+                        title = presentationName,
+                        detail = "Slide ${index + 1}",
+                        clientId = clientId
+                    )) }
                     call.respondText("""{"ok":true}""", ContentType.Application.Json)
                 }
 
@@ -1813,7 +1861,14 @@ class CompanionServer {
                             _presentationFilePaths.remove(oldId)
                         }
                         _lastDeviceUploadedPresentationId = id
+                        val uploadClientId = call.request.headers[Constants.HEADER_DEVICE_ID] ?: ""
                         scope.launch { onPresentationUploaded.emit(file) }
+                        scope.launch { onInstantAction.emit(RemoteInstantAction(
+                            actionType = "upload",
+                            title = file.name,
+                            detail = "${fileBytes.size / 1024} KB",
+                            clientId = uploadClientId
+                        )) }
                         call.respondText(
                             """{"ok":true,"id":"$id","name":"${file.nameWithoutExtension.replace("\"", "\\\"")}"}""",
                             ContentType.Application.Json
@@ -1906,7 +1961,16 @@ class CompanionServer {
                         val resolvedIndex = req.fileName
                             ?.let { name -> _pictureFiles[req.folderId]?.indexOfFirst { it.name == name }?.takeIf { it >= 0 } }
                             ?: req.index
+                        val clientId = call.request.headers[Constants.HEADER_DEVICE_ID] ?: ""
                         scope.launch { onSelectPicture.emit(req.copy(index = resolvedIndex)) }
+                        val folderName = _pictureCatalogs[req.folderId]?.folderName ?: req.folderId
+                        val imageLabel = req.fileName ?: "Image $resolvedIndex"
+                        scope.launch { onInstantAction.emit(RemoteInstantAction(
+                            actionType = "present",
+                            title = folderName,
+                            detail = imageLabel,
+                            clientId = clientId
+                        )) }
                         call.respondText("""{"ok":true}""", ContentType.Application.Json)
                     } catch (_: Exception) {
                         call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":"invalid request body"}""")
@@ -1989,6 +2053,13 @@ class CompanionServer {
                             type    = Constants.WS_EVENT_PICTURES_UPDATED,
                             payload = json.encodeToString(PictureFolderResponse.serializer(), catalog)
                         ))
+                        val picUploadClientId = call.request.headers[Constants.HEADER_DEVICE_ID] ?: ""
+                        scope.launch { onInstantAction.emit(RemoteInstantAction(
+                            actionType = "upload",
+                            title = file.name,
+                            detail = catalog.folderName,
+                            clientId = picUploadClientId
+                        )) }
                         call.respondText(
                             """{"ok":true,"folder-id":"$dateFolderId","image-index":$newIndex,"file-name":"${file.name}"}""",
                             ContentType.Application.Json
@@ -2054,21 +2125,31 @@ class CompanionServer {
                                     Constants.WS_CMD_SELECT_PICTURE -> {
                                         val req = json.decodeFromString(SelectPictureRequest.serializer(), msg.payload)
                                         scope.launch { onSelectPicture.emit(req) }
+                                        val folderName = _pictureCatalogs[req.folderId]?.folderName ?: req.folderId
+                                        val imageLabel = req.fileName ?: "Image ${req.index}"
+                                        scope.launch { onInstantAction.emit(RemoteInstantAction("present", folderName, imageLabel, wsClientId)) }
                                     }
                                     Constants.WS_CMD_SELECT_SONG_SECTION -> {
                                         val req = json.decodeFromString(SelectSongSectionRequest.serializer(), msg.payload)
                                         scope.launch { onSelectSongSection.emit(req) }
+                                        scope.launch { onInstantAction.emit(RemoteInstantAction("present", "Song ${req.number}", "Section ${req.section}", wsClientId)) }
                                     }
                                     Constants.WS_CMD_SELECT_SLIDE -> {
                                         val req = json.decodeFromString(SelectSlideRequest.serializer(), msg.payload)
                                         scope.launch { onSelectSlide.emit(req) }
+                                        val presName = _presentationCatalogs[_scheduleItemToPresentationId[req.id] ?: req.id]?.fileName ?: req.id
+                                        scope.launch { onInstantAction.emit(RemoteInstantAction("present", presName, "Slide ${req.index + 1}", wsClientId)) }
                                     }
                                     Constants.WS_CMD_SELECT_BIBLE_VERSE -> {
                                         val req = json.decodeFromString(SelectBibleVerseRequest.serializer(), msg.payload)
                                         scope.launch { onSelectBibleVerse.emit(req) }
+                                        val ref = if (req.verseRange.isNotEmpty()) "${req.bookName} ${req.chapter}:${req.verseRange}"
+                                                  else "${req.bookName} ${req.chapter}:${req.verseNumber}"
+                                        scope.launch { onInstantAction.emit(RemoteInstantAction("present", ref, req.verseText.take(60), wsClientId)) }
                                     }
                                     Constants.WS_CMD_CLEAR -> {
                                         scope.launch { onClear.emit(Unit) }
+                                        scope.launch { onInstantAction.emit(RemoteInstantAction("clear", "Clear Display", clientId = wsClientId)) }
                                     }
                                     Constants.WS_CMD_ADD_TO_SCHEDULE -> {
                                         val item = parseRemoteItem(msg.payload)

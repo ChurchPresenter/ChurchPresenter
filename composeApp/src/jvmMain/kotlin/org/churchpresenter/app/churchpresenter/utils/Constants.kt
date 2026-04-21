@@ -271,6 +271,7 @@ object Constants {
     // API key authentication
     const val HEADER_API_KEY        = "X-Api-Key"
     const val HEADER_DEVICE_ID      = "X-Device-Id"
+    const val HEADER_APP_VERSION    = "X-App-Version"
     const val QUERY_PARAM_API_KEY   = "apiKey"
     const val QUERY_PARAM_SONGBOOK  = "songbook"
     const val QUERY_PARAM_BOOK      = "book"

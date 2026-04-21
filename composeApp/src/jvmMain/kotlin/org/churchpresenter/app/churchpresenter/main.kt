@@ -77,6 +77,8 @@ import org.churchpresenter.app.churchpresenter.data.StatisticsManager
 import org.churchpresenter.app.churchpresenter.dialogs.AboutDialog
 import org.churchpresenter.app.churchpresenter.dialogs.KeyboardShortcutsDialog
 import org.churchpresenter.app.churchpresenter.dialogs.LicenseDialog
+import org.churchpresenter.app.churchpresenter.dialogs.RemoteActivityNotification
+import org.churchpresenter.app.churchpresenter.dialogs.RemoteActivityToastHost
 import org.churchpresenter.app.churchpresenter.dialogs.RemoteEvent
 import org.churchpresenter.app.churchpresenter.dialogs.RemoteEventDialog
 import org.churchpresenter.app.churchpresenter.dialogs.RemoteEventType
@@ -360,6 +362,9 @@ fun main() {
                                     remember { mutableStateListOf<String>() }
                                 val sessionBlockedClients =
                                     remember { mutableStateListOf<String>() }
+                                // Activity toasts for already-allowed clients (auto-approved actions)
+                                val remoteActivityNotifications =
+                                    remember { mutableStateListOf<RemoteActivityNotification>() }
 
                                 // ── Remote add-to-schedule requests ──────────────────────────────────────────
                                 LaunchedEffect(Unit) {
@@ -425,6 +430,15 @@ fun main() {
                                                 else -> Unit
                                             }
                                             pending.decision.complete(true)
+                                            // Show activity toast so operator is aware
+                                            val (eTitle, eDetail) = remoteEventLabel(item)
+                                            remoteActivityNotifications.add(RemoteActivityNotification(
+                                                type = RemoteEventType.ADD_TO_SCHEDULE,
+                                                title = eTitle,
+                                                detail = eDetail,
+                                                clientId = clientId,
+                                                clientLabel = remoteClientManager.getLabel(clientId)
+                                            ))
                                             return@collect
                                         }
                                         val item = pending.item
@@ -550,6 +564,25 @@ fun main() {
                                                 }
                                             }
                                             pending.decision.complete(true)
+                                            // Show activity toast so operator is aware
+                                            val batchCount = pending.items.size
+                                            val batchTitle = if (batchCount == 1)
+                                                remoteEventLabel(pending.items.first()).first
+                                            else "$batchCount items"
+                                            val batchDetail = pending.items.take(3).joinToString(" · ") { item ->
+                                                when (item) {
+                                                    is ScheduleItem.BibleVerseItem -> "${item.bookName} ${item.chapter}:${item.verseNumber}"
+                                                    is ScheduleItem.SongItem -> "${item.songNumber} – ${item.title}"
+                                                    else -> item.displayText.take(30)
+                                                }
+                                            }.let { if (batchCount > 3) "$it …" else it }
+                                            remoteActivityNotifications.add(RemoteActivityNotification(
+                                                type = RemoteEventType.ADD_TO_SCHEDULE,
+                                                title = batchTitle,
+                                                detail = batchDetail,
+                                                clientId = clientId,
+                                                clientLabel = remoteClientManager.getLabel(clientId)
+                                            ))
                                             return@collect
                                         }
                                         val count = pending.items.size
@@ -657,6 +690,15 @@ fun main() {
                                                 coroutineScope.launch { remoteSelectSongFlow.emit(item) }
                                             }
                                             pending.decision.complete(true)
+                                            // Show activity toast so operator is aware
+                                            val (pTitle, pDetail) = remoteEventLabel(item)
+                                            remoteActivityNotifications.add(RemoteActivityNotification(
+                                                type = RemoteEventType.PROJECT,
+                                                title = pTitle,
+                                                detail = pDetail,
+                                                clientId = clientId,
+                                                clientLabel = remoteClientManager.getLabel(clientId)
+                                            ))
                                             return@collect
                                         }
                                         val item = pending.item
@@ -709,6 +751,29 @@ fun main() {
                                     companionServer.onClear.collect {
                                         mediaViewModel.pause()
                                         presenterManager.requestClearDisplay()
+                                    }
+                                }
+
+                                // ── Instant-action activity toasts ────────────────────────────────────────────
+                                // For every no-approval action (present, upload, clear) show a toast so the
+                                // operator can see what a remote client just did and optionally block them.
+                                LaunchedEffect(Unit) {
+                                    companionServer.onInstantAction.collect { action ->
+                                        val type = when (action.actionType) {
+                                            "present" -> RemoteEventType.PRESENT
+                                            "upload"  -> RemoteEventType.UPLOAD
+                                            "clear"   -> RemoteEventType.CLEAR
+                                            else      -> RemoteEventType.PRESENT
+                                        }
+                                        remoteActivityNotifications.add(
+                                            RemoteActivityNotification(
+                                                type = type,
+                                                title = action.title,
+                                                detail = action.detail,
+                                                clientId = action.clientId,
+                                                clientLabel = remoteClientManager.getLabel(action.clientId)
+                                            )
+                                        )
                                     }
                                 }
 
@@ -966,6 +1031,22 @@ fun main() {
                                     onDeny = {
                                         currentRemote?.third?.invoke()
                                         if (remoteEventQueue.isNotEmpty()) remoteEventQueue.removeAt(0)
+                                    }
+                                )
+
+                                // ── Activity toast for auto-approved clients ──────────────
+                                RemoteActivityToastHost(
+                                    notifications = remoteActivityNotifications,
+                                    onDismiss = { n -> remoteActivityNotifications.remove(n) },
+                                    onDismissAll = { remoteActivityNotifications.clear() },
+                                    onBlockForSession = { n ->
+                                        val cid = n.clientId
+                                        if (cid.isNotBlank() && !sessionBlockedClients.contains(cid)) {
+                                            sessionBlockedClients.add(cid)
+                                            // Also remove from session-allowed if present
+                                            sessionAllowedClients.remove(cid)
+                                        }
+                                        remoteActivityNotifications.removeAll { it.clientId == cid }
                                     }
                                 )
                             } // end Box (window content)
