@@ -45,6 +45,8 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.rememberDialogState
+import org.churchpresenter.app.churchpresenter.LocalMainWindowState
+import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.author
 import churchpresenter.composeapp.generated.resources.cancel
@@ -107,9 +109,14 @@ fun EditSongDialog(
         }
     }
 
+    val mainWindowState = LocalMainWindowState.current
     Dialog(
         onCloseRequest = onDismiss,
-        state = rememberDialogState(width = 800.dp, height = 700.dp),
+        state = rememberDialogState(
+            position = centeredOnMainWindow(mainWindowState, 800.dp, 700.dp),
+            width = 800.dp,
+            height = 700.dp
+        ),
         title = if (isNewSong) stringResource(Res.string.new_song) else stringResource(Res.string.edit_song),
         resizable = true
     ) {

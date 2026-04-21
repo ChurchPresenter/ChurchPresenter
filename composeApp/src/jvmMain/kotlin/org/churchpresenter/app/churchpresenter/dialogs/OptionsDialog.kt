@@ -30,6 +30,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.rememberDialogState
+import org.churchpresenter.app.churchpresenter.LocalMainWindowState
+import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.appearance
 import churchpresenter.composeapp.generated.resources.background
@@ -91,9 +93,14 @@ fun OptionsDialog(
         ThemeMode.DARK -> true
         ThemeMode.SYSTEM -> isSystemInDarkTheme()
     }
+    val mainWindowState = LocalMainWindowState.current
     Dialog(
         onCloseRequest = onDismiss,
-        state = rememberDialogState(width = 1000.dp, height = 700.dp),
+        state = rememberDialogState(
+            position = centeredOnMainWindow(mainWindowState, 1000.dp, 700.dp),
+            width = 1000.dp,
+            height = 700.dp
+        ),
         title = stringResource(Res.string.options),
         resizable = true
     ) {

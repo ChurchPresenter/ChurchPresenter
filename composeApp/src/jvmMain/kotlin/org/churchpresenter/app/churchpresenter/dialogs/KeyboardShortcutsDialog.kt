@@ -25,6 +25,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.rememberDialogState
+import org.churchpresenter.app.churchpresenter.LocalMainWindowState
+import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.keyboard_shortcuts_title
 import churchpresenter.composeapp.generated.resources.ok
@@ -106,9 +108,14 @@ fun KeyboardShortcutsDialog(
 ) {
     if (!isVisible) return
 
+    val mainWindowState = LocalMainWindowState.current
     DialogWindow(
         onCloseRequest = onDismiss,
-        state = rememberDialogState(width = 680.dp, height = 600.dp),
+        state = rememberDialogState(
+            position = centeredOnMainWindow(mainWindowState, 680.dp, 600.dp),
+            width = 680.dp,
+            height = 600.dp
+        ),
         title = stringResource(Res.string.keyboard_shortcuts_title),
         resizable = true
     ) {

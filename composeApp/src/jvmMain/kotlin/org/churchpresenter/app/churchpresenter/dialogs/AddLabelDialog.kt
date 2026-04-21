@@ -26,6 +26,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.rememberDialogState
+import org.churchpresenter.app.churchpresenter.LocalMainWindowState
+import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.add_label
 import churchpresenter.composeapp.generated.resources.background_color_label
@@ -51,7 +53,12 @@ fun AddLabelDialog(
     var textColor by remember { mutableStateOf(existingTextColor) }
     var backgroundColor by remember { mutableStateOf(existingBackgroundColor) }
 
-    val dialogState = rememberDialogState(width = 500.dp, height = 400.dp)
+    val mainWindowState = LocalMainWindowState.current
+    val dialogState = rememberDialogState(
+        position = centeredOnMainWindow(mainWindowState, 500.dp, 400.dp),
+        width = 500.dp,
+        height = 400.dp
+    )
 
     Dialog(
         onCloseRequest = onDismiss,

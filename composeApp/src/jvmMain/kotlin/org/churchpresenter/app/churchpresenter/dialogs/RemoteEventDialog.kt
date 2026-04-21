@@ -45,6 +45,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.rememberDialogState
+import org.churchpresenter.app.churchpresenter.LocalMainWindowState
+import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.allow
 import churchpresenter.composeapp.generated.resources.allow_for_session
@@ -134,10 +136,16 @@ fun RemoteEventDialog(
         stringResource(Res.string.remote_api_request_title)
 
     val dialogHeight = if (remaining > 0) 330.dp else 290.dp
+    val dialogWidth = 500.dp
+    val mainWindowState = LocalMainWindowState.current
 
     DialogWindow(
         onCloseRequest = onDeny,
-        state = rememberDialogState(width = 500.dp, height = dialogHeight),
+        state = rememberDialogState(
+            position = centeredOnMainWindow(mainWindowState, dialogWidth, dialogHeight),
+            width = dialogWidth,
+            height = dialogHeight
+        ),
         title = dialogTitle,
         resizable = false,
         alwaysOnTop = true

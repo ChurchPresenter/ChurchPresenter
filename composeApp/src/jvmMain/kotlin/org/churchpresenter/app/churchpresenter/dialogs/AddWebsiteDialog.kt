@@ -26,6 +26,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.rememberDialogState
+import org.churchpresenter.app.churchpresenter.LocalMainWindowState
+import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.cancel
 import churchpresenter.composeapp.generated.resources.ok
@@ -45,7 +47,12 @@ fun AddWebsiteDialog(
     var url by remember { mutableStateOf("https://") }
     var displayTitle by remember { mutableStateOf("") }
 
-    val dialogState = rememberDialogState(width = 500.dp, height = 440.dp)
+    val mainWindowState = LocalMainWindowState.current
+    val dialogState = rememberDialogState(
+        position = centeredOnMainWindow(mainWindowState, 500.dp, 440.dp),
+        width = 500.dp,
+        height = 440.dp
+    )
 
     Dialog(
         onCloseRequest = onDismiss,

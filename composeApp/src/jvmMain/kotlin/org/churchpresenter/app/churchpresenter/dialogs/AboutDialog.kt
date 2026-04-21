@@ -19,6 +19,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.rememberDialogState
+import org.churchpresenter.app.churchpresenter.LocalMainWindowState
+import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.about_title
 import churchpresenter.composeapp.generated.resources.app_name
@@ -38,9 +40,14 @@ fun AboutDialog(
 ) {
     if (!isVisible) return
 
+    val mainWindowState = LocalMainWindowState.current
     DialogWindow(
         onCloseRequest = onDismiss,
-        state = rememberDialogState(width = 360.dp, height = 300.dp),
+        state = rememberDialogState(
+            position = centeredOnMainWindow(mainWindowState, 360.dp, 300.dp),
+            width = 360.dp,
+            height = 300.dp
+        ),
         title = stringResource(Res.string.about_title),
         resizable = false
     ) {

@@ -347,7 +347,10 @@ fun main() {
             ) {
                 LanguageProvider(language = currentLanguage) {
                     AppThemeWrapper(theme = theme) {
-                        CompositionLocalProvider(LocalMediaViewModel provides mediaViewModel) {
+                        CompositionLocalProvider(
+                            LocalMediaViewModel provides mediaViewModel,
+                            LocalMainWindowState provides state
+                        ) {
                             Box(modifier = Modifier.fillMaxSize()) {
 
                                 // ── Remote API permission state (inside Window so schedule actions are live) ──

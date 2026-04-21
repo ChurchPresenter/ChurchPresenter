@@ -54,6 +54,8 @@ import org.churchpresenter.app.churchpresenter.ui.theme.AppThemeWrapper
 import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.rememberDialogState
+import org.churchpresenter.app.churchpresenter.LocalMainWindowState
+import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.EncodeHintType
 import com.google.zxing.qrcode.QRCodeWriter
@@ -699,9 +701,14 @@ private fun ConnectionQrDialog(serverUrl: String, apiKey: String?, onDismiss: ()
     }
 
     val isDark = MaterialTheme.colorScheme.background.luminance() < 0.5f
+    val mainWindowState = LocalMainWindowState.current
     Dialog(
         onCloseRequest = onDismiss,
-        state = rememberDialogState(width = 400.dp, height = 500.dp),
+        state = rememberDialogState(
+            position = centeredOnMainWindow(mainWindowState, 400.dp, 500.dp),
+            width = 400.dp,
+            height = 500.dp
+        ),
         title = stringResource(Res.string.connection_qr_title),
         resizable = false
     ) {
