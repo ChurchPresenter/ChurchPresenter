@@ -45,6 +45,7 @@ import org.churchpresenter.app.churchpresenter.utils.isChorusHeader
 import org.churchpresenter.app.churchpresenter.utils.isHeaderLine
 import org.churchpresenter.app.churchpresenter.data.Bible
 import org.churchpresenter.app.churchpresenter.data.Songs
+import org.churchpresenter.app.churchpresenter.BuildConfig
 import java.awt.image.BufferedImage
 import java.io.BufferedInputStream
 import java.io.BufferedOutputStream
@@ -1331,6 +1332,7 @@ class CompanionServer {
                 allowHeader(Constants.HEADER_API_KEY)
                 allowHeader(Constants.HEADER_DEVICE_ID)
                 allowHeader(Constants.HEADER_APP_VERSION)
+                exposeHeader(Constants.HEADER_SERVER_VERSION)
                 anyHost()
             }
             install(StatusPages) {
@@ -1417,9 +1419,10 @@ class CompanionServer {
                     val exposedEndpoints = listOf(
                         "songs", "bible", "schedule", "presentations", "pictures", "status"
                     )
+                    call.response.headers.append(Constants.HEADER_SERVER_VERSION, BuildConfig.APP_VERSION)
                     call.respond(
                         StatusResponse(
-                            appVersion  = Constants.SERVER_VERSION,
+                            appVersion  = BuildConfig.APP_VERSION,
                             endpoints   = exposedEndpoints,
                             bibles      = bibleNames,
                             songbooks   = songbookNames,
