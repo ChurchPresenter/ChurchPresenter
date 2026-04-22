@@ -688,6 +688,9 @@
     <string name="web_bookmark_remove">Remove Bookmark</string>
     <string name="web_preview_hint">Enter a URL above and tap Go Live</string>
     <string name="web_live_badge">LIVE</string>
+    <string name="web_type_to_page_label">Type to page</string>
+    <string name="web_type_to_page_placeholder">Click an input on the live page first</string>
+    <string name="web_focus_first_input">Focus first input on page</string>
     <string name="web_bookmarks">Bookmarks</string>
     <string name="web_clear_cache">Clear Cache</string>
     <string name="web_back">Back</string>

@@ -76,8 +76,11 @@ import churchpresenter.composeapp.generated.resources.web_forward
 import churchpresenter.composeapp.generated.resources.ic_cast
 import churchpresenter.composeapp.generated.resources.ic_playlist_add
 import churchpresenter.composeapp.generated.resources.web_go_live
+import churchpresenter.composeapp.generated.resources.web_focus_first_input
 import churchpresenter.composeapp.generated.resources.web_live_badge
 import churchpresenter.composeapp.generated.resources.web_preview_hint
+import churchpresenter.composeapp.generated.resources.web_type_to_page_label
+import churchpresenter.composeapp.generated.resources.web_type_to_page_placeholder
 import churchpresenter.composeapp.generated.resources.web_refresh
 import churchpresenter.composeapp.generated.resources.web_url_hint
 import churchpresenter.composeapp.generated.resources.web_url_label
@@ -136,6 +139,17 @@ fun WebTab(
     // Zoom level (0.0 = 100%, each ±1.0 ≈ 1.2x scale change)
     var zoomLevel by remember { mutableStateOf(0.0) }
     var isMobileView by remember { mutableStateOf(false) }
+
+    // Local buffer for the "Type to page" field shown in live mirror mode.
+    // We cannot forward raw keystrokes to the live CefBrowser on macOS/Linux —
+    // native event routing drops injected events when the browser window isn't
+    // the OS key window. Instead we diff this buffer on every change and inject
+    // the delta into the live page via CefBrowser.executeJavaScript, which is an
+    // in-process Chromium API that works identically on all platforms.
+    var typeBuffer by remember { mutableStateOf("") }
+    // Clear the buffer whenever we leave live mode so stale text doesn't
+    // re-inject when the user goes live again on a different page.
+    LaunchedEffect(isLive) { if (!isLive) typeBuffer = "" }
 
     // Clear snapshot when no longer live
     LaunchedEffect(isLive) {
@@ -490,6 +504,58 @@ fun WebTab(
                         text = stringResource(if (useInteractivePreview) Res.string.interactive_mode else Res.string.mirror_mode),
                         style = MaterialTheme.typography.labelSmall,
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                    )
+                }
+            }
+
+            // ── "Type to page" input for the live mirror ──
+            // Only useful in mirror mode — interactive mode already accepts native typing.
+            if (!useInteractivePreview) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    OutlinedTextField(
+                        value = typeBuffer,
+                        onValueChange = { next ->
+                            val browser = presenterManager?.liveBrowser?.value
+                            if (browser == null) { typeBuffer = next; return@OutlinedTextField }
+                            val old = typeBuffer
+                            val common = commonPrefixLength(old, next)
+                            val toDelete = old.length - common
+                            val toInsert = next.substring(common)
+                            repeat(toDelete) { browser.executeJavaScript(JS_BACKSPACE, "", 0) }
+                            toInsert.forEach { ch -> browser.executeJavaScript(jsInsert(ch), "", 0) }
+                            typeBuffer = next
+                        },
+                        modifier = Modifier
+                            .weight(1f)
+                            .onKeyEvent { event ->
+                                if (event.type == KeyEventType.KeyDown && event.key == Key.Enter) {
+                                    presenterManager?.liveBrowser?.value
+                                        ?.executeJavaScript(JS_ENTER, "", 0)
+                                    typeBuffer = ""
+                                    true
+                                } else false
+                            },
+                        singleLine = true,
+                        label = { Text(stringResource(Res.string.web_type_to_page_label)) },
+                        placeholder = {
+                            Text(
+                                text = stringResource(Res.string.web_type_to_page_placeholder),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
+                            )
+                        },
+                        textStyle = MaterialTheme.typography.bodyMedium
+                    )
+                    TooltipIconButton(
+                        painter = painterResource(Res.drawable.ic_cast),
+                        text = stringResource(Res.string.web_focus_first_input),
+                        onClick = {
+                            presenterManager?.liveBrowser?.value
+                                ?.executeJavaScript(JS_FOCUS_FIRST_INPUT, "", 0)
+                        }
                     )
                 }
             }
@@ -857,3 +923,86 @@ private fun normaliseUrl(raw: String): String {
         else -> trimmed
     }
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Type-to-page JS helpers.
+//
+// Rationale: CefBrowser.sendKeyEvent routes through the native OS event system
+// (Win32 message queue / NSEvent / X11), which only accepts synthesised keys on
+// Windows. On macOS/Linux keystrokes injected from the main window never reach
+// the live browser on the secondary display because that window isn't the OS
+// "key window". CefBrowser.executeJavaScript runs Chromium's in-process JS
+// engine and therefore works identically on all three platforms.
+//
+// Limitation: the injected edits target document.activeElement. Pages using
+// <canvas>-based editors (Google Docs, Figma) that don't use real DOM inputs
+// won't receive characters this way — they need raw keystrokes we cannot
+// cross-window forward. The JS_FOCUS_FIRST_INPUT helper covers the common case.
+// ─────────────────────────────────────────────────────────────────────────────
+
+private fun commonPrefixLength(a: String, b: String): Int {
+    val n = minOf(a.length, b.length)
+    var i = 0
+    while (i < n && a[i] == b[i]) i++
+    return i
+}
+
+/** Encode a Kotlin [Char] as a JSON string literal, safe to splice into JS. */
+private fun jsEncode(ch: Char): String = buildString {
+    append('"')
+    when (ch) {
+        '\\' -> append("\\\\")
+        '"'  -> append("\\\"")
+        '\n' -> append("\\n")
+        '\r' -> append("\\r")
+        '\t' -> append("\\t")
+        else -> if (ch.code < 0x20) append("\\u%04x".format(ch.code)) else append(ch)
+    }
+    append('"')
+}
+
+private fun jsInsert(ch: Char): String = """
+    (function(ch){
+      var el=document.activeElement; if(!el) return;
+      if (el.isContentEditable) { document.execCommand('insertText', false, ch); return; }
+      if (el.tagName==='INPUT' || el.tagName==='TEXTAREA') {
+        var s = el.selectionStart != null ? el.selectionStart : el.value.length;
+        var e = el.selectionEnd   != null ? el.selectionEnd   : el.value.length;
+        el.setRangeText(ch, s, e, 'end');
+        el.dispatchEvent(new InputEvent('input', {data: ch, inputType: 'insertText', bubbles: true}));
+      }
+    })(${jsEncode(ch)});
+""".trimIndent()
+
+private const val JS_BACKSPACE = """
+    (function(){
+      var el=document.activeElement; if(!el) return;
+      if (el.isContentEditable) { document.execCommand('delete', false); return; }
+      if (el.tagName==='INPUT' || el.tagName==='TEXTAREA') {
+        var s=el.selectionStart, e=el.selectionEnd;
+        if (s===e && s>0) { el.setRangeText('', s-1, s, 'end'); }
+        else              { el.setRangeText('', s,   e, 'end'); }
+        el.dispatchEvent(new InputEvent('input', {inputType: 'deleteContentBackward', bubbles: true}));
+      }
+    })();
+"""
+
+private const val JS_ENTER = """
+    (function(){
+      var el=document.activeElement; if(!el) return;
+      var down = new KeyboardEvent('keydown', {key:'Enter', code:'Enter', keyCode:13, which:13, bubbles:true, cancelable:true});
+      var cancelled = !el.dispatchEvent(down);
+      el.dispatchEvent(new KeyboardEvent('keyup', {key:'Enter', code:'Enter', keyCode:13, which:13, bubbles:true, cancelable:true}));
+      if (!cancelled && el.form) {
+        if (el.form.requestSubmit) el.form.requestSubmit();
+        else el.form.submit();
+      }
+    })();
+"""
+
+private const val JS_FOCUS_FIRST_INPUT = """
+    (function(){
+      var el=document.querySelector('input:not([type=hidden]):not([type=submit]):not([type=button]):not([type=reset]),textarea,[contenteditable=true]');
+      if (el) el.focus();
+    })();
+"""
