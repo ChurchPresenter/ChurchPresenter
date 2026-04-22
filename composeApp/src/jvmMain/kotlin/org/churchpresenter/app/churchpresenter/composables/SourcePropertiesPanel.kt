@@ -50,6 +50,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import churchpresenter.composeapp.generated.resources.symbol_dropdown
 import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDefault
+import org.churchpresenter.app.churchpresenter.utils.TimerStateManager
 import org.jetbrains.compose.resources.stringResource
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.canvas_bg_color
@@ -164,6 +165,7 @@ import churchpresenter.composeapp.generated.resources.canvas_qr_default_text
 import churchpresenter.composeapp.generated.resources.canvas_decklink_device
 import churchpresenter.composeapp.generated.resources.ic_folder
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
@@ -744,13 +746,54 @@ private fun ClockProperties(source: SceneSource.ClockSource, onUpdate: (SceneSou
     }
     if (source.mode == "countdown") {
         PropertyTextField(stringResource(Res.string.canvas_clock_target_hour), source.targetHour.toString()) { v ->
-            v.toIntOrNull()?.let { onUpdate(source.copy(targetHour = it.coerceIn(0, 23))) }
+            v.toIntOrNull()?.let { onUpdate(source.copy(targetHour = it.coerceIn(0, 99))) }
         }
         PropertyTextField(stringResource(Res.string.canvas_clock_target_minute), source.targetMinute.toString()) { v ->
             v.toIntOrNull()?.let { onUpdate(source.copy(targetMinute = it.coerceIn(0, 59))) }
         }
         PropertyTextField(stringResource(Res.string.canvas_clock_target_second), source.targetSecond.toString()) { v ->
             v.toIntOrNull()?.let { onUpdate(source.copy(targetSecond = it.coerceIn(0, 59))) }
+        }
+
+        // Timer controls
+        val totalSeconds = source.targetHour * 3600 + source.targetMinute * 60 + source.targetSecond
+        val timerState = TimerStateManager.getState(source.id, totalSeconds)
+        val isRunning = timerState.isRunning
+        val remaining = timerState.remainingSeconds
+
+
+        val hh = remaining / 3600
+        val mm = (remaining % 3600) / 60
+        val ss = remaining % 60
+
+        Spacer(Modifier.height(8.dp))
+        Text(
+            "%02d:%02d:%02d".format(hh, mm, ss),
+            style = MaterialTheme.typography.titleLarge,
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.fillMaxWidth(),
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+        )
+        Spacer(Modifier.height(4.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            Button(
+                onClick = { TimerStateManager.setRunning(source.id, totalSeconds, !isRunning) },
+                enabled = remaining > 0 || isRunning,
+                modifier = Modifier.weight(1f).height(32.dp),
+                contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 8.dp, vertical = 0.dp)
+            ) {
+                Text(if (isRunning) "⏸ Pause" else "▶ Start", style = MaterialTheme.typography.labelSmall)
+            }
+            Button(
+                onClick = { TimerStateManager.reset(source.id, totalSeconds) },
+                modifier = Modifier.weight(1f).height(32.dp),
+                contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 8.dp, vertical = 0.dp)
+            ) {
+                Text("⟳ Reset", style = MaterialTheme.typography.labelSmall)
+            }
         }
     }
 }

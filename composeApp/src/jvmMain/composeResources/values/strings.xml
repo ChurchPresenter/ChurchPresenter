@@ -802,9 +802,9 @@
     <string name="canvas_clock_show_hours">Show Hours</string>
     <string name="canvas_clock_show_seconds">Show Seconds</string>
     <string name="canvas_clock_font_size">Font Size</string>
-    <string name="canvas_clock_target_hour">Target Hour</string>
-    <string name="canvas_clock_target_minute">Target Minute</string>
-    <string name="canvas_clock_target_second">Target Second</string>
+    <string name="canvas_clock_target_hour">Duration Hours</string>
+    <string name="canvas_clock_target_minute">Duration Minutes</string>
+    <string name="canvas_clock_target_second">Duration Seconds</string>
     <string name="canvas_qr_type">Type</string>
     <string name="canvas_qr_content">Content</string>
     <string name="canvas_qr_foreground">Foreground</string>

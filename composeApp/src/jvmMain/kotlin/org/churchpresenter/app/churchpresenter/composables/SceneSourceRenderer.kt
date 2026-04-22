@@ -77,6 +77,7 @@ import kotlin.math.sin
 import org.jetbrains.skia.Image as SkiaImage
 import java.io.File
 import androidx.compose.foundation.Canvas
+import org.churchpresenter.app.churchpresenter.utils.TimerStateManager
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
@@ -493,42 +494,47 @@ private fun ClockSourceContent(source: SceneSource.ClockSource, modifier: Modifi
 
     var displayText by remember { mutableStateOf("") }
 
-    LaunchedEffect(source.mode, source.timeFormat, source.showHours, source.showSeconds, source.targetHour, source.targetMinute, source.targetSecond) {
-        while (isActive) {
-            val now = LocalTime.now()
-            displayText = when (source.mode) {
-                "countdown" -> {
-                    val target = LocalTime.of(source.targetHour, source.targetMinute, source.targetSecond)
-                    val remaining = java.time.Duration.between(now, target)
-                    if (remaining.isNegative) {
-                        if (source.showHours && source.showSeconds) "00:00:00"
-                        else if (source.showHours) "00:00"
-                        else if (source.showSeconds) "00:00"
-                        else "00"
-                    } else {
-                        val h = remaining.toHours()
-                        val m = remaining.toMinutesPart()
-                        val s = remaining.toSecondsPart()
-                        buildString {
-                            if (source.showHours) { append("%02d:".format(h)) }
-                            append("%02d".format(m))
-                            if (source.showSeconds) { append(":%02d".format(s)) }
-                        }
-                    }
-                }
-                else -> {
-                    val pattern = buildString {
-                        if (source.showHours) {
-                            append(if (source.timeFormat == "12h") "hh:" else "HH:")
-                        }
-                        append("mm")
-                        if (source.showSeconds) append(":ss")
-                        if (source.timeFormat == "12h") append(" a")
-                    }
-                    now.format(DateTimeFormatter.ofPattern(pattern))
-                }
+    val totalSeconds = source.targetHour * 3600 + source.targetMinute * 60 + source.targetSecond
+
+    if (source.mode == "countdown") {
+        // Sync TimerStateManager when duration fields change
+        LaunchedEffect(totalSeconds) {
+            TimerStateManager.onDurationChanged(source.id, totalSeconds)
+        }
+
+        // Tick loop lives here so it runs even when the source is not selected
+        val timerState = TimerStateManager.getState(source.id, totalSeconds)
+        LaunchedEffect(timerState.isRunning) {
+            while (timerState.isRunning) {
+                delay(1000)
+                TimerStateManager.tick(source.id, totalSeconds)
             }
-            delay(1000)
+        }
+
+        val remaining = TimerStateManager.getState(source.id, totalSeconds).remainingSeconds
+        val h = remaining / 3600
+        val m = (remaining % 3600) / 60
+        val s = remaining % 60
+        displayText = buildString {
+            if (source.showHours) append("%02d:".format(h))
+            append("%02d".format(m))
+            if (source.showSeconds) append(":%02d".format(s))
+        }
+    } else {
+        LaunchedEffect(source.timeFormat, source.showHours, source.showSeconds) {
+            while (isActive) {
+                val now = LocalTime.now()
+                val pattern = buildString {
+                    if (source.showHours) {
+                        append(if (source.timeFormat == "12h") "hh:" else "HH:")
+                    }
+                    append("mm")
+                    if (source.showSeconds) append(":ss")
+                    if (source.timeFormat == "12h") append(" a")
+                }
+                displayText = now.format(DateTimeFormatter.ofPattern(pattern))
+                delay(1000)
+            }
         }
     }
 
