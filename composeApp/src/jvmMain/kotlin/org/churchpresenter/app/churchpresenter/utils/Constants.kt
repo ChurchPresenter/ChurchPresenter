@@ -199,6 +199,7 @@ object Constants {
     // Display Mode Types (for screen assignments)
     const val DISPLAY_MODE_FULLSCREEN = "fullscreen"
     const val DISPLAY_MODE_LOWER_THIRD = "lower_third"
+    const val DISPLAY_MODE_STAGE_MONITOR = "stage_monitor"
 
     // Output Role (fill+key for video mixers)
     const val OUTPUT_ROLE_NORMAL = "normal"

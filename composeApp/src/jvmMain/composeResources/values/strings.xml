@@ -1098,4 +1098,17 @@
     <string name="stage_monitor_layout_vertical">Vertical</string>
     <string name="stage_monitor_layout_horizontal">Horizontal</string>
     <string name="stage_monitor_no_extra_displays">No secondary displays detected. Connect an additional monitor to use Stage Monitor.</string>
+    <string name="display_stage_monitor">Stage Monitor</string>
+    <string name="stage_monitor_layout_quadrants">4-Quadrant Layout</string>
+    <string name="stage_monitor_quadrant_current">Top-Left: Current Slide</string>
+    <string name="stage_monitor_quadrant_next">Bottom-Left: Next Slide</string>
+    <string name="stage_monitor_quadrant_timer">Top-Right: Countdown Timer</string>
+    <string name="stage_monitor_quadrant_clock">Bottom-Center: Clock</string>
+    <string name="stage_monitor_quadrant_notes">Bottom-Right: Presenter Notes</string>
+    <string name="stage_monitor_show_label">Show Song/Bible Label</string>
+    <string name="stage_monitor_label_style_section">Label Style</string>
+    <string name="stage_monitor_clock_show_seconds">Show Seconds</string>
+    <string name="stage_monitor_clock_24h">24-Hour Format</string>
+    <string name="stage_monitor_notes_text">Notes Text</string>
+    <string name="stage_monitor_notes_hint">Enter presenter notes or reminders here…</string>
 </resources>

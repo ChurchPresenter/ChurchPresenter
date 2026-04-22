@@ -63,6 +63,7 @@ import churchpresenter.composeapp.generated.resources.content_streaming
 import churchpresenter.composeapp.generated.resources.detected_screens
 import churchpresenter.composeapp.generated.resources.display_fullscreen
 import churchpresenter.composeapp.generated.resources.display_lower_third
+import churchpresenter.composeapp.generated.resources.display_stage_monitor
 import churchpresenter.composeapp.generated.resources.display_mode
 import churchpresenter.composeapp.generated.resources.identify_screen
 import churchpresenter.composeapp.generated.resources.key_output
@@ -286,6 +287,7 @@ fun ProjectionSettingsTab(
         val announcementsLabel = stringResource(Res.string.content_announcements)
         val fullScreenLabel = stringResource(Res.string.display_fullscreen)
         val lowerThirdLabel = stringResource(Res.string.display_lower_third)
+        val stageMonitorLabel = stringResource(Res.string.display_stage_monitor)
 
         val cellWidth = 82.dp
 
@@ -316,7 +318,8 @@ fun ProjectionSettingsTab(
 
         val displayModes = listOf(
             fullScreenLabel to Constants.DISPLAY_MODE_FULLSCREEN,
-            lowerThirdLabel to Constants.DISPLAY_MODE_LOWER_THIRD
+            lowerThirdLabel to Constants.DISPLAY_MODE_LOWER_THIRD,
+            stageMonitorLabel to Constants.DISPLAY_MODE_STAGE_MONITOR
         )
 
         val contentScrollState = rememberScrollState()
@@ -354,7 +357,7 @@ fun ProjectionSettingsTab(
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.primary,
                 textAlign = TextAlign.Center,
-                modifier = Modifier.width(displayModeColWidth * 2)
+                modifier = Modifier.width(displayModeColWidth * 3)
             )
         }
 
@@ -739,7 +742,7 @@ fun ProjectionSettingsTab(
                     )
                 )
             }
-            Spacer(modifier = Modifier.width(displayModeColWidth * 2))
+            Spacer(modifier = Modifier.width(displayModeColWidth * 3))
         }
 
         Spacer(modifier = Modifier.height(8.dp))
