@@ -92,7 +92,7 @@ sealed class SceneSource {
         val renderHeight: Int = 1080,
         val customCss: String = "",
         val fps: Int = 30,
-        val forceTransparent: Boolean = true
+        val forceTransparent: Boolean = false
     ) : SceneSource()
 
     @Serializable

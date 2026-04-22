@@ -561,7 +561,7 @@ fun CanvasTab(
                                         SceneSource.BrowserSource(
                                             id = UUID.randomUUID().toString(),
                                             name = strBrowser,
-                                            url = "",
+                                            url = "http://www.",
                                             transform = SourceTransform(
                                                 x = 0.1f, y = 0.1f,
                                                 width = 0.8f, height = 0.8f
