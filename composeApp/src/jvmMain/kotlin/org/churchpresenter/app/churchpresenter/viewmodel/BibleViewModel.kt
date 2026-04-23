@@ -331,6 +331,7 @@ class BibleViewModel(
                     }
                     _verses.value = chapterResult.verses
                     refreshFilteredLists()
+                    _verseSelectionToken.value++
                 }
             }
         }
