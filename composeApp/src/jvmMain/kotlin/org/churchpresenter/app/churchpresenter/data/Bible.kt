@@ -99,6 +99,7 @@ class Bible {
                 Files.newBufferedReader(path, StandardCharsets.UTF_8)
             }
             val bookHeaderRegex = Regex("^(\\d+)\\s+(.+?)\\s+(\\d+)$")
+            val headerOrder = mutableListOf<Int>()
             val parsedBookNames = mutableMapOf<Int, String>()
             val parsedChapterCounts = mutableMapOf<Int, Int>()
             reader.use { r ->
@@ -110,15 +111,15 @@ class Bible {
                         val m = bookHeaderRegex.matchEntire(line)
                         if (m != null) {
                             val bookId = m.groupValues[1].toInt()
+                            headerOrder.add(bookId)
                             parsedBookNames[bookId] = m.groupValues[2].trim()
                             parsedChapterCounts[bookId] = m.groupValues[3].toInt()
                         }
                     }
                 }
             }
-            if (parsedBookNames.isNotEmpty()) {
-                val maxBook = parsedBookNames.keys.maxOrNull() ?: 0
-                for (b in 1..maxBook) {
+            if (headerOrder.isNotEmpty()) {
+                for (b in headerOrder) {
                     val name = parsedBookNames[b] ?: "Book $b"
                     books.add(BibleBook(
                         book = name,
@@ -156,6 +157,7 @@ class Bible {
             val verseLineRegex = Regex("^(B(\\d{3})C(\\d{3})V(\\d{3}))\\s+\\d+\\s+\\d+\\s+\\d+\\s+(.*)")
             val bookHeaderRegex = Regex("^(\\d+)\\s+(.+?)\\s+(\\d+)$")
             val bookChapterMap = mutableMapOf<Int, MutableSet<Int>>()
+            val headerOrder = mutableListOf<Int>()
             val parsedBookNames = mutableMapOf<Int, String>()
             var bibleTitle: String? = null
 
@@ -185,6 +187,7 @@ class Bible {
                             val bookId = headerMatch.groupValues[1].toInt()
                             val bookName = headerMatch.groupValues[2].trim()
                             val chapterCount = headerMatch.groupValues[3].toInt()
+                            headerOrder.add(bookId)
                             parsedBookNames[bookId] = bookName
                             return@forEachLine
                         }
@@ -279,21 +282,38 @@ class Bible {
                 }
             }
 
-            // Build book list using parsed names from header, fallback to provided bookNames, then generic names
+            // Build book list preserving header order from the SPB file
             val maxBook = if (bookChapterMap.isEmpty()) 0 else bookChapterMap.keys.maxOrNull() ?: 0
-            for (b in 1..maxBook) {
+            val headerBookIds = headerOrder.toSet()
+            // First: books in header order
+            for (b in headerOrder) {
                 val chapterCount = bookChapterMap[b]?.maxOrNull() ?: 0
                 val name = when {
                     parsedBookNames.containsKey(b) -> parsedBookNames.getValue(b)
                     bookNames.size >= b -> bookNames[b - 1]
                     else -> "Book $b"
                 }
-                val abbreviation = generateAbbreviation(name)
                 books.add(BibleBook(
                     book = name,
                     bookId = b.toString(),
                     chapterCount = chapterCount,
-                    abbreviation = abbreviation
+                    abbreviation = generateAbbreviation(name)
+                ))
+            }
+            // Then: any books found in verse data but missing from header
+            for (b in 1..maxBook) {
+                if (b in headerBookIds) continue
+                if (!bookChapterMap.containsKey(b)) continue
+                val chapterCount = bookChapterMap[b]?.maxOrNull() ?: 0
+                val name = when {
+                    bookNames.size >= b -> bookNames[b - 1]
+                    else -> "Book $b"
+                }
+                books.add(BibleBook(
+                    book = name,
+                    bookId = b.toString(),
+                    chapterCount = chapterCount,
+                    abbreviation = generateAbbreviation(name)
                 ))
             }
 
@@ -462,7 +482,7 @@ class Bible {
         // O(1) lookup via chapterIndex, then find specific verse number
         val bibleVerse = chapterIndex[chapterKey(book, chapter)]
             ?.firstOrNull { it.verseNumber == verseNumber } ?: return null
-        val bookName = books.getOrNull(book - 1)?.book ?: "Book $book"
+        val bookName = books.firstOrNull { it.bookId == book.toString() }?.book ?: "Book $book"
         return Triple(bookName, bibleVerse.verseText, bibleVerse.verseId)
     }
 
@@ -474,9 +494,15 @@ class Bible {
         chapterIndex[chapterKey(book, chapter)] ?: emptyList()
 
     /**
-     * Returns the book name for the given 1-based book id, or null if out of range.
+     * Returns the book name for the given 1-based book id, or null if not found.
      */
-    fun getBookName(bookId: Int): String? = books.getOrNull(bookId - 1)?.book
+    fun getBookName(bookId: Int): String? = books.firstOrNull { it.bookId == bookId.toString() }?.book
+
+    /**
+     * Returns the SPB book ID for the given 0-based display index.
+     */
+    fun getBookId(displayIndex: Int): Int =
+        books.getOrNull(displayIndex)?.bookId?.toIntOrNull() ?: (displayIndex + 1)
 
     // Diagnostic helper: number of parsed verses from SPB
     fun getVerseCount(): Int {

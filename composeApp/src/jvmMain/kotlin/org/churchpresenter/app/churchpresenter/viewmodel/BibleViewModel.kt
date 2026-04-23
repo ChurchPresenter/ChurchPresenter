@@ -296,7 +296,7 @@ class BibleViewModel(
 
                 if (primary != null) {
                     _books.value = primary.getCanonicalBooks()
-                    val bookId = _selectedBookIndex.value + 1
+                    val bookId = primary.getBookId(_selectedBookIndex.value)
                     val chapterResult = withContext(Dispatchers.IO) {
                         primary.getChapter(bookId, _selectedChapter.value)
                     }
@@ -325,7 +325,7 @@ class BibleViewModel(
                 _selectedChapter.value = chapter
                 _selectedVerseIndex.value = 0
                 viewModelScope.launch {
-                    val bookId = clampedIndex + 1
+                    val bookId = bible.getBookId(clampedIndex)
                     val chapterResult = withContext(Dispatchers.IO) {
                         bible.getChapter(bookId, chapter)
                     }
@@ -408,7 +408,7 @@ class BibleViewModel(
             if (bookCount == 0) return@launch
 
             val clampedIndex = bookIndex.coerceIn(0, bookCount - 1)
-            val bookId = clampedIndex + 1
+            val bookId = bible.getBookId(clampedIndex)
 
             val chapterResult = withContext(Dispatchers.IO) {
                 bible.getChapter(bookId, chapter)
@@ -488,24 +488,24 @@ class BibleViewModel(
             "hebrews", "james", "1 peter", "2 peter", "1 john", "2 john", "3 john", "jude", "revelation"
         )
 
-        // Find indices of matching English books
-        val matchingIndices = standardEnglishBooks.mapIndexedNotNull { index, englishName ->
+        // Find book IDs of matching English books (index+1 = standard book ID)
+        val matchingBookIds = standardEnglishBooks.mapIndexedNotNull { index, englishName ->
             if (englishName.contains(query, ignoreCase = true)) {
-                index
+                index + 1
             } else {
                 null
             }
         }
 
-        if (matchingIndices.isEmpty()) {
+        if (matchingBookIds.isEmpty()) {
             return emptyList()
         }
 
-        // Get books from the actual Bible by these indices
-        // This works because Bible files are in standard book order
-        val mappedResults = matchingIndices.mapNotNull { index ->
-            _books.value.getOrNull(index)
-        }
+        // Look up display names by book ID (works regardless of display order)
+        val bible = _primaryBible.value
+        val mappedResults = matchingBookIds.mapNotNull { bookId ->
+            bible?.getBookName(bookId)
+        }.filter { it in _books.value }
 
         return mappedResults
     }
@@ -535,7 +535,7 @@ class BibleViewModel(
             return verseList
         }
 
-        val bookId = _selectedBookIndex.value + 1
+        val bookId = _primaryBible.value?.getBookId(_selectedBookIndex.value) ?: (_selectedBookIndex.value + 1)
 
         // ── Multi-verse mode: combine selected verses into one SelectedVerse per bible ──
         if (_multiVerseEnabled.value && _selectedVerseIndices.isNotEmpty()) {
@@ -776,7 +776,7 @@ class BibleViewModel(
                 val results = when (_selectedScopeIndex.value) {
                     1 -> {
                         // Search in current book only
-                        val bookId = _selectedBookIndex.value + 1
+                        val bookId = bible.getBookId(_selectedBookIndex.value)
                         bible.searchBible(allWords = false, searchExp = searchRegex, book = bookId)
                     }
                     else -> {
@@ -813,7 +813,7 @@ class BibleViewModel(
         if (bookCount == 0) return
 
         val clampedIndex = bookIndex.coerceIn(0, bookCount - 1)
-        val bookId = clampedIndex + 1
+        val bookId = bible.getBookId(clampedIndex)
 
         _selectedBookIndex.value = clampedIndex
         _selectedChapter.value = chapter

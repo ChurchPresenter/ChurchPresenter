@@ -17,6 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.isCtrlPressed
 import androidx.compose.ui.input.pointer.isMetaPressed
@@ -87,7 +88,7 @@ fun SelectionListWithIndex(
         ) {
             itemsIndexed(
                 items = list,
-                key = { index, _ -> "$index-${list.hashCode()}" }
+                key = { index, item -> "$index-$item" }
             ) { index, item ->
                 val isSelected = if (selectedIndices != null) selectedIndices.contains(index) else index == selectedIndex
                 Text(
@@ -105,7 +106,7 @@ fun SelectionListWithIndex(
                             var lastClickTime = 0L
                             awaitPointerEventScope {
                                 while (true) {
-                                    val event = awaitPointerEvent()
+                                    val event = awaitPointerEvent(PointerEventPass.Initial)
                                     if (event.type == PointerEventType.Release &&
                                         index >= 0 && index < list.size
                                     ) {
