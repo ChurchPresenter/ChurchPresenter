@@ -1111,4 +1111,13 @@
     <string name="stage_monitor_clock_24h">24-Hour Format</string>
     <string name="stage_monitor_notes_text">Notes Text</string>
     <string name="stage_monitor_notes_hint">Enter presenter notes or reminders here…</string>
+
+    <!-- Update checker -->
+    <string name="update_dialog_title">Update Available</string>
+    <string name="update_dialog_message">A new version of Church Presenter is available: %1$s</string>
+    <string name="update_dialog_download">Download</string>
+    <string name="update_dialog_dismiss">Later</string>
+    <string name="update_dialog_release_notes">What's new:</string>
+    <string name="update_check_menu">Check for Updates…</string>
+    <string name="update_already_latest">You are running the latest version.</string>
 </resources>

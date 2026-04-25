@@ -115,6 +115,9 @@ import org.churchpresenter.app.churchpresenter.server.ProjectRequest
 import org.churchpresenter.app.churchpresenter.ui.theme.AppThemeWrapper
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.CrashReporter
+import org.churchpresenter.app.churchpresenter.utils.UpdateChecker
+import org.churchpresenter.app.churchpresenter.utils.UpdateInfo
+import org.churchpresenter.app.churchpresenter.dialogs.UpdateAvailableDialog
 import org.jetbrains.compose.resources.stringResource
 import java.awt.Desktop
 import java.awt.GraphicsDevice
@@ -268,6 +271,7 @@ fun main() {
         var showOptionsDialog by remember { mutableStateOf(false) }
         var showKeyboardShortcutsDialog by remember { mutableStateOf(false) }
         var showAboutDialog by remember { mutableStateOf(false) }
+        var pendingUpdateInfo by remember { mutableStateOf<UpdateInfo?>(null) }
         var selectedScheduleItemId by remember { mutableStateOf<String?>(null) }
 
         // Preload songs and bible at startup, then signal ready
@@ -295,6 +299,11 @@ fun main() {
                 }
             }
             appReady = true
+            // Check for updates in background after startup
+            val updateInfo = UpdateChecker.checkForUpdate()
+            if (updateInfo != null) {
+                pendingUpdateInfo = updateInfo
+            }
         }
 
 
@@ -787,8 +796,15 @@ fun main() {
                                             .browse(URI("https://github.com/ChurchPresenter/ChurchPresenter/"))
                                     },
                                     onCheckForUpdates = {
-                                        Desktop.getDesktop()
-                                            .browse(URI("https://github.com/ChurchPresenter/ChurchPresenter/releases/latest"))
+                                        coroutineScope.launch {
+                                            val info = UpdateChecker.checkForUpdate()
+                                            if (info != null) {
+                                                pendingUpdateInfo = info
+                                            } else {
+                                                Desktop.getDesktop()
+                                                    .browse(URI("https://github.com/ChurchPresenter/ChurchPresenter/releases/latest"))
+                                            }
+                                        }
                                     },
                                     onKeyboardShortcuts = { showKeyboardShortcutsDialog = true },
                                     theme = {
@@ -970,6 +986,10 @@ fun main() {
                                 AboutDialog(
                                     isVisible = showAboutDialog,
                                     onDismiss = { showAboutDialog = false }
+                                )
+                                UpdateAvailableDialog(
+                                    updateInfo = pendingUpdateInfo,
+                                    onDismiss = { pendingUpdateInfo = null }
                                 )
 
                                 // ── Remote API event dialog ───────────────────────

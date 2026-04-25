@@ -1018,5 +1018,14 @@
     <string name="server_host_label">Хост (перавызначэнне)</string>
     <string name="server_host_hint">напрыклад, 192.168.1.50 або church-mac.local</string>
     <string name="server_host_note">Фіксаваны IP або імя хоста ў URL. Пакіньце пустым для аўтавызначэння.</string>
+
+    <!-- Update checker -->
+    <string name="update_dialog_title">Даступнае абнаўленне</string>
+    <string name="update_dialog_message">Даступная новая версія Church Presenter: %1$s</string>
+    <string name="update_dialog_download">Спампаваць</string>
+    <string name="update_dialog_dismiss">Пазней</string>
+    <string name="update_dialog_release_notes">Што новага:</string>
+    <string name="update_check_menu">Праверыць абнаўленні…</string>
+    <string name="update_already_latest">У вас усталявана апошняя версія.</string>
 </resources>
 

@@ -1018,5 +1018,14 @@
     <string name="server_host_label">Host (überschreiben)</string>
     <string name="server_host_hint">z. B. 192.168.1.50 oder church-mac.local</string>
     <string name="server_host_note">Feste IP oder Hostname in der URL. Leer lassen für automatische Erkennung.</string>
+
+    <!-- Update checker -->
+    <string name="update_dialog_title">Update verfügbar</string>
+    <string name="update_dialog_message">Eine neue Version von Church Presenter ist verfügbar: %1$s</string>
+    <string name="update_dialog_download">Herunterladen</string>
+    <string name="update_dialog_dismiss">Später</string>
+    <string name="update_dialog_release_notes">Was ist neu:</string>
+    <string name="update_check_menu">Nach Updates suchen…</string>
+    <string name="update_already_latest">Sie verwenden die neueste Version.</string>
 </resources>
 

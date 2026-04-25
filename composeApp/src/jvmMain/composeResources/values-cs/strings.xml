@@ -1095,6 +1095,15 @@
     <string name="connection_qr_title">QR kód připojení</string>
     <string name="server_host_label">Hostitel (přepis)</string>
     <string name="server_host_hint">např. 192.168.1.50 nebo church-mac.local</string>
-    <string name="server_host_note">Pevná IP nebo název hostitele zobrazený v URL. Ponechte prázdné pro automatické zjištění.</string>
+    <string name="server_host_note">Pevn IP nebo nzev hostitele zobrazen v URL. Ponechte przdn pro automatick zjištěn.</string>
+
+    <!-- Update checker -->
+    <string name="update_dialog_title">Dostupná aktualizace</string>
+    <string name="update_dialog_message">Je dostupná nová verze Church Presenter: %1$s</string>
+    <string name="update_dialog_download">Stáhnout</string>
+    <string name="update_dialog_dismiss">Později</string>
+    <string name="update_dialog_release_notes">Co je nového:</string>
+    <string name="update_check_menu">Zkontrolovat aktualizace…</string>
+    <string name="update_already_latest">Máte nainstalovanou nejnovější verzi.</string>
 </resources>
 
