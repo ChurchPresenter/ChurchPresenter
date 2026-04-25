@@ -370,6 +370,8 @@ val generateBuildConfig by tasks.registering {
     val appVersion = "$versionYear.${commits / 256}.${commits % 256}"
     val outputDir = layout.buildDirectory.dir("generated/buildconfig")
 
+    // Always re-run — git state (commit count/hash) can change without any file edits
+    outputs.upToDateWhen { false }
     outputs.dir(outputDir)
 
     doLast {
