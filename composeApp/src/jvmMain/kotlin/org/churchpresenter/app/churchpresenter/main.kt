@@ -117,6 +117,7 @@ import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.CrashReporter
 import org.churchpresenter.app.churchpresenter.utils.UpdateChecker
 import org.churchpresenter.app.churchpresenter.utils.UpdateInfo
+import org.churchpresenter.app.churchpresenter.dialogs.StatisticsDialog
 import org.churchpresenter.app.churchpresenter.dialogs.UpdateAvailableDialog
 import org.jetbrains.compose.resources.stringResource
 import java.awt.Desktop
@@ -269,6 +270,7 @@ fun main() {
         val remoteSelectSongFlow =
             remember { kotlinx.coroutines.flow.MutableSharedFlow<ScheduleItem.SongItem>(extraBufferCapacity = 8) }
         var showOptionsDialog by remember { mutableStateOf(false) }
+        var showStatisticsDialog by remember { mutableStateOf(false) }
         var showKeyboardShortcutsDialog by remember { mutableStateOf(false) }
         var showAboutDialog by remember { mutableStateOf(false) }
         var pendingUpdateInfo by remember { mutableStateOf<UpdateInfo?>(null) }
@@ -791,6 +793,7 @@ fun main() {
 
                                 NavigationTopBar(
                                     onAbout = { showAboutDialog = true },
+                                    onStatistics = { showStatisticsDialog = true },
                                     onHelp = {
                                         Desktop.getDesktop()
                                             .browse(URI("https://github.com/ChurchPresenter/ChurchPresenter/"))
@@ -944,7 +947,6 @@ fun main() {
                                     isVisible = showOptionsDialog,
                                     theme = theme,
                                     settingsManager = settingsManager,
-                                    statisticsManager = statisticsManager,
                                     companionServer = companionServer,
                                     remoteClientManager = remoteClientManager,
                                     presenterManager = presenterManager,
@@ -982,6 +984,12 @@ fun main() {
                                 KeyboardShortcutsDialog(
                                     isVisible = showKeyboardShortcutsDialog,
                                     onDismiss = { showKeyboardShortcutsDialog = false }
+                                )
+                                StatisticsDialog(
+                                    isVisible = showStatisticsDialog,
+                                    theme = theme,
+                                    statisticsManager = statisticsManager,
+                                    onDismiss = { showStatisticsDialog = false }
                                 )
                                 AboutDialog(
                                     isVisible = showAboutDialog,
