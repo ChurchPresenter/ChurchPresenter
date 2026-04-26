@@ -47,12 +47,10 @@ import churchpresenter.composeapp.generated.resources.options
 import churchpresenter.composeapp.generated.resources.projection
 import churchpresenter.composeapp.generated.resources.server_settings
 import churchpresenter.composeapp.generated.resources.song
-import churchpresenter.composeapp.generated.resources.statistics
 import churchpresenter.composeapp.generated.resources.stage_monitor
 import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.data.RemoteClientManager
 import org.churchpresenter.app.churchpresenter.data.SettingsManager
-import org.churchpresenter.app.churchpresenter.data.StatisticsManager
 import org.churchpresenter.app.churchpresenter.server.CompanionServer
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.SystemSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.BackgroundSettingsTab
@@ -62,7 +60,6 @@ import org.churchpresenter.app.churchpresenter.dialogs.tabs.ProjectionSettingsTa
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.ServerSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.SongSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.LowerThirdSettingsTab
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.StatisticsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.StageMonitorSettingsTab
 import org.churchpresenter.app.churchpresenter.ui.theme.AppThemeWrapper
 import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
@@ -74,7 +71,6 @@ fun OptionsDialog(
     isVisible: Boolean,
     theme: ThemeMode,
     settingsManager: SettingsManager,
-    statisticsManager: StatisticsManager,
     companionServer: CompanionServer,
     remoteClientManager: RemoteClientManager,
     presenterManager: PresenterManager,
@@ -160,11 +156,6 @@ fun OptionsDialog(
                         Tab(
                             selected = selectedTabIndex == 8,
                             onClick = { selectedTabIndex = 8 },
-                            text = { Text(stringResource(Res.string.statistics)) }
-                        )
-                        Tab(
-                            selected = selectedTabIndex == 9,
-                            onClick = { selectedTabIndex = 9 },
                             text = { Text(stringResource(Res.string.stage_monitor)) }
                         )
                     }
@@ -235,10 +226,7 @@ fun OptionsDialog(
                                 companionServer = companionServer,
                                 remoteClientManager = remoteClientManager
                             )
-                            8 -> StatisticsTab(
-                                statisticsManager = statisticsManager
-                            )
-                            9 -> StageMonitorSettingsTab(
+                            8 -> StageMonitorSettingsTab(
                                 settings = currentSettings,
                                 onSettingsChange = { updateFn ->
                                     currentSettings = updateFn(currentSettings)

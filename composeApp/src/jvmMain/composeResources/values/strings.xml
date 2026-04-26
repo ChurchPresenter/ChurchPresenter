@@ -985,6 +985,12 @@
     <string name="top_verses">Top Verses</string>
     <string name="clear_statistics">Clear Statistics</string>
     <string name="times_displayed">times</string>
+    <string name="menu_statistics">Statistics</string>
+    <string name="export_to_xls">Export to XLS</string>
+    <string name="statistics_exported_success">Statistics exported successfully.</string>
+    <string name="statistics_exported_error">Failed to export statistics.</string>
+    <string name="file_chooser_save_statistics">Save Statistics As</string>
+    <string name="file_filter_xls">Excel Spreadsheet (*.xls)</string>
 
     <!-- Remote API event dialog -->
     <string name="remote_api_add_to_schedule">Add to Schedule</string>

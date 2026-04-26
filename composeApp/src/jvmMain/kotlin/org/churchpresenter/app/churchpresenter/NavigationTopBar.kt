@@ -36,6 +36,7 @@ import churchpresenter.composeapp.generated.resources.menu_save_schedule
 import churchpresenter.composeapp.generated.resources.menu_save_schedule_as
 import churchpresenter.composeapp.generated.resources.menu_schedule
 import churchpresenter.composeapp.generated.resources.menu_settings
+import churchpresenter.composeapp.generated.resources.menu_statistics
 import churchpresenter.composeapp.generated.resources.system_theme
 import org.churchpresenter.app.churchpresenter.data.Language
 import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
@@ -55,6 +56,7 @@ fun FrameWindowScope.NavigationTopBar(
     onRemoveFromSchedule: () -> Unit = {},
     onClearSchedule: () -> Unit = {},
     onSettings: () -> Unit = {},
+    onStatistics: () -> Unit = {},
     onAbout: () -> Unit = {},
     onHelp: () -> Unit = {},
     onKeyboardShortcuts: () -> Unit = {},
@@ -125,6 +127,10 @@ fun FrameWindowScope.NavigationTopBar(
                 stringResource(Res.string.menu_settings),
                 onClick = onSettings,
                 shortcut = KeyShortcut(ctrl = true, key = Key.T)
+            )
+            Item(
+                stringResource(Res.string.menu_statistics),
+                onClick = onStatistics
             )
         }
 

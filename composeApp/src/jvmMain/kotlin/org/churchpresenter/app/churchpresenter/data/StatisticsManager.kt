@@ -5,6 +5,9 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import org.apache.poi.hssf.usermodel.HSSFWorkbook
+import org.apache.poi.ss.usermodel.FillPatternType
+import org.apache.poi.ss.usermodel.IndexedColors
 
 @Serializable
 data class DisplayStatistics(
@@ -117,5 +120,91 @@ class StatisticsManager {
     fun clearStatistics() {
         statistics = DisplayStatistics()
         save()
+    }
+
+    /**
+     * Exports statistics to an XLS file (Excel 97-2003 format) at the given [file] path.
+     * Returns true on success, false if an error occurred.
+     */
+    fun exportStatisticsToXls(file: File): Boolean {
+        return try {
+            val workbook = HSSFWorkbook()
+
+            // Header cell style — light blue background, bold
+            val headerStyle = workbook.createCellStyle().apply {
+                fillForegroundColor = IndexedColors.LIGHT_CORNFLOWER_BLUE.index
+                fillPattern = FillPatternType.SOLID_FOREGROUND
+                val boldFont = workbook.createFont().apply { bold = true }
+                setFont(boldFont)
+            }
+
+            // ── Songs sheet ──────────────────────────────────────────────────────────
+            val songsSheet = workbook.createSheet("Top Songs")
+            var rowIndex = 0
+            val allSongs = statistics.songDisplayCounts.values
+                .sortedByDescending { it.count }
+
+            val songHeaderRow = songsSheet.createRow(rowIndex++)
+            listOf("Rank", "Songbook", "Number", "Title", "Count").forEachIndexed { col, label ->
+                songHeaderRow.createCell(col).also {
+                    it.setCellValue(label)
+                    it.cellStyle = headerStyle
+                }
+            }
+
+            // Group by songbook and write rows
+            allSongs.groupBy { it.songbook }
+                .toSortedMap()
+                .forEach { (_, entries) ->
+                    entries.sortedByDescending { it.count }.forEachIndexed { rank, entry ->
+                        val row = songsSheet.createRow(rowIndex++)
+                        row.createCell(0).setCellValue((rank + 1).toDouble())
+                        row.createCell(1).setCellValue(entry.songbook)
+                        row.createCell(2).setCellValue(entry.songNumber.toDouble())
+                        row.createCell(3).setCellValue(entry.title)
+                        row.createCell(4).setCellValue(entry.count.toDouble())
+                    }
+                }
+
+            // Auto-size columns
+            (0..4).forEach { songsSheet.autoSizeColumn(it) }
+
+            // ── Verses sheet ─────────────────────────────────────────────────────────
+            val versesSheet = workbook.createSheet("Top Verses")
+            rowIndex = 0
+            val allVerses = statistics.verseDisplayCounts.values
+                .sortedByDescending { it.count }
+
+            val verseHeaderRow = versesSheet.createRow(rowIndex++)
+            listOf("Rank", "Bible", "Book", "Chapter", "Verse", "Count").forEachIndexed { col, label ->
+                verseHeaderRow.createCell(col).also {
+                    it.setCellValue(label)
+                    it.cellStyle = headerStyle
+                }
+            }
+
+            allVerses.groupBy { it.bibleName }
+                .toSortedMap()
+                .forEach { (_, entries) ->
+                    entries.sortedByDescending { it.count }.forEachIndexed { rank, entry ->
+                        val row = versesSheet.createRow(rowIndex++)
+                        row.createCell(0).setCellValue((rank + 1).toDouble())
+                        row.createCell(1).setCellValue(entry.bibleName)
+                        row.createCell(2).setCellValue(entry.bookName)
+                        row.createCell(3).setCellValue(entry.chapter.toDouble())
+                        row.createCell(4).setCellValue(entry.verseNumber.toDouble())
+                        row.createCell(5).setCellValue(entry.count.toDouble())
+                    }
+                }
+
+            (0..5).forEach { versesSheet.autoSizeColumn(it) }
+
+            // Write file
+            file.outputStream().use { workbook.write(it) }
+            workbook.close()
+            true
+        } catch (_: Exception) {
+            false
+        }
     }
 }
