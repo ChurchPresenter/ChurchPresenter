@@ -24,7 +24,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.graphicsLayer
@@ -74,7 +73,6 @@ fun SongPresenter(
     showBackground: Boolean = true,
     crossfadeEnabled: Boolean = false,
 ) {
-    val isFillOrKey = outputRole == Constants.OUTPUT_ROLE_FILL || outputRole == Constants.OUTPUT_ROLE_KEY
     val isKey = outputRole == Constants.OUTPUT_ROLE_KEY
     val ss = appSettings.songSettings
 
@@ -924,8 +922,7 @@ fun SongPresenter(
                 }
             }
 
-            if (crossfadeEnabled || appSettings.songSettings.fadeIn || appSettings.songSettings.fadeOut) {
-                val ss = appSettings.songSettings
+            if (crossfadeEnabled || ss.fadeIn || ss.fadeOut) {
                 val duration = ss.transitionDuration.toInt().coerceAtLeast(100)
                 val isCrossfade = crossfadeEnabled
                 var displayedCurrent by remember { mutableStateOf(lyricSection) }

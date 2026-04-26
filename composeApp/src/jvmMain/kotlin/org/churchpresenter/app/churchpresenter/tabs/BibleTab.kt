@@ -192,12 +192,14 @@ fun BibleTab(
 
     val verseSelectionToken by viewModel.verseSelectionToken
 
+    val currentIsPresenting by rememberUpdatedState(isPresenting)
+
     // Only push to presenter when:
     //  - not currently presenting (free browsing always updates preview), OR
     //  - an explicit verse selection happened (token changed) while presenting
     LaunchedEffect(verseSelectionToken) {
         // In multi-verse mode while presenting, don't update until Go Live is pressed
-        if (viewModel.multiVerseEnabled.value && isPresenting) return@LaunchedEffect
+        if (viewModel.multiVerseEnabled.value && currentIsPresenting) return@LaunchedEffect
         if (verses.isNotEmpty() && selectedVerseIndex >= 0 && selectedVerseIndex < verses.size) {
             val selectedVerses = viewModel.getSelectedVerses()
             if (selectedVerses.isNotEmpty()) onVerseSelected(selectedVerses)
@@ -206,7 +208,7 @@ fun BibleTab(
 
     // While not presenting, also update preview when chapter loads so the first verse shows
     LaunchedEffect(verses.size) {
-        if (!isPresenting && verses.isNotEmpty()) {
+        if (!currentIsPresenting && verses.isNotEmpty()) {
             val selectedVerses = viewModel.getSelectedVerses()
             if (selectedVerses.isNotEmpty()) onVerseSelected(selectedVerses)
         }

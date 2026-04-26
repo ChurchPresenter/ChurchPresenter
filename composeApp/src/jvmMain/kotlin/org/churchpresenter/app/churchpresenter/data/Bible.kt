@@ -332,8 +332,6 @@ class Bible {
             // Build chapter index for O(1) lookup in getChapter()
             buildChapterIndex()
 
-        } catch (e: Exception) {
-            throw e
         }
     }
 
@@ -431,6 +429,13 @@ class Bible {
         var sw = searchExp.pattern
         sw = sw.replace("\\b(", "").replace(")\\b", "")
 
+        // Precompile per-word regexes outside the loop
+        val wordRegexes = if (allWords) {
+            sw.split("|").map { word ->
+                Regex("\\b${Regex.escape(word)}\\b", RegexOption.IGNORE_CASE)
+            }
+        } else emptyList()
+
         operatorBible
             .filter { bv ->
                 val matchesText = searchExp.containsMatchIn(bv.verseText)
@@ -440,11 +445,7 @@ class Bible {
             }
             .forEach { bv ->
                 if (allWords) {
-                    val words = sw.split("|")
-                    val hasAll = words.all { word ->
-                        Regex("\\b${Regex.escape(word)}\\b", RegexOption.IGNORE_CASE).containsMatchIn(bv.verseText)
-                    }
-                    if (hasAll) {
+                    if (wordRegexes.all { it.containsMatchIn(bv.verseText) }) {
                         addSearchResult(bv, returnResults)
                     }
                 } else {
@@ -455,8 +456,11 @@ class Bible {
         return returnResults
     }
 
+    private val bookIdToName: Map<String, String> get() =
+        books.associate { it.bookId to it.book }
+
     private fun addSearchResult(bv: BibleVerse, bsl: MutableList<BibleSearch>) {
-        val bookName = books.firstOrNull { it.bookId == bv.book.toString() }?.book ?: ""
+        val bookName = bookIdToName[bv.book.toString()] ?: ""
         val chapter = bv.chapter.toString()
         val verse = bv.verseNumber.toString()
 

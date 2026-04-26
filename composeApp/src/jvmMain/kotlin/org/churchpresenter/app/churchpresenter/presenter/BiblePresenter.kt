@@ -79,7 +79,6 @@ fun BiblePresenter(
     showBackground: Boolean = true,
     crossfadeEnabled: Boolean = false,
 ) {
-    val isFillOrKey = outputRole == Constants.OUTPUT_ROLE_FILL || outputRole == Constants.OUTPUT_ROLE_KEY
     val isKey = outputRole == Constants.OUTPUT_ROLE_KEY
     val bs = appSettings.bibleSettings
 
@@ -105,7 +104,7 @@ fun BiblePresenter(
         systemFontFamilyOrDefault(if (isLowerThird) bs.secondaryReferenceLowerThirdFontType else bs.secondaryReferenceFontType)
     }
 
-    val primaryBible = selectedVerses.first()
+    val primaryBible = selectedVerses.firstOrNull() ?: return
     val secondaryBible = selectedVerses.getOrNull(1)
 
     // Resolve colors — key mode forces white for a proper key signal
@@ -701,7 +700,6 @@ fun BiblePresenter(
                 // - Fade in: first appearance fades from transparent
                 // - Crossfade: switching verses blends old/new simultaneously
                 // - Fade out: handled externally when clearing display
-                val bs = appSettings.bibleSettings
                 val duration = bs.transitionDuration.toInt().coerceAtLeast(100)
                 val isCrossfade = crossfadeEnabled
                 var displayedCurrent by remember { mutableStateOf(selectedVerses) }

@@ -29,6 +29,7 @@ class SongsViewModel(
     val isLoading: State<Boolean> = _isLoading
 
     private val viewModelScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
+    private var loadSongsJob: kotlinx.coroutines.Job? = null
     private val songFolderWatcher = SongFolderWatcher(viewModelScope) { loadSongs() }
     private val _allSongItems = mutableStateOf<List<SongItem>>(emptyList())
 
@@ -78,7 +79,8 @@ class SongsViewModel(
     }
 
     fun loadSongs() {
-        viewModelScope.launch {
+        loadSongsJob?.cancel()
+        loadSongsJob = viewModelScope.launch {
             _isLoading.value = true
             val storageDir = appSettings.songSettings.storageDirectory
             try {

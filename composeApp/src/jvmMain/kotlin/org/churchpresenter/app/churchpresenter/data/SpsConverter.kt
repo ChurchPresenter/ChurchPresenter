@@ -31,7 +31,7 @@ class SpsConverter {
             }
 
             // Create songbook folder
-            val songbookDir = File(outputDirectory, sanitizeFolderName(songbookName))
+            val songbookDir = File(outputDirectory, sanitizeName(songbookName))
             if (!songbookDir.exists()) {
                 songbookDir.mkdirs()
             }
@@ -41,7 +41,7 @@ class SpsConverter {
             for (song in songList) {
                 try {
                     val paddedNumber = song.number.padStart(4, '0')
-                    val sanitizedTitle = sanitizeFileName(song.title)
+                    val sanitizedTitle = sanitizeName(song.title)
                     val fileName = "$paddedNumber - $sanitizedTitle.song"
                     val filePath = File(songbookDir, fileName).absolutePath
 
@@ -67,7 +67,7 @@ class SpsConverter {
             val songbookName = songList.first().songbook.ifEmpty {
                 File(spsFilePath).nameWithoutExtension
             }
-            return sanitizeFolderName(songbookName)
+            return sanitizeName(songbookName)
         } catch (_: Exception) {
             return null
         }
@@ -78,21 +78,19 @@ class SpsConverter {
         return File(outputDirectory, folderName).exists()
     }
 
-    private fun sanitizeFileName(name: String): String {
-        return name
-            .replace(Regex("""[/\\:*?"<>|]"""), " ")   // Windows-illegal chars
-            .replace(Regex("""[\x00-\x1F\x7F]"""), "")  // control characters
-            .replace(Regex("""[^\p{Print}\p{L}\p{M}\p{N}\p{P}\p{Z}]"""), " ") // non-printable
-            .replace(Regex("""\s+"""), " ")              // collapse whitespace
-            .trim()
+    companion object {
+        private val ILLEGAL_CHARS = Regex("""[/\\:*?"<>|]""")
+        private val CONTROL_CHARS = Regex("""[\x00-\x1F\x7F]""")
+        private val NON_PRINTABLE = Regex("""[^\p{Print}\p{L}\p{M}\p{N}\p{P}\p{Z}]""")
+        private val WHITESPACE_RUN = Regex("""\s+""")
     }
 
-    private fun sanitizeFolderName(name: String): String {
+    private fun sanitizeName(name: String): String {
         return name
-            .replace(Regex("""[/\\:*?"<>|]"""), " ")
-            .replace(Regex("""[\x00-\x1F\x7F]"""), "")
-            .replace(Regex("""[^\p{Print}\p{L}\p{M}\p{N}\p{P}\p{Z}]"""), " ")
-            .replace(Regex("""\s+"""), " ")
+            .replace(ILLEGAL_CHARS, " ")
+            .replace(CONTROL_CHARS, "")
+            .replace(NON_PRINTABLE, " ")
+            .replace(WHITESPACE_RUN, " ")
             .trim()
     }
 }

@@ -214,6 +214,17 @@ class BibleViewModel(
     companion object {
         private const val CANONICAL_BOOK_COUNT = 66
         private const val CLICK_DEBOUNCE_MS = 300L
+        private val STANDARD_ENGLISH_BOOKS = listOf(
+            "genesis", "exodus", "leviticus", "numbers", "deuteronomy", "joshua", "judges", "ruth",
+            "1 samuel", "2 samuel", "1 kings", "2 kings", "1 chronicles", "2 chronicles",
+            "ezra", "nehemiah", "esther", "job", "psalms", "proverbs", "ecclesiastes", "song of solomon",
+            "isaiah", "jeremiah", "lamentations", "ezekiel", "daniel", "hosea", "joel", "amos",
+            "obadiah", "jonah", "micah", "nahum", "habakkuk", "zephaniah", "haggai", "zechariah", "malachi",
+            "matthew", "mark", "luke", "john", "acts", "romans",
+            "1 corinthians", "2 corinthians", "galatians", "ephesians", "philippians", "colossians",
+            "1 thessalonians", "2 thessalonians", "1 timothy", "2 timothy", "titus", "philemon",
+            "hebrews", "james", "1 peter", "2 peter", "1 john", "2 john", "3 john", "jude", "revelation"
+        )
     }
 
     private val viewModelScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
@@ -236,6 +247,8 @@ class BibleViewModel(
     }
 
     fun loadBibles() {
+        loadChapterJob?.cancel()
+        loadChapterJob = null
         viewModelScope.launch {
             _isLoading.value = true
             _isFullyLoadedFlow.value = false
@@ -490,22 +503,7 @@ class BibleViewModel(
             return emptyList()
         }
 
-        // Create a list of standard English book order (hardcoded for reliability)
-        // This must match the order of books in Bible files (66 books in standard order)
-        val standardEnglishBooks = listOf(
-            "genesis", "exodus", "leviticus", "numbers", "deuteronomy", "joshua", "judges", "ruth",
-            "1 samuel", "2 samuel", "1 kings", "2 kings", "1 chronicles", "2 chronicles",
-            "ezra", "nehemiah", "esther", "job", "psalms", "proverbs", "ecclesiastes", "song of solomon",
-            "isaiah", "jeremiah", "lamentations", "ezekiel", "daniel", "hosea", "joel", "amos",
-            "obadiah", "jonah", "micah", "nahum", "habakkuk", "zephaniah", "haggai", "zechariah", "malachi",
-            "matthew", "mark", "luke", "john", "acts", "romans",
-            "1 corinthians", "2 corinthians", "galatians", "ephesians", "philippians", "colossians",
-            "1 thessalonians", "2 thessalonians", "1 timothy", "2 timothy", "titus", "philemon",
-            "hebrews", "james", "1 peter", "2 peter", "1 john", "2 john", "3 john", "jude", "revelation"
-        )
-
-        // Find book IDs of matching English books (index+1 = standard book ID)
-        val matchingBookIds = standardEnglishBooks.mapIndexedNotNull { index, englishName ->
+        val matchingBookIds = STANDARD_ENGLISH_BOOKS.mapIndexedNotNull { index, englishName ->
             if (englishName.contains(query, ignoreCase = true)) {
                 index + 1
             } else {

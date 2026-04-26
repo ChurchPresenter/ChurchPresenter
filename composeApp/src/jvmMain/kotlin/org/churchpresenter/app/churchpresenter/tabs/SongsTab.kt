@@ -469,8 +469,7 @@ fun SongsTab(
                         }
                     }
                 } else {
-
-                val lazyListState = rememberLazyListState()
+                    val lazyListState = rememberLazyListState()
 
                 LaunchedEffect(selectedSongIndex, filteredSongs.size) {
                     if (selectedSongIndex >= 0 && selectedSongIndex < filteredSongs.size) {
@@ -548,7 +547,7 @@ fun SongsTab(
                     modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
                     adapter = rememberScrollbarAdapter(scrollState = lazyListState)
                 )
-                } // else
+                }
             }
         }
 

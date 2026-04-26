@@ -130,14 +130,17 @@ class ScheduleViewModel(
         )
         if (file != null) {
             if (file.exists()) {
-                val raw = file.readText()
-                // Support both old plain-JSON files and new encrypted files gracefully
-                val jsonText = try { decrypt(raw) } catch (_: Exception) { raw }
-                val items = json.decodeFromString(ListSerializer(ScheduleItem.serializer()), jsonText)
-                _scheduleItems.clear()
-                _scheduleItems.addAll(items)
-                currentFilePath = file.absolutePathString()
-                notifyChanged()
+                try {
+                    val raw = file.readText()
+                    val jsonText = try { decrypt(raw) } catch (_: Exception) { raw }
+                    val items = json.decodeFromString(ListSerializer(ScheduleItem.serializer()), jsonText)
+                    _scheduleItems.clear()
+                    _scheduleItems.addAll(items)
+                    currentFilePath = file.absolutePathString()
+                    notifyChanged()
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
             }
         }
     }

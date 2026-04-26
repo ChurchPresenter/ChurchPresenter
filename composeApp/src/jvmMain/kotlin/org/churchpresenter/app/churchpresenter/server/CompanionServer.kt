@@ -568,8 +568,10 @@ class CompanionServer {
 
     // Presentation catalog — metadata only; raw JPEG bytes stored per-slide in _slideBytes
     private val _presentationCatalog = MutableStateFlow(PresentationCatalogResponse(emptyList(), 0))
-    /** presentationId → list of JPEG-encoded slide bytes (index = slide number) */
+    /** presentationId → list of JPEG-encoded slide bytes (index = slide number). Max 5 cached. */
     private val _slideBytes = ConcurrentHashMap<String, List<ByteArray>>()
+    private val _slideBytesOrder = java.util.concurrent.ConcurrentLinkedDeque<String>()
+    private val MAX_CACHED_PRESENTATIONS = 5
     /** presentationId (file hash) → PresentationDto — covers tab-loaded and background-rendered items */
     private val _presentationCatalogs = ConcurrentHashMap<String, PresentationDto>()
     /** presentationId (file hash) → absolute file path — populated by updatePresentation and updateSchedule */
@@ -578,6 +580,16 @@ class CompanionServer {
     private val _scheduleItemToPresentationId = ConcurrentHashMap<String, String>()
     /** Set of presentation IDs currently being background-rendered (avoids duplicate renders) */
     private val _renderingPresentations = ConcurrentHashMap<String, Unit>()
+
+    private fun cacheSlideBytes(id: String, slides: List<ByteArray>) {
+        _slideBytes[id] = slides
+        _slideBytesOrder.remove(id)
+        _slideBytesOrder.addFirst(id)
+        while (_slideBytesOrder.size > MAX_CACHED_PRESENTATIONS) {
+            val evicted = _slideBytesOrder.pollLast()
+            if (evicted != null) _slideBytes.remove(evicted)
+        }
+    }
 
     /** Stable folder ID used for all device-uploaded photos (accumulates across sessions). */
     private val DEVICE_UPLOADS_FOLDER_ID = "device_uploads"
@@ -835,7 +847,7 @@ class CompanionServer {
                 ImageIO.write(img, "jpg", baos)
                 baos.toByteArray()
             }
-            _slideBytes[id] = jpegSlides
+            cacheSlideBytes(id, jpegSlides)
 
             val catalog = buildPresentationCatalog(id, fileName, fileType, jpegSlides.size)
             // Cache the dto so GET /api/presentations/{id} works for tab-loaded presentations
@@ -962,7 +974,7 @@ class CompanionServer {
             val jpegSlides = images.map { img ->
                 ByteArrayOutputStream().also { baos -> ImageIO.write(img, "jpg", baos) }.toByteArray()
             }
-            _slideBytes[presentationId] = jpegSlides
+            cacheSlideBytes(presentationId, jpegSlides)
             _presentationFilePaths[presentationId] = filePath
             val slideDtos = jpegSlides.indices.map { i ->
                 SlideDto(slideIndex = i, thumbnailUrl = "${Constants.ENDPOINT_PRESENTATIONS}/$presentationId/slides/$i")
@@ -985,11 +997,14 @@ class CompanionServer {
             val docClass  = Class.forName("org.apache.pdfbox.pdmodel.PDDocument")
             val rendClass = Class.forName("org.apache.pdfbox.rendering.PDFRenderer")
             val doc   = docClass.getMethod("load", File::class.java).invoke(null, file)
-            val pages = docClass.getMethod("getNumberOfPages").invoke(doc) as Int
-            val rend  = rendClass.getConstructor(docClass).newInstance(doc)
-            val renderDpi = rendClass.getMethod("renderImageWithDPI", Int::class.java, Float::class.java)
-            for (p in 0 until pages) result.add(renderDpi.invoke(rend, p, 150f) as BufferedImage)
-            docClass.getMethod("close").invoke(doc)
+            try {
+                val pages = docClass.getMethod("getNumberOfPages").invoke(doc) as Int
+                val rend  = rendClass.getConstructor(docClass).newInstance(doc)
+                val renderDpi = rendClass.getMethod("renderImageWithDPI", Int::class.java, Float::class.java)
+                for (p in 0 until pages) result.add(renderDpi.invoke(rend, p, 150f) as BufferedImage)
+            } finally {
+                docClass.getMethod("close").invoke(doc)
+            }
         } catch (_: ClassNotFoundException) {
         } catch (e: Exception) { e.printStackTrace() }
         return result
@@ -1004,23 +1019,29 @@ class CompanionServer {
         try {
             val clazz  = Class.forName(className)
             val fis    = java.io.FileInputStream(file)
-            val ppt    = clazz.getConstructor(java.io.InputStream::class.java).newInstance(fis)
-            val slides = clazz.getMethod("getSlides").invoke(ppt) as List<*>
-            val size   = clazz.getMethod("getPageSize").invoke(ppt) as java.awt.Dimension
-            slides.forEach { slide ->
-                val s = slide ?: return@forEach
-                val img = BufferedImage(size.width, size.height, BufferedImage.TYPE_INT_RGB)
-                val g   = img.createGraphics()
-                g.setRenderingHint(java.awt.RenderingHints.KEY_ANTIALIASING, java.awt.RenderingHints.VALUE_ANTIALIAS_ON)
-                g.setRenderingHint(java.awt.RenderingHints.KEY_RENDERING, java.awt.RenderingHints.VALUE_RENDER_QUALITY)
-                g.paint = java.awt.Color.WHITE
-                g.fillRect(0, 0, size.width, size.height)
-                s::class.java.getMethod("draw", java.awt.Graphics2D::class.java).invoke(s, g)
-                g.dispose()
-                result.add(img)
+            try {
+                val ppt    = clazz.getConstructor(java.io.InputStream::class.java).newInstance(fis)
+                try {
+                    val slides = clazz.getMethod("getSlides").invoke(ppt) as List<*>
+                    val size   = clazz.getMethod("getPageSize").invoke(ppt) as java.awt.Dimension
+                    slides.forEach { slide ->
+                        val s = slide ?: return@forEach
+                        val img = BufferedImage(size.width, size.height, BufferedImage.TYPE_INT_RGB)
+                        val g   = img.createGraphics()
+                        g.setRenderingHint(java.awt.RenderingHints.KEY_ANTIALIASING, java.awt.RenderingHints.VALUE_ANTIALIAS_ON)
+                        g.setRenderingHint(java.awt.RenderingHints.KEY_RENDERING, java.awt.RenderingHints.VALUE_RENDER_QUALITY)
+                        g.paint = java.awt.Color.WHITE
+                        g.fillRect(0, 0, size.width, size.height)
+                        s::class.java.getMethod("draw", java.awt.Graphics2D::class.java).invoke(s, g)
+                        g.dispose()
+                        result.add(img)
+                    }
+                } finally {
+                    clazz.getMethod("close").invoke(ppt)
+                }
+            } finally {
+                fis.close()
             }
-            clazz.getMethod("close").invoke(ppt)
-            fis.close()
         } catch (_: ClassNotFoundException) {
         } catch (e: Exception) { e.printStackTrace() }
         return result
@@ -1827,6 +1848,11 @@ class CompanionServer {
                         return@post
                     }
                     try {
+                        val contentLength = call.request.headers["Content-Length"]?.toLongOrNull() ?: 0L
+                        if (contentLength > 200 * 1024 * 1024) { // 200 MB limit
+                            call.respond(io.ktor.http.HttpStatusCode.PayloadTooLarge, """{"error":"file too large (max 200 MB)"}""")
+                            return@post
+                        }
                         val body   = call.receiveText()
                         val parsed = json.parseToJsonElement(body) as? kotlinx.serialization.json.JsonObject
                         val name   = (parsed?.get("name") as? kotlinx.serialization.json.JsonPrimitive)?.content
@@ -2359,6 +2385,7 @@ class CompanionServer {
     fun stop() {
         server?.stop(1_000, 2_000)
         server = null
+        scope.coroutineContext[kotlinx.coroutines.Job]?.cancelChildren()
         _isRunning.value = false
         _serverUrl.value = ""
     }
