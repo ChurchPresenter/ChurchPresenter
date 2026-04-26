@@ -1,16 +1,21 @@
 package org.churchpresenter.app.churchpresenter.ui.theme
 
+import androidx.compose.foundation.LocalScrollbarStyle
+import androidx.compose.foundation.ScrollbarStyle
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Typography
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.churchpresenter.app.churchpresenter.utils.Constants
 
@@ -193,9 +198,21 @@ fun ChurchPresenterTheme(
 
     MaterialTheme(
         colorScheme = colorScheme,
-        typography = AppTypography,
-        content = content
-    )
+        typography = AppTypography
+    ) {
+        CompositionLocalProvider(
+            LocalScrollbarStyle provides ScrollbarStyle(
+                minimalHeight = 16.dp,
+                thickness = 8.dp,
+                shape = RoundedCornerShape(4.dp),
+                hoverDurationMillis = 300,
+                unhoverColor = colorScheme.onSurface.copy(alpha = 0.3f),
+                hoverColor = colorScheme.onSurface.copy(alpha = 0.5f)
+            )
+        ) {
+            content()
+        }
+    }
 }
 
 @Composable
