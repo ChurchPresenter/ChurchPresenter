@@ -38,6 +38,10 @@ class PresentationViewModel(appSettings: AppSettings? = null) {
     private val _bufferedSlides = mutableListOf<BufferedImage>()
     val bufferedSlides: List<BufferedImage> get() = _bufferedSlides.toList()
 
+    /** Presenter notes extracted from each slide (parallel to [slides]). Empty string if no notes. */
+    private val _slideNotes = mutableStateListOf<String>()
+    val slideNotes: List<String> get() = _slideNotes
+
     private val _selectedSlideIndex = mutableStateOf(0)
     val selectedSlideIndex: Int
         get() = _selectedSlideIndex.value
@@ -134,6 +138,7 @@ class PresentationViewModel(appSettings: AppSettings? = null) {
         _selectedPresentation.value = null
         _slides.clear()
         _bufferedSlides.clear()
+        _slideNotes.clear()
         _selectedSlideIndex.value = 0
     }
 
@@ -148,6 +153,7 @@ class PresentationViewModel(appSettings: AppSettings? = null) {
                 withContext(Dispatchers.Main) {
                     _slides.clear()
                     _bufferedSlides.clear()
+                    _slideNotes.clear()
                 }
                 when (file.extension.lowercase()) {
                     "pdf" -> loadPdfSlides(file)
@@ -160,7 +166,7 @@ class PresentationViewModel(appSettings: AppSettings? = null) {
         }
     }
 
-    private suspend fun loadPdfSlides(file: File) {
+    private suspend fun loadPdfSlides(file: File, notesPerSlide: List<String> = emptyList()) {
         try {
             val pdDocumentClass = Class.forName("org.apache.pdfbox.pdmodel.PDDocument")
             val pdfRendererClass = Class.forName("org.apache.pdfbox.rendering.PDFRenderer")
@@ -169,12 +175,17 @@ class PresentationViewModel(appSettings: AppSettings? = null) {
             val numberOfPages = pdDocumentClass.getMethod("getNumberOfPages").invoke(document) as Int
             val renderer = pdfRendererClass.getConstructor(pdDocumentClass).newInstance(document)
             val renderMethod = pdfRendererClass.getMethod("renderImageWithDPI", Int::class.java, Float::class.java)
+            // 288 DPI → ~4× the standard 72 DPI PDF unit → 3840px wide for a typical 13.3" wide slide
+            val targetDpi = 288f
             for (page in 0 until numberOfPages) {
-                val image = renderMethod.invoke(renderer, page, 150f) as BufferedImage
+                val image = renderMethod.invoke(renderer, page, targetDpi) as BufferedImage
+                println("[PDF] page $page rendered at ${image.width}×${image.height}px")
                 val imageBitmap = bufferedImageToImageBitmap(image)
+                val notes = notesPerSlide.getOrElse(page) { "" }
                 withContext(Dispatchers.Main) {
                     _bufferedSlides.add(image)
                     _slides.add(imageBitmap)
+                    _slideNotes.add(notes)
                 }
             }
             pdDocumentClass.getMethod("close").invoke(document)
@@ -195,23 +206,44 @@ class PresentationViewModel(appSettings: AppSettings? = null) {
                     val ppt = xmlSlideShowClass.getConstructor(java.io.InputStream::class.java).newInstance(fileInputStream)
                     val slides = xmlSlideShowClass.getMethod("getSlides").invoke(ppt) as List<*>
                     val pageSize = xmlSlideShowClass.getMethod("getPageSize").invoke(ppt) as java.awt.Dimension
+                    // Scale to a fixed 3840-wide target so the bitmap is always 4K-ready.
+                    // This covers Retina/HiDPI screens (logical 1920×1080 = 3840×2160 physical).
+                    val renderScale = 3840.0 / pageSize.width
+                    println("[Slides] PPTX pageSize=${pageSize.width}×${pageSize.height}  renderScale=$renderScale  → ${(pageSize.width*renderScale).toInt()}×${(pageSize.height*renderScale).toInt()}")
                     slides.forEach { slide ->
                         val s = slide ?: return@forEach
                         try {
-                            val img = BufferedImage(pageSize.width, pageSize.height, BufferedImage.TYPE_INT_RGB)
+                            val imgW = (pageSize.width * renderScale).toInt()
+                            val imgH = (pageSize.height * renderScale).toInt()
+                            val img = BufferedImage(imgW, imgH, BufferedImage.TYPE_INT_RGB)
                             val graphics = img.createGraphics()
                             graphics.setRenderingHint(java.awt.RenderingHints.KEY_ANTIALIASING, java.awt.RenderingHints.VALUE_ANTIALIAS_ON)
                             graphics.setRenderingHint(java.awt.RenderingHints.KEY_RENDERING, java.awt.RenderingHints.VALUE_RENDER_QUALITY)
                             graphics.setRenderingHint(java.awt.RenderingHints.KEY_INTERPOLATION, java.awt.RenderingHints.VALUE_INTERPOLATION_BICUBIC)
                             graphics.setRenderingHint(java.awt.RenderingHints.KEY_FRACTIONALMETRICS, java.awt.RenderingHints.VALUE_FRACTIONALMETRICS_ON)
+                            graphics.setRenderingHint(java.awt.RenderingHints.KEY_TEXT_ANTIALIASING, java.awt.RenderingHints.VALUE_TEXT_ANTIALIAS_ON)
+                            graphics.scale(renderScale, renderScale)
                             graphics.paint = java.awt.Color.WHITE
                             graphics.fillRect(0, 0, pageSize.width, pageSize.height)
                             s::class.java.getMethod("draw", java.awt.Graphics2D::class.java).invoke(s, graphics)
                             graphics.dispose()
                             val imageBitmap = bufferedImageToImageBitmap(img)
+                            // Save first PPTX slide to disk so we can verify render quality
+                            if (_slides.isEmpty()) {
+                                try {
+                                    val debugFile = File(System.getProperty("java.io.tmpdir"), "churchpresenter_slide_debug.png")
+                                    ImageIO.write(img, "PNG", debugFile)
+                                    println("[Slides] Debug slide saved: ${debugFile.absolutePath}  (${img.width}×${img.height}px)")
+                                } catch (ex: Exception) {
+                                    println("[Slides] Debug save failed: ${ex.message}")
+                                }
+                            }
+                            // Extract presenter notes for this slide
+                            val notes = extractXslfSlideNotes(s)
                             withContext(Dispatchers.Main) {
                                 _bufferedSlides.add(img)
                                 _slides.add(imageBitmap)
+                                _slideNotes.add(notes)
                             }
                         } catch (e: Exception) {
                             e.printStackTrace()
@@ -229,21 +261,31 @@ class PresentationViewModel(appSettings: AppSettings? = null) {
                     val ppt = hslfSlideShowClass.getConstructor(java.io.InputStream::class.java).newInstance(fileInputStream)
                     val slides = hslfSlideShowClass.getMethod("getSlides").invoke(ppt) as List<*>
                     val pageSize = hslfSlideShowClass.getMethod("getPageSize").invoke(ppt) as java.awt.Dimension
+                    // Scale to a fixed 3840-wide target so the bitmap is always 4K-ready.
+                    val renderScale = 3840.0 / pageSize.width
                     slides.forEach { slide ->
                         val s = slide ?: return@forEach
                         try {
-                            val img = BufferedImage(pageSize.width, pageSize.height, BufferedImage.TYPE_INT_RGB)
+                            val imgW = (pageSize.width * renderScale).toInt()
+                            val imgH = (pageSize.height * renderScale).toInt()
+                            val img = BufferedImage(imgW, imgH, BufferedImage.TYPE_INT_RGB)
                             val graphics = img.createGraphics()
                             graphics.setRenderingHint(java.awt.RenderingHints.KEY_ANTIALIASING, java.awt.RenderingHints.VALUE_ANTIALIAS_ON)
                             graphics.setRenderingHint(java.awt.RenderingHints.KEY_RENDERING, java.awt.RenderingHints.VALUE_RENDER_QUALITY)
+                            graphics.setRenderingHint(java.awt.RenderingHints.KEY_INTERPOLATION, java.awt.RenderingHints.VALUE_INTERPOLATION_BICUBIC)
+                            graphics.setRenderingHint(java.awt.RenderingHints.KEY_TEXT_ANTIALIASING, java.awt.RenderingHints.VALUE_TEXT_ANTIALIAS_ON)
+                            graphics.scale(renderScale, renderScale)
                             graphics.paint = java.awt.Color.WHITE
                             graphics.fillRect(0, 0, pageSize.width, pageSize.height)
                             s::class.java.getMethod("draw", java.awt.Graphics2D::class.java).invoke(s, graphics)
                             graphics.dispose()
                             val imageBitmap = bufferedImageToImageBitmap(img)
+                            // Extract presenter notes for this slide
+                            val notes = extractHslfSlideNotes(s)
                             withContext(Dispatchers.Main) {
                                 _bufferedSlides.add(img)
                                 _slides.add(imageBitmap)
+                                _slideNotes.add(notes)
                             }
                         } catch (e: Exception) {
                             e.printStackTrace()
@@ -262,7 +304,245 @@ class PresentationViewModel(appSettings: AppSettings? = null) {
 
 
     private suspend fun loadKeynoteSlides(file: File) {
+        // Step 1: Extract QuickLook/Preview.pdf from the .key zip — this is full-quality
+        // and is always embedded by Keynote. No external tools needed.
+        val quickLookPdf = extractKeynoteQuickLookPdf(file)
+        if (quickLookPdf != null) {
+            try {
+                // Extract notes in parallel before loading PDF slides
+                val notes = extractKeynoteNotes(file)
+                loadPdfSlides(quickLookPdf, notesPerSlide = notes)
+            } finally {
+                quickLookPdf.delete()
+            }
+            if (_slides.isNotEmpty()) return  // success
+        }
+
+        // Step 2: Try qlmanage PDF export (macOS only, may not be available)
+        val pdfFile = tryExportKeynoteToPdf(file)
+        if (pdfFile != null) {
+            try {
+                val notes = extractKeynoteNotes(file)
+                loadPdfSlides(pdfFile, notesPerSlide = notes)
+            } finally {
+                pdfFile.delete()
+            }
+            if (_slides.isNotEmpty()) return  // success
+        }
+
+        // Step 3: Fallback: extract embedded thumbnails (low quality)
+        println("[Keynote] Falling back to embedded thumbnails for ${file.name}")
         loadKeynoteViaUnzip(file)
+    }
+
+    /**
+     * Extracts the QuickLook/Preview.pdf embedded inside a .key (zip) file.
+     * Keynote always writes a full-quality PDF preview of all slides here.
+     * Returns the temporary PDF file on success, null if not found or not a zip.
+     */
+    private suspend fun extractKeynoteQuickLookPdf(file: File): File? = withContext(Dispatchers.IO) {
+        if (!file.isFile || !file.name.endsWith(".key", ignoreCase = true)) return@withContext null
+        try {
+            val dest = File(System.getProperty("java.io.tmpdir"), "keynote_ql_preview_${System.currentTimeMillis()}.pdf")
+            ZipInputStream(BufferedInputStream(FileInputStream(file))).use { zip ->
+                var entry = zip.nextEntry
+                while (entry != null) {
+                    val name = entry.name
+                    if (!entry.isDirectory && name.equals("QuickLook/Preview.pdf", ignoreCase = true)) {
+                        BufferedOutputStream(FileOutputStream(dest)).use { out -> zip.copyTo(out) }
+                        zip.closeEntry()
+                        if (dest.length() > 0) {
+                            println("[Keynote] Extracted QuickLook/Preview.pdf: ${dest.absolutePath} (${dest.length()} bytes)")
+                            return@withContext dest
+                        }
+                    }
+                    zip.closeEntry()
+                    entry = zip.nextEntry
+                }
+            }
+            dest.delete()
+            null
+        } catch (e: Exception) {
+            println("[Keynote] Failed to extract QuickLook/Preview.pdf: ${e.message}")
+            null
+        }
+    }
+
+    /**
+     * Extracts speaker notes from a Keynote .key file.
+     * Tries multiple strategies:
+     * 1. Parse index.apxl XML (older Keynote format)
+     * 2. Scan Slide-*.iwa binary files for plain-text note strings (newer format)
+     * Returns a list of note strings, one per slide (empty string if no notes).
+     */
+    private suspend fun extractKeynoteNotes(file: File): List<String> = withContext(Dispatchers.IO) {
+        if (!file.isFile || !file.name.endsWith(".key", ignoreCase = true)) return@withContext emptyList()
+        try {
+            // Map: slideIndex (0-based) -> notes text
+            val apxlNotes = mutableListOf<String>()
+            val iwaNotesMap = mutableMapOf<Long, String>() // sortKey -> notes text
+
+            ZipInputStream(BufferedInputStream(FileInputStream(file))).use { zip ->
+                var entry = zip.nextEntry
+                while (entry != null) {
+                    val name = entry.name
+                    val base = name.substringAfterLast("/")
+                    when {
+                        // Strategy 1: index.apxl (older Keynote XML format)
+                        base.equals("index.apxl", ignoreCase = true) && apxlNotes.isEmpty() -> {
+                            val bytes = zip.readBytes()
+                            val xml = String(bytes, Charsets.UTF_8)
+                            apxlNotes.addAll(parseApxlNotes(xml))
+                        }
+                        // Strategy 2: Slide-*.iwa binary protobuf — scan for note text.
+                        // Include Slide.iwa (slide 1) AND Slide-XXXX-2.iwa (slides 2+).
+                        base.startsWith("Slide") && base.endsWith(".iwa") -> {
+                            val bytes = zip.readBytes()
+                            val noteText = scanIwaForNoteText(bytes)
+                            // Use -1 as the sort key for "Slide.iwa" so it always comes first
+                            val sortKey = if (base == "Slide.iwa") -1L
+                            else base.removePrefix("Slide-").removeSuffix(".iwa").split("-")[0].toLongOrNull() ?: Long.MAX_VALUE
+                            iwaNotesMap[sortKey] = noteText
+                        }
+                    }
+                    zip.closeEntry()
+                    entry = zip.nextEntry
+                }
+            }
+
+            if (apxlNotes.isNotEmpty()) {
+                println("[Keynote] Extracted ${apxlNotes.size} notes from index.apxl")
+                return@withContext apxlNotes
+            }
+
+            if (iwaNotesMap.isNotEmpty()) {
+                // Sort by the numeric key (Slide.iwa=-1 first, then ascending slide ID)
+                val sorted = iwaNotesMap.entries
+                    .sortedBy { it.key }
+                    .map { it.value }
+                println("[Keynote] Extracted ${sorted.size} notes from .iwa files: ${sorted.map { it.take(30) }}")
+                return@withContext sorted
+            }
+        } catch (e: Exception) {
+            println("[Keynote] extractKeynoteNotes failed: ${e.message}")
+        }
+        emptyList()
+    }
+
+    /**
+     * Parses presenter notes from an index.apxl XML (older Keynote format).
+     * Notes are stored under <sl:notes> -> <sf:text-storage> -> <sf:p> elements.
+     */
+    private fun parseApxlNotes(xml: String): List<String> {
+        val result = mutableListOf<String>()
+        try {
+            val factory = javax.xml.parsers.DocumentBuilderFactory.newInstance()
+            factory.isNamespaceAware = true
+            val builder = factory.newDocumentBuilder()
+            val doc = builder.parse(org.xml.sax.InputSource(java.io.StringReader(xml)))
+            // Find all <sl:slide> elements in order
+            val slides = doc.getElementsByTagNameNS("*", "slide")
+            for (i in 0 until slides.length) {
+                val slide = slides.item(i)
+                val notesSb = StringBuilder()
+                // Find <sl:notes> within this slide
+                val children = slide.childNodes
+                for (j in 0 until children.length) {
+                    val child = children.item(j)
+                    if (child.localName == "notes") {
+                        extractTextFromNode(child, notesSb)
+                    }
+                }
+                result.add(notesSb.toString().trim())
+            }
+        } catch (e: Exception) {
+            println("[Keynote] parseApxlNotes failed: ${e.message}")
+        }
+        return result
+    }
+
+    private fun extractTextFromNode(node: org.w3c.dom.Node, sb: StringBuilder) {
+        if (node.nodeType == org.w3c.dom.Node.TEXT_NODE) {
+            val text = node.nodeValue?.trim()
+            if (!text.isNullOrBlank()) {
+                if (sb.isNotEmpty()) sb.append(" ")
+                sb.append(text)
+            }
+        }
+        val children = node.childNodes
+        for (i in 0 until children.length) {
+            extractTextFromNode(children.item(i), sb)
+        }
+    }
+
+    /**
+     * Scans a Keynote .iwa protobuf binary for speaker note text.
+     *
+     * Keynote stores the notes plain-text string at protobuf field 902 (wire type 2 = length-delimited).
+     * Field 902, wire type 2 encodes as a 2-byte varint tag: 0xB2 0x38.
+     * This is reliable across Keynote versions tested.
+     */
+    private fun scanIwaForNoteText(bytes: ByteArray): String {
+        val sb = StringBuilder()
+        var i = 0
+        while (i < bytes.size - 3) {
+            // Look for the 2-byte field tag: 0xB2 0x38 (field 902, wire type 2)
+            if ((bytes[i].toInt() and 0xFF) == 0xB2 && (bytes[i + 1].toInt() and 0xFF) == 0x38) {
+                // Read varint length starting at i+2
+                var length = 0
+                var shift = 0
+                var j = i + 2
+                while (j < bytes.size) {
+                    val b = bytes[j].toInt() and 0xFF
+                    length = length or ((b and 0x7F) shl shift)
+                    j++
+                    if (b and 0x80 == 0) break
+                    shift += 7
+                }
+                if (length in 1..4096 && j + length <= bytes.size) {
+                    try {
+                        val s = String(bytes, j, length, Charsets.UTF_8)
+                        if (sb.isNotEmpty()) sb.append("\n")
+                        sb.append(s)
+                    } catch (_: Exception) {}
+                }
+            }
+            i++
+        }
+        return sb.toString().trim()
+    }
+
+    /**
+     * Uses macOS qlmanage to export a Keynote file to a full-quality PDF.
+     * Returns the PDF file on success, null on failure.
+     */
+    private suspend fun tryExportKeynoteToPdf(file: File): File? = withContext(Dispatchers.IO) {
+        try {
+            val outDir = File(System.getProperty("java.io.tmpdir"), "keynote_ql_${System.currentTimeMillis()}")
+            outDir.mkdirs()
+            // qlmanage -p generates a Quick Look preview; for Keynote this is a multi-page PDF
+            val process = ProcessBuilder("qlmanage", "-p", file.absolutePath, "-o", outDir.absolutePath)
+                .redirectErrorStream(true)
+                .start()
+            val exited = process.waitFor(60, java.util.concurrent.TimeUnit.SECONDS)
+            if (!exited) { process.destroyForcibly(); outDir.deleteRecursively(); return@withContext null }
+            // qlmanage outputs a file named "<originalname>.pdf" inside outDir
+            val pdfOut = outDir.listFiles()?.firstOrNull { it.extension.equals("pdf", ignoreCase = true) }
+            if (pdfOut != null && pdfOut.length() > 0) {
+                // Move to a stable temp path so outDir can be cleaned up
+                val dest = File(System.getProperty("java.io.tmpdir"), "keynote_preview_${System.currentTimeMillis()}.pdf")
+                pdfOut.copyTo(dest, overwrite = true)
+                outDir.deleteRecursively()
+                println("[Keynote] qlmanage PDF: ${dest.absolutePath}  (${dest.length()} bytes)")
+                dest
+            } else {
+                outDir.deleteRecursively()
+                null
+            }
+        } catch (e: Exception) {
+            println("[Keynote] qlmanage failed: ${e.message}")
+            null
+        }
     }
 
     private suspend fun loadKeynoteViaUnzip(file: File) {
@@ -328,14 +608,19 @@ class PresentationViewModel(appSettings: AppSettings? = null) {
 
                 val orderedSlides = sortByZipOrder(stFiles, slideIwaOrder)
 
-                orderedSlides.forEach { slideFile ->
+                // Extract notes for fallback path
+                val keynoteNotes = extractKeynoteNotes(file)
+
+                orderedSlides.forEachIndexed { index, slideFile ->
                     try {
                         val bufferedImage = ImageIO.read(slideFile)
                         if (bufferedImage != null) {
                             val imageBitmap = bufferedImageToImageBitmap(bufferedImage)
+                            val notes = keynoteNotes.getOrElse(index) { "" }
                             withContext(Dispatchers.Main) {
                                 _bufferedSlides.add(bufferedImage)
                                 _slides.add(imageBitmap)
+                                _slideNotes.add(notes)
                             }
                         }
                     } catch (e: Exception) {
@@ -418,6 +703,92 @@ class PresentationViewModel(appSettings: AppSettings? = null) {
 
         // Fallback: return st- files sorted by STID (creation order ≈ presentation order)
         return stFilesSortedByStId
+    }
+
+    /**
+     * Extracts presenter notes text from an XSLFSlide (pptx) via reflection.
+     * Uses duck-typing: tries getText() on every shape, skips those that don't have it.
+     * Shape[0] in a notes slide is the slide thumbnail (no getText), shape[1+] are text bodies.
+     */
+    private fun extractXslfSlideNotes(slide: Any): String {
+        return try {
+            val notesSlide = slide::class.java.getMethod("getNotes").invoke(slide)
+            if (notesSlide == null) {
+                println("[Notes] getNotes() returned null for slide ${slide::class.java.simpleName}")
+                return ""
+            }
+            val shapes = notesSlide::class.java.getMethod("getShapes").invoke(notesSlide) as? List<*>
+            if (shapes == null) {
+                println("[Notes] getShapes() returned null")
+                return ""
+            }
+            println("[Notes] XSLF notes slide has ${shapes.size} shapes")
+            val sb = StringBuilder()
+            for ((i, shape) in shapes.withIndex()) {
+                if (shape == null) continue
+                try {
+                    // Try calling getText() via reflection (duck-typing — works for any text shape subclass)
+                    val getTextMethod = shape::class.java.getMethod("getText")
+                    val text = getTextMethod.invoke(shape) as? String
+                    println("[Notes] shape[$i] ${shape::class.java.simpleName} getText()='$text'")
+                    if (!text.isNullOrBlank()) {
+                        if (sb.isNotEmpty()) sb.append("\n")
+                        sb.append(text.trim())
+                    }
+                } catch (_: NoSuchMethodException) {
+                    println("[Notes] shape[$i] ${shape::class.java.simpleName} has no getText()")
+                } catch (e: Exception) {
+                    println("[Notes] shape[$i] getText() threw: ${e.message}")
+                }
+            }
+            println("[Notes] Extracted notes: '$sb'")
+            sb.toString()
+        } catch (e: Exception) {
+            println("[Notes] extractXslfSlideNotes failed: ${e.message}")
+            ""
+        }
+    }
+
+    /**
+     * Extracts presenter notes text from an HSLFSlide (ppt) via reflection.
+     * Uses duck-typing: tries getText() on every shape.
+     */
+    private fun extractHslfSlideNotes(slide: Any): String {
+        return try {
+            val notesSlide = slide::class.java.getMethod("getNotes").invoke(slide)
+            if (notesSlide == null) {
+                println("[Notes] HSLF getNotes() returned null")
+                return ""
+            }
+            val shapes = notesSlide::class.java.getMethod("getShapes").invoke(notesSlide) as? List<*>
+            if (shapes == null) {
+                println("[Notes] HSLF getShapes() returned null")
+                return ""
+            }
+            println("[Notes] HSLF notes slide has ${shapes.size} shapes")
+            val sb = StringBuilder()
+            for ((i, shape) in shapes.withIndex()) {
+                if (shape == null) continue
+                try {
+                    val getTextMethod = shape::class.java.getMethod("getText")
+                    val text = getTextMethod.invoke(shape) as? String
+                    println("[Notes] shape[$i] ${shape::class.java.simpleName} getText()='$text'")
+                    if (!text.isNullOrBlank()) {
+                        if (sb.isNotEmpty()) sb.append("\n")
+                        sb.append(text.trim())
+                    }
+                } catch (_: NoSuchMethodException) {
+                    println("[Notes] shape[$i] ${shape::class.java.simpleName} has no getText()")
+                } catch (e: Exception) {
+                    println("[Notes] shape[$i] getText() threw: ${e.message}")
+                }
+            }
+            println("[Notes] Extracted HSLF notes: '$sb'")
+            sb.toString()
+        } catch (e: Exception) {
+            println("[Notes] extractHslfSlideNotes failed: ${e.message}")
+            ""
+        }
     }
 
     private fun bufferedImageToImageBitmap(bufferedImage: BufferedImage): ImageBitmap {

@@ -295,6 +295,7 @@ fun MainDesktop(
                 val slide = presentationViewModel.slides.getOrNull(index)
                 presenterManager.setSelectedSlide(slide)
                 presenterManager.setNextSlide(presentationViewModel.slides.getOrNull(index + 1))
+                presenterManager.setPresenterNotes(presentationViewModel.slideNotes.getOrElse(index) { "" })
                 if (presenterManager.presentingMode.value != Presenting.PRESENTATION) {
                     presenterManager.setPresentingMode(Presenting.PRESENTATION)
                     presenterManager.setShowPresenterWindow(true)

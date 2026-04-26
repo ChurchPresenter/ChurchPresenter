@@ -1304,6 +1304,7 @@ private fun PresenterWindows(
     val activeScene by presenterManager.activeScene
     val timerRemainingSeconds by presenterManager.timerRemainingSeconds
     val timerRunning by presenterManager.timerRunning
+    val presenterNotes by presenterManager.presenterNotes
 
     val proj = appSettings.projectionSettings
 
@@ -1959,6 +1960,7 @@ private fun PresenterWindows(
                         displayedSlide = displayedSlide,
                         nextSlide = nextSlide,
                         announcementText = displayedAnnouncementText,
+                        presenterNotes = presenterNotes,
                         modifier = Modifier.fillMaxSize()
                     )
                 } else {

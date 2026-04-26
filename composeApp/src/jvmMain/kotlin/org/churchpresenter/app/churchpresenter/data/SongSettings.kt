@@ -695,8 +695,7 @@ data class StageMonitorSettings(
     val notesShadow: Boolean = false,
     val notesShadowColor: String = "#000000",
     val notesShadowSize: Int = 100,
-    val notesShadowOpacity: Int = 80,
-    val notesText: String = "" // custom presenter notes/reminder text
+    val notesShadowOpacity: Int = 80
 )
 
 @Serializable

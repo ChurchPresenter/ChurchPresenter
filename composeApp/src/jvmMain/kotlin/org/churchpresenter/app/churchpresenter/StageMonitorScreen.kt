@@ -66,6 +66,7 @@ fun StageMonitorScreen(
     displayedSlide: ImageBitmap? = null,
     nextSlide: ImageBitmap? = null,
     announcementText: String = "",
+    presenterNotes: String = "",
     modifier: Modifier = Modifier
 ) {
     // Derive current text
@@ -346,7 +347,7 @@ fun StageMonitorScreen(
                     VerticalDivider(color = Color.DarkGray, thickness = 1.dp)
                 }
 
-                // Bottom-Right: Presenter Notes
+                // Bottom-Right: Presenter Notes (from PowerPoint/Keynote)
                 Box(
                     modifier = Modifier
                         .weight(1f)
@@ -357,7 +358,7 @@ fun StageMonitorScreen(
                 ) {
                     val scrollState = rememberScrollState()
                     Text(
-                        text = sm.notesText.ifBlank { "" },
+                        text = presenterNotes,
                         style = buildTextStyle(
                             fontType = sm.notesFontType,
                             fontSize = sm.notesFontSize,

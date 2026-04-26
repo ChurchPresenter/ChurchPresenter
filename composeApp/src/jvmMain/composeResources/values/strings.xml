@@ -1109,8 +1109,7 @@
     <string name="stage_monitor_label_style_section">Label Style</string>
     <string name="stage_monitor_clock_show_seconds">Show Seconds</string>
     <string name="stage_monitor_clock_24h">24-Hour Format</string>
-    <string name="stage_monitor_notes_text">Notes Text</string>
-    <string name="stage_monitor_notes_hint">Enter presenter notes or reminders here…</string>
+    <string name="stage_monitor_notes_from_presentation">Notes are automatically shown from the active PowerPoint or Keynote slide.</string>
 
     <!-- Update checker -->
     <string name="update_dialog_title">Update Available</string>

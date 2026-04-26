@@ -20,7 +20,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -38,8 +37,7 @@ import churchpresenter.composeapp.generated.resources.vertical_alignment
 import churchpresenter.composeapp.generated.resources.stage_monitor_clock_24h
 import churchpresenter.composeapp.generated.resources.stage_monitor_clock_show_seconds
 import churchpresenter.composeapp.generated.resources.stage_monitor_label_style_section
-import churchpresenter.composeapp.generated.resources.stage_monitor_notes_hint
-import churchpresenter.composeapp.generated.resources.stage_monitor_notes_text
+import churchpresenter.composeapp.generated.resources.stage_monitor_notes_from_presentation
 import churchpresenter.composeapp.generated.resources.stage_monitor_quadrant_clock
 import churchpresenter.composeapp.generated.resources.stage_monitor_quadrant_current
 import churchpresenter.composeapp.generated.resources.stage_monitor_quadrant_next
@@ -290,6 +288,12 @@ fun StageMonitorSettingsTab(
                 // Presenter Notes card
                 Column(modifier = cardMod) {
                     SectionHeader(stringResource(Res.string.stage_monitor_quadrant_notes))
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        text = stringResource(Res.string.stage_monitor_notes_from_presentation),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                     Spacer(Modifier.height(8.dp))
                     QuadrantFontSettings(
                         fontType = sm.notesFontType, fontSize = sm.notesFontSize,
@@ -309,27 +313,6 @@ fun StageMonitorSettingsTab(
                         onShadowColorChange = { update { copy(notesShadowColor = it) } },
                         onShadowSizeChange = { update { copy(notesShadowSize = it) } },
                         onShadowOpacityChange = { update { copy(notesShadowOpacity = it) } }
-                    )
-                    Spacer(Modifier.height(8.dp))
-                    Text(
-                        text = stringResource(Res.string.stage_monitor_notes_text),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                    Spacer(Modifier.height(4.dp))
-                    OutlinedTextField(
-                        value = sm.notesText,
-                        onValueChange = { update { copy(notesText = it) } },
-                        modifier = Modifier.fillMaxWidth().height(120.dp),
-                        placeholder = {
-                            Text(
-                                text = stringResource(Res.string.stage_monitor_notes_hint),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        },
-                        textStyle = MaterialTheme.typography.bodyMedium,
-                        maxLines = 6
                     )
                 }
 

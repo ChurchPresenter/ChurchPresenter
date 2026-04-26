@@ -128,10 +128,17 @@ fun PresentationTab(
 
     // Push current slide to presenter whenever slide index changes (if presenting)
     LaunchedEffect(viewModel.selectedSlideIndex, viewModel.slides.size) {
-        if (presenterManager?.presentingMode?.value == Presenting.PRESENTATION && viewModel.slides.isNotEmpty()) {
-            val slide = viewModel.slides.getOrNull(viewModel.selectedSlideIndex)
-            presenterManager.setSelectedSlide(slide)
-            presenterManager.setNextSlide(viewModel.slides.getOrNull(viewModel.selectedSlideIndex + 1))
+        val mode = presenterManager?.presentingMode?.value
+        val notesList = viewModel.slideNotes
+        val idx = viewModel.selectedSlideIndex
+        println("[PresentationTab] LaunchedEffect: mode=$mode slides=${viewModel.slides.size} notesCount=${notesList.size} selectedIdx=$idx")
+        if (mode == Presenting.PRESENTATION && viewModel.slides.isNotEmpty()) {
+            val slide = viewModel.slides.getOrNull(idx)
+            presenterManager!!.setSelectedSlide(slide)
+            presenterManager.setNextSlide(viewModel.slides.getOrNull(idx + 1))
+            val notes = notesList.getOrElse(idx) { "" }
+            println("[PresentationTab] Setting presenterNotes='$notes'")
+            presenterManager.setPresenterNotes(notes)
         }
     }
 
@@ -263,6 +270,7 @@ fun PresentationTab(
                             val slide = viewModel.slides.getOrNull(viewModel.selectedSlideIndex)
                             presenterManager.setSelectedSlide(slide)
                             presenterManager.setNextSlide(viewModel.slides.getOrNull(viewModel.selectedSlideIndex + 1))
+                            presenterManager.setPresenterNotes(viewModel.slideNotes.getOrElse(viewModel.selectedSlideIndex) { "" })
                             presenterManager.setPresentingMode(Presenting.PRESENTATION)
                             presenterManager.setShowPresenterWindow(true)
                         },
@@ -387,6 +395,7 @@ fun PresentationTab(
                                 val selectedSlide = viewModel.slides.getOrNull(index)
                                 presenterManager.setSelectedSlide(selectedSlide)
                                 presenterManager.setNextSlide(viewModel.slides.getOrNull(index + 1))
+                                presenterManager.setPresenterNotes(viewModel.slideNotes.getOrElse(index) { "" })
                                 presenterManager.setPresentingMode(Presenting.PRESENTATION)
                                 presenterManager.setShowPresenterWindow(true)
                             }

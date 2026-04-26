@@ -14,6 +14,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.toComposeImageBitmap
+import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalWindowInfo
 import churchpresenter.composeapp.generated.resources.Res
@@ -171,11 +172,18 @@ fun SlidePresenter(
 @Composable
 private fun SlideBitmapContent(slide: ImageBitmap?) {
     if (slide != null) {
+        // Get physical pixel dimensions of the presenter window
+        val windowInfo = LocalWindowInfo.current
+        val containerSize = windowInfo.containerSize
+        val screenW = containerSize.width.takeIf { it > 0 } ?: 1920
+        val screenH = containerSize.height.takeIf { it > 0 } ?: 1080
+        println("[SlidePresenter] bitmap=${slide.width}×${slide.height}  container=${screenW}×${screenH}")
         Image(
             bitmap = slide,
             contentDescription = stringResource(Res.string.presented_slide),
             modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.Fit
+            contentScale = ContentScale.Fit,
+            filterQuality = FilterQuality.High
         )
     } else {
         Box(modifier = Modifier.fillMaxSize().background(Color.Black))

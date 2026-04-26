@@ -105,6 +105,10 @@ class PresenterManager {
     private val _nextSlide = mutableStateOf<ImageBitmap?>(null)
     val nextSlide: State<ImageBitmap?> = _nextSlide
 
+    // Presenter notes for the current slide (from PowerPoint/Keynote)
+    private val _presenterNotes = mutableStateOf("")
+    val presenterNotes: State<String> = _presenterNotes
+
     private val _slideTransitionAlpha = mutableStateOf(1f)
     val slideTransitionAlpha: State<Float> = _slideTransitionAlpha
 
@@ -249,6 +253,10 @@ class PresenterManager {
 
     fun setNextSlide(slide: ImageBitmap?) {
         _nextSlide.value = slide
+    }
+
+    fun setPresenterNotes(notes: String) {
+        _presenterNotes.value = notes
     }
 
     fun setSlideTransitionAlpha(alpha: Float) {
