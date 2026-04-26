@@ -108,8 +108,12 @@ fun SelectionListWithIndex(
                                 while (true) {
                                     val event = awaitPointerEvent(PointerEventPass.Initial)
                                     if (event.type == PointerEventType.Release &&
-                                        index >= 0 && index < list.size
+                                        index >= 0 && index < list.size &&
+                                        event.changes.any { !it.isConsumed }
                                     ) {
+                                        // Consume the event so a recomposition-triggered item
+                                        // shift doesn't fire the same Release on another item
+                                        event.changes.forEach { it.consume() }
                                         val now = System.currentTimeMillis()
                                         val isDouble = now - lastClickTime < 300L
                                         lastClickTime = now

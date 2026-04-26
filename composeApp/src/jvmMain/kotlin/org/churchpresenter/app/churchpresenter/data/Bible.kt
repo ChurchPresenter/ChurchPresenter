@@ -18,6 +18,8 @@ class Bible {
     private val operatorBible = mutableListOf<BibleVerse>()
     // Index: (bookId, chapterNum) -> ordered list of verses — built at load time for O(1) lookup
     private val chapterIndex = HashMap<Long, List<BibleVerse>>()
+    // Maps code (BXXXCXXXVXXX) book/chapter to display book/chapter for cross-referencing
+    private val codeToDisplayMap = HashMap<Long, Long>()
 
     private var conn: java.sql.Connection? = null
 
@@ -154,7 +156,7 @@ class Bible {
             }
 
             val codeRegex = Regex("^B(\\d{3})C(\\d{3})V(\\d{3})$")
-            val verseLineRegex = Regex("^(B(\\d{3})C(\\d{3})V(\\d{3}))\\s+\\d+\\s+\\d+\\s+\\d+\\s+(.*)")
+            val verseLineRegex = Regex("^(B(\\d{3})C(\\d{3})V(\\d{3}))\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)\\s+(.*)")
             val bookHeaderRegex = Regex("^(\\d+)\\s+(.+?)\\s+(\\d+)$")
             val bookChapterMap = mutableMapOf<Int, MutableSet<Int>>()
             val headerOrder = mutableListOf<Int>()
@@ -212,10 +214,14 @@ class Bible {
                     val verseMatch = verseLineRegex.matchEntire(line)
                     if (verseMatch != null) {
                         val code = verseMatch.groupValues[1]
-                        val b = verseMatch.groupValues[2].toInt()
-                        val ch = verseMatch.groupValues[3].toInt()
-                        val vnum = verseMatch.groupValues[4].toInt()
-                        val text = verseMatch.groupValues[5].trim()
+                        // Code numbers from BXXXCXXXVXXX (internal/Hebrew numbering)
+                        val codeBook = verseMatch.groupValues[2].toInt()
+                        val codeChapter = verseMatch.groupValues[3].toInt()
+                        // Display reference numbers (native numbering, e.g. LXX for Russian)
+                        val b = verseMatch.groupValues[5].toInt()
+                        val ch = verseMatch.groupValues[6].toInt()
+                        val vnum = verseMatch.groupValues[7].toInt()
+                        val text = verseMatch.groupValues[8].trim()
 
                         operatorBible.add(
                             BibleVerse(
@@ -227,6 +233,8 @@ class Bible {
                             )
                         )
                         bookChapterMap.getOrPut(b) { mutableSetOf() }.add(ch)
+                        // Map code reference to display reference for cross-Bible lookups
+                        codeToDisplayMap[chapterKey(codeBook, codeChapter)] = chapterKey(b, ch)
                         currentCode = null
                         sb.setLength(0)
                         return@forEachLine
@@ -503,6 +511,50 @@ class Bible {
      */
     fun getBookId(displayIndex: Int): Int =
         books.getOrNull(displayIndex)?.bookId?.toIntOrNull() ?: (displayIndex + 1)
+
+    /**
+     * Extracts the internal code book/chapter/verse from a verseId like "B019C023V001".
+     * Returns (book, chapter, verse) or null if the format doesn't match.
+     */
+    fun parseVerseCode(verseId: String): Triple<Int, Int, Int>? {
+        val m = Regex("B(\\d{3})C(\\d{3})V(\\d{3})").matchEntire(verseId) ?: return null
+        return Triple(m.groupValues[1].toInt(), m.groupValues[2].toInt(), m.groupValues[3].toInt())
+    }
+
+    /**
+     * Returns the internal code book/chapter/verse for a given display reference in this Bible.
+     * Used to cross-reference between Bibles with different numbering systems.
+     */
+    fun getCodeReference(book: Int, chapter: Int, verseNumber: Int): Triple<Int, Int, Int>? {
+        val verse = chapterIndex[chapterKey(book, chapter)]
+            ?.firstOrNull { it.verseNumber == verseNumber } ?: return null
+        return parseVerseCode(verse.verseId)
+    }
+
+    /**
+     * Looks up a verse by its internal code reference (BXXXCXXXVXXX numbering),
+     * translating to this Bible's display numbering first.
+     * Returns: (bookName, verseText, verseId, displayChapter, displayVerse)
+     */
+    data class CodeLookupResult(
+        val bookName: String, val verseText: String, val verseId: String,
+        val displayChapter: Int, val displayVerse: Int
+    )
+
+    fun getVerseDetailsByCode(codeBook: Int, codeChapter: Int, codeVerse: Int): CodeLookupResult? {
+        val displayKey = codeToDisplayMap[chapterKey(codeBook, codeChapter)]
+        val displayBook: Int
+        val displayChapter: Int
+        if (displayKey != null) {
+            displayBook = (displayKey shr 20).toInt()
+            displayChapter = (displayKey and 0xFFFFF).toInt()
+        } else {
+            displayBook = codeBook
+            displayChapter = codeChapter
+        }
+        val result = getVerseDetails(displayBook, displayChapter, codeVerse) ?: return null
+        return CodeLookupResult(result.first, result.second, result.third, displayChapter, codeVerse)
+    }
 
     // Diagnostic helper: number of parsed verses from SPB
     fun getVerseCount(): Int {

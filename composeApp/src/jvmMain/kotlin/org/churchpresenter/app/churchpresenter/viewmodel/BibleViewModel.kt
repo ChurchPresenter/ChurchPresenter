@@ -213,9 +213,13 @@ class BibleViewModel(
 
     companion object {
         private const val CANONICAL_BOOK_COUNT = 66
+        private const val CLICK_DEBOUNCE_MS = 300L
     }
 
     private val viewModelScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
+    private var loadChapterJob: kotlinx.coroutines.Job? = null
+    private var lastChapterSelectTime = 0L
+    private var lastBookSelectTime = 0L
 
     /** Returns at most 66 canonical books from a loaded Bible. */
     private fun Bible.getCanonicalBooks(): List<String> = getBooks().take(CANONICAL_BOOK_COUNT)
@@ -324,7 +328,8 @@ class BibleViewModel(
                 _selectedBookIndex.value = clampedIndex
                 _selectedChapter.value = chapter
                 _selectedVerseIndex.value = 0
-                viewModelScope.launch {
+                loadChapterJob?.cancel()
+                loadChapterJob = viewModelScope.launch {
                     val bookId = bible.getBookId(clampedIndex)
                     val chapterResult = withContext(Dispatchers.IO) {
                         bible.getChapter(bookId, chapter)
@@ -338,6 +343,9 @@ class BibleViewModel(
     }
 
     fun selectBook(bookIndex: Int) {
+        val now = System.currentTimeMillis()
+        if (now - lastBookSelectTime < CLICK_DEBOUNCE_MS) return
+        lastBookSelectTime = now
         _selectedBookIndex.value = bookIndex
         _selectedChapter.value = 1
         _selectedVerseIndex.value = 0
@@ -347,6 +355,9 @@ class BibleViewModel(
     }
 
     fun selectChapter(chapter: Int) {
+        val now = System.currentTimeMillis()
+        if (now - lastChapterSelectTime < CLICK_DEBOUNCE_MS) return
+        lastChapterSelectTime = now
         _selectedChapter.value = chapter
         _selectedVerseIndex.value = 0
         _selectedVerseIndices.clear()
@@ -552,13 +563,20 @@ class BibleViewModel(
                 val vNum = verse.substringBefore(". ").toIntOrNull() ?: continue
                 verseNumbers.add(vNum)
 
-                _primaryBible.value?.getVerseDetails(bookId, _selectedChapter.value, vNum)?.let { (bk, text, _) ->
-                    if (bookName.isEmpty()) bookName = bk
-                    primaryTexts.add(text)
+                // Primary: use text from _verses.value to stay in sync with Bible tab
+                val primaryText = verse.substringAfter(". ")
+                if (primaryText.isNotEmpty()) {
+                    if (bookName.isEmpty()) bookName = _primaryBible.value?.getBookName(bookId) ?: ""
+                    primaryTexts.add(primaryText)
                 }
-                _secondaryBible.value?.getVerseDetails(bookId, _selectedChapter.value, vNum)?.let { (bk, text, _) ->
-                    if (secondaryBookName.isEmpty()) secondaryBookName = bk
-                    secondaryTexts.add(text)
+                // Cross-reference via internal code for secondary Bible
+                val codeRef = _primaryBible.value?.getCodeReference(bookId, _selectedChapter.value, vNum)
+                val sB = codeRef?.first ?: bookId
+                val sCh = codeRef?.second ?: _selectedChapter.value
+                val sV = codeRef?.third ?: vNum
+                _secondaryBible.value?.getVerseDetailsByCode(sB, sCh, sV)?.let { result ->
+                    if (secondaryBookName.isEmpty()) secondaryBookName = result.bookName
+                    secondaryTexts.add(result.verseText)
                 }
             }
 
@@ -605,32 +623,43 @@ class BibleViewModel(
         val verse = _verses.value[safeIndex]
         val verseNumber = verse.substringBefore(". ").toIntOrNull() ?: 1
 
-        // Add primary Bible verse
-        _primaryBible.value?.getVerseDetails(bookId, _selectedChapter.value, verseNumber)?.let { (bookName, verseText, _) ->
-            val abbreviation = _primaryBible.value?.getBibleAbbreviation() ?: ""
+        // Add primary Bible verse — use text from _verses.value (the verse list displayed
+        // in the Bible tab) to guarantee the presenter always matches what the user sees.
+        // Re-querying via getVerseDetails could return different data if _selectedChapter
+        // updated before _verses was reloaded.
+        val primaryVerseText = verse.substringAfter(". ")
+        val primaryBookName = _primaryBible.value?.getBookName(bookId) ?: ""
+        if (primaryVerseText.isNotEmpty()) {
             verseList.add(
                 SelectedVerse(
-                    bibleAbbreviation = abbreviation,
+                    bibleAbbreviation = _primaryBible.value?.getBibleAbbreviation() ?: "",
                     bibleName = _primaryBible.value?.getBibleTitle() ?: "",
-                    bookName = bookName,
+                    bookName = primaryBookName,
                     chapter = _selectedChapter.value,
                     verseNumber = verseNumber,
-                    verseText = verseText
+                    verseText = primaryVerseText
                 )
             )
         }
 
-        // Add secondary Bible verse if available
-        _secondaryBible.value?.getVerseDetails(bookId, _selectedChapter.value, verseNumber)?.let { (bookName, verseText, _) ->
+        // Add secondary Bible verse if available.
+        // Use the internal code reference from the primary verse to cross-reference
+        // the secondary Bible, since they may use different numbering (e.g. LXX vs Hebrew Psalms).
+        // getVerseDetailsByCode translates code numbers to the secondary Bible's display numbers.
+        val codeRef = _primaryBible.value?.getCodeReference(bookId, _selectedChapter.value, verseNumber)
+        val secBook = codeRef?.first ?: bookId
+        val secChapter = codeRef?.second ?: _selectedChapter.value
+        val secVerse = codeRef?.third ?: verseNumber
+        _secondaryBible.value?.getVerseDetailsByCode(secBook, secChapter, secVerse)?.let { result ->
             val abbreviation = _secondaryBible.value?.getBibleAbbreviation() ?: ""
             verseList.add(
                 SelectedVerse(
                     bibleAbbreviation = abbreviation,
                     bibleName = _secondaryBible.value?.getBibleTitle() ?: "",
-                    bookName = bookName,
-                    chapter = _selectedChapter.value,
-                    verseNumber = verseNumber,
-                    verseText = verseText
+                    bookName = result.bookName,
+                    chapter = result.displayChapter,
+                    verseNumber = result.displayVerse,
+                    verseText = result.verseText
                 )
             )
         }
