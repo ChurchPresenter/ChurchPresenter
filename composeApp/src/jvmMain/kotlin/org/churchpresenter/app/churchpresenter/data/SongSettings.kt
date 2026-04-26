@@ -629,6 +629,8 @@ data class StageMonitorSettings(
     val currentShadowColor: String = "#000000",
     val currentShadowSize: Int = 100,
     val currentShadowOpacity: Int = 80,
+    val currentVerticalAlignment: String = Constants.TOP,
+    val currentHorizontalAlignment: String = Constants.LEFT,
 
     // Bottom-Left: Next slide
     val nextFontSize: Int = 40,
@@ -642,6 +644,8 @@ data class StageMonitorSettings(
     val nextShadowColor: String = "#000000",
     val nextShadowSize: Int = 100,
     val nextShadowOpacity: Int = 80,
+    val nextVerticalAlignment: String = Constants.TOP,
+    val nextHorizontalAlignment: String = Constants.LEFT,
 
     // Top-Right: Timer
     val showTimer: Boolean = true,

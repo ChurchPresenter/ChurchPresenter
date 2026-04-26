@@ -131,6 +131,7 @@ fun PresentationTab(
         if (presenterManager?.presentingMode?.value == Presenting.PRESENTATION && viewModel.slides.isNotEmpty()) {
             val slide = viewModel.slides.getOrNull(viewModel.selectedSlideIndex)
             presenterManager.setSelectedSlide(slide)
+            presenterManager.setNextSlide(viewModel.slides.getOrNull(viewModel.selectedSlideIndex + 1))
         }
     }
 
@@ -187,7 +188,7 @@ fun PresentationTab(
                         )
                         val files = FileChooser.platformInstance.chooseMultiple(
                             path = Path(appSettings.presentationStorageDirectory),
-                            filters = listOf(pptFilter, keynoteFilter, pdfFilter, allFilter),
+                            filters = listOf(allFilter, pptFilter, keynoteFilter, pdfFilter),
                             title = presentationFileDialogTitle,
                             selectDirectory = false
                         )
@@ -261,6 +262,7 @@ fun PresentationTab(
                         onClick = {
                             val slide = viewModel.slides.getOrNull(viewModel.selectedSlideIndex)
                             presenterManager.setSelectedSlide(slide)
+                            presenterManager.setNextSlide(viewModel.slides.getOrNull(viewModel.selectedSlideIndex + 1))
                             presenterManager.setPresentingMode(Presenting.PRESENTATION)
                             presenterManager.setShowPresenterWindow(true)
                         },
@@ -384,6 +386,7 @@ fun PresentationTab(
                             if (presenterManager != null) {
                                 val selectedSlide = viewModel.slides.getOrNull(index)
                                 presenterManager.setSelectedSlide(selectedSlide)
+                                presenterManager.setNextSlide(viewModel.slides.getOrNull(index + 1))
                                 presenterManager.setPresentingMode(Presenting.PRESENTATION)
                                 presenterManager.setShowPresenterWindow(true)
                             }

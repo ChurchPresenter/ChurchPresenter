@@ -265,6 +265,8 @@ fun MainDesktop(
                 }
                 // Now syncWithPresenter will read the correct file via getCurrentImageFile().
                 presenterManager.setSelectedImagePath(imageFile.absolutePath)
+                val nextIdx = if (index in picturesViewModel.images.indices) index + 1 else -1
+                presenterManager.setNextImagePath(picturesViewModel.images.getOrNull(nextIdx)?.absolutePath)
                 presenterManager.setPresentingMode(Presenting.PICTURES)
                 presenterManager.setShowPresenterWindow(true)
             } else {
@@ -275,6 +277,7 @@ fun MainDesktop(
                     val currentImage = picturesViewModel.getCurrentImageFile()
                     if (currentImage != null) {
                         presenterManager.setSelectedImagePath(currentImage.absolutePath)
+                        presenterManager.setNextImagePath(picturesViewModel.images.getOrNull(index + 1)?.absolutePath)
                         presenterManager.setPresentingMode(Presenting.PICTURES)
                         presenterManager.setShowPresenterWindow(true)
                     }
@@ -291,6 +294,7 @@ fun MainDesktop(
                 presentationViewModel.selectSlide(index)
                 val slide = presentationViewModel.slides.getOrNull(index)
                 presenterManager.setSelectedSlide(slide)
+                presenterManager.setNextSlide(presentationViewModel.slides.getOrNull(index + 1))
                 if (presenterManager.presentingMode.value != Presenting.PRESENTATION) {
                     presenterManager.setPresentingMode(Presenting.PRESENTATION)
                     presenterManager.setShowPresenterWindow(true)

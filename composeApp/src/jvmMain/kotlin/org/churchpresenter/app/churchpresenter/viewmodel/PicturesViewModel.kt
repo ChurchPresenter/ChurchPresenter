@@ -202,6 +202,8 @@ class PicturesViewModel(
     fun goLive(presenterManager: PresenterManager) {
         val currentImage = getCurrentImageFile() ?: return
         presenterManager.setSelectedImagePath(currentImage.absolutePath)
+        val nextIndex = _selectedImageIndex.value + 1
+        presenterManager.setNextImagePath(_images.getOrNull(nextIndex)?.absolutePath)
         presenterManager.setPresentingMode(Presenting.PICTURES)
         presenterManager.setShowPresenterWindow(true)
     }
@@ -223,6 +225,8 @@ class PicturesViewModel(
             val currentImage = getCurrentImageFile()
             if (currentImage != null) {
                 presenterManager.setSelectedImagePath(currentImage.absolutePath)
+                val nextIndex = _selectedImageIndex.value + 1
+                presenterManager.setNextImagePath(_images.getOrNull(nextIndex)?.absolutePath)
             }
         }
     }

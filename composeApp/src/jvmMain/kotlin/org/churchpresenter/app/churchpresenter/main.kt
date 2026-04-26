@@ -1277,9 +1277,11 @@ private fun PresenterWindows(
     val songDisplaySectionIndex by presenterManager.songDisplaySectionIndex
     val selectedImagePath by presenterManager.selectedImagePath
     val displayedImagePath by presenterManager.displayedImagePath
+    val nextImagePath by presenterManager.nextImagePath
     val pictureTransitionAlpha by presenterManager.pictureTransitionAlpha
     val selectedSlide by presenterManager.selectedSlide
     val displayedSlide by presenterManager.displayedSlide
+    val nextSlide by presenterManager.nextSlide
     val slideTransitionAlpha by presenterManager.slideTransitionAlpha
     val animationType by presenterManager.animationType
     val transitionDuration by presenterManager.transitionDuration
@@ -1300,6 +1302,8 @@ private fun PresenterWindows(
     val mediaTransitionAlpha by presenterManager.mediaTransitionAlpha
     val websiteUrl by presenterManager.websiteUrl
     val activeScene by presenterManager.activeScene
+    val timerRemainingSeconds by presenterManager.timerRemainingSeconds
+    val timerRunning by presenterManager.timerRunning
 
     val proj = appSettings.projectionSettings
 
@@ -1939,6 +1943,24 @@ private fun PresenterWindows(
             alwaysOnTop = true,
         ) {
             CompositionLocalProvider(LocalMediaViewModel provides mediaViewModel) {
+                if (screenAssignment.displayMode == Constants.DISPLAY_MODE_STAGE_MONITOR) {
+                    // Stage monitor: dedicated presenter-confidence layout
+                    StageMonitorScreen(
+                        sm = appSettings.stageMonitorSettings,
+                        presentingMode = presentingMode,
+                        currentLyricSection = displayedLyricSection,
+                        allLyricSections = allLyricSections,
+                        songDisplaySectionIndex = songDisplaySectionIndex,
+                        displayedVerses = displayedVerses,
+                        timerRemainingSeconds = timerRemainingSeconds,
+                        timerRunning = timerRunning,
+                        displayedImagePath = displayedImagePath,
+                        nextImagePath = nextImagePath,
+                        displayedSlide = displayedSlide,
+                        nextSlide = nextSlide,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                } else {
                 PresenterScreen(
                     modifier = Modifier.fillMaxSize(),
                     appSettings = appSettings,
@@ -2075,7 +2097,8 @@ private fun PresenterWindows(
                             }
                         }
                     }
-                }
+                    }
+                } // end else (non-stage-monitor)
             }
         }
 

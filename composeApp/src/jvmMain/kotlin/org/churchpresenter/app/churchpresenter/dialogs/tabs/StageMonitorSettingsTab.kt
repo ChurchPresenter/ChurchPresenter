@@ -33,6 +33,8 @@ import churchpresenter.composeapp.generated.resources.background_color
 import churchpresenter.composeapp.generated.resources.color
 import churchpresenter.composeapp.generated.resources.font_size
 import churchpresenter.composeapp.generated.resources.font_type
+import churchpresenter.composeapp.generated.resources.horizontal_alignment
+import churchpresenter.composeapp.generated.resources.vertical_alignment
 import churchpresenter.composeapp.generated.resources.stage_monitor_clock_24h
 import churchpresenter.composeapp.generated.resources.stage_monitor_clock_show_seconds
 import churchpresenter.composeapp.generated.resources.stage_monitor_label_style_section
@@ -48,9 +50,12 @@ import churchpresenter.composeapp.generated.resources.stage_monitor_show_label
 import churchpresenter.composeapp.generated.resources.stage_monitor_show_timer
 import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
 import org.churchpresenter.app.churchpresenter.composables.FontSettingsDropdown
+import org.churchpresenter.app.churchpresenter.composables.HorizontalAlignmentButtons
 import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
 import org.churchpresenter.app.churchpresenter.composables.ShadowDetailRow
 import org.churchpresenter.app.churchpresenter.composables.TextStyleButtons
+import org.churchpresenter.app.churchpresenter.composables.VerticalAlignmentButtons
+import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.data.StageMonitorSettings
 import org.jetbrains.compose.resources.stringResource
@@ -111,6 +116,20 @@ fun StageMonitorSettingsTab(
                     onShadowSizeChange = { update { copy(currentShadowSize = it) } },
                     onShadowOpacityChange = { update { copy(currentShadowOpacity = it) } }
                 )
+                SettingRow(stringResource(Res.string.vertical_alignment)) {
+                    VerticalAlignmentButtons(
+                        selectedAlignment = sm.currentVerticalAlignment,
+                        onAlignmentChange = { update { copy(currentVerticalAlignment = it) } },
+                        topValue = Constants.TOP, middleValue = Constants.MIDDLE, bottomValue = Constants.BOTTOM
+                    )
+                }
+                SettingRow(stringResource(Res.string.horizontal_alignment)) {
+                    HorizontalAlignmentButtons(
+                        selectedAlignment = sm.currentHorizontalAlignment,
+                        onAlignmentChange = { update { copy(currentHorizontalAlignment = it) } },
+                        leftValue = Constants.LEFT, centerValue = Constants.CENTER, rightValue = Constants.RIGHT
+                    )
+                }
 
                 Spacer(Modifier.height(16.dp))
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
@@ -137,6 +156,20 @@ fun StageMonitorSettingsTab(
                     onShadowSizeChange = { update { copy(nextShadowSize = it) } },
                     onShadowOpacityChange = { update { copy(nextShadowOpacity = it) } }
                 )
+                SettingRow(stringResource(Res.string.vertical_alignment)) {
+                    VerticalAlignmentButtons(
+                        selectedAlignment = sm.nextVerticalAlignment,
+                        onAlignmentChange = { update { copy(nextVerticalAlignment = it) } },
+                        topValue = Constants.TOP, middleValue = Constants.MIDDLE, bottomValue = Constants.BOTTOM
+                    )
+                }
+                SettingRow(stringResource(Res.string.horizontal_alignment)) {
+                    HorizontalAlignmentButtons(
+                        selectedAlignment = sm.nextHorizontalAlignment,
+                        onAlignmentChange = { update { copy(nextHorizontalAlignment = it) } },
+                        leftValue = Constants.LEFT, centerValue = Constants.CENTER, rightValue = Constants.RIGHT
+                    )
+                }
             }
 
             // ── Right column: Timer + Clock + Notes + Label ──────────────────────

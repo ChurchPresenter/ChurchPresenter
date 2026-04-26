@@ -80,6 +80,9 @@ class PresenterManager {
     private val _displayedImagePath = mutableStateOf<String?>(null)
     val displayedImagePath: State<String?> = _displayedImagePath
 
+    private val _nextImagePath = mutableStateOf<String?>(null)
+    val nextImagePath: State<String?> = _nextImagePath
+
     private val _pictureTransitionAlpha = mutableStateOf(1f)
     val pictureTransitionAlpha: State<Float> = _pictureTransitionAlpha
 
@@ -98,6 +101,9 @@ class PresenterManager {
     // Shared Slide transition state
     private val _displayedSlide = mutableStateOf<ImageBitmap?>(null)
     val displayedSlide: State<ImageBitmap?> = _displayedSlide
+
+    private val _nextSlide = mutableStateOf<ImageBitmap?>(null)
+    val nextSlide: State<ImageBitmap?> = _nextSlide
 
     private val _slideTransitionAlpha = mutableStateOf(1f)
     val slideTransitionAlpha: State<Float> = _slideTransitionAlpha
@@ -209,6 +215,10 @@ class PresenterManager {
         _displayedImagePath.value = path
     }
 
+    fun setNextImagePath(path: String?) {
+        _nextImagePath.value = path
+    }
+
     fun setPictureTransitionAlpha(alpha: Float) {
         _pictureTransitionAlpha.value = alpha
     }
@@ -235,6 +245,10 @@ class PresenterManager {
 
     fun setDisplayedSlide(slide: ImageBitmap?) {
         _displayedSlide.value = slide
+    }
+
+    fun setNextSlide(slide: ImageBitmap?) {
+        _nextSlide.value = slide
     }
 
     fun setSlideTransitionAlpha(alpha: Float) {
@@ -324,5 +338,17 @@ class PresenterManager {
 
     fun setActiveScene(scene: Scene?) {
         _activeScene.value = scene
+    }
+
+    // Announcements countdown timer — mirrored here so stage monitor can observe it
+    private val _timerRemainingSeconds = mutableStateOf(0)
+    val timerRemainingSeconds: State<Int> = _timerRemainingSeconds
+
+    private val _timerRunning = mutableStateOf(false)
+    val timerRunning: State<Boolean> = _timerRunning
+
+    fun setTimerState(remainingSeconds: Int, running: Boolean) {
+        _timerRemainingSeconds.value = remainingSeconds
+        _timerRunning.value = running
     }
 }

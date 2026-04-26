@@ -932,17 +932,21 @@ fun AnnouncementsTab(
                                                 AnnouncementsViewModel.formatTimer(viewModel.timerRemaining)
                                             )
                                         }
+                                        // Mirror initial timer state to PresenterManager for stage monitor
+                                        presenterManager?.setTimerState(viewModel.timerRemaining, !viewModel.timerRunning)
                                         viewModel.startPauseTimer(
                                             onTick = { remaining ->
                                                 if (presenterManager != null &&
                                                     presenterManager.presentingMode.value == Presenting.ANNOUNCEMENTS) {
                                                     presenterManager.setAnnouncementText(AnnouncementsViewModel.formatTimer(remaining))
                                                 }
+                                                presenterManager?.setTimerState(remaining, true)
                                             },
                                             onExpired = { expiredMsg ->
                                                 if (presenterManager != null) {
                                                     presenterManager.setAnnouncementText(expiredMsg.ifBlank { timerExpiredLabel })
                                                     presenterManager.setPresentingMode(Presenting.ANNOUNCEMENTS)
+                                                    presenterManager.setTimerState(0, false)
                                                 }
                                             }
                                         )
@@ -970,7 +974,11 @@ fun AnnouncementsTab(
                                 tooltipPlacement = TooltipPlacement.CursorPoint()
                             ) {
                                 IconButton(
-                                    onClick = { viewModel.resetTimer() },
+                                    onClick = {
+                                        viewModel.resetTimer()
+                                        val total = viewModel.timerHours * 3600 + viewModel.timerMinutes * 60 + viewModel.timerSeconds
+                                        presenterManager?.setTimerState(total, false)
+                                    },
                                     colors = IconButtonDefaults.iconButtonColors(
                                         containerColor = MaterialTheme.colorScheme.surfaceVariant,
                                         contentColor = MaterialTheme.colorScheme.onSurfaceVariant
