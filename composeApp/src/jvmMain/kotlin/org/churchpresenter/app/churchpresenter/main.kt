@@ -1958,6 +1958,7 @@ private fun PresenterWindows(
                         nextImagePath = nextImagePath,
                         displayedSlide = displayedSlide,
                         nextSlide = nextSlide,
+                        announcementText = displayedAnnouncementText,
                         modifier = Modifier.fillMaxSize()
                     )
                 } else {

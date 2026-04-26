@@ -33,6 +33,8 @@ import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
 import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDefault
 import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.app.churchpresenter.composables.SoftwareVideoPlayer
+import org.churchpresenter.app.churchpresenter.viewmodel.LocalMediaViewModel
 import org.jetbrains.skia.Image as SkiaImage
 import androidx.compose.ui.graphics.toComposeImageBitmap
 import java.io.File
@@ -63,6 +65,7 @@ fun StageMonitorScreen(
     nextImagePath: String? = null,
     displayedSlide: ImageBitmap? = null,
     nextSlide: ImageBitmap? = null,
+    announcementText: String = "",
     modifier: Modifier = Modifier
 ) {
     // Derive current text
@@ -75,6 +78,7 @@ fun StageMonitorScreen(
                 "$ref\n${v.verseText}"
             } else ""
         }
+        Presenting.ANNOUNCEMENTS -> announcementText
         else -> ""
     }
 
@@ -121,6 +125,8 @@ fun StageMonitorScreen(
 
     // Timer text
     val timerText = formatTimer(timerRemainingSeconds)
+
+    val mediaViewModel = LocalMediaViewModel.current
 
     Box(
         modifier = modifier
@@ -187,7 +193,7 @@ fun StageMonitorScreen(
                                     Spacer(Modifier.height(6.dp))
                                 }
                                 Text(
-                                    text = currentText.ifBlank { "–" },
+                                    text = currentText,
                                     style = buildTextStyle(
                                         fontType = sm.currentFontType,
                                         fontSize = sm.currentFontSize,
@@ -287,7 +293,7 @@ fun StageMonitorScreen(
                                 horizontalAlignment = resolveColumnHorizontalAlignment(sm.nextHorizontalAlignment)
                             ) {
                                 Text(
-                                    text = nextText.ifBlank { "–" },
+                                    text = nextText,
                                     style = buildTextStyle(
                                         fontType = sm.nextFontType,
                                         fontSize = sm.nextFontSize,
@@ -367,6 +373,24 @@ fun StageMonitorScreen(
                         modifier = Modifier
                             .fillMaxSize()
                             .verticalScroll(scrollState)
+                    )
+                }
+            }
+        }
+
+        // ── MEDIA overlay: when playing media, cover the full stage monitor ──
+        if (presentingMode == Presenting.MEDIA && mediaViewModel != null) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black),
+                contentAlignment = Alignment.Center
+            ) {
+                if (mediaViewModel.isLoaded && !mediaViewModel.isAudioFile) {
+                    SoftwareVideoPlayer(
+                        viewModel = mediaViewModel,
+                        modifier = Modifier.fillMaxSize(),
+                        audioEnabled = false // audio is handled by the main output
                     )
                 }
             }
