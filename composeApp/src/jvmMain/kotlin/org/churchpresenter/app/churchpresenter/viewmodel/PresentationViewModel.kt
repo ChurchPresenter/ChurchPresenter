@@ -229,18 +229,7 @@ class PresentationViewModel(appSettings: AppSettings? = null) {
                             s::class.java.getMethod("draw", java.awt.Graphics2D::class.java).invoke(s, graphics)
                             graphics.dispose()
                             val imageBitmap = bufferedImageToImageBitmap(img)
-                            // Save first PPTX slide to disk so we can verify render quality
-                            if (_slides.isEmpty()) {
-                                try {
-                                    val debugFile = File(System.getProperty("java.io.tmpdir"), "churchpresenter_slide_debug.png")
-                                    ImageIO.write(img, "PNG", debugFile)
-                                    println("[Slides] Debug slide saved: ${debugFile.absolutePath}  (${img.width}×${img.height}px)")
-                                } catch (ex: Exception) {
-                                    println("[Slides] Debug save failed: ${ex.message}")
-                                }
-                            }
-                            // Extract presenter notes for this slide
-                            val notes = extractXslfSlideNotes(s)
+                            val notes = extractPoiSlideNotes(s)
                             withContext(Dispatchers.Main) {
                                 _bufferedSlides.add(img)
                                 _slides.add(imageBitmap)
@@ -282,7 +271,7 @@ class PresentationViewModel(appSettings: AppSettings? = null) {
                             graphics.dispose()
                             val imageBitmap = bufferedImageToImageBitmap(img)
                             // Extract presenter notes for this slide
-                            val notes = extractHslfSlideNotes(s)
+                            val notes = extractPoiSlideNotes(s)
                             withContext(Dispatchers.Main) {
                                 _bufferedSlides.add(img)
                                 _slides.add(imageBitmap)
@@ -471,12 +460,8 @@ class PresentationViewModel(appSettings: AppSettings? = null) {
             }
 
             if (iwaNotesMap.isNotEmpty()) {
-                // Sort by the numeric key (Slide.iwa=-1 first, then ascending slide ID)
-                val sorted = iwaNotesMap.entries
-                    .sortedBy { it.key }
-                    .map { it.value }
-                println("[Keynote] Extracted ${sorted.size} notes from .iwa files: ${sorted.map { it.take(30) }}")
-                return@withContext sorted
+                // Sort by the numeric key (Slide.iwa = -1 comes first, then ascending slide ID)
+                return@withContext iwaNotesMap.entries.sortedBy { it.key }.map { it.value }
             }
         } catch (e: Exception) {
             println("[Keynote] extractKeynoteNotes failed: ${e.message}")
@@ -761,87 +746,31 @@ class PresentationViewModel(appSettings: AppSettings? = null) {
     }
 
     /**
-     * Extracts presenter notes text from an XSLFSlide (pptx) via reflection.
-     * Uses duck-typing: tries getText() on every shape, skips those that don't have it.
-     * Shape[0] in a notes slide is the slide thumbnail (no getText), shape[1+] are text bodies.
+     * Extracts presenter notes from an Apache POI slide object (works for both XSLF and HSLF).
+     * Calls getNotes() then iterates shapes via reflection, collecting getText() results.
      */
-    private fun extractXslfSlideNotes(slide: Any): String {
+    private fun extractPoiSlideNotes(slide: Any): String {
         return try {
-            val notesSlide = slide::class.java.getMethod("getNotes").invoke(slide)
-            if (notesSlide == null) {
-                println("[Notes] getNotes() returned null for slide ${slide::class.java.simpleName}")
-                return ""
-            }
-            val shapes = notesSlide::class.java.getMethod("getShapes").invoke(notesSlide) as? List<*>
-            if (shapes == null) {
-                println("[Notes] getShapes() returned null")
-                return ""
-            }
-            println("[Notes] XSLF notes slide has ${shapes.size} shapes")
+            val notesSlide = slide::class.java.getMethod("getNotes").invoke(slide) ?: return ""
+            val shapes = notesSlide::class.java.getMethod("getShapes").invoke(notesSlide) as? List<*> ?: return ""
             val sb = StringBuilder()
-            for ((i, shape) in shapes.withIndex()) {
+            for (shape in shapes) {
                 if (shape == null) continue
                 try {
-                    // Try calling getText() via reflection (duck-typing — works for any text shape subclass)
-                    val getTextMethod = shape::class.java.getMethod("getText")
-                    val text = getTextMethod.invoke(shape) as? String
-                    println("[Notes] shape[$i] ${shape::class.java.simpleName} getText()='$text'")
+                    val text = shape::class.java.getMethod("getText").invoke(shape) as? String
                     if (!text.isNullOrBlank()) {
                         if (sb.isNotEmpty()) sb.append("\n")
                         sb.append(text.trim())
                     }
                 } catch (_: NoSuchMethodException) {
-                    println("[Notes] shape[$i] ${shape::class.java.simpleName} has no getText()")
+                    // Shape has no getText() — not a text shape, skip
                 } catch (e: Exception) {
-                    println("[Notes] shape[$i] getText() threw: ${e.message}")
+                    e.printStackTrace()
                 }
             }
-            println("[Notes] Extracted notes: '$sb'")
             sb.toString()
         } catch (e: Exception) {
-            println("[Notes] extractXslfSlideNotes failed: ${e.message}")
-            ""
-        }
-    }
-
-    /**
-     * Extracts presenter notes text from an HSLFSlide (ppt) via reflection.
-     * Uses duck-typing: tries getText() on every shape.
-     */
-    private fun extractHslfSlideNotes(slide: Any): String {
-        return try {
-            val notesSlide = slide::class.java.getMethod("getNotes").invoke(slide)
-            if (notesSlide == null) {
-                println("[Notes] HSLF getNotes() returned null")
-                return ""
-            }
-            val shapes = notesSlide::class.java.getMethod("getShapes").invoke(notesSlide) as? List<*>
-            if (shapes == null) {
-                println("[Notes] HSLF getShapes() returned null")
-                return ""
-            }
-            println("[Notes] HSLF notes slide has ${shapes.size} shapes")
-            val sb = StringBuilder()
-            for ((i, shape) in shapes.withIndex()) {
-                if (shape == null) continue
-                try {
-                    val getTextMethod = shape::class.java.getMethod("getText")
-                    val text = getTextMethod.invoke(shape) as? String
-                    println("[Notes] shape[$i] ${shape::class.java.simpleName} getText()='$text'")
-                    if (!text.isNullOrBlank()) {
-                        if (sb.isNotEmpty()) sb.append("\n")
-                        sb.append(text.trim())
-                    }
-                } catch (_: NoSuchMethodException) {
-                    println("[Notes] shape[$i] ${shape::class.java.simpleName} has no getText()")
-                } catch (e: Exception) {
-                    println("[Notes] shape[$i] getText() threw: ${e.message}")
-                }
-            }
-            println("[Notes] Extracted HSLF notes: '$sb'")
-            sb.toString()
-        } catch (e: Exception) {
-            println("[Notes] extractHslfSlideNotes failed: ${e.message}")
+            e.printStackTrace()
             ""
         }
     }
