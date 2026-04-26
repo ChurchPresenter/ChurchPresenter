@@ -112,6 +112,7 @@ import org.jetbrains.compose.resources.stringResource
 @Composable
 fun SongsTab(
     modifier: Modifier = Modifier,
+    viewModel: SongsViewModel,
     appSettings: AppSettings,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit = {},
     onAddToSchedule: ((songNumber: Int, title: String, songbook: String, songId: String) -> Unit)? = null,
@@ -124,19 +125,16 @@ fun SongsTab(
     onPresenting: (Presenting) -> Unit = { Presenting.NONE },
     isPresenting: Boolean = false,
     theme: ThemeMode = ThemeMode.SYSTEM,
-    onSongsLoaded: ((List<SongItem>) -> Unit)? = null,
     statisticsManager: StatisticsManager? = null
 ) {
-    val onSongsLoadedState by rememberUpdatedState(onSongsLoaded)
-    val viewModel = remember { SongsViewModel(appSettings, onSongsLoaded = { songs -> onSongsLoadedState?.invoke(songs) }) }
-
     // Reload songs whenever the storage directory changes (e.g. after settings are saved)
+    val isFirstComposition = remember { mutableStateOf(true) }
     LaunchedEffect(appSettings.songSettings.storageDirectory) {
-        viewModel.updateSettings(appSettings)
-    }
-
-    DisposableEffect(Unit) {
-        onDispose { viewModel.dispose() }
+        if (isFirstComposition.value) {
+            isFirstComposition.value = false
+        } else {
+            viewModel.updateSettings(appSettings)
+        }
     }
 
     // React to schedule item selection.

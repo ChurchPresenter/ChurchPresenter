@@ -300,12 +300,16 @@ class BibleViewModel(
 
                 if (primary != null) {
                     _books.value = primary.getCanonicalBooks()
-                    val bookId = primary.getBookId(_selectedBookIndex.value)
+                    // Preserve current position, clamping to valid range
+                    val bookCount = minOf(primary.getBookCount(), CANONICAL_BOOK_COUNT)
+                    val clampedBookIndex = _selectedBookIndex.value.coerceIn(0, (bookCount - 1).coerceAtLeast(0))
+                    _selectedBookIndex.value = clampedBookIndex
+                    val bookId = primary.getBookId(clampedBookIndex)
                     val chapterResult = withContext(Dispatchers.IO) {
                         primary.getChapter(bookId, _selectedChapter.value)
                     }
                     _verses.value = chapterResult.verses
-                    _selectedVerseIndex.value = 0
+                    _selectedVerseIndex.value = _selectedVerseIndex.value.coerceIn(0, (chapterResult.verses.size - 1).coerceAtLeast(0))
                     refreshFilteredLists()
                     onBibleLoaded?.invoke(primary, appSettings.bibleSettings.primaryBible)
                 } else if (booksOnlyBible == null) {

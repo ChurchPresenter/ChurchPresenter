@@ -95,6 +95,7 @@ import org.churchpresenter.app.churchpresenter.viewmodel.PresentationViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.app.churchpresenter.viewmodel.SceneViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.ScheduleViewModel
+import org.churchpresenter.app.churchpresenter.viewmodel.SongsViewModel
 import java.awt.image.BufferedImage
 import java.io.File
 
@@ -206,6 +207,10 @@ fun MainDesktop(
     DisposableEffect(Unit) { onDispose { presentationViewModel.dispose() } }
 
     val sceneViewModel = remember { SceneViewModel() }
+
+    val currentOnSongsLoaded by rememberUpdatedState(onSongsLoaded)
+    val songsViewModel = remember { SongsViewModel(appSettings, onSongsLoaded = { songs -> currentOnSongsLoaded?.invoke(songs) }) }
+    DisposableEffect(Unit) { onDispose { songsViewModel.dispose() } }
 
     val currentOnPicturesLoaded by rememberUpdatedState(onPicturesLoaded)
     val currentOnBibleLoaded by rememberUpdatedState(onBibleLoaded)
@@ -715,6 +720,7 @@ fun MainDesktop(
 
                             Tabs.SONGS -> SongsTab(
                                 modifier = Modifier.fillMaxSize(),
+                                viewModel = songsViewModel,
                                 appSettings = appSettings,
                                 onSettingsChange = onSettingsChange,
                                 onAddToSchedule = { songNumber, title, songbook, songId ->
@@ -729,7 +735,6 @@ fun MainDesktop(
                                 onPresenting = presenting,
                                 isPresenting = presentingMode == Presenting.LYRICS,
                                 theme = theme,
-                                onSongsLoaded = onSongsLoaded,
                                 statisticsManager = statisticsManager
                             )
 
