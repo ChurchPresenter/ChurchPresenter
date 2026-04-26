@@ -79,10 +79,20 @@ class SpsConverter {
     }
 
     private fun sanitizeFileName(name: String): String {
-        return name.replace(Regex("""[/\\:*?"<>|]"""), " ").trim()
+        return name
+            .replace(Regex("""[/\\:*?"<>|]"""), " ")   // Windows-illegal chars
+            .replace(Regex("""[\x00-\x1F\x7F]"""), "")  // control characters
+            .replace(Regex("""[^\p{Print}\p{L}\p{M}\p{N}\p{P}\p{Z}]"""), " ") // non-printable
+            .replace(Regex("""\s+"""), " ")              // collapse whitespace
+            .trim()
     }
 
     private fun sanitizeFolderName(name: String): String {
-        return name.replace(Regex("""[/\\:*?"<>|]"""), " ").trim()
+        return name
+            .replace(Regex("""[/\\:*?"<>|]"""), " ")
+            .replace(Regex("""[\x00-\x1F\x7F]"""), "")
+            .replace(Regex("""[^\p{Print}\p{L}\p{M}\p{N}\p{P}\p{Z}]"""), " ")
+            .replace(Regex("""\s+"""), " ")
+            .trim()
     }
 }

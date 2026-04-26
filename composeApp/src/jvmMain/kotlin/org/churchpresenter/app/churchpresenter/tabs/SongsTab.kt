@@ -26,9 +26,11 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -65,6 +67,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.style.TextAlign
+import churchpresenter.composeapp.generated.resources.songs_indexing
 import churchpresenter.composeapp.generated.resources.songs_no_db_title
 import churchpresenter.composeapp.generated.resources.songs_no_db_hint
 import churchpresenter.composeapp.generated.resources.songs_no_db_step
@@ -148,6 +151,7 @@ fun SongsTab(
     val selectedSongIndex by viewModel.selectedSongIndex
     val selectedSectionIndex by viewModel.selectedSectionIndex
     val filteredSongs by viewModel.filteredSongItems
+    val isLoading by viewModel.isLoading
 
     // Edit Song Dialog state (pure UI state — fine to keep here)
     var showEditDialog by remember { mutableStateOf(false) }
@@ -452,6 +456,20 @@ fun SongsTab(
             }
 
             Box(modifier = Modifier.weight(1f)) {
+                if (isLoading && filteredSongs.isEmpty()) {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            CircularProgressIndicator(modifier = Modifier.size(32.dp))
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                stringResource(Res.string.songs_indexing),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                } else {
+
                 val lazyListState = rememberLazyListState()
 
                 LaunchedEffect(selectedSongIndex, filteredSongs.size) {
@@ -530,6 +548,7 @@ fun SongsTab(
                     modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
                     adapter = rememberScrollbarAdapter(scrollState = lazyListState)
                 )
+                } // else
             }
         }
 

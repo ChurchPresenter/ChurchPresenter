@@ -656,6 +656,7 @@
     <string name="bible_no_primary_hint">Open ⚙ Settings and go to the Bible tab, then:</string>
     <string name="bible_no_primary_step1">1. Set the Bible storage directory</string>
     <string name="bible_no_primary_step2">2. Select a Primary Bible file</string>
+    <string name="songs_indexing">Indexing songs…</string>
     <string name="songs_no_db_title">No Song Database Configured</string>
     <string name="songs_no_db_hint">Open ⚙ Settings and go to the Songs tab, then:</string>
     <string name="songs_no_db_step">Set a directory containing a song database file</string>

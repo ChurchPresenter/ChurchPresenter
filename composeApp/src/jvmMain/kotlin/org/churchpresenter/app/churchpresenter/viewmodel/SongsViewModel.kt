@@ -428,10 +428,12 @@ class SongsViewModel(
                     "${it.number}. ${it.title}".contains(_searchQuery.value, ignoreCase = true)
                 }
                 Constants.STARTS_WITH -> filtered.filter {
-                    it.title.startsWith(_searchQuery.value, ignoreCase = true)
+                    it.title.startsWith(_searchQuery.value, ignoreCase = true) ||
+                    it.number.startsWith(_searchQuery.value, ignoreCase = true)
                 }
                 Constants.EXACT_MATCH -> filtered.filter {
-                    it.title.equals(_searchQuery.value, ignoreCase = true)
+                    it.title.equals(_searchQuery.value, ignoreCase = true) ||
+                    it.number.equals(_searchQuery.value, ignoreCase = true)
                 }
                 else -> filtered
             }

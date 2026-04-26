@@ -817,108 +817,109 @@ fun SongPresenter(
                     Column(modifier = Modifier.fillMaxSize()) {
                         // Top section: items positioned "above verse"
                         TitleAndNumberRow(Constants.ABOVE_VERSE)
-                        // Balance: if bottom has content but top doesn't, add invisible mirror
-                        if (!hasTopContent && hasBottomContent) {
-                            TitleAndNumberRow(Constants.BELOW_VERSE, invisible = true)
-                        }
 
-                        // Middle section: lyrics centered in remaining space
-                        Box(
-                            modifier = Modifier.fillMaxWidth().weight(1f),
-                            contentAlignment = if (isLowerThird) Alignment.BottomCenter else contentAlignment
-                        ) {
-                            if (hasBilingual) {
-                                if (useSideBySide) {
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth().wrapContentHeight(),
-                                        horizontalArrangement = Arrangement.SpaceEvenly
-                                    ) {
-                                        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.Bottom) {
-                                            combinedPrimaryLines.forEachIndexed { idx, line ->
-                                                LookAheadSpacer(idx, primaryLaStart)
-                                                LyricLine(idx, line, primaryLaStart)
+                        // Lyrics area + bottom title/number overlaid (z-stacked).
+                        // The bottom title/number floats over the lyrics so it doesn't
+                        // steal vertical space and cut off lyrics text.
+                        Box(modifier = Modifier.fillMaxWidth().weight(1f)) {
+                            // Lyrics fill the entire remaining space
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = if (isLowerThird) Alignment.BottomCenter else contentAlignment
+                            ) {
+                                if (hasBilingual) {
+                                    if (useSideBySide) {
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth().wrapContentHeight(),
+                                            horizontalArrangement = Arrangement.SpaceEvenly
+                                        ) {
+                                            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.Bottom) {
+                                                combinedPrimaryLines.forEachIndexed { idx, line ->
+                                                    LookAheadSpacer(idx, primaryLaStart)
+                                                    LyricLine(idx, line, primaryLaStart)
+                                                }
+                                                EndOfSongIndicator()
+                                                LookAheadPlaceholder()
                                             }
-                                            EndOfSongIndicator()
-                                            LookAheadPlaceholder()
+                                            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.Bottom) {
+                                                combinedSecondaryLines.forEachIndexed { idx, line ->
+                                                    LookAheadSpacer(idx, secondaryLaStart)
+                                                    LyricLine(idx, line, secondaryLaStart)
+                                                }
+                                                EndOfSongIndicator()
+                                                LookAheadPlaceholder()
+                                            }
                                         }
-                                        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.Bottom) {
-                                            combinedSecondaryLines.forEachIndexed { idx, line ->
-                                                LookAheadSpacer(idx, secondaryLaStart)
-                                                LyricLine(idx, line, secondaryLaStart)
+                                    } else {
+                                        // Top/bottom bilingual layout
+                                        if (isLowerThird) {
+                                            // Lower third: compact layout, no height splitting
+                                            Column(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
+                                                combinedPrimaryLines.forEachIndexed { idx, line ->
+                                                    LookAheadSpacer(idx, primaryLaStart)
+                                                    LyricLine(idx, line, primaryLaStart)
+                                                }
+                                                EndOfSongIndicator()
+                                                LookAheadPlaceholder()
+                                                Spacer(modifier = Modifier.padding(top = (12 * scaleFactor).dp))
+                                                combinedSecondaryLines.forEachIndexed { idx, line ->
+                                                    LookAheadSpacer(idx, secondaryLaStart)
+                                                    LyricLine(idx, line, secondaryLaStart)
+                                                }
+                                                EndOfSongIndicator()
+                                                LookAheadPlaceholder()
                                             }
-                                            EndOfSongIndicator()
-                                            LookAheadPlaceholder()
+                                        } else {
+                                            // Full screen: each language gets its own half
+                                            val halfAlignment = contentAlignment
+                                            Column(modifier = Modifier.fillMaxWidth().fillMaxHeight()) {
+                                                Box(modifier = Modifier.fillMaxWidth().weight(1f), contentAlignment = halfAlignment) {
+                                                    Column(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
+                                                        combinedPrimaryLines.forEachIndexed { idx, line ->
+                                                            LookAheadSpacer(idx, primaryLaStart)
+                                                            LyricLine(idx, line, primaryLaStart)
+                                                        }
+                                                        EndOfSongIndicator()
+                                                        LookAheadPlaceholder()
+                                                    }
+                                                }
+                                                Spacer(modifier = Modifier.padding(top = (12 * scaleFactor).dp))
+                                                Box(modifier = Modifier.fillMaxWidth().weight(1f), contentAlignment = halfAlignment) {
+                                                    Column(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
+                                                        combinedSecondaryLines.forEachIndexed { idx, line ->
+                                                            LookAheadSpacer(idx, secondaryLaStart)
+                                                            LyricLine(idx, line, secondaryLaStart)
+                                                        }
+                                                        EndOfSongIndicator()
+                                                        LookAheadPlaceholder()
+                                                    }
+                                                }
+                                            }
                                         }
                                     }
                                 } else {
-                                    // Top/bottom bilingual layout
-                                    if (isLowerThird) {
-                                        // Lower third: compact layout, no height splitting
-                                        Column(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
-                                            combinedPrimaryLines.forEachIndexed { idx, line ->
-                                                LookAheadSpacer(idx, primaryLaStart)
-                                                LyricLine(idx, line, primaryLaStart)
-                                            }
-                                            EndOfSongIndicator()
-                                            LookAheadPlaceholder()
-                                            Spacer(modifier = Modifier.padding(top = (12 * scaleFactor).dp))
-                                            combinedSecondaryLines.forEachIndexed { idx, line ->
-                                                LookAheadSpacer(idx, secondaryLaStart)
-                                                LyricLine(idx, line, secondaryLaStart)
-                                            }
-                                            EndOfSongIndicator()
-                                            LookAheadPlaceholder()
+                                    // Single language layout
+                                    Column(
+                                        modifier = Modifier.fillMaxWidth().wrapContentHeight(),
+                                        verticalArrangement = if (isLowerThird) Arrangement.Bottom else Arrangement.Top
+                                    ) {
+                                        combinedPrimaryLines.forEachIndexed { idx, line ->
+                                            LookAheadSpacer(idx, primaryLaStart)
+                                            LyricLine(idx, line, primaryLaStart)
                                         }
-                                    } else {
-                                        // Full screen: each language gets its own half
-                                        val halfAlignment = contentAlignment
-                                        Column(modifier = Modifier.fillMaxWidth().fillMaxHeight()) {
-                                            Box(modifier = Modifier.fillMaxWidth().weight(1f), contentAlignment = halfAlignment) {
-                                                Column(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
-                                                    combinedPrimaryLines.forEachIndexed { idx, line ->
-                                                        LookAheadSpacer(idx, primaryLaStart)
-                                                        LyricLine(idx, line, primaryLaStart)
-                                                    }
-                                                    EndOfSongIndicator()
-                                                    LookAheadPlaceholder()
-                                                }
-                                            }
-                                            Spacer(modifier = Modifier.padding(top = (12 * scaleFactor).dp))
-                                            Box(modifier = Modifier.fillMaxWidth().weight(1f), contentAlignment = halfAlignment) {
-                                                Column(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
-                                                    combinedSecondaryLines.forEachIndexed { idx, line ->
-                                                        LookAheadSpacer(idx, secondaryLaStart)
-                                                        LyricLine(idx, line, secondaryLaStart)
-                                                    }
-                                                    EndOfSongIndicator()
-                                                    LookAheadPlaceholder()
-                                                }
-                                            }
-                                        }
+                                        EndOfSongIndicator()
+                                        LookAheadPlaceholder()
                                     }
                                 }
-                            } else {
-                                // Single language layout
-                                Column(
-                                    modifier = Modifier.fillMaxWidth().wrapContentHeight(),
-                                    verticalArrangement = if (isLowerThird) Arrangement.Bottom else Arrangement.Top
-                                ) {
-                                    combinedPrimaryLines.forEachIndexed { idx, line ->
-                                        LookAheadSpacer(idx, primaryLaStart)
-                                        LyricLine(idx, line, primaryLaStart)
-                                    }
-                                    EndOfSongIndicator()
-                                    LookAheadPlaceholder()
+                            }
+
+                            // Bottom title/number overlaid at the bottom of the lyrics area
+                            if (hasBottomContent) {
+                                Box(modifier = Modifier.fillMaxWidth().align(Alignment.BottomCenter)) {
+                                    TitleAndNumberRow(Constants.BELOW_VERSE)
                                 }
                             }
                         }
-
-                        // Balance: if top has content but bottom doesn't, add invisible mirror
-                        if (hasTopContent && !hasBottomContent) {
-                            TitleAndNumberRow(Constants.ABOVE_VERSE, invisible = true)
-                        }
-                        // Bottom section: items positioned "below verse"
-                        TitleAndNumberRow(Constants.BELOW_VERSE)
                     }
                 }
             }
