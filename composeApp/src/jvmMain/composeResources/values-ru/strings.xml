@@ -964,6 +964,7 @@
     <string name="canvas_scale_stretch">Растянуть</string>
     <string name="canvas_scale_none">Исходный</string>
     <string name="canvas_text_content">Текст</string>
+    <string name="canvas_expand_text_field">Редактировать в большом окне</string>
     <string name="canvas_line_spacing">Межстрочный интервал</string>
     <string name="canvas_font">Шрифт</string>
     <string name="canvas_align_horizontal">По горизонтали</string>

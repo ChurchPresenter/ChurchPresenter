@@ -1,6 +1,7 @@
 package org.churchpresenter.app.churchpresenter.composables
 
 import androidx.compose.foundation.LocalScrollbarStyle
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.focus.onFocusChanged
@@ -14,7 +15,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -122,7 +126,9 @@ import churchpresenter.composeapp.generated.resources.canvas_scale_fit
 import churchpresenter.composeapp.generated.resources.canvas_scale_fill
 import churchpresenter.composeapp.generated.resources.canvas_scale_stretch
 import churchpresenter.composeapp.generated.resources.canvas_scale_none
+import churchpresenter.composeapp.generated.resources.canvas_expand_text_field
 import churchpresenter.composeapp.generated.resources.canvas_text_content
+import churchpresenter.composeapp.generated.resources.close
 import churchpresenter.composeapp.generated.resources.canvas_line_spacing
 import churchpresenter.composeapp.generated.resources.canvas_font
 import churchpresenter.composeapp.generated.resources.canvas_align_horizontal
@@ -321,6 +327,7 @@ private fun TextProperties(source: SceneSource.TextSource, onUpdate: (SceneSourc
     Text(stringResource(Res.string.canvas_source_text), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
     // Multiline text input — supports Enter for line breaks
     var textValue by remember(source.text) { mutableStateOf(source.text) }
+    var showTextDialog by remember { mutableStateOf(false) }
     OutlinedTextField(
         value = textValue,
         onValueChange = {
@@ -334,6 +341,47 @@ private fun TextProperties(source: SceneSource.TextSource, onUpdate: (SceneSourc
         modifier = Modifier.fillMaxWidth(),
         textStyle = MaterialTheme.typography.bodySmall
     )
+    Text(
+        text = stringResource(Res.string.canvas_expand_text_field),
+        style = MaterialTheme.typography.labelSmall,
+        color = MaterialTheme.colorScheme.primary,
+        modifier = Modifier.clickable { showTextDialog = true }.padding(vertical = 2.dp)
+    )
+    if (showTextDialog) {
+        androidx.compose.ui.window.DialogWindow(
+            onCloseRequest = { showTextDialog = false },
+            state = androidx.compose.ui.window.rememberDialogState(
+                width = 600.dp, height = 450.dp
+            ),
+            title = stringResource(Res.string.canvas_text_content),
+            resizable = true
+        ) {
+            androidx.compose.material3.Surface(
+                modifier = Modifier.fillMaxSize(),
+                color = MaterialTheme.colorScheme.background
+            ) {
+                Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+                    OutlinedTextField(
+                        value = textValue,
+                        onValueChange = {
+                            textValue = it
+                            onUpdate(source.copy(text = it))
+                        },
+                        label = { Text(stringResource(Res.string.canvas_text_content)) },
+                        singleLine = false,
+                        modifier = Modifier.fillMaxWidth().weight(1f),
+                        textStyle = MaterialTheme.typography.bodyMedium
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                        androidx.compose.material3.Button(onClick = { showTextDialog = false }) {
+                            Text(stringResource(Res.string.close))
+                        }
+                    }
+                }
+            }
+        }
+    }
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(stringResource(Res.string.canvas_line_spacing), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         Slider(

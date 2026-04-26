@@ -759,6 +759,7 @@
     <string name="canvas_scale_stretch">Stretch</string>
     <string name="canvas_scale_none">None</string>
     <string name="canvas_text_content">Text</string>
+    <string name="canvas_expand_text_field">Edit in larger window</string>
     <string name="canvas_line_spacing">Line Spacing</string>
     <string name="canvas_font">Font</string>
     <string name="canvas_align_horizontal">Horizontal</string>
