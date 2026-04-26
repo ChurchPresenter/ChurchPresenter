@@ -175,8 +175,9 @@ class PresentationViewModel(appSettings: AppSettings? = null) {
             val numberOfPages = pdDocumentClass.getMethod("getNumberOfPages").invoke(document) as Int
             val renderer = pdfRendererClass.getConstructor(pdDocumentClass).newInstance(document)
             val renderMethod = pdfRendererClass.getMethod("renderImageWithDPI", Int::class.java, Float::class.java)
-            // 288 DPI → ~4× the standard 72 DPI PDF unit → 3840px wide for a typical 13.3" wide slide
-            val targetDpi = 288f
+            // 288 DPI → ~4× the standard 72 DPI PDF unit → 3840px wide for a typical 13.3" wide slide.
+            // Use 300 DPI for a round number that is also standard print quality.
+            val targetDpi = 300f
             for (page in 0 until numberOfPages) {
                 val image = renderMethod.invoke(renderer, page, targetDpi) as BufferedImage
                 println("[PDF] page $page rendered at ${image.width}×${image.height}px")
@@ -304,37 +305,91 @@ class PresentationViewModel(appSettings: AppSettings? = null) {
 
 
     private suspend fun loadKeynoteSlides(file: File) {
-        // Step 1: Extract QuickLook/Preview.pdf from the .key zip — this is full-quality
-        // and is always embedded by Keynote. No external tools needed.
+
+        // Step 1: Use the Keynote app via osascript to export a full-quality PDF.
+        // This is the highest-quality path on macOS and preserves all slide fidelity.
+        val nativePdf = tryExportKeynoteViaApp(file)
+        if (nativePdf != null) {
+            try {
+                val n = extractKeynoteNotes(file)
+                loadPdfSlides(nativePdf, notesPerSlide = n)
+            } finally {
+                nativePdf.delete()
+            }
+            if (_slides.isNotEmpty()) return
+        }
+
+        // Step 2: Extract QuickLook/Preview.pdf from the .key zip (medium quality, no external tools).
         val quickLookPdf = extractKeynoteQuickLookPdf(file)
         if (quickLookPdf != null) {
             try {
-                // Extract notes in parallel before loading PDF slides
-                val notes = extractKeynoteNotes(file)
-                loadPdfSlides(quickLookPdf, notesPerSlide = notes)
+                val n = extractKeynoteNotes(file)
+                loadPdfSlides(quickLookPdf, notesPerSlide = n)
             } finally {
                 quickLookPdf.delete()
             }
-            if (_slides.isNotEmpty()) return  // success
+            if (_slides.isNotEmpty()) return
         }
 
-        // Step 2: Try qlmanage PDF export (macOS only, may not be available)
+        // Step 3: Try qlmanage PDF export (macOS only, may not be available)
         val pdfFile = tryExportKeynoteToPdf(file)
         if (pdfFile != null) {
             try {
-                val notes = extractKeynoteNotes(file)
-                loadPdfSlides(pdfFile, notesPerSlide = notes)
+                val n = extractKeynoteNotes(file)
+                loadPdfSlides(pdfFile, notesPerSlide = n)
             } finally {
                 pdfFile.delete()
             }
-            if (_slides.isNotEmpty()) return  // success
+            if (_slides.isNotEmpty()) return
         }
 
-        // Step 3: Fallback: extract embedded thumbnails (low quality)
+        // Step 4: Fallback: extract embedded thumbnails (low quality)
         println("[Keynote] Falling back to embedded thumbnails for ${file.name}")
         loadKeynoteViaUnzip(file)
     }
 
+    /**
+     * Exports a Keynote file to a high-quality PDF using the macOS Keynote app via osascript.
+     * This produces the best possible slide quality — pixel-perfect, full resolution.
+     * Returns the PDF file on success, null if Keynote is not installed or export fails.
+     */
+    private suspend fun tryExportKeynoteViaApp(file: File): File? = withContext(Dispatchers.IO) {
+        // Only available on macOS
+        if (!System.getProperty("os.name", "").lowercase().contains("mac")) return@withContext null
+        try {
+            val dest = File(System.getProperty("java.io.tmpdir"), "keynote_export_${System.currentTimeMillis()}.pdf")
+            val script = """
+                tell application "Keynote"
+                    set wasRunning to running
+                    set theDoc to open POSIX file "${file.absolutePath}"
+                    export theDoc to POSIX file "${dest.absolutePath}" as PDF with properties {PDF image quality:Best}
+                    close theDoc saving no
+                    if not wasRunning then quit
+                end tell
+            """.trimIndent()
+            val process = ProcessBuilder("osascript", "-e", script)
+                .redirectErrorStream(true)
+                .start()
+            val output = process.inputStream.bufferedReader().readText()
+            val exited = process.waitFor(120, java.util.concurrent.TimeUnit.SECONDS)
+            if (!exited) {
+                process.destroyForcibly()
+                println("[Keynote] osascript timed out")
+                dest.delete()
+                return@withContext null
+            }
+            if (dest.exists() && dest.length() > 0) {
+                println("[Keynote] Keynote app exported PDF: ${dest.absolutePath} (${dest.length()} bytes)")
+                return@withContext dest
+            }
+            println("[Keynote] osascript finished but no PDF produced. Output: $output")
+            dest.delete()
+            null
+        } catch (e: Exception) {
+            println("[Keynote] tryExportKeynoteViaApp failed: ${e.message}")
+            null
+        }
+    }
     /**
      * Extracts the QuickLook/Preview.pdf embedded inside a .key (zip) file.
      * Keynote always writes a full-quality PDF preview of all slides here.
