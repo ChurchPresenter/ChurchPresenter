@@ -692,6 +692,7 @@
     <string name="symbol_ok">✓</string>
     <string name="tab_web">Веб</string>
     <string name="tab_canvas">Полотно</string>
+    <string name="tab_visibility">Видимість вкладок</string>
     <string name="text_margins">Відступи тексту</string>
     <string name="theme">Тема</string>
     <string name="timer_expired">Час вийшов!</string>

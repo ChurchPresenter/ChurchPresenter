@@ -688,6 +688,7 @@
     <string name="symbol_ok">✓</string>
     <string name="tab_web">Веб</string>
     <string name="tab_canvas">Холст</string>
+    <string name="tab_visibility">Видимость вкладок</string>
     <string name="text_margins">Отступы текста</string>
     <string name="theme">Тема</string>
     <string name="timer_expired">Время вышло!</string>

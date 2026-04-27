@@ -723,5 +723,6 @@ data class AppSettings(
     val windowWidth: Int = 1280,
     val windowHeight: Int = 800,
     val windowX: Int = -1,
-    val windowY: Int = -1
+    val windowY: Int = -1,
+    val hiddenTabs: Set<String> = emptySet()
 )

@@ -35,7 +35,8 @@ import org.jetbrains.compose.resources.stringResource
 @Composable
 fun TabSection(
     modifier: Modifier = Modifier,
-    selectedTabIndex: Int = Tabs.BIBLE.ordinal,
+    visibleTabs: List<Tabs> = Tabs.entries,
+    selectedTabIndex: Int = 0,
     onTabSelected: (Int) -> Unit,
 ) {
     val scrollState = remember { ScrollState(0) }
@@ -74,7 +75,7 @@ fun TabSection(
             edgePadding = 0.dp,
             divider = {},
         ) {
-            Tabs.entries.forEachIndexed { index, tab ->
+            visibleTabs.forEachIndexed { index, tab ->
                 Tab(
                     selected = selectedTabIndex == index,
                     onClick = { onTabSelected.invoke(index) },
@@ -116,7 +117,7 @@ fun TabSection(
 }
 
 @Composable
-private fun getStringName(tabs: Tabs): String {
+internal fun getStringName(tabs: Tabs): String {
     return when (tabs) {
         Tabs.BIBLE -> stringResource(Res.string.bible)
         Tabs.SONGS -> stringResource(Res.string.songs)

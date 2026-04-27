@@ -332,7 +332,7 @@ class Bible {
             // Build chapter index for O(1) lookup in getChapter()
             buildChapterIndex()
 
-        }
+        } catch (_: Exception) {}
     }
 
     /** Encodes (bookId, chapterNum) as a single Long key for the HashMap. */

@@ -686,6 +686,7 @@
     <string name="symbol_ok">✓</string>
     <string name="tab_web">Web</string>
     <string name="tab_canvas">Płótno</string>
+    <string name="tab_visibility">Widoczność kart</string>
     <string name="text_margins">Marginesy tekstu</string>
     <string name="theme">Motyw</string>
     <string name="timer_expired">Czas minął!</string>

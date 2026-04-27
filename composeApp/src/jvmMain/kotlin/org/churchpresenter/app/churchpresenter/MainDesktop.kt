@@ -183,6 +183,18 @@ fun MainDesktop(
     var selectedWebsiteItem by remember { mutableStateOf<ScheduleItem.WebsiteItem?>(null) }
 
     var selectedTabIndex by rememberSaveable { mutableStateOf(0) }
+    val visibleTabs = remember(appSettings.hiddenTabs) {
+        Tabs.entries.filter { it.name !in appSettings.hiddenTabs }.ifEmpty { listOf(Tabs.BIBLE) }
+    }
+    fun selectTab(tab: Tabs) {
+        val idx = visibleTabs.indexOf(tab)
+        if (idx >= 0) selectedTabIndex = idx
+    }
+    LaunchedEffect(visibleTabs) {
+        if (selectedTabIndex !in visibleTabs.indices) {
+            selectedTabIndex = selectedTabIndex.coerceIn(visibleTabs.indices)
+        }
+    }
     var showAddLabelDialog by remember { mutableStateOf(false) }
     var editingLabelItem by remember { mutableStateOf<ScheduleItem.LabelItem?>(null) }
     var showAddWebsiteDialog by remember { mutableStateOf(false) }
@@ -191,8 +203,9 @@ fun MainDesktop(
 
     // Hidden VLCJ player for audio: keeps audio playing when user switches away from Media tab.
     // Only composed when NOT on the Media tab (the tab has its own VideoPlayer).
+    val currentTab = visibleTabs.getOrElse(selectedTabIndex) { Tabs.BIBLE }
     if (mediaViewModel != null && mediaViewModel.isAudioFile && mediaViewModel.isPlaying
-        && selectedTabIndex != Tabs.MEDIA.ordinal
+        && currentTab != Tabs.MEDIA
     ) {
         VideoPlayer(
             viewModel = mediaViewModel,
@@ -334,7 +347,7 @@ fun MainDesktop(
         remoteSelectSongFlow?.collect { songItem ->
             selectedSongItem = songItem
             selectedSongItemVersion++
-            selectedTabIndex = Tabs.SONGS.ordinal
+            selectTab(Tabs.SONGS)
         }
     }
 
@@ -345,7 +358,7 @@ fun MainDesktop(
         uploadPresentationFlow?.collect { file ->
             presentationViewModel.addPresentation(file)
             // Switch to the Presentations tab so the user can see the newly loaded file
-            selectedTabIndex = Tabs.PRESENTATION.ordinal
+            selectTab(Tabs.PRESENTATION)
         }
     }
 
@@ -371,31 +384,31 @@ fun MainDesktop(
                         }
 
                         Key.F6 -> {
-                            selectedTabIndex = Tabs.BIBLE.ordinal; true
+                            selectTab(Tabs.BIBLE); true
                         }
 
                         Key.F7 -> {
-                            selectedTabIndex = Tabs.SONGS.ordinal; true
+                            selectTab(Tabs.SONGS); true
                         }
 
                         Key.F8 -> {
-                            selectedTabIndex = Tabs.PICTURES.ordinal; true
+                            selectTab(Tabs.PICTURES); true
                         }
 
                         Key.F9 -> {
-                            selectedTabIndex = Tabs.PRESENTATION.ordinal; true
+                            selectTab(Tabs.PRESENTATION); true
                         }
 
                         Key.F10 -> {
-                            selectedTabIndex = Tabs.MEDIA.ordinal; true
+                            selectTab(Tabs.MEDIA); true
                         }
 
                         Key.F11 -> {
-                            selectedTabIndex = Tabs.LOWER_THIRD.ordinal; true
+                            selectTab(Tabs.LOWER_THIRD); true
                         }
 
                         Key.F12 -> {
-                            selectedTabIndex = Tabs.ANNOUNCEMENTS.ordinal; true
+                            selectTab(Tabs.ANNOUNCEMENTS); true
                         }
 
                         else -> false
@@ -472,7 +485,7 @@ fun MainDesktop(
                         },
                         onPresentPictures = { item ->
                             selectedPictureItem = item
-                            selectedTabIndex = Tabs.PICTURES.ordinal
+                            selectTab(Tabs.PICTURES)
                             presenting(Presenting.PICTURES)
                         },
                         onPresentMedia = { item ->
@@ -521,20 +534,20 @@ fun MainDesktop(
                         },
                         onPresentWebsite = { item ->
                             selectedWebsiteItem = item
-                            selectedTabIndex = Tabs.WEB.ordinal
+                            selectTab(Tabs.WEB)
                             presenterManager.setWebsiteUrl(item.url)
                             presenting(Presenting.WEBSITE)
                         },
                         onItemClick = { item ->
                             when (item) {
                                 is ScheduleItem.SongItem -> {
-                                    selectedTabIndex = Tabs.SONGS.ordinal
+                                    selectTab(Tabs.SONGS)
                                     selectedSongItem = item
                                     selectedSongItemVersion++
                                 }
 
                                 is ScheduleItem.BibleVerseItem -> {
-                                    selectedTabIndex = Tabs.BIBLE.ordinal
+                                    selectTab(Tabs.BIBLE)
                                     selectedBibleVerseItem = item
                                 }
 
@@ -544,27 +557,27 @@ fun MainDesktop(
                                 }
 
                                 is ScheduleItem.PictureItem -> {
-                                    selectedTabIndex = Tabs.PICTURES.ordinal
+                                    selectTab(Tabs.PICTURES)
                                     selectedPictureItem = item
                                 }
 
                                 is ScheduleItem.PresentationItem -> {
-                                    selectedTabIndex = Tabs.PRESENTATION.ordinal
+                                    selectTab(Tabs.PRESENTATION)
                                     selectedPresentationItem = item
                                 }
 
                                 is ScheduleItem.MediaItem -> {
-                                    selectedTabIndex = Tabs.MEDIA.ordinal
+                                    selectTab(Tabs.MEDIA)
                                     selectedMediaItem = item
                                 }
 
                                 is ScheduleItem.LowerThirdItem -> {
-                                    selectedTabIndex = Tabs.LOWER_THIRD.ordinal
+                                    selectTab(Tabs.LOWER_THIRD)
                                     selectedLowerThirdItem = item
                                 }
 
                                 is ScheduleItem.AnnouncementItem -> {
-                                    selectedTabIndex = Tabs.ANNOUNCEMENTS.ordinal
+                                    selectTab(Tabs.ANNOUNCEMENTS)
                                     onSettingsChange { settings ->
                                         settings.copy(
                                             announcementsSettings = settings.announcementsSettings.copy(
@@ -593,12 +606,12 @@ fun MainDesktop(
 
                                 is ScheduleItem.WebsiteItem -> {
                                     selectedWebsiteItem = item
-                                    selectedTabIndex = Tabs.WEB.ordinal
+                                    selectTab(Tabs.WEB)
                                 }
 
                                 is ScheduleItem.SceneItem -> {
                                     sceneViewModel.selectScene(item.sceneId)
-                                    selectedTabIndex = Tabs.CANVAS.ordinal
+                                    selectTab(Tabs.CANVAS)
                                 }
                             }
                         },
@@ -685,6 +698,7 @@ fun MainDesktop(
                     ) {
                         TabSection(
                             modifier = Modifier.weight(1f),
+                            visibleTabs = visibleTabs,
                             selectedTabIndex = selectedTabIndex,
                             onTabSelected = { selectedTabIndex = it }
                         )
@@ -697,8 +711,6 @@ fun MainDesktop(
                         )
                     }
                     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant, thickness = 1.dp)
-
-                    val currentTab = Tabs.entries[selectedTabIndex]
 
                     Box(modifier = Modifier.fillMaxSize()) {
                         when (currentTab) {

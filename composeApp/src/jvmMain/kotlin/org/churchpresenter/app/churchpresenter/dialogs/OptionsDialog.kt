@@ -48,6 +48,7 @@ import churchpresenter.composeapp.generated.resources.projection
 import churchpresenter.composeapp.generated.resources.server_settings
 import churchpresenter.composeapp.generated.resources.song
 import churchpresenter.composeapp.generated.resources.stage_monitor
+import churchpresenter.composeapp.generated.resources.tab_visibility
 import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.data.RemoteClientManager
 import org.churchpresenter.app.churchpresenter.data.SettingsManager
@@ -61,6 +62,7 @@ import org.churchpresenter.app.churchpresenter.dialogs.tabs.ServerSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.SongSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.LowerThirdSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.StageMonitorSettingsTab
+import org.churchpresenter.app.churchpresenter.dialogs.tabs.TabVisibilitySettingsTab
 import org.churchpresenter.app.churchpresenter.ui.theme.AppThemeWrapper
 import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
@@ -158,6 +160,11 @@ fun OptionsDialog(
                             onClick = { selectedTabIndex = 8 },
                             text = { Text(stringResource(Res.string.stage_monitor)) }
                         )
+                        Tab(
+                            selected = selectedTabIndex == 9,
+                            onClick = { selectedTabIndex = 9 },
+                            text = { Text(stringResource(Res.string.tab_visibility)) }
+                        )
                     }
 
                     // Tab Content
@@ -227,6 +234,12 @@ fun OptionsDialog(
                                 remoteClientManager = remoteClientManager
                             )
                             8 -> StageMonitorSettingsTab(
+                                settings = currentSettings,
+                                onSettingsChange = { updateFn ->
+                                    currentSettings = updateFn(currentSettings)
+                                }
+                            )
+                            9 -> TabVisibilitySettingsTab(
                                 settings = currentSettings,
                                 onSettingsChange = { updateFn ->
                                     currentSettings = updateFn(currentSettings)
