@@ -247,6 +247,7 @@ object Constants {
     const val WS_EVENT_SCHEDULE_UPDATED           = "schedule_updated"
     const val WS_EVENT_PRESENTATION_UPDATED       = "presentation_updated"
     const val WS_EVENT_PICTURES_UPDATED           = "pictures_updated"
+    const val WS_EVENT_DISPLAY_CLEARED            = "display_cleared"
 
     // WebSocket command types (client → server)
     const val WS_CMD_SELECT_SONG            = "select_song"
@@ -258,6 +259,7 @@ object Constants {
     const val WS_CMD_ADD_BATCH_TO_SCHEDULE  = "add_batch_to_schedule"
     const val WS_CMD_PROJECT                = "project"
     const val WS_CMD_CLEAR                  = "clear"
+    const val WS_CMD_BIBLE_HOLD             = "bible_hold"
 
     // Instant-select endpoints (no approval dialog)
     const val ENDPOINT_BIBLE_SELECT         = "/api/bible/select"

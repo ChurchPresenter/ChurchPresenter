@@ -382,8 +382,20 @@ fun SongsTab(
                     }
                 )
 
+                // Hidden rebuild: 4 rapid clicks on the search button force-reloads songs from disk
+                var rebuildClickCount by remember { mutableStateOf(0) }
+                var rebuildClickTime by remember { mutableStateOf(0L) }
                 IconButton(
-                    onClick = { /* Search action */ },
+                    onClick = {
+                        val now = System.currentTimeMillis()
+                        if (now - rebuildClickTime > 800) rebuildClickCount = 0
+                        rebuildClickCount++
+                        rebuildClickTime = now
+                        if (rebuildClickCount >= 4) {
+                            rebuildClickCount = 0
+                            viewModel.loadSongs()
+                        }
+                    },
                     colors = IconButtonDefaults.iconButtonColors(
                         containerColor = MaterialTheme.colorScheme.primary,
                         contentColor = MaterialTheme.colorScheme.onPrimary

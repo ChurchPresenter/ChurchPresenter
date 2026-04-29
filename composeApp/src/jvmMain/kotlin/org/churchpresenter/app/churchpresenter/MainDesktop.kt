@@ -324,19 +324,55 @@ fun MainDesktop(
 
     // Handle remote Bible verse instant display (POST /api/bible/select or WS select_bible_verse)
     // No approval required — displays the verse immediately like select_picture.
+    // Enriches the bare request with Bible abbreviation/title from loaded Bibles
+    // and includes the secondary Bible verse if one is loaded.
     LaunchedEffect(selectBibleVerseFlow) {
         selectBibleVerseFlow?.collect { req ->
-            presenterManager.setSelectedVerses(
-                listOf(
-                    SelectedVerse(
-                        bookName    = req.bookName,
-                        chapter     = req.chapter,
-                        verseNumber = req.verseNumber,
-                        verseText   = req.verseText,
-                        verseRange  = req.verseRange
-                    )
+            val verses = mutableListOf<SelectedVerse>()
+            val primaryBible = bibleViewModel.primaryBible.value
+            val secondaryBible = bibleViewModel.secondaryBible.value
+
+            // Resolve bookId from book name using the primary Bible's book list
+            val bookIndex = primaryBible?.getBooks()
+                ?.indexOfFirst { it.equals(req.bookName, ignoreCase = true) }
+                ?: -1
+            val bookId = if (bookIndex >= 0) primaryBible?.getBookId(bookIndex) ?: 0 else 0
+
+            // Primary verse enriched with abbreviation and title
+            verses.add(
+                SelectedVerse(
+                    bibleAbbreviation = primaryBible?.getBibleAbbreviation() ?: "",
+                    bibleName = primaryBible?.getBibleTitle() ?: "",
+                    bookName    = req.bookName,
+                    chapter     = req.chapter,
+                    verseNumber = req.verseNumber,
+                    verseText   = req.verseText,
+                    verseRange  = req.verseRange
                 )
             )
+
+            // Secondary verse (if a secondary Bible is loaded)
+            if (secondaryBible != null && bookId > 0) {
+                val codeRef = primaryBible?.getCodeReference(bookId, req.chapter, req.verseNumber)
+                val secBook = codeRef?.first ?: bookId
+                val secChapter = codeRef?.second ?: req.chapter
+                val secVerse = codeRef?.third ?: req.verseNumber
+                secondaryBible.getVerseDetailsByCode(secBook, secChapter, secVerse)?.let { result ->
+                    verses.add(
+                        SelectedVerse(
+                            bibleAbbreviation = secondaryBible.getBibleAbbreviation(),
+                            bibleName = secondaryBible.getBibleTitle(),
+                            bookName = result.bookName,
+                            chapter = result.displayChapter,
+                            verseNumber = result.displayVerse,
+                            verseText = result.verseText,
+                            verseRange = req.verseRange
+                        )
+                    )
+                }
+            }
+
+            presenterManager.setSelectedVerses(verses)
             presenterManager.setPresentingMode(Presenting.BIBLE)
             presenterManager.setShowPresenterWindow(true)
         }

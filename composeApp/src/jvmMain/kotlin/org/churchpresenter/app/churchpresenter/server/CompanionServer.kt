@@ -38,6 +38,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.jsonObject
 import org.churchpresenter.app.churchpresenter.data.SongItem
 import org.churchpresenter.app.churchpresenter.models.ScheduleItem
 import org.churchpresenter.app.churchpresenter.utils.Constants
@@ -67,6 +68,7 @@ import javax.imageio.ImageIO
 
 @Serializable
 data class SongDto(
+    val id: Int = 0,
     val number: String,
     val title: String,
     val tune: String = "",
@@ -699,6 +701,12 @@ class CompanionServer {
         onBufferOverflow = BufferOverflow.DROP_OLDEST
     )
 
+    /** Emitted when a remote client sends WS "bible_hold". Payload: {"hold": true/false}. */
+    val onBibleHold = MutableSharedFlow<Boolean>(
+        extraBufferCapacity = 4,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
+
     /**
      * Emitted for every instant (no-approval) action so the UI can show an activity toast.
      * Carries enough info to build a [RemoteActivityNotification] without approval logic.
@@ -1232,6 +1240,8 @@ class CompanionServer {
     }
 
     private fun buildCatalog(songs: List<SongItem>): SongCatalogResponse {
+        // Build an index map so each SongDto gets a unique id (position in _songs)
+        val indexMap = songs.withIndex().associate { (i, s) -> s to i }
         val entries = songs
             .groupBy { it.songbook }
             .entries
@@ -1241,7 +1251,7 @@ class CompanionServer {
                     bookName = bookName,
                     songTotal = bookSongs.size,
                     songs = bookSongs.map { s ->
-                        SongDto(number = s.number, title = s.title, tune = s.tune, author = s.author)
+                        SongDto(id = indexMap[s] ?: 0, number = s.number, title = s.title, tune = s.tune, author = s.author)
                     }
                 )
             }
@@ -1478,16 +1488,27 @@ class CompanionServer {
                  * Returns full song details including all lyric sections.
                  * Use ?songbook= to disambiguate when the same number exists in multiple songbooks.
                  */
-                get("${Constants.ENDPOINT_SONGS}/{number}") {
+                get("${Constants.ENDPOINT_SONGS}/{identifier}") {
                     if (!checkApiKey(call)) return@get
-                    val number = call.parameters["number"] ?: run {
-                        call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":"missing number"}""")
+                    val identifier = call.parameters["identifier"] ?: run {
+                        call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":"missing identifier"}""")
                         return@get
                     }
                     val songbookFilter = call.request.queryParameters[Constants.QUERY_PARAM_SONGBOOK]
-                    val song = _songs.firstOrNull { s ->
-                        s.number == number &&
-                            (songbookFilter.isNullOrBlank() || s.songbook.equals(songbookFilter, ignoreCase = true))
+                    val titleFilter = call.request.queryParameters["title"]
+                    // Try index-based lookup first (id=N query param)
+                    val idParam = call.request.queryParameters["id"]?.toIntOrNull()
+                    val song = if (idParam != null) {
+                        _songs.getOrNull(idParam)
+                    } else {
+                        // Fall back to number + songbook match; treat "_" as empty number
+                        val lookupNumber = if (identifier == "_") "" else identifier
+                        _songs.firstOrNull { s ->
+                            val matchesSongbook = songbookFilter.isNullOrBlank() || s.songbook.equals(songbookFilter, ignoreCase = true)
+                            val matchesNumber = s.number == lookupNumber
+                            val matchesTitle = !titleFilter.isNullOrBlank() && s.title.equals(titleFilter, ignoreCase = true)
+                            matchesSongbook && (matchesNumber || matchesTitle)
+                        }
                     }
                     if (song == null) {
                         call.respond(io.ktor.http.HttpStatusCode.NotFound, """{"error":"song not found"}""")
@@ -2181,6 +2202,13 @@ class CompanionServer {
                                         scope.launch { onClear.emit(Unit) }
                                         scope.launch { onInstantAction.emit(RemoteInstantAction("clear", "Clear Display", clientId = wsClientId)) }
                                     }
+                                    Constants.WS_CMD_BIBLE_HOLD -> {
+                                        val hold = try {
+                                            json.parseToJsonElement(msg.payload)
+                                                .jsonObject["hold"]?.toString()?.toBooleanStrictOrNull() ?: true
+                                        } catch (_: Exception) { true }
+                                        scope.launch { onBibleHold.emit(hold) }
+                                    }
                                     Constants.WS_CMD_ADD_TO_SCHEDULE -> {
                                         val item = parseRemoteItem(msg.payload)
                                             ?: json.decodeFromString(AddToScheduleRequest.serializer(), msg.payload).item
@@ -2485,6 +2513,11 @@ class CompanionServer {
         scope.launch {
             broadcastChannel.emit(json.encodeToString(WebSocketMessage.serializer(), msg))
         }
+    }
+
+    /** Broadcasts a display_cleared event to all connected mobile clients. */
+    fun broadcastDisplayCleared() {
+        broadcast(WebSocketMessage(type = Constants.WS_EVENT_DISPLAY_CLEARED, payload = ""))
     }
 
     /** Locate the Lottie-Gen directory containing lottie-generator.html. */

@@ -44,6 +44,7 @@ import androidx.compose.ui.input.key.type
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
@@ -766,6 +767,23 @@ fun main() {
                                         mediaViewModel.pause()
                                         presenterManager.requestClearDisplay()
                                     }
+                                }
+
+                                // ── Remote Bible hold toggle ──────────────────────────────────────────────────
+                                LaunchedEffect(Unit) {
+                                    companionServer.onBibleHold.collect { hold ->
+                                        presenterManager.setBibleHold(hold)
+                                    }
+                                }
+
+                                // ── Notify mobile clients when display is cleared ─────────────────────────────
+                                LaunchedEffect(Unit) {
+                                    snapshotFlow { presenterManager.presentingMode.value }
+                                        .collect { mode ->
+                                            if (mode == Presenting.NONE) {
+                                                companionServer.broadcastDisplayCleared()
+                                            }
+                                        }
                                 }
 
                                 // ── Instant-action activity toasts ────────────────────────────────────────────
