@@ -2520,6 +2520,11 @@ class CompanionServer {
         broadcast(WebSocketMessage(type = Constants.WS_EVENT_DISPLAY_CLEARED, payload = ""))
     }
 
+    /** Broadcasts the currently active song section index to all connected mobile clients. */
+    fun broadcastSongSectionSelected(sectionIndex: Int) {
+        broadcast(WebSocketMessage(type = Constants.WS_EVENT_SONG_SECTION_SELECTED, payload = sectionIndex.toString()))
+    }
+
     /** Locate the Lottie-Gen directory containing lottie-generator.html. */
     private fun findLottieGenDir(): File? {
         val appResourcesDir = System.getProperty("compose.application.resources.dir")

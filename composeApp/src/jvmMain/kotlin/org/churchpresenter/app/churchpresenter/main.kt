@@ -786,6 +786,16 @@ fun main() {
                                         }
                                 }
 
+                                // ── Notify mobile clients when song section changes ──────────────────────────
+                                LaunchedEffect(Unit) {
+                                    snapshotFlow { presenterManager.songDisplaySectionIndex.value }
+                                        .collect { index ->
+                                            if (presenterManager.presentingMode.value == Presenting.LYRICS) {
+                                                companionServer.broadcastSongSectionSelected(index)
+                                            }
+                                        }
+                                }
+
                                 // ── Instant-action activity toasts ────────────────────────────────────────────
                                 // For every no-approval action (present, upload, clear) show a toast so the
                                 // operator can see what a remote client just did and optionally block them.

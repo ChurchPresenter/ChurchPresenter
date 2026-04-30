@@ -137,7 +137,7 @@ private fun RemoteActivityToast(
 
     Surface(
         modifier = Modifier
-            .padding(bottom = 16.dp, start = 16.dp, end = 16.dp)
+            .padding(bottom = 48.dp, start = 16.dp, end = 16.dp)
             .widthIn(max = 680.dp)
             .fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),

@@ -22,6 +22,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -224,6 +225,17 @@ fun MainDesktop(
     val currentOnSongsLoaded by rememberUpdatedState(onSongsLoaded)
     val songsViewModel = remember { SongsViewModel(appSettings, onSongsLoaded = { songs -> currentOnSongsLoaded?.invoke(songs) }) }
     DisposableEffect(Unit) { onDispose { songsViewModel.dispose() } }
+
+    // Sync remote section changes (e.g. from mobile) back to the songs UI
+    LaunchedEffect(Unit) {
+        snapshotFlow { presenterManager.songDisplaySectionIndex.value }
+            .collect { index ->
+                if (presenterManager.presentingMode.value == Presenting.LYRICS &&
+                    songsViewModel.selectedSectionIndex.value != index) {
+                    songsViewModel.selectSection(index)
+                }
+            }
+    }
 
     val currentOnPicturesLoaded by rememberUpdatedState(onPicturesLoaded)
     val currentOnBibleLoaded by rememberUpdatedState(onBibleLoaded)
