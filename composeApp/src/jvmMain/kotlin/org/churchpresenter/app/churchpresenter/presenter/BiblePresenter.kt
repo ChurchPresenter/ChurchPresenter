@@ -487,7 +487,7 @@ fun BiblePresenter(
                     secondary != null && (!isLowerThird || appSettings.bibleSettings.secondaryBibleLowerThirdEnabled)
 
                 if (showSecondary && isLowerThird) {
-                    val sec = secondary ?: return@TextContent
+                    val sec = secondary
                     // Lower third: side-by-side Row layout (50/50) with matched auto-fit
                     BoxWithConstraints(
                         modifier = innerModifier,

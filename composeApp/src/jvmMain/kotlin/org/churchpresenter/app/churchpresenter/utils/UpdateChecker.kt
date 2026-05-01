@@ -4,7 +4,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.churchpresenter.app.churchpresenter.BuildConfig
 import java.net.HttpURLConnection
-import java.net.URL
+import java.net.URI
 
 data class UpdateInfo(
     val latestVersion: String,
@@ -25,7 +25,7 @@ object UpdateChecker {
      */
     suspend fun checkForUpdate(): UpdateInfo? = withContext(Dispatchers.IO) {
         try {
-            val url = URL(GITHUB_API_URL)
+            val url = URI(GITHUB_API_URL).toURL()
             val connection = url.openConnection() as HttpURLConnection
             connection.requestMethod = "GET"
             connection.setRequestProperty("Accept", "application/vnd.github+json")

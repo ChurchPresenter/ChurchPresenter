@@ -52,7 +52,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import org.churchpresenter.app.churchpresenter.ui.theme.AppThemeWrapper
 import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
-import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.rememberDialogState
 import org.churchpresenter.app.churchpresenter.LocalMainWindowState
 import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
@@ -702,7 +702,7 @@ private fun ConnectionQrDialog(serverUrl: String, apiKey: String?, onDismiss: ()
 
     val isDark = MaterialTheme.colorScheme.background.luminance() < 0.5f
     val mainWindowState = LocalMainWindowState.current
-    Dialog(
+    DialogWindow(
         onCloseRequest = onDismiss,
         state = rememberDialogState(
             position = centeredOnMainWindow(mainWindowState, 400.dp, 500.dp),

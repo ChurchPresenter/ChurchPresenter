@@ -132,9 +132,9 @@ fun PresentationTab(
         val notesList = viewModel.slideNotes
         val idx = viewModel.selectedSlideIndex
         println("[PresentationTab] LaunchedEffect: mode=$mode slides=${viewModel.slides.size} notesCount=${notesList.size} selectedIdx=$idx")
-        if (mode == Presenting.PRESENTATION && viewModel.slides.isNotEmpty()) {
+        if (mode == Presenting.PRESENTATION && presenterManager != null && viewModel.slides.isNotEmpty()) {
             val slide = viewModel.slides.getOrNull(idx)
-            presenterManager!!.setSelectedSlide(slide)
+            presenterManager.setSelectedSlide(slide)
             presenterManager.setNextSlide(viewModel.slides.getOrNull(idx + 1))
             val notes = notesList.getOrElse(idx) { "" }
             println("[PresentationTab] Setting presenterNotes='$notes'")

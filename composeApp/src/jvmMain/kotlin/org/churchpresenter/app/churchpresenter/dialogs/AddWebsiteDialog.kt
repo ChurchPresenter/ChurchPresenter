@@ -24,7 +24,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.rememberDialogState
 import org.churchpresenter.app.churchpresenter.LocalMainWindowState
 import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
@@ -54,7 +54,7 @@ fun AddWebsiteDialog(
         height = 440.dp
     )
 
-    Dialog(
+    DialogWindow(
         onCloseRequest = onDismiss,
         state = dialogState,
         title = stringResource(Res.string.website_dialog_title),

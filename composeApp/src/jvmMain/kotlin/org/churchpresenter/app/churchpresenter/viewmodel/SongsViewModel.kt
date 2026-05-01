@@ -118,7 +118,7 @@ class SongsViewModel(
                 val freshSongs = songs.getSongs()
 
                 // Only update UI if data actually changed
-                val currentSongs = _songsData.value?.getSongs() ?: emptyList()
+                val currentSongs = _songsData.value.getSongs()
                 if (freshSongs != currentSongs) {
                     applySongList(freshSongs, songs)
                 }

@@ -26,6 +26,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.PlainTooltip
+import androidx.compose.material3.TooltipAnchorPosition
 import androidx.compose.material3.TooltipBox
 import androidx.compose.material3.TooltipDefaults
 import androidx.compose.material3.rememberTooltipState
@@ -415,7 +416,7 @@ fun ProjectionSettingsTab(
                     @OptIn(ExperimentalMaterial3Api::class)
                     if (hasInputConflict) {
                         TooltipBox(
-                            positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
+                            positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
                             tooltip = { PlainTooltip { Text("Also used for input — may not work on devices without simultaneous I/O") } },
                             state = rememberTooltipState()
                         ) {
@@ -570,7 +571,7 @@ fun ProjectionSettingsTab(
                     @OptIn(ExperimentalMaterial3Api::class)
                     if (hasKeyInputConflict) {
                         TooltipBox(
-                            positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
+                            positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
                             tooltip = { PlainTooltip { Text("Also used for input — may not work on devices without simultaneous I/O") } },
                             state = rememberTooltipState()
                         ) {
@@ -686,7 +687,7 @@ fun ProjectionSettingsTab(
                         Box(modifier = Modifier.width(cellWidth), contentAlignment = Alignment.Center) {
                             if (isWebOnDeckLink) {
                                 TooltipBox(
-                                    positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
+                                    positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
                                     tooltip = { PlainTooltip { Text("Web browser cannot render on DeckLink outputs") } },
                                     state = rememberTooltipState()
                                 ) {

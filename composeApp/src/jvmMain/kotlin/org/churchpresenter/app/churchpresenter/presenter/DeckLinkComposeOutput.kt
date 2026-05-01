@@ -154,7 +154,8 @@ fun DeckLinkComposeOutput(
                 delay(100)
             }
 
-            if (skiaLayer == null) {
+            val layer = skiaLayer
+            if (layer == null) {
                 System.err.println("[DeckLink] Device $deviceIndex: Could not find SkiaLayer")
                 return@launch
             }
@@ -167,7 +168,7 @@ fun DeckLinkComposeOutput(
             while (isActive) {
                 try {
                     // screenshot() safely reads the Skia backing surface
-                    val bitmap = skiaLayer!!.screenshot()
+                    val bitmap = layer.screenshot()
                     if (bitmap != null && bitmap.width > 0 && bitmap.height > 0) {
                         // peekPixels gives direct access to the bitmap buffer
                         val pixmap = bitmap.peekPixels()

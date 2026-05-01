@@ -43,7 +43,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
+import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -195,7 +195,7 @@ fun QATab(
             }
 
             // Filter tabs
-            TabRow(selectedTabIndex = selectedFilter) {
+            PrimaryTabRow(selectedTabIndex = selectedFilter) {
                 Tab(
                     selected = selectedFilter == 0,
                     onClick = { selectedFilter = 0 },

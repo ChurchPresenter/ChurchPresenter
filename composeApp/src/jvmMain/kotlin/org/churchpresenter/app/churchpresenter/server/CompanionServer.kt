@@ -2298,10 +2298,13 @@ class CompanionServer {
                 get("/fonts/{filename}") {
                     val rawFilename = call.parameters["filename"] ?: return@get
                     val filename = File(rawFilename).name
-                    val fontsDir = lottieGenDir?.let { File(it, "fonts") }
-                    val file = fontsDir?.let { File(it, filename) }
-                    if (file == null || !file.exists() ||
-                        !file.canonicalPath.startsWith(fontsDir!!.canonicalPath + File.separator)) {
+                    val fontsDir = lottieGenDir?.let { File(it, "fonts") } ?: run {
+                        call.respond(io.ktor.http.HttpStatusCode.NotFound)
+                        return@get
+                    }
+                    val file = File(fontsDir, filename)
+                    if (!file.exists() ||
+                        !file.canonicalPath.startsWith(fontsDir.canonicalPath + File.separator)) {
                         call.respond(io.ktor.http.HttpStatusCode.NotFound)
                         return@get
                     }
@@ -2578,7 +2581,7 @@ class CompanionServer {
                     val qa = qaManager
                     val ok = qa?.displayQuestion(id) ?: false
                     if (ok) {
-                        scope.launch { onQADisplay.emit(qa?.displayedQuestion) }
+                        scope.launch { onQADisplay.emit(qa.displayedQuestion) }
                         call.respondText("""{"ok":true}""", ContentType.Application.Json)
                     }
                     else call.respond(io.ktor.http.HttpStatusCode.NotFound, """{"error":"question not found or not approved"}""")

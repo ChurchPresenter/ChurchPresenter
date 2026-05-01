@@ -31,7 +31,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.rememberDialogState
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.clear_statistics
@@ -78,7 +78,7 @@ fun StatisticsDialog(
     val saveTitle = stringResource(Res.string.file_chooser_save_statistics)
     val filterDesc = stringResource(Res.string.file_filter_xls)
 
-    Dialog(
+    DialogWindow(
         onCloseRequest = onDismiss,
         state = rememberDialogState(
             position = centeredOnMainWindow(mainWindowState, 700.dp, 600.dp),

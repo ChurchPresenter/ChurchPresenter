@@ -16,8 +16,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
-import androidx.compose.material3.ScrollableTabRow
-import androidx.compose.material3.TabRow
+import androidx.compose.material3.PrimaryScrollableTabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -28,7 +27,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.rememberDialogState
 import org.churchpresenter.app.churchpresenter.LocalMainWindowState
 import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
@@ -92,7 +91,7 @@ fun OptionsDialog(
         ThemeMode.SYSTEM -> isSystemInDarkTheme()
     }
     val mainWindowState = LocalMainWindowState.current
-    Dialog(
+    DialogWindow(
         onCloseRequest = onDismiss,
         state = rememberDialogState(
             position = centeredOnMainWindow(mainWindowState, 1000.dp, 700.dp),
@@ -109,7 +108,7 @@ fun OptionsDialog(
             ) {
                 Column(modifier = Modifier.fillMaxSize()) {
                     // Tab Row
-                    ScrollableTabRow(
+                    PrimaryScrollableTabRow(
                         selectedTabIndex = selectedTabIndex,
                         containerColor = MaterialTheme.colorScheme.surface,
                         contentColor = MaterialTheme.colorScheme.onSurface,

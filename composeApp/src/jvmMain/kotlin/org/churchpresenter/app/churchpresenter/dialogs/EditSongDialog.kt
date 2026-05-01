@@ -43,7 +43,7 @@ import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.rememberDialogState
 import org.churchpresenter.app.churchpresenter.LocalMainWindowState
 import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
@@ -110,7 +110,7 @@ fun EditSongDialog(
     }
 
     val mainWindowState = LocalMainWindowState.current
-    Dialog(
+    DialogWindow(
         onCloseRequest = onDismiss,
         state = rememberDialogState(
             position = centeredOnMainWindow(mainWindowState, 800.dp, 700.dp),
