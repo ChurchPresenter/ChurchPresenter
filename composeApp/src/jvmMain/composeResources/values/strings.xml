@@ -709,6 +709,7 @@
     <string name="website_disclaimer">We are not responsible for any advertisements or content that may appear on the displayed website.</string>
     <string name="tab_web">Web</string>
     <string name="tab_canvas">Canvas</string>
+    <string name="tab_qa">Q&amp;A</string>
     <string name="tab_visibility">Tab Visibility</string>
     <string name="canvas_scenes">Scenes</string>
     <string name="canvas_sources">Sources</string>

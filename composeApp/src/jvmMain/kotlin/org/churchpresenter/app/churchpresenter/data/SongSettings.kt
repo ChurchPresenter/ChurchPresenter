@@ -499,6 +499,7 @@ data class ScreenAssignment(
     val showWebsite: Boolean = true,
     val displayMode: String = "fullscreen", // Constants.DISPLAY_MODE_FULLSCREEN or DISPLAY_MODE_LOWER_THIRD
     val songLookAhead: Boolean = false, // enable look-ahead for songs on this output
+    val showQA: Boolean = true,
     val showFullscreenBackground: Boolean = true, // show configured background in fullscreen mode
     val showLowerThirdBackground: Boolean = true  // show configured background in lower third mode
 ) {
@@ -593,6 +594,26 @@ data class AnnouncementsSettings(
     val timerSeconds: Int = 0,
     val timerTextColor: String = "#FFFFFF",
     val timerExpiredText: String = ""
+)
+
+@Serializable
+data class QASettings(
+    val textColor: String = "#FFFFFF",
+    val backgroundColor: String = "#1E1E2E",
+    val fontSize: Int = 48,
+    val fontType: String = "Arial",
+    val bold: Boolean = false,
+    val italic: Boolean = false,
+    val underline: Boolean = false,
+    val shadow: Boolean = false,
+    val shadowColor: String = "#000000",
+    val shadowSize: Int = 100,
+    val shadowOpacity: Int = 78,
+    val horizontalAlignment: String = Constants.CENTER,
+    val position: String = Constants.CENTER,
+    val adminPassword: String = "",
+    val rateLimitPerMinute: Int = 3,
+    val rateLimitCooldownSeconds: Int = 30,
 )
 
 @Serializable
@@ -707,6 +728,7 @@ data class AppSettings(
     val pictureSettings: PictureSettings = PictureSettings(),
     val streamingSettings: StreamingSettings = StreamingSettings(),
     val announcementsSettings: AnnouncementsSettings = AnnouncementsSettings(),
+    val qaSettings: QASettings = QASettings(),
     val serverSettings: ServerSettings = ServerSettings(),
     val stageMonitorSettings: StageMonitorSettings = StageMonitorSettings(),
     val presentationStorageDirectory: String = "",
@@ -724,5 +746,5 @@ data class AppSettings(
     val windowHeight: Int = 800,
     val windowX: Int = -1,
     val windowY: Int = -1,
-    val hiddenTabs: Set<String> = emptySet()
+    val hiddenTabs: Set<String> = setOf("QA")
 )

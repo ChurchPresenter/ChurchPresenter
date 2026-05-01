@@ -36,7 +36,8 @@ class SettingsManager {
                 val raw = settingsFile.readText()
                 val migrated = migrateProjectionSettings(raw)
                 try {
-                    jsonFormat.decodeFromString<AppSettings>(migrated)
+                    val settings = jsonFormat.decodeFromString<AppSettings>(migrated)
+                    migrateHiddenTabs(settings, raw)
                 } catch (e: Exception) {
                     AppSettings()
                 }
@@ -46,6 +47,19 @@ class SettingsManager {
         } catch (e: Exception) {
             AppSettings() // Return default settings on error
         }
+    }
+
+    /**
+     * Ensures new tabs (like QA) are hidden by default for existing users.
+     * If the raw JSON has no "qaSettings" key, the user has never interacted with Q&A,
+     * so we add "QA" to hiddenTabs if it's not already there.
+     */
+    private fun migrateHiddenTabs(settings: AppSettings, raw: String): AppSettings {
+        var result = settings
+        if ("\"qaSettings\"" !in raw && "QA" !in result.hiddenTabs) {
+            result = result.copy(hiddenTabs = result.hiddenTabs + "QA")
+        }
+        return result
     }
 
     /** Migrates old screen1-4Assignment fields to screenAssignments list. */

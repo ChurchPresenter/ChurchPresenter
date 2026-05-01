@@ -312,6 +312,7 @@ fun ProjectionSettingsTab(
             ContentCol(streamingLabel, { it.showStreaming }, { a, v -> a.copy(showStreaming = v) }),
             ContentCol(announcementsLabel, { it.showAnnouncements }, { a, v -> a.copy(showAnnouncements = v) }),
             ContentCol("Web", { it.showWebsite }, { a, v -> a.copy(showWebsite = v) }),
+            ContentCol("Q&A", { it.showQA }, { a, v -> a.copy(showQA = v) }),
             ContentCol("Background", { it.showFullscreenBackground }, { a, v -> a.copy(showFullscreenBackground = v) }),
             ContentCol("Lower Third Background", { it.showLowerThirdBackground }, { a, v -> a.copy(showLowerThirdBackground = v) }),
         )

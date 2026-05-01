@@ -359,4 +359,26 @@ class PresenterManager {
         _timerRemainingSeconds.value = remainingSeconds
         _timerRunning.value = running
     }
+
+    // Q&A display state
+    private val _displayedQuestion = mutableStateOf<org.churchpresenter.app.churchpresenter.models.Question?>(null)
+    val displayedQuestion: State<org.churchpresenter.app.churchpresenter.models.Question?> = _displayedQuestion
+
+    private val _qaTransitionAlpha = mutableStateOf(1f)
+    val qaTransitionAlpha: State<Float> = _qaTransitionAlpha
+
+    private val _showQRCodeOnDisplay = mutableStateOf(false)
+    val showQRCodeOnDisplay: State<Boolean> = _showQRCodeOnDisplay
+
+    fun setDisplayedQuestion(question: org.churchpresenter.app.churchpresenter.models.Question?) {
+        _displayedQuestion.value = question
+    }
+
+    fun setQaTransitionAlpha(alpha: Float) {
+        _qaTransitionAlpha.value = alpha
+    }
+
+    fun setShowQRCodeOnDisplay(show: Boolean) {
+        _showQRCodeOnDisplay.value = show
+    }
 }

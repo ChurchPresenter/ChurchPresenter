@@ -85,6 +85,7 @@ import org.churchpresenter.app.churchpresenter.tabs.SongsTab
 import org.churchpresenter.app.churchpresenter.tabs.WebTab
 import org.churchpresenter.app.churchpresenter.tabs.LowerThirdTab
 import org.churchpresenter.app.churchpresenter.tabs.CanvasTab
+import org.churchpresenter.app.churchpresenter.tabs.QATab
 import org.churchpresenter.app.churchpresenter.tabs.TabSection
 import org.churchpresenter.app.churchpresenter.tabs.Tabs
 import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
@@ -94,6 +95,7 @@ import org.churchpresenter.app.churchpresenter.viewmodel.BibleViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PicturesViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresentationViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
+import org.churchpresenter.app.churchpresenter.viewmodel.QAManager
 import org.churchpresenter.app.churchpresenter.viewmodel.SceneViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.ScheduleViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.SongsViewModel
@@ -156,6 +158,7 @@ fun MainDesktop(
     /** Emits a presentation [File] uploaded by a mobile client — loaded into [PresentationViewModel] automatically. */
     uploadPresentationFlow: Flow<java.io.File>? = null,
     serverUrl: String = "",
+    qaManager: QAManager? = null,
 ) {
     val isDarkTheme = when (theme) {
         ThemeMode.LIGHT -> false
@@ -903,6 +906,18 @@ fun MainDesktop(
                                     currentScheduleActions.addScene(sceneId, sceneName)
                                 }
                             )
+
+                            Tabs.QA -> if (qaManager != null) {
+                                QATab(
+                                    modifier = Modifier.fillMaxSize(),
+                                    qaManager = qaManager,
+                                    presenterManager = presenterManager,
+                                    serverUrl = serverUrl,
+                                    presenting = presenting,
+                                    appSettings = appSettings,
+                                    onSettingsChange = onSettingsChange
+                                )
+                            }
                         }
                     }
                 }
@@ -989,7 +1004,8 @@ fun MainDesktop(
                         LivePreviewPanel(
                             presenterManager = presenterManager,
                             appSettings = appSettings,
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier.fillMaxWidth(),
+                            serverUrl = serverUrl,
                         )
                     }
                 }

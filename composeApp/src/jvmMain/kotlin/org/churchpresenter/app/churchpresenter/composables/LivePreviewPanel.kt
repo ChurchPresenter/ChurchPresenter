@@ -64,6 +64,8 @@ import org.churchpresenter.app.churchpresenter.presenter.LowerThirdPresenter
 import org.churchpresenter.app.churchpresenter.presenter.MediaPresenter
 import org.churchpresenter.app.churchpresenter.presenter.PicturePresenter
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.app.churchpresenter.presenter.QAPresenter
+import org.churchpresenter.app.churchpresenter.presenter.QAQRCodePresenter
 import org.churchpresenter.app.churchpresenter.presenter.ScenePresenter
 import org.churchpresenter.app.churchpresenter.presenter.SlidePresenter
 import org.churchpresenter.app.churchpresenter.presenter.SongPresenter
@@ -84,7 +86,8 @@ import org.jetbrains.compose.resources.stringResource
 fun LivePreviewPanel(
     presenterManager: PresenterManager,
     appSettings: AppSettings,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    serverUrl: String = "",
 ) {
     val proj = appSettings.projectionSettings
     val deckLinkCount = remember { if (DeckLinkManager.isAvailable()) DeckLinkManager.listDevices().size else 0 }
@@ -106,7 +109,8 @@ fun LivePreviewPanel(
                 screenAssignment = screenAssignment,
                 presenterManager = presenterManager,
                 appSettings = appSettings,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                serverUrl = serverUrl,
             )
         }
 
@@ -127,7 +131,8 @@ private fun SingleDisplayPreview(
     screenAssignment: ScreenAssignment,
     presenterManager: PresenterManager,
     appSettings: AppSettings,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    serverUrl: String = "",
 ) {
     val presentingMode by presenterManager.presentingMode
     val displayedVerses by presenterManager.displayedVerses
@@ -163,6 +168,7 @@ private fun SingleDisplayPreview(
         Presenting.ANNOUNCEMENTS -> screenAssignment.showAnnouncements
         Presenting.WEBSITE -> true
         Presenting.CANVAS -> true
+        Presenting.QA -> screenAssignment.showQA
         Presenting.NONE -> false
     }
 
@@ -234,6 +240,15 @@ private fun SingleDisplayPreview(
                                 )
                             Presenting.CANVAS ->
                                 ScenePresenter(scene = activeScene)
+                            Presenting.QA -> {
+                                val displayedQuestion by presenterManager.displayedQuestion
+                                val showQRCode by presenterManager.showQRCodeOnDisplay
+                                if (showQRCode) {
+                                    QAQRCodePresenter(url = "$serverUrl/qa", qaSettings = appSettings.qaSettings)
+                                } else {
+                                    QAPresenter(question = displayedQuestion, qaSettings = appSettings.qaSettings)
+                                }
+                            }
                             else -> {}
                         }
                         }

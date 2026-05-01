@@ -17,6 +17,7 @@ import io.ktor.server.request.receiveText
 import io.ktor.server.response.respond
 import io.ktor.server.response.respondBytes
 import io.ktor.server.response.respondText
+import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.routing
@@ -47,6 +48,10 @@ import org.churchpresenter.app.churchpresenter.utils.isChorusHeader
 import org.churchpresenter.app.churchpresenter.utils.isHeaderLine
 import org.churchpresenter.app.churchpresenter.data.Bible
 import org.churchpresenter.app.churchpresenter.data.Songs
+import org.churchpresenter.app.churchpresenter.models.QuestionStatus
+import org.churchpresenter.app.churchpresenter.models.SubmitQuestionRequest
+import org.churchpresenter.app.churchpresenter.models.toDto
+import org.churchpresenter.app.churchpresenter.viewmodel.QAManager
 import org.churchpresenter.app.churchpresenter.BuildConfig
 import java.awt.image.BufferedImage
 import java.io.BufferedInputStream
@@ -557,6 +562,10 @@ data class PendingBatchRequest(
  * Song-selection events from mobile arrive via [onSongSelected].
  */
 class CompanionServer {
+    var qaManager: QAManager? = null
+    @Volatile var qaAdminPassword: String = ""
+    @Volatile var qaCooldownSeconds: Int = 30
+
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     // Current data — thread-safe StateFlows
@@ -696,6 +705,12 @@ class CompanionServer {
     )
 
     /** Emitted when a remote client calls POST /api/clear or sends WS "clear". Clears the display instantly. */
+    /** Emitted when the web admin triggers Go Live or clear display for Q&A. Payload: Question or null. */
+    val onQADisplay = MutableSharedFlow<org.churchpresenter.app.churchpresenter.models.Question?>(
+        extraBufferCapacity = 4,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
+
     val onClear = MutableSharedFlow<Unit>(
         extraBufferCapacity = 4,
         onBufferOverflow = BufferOverflow.DROP_OLDEST
@@ -1360,10 +1375,12 @@ class CompanionServer {
             install(CORS) {
                 allowMethod(HttpMethod.Get)
                 allowMethod(HttpMethod.Post)
+                allowMethod(HttpMethod.Delete)
                 allowHeader(HttpHeaders.ContentType)
                 allowHeader(Constants.HEADER_API_KEY)
                 allowHeader(Constants.HEADER_DEVICE_ID)
                 allowHeader(Constants.HEADER_APP_VERSION)
+                allowHeader("X-QA-Password")
                 exposeHeader(Constants.HEADER_SERVER_VERSION)
                 anyHost()
             }
@@ -2408,6 +2425,212 @@ class CompanionServer {
                         call.respond(io.ktor.http.HttpStatusCode.InternalServerError, """{"error":"write failed"}""")
                     }
                 }
+
+                // ── Q&A Endpoints ─────────────────────────────────────────────────
+
+                // Public: submission page
+                get("/qa") {
+                    call.respondText(qaSubmissionPageHtml(), ContentType.Text.Html)
+                }
+
+                // Public: admin page
+                get("/qa/admin") {
+                    call.respondText(qaAdminPageHtml(), ContentType.Text.Html)
+                }
+
+                // Public: session status
+                get("/api/qa/status") {
+                    val qa = qaManager
+                    call.respondText(
+                        """{"sessionActive":${qa?.sessionActive ?: false},"cooldownSeconds":$qaCooldownSeconds,"displayedQuestionId":"${qa?.displayedQuestion?.id ?: ""}"}""",
+                        ContentType.Application.Json
+                    )
+                }
+
+                // Public: submit a question (no API key)
+                post("/api/qa/submit") {
+                    val qa = qaManager
+                    if (qa == null || !qa.sessionActive) {
+                        call.respond(io.ktor.http.HttpStatusCode.Forbidden, """{"error":"Q&A session is not active"}""")
+                        return@post
+                    }
+                    val body = call.receiveText()
+                    val request = try {
+                        json.decodeFromString(SubmitQuestionRequest.serializer(), body)
+                    } catch (_: Exception) {
+                        call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":"invalid request"}""")
+                        return@post
+                    }
+                    if (request.text.isBlank()) {
+                        call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":"question text is required"}""")
+                        return@post
+                    }
+                    val clientIp = call.request.headers["X-Forwarded-For"]?.split(",")?.first()?.trim()
+                        ?: call.request.local.remoteAddress
+                    val question = qa.submitQuestion(request.text, request.name, clientIp, qaCooldownSeconds)
+                    if (question != null) {
+                        call.respondText(
+                            json.encodeToString(org.churchpresenter.app.churchpresenter.models.QuestionDto.serializer(), question.toDto()),
+                            ContentType.Application.Json
+                        )
+                    } else {
+                        if (qa.isRateLimited(clientIp, qaCooldownSeconds)) {
+                            call.respond(io.ktor.http.HttpStatusCode.TooManyRequests, """{"error":"Too many questions. Please wait a moment."}""")
+                        } else {
+                            call.respond(io.ktor.http.HttpStatusCode.Forbidden, """{"error":"submission failed"}""")
+                        }
+                    }
+                }
+
+                // Admin: check password
+                post("/api/qa/auth") {
+                    if (!checkQaAdmin(call)) return@post
+                    call.respondText("""{"ok":true}""", ContentType.Application.Json)
+                }
+
+                // Admin: list questions
+                get("/api/qa/questions") {
+                    if (!checkQaAdmin(call)) return@get
+                    val qa = qaManager ?: run {
+                        call.respondText("[]", ContentType.Application.Json)
+                        return@get
+                    }
+                    val statusFilter = call.request.queryParameters["status"]
+                    val filtered = if (statusFilter != null) {
+                        val s = try { QuestionStatus.valueOf(statusFilter.uppercase()) } catch (_: Exception) { null }
+                        if (s != null) qa.questions.filter { it.status == s } else qa.questions
+                    } else qa.questions
+                    val dtos = filtered.map { it.toDto() }
+                    call.respondText(
+                        json.encodeToString(kotlinx.serialization.builtins.ListSerializer(org.churchpresenter.app.churchpresenter.models.QuestionDto.serializer()), dtos),
+                        ContentType.Application.Json
+                    )
+                }
+
+                // Admin: approve question
+                post("/api/qa/questions/{id}/approve") {
+                    if (!checkQaAdmin(call)) return@post
+                    val id = call.parameters["id"] ?: run {
+                        call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":"missing id"}""")
+                        return@post
+                    }
+                    val ok = qaManager?.approveQuestion(id) ?: false
+                    if (ok) call.respondText("""{"ok":true}""", ContentType.Application.Json)
+                    else call.respond(io.ktor.http.HttpStatusCode.NotFound, """{"error":"question not found"}""")
+                }
+
+                // Admin: edit question text
+                post("/api/qa/questions/{id}/edit") {
+                    if (!checkQaAdmin(call)) return@post
+                    val id = call.parameters["id"] ?: run {
+                        call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":"missing id"}""")
+                        return@post
+                    }
+                    val body = call.receiveText()
+                    val request = try {
+                        json.decodeFromString(SubmitQuestionRequest.serializer(), body)
+                    } catch (_: Exception) {
+                        call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":"invalid request"}""")
+                        return@post
+                    }
+                    val ok = qaManager?.editQuestion(id, request.text) ?: false
+                    if (ok) call.respondText("""{"ok":true}""", ContentType.Application.Json)
+                    else call.respond(io.ktor.http.HttpStatusCode.NotFound, """{"error":"question not found"}""")
+                }
+
+                // Admin: deny question
+                post("/api/qa/questions/{id}/deny") {
+                    if (!checkQaAdmin(call)) return@post
+                    val id = call.parameters["id"] ?: run {
+                        call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":"missing id"}""")
+                        return@post
+                    }
+                    val ok = qaManager?.denyQuestion(id) ?: false
+                    if (ok) {
+                        if (qaManager?.displayedQuestion == null) scope.launch { onQADisplay.emit(null) }
+                        call.respondText("""{"ok":true}""", ContentType.Application.Json)
+                    }
+                    else call.respond(io.ktor.http.HttpStatusCode.NotFound, """{"error":"question not found"}""")
+                }
+
+                // Admin: mark question as done
+                post("/api/qa/questions/{id}/done") {
+                    if (!checkQaAdmin(call)) return@post
+                    val id = call.parameters["id"] ?: run {
+                        call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":"missing id"}""")
+                        return@post
+                    }
+                    val ok = qaManager?.markDone(id) ?: false
+                    if (ok) {
+                        if (qaManager?.displayedQuestion == null) scope.launch { onQADisplay.emit(null) }
+                        call.respondText("""{"ok":true}""", ContentType.Application.Json)
+                    }
+                    else call.respond(io.ktor.http.HttpStatusCode.NotFound, """{"error":"question not found"}""")
+                }
+
+                // Admin: display question on projection
+                post("/api/qa/questions/{id}/display") {
+                    if (!checkQaAdmin(call)) return@post
+                    val id = call.parameters["id"] ?: run {
+                        call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":"missing id"}""")
+                        return@post
+                    }
+                    val qa = qaManager
+                    val ok = qa?.displayQuestion(id) ?: false
+                    if (ok) {
+                        scope.launch { onQADisplay.emit(qa?.displayedQuestion) }
+                        call.respondText("""{"ok":true}""", ContentType.Application.Json)
+                    }
+                    else call.respond(io.ktor.http.HttpStatusCode.NotFound, """{"error":"question not found or not approved"}""")
+                }
+
+                // Admin: delete question
+                delete("/api/qa/questions/{id}") {
+                    if (!checkQaAdmin(call)) return@delete
+                    val id = call.parameters["id"] ?: run {
+                        call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":"missing id"}""")
+                        return@delete
+                    }
+                    val ok = qaManager?.deleteQuestion(id) ?: false
+                    if (ok) call.respondText("""{"ok":true}""", ContentType.Application.Json)
+                    else call.respond(io.ktor.http.HttpStatusCode.NotFound, """{"error":"question not found"}""")
+                }
+
+                // Admin: add question (admin-created)
+                post("/api/qa/add") {
+                    if (!checkQaAdmin(call)) return@post
+                    val body = call.receiveText()
+                    val request = try {
+                        json.decodeFromString(SubmitQuestionRequest.serializer(), body)
+                    } catch (_: Exception) {
+                        call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":"invalid request"}""")
+                        return@post
+                    }
+                    val question = qaManager?.addQuestion(request.text)
+                    if (question != null) {
+                        call.respondText(
+                            json.encodeToString(org.churchpresenter.app.churchpresenter.models.QuestionDto.serializer(), question.toDto()),
+                            ContentType.Application.Json
+                        )
+                    } else {
+                        call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":"failed to add question"}""")
+                    }
+                }
+
+                // Admin: clear display
+                post("/api/qa/clear-display") {
+                    if (!checkQaAdmin(call)) return@post
+                    qaManager?.clearDisplay()
+                    scope.launch { onQADisplay.emit(null) }
+                    call.respondText("""{"ok":true}""", ContentType.Application.Json)
+                }
+
+                // Admin: clear all questions
+                post("/api/qa/clear-all") {
+                    if (!checkQaAdmin(call)) return@post
+                    qaManager?.clearAll()
+                    call.respondText("""{"ok":true}""", ContentType.Application.Json)
+                }
             }
     }
 
@@ -2506,7 +2729,19 @@ class CompanionServer {
         }
     }
 
-
+    private suspend fun checkQaAdmin(call: io.ktor.server.application.ApplicationCall): Boolean {
+        val pw = qaAdminPassword
+        if (pw.isEmpty()) return true
+        val provided = call.request.headers["X-QA-Password"]
+            ?: call.request.queryParameters["password"]
+            ?: ""
+        return if (MessageDigest.isEqual(provided.toByteArray(), pw.toByteArray())) {
+            true
+        } else {
+            call.respond(io.ktor.http.HttpStatusCode.Unauthorized, """{"error":"Invalid admin password"}""")
+            false
+        }
+    }
 
 
     private fun broadcast(msg: WebSocketMessage) {
@@ -2583,6 +2818,337 @@ class CompanionServer {
             "localhost"
         }
     }
+
+    // ── Q&A HTML Pages ────────────────────────────────────────────────────────
+
+    private fun qaSubmissionPageHtml(): String = """
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ask a Question</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f5f5f5;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px}
+.card{background:#fff;border-radius:16px;box-shadow:0 2px 12px rgba(0,0,0,.1);padding:32px;max-width:480px;width:100%}
+h1{font-size:24px;margin-bottom:8px;color:#1e1e2e}
+p.sub{color:#666;margin-bottom:24px;font-size:14px}
+textarea{width:100%;min-height:120px;border:2px solid #e0e0e0;border-radius:12px;padding:16px;font-size:16px;resize:vertical;font-family:inherit;transition:border-color .2s}
+textarea:focus{outline:none;border-color:#1e88e5}
+button{width:100%;padding:14px;background:#1e88e5;color:#fff;border:none;border-radius:12px;font-size:16px;font-weight:600;cursor:pointer;margin-top:16px;transition:background .2s}
+button:hover{background:#1565c0}
+button:disabled{background:#bbb;cursor:not-allowed}
+.msg{text-align:center;padding:12px;border-radius:8px;margin-top:16px;font-size:14px}
+.msg.ok{background:#e8f5e9;color:#2e7d32}
+.msg.err{background:#ffebee;color:#c62828}
+.msg.off{background:#fff3e0;color:#e65100}
+#charcount{text-align:right;font-size:12px;color:#999;margin-top:4px}
+</style>
+</head>
+<body>
+<div class="card">
+<h1 id="page-title">Ask a Question</h1>
+<p class="sub" id="page-sub">Your question will be reviewed before being displayed.</p>
+<div id="form-area">
+<input type="text" id="name" placeholder="Your name" style="width:100%;border:2px solid #e0e0e0;border-radius:12px;padding:12px 16px;font-size:15px;font-family:inherit;margin-bottom:12px;box-sizing:border-box;transition:border-color .2s" onfocus="this.style.borderColor='#1e88e5'" onblur="this.style.borderColor='#e0e0e0'">
+<textarea id="q" maxlength="500" placeholder="Type your question here..."></textarea>
+<div id="charcount">0 / 500</div>
+<button id="btn" onclick="submit()">Submit Question</button>
+</div>
+<div id="msg" class="msg" style="display:none"></div>
+</div>
+<script>
+const q=document.getElementById('q'),btn=document.getElementById('btn'),msg=document.getElementById('msg'),cc=document.getElementById('charcount'),nameField=document.getElementById('name');
+let submitted=false,cooldown=30;
+const submitTime=parseInt(sessionStorage.getItem('qa_submit_time')||'0');
+if(submitTime>0){
+  const elapsed=Math.floor((Date.now()-submitTime)/1000);
+  const savedCooldown=parseInt(sessionStorage.getItem('qa_cooldown')||'30');
+  if(elapsed<savedCooldown){submitted=true;showThanks()}
+  else{sessionStorage.removeItem('qa_submit_time');sessionStorage.removeItem('qa_cooldown')}
+}
+q.addEventListener('input',()=>{cc.textContent=q.value.length+' / 500'});
+async function submit(){
+  const text=q.value.trim();
+  if(!text){show('Please enter a question','err');return}
+  btn.disabled=true;btn.textContent='Submitting...';
+  try{
+    const name=nameField.value.trim();
+    const r=await fetch('/api/qa/submit',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text,name})});
+    if(r.ok){showThanks();sessionStorage.setItem('qa_submit_time',Date.now().toString());sessionStorage.setItem('qa_cooldown',cooldown.toString())}
+    else if(r.status===429){showThanks()}
+    else if(r.status===403){show('Q&A session is not active right now.','off')}
+    else{const d=await r.json().catch(()=>({}));show(d.error||'Submission failed','err');btn.disabled=false;btn.textContent='Submit Question'}
+  }catch(e){show('Network error. Please try again.','err');btn.disabled=false;btn.textContent='Submit Question'}
+}
+function showThanks(){
+  document.getElementById('form-area').style.display='none';
+  document.getElementById('page-title').style.display='none';
+  document.getElementById('page-sub').style.display='none';
+  msg.innerHTML='<strong>Thanks for submitting your question!</strong><br><span style="font-size:13px;opacity:0.8">Your question will be reviewed before being displayed.</span>';
+  msg.className='msg ok';msg.style.display='block';
+  submitted=true;
+}
+function show(t,c){msg.textContent=t;msg.className='msg '+c;msg.style.display='block'}
+// Check session status periodically
+async function checkStatus(){
+  try{const r=await fetch('/api/qa/status');const d=await r.json();
+    if(d.cooldownSeconds)cooldown=d.cooldownSeconds;
+    if(submitted){
+      const st=parseInt(sessionStorage.getItem('qa_submit_time')||'0');
+      if(st>0&&Math.floor((Date.now()-st)/1000)>=cooldown){
+        submitted=false;sessionStorage.removeItem('qa_submit_time');sessionStorage.removeItem('qa_cooldown');
+        document.getElementById('form-area').style.display='block';msg.style.display='none';
+        document.getElementById('page-title').style.display='';document.getElementById('page-sub').style.display='';
+        btn.disabled=false;btn.textContent='Submit Question';q.value='';
+      }
+      return;
+    }
+    if(!d.sessionActive){document.getElementById('form-area').style.display='none';document.getElementById('page-title').style.display='none';document.getElementById('page-sub').style.display='none';show('Q&A session is not active right now.','off')}
+    else{document.getElementById('form-area').style.display='block';document.getElementById('page-title').style.display='';document.getElementById('page-sub').style.display='';if(msg.className.includes('off'))msg.style.display='none'}
+  }catch(e){}
+}
+checkStatus();setInterval(checkStatus,5000);
+</script>
+</body>
+</html>
+""".trimIndent()
+
+    private fun qaAdminPageHtml(): String = """
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Q&A Admin</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#1e1e2e;color:#e0e0e0;min-height:100vh;padding:16px}
+.header{display:flex;align-items:center;justify-content:space-between;padding:16px;margin-bottom:16px}
+h1{font-size:22px}
+.tabs{display:flex;gap:8px;margin-bottom:16px;padding:0 16px}
+.tab{padding:8px 20px;border-radius:8px;border:1px solid #3b3b5c;background:transparent;color:#e0e0e0;cursor:pointer;font-size:14px;transition:all .2s}
+.tab.active{background:#1e88e5;border-color:#1e88e5;color:#fff}
+.tab .count{background:rgba(255,255,255,.2);border-radius:10px;padding:1px 8px;margin-left:6px;font-size:12px}
+.list{padding:0 16px}
+.q{background:#2a2a3e;border-radius:12px;padding:16px;margin-bottom:8px;display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.q.live{border:2px solid #43a047}
+.q-text{flex:1;font-size:15px;line-height:1.4;min-width:150px}
+.q-time{color:#888;font-size:12px;white-space:nowrap;padding-top:3px}
+.q-label{font-size:11px;padding:2px 8px;border-radius:6px;font-weight:600}
+.q-label.done{background:#42a5f5;color:#fff}
+.q-label.denied{background:#e53935;color:#fff}
+.q-actions{display:flex;gap:6px;flex-wrap:wrap}
+.btn{padding:8px 14px;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;transition:background .2s}
+.btn-approve{background:#43a047;color:#fff}.btn-approve:hover{background:#2e7d32}
+.btn-deny{background:#e53935;color:#fff}.btn-deny:hover{background:#c62828}
+.btn-live{background:#1e88e5;color:#fff}.btn-live:hover{background:#1565c0}
+.btn-done{background:#42a5f5;color:#fff}.btn-done:hover{background:#1e88e5}
+.btn-back{background:#ff9800;color:#fff}.btn-back:hover{background:#f57c00}
+.btn-golive-confirm{background:#1e88e5;color:#fff;opacity:0.5}.btn-golive-confirm:hover{opacity:1}
+.btn-edit{background:#ff9800;color:#fff}.btn-edit:hover{background:#f57c00}
+.btn-del{background:#555;color:#ccc}.btn-del:hover{background:#777}
+.edit-area{width:100%;display:flex;gap:6px;align-items:center;margin-top:8px}
+.edit-area textarea{flex:1;background:#1e1e2e;color:#e0e0e0;border:2px solid #1e88e5;border-radius:8px;padding:8px;font-size:14px;font-family:inherit;resize:vertical;min-height:40px}
+.edit-area .btn{white-space:nowrap}
+.empty{text-align:center;padding:48px;color:#888;font-size:16px}
+.status-bar{padding:8px 16px;background:#43a047;color:#fff;border-radius:8px;margin:0 16px 16px;display:flex;align-items:center;justify-content:space-between}
+.status-bar .btn{background:rgba(255,255,255,.2);color:#fff}
+.add-bar{display:flex;gap:8px;padding:0 16px;margin-bottom:16px}
+.add-bar input{flex:1;background:#2a2a3e;color:#e0e0e0;border:1px solid #3b3b5c;border-radius:8px;padding:10px 14px;font-size:14px;font-family:inherit}
+.add-bar input:focus{outline:none;border-color:#1e88e5}
+.login{max-width:360px;margin:80px auto;text-align:center}
+.login input{width:100%;background:#2a2a3e;color:#e0e0e0;border:2px solid #3b3b5c;border-radius:12px;padding:14px;font-size:16px;margin:16px 0;text-align:center}
+.login input:focus{outline:none;border-color:#1e88e5}
+.login .btn{width:100%;padding:14px;font-size:16px}
+.login .err{color:#e53935;margin-top:8px;font-size:14px}
+</style>
+</head>
+<body>
+<div id="login-screen" class="login" style="display:none">
+<h1>Q&A Admin</h1>
+<p style="color:#888;margin-top:8px">Enter admin password to continue</p>
+<input type="password" id="pw-input" placeholder="Password" onkeydown="if(event.key==='Enter')doLogin()">
+<button class="btn btn-live" onclick="doLogin()">Login</button>
+<div class="err" id="pw-err" style="display:none"></div>
+</div>
+
+<div id="main-app" style="display:none">
+<div class="header">
+<h1>Q&A Admin</h1>
+<span id="status" style="font-size:13px;color:#888">Connecting...</span>
+</div>
+
+<div id="display-bar" class="status-bar" style="display:none">
+<span id="display-text">Displaying question...</span>
+<button class="btn" onclick="clearDisplay()">Clear Display</button>
+</div>
+
+<div class="add-bar">
+<input type="text" id="add-input" placeholder="Add a question..." spellcheck="true" onkeydown="if(event.key==='Enter')addQ()">
+<button class="btn btn-approve" onclick="addQ()">Add</button>
+</div>
+
+<div class="tabs">
+<button class="tab active" onclick="setFilter('INCOMING',this)" id="tab-incoming">Incoming <span class="count" id="cnt-incoming">0</span></button>
+<button class="tab" onclick="setFilter('FINISHED',this)" id="tab-finished">Finished <span class="count" id="cnt-finished">0</span></button>
+</div>
+
+<div class="list" id="list"></div>
+</div>
+
+<script>
+let questions=[],filter='INCOMING',displayedId=null,editingId=null,authed=false;
+let password=localStorage.getItem('qa_admin_pw')||'';
+const headers={'Content-Type':'application/json'};
+
+function setHeaders(){
+  if(password)headers['X-QA-Password']=password;
+}
+setHeaders();
+
+async function checkAuth(){
+  const r=await fetch('/api/qa/auth',{method:'POST',headers});
+  if(r.ok){authed=true;document.getElementById('login-screen').style.display='none';document.getElementById('main-app').style.display='block';load();checkStatus()}
+  else{document.getElementById('login-screen').style.display='block';document.getElementById('main-app').style.display='none';document.getElementById('pw-input').focus()}
+}
+async function doLogin(){
+  password=document.getElementById('pw-input').value;
+  localStorage.setItem('qa_admin_pw',password);
+  headers['X-QA-Password']=password;
+  const r=await fetch('/api/qa/auth',{method:'POST',headers});
+  if(r.ok){authed=true;document.getElementById('login-screen').style.display='none';document.getElementById('main-app').style.display='block';load();checkStatus()}
+  else{document.getElementById('pw-err').textContent='Incorrect password';document.getElementById('pw-err').style.display='block'}
+}
+
+// Check if password needed
+(async()=>{
+  try{const r=await fetch('/api/qa/auth',{method:'POST',headers});
+    if(r.ok){authed=true;document.getElementById('main-app').style.display='block';load();checkStatus()}
+    else{document.getElementById('login-screen').style.display='block';document.getElementById('pw-input').focus()}
+  }catch(e){document.getElementById('login-screen').style.display='block'}
+})();
+
+function lockOut(){
+  authed=false;password='';localStorage.removeItem('qa_admin_pw');
+  document.getElementById('main-app').style.display='none';
+  document.getElementById('login-screen').style.display='block';
+  document.getElementById('pw-err').textContent='Session expired. Please log in again.';
+  document.getElementById('pw-err').style.display='block';
+  document.getElementById('pw-input').value='';document.getElementById('pw-input').focus();
+}
+async function load(){
+  if(!authed)return;
+  try{
+    const r=await fetch('/api/qa/questions',{headers});
+    if(r.status===401){lockOut();return}
+    if(r.ok)questions=await r.json();
+    if(!editingId)render();
+  }catch(e){}
+}
+
+function render(){
+  let filtered;
+  if(filter==='INCOMING')filtered=questions.filter(q=>q.status==='PENDING'||q.status==='APPROVED');
+  else filtered=questions.filter(q=>q.status==='DONE'||q.status==='DENIED');
+  const list=document.getElementById('list');
+  document.getElementById('cnt-incoming').textContent=questions.filter(q=>q.status==='PENDING'||q.status==='APPROVED').length;
+  document.getElementById('cnt-finished').textContent=questions.filter(q=>q.status==='DONE'||q.status==='DENIED').length;
+
+  if(!filtered.length){list.innerHTML='<div class="empty">'+(filter==='INCOMING'?'No incoming questions':'No finished questions')+'</div>';return}
+  list.innerHTML=filtered.map(q=>{
+    const time=new Date(q.timestamp).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+    const isLive=q.id===displayedId;
+    let label='';
+    if(q.status==='DONE')label='<span class="q-label done">Done</span> ';
+    else if(q.status==='DENIED')label='<span class="q-label denied">Denied</span> ';
+    let actions='<button class="btn btn-edit" onclick="editQ(\''+q.id+'\')">Edit</button>';
+    if(q.status==='PENDING'){
+      actions+='<button class="btn btn-approve" onclick="action(\'approve\',\''+q.id+'\')">Approve</button><button class="btn btn-deny" onclick="action(\'deny\',\''+q.id+'\')">Deny</button>';
+    }else if(q.status==='APPROVED'){
+      actions+=(isLive?'':'<button class="btn btn-live" onclick="action(\'display\',\''+q.id+'\')">Go Live</button>')+'<button class="btn btn-done" onclick="action(\'done\',\''+q.id+'\')">Done</button><button class="btn btn-deny" onclick="action(\'deny\',\''+q.id+'\')">Deny</button>';
+    }else if(q.status==='DONE'){
+      actions+='<button class="btn btn-back" onclick="action(\'approve\',\''+q.id+'\')">Back to Incoming</button>';
+      actions+='<button class="btn btn-golive-confirm" onclick="confirmGoLive(\''+q.id+'\')">Go Live</button>';
+    }else if(q.status==='DENIED'){
+      actions+='<button class="btn btn-golive-confirm" onclick="confirmGoLive(\''+q.id+'\')">Go Live</button>';
+    }
+    actions+='<button class="btn btn-del" onclick="del(\''+q.id+'\')">Del</button>';
+    const nameTag=q.submitterName?'<span style="color:#888;font-size:12px">'+esc(q.submitterName)+':</span> ':'';
+    return '<div class="q'+(isLive?' live':'')+'" id="q-'+q.id+'"><span class="q-time">'+time+'</span><span class="q-text" id="qt-'+q.id+'">'+label+nameTag+esc(q.text)+'</span><div class="q-actions">'+actions+'</div></div>';
+  }).join('');
+}
+
+function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML}
+
+let pendingConfirm=null;
+function confirmGoLive(id){
+  if(pendingConfirm===id){
+    pendingConfirm=null;
+    action('approve',id).then(()=>action('display',id));
+    return;
+  }
+  pendingConfirm=id;
+  const el=document.getElementById('q-'+id);
+  if(el){const btns=el.querySelectorAll('.btn-golive-confirm');btns.forEach(b=>{b.textContent='Confirm Go Live?';b.style.opacity='1'})}
+  setTimeout(()=>{if(pendingConfirm===id){pendingConfirm=null;load()}},3000);
+}
+async function action(act,id){
+  try{const r=await fetch('/api/qa/questions/'+id+'/'+act,{method:'POST',headers});
+    if(r.status===401){lockOut();return}
+    if(r.ok&&act==='display')displayedId=id;
+    if(r.ok&&(act==='done'||act==='deny'))if(displayedId===id)displayedId=null;
+    load();
+  }catch(e){}
+}
+async function del(id){
+  try{const r=await fetch('/api/qa/questions/'+id,{method:'DELETE',headers});if(r.status===401){lockOut();return}load()}catch(e){}
+}
+function editQ(id){
+  const q=questions.find(q=>q.id===id);if(!q)return;
+  editingId=id;
+  const el=document.getElementById('qt-'+id);if(!el)return;
+  el.innerHTML='<div class="edit-area"><textarea id="edit-'+id+'" spellcheck="true">'+q.text+'</textarea><button class="btn btn-approve" onclick="saveEdit(\''+id+'\')">Save</button><button class="btn btn-del" onclick="cancelEdit()">Cancel</button></div>';
+  const ta=document.getElementById('edit-'+id);if(ta){ta.focus();ta.setSelectionRange(ta.value.length,ta.value.length)}
+}
+async function saveEdit(id){
+  const ta=document.getElementById('edit-'+id);if(!ta)return;
+  const text=ta.value.trim();if(!text)return;
+  editingId=null;
+  try{const r=await fetch('/api/qa/questions/'+id+'/edit',{method:'POST',headers,body:JSON.stringify({text})});if(r.status===401){lockOut();return}load()}catch(e){}
+}
+function cancelEdit(){editingId=null;render()}
+async function addQ(){
+  const inp=document.getElementById('add-input');const text=inp.value.trim();if(!text)return;
+  inp.value='';
+  try{const r=await fetch('/api/qa/add',{method:'POST',headers,body:JSON.stringify({text})});if(r.status===401){lockOut();return}load()}catch(e){}
+}
+async function clearDisplay(){
+  try{await fetch('/api/qa/clear-display',{method:'POST',headers});displayedId=null;render();load()}catch(e){}
+}
+function setFilter(f,el){
+  filter=f;
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  render();
+}
+async function checkStatus(){
+  if(!authed)return;
+  try{const r=await fetch('/api/qa/status');const d=await r.json();
+    document.getElementById('status').textContent=d.sessionActive?'Session Active':'Session Inactive';
+    document.getElementById('status').style.color=d.sessionActive?'#43a047':'#e53935';
+    const newDisplayed=d.displayedQuestionId||null;
+    if(newDisplayed!==displayedId){displayedId=newDisplayed;render()}
+  }catch(e){document.getElementById('status').textContent='Disconnected';document.getElementById('status').style.color='#e53935'}
+}
+
+setInterval(()=>{if(authed)load()},3000);
+setInterval(()=>{if(authed)checkStatus()},3000);
+</script>
+</body>
+</html>
+""".trimIndent()
 }
 
 // ── Extension mappers ─────────────────────────────────────────────────────────

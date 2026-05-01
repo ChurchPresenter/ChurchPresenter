@@ -86,6 +86,8 @@ import org.churchpresenter.app.churchpresenter.dialogs.RemoteEventType
 import org.churchpresenter.app.churchpresenter.dialogs.OptionsDialog
 import org.churchpresenter.app.churchpresenter.presenter.DeckLinkComposeOutput
 import org.churchpresenter.app.churchpresenter.presenter.AnnouncementsPresenter
+import org.churchpresenter.app.churchpresenter.presenter.QAPresenter
+import org.churchpresenter.app.churchpresenter.presenter.QAQRCodePresenter
 import org.churchpresenter.app.churchpresenter.presenter.CefManager
 import org.churchpresenter.app.churchpresenter.presenter.WebsitePresenter
 import org.churchpresenter.app.churchpresenter.presenter.BiblePresenter
@@ -110,6 +112,7 @@ import io.github.alexzhirkevich.compottie.rememberLottieComposition
 import org.churchpresenter.app.churchpresenter.composables.vlcCustomPath
 import org.churchpresenter.app.churchpresenter.data.Bible
 import org.churchpresenter.app.churchpresenter.server.CompanionServer
+import org.churchpresenter.app.churchpresenter.viewmodel.QAManager
 import org.churchpresenter.app.churchpresenter.server.AddToScheduleRequest
 import org.churchpresenter.app.churchpresenter.server.PendingRemoteRequest
 import org.churchpresenter.app.churchpresenter.server.ProjectRequest
@@ -268,6 +271,13 @@ fun main() {
             mutableStateOf(savedTheme)
         }
         val companionServer = remember { CompanionServer() }
+        val qaManager = remember { QAManager() }
+        remember(qaManager) { companionServer.qaManager = qaManager; true }
+        // Sync QA settings to server
+        LaunchedEffect(appSettings.qaSettings.adminPassword, appSettings.qaSettings.rateLimitCooldownSeconds) {
+            companionServer.qaAdminPassword = appSettings.qaSettings.adminPassword
+            companionServer.qaCooldownSeconds = appSettings.qaSettings.rateLimitCooldownSeconds
+        }
         val remoteSelectSongFlow =
             remember { kotlinx.coroutines.flow.MutableSharedFlow<ScheduleItem.SongItem>(extraBufferCapacity = 8) }
         var showOptionsDialog by remember { mutableStateOf(false) }
@@ -768,6 +778,18 @@ fun main() {
                                         presenterManager.requestClearDisplay()
                                     }
                                 }
+                                LaunchedEffect(Unit) {
+                                    companionServer.onQADisplay.collect { question ->
+                                        if (question != null) {
+                                            presenterManager.setDisplayedQuestion(question)
+                                            presenterManager.setShowQRCodeOnDisplay(false)
+                                            presenterManager.setPresentingMode(Presenting.QA)
+                                        } else {
+                                            presenterManager.setDisplayedQuestion(null)
+                                            presenterManager.setPresentingMode(Presenting.NONE)
+                                        }
+                                    }
+                                }
 
                                 // ── Remote Bible hold toggle ──────────────────────────────────────────────────
                                 LaunchedEffect(Unit) {
@@ -969,7 +991,8 @@ fun main() {
                                             emit(file)
                                         }
                                     },
-                                    serverUrl = companionServer.serverUrl.collectAsState().value
+                                    serverUrl = companionServer.serverUrl.collectAsState().value,
+                                    qaManager = qaManager
                                 )
                                 OptionsDialog(
                                     isVisible = showOptionsDialog,
@@ -1128,6 +1151,7 @@ fun main() {
                 mediaViewModel = mediaViewModel,
                 appSettings = appSettings,
                 identifyingScreen = identifyingScreen,
+                serverUrl = companionServer.serverUrl.collectAsState().value,
             )
         } else if (appReady) {
             LicenseDialog(
@@ -1298,6 +1322,7 @@ private fun PresenterWindows(
     mediaViewModel: MediaViewModel,
     appSettings: AppSettings,
     identifyingScreen: Boolean,
+    serverUrl: String = "",
 ) {
     val showPresenterWindow by presenterManager.showPresenterWindow
     val presentingMode by presenterManager.presentingMode
@@ -1338,6 +1363,9 @@ private fun PresenterWindows(
     val mediaTransitionAlpha by presenterManager.mediaTransitionAlpha
     val websiteUrl by presenterManager.websiteUrl
     val activeScene by presenterManager.activeScene
+    val displayedQuestion by presenterManager.displayedQuestion
+    val qaTransitionAlpha by presenterManager.qaTransitionAlpha
+    val showQRCodeOnDisplay by presenterManager.showQRCodeOnDisplay
     val timerRemainingSeconds by presenterManager.timerRemainingSeconds
     val timerRunning by presenterManager.timerRunning
     val presenterNotes by presenterManager.presenterNotes
@@ -1671,6 +1699,23 @@ private fun PresenterWindows(
 
                         Presenting.CANVAS -> ScenePresenter(scene = activeScene)
 
+                        Presenting.QA ->
+                            if (screenAssignment.showQA) {
+                                if (showQRCodeOnDisplay) {
+                                    QAQRCodePresenter(
+                                        url = "$serverUrl/qa",
+                                        qaSettings = appSettings.qaSettings,
+                                        transitionAlpha = qaTransitionAlpha,
+                                    )
+                                } else {
+                                    QAPresenter(
+                                        question = displayedQuestion,
+                                        qaSettings = appSettings.qaSettings,
+                                        transitionAlpha = qaTransitionAlpha,
+                                    )
+                                }
+                            }
+
                         Presenting.NONE -> { /* nothing */ }
                     }
                     }
@@ -1776,6 +1821,23 @@ private fun PresenterWindows(
                             )
 
                         Presenting.CANVAS -> ScenePresenter(scene = activeScene)
+
+                        Presenting.QA ->
+                            if (screenAssignment.showQA) {
+                                if (showQRCodeOnDisplay) {
+                                    QAQRCodePresenter(
+                                        url = "$serverUrl/qa",
+                                        qaSettings = appSettings.qaSettings,
+                                        transitionAlpha = qaTransitionAlpha,
+                                    )
+                                } else {
+                                    QAPresenter(
+                                        question = displayedQuestion,
+                                        qaSettings = appSettings.qaSettings,
+                                        transitionAlpha = qaTransitionAlpha,
+                                    )
+                                }
+                            }
 
                         Presenting.NONE -> { /* nothing */ }
                     }
@@ -1910,6 +1972,23 @@ private fun PresenterWindows(
                                             )
 
                                         Presenting.CANVAS -> ScenePresenter(scene = activeScene)
+
+                                        Presenting.QA ->
+                                            if (screenAssignment.showQA) {
+                                                if (showQRCodeOnDisplay) {
+                                                    QAQRCodePresenter(
+                                                        url = "$serverUrl/qa",
+                                                        qaSettings = appSettings.qaSettings,
+                                                        transitionAlpha = qaTransitionAlpha,
+                                                    )
+                                                } else {
+                                                    QAPresenter(
+                                                        question = displayedQuestion,
+                                                        qaSettings = appSettings.qaSettings,
+                                                        transitionAlpha = qaTransitionAlpha,
+                                                    )
+                                                }
+                                            }
 
                                         Presenting.NONE -> { /* nothing */ }
                                     }
@@ -2107,6 +2186,23 @@ private fun PresenterWindows(
 
                             Presenting.CANVAS -> ScenePresenter(scene = activeScene)
 
+                            Presenting.QA ->
+                                if (screenAssignment.showQA) {
+                                    if (showQRCodeOnDisplay) {
+                                        QAQRCodePresenter(
+                                            url = "$serverUrl/qa",
+                                            qaSettings = appSettings.qaSettings,
+                                            transitionAlpha = qaTransitionAlpha,
+                                        )
+                                    } else {
+                                        QAPresenter(
+                                            question = displayedQuestion,
+                                            qaSettings = appSettings.qaSettings,
+                                            transitionAlpha = qaTransitionAlpha,
+                                        )
+                                    }
+                                }
+
                             Presenting.NONE -> { /* nothing */
                             }
                         }
@@ -2284,6 +2380,23 @@ private fun PresenterWindows(
 
                                     Presenting.CANVAS -> ScenePresenter(scene = activeScene)
 
+                                    Presenting.QA ->
+                                        if (screenAssignment.showQA) {
+                                            if (showQRCodeOnDisplay) {
+                                                QAQRCodePresenter(
+                                                    url = "$serverUrl/qa",
+                                                    qaSettings = appSettings.qaSettings,
+                                                    transitionAlpha = qaTransitionAlpha,
+                                                )
+                                            } else {
+                                                QAPresenter(
+                                                    question = displayedQuestion,
+                                                    qaSettings = appSettings.qaSettings,
+                                                    transitionAlpha = qaTransitionAlpha,
+                                                )
+                                            }
+                                        }
+
                                     Presenting.NONE -> { /* nothing */
                                     }
                                 }
@@ -2395,6 +2508,23 @@ private fun PresenterWindows(
                             )
 
                         Presenting.CANVAS -> ScenePresenter(scene = activeScene)
+
+                        Presenting.QA ->
+                            if (screenAssignment.showQA) {
+                                if (showQRCodeOnDisplay) {
+                                    QAQRCodePresenter(
+                                        url = "$serverUrl/qa",
+                                        qaSettings = appSettings.qaSettings,
+                                        transitionAlpha = qaTransitionAlpha,
+                                    )
+                                } else {
+                                    QAPresenter(
+                                        question = displayedQuestion,
+                                        qaSettings = appSettings.qaSettings,
+                                        transitionAlpha = qaTransitionAlpha,
+                                    )
+                                }
+                            }
 
                         Presenting.NONE -> { /* nothing */ }
                     }
