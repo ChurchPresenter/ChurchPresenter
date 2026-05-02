@@ -8,7 +8,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
-import org.churchpresenter.app.churchpresenter.composables.SoftwareVideoPlayer
+import org.churchpresenter.app.churchpresenter.composables.SharedVideoOutputDisplay
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.viewmodel.LocalMediaViewModel
 
@@ -41,12 +41,11 @@ fun MediaPresenter(
             .alpha(transitionAlpha)
     ) {
         if (viewModel.isLoaded && isVisible) {
-            SoftwareVideoPlayer(
-                viewModel = viewModel,
-                modifier = Modifier.fillMaxSize(),
-                audioEnabled = audioEnabled,
-                audioDeviceId = audioDeviceId
-            )
+            // No VLC instance here — the single master SoftwareVideoPlayer (hosted in
+            // MainDesktop / MediaTab) decodes once and writes every frame to SharedVideoOutput.
+            // All presenter windows (any number of screens) just display that shared bitmap,
+            // eliminating the multiple-decoder jitter that occurred with per-window VideoPlayers.
+            SharedVideoOutputDisplay(modifier = Modifier.fillMaxSize())
         }
     }
 }

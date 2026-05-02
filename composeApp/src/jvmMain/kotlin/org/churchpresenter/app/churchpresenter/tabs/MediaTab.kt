@@ -89,6 +89,8 @@ import churchpresenter.composeapp.generated.resources.pause
 import churchpresenter.composeapp.generated.resources.play
 import org.churchpresenter.app.churchpresenter.composables.SegmentedButton
 import org.churchpresenter.app.churchpresenter.composables.SegmentedButtonItem
+import org.churchpresenter.app.churchpresenter.composables.SharedVideoOutputDisplay
+import org.churchpresenter.app.churchpresenter.composables.SoftwareVideoPlayer
 import org.churchpresenter.app.churchpresenter.composables.VideoPlayer
 import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.composables.isVlcArchMismatch
@@ -579,7 +581,16 @@ fun MediaTab(
 
             Spacer(modifier = Modifier.weight(1f))
         } else {
-            // Video file or no media: show video preview
+            // Master decoder: one SoftwareVideoPlayer handles decode + audio for all windows.
+            // Kept at 0dp (invisible) at all times — SharedVideoOutputDisplay renders its frames.
+            if (viewModel.isLoaded) {
+                SoftwareVideoPlayer(
+                    viewModel = viewModel,
+                    modifier = Modifier.size(0.dp)
+                )
+            }
+
+            // Video preview area
             Text(
                 text = stringResource(Res.string.media_preview),
                 style = MaterialTheme.typography.titleMedium,
@@ -621,10 +632,8 @@ fun MediaTab(
                             }
                         }
                         viewModel.isLoaded -> {
-                            VideoPlayer(
-                                viewModel = viewModel,
-                                modifier = Modifier.fillMaxSize()
-                            )
+                            // Show frames from the master SoftwareVideoPlayer above (0dp)
+                            SharedVideoOutputDisplay(modifier = Modifier.fillMaxSize())
                         }
                         else -> {
                             Column(

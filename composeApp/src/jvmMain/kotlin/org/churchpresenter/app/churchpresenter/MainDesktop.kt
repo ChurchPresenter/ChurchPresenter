@@ -59,6 +59,7 @@ import churchpresenter.composeapp.generated.resources.ic_cast
 import churchpresenter.composeapp.generated.resources.ic_close
 import kotlinx.coroutines.flow.Flow
 import org.churchpresenter.app.churchpresenter.composables.LivePreviewPanel
+import org.churchpresenter.app.churchpresenter.composables.SoftwareVideoPlayer
 import org.churchpresenter.app.churchpresenter.composables.VideoPlayer
 import org.churchpresenter.app.churchpresenter.composables.TooltipIconButton
 import org.jetbrains.compose.resources.painterResource
@@ -212,6 +213,17 @@ fun MainDesktop(
         && currentTab != Tabs.MEDIA
     ) {
         VideoPlayer(
+            viewModel = mediaViewModel,
+            modifier = Modifier.size(0.dp)
+        )
+    }
+    // Master video decoder for video files when away from Media tab.
+    // When on Media tab, MediaTab hosts its own SoftwareVideoPlayer (the master decoder).
+    // Both are mutually exclusive so only one decoder runs at a time.
+    if (mediaViewModel != null && !mediaViewModel.isAudioFile && mediaViewModel.isLoaded
+        && currentTab != Tabs.MEDIA
+    ) {
+        SoftwareVideoPlayer(
             viewModel = mediaViewModel,
             modifier = Modifier.size(0.dp)
         )
