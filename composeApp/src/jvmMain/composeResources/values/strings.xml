@@ -1121,6 +1121,53 @@
     <string name="stage_monitor_clock_24h">24-Hour Format</string>
     <string name="stage_monitor_notes_from_presentation">Notes are automatically shown from the active PowerPoint or Keynote slide.</string>
 
+    <!-- Q&A Tab -->
+    <string name="qa_server_not_running">Server not running — start the companion server in Settings to enable Q&amp;A</string>
+    <string name="qa_stop_session">Stop Session</string>
+    <string name="qa_new_session">New Session</string>
+    <string name="qa_resume">Resume (%1$d)</string>
+    <string name="qa_incoming">Incoming</string>
+    <string name="qa_finished">Finished</string>
+    <string name="qa_history">History</string>
+    <string name="qa_clear_all_questions">Clear All Questions</string>
+    <string name="qa_incoming_tab">Incoming (%1$d)</string>
+    <string name="qa_finished_tab">Finished (%1$d)</string>
+    <string name="qa_history_tab">History (%1$d)</string>
+    <string name="qa_displaying">Displaying: %1$s…</string>
+    <string name="qa_waiting">Waiting for questions…</string>
+    <string name="qa_start_session_hint">Start a session to receive questions</string>
+    <string name="qa_no_finished">No finished questions</string>
+    <string name="qa_no_history">No history from previous sessions</string>
+    <string name="qa_export_to_file">Export to File</string>
+    <string name="qa_import_from_file">Import from File</string>
+    <string name="qa_delete_all_history">Delete All History</string>
+    <string name="qa_export_dialog_title">Export Questions</string>
+    <string name="qa_import_dialog_title">Import Questions</string>
+    <string name="qa_submit_questions">Submit Questions</string>
+    <string name="qa_hide_qr">Hide QR from Display</string>
+    <string name="qa_show_qr">Show QR on Display</string>
+    <string name="qa_admin_panel">Admin Panel</string>
+    <string name="qa_server_hint">Start the companion server to enable Q&amp;A</string>
+    <string name="qa_display_styling">Display Styling</string>
+    <string name="qa_font">Font</string>
+    <string name="qa_size">Size</string>
+    <string name="qa_background_color">Background Color</string>
+    <string name="qa_transparent">Transparent</string>
+    <string name="qa_position">Position</string>
+    <string name="qa_settings_section">Settings</string>
+    <string name="qa_cooldown_label">Cooldown between questions (seconds)</string>
+    <string name="qa_admin_password">Admin Password</string>
+    <string name="qa_no_password">No password</string>
+    <string name="qa_approve">Approve</string>
+    <string name="qa_deny">Deny</string>
+    <string name="qa_mark_done">Mark Done</string>
+    <string name="qa_done_clear">Done &amp; Clear</string>
+    <string name="qa_back_to_incoming">Back to Incoming</string>
+    <string name="qa_confirm_go_live_prompt">Go Live?</string>
+    <string name="qa_confirm_go_live">Confirm Go Live</string>
+    <string name="qa_edit_question_hint">Edit question text…</string>
+    <string name="qa_delete_question">Delete</string>
+
     <!-- Update checker -->
     <string name="update_dialog_title">Update Available</string>
     <string name="update_dialog_message">A new version of Church Presenter is available: %1$s</string>
