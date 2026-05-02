@@ -343,12 +343,16 @@ fun VideoPlayer(
     }
 
     // Play / pause sync
+    // We always send the command unconditionally: mp.status().isPlaying() can return a stale
+    // value on the EDT (VLC may be buffering/transitioning) and guard-skipping the call is what
+    // causes the button to get stuck. libvlc play/pause on an already-playing/paused player
+    // is a documented no-op, so this is safe.
     LaunchedEffect(viewModel.isPlaying) {
         SwingUtilities.invokeLater {
             if (viewModel.isPlaying) {
-                if (!mp.status().isPlaying) mp.controls().play()
+                mp.controls().play()
             } else {
-                if (mp.status().isPlaying) mp.controls().pause()
+                mp.controls().pause()
             }
         }
     }
@@ -524,12 +528,16 @@ fun SoftwareVideoPlayer(
     }
 
     // Play / pause sync
+    // We always send the command unconditionally: mp.status().isPlaying() can return a stale
+    // value on the EDT (VLC may be buffering/transitioning) and guard-skipping the call is what
+    // causes the button to get stuck. libvlc play/pause on an already-playing/paused player
+    // is a documented no-op, so this is safe.
     LaunchedEffect(viewModel.isPlaying) {
         SwingUtilities.invokeLater {
             if (viewModel.isPlaying) {
-                if (!mp.status().isPlaying) mp.controls().play()
+                mp.controls().play()
             } else {
-                if (mp.status().isPlaying) mp.controls().pause()
+                mp.controls().pause()
             }
         }
     }
