@@ -65,6 +65,7 @@ import churchpresenter.composeapp.generated.resources.tab_visibility
 import churchpresenter.composeapp.generated.resources.ic_cast
 import churchpresenter.composeapp.generated.resources.ic_close
 import kotlinx.coroutines.flow.Flow
+import org.churchpresenter.app.churchpresenter.utils.AnalyticsReporter
 import org.churchpresenter.app.churchpresenter.composables.LivePreviewPanel
 import org.churchpresenter.app.churchpresenter.composables.SoftwareVideoPlayer
 import org.churchpresenter.app.churchpresenter.composables.VideoPlayer
@@ -436,6 +437,7 @@ fun MainDesktop(
 
     LaunchedEffect(selectedTabIndex) {
         onTabChange(selectedTabIndex)
+        AnalyticsReporter.logPageView(visibleTabs.getOrNull(selectedTabIndex)?.name ?: "unknown")
         // Re-request focus so F-key shortcuts keep working after the new tab's children steal focus
         mainFocusRequester.requestFocus()
     }

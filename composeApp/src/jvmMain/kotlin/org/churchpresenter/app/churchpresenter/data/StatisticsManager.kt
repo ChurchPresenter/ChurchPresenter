@@ -8,6 +8,7 @@ import kotlinx.serialization.json.Json
 import org.apache.poi.hssf.usermodel.HSSFWorkbook
 import org.apache.poi.ss.usermodel.FillPatternType
 import org.apache.poi.ss.usermodel.IndexedColors
+import org.churchpresenter.app.churchpresenter.utils.AnalyticsReporter
 
 @Serializable
 data class DisplayStatistics(
@@ -79,6 +80,7 @@ class StatisticsManager {
             )
             save()
         }
+        AnalyticsReporter.logSongDisplayed(songNumber, title, songbook)
     }
 
     fun recordVerseDisplay(bibleName: String, bookName: String, chapter: Int, verseNumber: Int) {
@@ -97,6 +99,7 @@ class StatisticsManager {
             )
             save()
         }
+        AnalyticsReporter.logVerseDisplayed(bibleName, bookName, chapter, verseNumber)
     }
 
     /** Returns top songs grouped by songbook, each list sorted by count descending. */
