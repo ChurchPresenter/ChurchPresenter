@@ -48,6 +48,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Tune
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -779,17 +780,13 @@ fun MainDesktop(
                         // Tab visibility dropdown button
                         var showTabVisibilityMenu by remember { mutableStateOf(false) }
                         Box {
-                            IconButton(
+                            TooltipIconButton(
+                                painter = rememberVectorPainter(Icons.Default.Tune),
+                                text = stringResource(Res.string.tab_visibility),
                                 onClick = { showTabVisibilityMenu = true },
-                                modifier = Modifier.size(36.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Tune,
-                                    contentDescription = stringResource(Res.string.tab_visibility),
-                                    tint = MaterialTheme.colorScheme.onSurface,
-                                    modifier = Modifier.size(20.dp)
-                                )
-                            }
+                                buttonSize = 36.dp,
+                                iconTint = MaterialTheme.colorScheme.onSurface
+                            )
                             DropdownMenu(
                                 expanded = showTabVisibilityMenu,
                                 onDismissRequest = { showTabVisibilityMenu = false }
