@@ -1028,5 +1028,53 @@
     <string name="update_dialog_release_notes">Was ist neu:</string>
     <string name="update_check_menu">Nach Updates suchen…</string>
     <string name="update_already_latest">Sie verwenden die neueste Version.</string>
+
+    <!-- Q&A Tab -->
+    <string name="tab_qa">Fragen &amp; Antworten</string>
+    <string name="qa_server_not_running">Server nicht aktiv — starten Sie den Companion-Server in den Einstellungen, um Q&amp;A zu aktivieren</string>
+    <string name="qa_stop_session">Sitzung beenden</string>
+    <string name="qa_new_session">Neue Sitzung</string>
+    <string name="qa_resume">Fortsetzen (%1$d)</string>
+    <string name="qa_incoming">Eingehend</string>
+    <string name="qa_finished">Abgeschlossen</string>
+    <string name="qa_history">Verlauf</string>
+    <string name="qa_clear_all_questions">Alle Fragen löschen</string>
+    <string name="qa_incoming_tab">Eingehend (%1$d)</string>
+    <string name="qa_finished_tab">Abgeschlossen (%1$d)</string>
+    <string name="qa_history_tab">Verlauf (%1$d)</string>
+    <string name="qa_displaying">Wird angezeigt: %1$s…</string>
+    <string name="qa_waiting">Warten auf Fragen…</string>
+    <string name="qa_start_session_hint">Starten Sie eine Sitzung, um Fragen zu empfangen</string>
+    <string name="qa_no_finished">Keine abgeschlossenen Fragen</string>
+    <string name="qa_no_history">Kein Verlauf aus vorherigen Sitzungen</string>
+    <string name="qa_export_to_file">In Datei exportieren</string>
+    <string name="qa_import_from_file">Aus Datei importieren</string>
+    <string name="qa_delete_all_history">Gesamten Verlauf löschen</string>
+    <string name="qa_export_dialog_title">Fragen exportieren</string>
+    <string name="qa_import_dialog_title">Fragen importieren</string>
+    <string name="qa_submit_questions">Fragen senden</string>
+    <string name="qa_hide_qr">QR von Anzeige ausblenden</string>
+    <string name="qa_show_qr">QR auf Anzeige zeigen</string>
+    <string name="qa_admin_panel">Admin-Bereich</string>
+    <string name="qa_server_hint">Starten Sie den Companion-Server, um Q&amp;A zu aktivieren</string>
+    <string name="qa_display_styling">Anzeigegestaltung</string>
+    <string name="qa_font">Schriftart</string>
+    <string name="qa_size">Größe</string>
+    <string name="qa_background_color">Hintergrundfarbe</string>
+    <string name="qa_transparent">Transparent</string>
+    <string name="qa_position">Position</string>
+    <string name="qa_settings_section">Einstellungen</string>
+    <string name="qa_cooldown_label">Wartezeit zwischen Fragen (Sekunden)</string>
+    <string name="qa_admin_password">Admin-Passwort</string>
+    <string name="qa_no_password">Kein Passwort</string>
+    <string name="qa_approve">Genehmigen</string>
+    <string name="qa_deny">Ablehnen</string>
+    <string name="qa_mark_done">Als erledigt markieren</string>
+    <string name="qa_done_clear">Fertig &amp; Löschen</string>
+    <string name="qa_back_to_incoming">Zurück zu Eingehend</string>
+    <string name="qa_confirm_go_live_prompt">Live gehen?</string>
+    <string name="qa_confirm_go_live">Live gehen bestätigen</string>
+    <string name="qa_edit_question_hint">Fragetext bearbeiten…</string>
+    <string name="qa_delete_question">Löschen</string>
 </resources>
 

@@ -1028,5 +1028,53 @@
     <string name="update_dialog_release_notes">Жаңалықтар:</string>
     <string name="update_check_menu">Жаңартуларды тексеру…</string>
     <string name="update_already_latest">Сізде ең соңғы нұсқа орнатылған.</string>
+
+    <!-- Q&A Tab -->
+    <string name="tab_qa">Сұрақтар мен жауаптар</string>
+    <string name="qa_server_not_running">Сервер іске қосылмаған — Q&amp;A қосу үшін Параметрлерде companion серверін іске қосыңыз</string>
+    <string name="qa_stop_session">Сеансты аяқтау</string>
+    <string name="qa_new_session">Жаңа сеанс</string>
+    <string name="qa_resume">Жалғастыру (%1$d)</string>
+    <string name="qa_incoming">Кіріс</string>
+    <string name="qa_finished">Аяқталған</string>
+    <string name="qa_history">Тарих</string>
+    <string name="qa_clear_all_questions">Барлық сұрақтарды тазалау</string>
+    <string name="qa_incoming_tab">Кіріс (%1$d)</string>
+    <string name="qa_finished_tab">Аяқталған (%1$d)</string>
+    <string name="qa_history_tab">Тарих (%1$d)</string>
+    <string name="qa_displaying">Көрсетілуде: %1$s…</string>
+    <string name="qa_waiting">Сұрақтар күтілуде…</string>
+    <string name="qa_start_session_hint">Сұрақтар алу үшін сеансты бастаңыз</string>
+    <string name="qa_no_finished">Аяқталған сұрақтар жоқ</string>
+    <string name="qa_no_history">Алдыңғы сеанстардан тарих жоқ</string>
+    <string name="qa_export_to_file">Файлға экспорттау</string>
+    <string name="qa_import_from_file">Файлдан импорттау</string>
+    <string name="qa_delete_all_history">Барлық тарихты жою</string>
+    <string name="qa_export_dialog_title">Сұрақтарды экспорттау</string>
+    <string name="qa_import_dialog_title">Сұрақтарды импорттау</string>
+    <string name="qa_submit_questions">Сұрақтарды жіберу</string>
+    <string name="qa_hide_qr">QR-ды экраннан жасыру</string>
+    <string name="qa_show_qr">QR-ды экранда көрсету</string>
+    <string name="qa_admin_panel">Әкімші панелі</string>
+    <string name="qa_server_hint">Q&amp;A қосу үшін companion серверін іске қосыңыз</string>
+    <string name="qa_display_styling">Дисплей стилі</string>
+    <string name="qa_font">Қаріп</string>
+    <string name="qa_size">Өлшем</string>
+    <string name="qa_background_color">Фон түсі</string>
+    <string name="qa_transparent">Мөлдір</string>
+    <string name="qa_position">Орын</string>
+    <string name="qa_settings_section">Параметрлер</string>
+    <string name="qa_cooldown_label">Сұрақтар арасындағы үзіліс (секунд)</string>
+    <string name="qa_admin_password">Әкімші құпия сөзі</string>
+    <string name="qa_no_password">Құпия сөзсіз</string>
+    <string name="qa_approve">Мақұлдау</string>
+    <string name="qa_deny">Қабылдамау</string>
+    <string name="qa_mark_done">Орындалды деп белгілеу</string>
+    <string name="qa_done_clear">Дайын &amp; Тазалау</string>
+    <string name="qa_back_to_incoming">Кіріске қайту</string>
+    <string name="qa_confirm_go_live_prompt">Тікелей эфирге шығу?</string>
+    <string name="qa_confirm_go_live">Тікелей эфирге шығуды растау</string>
+    <string name="qa_edit_question_hint">Сұрақ мәтінін өңдеу…</string>
+    <string name="qa_delete_question">Жою</string>
 </resources>
 

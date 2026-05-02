@@ -1030,5 +1030,53 @@
     <string name="update_dialog_release_notes">Что нового:</string>
     <string name="update_check_menu">Проверить обновления…</string>
     <string name="update_already_latest">У вас установлена последняя версия.</string>
+
+    <!-- Q&A Tab -->
+    <string name="tab_qa">Вопросы и ответы</string>
+    <string name="qa_server_not_running">Сервер не запущен — запустите companion-сервер в Настройках для включения Q&amp;A</string>
+    <string name="qa_stop_session">Завершить сеанс</string>
+    <string name="qa_new_session">Новый сеанс</string>
+    <string name="qa_resume">Продолжить (%1$d)</string>
+    <string name="qa_incoming">Входящие</string>
+    <string name="qa_finished">Завершённые</string>
+    <string name="qa_history">История</string>
+    <string name="qa_clear_all_questions">Очистить все вопросы</string>
+    <string name="qa_incoming_tab">Входящие (%1$d)</string>
+    <string name="qa_finished_tab">Завершённые (%1$d)</string>
+    <string name="qa_history_tab">История (%1$d)</string>
+    <string name="qa_displaying">Отображается: %1$s…</string>
+    <string name="qa_waiting">Ожидание вопросов…</string>
+    <string name="qa_start_session_hint">Начните сеанс для получения вопросов</string>
+    <string name="qa_no_finished">Нет завершённых вопросов</string>
+    <string name="qa_no_history">Нет истории предыдущих сеансов</string>
+    <string name="qa_export_to_file">Экспорт в файл</string>
+    <string name="qa_import_from_file">Импорт из файла</string>
+    <string name="qa_delete_all_history">Удалить всю историю</string>
+    <string name="qa_export_dialog_title">Экспорт вопросов</string>
+    <string name="qa_import_dialog_title">Импорт вопросов</string>
+    <string name="qa_submit_questions">Отправить вопросы</string>
+    <string name="qa_hide_qr">Скрыть QR с экрана</string>
+    <string name="qa_show_qr">Показать QR на экране</string>
+    <string name="qa_admin_panel">Панель администратора</string>
+    <string name="qa_server_hint">Запустите companion-сервер для включения Q&amp;A</string>
+    <string name="qa_display_styling">Оформление отображения</string>
+    <string name="qa_font">Шрифт</string>
+    <string name="qa_size">Размер</string>
+    <string name="qa_background_color">Цвет фона</string>
+    <string name="qa_transparent">Прозрачный</string>
+    <string name="qa_position">Положение</string>
+    <string name="qa_settings_section">Настройки</string>
+    <string name="qa_cooldown_label">Пауза между вопросами (секунды)</string>
+    <string name="qa_admin_password">Пароль администратора</string>
+    <string name="qa_no_password">Без пароля</string>
+    <string name="qa_approve">Одобрить</string>
+    <string name="qa_deny">Отклонить</string>
+    <string name="qa_mark_done">Отметить как выполненный</string>
+    <string name="qa_done_clear">Готово и очистить</string>
+    <string name="qa_back_to_incoming">Назад во входящие</string>
+    <string name="qa_confirm_go_live_prompt">Выйти в эфир?</string>
+    <string name="qa_confirm_go_live">Подтвердить выход в эфир</string>
+    <string name="qa_edit_question_hint">Редактировать текст вопроса…</string>
+    <string name="qa_delete_question">Удалить</string>
 </resources>
 

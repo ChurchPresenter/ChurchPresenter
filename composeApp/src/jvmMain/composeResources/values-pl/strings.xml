@@ -1027,5 +1027,53 @@
     <string name="update_dialog_release_notes">Co nowego:</string>
     <string name="update_check_menu">Sprawdź aktualizacje…</string>
     <string name="update_already_latest">Masz zainstalowaną najnowszą wersję.</string>
+
+    <!-- Q&A Tab -->
+    <string name="tab_qa">Pytania i odpowiedzi</string>
+    <string name="qa_server_not_running">Serwer nie działa — uruchom serwer companion w Ustawieniach, aby włączyć Q&amp;A</string>
+    <string name="qa_stop_session">Zakończ sesję</string>
+    <string name="qa_new_session">Nowa sesja</string>
+    <string name="qa_resume">Wznów (%1$d)</string>
+    <string name="qa_incoming">Przychodzące</string>
+    <string name="qa_finished">Zakończone</string>
+    <string name="qa_history">Historia</string>
+    <string name="qa_clear_all_questions">Wyczyść wszystkie pytania</string>
+    <string name="qa_incoming_tab">Przychodzące (%1$d)</string>
+    <string name="qa_finished_tab">Zakończone (%1$d)</string>
+    <string name="qa_history_tab">Historia (%1$d)</string>
+    <string name="qa_displaying">Wyświetlane: %1$s…</string>
+    <string name="qa_waiting">Oczekiwanie na pytania…</string>
+    <string name="qa_start_session_hint">Rozpocznij sesję, aby odbierać pytania</string>
+    <string name="qa_no_finished">Brak zakończonych pytań</string>
+    <string name="qa_no_history">Brak historii z poprzednich sesji</string>
+    <string name="qa_export_to_file">Eksportuj do pliku</string>
+    <string name="qa_import_from_file">Importuj z pliku</string>
+    <string name="qa_delete_all_history">Usuń całą historię</string>
+    <string name="qa_export_dialog_title">Eksportuj pytania</string>
+    <string name="qa_import_dialog_title">Importuj pytania</string>
+    <string name="qa_submit_questions">Prześlij pytania</string>
+    <string name="qa_hide_qr">Ukryj QR z wyświetlacza</string>
+    <string name="qa_show_qr">Pokaż QR na wyświetlaczu</string>
+    <string name="qa_admin_panel">Panel administratora</string>
+    <string name="qa_server_hint">Uruchom serwer companion, aby włączyć Q&amp;A</string>
+    <string name="qa_display_styling">Styl wyświetlania</string>
+    <string name="qa_font">Czcionka</string>
+    <string name="qa_size">Rozmiar</string>
+    <string name="qa_background_color">Kolor tła</string>
+    <string name="qa_transparent">Przezroczysty</string>
+    <string name="qa_position">Pozycja</string>
+    <string name="qa_settings_section">Ustawienia</string>
+    <string name="qa_cooldown_label">Przerwa między pytaniami (sekundy)</string>
+    <string name="qa_admin_password">Hasło administratora</string>
+    <string name="qa_no_password">Bez hasła</string>
+    <string name="qa_approve">Zatwierdź</string>
+    <string name="qa_deny">Odrzuć</string>
+    <string name="qa_mark_done">Oznacz jako wykonane</string>
+    <string name="qa_done_clear">Gotowe &amp; Wyczyść</string>
+    <string name="qa_back_to_incoming">Powrót do przychodzących</string>
+    <string name="qa_confirm_go_live_prompt">Nadawać na żywo?</string>
+    <string name="qa_confirm_go_live">Potwierdź nadawanie na żywo</string>
+    <string name="qa_edit_question_hint">Edytuj tekst pytania…</string>
+    <string name="qa_delete_question">Usuń</string>
 </resources>
 

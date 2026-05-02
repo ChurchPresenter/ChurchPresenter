@@ -1033,5 +1033,53 @@
     <string name="update_dialog_release_notes">Що нового:</string>
     <string name="update_check_menu">Перевірити оновлення…</string>
     <string name="update_already_latest">У вас встановлена остання версія.</string>
+
+    <!-- Q&A Tab -->
+    <string name="tab_qa">Запитання і відповіді</string>
+    <string name="qa_server_not_running">Сервер не запущено — запустіть companion-сервер у Налаштуваннях для включення Q&amp;A</string>
+    <string name="qa_stop_session">Завершити сеанс</string>
+    <string name="qa_new_session">Новий сеанс</string>
+    <string name="qa_resume">Продовжити (%1$d)</string>
+    <string name="qa_incoming">Вхідні</string>
+    <string name="qa_finished">Завершені</string>
+    <string name="qa_history">Історія</string>
+    <string name="qa_clear_all_questions">Очистити всі запитання</string>
+    <string name="qa_incoming_tab">Вхідні (%1$d)</string>
+    <string name="qa_finished_tab">Завершені (%1$d)</string>
+    <string name="qa_history_tab">Історія (%1$d)</string>
+    <string name="qa_displaying">Відображається: %1$s…</string>
+    <string name="qa_waiting">Очікування запитань…</string>
+    <string name="qa_start_session_hint">Розпочніть сеанс для отримання запитань</string>
+    <string name="qa_no_finished">Немає завершених запитань</string>
+    <string name="qa_no_history">Немає історії попередніх сеансів</string>
+    <string name="qa_export_to_file">Експорт у файл</string>
+    <string name="qa_import_from_file">Імпорт з файлу</string>
+    <string name="qa_delete_all_history">Видалити всю історію</string>
+    <string name="qa_export_dialog_title">Експорт запитань</string>
+    <string name="qa_import_dialog_title">Імпорт запитань</string>
+    <string name="qa_submit_questions">Надіслати запитання</string>
+    <string name="qa_hide_qr">Приховати QR з екрана</string>
+    <string name="qa_show_qr">Показати QR на екрані</string>
+    <string name="qa_admin_panel">Панель адміністратора</string>
+    <string name="qa_server_hint">Запустіть companion-сервер для включення Q&amp;A</string>
+    <string name="qa_display_styling">Оформлення відображення</string>
+    <string name="qa_font">Шрифт</string>
+    <string name="qa_size">Розмір</string>
+    <string name="qa_background_color">Колір фону</string>
+    <string name="qa_transparent">Прозорий</string>
+    <string name="qa_position">Положення</string>
+    <string name="qa_settings_section">Налаштування</string>
+    <string name="qa_cooldown_label">Пауза між запитаннями (секунди)</string>
+    <string name="qa_admin_password">Пароль адміністратора</string>
+    <string name="qa_no_password">Без пароля</string>
+    <string name="qa_approve">Схвалити</string>
+    <string name="qa_deny">Відхилити</string>
+    <string name="qa_mark_done">Позначити як виконане</string>
+    <string name="qa_done_clear">Готово і очистити</string>
+    <string name="qa_back_to_incoming">Назад до вхідних</string>
+    <string name="qa_confirm_go_live_prompt">Вийти в ефір?</string>
+    <string name="qa_confirm_go_live">Підтвердити вихід в ефір</string>
+    <string name="qa_edit_question_hint">Редагувати текст запитання…</string>
+    <string name="qa_delete_question">Видалити</string>
 </resources>
 

@@ -1028,5 +1028,53 @@
     <string name="update_dialog_release_notes">Што новага:</string>
     <string name="update_check_menu">Праверыць абнаўленні…</string>
     <string name="update_already_latest">У вас усталявана апошняя версія.</string>
+
+    <!-- Q&A Tab -->
+    <string name="tab_qa">Пытанні і адказы</string>
+    <string name="qa_server_not_running">Сервер не запушчаны — запусціце companion-сервер у Настройках для ўключэння Q&amp;A</string>
+    <string name="qa_stop_session">Завяршыць сеанс</string>
+    <string name="qa_new_session">Новы сеанс</string>
+    <string name="qa_resume">Працягнуць (%1$d)</string>
+    <string name="qa_incoming">Уваходныя</string>
+    <string name="qa_finished">Завершаныя</string>
+    <string name="qa_history">Гісторыя</string>
+    <string name="qa_clear_all_questions">Ачысціць усе пытанні</string>
+    <string name="qa_incoming_tab">Уваходныя (%1$d)</string>
+    <string name="qa_finished_tab">Завершаныя (%1$d)</string>
+    <string name="qa_history_tab">Гісторыя (%1$d)</string>
+    <string name="qa_displaying">Адлюстроўваецца: %1$s…</string>
+    <string name="qa_waiting">Чаканне пытанняў…</string>
+    <string name="qa_start_session_hint">Пачніце сеанс для атрымання пытанняў</string>
+    <string name="qa_no_finished">Няма завершаных пытанняў</string>
+    <string name="qa_no_history">Няма гісторыі папярэдніх сеансаў</string>
+    <string name="qa_export_to_file">Экспарт у файл</string>
+    <string name="qa_import_from_file">Імпарт з файла</string>
+    <string name="qa_delete_all_history">Выдаліць усю гісторыю</string>
+    <string name="qa_export_dialog_title">Экспарт пытанняў</string>
+    <string name="qa_import_dialog_title">Імпарт пытанняў</string>
+    <string name="qa_submit_questions">Адправіць пытанні</string>
+    <string name="qa_hide_qr">Схаваць QR з экрана</string>
+    <string name="qa_show_qr">Паказаць QR на экране</string>
+    <string name="qa_admin_panel">Панэль адміністратара</string>
+    <string name="qa_server_hint">Запусціце companion-сервер для ўключэння Q&amp;A</string>
+    <string name="qa_display_styling">Афармленне адлюстравання</string>
+    <string name="qa_font">Шрыфт</string>
+    <string name="qa_size">Памер</string>
+    <string name="qa_background_color">Колер фону</string>
+    <string name="qa_transparent">Празрысты</string>
+    <string name="qa_position">Становішча</string>
+    <string name="qa_settings_section">Настройкі</string>
+    <string name="qa_cooldown_label">Паўза паміж пытаннямі (секунды)</string>
+    <string name="qa_admin_password">Пароль адміністратара</string>
+    <string name="qa_no_password">Без пароля</string>
+    <string name="qa_approve">Адобрыць</string>
+    <string name="qa_deny">Адхіліць</string>
+    <string name="qa_mark_done">Адзначыць як выкананае</string>
+    <string name="qa_done_clear">Гатова і ачысціць</string>
+    <string name="qa_back_to_incoming">Назад да ўваходных</string>
+    <string name="qa_confirm_go_live_prompt">Выйсці ў эфір?</string>
+    <string name="qa_confirm_go_live">Пацвердзіць выхад у эфір</string>
+    <string name="qa_edit_question_hint">Рэдагаваць тэкст пытання…</string>
+    <string name="qa_delete_question">Выдаліць</string>
 </resources>
 

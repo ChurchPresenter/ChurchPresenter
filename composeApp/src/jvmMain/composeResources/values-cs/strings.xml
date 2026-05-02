@@ -1106,5 +1106,53 @@
     <string name="update_dialog_release_notes">Co je nového:</string>
     <string name="update_check_menu">Zkontrolovat aktualizace…</string>
     <string name="update_already_latest">Máte nainstalovanou nejnovější verzi.</string>
+
+    <!-- Q&A Tab -->
+    <string name="tab_qa">Otázky a odpovědi</string>
+    <string name="qa_server_not_running">Server není spuštěn — spusťte companion server v Nastavení pro aktivaci Q&amp;A</string>
+    <string name="qa_stop_session">Ukončit relaci</string>
+    <string name="qa_new_session">Nová relace</string>
+    <string name="qa_resume">Pokračovat (%1$d)</string>
+    <string name="qa_incoming">Příchozí</string>
+    <string name="qa_finished">Dokončené</string>
+    <string name="qa_history">Historie</string>
+    <string name="qa_clear_all_questions">Vymazat všechny otázky</string>
+    <string name="qa_incoming_tab">Příchozí (%1$d)</string>
+    <string name="qa_finished_tab">Dokončené (%1$d)</string>
+    <string name="qa_history_tab">Historie (%1$d)</string>
+    <string name="qa_displaying">Zobrazuje se: %1$s…</string>
+    <string name="qa_waiting">Čekání na otázky…</string>
+    <string name="qa_start_session_hint">Spusťte relaci pro příjem otázek</string>
+    <string name="qa_no_finished">Žádné dokončené otázky</string>
+    <string name="qa_no_history">Žádná historie z předchozích relací</string>
+    <string name="qa_export_to_file">Exportovat do souboru</string>
+    <string name="qa_import_from_file">Importovat ze souboru</string>
+    <string name="qa_delete_all_history">Smazat celou historii</string>
+    <string name="qa_export_dialog_title">Exportovat otázky</string>
+    <string name="qa_import_dialog_title">Importovat otázky</string>
+    <string name="qa_submit_questions">Odeslat otázky</string>
+    <string name="qa_hide_qr">Skrýt QR z displeje</string>
+    <string name="qa_show_qr">Zobrazit QR na displeji</string>
+    <string name="qa_admin_panel">Administrační panel</string>
+    <string name="qa_server_hint">Spusťte companion server pro aktivaci Q&amp;A</string>
+    <string name="qa_display_styling">Styl zobrazení</string>
+    <string name="qa_font">Písmo</string>
+    <string name="qa_size">Velikost</string>
+    <string name="qa_background_color">Barva pozadí</string>
+    <string name="qa_transparent">Průhledné</string>
+    <string name="qa_position">Poloha</string>
+    <string name="qa_settings_section">Nastavení</string>
+    <string name="qa_cooldown_label">Prodleva mezi otázkami (sekundy)</string>
+    <string name="qa_admin_password">Heslo administrátora</string>
+    <string name="qa_no_password">Bez hesla</string>
+    <string name="qa_approve">Schválit</string>
+    <string name="qa_deny">Zamítnout</string>
+    <string name="qa_mark_done">Označit jako hotové</string>
+    <string name="qa_done_clear">Hotovo &amp; Vymazat</string>
+    <string name="qa_back_to_incoming">Zpět na příchozí</string>
+    <string name="qa_confirm_go_live_prompt">Jít živě?</string>
+    <string name="qa_confirm_go_live">Potvrdit živé vysílání</string>
+    <string name="qa_edit_question_hint">Upravit text otázky…</string>
+    <string name="qa_delete_question">Smazat</string>
 </resources>
 
