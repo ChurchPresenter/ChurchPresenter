@@ -226,35 +226,51 @@ private fun VideoSourceContent(
     }
 
     val currentFrame = remember { mutableStateOf<ImageBitmap?>(null) }
+    val frameVersion = remember { mutableStateOf(0L) }
+    val bufferedImageHolder = remember { mutableStateOf<BufferedImage?>(null) }
 
     val factory = remember {
-        try { MediaPlayerFactory() } catch (_: Throwable) { null }
+        try { MediaPlayerFactory("--no-video-title-show") } catch (_: Throwable) { null }
     } ?: return
 
     val mediaPlayer = remember(factory) {
         try { factory.mediaPlayers().newEmbeddedMediaPlayer() } catch (_: Throwable) { null }
     } ?: return
 
-    DisposableEffect(source.filePath) {
-        var bufferedImage: BufferedImage? = null
+    // Convert frames off VLC's render thread to avoid blocking audio pipeline
+    LaunchedEffect(Unit) {
+        var lastVersion = 0L
+        while (isActive) {
+            val v = frameVersion.value
+            if (v != lastVersion) {
+                lastVersion = v
+                val img = bufferedImageHolder.value
+                if (img != null) {
+                    currentFrame.value = img.toComposeImageBitmap()
+                }
+            }
+            delay(16)
+        }
+    }
 
+    DisposableEffect(source.filePath) {
         val bufferFormatCallback = object : BufferFormatCallback {
             override fun getBufferFormat(sourceWidth: Int, sourceHeight: Int): BufferFormat {
-                bufferedImage = BufferedImage(sourceWidth, sourceHeight, BufferedImage.TYPE_INT_ARGB)
+                bufferedImageHolder.value = BufferedImage(sourceWidth, sourceHeight, BufferedImage.TYPE_INT_ARGB)
                 return RV32BufferFormat(sourceWidth, sourceHeight)
             }
             override fun allocatedBuffers(buffers: Array<out ByteBuffer>) { }
         }
 
         val renderCallback = RenderCallback { _, nativeBuffers, _ ->
-            val img = bufferedImage ?: return@RenderCallback
+            val img = bufferedImageHolder.value ?: return@RenderCallback
             if (nativeBuffers == null || nativeBuffers.isEmpty()) return@RenderCallback
             val pixelData = (img.raster.dataBuffer as? DataBufferInt)?.data ?: return@RenderCallback
             try {
                 val buf = nativeBuffers[0] ?: return@RenderCallback
                 buf.rewind()
                 buf.asIntBuffer().get(pixelData, 0, pixelData.size.coerceAtMost(buf.remaining() / 4))
-                currentFrame.value = img.toComposeImageBitmap()
+                frameVersion.value++
             } catch (_: Throwable) { }
         }
 
@@ -275,7 +291,7 @@ private fun VideoSourceContent(
         delay(100)
         try {
             mediaPlayer.audio().setVolume((source.volume * 100).toInt())
-            val options = mutableListOf<String>()
+            val options = mutableListOf(":clock-jitter=0")
             if (source.loop) options.add(":input-repeat=65535")
             mediaPlayer.media().play(file.absolutePath, *options.toTypedArray())
         } catch (_: Throwable) { }
@@ -286,7 +302,7 @@ private fun VideoSourceContent(
         Image(
             bitmap = frame,
             contentDescription = source.name,
-            contentScale = ContentScale.Crop,
+            contentScale = ContentScale.Fit,
             modifier = modifier.fillMaxSize()
         )
     } else {

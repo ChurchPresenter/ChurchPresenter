@@ -42,22 +42,38 @@ fun LoopingVideoBackground(
     if (CrashReporter.videoBackgroundsDisabled) return
 
     val currentFrame = remember { mutableStateOf<ImageBitmap?>(null) }
+    val frameVersion = remember { mutableStateOf(0L) }
+    val bufferedImageHolder = remember { mutableStateOf<BufferedImage?>(null) }
 
     val factory = remember {
-        try { MediaPlayerFactory() } catch (_: Throwable) { null }
+        try { MediaPlayerFactory("--no-video-title-show") } catch (_: Throwable) { null }
     } ?: return
 
     val mediaPlayer = remember(factory) {
         try { factory.mediaPlayers().newEmbeddedMediaPlayer() } catch (_: Throwable) { null }
     } ?: return
 
+    // Convert frames off VLC's render thread to avoid blocking its internal pipeline
+    LaunchedEffect(Unit) {
+        var lastVersion = 0L
+        while (isActive) {
+            val v = frameVersion.value
+            if (v != lastVersion) {
+                lastVersion = v
+                val img = bufferedImageHolder.value
+                if (img != null) {
+                    currentFrame.value = img.toComposeImageBitmap()
+                }
+            }
+            delay(16)
+        }
+    }
+
     // Set up callback video surface for software rendering
     DisposableEffect(Unit) {
-        var bufferedImage: BufferedImage? = null
-
         val bufferFormatCallback = object : BufferFormatCallback {
             override fun getBufferFormat(sourceWidth: Int, sourceHeight: Int): BufferFormat {
-                bufferedImage = BufferedImage(sourceWidth, sourceHeight, BufferedImage.TYPE_INT_ARGB)
+                bufferedImageHolder.value = BufferedImage(sourceWidth, sourceHeight, BufferedImage.TYPE_INT_ARGB)
                 return RV32BufferFormat(sourceWidth, sourceHeight)
             }
             override fun allocatedBuffers(buffers: Array<out ByteBuffer>) { }
@@ -66,14 +82,14 @@ fun LoopingVideoBackground(
         // Use RenderCallback directly (not RenderCallbackAdapter) to avoid
         // the adapter's null dst crash when VLC fires display before buffer allocation.
         val renderCallback = RenderCallback { player, nativeBuffers, bufferFormat ->
-            val img = bufferedImage ?: return@RenderCallback
+            val img = bufferedImageHolder.value ?: return@RenderCallback
             if (nativeBuffers == null || nativeBuffers.isEmpty()) return@RenderCallback
             val pixelData = (img.raster.dataBuffer as? DataBufferInt)?.data ?: return@RenderCallback
             try {
                 val buf = nativeBuffers[0] ?: return@RenderCallback
                 buf.rewind()
                 buf.asIntBuffer().get(pixelData, 0, pixelData.size.coerceAtMost(buf.remaining() / 4))
-                currentFrame.value = img.toComposeImageBitmap()
+                frameVersion.value++
             } catch (_: Throwable) { }
         }
 

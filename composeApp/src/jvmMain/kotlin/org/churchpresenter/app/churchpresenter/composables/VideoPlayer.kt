@@ -406,6 +406,8 @@ fun SoftwareVideoPlayer(
     if (!isVlcAvailable) return
 
     val currentFrame = remember { mutableStateOf<ImageBitmap?>(null) }
+    val frameVersion = remember { mutableStateOf(0L) }
+    val bufferedImageHolder = remember { mutableStateOf<java.awt.image.BufferedImage?>(null) }
 
     // On macOS, factory.mediaPlayers().newEmbeddedMediaPlayer() does NOT deliver video
     // frames to a callback surface — that requires CallbackMediaPlayerComponent.
@@ -425,32 +427,46 @@ fun SoftwareVideoPlayer(
     // even slow-starting or portrait/rotated videos have time to deliver their first frame.
     val firstFrameCaptured = remember { mutableStateOf(false) }
 
+    // Convert frames off VLC's render thread to avoid blocking audio pipeline
+    LaunchedEffect(Unit) {
+        var lastVersion = 0L
+        while (isActive) {
+            val v = frameVersion.value
+            if (v != lastVersion) {
+                lastVersion = v
+                val img = bufferedImageHolder.value
+                if (img != null) {
+                    val bitmap = img.toComposeImageBitmap()
+                    currentFrame.value = bitmap
+                    SharedVideoOutput.frame.value = bitmap
+                }
+            }
+            delay(16) // ~60fps cap
+        }
+    }
+
     // Set up callback video surface for software rendering
     DisposableEffect(Unit) {
-        var bufferedImage: java.awt.image.BufferedImage? = null
-
         val bufferFormatCallback = object : uk.co.caprica.vlcj.player.embedded.videosurface.callback.BufferFormatCallback {
             override fun getBufferFormat(sourceWidth: Int, sourceHeight: Int): uk.co.caprica.vlcj.player.embedded.videosurface.callback.BufferFormat {
                 val w = sourceWidth.coerceAtLeast(1)
                 val h = sourceHeight.coerceAtLeast(1)
-                bufferedImage = java.awt.image.BufferedImage(w, h, java.awt.image.BufferedImage.TYPE_INT_RGB)
+                bufferedImageHolder.value = java.awt.image.BufferedImage(w, h, java.awt.image.BufferedImage.TYPE_INT_RGB)
                 return uk.co.caprica.vlcj.player.embedded.videosurface.callback.format.RV32BufferFormat(w, h)
             }
             override fun allocatedBuffers(buffers: Array<out java.nio.ByteBuffer>) { }
         }
 
         val renderCallback = uk.co.caprica.vlcj.player.embedded.videosurface.callback.RenderCallback { _, nativeBuffers, _ ->
-            val img = bufferedImage ?: return@RenderCallback
+            val img = bufferedImageHolder.value ?: return@RenderCallback
             if (nativeBuffers == null || nativeBuffers.isEmpty()) return@RenderCallback
             val pixelData = (img.raster.dataBuffer as? java.awt.image.DataBufferInt)?.data ?: return@RenderCallback
             try {
                 val buf = nativeBuffers[0] ?: return@RenderCallback
                 buf.rewind()
                 buf.asIntBuffer().get(pixelData, 0, pixelData.size.coerceAtMost(buf.remaining() / 4))
-                val bitmap = img.toComposeImageBitmap()
-                currentFrame.value = bitmap
-                SharedVideoOutput.frame.value = bitmap   // share to all presenter windows
                 firstFrameCaptured.value = true
+                frameVersion.value++  // signal new frame available, conversion happens off-thread
             } catch (_: Throwable) { }
         }
 
@@ -578,7 +594,7 @@ fun SoftwareVideoPlayer(
         Image(
             bitmap = frame,
             contentDescription = null,
-            contentScale = ContentScale.Crop,
+            contentScale = ContentScale.Fit,
             modifier = modifier
         )
     }
