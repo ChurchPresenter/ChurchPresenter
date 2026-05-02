@@ -47,7 +47,6 @@ import churchpresenter.composeapp.generated.resources.projection
 import churchpresenter.composeapp.generated.resources.server_settings
 import churchpresenter.composeapp.generated.resources.song
 import churchpresenter.composeapp.generated.resources.stage_monitor
-import churchpresenter.composeapp.generated.resources.tab_visibility
 import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.data.RemoteClientManager
 import org.churchpresenter.app.churchpresenter.data.SettingsManager
@@ -61,7 +60,6 @@ import org.churchpresenter.app.churchpresenter.dialogs.tabs.ServerSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.SongSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.LowerThirdSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.StageMonitorSettingsTab
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.TabVisibilitySettingsTab
 import org.churchpresenter.app.churchpresenter.ui.theme.AppThemeWrapper
 import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
@@ -84,7 +82,9 @@ fun OptionsDialog(
     if (!isVisible) return
 
     var currentSettings by remember { mutableStateOf(settingsManager.loadSettings()) }
+    val tabCount = 9
     var selectedTabIndex by remember { mutableStateOf(0) }
+    val safeTabIndex = selectedTabIndex.coerceIn(0, tabCount - 1)
     val isDarkTheme = when (theme) {
         ThemeMode.LIGHT -> false
         ThemeMode.DARK -> true
@@ -109,60 +109,55 @@ fun OptionsDialog(
                 Column(modifier = Modifier.fillMaxSize()) {
                     // Tab Row
                     PrimaryScrollableTabRow(
-                        selectedTabIndex = selectedTabIndex,
+                        selectedTabIndex = safeTabIndex,
                         containerColor = MaterialTheme.colorScheme.surface,
                         contentColor = MaterialTheme.colorScheme.onSurface,
                         edgePadding = 0.dp
                     ) {
                         Tab(
-                            selected = selectedTabIndex == 0,
+                            selected = safeTabIndex == 0,
                             onClick = { selectedTabIndex = 0 },
                             text = { Text(stringResource(Res.string.appearance)) }
                         )
                         Tab(
-                            selected = selectedTabIndex == 1,
+                            selected = safeTabIndex == 1,
                             onClick = { selectedTabIndex = 1 },
                             text = { Text(stringResource(Res.string.bible)) }
                         )
                         Tab(
-                            selected = selectedTabIndex == 2,
+                            selected = safeTabIndex == 2,
                             onClick = { selectedTabIndex = 2 },
                             text = { Text(stringResource(Res.string.song)) }
                         )
                         Tab(
-                            selected = selectedTabIndex == 3,
+                            selected = safeTabIndex == 3,
                             onClick = { selectedTabIndex = 3 },
                             text = { Text(stringResource(Res.string.background)) }
                         )
                         Tab(
-                            selected = selectedTabIndex == 4,
+                            selected = safeTabIndex == 4,
                             onClick = { selectedTabIndex = 4 },
                             text = { Text(stringResource(Res.string.pictures)) }
                         )
                         Tab(
-                            selected = selectedTabIndex == 5,
+                            selected = safeTabIndex == 5,
                             onClick = { selectedTabIndex = 5 },
                             text = { Text(stringResource(Res.string.projection)) }
                         )
                         Tab(
-                            selected = selectedTabIndex == 6,
+                            selected = safeTabIndex == 6,
                             onClick = { selectedTabIndex = 6 },
                             text = { Text(stringResource(Res.string.display_lower_third)) }
                         )
                         Tab(
-                            selected = selectedTabIndex == 7,
+                            selected = safeTabIndex == 7,
                             onClick = { selectedTabIndex = 7 },
                             text = { Text(stringResource(Res.string.server_settings)) }
                         )
                         Tab(
-                            selected = selectedTabIndex == 8,
+                            selected = safeTabIndex == 8,
                             onClick = { selectedTabIndex = 8 },
                             text = { Text(stringResource(Res.string.stage_monitor)) }
-                        )
-                        Tab(
-                            selected = selectedTabIndex == 9,
-                            onClick = { selectedTabIndex = 9 },
-                            text = { Text(stringResource(Res.string.tab_visibility)) }
                         )
                     }
 
@@ -173,7 +168,7 @@ fun OptionsDialog(
                             .fillMaxWidth()
                             .background(MaterialTheme.colorScheme.background)
                     ) {
-                        when (selectedTabIndex) {
+                        when (safeTabIndex) {
                             0 -> SystemSettingsTab(
                                 currentTheme = theme,
                                 onThemeChange = onThemeChange,
@@ -233,12 +228,6 @@ fun OptionsDialog(
                                 remoteClientManager = remoteClientManager
                             )
                             8 -> StageMonitorSettingsTab(
-                                settings = currentSettings,
-                                onSettingsChange = { updateFn ->
-                                    currentSettings = updateFn(currentSettings)
-                                }
-                            )
-                            9 -> TabVisibilitySettingsTab(
                                 settings = currentSettings,
                                 onSettingsChange = { updateFn ->
                                     currentSettings = updateFn(currentSettings)

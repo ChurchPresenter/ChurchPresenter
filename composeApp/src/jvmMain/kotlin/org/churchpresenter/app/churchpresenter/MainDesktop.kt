@@ -46,6 +46,12 @@ import androidx.compose.ui.input.key.type
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Tune
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Text
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.ic_arrow_left
 import churchpresenter.composeapp.generated.resources.ic_arrow_right
@@ -55,6 +61,7 @@ import churchpresenter.composeapp.generated.resources.tooltip_expand_schedule
 import churchpresenter.composeapp.generated.resources.tooltip_clear_display
 import churchpresenter.composeapp.generated.resources.tooltip_toggle_displays
 import churchpresenter.composeapp.generated.resources.tooltip_settings
+import churchpresenter.composeapp.generated.resources.tab_visibility
 import churchpresenter.composeapp.generated.resources.ic_cast
 import churchpresenter.composeapp.generated.resources.ic_close
 import kotlinx.coroutines.flow.Flow
@@ -89,6 +96,7 @@ import org.churchpresenter.app.churchpresenter.tabs.CanvasTab
 import org.churchpresenter.app.churchpresenter.tabs.QATab
 import org.churchpresenter.app.churchpresenter.tabs.TabSection
 import org.churchpresenter.app.churchpresenter.tabs.Tabs
+import org.churchpresenter.app.churchpresenter.tabs.getStringName
 import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.viewmodel.LocalMediaViewModel
@@ -765,6 +773,54 @@ fun MainDesktop(
                             selectedTabIndex = selectedTabIndex,
                             onTabSelected = { selectedTabIndex = it }
                         )
+                        // Tab visibility dropdown button
+                        var showTabVisibilityMenu by remember { mutableStateOf(false) }
+                        Box {
+                            IconButton(
+                                onClick = { showTabVisibilityMenu = true },
+                                modifier = Modifier.size(36.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Tune,
+                                    contentDescription = stringResource(Res.string.tab_visibility),
+                                    tint = MaterialTheme.colorScheme.onSurface,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+                            DropdownMenu(
+                                expanded = showTabVisibilityMenu,
+                                onDismissRequest = { showTabVisibilityMenu = false }
+                            ) {
+                                val visibleCount = Tabs.entries.count { it.name !in appSettings.hiddenTabs }
+                                Tabs.entries.forEach { tab ->
+                                    val isVisible = tab.name !in appSettings.hiddenTabs
+                                    val isOnlyVisible = isVisible && visibleCount == 1
+                                    DropdownMenuItem(
+                                        text = { Text(getStringName(tab)) },
+                                        onClick = {
+                                            if (!isOnlyVisible) {
+                                                onSettingsChange { s ->
+                                                    val newHidden = if (isVisible) {
+                                                        s.hiddenTabs + tab.name
+                                                    } else {
+                                                        s.hiddenTabs - tab.name
+                                                    }
+                                                    s.copy(hiddenTabs = newHidden)
+                                                }
+                                            }
+                                        },
+                                        leadingIcon = {
+                                            Checkbox(
+                                                checked = isVisible,
+                                                onCheckedChange = null,
+                                                enabled = !isOnlyVisible
+                                            )
+                                        },
+                                        enabled = !isOnlyVisible
+                                    )
+                                }
+                            }
+                        }
                         TooltipIconButton(
                             painter = painterResource(Res.drawable.ic_settings),
                             text = stringResource(Res.string.tooltip_settings),
