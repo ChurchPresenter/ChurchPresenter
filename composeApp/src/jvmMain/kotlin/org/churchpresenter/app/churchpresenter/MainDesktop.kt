@@ -199,14 +199,15 @@ fun MainDesktop(
     val visibleTabs = remember(appSettings.hiddenTabs) {
         Tabs.entries.filter { it.name !in appSettings.hiddenTabs }.ifEmpty { listOf(Tabs.BIBLE) }
     }
+    // Clamp synchronously so no composition pass ever sees an out-of-bounds index.
+    val effectiveTabIndex = selectedTabIndex.coerceIn(visibleTabs.indices)
+    // Persist the clamped value back into state after composition.
+    LaunchedEffect(effectiveTabIndex) {
+        if (selectedTabIndex != effectiveTabIndex) selectedTabIndex = effectiveTabIndex
+    }
     fun selectTab(tab: Tabs) {
         val idx = visibleTabs.indexOf(tab)
         if (idx >= 0) selectedTabIndex = idx
-    }
-    LaunchedEffect(visibleTabs) {
-        if (selectedTabIndex !in visibleTabs.indices) {
-            selectedTabIndex = selectedTabIndex.coerceIn(visibleTabs.indices)
-        }
     }
     var showAddLabelDialog by remember { mutableStateOf(false) }
     var editingLabelItem by remember { mutableStateOf<ScheduleItem.LabelItem?>(null) }
@@ -216,7 +217,7 @@ fun MainDesktop(
 
     // Hidden VLCJ player for audio: keeps audio playing when user switches away from Media tab.
     // Only composed when NOT on the Media tab (the tab has its own VideoPlayer).
-    val currentTab = visibleTabs.getOrElse(selectedTabIndex) { Tabs.BIBLE }
+    val currentTab = visibleTabs[effectiveTabIndex]
     if (mediaViewModel != null && mediaViewModel.isAudioFile && mediaViewModel.isPlaying
         && currentTab != Tabs.MEDIA
     ) {
@@ -770,7 +771,7 @@ fun MainDesktop(
                         TabSection(
                             modifier = Modifier.weight(1f),
                             visibleTabs = visibleTabs,
-                            selectedTabIndex = selectedTabIndex,
+                            selectedTabIndex = effectiveTabIndex,
                             onTabSelected = { selectedTabIndex = it }
                         )
                         // Tab visibility dropdown button
