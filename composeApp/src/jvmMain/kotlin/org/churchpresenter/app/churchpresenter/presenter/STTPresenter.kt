@@ -247,11 +247,12 @@ private fun buildDisplayText(
     val lines = mutableListOf<String>()
     for (seg in segments) {
         if (seg.text.isNotBlank()) {
-            lines.add(seg.text.trim())
+            // Normalize whitespace: collapse multiple spaces/tabs into single space
+            lines.add(seg.text.trim().replace(Regex("\\s+"), " "))
         }
     }
     if (showInProgress && inProgressText.isNotBlank()) {
-        lines.add(inProgressText.trim())
+        lines.add(inProgressText.trim().replace(Regex("\\s+"), " "))
     }
 
     if (lines.isEmpty()) return AnnotatedString("")
