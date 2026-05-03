@@ -515,15 +515,17 @@ private fun applyHighlighting(
         if (hw.word.isBlank()) continue
         try {
             val highlightColor = org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor(hw.color)
-            val wb = "(?<=^|[\\s.,;:!?()\"'\\u00AB\\u00BB\\u201E\\u201C\\u201F])"
-            val we = "(?=[\\s.,;:!?()\"'\\u00AB\\u00BB\\u201E\\u201C\\u201F]|$)"
-            val pattern = if (hw.isRegex) {
+            val wb = "(?<![\\p{L}\\p{N}])"
+            val we = "(?![\\p{L}\\p{N}])"
+            val rawPattern = if (hw.isRegex) {
                 "$wb(?:${hw.word})$we"
             } else {
                 val escaped = Regex.escape(hw.word)
                 "$wb$escaped$we"
             }
-            val regex = if (hw.caseSensitive) Regex(pattern) else Regex(pattern, RegexOption.IGNORE_CASE)
+            var flags = java.util.regex.Pattern.UNICODE_CHARACTER_CLASS
+            if (!hw.caseSensitive) flags = flags or java.util.regex.Pattern.CASE_INSENSITIVE or java.util.regex.Pattern.UNICODE_CASE
+            val regex = java.util.regex.Pattern.compile(rawPattern, flags).toRegex()
             regex.findAll(text).forEach { match ->
                 for (j in match.range) colors[j] = highlightColor
             }
