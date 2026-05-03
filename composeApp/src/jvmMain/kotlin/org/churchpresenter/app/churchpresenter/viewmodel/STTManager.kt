@@ -228,15 +228,26 @@ class STTManager {
 
     private fun handleWordHighlightingUpdate(data: JSONObject) {
         _wordHighlightingEnabled.value = data.optBoolean("enabled", true)
+
+        val disabledColors = mutableSetOf<String>()
+        val disabledArray = data.optJSONArray("disabled_colors")
+        if (disabledArray != null) {
+            for (i in 0 until disabledArray.length()) {
+                disabledColors.add(disabledArray.optString(i, ""))
+            }
+        }
+
         val wordsArray = data.optJSONArray("words")
         _highlightedWords.clear()
         if (wordsArray != null) {
             for (i in 0 until wordsArray.length()) {
                 val w = wordsArray.getJSONObject(i)
+                val color = w.optString("color", "#ffff00")
+                if (color in disabledColors) continue
                 _highlightedWords.add(
                     HighlightedWord(
                         word = w.optString("word", ""),
-                        color = w.optString("color", "#ffff00"),
+                        color = color,
                         caseSensitive = w.optBoolean("case_sensitive", false),
                         isRegex = w.optBoolean("is_regex", false)
                     )
@@ -256,6 +267,15 @@ class STTManager {
             if (response.statusCode() == 200) {
                 val json = JSONObject(response.body())
                 if (json.optBoolean("success", false)) {
+                    // Collect disabled color groups to filter them out
+                    val disabledColors = mutableSetOf<String>()
+                    val disabledArray = json.optJSONArray("disabled_colors")
+                    if (disabledArray != null) {
+                        for (i in 0 until disabledArray.length()) {
+                            disabledColors.add(disabledArray.optString(i, ""))
+                        }
+                    }
+
                     scope.launch {
                         _wordHighlightingEnabled.value = json.optBoolean("enabled", true)
                         val wordsArray = json.optJSONArray("words")
@@ -263,10 +283,13 @@ class STTManager {
                         if (wordsArray != null) {
                             for (i in 0 until wordsArray.length()) {
                                 val w = wordsArray.getJSONObject(i)
+                                val color = w.optString("color", "#ffff00")
+                                // Skip words whose color group is disabled
+                                if (color in disabledColors) continue
                                 _highlightedWords.add(
                                     HighlightedWord(
                                         word = w.optString("word", ""),
-                                        color = w.optString("color", "#ffff00"),
+                                        color = color,
                                         caseSensitive = w.optBoolean("case_sensitive", false),
                                         isRegex = w.optBoolean("is_regex", false)
                                     )
