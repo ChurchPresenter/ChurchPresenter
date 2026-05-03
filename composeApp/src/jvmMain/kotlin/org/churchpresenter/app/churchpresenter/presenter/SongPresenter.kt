@@ -394,12 +394,41 @@ fun SongPresenter(
                         } else section
                     }
                 } else allLyricSections
+                // Compute reserved height for title/song number above the verse
+                val referenceDensity = Density(1f)
+                val fitTitleDisplay = if (isLowerThird) ss.titleLowerThirdDisplay else ss.titleDisplay
+                val fitTitlePosition = if (isLowerThird) ss.titleLowerThirdPosition else ss.titlePosition
+                val fitNumberDisplay = if (isLowerThird) ss.showNumberLowerThird else ss.showNumber
+                val fitNumberPosition = if (isLowerThird) ss.songNumberLowerThirdPosition else ss.songNumberPosition
+                val fitTitleFontSize = if (isLowerThird) ss.titleLowerThirdFontSize else ss.titleFontSize
+                val fitNumberFontSize = if (isLowerThird) ss.songNumberLowerThirdFontSize else ss.songNumberFontSize
+
+                var reserved = 0
+                if (fitTitleDisplay != Constants.NONE && fitTitlePosition == Constants.ABOVE_VERSE) {
+                    val titleStyle = TextStyle(fontSize = fitTitleFontSize.sp, fontFamily = titleFontFamily)
+                    val longestTitle = allLyricSections.maxOfOrNull { it.title.length }?.let { len ->
+                        allLyricSections.first { it.title.length == len }.title
+                    } ?: ""
+                    if (longestTitle.isNotEmpty()) {
+                        reserved += autoFitTextMeasurer.measure(longestTitle, titleStyle, density = referenceDensity).size.height
+                    }
+                }
+                if (fitNumberDisplay != Constants.NONE && fitNumberPosition == Constants.ABOVE_VERSE) {
+                    val numStyle = TextStyle(fontSize = fitNumberFontSize.sp, fontFamily = titleFontFamily)
+                    val maxNum = allLyricSections.maxOfOrNull { it.songNumber } ?: 0
+                    if (maxNum > 0) {
+                        reserved += autoFitTextMeasurer.measure(maxNum.toString(), numStyle, density = referenceDensity).size.height
+                    }
+                }
+
                 calculateAutoFitForAllSections(
                     textMeasurer = autoFitTextMeasurer,
                     sections = sectionsForFit,
                     baseStyle = baseStyle,
                     availableWidth = refWidth,
-                    availableHeight = refHeight
+                    availableHeight = refHeight,
+                    reservedHeight = reserved,
+                    includeEndIndicator = true
                 )
             }
         }

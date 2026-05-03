@@ -59,6 +59,9 @@ class SongsViewModel(
 
     private val _filteredSongsList = mutableStateOf<List<SongItem>>(emptyList())
 
+    // After edit/reload, re-select the song by its sourceFile path
+    private var _pendingSelectSourceFile: String? = null
+
     // Sort state — managed by ViewModel so it survives recomposition
     private val _sortColumn = mutableStateOf("")
     val sortColumn: State<String> = _sortColumn
@@ -169,8 +172,7 @@ class SongsViewModel(
         _songbooks.value = allPaths.sorted()
 
         _allSongItems.value = songItems
-        _filteredSongsList.value = songItems
-        refreshFilteredSongItems()
+        applyFilters()
 
         onSongsLoaded?.invoke(songItems)
     }
@@ -472,6 +474,17 @@ class SongsViewModel(
         }
 
         refreshFilteredSongItems()
+
+        // Re-select song by sourceFile after reload (preserves selection across edits)
+        val pendingFile = _pendingSelectSourceFile
+        if (pendingFile != null) {
+            val items = _filteredSongItems.value
+            val idx = items.indexOfFirst { it.sourceFile == pendingFile }
+            if (idx >= 0) {
+                _selectedSongIndex.value = idx
+                _pendingSelectSourceFile = null
+            }
+        }
     }
 
     private fun refreshFilteredSongItems() {
@@ -568,6 +581,8 @@ class SongsViewModel(
             val saved = _songsData.value.saveSongToFile(oldSong, songToSave, storageDir)
 
             if (saved) {
+                // Remember which song to re-select after async reload
+                _pendingSelectSourceFile = songToSave.sourceFile
                 // Reload songs to reflect changes
                 loadSongs()
                 // Re-apply current filters to update the filtered list
@@ -634,7 +649,8 @@ class SongsViewModel(
         scheduleViewModel.addSong(
             songNumber = song.number.toIntOrNull() ?: 0,
             title = song.title,
-            songbook = song.songbook
+            songbook = song.songbook,
+            songId = song.songId
         )
         return true
     }
