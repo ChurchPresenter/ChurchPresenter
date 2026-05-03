@@ -334,6 +334,8 @@
     <string name="select_image_folder_dialog">Bildordner auswählen</string>
     <string name="loop">Wiederholen</string>
     <string name="transition_duration">Übergangszeit:</string>
+    <string name="unit_s">s</string>
+    <string name="unit_ms">ms</string>
     <string name="animation_type">Animationstyp:</string>
     <string name="animation_crossfade">Überblendung</string>
     <string name="animation_fade">Einblenden</string>

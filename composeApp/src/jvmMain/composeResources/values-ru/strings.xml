@@ -334,6 +334,8 @@
     <string name="select_image_folder_dialog">Выбрать папку с изображениями</string>
     <string name="loop">По кругу</string>
     <string name="transition_duration">Длительность перехода:</string>
+    <string name="unit_s">с</string>
+    <string name="unit_ms">мс</string>
     <string name="animation_type">Тип анимации:</string>
     <string name="animation_crossfade">Плавный переход</string>
     <string name="animation_fade">Затухание</string>

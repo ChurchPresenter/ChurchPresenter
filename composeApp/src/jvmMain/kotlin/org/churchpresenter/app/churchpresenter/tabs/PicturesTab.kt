@@ -83,6 +83,8 @@ import churchpresenter.composeapp.generated.resources.select_folder
 import churchpresenter.composeapp.generated.resources.select_folder_to_view
 import churchpresenter.composeapp.generated.resources.select_image_folder_dialog
 import churchpresenter.composeapp.generated.resources.transition_duration
+import churchpresenter.composeapp.generated.resources.unit_s
+import churchpresenter.composeapp.generated.resources.unit_ms
 import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
 import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.models.AnimationType
@@ -331,7 +333,7 @@ fun PicturesTab(
                                 }
                             },
                             label = { Text(stringResource(Res.string.auto_scroll_interval)) },
-                            suffix = { Text("s") },
+                            suffix = { Text(stringResource(Res.string.unit_s)) },
                             singleLine = true,
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                             modifier = Modifier.width(150.dp),
@@ -351,7 +353,7 @@ fun PicturesTab(
                                 }
                             },
                             label = { Text(stringResource(Res.string.transition_duration)) },
-                            suffix = { Text("ms") },
+                            suffix = { Text(stringResource(Res.string.unit_ms)) },
                             singleLine = true,
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                             modifier = Modifier.width(170.dp),

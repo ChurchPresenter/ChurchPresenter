@@ -334,6 +334,8 @@
     <string name="select_image_folder_dialog">Wybierz folder z obrazami</string>
     <string name="loop">Zapętlenie</string>
     <string name="transition_duration">Czas przejścia:</string>
+    <string name="unit_s">s</string>
+    <string name="unit_ms">ms</string>
     <string name="animation_type">Typ animacji:</string>
     <string name="animation_crossfade">Przenikanie</string>
     <string name="animation_fade">Zanikanie</string>

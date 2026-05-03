@@ -333,6 +333,8 @@
     <string name="select_image_folder_dialog">Выбраць папку з малюнкамі</string>
     <string name="loop">Па коле</string>
     <string name="transition_duration">Працягласць пераходу:</string>
+    <string name="unit_s">с</string>
+    <string name="unit_ms">мс</string>
     <string name="animation_type">Тып анімацыі:</string>
     <string name="animation_crossfade">Плаўны пераход</string>
     <string name="animation_fade">Згасанне</string>

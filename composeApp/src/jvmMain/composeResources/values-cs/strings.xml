@@ -419,6 +419,8 @@
     <string name="select_image_folder_dialog">Vybrat složku s obrázky</string>
     <string name="loop">Smyčka</string>
     <string name="transition_duration">Doba přechodu:</string>
+    <string name="unit_s">s</string>
+    <string name="unit_ms">ms</string>
     <string name="animation_type">Typ animace:</string>
     <string name="animation_crossfade">Prolínání</string>
     <string name="animation_fade">Zeslabení</string>

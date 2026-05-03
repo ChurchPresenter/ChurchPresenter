@@ -444,6 +444,8 @@
     <string name="loop_on">Loop On</string>
     <string name="loop_off">Loop Off</string>
     <string name="transition_duration">Transition Duration:</string>
+    <string name="unit_s">s</string>
+    <string name="unit_ms">ms</string>
     <string name="animation_type">Animation Type:</string>
     <string name="animation_crossfade">Crossfade</string>
     <string name="animation_fade">Fade</string>
