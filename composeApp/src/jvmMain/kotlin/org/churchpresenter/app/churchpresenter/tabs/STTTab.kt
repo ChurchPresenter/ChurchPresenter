@@ -1,6 +1,7 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -18,6 +19,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -40,6 +42,7 @@ import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -317,51 +320,71 @@ fun STTTab(
 
                     // Transcription column
                     if (showTranscription) {
-                        Column(
-                            modifier = Modifier.weight(1f).fillMaxHeight().verticalScroll(rememberScrollState()).padding(4.dp)
-                        ) {
-                            Text("Transcription", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
-                            Spacer(Modifier.height(4.dp))
-                            displaySegments.forEach { segment ->
-                                Text(
-                                    text = applyHighlighting(segment.text, highlightedWords, highlightingEnabled, MaterialTheme.colorScheme.onSurface),
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    modifier = Modifier.padding(vertical = 1.dp)
-                                )
+                        val transcriptionScrollState = rememberScrollState()
+                        LaunchedEffect(displaySegments.size, inProgressText) {
+                            transcriptionScrollState.animateScrollTo(transcriptionScrollState.maxValue)
+                        }
+                        Box(modifier = Modifier.weight(1f).fillMaxHeight()) {
+                            Column(
+                                modifier = Modifier.fillMaxSize().verticalScroll(transcriptionScrollState).padding(4.dp)
+                            ) {
+                                Text("Transcription", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+                                Spacer(Modifier.height(4.dp))
+                                displaySegments.forEach { segment ->
+                                    Text(
+                                        text = applyHighlighting(segment.text, highlightedWords, highlightingEnabled, MaterialTheme.colorScheme.onSurface),
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        modifier = Modifier.padding(vertical = 1.dp)
+                                    )
+                                }
+                                if (sttSettings.showInProgress && inProgressText.isNotBlank()) {
+                                    Text(
+                                        text = inProgressText,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                                        modifier = Modifier.padding(vertical = 1.dp)
+                                    )
+                                }
                             }
-                            if (sttSettings.showInProgress && inProgressText.isNotBlank()) {
-                                Text(
-                                    text = inProgressText,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                                    modifier = Modifier.padding(vertical = 1.dp)
-                                )
-                            }
+                            VerticalScrollbar(
+                                modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
+                                adapter = rememberScrollbarAdapter(transcriptionScrollState)
+                            )
                         }
                     }
 
                     // Translation column
                     if (showTranslation) {
-                        Column(
-                            modifier = Modifier.weight(1f).fillMaxHeight().verticalScroll(rememberScrollState()).padding(4.dp)
-                        ) {
-                            Text("Translation", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
-                            Spacer(Modifier.height(4.dp))
-                            displayTranslation.forEach { segment ->
-                                Text(
-                                    text = applyHighlighting(segment.text, highlightedWords, highlightingEnabled, MaterialTheme.colorScheme.primary),
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    modifier = Modifier.padding(vertical = 1.dp)
-                                )
+                        val translationScrollState = rememberScrollState()
+                        LaunchedEffect(displayTranslation.size, inProgressTranslation) {
+                            translationScrollState.animateScrollTo(translationScrollState.maxValue)
+                        }
+                        Box(modifier = Modifier.weight(1f).fillMaxHeight()) {
+                            Column(
+                                modifier = Modifier.fillMaxSize().verticalScroll(translationScrollState).padding(4.dp)
+                            ) {
+                                Text("Translation", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+                                Spacer(Modifier.height(4.dp))
+                                displayTranslation.forEach { segment ->
+                                    Text(
+                                        text = applyHighlighting(segment.text, highlightedWords, highlightingEnabled, MaterialTheme.colorScheme.primary),
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        modifier = Modifier.padding(vertical = 1.dp)
+                                    )
+                                }
+                                if (sttSettings.showTranslationInProgress && inProgressTranslation.isNotBlank()) {
+                                    Text(
+                                        text = inProgressTranslation,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f),
+                                        modifier = Modifier.padding(vertical = 1.dp)
+                                    )
+                                }
                             }
-                            if (sttSettings.showTranslationInProgress && inProgressTranslation.isNotBlank()) {
-                                Text(
-                                    text = inProgressTranslation,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f),
-                                    modifier = Modifier.padding(vertical = 1.dp)
-                                )
-                            }
+                            VerticalScrollbar(
+                                modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
+                                adapter = rememberScrollbarAdapter(translationScrollState)
+                            )
                         }
                     }
                 }
