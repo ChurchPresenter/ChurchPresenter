@@ -1031,6 +1031,7 @@
 
     <!-- Q&A Tab -->
     <string name="tab_qa">Сұрақтар мен жауаптар</string>
+    <string name="tab_stt">STT</string>
     <string name="qa_server_not_running">Сервер іске қосылмаған — Q&amp;A қосу үшін Параметрлерде companion серверін іске қосыңыз</string>
     <string name="qa_stop_session">Сеансты аяқтау</string>
     <string name="qa_new_session">Жаңа сеанс</string>

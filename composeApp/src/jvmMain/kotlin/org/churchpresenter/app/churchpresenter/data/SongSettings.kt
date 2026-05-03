@@ -500,6 +500,7 @@ data class ScreenAssignment(
     val displayMode: String = "fullscreen", // Constants.DISPLAY_MODE_FULLSCREEN or DISPLAY_MODE_LOWER_THIRD
     val songLookAhead: Boolean = false, // enable look-ahead for songs on this output
     val showQA: Boolean = true,
+    val showSTT: Boolean = true,
     val showFullscreenBackground: Boolean = true, // show configured background in fullscreen mode
     val showLowerThirdBackground: Boolean = true  // show configured background in lower third mode
 ) {
@@ -617,6 +618,33 @@ data class QASettings(
 )
 
 @Serializable
+data class STTSettings(
+    val serverUrl: String = "http://localhost:80",
+    val displayMode: String = "transcribe", // "transcribe", "translate", "both"
+    val layout: String = "stacked", // "stacked", "stacked_inverse", "side_by_side", "side_by_side_inverse"
+    val showWordHighlighting: Boolean = true,
+    val maxSegments: Int = 5, // last N segments shown (0 = unlimited)
+    val showInProgress: Boolean = true,
+    val showTranslationInProgress: Boolean = true,
+    val dripFeedEnabled: Boolean = true,
+    val dripFeedSpeed: Int = 40, // ms per word
+    val textColor: String = "#FFFFFF",
+    val translationTextColor: String = "#AAAAFF",
+    val backgroundColor: String = "#1E1E2E",
+    val fontSize: Int = 42,
+    val fontType: String = "Arial",
+    val bold: Boolean = false,
+    val italic: Boolean = false,
+    val underline: Boolean = false,
+    val shadow: Boolean = false,
+    val shadowColor: String = "#000000",
+    val shadowSize: Int = 100,
+    val shadowOpacity: Int = 78,
+    val horizontalAlignment: String = Constants.CENTER,
+    val position: String = Constants.BOTTOM,
+)
+
+@Serializable
 data class ServerSettings(
     val enabled: Boolean = false,
     val port: Int = Constants.SERVER_DEFAULT_PORT,
@@ -729,6 +757,7 @@ data class AppSettings(
     val streamingSettings: StreamingSettings = StreamingSettings(),
     val announcementsSettings: AnnouncementsSettings = AnnouncementsSettings(),
     val qaSettings: QASettings = QASettings(),
+    val sttSettings: STTSettings = STTSettings(),
     val serverSettings: ServerSettings = ServerSettings(),
     val stageMonitorSettings: StageMonitorSettings = StageMonitorSettings(),
     val presentationStorageDirectory: String = "",
@@ -746,5 +775,5 @@ data class AppSettings(
     val windowHeight: Int = 800,
     val windowX: Int = -1,
     val windowY: Int = -1,
-    val hiddenTabs: Set<String> = setOf("QA")
+    val hiddenTabs: Set<String> = setOf("QA", "STT")
 )

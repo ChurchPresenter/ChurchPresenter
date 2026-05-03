@@ -1030,6 +1030,7 @@
 
     <!-- Q&A Tab -->
     <string name="tab_qa">Pytania i odpowiedzi</string>
+    <string name="tab_stt">STT</string>
     <string name="qa_server_not_running">Serwer nie działa — uruchom serwer companion w Ustawieniach, aby włączyć Q&amp;A</string>
     <string name="qa_stop_session">Zakończ sesję</string>
     <string name="qa_new_session">Nowa sesja</string>

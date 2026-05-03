@@ -1033,6 +1033,7 @@
 
     <!-- Q&A Tab -->
     <string name="tab_qa">Вопросы и ответы</string>
+    <string name="tab_stt">STT</string>
     <string name="qa_server_not_running">Сервер не запущен — запустите companion-сервер в Настройках для включения Q&amp;A</string>
     <string name="qa_stop_session">Завершить сеанс</string>
     <string name="qa_new_session">Новый сеанс</string>

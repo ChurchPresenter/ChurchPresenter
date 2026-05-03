@@ -1031,6 +1031,7 @@
 
     <!-- Q&A Tab -->
     <string name="tab_qa">Fragen &amp; Antworten</string>
+    <string name="tab_stt">STT</string>
     <string name="qa_server_not_running">Server nicht aktiv — starten Sie den Companion-Server in den Einstellungen, um Q&amp;A zu aktivieren</string>
     <string name="qa_stop_session">Sitzung beenden</string>
     <string name="qa_new_session">Neue Sitzung</string>

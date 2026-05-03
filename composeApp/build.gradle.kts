@@ -162,6 +162,8 @@ kotlin {
             implementation("net.java.dev.jna:jna-platform:5.16.0")
             implementation("com.google.zxing:core:3.5.3")
             implementation("com.google.zxing:javase:3.5.3")
+            // Socket.IO client for STT integration
+            implementation(libs.socket.io.client)
             // JCEF — embedded Chromium browser for web presenter
             implementation("me.friwi:jcefmaven:143.0.14")
             // Bundle platform-specific Chromium binaries so no runtime download is needed

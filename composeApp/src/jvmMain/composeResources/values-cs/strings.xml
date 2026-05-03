@@ -1109,6 +1109,7 @@
 
     <!-- Q&A Tab -->
     <string name="tab_qa">Otázky a odpovědi</string>
+    <string name="tab_stt">STT</string>
     <string name="qa_server_not_running">Server není spuštěn — spusťte companion server v Nastavení pro aktivaci Q&amp;A</string>
     <string name="qa_stop_session">Ukončit relaci</string>
     <string name="qa_new_session">Nová relace</string>
