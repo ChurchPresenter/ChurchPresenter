@@ -1844,12 +1844,14 @@ private fun PresenterWindows(
                                     QAQRCodePresenter(
                                         url = "${qaDisplayUrl.ifEmpty { serverUrl }}/qa",
                                         qaSettings = appSettings.qaSettings,
+                                        outputRole = Constants.OUTPUT_ROLE_KEY,
                                         transitionAlpha = qaTransitionAlpha,
                                     )
                                 } else {
                                     QAPresenter(
                                         question = displayedQuestion,
                                         qaSettings = appSettings.qaSettings,
+                                        outputRole = Constants.OUTPUT_ROLE_KEY,
                                         transitionAlpha = qaTransitionAlpha,
                                     )
                                 }
@@ -1995,12 +1997,14 @@ private fun PresenterWindows(
                                                     QAQRCodePresenter(
                                                         url = "${qaDisplayUrl.ifEmpty { serverUrl }}/qa",
                                                         qaSettings = appSettings.qaSettings,
+                                                        outputRole = Constants.OUTPUT_ROLE_KEY,
                                                         transitionAlpha = qaTransitionAlpha,
                                                     )
                                                 } else {
                                                     QAPresenter(
                                                         question = displayedQuestion,
                                                         qaSettings = appSettings.qaSettings,
+                                                        outputRole = Constants.OUTPUT_ROLE_KEY,
                                                         transitionAlpha = qaTransitionAlpha,
                                                     )
                                                 }

@@ -612,7 +612,6 @@ data class QASettings(
     val horizontalAlignment: String = Constants.CENTER,
     val position: String = Constants.CENTER,
     val adminPassword: String = generateDefaultPassword(),
-    val rateLimitPerMinute: Int = 3,
     val rateLimitCooldownSeconds: Int = 30,
 )
 
