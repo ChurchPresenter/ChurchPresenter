@@ -994,6 +994,7 @@ fun MainDesktop(
                                 STTTab(
                                     modifier = Modifier.fillMaxSize(),
                                     sttManager = sttManager,
+                                    presenterManager = presenterManager,
                                     presenting = presenting,
                                     appSettings = appSettings,
                                     onSettingsChange = onSettingsChange

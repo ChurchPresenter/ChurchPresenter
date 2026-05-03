@@ -68,6 +68,7 @@ import java.awt.GraphicsEnvironment
 fun STTTab(
     modifier: Modifier = Modifier,
     sttManager: STTManager,
+    presenterManager: org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager,
     presenting: (Presenting) -> Unit,
     appSettings: AppSettings,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
@@ -75,7 +76,8 @@ fun STTTab(
     val sttSettings = appSettings.sttSettings
     val connected by sttManager.connected
     val connecting by sttManager.connecting
-    val isLive by sttManager.isLive
+    val presentingMode by presenterManager.presentingMode
+    val isLive = presentingMode == Presenting.STT
     val segments = sttManager.segments
     val inProgressText by sttManager.inProgressText
     val translationSegments = sttManager.translationSegments
@@ -150,7 +152,6 @@ fun STTTab(
                 // Go Live
                 IconButton(
                     onClick = {
-                        sttManager.setLive(true)
                         presenting(Presenting.STT)
                     },
                     enabled = connected && !isLive,
