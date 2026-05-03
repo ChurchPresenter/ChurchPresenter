@@ -6,8 +6,12 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import java.io.File
 import java.io.FileOutputStream
-import java.net.HttpURLConnection
+import java.io.IOException
 import java.net.URI
+import java.net.http.HttpClient
+import java.net.http.HttpRequest
+import java.net.http.HttpResponse
+import java.time.Duration
 
 sealed class TunnelStatus {
     data object Idle : TunnelStatus()
@@ -31,11 +35,25 @@ class TunnelManager {
     private var monitorJob: Job? = null
 
     private val dataDir = File(System.getProperty("user.home"), ".churchpresenter")
-    private val binaryFile = File(dataDir, "cloudflared.exe")
-    private val tmpFile = File(dataDir, "cloudflared.exe.tmp")
 
-    private val downloadUrl =
-        "https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-windows-amd64.exe"
+    private val os = System.getProperty("os.name").lowercase()
+    private val arch = System.getProperty("os.arch").lowercase()
+
+    private val isMac = os.contains("mac")
+    private val isWin = os.contains("win")
+    private val isArm = arch.contains("aarch64") || arch.contains("arm")
+
+    private val binaryName = if (isWin) "cloudflared.exe" else "cloudflared"
+    private val binaryFile = File(dataDir, binaryName)
+    private val tmpFile = File(dataDir, if (isMac) "cloudflared.tgz.tmp" else "$binaryName.tmp")
+
+    private val downloadUrl = when {
+        isWin -> "https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-windows-amd64.exe"
+        isMac && isArm -> "https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-darwin-arm64.tgz"
+        isMac -> "https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-darwin-amd64.tgz"
+        isArm -> "https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-arm64"
+        else -> "https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64"
+    }
 
     private val urlRegex = Regex("""https://[a-z0-9-]+\.trycloudflare\.com""")
 
@@ -82,27 +100,48 @@ class TunnelManager {
         dataDir.mkdirs()
         tmpFile.delete()
 
-        val connection = URI(downloadUrl).toURL().openConnection() as HttpURLConnection
-        connection.instanceFollowRedirects = true
-        connection.connectTimeout = 15_000
-        connection.readTimeout = 60_000
+        val client = HttpClient.newBuilder()
+            .followRedirects(HttpClient.Redirect.ALWAYS)
+            .connectTimeout(Duration.ofSeconds(15))
+            .build()
+
+        val request = HttpRequest.newBuilder()
+            .uri(URI(downloadUrl))
+            .timeout(Duration.ofSeconds(120))
+            .build()
+
+        val response = client.send(request, HttpResponse.BodyHandlers.ofInputStream())
+        if (response.statusCode() != 200) {
+            throw IOException("Download failed (HTTP ${response.statusCode()})")
+        }
 
         try {
-            connection.inputStream.use { input ->
+            response.body().use { input ->
                 FileOutputStream(tmpFile).use { output ->
                     input.copyTo(output, bufferSize = 65536)
                 }
             }
 
-            if (!tmpFile.renameTo(binaryFile)) {
+            if (isMac) {
                 binaryFile.delete()
+                val result = ProcessBuilder("tar", "-xzf", tmpFile.absolutePath, "-C", dataDir.absolutePath, "cloudflared")
+                    .redirectErrorStream(true)
+                    .start()
+                val exitCode = result.waitFor()
+                if (exitCode != 0 || !binaryFile.exists()) {
+                    throw RuntimeException("Failed to extract cloudflared from archive (exit $exitCode)")
+                }
+            } else {
                 if (!tmpFile.renameTo(binaryFile)) {
-                    throw RuntimeException("Failed to move downloaded binary into place")
+                    binaryFile.delete()
+                    if (!tmpFile.renameTo(binaryFile)) {
+                        throw RuntimeException("Failed to move downloaded binary into place")
+                    }
                 }
             }
+            binaryFile.setExecutable(true)
         } finally {
             tmpFile.delete()
-            connection.disconnect()
         }
     }
 
