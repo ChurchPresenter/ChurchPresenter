@@ -136,17 +136,17 @@ fun STTPresenter(
     }
 
     BoxWithConstraints(
-        modifier = modifier.fillMaxSize(),
+        modifier = modifier.fillMaxSize().padding(32.dp),
         contentAlignment = boxAlignment
     ) {
         if (transcriptionText.isNotEmpty() || translationText.isNotEmpty() || isBothMode) {
             val maxCardHeight = with(LocalDensity.current) {
-                (constraints.maxHeight.toDp() - 64.dp)
+                constraints.maxHeight.toDp()
             }
 
             Box(
                 modifier = Modifier
-                    .padding(32.dp)
+                    .fillMaxWidth()
                     .then(if (isBothMode) Modifier.height(maxCardHeight) else Modifier.heightIn(max = maxCardHeight))
                     .clip(RoundedCornerShape(16.dp))
                     .background(cardBg)
