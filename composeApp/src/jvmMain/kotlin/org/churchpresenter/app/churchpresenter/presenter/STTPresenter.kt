@@ -277,13 +277,15 @@ private fun buildDisplayText(
             if (hw.word.isBlank()) continue
             try {
                 val highlightColor = parseHexColor(hw.color)
-                val regex = if (hw.isRegex) {
-                    if (hw.caseSensitive) Regex(hw.word) else Regex(hw.word, RegexOption.IGNORE_CASE)
+                val wb = "(?<=^|[\\s.,;:!?()\"'\\u00AB\\u00BB\\u201E\\u201C\\u201F])"
+                val we = "(?=[\\s.,;:!?()\"'\\u00AB\\u00BB\\u201E\\u201C\\u201F]|$)"
+                val pattern = if (hw.isRegex) {
+                    "$wb(?:${hw.word})$we"
                 } else {
                     val escaped = Regex.escape(hw.word)
-                    val pattern = "(?<=^|[\\s.,;:!?()\"'])$escaped(?=[\\s.,;:!?()\"']|$)"
-                    if (hw.caseSensitive) Regex(pattern) else Regex(pattern, RegexOption.IGNORE_CASE)
+                    "$wb$escaped$we"
                 }
+                val regex = if (hw.caseSensitive) Regex(pattern) else Regex(pattern, RegexOption.IGNORE_CASE)
                 regex.findAll(fullText).forEach { match ->
                     for (j in match.range) colors[j] = highlightColor
                 }
