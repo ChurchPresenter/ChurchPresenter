@@ -496,14 +496,14 @@ fun QATab(
                         Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
                             androidx.compose.material3.CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
                             Spacer(Modifier.height(4.dp))
-                            Text("Downloading tunnel client...", style = MaterialTheme.typography.bodySmall)
+                            Text("Downloading tunnel client...", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface)
                         }
                     }
                     TunnelStatus.Starting -> {
                         Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
                             androidx.compose.material3.CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
                             Spacer(Modifier.height(4.dp))
-                            Text("Starting tunnel...", style = MaterialTheme.typography.bodySmall)
+                            Text("Starting tunnel...", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface)
                         }
                     }
                     is TunnelStatus.Connected -> {
