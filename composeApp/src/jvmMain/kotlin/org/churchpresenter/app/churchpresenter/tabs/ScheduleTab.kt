@@ -497,7 +497,7 @@ private fun ScheduleItemRow(
                 if (item !is ScheduleItem.LabelItem) Modifier.clickable { onSelect() }
                 else Modifier
             )
-            .padding(12.dp),
+            .padding(horizontal = 12.dp, vertical = 8.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -527,17 +527,46 @@ private fun ScheduleItemRow(
                     // Display label text with custom text color
                     Text(
                         text = item.text,
-                        style = MaterialTheme.typography.bodyLarge,
+                        style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Medium,
                         color = Utils.parseHexColor(item.textColor),
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
+                is ScheduleItem.SongItem -> {
+                    val textColor = if (isSelected) MaterialTheme.colorScheme.onSurfaceVariant
+                            else MaterialTheme.colorScheme.onSurface
+                    if (item.songNumber > 0) {
+                        Text(
+                            maxLines = 1,
+                            text = item.songNumber.toString(),
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = textColor
+                        )
+                    }
+                    Text(
+                        maxLines = 1,
+                        text = item.title,
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Medium,
+                        color = textColor
+                    )
+                    if (item.songbook.isNotBlank()) {
+                        Text(
+                            maxLines = 1,
+                            text = item.songbook,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = if (isSelected) MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                                    else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                        )
+                    }
+                }
                 else -> {
                     Text(
                         maxLines = 1,
                         text = item.displayText,
-                        style = MaterialTheme.typography.bodyLarge,
+                        style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Medium,
                         color = if (isSelected) MaterialTheme.colorScheme.onSurfaceVariant
                                 else MaterialTheme.colorScheme.onSurface
@@ -546,13 +575,7 @@ private fun ScheduleItemRow(
             }
 
             when (item) {
-                is ScheduleItem.SongItem -> Text(
-                    maxLines = 1,
-                    text = item.songbook,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = if (isSelected) MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-                            else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                )
+                is ScheduleItem.SongItem -> {} // already handled above
                 is ScheduleItem.BibleVerseItem -> Text(
                     maxLines = 1,
                     text = item.verseText.take(100) + if (item.verseText.length > 100) "..." else "",

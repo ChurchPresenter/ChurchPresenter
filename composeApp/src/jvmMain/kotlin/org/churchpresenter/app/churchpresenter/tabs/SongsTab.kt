@@ -469,6 +469,10 @@ fun SongsTab(
                         .padding(horizontal = 8.dp)
                         .clickable { viewModel.updateSort(Constants.SORT_TUNE) }
                 )
+                DragHandle(
+                    onDrag = { colWTune = (colWTune + it).coerceIn(with(density) { 40.dp.toPx() }, with(density) { 300.dp.toPx() }) },
+                    onDragEnd = ::saveColWidths
+                )
             }
 
             Box(modifier = Modifier.weight(1f)) {
@@ -555,6 +559,20 @@ fun SongsTab(
                                 maxLines = 1,
                                 color = textColor
                             )
+                            Box(modifier = Modifier.width(6.dp)) // spacer matching drag handle
+                            if (onAddToSchedule != null) {
+                                IconButton(
+                                    onClick = { onAddToSchedule(song.number.toIntOrNull() ?: 0, song.title, song.songbook, song.songId) },
+                                    modifier = Modifier.size(24.dp)
+                                ) {
+                                    Icon(
+                                        painter = painterResource(Res.drawable.ic_playlist_add),
+                                        contentDescription = null,
+                                        modifier = Modifier.size(16.dp),
+                                        tint = MaterialTheme.colorScheme.secondary
+                                    )
+                                }
+                            }
                         }
                         HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
                     }
