@@ -611,10 +611,15 @@ data class QASettings(
     val shadowOpacity: Int = 78,
     val horizontalAlignment: String = Constants.CENTER,
     val position: String = Constants.CENTER,
-    val adminPassword: String = "",
+    val adminPassword: String = generateDefaultPassword(),
     val rateLimitPerMinute: Int = 3,
     val rateLimitCooldownSeconds: Int = 30,
 )
+
+private fun generateDefaultPassword(): String {
+    val chars = "ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789"
+    return (1..6).map { chars.random() }.joinToString("")
+}
 
 @Serializable
 data class ServerSettings(
