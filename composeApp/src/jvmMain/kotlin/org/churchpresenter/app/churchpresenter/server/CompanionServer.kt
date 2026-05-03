@@ -2232,8 +2232,9 @@ class CompanionServer {
                                         val pending = PendingRemoteRequest(item, wsClientId)
                                         scope.launch {
                                             onAddToSchedule.emit(pending)
-                                            // WS is fire-and-forget — complete automatically after emit
-                                            // (decision resolved by UI; if blocked, item is dropped silently)
+                                            val allowed = try { pending.decision.await() } catch (_: Exception) { false }
+                                            val response = if (allowed) """{"ok":true}""" else """{"ok":false,"reason":"denied"}"""
+                                            try { send(Frame.Text(response)) } catch (_: Exception) { }
                                         }
                                     }
                                     Constants.WS_CMD_ADD_BATCH_TO_SCHEDULE -> {
@@ -2243,14 +2244,24 @@ class CompanionServer {
                                         } catch (_: Exception) { emptyList() }
                                         if (items.isNotEmpty()) {
                                             val pending = PendingBatchRequest(items, wsClientId)
-                                            scope.launch { onAddBatchToSchedule.emit(pending) }
+                                            scope.launch {
+                                                onAddBatchToSchedule.emit(pending)
+                                                val allowed = try { pending.decision.await() } catch (_: Exception) { false }
+                                                val response = if (allowed) """{"ok":true}""" else """{"ok":false,"reason":"denied"}"""
+                                                try { send(Frame.Text(response)) } catch (_: Exception) { }
+                                            }
                                         }
                                     }
                                     Constants.WS_CMD_PROJECT -> {
                                         val item = parseRemoteItem(msg.payload)
                                             ?: json.decodeFromString(ProjectRequest.serializer(), msg.payload).item
                                         val pending = PendingRemoteRequest(item, wsClientId)
-                                        scope.launch { onProject.emit(pending) }
+                                        scope.launch {
+                                            onProject.emit(pending)
+                                            val allowed = try { pending.decision.await() } catch (_: Exception) { false }
+                                            val response = if (allowed) """{"ok":true}""" else """{"ok":false,"reason":"denied"}"""
+                                            try { send(Frame.Text(response)) } catch (_: Exception) { }
+                                        }
                                     }
                                 }
                             } catch (_: Exception) { /* ignore malformed frames */ }
