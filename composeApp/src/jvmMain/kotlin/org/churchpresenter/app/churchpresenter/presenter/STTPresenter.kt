@@ -281,7 +281,7 @@ private fun buildDisplayText(
                     if (hw.caseSensitive) Regex(hw.word) else Regex(hw.word, RegexOption.IGNORE_CASE)
                 } else {
                     val escaped = Regex.escape(hw.word)
-                    val pattern = "\\b$escaped\\b"
+                    val pattern = "(?<=^|[\\s.,;:!?()\"'])$escaped(?=[\\s.,;:!?()\"']|$)"
                     if (hw.caseSensitive) Regex(pattern) else Regex(pattern, RegexOption.IGNORE_CASE)
                 }
                 regex.findAll(fullText).forEach { match ->
