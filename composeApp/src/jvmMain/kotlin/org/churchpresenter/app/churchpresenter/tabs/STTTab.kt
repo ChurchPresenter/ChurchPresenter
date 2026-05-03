@@ -45,6 +45,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -300,6 +303,9 @@ fun STTTab(
                         modifier = Modifier.padding(16.dp)
                     )
                 } else {
+                    val highlightedWords = sttManager.highlightedWords
+                    val highlightingEnabled = sttSettings.showWordHighlighting && sttManager.wordHighlightingEnabled.value
+
                     // Transcription column
                     if (showTranscription) {
                         Column(
@@ -309,9 +315,8 @@ fun STTTab(
                             Spacer(Modifier.height(4.dp))
                             displaySegments.forEach { segment ->
                                 Text(
-                                    text = segment.text,
+                                    text = applyHighlighting(segment.text, highlightedWords, highlightingEnabled, MaterialTheme.colorScheme.onSurface),
                                     style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurface,
                                     modifier = Modifier.padding(vertical = 1.dp)
                                 )
                             }
@@ -335,9 +340,8 @@ fun STTTab(
                             Spacer(Modifier.height(4.dp))
                             displayTranslation.forEach { segment ->
                                 Text(
-                                    text = segment.text,
+                                    text = applyHighlighting(segment.text, highlightedWords, highlightingEnabled, MaterialTheme.colorScheme.primary),
                                     style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.primary,
                                     modifier = Modifier.padding(vertical = 1.dp)
                                 )
                             }
@@ -490,6 +494,37 @@ private fun DropdownSelector(
                     }
                 )
             }
+        }
+    }
+}
+
+private fun applyHighlighting(
+    text: String,
+    highlightedWords: List<org.churchpresenter.app.churchpresenter.viewmodel.HighlightedWord>,
+    enabled: Boolean,
+    baseColor: Color
+): androidx.compose.ui.text.AnnotatedString {
+    if (!enabled || highlightedWords.isEmpty()) {
+        return buildAnnotatedString {
+            withStyle(SpanStyle(color = baseColor)) { append(text) }
+        }
+    }
+    return buildAnnotatedString {
+        withStyle(SpanStyle(color = baseColor)) { append(text) }
+        for (hw in highlightedWords) {
+            if (hw.word.isBlank()) continue
+            try {
+                val highlightColor = org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor(hw.color)
+                val regex = if (hw.isRegex) {
+                    if (hw.caseSensitive) Regex(hw.word) else Regex(hw.word, RegexOption.IGNORE_CASE)
+                } else {
+                    val escaped = Regex.escape(hw.word)
+                    if (hw.caseSensitive) Regex(escaped) else Regex(escaped, RegexOption.IGNORE_CASE)
+                }
+                regex.findAll(text).forEach { match ->
+                    addStyle(SpanStyle(color = highlightColor), match.range.first, match.range.last + 1)
+                }
+            } catch (_: Exception) {}
         }
     }
 }
