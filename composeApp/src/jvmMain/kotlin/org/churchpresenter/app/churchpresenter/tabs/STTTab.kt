@@ -237,6 +237,15 @@ fun STTTab(
                         onValueChange = { onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(maxSegments = it)) } }
                     )
                 }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text("Max Lines:", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface)
+                    Spacer(Modifier.width(4.dp))
+                    NumberSettingsTextField(
+                        initialText = sttSettings.maxLines,
+                        range = 0..50,
+                        onValueChange = { onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(maxLines = it)) } }
+                    )
+                }
             }
 
             // Drip feed settings

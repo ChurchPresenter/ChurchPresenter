@@ -623,7 +623,8 @@ data class STTSettings(
     val displayMode: String = "transcribe", // "transcribe", "translate", "both"
     val layout: String = "stacked", // "stacked", "stacked_inverse", "side_by_side", "side_by_side_inverse"
     val showWordHighlighting: Boolean = true,
-    val maxSegments: Int = 5, // last N segments shown (0 = unlimited)
+    val maxSegments: Int = 5, // last N segments shown (0 = unlimited) — used for tab preview
+    val maxLines: Int = 3, // max visible lines on projection display (0 = unlimited)
     val showInProgress: Boolean = true,
     val showTranslationInProgress: Boolean = true,
     val dripFeedEnabled: Boolean = true,

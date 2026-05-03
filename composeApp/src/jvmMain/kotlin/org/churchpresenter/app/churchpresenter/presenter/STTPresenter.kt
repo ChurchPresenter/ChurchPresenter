@@ -32,7 +32,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
@@ -42,6 +41,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.churchpresenter.app.churchpresenter.data.STTSettings
@@ -99,55 +99,35 @@ fun STTPresenter(
     val showTranscription = sttSettings.displayMode == "transcribe" || sttSettings.displayMode == "both"
     val showTranslation = sttSettings.displayMode == "translate" || sttSettings.displayMode == "both"
 
-    // Filter to last N segments
-    val maxSeg = sttSettings.maxSegments
-    val filteredSegments = if (maxSeg > 0) segments.takeLast(maxSeg) else segments
-    val filteredTranslationSegments = if (maxSeg > 0) translationSegments.takeLast(maxSeg) else translationSegments
-
-    // Drip feed: when in-progress is off, reveal newest segment word-by-word
+    // Drip feed: reveal newest segment word-by-word
     val dripEnabled = sttSettings.dripFeedEnabled
     val dripSpeed = sttSettings.dripFeedSpeed.toLong().coerceAtLeast(10L)
-    val dripResultTranscription = useDripFeed(filteredSegments, enabled = dripEnabled && !sttSettings.showInProgress, delayMs = dripSpeed)
-    val dripResultTranslation = useDripFeed(filteredTranslationSegments, enabled = dripEnabled && !sttSettings.showTranslationInProgress, delayMs = dripSpeed)
+    val dripTranscription = useDripFeed(segments, enabled = dripEnabled && !sttSettings.showInProgress, delayMs = dripSpeed)
+    val dripTranslation = useDripFeed(translationSegments, enabled = dripEnabled && !sttSettings.showTranslationInProgress, delayMs = dripSpeed)
 
-    // Build transcription text
+    // Build text — pass ALL segments, no filtering by maxSegments
     val transcriptionText = buildDisplayText(
-        dripResultTranscription.segments, inProgressText, sttSettings.showInProgress,
-        highlightedWords, sttSettings.showWordHighlighting, textColor,
-        outgoingText = dripResultTranscription.outgoingText,
-        outgoingFadedWords = dripResultTranscription.outgoingFadedWords
+        dripTranscription, inProgressText, sttSettings.showInProgress,
+        highlightedWords, sttSettings.showWordHighlighting, textColor
     )
-    // Build translation text
     val translationText = buildDisplayText(
-        dripResultTranslation.segments, inProgressTranslation, sttSettings.showTranslationInProgress,
-        highlightedWords, sttSettings.showWordHighlighting, translationColor,
-        outgoingText = dripResultTranslation.outgoingText,
-        outgoingFadedWords = dripResultTranslation.outgoingFadedWords
+        dripTranslation, inProgressTranslation, sttSettings.showTranslationInProgress,
+        highlightedWords, sttSettings.showWordHighlighting, translationColor
     )
 
     val isBothMode = showTranscription && showTranslation
     val isSideBySide = sttSettings.layout == "side_by_side" || sttSettings.layout == "side_by_side_inverse"
     val isInverse = sttSettings.layout == "stacked_inverse" || sttSettings.layout == "side_by_side_inverse"
-
-    // Auto-scroll to bottom so newest text is always visible
-    val scrollState = rememberScrollState()
-    LaunchedEffect(transcriptionText, translationText) {
-        scrollState.animateScrollTo(scrollState.maxValue)
-    }
+    val maxLines = sttSettings.maxLines
 
     BoxWithConstraints(
         modifier = modifier.fillMaxSize().padding(32.dp),
         contentAlignment = boxAlignment
     ) {
         if (transcriptionText.isNotEmpty() || translationText.isNotEmpty() || isBothMode) {
-            val maxCardHeight = with(LocalDensity.current) {
-                constraints.maxHeight.toDp()
-            }
-
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .then(if (isBothMode) Modifier.height(maxCardHeight) else Modifier.heightIn(max = maxCardHeight))
                     .clip(RoundedCornerShape(16.dp))
                     .background(cardBg)
                     .padding(24.dp)
@@ -159,78 +139,76 @@ fun STTPresenter(
                     val secondStyle = baseTextStyle.copy(color = if (isInverse) textColor else translationColor)
 
                     if (isSideBySide) {
-                        // Side by side: 50/50 horizontal split
                         Row(
-                            modifier = Modifier.fillMaxSize(),
+                            modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(24.dp)
                         ) {
-                            val scrollState1 = rememberScrollState()
-                            val scrollState2 = rememberScrollState()
-                            LaunchedEffect(first) { scrollState1.animateScrollTo(scrollState1.maxValue) }
-                            LaunchedEffect(second) { scrollState2.animateScrollTo(scrollState2.maxValue) }
-
-                            Column(
-                                modifier = Modifier.weight(1f).fillMaxHeight().verticalScroll(scrollState1),
-                                verticalArrangement = Arrangement.Bottom
-                            ) {
-                                Text(text = first, style = firstStyle, modifier = Modifier.fillMaxWidth())
-                            }
-                            Column(
-                                modifier = Modifier.weight(1f).fillMaxHeight().verticalScroll(scrollState2),
-                                verticalArrangement = Arrangement.Bottom
-                            ) {
-                                Text(text = second, style = secondStyle, modifier = Modifier.fillMaxWidth())
-                            }
+                            BottomAlignedText(text = first, style = firstStyle, maxLines = maxLines, modifier = Modifier.weight(1f))
+                            BottomAlignedText(text = second, style = secondStyle, maxLines = maxLines, modifier = Modifier.weight(1f))
                         }
                     } else {
-                        // Stacked: 50/50 vertical split
-                        Column(modifier = Modifier.fillMaxSize()) {
-                            val scrollState1 = rememberScrollState()
-                            val scrollState2 = rememberScrollState()
-                            LaunchedEffect(first) { scrollState1.animateScrollTo(scrollState1.maxValue) }
-                            LaunchedEffect(second) { scrollState2.animateScrollTo(scrollState2.maxValue) }
-
-                            Column(
-                                modifier = Modifier.weight(1f).fillMaxWidth().verticalScroll(scrollState1),
-                                verticalArrangement = Arrangement.Bottom
-                            ) {
-                                Text(text = first, style = firstStyle, modifier = Modifier.fillMaxWidth())
-                            }
+                        Column(modifier = Modifier.fillMaxWidth()) {
+                            BottomAlignedText(text = first, style = firstStyle, maxLines = maxLines, modifier = Modifier.fillMaxWidth())
                             Spacer(modifier = Modifier.height(16.dp))
-                            Column(
-                                modifier = Modifier.weight(1f).fillMaxWidth().verticalScroll(scrollState2),
-                                verticalArrangement = Arrangement.Bottom
-                            ) {
-                                Text(text = second, style = secondStyle, modifier = Modifier.fillMaxWidth())
-                            }
+                            BottomAlignedText(text = second, style = secondStyle, maxLines = maxLines, modifier = Modifier.fillMaxWidth())
                         }
                     }
                 } else {
-                    // Single mode
-                    Column(
-                        modifier = Modifier.fillMaxWidth().verticalScroll(scrollState),
-                        verticalArrangement = Arrangement.Bottom
-                    ) {
-                        val displayText = when {
-                            showTranscription && transcriptionText.isNotEmpty() -> transcriptionText
-                            showTranslation && translationText.isNotEmpty() -> translationText
-                            transcriptionText.isNotEmpty() -> transcriptionText
-                            else -> translationText
-                        }
-                        val displayColor = when {
-                            showTranscription && transcriptionText.isNotEmpty() -> textColor
-                            showTranslation && translationText.isNotEmpty() -> translationColor
-                            else -> textColor
-                        }
-                        Text(
-                            text = displayText,
-                            style = baseTextStyle.copy(color = displayColor),
-                            modifier = Modifier.fillMaxWidth()
-                        )
+                    val displayText = when {
+                        showTranscription && transcriptionText.isNotEmpty() -> transcriptionText
+                        showTranslation && translationText.isNotEmpty() -> translationText
+                        transcriptionText.isNotEmpty() -> transcriptionText
+                        else -> translationText
                     }
+                    val displayColor = when {
+                        showTranscription && transcriptionText.isNotEmpty() -> textColor
+                        showTranslation && translationText.isNotEmpty() -> translationColor
+                        else -> textColor
+                    }
+                    BottomAlignedText(
+                        text = displayText,
+                        style = baseTextStyle.copy(color = displayColor),
+                        maxLines = maxLines,
+                        modifier = Modifier.fillMaxWidth()
+                    )
                 }
             }
         }
+    }
+}
+
+/**
+ * Text that shows the last N lines. Old lines scroll off the top.
+ */
+@Composable
+private fun BottomAlignedText(
+    text: AnnotatedString,
+    style: TextStyle,
+    maxLines: Int,
+    modifier: Modifier = Modifier
+) {
+    if (text.isEmpty()) {
+        val lineHeight = style.fontSize.value * 1.3f
+        val reservedHeight = if (maxLines > 0) (lineHeight * maxLines).dp else 0.dp
+        Spacer(modifier = modifier.then(if (maxLines > 0) Modifier.height(reservedHeight) else Modifier))
+        return
+    }
+
+    val scrollState = rememberScrollState()
+    LaunchedEffect(text) {
+        scrollState.scrollTo(scrollState.maxValue)
+    }
+
+    val lineHeight = style.fontSize.value * 1.3f
+    val maxHeight = if (maxLines > 0) (lineHeight * maxLines).dp else Dp.Unspecified
+
+    Column(
+        modifier = modifier
+            .then(if (maxHeight != Dp.Unspecified) Modifier.heightIn(max = maxHeight) else Modifier)
+            .verticalScroll(scrollState),
+        verticalArrangement = Arrangement.Bottom
+    ) {
+        Text(text = text, style = style, modifier = Modifier.fillMaxWidth())
     }
 }
 
@@ -240,14 +218,11 @@ private fun buildDisplayText(
     showInProgress: Boolean,
     highlightedWords: List<HighlightedWord>,
     showWordHighlighting: Boolean,
-    baseColor: Color,
-    outgoingText: String = "",
-    outgoingFadedWords: Int = 0
+    baseColor: Color
 ): AnnotatedString {
     val lines = mutableListOf<String>()
     for (seg in segments) {
         if (seg.text.isNotBlank()) {
-            // Normalize whitespace: collapse multiple spaces/tabs into single space
             lines.add(seg.text.trim().replace(Regex("\\s+"), " "))
         }
     }
@@ -259,8 +234,7 @@ private fun buildDisplayText(
 
     val fullText = lines.joinToString(" ")
 
-    // Build a per-character color array, then construct AnnotatedString in contiguous runs.
-    // This avoids overlapping SpanStyle spans which cause spacing artifacts in Compose.
+    // Build per-character color array then construct contiguous runs
     val colors = Array(fullText.length) { baseColor }
 
     // Dim in-progress text
@@ -271,7 +245,7 @@ private fun buildDisplayText(
         }
     }
 
-    // Apply word highlighting — use word boundaries for non-regex patterns
+    // Apply word highlighting with Unicode word boundaries
     if (showWordHighlighting && highlightedWords.isNotEmpty()) {
         for (hw in highlightedWords) {
             if (hw.word.isBlank()) continue
@@ -295,25 +269,7 @@ private fun buildDisplayText(
         }
     }
 
-    // Make faded outgoing words transparent (they still occupy space)
-    if (outgoingText.isNotBlank() && outgoingFadedWords > 0) {
-        val outgoingWords = outgoingText.trim().split(Regex("\\s+"))
-        var charPos = 0
-        for (i in 0 until outgoingFadedWords.coerceAtMost(outgoingWords.size)) {
-            val word = outgoingWords[i]
-            val wordStart = fullText.indexOf(word, charPos)
-            if (wordStart >= 0) {
-                for (j in wordStart until wordStart + word.length) colors[j] = Color.Transparent
-                charPos = wordStart + word.length
-                if (charPos < fullText.length && fullText[charPos] == ' ') {
-                    colors[charPos] = Color.Transparent
-                    charPos++
-                }
-            }
-        }
-    }
-
-    // Build AnnotatedString with contiguous color runs (no overlapping spans)
+    // Build AnnotatedString with contiguous color runs
     return buildAnnotatedString {
         var i = 0
         while (i < fullText.length) {
@@ -328,142 +284,37 @@ private fun buildDisplayText(
 }
 
 /**
- * Result of drip feed: segments to display plus info about fading words.
- * @param segments The segments to render
- * @param outgoingText Full text of the outgoing segment (fading out)
- * @param outgoingFadedWords How many words from the start of outgoingText are now transparent
- * @param outgoingComplete True when all words are faded and the segment should be removed
- */
-private data class DripFeedResult(
-    val segments: List<STTSegment>,
-    val outgoingText: String = "",
-    val outgoingFadedWords: Int = 0,
-    val outgoingComplete: Boolean = true,
-)
-
-/**
- * Drip feed effect: reveals the newest segment word-by-word (ChatGPT-style).
- * When a segment is pushed out (due to maxSegments), its words fade to transparent
- * one by one from the start. The segment is only removed once all words are transparent.
+ * Drip feed: reveals the newest segment word-by-word (ChatGPT-style).
+ * Returns the segment list with the last segment's text partially revealed.
  */
 @Composable
-private fun useDripFeed(segments: List<STTSegment>, enabled: Boolean, delayMs: Long = 40L): DripFeedResult {
-    if (!enabled || segments.isEmpty()) return DripFeedResult(segments)
-
-    // Track outgoing segments — keep multiple fully-transparent segments to prevent reflow.
-    val maxRetained = (segments.size * 4).coerceAtLeast(8)
-
-    // All outgoing texts (fully transparent, just holding layout space)
-    var retainedOutgoing by remember { mutableStateOf<List<String>>(emptyList()) }
-
-    // Currently-animating outgoing segment
-    var outgoingFullText by remember { mutableStateOf("") }
-    var outgoingWordCount by remember { mutableIntStateOf(0) }
-    var outgoingFadedWords by remember { mutableIntStateOf(0) }
+private fun useDripFeed(segments: List<STTSegment>, enabled: Boolean, delayMs: Long = 40L): List<STTSegment> {
+    if (!enabled || segments.isEmpty()) return segments
 
     val lastSegment = segments.last()
     val newWords = remember(lastSegment.id, lastSegment.text) {
         lastSegment.text.trim().split(Regex("\\s+"))
     }
 
-    // Track which segment revealedWordCount belongs to
     var revealedForSegmentId by remember { mutableIntStateOf(lastSegment.id) }
     var revealedWordCount by remember { mutableIntStateOf(Int.MAX_VALUE) }
 
-    // Synchronously detect segment changes during composition (no frame delay).
-    // This uses remember with keys — when keys change, the block re-runs immediately.
-    val currentFirstId = segments.first().id
-    val currentLastId = lastSegment.id
-    var prevFirstId by remember { mutableIntStateOf(currentFirstId) }
-    var prevFirstText by remember { mutableStateOf(segments.first().text) }
-    var prevLastId by remember { mutableIntStateOf(currentLastId) }
-
-    // Detect pushed-out segment SYNCHRONOUSLY during composition
-    if (currentLastId != prevLastId) {
-        // New segment arrived — capture outgoing immediately (no LaunchedEffect delay)
-        if (prevFirstId != currentFirstId && prevFirstText.isNotBlank()) {
-            // Move any existing outgoing to retained
-            if (outgoingFullText.isNotBlank()) {
-                retainedOutgoing = (retainedOutgoing + outgoingFullText).takeLast(maxRetained)
-            }
-            outgoingFullText = prevFirstText
-            outgoingWordCount = prevFirstText.trim().split(Regex("\\s+")).size
-            outgoingFadedWords = 0
-        }
-        prevFirstId = currentFirstId
-        prevFirstText = segments.first().text
-        prevLastId = currentLastId
-    } else if (currentFirstId != prevFirstId) {
-        // First segment changed without last changing (shouldn't normally happen, but handle it)
-        prevFirstId = currentFirstId
-        prevFirstText = segments.first().text
-    }
-
-    // If the segment changed but animation hasn't started yet, show 0 words
+    // If segment changed but LaunchedEffect hasn't fired, show 0 words
     val effectiveRevealed = if (revealedForSegmentId != lastSegment.id) 0 else revealedWordCount
 
-    // Animation coroutine — only handles the timing/counting
     LaunchedEffect(lastSegment.id, lastSegment.text) {
         revealedForSegmentId = lastSegment.id
         revealedWordCount = 0
-        val totalNew = newWords.size
-        val totalOut = outgoingWordCount
-        val maxSteps = maxOf(totalNew, totalOut)
-
-        for (i in 1..maxSteps) {
+        for (i in 1..newWords.size) {
             delay(delayMs)
-            if (i <= totalNew) revealedWordCount = i
-            if (i <= totalOut) outgoingFadedWords = i
+            revealedWordCount = i
         }
     }
 
-    // Build result segments
-    val result = mutableListOf<STTSegment>()
+    if (effectiveRevealed >= newWords.size) return segments
 
-    // Add retained (fully transparent) segments — these keep layout stable
-    retainedOutgoing.forEach { text ->
-        result.add(STTSegment(id = -2, timestamp = "", text = text, start = 0.0, end = 0.0, completed = true))
-    }
-
-    // Add currently-animating outgoing segment
-    if (outgoingFullText.isNotBlank()) {
-        result.add(STTSegment(id = -1, timestamp = "", text = outgoingFullText, start = 0.0, end = 0.0, completed = true))
-    }
-
-    // Add current segments (except last which we'll modify)
-    if (segments.size > 1) {
-        result.addAll(segments.dropLast(1))
-    }
-
-    // Add newest segment (partially revealed or fully revealed)
-    if (effectiveRevealed >= newWords.size) {
-        result.add(lastSegment)
-    } else {
-        val revealedText = newWords.take(effectiveRevealed).joinToString(" ")
-        result.add(lastSegment.copy(text = revealedText))
-    }
-
-    // Combine all outgoing text (retained + current) for fade styling
-    val allOutgoingText = buildString {
-        retainedOutgoing.forEach { text ->
-            if (isNotEmpty()) append(" ")
-            append(text.trim())
-        }
-        if (outgoingFullText.isNotBlank()) {
-            if (isNotEmpty()) append(" ")
-            append(outgoingFullText.trim())
-        }
-    }
-    // All retained words are fully faded; current outgoing has partial fade
-    val retainedWordTotal = retainedOutgoing.sumOf { it.trim().split(Regex("\\s+")).size }
-    val totalFaded = retainedWordTotal + outgoingFadedWords
-
-    return DripFeedResult(
-        segments = result,
-        outgoingText = allOutgoingText,
-        outgoingFadedWords = totalFaded,
-        outgoingComplete = allOutgoingText.isBlank()
-    )
+    val revealedText = newWords.take(effectiveRevealed).joinToString(" ")
+    return segments.dropLast(1) + lastSegment.copy(text = revealedText)
 }
 
 private fun sttPositionToAlignment(position: String): Alignment = when (position) {
