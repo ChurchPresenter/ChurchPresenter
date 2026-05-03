@@ -117,6 +117,25 @@ import churchpresenter.composeapp.generated.resources.qa_stop_session
 import churchpresenter.composeapp.generated.resources.qa_submit_questions
 import churchpresenter.composeapp.generated.resources.qa_transparent
 import churchpresenter.composeapp.generated.resources.qa_waiting
+import churchpresenter.composeapp.generated.resources.qa_public_access
+import churchpresenter.composeapp.generated.resources.qa_public_access_description
+import churchpresenter.composeapp.generated.resources.qa_enable_public_access
+import churchpresenter.composeapp.generated.resources.qa_disable_public_access
+import churchpresenter.composeapp.generated.resources.qa_downloading_tunnel
+import churchpresenter.composeapp.generated.resources.qa_starting_tunnel
+import churchpresenter.composeapp.generated.resources.qa_qr_code_shows
+import churchpresenter.composeapp.generated.resources.qa_local
+import churchpresenter.composeapp.generated.resources.qa_public
+import churchpresenter.composeapp.generated.resources.qa_retry
+import churchpresenter.composeapp.generated.resources.qa_pos_tl
+import churchpresenter.composeapp.generated.resources.qa_pos_tc
+import churchpresenter.composeapp.generated.resources.qa_pos_tr
+import churchpresenter.composeapp.generated.resources.qa_pos_cl
+import churchpresenter.composeapp.generated.resources.qa_pos_c
+import churchpresenter.composeapp.generated.resources.qa_pos_cr
+import churchpresenter.composeapp.generated.resources.qa_pos_bl
+import churchpresenter.composeapp.generated.resources.qa_pos_bc
+import churchpresenter.composeapp.generated.resources.qa_pos_br
 import churchpresenter.composeapp.generated.resources.save
 import churchpresenter.composeapp.generated.resources.tooltip_clear_display
 import churchpresenter.composeapp.generated.resources.tooltip_edit
@@ -481,14 +500,14 @@ fun QATab(
                 Spacer(Modifier.height(12.dp))
 
                 Text(
-                    "Public Access",
+                    stringResource(Res.string.qa_public_access),
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 Spacer(Modifier.height(4.dp))
                 Text(
-                    "Let users submit questions via mobile data without joining your WiFi",
+                    stringResource(Res.string.qa_public_access_description),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -499,21 +518,21 @@ fun QATab(
                         Button(onClick = onStartTunnel, modifier = Modifier.fillMaxWidth()) {
                             Icon(Icons.Default.PlayArrow, contentDescription = null, modifier = Modifier.size(16.dp))
                             Spacer(Modifier.width(4.dp))
-                            Text("Enable Public Access", fontSize = 12.sp)
+                            Text(stringResource(Res.string.qa_enable_public_access), fontSize = 12.sp)
                         }
                     }
                     TunnelStatus.Downloading -> {
                         Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
                             androidx.compose.material3.CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
                             Spacer(Modifier.height(4.dp))
-                            Text("Downloading tunnel client...", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface)
+                            Text(stringResource(Res.string.qa_downloading_tunnel), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface)
                         }
                     }
                     TunnelStatus.Starting -> {
                         Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
                             androidx.compose.material3.CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
                             Spacer(Modifier.height(4.dp))
-                            Text("Starting tunnel...", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface)
+                            Text(stringResource(Res.string.qa_starting_tunnel), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface)
                         }
                     }
                     is TunnelStatus.Connected -> {
@@ -527,11 +546,11 @@ fun QATab(
                         ) {
                             Icon(Icons.Default.Stop, contentDescription = null, modifier = Modifier.size(16.dp))
                             Spacer(Modifier.width(4.dp))
-                            Text("Disable Public Access", fontSize = 12.sp)
+                            Text(stringResource(Res.string.qa_disable_public_access), fontSize = 12.sp)
                         }
 
                         Spacer(Modifier.height(8.dp))
-                        Text("QR Code shows:", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(stringResource(Res.string.qa_qr_code_shows), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         Spacer(Modifier.height(4.dp))
 
                         Row(horizontalArrangement = Arrangement.spacedBy(4.dp), modifier = Modifier.fillMaxWidth()) {
@@ -544,7 +563,7 @@ fun QATab(
                                     contentColor = MaterialTheme.colorScheme.onPrimaryContainer
                                 ) else ButtonDefaults.outlinedButtonColors()
                             ) {
-                                Text("Local", fontSize = 11.sp)
+                                Text(stringResource(Res.string.qa_local), fontSize = 11.sp)
                             }
                             OutlinedButton(
                                 onClick = { onQaDisplayUrlChanged(tunnelUrl) },
@@ -554,7 +573,7 @@ fun QATab(
                                     contentColor = MaterialTheme.colorScheme.onPrimaryContainer
                                 ) else ButtonDefaults.outlinedButtonColors()
                             ) {
-                                Text("Public", fontSize = 11.sp)
+                                Text(stringResource(Res.string.qa_public), fontSize = 11.sp)
                             }
                         }
 
@@ -577,7 +596,7 @@ fun QATab(
                         Button(onClick = onStartTunnel, modifier = Modifier.fillMaxWidth()) {
                             Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(16.dp))
                             Spacer(Modifier.width(4.dp))
-                            Text("Retry", fontSize = 12.sp)
+                            Text(stringResource(Res.string.qa_retry), fontSize = 12.sp)
                         }
                     }
                 }
@@ -602,7 +621,7 @@ fun QATab(
                                 contentColor = MaterialTheme.colorScheme.onPrimaryContainer
                             ) else ButtonDefaults.outlinedButtonColors()
                         ) {
-                            Text("Local", fontSize = 11.sp)
+                            Text(stringResource(Res.string.qa_local), fontSize = 11.sp)
                         }
                         OutlinedButton(
                             onClick = { adminUseTunnel = true },
@@ -612,7 +631,7 @@ fun QATab(
                                 contentColor = MaterialTheme.colorScheme.onPrimaryContainer
                             ) else ButtonDefaults.outlinedButtonColors()
                         ) {
-                            Text("Public", fontSize = 11.sp)
+                            Text(stringResource(Res.string.qa_public), fontSize = 11.sp)
                         }
                     }
                     Spacer(Modifier.height(8.dp))
@@ -683,9 +702,15 @@ fun QATab(
             Text(stringResource(Res.string.qa_position), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)
             Spacer(Modifier.height(4.dp))
             val positions = listOf(
-                Constants.TOP_LEFT to "TL", Constants.TOP_CENTER to "TC", Constants.TOP_RIGHT to "TR",
-                Constants.CENTER_LEFT to "CL", Constants.CENTER to "C", Constants.CENTER_RIGHT to "CR",
-                Constants.BOTTOM_LEFT to "BL", Constants.BOTTOM_CENTER to "BC", Constants.BOTTOM_RIGHT to "BR"
+                Constants.TOP_LEFT to stringResource(Res.string.qa_pos_tl),
+                Constants.TOP_CENTER to stringResource(Res.string.qa_pos_tc),
+                Constants.TOP_RIGHT to stringResource(Res.string.qa_pos_tr),
+                Constants.CENTER_LEFT to stringResource(Res.string.qa_pos_cl),
+                Constants.CENTER to stringResource(Res.string.qa_pos_c),
+                Constants.CENTER_RIGHT to stringResource(Res.string.qa_pos_cr),
+                Constants.BOTTOM_LEFT to stringResource(Res.string.qa_pos_bl),
+                Constants.BOTTOM_CENTER to stringResource(Res.string.qa_pos_bc),
+                Constants.BOTTOM_RIGHT to stringResource(Res.string.qa_pos_br),
             )
             Column(verticalArrangement = Arrangement.spacedBy(2.dp), modifier = Modifier.fillMaxWidth()) {
                 positions.chunked(3).forEach { rowItems ->

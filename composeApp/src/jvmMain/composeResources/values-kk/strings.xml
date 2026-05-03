@@ -1029,6 +1029,41 @@
     <string name="update_check_menu">Жаңартуларды тексеру…</string>
     <string name="update_already_latest">Сізде ең соңғы нұсқа орнатылған.</string>
 
+    <!-- Stage Monitor Settings -->
+    <string name="stage_monitor">Сахна мониторы</string>
+    <string name="display_stage_monitor">Сахна мониторы</string>
+    <string name="stage_monitor_enable">Сахна мониторын қосу</string>
+    <string name="stage_monitor_display">Мақсатты дисплей</string>
+    <string name="stage_monitor_display_none">Жоқ (өшірілген)</string>
+    <string name="stage_monitor_section_general">Жалпы</string>
+    <string name="stage_monitor_section_current">Ағымдағы слайд</string>
+    <string name="stage_monitor_section_next">Келесі слайдты алдын ала қарау</string>
+    <string name="stage_monitor_section_label_style">Белгі стилі</string>
+    <string name="stage_monitor_section_clock">Сағат және таймер</string>
+    <string name="stage_monitor_show_next_slide">Келесі слайдты алдын ала қарауды көрсету</string>
+    <string name="stage_monitor_show_clock">Сағатты көрсету</string>
+    <string name="stage_monitor_show_timer">Кері санауды көрсету</string>
+    <string name="stage_monitor_show_section_label">Бөлім белгісін көрсету</string>
+    <string name="stage_monitor_show_label">Ән/Киелі кітап белгісін көрсету</string>
+    <string name="stage_monitor_show_notes">Баяндамашы жазбаларын көрсету</string>
+    <string name="stage_monitor_text_color">Мәтін түсі</string>
+    <string name="stage_monitor_font_size">Қаріп өлшемі</string>
+    <string name="stage_monitor_background_color">Фон түсі</string>
+    <string name="stage_monitor_layout">Орналасу</string>
+    <string name="stage_monitor_layout_vertical">Тік</string>
+    <string name="stage_monitor_layout_horizontal">Көлденең</string>
+    <string name="stage_monitor_layout_quadrants">4 квадрантты орналасу</string>
+    <string name="stage_monitor_quadrant_current">Жоғары-сол: ағымдағы слайд</string>
+    <string name="stage_monitor_quadrant_next">Төменгі-сол: келесі слайд</string>
+    <string name="stage_monitor_quadrant_timer">Жоғары-оң: кері санау</string>
+    <string name="stage_monitor_quadrant_clock">Төменгі-орта: сағат</string>
+    <string name="stage_monitor_quadrant_notes">Төменгі-оң: баяндамашы жазбалары</string>
+    <string name="stage_monitor_label_style_section">Белгі стилі</string>
+    <string name="stage_monitor_clock_show_seconds">Секундтарды көрсету</string>
+    <string name="stage_monitor_clock_24h">24 сағаттық формат</string>
+    <string name="stage_monitor_no_extra_displays">Қосымша дисплейлер анықталмады. Сахна мониторын пайдалану үшін қосымша монитор жалғаңыз.</string>
+    <string name="stage_monitor_notes_from_presentation">Жазбалар белсенді PowerPoint немесе Keynote слайдынан автоматты түрде көрсетіледі.</string>
+
     <!-- Q&A Tab -->
     <string name="tab_qa">Сұрақтар мен жауаптар</string>
     <string name="qa_server_not_running">Сервер іске қосылмаған — Q&amp;A қосу үшін Параметрлерде companion серверін іске қосыңыз</string>
@@ -1076,5 +1111,24 @@
     <string name="qa_confirm_go_live">Тікелей эфирге шығуды растау</string>
     <string name="qa_edit_question_hint">Сұрақ мәтінін өңдеу…</string>
     <string name="qa_delete_question">Жою</string>
+    <string name="qa_public_access">Жалпыға қол жеткізу</string>
+    <string name="qa_public_access_description">Қатысушыларға Wi-Fi желісіне қосылмай, мобильді интернет арқылы сұрақ жіберуге мүмкіндік беріңіз</string>
+    <string name="qa_enable_public_access">Жалпыға қол жеткізуді қосу</string>
+    <string name="qa_disable_public_access">Жалпыға қол жеткізуді өшіру</string>
+    <string name="qa_downloading_tunnel">Туннель клиенті жүктелуде…</string>
+    <string name="qa_starting_tunnel">Туннель іске қосылуда…</string>
+    <string name="qa_qr_code_shows">QR-код көрсетеді:</string>
+    <string name="qa_local">Жергілікті</string>
+    <string name="qa_public">Жалпыға</string>
+    <string name="qa_retry">Қайталау</string>
+    <string name="qa_pos_tl">ЖС</string>
+    <string name="qa_pos_tc">ЖО</string>
+    <string name="qa_pos_tr">ЖҚ</string>
+    <string name="qa_pos_cl">ОС</string>
+    <string name="qa_pos_c">О</string>
+    <string name="qa_pos_cr">ОҚ</string>
+    <string name="qa_pos_bl">ТС</string>
+    <string name="qa_pos_bc">ТО</string>
+    <string name="qa_pos_br">ТҚ</string>
 </resources>
 

@@ -1167,6 +1167,25 @@
     <string name="qa_confirm_go_live">Confirm Go Live</string>
     <string name="qa_edit_question_hint">Edit question text…</string>
     <string name="qa_delete_question">Delete</string>
+    <string name="qa_public_access">Public Access</string>
+    <string name="qa_public_access_description">Let users submit questions via mobile data without joining your WiFi</string>
+    <string name="qa_enable_public_access">Enable Public Access</string>
+    <string name="qa_disable_public_access">Disable Public Access</string>
+    <string name="qa_downloading_tunnel">Downloading tunnel client…</string>
+    <string name="qa_starting_tunnel">Starting tunnel…</string>
+    <string name="qa_qr_code_shows">QR Code shows:</string>
+    <string name="qa_local">Local</string>
+    <string name="qa_public">Public</string>
+    <string name="qa_retry">Retry</string>
+    <string name="qa_pos_tl">TL</string>
+    <string name="qa_pos_tc">TC</string>
+    <string name="qa_pos_tr">TR</string>
+    <string name="qa_pos_cl">CL</string>
+    <string name="qa_pos_c">C</string>
+    <string name="qa_pos_cr">CR</string>
+    <string name="qa_pos_bl">BL</string>
+    <string name="qa_pos_bc">BC</string>
+    <string name="qa_pos_br">BR</string>
 
     <!-- Update checker -->
     <string name="update_dialog_title">Update Available</string>
