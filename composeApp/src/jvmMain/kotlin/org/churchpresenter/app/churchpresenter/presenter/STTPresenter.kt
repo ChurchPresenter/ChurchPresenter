@@ -259,69 +259,65 @@ private fun buildDisplayText(
 
     val fullText = lines.joinToString(" ")
 
+    // Build a per-character color array, then construct AnnotatedString in contiguous runs.
+    // This avoids overlapping SpanStyle spans which cause spacing artifacts in Compose.
+    val colors = Array(fullText.length) { baseColor }
+
+    // Dim in-progress text
+    if (showInProgress && inProgressText.isNotBlank() && segments.isNotEmpty()) {
+        val inProgressStart = fullText.length - inProgressText.trim().length
+        if (inProgressStart >= 0) {
+            for (j in inProgressStart until fullText.length) colors[j] = baseColor.copy(alpha = 0.6f)
+        }
+    }
+
+    // Apply word highlighting — use word boundaries for non-regex patterns
+    if (showWordHighlighting && highlightedWords.isNotEmpty()) {
+        for (hw in highlightedWords) {
+            if (hw.word.isBlank()) continue
+            try {
+                val highlightColor = parseHexColor(hw.color)
+                val regex = if (hw.isRegex) {
+                    if (hw.caseSensitive) Regex(hw.word) else Regex(hw.word, RegexOption.IGNORE_CASE)
+                } else {
+                    val escaped = Regex.escape(hw.word)
+                    val pattern = "\\b$escaped\\b"
+                    if (hw.caseSensitive) Regex(pattern) else Regex(pattern, RegexOption.IGNORE_CASE)
+                }
+                regex.findAll(fullText).forEach { match ->
+                    for (j in match.range) colors[j] = highlightColor
+                }
+            } catch (_: Exception) {}
+        }
+    }
+
+    // Make faded outgoing words transparent (they still occupy space)
+    if (outgoingText.isNotBlank() && outgoingFadedWords > 0) {
+        val outgoingWords = outgoingText.trim().split(Regex("\\s+"))
+        var charPos = 0
+        for (i in 0 until outgoingFadedWords.coerceAtMost(outgoingWords.size)) {
+            val word = outgoingWords[i]
+            val wordStart = fullText.indexOf(word, charPos)
+            if (wordStart >= 0) {
+                for (j in wordStart until wordStart + word.length) colors[j] = Color.Transparent
+                charPos = wordStart + word.length
+                if (charPos < fullText.length && fullText[charPos] == ' ') {
+                    colors[charPos] = Color.Transparent
+                    charPos++
+                }
+            }
+        }
+    }
+
+    // Build AnnotatedString with contiguous color runs (no overlapping spans)
     return buildAnnotatedString {
-        withStyle(SpanStyle(color = baseColor)) {
-            append(fullText)
-        }
-
-        // Make faded words of the outgoing segment transparent (they still take space)
-        if (outgoingText.isNotBlank() && outgoingFadedWords > 0) {
-            val outgoingWords = outgoingText.trim().split(Regex("\\s+"))
-            // Find the position in fullText where outgoing words are (always at the start)
-            var charPos = 0
-            for (i in 0 until outgoingFadedWords.coerceAtMost(outgoingWords.size)) {
-                val word = outgoingWords[i]
-                val wordStart = fullText.indexOf(word, charPos)
-                if (wordStart >= 0) {
-                    addStyle(
-                        SpanStyle(color = Color.Transparent),
-                        wordStart,
-                        wordStart + word.length
-                    )
-                    charPos = wordStart + word.length
-                    // Also make the space after transparent
-                    if (charPos < fullText.length && fullText[charPos] == ' ') {
-                        addStyle(SpanStyle(color = Color.Transparent), charPos, charPos + 1)
-                        charPos++
-                    }
-                }
-            }
-        }
-
-        // Dim in-progress text
-        if (showInProgress && inProgressText.isNotBlank() && segments.isNotEmpty()) {
-            val inProgressStart = fullText.length - inProgressText.trim().length
-            if (inProgressStart >= 0) {
-                addStyle(
-                    SpanStyle(color = baseColor.copy(alpha = 0.6f)),
-                    inProgressStart,
-                    fullText.length
-                )
-            }
-        }
-
-        // Apply word highlighting colors
-        if (showWordHighlighting && highlightedWords.isNotEmpty()) {
-            for (hw in highlightedWords) {
-                if (hw.word.isBlank()) continue
-                try {
-                    val highlightColor = parseHexColor(hw.color)
-                    val regex = if (hw.isRegex) {
-                        if (hw.caseSensitive) Regex(hw.word) else Regex(hw.word, RegexOption.IGNORE_CASE)
-                    } else {
-                        val escaped = Regex.escape(hw.word)
-                        if (hw.caseSensitive) Regex(escaped) else Regex(escaped, RegexOption.IGNORE_CASE)
-                    }
-                    regex.findAll(fullText).forEach { match ->
-                        addStyle(
-                            SpanStyle(color = highlightColor),
-                            match.range.first,
-                            match.range.last + 1
-                        )
-                    }
-                } catch (_: Exception) {
-                    // Skip invalid regex patterns
-                }
+        var i = 0
+        while (i < fullText.length) {
+            val color = colors[i]
+            val start = i
+            while (i < fullText.length && colors[i] == color) i++
+            withStyle(SpanStyle(color = color)) {
+                append(fullText.substring(start, i))
             }
         }
     }
