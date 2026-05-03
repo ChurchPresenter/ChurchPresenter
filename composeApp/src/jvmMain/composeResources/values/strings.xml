@@ -476,6 +476,7 @@
     <string name="windows_count_label">Windows (1-3)</string>
     <string name="window_position">Window Position</string>
     <string name="text_margins">Text Margins</string>
+    <string name="end_of_song_spacing">End-of-Song (*) Spacing</string>
     <string name="auto_fit">Auto</string>
     <string name="auto_fit_checkbox_tooltip">Automatically fit text to screen, using font size as maximum</string>
     <string name="auto_fit_button_tooltip">Calculate optimal font size for current verse</string>

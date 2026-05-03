@@ -692,6 +692,7 @@
     <string name="tab_canvas">Холст</string>
     <string name="tab_visibility">Видимость вкладок</string>
     <string name="text_margins">Отступы текста</string>
+    <string name="end_of_song_spacing">Конец песни (*) интервал</string>
     <string name="theme">Тема</string>
     <string name="timer_expired">Время вышло!</string>
     <string name="timer_expired_text_hint">Введите сообщение по окончании…</string>

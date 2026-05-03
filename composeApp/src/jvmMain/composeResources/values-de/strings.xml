@@ -691,6 +691,7 @@
     <string name="tab_canvas">Leinwand</string>
     <string name="tab_visibility">Tab-Sichtbarkeit</string>
     <string name="text_margins">Textränder</string>
+    <string name="end_of_song_spacing">Liedende (*) Abstand</string>
     <string name="theme">Design</string>
     <string name="timer_expired">Zeit abgelaufen!</string>
     <string name="timer_expired_text_hint">Nachricht eingeben, die angezeigt wird, wenn die Zeit abgelaufen ist…</string>

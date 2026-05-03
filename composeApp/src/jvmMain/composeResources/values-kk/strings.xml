@@ -691,6 +691,7 @@
     <string name="tab_canvas">Кенеп</string>
     <string name="tab_visibility">Қойындылар көрінісі</string>
     <string name="text_margins">Мәтін жиектері</string>
+    <string name="end_of_song_spacing">Ән соңы (*) аралығы</string>
     <string name="theme">Тақырып</string>
     <string name="timer_expired">Уақыт бітті!</string>
     <string name="timer_expired_text_hint">Аяқталғанда көрсетілетін хабарламаны енгізіңіз…</string>

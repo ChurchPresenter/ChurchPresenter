@@ -691,6 +691,7 @@
     <string name="tab_canvas">Палатно</string>
     <string name="tab_visibility">Бачнасць укладак</string>
     <string name="text_margins">Водступы тэксту</string>
+    <string name="end_of_song_spacing">Канец песні (*) адлегласць</string>
     <string name="theme">Тэма</string>
     <string name="timer_expired">Час выйшаў!</string>
     <string name="timer_expired_text_hint">Увядзіце паведамленне для паказу па заканчэнні…</string>

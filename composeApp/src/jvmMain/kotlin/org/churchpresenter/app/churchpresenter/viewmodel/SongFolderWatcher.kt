@@ -27,19 +27,10 @@ class SongFolderWatcher(
         watchJob = scope.launch(Dispatchers.IO) {
             val watchService = FileSystems.getDefault().newWatchService()
             try {
-                // Watch root directory for new/deleted subdirectories
-                rootDir.toPath().register(
-                    watchService,
-                    StandardWatchEventKinds.ENTRY_CREATE,
-                    StandardWatchEventKinds.ENTRY_DELETE,
-                    StandardWatchEventKinds.ENTRY_MODIFY
-                )
-
-                // Watch each existing subdirectory for .song file changes
-                val subdirs = rootDir.listFiles { file -> file.isDirectory } ?: emptyArray()
-                for (subdir in subdirs) {
+                // Recursively watch root and all subdirectories
+                fun registerDir(dir: File) {
                     try {
-                        subdir.toPath().register(
+                        dir.toPath().register(
                             watchService,
                             StandardWatchEventKinds.ENTRY_CREATE,
                             StandardWatchEventKinds.ENTRY_DELETE,
@@ -47,7 +38,12 @@ class SongFolderWatcher(
                         )
                     } catch (_: Exception) {
                     }
+                    val subdirs = dir.listFiles { file -> file.isDirectory } ?: emptyArray()
+                    for (subdir in subdirs) {
+                        registerDir(subdir)
+                    }
                 }
+                registerDir(rootDir)
 
                 while (isActive) {
                     val key = watchService.take()

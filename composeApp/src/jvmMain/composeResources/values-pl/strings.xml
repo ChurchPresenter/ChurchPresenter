@@ -690,6 +690,7 @@
     <string name="tab_canvas">Płótno</string>
     <string name="tab_visibility">Widoczność kart</string>
     <string name="text_margins">Marginesy tekstu</string>
+    <string name="end_of_song_spacing">Koniec pieśni (*) odstęp</string>
     <string name="theme">Motyw</string>
     <string name="timer_expired">Czas minął!</string>
     <string name="timer_expired_text_hint">Wprowadź wiadomość wyświetlaną po zakończeniu…</string>

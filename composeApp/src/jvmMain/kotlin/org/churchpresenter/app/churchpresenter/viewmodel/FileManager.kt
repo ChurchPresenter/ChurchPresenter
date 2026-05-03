@@ -40,18 +40,35 @@ class FileManager {
     fun getSongFoldersInDirectory(directory: String): List<Pair<String, Int>> {
         if (directory.isEmpty()) return emptyList()
 
-        val dir = File(directory)
-        if (!dir.exists() || !dir.isDirectory) return emptyList()
+        val rootDir = File(directory)
+        if (!rootDir.exists() || !rootDir.isDirectory) return emptyList()
 
-        return dir.listFiles { file -> file.isDirectory }
-            ?.mapNotNull { subdir ->
-                val songCount = subdir.listFiles { file ->
-                    file.extension.lowercase() == Constants.EXTENSION_SONG
-                }?.size ?: 0
-                if (songCount > 0) Pair(subdir.name, songCount) else null
+        val results = mutableListOf<Pair<String, Int>>()
+
+        // Count .song files in the root directory itself
+        val rootSongCount = rootDir.listFiles { file ->
+            file.extension.lowercase() == Constants.EXTENSION_SONG
+        }?.size ?: 0
+        if (rootSongCount > 0) {
+            results.add(Pair("/", rootSongCount))
+        }
+
+        collectSongFolders(rootDir, rootDir, results)
+        return results.sortedBy { it.first }
+    }
+
+    private fun collectSongFolders(currentDir: File, rootDir: File, results: MutableList<Pair<String, Int>>) {
+        val subdirs = currentDir.listFiles { file -> file.isDirectory } ?: emptyArray()
+        for (subdir in subdirs) {
+            val songCount = subdir.listFiles { file ->
+                file.extension.lowercase() == Constants.EXTENSION_SONG
+            }?.size ?: 0
+            if (songCount > 0) {
+                val relativePath = subdir.toRelativeString(rootDir).replace('\\', '/')
+                results.add(Pair(relativePath, songCount))
             }
-            ?.sortedBy { it.first }
-            ?: emptyList()
+            collectSongFolders(subdir, rootDir, results)
+        }
     }
 
     /**

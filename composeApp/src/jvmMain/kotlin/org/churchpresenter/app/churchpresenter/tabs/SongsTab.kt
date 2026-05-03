@@ -382,7 +382,7 @@ fun SongsTab(
                     }
                 )
 
-                // Hidden rebuild: 4 rapid clicks on the search button force-reloads songs from disk
+                // Hidden rebuild: 3 rapid clicks on the search button force-reloads songs from disk
                 var rebuildClickCount by remember { mutableStateOf(0) }
                 var rebuildClickTime by remember { mutableStateOf(0L) }
                 IconButton(
@@ -391,7 +391,7 @@ fun SongsTab(
                         if (now - rebuildClickTime > 800) rebuildClickCount = 0
                         rebuildClickCount++
                         rebuildClickTime = now
-                        if (rebuildClickCount >= 4) {
+                        if (rebuildClickCount >= 3) {
                             rebuildClickCount = 0
                             viewModel.loadSongs()
                         }
@@ -401,7 +401,11 @@ fun SongsTab(
                         contentColor = MaterialTheme.colorScheme.onPrimary
                     )
                 ) {
-                    Icon(painter = painterResource(Res.drawable.ic_search), contentDescription = stringResource(Res.string.search), modifier = Modifier.size(20.dp))
+                    if (isLoading) {
+                        CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp, color = MaterialTheme.colorScheme.onPrimary)
+                    } else {
+                        Icon(painter = painterResource(Res.drawable.ic_search), contentDescription = stringResource(Res.string.search), modifier = Modifier.size(20.dp))
+                    }
                 }
             }
 

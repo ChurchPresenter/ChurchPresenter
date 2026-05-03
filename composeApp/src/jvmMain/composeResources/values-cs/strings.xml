@@ -777,6 +777,7 @@
     <string name="tab_canvas">Plátno</string>
     <string name="tab_visibility">Viditelnost karet</string>
     <string name="text_margins">Okraje textu</string>
+    <string name="end_of_song_spacing">Konec písně (*) rozestup</string>
     <string name="theme">Motiv</string>
     <string name="timer_expired">Čas vypršel!</string>
     <string name="timer_expired_text_hint">Zadejte zprávu pro zobrazení po skončení…</string>

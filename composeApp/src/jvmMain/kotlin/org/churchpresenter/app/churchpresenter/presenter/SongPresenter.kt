@@ -706,8 +706,10 @@ fun SongPresenter(
                         val visible = section.isLastSection && (!isLineMode || effectiveLineIndex >= allDisplayLines.size - 1)
                         val indicatorAlpha = if (visible) 1f else 0f
                         Spacer(modifier = Modifier.padding(top = (4 * scaleFactor).dp))
+                        val indicatorPad = " ".repeat(ss.endOfSongIndicatorSpacing)
+                        val indicatorText = "$indicatorPad*$indicatorPad"
                         Row(modifier = Modifier.fillMaxWidth().alpha(indicatorAlpha), horizontalArrangement = Arrangement.Center) {
-                            repeat(3) { Text(text = "  *  ", fontSize = scaledLyricsFontSize, color = lyricsColor, style = lyricsTextStyleScaled) }
+                            repeat(3) { Text(text = indicatorText, fontSize = scaledLyricsFontSize, color = lyricsColor, style = lyricsTextStyleScaled) }
                         }
                     }
 
