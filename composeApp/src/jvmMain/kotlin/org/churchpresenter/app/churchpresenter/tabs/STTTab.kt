@@ -509,22 +509,31 @@ private fun applyHighlighting(
             withStyle(SpanStyle(color = baseColor)) { append(text) }
         }
     }
+    // Build per-character color array then construct contiguous runs (no overlapping spans)
+    val colors = Array(text.length) { baseColor }
+    for (hw in highlightedWords) {
+        if (hw.word.isBlank()) continue
+        try {
+            val highlightColor = org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor(hw.color)
+            val regex = if (hw.isRegex) {
+                if (hw.caseSensitive) Regex(hw.word) else Regex(hw.word, RegexOption.IGNORE_CASE)
+            } else {
+                val escaped = Regex.escape(hw.word)
+                val pattern = "\\b$escaped\\b"
+                if (hw.caseSensitive) Regex(pattern) else Regex(pattern, RegexOption.IGNORE_CASE)
+            }
+            regex.findAll(text).forEach { match ->
+                for (j in match.range) colors[j] = highlightColor
+            }
+        } catch (_: Exception) {}
+    }
     return buildAnnotatedString {
-        withStyle(SpanStyle(color = baseColor)) { append(text) }
-        for (hw in highlightedWords) {
-            if (hw.word.isBlank()) continue
-            try {
-                val highlightColor = org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor(hw.color)
-                val regex = if (hw.isRegex) {
-                    if (hw.caseSensitive) Regex(hw.word) else Regex(hw.word, RegexOption.IGNORE_CASE)
-                } else {
-                    val escaped = Regex.escape(hw.word)
-                    if (hw.caseSensitive) Regex(escaped) else Regex(escaped, RegexOption.IGNORE_CASE)
-                }
-                regex.findAll(text).forEach { match ->
-                    addStyle(SpanStyle(color = highlightColor), match.range.first, match.range.last + 1)
-                }
-            } catch (_: Exception) {}
+        var i = 0
+        while (i < text.length) {
+            val color = colors[i]
+            val start = i
+            while (i < text.length && colors[i] == color) i++
+            withStyle(SpanStyle(color = color)) { append(text.substring(start, i)) }
         }
     }
 }
