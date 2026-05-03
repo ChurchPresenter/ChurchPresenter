@@ -190,11 +190,15 @@ class STTManager {
             _translationSegments.clear()
             for (i in 0 until segmentsArray.length()) {
                 val seg = segmentsArray.getJSONObject(i)
+                // STT app sends "translated_text" for translation segments
+                val text = seg.optString("translated_text", "").ifBlank {
+                    seg.optString("text", "")
+                }
                 _translationSegments.add(
                     STTSegment(
                         id = seg.optInt("id", i),
                         timestamp = seg.optString("timestamp", ""),
-                        text = seg.optString("text", ""),
+                        text = text,
                         start = seg.optDouble("start", 0.0),
                         end = seg.optDouble("end", 0.0),
                         completed = seg.optBoolean("completed", true)
@@ -203,8 +207,10 @@ class STTManager {
             }
         }
 
+        // in_progress can be a string or a JSON object with "translated_text"
         val inProgress = data.opt("in_progress")
         _inProgressTranslation.value = when (inProgress) {
+            is JSONObject -> inProgress.optString("translated_text", "")
             is String -> inProgress
             null, JSONObject.NULL -> ""
             else -> inProgress.toString()
