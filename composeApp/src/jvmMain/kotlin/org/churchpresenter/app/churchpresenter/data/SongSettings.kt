@@ -610,7 +610,7 @@ data class QASettings(
     val shadowSize: Int = 100,
     val shadowOpacity: Int = 78,
     val horizontalAlignment: String = Constants.CENTER,
-    val position: String = Constants.CENTER,
+    val position: String = Constants.BOTTOM_CENTER,
     val adminPassword: String = generateDefaultPassword(),
     val rateLimitCooldownSeconds: Int = 30,
 )

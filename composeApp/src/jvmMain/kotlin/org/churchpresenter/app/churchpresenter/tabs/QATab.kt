@@ -52,6 +52,7 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -160,6 +161,14 @@ fun QATab(
     val questions = qaManager.questions
     val displayedQuestion = qaManager.displayedQuestion
     val showQROnDisplay = qaManager.showQRCodeOnDisplay
+    val presentingMode by presenterManager.presentingMode
+
+    // Reset QA display state when display is cleared (e.g. via Escape or Clear Display)
+    LaunchedEffect(presentingMode) {
+        if (presentingMode == Presenting.NONE && (showQROnDisplay || displayedQuestion != null)) {
+            qaManager.clearDisplay()
+        }
+    }
 
     val effectiveBaseUrl = qaDisplayUrl.ifEmpty { serverUrl }
     val submissionUrl = if (effectiveBaseUrl.isNotEmpty()) "$effectiveBaseUrl/qa" else ""
@@ -310,6 +319,7 @@ fun QATab(
                         onClick = {
                             qaManager.clearDisplay()
                             presenterManager.setDisplayedQuestion(null)
+                            presenterManager.setShowQRCodeOnDisplay(false)
                             presenting(Presenting.NONE)
                         }
                     ) {
