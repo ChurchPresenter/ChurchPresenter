@@ -12,6 +12,9 @@ import kotlinx.coroutines.launch
 import org.json.JSONArray
 import org.json.JSONObject
 import java.net.URI
+import java.net.http.HttpClient
+import java.net.http.HttpRequest
+import java.net.http.HttpResponse
 
 data class STTSegment(
     val id: Int,
@@ -96,6 +99,10 @@ class STTManager {
                     // Request initial data
                     s.emit("request_all_entries")
                     s.emit("request_all_translation_entries")
+                    // Fetch word highlighting via REST (not sent on connect via socket)
+                    scope.launch(Dispatchers.IO) {
+                        fetchWordHighlighting(url)
+                    }
                 }
 
                 s.on(Socket.EVENT_DISCONNECT) {
@@ -235,6 +242,42 @@ class STTManager {
                     )
                 )
             }
+        }
+    }
+
+    private fun fetchWordHighlighting(baseUrl: String) {
+        try {
+            val client = HttpClient.newHttpClient()
+            val request = HttpRequest.newBuilder()
+                .uri(URI.create("$baseUrl/api/word-highlighting/words"))
+                .GET()
+                .build()
+            val response = client.send(request, HttpResponse.BodyHandlers.ofString())
+            if (response.statusCode() == 200) {
+                val json = JSONObject(response.body())
+                if (json.optBoolean("success", false)) {
+                    scope.launch {
+                        _wordHighlightingEnabled.value = json.optBoolean("enabled", true)
+                        val wordsArray = json.optJSONArray("words")
+                        _highlightedWords.clear()
+                        if (wordsArray != null) {
+                            for (i in 0 until wordsArray.length()) {
+                                val w = wordsArray.getJSONObject(i)
+                                _highlightedWords.add(
+                                    HighlightedWord(
+                                        word = w.optString("word", ""),
+                                        color = w.optString("color", "#ffff00"),
+                                        caseSensitive = w.optBoolean("case_sensitive", false),
+                                        isRegex = w.optBoolean("is_regex", false)
+                                    )
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (_: Exception) {
+            // Silently ignore — highlighting is optional
         }
     }
 
