@@ -633,6 +633,7 @@ data class STTSettings(
     val translationTextColor: String = "#AAAAFF",
     val backgroundColor: String = "#1E1E2E",
     val fontSize: Int = 42,
+    val lineSpacing: Int = 130, // line height as percentage of font size (100 = no extra spacing)
     val fontType: String = "Arial",
     val bold: Boolean = false,
     val italic: Boolean = false,

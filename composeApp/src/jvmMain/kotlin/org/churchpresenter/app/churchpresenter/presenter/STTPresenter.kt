@@ -1,15 +1,12 @@
 package org.churchpresenter.app.churchpresenter.presenter
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -29,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import kotlinx.coroutines.delay
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
@@ -79,6 +77,8 @@ fun STTPresenter(
         blurRadius = 8f * shadowSizeMul
     )
 
+    val lineHeightSp = (sttSettings.fontSize * sttSettings.lineSpacing / 100f).sp
+
     val baseTextStyle = TextStyle(
         fontFamily = fontFamily,
         fontWeight = if (sttSettings.bold) FontWeight.Bold else FontWeight.Normal,
@@ -90,7 +90,8 @@ fun STTPresenter(
             sttSettings.position.contains("Right") -> TextAlign.Right
             else -> TextAlign.Center
         },
-        fontSize = sttSettings.fontSize.sp
+        fontSize = sttSettings.fontSize.sp,
+        lineHeight = lineHeightSp
     )
 
     val boxAlignment = sttPositionToAlignment(sttSettings.position)
@@ -178,7 +179,9 @@ fun STTPresenter(
 }
 
 /**
- * Text that shows the last N lines. Old lines scroll off the top.
+ * Shows text clipped to the last N lines. Uses actual measured line height
+ * so clipping is precise for any font size. Content is bottom-aligned —
+ * when text exceeds maxLines, old lines are clipped off the top.
  */
 @Composable
 private fun BottomAlignedText(
@@ -187,28 +190,42 @@ private fun BottomAlignedText(
     maxLines: Int,
     modifier: Modifier = Modifier
 ) {
-    if (text.isEmpty()) {
-        val lineHeight = style.fontSize.value * 1.3f
-        val reservedHeight = if (maxLines > 0) (lineHeight * maxLines).dp else 0.dp
-        Spacer(modifier = modifier.then(if (maxLines > 0) Modifier.height(reservedHeight) else Modifier))
+    if (maxLines <= 0) {
+        // Unlimited — just show all text
+        Text(text = text, style = style, modifier = modifier.fillMaxWidth())
         return
     }
 
-    val scrollState = rememberScrollState()
-    LaunchedEffect(text) {
-        scrollState.scrollTo(scrollState.maxValue)
+    // Measure actual line height from the text layout
+    var measuredLineHeight by remember { mutableStateOf(0f) }
+    var totalLines by remember { mutableIntStateOf(0) }
+
+    val density = LocalDensity.current
+    val clipHeight = if (measuredLineHeight > 0f) {
+        with(density) { (measuredLineHeight * maxLines).toDp() }
+    } else {
+        // Fallback before first measurement
+        Dp.Unspecified
     }
 
-    val lineHeight = style.fontSize.value * 1.3f
-    val maxHeight = if (maxLines > 0) (lineHeight * maxLines).dp else Dp.Unspecified
-
-    Column(
+    Box(
         modifier = modifier
-            .then(if (maxHeight != Dp.Unspecified) Modifier.heightIn(max = maxHeight) else Modifier)
-            .verticalScroll(scrollState),
-        verticalArrangement = Arrangement.Bottom
+            .then(if (clipHeight != Dp.Unspecified) Modifier.heightIn(max = clipHeight) else Modifier)
+            .clipToBounds(),
+        contentAlignment = Alignment.BottomStart
     ) {
-        Text(text = text, style = style, modifier = Modifier.fillMaxWidth())
+        Text(
+            text = text,
+            style = style,
+            modifier = Modifier.fillMaxWidth(),
+            onTextLayout = { result ->
+                if (result.lineCount > 0) {
+                    // Average line height across all lines for accuracy
+                    measuredLineHeight = result.size.height.toFloat() / result.lineCount
+                    totalLines = result.lineCount
+                }
+            }
+        )
     }
 }
 
