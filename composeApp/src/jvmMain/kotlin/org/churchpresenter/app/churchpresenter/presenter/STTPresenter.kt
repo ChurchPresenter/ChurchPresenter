@@ -147,7 +147,7 @@ fun STTPresenter(
             Box(
                 modifier = Modifier
                     .padding(32.dp)
-                    .heightIn(max = maxCardHeight)
+                    .then(if (isBothMode) Modifier.height(maxCardHeight) else Modifier.heightIn(max = maxCardHeight))
                     .clip(RoundedCornerShape(16.dp))
                     .background(cardBg)
                     .padding(24.dp)
