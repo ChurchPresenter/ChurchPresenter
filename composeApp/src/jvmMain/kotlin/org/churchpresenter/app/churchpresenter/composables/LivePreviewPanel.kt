@@ -88,6 +88,7 @@ fun LivePreviewPanel(
     appSettings: AppSettings,
     modifier: Modifier = Modifier,
     serverUrl: String = "",
+    qaDisplayUrl: String = "",
 ) {
     val proj = appSettings.projectionSettings
     val deckLinkCount = remember { if (DeckLinkManager.isAvailable()) DeckLinkManager.listDevices().size else 0 }
@@ -111,6 +112,7 @@ fun LivePreviewPanel(
                 appSettings = appSettings,
                 modifier = Modifier.fillMaxWidth(),
                 serverUrl = serverUrl,
+                qaDisplayUrl = qaDisplayUrl,
             )
         }
 
@@ -133,6 +135,7 @@ private fun SingleDisplayPreview(
     appSettings: AppSettings,
     modifier: Modifier = Modifier,
     serverUrl: String = "",
+    qaDisplayUrl: String = "",
 ) {
     val presentingMode by presenterManager.presentingMode
     val displayedVerses by presenterManager.displayedVerses
@@ -244,7 +247,7 @@ private fun SingleDisplayPreview(
                                 val displayedQuestion by presenterManager.displayedQuestion
                                 val showQRCode by presenterManager.showQRCodeOnDisplay
                                 if (showQRCode) {
-                                    QAQRCodePresenter(url = "$serverUrl/qa", qaSettings = appSettings.qaSettings)
+                                    QAQRCodePresenter(url = "${qaDisplayUrl.ifEmpty { serverUrl }}/qa", qaSettings = appSettings.qaSettings)
                                 } else {
                                     QAPresenter(question = displayedQuestion, qaSettings = appSettings.qaSettings)
                                 }

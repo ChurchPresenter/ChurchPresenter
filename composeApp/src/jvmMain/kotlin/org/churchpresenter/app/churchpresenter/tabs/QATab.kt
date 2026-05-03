@@ -33,6 +33,8 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Stop
@@ -59,6 +61,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.DpOffset
@@ -123,6 +127,7 @@ import org.churchpresenter.app.churchpresenter.composables.TextStyleButtons
 import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.models.Question
 import org.churchpresenter.app.churchpresenter.models.QuestionStatus
+import org.churchpresenter.app.churchpresenter.server.TunnelStatus
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.presenter.generateQRCodeBitmap
 import org.churchpresenter.app.churchpresenter.utils.Constants
@@ -144,14 +149,28 @@ fun QATab(
     presenting: (Presenting) -> Unit,
     appSettings: AppSettings = AppSettings(),
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit = {},
+    tunnelStatus: TunnelStatus = TunnelStatus.Idle,
+    tunnelUrl: String = "",
+    onStartTunnel: () -> Unit = {},
+    onStopTunnel: () -> Unit = {},
+    qaDisplayUrl: String = "",
+    onQaDisplayUrlChanged: (String) -> Unit = {},
 ) {
     val sessionActive = qaManager.sessionActive
     val questions = qaManager.questions
     val displayedQuestion = qaManager.displayedQuestion
     val showQROnDisplay = qaManager.showQRCodeOnDisplay
 
-    val submissionUrl = if (serverUrl.isNotEmpty()) "$serverUrl/qa" else ""
-    val adminUrl = if (serverUrl.isNotEmpty()) "$serverUrl/qa/admin" else ""
+    val effectiveBaseUrl = qaDisplayUrl.ifEmpty { serverUrl }
+    val submissionUrl = if (effectiveBaseUrl.isNotEmpty()) "$effectiveBaseUrl/qa" else ""
+    var adminUseTunnel by remember { mutableStateOf(false) }
+    val adminBaseUrl = if (adminUseTunnel && tunnelUrl.isNotEmpty()) tunnelUrl else serverUrl
+    val adminDisplayUrl = if (adminBaseUrl.isNotEmpty()) "$adminBaseUrl/qa/admin" else ""
+    val adminQrUrl = if (adminBaseUrl.isNotEmpty()) {
+        val pw = appSettings.qaSettings.adminPassword
+        if (pw.isNotEmpty()) "$adminBaseUrl/qa/admin?password=${java.net.URLEncoder.encode(pw, "UTF-8")}"
+        else "$adminBaseUrl/qa/admin"
+    } else ""
 
     var selectedFilter by remember { mutableStateOf(0) }
 
@@ -441,17 +460,159 @@ fun QATab(
                     Text(stringResource(if (showQROnDisplay) Res.string.qa_hide_qr else Res.string.qa_show_qr), fontSize = 12.sp)
                 }
 
+            } else {
+                Text(stringResource(Res.string.qa_server_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 32.dp))
+            }
+
+            // ── Public Access (Tunnel) ──────────────────────────────
+            if (serverUrl.isNotEmpty()) {
                 Spacer(Modifier.height(16.dp))
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                Spacer(Modifier.height(12.dp))
+
+                Text(
+                    "Public Access",
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    "Let users submit questions via mobile data without joining your WiFi",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(Modifier.height(8.dp))
+
+                when (tunnelStatus) {
+                    TunnelStatus.Idle -> {
+                        Button(onClick = onStartTunnel, modifier = Modifier.fillMaxWidth()) {
+                            Icon(Icons.Default.PlayArrow, contentDescription = null, modifier = Modifier.size(16.dp))
+                            Spacer(Modifier.width(4.dp))
+                            Text("Enable Public Access", fontSize = 12.sp)
+                        }
+                    }
+                    TunnelStatus.Downloading -> {
+                        Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+                            androidx.compose.material3.CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
+                            Spacer(Modifier.height(4.dp))
+                            Text("Downloading tunnel client...", style = MaterialTheme.typography.bodySmall)
+                        }
+                    }
+                    TunnelStatus.Starting -> {
+                        Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+                            androidx.compose.material3.CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
+                            Spacer(Modifier.height(4.dp))
+                            Text("Starting tunnel...", style = MaterialTheme.typography.bodySmall)
+                        }
+                    }
+                    is TunnelStatus.Connected -> {
+                        Button(
+                            onClick = {
+                                onStopTunnel()
+                                onQaDisplayUrlChanged(serverUrl)
+                            },
+                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Icon(Icons.Default.Stop, contentDescription = null, modifier = Modifier.size(16.dp))
+                            Spacer(Modifier.width(4.dp))
+                            Text("Disable Public Access", fontSize = 12.sp)
+                        }
+
+                        Spacer(Modifier.height(8.dp))
+                        Text("QR Code shows:", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Spacer(Modifier.height(4.dp))
+
+                        Row(horizontalArrangement = Arrangement.spacedBy(4.dp), modifier = Modifier.fillMaxWidth()) {
+                            val isLocal = qaDisplayUrl.isEmpty() || qaDisplayUrl == serverUrl
+                            OutlinedButton(
+                                onClick = { onQaDisplayUrlChanged(serverUrl) },
+                                modifier = Modifier.weight(1f),
+                                colors = if (isLocal) ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                                ) else ButtonDefaults.outlinedButtonColors()
+                            ) {
+                                Text("Local", fontSize = 11.sp)
+                            }
+                            OutlinedButton(
+                                onClick = { onQaDisplayUrlChanged(tunnelUrl) },
+                                modifier = Modifier.weight(1f),
+                                colors = if (!isLocal) ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                                ) else ButtonDefaults.outlinedButtonColors()
+                            ) {
+                                Text("Public", fontSize = 11.sp)
+                            }
+                        }
+
+                        Spacer(Modifier.height(4.dp))
+                        Text(
+                            tunnelStatus.url,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Color(0xFF43A047),
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+                    is TunnelStatus.Error -> {
+                        Text(
+                            tunnelStatus.message,
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodySmall,
+                            modifier = Modifier.padding(bottom = 4.dp)
+                        )
+                        Button(onClick = onStartTunnel, modifier = Modifier.fillMaxWidth()) {
+                            Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(16.dp))
+                            Spacer(Modifier.width(4.dp))
+                            Text("Retry", fontSize = 12.sp)
+                        }
+                    }
+                }
+            }
+
+            // ── Admin QR Code ──────────────────────────────────────
+            if (adminDisplayUrl.isNotEmpty()) {
+                Spacer(Modifier.height(16.dp))
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                Spacer(Modifier.height(12.dp))
 
                 Text(stringResource(Res.string.qa_admin_panel), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
                 Spacer(Modifier.height(8.dp))
-                val adminQR = remember(adminUrl) { generateQRCodeBitmap(adminUrl, 256) }
+
+                if (tunnelStatus is TunnelStatus.Connected) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(4.dp), modifier = Modifier.fillMaxWidth()) {
+                        OutlinedButton(
+                            onClick = { adminUseTunnel = false },
+                            modifier = Modifier.weight(1f),
+                            colors = if (!adminUseTunnel) ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                            ) else ButtonDefaults.outlinedButtonColors()
+                        ) {
+                            Text("Local", fontSize = 11.sp)
+                        }
+                        OutlinedButton(
+                            onClick = { adminUseTunnel = true },
+                            modifier = Modifier.weight(1f),
+                            colors = if (adminUseTunnel) ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                            ) else ButtonDefaults.outlinedButtonColors()
+                        ) {
+                            Text("Public", fontSize = 11.sp)
+                        }
+                    }
+                    Spacer(Modifier.height(8.dp))
+                }
+
+                val adminQR = remember(adminQrUrl) { generateQRCodeBitmap(adminQrUrl, 256) }
                 if (adminQR != null) {
                     Image(bitmap = adminQR, contentDescription = stringResource(Res.string.qa_admin_panel), modifier = Modifier.size(140.dp).clip(RoundedCornerShape(8.dp)))
                 }
-                Text(adminUrl, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 4.dp))
-            } else {
-                Text(stringResource(Res.string.qa_server_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 32.dp))
+                Text(adminDisplayUrl, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 4.dp))
             }
 
             Spacer(Modifier.height(16.dp))
@@ -551,6 +712,7 @@ fun QATab(
             Spacer(Modifier.height(12.dp))
 
             Text(stringResource(Res.string.qa_admin_password), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)
+            var passwordVisible by remember { mutableStateOf(false) }
             OutlinedTextField(
                 value = qaSettings.adminPassword,
                 onValueChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(adminPassword = it)) } },
@@ -558,6 +720,16 @@ fun QATab(
                 textStyle = MaterialTheme.typography.bodySmall,
                 singleLine = true,
                 placeholder = { Text(stringResource(Res.string.qa_no_password), style = MaterialTheme.typography.bodySmall) },
+                visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                trailingIcon = {
+                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                        Icon(
+                            imageVector = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+                },
             )
         }
     }

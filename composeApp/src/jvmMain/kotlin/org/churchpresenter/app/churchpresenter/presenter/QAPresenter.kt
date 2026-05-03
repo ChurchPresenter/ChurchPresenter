@@ -161,13 +161,6 @@ fun QAQRCodePresenter(
                 fontWeight = FontWeight.Medium,
                 textAlign = TextAlign.Center,
             )
-            Text(
-                text = url,
-                color = textColor.copy(alpha = 0.7f),
-                fontSize = 20.sp,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(top = 8.dp)
-            )
         }
     }
 }

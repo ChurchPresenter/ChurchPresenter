@@ -112,6 +112,7 @@ import io.github.alexzhirkevich.compottie.rememberLottieComposition
 import org.churchpresenter.app.churchpresenter.composables.vlcCustomPath
 import org.churchpresenter.app.churchpresenter.data.Bible
 import org.churchpresenter.app.churchpresenter.server.CompanionServer
+import org.churchpresenter.app.churchpresenter.server.TunnelStatus
 import org.churchpresenter.app.churchpresenter.viewmodel.QAManager
 import org.churchpresenter.app.churchpresenter.server.AddToScheduleRequest
 import org.churchpresenter.app.churchpresenter.server.PendingRemoteRequest
@@ -281,6 +282,9 @@ fun main() {
             companionServer.qaAdminPassword = appSettings.qaSettings.adminPassword
             companionServer.qaCooldownSeconds = appSettings.qaSettings.rateLimitCooldownSeconds
         }
+        val tunnelStatus by companionServer.tunnelManager.status.collectAsState()
+        val tunnelUrl by companionServer.tunnelManager.tunnelUrl.collectAsState()
+        var qaDisplayUrl by remember { mutableStateOf("") }
         val remoteSelectSongFlow =
             remember { kotlinx.coroutines.flow.MutableSharedFlow<ScheduleItem.SongItem>(extraBufferCapacity = 8) }
         var showOptionsDialog by remember { mutableStateOf(false) }
@@ -364,6 +368,7 @@ fun main() {
                         windowY = if (isFloating) state.position.y.value.toInt() else -1
                     )
                     settingsManager.saveSettings(appSettings)
+                    companionServer.tunnelManager.shutdown()
                     exitApplication()
                 },
                 title = stringResource(Res.string.app_name),
@@ -995,7 +1000,13 @@ fun main() {
                                         }
                                     },
                                     serverUrl = companionServer.serverUrl.collectAsState().value,
-                                    qaManager = qaManager
+                                    qaManager = qaManager,
+                                    tunnelStatus = tunnelStatus,
+                                    tunnelUrl = tunnelUrl ?: "",
+                                    onStartTunnel = { companionServer.tunnelManager.start(appSettings.serverSettings.port) },
+                                    onStopTunnel = { companionServer.tunnelManager.stop() },
+                                    qaDisplayUrl = qaDisplayUrl,
+                                    onQaDisplayUrlChanged = { qaDisplayUrl = it },
                                 )
                                 OptionsDialog(
                                     isVisible = showOptionsDialog,
@@ -1155,6 +1166,7 @@ fun main() {
                 appSettings = appSettings,
                 identifyingScreen = identifyingScreen,
                 serverUrl = companionServer.serverUrl.collectAsState().value,
+                qaDisplayUrl = qaDisplayUrl,
             )
         } else if (appReady) {
             LicenseDialog(
@@ -1326,6 +1338,7 @@ private fun PresenterWindows(
     appSettings: AppSettings,
     identifyingScreen: Boolean,
     serverUrl: String = "",
+    qaDisplayUrl: String = "",
 ) {
     val showPresenterWindow by presenterManager.showPresenterWindow
     val presentingMode by presenterManager.presentingMode
@@ -1706,7 +1719,7 @@ private fun PresenterWindows(
                             if (screenAssignment.showQA) {
                                 if (showQRCodeOnDisplay) {
                                     QAQRCodePresenter(
-                                        url = "$serverUrl/qa",
+                                        url = "${qaDisplayUrl.ifEmpty { serverUrl }}/qa",
                                         qaSettings = appSettings.qaSettings,
                                         transitionAlpha = qaTransitionAlpha,
                                     )
@@ -1829,7 +1842,7 @@ private fun PresenterWindows(
                             if (screenAssignment.showQA) {
                                 if (showQRCodeOnDisplay) {
                                     QAQRCodePresenter(
-                                        url = "$serverUrl/qa",
+                                        url = "${qaDisplayUrl.ifEmpty { serverUrl }}/qa",
                                         qaSettings = appSettings.qaSettings,
                                         transitionAlpha = qaTransitionAlpha,
                                     )
@@ -1980,7 +1993,7 @@ private fun PresenterWindows(
                                             if (screenAssignment.showQA) {
                                                 if (showQRCodeOnDisplay) {
                                                     QAQRCodePresenter(
-                                                        url = "$serverUrl/qa",
+                                                        url = "${qaDisplayUrl.ifEmpty { serverUrl }}/qa",
                                                         qaSettings = appSettings.qaSettings,
                                                         transitionAlpha = qaTransitionAlpha,
                                                     )
@@ -2193,7 +2206,7 @@ private fun PresenterWindows(
                                 if (screenAssignment.showQA) {
                                     if (showQRCodeOnDisplay) {
                                         QAQRCodePresenter(
-                                            url = "$serverUrl/qa",
+                                            url = "${qaDisplayUrl.ifEmpty { serverUrl }}/qa",
                                             qaSettings = appSettings.qaSettings,
                                             transitionAlpha = qaTransitionAlpha,
                                         )
@@ -2387,7 +2400,7 @@ private fun PresenterWindows(
                                         if (screenAssignment.showQA) {
                                             if (showQRCodeOnDisplay) {
                                                 QAQRCodePresenter(
-                                                    url = "$serverUrl/qa",
+                                                    url = "${qaDisplayUrl.ifEmpty { serverUrl }}/qa",
                                                     qaSettings = appSettings.qaSettings,
                                                     transitionAlpha = qaTransitionAlpha,
                                                 )
@@ -2516,7 +2529,7 @@ private fun PresenterWindows(
                             if (screenAssignment.showQA) {
                                 if (showQRCodeOnDisplay) {
                                     QAQRCodePresenter(
-                                        url = "$serverUrl/qa",
+                                        url = "${qaDisplayUrl.ifEmpty { serverUrl }}/qa",
                                         qaSettings = appSettings.qaSettings,
                                         transitionAlpha = qaTransitionAlpha,
                                     )

@@ -745,6 +745,8 @@ class CompanionServer {
     private val _serverUrl = MutableStateFlow("")
     val serverUrl: StateFlow<String> = _serverUrl.asStateFlow()
 
+    val tunnelManager = TunnelManager()
+
 
     private var server: EmbeddedServer<NettyApplicationEngine, NettyApplicationEngine.Configuration>? = null
     private var currentPort: Int = Constants.SERVER_DEFAULT_PORT
@@ -2649,6 +2651,7 @@ class CompanionServer {
     }
 
     fun stop() {
+        tunnelManager.stop()
         server?.stop(1_000, 2_000)
         server = null
         scope.coroutineContext[kotlinx.coroutines.Job]?.cancelChildren()
@@ -3014,7 +3017,8 @@ h1{font-size:22px}
 
 <script>
 let questions=[],filter='INCOMING',displayedId=null,editingId=null,authed=false;
-let password=localStorage.getItem('qa_admin_pw')||'';
+let password=new URLSearchParams(window.location.search).get('password')||localStorage.getItem('qa_admin_pw')||'';
+if(password)localStorage.setItem('qa_admin_pw',password);
 const headers={'Content-Type':'application/json'};
 
 function setHeaders(){

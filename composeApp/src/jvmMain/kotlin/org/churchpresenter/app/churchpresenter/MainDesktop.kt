@@ -96,6 +96,7 @@ import org.churchpresenter.app.churchpresenter.tabs.WebTab
 import org.churchpresenter.app.churchpresenter.tabs.LowerThirdTab
 import org.churchpresenter.app.churchpresenter.tabs.CanvasTab
 import org.churchpresenter.app.churchpresenter.tabs.QATab
+import org.churchpresenter.app.churchpresenter.server.TunnelStatus
 import org.churchpresenter.app.churchpresenter.tabs.TabSection
 import org.churchpresenter.app.churchpresenter.tabs.Tabs
 import org.churchpresenter.app.churchpresenter.tabs.getStringName
@@ -170,6 +171,12 @@ fun MainDesktop(
     uploadPresentationFlow: Flow<java.io.File>? = null,
     serverUrl: String = "",
     qaManager: QAManager? = null,
+    tunnelStatus: TunnelStatus = TunnelStatus.Idle,
+    tunnelUrl: String = "",
+    onStartTunnel: () -> Unit = {},
+    onStopTunnel: () -> Unit = {},
+    qaDisplayUrl: String = "",
+    onQaDisplayUrlChanged: (String) -> Unit = {},
 ) {
     val isDarkTheme = when (theme) {
         ThemeMode.LIGHT -> false
@@ -983,7 +990,13 @@ fun MainDesktop(
                                     serverUrl = serverUrl,
                                     presenting = presenting,
                                     appSettings = appSettings,
-                                    onSettingsChange = onSettingsChange
+                                    onSettingsChange = onSettingsChange,
+                                    tunnelStatus = tunnelStatus,
+                                    tunnelUrl = tunnelUrl,
+                                    onStartTunnel = onStartTunnel,
+                                    onStopTunnel = onStopTunnel,
+                                    qaDisplayUrl = qaDisplayUrl,
+                                    onQaDisplayUrlChanged = onQaDisplayUrlChanged,
                                 )
                             }
                         }
@@ -1074,6 +1087,7 @@ fun MainDesktop(
                             appSettings = appSettings,
                             modifier = Modifier.fillMaxWidth(),
                             serverUrl = serverUrl,
+                            qaDisplayUrl = qaDisplayUrl,
                         )
                     }
                 }
