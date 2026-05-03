@@ -249,6 +249,15 @@ fun STTTab(
                         onValueChange = { onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(maxLines = it)) } }
                     )
                 }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text("Line Spacing %:", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface)
+                    Spacer(Modifier.width(4.dp))
+                    NumberSettingsTextField(
+                        initialText = sttSettings.lineSpacing,
+                        range = 80..300,
+                        onValueChange = { onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(lineSpacing = it)) } }
+                    )
+                }
             }
 
             // Drip feed settings
