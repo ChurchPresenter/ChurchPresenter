@@ -179,8 +179,7 @@ fun STTPresenter(
 }
 
 /**
- * Shows text clipped to the last N lines. Uses actual measured line height
- * so clipping is precise for any font size. Content is bottom-aligned —
+ * Shows text clipped to the last N lines. Content is bottom-aligned —
  * when text exceeds maxLines, old lines are clipped off the top.
  */
 @Composable
@@ -191,41 +190,22 @@ private fun BottomAlignedText(
     modifier: Modifier = Modifier
 ) {
     if (maxLines <= 0) {
-        // Unlimited — just show all text
         Text(text = text, style = style, modifier = modifier.fillMaxWidth())
         return
     }
 
-    // Measure actual line height from the text layout
-    var measuredLineHeight by remember { mutableStateOf(0f) }
-    var totalLines by remember { mutableIntStateOf(0) }
-
+    // Calculate clip height from the style's lineHeight (set explicitly in STTPresenter)
     val density = LocalDensity.current
-    val clipHeight = if (measuredLineHeight > 0f) {
-        with(density) { (measuredLineHeight * maxLines).toDp() }
-    } else {
-        // Fallback before first measurement
-        Dp.Unspecified
-    }
+    val lineHeightPx = with(density) { style.lineHeight.toPx() }
+    val clipHeight = with(density) { (lineHeightPx * maxLines).toDp() }
 
     Box(
         modifier = modifier
-            .then(if (clipHeight != Dp.Unspecified) Modifier.heightIn(max = clipHeight) else Modifier)
+            .heightIn(max = clipHeight)
             .clipToBounds(),
         contentAlignment = Alignment.BottomStart
     ) {
-        Text(
-            text = text,
-            style = style,
-            modifier = Modifier.fillMaxWidth(),
-            onTextLayout = { result ->
-                if (result.lineCount > 0) {
-                    // Average line height across all lines for accuracy
-                    measuredLineHeight = result.size.height.toFloat() / result.lineCount
-                    totalLines = result.lineCount
-                }
-            }
-        )
+        Text(text = text, style = style, modifier = Modifier.fillMaxWidth())
     }
 }
 
