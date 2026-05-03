@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
@@ -181,6 +180,7 @@ fun STTPresenter(
 /**
  * Shows text clipped to the last N lines. Content is bottom-aligned —
  * when text exceeds maxLines, old lines are clipped off the top.
+ * The text is shifted upward so the last line sits at the bottom of the clip area.
  */
 @Composable
 private fun BottomAlignedText(
@@ -194,18 +194,26 @@ private fun BottomAlignedText(
         return
     }
 
-    // Calculate clip height from the style's lineHeight (set explicitly in STTPresenter)
     val density = LocalDensity.current
     val lineHeightPx = with(density) { style.lineHeight.toPx() }
-    val clipHeight = with(density) { (lineHeightPx * maxLines).toDp() }
+    val clipHeightPx = lineHeightPx * maxLines
+    val clipHeight = with(density) { clipHeightPx.toDp() }
 
-    Box(
-        modifier = modifier
-            .heightIn(max = clipHeight)
-            .clipToBounds(),
-        contentAlignment = Alignment.BottomStart
-    ) {
-        Text(text = text, style = style, modifier = Modifier.fillMaxWidth())
+    val clipHeightPxInt = clipHeightPx.toInt()
+
+    androidx.compose.ui.layout.Layout(
+        content = {
+            Text(text = text, style = style, modifier = Modifier.fillMaxWidth())
+        },
+        modifier = modifier.height(clipHeight).clipToBounds()
+    ) { measurables, constraints ->
+        val placeable = measurables.first().measure(
+            constraints.copy(maxHeight = androidx.compose.ui.unit.Constraints.Infinity)
+        )
+        layout(constraints.maxWidth, clipHeightPxInt) {
+            val y = clipHeightPxInt - placeable.height
+            placeable.place(0, y.coerceAtMost(0))
+        }
     }
 }
 
