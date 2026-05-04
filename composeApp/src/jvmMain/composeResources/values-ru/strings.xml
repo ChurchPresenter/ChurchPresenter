@@ -750,6 +750,12 @@
     <string name="top_verses">Топ стихов</string>
     <string name="clear_statistics">Очистить статистику</string>
     <string name="times_displayed">раз</string>
+    <string name="menu_statistics">Статистика</string>
+    <string name="export_to_xls">Экспортировать в XLS</string>
+    <string name="statistics_exported_success">Статистика успешно экспортирована.</string>
+    <string name="statistics_exported_error">Не удалось экспортировать статистику.</string>
+    <string name="file_chooser_save_statistics">Сохранить статистику как</string>
+    <string name="file_filter_xls">Электронная таблица Excel (*.xls)</string>
 
     <!-- Remote API / Companion Server (added) -->
     <string name="auto_fit_button_tooltip">Вычислить оптимальный размер шрифта для текущего стиха</string>
@@ -1135,5 +1141,73 @@
     <string name="qa_pos_bl">НЛ</string>
     <string name="qa_pos_bc">НЦ</string>
     <string name="qa_pos_br">НП</string>
+
+    <!-- CCLI Report -->
+    <string name="ccli_report">CCLI Отчёт</string>
+    <string name="ccli_report_title">Отчёт по использованию CCLI</string>
+    <string name="ccli_preset_30d">Последние 30 дней</string>
+    <string name="ccli_preset_90d">Последние 90 дней</string>
+    <string name="ccli_preset_this_year">Этот год</string>
+    <string name="ccli_preset_last_year">Прошлый год</string>
+    <string name="ccli_preset_all_time">За всё время</string>
+    <string name="ccli_tab_songs">Песни</string>
+    <string name="ccli_tab_bible">Библия</string>
+    <string name="ccli_tab_activity">Активность</string>
+    <string name="ccli_songs_summary">%1$d уникальных песен · %2$d всего воспроизведений</string>
+    <string name="ccli_bible_summary">%1$d уникальных стихов · %2$d всего воспроизведений</string>
+    <string name="ccli_no_data">Нет данных за этот период.</string>
+    <string name="ccli_no_events">Журнал событий пуст. Презентации песен и стихов отслеживаются автоматически с этого момента.</string>
+    <string name="ccli_songs_chart">Топ песен</string>
+    <string name="ccli_bible_books_chart">Топ книг Библии</string>
+    <string name="ccli_activity_title">Презентации по времени</string>
+    <string name="ccli_from">С:</string>
+    <string name="ccli_to">По:</string>
+    <string name="ccli_legend_songs">Песни</string>
+    <string name="ccli_legend_bible">Стихи Библии</string>
+    <string name="ccli_stat_songs_presented">Показано песен</string>
+    <string name="ccli_stat_bible_verses">Стихов Библии</string>
+    <string name="ccli_stat_busiest">Пиковый период</string>
+    <string name="ccli_col_rank">№</string>
+    <string name="ccli_col_title">Название</string>
+    <string name="ccli_col_author">Автор</string>
+    <string name="ccli_col_songbook">Сборник</string>
+    <string name="ccli_col_used">Исп.</string>
+    <string name="ccli_col_first">Первый</string>
+    <string name="ccli_col_last">Последний</string>
+    <string name="ccli_col_verse">Стих</string>
+    <string name="ccli_col_bible">Библия</string>
+    <string name="ccli_report_description">Отчёт с фильтром по дате и диаграммами — экспортируйте CSV для отчётности CCLI</string>
+    <string name="ccli_export_csv">Экспорт CCLI CSV</string>
+    <string name="ccli_export_xls">Экспорт XLS</string>
+    <string name="ccli_exported_success">Отчёт успешно экспортирован.</string>
+    <string name="ccli_exported_error">Не удалось экспортировать отчёт.</string>
+    <string name="ccli_file_chooser_csv">Сохранить отчёт CCLI как</string>
+    <string name="ccli_file_filter_csv">Файлы CSV</string>
+    <string name="ccli_file_chooser_xls">Сохранить отчёт как XLS</string>
+    <string name="ccli_file_filter_xls">Файлы XLS</string>
+    <string name="ccli_month_january">Январь</string>
+    <string name="ccli_month_february">Февраль</string>
+    <string name="ccli_month_march">Март</string>
+    <string name="ccli_month_april">Апрель</string>
+    <string name="ccli_month_may">Май</string>
+    <string name="ccli_month_june">Июнь</string>
+    <string name="ccli_month_july">Июль</string>
+    <string name="ccli_month_august">Август</string>
+    <string name="ccli_month_september">Сентябрь</string>
+    <string name="ccli_month_october">Октябрь</string>
+    <string name="ccli_month_november">Ноябрь</string>
+    <string name="ccli_month_december">Декабрь</string>
+    <string name="ccli_month_jan">Янв</string>
+    <string name="ccli_month_feb">Фев</string>
+    <string name="ccli_month_mar">Мар</string>
+    <string name="ccli_month_apr">Апр</string>
+    <string name="ccli_month_may_short">Май</string>
+    <string name="ccli_month_jun">Июн</string>
+    <string name="ccli_month_jul">Июл</string>
+    <string name="ccli_month_aug">Авг</string>
+    <string name="ccli_month_sep">Сен</string>
+    <string name="ccli_month_oct">Окт</string>
+    <string name="ccli_month_nov">Ноя</string>
+    <string name="ccli_month_dec">Дек</string>
 </resources>
 

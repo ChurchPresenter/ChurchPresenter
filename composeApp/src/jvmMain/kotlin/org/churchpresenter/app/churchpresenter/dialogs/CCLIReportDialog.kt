@@ -97,6 +97,30 @@ import churchpresenter.composeapp.generated.resources.ccli_tab_activity
 import churchpresenter.composeapp.generated.resources.ccli_tab_bible
 import churchpresenter.composeapp.generated.resources.ccli_tab_songs
 import churchpresenter.composeapp.generated.resources.ccli_to
+import churchpresenter.composeapp.generated.resources.ccli_month_january
+import churchpresenter.composeapp.generated.resources.ccli_month_february
+import churchpresenter.composeapp.generated.resources.ccli_month_march
+import churchpresenter.composeapp.generated.resources.ccli_month_april
+import churchpresenter.composeapp.generated.resources.ccli_month_may
+import churchpresenter.composeapp.generated.resources.ccli_month_june
+import churchpresenter.composeapp.generated.resources.ccli_month_july
+import churchpresenter.composeapp.generated.resources.ccli_month_august
+import churchpresenter.composeapp.generated.resources.ccli_month_september
+import churchpresenter.composeapp.generated.resources.ccli_month_october
+import churchpresenter.composeapp.generated.resources.ccli_month_november
+import churchpresenter.composeapp.generated.resources.ccli_month_december
+import churchpresenter.composeapp.generated.resources.ccli_month_jan
+import churchpresenter.composeapp.generated.resources.ccli_month_feb
+import churchpresenter.composeapp.generated.resources.ccli_month_mar
+import churchpresenter.composeapp.generated.resources.ccli_month_apr
+import churchpresenter.composeapp.generated.resources.ccli_month_may_short
+import churchpresenter.composeapp.generated.resources.ccli_month_jun
+import churchpresenter.composeapp.generated.resources.ccli_month_jul
+import churchpresenter.composeapp.generated.resources.ccli_month_aug
+import churchpresenter.composeapp.generated.resources.ccli_month_sep
+import churchpresenter.composeapp.generated.resources.ccli_month_oct
+import churchpresenter.composeapp.generated.resources.ccli_month_nov
+import churchpresenter.composeapp.generated.resources.ccli_month_dec
 import churchpresenter.composeapp.generated.resources.close
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -119,14 +143,6 @@ import java.util.Locale
 import javax.swing.JFileChooser
 import javax.swing.filechooser.FileNameExtensionFilter
 
-private val MONTHS = listOf(
-    "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December"
-)
-private val MONTHS_SHORT = listOf(
-    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
-)
 private val VERSE_BAR_COLOR = Color(0xFF43A047)
 
 @Composable
@@ -241,14 +257,14 @@ fun CCLIReportDialog(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            Text("From:", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text(stringResource(Res.string.ccli_from), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             DatePicker(
                                 year = fromYear, month = fromMonth, day = fromDay,
                                 yearRange = yearRange,
                                 onChanged = { y, m, d -> fromYear = y; fromMonth = m; fromDay = d }
                             )
                             Spacer(Modifier.width(16.dp))
-                            Text("To:", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text(stringResource(Res.string.ccli_to), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             DatePicker(
                                 year = toYear, month = toMonth, day = toDay,
                                 yearRange = yearRange,
@@ -494,9 +510,9 @@ private fun ActivityContent(activity: List<ActivityPoint>) {
         val totalVerses = activity.sumOf { it.verseCount }
         val busiest = activity.maxByOrNull { it.songCount + it.verseCount }
         Row(horizontalArrangement = Arrangement.spacedBy(24.dp), modifier = Modifier.padding(bottom = 12.dp)) {
-            StatChip("Songs presented", "$totalSongs", primary)
-            StatChip("Bible verses", "$totalVerses", verseColor)
-            if (busiest != null) StatChip("Busiest period", "${busiest.label} (${busiest.songCount + busiest.verseCount})", MaterialTheme.colorScheme.secondary)
+            StatChip(stringResource(Res.string.ccli_stat_songs_presented), "$totalSongs", primary)
+            StatChip(stringResource(Res.string.ccli_stat_bible_verses), "$totalVerses", verseColor)
+            if (busiest != null) StatChip(stringResource(Res.string.ccli_stat_busiest), "${busiest.label} (${busiest.songCount + busiest.verseCount})", MaterialTheme.colorScheme.secondary)
         }
 
         // Chart
@@ -514,11 +530,11 @@ private fun ActivityContent(activity: List<ActivityPoint>) {
         ) {
             LegendDot(primary)
             Spacer(Modifier.width(4.dp))
-            Text("Songs", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(stringResource(Res.string.ccli_legend_songs), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Spacer(Modifier.width(16.dp))
             LegendDot(verseColor)
             Spacer(Modifier.width(4.dp))
-            Text("Bible Verses", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(stringResource(Res.string.ccli_legend_bible), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
 }
@@ -536,13 +552,13 @@ private fun SongTable(songs: List<SongSummary>, modifier: Modifier = Modifier) {
                 .padding(horizontal = 12.dp, vertical = 6.dp),
             horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            TableHeader("#", 28.dp.value)
-            TableHeader("Title", null, weight = 2f)
-            TableHeader("Author", null, weight = 1.5f)
-            TableHeader("Songbook", null, weight = 1f)
-            TableHeader("Used", 52.dp.value)
-            TableHeader("First", 90.dp.value)
-            TableHeader("Last", 90.dp.value)
+            TableHeader(stringResource(Res.string.ccli_col_rank), 28.dp.value)
+            TableHeader(stringResource(Res.string.ccli_col_title), null, weight = 2f)
+            TableHeader(stringResource(Res.string.ccli_col_author), null, weight = 1.5f)
+            TableHeader(stringResource(Res.string.ccli_col_songbook), null, weight = 1f)
+            TableHeader(stringResource(Res.string.ccli_col_used), 52.dp.value)
+            TableHeader(stringResource(Res.string.ccli_col_first), 90.dp.value)
+            TableHeader(stringResource(Res.string.ccli_col_last), 90.dp.value)
         }
         HorizontalDivider()
         LazyColumn(modifier = Modifier.fillMaxSize()) {
@@ -579,12 +595,12 @@ private fun VerseTable(verses: List<VerseSummary>, modifier: Modifier = Modifier
                 .padding(horizontal = 12.dp, vertical = 6.dp),
             horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            TableHeader("#", 28.dp.value)
-            TableHeader("Verse", null, weight = 2f)
-            TableHeader("Bible", null, weight = 1f)
-            TableHeader("Used", 52.dp.value)
-            TableHeader("First", 90.dp.value)
-            TableHeader("Last", 90.dp.value)
+            TableHeader(stringResource(Res.string.ccli_col_rank), 28.dp.value)
+            TableHeader(stringResource(Res.string.ccli_col_verse), null, weight = 2f)
+            TableHeader(stringResource(Res.string.ccli_col_bible), null, weight = 1f)
+            TableHeader(stringResource(Res.string.ccli_col_used), 52.dp.value)
+            TableHeader(stringResource(Res.string.ccli_col_first), 90.dp.value)
+            TableHeader(stringResource(Res.string.ccli_col_last), 90.dp.value)
         }
         HorizontalDivider()
         LazyColumn(modifier = Modifier.fillMaxSize()) {
@@ -773,6 +789,34 @@ private fun DatePicker(
     val safeDay = day.coerceAtMost(daysInMonth)
     val years = remember(yearRange) { yearRange.map { it.toString() } }
     val days = remember(daysInMonth) { (1..daysInMonth).map { it.toString() } }
+    val months = listOf(
+        stringResource(Res.string.ccli_month_january),
+        stringResource(Res.string.ccli_month_february),
+        stringResource(Res.string.ccli_month_march),
+        stringResource(Res.string.ccli_month_april),
+        stringResource(Res.string.ccli_month_may),
+        stringResource(Res.string.ccli_month_june),
+        stringResource(Res.string.ccli_month_july),
+        stringResource(Res.string.ccli_month_august),
+        stringResource(Res.string.ccli_month_september),
+        stringResource(Res.string.ccli_month_october),
+        stringResource(Res.string.ccli_month_november),
+        stringResource(Res.string.ccli_month_december)
+    )
+    val monthsShort = listOf(
+        stringResource(Res.string.ccli_month_jan),
+        stringResource(Res.string.ccli_month_feb),
+        stringResource(Res.string.ccli_month_mar),
+        stringResource(Res.string.ccli_month_apr),
+        stringResource(Res.string.ccli_month_may_short),
+        stringResource(Res.string.ccli_month_jun),
+        stringResource(Res.string.ccli_month_jul),
+        stringResource(Res.string.ccli_month_aug),
+        stringResource(Res.string.ccli_month_sep),
+        stringResource(Res.string.ccli_month_oct),
+        stringResource(Res.string.ccli_month_nov),
+        stringResource(Res.string.ccli_month_dec)
+    )
 
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
         DropdownPicker(
@@ -782,8 +826,8 @@ private fun DatePicker(
             onSelected = { idx -> onChanged(yearRange.first + idx, month, safeDay) }
         )
         DropdownPicker(
-            buttonLabel = MONTHS_SHORT[month - 1],
-            options = MONTHS,
+            buttonLabel = monthsShort[month - 1],
+            options = months,
             modifier = Modifier.width(82.dp),
             onSelected = { idx -> onChanged(year, idx + 1, safeDay) }
         )

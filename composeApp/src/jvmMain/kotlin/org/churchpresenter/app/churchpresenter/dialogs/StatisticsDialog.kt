@@ -36,6 +36,7 @@ import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.rememberDialogState
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.ccli_report
+import churchpresenter.composeapp.generated.resources.ccli_report_description
 import churchpresenter.composeapp.generated.resources.clear_statistics
 import churchpresenter.composeapp.generated.resources.close
 import churchpresenter.composeapp.generated.resources.export_to_xls
@@ -140,7 +141,7 @@ fun StatisticsDialog(
                                         color = MaterialTheme.colorScheme.primary
                                     )
                                     Text(
-                                        "Date-filtered report with charts — export CSV for CCLI license reporting",
+                                        stringResource(Res.string.ccli_report_description),
                                         style = MaterialTheme.typography.bodySmall,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )

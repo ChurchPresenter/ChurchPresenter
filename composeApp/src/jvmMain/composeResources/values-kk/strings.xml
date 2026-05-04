@@ -749,6 +749,12 @@
     <string name="top_verses">Үздік аяттар</string>
     <string name="clear_statistics">Статистиканы тазалау</string>
     <string name="times_displayed">рет</string>
+    <string name="menu_statistics">Статистика</string>
+    <string name="export_to_xls">XLS форматына экспорттау</string>
+    <string name="statistics_exported_success">Статистика сәтті экспортталды.</string>
+    <string name="statistics_exported_error">Статистиканы экспорттау сәтсіз аяқталды.</string>
+    <string name="file_chooser_save_statistics">Статистиканы сақтау</string>
+    <string name="file_filter_xls">Excel кестесі (*.xls)</string>
 
     <!-- Remote API / Companion Server (added) -->
     <string name="auto_fit_button_tooltip">Ағымдағы аят үшін оңтайлы қаріп өлшемін есептеу</string>
@@ -1133,5 +1139,73 @@
     <string name="qa_pos_bl">ТС</string>
     <string name="qa_pos_bc">ТО</string>
     <string name="qa_pos_br">ТҚ</string>
+
+    <!-- CCLI Report -->
+    <string name="ccli_report">CCLI Есеп</string>
+    <string name="ccli_report_title">CCLI Пайдалану Есебі</string>
+    <string name="ccli_preset_30d">Соңғы 30 күн</string>
+    <string name="ccli_preset_90d">Соңғы 90 күн</string>
+    <string name="ccli_preset_this_year">Осы жыл</string>
+    <string name="ccli_preset_last_year">Өткен жыл</string>
+    <string name="ccli_preset_all_time">Барлық уақыт</string>
+    <string name="ccli_tab_songs">Әндер</string>
+    <string name="ccli_tab_bible">Інжіл</string>
+    <string name="ccli_tab_activity">Белсенділік</string>
+    <string name="ccli_songs_summary">%1$d бірегей ән · %2$d жалпы ойнатулар</string>
+    <string name="ccli_bible_summary">%1$d бірегей аят · %2$d жалпы ойнатулар</string>
+    <string name="ccli_no_data">Бұл кезең үшін деректер жоқ.</string>
+    <string name="ccli_no_events">Оқиға журналы жоқ. Ән мен аят презентациялары осы сәттен бастап автоматты түрде тіркеледі.</string>
+    <string name="ccli_songs_chart">Үздік әндер</string>
+    <string name="ccli_bible_books_chart">Үздік Інжіл кітаптары</string>
+    <string name="ccli_activity_title">Уақыт бойынша презентациялар</string>
+    <string name="ccli_from">Бастап:</string>
+    <string name="ccli_to">Дейін:</string>
+    <string name="ccli_legend_songs">Әндер</string>
+    <string name="ccli_legend_bible">Інжіл аяттары</string>
+    <string name="ccli_stat_songs_presented">Ұсынылған әндер</string>
+    <string name="ccli_stat_bible_verses">Інжіл аяттары</string>
+    <string name="ccli_stat_busiest">Ең белсенді кезең</string>
+    <string name="ccli_col_rank">№</string>
+    <string name="ccli_col_title">Тақырып</string>
+    <string name="ccli_col_author">Автор</string>
+    <string name="ccli_col_songbook">Жырнама</string>
+    <string name="ccli_col_used">Қолд.</string>
+    <string name="ccli_col_first">Бірінші</string>
+    <string name="ccli_col_last">Соңғы</string>
+    <string name="ccli_col_verse">Аят</string>
+    <string name="ccli_col_bible">Інжіл</string>
+    <string name="ccli_report_description">Күн сүзгісі бар және диаграммалары бар есеп — CCLI лицензия есебі үшін CSV экспорттаңыз</string>
+    <string name="ccli_export_csv">CCLI CSV экспорттау</string>
+    <string name="ccli_export_xls">XLS экспорттау</string>
+    <string name="ccli_exported_success">Есеп сәтті экспортталды.</string>
+    <string name="ccli_exported_error">Есепті экспорттау сәтсіз аяқталды.</string>
+    <string name="ccli_file_chooser_csv">CCLI есебін сақтау</string>
+    <string name="ccli_file_filter_csv">CSV файлдары</string>
+    <string name="ccli_file_chooser_xls">Есепті XLS ретінде сақтау</string>
+    <string name="ccli_file_filter_xls">XLS файлдары</string>
+    <string name="ccli_month_january">Қаңтар</string>
+    <string name="ccli_month_february">Ақпан</string>
+    <string name="ccli_month_march">Наурыз</string>
+    <string name="ccli_month_april">Сәуір</string>
+    <string name="ccli_month_may">Мамыр</string>
+    <string name="ccli_month_june">Маусым</string>
+    <string name="ccli_month_july">Шілде</string>
+    <string name="ccli_month_august">Тамыз</string>
+    <string name="ccli_month_september">Қыркүйек</string>
+    <string name="ccli_month_october">Қазан</string>
+    <string name="ccli_month_november">Қараша</string>
+    <string name="ccli_month_december">Желтоқсан</string>
+    <string name="ccli_month_jan">Қаң</string>
+    <string name="ccli_month_feb">Ақп</string>
+    <string name="ccli_month_mar">Нау</string>
+    <string name="ccli_month_apr">Сәу</string>
+    <string name="ccli_month_may_short">Мам</string>
+    <string name="ccli_month_jun">Мау</string>
+    <string name="ccli_month_jul">Шіл</string>
+    <string name="ccli_month_aug">Там</string>
+    <string name="ccli_month_sep">Қыр</string>
+    <string name="ccli_month_oct">Қаз</string>
+    <string name="ccli_month_nov">Қар</string>
+    <string name="ccli_month_dec">Жел</string>
 </resources>
 

@@ -748,6 +748,12 @@
     <string name="top_verses">Najczęściej wyświetlane wersety</string>
     <string name="clear_statistics">Wyczyść statystyki</string>
     <string name="times_displayed">razy</string>
+    <string name="menu_statistics">Statystyki</string>
+    <string name="export_to_xls">Eksportuj do XLS</string>
+    <string name="statistics_exported_success">Statystyki wyeksportowane pomyślnie.</string>
+    <string name="statistics_exported_error">Nie udało się wyeksportować statystyk.</string>
+    <string name="file_chooser_save_statistics">Zapisz statystyki jako</string>
+    <string name="file_filter_xls">Arkusz Excel (*.xls)</string>
 
     <!-- Remote API / Companion Server (added) -->
     <string name="auto_fit_button_tooltip">Oblicz optymalny rozmiar czcionki dla bieżącego wersetu</string>
@@ -1132,5 +1138,73 @@
     <string name="qa_pos_bl">DL</string>
     <string name="qa_pos_bc">DC</string>
     <string name="qa_pos_br">DP</string>
+
+    <!-- CCLI Report -->
+    <string name="ccli_report">Raport CCLI</string>
+    <string name="ccli_report_title">Raport wykorzystania CCLI</string>
+    <string name="ccli_preset_30d">Ostatnie 30 dni</string>
+    <string name="ccli_preset_90d">Ostatnie 90 dni</string>
+    <string name="ccli_preset_this_year">Ten rok</string>
+    <string name="ccli_preset_last_year">Poprzedni rok</string>
+    <string name="ccli_preset_all_time">Cały czas</string>
+    <string name="ccli_tab_songs">Pieśni</string>
+    <string name="ccli_tab_bible">Biblia</string>
+    <string name="ccli_tab_activity">Aktywność</string>
+    <string name="ccli_songs_summary">%1$d unikalnych pieśni · %2$d odtworzeń łącznie</string>
+    <string name="ccli_bible_summary">%1$d unikalnych wersetów · %2$d odtworzeń łącznie</string>
+    <string name="ccli_no_data">Brak danych dla tego okresu.</string>
+    <string name="ccli_no_events">Brak dziennika zdarzeń. Prezentacje pieśni i wersetów są automatycznie śledzone od teraz.</string>
+    <string name="ccli_songs_chart">Najpopularniejsze pieśni</string>
+    <string name="ccli_bible_books_chart">Najpopularniejsze księgi Biblii</string>
+    <string name="ccli_activity_title">Prezentacje w czasie</string>
+    <string name="ccli_from">Od:</string>
+    <string name="ccli_to">Do:</string>
+    <string name="ccli_legend_songs">Pieśni</string>
+    <string name="ccli_legend_bible">Wersety Biblii</string>
+    <string name="ccli_stat_songs_presented">Zaprezentowane pieśni</string>
+    <string name="ccli_stat_bible_verses">Wersety Biblii</string>
+    <string name="ccli_stat_busiest">Najruchliwszy okres</string>
+    <string name="ccli_col_rank">#</string>
+    <string name="ccli_col_title">Tytuł</string>
+    <string name="ccli_col_author">Autor</string>
+    <string name="ccli_col_songbook">Śpiewnik</string>
+    <string name="ccli_col_used">Użyto</string>
+    <string name="ccli_col_first">Pierwsze</string>
+    <string name="ccli_col_last">Ostatnie</string>
+    <string name="ccli_col_verse">Werset</string>
+    <string name="ccli_col_bible">Biblia</string>
+    <string name="ccli_report_description">Raport z filtrem dat i wykresami — eksportuj CSV do raportowania licencji CCLI</string>
+    <string name="ccli_export_csv">Eksportuj CCLI CSV</string>
+    <string name="ccli_export_xls">Eksportuj XLS</string>
+    <string name="ccli_exported_success">Raport wyeksportowany pomyślnie.</string>
+    <string name="ccli_exported_error">Nie udało się wyeksportować raportu.</string>
+    <string name="ccli_file_chooser_csv">Zapisz raport CCLI jako</string>
+    <string name="ccli_file_filter_csv">Pliki CSV</string>
+    <string name="ccli_file_chooser_xls">Zapisz raport jako XLS</string>
+    <string name="ccli_file_filter_xls">Pliki XLS</string>
+    <string name="ccli_month_january">Styczeń</string>
+    <string name="ccli_month_february">Luty</string>
+    <string name="ccli_month_march">Marzec</string>
+    <string name="ccli_month_april">Kwiecień</string>
+    <string name="ccli_month_may">Maj</string>
+    <string name="ccli_month_june">Czerwiec</string>
+    <string name="ccli_month_july">Lipiec</string>
+    <string name="ccli_month_august">Sierpień</string>
+    <string name="ccli_month_september">Wrzesień</string>
+    <string name="ccli_month_october">Październik</string>
+    <string name="ccli_month_november">Listopad</string>
+    <string name="ccli_month_december">Grudzień</string>
+    <string name="ccli_month_jan">Sty</string>
+    <string name="ccli_month_feb">Lut</string>
+    <string name="ccli_month_mar">Mar</string>
+    <string name="ccli_month_apr">Kwi</string>
+    <string name="ccli_month_may_short">Maj</string>
+    <string name="ccli_month_jun">Cze</string>
+    <string name="ccli_month_jul">Lip</string>
+    <string name="ccli_month_aug">Sie</string>
+    <string name="ccli_month_sep">Wrz</string>
+    <string name="ccli_month_oct">Paź</string>
+    <string name="ccli_month_nov">Lis</string>
+    <string name="ccli_month_dec">Gru</string>
 </resources>
 

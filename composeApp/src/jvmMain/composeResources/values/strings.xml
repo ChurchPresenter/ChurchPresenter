@@ -1233,6 +1233,30 @@
     <string name="ccli_file_filter_csv">CSV files</string>
     <string name="ccli_file_chooser_xls">Save Report As XLS</string>
     <string name="ccli_file_filter_xls">XLS files</string>
+    <string name="ccli_month_january">January</string>
+    <string name="ccli_month_february">February</string>
+    <string name="ccli_month_march">March</string>
+    <string name="ccli_month_april">April</string>
+    <string name="ccli_month_may">May</string>
+    <string name="ccli_month_june">June</string>
+    <string name="ccli_month_july">July</string>
+    <string name="ccli_month_august">August</string>
+    <string name="ccli_month_september">September</string>
+    <string name="ccli_month_october">October</string>
+    <string name="ccli_month_november">November</string>
+    <string name="ccli_month_december">December</string>
+    <string name="ccli_month_jan">Jan</string>
+    <string name="ccli_month_feb">Feb</string>
+    <string name="ccli_month_mar">Mar</string>
+    <string name="ccli_month_apr">Apr</string>
+    <string name="ccli_month_may_short">May</string>
+    <string name="ccli_month_jun">Jun</string>
+    <string name="ccli_month_jul">Jul</string>
+    <string name="ccli_month_aug">Aug</string>
+    <string name="ccli_month_sep">Sep</string>
+    <string name="ccli_month_oct">Oct</string>
+    <string name="ccli_month_nov">Nov</string>
+    <string name="ccli_month_dec">Dec</string>
 
     <!-- Update checker -->
     <string name="update_dialog_title">Update Available</string>

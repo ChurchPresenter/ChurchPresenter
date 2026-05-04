@@ -835,6 +835,12 @@
     <string name="top_verses">Nejčastější verše</string>
     <string name="clear_statistics">Vymazat statistiky</string>
     <string name="times_displayed">krát</string>
+    <string name="menu_statistics">Statistiky</string>
+    <string name="export_to_xls">Exportovat do XLS</string>
+    <string name="statistics_exported_success">Statistiky úspěšně exportovány.</string>
+    <string name="statistics_exported_error">Statistiky se nepodařilo exportovat.</string>
+    <string name="file_chooser_save_statistics">Uložit statistiky jako</string>
+    <string name="file_filter_xls">Tabulka Excel (*.xls)</string>
 
     <!-- Remote API / Companion Server (added) -->
     <string name="auto_fit_button_tooltip">Vypočítat optimální velikost písma pro aktuální verš</string>
@@ -1211,5 +1217,73 @@
     <string name="qa_pos_bl">DL</string>
     <string name="qa_pos_bc">DS</string>
     <string name="qa_pos_br">DP</string>
+
+    <!-- CCLI Report -->
+    <string name="ccli_report">Zpráva CCLI</string>
+    <string name="ccli_report_title">Zpráva o využití CCLI</string>
+    <string name="ccli_preset_30d">Posledních 30 dní</string>
+    <string name="ccli_preset_90d">Posledních 90 dní</string>
+    <string name="ccli_preset_this_year">Tento rok</string>
+    <string name="ccli_preset_last_year">Loňský rok</string>
+    <string name="ccli_preset_all_time">Veškerý čas</string>
+    <string name="ccli_tab_songs">Písně</string>
+    <string name="ccli_tab_bible">Bible</string>
+    <string name="ccli_tab_activity">Aktivita</string>
+    <string name="ccli_songs_summary">%1$d jedinečných písní · %2$d celkových přehrání</string>
+    <string name="ccli_bible_summary">%1$d jedinečných veršů · %2$d celkových přehrání</string>
+    <string name="ccli_no_data">Žádná data pro toto období.</string>
+    <string name="ccli_no_events">Žádný protokol událostí. Prezentace písní a veršů jsou automaticky sledovány od nynějška.</string>
+    <string name="ccli_songs_chart">Nejhrananější písně</string>
+    <string name="ccli_bible_books_chart">Nejpoužívanější biblické knihy</string>
+    <string name="ccli_activity_title">Prezentace v čase</string>
+    <string name="ccli_from">Od:</string>
+    <string name="ccli_to">Do:</string>
+    <string name="ccli_legend_songs">Písně</string>
+    <string name="ccli_legend_bible">Biblické verše</string>
+    <string name="ccli_stat_songs_presented">Prezentované písně</string>
+    <string name="ccli_stat_bible_verses">Biblické verše</string>
+    <string name="ccli_stat_busiest">Nejrušnější období</string>
+    <string name="ccli_col_rank">#</string>
+    <string name="ccli_col_title">Název</string>
+    <string name="ccli_col_author">Autor</string>
+    <string name="ccli_col_songbook">Zpěvník</string>
+    <string name="ccli_col_used">Použito</string>
+    <string name="ccli_col_first">První</string>
+    <string name="ccli_col_last">Poslední</string>
+    <string name="ccli_col_verse">Verš</string>
+    <string name="ccli_col_bible">Bible</string>
+    <string name="ccli_report_description">Sestava s filtrem dat a grafy — exportujte CSV pro licenční zprávu CCLI</string>
+    <string name="ccli_export_csv">Exportovat CCLI CSV</string>
+    <string name="ccli_export_xls">Exportovat XLS</string>
+    <string name="ccli_exported_success">Zpráva úspěšně exportována.</string>
+    <string name="ccli_exported_error">Zprávu se nepodařilo exportovat.</string>
+    <string name="ccli_file_chooser_csv">Uložit zprávu CCLI jako</string>
+    <string name="ccli_file_filter_csv">Soubory CSV</string>
+    <string name="ccli_file_chooser_xls">Uložit zprávu jako XLS</string>
+    <string name="ccli_file_filter_xls">Soubory XLS</string>
+    <string name="ccli_month_january">Leden</string>
+    <string name="ccli_month_february">Únor</string>
+    <string name="ccli_month_march">Březen</string>
+    <string name="ccli_month_april">Duben</string>
+    <string name="ccli_month_may">Květen</string>
+    <string name="ccli_month_june">Červen</string>
+    <string name="ccli_month_july">Červenec</string>
+    <string name="ccli_month_august">Srpen</string>
+    <string name="ccli_month_september">Září</string>
+    <string name="ccli_month_october">Říjen</string>
+    <string name="ccli_month_november">Listopad</string>
+    <string name="ccli_month_december">Prosinec</string>
+    <string name="ccli_month_jan">Led</string>
+    <string name="ccli_month_feb">Úno</string>
+    <string name="ccli_month_mar">Bře</string>
+    <string name="ccli_month_apr">Dub</string>
+    <string name="ccli_month_may_short">Kvě</string>
+    <string name="ccli_month_jun">Čvn</string>
+    <string name="ccli_month_jul">Čvc</string>
+    <string name="ccli_month_aug">Srp</string>
+    <string name="ccli_month_sep">Zář</string>
+    <string name="ccli_month_oct">Říj</string>
+    <string name="ccli_month_nov">Lis</string>
+    <string name="ccli_month_dec">Pro</string>
 </resources>
 
