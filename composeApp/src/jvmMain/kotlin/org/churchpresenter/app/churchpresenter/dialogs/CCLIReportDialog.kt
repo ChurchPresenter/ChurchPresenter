@@ -23,18 +23,19 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -48,7 +49,6 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -60,6 +60,15 @@ import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.ccli_activity_title
 import churchpresenter.composeapp.generated.resources.ccli_bible_books_chart
 import churchpresenter.composeapp.generated.resources.ccli_bible_summary
+import churchpresenter.composeapp.generated.resources.ccli_col_author
+import churchpresenter.composeapp.generated.resources.ccli_col_bible
+import churchpresenter.composeapp.generated.resources.ccli_col_first
+import churchpresenter.composeapp.generated.resources.ccli_col_last
+import churchpresenter.composeapp.generated.resources.ccli_col_rank
+import churchpresenter.composeapp.generated.resources.ccli_col_songbook
+import churchpresenter.composeapp.generated.resources.ccli_col_title
+import churchpresenter.composeapp.generated.resources.ccli_col_used
+import churchpresenter.composeapp.generated.resources.ccli_col_verse
 import churchpresenter.composeapp.generated.resources.ccli_export_csv
 import churchpresenter.composeapp.generated.resources.ccli_export_xls
 import churchpresenter.composeapp.generated.resources.ccli_exported_error
@@ -68,6 +77,9 @@ import churchpresenter.composeapp.generated.resources.ccli_file_chooser_csv
 import churchpresenter.composeapp.generated.resources.ccli_file_chooser_xls
 import churchpresenter.composeapp.generated.resources.ccli_file_filter_csv
 import churchpresenter.composeapp.generated.resources.ccli_file_filter_xls
+import churchpresenter.composeapp.generated.resources.ccli_from
+import churchpresenter.composeapp.generated.resources.ccli_legend_bible
+import churchpresenter.composeapp.generated.resources.ccli_legend_songs
 import churchpresenter.composeapp.generated.resources.ccli_no_data
 import churchpresenter.composeapp.generated.resources.ccli_no_events
 import churchpresenter.composeapp.generated.resources.ccli_preset_30d
@@ -78,9 +90,13 @@ import churchpresenter.composeapp.generated.resources.ccli_preset_this_year
 import churchpresenter.composeapp.generated.resources.ccli_report_title
 import churchpresenter.composeapp.generated.resources.ccli_songs_chart
 import churchpresenter.composeapp.generated.resources.ccli_songs_summary
+import churchpresenter.composeapp.generated.resources.ccli_stat_bible_verses
+import churchpresenter.composeapp.generated.resources.ccli_stat_busiest
+import churchpresenter.composeapp.generated.resources.ccli_stat_songs_presented
 import churchpresenter.composeapp.generated.resources.ccli_tab_activity
 import churchpresenter.composeapp.generated.resources.ccli_tab_bible
 import churchpresenter.composeapp.generated.resources.ccli_tab_songs
+import churchpresenter.composeapp.generated.resources.ccli_to
 import churchpresenter.composeapp.generated.resources.close
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -107,6 +123,11 @@ private val MONTHS = listOf(
     "January", "February", "March", "April", "May", "June",
     "July", "August", "September", "October", "November", "December"
 )
+private val MONTHS_SHORT = listOf(
+    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+)
+private val VERSE_BAR_COLOR = Color(0xFF43A047)
 
 @Composable
 fun CCLIReportDialog(
@@ -452,7 +473,7 @@ private fun BibleReportContent(verses: List<VerseSummary>) {
 @Composable
 private fun ActivityContent(activity: List<ActivityPoint>) {
     val primary = MaterialTheme.colorScheme.primary
-    val tertiary = MaterialTheme.colorScheme.tertiary
+    val verseColor = VERSE_BAR_COLOR
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
         Text(
@@ -474,7 +495,7 @@ private fun ActivityContent(activity: List<ActivityPoint>) {
         val busiest = activity.maxByOrNull { it.songCount + it.verseCount }
         Row(horizontalArrangement = Arrangement.spacedBy(24.dp), modifier = Modifier.padding(bottom = 12.dp)) {
             StatChip("Songs presented", "$totalSongs", primary)
-            StatChip("Bible verses", "$totalVerses", tertiary)
+            StatChip("Bible verses", "$totalVerses", verseColor)
             if (busiest != null) StatChip("Busiest period", "${busiest.label} (${busiest.songCount + busiest.verseCount})", MaterialTheme.colorScheme.secondary)
         }
 
@@ -482,7 +503,7 @@ private fun ActivityContent(activity: List<ActivityPoint>) {
         ActivityBarChart(
             data = activity,
             songColor = primary,
-            verseColor = tertiary,
+            verseColor = verseColor,
             modifier = Modifier.weight(1f).fillMaxWidth()
         )
 
@@ -495,7 +516,7 @@ private fun ActivityContent(activity: List<ActivityPoint>) {
             Spacer(Modifier.width(4.dp))
             Text("Songs", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Spacer(Modifier.width(16.dp))
-            LegendDot(tertiary)
+            LegendDot(verseColor)
             Spacer(Modifier.width(4.dp))
             Text("Bible Verses", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
@@ -740,7 +761,6 @@ private fun ActivityBarChart(
 
 // ── Date picker ───────────────────────────────────────────────────────────────
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun DatePicker(
     year: Int,
@@ -751,68 +771,60 @@ private fun DatePicker(
 ) {
     val daysInMonth = remember(year, month) { LocalDate.of(year, month, 1).lengthOfMonth() }
     val safeDay = day.coerceAtMost(daysInMonth)
+    val years = remember(yearRange) { yearRange.map { it.toString() } }
+    val days = remember(daysInMonth) { (1..daysInMonth).map { it.toString() } }
 
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-        // Year field
-        var yearText by remember(year) { mutableStateOf(year.toString()) }
-        OutlinedTextField(
-            value = yearText,
-            onValueChange = { v ->
-                if (v.length <= 4 && v.all { it.isDigit() }) {
-                    yearText = v
-                    v.toIntOrNull()?.takeIf { it in yearRange.first..2100 }?.let { y ->
-                        onChanged(y, month, safeDay)
-                    }
-                }
-            },
-            modifier = Modifier.width(72.dp),
-            singleLine = true,
-            textStyle = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace)
+        DropdownPicker(
+            buttonLabel = year.toString(),
+            options = years,
+            modifier = Modifier.width(78.dp),
+            onSelected = { idx -> onChanged(yearRange.first + idx, month, safeDay) }
         )
-
-        // Month dropdown
-        CompactDropdown(
-            selected = MONTHS[month - 1],
+        DropdownPicker(
+            buttonLabel = MONTHS_SHORT[month - 1],
             options = MONTHS,
-            width = 110,
+            modifier = Modifier.width(82.dp),
             onSelected = { idx -> onChanged(year, idx + 1, safeDay) }
         )
-
-        // Day dropdown
-        val days = (1..daysInMonth).map { it.toString() }
-        CompactDropdown(
-            selected = "$safeDay",
+        DropdownPicker(
+            buttonLabel = safeDay.toString(),
             options = days,
-            width = 56,
+            modifier = Modifier.width(64.dp),
             onSelected = { idx -> onChanged(year, month, idx + 1) }
         )
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun CompactDropdown(
-    selected: String,
+private fun DropdownPicker(
+    buttonLabel: String,
     options: List<String>,
-    width: Int,
+    modifier: Modifier = Modifier,
     onSelected: (Int) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
-    ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { expanded = it }) {
-        OutlinedTextField(
-            value = selected,
-            onValueChange = {},
-            readOnly = true,
-            singleLine = true,
-            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
-            modifier = Modifier.width(width.dp).menuAnchor(),
-            textStyle = MaterialTheme.typography.bodySmall
-        )
-        ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+    Box {
+        OutlinedButton(
+            onClick = { expanded = true },
+            modifier = modifier.height(36.dp),
+            contentPadding = PaddingValues(start = 10.dp, end = 4.dp, top = 0.dp, bottom = 0.dp)
+        ) {
+            Text(
+                buttonLabel,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.weight(1f),
+                maxLines = 1,
+                overflow = TextOverflow.Clip
+            )
+            Icon(Icons.Default.ArrowDropDown, contentDescription = null, modifier = Modifier.size(16.dp))
+        }
+        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             options.forEachIndexed { idx, opt ->
                 DropdownMenuItem(
                     text = { Text(opt, style = MaterialTheme.typography.bodySmall) },
-                    onClick = { onSelected(idx); expanded = false }
+                    onClick = { onSelected(idx); expanded = false },
+                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 2.dp)
                 )
             }
         }
