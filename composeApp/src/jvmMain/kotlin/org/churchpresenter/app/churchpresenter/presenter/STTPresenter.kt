@@ -140,7 +140,8 @@ fun STTPresenter(
                     if (isSideBySide) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(24.dp)
+                            horizontalArrangement = Arrangement.spacedBy(24.dp),
+                            verticalAlignment = Alignment.Bottom
                         ) {
                             BottomAlignedText(text = first, style = firstStyle, maxLines = maxLines, modifier = Modifier.weight(1f))
                             BottomAlignedText(text = second, style = secondStyle, maxLines = maxLines, modifier = Modifier.weight(1f))
