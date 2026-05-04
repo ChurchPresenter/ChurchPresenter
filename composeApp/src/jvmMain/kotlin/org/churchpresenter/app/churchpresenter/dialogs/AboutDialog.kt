@@ -36,6 +36,8 @@ import churchpresenter.composeapp.generated.resources.open_converter
 import churchpresenter.composeapp.generated.resources.report_bug
 import churchpresenter.composeapp.generated.resources.submit_feature_request
 import org.churchpresenter.app.churchpresenter.BuildConfig
+import org.churchpresenter.app.churchpresenter.ui.theme.AppThemeWrapper
+import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import churchpresenter.composeapp.generated.resources.ic_app_icon
@@ -46,7 +48,8 @@ import java.io.File
 @Composable
 fun AboutDialog(
     isVisible: Boolean,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    theme: ThemeMode = ThemeMode.SYSTEM
 ) {
     if (!isVisible) return
 
@@ -129,18 +132,20 @@ fun AboutDialog(
     }
 
     if (showConverter) {
-        ConverterWindow(onClose = { showConverter = false })
+        ConverterWindow(theme = theme, onClose = { showConverter = false })
     }
 }
 
 @Composable
-private fun ConverterWindow(onClose: () -> Unit) {
+private fun ConverterWindow(theme: ThemeMode, onClose: () -> Unit) {
     Window(
         onCloseRequest = onClose,
         title = "ChurchPresenter Converter",
         icon = painterResource(Res.drawable.ic_app_icon),
         state = rememberWindowState(width = 1100.dp, height = 800.dp)
     ) {
-        ConverterApp()
+        AppThemeWrapper(theme = theme) {
+            ConverterApp()
+        }
     }
 }

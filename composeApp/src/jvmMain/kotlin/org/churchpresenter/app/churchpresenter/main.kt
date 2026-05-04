@@ -1058,7 +1058,8 @@ fun main() {
                                 )
                                 AboutDialog(
                                     isVisible = showAboutDialog,
-                                    onDismiss = { showAboutDialog = false }
+                                    onDismiss = { showAboutDialog = false },
+                                    theme = theme
                                 )
                                 UpdateAvailableDialog(
                                     updateInfo = pendingUpdateInfo,
