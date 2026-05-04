@@ -1190,6 +1190,33 @@
     <string name="qa_pos_bc">BC</string>
     <string name="qa_pos_br">BR</string>
 
+    <!-- CCLI Report -->
+    <string name="ccli_report">CCLI Report</string>
+    <string name="ccli_report_title">CCLI Usage Report</string>
+    <string name="ccli_preset_30d">Last 30 Days</string>
+    <string name="ccli_preset_90d">Last 90 Days</string>
+    <string name="ccli_preset_this_year">This Year</string>
+    <string name="ccli_preset_last_year">Last Year</string>
+    <string name="ccli_preset_all_time">All Time</string>
+    <string name="ccli_tab_songs">Songs</string>
+    <string name="ccli_tab_bible">Bible</string>
+    <string name="ccli_tab_activity">Activity</string>
+    <string name="ccli_songs_summary">%1$d unique songs · %2$d total plays</string>
+    <string name="ccli_bible_summary">%1$d unique verses · %2$d total plays</string>
+    <string name="ccli_no_data">No data for this period.</string>
+    <string name="ccli_no_events">No event log yet. Song and verse presentations are tracked automatically starting now.</string>
+    <string name="ccli_songs_chart">Top Songs</string>
+    <string name="ccli_bible_books_chart">Top Bible Books</string>
+    <string name="ccli_activity_title">Presentations Over Time</string>
+    <string name="ccli_export_csv">Export CCLI CSV</string>
+    <string name="ccli_export_xls">Export XLS</string>
+    <string name="ccli_exported_success">Report exported successfully.</string>
+    <string name="ccli_exported_error">Failed to export report.</string>
+    <string name="ccli_file_chooser_csv">Save CCLI Report As</string>
+    <string name="ccli_file_filter_csv">CSV files</string>
+    <string name="ccli_file_chooser_xls">Save Report As XLS</string>
+    <string name="ccli_file_filter_xls">XLS files</string>
+
     <!-- Update checker -->
     <string name="update_dialog_title">Update Available</string>
     <string name="update_dialog_message">A new version of Church Presenter is available: %1$s</string>

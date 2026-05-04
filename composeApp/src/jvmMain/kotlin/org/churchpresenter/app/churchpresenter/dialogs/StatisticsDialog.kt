@@ -17,6 +17,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
@@ -34,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.rememberDialogState
 import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.ccli_report
 import churchpresenter.composeapp.generated.resources.clear_statistics
 import churchpresenter.composeapp.generated.resources.close
 import churchpresenter.composeapp.generated.resources.export_to_xls
@@ -72,18 +74,28 @@ fun StatisticsDialog(
     var topSongsBySongbook by remember { mutableStateOf(statisticsManager.getTopSongsBySongbook()) }
     var topVersesByBible by remember { mutableStateOf(statisticsManager.getTopVersesByBible()) }
     var statusMessage by remember { mutableStateOf<String?>(null) }
+    var showCCLIReport by remember { mutableStateOf(false) }
 
     val successMsg = stringResource(Res.string.statistics_exported_success)
     val errorMsg = stringResource(Res.string.statistics_exported_error)
     val saveTitle = stringResource(Res.string.file_chooser_save_statistics)
     val filterDesc = stringResource(Res.string.file_filter_xls)
 
+    if (showCCLIReport) {
+        CCLIReportDialog(
+            isVisible = true,
+            theme = theme,
+            statisticsManager = statisticsManager,
+            onDismiss = { showCCLIReport = false }
+        )
+    }
+
     DialogWindow(
         onCloseRequest = onDismiss,
         state = rememberDialogState(
-            position = centeredOnMainWindow(mainWindowState, 700.dp, 600.dp),
+            position = centeredOnMainWindow(mainWindowState, 700.dp, 620.dp),
             width = 700.dp,
-            height = 600.dp
+            height = 620.dp
         ),
         title = stringResource(Res.string.statistics),
         resizable = true
@@ -94,7 +106,6 @@ fun StatisticsDialog(
                 color = MaterialTheme.colorScheme.background
             ) {
                 Column(modifier = Modifier.fillMaxSize()) {
-                    // Content
                     Box(
                         modifier = Modifier
                             .weight(1f)
@@ -111,7 +122,37 @@ fun StatisticsDialog(
                                 .padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 16.dp),
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            // Top Songs
+                            // ── CCLI callout ──────────────────────────────────
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f), RoundedCornerShape(6.dp))
+                                    .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f), RoundedCornerShape(6.dp))
+                                    .padding(horizontal = 14.dp, vertical = 10.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        stringResource(Res.string.ccli_report),
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
+                                    Text(
+                                        "Date-filtered report with charts — export CSV for CCLI license reporting",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                                Button(onClick = { showCCLIReport = true }) {
+                                    Text(stringResource(Res.string.ccli_report), style = MaterialTheme.typography.labelMedium)
+                                }
+                            }
+
+                            HorizontalDivider()
+
+                            // ── Top Songs ─────────────────────────────────────
                             if (topSongsBySongbook.isEmpty()) {
                                 Text(
                                     text = stringResource(Res.string.top_songs),
@@ -157,7 +198,7 @@ fun StatisticsDialog(
                                 }
                             }
 
-                            // Top Verses
+                            // ── Top Verses ────────────────────────────────────
                             if (topVersesByBible.isEmpty()) {
                                 Text(
                                     text = stringResource(Res.string.top_verses),
@@ -205,7 +246,6 @@ fun StatisticsDialog(
                         }
                     }
 
-                    // Status message
                     if (statusMessage != null) {
                         Text(
                             text = statusMessage!!,
@@ -215,7 +255,7 @@ fun StatisticsDialog(
                         )
                     }
 
-                    // Bottom button row
+                    HorizontalDivider()
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -224,7 +264,6 @@ fun StatisticsDialog(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        // Export to XLS
                         OutlinedButton(
                             onClick = {
                                 coroutineScope.launch {
@@ -237,25 +276,18 @@ fun StatisticsDialog(
                                         }
                                         if (chooser.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
                                             var f = chooser.selectedFile
-                                            if (!f.name.endsWith(".xls", ignoreCase = true)) {
-                                                f = File(f.absolutePath + ".xls")
-                                            }
+                                            if (!f.name.endsWith(".xls", ignoreCase = true)) f = File(f.absolutePath + ".xls")
                                             f
                                         } else null
                                     }
                                     if (file != null) {
-                                        val ok = withContext(Dispatchers.IO) {
-                                            statisticsManager.exportStatisticsToXls(file)
-                                        }
+                                        val ok = withContext(Dispatchers.IO) { statisticsManager.exportStatisticsToXls(file) }
                                         statusMessage = if (ok) successMsg else errorMsg
                                     }
                                 }
                             }
-                        ) {
-                            Text(stringResource(Res.string.export_to_xls))
-                        }
+                        ) { Text(stringResource(Res.string.export_to_xls)) }
 
-                        // Clear Statistics
                         Button(
                             onClick = {
                                 statisticsManager.clearStatistics()
@@ -267,20 +299,14 @@ fun StatisticsDialog(
                                 containerColor = MaterialTheme.colorScheme.error,
                                 contentColor = MaterialTheme.colorScheme.onError
                             )
-                        ) {
-                            Text(stringResource(Res.string.clear_statistics))
-                        }
+                        ) { Text(stringResource(Res.string.clear_statistics)) }
 
                         Spacer(modifier = Modifier.weight(1f))
 
-                        // Close
-                        Button(onClick = onDismiss) {
-                            Text(stringResource(Res.string.close))
-                        }
+                        Button(onClick = onDismiss) { Text(stringResource(Res.string.close)) }
                     }
                 }
             }
         }
     }
 }
-

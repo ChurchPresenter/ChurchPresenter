@@ -186,7 +186,8 @@ fun SongsTab(
                 statisticsManager?.recordSongDisplay(
                     songNumber = song.number.toIntOrNull() ?: 0,
                     title = song.title,
-                    songbook = song.songbook
+                    songbook = song.songbook,
+                    author = song.author
                 )
             }
         }
