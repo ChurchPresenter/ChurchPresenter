@@ -435,6 +435,8 @@ kotlin {
         jvmMain {
             kotlin.srcDir(generateBuildConfig.map { layout.buildDirectory.dir("generated/buildconfig") })
             kotlin.srcDir(generateAnalyticsConfig.map { layout.buildDirectory.dir("generated/analyticsconfig") })
+            // Include Converter submodule source (builds together, launches as separate window)
+            kotlin.srcDir("src/jvmMain/appResources/common/ChurchPresenter-Converter/src/main/kotlin")
         }
     }
 }

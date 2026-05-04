@@ -13,12 +13,18 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogWindow
+import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.rememberDialogState
+import androidx.compose.ui.window.rememberWindowState
 import org.churchpresenter.app.churchpresenter.LocalMainWindowState
 import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
 import churchpresenter.composeapp.generated.resources.Res
@@ -26,10 +32,14 @@ import churchpresenter.composeapp.generated.resources.about_title
 import churchpresenter.composeapp.generated.resources.app_name
 import churchpresenter.composeapp.generated.resources.action_ok
 import churchpresenter.composeapp.generated.resources.open_crash_logs
+import churchpresenter.composeapp.generated.resources.open_converter
 import churchpresenter.composeapp.generated.resources.report_bug
 import churchpresenter.composeapp.generated.resources.submit_feature_request
 import org.churchpresenter.app.churchpresenter.BuildConfig
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import churchpresenter.composeapp.generated.resources.ic_app_icon
+import ui.App as ConverterApp
 import java.awt.Desktop
 import java.io.File
 
@@ -40,13 +50,15 @@ fun AboutDialog(
 ) {
     if (!isVisible) return
 
+    var showConverter by remember { mutableStateOf(false) }
+
     val mainWindowState = LocalMainWindowState.current
     DialogWindow(
         onCloseRequest = onDismiss,
         state = rememberDialogState(
-            position = centeredOnMainWindow(mainWindowState, 360.dp, 300.dp),
+            position = centeredOnMainWindow(mainWindowState, 360.dp, 340.dp),
             width = 360.dp,
-            height = 300.dp
+            height = 340.dp
         ),
         title = stringResource(Res.string.about_title),
         resizable = false
@@ -98,6 +110,9 @@ fun AboutDialog(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+                    OutlinedButton(onClick = { showConverter = true }) {
+                        Text(stringResource(Res.string.open_converter))
+                    }
                     OutlinedButton(onClick = {
                         val crashDir = File(System.getProperty("user.home"), ".churchpresenter/crash-reports")
                         crashDir.mkdirs()
@@ -111,5 +126,21 @@ fun AboutDialog(
                 }
             }
         }
+    }
+
+    if (showConverter) {
+        ConverterWindow(onClose = { showConverter = false })
+    }
+}
+
+@Composable
+private fun ConverterWindow(onClose: () -> Unit) {
+    Window(
+        onCloseRequest = onClose,
+        title = "ChurchPresenter Converter",
+        icon = painterResource(Res.drawable.ic_app_icon),
+        state = rememberWindowState(width = 1100.dp, height = 800.dp)
+    ) {
+        ConverterApp()
     }
 }
