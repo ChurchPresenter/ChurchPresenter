@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -145,10 +146,10 @@ fun STTPresenter(
                             BottomAlignedText(text = second, style = secondStyle, maxLines = maxLines, modifier = Modifier.weight(1f))
                         }
                     } else {
-                        Column(modifier = Modifier.fillMaxWidth()) {
-                            BottomAlignedText(text = first, style = firstStyle, maxLines = maxLines, modifier = Modifier.fillMaxWidth())
+                        Column(modifier = Modifier.fillMaxWidth().fillMaxHeight()) {
+                            BottomAlignedText(text = first, style = firstStyle, maxLines = maxLines, modifier = Modifier.fillMaxWidth().weight(1f))
                             Spacer(modifier = Modifier.height(16.dp))
-                            BottomAlignedText(text = second, style = secondStyle, maxLines = maxLines, modifier = Modifier.fillMaxWidth())
+                            BottomAlignedText(text = second, style = secondStyle, maxLines = maxLines, modifier = Modifier.fillMaxWidth().weight(1f))
                         }
                     }
                 } else {
