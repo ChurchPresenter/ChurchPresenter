@@ -428,7 +428,7 @@ fun CanvasTab(
                             tooltipPlacement = TooltipPlacement.CursorPoint()
                         ) {
                             IconButton(
-                                onClick = { showAddMenu = true },
+                                onClick = { showAddMenu = true; activeTool = "select" },
                                 modifier = Modifier.size(28.dp)
                             ) {
                                 Icon(
@@ -856,7 +856,6 @@ fun CanvasTab(
                         drawingStrokeWidth = drawingStrokeWidth,
                         onShapeDrawn = { shape ->
                             sceneViewModel.addSource(shape)
-                            activeTool = "select"
                         }
                     )
                 }
