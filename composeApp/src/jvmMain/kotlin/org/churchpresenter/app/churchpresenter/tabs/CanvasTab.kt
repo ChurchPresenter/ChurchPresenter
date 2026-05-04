@@ -55,6 +55,7 @@ import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.ic_add
@@ -277,7 +278,7 @@ fun CanvasTab(
                                         Text(stringResource(Res.string.canvas_rename_scene), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
                                     }
                                 },
-                                tooltipPlacement = TooltipPlacement.CursorPoint()
+                                tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
                             ) {
                                 IconButton(
                                     onClick = {
@@ -300,7 +301,7 @@ fun CanvasTab(
                                         Text(stringResource(Res.string.canvas_remove_scene), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
                                     }
                                 },
-                                tooltipPlacement = TooltipPlacement.CursorPoint()
+                                tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
                             ) {
                                 IconButton(
                                     onClick = { sceneViewModel.removeScene(scene.id) },
@@ -365,7 +366,7 @@ fun CanvasTab(
                                         Text(stringResource(Res.string.canvas_toggle_visibility), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
                                     }
                                 },
-                                tooltipPlacement = TooltipPlacement.CursorPoint()
+                                tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
                             ) {
                                 IconButton(
                                     onClick = { sceneViewModel.toggleSourceVisibility(source.id) },
@@ -386,7 +387,7 @@ fun CanvasTab(
                                         Text(stringResource(Res.string.canvas_toggle_lock), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
                                     }
                                 },
-                                tooltipPlacement = TooltipPlacement.CursorPoint()
+                                tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
                             ) {
                                 IconButton(
                                     onClick = { sceneViewModel.toggleSourceLock(source.id) },
@@ -425,7 +426,7 @@ fun CanvasTab(
                                     Text(stringResource(Res.string.canvas_add_source), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
                                 }
                             },
-                            tooltipPlacement = TooltipPlacement.CursorPoint()
+                            tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
                         ) {
                             IconButton(
                                 onClick = { showAddMenu = true; activeTool = "select" },
@@ -581,7 +582,7 @@ fun CanvasTab(
                                     Text(stringResource(Res.string.canvas_delete_source), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
                                 }
                             },
-                            tooltipPlacement = TooltipPlacement.CursorPoint()
+                            tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
                         ) {
                             IconButton(
                                 onClick = { sceneViewModel.removeSource(currentSelectedId) },
@@ -601,7 +602,7 @@ fun CanvasTab(
                                     Text(stringResource(Res.string.canvas_source_move_forward), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
                                 }
                             },
-                            tooltipPlacement = TooltipPlacement.CursorPoint()
+                            tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
                         ) {
                             IconButton(
                                 onClick = { sceneViewModel.moveSourceDown(currentSelectedId) },
@@ -621,7 +622,7 @@ fun CanvasTab(
                                     Text(stringResource(Res.string.canvas_source_move_backward), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
                                 }
                             },
-                            tooltipPlacement = TooltipPlacement.CursorPoint()
+                            tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
                         ) {
                             IconButton(
                                 onClick = { sceneViewModel.moveSourceUp(currentSelectedId) },
@@ -681,7 +682,7 @@ fun CanvasTab(
                                         Text(tool.label, color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
                                     }
                                 },
-                                tooltipPlacement = TooltipPlacement.CursorPoint()
+                                tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
                             ) {
                                 IconButton(
                                     onClick = { activeTool = tool.id },
@@ -739,7 +740,7 @@ fun CanvasTab(
                                     Text(stringResource(Res.string.add_to_schedule), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
                                 }
                             },
-                            tooltipPlacement = TooltipPlacement.CursorPoint()
+                            tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
                         ) {
                             IconButton(
                                 onClick = { onAddToSchedule(currentScene.id, currentScene.name) },
@@ -759,7 +760,7 @@ fun CanvasTab(
                                     Text(stringResource(Res.string.go_live), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
                                 }
                             },
-                            tooltipPlacement = TooltipPlacement.CursorPoint()
+                            tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
                         ) {
                             IconButton(
                                 onClick = {

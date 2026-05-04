@@ -77,6 +77,7 @@ import androidx.compose.ui.Alignment.Companion.TopStart
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import churchpresenter.composeapp.generated.resources.Res
@@ -261,7 +262,7 @@ fun AnnouncementsTab(
                             if (onAddToSchedule != null) {
                                 TooltipArea(
                                     tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.tooltip_add_to_schedule), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
-                                    tooltipPlacement = TooltipPlacement.CursorPoint()
+                                    tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
                                 ) {
                                     IconButton(
                                         onClick = {
@@ -293,7 +294,7 @@ fun AnnouncementsTab(
                                         && !viewModel.timerRunning
                                 TooltipArea(
                                     tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(if (announcementTextIsLive) Res.string.tooltip_announcement_hide else Res.string.tooltip_announcement_show), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
-                                    tooltipPlacement = TooltipPlacement.CursorPoint()
+                                    tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
                                 ) {
                                     IconButton(
                                         onClick = {
@@ -325,7 +326,7 @@ fun AnnouncementsTab(
                                 }
                                 TooltipArea(
                                     tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.tooltip_go_live), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
-                                    tooltipPlacement = TooltipPlacement.CursorPoint()
+                                    tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
                                 ) {
                                     IconButton(
                                         onClick = { viewModel.goLive(presenterManager, onSettingsChange) },
@@ -747,7 +748,7 @@ fun AnnouncementsTab(
                                     )
                                 }
                             },
-                            tooltipPlacement = TooltipPlacement.CursorPoint()
+                            tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
                         ) {
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                 SectionLabel(stringResource(Res.string.announcement_loop_count))
@@ -917,7 +918,7 @@ fun AnnouncementsTab(
                             // ── Play / Pause ──────────────────────────────────────────
                             TooltipArea(
                                 tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(if (viewModel.timerRunning) pauseLabel else startLabel, color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
-                                tooltipPlacement = TooltipPlacement.CursorPoint()
+                                tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
                             ) {
                                 IconButton(
                                     onClick = {
@@ -971,7 +972,7 @@ fun AnnouncementsTab(
                             // ── Reset ─────────────────────────────────────────────────
                             TooltipArea(
                                 tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(resetLabel, color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
-                                tooltipPlacement = TooltipPlacement.CursorPoint()
+                                tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
                             ) {
                                 IconButton(
                                     onClick = {
@@ -992,7 +993,7 @@ fun AnnouncementsTab(
                             if (onAddToSchedule != null) {
                                 TooltipArea(
                                     tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.tooltip_add_to_schedule), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
-                                    tooltipPlacement = TooltipPlacement.CursorPoint()
+                                    tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
                                 ) {
                                     IconButton(
                                         onClick = { onAddToSchedule.invoke(viewModel.buildSettings()) },
@@ -1013,7 +1014,7 @@ fun AnnouncementsTab(
                             if (presenterManager != null) {
                                 TooltipArea(
                                     tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.tooltip_go_live), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
-                                    tooltipPlacement = TooltipPlacement.CursorPoint()
+                                    tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
                                 ) {
                                     IconButton(
                                         onClick = {

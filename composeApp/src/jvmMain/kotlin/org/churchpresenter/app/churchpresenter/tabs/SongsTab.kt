@@ -73,6 +73,7 @@ import churchpresenter.composeapp.generated.resources.songs_indexing
 import churchpresenter.composeapp.generated.resources.songs_no_db_title
 import churchpresenter.composeapp.generated.resources.songs_no_db_hint
 import churchpresenter.composeapp.generated.resources.songs_no_db_step
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -639,10 +640,10 @@ fun SongsTab(
                                 Text(editSongStr, color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
                             }
                         },
-                        tooltipPlacement = TooltipPlacement.CursorPoint()
+                        tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
                     ) {
                         IconButton(
-                            onClick = { songToEdit = filteredSongs[selectedSongIndex]; showEditDialog = true },
+                            onClick = { songToEdit = filteredSongs[selectedSongIndex]; showEditDialog = true; tabFocusRequester.requestFocus() },
                             colors = IconButtonDefaults.iconButtonColors(
                                 containerColor = MaterialTheme.colorScheme.tertiary,
                                 contentColor = MaterialTheme.colorScheme.onTertiary
@@ -660,10 +661,10 @@ fun SongsTab(
                             Text(newSongStr, color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
                         }
                     },
-                    tooltipPlacement = TooltipPlacement.CursorPoint()
+                    tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
                 ) {
                     IconButton(
-                        onClick = { showNewSongDialog = true },
+                        onClick = { showNewSongDialog = true; tabFocusRequester.requestFocus() },
                         colors = IconButtonDefaults.iconButtonColors(
                             containerColor = MaterialTheme.colorScheme.tertiary,
                             contentColor = MaterialTheme.colorScheme.onTertiary
@@ -680,13 +681,14 @@ fun SongsTab(
                                 Text(addScheduleStr, color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
                             }
                         },
-                        tooltipPlacement = TooltipPlacement.CursorPoint()
+                        tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
                     ) {
                         IconButton(
                             onClick = {
                                 filteredSongs.getOrNull(selectedSongIndex)?.let { item ->
                                     onAddToSchedule(item.number.toIntOrNull() ?: 0, item.title, item.songbook, item.songId)
                                 }
+                                tabFocusRequester.requestFocus()
                             },
                             colors = IconButtonDefaults.iconButtonColors(
                                 containerColor = MaterialTheme.colorScheme.secondary,
@@ -704,10 +706,10 @@ fun SongsTab(
                             Text(goLiveStr, color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
                         }
                     },
-                    tooltipPlacement = TooltipPlacement.CursorPoint()
+                    tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
                 ) {
                     IconButton(
-                        onClick = { sendToPresenter(); onPresenting(Presenting.LYRICS) },
+                        onClick = { sendToPresenter(); onPresenting(Presenting.LYRICS); tabFocusRequester.requestFocus() },
                         enabled = hasSongSelected,
                         colors = IconButtonDefaults.iconButtonColors(
                             containerColor = MaterialTheme.colorScheme.primary,

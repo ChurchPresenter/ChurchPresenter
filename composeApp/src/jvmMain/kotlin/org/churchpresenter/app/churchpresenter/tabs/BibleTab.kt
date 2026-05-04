@@ -574,10 +574,10 @@ fun BibleTab(
                                             Text(holdLiveStr, color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
                                         }
                                     },
-                                    tooltipPlacement = TooltipPlacement.CursorPoint()
+                                    tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
                                 ) {
                                     IconButton(
-                                        onClick = { presenterManager.setBibleHold(!holdLive) },
+                                        onClick = { presenterManager.setBibleHold(!holdLive); focusRequester.requestFocus() },
                                         colors = IconButtonDefaults.iconButtonColors(
                                             containerColor = if (holdLive) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.surfaceVariant,
                                             contentColor = if (holdLive) MaterialTheme.colorScheme.onError else MaterialTheme.colorScheme.onSurfaceVariant
@@ -598,7 +598,7 @@ fun BibleTab(
                                     )
                                 }
                             },
-                            tooltipPlacement = TooltipPlacement.CursorPoint()
+                            tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
                         ) {
                             Text(
                                 text = "⌘/Ctrl · Shift",
@@ -629,12 +629,13 @@ fun BibleTab(
                                     }
                                 }
                             },
-                            tooltipPlacement = TooltipPlacement.CursorPoint(
-                                offset = DpOffset(0.dp, 16.dp)
+                            tooltipPlacement = TooltipPlacement.ComponentRect(
+                                anchor = Alignment.BottomCenter,
+                                offset = DpOffset(0.dp, 4.dp)
                             )
                         ) {
                                 IconButton(
-                                    onClick = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.swapped()) } },
+                                    onClick = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.swapped()) }; focusRequester.requestFocus() },
                                     colors = IconButtonDefaults.iconButtonColors(
                                         containerColor = MaterialTheme.colorScheme.tertiary,
                                         contentColor = MaterialTheme.colorScheme.onTertiary
@@ -650,13 +651,14 @@ fun BibleTab(
                                         Text(addScheduleStr, color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
                                     }
                                 },
-                                tooltipPlacement = TooltipPlacement.CursorPoint()
+                                tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
                             ) {
                                 IconButton(
                                     onClick = {
                                         viewModel.addCurrentVerseToSchedule { bookName, chapter, verseNumber, verseText, verseRange ->
                                             onAddToSchedule?.invoke(bookName, chapter, verseNumber, verseText, verseRange)
                                         }
+                                        focusRequester.requestFocus()
                                     },
                                     colors = IconButtonDefaults.iconButtonColors(
                                         containerColor = MaterialTheme.colorScheme.secondary,
@@ -673,10 +675,10 @@ fun BibleTab(
                                         Text(goLiveStr, color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
                                     }
                                 },
-                                tooltipPlacement = TooltipPlacement.CursorPoint()
+                                tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
                             ) {
                                 IconButton(
-                                    onClick = { goLiveWithHistory() },
+                                    onClick = { goLiveWithHistory(); focusRequester.requestFocus() },
                                     colors = IconButtonDefaults.iconButtonColors(
                                         containerColor = MaterialTheme.colorScheme.primary,
                                         contentColor = MaterialTheme.colorScheme.onPrimary
@@ -827,7 +829,7 @@ fun BibleTab(
                                         Text(stringResource(Res.string.bible_history_clear), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
                                     }
                                 },
-                                tooltipPlacement = TooltipPlacement.CursorPoint()
+                                tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
                             ) {
                                 IconButton(onClick = { viewModel.clearHistory() }) {
                                     Icon(

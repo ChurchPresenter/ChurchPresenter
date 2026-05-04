@@ -16,6 +16,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -101,8 +102,9 @@ fun <T> SegmentedButton(
                             )
                         }
                     },
-                    tooltipPlacement = TooltipPlacement.CursorPoint(
-                        offset = DpOffset(0.dp, 16.dp)
+                    tooltipPlacement = TooltipPlacement.ComponentRect(
+                        anchor = Alignment.BottomCenter,
+                        offset = DpOffset(0.dp, 4.dp)
                     )
                 ) {
                     button()

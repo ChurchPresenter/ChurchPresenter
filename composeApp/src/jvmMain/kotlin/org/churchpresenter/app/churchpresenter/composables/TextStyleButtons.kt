@@ -119,8 +119,9 @@ private fun TextStyleToggleButton(
                 )
             }
         },
-        tooltipPlacement = TooltipPlacement.CursorPoint(
-            offset = DpOffset(0.dp, 16.dp)
+        tooltipPlacement = TooltipPlacement.ComponentRect(
+            anchor = Alignment.BottomCenter,
+            offset = DpOffset(0.dp, 4.dp)
         )
     ) {
         Surface(
