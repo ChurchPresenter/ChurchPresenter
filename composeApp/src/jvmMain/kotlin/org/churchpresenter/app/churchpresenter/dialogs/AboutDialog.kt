@@ -53,15 +53,13 @@ fun AboutDialog(
 ) {
     if (!isVisible) return
 
-    var showConverter by remember { mutableStateOf(false) }
-
     val mainWindowState = LocalMainWindowState.current
     DialogWindow(
         onCloseRequest = onDismiss,
         state = rememberDialogState(
-            position = centeredOnMainWindow(mainWindowState, 360.dp, 340.dp),
+            position = centeredOnMainWindow(mainWindowState, 360.dp, 300.dp),
             width = 360.dp,
-            height = 340.dp
+            height = 300.dp
         ),
         title = stringResource(Res.string.about_title),
         resizable = false
@@ -113,9 +111,6 @@ fun AboutDialog(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    OutlinedButton(onClick = { showConverter = true }) {
-                        Text(stringResource(Res.string.open_converter))
-                    }
                     OutlinedButton(onClick = {
                         val crashDir = File(System.getProperty("user.home"), ".churchpresenter/crash-reports")
                         crashDir.mkdirs()
@@ -130,14 +125,10 @@ fun AboutDialog(
             }
         }
     }
-
-    if (showConverter) {
-        ConverterWindow(theme = theme, onClose = { showConverter = false })
-    }
 }
 
 @Composable
-private fun ConverterWindow(theme: ThemeMode, onClose: () -> Unit) {
+fun ConverterWindow(theme: ThemeMode, onClose: () -> Unit) {
     Window(
         onCloseRequest = onClose,
         title = "ChurchPresenter Converter",

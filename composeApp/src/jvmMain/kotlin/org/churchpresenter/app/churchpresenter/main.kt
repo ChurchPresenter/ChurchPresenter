@@ -76,6 +76,7 @@ import org.churchpresenter.app.churchpresenter.data.RemoteClientManager
 import org.churchpresenter.app.churchpresenter.data.SettingsManager
 import org.churchpresenter.app.churchpresenter.data.StatisticsManager
 import org.churchpresenter.app.churchpresenter.dialogs.AboutDialog
+import org.churchpresenter.app.churchpresenter.dialogs.ConverterWindow
 import org.churchpresenter.app.churchpresenter.dialogs.KeyboardShortcutsDialog
 import org.churchpresenter.app.churchpresenter.dialogs.LicenseDialog
 import org.churchpresenter.app.churchpresenter.dialogs.RemoteActivityNotification
@@ -291,6 +292,7 @@ fun main() {
         var showStatisticsDialog by remember { mutableStateOf(false) }
         var showKeyboardShortcutsDialog by remember { mutableStateOf(false) }
         var showAboutDialog by remember { mutableStateOf(false) }
+        var showConverterWindow by remember { mutableStateOf(false) }
         var pendingUpdateInfo by remember { mutableStateOf<UpdateInfo?>(null) }
         var selectedScheduleItemId by remember { mutableStateOf<String?>(null) }
 
@@ -852,6 +854,7 @@ fun main() {
                                 NavigationTopBar(
                                     onAbout = { showAboutDialog = true },
                                     onStatistics = { showStatisticsDialog = true },
+                                    onConverter = { showConverterWindow = true },
                                     onHelp = {
                                         Desktop.getDesktop()
                                             .browse(URI("https://github.com/ChurchPresenter/ChurchPresenter/"))
@@ -1061,6 +1064,12 @@ fun main() {
                                     onDismiss = { showAboutDialog = false },
                                     theme = theme
                                 )
+                                if (showConverterWindow) {
+                                    ConverterWindow(
+                                        theme = theme,
+                                        onClose = { showConverterWindow = false }
+                                    )
+                                }
                                 UpdateAvailableDialog(
                                     updateInfo = pendingUpdateInfo,
                                     onDismiss = { pendingUpdateInfo = null }
