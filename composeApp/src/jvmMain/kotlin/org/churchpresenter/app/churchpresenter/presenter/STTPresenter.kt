@@ -22,7 +22,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalDensity
 import kotlinx.coroutines.delay
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
@@ -38,7 +37,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.churchpresenter.app.churchpresenter.data.STTSettings
@@ -194,34 +192,42 @@ private fun BottomAlignedText(
         return
     }
 
-    val density = LocalDensity.current
-    val lineHeightPx = with(density) { style.lineHeight.toPx() }
-    val clipHeightPx = lineHeightPx * maxLines
-    val clipHeight = with(density) { clipHeightPx.toDp() }
-
-    val clipHeightPxInt = clipHeightPx.toInt()
+    // Reference text with exactly maxLines lines — measured to get precise pixel height
+    val referenceText = remember(maxLines) { "\n".repeat(maxLines - 1).ifEmpty { " " } }
 
     androidx.compose.ui.layout.Layout(
         content = {
+            // Invisible reference: measures exact height of maxLines lines
+            Text(
+                text = referenceText,
+                style = style,
+                modifier = Modifier.fillMaxWidth(),
+                maxLines = maxLines
+            )
+            // Actual content: measured unconstrained
             Text(text = text, style = style, modifier = Modifier.fillMaxWidth())
         },
         modifier = modifier.clipToBounds()
     ) { measurables, constraints ->
-        // Measure text unconstrained vertically so we get its full height
-        val placeable = measurables.first().measure(
-            androidx.compose.ui.unit.Constraints(
-                minWidth = constraints.minWidth,
-                maxWidth = constraints.maxWidth,
-                minHeight = 0,
-                maxHeight = androidx.compose.ui.unit.Constraints.Infinity
-            )
+        val unconstrainedConstraints = androidx.compose.ui.unit.Constraints(
+            minWidth = constraints.minWidth,
+            maxWidth = constraints.maxWidth,
+            minHeight = 0,
+            maxHeight = androidx.compose.ui.unit.Constraints.Infinity
         )
-        // Report only clipHeight to parent so the card wraps tightly
-        val reportedHeight = clipHeightPxInt.coerceAtMost(placeable.height)
+        // Measure reference to get exact N-line height
+        val refPlaceable = measurables[0].measure(unconstrainedConstraints)
+        val clipHeightPx = refPlaceable.height
+
+        // Measure actual text at full height
+        val textPlaceable = measurables[1].measure(unconstrainedConstraints)
+
+        val reportedHeight = clipHeightPx.coerceAtMost(textPlaceable.height)
         layout(constraints.maxWidth, reportedHeight) {
-            // Place text so its bottom edge aligns with the bottom of reported height
-            val y = reportedHeight - placeable.height
-            placeable.place(0, y.coerceAtMost(0))
+            // Place text bottom-aligned: shift up so last lines are visible
+            val y = reportedHeight - textPlaceable.height
+            textPlaceable.place(0, y.coerceAtMost(0))
+            // Don't place reference — it's just for measurement
         }
     }
 }
