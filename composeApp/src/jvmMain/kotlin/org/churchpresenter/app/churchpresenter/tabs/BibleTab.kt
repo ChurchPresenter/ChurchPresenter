@@ -523,6 +523,7 @@ fun BibleTab(
                                     .clickable {
                                         viewModel.selectSearchResult(result)
                                         viewModel.clearSearch()
+                                        focusRequester.requestFocus()
                                     }
                                     .background(MaterialTheme.colorScheme.surface)
                                     .padding(8.dp),
@@ -776,6 +777,7 @@ fun BibleTab(
                                     val realIndex = verses.indexOf(it)
                                     if (realIndex >= 0) viewModel.selectVerse(realIndex)
                                 }
+                                focusRequester.requestFocus()
                             },
                             onItemDoubleClicked = { _, _ -> goLiveWithHistory() },
                             onItemCtrlClicked = { index, _ ->
@@ -853,6 +855,7 @@ fun BibleTab(
                                             modifier = Modifier.fillMaxWidth()
                                                 .clickable {
                                                     viewModel.selectVerseByDetails(entry.bookName, entry.chapter, entry.verseNumber)
+                                                    focusRequester.requestFocus()
                                                 }
                                                 .padding(horizontal = 8.dp, vertical = 4.dp),
                                             overflow = TextOverflow.Ellipsis

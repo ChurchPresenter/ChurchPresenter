@@ -57,7 +57,9 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
-import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.pointer.PointerIcon
 import org.churchpresenter.app.churchpresenter.data.StatisticsManager
@@ -239,6 +241,9 @@ fun SongsTab(
     val density = LocalDensity.current
     val onSettingsChangeState = rememberUpdatedState(onSettingsChange)
 
+    val tabFocusRequester = remember { FocusRequester() }
+    LaunchedEffect(Unit) { tabFocusRequester.requestFocus() }
+
     // Column widths driven by settings; local state for smooth dragging
     var colWNumber by remember(appSettings.songSettings.colWidthNumber) {
         mutableStateOf(with(density) { appSettings.songSettings.colWidthNumber.dp.toPx() })
@@ -297,7 +302,9 @@ fun SongsTab(
                     lyricsPanelPx = rowTotalWidth / 2f
                 }
             }
-            .onKeyEvent { keyEvent ->
+            .focusRequester(tabFocusRequester)
+            .focusable()
+            .onPreviewKeyEvent { keyEvent ->
                 if (keyEvent.type == KeyEventType.KeyDown) {
                     val isLineMode = appSettings.songSettings.fullscreenDisplayMode != Constants.SONG_DISPLAY_MODE_VERSE ||
                         appSettings.songSettings.lowerThirdDisplayMode != Constants.SONG_DISPLAY_MODE_VERSE ||
@@ -336,7 +343,6 @@ fun SongsTab(
                     }
                 } else false
             }
-            .focusable()
     ) {
         // Left panel — Search and song list (fills remaining space)
         Column(modifier = Modifier.weight(1f).fillMaxHeight()) {
@@ -519,6 +525,7 @@ fun SongsTab(
                                     if (isPresenting && liveSongIndex >= 0) {
                                         viewModel.selectSection(-1)
                                     }
+                                    tabFocusRequester.requestFocus()
                                 }
                                 .padding(vertical = 8.dp),
                             verticalAlignment = Alignment.CenterVertically
