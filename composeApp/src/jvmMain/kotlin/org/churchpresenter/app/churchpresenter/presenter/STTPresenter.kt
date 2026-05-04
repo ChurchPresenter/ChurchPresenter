@@ -205,13 +205,17 @@ private fun BottomAlignedText(
         content = {
             Text(text = text, style = style, modifier = Modifier.fillMaxWidth())
         },
-        modifier = modifier.height(clipHeight).clipToBounds()
+        modifier = modifier.clipToBounds()
     ) { measurables, constraints ->
+        // Measure text unconstrained vertically so we get its full height
         val placeable = measurables.first().measure(
-            constraints.copy(maxHeight = androidx.compose.ui.unit.Constraints.Infinity)
+            constraints.copy(minHeight = 0, maxHeight = 100000)
         )
-        layout(constraints.maxWidth, clipHeightPxInt) {
-            val y = clipHeightPxInt - placeable.height
+        // Report only clipHeight to parent so the card wraps tightly
+        val reportedHeight = clipHeightPxInt.coerceAtMost(placeable.height)
+        layout(constraints.maxWidth, reportedHeight) {
+            // Place text so its bottom edge aligns with the bottom of reported height
+            val y = reportedHeight - placeable.height
             placeable.place(0, y.coerceAtMost(0))
         }
     }
