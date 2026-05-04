@@ -209,7 +209,12 @@ private fun BottomAlignedText(
     ) { measurables, constraints ->
         // Measure text unconstrained vertically so we get its full height
         val placeable = measurables.first().measure(
-            constraints.copy(minHeight = 0, maxHeight = 100000)
+            androidx.compose.ui.unit.Constraints(
+                minWidth = constraints.minWidth,
+                maxWidth = constraints.maxWidth,
+                minHeight = 0,
+                maxHeight = androidx.compose.ui.unit.Constraints.Infinity
+            )
         )
         // Report only clipHeight to parent so the card wraps tightly
         val reportedHeight = clipHeightPxInt.coerceAtMost(placeable.height)
