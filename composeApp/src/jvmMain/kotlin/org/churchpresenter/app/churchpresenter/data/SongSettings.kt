@@ -622,16 +622,16 @@ data class STTSettings(
     val serverUrl: String = "http://localhost:80",
     val displayMode: String = "transcribe", // "transcribe", "translate", "both"
     val layout: String = "stacked", // "stacked", "stacked_inverse", "side_by_side", "side_by_side_inverse"
-    val showWordHighlighting: Boolean = true,
+    val showWordHighlighting: Boolean = false,
     val maxSegments: Int = 5, // last N segments shown (0 = unlimited) — used for tab preview
     val maxLines: Int = 3, // max visible lines on projection display (0 = unlimited)
-    val showInProgress: Boolean = true,
-    val showTranslationInProgress: Boolean = true,
+    val showInProgress: Boolean = false,
+    val showTranslationInProgress: Boolean = false,
     val dripFeedEnabled: Boolean = true,
     val dripFeedSpeed: Int = 140, // ms per word
     val textColor: String = "#FFFFFF",
-    val translationTextColor: String = "#AAAAFF",
-    val backgroundColor: String = "#1E1E2E",
+    val translationTextColor: String = "#FFFFFF",
+    val backgroundColor: String = "transparent",
     val fontSize: Int = 42,
     val lineSpacing: Int = 130, // line height as percentage of font size (100 = no extra spacing)
     val fontType: String = "Arial",
