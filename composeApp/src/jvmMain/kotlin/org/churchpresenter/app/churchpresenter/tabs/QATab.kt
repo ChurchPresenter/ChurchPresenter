@@ -26,6 +26,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
@@ -472,7 +473,9 @@ fun QATab(
                 if (submissionQR != null) {
                     Image(bitmap = submissionQR, contentDescription = stringResource(Res.string.qa_submit_questions), modifier = Modifier.size(180.dp).clip(RoundedCornerShape(8.dp)))
                 }
-                Text(submissionUrl, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 4.dp))
+                SelectionContainer {
+                    Text(submissionUrl, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 4.dp))
+                }
 
                 Spacer(Modifier.height(8.dp))
                 OutlinedButton(
@@ -578,13 +581,15 @@ fun QATab(
                         }
 
                         Spacer(Modifier.height(4.dp))
-                        Text(
-                            tunnelStatus.url,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = Color(0xFF43A047),
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.fillMaxWidth()
-                        )
+                        SelectionContainer {
+                            Text(
+                                tunnelStatus.url,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = Color(0xFF43A047),
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
                     }
                     is TunnelStatus.Error -> {
                         Text(
@@ -641,7 +646,9 @@ fun QATab(
                 if (adminQR != null) {
                     Image(bitmap = adminQR, contentDescription = stringResource(Res.string.qa_admin_panel), modifier = Modifier.size(140.dp).clip(RoundedCornerShape(8.dp)))
                 }
-                Text(adminDisplayUrl, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 4.dp))
+                SelectionContainer {
+                    Text(adminDisplayUrl, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 4.dp))
+                }
             }
 
             Spacer(Modifier.height(16.dp))
