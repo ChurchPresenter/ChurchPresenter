@@ -148,11 +148,11 @@ fun STTPresenter(
                         }
                     } else {
                         Column(modifier = Modifier.fillMaxWidth().fillMaxSize()) {
-                            Box(modifier = Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.BottomStart) {
+                            Box(modifier = Modifier.weight(1f).fillMaxWidth(), contentAlignment = boxAlignment) {
                                 BottomAlignedText(text = first, style = firstStyle, maxLines = maxLines, modifier = Modifier.fillMaxWidth())
                             }
                             Spacer(modifier = Modifier.height(16.dp))
-                            Box(modifier = Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.BottomStart) {
+                            Box(modifier = Modifier.weight(1f).fillMaxWidth(), contentAlignment = boxAlignment) {
                                 BottomAlignedText(text = second, style = secondStyle, maxLines = maxLines, modifier = Modifier.fillMaxWidth())
                             }
                         }
