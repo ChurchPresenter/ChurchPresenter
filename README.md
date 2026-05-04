@@ -29,6 +29,8 @@ git submodule update --remote --merge
 ```
 
 > This will include [Lottie-Gen](https://github.com/ChurchPresenter/Lottie-Gen), a standalone tool for generating Lottie animations, located at `composeApp/src/jvmMain/appResources/common/Lottie-Gen`.
+>
+> It also includes [ChurchPresenter-Converter](https://github.com/ChurchPresenter/ChurchPresenter-Converter), a song/bible format converter built with Compose Desktop. Its source is compiled as part of the main app and accessible from the Help menu. Located at `composeApp/src/jvmMain/appResources/common/ChurchPresenter-Converter`.
 
 
 ---
