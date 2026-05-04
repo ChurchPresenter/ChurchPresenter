@@ -39,7 +39,6 @@ import churchpresenter.composeapp.generated.resources.cancel
 import churchpresenter.composeapp.generated.resources.symbol_cancel
 import churchpresenter.composeapp.generated.resources.symbol_ok
 import churchpresenter.composeapp.generated.resources.display_lower_third
-import churchpresenter.composeapp.generated.resources.pictures
 import churchpresenter.composeapp.generated.resources.apply
 import churchpresenter.composeapp.generated.resources.ok
 import churchpresenter.composeapp.generated.resources.options
@@ -54,7 +53,6 @@ import org.churchpresenter.app.churchpresenter.server.CompanionServer
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.SystemSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.BackgroundSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.BibleSettingsTab
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.MediaSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.ProjectionSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.ServerSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.SongSettingsTab
@@ -82,7 +80,7 @@ fun OptionsDialog(
     if (!isVisible) return
 
     var currentSettings by remember { mutableStateOf(settingsManager.loadSettings()) }
-    val tabCount = 9
+    val tabCount = 8
     var selectedTabIndex by remember { mutableStateOf(0) }
     val safeTabIndex = selectedTabIndex.coerceIn(0, tabCount - 1)
     val isDarkTheme = when (theme) {
@@ -137,26 +135,21 @@ fun OptionsDialog(
                         Tab(
                             selected = safeTabIndex == 4,
                             onClick = { selectedTabIndex = 4 },
-                            text = { Text(stringResource(Res.string.pictures)) }
+                            text = { Text(stringResource(Res.string.projection)) }
                         )
                         Tab(
                             selected = safeTabIndex == 5,
                             onClick = { selectedTabIndex = 5 },
-                            text = { Text(stringResource(Res.string.projection)) }
+                            text = { Text(stringResource(Res.string.display_lower_third)) }
                         )
                         Tab(
                             selected = safeTabIndex == 6,
                             onClick = { selectedTabIndex = 6 },
-                            text = { Text(stringResource(Res.string.display_lower_third)) }
+                            text = { Text(stringResource(Res.string.server_settings)) }
                         )
                         Tab(
                             selected = safeTabIndex == 7,
                             onClick = { selectedTabIndex = 7 },
-                            text = { Text(stringResource(Res.string.server_settings)) }
-                        )
-                        Tab(
-                            selected = safeTabIndex == 8,
-                            onClick = { selectedTabIndex = 8 },
                             text = { Text(stringResource(Res.string.stage_monitor)) }
                         )
                     }
@@ -197,13 +190,7 @@ fun OptionsDialog(
                                     currentSettings = updateFn(currentSettings)
                                 }
                             )
-                            4 -> MediaSettingsTab(
-                                settings = currentSettings,
-                                onSettingsChange = { updateFn ->
-                                    currentSettings = updateFn(currentSettings)
-                                }
-                            )
-                            5 -> ProjectionSettingsTab(
+                            4 -> ProjectionSettingsTab(
                                 settings = currentSettings,
                                 onSettingsChange = { updateFn ->
                                     currentSettings = updateFn(currentSettings)
@@ -211,7 +198,7 @@ fun OptionsDialog(
                                 onIdentifyScreen = { onIdentifyScreen() },
                                 scenes = scenes
                             )
-                            6 -> LowerThirdSettingsTab(
+                            5 -> LowerThirdSettingsTab(
                                 settings = currentSettings,
                                 onSettingsChange = { updateFn ->
                                     currentSettings = updateFn(currentSettings)
@@ -219,7 +206,7 @@ fun OptionsDialog(
                                 serverUrl = companionServer.serverUrl.value,
                                 isDarkTheme = isDarkTheme
                             )
-                            7 -> ServerSettingsTab(
+                            6 -> ServerSettingsTab(
                                 settings = currentSettings,
                                 onSettingsChange = { updateFn ->
                                     currentSettings = updateFn(currentSettings)
@@ -227,7 +214,7 @@ fun OptionsDialog(
                                 companionServer = companionServer,
                                 remoteClientManager = remoteClientManager
                             )
-                            8 -> StageMonitorSettingsTab(
+                            7 -> StageMonitorSettingsTab(
                                 settings = currentSettings,
                                 onSettingsChange = { updateFn ->
                                     currentSettings = updateFn(currentSettings)

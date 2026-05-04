@@ -173,6 +173,9 @@ data class SongSettings(
     val lowerThirdDisplayMode: String = Constants.SONG_DISPLAY_MODE_LINE, // "verse" or "line"
     val lowerThirdLanguageDisplay: String = Constants.SONG_LANG_BOTH, // "both", "primary", "secondary"
 
+    // End-of-song indicator spacing (number of spaces between each asterisk)
+    val endOfSongIndicatorSpacing: Int = 2,
+
     // Bilingual layout: "side_by_side" or "top_bottom"
     val bilingualLayout: String = Constants.BILINGUAL_SIDE_BY_SIDE,
 
@@ -611,11 +614,15 @@ data class QASettings(
     val shadowSize: Int = 100,
     val shadowOpacity: Int = 78,
     val horizontalAlignment: String = Constants.CENTER,
-    val position: String = Constants.CENTER,
-    val adminPassword: String = "",
-    val rateLimitPerMinute: Int = 3,
+    val position: String = Constants.BOTTOM_CENTER,
+    val adminPassword: String = generateDefaultPassword(),
     val rateLimitCooldownSeconds: Int = 30,
 )
+
+private fun generateDefaultPassword(): String {
+    val chars = "ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789"
+    return (1..6).map { chars.random() }.joinToString("")
+}
 
 @Serializable
 data class STTSettings(

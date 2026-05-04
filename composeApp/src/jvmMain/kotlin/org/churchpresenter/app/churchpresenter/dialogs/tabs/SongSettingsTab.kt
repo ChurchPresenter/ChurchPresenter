@@ -91,6 +91,7 @@ import churchpresenter.composeapp.generated.resources.bottom
 import churchpresenter.composeapp.generated.resources.left
 import churchpresenter.composeapp.generated.resources.right
 import churchpresenter.composeapp.generated.resources.screen
+import churchpresenter.composeapp.generated.resources.end_of_song_spacing
 import churchpresenter.composeapp.generated.resources.text_margins
 import churchpresenter.composeapp.generated.resources.top
 import churchpresenter.composeapp.generated.resources.milliseconds_suffix
@@ -715,6 +716,21 @@ private fun LeftColumn(
                 modifier = Modifier.padding(start = 4.dp)
             )
         }
+    }
+
+    Spacer(modifier = Modifier.height(20.dp))
+
+    // ── End-of-Song Indicator (*) Spacing ──
+    SettingRow(stringResource(Res.string.end_of_song_spacing)) {
+        NumberSettingsTextField(
+            initialText = settings.songSettings.endOfSongIndicatorSpacing,
+            range = 0..10,
+            onValueChange = { value ->
+                onSettingsChange { s ->
+                    s.copy(songSettings = s.songSettings.copy(endOfSongIndicatorSpacing = value))
+                }
+            }
+        )
     }
 
     Spacer(modifier = Modifier.height(20.dp))

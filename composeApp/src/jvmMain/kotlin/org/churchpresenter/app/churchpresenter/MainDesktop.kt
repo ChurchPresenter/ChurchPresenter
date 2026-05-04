@@ -48,6 +48,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Tune
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -65,6 +66,7 @@ import churchpresenter.composeapp.generated.resources.tab_visibility
 import churchpresenter.composeapp.generated.resources.ic_cast
 import churchpresenter.composeapp.generated.resources.ic_close
 import kotlinx.coroutines.flow.Flow
+import org.churchpresenter.app.churchpresenter.utils.AnalyticsReporter
 import org.churchpresenter.app.churchpresenter.composables.LivePreviewPanel
 import org.churchpresenter.app.churchpresenter.composables.SoftwareVideoPlayer
 import org.churchpresenter.app.churchpresenter.composables.VideoPlayer
@@ -95,6 +97,7 @@ import org.churchpresenter.app.churchpresenter.tabs.LowerThirdTab
 import org.churchpresenter.app.churchpresenter.tabs.CanvasTab
 import org.churchpresenter.app.churchpresenter.tabs.QATab
 import org.churchpresenter.app.churchpresenter.tabs.STTTab
+import org.churchpresenter.app.churchpresenter.server.TunnelStatus
 import org.churchpresenter.app.churchpresenter.tabs.TabSection
 import org.churchpresenter.app.churchpresenter.tabs.Tabs
 import org.churchpresenter.app.churchpresenter.tabs.getStringName
@@ -171,6 +174,12 @@ fun MainDesktop(
     serverUrl: String = "",
     qaManager: QAManager? = null,
     sttManager: STTManager? = null,
+    tunnelStatus: TunnelStatus = TunnelStatus.Idle,
+    tunnelUrl: String = "",
+    onStartTunnel: () -> Unit = {},
+    onStopTunnel: () -> Unit = {},
+    qaDisplayUrl: String = "",
+    onQaDisplayUrlChanged: (String) -> Unit = {},
 ) {
     val isDarkTheme = when (theme) {
         ThemeMode.LIGHT -> false
@@ -202,14 +211,15 @@ fun MainDesktop(
     val visibleTabs = remember(appSettings.hiddenTabs) {
         Tabs.entries.filter { it.name !in appSettings.hiddenTabs }.ifEmpty { listOf(Tabs.BIBLE) }
     }
+    // Clamp synchronously so no composition pass ever sees an out-of-bounds index.
+    val effectiveTabIndex = selectedTabIndex.coerceIn(visibleTabs.indices)
+    // Persist the clamped value back into state after composition.
+    LaunchedEffect(effectiveTabIndex) {
+        if (selectedTabIndex != effectiveTabIndex) selectedTabIndex = effectiveTabIndex
+    }
     fun selectTab(tab: Tabs) {
         val idx = visibleTabs.indexOf(tab)
         if (idx >= 0) selectedTabIndex = idx
-    }
-    LaunchedEffect(visibleTabs) {
-        if (selectedTabIndex !in visibleTabs.indices) {
-            selectedTabIndex = selectedTabIndex.coerceIn(visibleTabs.indices)
-        }
     }
     var showAddLabelDialog by remember { mutableStateOf(false) }
     var editingLabelItem by remember { mutableStateOf<ScheduleItem.LabelItem?>(null) }
@@ -219,7 +229,7 @@ fun MainDesktop(
 
     // Hidden VLCJ player for audio: keeps audio playing when user switches away from Media tab.
     // Only composed when NOT on the Media tab (the tab has its own VideoPlayer).
-    val currentTab = visibleTabs.getOrElse(selectedTabIndex) { Tabs.BIBLE }
+    val currentTab = visibleTabs[effectiveTabIndex]
     if (mediaViewModel != null && mediaViewModel.isAudioFile && mediaViewModel.isPlaying
         && currentTab != Tabs.MEDIA
     ) {
@@ -438,6 +448,7 @@ fun MainDesktop(
 
     LaunchedEffect(selectedTabIndex) {
         onTabChange(selectedTabIndex)
+        AnalyticsReporter.logPageView(visibleTabs.getOrNull(selectedTabIndex)?.name ?: "unknown")
         // Re-request focus so F-key shortcuts keep working after the new tab's children steal focus
         mainFocusRequester.requestFocus()
     }
@@ -773,23 +784,19 @@ fun MainDesktop(
                         TabSection(
                             modifier = Modifier.weight(1f),
                             visibleTabs = visibleTabs,
-                            selectedTabIndex = selectedTabIndex,
+                            selectedTabIndex = effectiveTabIndex,
                             onTabSelected = { selectedTabIndex = it }
                         )
                         // Tab visibility dropdown button
                         var showTabVisibilityMenu by remember { mutableStateOf(false) }
                         Box {
-                            IconButton(
+                            TooltipIconButton(
+                                painter = rememberVectorPainter(Icons.Default.Tune),
+                                text = stringResource(Res.string.tab_visibility),
                                 onClick = { showTabVisibilityMenu = true },
-                                modifier = Modifier.size(36.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Tune,
-                                    contentDescription = stringResource(Res.string.tab_visibility),
-                                    tint = MaterialTheme.colorScheme.onSurface,
-                                    modifier = Modifier.size(20.dp)
-                                )
-                            }
+                                buttonSize = 36.dp,
+                                iconTint = MaterialTheme.colorScheme.onSurface
+                            )
                             DropdownMenu(
                                 expanded = showTabVisibilityMenu,
                                 onDismissRequest = { showTabVisibilityMenu = false }
@@ -986,7 +993,13 @@ fun MainDesktop(
                                     serverUrl = serverUrl,
                                     presenting = presenting,
                                     appSettings = appSettings,
-                                    onSettingsChange = onSettingsChange
+                                    onSettingsChange = onSettingsChange,
+                                    tunnelStatus = tunnelStatus,
+                                    tunnelUrl = tunnelUrl,
+                                    onStartTunnel = onStartTunnel,
+                                    onStopTunnel = onStopTunnel,
+                                    qaDisplayUrl = qaDisplayUrl,
+                                    onQaDisplayUrlChanged = onQaDisplayUrlChanged,
                                 )
                             }
 
@@ -1089,6 +1102,7 @@ fun MainDesktop(
                             modifier = Modifier.fillMaxWidth(),
                             serverUrl = serverUrl,
                             sttManager = sttManager,
+                            qaDisplayUrl = qaDisplayUrl,
                         )
                     }
                 }

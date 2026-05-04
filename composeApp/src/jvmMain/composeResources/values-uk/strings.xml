@@ -334,6 +334,8 @@
     <string name="select_image_folder_dialog">Вибрати папку із зображеннями</string>
     <string name="loop">По колу</string>
     <string name="transition_duration">Тривалість переходу:</string>
+    <string name="unit_s">с</string>
+    <string name="unit_ms">мс</string>
     <string name="animation_type">Тип анімації:</string>
     <string name="animation_crossfade">Плавний перехід</string>
     <string name="animation_fade">Затухання</string>
@@ -694,6 +696,7 @@
     <string name="tab_canvas">Полотно</string>
     <string name="tab_visibility">Видимість вкладок</string>
     <string name="text_margins">Відступи тексту</string>
+    <string name="end_of_song_spacing">Кінець пісні (*) відстань</string>
     <string name="theme">Тема</string>
     <string name="timer_expired">Час вийшов!</string>
     <string name="timer_expired_text_hint">Введіть повідомлення для відображення після завершення…</string>
@@ -1034,6 +1037,41 @@
     <string name="update_check_menu">Перевірити оновлення…</string>
     <string name="update_already_latest">У вас встановлена остання версія.</string>
 
+    <!-- Stage Monitor Settings -->
+    <string name="stage_monitor">Монітор сцени</string>
+    <string name="display_stage_monitor">Монітор сцени</string>
+    <string name="stage_monitor_enable">Увімкнути монітор сцени</string>
+    <string name="stage_monitor_display">Цільовий дисплей</string>
+    <string name="stage_monitor_display_none">Немає (вимкнено)</string>
+    <string name="stage_monitor_section_general">Загальне</string>
+    <string name="stage_monitor_section_current">Поточний слайд</string>
+    <string name="stage_monitor_section_next">Наступний слайд</string>
+    <string name="stage_monitor_section_label_style">Стиль мітки</string>
+    <string name="stage_monitor_section_clock">Годинник і таймер</string>
+    <string name="stage_monitor_show_next_slide">Показувати наступний слайд</string>
+    <string name="stage_monitor_show_clock">Показувати годинник</string>
+    <string name="stage_monitor_show_timer">Показувати зворотній відлік</string>
+    <string name="stage_monitor_show_section_label">Показувати мітку розділу</string>
+    <string name="stage_monitor_show_label">Показувати мітку пісні/Біблії</string>
+    <string name="stage_monitor_show_notes">Показувати нотатки ведучого</string>
+    <string name="stage_monitor_text_color">Колір тексту</string>
+    <string name="stage_monitor_font_size">Розмір шрифту</string>
+    <string name="stage_monitor_background_color">Колір тла</string>
+    <string name="stage_monitor_layout">Макет</string>
+    <string name="stage_monitor_layout_vertical">Вертикальний</string>
+    <string name="stage_monitor_layout_horizontal">Горизонтальний</string>
+    <string name="stage_monitor_layout_quadrants">Розмітка на 4 частини</string>
+    <string name="stage_monitor_quadrant_current">Верх-ліво: поточний слайд</string>
+    <string name="stage_monitor_quadrant_next">Низ-ліво: наступний слайд</string>
+    <string name="stage_monitor_quadrant_timer">Верх-право: зворотній відлік</string>
+    <string name="stage_monitor_quadrant_clock">Низ-центр: годинник</string>
+    <string name="stage_monitor_quadrant_notes">Низ-право: нотатки ведучого</string>
+    <string name="stage_monitor_label_style_section">Стиль мітки</string>
+    <string name="stage_monitor_clock_show_seconds">Показувати секунди</string>
+    <string name="stage_monitor_clock_24h">24-годинний формат</string>
+    <string name="stage_monitor_no_extra_displays">Додаткові монітори не виявлено. Підключіть додатковий монітор для використання монітора сцени.</string>
+    <string name="stage_monitor_notes_from_presentation">Нотатки автоматично відображаються з активного слайда PowerPoint або Keynote.</string>
+
     <!-- Q&A Tab -->
     <string name="tab_qa">Запитання і відповіді</string>
     <string name="tab_stt">STT</string>
@@ -1082,5 +1120,24 @@
     <string name="qa_confirm_go_live">Підтвердити вихід в ефір</string>
     <string name="qa_edit_question_hint">Редагувати текст запитання…</string>
     <string name="qa_delete_question">Видалити</string>
+    <string name="qa_public_access">Публічний доступ</string>
+    <string name="qa_public_access_description">Дозвольте користувачам надсилати запитання через мобільний інтернет без підключення до вашої Wi-Fi мережі</string>
+    <string name="qa_enable_public_access">Увімкнути публічний доступ</string>
+    <string name="qa_disable_public_access">Вимкнути публічний доступ</string>
+    <string name="qa_downloading_tunnel">Завантаження клієнта тунелю…</string>
+    <string name="qa_starting_tunnel">Запуск тунелю…</string>
+    <string name="qa_qr_code_shows">QR-код показує:</string>
+    <string name="qa_local">Локальний</string>
+    <string name="qa_public">Публічний</string>
+    <string name="qa_retry">Повторити</string>
+    <string name="qa_pos_tl">ВЛ</string>
+    <string name="qa_pos_tc">ВЦ</string>
+    <string name="qa_pos_tr">ВП</string>
+    <string name="qa_pos_cl">ЦЛ</string>
+    <string name="qa_pos_c">Ц</string>
+    <string name="qa_pos_cr">ЦП</string>
+    <string name="qa_pos_bl">НЛ</string>
+    <string name="qa_pos_bc">НЦ</string>
+    <string name="qa_pos_br">НП</string>
 </resources>
 

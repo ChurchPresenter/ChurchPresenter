@@ -1,0 +1,10 @@
+# Google Analytics 4 — Measurement Protocol configuration for ChurchPresenter
+# Copy this file to analytics.properties and fill in your credentials.
+#
+# How to get these values:
+#   measurement_id  → GA4 property → Admin → Data Streams → your stream → Measurement ID (G-XXXXXXXXXX)
+#   api_secret      → GA4 property → Admin → Data Streams → your stream → Measurement Protocol API secrets → Create
+#
+# analytics.properties is .gitignored — never commit real credentials.
+measurement_id=G-XXXXXXXXXX
+api_secret=XXXXXXXXXX

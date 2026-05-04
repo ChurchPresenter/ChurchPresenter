@@ -382,7 +382,7 @@ fun SongsTab(
                     }
                 )
 
-                // Hidden rebuild: 4 rapid clicks on the search button force-reloads songs from disk
+                // Hidden rebuild: 3 rapid clicks on the search button force-reloads songs from disk
                 var rebuildClickCount by remember { mutableStateOf(0) }
                 var rebuildClickTime by remember { mutableStateOf(0L) }
                 IconButton(
@@ -391,7 +391,7 @@ fun SongsTab(
                         if (now - rebuildClickTime > 800) rebuildClickCount = 0
                         rebuildClickCount++
                         rebuildClickTime = now
-                        if (rebuildClickCount >= 4) {
+                        if (rebuildClickCount >= 3) {
                             rebuildClickCount = 0
                             viewModel.loadSongs()
                         }
@@ -401,7 +401,11 @@ fun SongsTab(
                         contentColor = MaterialTheme.colorScheme.onPrimary
                     )
                 ) {
-                    Icon(painter = painterResource(Res.drawable.ic_search), contentDescription = stringResource(Res.string.search), modifier = Modifier.size(20.dp))
+                    if (isLoading) {
+                        CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp, color = MaterialTheme.colorScheme.onPrimary)
+                    } else {
+                        Icon(painter = painterResource(Res.drawable.ic_search), contentDescription = stringResource(Res.string.search), modifier = Modifier.size(20.dp))
+                    }
                 }
             }
 
@@ -464,6 +468,10 @@ fun SongsTab(
                         .width(with(density) { colWTune.toDp() })
                         .padding(horizontal = 8.dp)
                         .clickable { viewModel.updateSort(Constants.SORT_TUNE) }
+                )
+                DragHandle(
+                    onDrag = { colWTune = (colWTune + it).coerceIn(with(density) { 40.dp.toPx() }, with(density) { 300.dp.toPx() }) },
+                    onDragEnd = ::saveColWidths
                 )
             }
 
@@ -551,6 +559,20 @@ fun SongsTab(
                                 maxLines = 1,
                                 color = textColor
                             )
+                            Box(modifier = Modifier.width(6.dp)) // spacer matching drag handle
+                            if (onAddToSchedule != null) {
+                                IconButton(
+                                    onClick = { onAddToSchedule(song.number.toIntOrNull() ?: 0, song.title, song.songbook, song.songId) },
+                                    modifier = Modifier.size(24.dp)
+                                ) {
+                                    Icon(
+                                        painter = painterResource(Res.drawable.ic_playlist_add),
+                                        contentDescription = null,
+                                        modifier = Modifier.size(16.dp),
+                                        tint = MaterialTheme.colorScheme.secondary
+                                    )
+                                }
+                            }
                         }
                         HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
                     }

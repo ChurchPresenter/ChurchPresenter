@@ -60,13 +60,43 @@ object UpdateChecker {
 
     /**
      * Simple JSON string field extractor (avoids adding a JSON dependency).
+     * Uses manual parsing instead of regex to avoid StackOverflowError on long values.
      */
     private fun parseJsonString(json: String, key: String): String? {
-        val pattern = Regex(""""$key"\s*:\s*"((?:[^"\\]|\\.)*)"""")
-        return pattern.find(json)?.groupValues?.getOrNull(1)
-            ?.replace("\\n", "\n")
-            ?.replace("\\\"", "\"")
-            ?.replace("\\\\", "\\")
+        val needle = "\"$key\""
+        val keyIdx = json.indexOf(needle)
+        if (keyIdx < 0) return null
+        // Skip past key, optional whitespace, colon, optional whitespace, opening quote
+        var i = keyIdx + needle.length
+        while (i < json.length && json[i].isWhitespace()) i++
+        if (i >= json.length || json[i] != ':') return null
+        i++
+        while (i < json.length && json[i].isWhitespace()) i++
+        if (i >= json.length || json[i] != '"') return null
+        i++ // skip opening quote
+        val sb = StringBuilder()
+        while (i < json.length) {
+            val c = json[i]
+            if (c == '\\' && i + 1 < json.length) {
+                val next = json[i + 1]
+                when (next) {
+                    'n' -> sb.append('\n')
+                    't' -> sb.append('\t')
+                    'r' -> sb.append('\r')
+                    '"' -> sb.append('"')
+                    '\\' -> sb.append('\\')
+                    '/' -> sb.append('/')
+                    else -> { sb.append('\\'); sb.append(next) }
+                }
+                i += 2
+            } else if (c == '"') {
+                return sb.toString()
+            } else {
+                sb.append(c)
+                i++
+            }
+        }
+        return null
     }
 
     /**

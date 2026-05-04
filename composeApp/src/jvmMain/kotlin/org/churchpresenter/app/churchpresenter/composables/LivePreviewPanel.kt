@@ -90,6 +90,7 @@ fun LivePreviewPanel(
     modifier: Modifier = Modifier,
     serverUrl: String = "",
     sttManager: org.churchpresenter.app.churchpresenter.viewmodel.STTManager? = null,
+    qaDisplayUrl: String = "",
 ) {
     val proj = appSettings.projectionSettings
     val deckLinkCount = remember { if (DeckLinkManager.isAvailable()) DeckLinkManager.listDevices().size else 0 }
@@ -114,6 +115,7 @@ fun LivePreviewPanel(
                 modifier = Modifier.fillMaxWidth(),
                 serverUrl = serverUrl,
                 sttManager = sttManager,
+                qaDisplayUrl = qaDisplayUrl,
             )
         }
 
@@ -137,6 +139,7 @@ private fun SingleDisplayPreview(
     modifier: Modifier = Modifier,
     serverUrl: String = "",
     sttManager: org.churchpresenter.app.churchpresenter.viewmodel.STTManager? = null,
+    qaDisplayUrl: String = "",
 ) {
     val presentingMode by presenterManager.presentingMode
     val displayedVerses by presenterManager.displayedVerses
@@ -249,7 +252,7 @@ private fun SingleDisplayPreview(
                                 val displayedQuestion by presenterManager.displayedQuestion
                                 val showQRCode by presenterManager.showQRCodeOnDisplay
                                 if (showQRCode) {
-                                    QAQRCodePresenter(url = "$serverUrl/qa", qaSettings = appSettings.qaSettings)
+                                    QAQRCodePresenter(url = "${qaDisplayUrl.ifEmpty { serverUrl }}/qa", qaSettings = appSettings.qaSettings)
                                 } else {
                                     QAPresenter(question = displayedQuestion, qaSettings = appSettings.qaSettings)
                                 }

@@ -419,6 +419,8 @@
     <string name="select_image_folder_dialog">Vybrat složku s obrázky</string>
     <string name="loop">Smyčka</string>
     <string name="transition_duration">Doba přechodu:</string>
+    <string name="unit_s">s</string>
+    <string name="unit_ms">ms</string>
     <string name="animation_type">Typ animace:</string>
     <string name="animation_crossfade">Prolínání</string>
     <string name="animation_fade">Zeslabení</string>
@@ -775,6 +777,7 @@
     <string name="tab_canvas">Plátno</string>
     <string name="tab_visibility">Viditelnost karet</string>
     <string name="text_margins">Okraje textu</string>
+    <string name="end_of_song_spacing">Konec písně (*) rozestup</string>
     <string name="theme">Motiv</string>
     <string name="timer_expired">Čas vypršel!</string>
     <string name="timer_expired_text_hint">Zadejte zprávu pro zobrazení po skončení…</string>
@@ -1107,6 +1110,41 @@
     <string name="update_check_menu">Zkontrolovat aktualizace…</string>
     <string name="update_already_latest">Máte nainstalovanou nejnovější verzi.</string>
 
+    <!-- Stage Monitor Settings -->
+    <string name="stage_monitor">Monitor scény</string>
+    <string name="display_stage_monitor">Monitor scény</string>
+    <string name="stage_monitor_enable">Povolit monitor scény</string>
+    <string name="stage_monitor_display">Cílový displej</string>
+    <string name="stage_monitor_display_none">Žádný (vypnuto)</string>
+    <string name="stage_monitor_section_general">Obecné</string>
+    <string name="stage_monitor_section_current">Aktuální snímek</string>
+    <string name="stage_monitor_section_next">Náhled dalšího snímku</string>
+    <string name="stage_monitor_section_label_style">Styl popisku</string>
+    <string name="stage_monitor_section_clock">Hodiny a časovač</string>
+    <string name="stage_monitor_show_next_slide">Zobrazit náhled dalšího snímku</string>
+    <string name="stage_monitor_show_clock">Zobrazit hodiny</string>
+    <string name="stage_monitor_show_timer">Zobrazit odpočítávání</string>
+    <string name="stage_monitor_show_section_label">Zobrazit popisek sekce</string>
+    <string name="stage_monitor_show_label">Zobrazit popisek písně/Bible</string>
+    <string name="stage_monitor_show_notes">Zobrazit poznámky moderátora</string>
+    <string name="stage_monitor_text_color">Barva textu</string>
+    <string name="stage_monitor_font_size">Velikost písma</string>
+    <string name="stage_monitor_background_color">Barva pozadí</string>
+    <string name="stage_monitor_layout">Rozložení</string>
+    <string name="stage_monitor_layout_vertical">Svislé</string>
+    <string name="stage_monitor_layout_horizontal">Vodorovné</string>
+    <string name="stage_monitor_layout_quadrants">Rozložení do 4 kvadrantů</string>
+    <string name="stage_monitor_quadrant_current">Vlevo nahoře: aktuální snímek</string>
+    <string name="stage_monitor_quadrant_next">Vlevo dole: další snímek</string>
+    <string name="stage_monitor_quadrant_timer">Vpravo nahoře: odpočítávání</string>
+    <string name="stage_monitor_quadrant_clock">Dole uprostřed: hodiny</string>
+    <string name="stage_monitor_quadrant_notes">Vpravo dole: poznámky moderátora</string>
+    <string name="stage_monitor_label_style_section">Styl popisku</string>
+    <string name="stage_monitor_clock_show_seconds">Zobrazit sekundy</string>
+    <string name="stage_monitor_clock_24h">24hodinový formát</string>
+    <string name="stage_monitor_no_extra_displays">Žádný sekundární displej nebyl zjištěn. Připojte další monitor pro použití monitoru scény.</string>
+    <string name="stage_monitor_notes_from_presentation">Poznámky jsou automaticky zobrazovány z aktivního snímku PowerPointu nebo Keynote.</string>
+
     <!-- Q&A Tab -->
     <string name="tab_qa">Otázky a odpovědi</string>
     <string name="tab_stt">STT</string>
@@ -1155,5 +1193,24 @@
     <string name="qa_confirm_go_live">Potvrdit živé vysílání</string>
     <string name="qa_edit_question_hint">Upravit text otázky…</string>
     <string name="qa_delete_question">Smazat</string>
+    <string name="qa_public_access">Veřejný přístup</string>
+    <string name="qa_public_access_description">Umožněte účastníkům posílat otázky přes mobilní data bez připojení k vaší Wi-Fi síti</string>
+    <string name="qa_enable_public_access">Povolit veřejný přístup</string>
+    <string name="qa_disable_public_access">Zakázat veřejný přístup</string>
+    <string name="qa_downloading_tunnel">Stahování tunnel klienta…</string>
+    <string name="qa_starting_tunnel">Spouštění tunnelu…</string>
+    <string name="qa_qr_code_shows">QR kód zobrazuje:</string>
+    <string name="qa_local">Místní</string>
+    <string name="qa_public">Veřejný</string>
+    <string name="qa_retry">Zkusit znovu</string>
+    <string name="qa_pos_tl">NL</string>
+    <string name="qa_pos_tc">NS</string>
+    <string name="qa_pos_tr">NP</string>
+    <string name="qa_pos_cl">SL</string>
+    <string name="qa_pos_c">S</string>
+    <string name="qa_pos_cr">SP</string>
+    <string name="qa_pos_bl">DL</string>
+    <string name="qa_pos_bc">DS</string>
+    <string name="qa_pos_br">DP</string>
 </resources>
 

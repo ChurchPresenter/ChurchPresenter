@@ -153,6 +153,8 @@ kotlin {
             implementation(libs.ktor.server.websockets)
             implementation(libs.ktor.serialization.kotlinx.json)
             implementation(libs.ktor.server.status.pages)
+            implementation(libs.ktor.client.core)
+            implementation(libs.ktor.client.cio)
             // BouncyCastle for custom CA / PKI cert generation
             implementation(libs.bouncycastle.pkix)
             implementation(libs.bouncycastle.prov)
@@ -394,16 +396,54 @@ val generateBuildConfig by tasks.registering {
     }
 }
 
+// Bake GA4 credentials into a generated Kotlin file at build time (like BuildConfig).
+// Source: $desktopSigningRepoPath/analytics.properties
+// When the file is absent credentials are empty strings and the reporter stays disabled.
+val generateAnalyticsConfig by tasks.registering {
+    val analyticsProps = if (desktopSigningRepoPath != null)
+        loadPropsFile("$desktopSigningRepoPath/analytics.properties")
+    else Properties()
+    val measurementId = analyticsProps.getProperty("measurement_id", "").trim()
+    val apiSecret = analyticsProps.getProperty("api_secret", "").trim()
+    val outputDir = layout.buildDirectory.dir("generated/analyticsconfig")
+
+    if (measurementId.isNotBlank() && apiSecret.isNotBlank()) {
+        logger.lifecycle("Analytics: credentials loaded from signing repo")
+    } else {
+        logger.lifecycle("Analytics: analytics.properties not found or incomplete — reporter disabled")
+    }
+
+    outputs.upToDateWhen { false }
+    outputs.dir(outputDir)
+
+    doLast {
+        val dir = outputDir.get().asFile.resolve("org/churchpresenter/app/churchpresenter")
+        dir.mkdirs()
+        dir.resolve("AnalyticsConfig.kt").writeText(
+            """
+            |package org.churchpresenter.app.churchpresenter
+            |
+            |object AnalyticsConfig {
+            |    const val MEASUREMENT_ID = "$measurementId"
+            |    const val API_SECRET = "$apiSecret"
+            |}
+            """.trimMargin()
+        )
+    }
+}
+
 kotlin {
     sourceSets {
         jvmMain {
             kotlin.srcDir(generateBuildConfig.map { layout.buildDirectory.dir("generated/buildconfig") })
+            kotlin.srcDir(generateAnalyticsConfig.map { layout.buildDirectory.dir("generated/analyticsconfig") })
         }
     }
 }
 
 tasks.named("compileKotlinJvm") {
     dependsOn(generateBuildConfig)
+    dependsOn(generateAnalyticsConfig)
 }
 
 // Workaround: avoid Gradle incremental state tracking on Compose resource generation tasks

@@ -9,6 +9,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.churchpresenter.app.churchpresenter.data.AppSettings
+import org.churchpresenter.app.churchpresenter.data.CachedSong
 import org.churchpresenter.app.churchpresenter.data.SongFileParser
 import org.churchpresenter.app.churchpresenter.data.SongItem
 import org.churchpresenter.app.churchpresenter.data.Songs
@@ -58,6 +59,9 @@ class SongsViewModel(
 
     private val _filteredSongsList = mutableStateOf<List<SongItem>>(emptyList())
 
+    // After edit/reload, re-select the song by its sourceFile path
+    private var _pendingSelectSourceFile: String? = null
+
     // Sort state — managed by ViewModel so it survives recomposition
     private val _sortColumn = mutableStateOf("")
     val sortColumn: State<String> = _sortColumn
@@ -95,15 +99,17 @@ class SongsViewModel(
                     }
                 }
 
-                // Phase 2: Load from disk and update if changed
-                val songs = withContext(Dispatchers.IO) {
+                // Phase 2: Load from disk incrementally (only re-parse changed files)
+                val result = withContext(Dispatchers.IO) {
                     val s = Songs()
+                    var cachedSongsList: List<CachedSong> = emptyList()
                     if (storageDir.isNotEmpty()) {
                         val dir = File(storageDir)
                         if (dir.exists() && dir.isDirectory) {
                             val parser = SongFileParser()
-                            val songFileSongs = parser.loadSongsFromDirectory(dir.absolutePath)
-                            s.addSongs(songFileSongs)
+                            val cacheMap = SongFileParser.loadCachedSongMap(storageDir)
+                            cachedSongsList = parser.loadSongsFromDirectory(dir.absolutePath, cacheMap)
+                            s.addSongs(cachedSongsList.map { it.song })
                         }
                     }
                     if (s.getSongCount() == 0) {
@@ -112,9 +118,11 @@ class SongsViewModel(
                         } catch (_: Exception) {
                         }
                     }
-                    s
+                    Pair(s, cachedSongsList)
                 }
 
+                val songs = result.first
+                val cachedSongsList = result.second
                 val freshSongs = songs.getSongs()
 
                 // Only update UI if data actually changed
@@ -124,9 +132,9 @@ class SongsViewModel(
                 }
 
                 // Save cache for next launch
-                if (storageDir.isNotEmpty() && freshSongs.isNotEmpty()) {
+                if (storageDir.isNotEmpty() && cachedSongsList.isNotEmpty()) {
                     withContext(Dispatchers.IO) {
-                        SongFileParser.saveSongCache(storageDir, freshSongs)
+                        SongFileParser.saveSongCache(storageDir, cachedSongsList)
                     }
                 }
 
@@ -144,16 +152,27 @@ class SongsViewModel(
         val songs = songsObj ?: Songs().also { it.addSongs(songItems) }
         _songsData.value = songs
 
-        val uniqueSongbooks = songItems
-            .map { it.songbook }
-            .filter { it.isNotBlank() }
-            .distinct()
-            .sorted()
-        _songbooks.value = uniqueSongbooks
+        // Collect songbooks including parent paths (e.g. "Kids/AM" also adds "Kids")
+        // Use "/" for songs in the root directory
+        val allPaths = mutableSetOf<String>()
+        for (item in songItems) {
+            val sb = item.songbook
+            if (sb.isBlank()) {
+                allPaths.add("/")
+                continue
+            }
+            allPaths.add(sb)
+            // Add all parent segments
+            var idx = sb.indexOf('/')
+            while (idx > 0) {
+                allPaths.add(sb.substring(0, idx))
+                idx = sb.indexOf('/', idx + 1)
+            }
+        }
+        _songbooks.value = allPaths.sorted()
 
         _allSongItems.value = songItems
-        _filteredSongsList.value = songItems
-        refreshFilteredSongItems()
+        applyFilters()
 
         onSongsLoaded?.invoke(songItems)
     }
@@ -419,8 +438,14 @@ class SongsViewModel(
         var filtered = _allSongItems.value
 
         // Filter by songbook - only apply if a real songbook is selected (not "All Song Books")
+        // Uses prefix matching so selecting "Kids" also shows "Kids/AM" and "Kids/PM"
         if (_selectedSongbook.value.isNotEmpty() && _songbooks.value.contains(_selectedSongbook.value)) {
-            filtered = filtered.filter { it.songbook == _selectedSongbook.value }
+            val selected = _selectedSongbook.value
+            filtered = if (selected == "/") {
+                filtered.filter { it.songbook.isBlank() }
+            } else {
+                filtered.filter { it.songbook == selected || it.songbook.startsWith("$selected/") }
+            }
         }
 
         // Filter by search query
@@ -449,6 +474,17 @@ class SongsViewModel(
         }
 
         refreshFilteredSongItems()
+
+        // Re-select song by sourceFile after reload (preserves selection across edits)
+        val pendingFile = _pendingSelectSourceFile
+        if (pendingFile != null) {
+            val items = _filteredSongItems.value
+            val idx = items.indexOfFirst { it.sourceFile == pendingFile }
+            if (idx >= 0) {
+                _selectedSongIndex.value = idx
+                _pendingSelectSourceFile = null
+            }
+        }
     }
 
     private fun refreshFilteredSongItems() {
@@ -545,6 +581,8 @@ class SongsViewModel(
             val saved = _songsData.value.saveSongToFile(oldSong, songToSave, storageDir)
 
             if (saved) {
+                // Remember which song to re-select after async reload
+                _pendingSelectSourceFile = songToSave.sourceFile
                 // Reload songs to reflect changes
                 loadSongs()
                 // Re-apply current filters to update the filtered list
@@ -611,7 +649,8 @@ class SongsViewModel(
         scheduleViewModel.addSong(
             songNumber = song.number.toIntOrNull() ?: 0,
             title = song.title,
-            songbook = song.songbook
+            songbook = song.songbook,
+            songId = song.songId
         )
         return true
     }

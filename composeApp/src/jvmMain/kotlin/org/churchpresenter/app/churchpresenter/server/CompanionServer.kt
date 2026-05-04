@@ -745,6 +745,8 @@ class CompanionServer {
     private val _serverUrl = MutableStateFlow("")
     val serverUrl: StateFlow<String> = _serverUrl.asStateFlow()
 
+    val tunnelManager = TunnelManager()
+
 
     private var server: EmbeddedServer<NettyApplicationEngine, NettyApplicationEngine.Configuration>? = null
     private var currentPort: Int = Constants.SERVER_DEFAULT_PORT
@@ -2232,8 +2234,9 @@ class CompanionServer {
                                         val pending = PendingRemoteRequest(item, wsClientId)
                                         scope.launch {
                                             onAddToSchedule.emit(pending)
-                                            // WS is fire-and-forget — complete automatically after emit
-                                            // (decision resolved by UI; if blocked, item is dropped silently)
+                                            val allowed = try { pending.decision.await() } catch (_: Exception) { false }
+                                            val response = if (allowed) """{"ok":true}""" else """{"ok":false,"reason":"denied"}"""
+                                            try { send(Frame.Text(response)) } catch (_: Exception) { }
                                         }
                                     }
                                     Constants.WS_CMD_ADD_BATCH_TO_SCHEDULE -> {
@@ -2243,14 +2246,24 @@ class CompanionServer {
                                         } catch (_: Exception) { emptyList() }
                                         if (items.isNotEmpty()) {
                                             val pending = PendingBatchRequest(items, wsClientId)
-                                            scope.launch { onAddBatchToSchedule.emit(pending) }
+                                            scope.launch {
+                                                onAddBatchToSchedule.emit(pending)
+                                                val allowed = try { pending.decision.await() } catch (_: Exception) { false }
+                                                val response = if (allowed) """{"ok":true}""" else """{"ok":false,"reason":"denied"}"""
+                                                try { send(Frame.Text(response)) } catch (_: Exception) { }
+                                            }
                                         }
                                     }
                                     Constants.WS_CMD_PROJECT -> {
                                         val item = parseRemoteItem(msg.payload)
                                             ?: json.decodeFromString(ProjectRequest.serializer(), msg.payload).item
                                         val pending = PendingRemoteRequest(item, wsClientId)
-                                        scope.launch { onProject.emit(pending) }
+                                        scope.launch {
+                                            onProject.emit(pending)
+                                            val allowed = try { pending.decision.await() } catch (_: Exception) { false }
+                                            val response = if (allowed) """{"ok":true}""" else """{"ok":false,"reason":"denied"}"""
+                                            try { send(Frame.Text(response)) } catch (_: Exception) { }
+                                        }
                                     }
                                 }
                             } catch (_: Exception) { /* ignore malformed frames */ }
@@ -2638,6 +2651,7 @@ class CompanionServer {
     }
 
     fun stop() {
+        tunnelManager.stop()
         server?.stop(1_000, 2_000)
         server = null
         scope.coroutineContext[kotlinx.coroutines.Job]?.cancelChildren()
@@ -3003,7 +3017,8 @@ h1{font-size:22px}
 
 <script>
 let questions=[],filter='INCOMING',displayedId=null,editingId=null,authed=false;
-let password=localStorage.getItem('qa_admin_pw')||'';
+let password=new URLSearchParams(window.location.search).get('password')||localStorage.getItem('qa_admin_pw')||'';
+if(password)localStorage.setItem('qa_admin_pw',password);
 const headers={'Content-Type':'application/json'};
 
 function setHeaders(){

@@ -57,15 +57,17 @@ fun calculateAutoFitForAllSections(
     baseStyle: TextStyle,
     availableWidth: Int,
     availableHeight: Int,
+    reservedHeight: Int = 0,
+    includeEndIndicator: Boolean = false,
 ): Int {
     if (sections.isEmpty() || availableWidth <= 0 || availableHeight <= 0) return 8
     val allLines = sections.flatMap { it.lines }
     if (allLines.all { it.isBlank() }) return 8
 
+    val effectiveHeight = (availableHeight - reservedHeight).coerceAtLeast(1)
     val referenceDensity = Density(1f)
     // Use unconstrained width to measure natural line width (no wrapping)
     val unconstrainedConstraints = Constraints()
-    val widthConstraints = Constraints(maxWidth = availableWidth)
 
     var low = 8
     var high = 300
@@ -74,7 +76,7 @@ fun calculateAutoFitForAllSections(
         val style = baseStyle.copy(fontSize = mid.sp)
         var fits = true
 
-        for (section in sections) {
+        for ((sectionIdx, section) in sections.withIndex()) {
             // Check both primary and secondary lines so bilingual text also fits
             val lineSets = if (section.secondaryLines.isNotEmpty())
                 listOf(section.lines, section.secondaryLines) else listOf(section.lines)
@@ -96,8 +98,19 @@ fun calculateAutoFitForAllSections(
                     sectionHeight += result.size.height
                 }
                 if (!fits) break
+                // Reserve space for end-of-song indicator on the last section
+                if (includeEndIndicator && sectionIdx == sections.lastIndex) {
+                    val lineHeight = textMeasurer.measure(
+                        text = "* * *",
+                        style = style,
+                        constraints = unconstrainedConstraints,
+                        density = referenceDensity
+                    ).size.height
+                    // Spacer (4px reference) + indicator line height
+                    sectionHeight += 4 + lineHeight
+                }
                 // Check height: all lines of this section must fit
-                if (sectionHeight > availableHeight) {
+                if (sectionHeight > effectiveHeight) {
                     fits = false
                     break
                 }

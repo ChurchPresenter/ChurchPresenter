@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import org.churchpresenter.app.churchpresenter.utils.AnalyticsReporter
 
 /**
  * Reusable IconButton with tooltip that appears on hover
@@ -57,7 +58,7 @@ fun TooltipIconButton(
         )
     ) {
         IconButton(
-            onClick = onClick,
+            onClick = { AnalyticsReporter.logButtonClick(text); onClick() },
             enabled = enabled,
             modifier = modifier.size(buttonSize),
             colors = colors

@@ -18,23 +18,29 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -44,10 +50,18 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.ic_refresh
 import churchpresenter.composeapp.generated.resources.add_to_schedule
+import churchpresenter.composeapp.generated.resources.animation_crossfade
+import churchpresenter.composeapp.generated.resources.animation_fade
+import churchpresenter.composeapp.generated.resources.animation_none
+import churchpresenter.composeapp.generated.resources.animation_slide_left
+import churchpresenter.composeapp.generated.resources.animation_slide_right
+import churchpresenter.composeapp.generated.resources.animation_type
+import churchpresenter.composeapp.generated.resources.auto_scroll_interval
 import churchpresenter.composeapp.generated.resources.go_live
 import churchpresenter.composeapp.generated.resources.ic_cast
 import churchpresenter.composeapp.generated.resources.ic_pause
@@ -68,8 +82,14 @@ import churchpresenter.composeapp.generated.resources.previous_image
 import churchpresenter.composeapp.generated.resources.select_folder
 import churchpresenter.composeapp.generated.resources.select_folder_to_view
 import churchpresenter.composeapp.generated.resources.select_image_folder_dialog
+import churchpresenter.composeapp.generated.resources.transition_duration
+import churchpresenter.composeapp.generated.resources.unit_s
+import churchpresenter.composeapp.generated.resources.unit_ms
+import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
 import org.churchpresenter.app.churchpresenter.data.AppSettings
+import org.churchpresenter.app.churchpresenter.models.AnimationType
 import org.churchpresenter.app.churchpresenter.models.ScheduleItem
+import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.viewmodel.PicturesViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.jetbrains.compose.resources.painterResource
@@ -289,6 +309,96 @@ fun PicturesTab(
                                 modifier = Modifier.size(20.dp)
                             )
                         }
+                    }
+
+                    // Inline slideshow settings
+                    if (appSettings != null) {
+                        var intervalText by remember(appSettings.pictureSettings.autoScrollInterval) {
+                            mutableStateOf(appSettings.pictureSettings.autoScrollInterval.toInt().toString())
+                        }
+                        var durationText by remember(appSettings.pictureSettings.transitionDuration) {
+                            mutableStateOf(appSettings.pictureSettings.transitionDuration.toInt().toString())
+                        }
+
+                        OutlinedTextField(
+                            value = intervalText,
+                            onValueChange = { value ->
+                                intervalText = value
+                                val parsed = value.toIntOrNull()
+                                if (parsed != null && parsed in 1..30) {
+                                    viewModel.autoScrollInterval = parsed.toFloat()
+                                    onSettingsChange { s ->
+                                        s.copy(pictureSettings = s.pictureSettings.copy(autoScrollInterval = parsed.toFloat()))
+                                    }
+                                }
+                            },
+                            label = { Text(stringResource(Res.string.auto_scroll_interval)) },
+                            suffix = { Text(stringResource(Res.string.unit_s)) },
+                            singleLine = true,
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                            modifier = Modifier.width(150.dp),
+                            textStyle = MaterialTheme.typography.bodyMedium,
+                        )
+
+                        OutlinedTextField(
+                            value = durationText,
+                            onValueChange = { value ->
+                                durationText = value
+                                val parsed = value.toIntOrNull()
+                                if (parsed != null && parsed in 100..2000) {
+                                    viewModel.transitionDuration = parsed.toFloat()
+                                    onSettingsChange { s ->
+                                        s.copy(pictureSettings = s.pictureSettings.copy(transitionDuration = parsed.toFloat()))
+                                    }
+                                }
+                            },
+                            label = { Text(stringResource(Res.string.transition_duration)) },
+                            suffix = { Text(stringResource(Res.string.unit_ms)) },
+                            singleLine = true,
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                            modifier = Modifier.width(170.dp),
+                            textStyle = MaterialTheme.typography.bodyMedium,
+                        )
+
+                        val crossfadeText = stringResource(Res.string.animation_crossfade)
+                        val fadeText = stringResource(Res.string.animation_fade)
+                        val slideLeftText = stringResource(Res.string.animation_slide_left)
+                        val slideRightText = stringResource(Res.string.animation_slide_right)
+                        val noneText = stringResource(Res.string.animation_none)
+
+                        val currentAnimationLabel = when (appSettings.pictureSettings.animationType) {
+                            Constants.ANIMATION_FADE -> fadeText
+                            Constants.ANIMATION_SLIDE_LEFT -> slideLeftText
+                            Constants.ANIMATION_SLIDE_RIGHT -> slideRightText
+                            Constants.ANIMATION_NONE -> noneText
+                            else -> crossfadeText
+                        }
+
+                        DropdownSelector(
+                            modifier = Modifier.width(160.dp),
+                            label = stringResource(Res.string.animation_type),
+                            items = listOf(crossfadeText, fadeText, slideLeftText, slideRightText, noneText),
+                            selected = currentAnimationLabel,
+                            onSelectedChange = { selected ->
+                                val newTypeString = when (selected) {
+                                    fadeText -> Constants.ANIMATION_FADE
+                                    slideLeftText -> Constants.ANIMATION_SLIDE_LEFT
+                                    slideRightText -> Constants.ANIMATION_SLIDE_RIGHT
+                                    noneText -> Constants.ANIMATION_NONE
+                                    else -> Constants.ANIMATION_CROSSFADE
+                                }
+                                viewModel.animationType = when (selected) {
+                                    fadeText -> AnimationType.FADE
+                                    slideLeftText -> AnimationType.SLIDE_LEFT
+                                    slideRightText -> AnimationType.SLIDE_RIGHT
+                                    noneText -> AnimationType.NONE
+                                    else -> AnimationType.CROSSFADE
+                                }
+                                onSettingsChange { s ->
+                                    s.copy(pictureSettings = s.pictureSettings.copy(animationType = newTypeString))
+                                }
+                            }
+                        )
                     }
                 }
 
