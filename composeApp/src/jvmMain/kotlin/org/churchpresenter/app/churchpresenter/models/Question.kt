@@ -9,7 +9,10 @@ data class Question(
     val text: String,
     val submitterName: String = "",
     val timestamp: Long,
-    val status: QuestionStatus = QuestionStatus.PENDING
+    val status: QuestionStatus = QuestionStatus.PENDING,
+    val voteCount: Int = 0,
+    val upvotes: Int = 0,
+    val downvotes: Int = 0,
 )
 
 @Serializable
@@ -18,7 +21,10 @@ data class QuestionDto(
     val text: String,
     val submitterName: String = "",
     val timestamp: Long,
-    val status: String
+    val status: String,
+    val voteCount: Int = 0,
+    val upvotes: Int = 0,
+    val downvotes: Int = 0,
 )
 
 @Serializable
@@ -27,10 +33,19 @@ data class SubmitQuestionRequest(
     val name: String = ""
 )
 
+@Serializable
+data class VoteRequest(
+    val questionId: String,
+    val direction: String = "up" // "up" or "down"
+)
+
 fun Question.toDto() = QuestionDto(
     id = id,
     text = text,
     submitterName = submitterName,
     timestamp = timestamp,
-    status = status.name
+    status = status.name,
+    voteCount = voteCount,
+    upvotes = upvotes,
+    downvotes = downvotes,
 )

@@ -74,6 +74,20 @@ import churchpresenter.composeapp.generated.resources.canvas_source_clock
 import churchpresenter.composeapp.generated.resources.canvas_source_qrcode
 import churchpresenter.composeapp.generated.resources.canvas_source_camera
 import churchpresenter.composeapp.generated.resources.canvas_source_screen_capture
+import churchpresenter.composeapp.generated.resources.canvas_source_bible
+import churchpresenter.composeapp.generated.resources.canvas_bible_version
+import churchpresenter.composeapp.generated.resources.canvas_bible_verse_text
+import churchpresenter.composeapp.generated.resources.canvas_bible_reference
+import churchpresenter.composeapp.generated.resources.canvas_bible_insert
+import churchpresenter.composeapp.generated.resources.canvas_bible_start_verse
+import churchpresenter.composeapp.generated.resources.canvas_bible_end_verse
+import churchpresenter.composeapp.generated.resources.canvas_bible_ref_font_size
+import churchpresenter.composeapp.generated.resources.canvas_bible_ref_color
+import churchpresenter.composeapp.generated.resources.canvas_bible_ref_bold
+import churchpresenter.composeapp.generated.resources.canvas_bible_ref_italic
+import churchpresenter.composeapp.generated.resources.bible_no_primary_title
+import churchpresenter.composeapp.generated.resources.book
+import churchpresenter.composeapp.generated.resources.chapter
 import churchpresenter.composeapp.generated.resources.canvas_clock_mode
 import churchpresenter.composeapp.generated.resources.canvas_clock_format
 import churchpresenter.composeapp.generated.resources.canvas_clock_show_hours
@@ -85,6 +99,7 @@ import churchpresenter.composeapp.generated.resources.canvas_clock_target_second
 import churchpresenter.composeapp.generated.resources.canvas_text_color
 import churchpresenter.composeapp.generated.resources.canvas_text_bg_color
 import churchpresenter.composeapp.generated.resources.canvas_text_bold
+import churchpresenter.composeapp.generated.resources.canvas_text_italic
 import churchpresenter.composeapp.generated.resources.canvas_qr_type
 import churchpresenter.composeapp.generated.resources.canvas_qr_content
 import churchpresenter.composeapp.generated.resources.canvas_qr_foreground
@@ -189,6 +204,7 @@ import kotlin.io.path.absolutePathString
 fun SourcePropertiesPanel(
     source: SceneSource,
     modifier: Modifier = Modifier,
+    appSettings: org.churchpresenter.app.churchpresenter.data.AppSettings? = null,
     onSourceUpdate: (SceneSource) -> Unit
 ) {
     Column(
@@ -252,6 +268,7 @@ fun SourcePropertiesPanel(
             is SceneSource.QRCodeSource -> QRCodeProperties(source, onSourceUpdate)
             is SceneSource.CameraSource -> CameraProperties(source, onSourceUpdate)
             is SceneSource.ScreenCaptureSource -> ScreenCaptureProperties(source, onSourceUpdate)
+            is SceneSource.BibleSource -> BibleProperties(source, onSourceUpdate, appSettings)
         }
     }
 }
@@ -1729,6 +1746,329 @@ private fun PropertySliderWithInput(label: String, value: Float, min: Float, max
     }
 }
 
+@Composable
+private fun BibleProperties(
+    source: SceneSource.BibleSource,
+    onUpdate: (SceneSource) -> Unit,
+    appSettings: org.churchpresenter.app.churchpresenter.data.AppSettings?
+) {
+    val availableFonts = remember { Utils.getAvailableSystemFonts() }
+
+    // Available bible files
+    val storageDir = appSettings?.bibleSettings?.storageDirectory ?: ""
+    val bibleFiles = remember(storageDir) {
+        if (storageDir.isEmpty()) emptyList()
+        else org.churchpresenter.app.churchpresenter.viewmodel.FileManager()
+            .getBibleFilesInDirectory(storageDir)
+    }
+    val bibleDisplayNames = remember(storageDir, bibleFiles) {
+        bibleFiles.associateWith { fileName ->
+            try {
+                java.io.File(storageDir, fileName).bufferedReader(java.nio.charset.StandardCharsets.UTF_8).use { reader ->
+                    repeat(10) {
+                        val line = reader.readLine() ?: return@use fileName.removeSuffix(".spb")
+                        if (line.startsWith("##Title:")) return@use line.substring(8).trim()
+                    }
+                    fileName.removeSuffix(".spb")
+                }
+            } catch (_: Exception) { fileName.removeSuffix(".spb") }
+        }
+    }
+
+    // Selected bible version
+    var selectedBibleFile by remember { mutableStateOf(appSettings?.bibleSettings?.primaryBible ?: "") }
+
+    // Bible data loading — keyed on the selected bible file
+    val bibleVm = remember(appSettings, selectedBibleFile) {
+        appSettings?.let {
+            val settings = it.copy(bibleSettings = it.bibleSettings.copy(primaryBible = selectedBibleFile))
+            org.churchpresenter.app.churchpresenter.viewmodel.BibleViewModel(settings)
+        }
+    }
+
+    val bible = bibleVm?.primaryBible?.value
+    val books = bibleVm?.books?.value ?: emptyList()
+    val verses = bibleVm?.verses?.value ?: emptyList()
+    val selectedBookIndex = bibleVm?.selectedBookIndex?.value ?: 0
+    val selectedChapter = bibleVm?.selectedChapter?.value ?: 1
+
+    Text(stringResource(Res.string.canvas_source_bible), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+
+    // Bible version selector
+    if (bibleFiles.isNotEmpty()) {
+        var versionExpanded by remember { mutableStateOf(false) }
+        Box {
+            OutlinedTextField(
+                value = bibleDisplayNames[selectedBibleFile] ?: selectedBibleFile.removeSuffix(".spb"),
+                onValueChange = {},
+                readOnly = true,
+                label = { Text(stringResource(Res.string.canvas_bible_version), style = MaterialTheme.typography.labelSmall) },
+                modifier = Modifier.fillMaxWidth().clickable { versionExpanded = true },
+                textStyle = MaterialTheme.typography.bodySmall,
+                trailingIcon = {
+                    Text(stringResource(Res.string.symbol_dropdown), modifier = Modifier.clickable { versionExpanded = !versionExpanded })
+                }
+            )
+            DropdownMenu(expanded = versionExpanded, onDismissRequest = { versionExpanded = false }) {
+                bibleFiles.forEach { fileName ->
+                    DropdownMenuItem(
+                        text = { Text(bibleDisplayNames[fileName] ?: fileName, style = MaterialTheme.typography.bodySmall) },
+                        onClick = {
+                            versionExpanded = false
+                            selectedBibleFile = fileName
+                        }
+                    )
+                }
+            }
+        }
+    }
+
+    // Book selector
+    if (books.isNotEmpty()) {
+        var bookExpanded by remember { mutableStateOf(false) }
+        Box {
+            OutlinedTextField(
+                value = books.getOrElse(selectedBookIndex) { "" },
+                onValueChange = {},
+                readOnly = true,
+                label = { Text(stringResource(Res.string.book), style = MaterialTheme.typography.labelSmall) },
+                modifier = Modifier.fillMaxWidth().clickable { bookExpanded = true },
+                textStyle = MaterialTheme.typography.bodySmall,
+                trailingIcon = {
+                    Text(stringResource(Res.string.symbol_dropdown), modifier = Modifier.clickable { bookExpanded = !bookExpanded })
+                }
+            )
+            DropdownMenu(expanded = bookExpanded, onDismissRequest = { bookExpanded = false }) {
+                books.forEachIndexed { index, bookName ->
+                    DropdownMenuItem(
+                        text = { Text(bookName, style = MaterialTheme.typography.bodySmall) },
+                        onClick = {
+                            bookExpanded = false
+                            bibleVm?.loadChapter(index, 1)
+                        }
+                    )
+                }
+            }
+        }
+
+        // Chapter selector
+        val chapterCount = bible?.getChapterCount(bible.getBookId(selectedBookIndex)) ?: 0
+        if (chapterCount > 0) {
+            var chapterExpanded by remember { mutableStateOf(false) }
+            Box {
+                OutlinedTextField(
+                    value = selectedChapter.toString(),
+                    onValueChange = {},
+                    readOnly = true,
+                    label = { Text(stringResource(Res.string.chapter), style = MaterialTheme.typography.labelSmall) },
+                    modifier = Modifier.fillMaxWidth().clickable { chapterExpanded = true },
+                    textStyle = MaterialTheme.typography.bodySmall,
+                    trailingIcon = {
+                        Text(stringResource(Res.string.symbol_dropdown), modifier = Modifier.clickable { chapterExpanded = !chapterExpanded })
+                    }
+                )
+                DropdownMenu(expanded = chapterExpanded, onDismissRequest = { chapterExpanded = false }) {
+                    (1..chapterCount).forEach { ch ->
+                        DropdownMenuItem(
+                            text = { Text(ch.toString(), style = MaterialTheme.typography.bodySmall) },
+                            onClick = {
+                                chapterExpanded = false
+                                bibleVm?.loadChapter(selectedBookIndex, ch)
+                            }
+                        )
+                    }
+                }
+            }
+        }
+
+        // Verse range selector
+        if (verses.isNotEmpty()) {
+            var startVerse by remember(selectedBookIndex, selectedChapter) { mutableStateOf(1) }
+            var endVerse by remember(selectedBookIndex, selectedChapter) { mutableStateOf(1) }
+
+            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                OutlinedTextField(
+                    value = startVerse.toString(),
+                    onValueChange = { v ->
+                        v.toIntOrNull()?.let { sv ->
+                            startVerse = sv.coerceIn(1, verses.size)
+                            if (endVerse < startVerse) endVerse = startVerse
+                        }
+                    },
+                    label = { Text(stringResource(Res.string.canvas_bible_start_verse), style = MaterialTheme.typography.labelSmall) },
+                    modifier = Modifier.weight(1f),
+                    textStyle = MaterialTheme.typography.bodySmall,
+                    singleLine = true
+                )
+                OutlinedTextField(
+                    value = endVerse.toString(),
+                    onValueChange = { v ->
+                        v.toIntOrNull()?.let { ev ->
+                            endVerse = ev.coerceIn(startVerse, verses.size)
+                        }
+                    },
+                    label = { Text(stringResource(Res.string.canvas_bible_end_verse), style = MaterialTheme.typography.labelSmall) },
+                    modifier = Modifier.weight(1f),
+                    textStyle = MaterialTheme.typography.bodySmall,
+                    singleLine = true
+                )
+            }
+
+            // Insert button
+            Button(
+                onClick = {
+                    val bookName = books.getOrElse(selectedBookIndex) { "" }
+                    val bookId = bible?.getBookId(selectedBookIndex) ?: return@Button
+                    val verseTexts = (startVerse..endVerse).mapNotNull { vNum ->
+                        bible.getVerseDetails(bookId, selectedChapter, vNum)?.second
+                    }
+                    val combinedText = verseTexts.joinToString(" ")
+                    val reference = if (startVerse == endVerse) {
+                        "$bookName $selectedChapter:$startVerse"
+                    } else {
+                        "$bookName $selectedChapter:$startVerse-$endVerse"
+                    }
+                    onUpdate(source.copy(verseText = combinedText, referenceText = reference))
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(stringResource(Res.string.canvas_bible_insert))
+            }
+        }
+    } else if (appSettings == null || storageDir.isEmpty()) {
+        Text(
+            stringResource(Res.string.bible_no_primary_title),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+
+    Spacer(modifier = Modifier.height(8.dp))
+    HorizontalDivider()
+    Spacer(modifier = Modifier.height(4.dp))
+
+    // Editable verse text field
+    var verseTextValue by remember(source.verseText) { mutableStateOf(source.verseText) }
+    OutlinedTextField(
+        value = verseTextValue,
+        onValueChange = {
+            verseTextValue = it
+            onUpdate(source.copy(verseText = it))
+        },
+        label = { Text(stringResource(Res.string.canvas_bible_verse_text), style = MaterialTheme.typography.labelSmall) },
+        singleLine = false,
+        minLines = 2,
+        maxLines = 6,
+        modifier = Modifier.fillMaxWidth(),
+        textStyle = MaterialTheme.typography.bodySmall
+    )
+
+    // Editable reference field
+    var refTextValue by remember(source.referenceText) { mutableStateOf(source.referenceText) }
+    OutlinedTextField(
+        value = refTextValue,
+        onValueChange = {
+            refTextValue = it
+            onUpdate(source.copy(referenceText = it))
+        },
+        label = { Text(stringResource(Res.string.canvas_bible_reference), style = MaterialTheme.typography.labelSmall) },
+        singleLine = true,
+        modifier = Modifier.fillMaxWidth(),
+        textStyle = MaterialTheme.typography.bodySmall
+    )
+
+    Spacer(modifier = Modifier.height(8.dp))
+    HorizontalDivider()
+    Spacer(modifier = Modifier.height(4.dp))
+
+    // Font styling for verse text
+    Text("Verse Style", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    FontDropdown(
+        label = stringResource(Res.string.canvas_font),
+        selected = source.fontFamily,
+        fonts = availableFonts,
+        onSelectedChange = { onUpdate(source.copy(fontFamily = it)) },
+        modifier = Modifier.fillMaxWidth()
+    )
+    PropertyTextField(stringResource(Res.string.canvas_clock_font_size), source.fontSize.toString()) { v ->
+        v.toIntOrNull()?.let { onUpdate(source.copy(fontSize = it)) }
+    }
+    ColorPickerField(
+        color = source.fontColor,
+        onColorChange = { onUpdate(source.copy(fontColor = it)) }
+    )
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Checkbox(checked = source.bold, onCheckedChange = { onUpdate(source.copy(bold = it)) })
+        Text(stringResource(Res.string.canvas_text_bold), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Checkbox(checked = source.italic, onCheckedChange = { onUpdate(source.copy(italic = it)) })
+        Text(stringResource(Res.string.canvas_text_italic), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    }
+
+    Spacer(modifier = Modifier.height(4.dp))
+
+    // Font styling for reference
+    Text("Reference Style", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    PropertyTextField(stringResource(Res.string.canvas_bible_ref_font_size), source.referenceFontSize.toString()) { v ->
+        v.toIntOrNull()?.let { onUpdate(source.copy(referenceFontSize = it)) }
+    }
+    ColorPickerField(
+        color = source.referenceFontColor,
+        onColorChange = { onUpdate(source.copy(referenceFontColor = it)) }
+    )
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Checkbox(checked = source.referenceBold, onCheckedChange = { onUpdate(source.copy(referenceBold = it)) })
+        Text(stringResource(Res.string.canvas_text_bold), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    }
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Checkbox(checked = source.referenceItalic, onCheckedChange = { onUpdate(source.copy(referenceItalic = it)) })
+        Text(stringResource(Res.string.canvas_text_italic), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    }
+
+    Spacer(modifier = Modifier.height(4.dp))
+
+    // Background color
+    ColorPickerField(
+        color = source.backgroundColor,
+        onColorChange = { onUpdate(source.copy(backgroundColor = it)) }
+    )
+
+    // Horizontal alignment
+    Text(stringResource(Res.string.canvas_align_horizontal), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    HorizontalAlignmentButtons(
+        selectedAlignment = source.horizontalAlignment,
+        onAlignmentChange = { onUpdate(source.copy(horizontalAlignment = it)) },
+        leftValue = "left",
+        centerValue = "center",
+        rightValue = "right"
+    )
+
+    Spacer(modifier = Modifier.height(4.dp))
+
+    // Vertical alignment
+    Text(stringResource(Res.string.canvas_align_vertical), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    VerticalAlignmentButtons(
+        selectedAlignment = source.verticalAlignment,
+        onAlignmentChange = { onUpdate(source.copy(verticalAlignment = it)) },
+        topValue = "top",
+        middleValue = "center",
+        bottomValue = "bottom"
+    )
+
+    Spacer(modifier = Modifier.height(4.dp))
+
+    // Line spacing
+    Text(stringResource(Res.string.canvas_line_spacing), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Slider(
+            value = source.lineSpacing / 100f,
+            onValueChange = { onUpdate(source.copy(lineSpacing = (it * 100).toInt())) },
+            valueRange = 0.5f..3f,
+            modifier = Modifier.weight(1f)
+        )
+        Text("${source.lineSpacing}%", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(40.dp))
+    }
+}
+
 // --- Transform update helpers ---
 
 private fun updateName(source: SceneSource, name: String): SceneSource = when (source) {
@@ -1742,6 +2082,7 @@ private fun updateName(source: SceneSource, name: String): SceneSource = when (s
     is SceneSource.QRCodeSource -> source.copy(name = name)
     is SceneSource.CameraSource -> source.copy(name = name)
     is SceneSource.ScreenCaptureSource -> source.copy(name = name)
+    is SceneSource.BibleSource -> source.copy(name = name)
 }
 
 private fun updateTransform(source: SceneSource, transform: SourceTransform): SceneSource = when (source) {
@@ -1755,6 +2096,7 @@ private fun updateTransform(source: SceneSource, transform: SourceTransform): Sc
     is SceneSource.QRCodeSource -> source.copy(transform = transform)
     is SceneSource.CameraSource -> source.copy(transform = transform)
     is SceneSource.ScreenCaptureSource -> source.copy(transform = transform)
+    is SceneSource.BibleSource -> source.copy(transform = transform)
 }
 
 @Composable

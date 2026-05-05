@@ -21,7 +21,8 @@ import java.util.concurrent.ConcurrentHashMap
 @Serializable
 private data class QAState(
     val questions: List<QuestionDto> = emptyList(),
-    val history: List<QuestionDto> = emptyList()
+    val history: List<QuestionDto> = emptyList(),
+    val votedIps: Map<String, Map<String, String>> = emptyMap()
 )
 
 class QAManager {
@@ -51,6 +52,10 @@ class QAManager {
 
     // ── Rate limiting (IP -> last submission timestamp) ────────────────
     private val _lastSubmission = ConcurrentHashMap<String, Long>()
+
+    // ── Voting (questionId -> map of IP -> direction "up"/"down") ─────
+    private val _votedIps = ConcurrentHashMap<String, ConcurrentHashMap<String, String>>()
+
 
     // ── Change events (for WebSocket broadcasts) ─────────────────────
     private val _events = MutableSharedFlow<QAEvent>(extraBufferCapacity = 64)
@@ -180,6 +185,7 @@ class QAManager {
             _questions.clear()
             clearDisplay()
             _lastSubmission.clear()
+            _votedIps.clear()
         }
         emitEvent(QAEvent.SessionChanged(_sessionActive.value))
         saveState()
@@ -188,6 +194,7 @@ class QAManager {
     fun clearAll() {
         clearDisplay()
         _questions.clear()
+        _votedIps.clear()
         saveState()
     }
 
@@ -206,6 +213,48 @@ class QAManager {
 
     fun findQuestion(id: String): Question? = _questions.firstOrNull { it.id == id }
 
+    // ── Voting ───────────────────────────────────────────────────────
+
+    fun voteForQuestion(questionId: String, clientIp: String, direction: String = "up"): Boolean {
+        val index = _questions.indexOfFirst { it.id == questionId }
+        if (index < 0) return false
+        val question = _questions[index]
+        if (question.status != QuestionStatus.APPROVED) return false
+        val votes = _votedIps.getOrPut(questionId) { ConcurrentHashMap() }
+        val existing = votes[clientIp]
+        if (existing == direction) return false // already voted same direction
+        // Calculate upvote/downvote changes
+        var upDelta = 0
+        var downDelta = 0
+        when {
+            existing == null && direction == "up" -> upDelta = 1
+            existing == null && direction == "down" -> downDelta = 1
+            existing == "up" && direction == "down" -> { upDelta = -1; downDelta = 1 }
+            existing == "down" && direction == "up" -> { downDelta = -1; upDelta = 1 }
+        }
+        votes[clientIp] = direction
+        val newUp = question.upvotes + upDelta
+        val newDown = question.downvotes + downDelta
+        _questions[index] = question.copy(
+            upvotes = newUp,
+            downvotes = newDown,
+            voteCount = newUp - newDown
+        )
+        emitEvent(QAEvent.QuestionUpdated(_questions[index]))
+        saveState()
+        return true
+    }
+
+    fun getVoteDirection(questionId: String, clientIp: String): String? {
+        return _votedIps[questionId]?.get(clientIp)
+    }
+
+    fun getApprovedQuestions(): List<Question> {
+        return _questions
+            .filter { it.status == QuestionStatus.APPROVED }
+            .sortedByDescending { it.voteCount }
+    }
+
     fun isRateLimited(clientIp: String, cooldownSeconds: Int): Boolean {
         if (clientIp.isEmpty() || cooldownSeconds <= 0) return false
         val now = System.currentTimeMillis()
@@ -220,7 +269,8 @@ class QAManager {
             try {
                 val state = QAState(
                     questions = _questions.map { it.toDto() },
-                    history = _history.map { it.toDto() }
+                    history = _history.map { it.toDto() },
+                    votedIps = _votedIps.mapValues { entry -> entry.value.toMap() }
                 )
                 stateFile.parentFile?.mkdirs()
                 stateFile.writeText(json.encodeToString(QAState.serializer(), state))
@@ -234,6 +284,11 @@ class QAManager {
             val state = json.decodeFromString(QAState.serializer(), stateFile.readText())
             _questions.addAll(state.questions.map { it.toQuestion() })
             _history.addAll(state.history.map { it.toQuestion() })
+            state.votedIps.forEach { (qId, ipMap) ->
+                val map = ConcurrentHashMap<String, String>()
+                map.putAll(ipMap)
+                _votedIps[qId] = map
+            }
         } catch (_: Exception) { }
     }
 
@@ -247,7 +302,10 @@ private fun QuestionDto.toQuestion() = Question(
     text = text,
     submitterName = submitterName,
     timestamp = timestamp,
-    status = try { QuestionStatus.valueOf(status) } catch (_: Exception) { QuestionStatus.PENDING }
+    status = try { QuestionStatus.valueOf(status) } catch (_: Exception) { QuestionStatus.PENDING },
+    voteCount = voteCount,
+    upvotes = upvotes,
+    downvotes = downvotes,
 )
 
 sealed class QAEvent {

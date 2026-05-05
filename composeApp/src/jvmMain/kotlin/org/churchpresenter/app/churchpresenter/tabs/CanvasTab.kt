@@ -99,6 +99,7 @@ import churchpresenter.composeapp.generated.resources.canvas_source_clock
 import churchpresenter.composeapp.generated.resources.canvas_source_qrcode
 import churchpresenter.composeapp.generated.resources.canvas_source_camera
 import churchpresenter.composeapp.generated.resources.canvas_source_screen_capture
+import churchpresenter.composeapp.generated.resources.canvas_source_bible
 import churchpresenter.composeapp.generated.resources.canvas_tool_select
 import churchpresenter.composeapp.generated.resources.canvas_tool_rectangle
 import churchpresenter.composeapp.generated.resources.canvas_tool_ellipse
@@ -142,6 +143,7 @@ fun CanvasTab(
     val strCamera        = stringResource(Res.string.canvas_source_camera)
     val strScreenCapture = stringResource(Res.string.canvas_source_screen_capture)
     val strBrowser       = stringResource(Res.string.canvas_source_browser)
+    val strBible         = stringResource(Res.string.canvas_source_bible)
 
     // Drawing tool state
     var activeTool by remember { mutableStateOf("select") }
@@ -571,6 +573,22 @@ fun CanvasTab(
                                     )
                                 }
                             )
+                            DropdownMenuItem(
+                                text = { Text(stringResource(Res.string.canvas_source_bible)) },
+                                onClick = {
+                                    showAddMenu = false
+                                    sceneViewModel.addSource(
+                                        SceneSource.BibleSource(
+                                            id = UUID.randomUUID().toString(),
+                                            name = strBible,
+                                            transform = SourceTransform(
+                                                x = 0.1f, y = 0.2f,
+                                                width = 0.8f, height = 0.6f
+                                            )
+                                        )
+                                    )
+                                }
+                            )
                         }
                     }
 
@@ -894,6 +912,7 @@ fun CanvasTab(
                 SourcePropertiesPanel(
                     source = selectedSource,
                     modifier = Modifier.fillMaxSize(),
+                    appSettings = appSettings,
                     onSourceUpdate = { updatedSource ->
                         sceneViewModel.updateSource(updatedSource.id) { updatedSource }
                     }

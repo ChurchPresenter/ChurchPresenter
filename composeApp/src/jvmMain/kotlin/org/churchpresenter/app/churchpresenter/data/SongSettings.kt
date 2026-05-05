@@ -616,6 +616,7 @@ data class QASettings(
     val position: String = Constants.BOTTOM_CENTER,
     val adminPassword: String = generateDefaultPassword(),
     val rateLimitCooldownSeconds: Int = 30,
+    val votingEnabled: Boolean = false,
 )
 
 private fun generateDefaultPassword(): String {
