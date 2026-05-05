@@ -3149,6 +3149,7 @@ a.back:hover{background:#1565c0}
 <script>
 const questionsEl=document.getElementById('questions'),msgEl=document.getElementById('msg');
 const voted=JSON.parse(sessionStorage.getItem('qa_voted')||'{}'); // {id: "up"|"down"}
+let lastDataHash='';
 
 async function loadQuestions(){
   try{
@@ -3159,11 +3160,11 @@ async function loadQuestions(){
       questionsEl.innerHTML='';
       msgEl.textContent='Voting is not enabled right now.';
       msgEl.className='msg off';msgEl.style.display='block';
+      lastDataHash='';
       return;
     }
     const data=await r.json();
     if(!Array.isArray(data)||data.length===0){
-      // Check session status
       const sr=await fetch('/api/qa/status');
       const sd=await sr.json();
       if(!sd.sessionActive){
@@ -3172,14 +3173,26 @@ async function loadQuestions(){
         questionsEl.innerHTML='';
         msgEl.textContent='Q&A session is not active right now.';
         msgEl.className='msg off';msgEl.style.display='block';
-        return;
+      } else {
+        document.getElementById('page-title').style.display='';
+        document.getElementById('page-sub').style.display='';
+        msgEl.style.display='none';
+        questionsEl.innerHTML='<div class="empty">No questions yet. Check back soon!</div>';
       }
-      document.getElementById('page-title').style.display='';
-      document.getElementById('page-sub').style.display='';
-      msgEl.style.display='none';
-      questionsEl.innerHTML='<div class="empty">No questions yet. Check back soon!</div>';
+      lastDataHash='';
       return;
     }
+    // Only rebuild DOM if data changed (prevents wrong-question clicks during refresh)
+    const newHash=data.map(q=>q.id).join(',');
+    if(newHash===lastDataHash){
+      // Just update vote states without rebuilding
+      data.forEach(q=>{
+        const dir=q.voted||voted[q.id]||null;
+        updateBtns(q.id,dir);
+      });
+      return;
+    }
+    lastDataHash=newHash;
     document.getElementById('page-title').style.display='';
     document.getElementById('page-sub').style.display='';
     msgEl.style.display='none';
