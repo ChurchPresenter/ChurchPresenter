@@ -562,11 +562,27 @@ data class PendingBatchRequest(
  * Song-selection events from mobile arrive via [onSongSelected].
  */
 class CompanionServer {
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
+    private var _qaEventJob: kotlinx.coroutines.Job? = null
     var qaManager: QAManager? = null
+        set(value) {
+            _qaEventJob?.cancel()
+            _qaEventJob = null
+            field = value
+            if (value != null) {
+                _qaEventJob = scope.launch {
+                    value.events.collect { _ ->
+                        broadcast(WebSocketMessage(
+                            type = Constants.WS_EVENT_QUESTIONS_UPDATED,
+                            payload = ""
+                        ))
+                    }
+                }
+            }
+        }
     @Volatile var qaAdminPassword: String = ""
     @Volatile var qaCooldownSeconds: Int = 30
-
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     // Current data — thread-safe StateFlows
     // All songs flat list
