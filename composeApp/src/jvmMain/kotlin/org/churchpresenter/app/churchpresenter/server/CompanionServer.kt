@@ -2909,7 +2909,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 h1{font-size:24px;color:#1e1e2e;text-align:center;margin-bottom:4px}
 p.sub{color:#666;text-align:center;margin-bottom:24px;font-size:14px}
 .question-card{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:20px;margin-bottom:12px;display:flex;align-items:flex-start;gap:16px}
-.vote-btns{display:flex;flex-direction:column;align-items:center;gap:4px;min-width:40px}
+.vote-btns{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:40px}
 .vote-btn{display:flex;align-items:center;justify-content:center;border:none;background:none;cursor:pointer;padding:6px;border-radius:8px;transition:all .2s;width:36px;height:36px}
 .vote-btn:hover{background:#e3f2fd}
 .vote-btn.voted{color:#1e88e5;background:#e3f2fd}
@@ -2918,6 +2918,7 @@ p.sub{color:#666;text-align:center;margin-bottom:24px;font-size:14px}
 .vote-btn.voted .vote-arrow{color:#1e88e5}
 .vote-btn.down-voted{color:#e53935;background:#ffebee}
 .vote-btn.down-voted .vote-arrow{color:#e53935}
+.vote-score{font-size:13px;font-weight:700;text-align:center;line-height:1;min-width:20px}
 .q-content{flex:1;min-width:0}
 .q-text{font-size:16px;color:#1e1e2e;line-height:1.4;word-wrap:break-word}
 .q-meta{font-size:12px;color:#999;margin-top:6px}
@@ -2988,9 +2989,12 @@ async function loadQuestions(){
     msgEl.style.display='none';
     questionsEl.innerHTML=data.map(q=>{
       const dir=q.voted||voted[q.id]||null;
+      const score=(q.upvotes||0)-(q.downvotes||0);
+      const scoreColor=score>0?'#43a047':score<0?'#e53935':'#999';
       return '<div class="question-card" id="qc-'+q.id+'">'
         +'<div class="vote-btns">'
         +'<button class="vote-btn'+(dir==='up'?' voted':'')+'" id="up-'+q.id+'" onclick="vote(\''+q.id+'\',\'up\')"><span class="vote-arrow">&#9650;</span></button>'
+        +'<span class="vote-score" id="vs-'+q.id+'" data-score="'+score+'" style="color:'+scoreColor+'">'+score+'</span>'
         +'<button class="vote-btn'+(dir==='down'?' down-voted':'')+'" id="dn-'+q.id+'" onclick="vote(\''+q.id+'\',\'down\')"><span class="vote-arrow">&#9660;</span></button>'
         +'</div>'
         +'<div class="q-content">'
@@ -3002,21 +3006,30 @@ async function loadQuestions(){
 
 async function vote(id,dir){
   try{
+    const prevDir=voted[id]||null;
     const r=await fetch('/api/qa/vote',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({questionId:id,direction:dir})});
     if(r.ok){
       const d=await r.json();
       const newDir=d.voted||null;
       if(newDir){voted[id]=newDir}else{delete voted[id]}
       sessionStorage.setItem('qa_voted',JSON.stringify(voted));
-      updateBtns(id,newDir);
+      updateBtns(id,newDir,prevDir);
     }
   }catch(e){}
 }
-function updateBtns(id,dir){
+function updateBtns(id,dir,prevDir){
   const up=document.getElementById('up-'+id);
   const dn=document.getElementById('dn-'+id);
+  const vs=document.getElementById('vs-'+id);
   if(up){up.className='vote-btn'+(dir==='up'?' voted':'')}
   if(dn){dn.className='vote-btn'+(dir==='down'?' down-voted':'')}
+  if(vs){
+    let s=parseInt(vs.dataset.score)||0;
+    if(prevDir==='up')s--;else if(prevDir==='down')s++;
+    if(dir==='up')s++;else if(dir==='down')s--;
+    vs.dataset.score=s;vs.textContent=s;
+    vs.style.color=s>0?'#43a047':s<0?'#e53935':'#999';
+  }
 }
 
 function escHtml(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML}
