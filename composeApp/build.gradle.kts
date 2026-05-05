@@ -169,7 +169,7 @@ kotlin {
             // Bundle platform-specific Chromium binaries so no runtime download is needed
             val jcefNativesVersion = "jcef-cffac27+cef-143.0.14+gdd46a37+chromium-143.0.7499.193"
             runtimeOnly("me.friwi:jcef-natives-${currentJcefPlatform()}:$jcefNativesVersion")
-            // JavaFX for WebView (website presenter, Lottie settings)
+            // JavaFX for WebView (website presenter)
             val jfxClassifier = currentOsClassifier()
             val jfxModules = listOf("javafx-base", "javafx-graphics", "javafx-media", "javafx-swing", "javafx-controls", "javafx-web")
             jfxModules.forEach { module ->
@@ -269,7 +269,7 @@ compose.desktop {
             copyright = "© ${Calendar.getInstance().get(Calendar.YEAR)} Church Presenter. All rights reserved."
             vendor = "Church Presenter"
 
-            // Bundle app resources (Lottie-Gen) alongside the packaged app.
+            // Bundle app resources alongside the packaged app.
             // These land in Contents/app/resources/ on macOS.
             appResourcesRootDir.set(project.layout.projectDirectory.dir("src/jvmMain/appResources"))
 

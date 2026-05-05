@@ -571,8 +571,6 @@
     <string name="presenter_view_title">Widok prezentera %1$d</string>
     <string name="key_output_title">Key Output %1$d</string>
     <string name="lower_third_generator">Generator dolnej trzeciej</string>
-    <string name="loading_generator">Ładowanie generatora...</string>
-    <string name="preview_will_appear_here">Podgląd pojawi się tutaj</string>
     <string name="pause_duration_ms">Pauza %1$dms</string>
     <string name="aspect_ratio_mismatch">Niezgodność proporcji: plik to %1$dx%2$d (%3$s), ale wyjście to %4$dx%5$d (%6$s)</string>
     <string name="mobile_view">Mobilny</string>
@@ -581,15 +579,8 @@
     <string name="mirror_mode">Lustro</string>
     <string name="time_separator">:</string>
 
-    <!-- Generator dialog messages -->
-    <string name="server_not_running_title">Serwer nie uruchomiony</string>
-    <string name="server_not_running_message">Uruchom serwer API, aby generować dolne trzecie.\nWygenerowane pliki zostaną zapisane w folderze skonfigurowanym w ustawieniach.</string>
-    <string name="no_folder_title">Brak folderu</string>
-    <string name="no_folder_message">Nie skonfigurowano folderu.\nNajpierw ustaw folder dolnej trzeciej w ustawieniach.</string>
-    <string name="choose_logo_image">Wybierz obraz logo</string>
     <string name="image_files_filter">Pliki graficzne (*.jpg, *.jpeg, *.png, *.gif, *.bmp)</string>
     <string name="video_files_filter">Pliki wideo (*.mp4, *.mov, *.avi, *.mkv, *.webm)</string>
-    <string name="images_filter">Obrazy</string>
     <string name="swap_bibles">Zamień</string>
 
     <!-- Additional translations -->

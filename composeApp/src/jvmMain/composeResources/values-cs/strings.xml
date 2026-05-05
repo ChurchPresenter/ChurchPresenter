@@ -657,8 +657,6 @@
     <string name="presenter_view_title">Zobrazení prezentéra %1$d</string>
     <string name="key_output_title">Key Output %1$d</string>
     <string name="lower_third_generator">Generátor dolní třetiny</string>
-    <string name="loading_generator">Načítání generátoru...</string>
-    <string name="preview_will_appear_here">Náhled se zobrazí zde</string>
     <string name="pause_duration_ms">Pauza %1$dms</string>
     <string name="aspect_ratio_mismatch">Nesoulad poměru stran: soubor je %1$dx%2$d (%3$s), ale výstup je %4$dx%5$d (%6$s)</string>
     <string name="mobile_view">Mobilní</string>
@@ -667,15 +665,8 @@
     <string name="mirror_mode">Zrcadlo</string>
     <string name="time_separator">:</string>
 
-    <!-- Generator dialog messages -->
-    <string name="server_not_running_title">Server neběží</string>
-    <string name="server_not_running_message">Spusťte prosím API server pro generování dolních třetin.\nVygenerované soubory budou uloženy do složky nastavené v nastavení.</string>
-    <string name="no_folder_title">Žádná složka</string>
-    <string name="no_folder_message">Není nastavena složka.\nNejprve nastavte složku dolní třetiny v nastavení.</string>
-    <string name="choose_logo_image">Vybrat obrázek loga</string>
     <string name="image_files_filter">Soubory obrázků (*.jpg, *.jpeg, *.png, *.gif, *.bmp)</string>
     <string name="video_files_filter">Video soubory (*.mp4, *.mov, *.avi, *.mkv, *.webm)</string>
-    <string name="images_filter">Obrázky</string>
     <string name="swap_bibles">Prohodit</string>
 
     <!-- Additional translations -->

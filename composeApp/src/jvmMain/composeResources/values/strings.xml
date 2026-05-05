@@ -966,8 +966,6 @@
     <string name="presenter_view_title">Presenter View %1$d</string>
     <string name="key_output_title">Key Output %1$d</string>
     <string name="lower_third_generator">Lower Third Generator</string>
-    <string name="loading_generator">Loading generator...</string>
-    <string name="preview_will_appear_here">Preview will appear here</string>
     <string name="pause_duration_ms">Pause %1$dms</string>
     <string name="aspect_ratio_mismatch">Aspect ratio mismatch: file is %1$dx%2$d (%3$s) but output is %4$dx%5$d (%6$s)</string>
     <string name="mobile_view">Mobile</string>
@@ -984,14 +982,8 @@
     <string name="symbol_dropdown">▾</string>
 
     <!-- Generator dialog messages -->
-    <string name="server_not_running_title">Server Not Running</string>
-    <string name="server_not_running_message">Please start the API server to generate lower thirds.\nGenerated files will be saved to the folder configured in Settings.</string>
-    <string name="no_folder_title">No Folder</string>
-    <string name="no_folder_message">No folder configured.\nSet a Lower Third folder in Settings first.</string>
-    <string name="choose_logo_image">Choose Logo Image</string>
     <string name="image_files_filter">Image Files (*.jpg, *.jpeg, *.png, *.gif, *.bmp)</string>
     <string name="video_files_filter">Video Files (*.mp4, *.mov, *.avi, *.mkv, *.webm)</string>
-    <string name="images_filter">Images</string>
     <string name="swap_bibles">Swap</string>
     <string name="multi_verse">Multi-verse</string>
     <string name="new_song">New Song</string>

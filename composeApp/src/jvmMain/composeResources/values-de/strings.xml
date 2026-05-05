@@ -571,8 +571,6 @@
     <string name="presenter_view_title">Präsentationsansicht %1$d</string>
     <string name="key_output_title">Key Output %1$d</string>
     <string name="lower_third_generator">Lower-Third-Generator</string>
-    <string name="loading_generator">Generator wird geladen...</string>
-    <string name="preview_will_appear_here">Vorschau wird hier angezeigt</string>
     <string name="pause_duration_ms">Pause %1$dms</string>
     <string name="aspect_ratio_mismatch">Seitenverhältnis stimmt nicht überein: Datei ist %1$dx%2$d (%3$s), aber Ausgabe ist %4$dx%5$d (%6$s)</string>
     <string name="mobile_view">Mobil</string>
@@ -581,15 +579,8 @@
     <string name="mirror_mode">Spiegel</string>
     <string name="time_separator">:</string>
 
-    <!-- Generator dialog messages -->
-    <string name="server_not_running_title">Server nicht gestartet</string>
-    <string name="server_not_running_message">Bitte starten Sie den API-Server, um Lower Thirds zu generieren.\nGenerierte Dateien werden im in den Einstellungen konfigurierten Ordner gespeichert.</string>
-    <string name="no_folder_title">Kein Ordner</string>
-    <string name="no_folder_message">Kein Ordner konfiguriert.\nLegen Sie zuerst einen Lower-Third-Ordner in den Einstellungen fest.</string>
-    <string name="choose_logo_image">Logo-Bild auswählen</string>
     <string name="image_files_filter">Bilddateien (*.jpg, *.jpeg, *.png, *.gif, *.bmp)</string>
     <string name="video_files_filter">Videodateien (*.mp4, *.mov, *.avi, *.mkv, *.webm)</string>
-    <string name="images_filter">Bilder</string>
     <string name="swap_bibles">Tauschen</string>
 
     <!-- Additional translations -->

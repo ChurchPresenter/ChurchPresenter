@@ -576,8 +576,6 @@
     <string name="presenter_view_title">Вікно презентації %1$d</string>
     <string name="key_output_title">Key Output %1$d</string>
     <string name="lower_third_generator">Генератор нижньої третини</string>
-    <string name="loading_generator">Завантаження генератора...</string>
-    <string name="preview_will_appear_here">Попередній перегляд з\'явиться тут</string>
     <string name="pause_duration_ms">Пауза %1$dмс</string>
     <string name="aspect_ratio_mismatch">Невідповідність співвідношення сторін: файл %1$dx%2$d (%3$s), але вивід %4$dx%5$d (%6$s)</string>
     <string name="mobile_view">Мобільний</string>
@@ -586,15 +584,8 @@
     <string name="mirror_mode">Дзеркало</string>
     <string name="time_separator">:</string>
 
-    <!-- Generator dialog messages -->
-    <string name="server_not_running_title">Сервер не запущено</string>
-    <string name="server_not_running_message">Будь ласка, запустіть API-сервер для генерації нижніх третин.\nЗгенеровані файли будуть збережені у папку, вказану в налаштуваннях.</string>
-    <string name="no_folder_title">Папку не вказано</string>
-    <string name="no_folder_message">Папку не налаштовано.\nСпочатку вкажіть папку нижньої третини в налаштуваннях.</string>
-    <string name="choose_logo_image">Вибрати логотип</string>
     <string name="image_files_filter">Файли зображень (*.jpg, *.jpeg, *.png, *.gif, *.bmp)</string>
     <string name="video_files_filter">Відеофайли (*.mp4, *.mov, *.avi, *.mkv, *.webm)</string>
-    <string name="images_filter">Зображення</string>
     <string name="swap_bibles">Поміняти</string>
 
     <!-- Additional translations -->

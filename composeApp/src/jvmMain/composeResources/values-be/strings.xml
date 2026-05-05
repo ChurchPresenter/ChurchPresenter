@@ -571,8 +571,6 @@
     <string name="presenter_view_title">Акно прэзентацыі %1$d</string>
     <string name="key_output_title">Key Output %1$d</string>
     <string name="lower_third_generator">Генератар ніжняй трэці</string>
-    <string name="loading_generator">Загрузка генератара...</string>
-    <string name="preview_will_appear_here">Папярэдні прагляд з\'явіцца тут</string>
     <string name="pause_duration_ms">Паўза %1$dмс</string>
     <string name="aspect_ratio_mismatch">Неадпаведнасць суадносін бакоў: файл %1$dx%2$d (%3$s), але вывад %4$dx%5$d (%6$s)</string>
     <string name="mobile_view">Мабільны</string>
@@ -581,15 +579,8 @@
     <string name="mirror_mode">Люстэрка</string>
     <string name="time_separator">:</string>
 
-    <!-- Generator dialog messages -->
-    <string name="server_not_running_title">Сервер не запушчаны</string>
-    <string name="server_not_running_message">Калі ласка, запусціце API-сервер для генерацыі ніжніх трэцей.\nЗгенераваныя файлы будуць захаваны ў папку, указаную ў наладах.</string>
-    <string name="no_folder_title">Папка не ўказана</string>
-    <string name="no_folder_message">Папка не наладжана.\nСпачатку ўкажыце папку ніжняй трэці ў наладах.</string>
-    <string name="choose_logo_image">Выбраць лагатып</string>
     <string name="image_files_filter">Файлы выяў (*.jpg, *.jpeg, *.png, *.gif, *.bmp)</string>
     <string name="video_files_filter">Відэафайлы (*.mp4, *.mov, *.avi, *.mkv, *.webm)</string>
-    <string name="images_filter">Выявы</string>
     <string name="swap_bibles">Памяняць</string>
 
     <!-- Additional translations -->

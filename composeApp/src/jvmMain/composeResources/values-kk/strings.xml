@@ -571,8 +571,6 @@
     <string name="presenter_view_title">Презентация терезесі %1$d</string>
     <string name="key_output_title">Key Output %1$d</string>
     <string name="lower_third_generator">Төменгі үштен бір генераторы</string>
-    <string name="loading_generator">Генератор жүктелуде...</string>
-    <string name="preview_will_appear_here">Алдын ала қарау мұнда пайда болады</string>
     <string name="pause_duration_ms">Кідіріс %1$dмс</string>
     <string name="aspect_ratio_mismatch">Қатынас сәйкессіздігі: файл %1$dx%2$d (%3$s), бірақ шығыс %4$dx%5$d (%6$s)</string>
     <string name="mobile_view">Мобильді</string>
@@ -581,15 +579,8 @@
     <string name="mirror_mode">Айна</string>
     <string name="time_separator">:</string>
 
-    <!-- Generator dialog messages -->
-    <string name="server_not_running_title">Сервер іске қосылмаған</string>
-    <string name="server_not_running_message">Төменгі үштен бірді жасау үшін API серверін іске қосыңыз.\nЖасалған файлдар параметрлерде көрсетілген папкаға сақталады.</string>
-    <string name="no_folder_title">Папка жоқ</string>
-    <string name="no_folder_message">Папка конфигурацияланбаған.\nАлдымен параметрлерде төменгі үштен бір папкасын орнатыңыз.</string>
-    <string name="choose_logo_image">Логотип суретін таңдау</string>
     <string name="image_files_filter">Сурет файлдары (*.jpg, *.jpeg, *.png, *.gif, *.bmp)</string>
     <string name="video_files_filter">Бейне файлдар (*.mp4, *.mov, *.avi, *.mkv, *.webm)</string>
-    <string name="images_filter">Суреттер</string>
     <string name="swap_bibles">Ауыстыру</string>
 
     <!-- Additional translations -->
