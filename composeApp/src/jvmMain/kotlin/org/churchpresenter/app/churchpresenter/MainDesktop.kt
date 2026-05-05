@@ -177,6 +177,7 @@ fun MainDesktop(
     onStopTunnel: () -> Unit = {},
     qaDisplayUrl: String = "",
     onQaDisplayUrlChanged: (String) -> Unit = {},
+    onOpenLottieGen: (outputDir: String, onFileSaved: (() -> Unit)?) -> Unit = { _, _ -> },
 ) {
     val isDarkTheme = when (theme) {
         ThemeMode.LIGHT -> false
@@ -923,8 +924,7 @@ fun MainDesktop(
                                     presenterManager.setPresentingMode(Presenting.LOWER_THIRD)
                                     presenterManager.setShowPresenterWindow(true)
                                 },
-                                isDarkTheme = isDarkTheme,
-                                serverUrl = serverUrl
+                                onOpenLottieGen = { outputDir, onSaved -> onOpenLottieGen(outputDir, onSaved) }
                             )
 
                             Tabs.ANNOUNCEMENTS -> AnnouncementsTab(

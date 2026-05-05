@@ -85,17 +85,8 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import churchpresenter.composeapp.generated.resources.generate_lower_third
 import churchpresenter.composeapp.generated.resources.aspect_ratio_mismatch
-import churchpresenter.composeapp.generated.resources.lower_third_generator
-import churchpresenter.composeapp.generated.resources.loading_generator
-import churchpresenter.composeapp.generated.resources.server_not_running_title
-import churchpresenter.composeapp.generated.resources.server_not_running_message
-import churchpresenter.composeapp.generated.resources.no_folder_title
-import churchpresenter.composeapp.generated.resources.no_folder_message
-import churchpresenter.composeapp.generated.resources.choose_logo_image
-import churchpresenter.composeapp.generated.resources.images_filter
-import org.churchpresenter.app.churchpresenter.dialogs.tabs.openLottieGeneratorDialog
-import java.awt.Window
 import org.churchpresenter.app.churchpresenter.viewmodel.isLottieFile
+import java.awt.Window
 import java.io.File
 import javax.swing.SwingUtilities
 
@@ -108,8 +99,7 @@ fun LowerThirdTab(
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit = {},
     onAddToSchedule: (presetId: String, presetLabel: String, pauseAtFrame: Boolean, pauseDurationMs: Long) -> Unit = { _, _, _, _ -> },
     onGoLive: (jsonContent: String, pauseAtFrame: Boolean, pauseFrame: Float, pauseDurationMs: Long) -> Unit = { _, _, _, _ -> },
-    isDarkTheme: Boolean = true,
-    serverUrl: String = ""
+    onOpenLottieGen: (outputDir: String, onFileSaved: (() -> Unit)?) -> Unit = { _, _ -> }
 ) {
     val lottieFolder = appSettings.streamingSettings.lowerThirdFolder
     var refreshKey by remember { mutableStateOf(0) }
@@ -300,33 +290,10 @@ fun LowerThirdTab(
                 }
             }
 
-            val genTitle = stringResource(Res.string.lower_third_generator)
-            val genLoading = stringResource(Res.string.loading_generator)
-            val srvTitle = stringResource(Res.string.server_not_running_title)
-            val srvMsg = stringResource(Res.string.server_not_running_message)
-            val nfTitle = stringResource(Res.string.no_folder_title)
-            val nfMsg = stringResource(Res.string.no_folder_message)
-            val logoTitle = stringResource(Res.string.choose_logo_image)
-            val imgFilter = stringResource(Res.string.images_filter)
             Button(
                 onClick = {
-                    SwingUtilities.invokeLater {
-                        openLottieGeneratorDialog(
-                            parentWindow = Window.getWindows().firstOrNull { it.isActive },
-                            onFileSaved = { scope.launch { refreshKey++ } },
-                            serverUrl = serverUrl,
-                            isDarkTheme = isDarkTheme,
-                            lowerThirdFolder = appSettings.streamingSettings.lowerThirdFolder,
-                            generatorDialogTitle = genTitle,
-                            loadingText = genLoading,
-                            serverNotRunningTitle = srvTitle,
-                            serverNotRunningMessage = srvMsg,
-                            noFolderTitle = nfTitle,
-                            noFolderMessage = nfMsg,
-                            chooseLogoTitle = logoTitle,
-                            imagesFilterText = imgFilter,
-                            parentScope = scope
-                        )
+                    onOpenLottieGen(appSettings.streamingSettings.lowerThirdFolder) {
+                        scope.launch { refreshKey++ }
                     }
                 },
                 modifier = Modifier.width(200.dp).padding(8.dp).align(Alignment.CenterHorizontally),

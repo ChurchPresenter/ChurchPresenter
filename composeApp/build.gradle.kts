@@ -437,6 +437,8 @@ kotlin {
             kotlin.srcDir(generateAnalyticsConfig.map { layout.buildDirectory.dir("generated/analyticsconfig") })
             // Include Converter submodule source (builds together, launches as separate window)
             kotlin.srcDir("src/jvmMain/appResources/common/ChurchPresenter-Converter/src/main/kotlin")
+            // Include LottieGen submodule source (builds together, launches as separate window)
+            kotlin.srcDir("src/jvmMain/appResources/common/ChurchPresenter-LottieGen/src/main/kotlin")
         }
     }
 }
@@ -457,24 +459,6 @@ tasks.matching { it.name in problematicTasks }.configureEach {
     doNotTrackState("Temporary workaround: OneDrive placeholder snapshot errors")
 }
 
-// Copy Lottie-Gen into appResources so it gets bundled with the packaged app.
-val copyLottieGen by tasks.registering(Copy::class) {
-    from(rootProject.file("Lottie-Gen"))
-    into(layout.projectDirectory.dir("src/jvmMain/appResources/common/Lottie-Gen"))
-}
-
-afterEvaluate {
-    tasks.matching { t ->
-        t.name == "prepareAppResources" ||
-        t.name.startsWith("createDistributable") ||
-        t.name.startsWith("packageDmg") ||
-        t.name.startsWith("packageMsi") ||
-        t.name.startsWith("packageExe") ||
-        t.name.startsWith("packageDeb")
-    }.configureEach {
-        dependsOn(copyLottieGen)
-    }
-}
 
 // ── Windows Code Signing ──────────────────────────────────────────────────────
 // Runs signtool.exe on the packaged .msi / .exe after Compose Desktop packaging.

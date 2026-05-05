@@ -32,7 +32,7 @@ import androidx.compose.foundation.Image
 
 /**
  * Initialises the JavaFX toolkit exactly once for the lifetime of the process.
- * Still needed for WebView (WebsitePresenter, LowerThirdSettingsTab).
+ * Still needed for WebView (WebsitePresenter).
  */
 private object JfxInit {
     @Volatile private var initialised = false

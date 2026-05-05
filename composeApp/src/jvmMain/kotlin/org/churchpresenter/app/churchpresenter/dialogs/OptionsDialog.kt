@@ -75,7 +75,8 @@ fun OptionsDialog(
     onSave: (AppSettings) -> Unit = {},
     onIdentifyScreen: () -> Unit = {},
     onThemeChange: (ThemeMode) -> Unit = {},
-    scenes: List<org.churchpresenter.app.churchpresenter.models.Scene> = emptyList()
+    scenes: List<org.churchpresenter.app.churchpresenter.models.Scene> = emptyList(),
+    onOpenLottieGen: (outputDir: String, onFileSaved: (() -> Unit)?) -> Unit = { _, _ -> }
 ) {
     if (!isVisible) return
 
@@ -203,8 +204,7 @@ fun OptionsDialog(
                                 onSettingsChange = { updateFn ->
                                     currentSettings = updateFn(currentSettings)
                                 },
-                                serverUrl = companionServer.serverUrl.value,
-                                isDarkTheme = isDarkTheme
+                                onOpenLottieGen = onOpenLottieGen
                             )
                             6 -> ServerSettingsTab(
                                 settings = currentSettings,

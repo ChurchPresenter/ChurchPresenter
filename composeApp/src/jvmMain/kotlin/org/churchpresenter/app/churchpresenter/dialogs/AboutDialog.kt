@@ -42,6 +42,7 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import churchpresenter.composeapp.generated.resources.ic_app_icon
 import ui.App as ConverterApp
+import lottiegen.App as LottieGenApp
 import java.awt.Desktop
 import java.io.File
 
@@ -137,6 +138,20 @@ fun ConverterWindow(theme: ThemeMode, onClose: () -> Unit) {
     ) {
         AppThemeWrapper(theme = theme) {
             ConverterApp()
+        }
+    }
+}
+
+@Composable
+fun LottieGenWindow(theme: ThemeMode, outputDir: File?, onClose: () -> Unit, onFileSaved: (() -> Unit)? = null, canvasWidth: Int? = null, canvasHeight: Int? = null) {
+    Window(
+        onCloseRequest = onClose,
+        title = "Lottie Lower Third Generator",
+        icon = painterResource(Res.drawable.ic_app_icon),
+        state = rememberWindowState(width = 1200.dp, height = 800.dp)
+    ) {
+        AppThemeWrapper(theme = theme) {
+            LottieGenApp(outputDir = outputDir, onFileSaved = onFileSaved, canvasWidth = canvasWidth, canvasHeight = canvasHeight)
         }
     }
 }

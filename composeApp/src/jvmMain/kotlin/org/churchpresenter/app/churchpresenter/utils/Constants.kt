@@ -234,12 +234,6 @@ object Constants {
     const val ENDPOINT_PICTURES               = "/api/pictures"
     const val ENDPOINT_WS                = "/ws"
 
-    // Lottie Generator endpoints
-    const val ENDPOINT_LOTTIE_PRESETS      = "/api/presets"
-    const val ENDPOINT_LOTTIE_COLOR_THEMES = "/api/color-themes"
-    const val ENDPOINT_LOTTIE_LOGOS        = "/api/logos"
-    const val ENDPOINT_LOTTIE_GENERATOR    = "/lottie-generator.html"
-
     // WebSocket event types (server → client)
     const val WS_EVENT_SONGS_UPDATED              = "songs_updated"
     const val WS_EVENT_BIBLE_UPDATED              = "bible_updated"

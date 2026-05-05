@@ -77,6 +77,7 @@ import org.churchpresenter.app.churchpresenter.data.SettingsManager
 import org.churchpresenter.app.churchpresenter.data.StatisticsManager
 import org.churchpresenter.app.churchpresenter.dialogs.AboutDialog
 import org.churchpresenter.app.churchpresenter.dialogs.ConverterWindow
+import org.churchpresenter.app.churchpresenter.dialogs.LottieGenWindow
 import org.churchpresenter.app.churchpresenter.dialogs.KeyboardShortcutsDialog
 import org.churchpresenter.app.churchpresenter.dialogs.LicenseDialog
 import org.churchpresenter.app.churchpresenter.dialogs.RemoteActivityNotification
@@ -120,6 +121,7 @@ import org.churchpresenter.app.churchpresenter.server.PendingRemoteRequest
 import org.churchpresenter.app.churchpresenter.server.ProjectRequest
 import org.churchpresenter.app.churchpresenter.ui.theme.AppThemeWrapper
 import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.app.churchpresenter.utils.presenterScreenBounds
 import org.churchpresenter.app.churchpresenter.utils.AnalyticsReporter
 import org.churchpresenter.app.churchpresenter.utils.CrashReporter
 import org.churchpresenter.app.churchpresenter.utils.UpdateChecker
@@ -294,6 +296,9 @@ fun main() {
         var showKeyboardShortcutsDialog by remember { mutableStateOf(false) }
         var showAboutDialog by remember { mutableStateOf(false) }
         var showConverterWindow by remember { mutableStateOf(false) }
+        var showLottieGenWindow by remember { mutableStateOf(false) }
+        var lottieGenOutputDir by remember { mutableStateOf<java.io.File?>(null) }
+        var lottieGenOnFileSaved by remember { mutableStateOf<(() -> Unit)?>(null) }
         var pendingUpdateInfo by remember { mutableStateOf<UpdateInfo?>(null) }
         var selectedScheduleItemId by remember { mutableStateOf<String?>(null) }
 
@@ -305,7 +310,6 @@ fun main() {
                     bibleStorageDir = appSettings.bibleSettings.storageDirectory,
                     primaryBibleFileName = appSettings.bibleSettings.primaryBible
                 )
-                companionServer.updateLowerThirdFolder(appSettings.streamingSettings.lowerThirdFolder)
                 // Seed API key from saved settings before starting, so the first
                 // request is already checked against the correct key.
                 companionServer.updateApiKey(
@@ -1047,6 +1051,11 @@ fun main() {
                                     onStopTunnel = { companionServer.tunnelManager.stop() },
                                     qaDisplayUrl = qaDisplayUrl,
                                     onQaDisplayUrlChanged = { qaDisplayUrl = it },
+                                    onOpenLottieGen = { outputDir, onSaved ->
+                                        lottieGenOutputDir = if (outputDir.isNotEmpty()) java.io.File(outputDir) else null
+                                        lottieGenOnFileSaved = onSaved
+                                        showLottieGenWindow = true
+                                    },
                                 )
                                 OptionsDialog(
                                     isVisible = showOptionsDialog,
@@ -1065,7 +1074,6 @@ fun main() {
                                             bibleStorageDir = updated.bibleSettings.storageDirectory,
                                             primaryBibleFileName = updated.bibleSettings.primaryBible
                                         )
-                                        companionServer.updateLowerThirdFolder(updated.streamingSettings.lowerThirdFolder)
                                         // Keep API key enforcement in sync with saved settings
                                         companionServer.updateApiKey(
                                             enabled = updated.serverSettings.apiKeyEnabled,
@@ -1084,6 +1092,11 @@ fun main() {
                                             delay(5_000L)
                                             identifyingScreen = false
                                         }
+                                    },
+                                    onOpenLottieGen = { outputDir, onSaved ->
+                                        lottieGenOutputDir = if (outputDir.isNotEmpty()) java.io.File(outputDir) else null
+                                        lottieGenOnFileSaved = onSaved
+                                        showLottieGenWindow = true
                                     }
                                 )
                                 KeyboardShortcutsDialog(
@@ -1105,6 +1118,17 @@ fun main() {
                                     ConverterWindow(
                                         theme = theme,
                                         onClose = { showConverterWindow = false }
+                                    )
+                                }
+                                if (showLottieGenWindow) {
+                                    val screenBounds = presenterScreenBounds()
+                                    LottieGenWindow(
+                                        theme = theme,
+                                        outputDir = lottieGenOutputDir,
+                                        onClose = { showLottieGenWindow = false },
+                                        onFileSaved = lottieGenOnFileSaved,
+                                        canvasWidth = screenBounds.width,
+                                        canvasHeight = screenBounds.height
                                     )
                                 }
                                 UpdateAvailableDialog(
