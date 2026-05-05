@@ -3376,6 +3376,13 @@ async function load(){
 }
 
 function render(){
+  // Show/hide clear display bar
+  const dbar=document.getElementById('display-bar');
+  if(displayedId){
+    const dq=questions.find(q=>q.id===displayedId);
+    document.getElementById('display-text').textContent='Displaying: '+(dq?dq.text.substring(0,50):'...');
+    dbar.style.display='flex';
+  }else{dbar.style.display='none'}
   let filtered;
   if(filter==='ALL')filtered=questions;
   else if(filter==='INCOMING')filtered=questions.filter(q=>q.status==='PENDING');
