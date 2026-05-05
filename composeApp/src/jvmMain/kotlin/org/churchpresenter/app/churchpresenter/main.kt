@@ -1052,9 +1052,18 @@ fun main() {
                                     qaDisplayUrl = qaDisplayUrl,
                                     onQaDisplayUrlChanged = { qaDisplayUrl = it },
                                     onOpenLottieGen = { outputDir, onSaved ->
-                                        lottieGenOutputDir = if (outputDir.isNotEmpty()) java.io.File(outputDir) else null
-                                        lottieGenOnFileSaved = onSaved
-                                        showLottieGenWindow = true
+                                        if (outputDir.isNotEmpty() && java.io.File(outputDir).isDirectory) {
+                                            lottieGenOutputDir = java.io.File(outputDir)
+                                            lottieGenOnFileSaved = onSaved
+                                            showLottieGenWindow = true
+                                        } else {
+                                            javax.swing.JOptionPane.showMessageDialog(
+                                                null,
+                                                "Please set a Lower Third folder in Settings first.",
+                                                "No Folder Configured",
+                                                javax.swing.JOptionPane.WARNING_MESSAGE
+                                            )
+                                        }
                                     },
                                 )
                                 OptionsDialog(
@@ -1094,9 +1103,18 @@ fun main() {
                                         }
                                     },
                                     onOpenLottieGen = { outputDir, onSaved ->
-                                        lottieGenOutputDir = if (outputDir.isNotEmpty()) java.io.File(outputDir) else null
-                                        lottieGenOnFileSaved = onSaved
-                                        showLottieGenWindow = true
+                                        if (outputDir.isNotEmpty() && java.io.File(outputDir).isDirectory) {
+                                            lottieGenOutputDir = java.io.File(outputDir)
+                                            lottieGenOnFileSaved = onSaved
+                                            showLottieGenWindow = true
+                                        } else {
+                                            javax.swing.JOptionPane.showMessageDialog(
+                                                null,
+                                                "Please set a Lower Third folder in Settings first.",
+                                                "No Folder Configured",
+                                                javax.swing.JOptionPane.WARNING_MESSAGE
+                                            )
+                                        }
                                     }
                                 )
                                 KeyboardShortcutsDialog(
