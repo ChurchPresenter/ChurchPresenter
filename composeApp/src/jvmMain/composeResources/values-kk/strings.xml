@@ -786,6 +786,9 @@
     <string name="endpoint_desc_ws_project">элементті тікелей трансляциялау (WS)</string>
     <string name="remote_api_add_to_schedule">Кестеге қосу</string>
     <string name="remote_api_project">Трансляциялау (Эфирге шығу)</string>
+    <string name="remote_api_qa_add">С&amp;Ж: Сұрақ қосу</string>
+    <string name="remote_api_qa_edit">С&amp;Ж: Сұрақты өңдеу</string>
+    <string name="remote_api_qa_delete">С&amp;Ж: Сұрақты жою</string>
     <string name="remote_api_request_title">Қашықтағы API сұранысы</string>
     <string name="remote_api_request_title_queued">Қашықтағы API сұранысы (%1$d күтуде)</string>
     <string name="remote_client_label">Клиент:</string>
@@ -1120,6 +1123,8 @@
     <string name="qa_confirm_go_live">Тікелей эфирге шығуды растау</string>
     <string name="qa_edit_question_hint">Сұрақ мәтінін өңдеу…</string>
     <string name="qa_delete_question">Жою</string>
+    <string name="qa_confirm_delete_prompt">Жою?</string>
+    <string name="qa_submitter_device">Құрылғы: %1$s</string>
     <string name="qa_public_access">Жалпыға қол жеткізу</string>
     <string name="qa_public_access_description">Қатысушыларға Wi-Fi желісіне қосылмай, мобильді интернет арқылы сұрақ жіберуге мүмкіндік беріңіз</string>
     <string name="qa_enable_public_access">Жалпыға қол жеткізуді қосу</string>

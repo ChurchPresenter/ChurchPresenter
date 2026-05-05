@@ -787,6 +787,9 @@
     <string name="endpoint_desc_ws_project">транслировать элемент напрямую (WS)</string>
     <string name="remote_api_add_to_schedule">Добавить в расписание</string>
     <string name="remote_api_project">Транслировать (В эфир)</string>
+    <string name="remote_api_qa_add">В&amp;О: Добавить вопрос</string>
+    <string name="remote_api_qa_edit">В&amp;О: Изменить вопрос</string>
+    <string name="remote_api_qa_delete">В&amp;О: Удалить вопрос</string>
     <string name="remote_api_request_title">Запрос удалённого API</string>
     <string name="remote_api_request_title_queued">Запрос удалённого API (%1$d в очереди)</string>
     <string name="remote_client_label">Клиент:</string>
@@ -1122,6 +1125,8 @@
     <string name="qa_confirm_go_live">Подтвердить выход в эфир</string>
     <string name="qa_edit_question_hint">Редактировать текст вопроса…</string>
     <string name="qa_delete_question">Удалить</string>
+    <string name="qa_confirm_delete_prompt">Удалить?</string>
+    <string name="qa_submitter_device">Устройство: %1$s</string>
     <string name="qa_public_access">Публичный доступ</string>
     <string name="qa_public_access_description">Позвольте пользователям отправлять вопросы через мобильный интернет без подключения к вашей Wi-Fi сети</string>
     <string name="qa_enable_public_access">Включить публичный доступ</string>

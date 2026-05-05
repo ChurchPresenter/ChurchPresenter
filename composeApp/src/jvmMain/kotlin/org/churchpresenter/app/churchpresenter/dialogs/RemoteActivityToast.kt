@@ -47,6 +47,13 @@ import churchpresenter.composeapp.generated.resources.remote_activity_projected
 import churchpresenter.composeapp.generated.resources.remote_activity_presented
 import churchpresenter.composeapp.generated.resources.remote_activity_uploaded
 import churchpresenter.composeapp.generated.resources.remote_activity_cleared
+import churchpresenter.composeapp.generated.resources.remote_activity_qa_add
+import churchpresenter.composeapp.generated.resources.remote_activity_qa_edit
+import churchpresenter.composeapp.generated.resources.remote_activity_qa_delete
+import churchpresenter.composeapp.generated.resources.remote_activity_qa_approve
+import churchpresenter.composeapp.generated.resources.remote_activity_qa_deny
+import churchpresenter.composeapp.generated.resources.remote_activity_qa_done
+import churchpresenter.composeapp.generated.resources.remote_activity_qa_display
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.stringResource
 
@@ -120,6 +127,13 @@ private fun RemoteActivityToast(
         RemoteEventType.PRESENT         -> stringResource(Res.string.remote_activity_presented)
         RemoteEventType.UPLOAD          -> stringResource(Res.string.remote_activity_uploaded)
         RemoteEventType.CLEAR           -> stringResource(Res.string.remote_activity_cleared)
+        RemoteEventType.QA_ADD          -> stringResource(Res.string.remote_activity_qa_add)
+        RemoteEventType.QA_EDIT         -> stringResource(Res.string.remote_activity_qa_edit)
+        RemoteEventType.QA_DELETE       -> stringResource(Res.string.remote_activity_qa_delete)
+        RemoteEventType.QA_APPROVE      -> stringResource(Res.string.remote_activity_qa_approve)
+        RemoteEventType.QA_DENY         -> stringResource(Res.string.remote_activity_qa_deny)
+        RemoteEventType.QA_DONE         -> stringResource(Res.string.remote_activity_qa_done)
+        RemoteEventType.QA_DISPLAY      -> stringResource(Res.string.remote_activity_qa_display)
     }
     val icon = when (notification.type) {
         RemoteEventType.ADD_TO_SCHEDULE -> "📋"
@@ -127,6 +141,13 @@ private fun RemoteActivityToast(
         RemoteEventType.PRESENT         -> "▶️"
         RemoteEventType.UPLOAD          -> "📤"
         RemoteEventType.CLEAR           -> "🔲"
+        RemoteEventType.QA_ADD,
+        RemoteEventType.QA_EDIT,
+        RemoteEventType.QA_DELETE,
+        RemoteEventType.QA_APPROVE,
+        RemoteEventType.QA_DENY,
+        RemoteEventType.QA_DONE,
+        RemoteEventType.QA_DISPLAY      -> "💬"
     }
 
     val clientDisplay = when {

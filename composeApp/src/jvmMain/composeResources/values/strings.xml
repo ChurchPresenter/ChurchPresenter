@@ -1014,6 +1014,13 @@
     <!-- Remote API event dialog -->
     <string name="remote_api_add_to_schedule">Add to Schedule</string>
     <string name="remote_api_project">Project (Go Live)</string>
+    <string name="remote_api_qa_add">Q&amp;A: Add Question</string>
+    <string name="remote_api_qa_edit">Q&amp;A: Edit Question</string>
+    <string name="remote_api_qa_delete">Q&amp;A: Delete Question</string>
+    <string name="remote_api_qa_approve">Q&amp;A: Approve Question</string>
+    <string name="remote_api_qa_deny">Q&amp;A: Deny Question</string>
+    <string name="remote_api_qa_done">Q&amp;A: Mark as Done</string>
+    <string name="remote_api_qa_display">Q&amp;A: Go Live</string>
     <string name="remote_api_request_title">Remote API Request</string>
     <string name="remote_api_request_title_queued">Remote API Request (%1$d pending)</string>
     <string name="remote_client_label">Client:</string>
@@ -1026,6 +1033,13 @@
     <string name="remote_activity_presented">Presenting</string>
     <string name="remote_activity_uploaded">Uploaded</string>
     <string name="remote_activity_cleared">Cleared Display</string>
+    <string name="remote_activity_qa_add">Q&amp;A Question Added</string>
+    <string name="remote_activity_qa_edit">Q&amp;A Question Edited</string>
+    <string name="remote_activity_qa_delete">Q&amp;A Question Deleted</string>
+    <string name="remote_activity_qa_approve">Q&amp;A Question Approved</string>
+    <string name="remote_activity_qa_deny">Q&amp;A Question Denied</string>
+    <string name="remote_activity_qa_done">Q&amp;A Question Done</string>
+    <string name="remote_activity_qa_display">Q&amp;A Question Live</string>
     <string name="remote_activity_by">by %1$s</string>
     <string name="remote_activity_dismiss">Dismiss</string>
     <string name="remote_activity_dismiss_all">Dismiss All</string>
@@ -1183,6 +1197,8 @@
     <string name="qa_confirm_go_live">Confirm Go Live</string>
     <string name="qa_edit_question_hint">Edit question text…</string>
     <string name="qa_delete_question">Delete</string>
+    <string name="qa_confirm_delete_prompt">Delete?</string>
+    <string name="qa_submitter_device">Device: %1$s</string>
     <string name="qa_public_access">Public Access</string>
     <string name="qa_public_access_description">Let users submit questions via mobile data without joining your WiFi</string>
     <string name="qa_enable_public_access">Enable Public Access</string>

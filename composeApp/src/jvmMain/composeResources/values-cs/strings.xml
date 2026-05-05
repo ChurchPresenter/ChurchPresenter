@@ -872,6 +872,9 @@
     <string name="endpoint_desc_ws_project">projektovat položku přímo (WS)</string>
     <string name="remote_api_add_to_schedule">Přidat do plánu</string>
     <string name="remote_api_project">Projektovat (Spustit živě)</string>
+    <string name="remote_api_qa_add">Q&amp;A: Přidat otázku</string>
+    <string name="remote_api_qa_edit">Q&amp;A: Upravit otázku</string>
+    <string name="remote_api_qa_delete">Q&amp;A: Smazat otázku</string>
     <string name="remote_api_request_title">Požadavek vzdáleného API</string>
     <string name="remote_api_request_title_queued">Požadavek vzdáleného API (%1$d čekající)</string>
     <string name="remote_client_label">Klient:</string>
@@ -1198,6 +1201,8 @@
     <string name="qa_confirm_go_live">Potvrdit živé vysílání</string>
     <string name="qa_edit_question_hint">Upravit text otázky…</string>
     <string name="qa_delete_question">Smazat</string>
+    <string name="qa_confirm_delete_prompt">Smazat?</string>
+    <string name="qa_submitter_device">Zařízení: %1$s</string>
     <string name="qa_public_access">Veřejný přístup</string>
     <string name="qa_public_access_description">Umožněte účastníkům posílat otázky přes mobilní data bez připojení k vaší Wi-Fi síti</string>
     <string name="qa_enable_public_access">Povolit veřejný přístup</string>

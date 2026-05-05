@@ -786,6 +786,9 @@
     <string name="endpoint_desc_ws_project">трансліраваць элемент непасрэдна (WS)</string>
     <string name="remote_api_add_to_schedule">Дадаць у расклад</string>
     <string name="remote_api_project">Трансліраваць (У эфір)</string>
+    <string name="remote_api_qa_add">Q&amp;A: Дадаць пытанне</string>
+    <string name="remote_api_qa_edit">Q&amp;A: Змяніць пытанне</string>
+    <string name="remote_api_qa_delete">Q&amp;A: Выдаліць пытанне</string>
     <string name="remote_api_request_title">Запыт аддаленага API</string>
     <string name="remote_api_request_title_queued">Запыт аддаленага API (%1$d у чарзе)</string>
     <string name="remote_client_label">Кліент:</string>
@@ -1120,6 +1123,8 @@
     <string name="qa_confirm_go_live">Пацвердзіць выхад у эфір</string>
     <string name="qa_edit_question_hint">Рэдагаваць тэкст пытання…</string>
     <string name="qa_delete_question">Выдаліць</string>
+    <string name="qa_confirm_delete_prompt">Выдаліць?</string>
+    <string name="qa_submitter_device">Прылада: %1$s</string>
     <string name="qa_public_access">Публічны доступ</string>
     <string name="qa_public_access_description">Дазвольце ўдзельнікам адпраўляць пытанні праз мабільны інтэрнэт без падключэння да вашай Wi-Fi сеткі</string>
     <string name="qa_enable_public_access">Уключыць публічны доступ</string>

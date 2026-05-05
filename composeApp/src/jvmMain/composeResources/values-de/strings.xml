@@ -786,6 +786,9 @@
     <string name="endpoint_desc_ws_project">Element direkt projizieren (WS)</string>
     <string name="remote_api_add_to_schedule">Zum Plan hinzufügen</string>
     <string name="remote_api_project">Projizieren (Live gehen)</string>
+    <string name="remote_api_qa_add">F&amp;A: Frage hinzufügen</string>
+    <string name="remote_api_qa_edit">F&amp;A: Frage bearbeiten</string>
+    <string name="remote_api_qa_delete">F&amp;A: Frage löschen</string>
     <string name="remote_api_request_title">Remote-API-Anfrage</string>
     <string name="remote_api_request_title_queued">Remote-API-Anfrage (%1$d ausstehend)</string>
     <string name="remote_client_label">Client:</string>
@@ -1120,6 +1123,8 @@
     <string name="qa_confirm_go_live">Live gehen bestätigen</string>
     <string name="qa_edit_question_hint">Fragetext bearbeiten…</string>
     <string name="qa_delete_question">Löschen</string>
+    <string name="qa_confirm_delete_prompt">Löschen?</string>
+    <string name="qa_submitter_device">Gerät: %1$s</string>
     <string name="qa_public_access">Öffentlicher Zugang</string>
     <string name="qa_public_access_description">Ermöglicht Teilnehmern, Fragen über mobile Daten zu stellen, ohne sich in Ihr WLAN einzuloggen</string>
     <string name="qa_enable_public_access">Öffentlichen Zugang aktivieren</string>

@@ -56,6 +56,13 @@ import churchpresenter.composeapp.generated.resources.block_permanently
 import churchpresenter.composeapp.generated.resources.deny
 import churchpresenter.composeapp.generated.resources.remote_api_add_to_schedule
 import churchpresenter.composeapp.generated.resources.remote_api_project
+import churchpresenter.composeapp.generated.resources.remote_api_qa_add
+import churchpresenter.composeapp.generated.resources.remote_api_qa_edit
+import churchpresenter.composeapp.generated.resources.remote_api_qa_delete
+import churchpresenter.composeapp.generated.resources.remote_api_qa_approve
+import churchpresenter.composeapp.generated.resources.remote_api_qa_deny
+import churchpresenter.composeapp.generated.resources.remote_api_qa_done
+import churchpresenter.composeapp.generated.resources.remote_api_qa_display
 import churchpresenter.composeapp.generated.resources.remote_api_request_title
 import churchpresenter.composeapp.generated.resources.remote_api_request_title_queued
 import churchpresenter.composeapp.generated.resources.remote_client_allowed_badge
@@ -83,7 +90,14 @@ enum class RemoteEventType {
     PROJECT,
     PRESENT,    // instant: select_song_section / select_picture / select_slide / select_bible_verse
     UPLOAD,     // instant: presentation or picture upload
-    CLEAR       // instant: POST /api/clear
+    CLEAR,      // instant: POST /api/clear
+    QA_ADD,
+    QA_EDIT,
+    QA_DELETE,
+    QA_APPROVE,
+    QA_DENY,
+    QA_DONE,
+    QA_DISPLAY,
 }
 
 /**
@@ -118,11 +132,25 @@ fun RemoteEventDialog(
     val actionLabel = when (event.type) {
         RemoteEventType.ADD_TO_SCHEDULE -> stringResource(Res.string.remote_api_add_to_schedule)
         RemoteEventType.PROJECT         -> stringResource(Res.string.remote_api_project)
+        RemoteEventType.QA_ADD          -> stringResource(Res.string.remote_api_qa_add)
+        RemoteEventType.QA_EDIT         -> stringResource(Res.string.remote_api_qa_edit)
+        RemoteEventType.QA_DELETE       -> stringResource(Res.string.remote_api_qa_delete)
+        RemoteEventType.QA_APPROVE      -> stringResource(Res.string.remote_api_qa_approve)
+        RemoteEventType.QA_DENY         -> stringResource(Res.string.remote_api_qa_deny)
+        RemoteEventType.QA_DONE         -> stringResource(Res.string.remote_api_qa_done)
+        RemoteEventType.QA_DISPLAY      -> stringResource(Res.string.remote_api_qa_display)
         else                            -> stringResource(Res.string.remote_api_request_title)
     }
     val icon = when (event.type) {
         RemoteEventType.ADD_TO_SCHEDULE -> "📋"
         RemoteEventType.PROJECT         -> "📡"
+        RemoteEventType.QA_ADD,
+        RemoteEventType.QA_EDIT,
+        RemoteEventType.QA_DELETE,
+        RemoteEventType.QA_APPROVE,
+        RemoteEventType.QA_DENY,
+        RemoteEventType.QA_DONE,
+        RemoteEventType.QA_DISPLAY      -> "💬"
         else                            -> "🔔"
     }
     val remaining = queueSize - 1  // items behind this one

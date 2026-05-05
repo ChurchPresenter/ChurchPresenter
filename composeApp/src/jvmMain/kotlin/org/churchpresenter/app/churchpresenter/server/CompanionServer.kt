@@ -723,6 +723,20 @@ class CompanionServer {
     )
 
     /** Emitted when a remote client calls POST /api/clear or sends WS "clear". Clears the display instantly. */
+    /** Emitted when a remote client requests a QA admin operation (add/edit/delete). */
+    data class PendingQAAdminRequest(
+        val action: String,
+        val questionId: String = "",
+        val text: String = "",
+        val clientId: String = "",
+        val decision: kotlinx.coroutines.CompletableDeferred<Boolean> = kotlinx.coroutines.CompletableDeferred()
+    )
+
+    val onQAAdminRequest = MutableSharedFlow<PendingQAAdminRequest>(
+        extraBufferCapacity = 8,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
+
     /** Emitted when the web admin triggers Go Live or clear display for Q&A. Payload: Question or null. */
     val onQADisplay = MutableSharedFlow<org.churchpresenter.app.churchpresenter.models.Question?>(
         extraBufferCapacity = 4,
@@ -2502,7 +2516,8 @@ class CompanionServer {
                     val clientIp = call.request.headers["CF-Connecting-IP"]
                         ?: call.request.headers["X-Forwarded-For"]?.split(",")?.first()?.trim()
                         ?: call.request.local.remoteAddress
-                    val question = qa.submitQuestion(request.text, request.name, clientIp, qaCooldownSeconds)
+                    val deviceId = call.request.headers[Constants.HEADER_DEVICE_ID] ?: ""
+                    val question = qa.submitQuestion(request.text, request.name, clientIp, qaCooldownSeconds, deviceId)
                     if (question != null) {
                         call.respondText(
                             json.encodeToString(org.churchpresenter.app.churchpresenter.models.QuestionDto.serializer(), question.toDto()),
@@ -2619,6 +2634,11 @@ class CompanionServer {
                         call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":"missing id"}""")
                         return@post
                     }
+                    val question = qaManager?.findQuestion(id)
+                    val clientId = call.request.headers[Constants.HEADER_DEVICE_ID] ?: ""
+                    val pending = PendingQAAdminRequest(action = "approve", questionId = id, text = question?.text ?: "", clientId = clientId)
+                    onQAAdminRequest.emit(pending)
+                    if (!pending.decision.await()) { call.respond(io.ktor.http.HttpStatusCode.Forbidden, """{"error":"denied by operator"}"""); return@post }
                     val ok = qaManager?.approveQuestion(id) ?: false
                     if (ok) call.respondText("""{"ok":true}""", ContentType.Application.Json)
                     else call.respond(io.ktor.http.HttpStatusCode.NotFound, """{"error":"question not found"}""")
@@ -2638,6 +2658,19 @@ class CompanionServer {
                         call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":"invalid request"}""")
                         return@post
                     }
+                    val clientId = call.request.headers[Constants.HEADER_DEVICE_ID] ?: ""
+                    val pending = PendingQAAdminRequest(
+                        action = "edit",
+                        questionId = id,
+                        text = request.text,
+                        clientId = clientId
+                    )
+                    onQAAdminRequest.emit(pending)
+                    val allowed = pending.decision.await()
+                    if (!allowed) {
+                        call.respond(io.ktor.http.HttpStatusCode.Forbidden, """{"error":"denied by operator"}""")
+                        return@post
+                    }
                     val ok = qaManager?.editQuestion(id, request.text) ?: false
                     if (ok) call.respondText("""{"ok":true}""", ContentType.Application.Json)
                     else call.respond(io.ktor.http.HttpStatusCode.NotFound, """{"error":"question not found"}""")
@@ -2650,6 +2683,11 @@ class CompanionServer {
                         call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":"missing id"}""")
                         return@post
                     }
+                    val question = qaManager?.findQuestion(id)
+                    val clientId = call.request.headers[Constants.HEADER_DEVICE_ID] ?: ""
+                    val pending = PendingQAAdminRequest(action = "deny", questionId = id, text = question?.text ?: "", clientId = clientId)
+                    onQAAdminRequest.emit(pending)
+                    if (!pending.decision.await()) { call.respond(io.ktor.http.HttpStatusCode.Forbidden, """{"error":"denied by operator"}"""); return@post }
                     val ok = qaManager?.denyQuestion(id) ?: false
                     if (ok) {
                         if (qaManager?.displayedQuestion == null) scope.launch { onQADisplay.emit(null) }
@@ -2665,6 +2703,11 @@ class CompanionServer {
                         call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":"missing id"}""")
                         return@post
                     }
+                    val question = qaManager?.findQuestion(id)
+                    val clientId = call.request.headers[Constants.HEADER_DEVICE_ID] ?: ""
+                    val pending = PendingQAAdminRequest(action = "done", questionId = id, text = question?.text ?: "", clientId = clientId)
+                    onQAAdminRequest.emit(pending)
+                    if (!pending.decision.await()) { call.respond(io.ktor.http.HttpStatusCode.Forbidden, """{"error":"denied by operator"}"""); return@post }
                     val ok = qaManager?.markDone(id) ?: false
                     if (ok) {
                         if (qaManager?.displayedQuestion == null) scope.launch { onQADisplay.emit(null) }
@@ -2680,6 +2723,11 @@ class CompanionServer {
                         call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":"missing id"}""")
                         return@post
                     }
+                    val question = qaManager?.findQuestion(id)
+                    val clientId = call.request.headers[Constants.HEADER_DEVICE_ID] ?: ""
+                    val pending = PendingQAAdminRequest(action = "display", questionId = id, text = question?.text ?: "", clientId = clientId)
+                    onQAAdminRequest.emit(pending)
+                    if (!pending.decision.await()) { call.respond(io.ktor.http.HttpStatusCode.Forbidden, """{"error":"denied by operator"}"""); return@post }
                     val qa = qaManager
                     val ok = qa?.displayQuestion(id) ?: false
                     if (ok) {
@@ -2696,6 +2744,20 @@ class CompanionServer {
                         call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":"missing id"}""")
                         return@delete
                     }
+                    val question = qaManager?.findQuestion(id)
+                    val clientId = call.request.headers[Constants.HEADER_DEVICE_ID] ?: ""
+                    val pending = PendingQAAdminRequest(
+                        action = "delete",
+                        questionId = id,
+                        text = question?.text ?: "",
+                        clientId = clientId
+                    )
+                    onQAAdminRequest.emit(pending)
+                    val allowed = pending.decision.await()
+                    if (!allowed) {
+                        call.respond(io.ktor.http.HttpStatusCode.Forbidden, """{"error":"denied by operator"}""")
+                        return@delete
+                    }
                     val ok = qaManager?.deleteQuestion(id) ?: false
                     if (ok) call.respondText("""{"ok":true}""", ContentType.Application.Json)
                     else call.respond(io.ktor.http.HttpStatusCode.NotFound, """{"error":"question not found"}""")
@@ -2709,6 +2771,18 @@ class CompanionServer {
                         json.decodeFromString(SubmitQuestionRequest.serializer(), body)
                     } catch (_: Exception) {
                         call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":"invalid request"}""")
+                        return@post
+                    }
+                    val clientId = call.request.headers[Constants.HEADER_DEVICE_ID] ?: ""
+                    val pending = PendingQAAdminRequest(
+                        action = "add",
+                        text = request.text,
+                        clientId = clientId
+                    )
+                    onQAAdminRequest.emit(pending)
+                    val allowed = pending.decision.await()
+                    if (!allowed) {
+                        call.respond(io.ktor.http.HttpStatusCode.Forbidden, """{"error":"denied by operator"}""")
                         return@post
                     }
                     val question = qaManager?.addQuestion(request.text)
@@ -3352,6 +3426,7 @@ async function action(act,id){
   }catch(e){}
 }
 async function del(id){
+  if(!confirm('Delete this question? This cannot be undone.'))return;
   try{const r=await fetch('/api/qa/questions/'+id,{method:'DELETE',headers});if(r.status===401){lockOut();return}load()}catch(e){}
 }
 function editQ(id){

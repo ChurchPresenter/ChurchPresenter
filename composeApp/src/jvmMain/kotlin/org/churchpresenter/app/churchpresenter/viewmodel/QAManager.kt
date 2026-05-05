@@ -67,7 +67,7 @@ class QAManager {
 
     // ── Actions ──────────────────────────────────────────────────────
 
-    fun submitQuestion(text: String, name: String = "", clientIp: String = "", cooldownSeconds: Int = 30): Question? {
+    fun submitQuestion(text: String, name: String = "", clientIp: String = "", cooldownSeconds: Int = 30, deviceId: String = ""): Question? {
         if (!_sessionActive.value || text.isBlank()) return null
 
         // Cooldown check
@@ -82,6 +82,7 @@ class QAManager {
             id = UUID.randomUUID().toString(),
             text = text.trim(),
             submitterName = name.trim(),
+            submitterDeviceId = deviceId,
             timestamp = System.currentTimeMillis()
         )
         _questions.add(question)
@@ -301,6 +302,7 @@ private fun QuestionDto.toQuestion() = Question(
     id = id,
     text = text,
     submitterName = submitterName,
+    submitterDeviceId = submitterDeviceId,
     timestamp = timestamp,
     status = try { QuestionStatus.valueOf(status) } catch (_: Exception) { QuestionStatus.PENDING },
     voteCount = voteCount,

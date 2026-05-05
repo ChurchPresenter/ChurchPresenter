@@ -140,6 +140,8 @@ import churchpresenter.composeapp.generated.resources.qa_pos_bl
 import churchpresenter.composeapp.generated.resources.qa_pos_bc
 import churchpresenter.composeapp.generated.resources.qa_pos_br
 import churchpresenter.composeapp.generated.resources.save
+import churchpresenter.composeapp.generated.resources.qa_confirm_delete_prompt
+import churchpresenter.composeapp.generated.resources.qa_submitter_device
 import churchpresenter.composeapp.generated.resources.tooltip_clear_display
 import churchpresenter.composeapp.generated.resources.tooltip_edit
 import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
@@ -955,6 +957,7 @@ private fun QuestionRow(
     val timeFormat = remember { SimpleDateFormat("HH:mm", Locale.getDefault()) }
     var editing by remember { mutableStateOf(false) }
     var confirmGoLive by remember { mutableStateOf(false) }
+    var confirmDelete by remember { mutableStateOf(false) }
     var editText by remember(question.text) { mutableStateOf(question.text) }
 
     // Strings resolved in composable scope for use in icon contentDescriptions
@@ -969,6 +972,7 @@ private fun QuestionRow(
     val strBackToIncoming = stringResource(Res.string.qa_back_to_incoming)
     val strConfirmGoLive = stringResource(Res.string.qa_confirm_go_live)
     val strDelete = stringResource(Res.string.qa_delete_question)
+    val strConfirmDelete = stringResource(Res.string.qa_confirm_delete_prompt)
 
     Column(
         modifier = Modifier
@@ -1011,16 +1015,6 @@ private fun QuestionRow(
                         }
                     }
                 }
-                if (question.submitterName.isNotBlank()) {
-                    Text(
-                        text = question.submitterName,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(end = 4.dp),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
                 if (statusLabel != null) {
                     Text(
                         text = statusLabel,
@@ -1029,14 +1023,60 @@ private fun QuestionRow(
                         modifier = Modifier.padding(end = 8.dp)
                     )
                 }
-                Text(
-                    text = question.text,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.weight(1f).padding(horizontal = 4.dp),
-                    maxLines = 3,
-                    overflow = TextOverflow.Ellipsis
-                )
+                val hasSubmitterInfo = question.submitterName.isNotBlank() || question.submitterDeviceId.isNotBlank()
+                TooltipArea(
+                    tooltip = {
+                        if (hasSubmitterInfo) {
+                            Surface(
+                                color = MaterialTheme.colorScheme.inverseSurface,
+                                shape = MaterialTheme.shapes.extraSmall,
+                                tonalElevation = 4.dp
+                            ) {
+                                Column(modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) {
+                                    if (question.submitterName.isNotBlank()) {
+                                        Text(
+                                            text = question.submitterName,
+                                            color = MaterialTheme.colorScheme.inverseOnSurface,
+                                            style = MaterialTheme.typography.bodySmall
+                                        )
+                                    }
+                                    if (question.submitterDeviceId.isNotBlank()) {
+                                        Text(
+                                            text = stringResource(Res.string.qa_submitter_device, question.submitterDeviceId),
+                                            color = MaterialTheme.colorScheme.inverseOnSurface,
+                                            style = MaterialTheme.typography.bodySmall
+                                        )
+                                    }
+                                }
+                            }
+                        } else {
+                            Box {}
+                        }
+                    },
+                    tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomStart, offset = DpOffset(0.dp, 4.dp)),
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        if (question.submitterName.isNotBlank()) {
+                            Text(
+                                text = question.submitterName,
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(end = 4.dp),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
+                        Text(
+                            text = question.text,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.weight(1f).padding(horizontal = 4.dp),
+                            maxLines = 3,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                }
             } else {
                 Spacer(Modifier.width(12.dp))
             }
@@ -1133,8 +1173,18 @@ private fun QuestionRow(
                         }
                     }
 
-                    QAIconButton(tooltip = strDelete, onClick = onDelete) {
-                        Icon(Icons.Default.Delete, strDelete, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                    if (confirmDelete) {
+                        Text(strConfirmDelete, style = MaterialTheme.typography.labelSmall, color = Color(0xFFE53935), modifier = Modifier.padding(end = 4.dp))
+                        QAIconButton(tooltip = strDelete, onClick = { confirmDelete = false; onDelete() }) {
+                            Icon(Icons.Default.Delete, strDelete, tint = Color(0xFFE53935))
+                        }
+                        QAIconButton(tooltip = strCancel, onClick = { confirmDelete = false }) {
+                            Icon(Icons.Default.Close, strCancel, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+                    } else {
+                        QAIconButton(tooltip = strDelete, onClick = { confirmDelete = true }) {
+                            Icon(Icons.Default.Delete, strDelete, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
                     }
                 }
             }
