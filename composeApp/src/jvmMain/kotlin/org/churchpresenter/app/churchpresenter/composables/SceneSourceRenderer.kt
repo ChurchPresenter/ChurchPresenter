@@ -3,7 +3,11 @@ package org.churchpresenter.app.churchpresenter.composables
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.ui.draw.clipToBounds
@@ -102,6 +106,7 @@ fun SceneSourceRenderer(
         is SceneSource.QRCodeSource -> QRCodeSourceContent(source, modifier)
         is SceneSource.CameraSource -> CameraSourceContent(source, modifier, isPresenter)
         is SceneSource.ScreenCaptureSource -> ScreenCaptureSourceContent(source, modifier)
+        is SceneSource.BibleSource -> BibleSourceContent(source, modifier)
     }
 }
 
@@ -848,5 +853,67 @@ private fun findMacWindowBounds(title: String): Rectangle? {
             Rectangle(parts[0], parts[1], parts[2], parts[3])
         } else null
     } catch (_: Exception) { null }
+}
+
+@Composable
+private fun BibleSourceContent(source: SceneSource.BibleSource, modifier: Modifier) {
+    val bgColor = if (source.backgroundColor.equals("#00000000", ignoreCase = true))
+        Color.Transparent
+    else
+        parseHexColor(source.backgroundColor)
+    val textColor = parseHexColor(source.fontColor)
+    val refColor = parseHexColor(source.referenceFontColor)
+    val fontFamily = remember(source.fontFamily) { systemFontFamilyOrDefault(source.fontFamily) }
+    val align = when (source.horizontalAlignment) {
+        "left" -> TextAlign.Left
+        "right" -> TextAlign.Right
+        else -> TextAlign.Center
+    }
+    val lineHeightMultiplier = source.lineSpacing / 100f
+    val verticalAlign = when (source.verticalAlignment) {
+        "top" -> Alignment.TopStart
+        "bottom" -> Alignment.BottomStart
+        else -> Alignment.Center
+    }
+
+    Box(
+        modifier = modifier.fillMaxSize().background(bgColor).clipToBounds(),
+        contentAlignment = verticalAlign
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth().padding(8.dp),
+            horizontalAlignment = when (source.horizontalAlignment) {
+                "left" -> Alignment.Start
+                "right" -> Alignment.End
+                else -> Alignment.CenterHorizontally
+            }
+        ) {
+            Text(
+                text = source.verseText.ifEmpty { "Select a verse..." },
+                color = if (source.verseText.isEmpty()) Color.Gray else textColor,
+                fontSize = source.fontSize.sp,
+                fontFamily = fontFamily,
+                fontWeight = if (source.bold) FontWeight.Bold else FontWeight.Normal,
+                fontStyle = if (source.italic) FontStyle.Italic else FontStyle.Normal,
+                textAlign = align,
+                lineHeight = (source.fontSize * lineHeightMultiplier).sp,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.fillMaxWidth()
+            )
+            if (source.referenceText.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = source.referenceText,
+                    color = refColor,
+                    fontSize = source.referenceFontSize.sp,
+                    fontFamily = fontFamily,
+                    fontWeight = if (source.referenceBold) FontWeight.Bold else FontWeight.Normal,
+                    fontStyle = if (source.referenceItalic) FontStyle.Italic else FontStyle.Normal,
+                    textAlign = align,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        }
+    }
 }
 

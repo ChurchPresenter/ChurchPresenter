@@ -188,6 +188,30 @@ sealed class SceneSource {
         val windowTitle: String = "",
         val windowId: String = ""
     ) : SceneSource()
+
+    @Serializable
+    data class BibleSource(
+        override val id: String,
+        override val name: String,
+        override val transform: SourceTransform = SourceTransform(),
+        override val visible: Boolean = true,
+        override val locked: Boolean = false,
+        val verseText: String = "",
+        val referenceText: String = "",
+        val fontFamily: String = "Arial",
+        val fontSize: Int = 48,
+        val fontColor: String = "#FFFFFF",
+        val referenceFontSize: Int = 32,
+        val referenceFontColor: String = "#FFFFFF",
+        val backgroundColor: String = "#00000000",
+        val bold: Boolean = false,
+        val italic: Boolean = false,
+        val referenceBold: Boolean = false,
+        val referenceItalic: Boolean = false,
+        val horizontalAlignment: String = "center",
+        val verticalAlignment: String = "center",
+        val lineSpacing: Int = 100
+    ) : SceneSource()
 }
 
 @Serializable
