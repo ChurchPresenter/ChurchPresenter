@@ -40,8 +40,10 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material.icons.filled.Tv
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -49,8 +51,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Tab
-import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -59,6 +59,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -202,22 +204,54 @@ fun QATab(
     } else ""
 
     var selectedFilter by remember { mutableStateOf(0) }
+    var sortByVotes by remember { mutableStateOf(false) }
+    var showClearConfirm by remember { mutableStateOf(false) }
 
-    val incomingCount = questions.count { it.status == QuestionStatus.PENDING || it.status == QuestionStatus.APPROVED }
-    val finishedCount = questions.count { it.status == QuestionStatus.DONE || it.status == QuestionStatus.DENIED }
+    val pendingCount = questions.count { it.status == QuestionStatus.PENDING }
+    val approvedCount = questions.count { it.status == QuestionStatus.APPROVED }
+    val incomingApprovedCount = questions.count { it.status == QuestionStatus.PENDING || it.status == QuestionStatus.APPROVED }
+    val doneCount = questions.count { it.status == QuestionStatus.DONE }
+    val deniedCount = questions.count { it.status == QuestionStatus.DENIED }
     val historyCount = qaManager.history.size
+    val allCount = questions.size
 
-    val filteredQuestions = remember(questions.toList(), selectedFilter, qaManager.history.toList()) {
+    // Filter options: 0=All, 1=Incoming(pending only), 2=Approved, 3=Incoming+Approved, 4=Done, 5=Denied
+    // History is separate (selectedFilter = 6)
+    val filterLabels = listOf("All", "Incoming", "Approved", "Incoming + Approved", "Done", "Denied")
+    val filterCounts = listOf(allCount, pendingCount, approvedCount, incomingApprovedCount, doneCount, deniedCount)
+    var filterDropdownExpanded by remember { mutableStateOf(false) }
+
+    val filteredQuestions = remember(questions.toList(), selectedFilter, qaManager.history.toList(), sortByVotes) {
         when (selectedFilter) {
-            0 -> questions.filter { it.status == QuestionStatus.PENDING || it.status == QuestionStatus.APPROVED }
-                .sortedBy { it.timestamp }
-            1 -> questions.filter { it.status == QuestionStatus.DONE || it.status == QuestionStatus.DENIED }
-            2 -> qaManager.history
+            0 -> {
+                val all = questions.toList()
+                if (sortByVotes) all.sortedByDescending { it.voteCount }
+                else all.sortedBy { it.timestamp }
+            }
+            1 -> {
+                val pending = questions.filter { it.status == QuestionStatus.PENDING }
+                if (sortByVotes) pending.sortedByDescending { it.voteCount }
+                else pending.sortedBy { it.timestamp }
+            }
+            2 -> {
+                val approved = questions.filter { it.status == QuestionStatus.APPROVED }
+                if (sortByVotes) approved.sortedByDescending { it.voteCount }
+                else approved.sortedBy { it.timestamp }
+            }
+            3 -> {
+                val incomingApproved = questions.filter { it.status == QuestionStatus.PENDING || it.status == QuestionStatus.APPROVED }
+                if (sortByVotes) incomingApproved.sortedByDescending { it.voteCount }
+                else incomingApproved.sortedBy { it.timestamp }
+            }
+            4 -> questions.filter { it.status == QuestionStatus.DONE }
+            5 -> questions.filter { it.status == QuestionStatus.DENIED }
+            6 -> qaManager.history
             else -> questions
         }
     }
 
     val qaSettings = appSettings.qaSettings
+    val clipboardManager = LocalClipboardManager.current
     val availableFonts = remember {
         GraphicsEnvironment.getLocalGraphicsEnvironment().availableFontFamilyNames.toList()
     }
@@ -275,21 +309,16 @@ fun QATab(
 
                 Spacer(Modifier.weight(1f))
 
-                StatBadge(stringResource(Res.string.qa_incoming), incomingCount, Color(0xFFFFA726))
+                StatBadge(stringResource(Res.string.qa_incoming), pendingCount, Color(0xFFFFA726))
                 Spacer(Modifier.width(8.dp))
-                StatBadge(stringResource(Res.string.qa_finished), finishedCount, Color(0xFF42A5F5))
+                StatBadge(stringResource(Res.string.qa_finished), doneCount + deniedCount, Color(0xFF42A5F5))
 
                 Spacer(Modifier.width(16.dp))
 
                 // Clear all questions
                 if (questions.isNotEmpty()) {
                     OutlinedButton(
-                        onClick = {
-                            qaManager.clearAll()
-                            presenterManager.setDisplayedQuestion(null)
-                            presenterManager.setShowQRCodeOnDisplay(false)
-                            presenting(Presenting.NONE)
-                        },
+                        onClick = { showClearConfirm = true },
                         colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFFE53935)),
                     ) {
                         Icon(Icons.Default.Delete, contentDescription = null, modifier = Modifier.size(16.dp))
@@ -299,23 +328,67 @@ fun QATab(
                 }
             }
 
-            // Filter tabs
-            PrimaryTabRow(selectedTabIndex = selectedFilter) {
-                Tab(
-                    selected = selectedFilter == 0,
-                    onClick = { selectedFilter = 0 },
-                    text = { Text(stringResource(Res.string.qa_incoming_tab, incomingCount)) }
-                )
-                Tab(
-                    selected = selectedFilter == 1,
-                    onClick = { selectedFilter = 1 },
-                    text = { Text(stringResource(Res.string.qa_finished_tab, finishedCount)) }
-                )
-                Tab(
-                    selected = selectedFilter == 2,
-                    onClick = { selectedFilter = 2 },
-                    text = { Text(stringResource(Res.string.qa_history_tab, historyCount)) }
-                )
+            // Filter: dropdown for question views + History tab
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                // Dropdown filter button
+                Box {
+                    OutlinedButton(
+                        onClick = { filterDropdownExpanded = true },
+                        modifier = Modifier.height(32.dp),
+                        contentPadding = ButtonDefaults.TextButtonContentPadding,
+                        colors = if (selectedFilter < 6) ButtonDefaults.outlinedButtonColors(
+                            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
+                        ) else ButtonDefaults.outlinedButtonColors()
+                    ) {
+                        Text(
+                            if (selectedFilter < 6) filterLabels[selectedFilter] else "Questions",
+                            style = MaterialTheme.typography.labelMedium
+                        )
+                        Text(" \u25BE", style = MaterialTheme.typography.labelSmall)
+                    }
+                    androidx.compose.material3.DropdownMenu(
+                        expanded = filterDropdownExpanded,
+                        onDismissRequest = { filterDropdownExpanded = false }
+                    ) {
+                        filterLabels.forEachIndexed { index, label ->
+                            val count = filterCounts.getOrElse(index) { 0 }
+                            androidx.compose.material3.DropdownMenuItem(
+                                text = { Text("$label ($count)") },
+                                onClick = { selectedFilter = index; filterDropdownExpanded = false }
+                            )
+                        }
+                    }
+                }
+
+                // Sort toggle
+                OutlinedButton(
+                    onClick = { sortByVotes = !sortByVotes },
+                    modifier = Modifier.height(32.dp),
+                    contentPadding = ButtonDefaults.TextButtonContentPadding
+                ) {
+                    Text(
+                        if (sortByVotes) "Sort: Votes" else "Sort: Time",
+                        style = MaterialTheme.typography.labelMedium
+                    )
+                }
+
+                Spacer(Modifier.weight(1f))
+
+                // History button
+                OutlinedButton(
+                    onClick = { selectedFilter = 6 },
+                    modifier = Modifier.height(32.dp),
+                    contentPadding = ButtonDefaults.TextButtonContentPadding,
+                    colors = if (selectedFilter == 6) ButtonDefaults.outlinedButtonColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
+                    ) else ButtonDefaults.outlinedButtonColors()
+                ) {
+                    Text("History ($historyCount)", style = MaterialTheme.typography.labelMedium)
+                }
             }
 
             // Clear display bar
@@ -353,8 +426,12 @@ fun QATab(
                     Text(
                         when (selectedFilter) {
                             0 -> if (sessionActive) stringResource(Res.string.qa_waiting) else stringResource(Res.string.qa_start_session_hint)
-                            1 -> stringResource(Res.string.qa_no_finished)
-                            2 -> stringResource(Res.string.qa_no_history)
+                            1 -> if (sessionActive) stringResource(Res.string.qa_waiting) else stringResource(Res.string.qa_start_session_hint)
+                            2 -> "No approved questions yet"
+                            3 -> if (sessionActive) stringResource(Res.string.qa_waiting) else stringResource(Res.string.qa_start_session_hint)
+                            4 -> "No done questions"
+                            5 -> "No denied questions"
+                            6 -> stringResource(Res.string.qa_no_history)
                             else -> ""
                         },
                         style = MaterialTheme.typography.bodyLarge,
@@ -363,7 +440,7 @@ fun QATab(
                 }
             } else {
                 // History tab actions bar
-                if (selectedFilter == 2 && filteredQuestions.isNotEmpty()) {
+                if (selectedFilter == 6 && filteredQuestions.isNotEmpty()) {
                     Row(
                         modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -418,7 +495,7 @@ fun QATab(
                         QuestionRow(
                             question = question,
                             isDisplayed = displayedQuestion?.id == question.id,
-                            isHistory = selectedFilter == 2,
+                            isHistory = selectedFilter == 6,
                             onApprove = { qaManager.approveQuestion(question.id) },
                             onDeny = { qaManager.denyQuestion(question.id) },
                             onMarkDone = {
@@ -456,6 +533,47 @@ fun QATab(
             }
         }
 
+        // ── Clear All Confirmation Dialog ─────────────────────────────
+        if (showClearConfirm) {
+            AlertDialog(
+                onDismissRequest = { showClearConfirm = false },
+                title = { Text("Clear All Questions") },
+                text = { Text("Are you sure you want to clear all questions? This cannot be undone.") },
+                confirmButton = {
+                    TextButton(onClick = {
+                        qaManager.clearAll()
+                        presenterManager.setDisplayedQuestion(null)
+                        presenterManager.setShowQRCodeOnDisplay(false)
+                        presenting(Presenting.NONE)
+                        showClearConfirm = false
+                    }) { Text("Clear", color = Color(0xFFE53935)) }
+                },
+                dismissButton = {
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        TextButton(onClick = {
+                            val chooser = javax.swing.JFileChooser().apply {
+                                dialogTitle = strExportTitle
+                                selectedFile = java.io.File("questions.txt")
+                            }
+                            if (chooser.showSaveDialog(null) == javax.swing.JFileChooser.APPROVE_OPTION) {
+                                chooser.selectedFile.writeText(
+                                    questions.joinToString("\n") { q ->
+                                        "[${java.text.SimpleDateFormat("HH:mm", java.util.Locale.getDefault()).format(java.util.Date(q.timestamp))}] [${q.status}] ${q.text}"
+                                    }
+                                )
+                            }
+                            qaManager.clearAll()
+                            presenterManager.setDisplayedQuestion(null)
+                            presenterManager.setShowQRCodeOnDisplay(false)
+                            presenting(Presenting.NONE)
+                            showClearConfirm = false
+                        }) { Text("Export & Clear") }
+                        TextButton(onClick = { showClearConfirm = false }) { Text("Cancel") }
+                    }
+                }
+            )
+        }
+
         // ── Right Panel: QR Codes, Styling & Settings ────────────────
         Column(
             modifier = Modifier
@@ -475,6 +593,13 @@ fun QATab(
                 }
                 SelectionContainer {
                     Text(submissionUrl, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 4.dp))
+                }
+                OutlinedButton(
+                    onClick = { clipboardManager.setText(AnnotatedString(submissionUrl)) },
+                    modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+                    contentPadding = ButtonDefaults.TextButtonContentPadding
+                ) {
+                    Text("Copy URL", fontSize = 11.sp)
                 }
 
                 Spacer(Modifier.height(8.dp))
@@ -649,6 +774,31 @@ fun QATab(
                 SelectionContainer {
                     Text(adminDisplayUrl, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 4.dp))
                 }
+                OutlinedButton(
+                    onClick = { clipboardManager.setText(AnnotatedString(adminQrUrl.ifEmpty { adminDisplayUrl })) },
+                    modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+                    contentPadding = ButtonDefaults.TextButtonContentPadding
+                ) {
+                    Text("Copy URL", fontSize = 11.sp)
+                }
+            }
+
+            // ── Voting Toggle ─────────────────────────────────────
+            Spacer(Modifier.height(16.dp))
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+            Spacer(Modifier.height(12.dp))
+
+            Button(
+                onClick = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(votingEnabled = !s.qaSettings.votingEnabled)) } },
+                modifier = Modifier.fillMaxWidth(),
+                colors = if (qaSettings.votingEnabled) ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF43A047),
+                    contentColor = Color.White
+                ) else ButtonDefaults.outlinedButtonColors(
+                    contentColor = MaterialTheme.colorScheme.onSurface
+                )
+            ) {
+                Text(if (qaSettings.votingEnabled) "Voting Enabled" else "Voting Disabled")
             }
 
             Spacer(Modifier.height(16.dp))
@@ -837,6 +987,30 @@ private fun QuestionRow(
             )
 
             if (!editing) {
+                if (question.upvotes > 0 || question.downvotes > 0) {
+                    Row(modifier = Modifier.padding(end = 6.dp), horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+                        if (question.upvotes > 0) {
+                            Surface(shape = RoundedCornerShape(4.dp), color = Color(0xFFE3F2FD)) {
+                                Text(
+                                    text = "\u25B2 ${question.upvotes}",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = Color(0xFF1565C0),
+                                    modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp)
+                                )
+                            }
+                        }
+                        if (question.downvotes > 0) {
+                            Surface(shape = RoundedCornerShape(4.dp), color = Color(0xFFFFEBEE)) {
+                                Text(
+                                    text = "\u25BC ${question.downvotes}",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = Color(0xFFC62828),
+                                    modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp)
+                                )
+                            }
+                        }
+                    }
+                }
                 if (question.submitterName.isNotBlank()) {
                     Text(
                         text = question.submitterName,
@@ -940,6 +1114,9 @@ private fun QuestionRow(
                             }
                         }
                         QuestionStatus.DENIED -> {
+                            QAIconButton(tooltip = strApprove, onClick = onApprove) {
+                                Icon(Icons.Default.Check, strApprove, tint = Color(0xFF43A047))
+                            }
                             if (confirmGoLive) {
                                 Text(stringResource(Res.string.qa_confirm_go_live_prompt), style = MaterialTheme.typography.labelSmall, color = Color(0xFFFFA726), modifier = Modifier.padding(end = 4.dp))
                                 QAIconButton(tooltip = strConfirmGoLive, onClick = { confirmGoLive = false; onApprove(); onDisplay() }) {
@@ -1002,7 +1179,7 @@ private fun QAIconButton(
                 )
             }
         },
-        tooltipPlacement = TooltipPlacement.CursorPoint(offset = DpOffset(0.dp, 16.dp))
+        tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
     ) {
         IconButton(onClick = onClick, enabled = enabled, modifier = modifier) {
             content()

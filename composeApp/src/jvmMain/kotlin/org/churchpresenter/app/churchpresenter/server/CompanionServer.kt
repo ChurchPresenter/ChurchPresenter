@@ -50,6 +50,7 @@ import org.churchpresenter.app.churchpresenter.data.Bible
 import org.churchpresenter.app.churchpresenter.data.Songs
 import org.churchpresenter.app.churchpresenter.models.QuestionStatus
 import org.churchpresenter.app.churchpresenter.models.SubmitQuestionRequest
+import org.churchpresenter.app.churchpresenter.models.VoteRequest
 import org.churchpresenter.app.churchpresenter.models.toDto
 import org.churchpresenter.app.churchpresenter.viewmodel.QAManager
 import org.churchpresenter.app.churchpresenter.BuildConfig
@@ -565,6 +566,7 @@ class CompanionServer {
     var qaManager: QAManager? = null
     @Volatile var qaAdminPassword: String = ""
     @Volatile var qaCooldownSeconds: Int = 30
+    @Volatile var qaVotingEnabled: Boolean = false
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
@@ -2458,7 +2460,7 @@ class CompanionServer {
                 get("/api/qa/status") {
                     val qa = qaManager
                     call.respondText(
-                        """{"sessionActive":${qa?.sessionActive ?: false},"cooldownSeconds":$qaCooldownSeconds,"displayedQuestionId":"${qa?.displayedQuestion?.id ?: ""}"}""",
+                        """{"sessionActive":${qa?.sessionActive ?: false},"cooldownSeconds":$qaCooldownSeconds,"displayedQuestionId":"${qa?.displayedQuestion?.id ?: ""}","votingEnabled":$qaVotingEnabled}""",
                         ContentType.Application.Json
                     )
                 }
@@ -2481,7 +2483,8 @@ class CompanionServer {
                         call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":"question text is required"}""")
                         return@post
                     }
-                    val clientIp = call.request.headers["X-Forwarded-For"]?.split(",")?.first()?.trim()
+                    val clientIp = call.request.headers["CF-Connecting-IP"]
+                        ?: call.request.headers["X-Forwarded-For"]?.split(",")?.first()?.trim()
                         ?: call.request.local.remoteAddress
                     val question = qa.submitQuestion(request.text, request.name, clientIp, qaCooldownSeconds)
                     if (question != null) {
@@ -2495,6 +2498,76 @@ class CompanionServer {
                         } else {
                             call.respond(io.ktor.http.HttpStatusCode.Forbidden, """{"error":"submission failed"}""")
                         }
+                    }
+                }
+
+                // Public: voting page
+                get("/qa/vote") {
+                    call.respondText(qaVotingPageHtml(), ContentType.Text.Html)
+                }
+
+                // Public: list approved questions (for voting)
+                get("/api/qa/approved") {
+                    if (!qaVotingEnabled) {
+                        call.respond(io.ktor.http.HttpStatusCode.Forbidden, """{"error":"Voting is not enabled"}""")
+                        return@get
+                    }
+                    val qa = qaManager
+                    if (qa == null || !qa.sessionActive) {
+                        call.respondText("[]", ContentType.Application.Json)
+                        return@get
+                    }
+                    val approved = qa.getApprovedQuestions()
+                    val clientIp = call.request.headers["CF-Connecting-IP"]
+                        ?: call.request.headers["X-Forwarded-For"]?.split(",")?.first()?.trim()
+                        ?: call.request.local.remoteAddress
+                    val dtos = approved.map {
+                        val dto = it.toDto()
+                        val textEsc = dto.text.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n").replace("\r", "\\r")
+                        val nameEsc = dto.submitterName.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n").replace("\r", "\\r")
+                        val voteDir = qa.getVoteDirection(it.id, clientIp)
+                        val votedStr = if (voteDir != null) "\"$voteDir\"" else "null"
+                        """{"id":"${dto.id}","text":"$textEsc","voteCount":${dto.voteCount},"voted":$votedStr}"""
+                    }
+                    call.respondText("[${dtos.joinToString(",")}]", ContentType.Application.Json)
+                }
+
+                // Public: vote for a question
+                post("/api/qa/vote") {
+                    if (!qaVotingEnabled) {
+                        call.respond(io.ktor.http.HttpStatusCode.Forbidden, """{"error":"Voting is not enabled"}""")
+                        return@post
+                    }
+                    val qa = qaManager
+                    if (qa == null || !qa.sessionActive) {
+                        call.respond(io.ktor.http.HttpStatusCode.Forbidden, """{"error":"Q&A session is not active"}""")
+                        return@post
+                    }
+                    val body = call.receiveText()
+                    val request = try {
+                        json.decodeFromString(VoteRequest.serializer(), body)
+                    } catch (_: Exception) {
+                        call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":"invalid request"}""")
+                        return@post
+                    }
+                    val question = qa.findQuestion(request.questionId)
+                    if (question == null) {
+                        call.respond(io.ktor.http.HttpStatusCode.NotFound, """{"error":"question not found"}""")
+                        return@post
+                    }
+                    if (question.status != QuestionStatus.APPROVED) {
+                        call.respond(io.ktor.http.HttpStatusCode.Forbidden, """{"error":"question is not available for voting"}""")
+                        return@post
+                    }
+                    val clientIp = call.request.headers["CF-Connecting-IP"]
+                        ?: call.request.headers["X-Forwarded-For"]?.split(",")?.first()?.trim()
+                        ?: call.request.local.remoteAddress
+                    val direction = if (request.direction == "down") "down" else "up"
+                    if (qa.voteForQuestion(request.questionId, clientIp, direction)) {
+                        val updated = qa.findQuestion(request.questionId)
+                        call.respondText("""{"ok":true,"voteCount":${updated?.voteCount ?: 0}}""", ContentType.Application.Json)
+                    } else {
+                        call.respond(io.ktor.http.HttpStatusCode.Conflict, """{"error":"already voted in this direction"}""")
                     }
                 }
 
@@ -2874,10 +2947,11 @@ button:disabled{background:#bbb;cursor:not-allowed}
 <button id="btn" onclick="submit()">Submit Question</button>
 </div>
 <div id="msg" class="msg" style="display:none"></div>
+<a id="vote-link" href="/qa/vote" style="display:none;text-align:center;margin-top:20px;color:#1e88e5;font-size:13px;text-decoration:none;opacity:0.8">Vote on questions</a>
 </div>
 <script>
 const q=document.getElementById('q'),btn=document.getElementById('btn'),msg=document.getElementById('msg'),cc=document.getElementById('charcount'),nameField=document.getElementById('name');
-let submitted=false,cooldown=30;
+let submitted=false,cooldown=30,votingOn=false;
 const submitTime=parseInt(sessionStorage.getItem('qa_submit_time')||'0');
 if(submitTime>0){
   const elapsed=Math.floor((Date.now()-submitTime)/1000);
@@ -2903,7 +2977,7 @@ function showThanks(){
   document.getElementById('form-area').style.display='none';
   document.getElementById('page-title').style.display='none';
   document.getElementById('page-sub').style.display='none';
-  msg.innerHTML='<strong>Thanks for submitting your question!</strong><br><span style="font-size:13px;opacity:0.8">Your question will be reviewed before being displayed.</span>';
+  msg.innerHTML='<strong>Thanks for submitting your question!</strong>';
   msg.className='msg ok';msg.style.display='block';
   submitted=true;
 }
@@ -2912,6 +2986,8 @@ function show(t,c){msg.textContent=t;msg.className='msg '+c;msg.style.display='b
 async function checkStatus(){
   try{const r=await fetch('/api/qa/status');const d=await r.json();
     if(d.cooldownSeconds)cooldown=d.cooldownSeconds;
+    votingOn=!!d.votingEnabled;
+    const vl=document.getElementById('vote-link');if(vl)vl.style.display=votingOn?'block':'none';
     if(submitted){
       const st=parseInt(sessionStorage.getItem('qa_submit_time')||'0');
       if(st>0&&Math.floor((Date.now()-st)/1000)>=cooldown){
@@ -2927,6 +3003,125 @@ async function checkStatus(){
   }catch(e){}
 }
 checkStatus();setInterval(checkStatus,5000);
+</script>
+</body>
+</html>
+""".trimIndent()
+
+    private fun qaVotingPageHtml(): String = """
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vote on Questions</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f5f5f5;min-height:100vh;padding:16px}
+.container{max-width:600px;margin:0 auto}
+h1{font-size:24px;color:#1e1e2e;text-align:center;margin-bottom:4px}
+p.sub{color:#666;text-align:center;margin-bottom:24px;font-size:14px}
+.question-card{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:20px;margin-bottom:12px;display:flex;align-items:flex-start;gap:16px}
+.vote-btns{display:flex;flex-direction:column;align-items:center;gap:4px;min-width:40px}
+.vote-btn{display:flex;align-items:center;justify-content:center;border:none;background:none;cursor:pointer;padding:6px;border-radius:8px;transition:all .2s;width:36px;height:36px}
+.vote-btn:hover{background:#e3f2fd}
+.vote-btn.voted{color:#1e88e5;background:#e3f2fd}
+.vote-btn:disabled{cursor:default}
+.vote-arrow{font-size:18px;line-height:1;color:#999;transition:color .2s}
+.vote-btn.voted .vote-arrow{color:#1e88e5}
+.vote-btn.down-voted{color:#e53935;background:#ffebee}
+.vote-btn.down-voted .vote-arrow{color:#e53935}
+.q-content{flex:1;min-width:0}
+.q-text{font-size:16px;color:#1e1e2e;line-height:1.4;word-wrap:break-word}
+.q-meta{font-size:12px;color:#999;margin-top:6px}
+.msg{text-align:center;padding:16px;border-radius:8px;font-size:14px;margin-top:16px}
+.msg.off{background:#fff3e0;color:#e65100}
+.empty{text-align:center;color:#999;font-size:14px;margin-top:40px}
+a.back{display:block;text-align:center;margin-top:20px;color:#1e88e5;font-size:13px;text-decoration:none;opacity:0.8}
+</style>
+</head>
+<body>
+<div class="container">
+<h1 id="page-title">Vote on Questions</h1>
+<p class="sub" id="page-sub">Vote on the questions you'd like answered</p>
+<div id="questions"></div>
+<div id="msg" class="msg" style="display:none"></div>
+<a class="back" href="/qa">&larr; Submit a question</a>
+</div>
+<script>
+const questionsEl=document.getElementById('questions'),msgEl=document.getElementById('msg');
+const voted=JSON.parse(sessionStorage.getItem('qa_voted')||'{}'); // {id: "up"|"down"}
+
+async function loadQuestions(){
+  try{
+    const r=await fetch('/api/qa/approved');
+    if(r.status===403){
+      document.getElementById('page-title').style.display='none';
+      document.getElementById('page-sub').style.display='none';
+      questionsEl.innerHTML='';
+      msgEl.textContent='Voting is not enabled right now.';
+      msgEl.className='msg off';msgEl.style.display='block';
+      return;
+    }
+    const data=await r.json();
+    if(!Array.isArray(data)||data.length===0){
+      // Check session status
+      const sr=await fetch('/api/qa/status');
+      const sd=await sr.json();
+      if(!sd.sessionActive){
+        document.getElementById('page-title').style.display='none';
+        document.getElementById('page-sub').style.display='none';
+        questionsEl.innerHTML='';
+        msgEl.textContent='Q&A session is not active right now.';
+        msgEl.className='msg off';msgEl.style.display='block';
+        return;
+      }
+      document.getElementById('page-title').style.display='';
+      document.getElementById('page-sub').style.display='';
+      msgEl.style.display='none';
+      questionsEl.innerHTML='<div class="empty">No questions yet. Check back soon!</div>';
+      return;
+    }
+    document.getElementById('page-title').style.display='';
+    document.getElementById('page-sub').style.display='';
+    msgEl.style.display='none';
+    questionsEl.innerHTML=data.map(q=>{
+      const dir=q.voted||voted[q.id]||null;
+      return '<div class="question-card" id="qc-'+q.id+'">'
+        +'<div class="vote-btns">'
+        +'<button class="vote-btn'+(dir==='up'?' voted':'')+'" id="up-'+q.id+'" onclick="vote(\''+q.id+'\',\'up\')"><span class="vote-arrow">&#9650;</span></button>'
+        +'<button class="vote-btn'+(dir==='down'?' down-voted':'')+'" id="dn-'+q.id+'" onclick="vote(\''+q.id+'\',\'down\')"><span class="vote-arrow">&#9660;</span></button>'
+        +'</div>'
+        +'<div class="q-content">'
+        +'<div class="q-text">'+escHtml(q.text)+'</div>'
+        +'</div></div>';
+    }).join('');
+  }catch(e){console.error(e)}
+}
+
+async function vote(id,dir){
+  try{
+    const r=await fetch('/api/qa/vote',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({questionId:id,direction:dir})});
+    if(r.ok){
+      voted[id]=dir;
+      sessionStorage.setItem('qa_voted',JSON.stringify(voted));
+      updateBtns(id,dir);
+    }else if(r.status===409){
+      // already voted same direction, ignore
+    }
+  }catch(e){}
+}
+function updateBtns(id,dir){
+  const up=document.getElementById('up-'+id);
+  const dn=document.getElementById('dn-'+id);
+  if(up){up.className='vote-btn'+(dir==='up'?' voted':'')}
+  if(dn){dn.className='vote-btn'+(dir==='down'?' down-voted':'')}
+}
+
+function escHtml(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML}
+
+loadQuestions();
+setInterval(loadQuestions,5000);
 </script>
 </body>
 </html>
@@ -3007,16 +3202,21 @@ h1{font-size:22px}
 <button class="btn btn-approve" onclick="addQ()">Add</button>
 </div>
 
-<div class="tabs">
-<button class="tab active" onclick="setFilter('INCOMING',this)" id="tab-incoming">Incoming <span class="count" id="cnt-incoming">0</span></button>
-<button class="tab" onclick="setFilter('FINISHED',this)" id="tab-finished">Finished <span class="count" id="cnt-finished">0</span></button>
+<div class="tabs" style="flex-wrap:wrap;gap:4px">
+<button class="tab active" onclick="setFilter('ALL',this)">All <span class="count" id="cnt-all">0</span></button>
+<button class="tab" onclick="setFilter('INCOMING',this)">Incoming <span class="count" id="cnt-incoming">0</span></button>
+<button class="tab" onclick="setFilter('APPROVED',this)">Approved <span class="count" id="cnt-approved">0</span></button>
+<button class="tab" onclick="setFilter('INCOMING_APPROVED',this)">Incoming+Approved <span class="count" id="cnt-ia">0</span></button>
+<button class="tab" onclick="setFilter('DONE',this)">Done <span class="count" id="cnt-done">0</span></button>
+<button class="tab" onclick="setFilter('DENIED',this)">Denied <span class="count" id="cnt-denied">0</span></button>
+<button class="tab" id="sort-btn" onclick="toggleSort()" style="margin-left:auto">Sort: Time</button>
 </div>
 
 <div class="list" id="list"></div>
 </div>
 
 <script>
-let questions=[],filter='INCOMING',displayedId=null,editingId=null,authed=false;
+let questions=[],filter='ALL',sortBy='time',displayedId=null,editingId=null,authed=false;
 let password=new URLSearchParams(window.location.search).get('password')||localStorage.getItem('qa_admin_pw')||'';
 if(password)localStorage.setItem('qa_admin_pw',password);
 const headers={'Content-Type':'application/json'};
@@ -3068,13 +3268,24 @@ async function load(){
 
 function render(){
   let filtered;
-  if(filter==='INCOMING')filtered=questions.filter(q=>q.status==='PENDING'||q.status==='APPROVED');
-  else filtered=questions.filter(q=>q.status==='DONE'||q.status==='DENIED');
+  if(filter==='ALL')filtered=questions;
+  else if(filter==='INCOMING')filtered=questions.filter(q=>q.status==='PENDING');
+  else if(filter==='APPROVED')filtered=questions.filter(q=>q.status==='APPROVED');
+  else if(filter==='INCOMING_APPROVED')filtered=questions.filter(q=>q.status==='PENDING'||q.status==='APPROVED');
+  else if(filter==='DONE')filtered=questions.filter(q=>q.status==='DONE');
+  else if(filter==='DENIED')filtered=questions.filter(q=>q.status==='DENIED');
+  else filtered=questions;
   const list=document.getElementById('list');
-  document.getElementById('cnt-incoming').textContent=questions.filter(q=>q.status==='PENDING'||q.status==='APPROVED').length;
-  document.getElementById('cnt-finished').textContent=questions.filter(q=>q.status==='DONE'||q.status==='DENIED').length;
+  document.getElementById('cnt-all').textContent=questions.length;
+  document.getElementById('cnt-incoming').textContent=questions.filter(q=>q.status==='PENDING').length;
+  document.getElementById('cnt-approved').textContent=questions.filter(q=>q.status==='APPROVED').length;
+  document.getElementById('cnt-ia').textContent=questions.filter(q=>q.status==='PENDING'||q.status==='APPROVED').length;
+  document.getElementById('cnt-done').textContent=questions.filter(q=>q.status==='DONE').length;
+  document.getElementById('cnt-denied').textContent=questions.filter(q=>q.status==='DENIED').length;
 
-  if(!filtered.length){list.innerHTML='<div class="empty">'+(filter==='INCOMING'?'No incoming questions':'No finished questions')+'</div>';return}
+  if(sortBy==='votes')filtered=[...filtered].sort((a,b)=>b.voteCount-a.voteCount);
+  else filtered=[...filtered].sort((a,b)=>a.timestamp-b.timestamp);
+  if(!filtered.length){list.innerHTML='<div class="empty">No questions</div>';return}
   list.innerHTML=filtered.map(q=>{
     const time=new Date(q.timestamp).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
     const isLive=q.id===displayedId;
@@ -3090,11 +3301,15 @@ function render(){
       actions+='<button class="btn btn-back" onclick="action(\'approve\',\''+q.id+'\')">Back to Incoming</button>';
       actions+='<button class="btn btn-golive-confirm" onclick="confirmGoLive(\''+q.id+'\')">Go Live</button>';
     }else if(q.status==='DENIED'){
+      actions+='<button class="btn btn-approve" onclick="action(\'approve\',\''+q.id+'\')">Approve</button>';
       actions+='<button class="btn btn-golive-confirm" onclick="confirmGoLive(\''+q.id+'\')">Go Live</button>';
     }
     actions+='<button class="btn btn-del" onclick="del(\''+q.id+'\')">Del</button>';
     const nameTag=q.submitterName?'<span style="color:#888;font-size:12px">'+esc(q.submitterName)+':</span> ':'';
-    return '<div class="q'+(isLive?' live':'')+'" id="q-'+q.id+'"><span class="q-time">'+time+'</span><span class="q-text" id="qt-'+q.id+'">'+label+nameTag+esc(q.text)+'</span><div class="q-actions">'+actions+'</div></div>';
+    const upTag=q.upvotes>0?'<span style="display:inline-block;background:#e3f2fd;color:#1565c0;font-size:11px;font-weight:700;padding:2px 4px;border-radius:4px;margin-right:2px">&#9650; '+q.upvotes+'</span>':'';
+    const dnTag=q.downvotes>0?'<span style="display:inline-block;background:#ffebee;color:#c62828;font-size:11px;font-weight:700;padding:2px 4px;border-radius:4px;margin-right:4px">&#9660; '+q.downvotes+'</span>':'';
+    const voteTag=upTag+dnTag;
+    return '<div class="q'+(isLive?' live':'')+'" id="q-'+q.id+'"><span class="q-time">'+time+'</span><span class="q-text" id="qt-'+q.id+'">'+voteTag+label+nameTag+esc(q.text)+'</span><div class="q-actions">'+actions+'</div></div>';
   }).join('');
 }
 
@@ -3149,6 +3364,11 @@ function setFilter(f,el){
   filter=f;
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   el.classList.add('active');
+  render();
+}
+function toggleSort(){
+  sortBy=sortBy==='time'?'votes':'time';
+  document.getElementById('sort-btn').textContent='Sort: '+(sortBy==='votes'?'Votes':'Time');
   render();
 }
 async function checkStatus(){

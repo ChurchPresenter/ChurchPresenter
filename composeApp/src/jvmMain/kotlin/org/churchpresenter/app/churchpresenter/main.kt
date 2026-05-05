@@ -279,9 +279,10 @@ fun main() {
         val qaManager = remember { QAManager() }
         remember(qaManager) { companionServer.qaManager = qaManager; true }
         // Sync QA settings to server
-        LaunchedEffect(appSettings.qaSettings.adminPassword, appSettings.qaSettings.rateLimitCooldownSeconds) {
+        LaunchedEffect(appSettings.qaSettings.adminPassword, appSettings.qaSettings.rateLimitCooldownSeconds, appSettings.qaSettings.votingEnabled) {
             companionServer.qaAdminPassword = appSettings.qaSettings.adminPassword
             companionServer.qaCooldownSeconds = appSettings.qaSettings.rateLimitCooldownSeconds
+            companionServer.qaVotingEnabled = appSettings.qaSettings.votingEnabled
         }
         val tunnelStatus by companionServer.tunnelManager.status.collectAsState()
         val tunnelUrl by companionServer.tunnelManager.tunnelUrl.collectAsState()
@@ -370,6 +371,7 @@ fun main() {
                         windowY = if (isFloating) state.position.y.value.toInt() else -1
                     )
                     settingsManager.saveSettings(appSettings)
+                    if (qaManager.sessionActive) qaManager.toggleSession()
                     companionServer.tunnelManager.shutdown()
                     exitApplication()
                 },
