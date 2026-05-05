@@ -223,17 +223,19 @@ class QAManager {
         if (question.status != QuestionStatus.APPROVED) return false
         val votes = _votedIps.getOrPut(questionId) { ConcurrentHashMap() }
         val existing = votes[clientIp]
-        if (existing == direction) return false // already voted same direction
         // Calculate upvote/downvote changes
         var upDelta = 0
         var downDelta = 0
+        val isUndo = existing == direction
         when {
+            isUndo && direction == "up" -> upDelta = -1
+            isUndo && direction == "down" -> downDelta = -1
             existing == null && direction == "up" -> upDelta = 1
             existing == null && direction == "down" -> downDelta = 1
             existing == "up" && direction == "down" -> { upDelta = -1; downDelta = 1 }
             existing == "down" && direction == "up" -> { downDelta = -1; upDelta = 1 }
         }
-        votes[clientIp] = direction
+        if (isUndo) votes.remove(clientIp) else votes[clientIp] = direction
         val newUp = question.upvotes + upDelta
         val newDown = question.downvotes + downDelta
         _questions[index] = question.copy(

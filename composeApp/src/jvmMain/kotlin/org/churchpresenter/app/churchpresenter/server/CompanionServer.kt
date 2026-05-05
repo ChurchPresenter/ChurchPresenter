@@ -2594,12 +2594,10 @@ class CompanionServer {
                         ?: call.request.headers["X-Forwarded-For"]?.split(",")?.first()?.trim()
                         ?: call.request.local.remoteAddress
                     val direction = if (request.direction == "down") "down" else "up"
-                    if (qa.voteForQuestion(request.questionId, clientIp, direction)) {
-                        val updated = qa.findQuestion(request.questionId)
-                        call.respondText("""{"ok":true,"voteCount":${updated?.voteCount ?: 0}}""", ContentType.Application.Json)
-                    } else {
-                        call.respond(io.ktor.http.HttpStatusCode.Conflict, """{"error":"already voted in this direction"}""")
-                    }
+                    qa.voteForQuestion(request.questionId, clientIp, direction)
+                    val currentDir = qa.getVoteDirection(request.questionId, clientIp)
+                    val voted = if (currentDir != null) "\"$currentDir\"" else "null"
+                    call.respondText("""{"ok":true,"voted":$voted}""", ContentType.Application.Json)
                 }
 
                 // Admin: check password
@@ -3214,11 +3212,11 @@ async function vote(id,dir){
   try{
     const r=await fetch('/api/qa/vote',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({questionId:id,direction:dir})});
     if(r.ok){
-      voted[id]=dir;
+      const d=await r.json();
+      const newDir=d.voted||null;
+      if(newDir){voted[id]=newDir}else{delete voted[id]}
       sessionStorage.setItem('qa_voted',JSON.stringify(voted));
-      updateBtns(id,dir);
-    }else if(r.status===409){
-      // already voted same direction, ignore
+      updateBtns(id,newDir);
     }
   }catch(e){}
 }
