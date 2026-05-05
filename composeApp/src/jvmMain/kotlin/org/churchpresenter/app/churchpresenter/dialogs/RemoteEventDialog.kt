@@ -63,6 +63,7 @@ import churchpresenter.composeapp.generated.resources.remote_api_qa_approve
 import churchpresenter.composeapp.generated.resources.remote_api_qa_deny
 import churchpresenter.composeapp.generated.resources.remote_api_qa_done
 import churchpresenter.composeapp.generated.resources.remote_api_qa_display
+import churchpresenter.composeapp.generated.resources.remote_api_qa_clear_display
 import churchpresenter.composeapp.generated.resources.remote_api_request_title
 import churchpresenter.composeapp.generated.resources.remote_api_request_title_queued
 import churchpresenter.composeapp.generated.resources.remote_client_allowed_badge
@@ -98,6 +99,7 @@ enum class RemoteEventType {
     QA_DENY,
     QA_DONE,
     QA_DISPLAY,
+    QA_CLEAR_DISPLAY,
 }
 
 /**
@@ -139,6 +141,7 @@ fun RemoteEventDialog(
         RemoteEventType.QA_DENY         -> stringResource(Res.string.remote_api_qa_deny)
         RemoteEventType.QA_DONE         -> stringResource(Res.string.remote_api_qa_done)
         RemoteEventType.QA_DISPLAY      -> stringResource(Res.string.remote_api_qa_display)
+        RemoteEventType.QA_CLEAR_DISPLAY -> stringResource(Res.string.remote_api_qa_clear_display)
         else                            -> stringResource(Res.string.remote_api_request_title)
     }
     val icon = when (event.type) {
@@ -150,7 +153,8 @@ fun RemoteEventDialog(
         RemoteEventType.QA_APPROVE,
         RemoteEventType.QA_DENY,
         RemoteEventType.QA_DONE,
-        RemoteEventType.QA_DISPLAY      -> "💬"
+        RemoteEventType.QA_DISPLAY,
+        RemoteEventType.QA_CLEAR_DISPLAY -> "💬"
         else                            -> "🔔"
     }
     val remaining = queueSize - 1  // items behind this one

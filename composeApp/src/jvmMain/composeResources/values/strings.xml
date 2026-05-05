@@ -1021,6 +1021,7 @@
     <string name="remote_api_qa_deny">Q&amp;A: Deny Question</string>
     <string name="remote_api_qa_done">Q&amp;A: Mark as Done</string>
     <string name="remote_api_qa_display">Q&amp;A: Go Live</string>
+    <string name="remote_api_qa_clear_display">Q&amp;A: Clear Display</string>
     <string name="remote_api_request_title">Remote API Request</string>
     <string name="remote_api_request_title_queued">Remote API Request (%1$d pending)</string>
     <string name="remote_client_label">Client:</string>
@@ -1040,6 +1041,7 @@
     <string name="remote_activity_qa_deny">Q&amp;A Question Denied</string>
     <string name="remote_activity_qa_done">Q&amp;A Question Done</string>
     <string name="remote_activity_qa_display">Q&amp;A Question Live</string>
+    <string name="remote_activity_qa_clear_display">Q&amp;A Display Cleared</string>
     <string name="remote_activity_by">by %1$s</string>
     <string name="remote_activity_dismiss">Dismiss</string>
     <string name="remote_activity_dismiss_all">Dismiss All</string>

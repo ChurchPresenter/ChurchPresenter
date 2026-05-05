@@ -788,6 +788,7 @@
     <string name="remote_api_qa_add">P&amp;O: Dodaj pytanie</string>
     <string name="remote_api_qa_edit">P&amp;O: Edytuj pytanie</string>
     <string name="remote_api_qa_delete">P&amp;O: Usuń pytanie</string>
+    <string name="remote_api_qa_clear_display">P&amp;O: Wyczyść ekran</string>
     <string name="remote_api_request_title">Żądanie zdalnego API</string>
     <string name="remote_api_request_title_queued">Żądanie zdalnego API (%1$d oczekujące)</string>
     <string name="remote_client_label">Klient:</string>

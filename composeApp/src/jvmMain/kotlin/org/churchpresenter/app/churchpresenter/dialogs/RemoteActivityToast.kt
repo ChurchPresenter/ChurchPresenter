@@ -54,6 +54,7 @@ import churchpresenter.composeapp.generated.resources.remote_activity_qa_approve
 import churchpresenter.composeapp.generated.resources.remote_activity_qa_deny
 import churchpresenter.composeapp.generated.resources.remote_activity_qa_done
 import churchpresenter.composeapp.generated.resources.remote_activity_qa_display
+import churchpresenter.composeapp.generated.resources.remote_activity_qa_clear_display
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.stringResource
 
@@ -134,6 +135,7 @@ private fun RemoteActivityToast(
         RemoteEventType.QA_DENY         -> stringResource(Res.string.remote_activity_qa_deny)
         RemoteEventType.QA_DONE         -> stringResource(Res.string.remote_activity_qa_done)
         RemoteEventType.QA_DISPLAY      -> stringResource(Res.string.remote_activity_qa_display)
+        RemoteEventType.QA_CLEAR_DISPLAY -> stringResource(Res.string.remote_activity_qa_clear_display)
     }
     val icon = when (notification.type) {
         RemoteEventType.ADD_TO_SCHEDULE -> "📋"
@@ -147,7 +149,8 @@ private fun RemoteActivityToast(
         RemoteEventType.QA_APPROVE,
         RemoteEventType.QA_DENY,
         RemoteEventType.QA_DONE,
-        RemoteEventType.QA_DISPLAY      -> "💬"
+        RemoteEventType.QA_DISPLAY,
+        RemoteEventType.QA_CLEAR_DISPLAY -> "💬"
     }
 
     val clientDisplay = when {

@@ -789,6 +789,7 @@
     <string name="remote_api_qa_add">С&amp;Ж: Сұрақ қосу</string>
     <string name="remote_api_qa_edit">С&amp;Ж: Сұрақты өңдеу</string>
     <string name="remote_api_qa_delete">С&amp;Ж: Сұрақты жою</string>
+    <string name="remote_api_qa_clear_display">С&amp;Ж: Дисплейді тазалау</string>
     <string name="remote_api_request_title">Қашықтағы API сұранысы</string>
     <string name="remote_api_request_title_queued">Қашықтағы API сұранысы (%1$d күтуде)</string>
     <string name="remote_client_label">Клиент:</string>

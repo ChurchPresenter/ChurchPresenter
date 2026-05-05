@@ -1235,8 +1235,9 @@ private fun qaActionType(action: String): RemoteEventType = when (action) {
     "approve" -> RemoteEventType.QA_APPROVE
     "deny"    -> RemoteEventType.QA_DENY
     "done"    -> RemoteEventType.QA_DONE
-    "display" -> RemoteEventType.QA_DISPLAY
-    else      -> RemoteEventType.QA_ADD
+    "display"       -> RemoteEventType.QA_DISPLAY
+    "clear-display" -> RemoteEventType.QA_CLEAR_DISPLAY
+    else            -> RemoteEventType.QA_ADD
 }
 
 /** Returns a (title, detail) pair describing a ScheduleItem for the remote event banner. */

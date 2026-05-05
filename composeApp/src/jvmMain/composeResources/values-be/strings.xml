@@ -789,6 +789,7 @@
     <string name="remote_api_qa_add">Q&amp;A: Дадаць пытанне</string>
     <string name="remote_api_qa_edit">Q&amp;A: Змяніць пытанне</string>
     <string name="remote_api_qa_delete">Q&amp;A: Выдаліць пытанне</string>
+    <string name="remote_api_qa_clear_display">Q&amp;A: Ачысціць дысплей</string>
     <string name="remote_api_request_title">Запыт аддаленага API</string>
     <string name="remote_api_request_title_queued">Запыт аддаленага API (%1$d у чарзе)</string>
     <string name="remote_client_label">Кліент:</string>

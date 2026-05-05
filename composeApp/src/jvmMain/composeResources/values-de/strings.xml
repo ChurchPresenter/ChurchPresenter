@@ -789,6 +789,7 @@
     <string name="remote_api_qa_add">F&amp;A: Frage hinzufügen</string>
     <string name="remote_api_qa_edit">F&amp;A: Frage bearbeiten</string>
     <string name="remote_api_qa_delete">F&amp;A: Frage löschen</string>
+    <string name="remote_api_qa_clear_display">F&amp;A: Anzeige löschen</string>
     <string name="remote_api_request_title">Remote-API-Anfrage</string>
     <string name="remote_api_request_title_queued">Remote-API-Anfrage (%1$d ausstehend)</string>
     <string name="remote_client_label">Client:</string>

@@ -2799,6 +2799,13 @@ class CompanionServer {
                 // Admin: clear display
                 post("/api/qa/clear-display") {
                     if (!checkQaAdmin(call)) return@post
+                    val clientId = call.request.headers["X-Device-Id"] ?: ""
+                    val pending = PendingQAAdminRequest(action = "clear-display", clientId = clientId)
+                    onQAAdminRequest.emit(pending)
+                    if (!pending.decision.await()) {
+                        call.respond(io.ktor.http.HttpStatusCode.Forbidden, """{"error":"denied"}""")
+                        return@post
+                    }
                     qaManager?.clearDisplay()
                     scope.launch { onQADisplay.emit(null) }
                     call.respondText("""{"ok":true}""", ContentType.Application.Json)
