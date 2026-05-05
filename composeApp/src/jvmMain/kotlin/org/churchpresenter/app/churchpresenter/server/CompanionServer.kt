@@ -3044,7 +3044,7 @@ button:disabled{background:#bbb;cursor:not-allowed}
 <button id="btn" onclick="submit()">Submit Question</button>
 </div>
 <div id="msg" class="msg" style="display:none"></div>
-<a id="vote-link" href="/qa/vote" style="display:none;text-align:center;margin-top:20px;color:#1e88e5;font-size:13px;text-decoration:none;opacity:0.8">Vote on questions</a>
+<a id="vote-link" href="/qa/vote" style="display:none;text-align:center;margin-top:12px;text-decoration:none;width:100%;padding:14px;background:#43a047;color:#fff;border-radius:12px;font-size:16px;font-weight:600;cursor:pointer;transition:background .2s;box-sizing:border-box">Vote on Questions</a>
 </div>
 <script>
 const q=document.getElementById('q'),btn=document.getElementById('btn'),msg=document.getElementById('msg'),cc=document.getElementById('charcount'),nameField=document.getElementById('name');
@@ -3134,7 +3134,8 @@ p.sub{color:#666;text-align:center;margin-bottom:24px;font-size:14px}
 .msg{text-align:center;padding:16px;border-radius:8px;font-size:14px;margin-top:16px}
 .msg.off{background:#fff3e0;color:#e65100}
 .empty{text-align:center;color:#999;font-size:14px;margin-top:40px}
-a.back{display:block;text-align:center;margin-top:20px;color:#1e88e5;font-size:13px;text-decoration:none;opacity:0.8}
+a.back{display:block;text-align:center;margin-top:20px;text-decoration:none;padding:14px;background:#1e88e5;color:#fff;border-radius:12px;font-size:16px;font-weight:600;transition:background .2s}
+a.back:hover{background:#1565c0}
 </style>
 </head>
 <body>
