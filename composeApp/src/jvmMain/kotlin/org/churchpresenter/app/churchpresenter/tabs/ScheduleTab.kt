@@ -3,6 +3,7 @@ package org.churchpresenter.app.churchpresenter.tabs
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import org.churchpresenter.app.churchpresenter.composables.initialPassClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -494,7 +495,7 @@ private fun ScheduleItemRow(
             .fillMaxWidth()
             .background(rowBackgroundColor)
             .then(
-                if (item !is ScheduleItem.LabelItem) Modifier.clickable { onSelect() }
+                if (item !is ScheduleItem.LabelItem) Modifier.initialPassClickable { onSelect() }
                 else Modifier
             )
             .padding(horizontal = 12.dp, vertical = 8.dp),

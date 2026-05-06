@@ -7,6 +7,7 @@ import androidx.compose.foundation.TooltipPlacement
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
+import org.churchpresenter.app.churchpresenter.composables.initialPassCombinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -488,7 +489,7 @@ fun PicturesTab(
                                         else MaterialTheme.colorScheme.outline,
                                 shape = RoundedCornerShape(8.dp)
                             )
-                            .combinedClickable(
+                            .initialPassCombinedClickable(
                                 onClick = { viewModel.selectImage(viewModel.images.indexOf(imageFile)) },
                                 onDoubleClick = {
                                     viewModel.selectImage(viewModel.images.indexOf(imageFile))

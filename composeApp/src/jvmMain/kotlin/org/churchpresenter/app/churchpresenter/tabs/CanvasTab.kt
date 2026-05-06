@@ -8,6 +8,8 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
+import org.churchpresenter.app.churchpresenter.composables.initialPassClickable
+import org.churchpresenter.app.churchpresenter.composables.initialPassCombinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -226,7 +228,7 @@ fun CanvasTab(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .combinedClickable(
+                            .initialPassCombinedClickable(
                                 onClick = { sceneViewModel.selectScene(scene.id) },
                                 onDoubleClick = {
                                     renamingSceneId = scene.id
@@ -352,7 +354,7 @@ fun CanvasTab(
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .clickable { sceneViewModel.selectSource(source.id) }
+                                .initialPassClickable { sceneViewModel.selectSource(source.id) }
                                 .background(
                                     if (isSelected) MaterialTheme.colorScheme.secondaryContainer
                                     else Color.Transparent,

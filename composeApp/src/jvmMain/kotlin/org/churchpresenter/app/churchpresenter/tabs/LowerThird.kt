@@ -10,6 +10,7 @@ import androidx.compose.foundation.TooltipPlacement
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import org.churchpresenter.app.churchpresenter.composables.initialPassClickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -239,7 +240,7 @@ fun LowerThirdTab(
                         val confirmTitle = stringResource(Res.string.confirm_delete)
                         val confirmMsg = stringResource(Res.string.confirm_delete_file, file.name)
                         Surface(
-                            modifier = Modifier.fillMaxWidth().clickable {
+                            modifier = Modifier.fillMaxWidth().initialPassClickable {
                                 selectedFile = file
                                 isPlaying = false
                             },
@@ -263,7 +264,7 @@ fun LowerThirdTab(
                                     modifier = Modifier
                                         .size(16.dp)
                                         .offset(y = 1.dp)
-                                        .clickable {
+                                        .initialPassClickable {
                                             SwingUtilities.invokeLater {
                                                 val result = JOptionPane.showConfirmDialog(
                                                     Window.getWindows().firstOrNull { it.isActive },
