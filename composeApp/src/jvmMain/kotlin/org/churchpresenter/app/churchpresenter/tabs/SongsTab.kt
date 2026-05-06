@@ -102,6 +102,8 @@ import churchpresenter.composeapp.generated.resources.starts_with
 import churchpresenter.composeapp.generated.resources.title
 import churchpresenter.composeapp.generated.resources.tune
 import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
+import org.churchpresenter.app.churchpresenter.composables.initialPassClickable
+import org.churchpresenter.app.churchpresenter.composables.initialPassCombinedClickable
 import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.data.SongItem
 import org.churchpresenter.app.churchpresenter.dialogs.EditSongDialog
@@ -522,7 +524,7 @@ fun SongsTab(
                                     if (index == selectedSongIndex) MaterialTheme.colorScheme.surfaceVariant
                                     else MaterialTheme.colorScheme.surface
                                 )
-                                .clickable {
+                                .initialPassClickable {
                                     viewModel.selectSong(index)
                                     if (isPresenting && liveSongIndex >= 0) {
                                         viewModel.selectSection(-1)
@@ -870,7 +872,7 @@ fun SongsTab(
                                             MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
                                         else Color.Transparent
                                     )
-                                    .combinedClickable(
+                                    .initialPassCombinedClickable(
                                         onClick = { sendTitleSlide() },
                                         onDoubleClick = { sendTitleSlide(); onPresenting(Presenting.LYRICS) }
                                     )
@@ -912,7 +914,7 @@ fun SongsTab(
                                             MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
                                         else Color.Transparent
                                     )
-                                    .combinedClickable(
+                                    .initialPassCombinedClickable(
                                         onClick = {
                                             viewModel.selectSection(sectionIndex)
                                             isTitleSlideSelected = false
@@ -1055,7 +1057,7 @@ private fun LyricLines(lines: List<String>, textColor: Color, activeLineIndex: I
             color = if (isActiveLine) MaterialTheme.colorScheme.primary else textColor,
             modifier = Modifier
                 .padding(vertical = 2.dp)
-                .then(if (onLineClick != null) Modifier.clickable { onLineClick(lineIndex) } else Modifier)
+                .then(if (onLineClick != null) Modifier.initialPassClickable { onLineClick(lineIndex) } else Modifier)
         )
     }
 }

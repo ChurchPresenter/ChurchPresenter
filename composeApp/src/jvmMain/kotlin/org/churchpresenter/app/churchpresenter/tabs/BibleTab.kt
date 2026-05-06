@@ -112,6 +112,7 @@ import churchpresenter.composeapp.generated.resources.hold_live
 import churchpresenter.composeapp.generated.resources.swap_bibles
 import churchpresenter.composeapp.generated.resources.verse
 import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
+import org.churchpresenter.app.churchpresenter.composables.initialPassClickable
 import org.churchpresenter.app.churchpresenter.composables.SearchTextField
 import org.churchpresenter.app.churchpresenter.composables.SelectionListWithIndex
 import org.churchpresenter.app.churchpresenter.data.AppSettings
@@ -520,7 +521,7 @@ fun BibleTab(
                                 text = highlightedText,
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .clickable {
+                                    .initialPassClickable {
                                         viewModel.selectSearchResult(result)
                                         viewModel.clearSearch()
                                         focusRequester.requestFocus()
@@ -855,7 +856,7 @@ fun BibleTab(
                                             color = MaterialTheme.colorScheme.onSurface,
                                             maxLines = 1,
                                             modifier = Modifier.fillMaxWidth()
-                                                .clickable {
+                                                .initialPassClickable {
                                                     viewModel.selectVerseByDetails(entry.bookName, entry.chapter, entry.verseNumber)
                                                     focusRequester.requestFocus()
                                                 }
