@@ -1189,6 +1189,7 @@
     <string name="qa_back_to_incoming">Back to Incoming</string>
     <string name="qa_confirm_go_live_prompt">Go Live?</string>
     <string name="qa_confirm_go_live">Confirm Go Live</string>
+    <string name="qa_add_question_hint">Add a question…</string>
     <string name="qa_edit_question_hint">Edit question text…</string>
     <string name="qa_delete_question">Delete</string>
     <string name="qa_confirm_delete_prompt">Delete?</string>

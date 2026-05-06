@@ -76,6 +76,7 @@ import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.cancel
 import churchpresenter.composeapp.generated.resources.go_live
 import churchpresenter.composeapp.generated.resources.qa_admin_panel
+import churchpresenter.composeapp.generated.resources.qa_add_question_hint
 import churchpresenter.composeapp.generated.resources.qa_admin_password
 import churchpresenter.composeapp.generated.resources.qa_approve
 import churchpresenter.composeapp.generated.resources.qa_back_to_incoming
@@ -206,8 +207,9 @@ fun QATab(
     } else ""
 
     var selectedFilter by remember { mutableStateOf(0) }
-    var sortByVotes by remember { mutableStateOf(false) }
+    var sortMode by remember { mutableStateOf(0) } // 0=newest, 1=oldest, 2=most votes, 3=least votes
     var showClearConfirm by remember { mutableStateOf(false) }
+    var addQuestionText by remember { mutableStateOf("") }
 
     val pendingCount = questions.count { it.status == QuestionStatus.PENDING }
     val approvedCount = questions.count { it.status == QuestionStatus.APPROVED }
@@ -223,30 +225,25 @@ fun QATab(
     val filterCounts = listOf(allCount, pendingCount, approvedCount, incomingApprovedCount, doneCount, deniedCount)
     var filterDropdownExpanded by remember { mutableStateOf(false) }
 
-    val filteredQuestions = remember(questions.toList(), selectedFilter, qaManager.history.toList(), sortByVotes) {
+    fun <T> List<T>.applySortMode(sortMode: Int, timestamp: (T) -> Long, voteCount: (T) -> Int): List<T> {
+        return when (sortMode) {
+            0 -> sortedByDescending { timestamp(it) }
+            1 -> sortedBy { timestamp(it) }
+            2 -> sortedByDescending { voteCount(it) }
+            3 -> sortedBy { voteCount(it) }
+            else -> this
+        }
+    }
+
+    val filteredQuestions = remember(questions.toList(), selectedFilter, qaManager.history.toList(), sortMode) {
+        val sorted = { list: List<Question> -> list.applySortMode(sortMode, { it.timestamp }, { it.voteCount }) }
         when (selectedFilter) {
-            0 -> {
-                val all = questions.toList()
-                if (sortByVotes) all.sortedByDescending { it.voteCount }
-                else all.sortedBy { it.timestamp }
-            }
-            1 -> {
-                val pending = questions.filter { it.status == QuestionStatus.PENDING }
-                if (sortByVotes) pending.sortedByDescending { it.voteCount }
-                else pending.sortedBy { it.timestamp }
-            }
-            2 -> {
-                val approved = questions.filter { it.status == QuestionStatus.APPROVED }
-                if (sortByVotes) approved.sortedByDescending { it.voteCount }
-                else approved.sortedBy { it.timestamp }
-            }
-            3 -> {
-                val incomingApproved = questions.filter { it.status == QuestionStatus.PENDING || it.status == QuestionStatus.APPROVED }
-                if (sortByVotes) incomingApproved.sortedByDescending { it.voteCount }
-                else incomingApproved.sortedBy { it.timestamp }
-            }
-            4 -> questions.filter { it.status == QuestionStatus.DONE }
-            5 -> questions.filter { it.status == QuestionStatus.DENIED }
+            0 -> sorted(questions.toList())
+            1 -> sorted(questions.filter { it.status == QuestionStatus.PENDING })
+            2 -> sorted(questions.filter { it.status == QuestionStatus.APPROVED })
+            3 -> sorted(questions.filter { it.status == QuestionStatus.PENDING || it.status == QuestionStatus.APPROVED })
+            4 -> sorted(questions.filter { it.status == QuestionStatus.DONE })
+            5 -> sorted(questions.filter { it.status == QuestionStatus.DENIED })
             6 -> qaManager.history
             else -> questions
         }
@@ -366,16 +363,28 @@ fun QATab(
                     }
                 }
 
-                // Sort toggle
-                OutlinedButton(
-                    onClick = { sortByVotes = !sortByVotes },
-                    modifier = Modifier.height(32.dp),
-                    contentPadding = ButtonDefaults.TextButtonContentPadding
-                ) {
-                    Text(
-                        if (sortByVotes) "Sort: Votes" else "Sort: Time",
-                        style = MaterialTheme.typography.labelMedium
-                    )
+                // Sort dropdown
+                var sortDropdownExpanded by remember { mutableStateOf(false) }
+                val sortLabels = listOf("Newest First", "Oldest First", "Most Votes", "Least Votes")
+                Box {
+                    OutlinedButton(
+                        onClick = { sortDropdownExpanded = true },
+                        modifier = Modifier.height(32.dp),
+                        contentPadding = ButtonDefaults.TextButtonContentPadding
+                    ) {
+                        Text("Sort: ${sortLabels[sortMode]}", style = MaterialTheme.typography.labelMedium)
+                    }
+                    androidx.compose.material3.DropdownMenu(
+                        expanded = sortDropdownExpanded,
+                        onDismissRequest = { sortDropdownExpanded = false }
+                    ) {
+                        sortLabels.forEachIndexed { index, label ->
+                            androidx.compose.material3.DropdownMenuItem(
+                                text = { Text(label) },
+                                onClick = { sortMode = index; sortDropdownExpanded = false }
+                            )
+                        }
+                    }
                 }
 
                 Spacer(Modifier.weight(1f))
@@ -390,6 +399,32 @@ fun QATab(
                     ) else ButtonDefaults.outlinedButtonColors()
                 ) {
                     Text("History ($historyCount)", style = MaterialTheme.typography.labelMedium)
+                }
+            }
+
+            // Add question input
+            if (sessionActive) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    OutlinedTextField(
+                        value = addQuestionText,
+                        onValueChange = { addQuestionText = it },
+                        placeholder = { Text(stringResource(Res.string.qa_add_question_hint)) },
+                        modifier = Modifier.weight(1f),
+                        singleLine = true
+                    )
+                    Button(
+                        onClick = {
+                            qaManager.addQuestion(addQuestionText)
+                            addQuestionText = ""
+                        },
+                        enabled = addQuestionText.isNotBlank()
+                    ) {
+                        Text("Add")
+                    }
                 }
             }
 
