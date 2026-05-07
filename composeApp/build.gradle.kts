@@ -445,6 +445,9 @@ kotlin {
             kotlin.srcDir("src/jvmMain/appResources/common/ChurchPresenter-Converter/src/main/kotlin")
             // Include LottieGen submodule source (builds together, launches as separate window)
             kotlin.srcDir("src/jvmMain/appResources/common/ChurchPresenter-LottieGen/src/main/kotlin")
+            // Include submodule resources (.properties files for localization)
+            resources.srcDir("src/jvmMain/appResources/common/ChurchPresenter-Converter/src/main/resources")
+            resources.srcDir("src/jvmMain/appResources/common/ChurchPresenter-LottieGen/src/main/resources")
         }
     }
 }
