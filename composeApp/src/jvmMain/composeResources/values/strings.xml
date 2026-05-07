@@ -1152,6 +1152,12 @@
     <string name="qa_new_session">New Session</string>
     <string name="qa_resume">Resume (%1$d)</string>
     <string name="qa_incoming">Incoming</string>
+    <string name="qa_all">All</string>
+    <string name="qa_approved">Approved</string>
+    <string name="qa_incoming_approved">Incoming + Approved</string>
+    <string name="qa_done">Done</string>
+    <string name="qa_denied">Denied</string>
+    <string name="qa_questions">Questions</string>
     <string name="qa_finished">Finished</string>
     <string name="qa_history">History</string>
     <string name="qa_clear_all_questions">Clear All Questions</string>
@@ -1214,6 +1220,57 @@
     <string name="qa_pos_bl">BL</string>
     <string name="qa_pos_bc">BC</string>
     <string name="qa_pos_br">BR</string>
+
+    <!-- QA: missing strings -->
+    <string name="qa_sort">Sort: %1$s</string>
+    <string name="qa_sort_newest">Newest First</string>
+    <string name="qa_sort_oldest">Oldest First</string>
+    <string name="qa_sort_most_votes">Most Votes</string>
+    <string name="qa_sort_least_votes">Least Votes</string>
+    <string name="qa_add">Add</string>
+    <string name="qa_clear_all_confirm_message">Are you sure you want to clear all questions? This cannot be undone.</string>
+    <string name="qa_clear">Clear</string>
+    <string name="qa_export_clear">Export &amp; Clear</string>
+    <string name="qa_copy_url">Copy URL</string>
+    <string name="qa_voting_enabled">Voting Enabled</string>
+    <string name="qa_voting_disabled">Voting Disabled</string>
+    <string name="qa_opacity">Opacity:</string>
+
+    <!-- STT tab -->
+    <string name="stt_server_url">STT Server URL</string>
+    <string name="stt_disconnect">Disconnect</string>
+    <string name="stt_connect">Connect</string>
+    <string name="stt_go_live">Go Live</string>
+    <string name="stt_display_mode">Display Mode</string>
+    <string name="stt_mode_transcribe">Transcription Only</string>
+    <string name="stt_mode_translate">Translation Only</string>
+    <string name="stt_mode_both">Both</string>
+    <string name="stt_layout">Layout</string>
+    <string name="stt_layout_stacked">Stacked</string>
+    <string name="stt_layout_stacked_inverse">Stacked (Inverse)</string>
+    <string name="stt_layout_side_by_side">Side by Side</string>
+    <string name="stt_layout_side_by_side_inverse">Side by Side (Inverse)</string>
+    <string name="stt_max_segments">Max Segments:</string>
+    <string name="stt_max_lines">Max Lines:</string>
+    <string name="stt_line_spacing">Line Spacing %:</string>
+    <string name="stt_word_highlighting">Word Highlighting</string>
+    <string name="stt_in_progress_text">In-Progress Text</string>
+    <string name="stt_translation_in_progress">Translation In-Progress</string>
+    <string name="stt_drip_feed">Drip Feed</string>
+    <string name="stt_drip_feed_speed">Speed (ms/word):</string>
+    <string name="stt_live_preview">Live Preview</string>
+    <string name="stt_not_connected">Not connected. Enter the STT server URL and click Connect.</string>
+    <string name="stt_waiting_for_transcription">Waiting for transcription…</string>
+    <string name="stt_transcription_label">Transcription</string>
+    <string name="stt_translation_label">Translation</string>
+    <string name="stt_display_styling">Display Styling</string>
+    <string name="stt_text_color">Text Color</string>
+    <string name="stt_translation_color">Translation Color</string>
+    <string name="stt_font">Font</string>
+    <string name="stt_size">Size</string>
+    <string name="stt_background_color">Background Color</string>
+    <string name="stt_opacity">Opacity:</string>
+    <string name="stt_position">Position</string>
 
     <!-- CCLI Report -->
     <string name="ccli_report">CCLI Report</string>

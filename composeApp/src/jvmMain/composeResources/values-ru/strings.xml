@@ -1078,6 +1078,13 @@
     <string name="qa_new_session">Новый сеанс</string>
     <string name="qa_resume">Продолжить (%1$d)</string>
     <string name="qa_incoming">Входящие</string>
+    <string name="qa_all">Все</string>
+    <string name="qa_approved">Одобрено</string>
+    <string name="qa_incoming_approved">Входящие + Одобренные</string>
+    <string name="qa_done">Выполнено</string>
+    <string name="qa_denied">Отклонено</string>
+    <string name="qa_questions">Вопросы</string>
+
     <string name="qa_finished">Завершённые</string>
     <string name="qa_history">История</string>
     <string name="qa_clear_all_questions">Очистить все вопросы</string>
@@ -1139,6 +1146,56 @@
     <string name="qa_pos_bl">НЛ</string>
     <string name="qa_pos_bc">НЦ</string>
     <string name="qa_pos_br">НП</string>
+
+    <!-- QA: missing strings -->
+    <string name="qa_sort">Сортировка: %1$s</string>
+    <string name="qa_sort_newest">Сначала новые</string>
+    <string name="qa_sort_oldest">Сначала старые</string>
+    <string name="qa_sort_most_votes">Больше голосов</string>
+    <string name="qa_sort_least_votes">Меньше голосов</string>
+    <string name="qa_add">Добавить</string>
+    <string name="qa_clear_all_confirm_message">Вы уверены, что хотите удалить все вопросы? Это действие нельзя отменить.</string>
+    <string name="qa_clear">Очистить</string>
+    <string name="qa_export_clear">Экспорт и очистка</string>
+    <string name="qa_copy_url">Скопировать ссылку</string>
+    <string name="qa_voting_enabled">Голосование включено</string>
+    <string name="qa_voting_disabled">Голосование отключено</string>
+    <string name="qa_opacity">Прозрачность:</string>
+    <!-- STT tab -->
+    <string name="stt_server_url">URL-адрес сервера STT</string>
+    <string name="stt_disconnect">Отключиться</string>
+    <string name="stt_connect">Подключиться</string>
+    <string name="stt_go_live">Начать прямой эфир</string>
+    <string name="stt_display_mode">Режим отображения</string>
+    <string name="stt_mode_transcribe">Только транскрипция</string>
+    <string name="stt_mode_translate">Только перевод</string>
+    <string name="stt_mode_both">Оба</string>
+    <string name="stt_layout">Макет</string>
+    <string name="stt_layout_stacked">Вертикально</string>
+    <string name="stt_layout_stacked_inverse">Вертикально (инверсия)</string>
+    <string name="stt_layout_side_by_side">Горизонтально</string>
+    <string name="stt_layout_side_by_side_inverse">Горизонтально (инверсия)</string>
+    <string name="stt_max_segments">Макс. сегментов:</string>
+    <string name="stt_max_lines">Макс. строк:</string>
+    <string name="stt_line_spacing">Межстрочный интервал %:</string>
+    <string name="stt_word_highlighting">Подсветка слов</string>
+    <string name="stt_in_progress_text">Текст в процессе</string>
+    <string name="stt_translation_in_progress">Перевод в процессе</string>
+    <string name="stt_drip_feed">Постепенный вывод</string>
+    <string name="stt_drip_feed_speed">Скорость (мс/слово):</string>
+    <string name="stt_live_preview">Предпросмотр</string>
+    <string name="stt_not_connected">Нет подключения. Введите URL-адрес сервера STT и нажмите «Подключиться».</string>
+    <string name="stt_waiting_for_transcription">Ожидание транскрипции…</string>
+    <string name="stt_transcription_label">Транскрипция</string>
+    <string name="stt_translation_label">Перевод</string>
+    <string name="stt_display_styling">Оформление отображения</string>
+    <string name="stt_text_color">Цвет текста</string>
+    <string name="stt_translation_color">Цвет перевода</string>
+    <string name="stt_font">Шрифт</string>
+    <string name="stt_size">Размер</string>
+    <string name="stt_background_color">Цвет фона</string>
+    <string name="stt_opacity">Прозрачность:</string>
+    <string name="stt_position">Положение</string>
 
     <!-- CCLI Report -->
     <string name="ccli_report">CCLI Отчёт</string>

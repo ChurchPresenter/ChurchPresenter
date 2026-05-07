@@ -58,6 +58,50 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.qa_pos_bc
+import churchpresenter.composeapp.generated.resources.qa_pos_bl
+import churchpresenter.composeapp.generated.resources.qa_pos_br
+import churchpresenter.composeapp.generated.resources.qa_pos_c
+import churchpresenter.composeapp.generated.resources.qa_pos_cl
+import churchpresenter.composeapp.generated.resources.qa_pos_cr
+import churchpresenter.composeapp.generated.resources.qa_pos_tc
+import churchpresenter.composeapp.generated.resources.qa_pos_tl
+import churchpresenter.composeapp.generated.resources.qa_pos_tr
+import churchpresenter.composeapp.generated.resources.stt_background_color
+import churchpresenter.composeapp.generated.resources.stt_connect
+import churchpresenter.composeapp.generated.resources.stt_disconnect
+import churchpresenter.composeapp.generated.resources.stt_display_mode
+import churchpresenter.composeapp.generated.resources.stt_display_styling
+import churchpresenter.composeapp.generated.resources.stt_drip_feed
+import churchpresenter.composeapp.generated.resources.stt_drip_feed_speed
+import churchpresenter.composeapp.generated.resources.stt_font
+import churchpresenter.composeapp.generated.resources.stt_go_live
+import churchpresenter.composeapp.generated.resources.stt_in_progress_text
+import churchpresenter.composeapp.generated.resources.stt_layout
+import churchpresenter.composeapp.generated.resources.stt_layout_side_by_side
+import churchpresenter.composeapp.generated.resources.stt_layout_side_by_side_inverse
+import churchpresenter.composeapp.generated.resources.stt_layout_stacked
+import churchpresenter.composeapp.generated.resources.stt_layout_stacked_inverse
+import churchpresenter.composeapp.generated.resources.stt_line_spacing
+import churchpresenter.composeapp.generated.resources.stt_live_preview
+import churchpresenter.composeapp.generated.resources.stt_max_lines
+import churchpresenter.composeapp.generated.resources.stt_max_segments
+import churchpresenter.composeapp.generated.resources.stt_mode_both
+import churchpresenter.composeapp.generated.resources.stt_mode_transcribe
+import churchpresenter.composeapp.generated.resources.stt_mode_translate
+import churchpresenter.composeapp.generated.resources.stt_not_connected
+import churchpresenter.composeapp.generated.resources.stt_opacity
+import churchpresenter.composeapp.generated.resources.stt_position
+import churchpresenter.composeapp.generated.resources.stt_server_url
+import churchpresenter.composeapp.generated.resources.stt_size
+import churchpresenter.composeapp.generated.resources.stt_text_color
+import churchpresenter.composeapp.generated.resources.stt_transcription_label
+import churchpresenter.composeapp.generated.resources.stt_translation_color
+import churchpresenter.composeapp.generated.resources.stt_translation_in_progress
+import churchpresenter.composeapp.generated.resources.stt_translation_label
+import churchpresenter.composeapp.generated.resources.stt_waiting_for_transcription
+import churchpresenter.composeapp.generated.resources.stt_word_highlighting
 import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
 import org.churchpresenter.app.churchpresenter.composables.FontSettingsDropdown
 import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
@@ -67,6 +111,7 @@ import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.viewmodel.STTManager
+import org.jetbrains.compose.resources.stringResource
 import java.awt.GraphicsEnvironment
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -110,7 +155,7 @@ fun STTTab(
                 OutlinedTextField(
                     value = urlInput,
                     onValueChange = { urlInput = it },
-                    label = { Text("STT Server URL") },
+                    label = { Text(stringResource(Res.string.stt_server_url)) },
                     singleLine = true,
                     modifier = Modifier.weight(1f),
                     enabled = !connected && !connecting
@@ -135,7 +180,7 @@ fun STTTab(
                             contentColor = Color.White
                         )
                     ) {
-                        Icon(Icons.Default.Stop, contentDescription = "Disconnect", modifier = Modifier.size(20.dp))
+                        Icon(Icons.Default.Stop, contentDescription = stringResource(Res.string.stt_disconnect), modifier = Modifier.size(20.dp))
                     }
                 } else {
                     IconButton(
@@ -153,7 +198,7 @@ fun STTTab(
                             disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
                         )
                     ) {
-                        Icon(Icons.Default.PlayArrow, contentDescription = "Connect", modifier = Modifier.size(20.dp))
+                        Icon(Icons.Default.PlayArrow, contentDescription = stringResource(Res.string.stt_connect), modifier = Modifier.size(20.dp))
                     }
                 }
 
@@ -170,7 +215,7 @@ fun STTTab(
                         disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
                     )
                 ) {
-                    Icon(Icons.Default.Tv, contentDescription = "Go Live", modifier = Modifier.size(20.dp))
+                    Icon(Icons.Default.Tv, contentDescription = stringResource(Res.string.stt_go_live), modifier = Modifier.size(20.dp))
                 }
             }
 
@@ -182,9 +227,13 @@ fun STTTab(
             ) {
                 // Display mode dropdown
                 DropdownSelector(
-                    label = "Display Mode",
+                    label = stringResource(Res.string.stt_display_mode),
                     value = sttSettings.displayMode,
-                    options = listOf("transcribe" to "Transcription Only", "translate" to "Translation Only", "both" to "Both"),
+                    options = listOf(
+                        "transcribe" to stringResource(Res.string.stt_mode_transcribe),
+                        "translate" to stringResource(Res.string.stt_mode_translate),
+                        "both" to stringResource(Res.string.stt_mode_both)
+                    ),
                     onValueChange = { onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(displayMode = it)) } },
                     modifier = Modifier.weight(1f)
                 )
@@ -192,13 +241,13 @@ fun STTTab(
                 // Layout dropdown (only when both)
                 AnimatedVisibility(visible = sttSettings.displayMode == "both") {
                     DropdownSelector(
-                        label = "Layout",
+                        label = stringResource(Res.string.stt_layout),
                         value = sttSettings.layout,
                         options = listOf(
-                            "stacked" to "Stacked",
-                            "stacked_inverse" to "Stacked (Inverse)",
-                            "side_by_side" to "Side by Side",
-                            "side_by_side_inverse" to "Side by Side (Inverse)"
+                            "stacked" to stringResource(Res.string.stt_layout_stacked),
+                            "stacked_inverse" to stringResource(Res.string.stt_layout_stacked_inverse),
+                            "side_by_side" to stringResource(Res.string.stt_layout_side_by_side),
+                            "side_by_side_inverse" to stringResource(Res.string.stt_layout_side_by_side_inverse)
                         ),
                         onValueChange = { onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(layout = it)) } },
                         modifier = Modifier.width(200.dp)
@@ -213,7 +262,7 @@ fun STTTab(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("Max Segments:", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface)
+                    Text(stringResource(Res.string.stt_max_segments), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface)
                     Spacer(Modifier.width(4.dp))
                     NumberSettingsTextField(
                         initialText = sttSettings.maxSegments,
@@ -222,7 +271,7 @@ fun STTTab(
                     )
                 }
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("Max Lines:", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface)
+                    Text(stringResource(Res.string.stt_max_lines), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface)
                     Spacer(Modifier.width(4.dp))
                     NumberSettingsTextField(
                         initialText = sttSettings.maxLines,
@@ -231,7 +280,7 @@ fun STTTab(
                     )
                 }
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("Line Spacing %:", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface)
+                    Text(stringResource(Res.string.stt_line_spacing), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface)
                     Spacer(Modifier.width(4.dp))
                     NumberSettingsTextField(
                         initialText = sttSettings.lineSpacing,
@@ -252,21 +301,21 @@ fun STTTab(
                         checked = sttSettings.showWordHighlighting,
                         onCheckedChange = { onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(showWordHighlighting = it)) } }
                     )
-                    Text("Word Highlighting", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface)
+                    Text(stringResource(Res.string.stt_word_highlighting), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface)
                 }
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Checkbox(
                         checked = sttSettings.showInProgress,
                         onCheckedChange = { onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(showInProgress = it)) } }
                     )
-                    Text("In-Progress Text", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface)
+                    Text(stringResource(Res.string.stt_in_progress_text), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface)
                 }
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Checkbox(
                         checked = sttSettings.showTranslationInProgress,
                         onCheckedChange = { onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(showTranslationInProgress = it)) } }
                     )
-                    Text("Translation In-Progress", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface)
+                    Text(stringResource(Res.string.stt_translation_in_progress), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface)
                 }
             }
 
@@ -281,10 +330,10 @@ fun STTTab(
                         checked = sttSettings.dripFeedEnabled,
                         onCheckedChange = { onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(dripFeedEnabled = it)) } }
                     )
-                    Text("Drip Feed", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface)
+                    Text(stringResource(Res.string.stt_drip_feed), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface)
                 }
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("Speed (ms/word):", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface)
+                    Text(stringResource(Res.string.stt_drip_feed_speed), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface)
                     Spacer(Modifier.width(4.dp))
                     NumberSettingsTextField(
                         initialText = sttSettings.dripFeedSpeed,
@@ -297,7 +346,7 @@ fun STTTab(
             HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
 
             // Live preview area
-            Text("Live Preview", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+            Text(stringResource(Res.string.stt_live_preview), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
 
             val maxSeg = sttSettings.maxSegments
             val displaySegments = if (maxSeg > 0) segments.takeLast(maxSeg) else segments
@@ -321,14 +370,14 @@ fun STTTab(
             ) {
                 if (!connected) {
                     Text(
-                        "Not connected. Enter the STT server URL and click Connect.",
+                        stringResource(Res.string.stt_not_connected),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(16.dp)
                     )
                 } else if (!hasContent) {
                     Text(
-                        "Waiting for transcription...",
+                        stringResource(Res.string.stt_waiting_for_transcription),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(16.dp)
@@ -347,7 +396,7 @@ fun STTTab(
                             Column(
                                 modifier = Modifier.fillMaxSize().verticalScroll(transcriptionScrollState).padding(4.dp)
                             ) {
-                                Text("Transcription", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+                                Text(stringResource(Res.string.stt_transcription_label), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
                                 Spacer(Modifier.height(4.dp))
                                 displaySegments.forEach { segment ->
                                     Text(
@@ -382,7 +431,7 @@ fun STTTab(
                             Column(
                                 modifier = Modifier.fillMaxSize().verticalScroll(translationScrollState).padding(4.dp)
                             ) {
-                                Text("Translation", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+                                Text(stringResource(Res.string.stt_translation_label), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
                                 Spacer(Modifier.height(4.dp))
                                 displayTranslation.forEach { segment ->
                                     Text(
@@ -420,11 +469,11 @@ fun STTTab(
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text("Display Styling", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+            Text(stringResource(Res.string.stt_display_styling), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
             Spacer(Modifier.height(8.dp))
 
             // Text color
-            Text("Text Color", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)
+            Text(stringResource(Res.string.stt_text_color), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 ColorPickerField(color = sttSettings.textColor, onColorChange = { onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(textColor = it)) } })
                 TextStyleButtons(
@@ -447,18 +496,18 @@ fun STTTab(
 
             // Translation text color
             Spacer(Modifier.height(8.dp))
-            Text("Translation Color", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)
+            Text(stringResource(Res.string.stt_translation_color), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)
             ColorPickerField(color = sttSettings.translationTextColor, onColorChange = { onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(translationTextColor = it)) } })
 
             // Font type + size
             Spacer(Modifier.height(8.dp))
             FlowRow(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Column(modifier = Modifier.width(140.dp)) {
-                    Text("Font", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)
+                    Text(stringResource(Res.string.stt_font), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)
                     FontSettingsDropdown(value = sttSettings.fontType, fonts = availableFonts, onValueChange = { onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(fontType = it)) } }, modifier = Modifier.fillMaxWidth())
                 }
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("Size", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)
+                    Text(stringResource(Res.string.stt_size), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)
                     NumberSettingsTextField(initialText = sttSettings.fontSize, range = 8..200, onValueChange = { onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(fontSize = it)) } })
                 }
             }
@@ -466,11 +515,11 @@ fun STTTab(
             // Background color
             Spacer(Modifier.height(8.dp))
             Column(horizontalAlignment = Alignment.Start) {
-                Text("Background Color", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)
+                Text(stringResource(Res.string.stt_background_color), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)
                 ColorPickerField(color = if (sttSettings.backgroundColor == "transparent") "#1E1E2E" else sttSettings.backgroundColor, onColorChange = { onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(backgroundColor = it)) } })
                 Spacer(Modifier.height(4.dp))
                 Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-                    Text("Opacity:", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)
+                    Text(stringResource(Res.string.stt_opacity), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)
                     Spacer(Modifier.width(4.dp))
                     androidx.compose.material3.Slider(
                         value = sttSettings.backgroundOpacity / 100f,
@@ -483,12 +532,18 @@ fun STTTab(
 
             // Position on screen
             Spacer(Modifier.height(8.dp))
-            Text("Position", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)
+            Text(stringResource(Res.string.stt_position), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)
             Spacer(Modifier.height(4.dp))
             val positions = listOf(
-                Constants.TOP_LEFT to "TL", Constants.TOP_CENTER to "TC", Constants.TOP_RIGHT to "TR",
-                Constants.CENTER_LEFT to "CL", Constants.CENTER to "C", Constants.CENTER_RIGHT to "CR",
-                Constants.BOTTOM_LEFT to "BL", Constants.BOTTOM_CENTER to "BC", Constants.BOTTOM_RIGHT to "BR"
+                Constants.TOP_LEFT to stringResource(Res.string.qa_pos_tl),
+                Constants.TOP_CENTER to stringResource(Res.string.qa_pos_tc),
+                Constants.TOP_RIGHT to stringResource(Res.string.qa_pos_tr),
+                Constants.CENTER_LEFT to stringResource(Res.string.qa_pos_cl),
+                Constants.CENTER to stringResource(Res.string.qa_pos_c),
+                Constants.CENTER_RIGHT to stringResource(Res.string.qa_pos_cr),
+                Constants.BOTTOM_LEFT to stringResource(Res.string.qa_pos_bl),
+                Constants.BOTTOM_CENTER to stringResource(Res.string.qa_pos_bc),
+                Constants.BOTTOM_RIGHT to stringResource(Res.string.qa_pos_br)
             )
             Column(verticalArrangement = Arrangement.spacedBy(2.dp), modifier = Modifier.fillMaxWidth()) {
                 positions.chunked(3).forEach { rowItems ->

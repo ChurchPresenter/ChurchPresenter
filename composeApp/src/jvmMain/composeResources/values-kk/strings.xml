@@ -1076,6 +1076,13 @@
     <string name="qa_new_session">Жаңа сеанс</string>
     <string name="qa_resume">Жалғастыру (%1$d)</string>
     <string name="qa_incoming">Кіріс</string>
+    <string name="qa_all">Барлығы</string>
+    <string name="qa_approved">Мақұлданды</string>
+    <string name="qa_incoming_approved">Кіріс + Мақұлданған</string>
+    <string name="qa_done">Орындалды</string>
+    <string name="qa_denied">Қабылданбады</string>
+    <string name="qa_questions">Сұрақтар</string>
+
     <string name="qa_finished">Аяқталған</string>
     <string name="qa_history">Тарих</string>
     <string name="qa_clear_all_questions">Барлық сұрақтарды тазалау</string>
@@ -1137,6 +1144,56 @@
     <string name="qa_pos_bl">ТС</string>
     <string name="qa_pos_bc">ТО</string>
     <string name="qa_pos_br">ТҚ</string>
+
+    <!-- QA: missing strings -->
+    <string name="qa_sort">Сұрыптау: %1$s</string>
+    <string name="qa_sort_newest">Алдымен жаңалар</string>
+    <string name="qa_sort_oldest">Алдымен ескілер</string>
+    <string name="qa_sort_most_votes">Көп дауыс</string>
+    <string name="qa_sort_least_votes">Аз дауыс</string>
+    <string name="qa_add">Қосу</string>
+    <string name="qa_clear_all_confirm_message">Барлық сұрақтарды өшіргіңіз келетінін растайсыз ба? Бұл әрекетті болдырмау мүмкін емес.</string>
+    <string name="qa_clear">Тазалау</string>
+    <string name="qa_export_clear">Экспорттау және тазалау</string>
+    <string name="qa_copy_url">URL-ді көшіру</string>
+    <string name="qa_voting_enabled">Дауыс беру қосулы</string>
+    <string name="qa_voting_disabled">Дауыс беру өшірулі</string>
+    <string name="qa_opacity">Мөлдірлік:</string>
+    <!-- STT tab -->
+    <string name="stt_server_url">STT сервер URL-і</string>
+    <string name="stt_disconnect">Ажырату</string>
+    <string name="stt_connect">Қосылу</string>
+    <string name="stt_go_live">Тікелей эфирге шығу</string>
+    <string name="stt_display_mode">Көрсету режимі</string>
+    <string name="stt_mode_transcribe">Тек транскрипция</string>
+    <string name="stt_mode_translate">Тек аударма</string>
+    <string name="stt_mode_both">Екеуі де</string>
+    <string name="stt_layout">Орналасу</string>
+    <string name="stt_layout_stacked">Жинақталған</string>
+    <string name="stt_layout_stacked_inverse">Жинақталған (кері)</string>
+    <string name="stt_layout_side_by_side">Қатар</string>
+    <string name="stt_layout_side_by_side_inverse">Қатар (кері)</string>
+    <string name="stt_max_segments">Макс. сегменттер:</string>
+    <string name="stt_max_lines">Макс. жолдар:</string>
+    <string name="stt_line_spacing">Жол аралығы %:</string>
+    <string name="stt_word_highlighting">Сөзді бөлектеу</string>
+    <string name="stt_in_progress_text">Орындалу мәтіні</string>
+    <string name="stt_translation_in_progress">Аударма орындалуда</string>
+    <string name="stt_drip_feed">Кезекті шығару</string>
+    <string name="stt_drip_feed_speed">Жылдамдық (мс/сөз):</string>
+    <string name="stt_live_preview">Тікелей алдын ала қарау</string>
+    <string name="stt_not_connected">Қосылмаған. STT сервер URL-ін енгізіп, Қосылу түймесін басыңыз.</string>
+    <string name="stt_waiting_for_transcription">Транскрипция күтілуде…</string>
+    <string name="stt_transcription_label">Транскрипция</string>
+    <string name="stt_translation_label">Аударма</string>
+    <string name="stt_display_styling">Дисплей мәнері</string>
+    <string name="stt_text_color">Мәтін түсі</string>
+    <string name="stt_translation_color">Аударма түсі</string>
+    <string name="stt_font">Қаріп</string>
+    <string name="stt_size">Өлшем</string>
+    <string name="stt_background_color">Фон түсі</string>
+    <string name="stt_opacity">Мөлдірлік:</string>
+    <string name="stt_position">Орын</string>
 
     <!-- CCLI Report -->
     <string name="ccli_report">CCLI Есеп</string>

@@ -1154,6 +1154,13 @@
     <string name="qa_new_session">Nová relace</string>
     <string name="qa_resume">Pokračovat (%1$d)</string>
     <string name="qa_incoming">Příchozí</string>
+    <string name="qa_all">Vše</string>
+    <string name="qa_approved">Schváleno</string>
+    <string name="qa_incoming_approved">Příchozí + Schválené</string>
+    <string name="qa_done">Hotovo</string>
+    <string name="qa_denied">Zamítnuto</string>
+    <string name="qa_questions">Otázky</string>
+
     <string name="qa_finished">Dokončené</string>
     <string name="qa_history">Historie</string>
     <string name="qa_clear_all_questions">Vymazat všechny otázky</string>
@@ -1215,6 +1222,56 @@
     <string name="qa_pos_bl">DL</string>
     <string name="qa_pos_bc">DS</string>
     <string name="qa_pos_br">DP</string>
+
+    <!-- QA: missing strings -->
+    <string name="qa_sort">Řazení: %1$s</string>
+    <string name="qa_sort_newest">Nejnovější první</string>
+    <string name="qa_sort_oldest">Nejstarší první</string>
+    <string name="qa_sort_most_votes">Nejvíce hlasů</string>
+    <string name="qa_sort_least_votes">Nejméně hlasů</string>
+    <string name="qa_add">Přidat</string>
+    <string name="qa_clear_all_confirm_message">Opravdu chcete smazat všechny otázky? Tuto akci nelze vrátit zpět.</string>
+    <string name="qa_clear">Vymazat</string>
+    <string name="qa_export_clear">Exportovat a vymazat</string>
+    <string name="qa_copy_url">Kopírovat URL</string>
+    <string name="qa_voting_enabled">Hlasování povoleno</string>
+    <string name="qa_voting_disabled">Hlasování zakázáno</string>
+    <string name="qa_opacity">Průhlednost:</string>
+    <!-- STT tab -->
+    <string name="stt_server_url">URL serveru STT</string>
+    <string name="stt_disconnect">Odpojit</string>
+    <string name="stt_connect">Připojit</string>
+    <string name="stt_go_live">Spustit živě</string>
+    <string name="stt_display_mode">Režim zobrazení</string>
+    <string name="stt_mode_transcribe">Pouze přepis</string>
+    <string name="stt_mode_translate">Pouze překlad</string>
+    <string name="stt_mode_both">Obojí</string>
+    <string name="stt_layout">Rozložení</string>
+    <string name="stt_layout_stacked">Vrstvené</string>
+    <string name="stt_layout_stacked_inverse">Vrstvené (Inverzní)</string>
+    <string name="stt_layout_side_by_side">Vedle sebe</string>
+    <string name="stt_layout_side_by_side_inverse">Vedle sebe (Inverzní)</string>
+    <string name="stt_max_segments">Max. segmentů:</string>
+    <string name="stt_max_lines">Max. řádků:</string>
+    <string name="stt_line_spacing">Řádkování %:</string>
+    <string name="stt_word_highlighting">Zvýraznění slov</string>
+    <string name="stt_in_progress_text">Text probíhá</string>
+    <string name="stt_translation_in_progress">Překlad probíhá</string>
+    <string name="stt_drip_feed">Postupné zobrazení</string>
+    <string name="stt_drip_feed_speed">Rychlost (ms/slovo):</string>
+    <string name="stt_live_preview">Živý náhled</string>
+    <string name="stt_not_connected">Nepřipojeno. Zadejte URL serveru STT a klikněte na Připojit.</string>
+    <string name="stt_waiting_for_transcription">Čekání na přepis…</string>
+    <string name="stt_transcription_label">Přepis</string>
+    <string name="stt_translation_label">Překlad</string>
+    <string name="stt_display_styling">Styl zobrazení</string>
+    <string name="stt_text_color">Barva textu</string>
+    <string name="stt_translation_color">Barva překladu</string>
+    <string name="stt_font">Písmo</string>
+    <string name="stt_size">Velikost</string>
+    <string name="stt_background_color">Barva pozadí</string>
+    <string name="stt_opacity">Průhlednost:</string>
+    <string name="stt_position">Poloha</string>
 
     <!-- CCLI Report -->
     <string name="ccli_report">Zpráva CCLI</string>

@@ -1076,6 +1076,13 @@
     <string name="qa_new_session">Новы сеанс</string>
     <string name="qa_resume">Працягнуць (%1$d)</string>
     <string name="qa_incoming">Уваходныя</string>
+    <string name="qa_all">Усё</string>
+    <string name="qa_approved">Адобрана</string>
+    <string name="qa_incoming_approved">Уваходзячыя + Адобраныя</string>
+    <string name="qa_done">Выканана</string>
+    <string name="qa_denied">Адхілена</string>
+    <string name="qa_questions">Пытанні</string>
+
     <string name="qa_finished">Завершаныя</string>
     <string name="qa_history">Гісторыя</string>
     <string name="qa_clear_all_questions">Ачысціць усе пытанні</string>
@@ -1137,6 +1144,56 @@
     <string name="qa_pos_bl">НЛ</string>
     <string name="qa_pos_bc">НЦ</string>
     <string name="qa_pos_br">НП</string>
+
+    <!-- QA: missing strings -->
+    <string name="qa_sort">Сартаванне: %1$s</string>
+    <string name="qa_sort_newest">Спачатку новыя</string>
+    <string name="qa_sort_oldest">Спачатку старыя</string>
+    <string name="qa_sort_most_votes">Болей галасоў</string>
+    <string name="qa_sort_least_votes">Менш галасоў</string>
+    <string name="qa_add">Дадаць</string>
+    <string name="qa_clear_all_confirm_message">Вы ўпэўнены, што хочаце ачысціць усе пытанні? Гэта немагчыма адмяніць.</string>
+    <string name="qa_clear">Ачысціць</string>
+    <string name="qa_export_clear">Экспарт і ачыстка</string>
+    <string name="qa_copy_url">Скапіраваць URL</string>
+    <string name="qa_voting_enabled">Галасаванне ўключана</string>
+    <string name="qa_voting_disabled">Галасаванне адключана</string>
+    <string name="qa_opacity">Празрыстасць:</string>
+    <!-- STT tab -->
+    <string name="stt_server_url">URL-адрас сервера STT</string>
+    <string name="stt_disconnect">Адключыцца</string>
+    <string name="stt_connect">Падключыцца</string>
+    <string name="stt_go_live">Пачаць прамы эфір</string>
+    <string name="stt_display_mode">Рэжым адлюстравання</string>
+    <string name="stt_mode_transcribe">Толькі транскрыпцыя</string>
+    <string name="stt_mode_translate">Толькі пераклад</string>
+    <string name="stt_mode_both">Абодва</string>
+    <string name="stt_layout">Макет</string>
+    <string name="stt_layout_stacked">Вертыкальна</string>
+    <string name="stt_layout_stacked_inverse">Вертыкальна (інверсія)</string>
+    <string name="stt_layout_side_by_side">Побач</string>
+    <string name="stt_layout_side_by_side_inverse">Побач (інверсія)</string>
+    <string name="stt_max_segments">Макс. сегментаў:</string>
+    <string name="stt_max_lines">Макс. радкоў:</string>
+    <string name="stt_line_spacing">Міжрадковы інтэрвал %:</string>
+    <string name="stt_word_highlighting">Вылучэнне слоў</string>
+    <string name="stt_in_progress_text">Тэкст у працэсе</string>
+    <string name="stt_translation_in_progress">Пераклад у працэсе</string>
+    <string name="stt_drip_feed">Паступовы вывад</string>
+    <string name="stt_drip_feed_speed">Хуткасць (мс/слова):</string>
+    <string name="stt_live_preview">Папярэдні прагляд</string>
+    <string name="stt_not_connected">Няма злучэння. Увядзіце URL-адрас сервера STT і націсніце «Падключыцца».</string>
+    <string name="stt_waiting_for_transcription">Чаканне транскрыпцыі…</string>
+    <string name="stt_transcription_label">Транскрыпцыя</string>
+    <string name="stt_translation_label">Пераклад</string>
+    <string name="stt_display_styling">Аформленне адлюстравання</string>
+    <string name="stt_text_color">Колер тэксту</string>
+    <string name="stt_translation_color">Колер перакладу</string>
+    <string name="stt_font">Шрыфт</string>
+    <string name="stt_size">Памер</string>
+    <string name="stt_background_color">Колер фону</string>
+    <string name="stt_opacity">Празрыстасць:</string>
+    <string name="stt_position">Становішча</string>
 
     <!-- CCLI Report -->
     <string name="ccli_report">Справаздача CCLI</string>

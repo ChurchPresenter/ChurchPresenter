@@ -144,6 +144,25 @@ import churchpresenter.composeapp.generated.resources.qa_confirm_delete_prompt
 import churchpresenter.composeapp.generated.resources.qa_submitter_device
 import churchpresenter.composeapp.generated.resources.tooltip_clear_display
 import churchpresenter.composeapp.generated.resources.tooltip_edit
+import churchpresenter.composeapp.generated.resources.qa_add
+import churchpresenter.composeapp.generated.resources.qa_clear
+import churchpresenter.composeapp.generated.resources.qa_clear_all_confirm_message
+import churchpresenter.composeapp.generated.resources.qa_copy_url
+import churchpresenter.composeapp.generated.resources.qa_export_clear
+import churchpresenter.composeapp.generated.resources.qa_opacity
+import churchpresenter.composeapp.generated.resources.qa_sort
+import churchpresenter.composeapp.generated.resources.qa_sort_least_votes
+import churchpresenter.composeapp.generated.resources.qa_sort_most_votes
+import churchpresenter.composeapp.generated.resources.qa_sort_newest
+import churchpresenter.composeapp.generated.resources.qa_sort_oldest
+import churchpresenter.composeapp.generated.resources.qa_voting_disabled
+import churchpresenter.composeapp.generated.resources.qa_voting_enabled
+import churchpresenter.composeapp.generated.resources.qa_all
+import churchpresenter.composeapp.generated.resources.qa_approved
+import churchpresenter.composeapp.generated.resources.qa_denied
+import churchpresenter.composeapp.generated.resources.qa_done
+import churchpresenter.composeapp.generated.resources.qa_incoming_approved
+import churchpresenter.composeapp.generated.resources.qa_questions
 import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
 import org.churchpresenter.app.churchpresenter.composables.FontSettingsDropdown
 import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
@@ -220,7 +239,14 @@ fun QATab(
 
     // Filter options: 0=All, 1=Incoming(pending only), 2=Approved, 3=Incoming+Approved, 4=Done, 5=Denied
     // History is separate (selectedFilter = 6)
-    val filterLabels = listOf("All", "Incoming", "Approved", "Incoming + Approved", "Done", "Denied")
+    val filterLabels = listOf(
+        stringResource(Res.string.qa_all),
+        stringResource(Res.string.qa_incoming),
+        stringResource(Res.string.qa_approved),
+        stringResource(Res.string.qa_incoming_approved),
+        stringResource(Res.string.qa_done),
+        stringResource(Res.string.qa_denied)
+    )
     val filterCounts = listOf(allCount, pendingCount, approvedCount, incomingApprovedCount, doneCount, deniedCount)
     var filterDropdownExpanded by remember { mutableStateOf(false) }
 
@@ -343,7 +369,7 @@ fun QATab(
                         ) else ButtonDefaults.outlinedButtonColors()
                     ) {
                         Text(
-                            if (selectedFilter < 6) filterLabels[selectedFilter] else "Questions",
+                            if (selectedFilter < 6) filterLabels[selectedFilter] else stringResource(Res.string.qa_questions),
                             style = MaterialTheme.typography.labelMedium
                         )
                         Text(" \u25BE", style = MaterialTheme.typography.labelSmall)
@@ -364,14 +390,19 @@ fun QATab(
 
                 // Sort dropdown
                 var sortDropdownExpanded by remember { mutableStateOf(false) }
-                val sortLabels = listOf("Newest First", "Oldest First", "Most Votes", "Least Votes")
+                val sortLabels = listOf(
+                    stringResource(Res.string.qa_sort_newest),
+                    stringResource(Res.string.qa_sort_oldest),
+                    stringResource(Res.string.qa_sort_most_votes),
+                    stringResource(Res.string.qa_sort_least_votes)
+                )
                 Box {
                     OutlinedButton(
                         onClick = { sortDropdownExpanded = true },
                         modifier = Modifier.height(32.dp),
                         contentPadding = ButtonDefaults.TextButtonContentPadding
                     ) {
-                        Text("Sort: ${sortLabels[sortMode]}", style = MaterialTheme.typography.labelMedium)
+                        Text(stringResource(Res.string.qa_sort, sortLabels[sortMode]), style = MaterialTheme.typography.labelMedium)
                     }
                     androidx.compose.material3.DropdownMenu(
                         expanded = sortDropdownExpanded,
@@ -397,7 +428,7 @@ fun QATab(
                         containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
                     ) else ButtonDefaults.outlinedButtonColors()
                 ) {
-                    Text("History ($historyCount)", style = MaterialTheme.typography.labelMedium)
+                    Text("${stringResource(Res.string.qa_history)} ($historyCount)", style = MaterialTheme.typography.labelMedium)
                 }
             }
 
@@ -422,7 +453,7 @@ fun QATab(
                         },
                         enabled = addQuestionText.isNotBlank()
                     ) {
-                        Text("Add")
+                        Text(stringResource(Res.string.qa_add))
                     }
                 }
             }
@@ -573,8 +604,8 @@ fun QATab(
         if (showClearConfirm) {
             AlertDialog(
                 onDismissRequest = { showClearConfirm = false },
-                title = { Text("Clear All Questions") },
-                text = { Text("Are you sure you want to clear all questions? This cannot be undone.") },
+                title = { Text(stringResource(Res.string.qa_clear_all_questions)) },
+                text = { Text(stringResource(Res.string.qa_clear_all_confirm_message)) },
                 confirmButton = {
                     TextButton(onClick = {
                         qaManager.clearAll()
@@ -582,7 +613,7 @@ fun QATab(
                         presenterManager.setShowQRCodeOnDisplay(false)
                         presenting(Presenting.NONE)
                         showClearConfirm = false
-                    }) { Text("Clear", color = Color(0xFFE53935)) }
+                    }) { Text(stringResource(Res.string.qa_clear), color = Color(0xFFE53935)) }
                 },
                 dismissButton = {
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -603,8 +634,8 @@ fun QATab(
                             presenterManager.setShowQRCodeOnDisplay(false)
                             presenting(Presenting.NONE)
                             showClearConfirm = false
-                        }) { Text("Export & Clear") }
-                        TextButton(onClick = { showClearConfirm = false }) { Text("Cancel") }
+                        }) { Text(stringResource(Res.string.qa_export_clear)) }
+                        TextButton(onClick = { showClearConfirm = false }) { Text(stringResource(Res.string.cancel)) }
                     }
                 }
             )
@@ -635,7 +666,7 @@ fun QATab(
                     modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
                     contentPadding = ButtonDefaults.TextButtonContentPadding
                 ) {
-                    Text("Copy URL", fontSize = 11.sp)
+                    Text(stringResource(Res.string.qa_copy_url), fontSize = 11.sp)
                 }
 
                 Spacer(Modifier.height(8.dp))
@@ -815,7 +846,7 @@ fun QATab(
                     modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
                     contentPadding = ButtonDefaults.TextButtonContentPadding
                 ) {
-                    Text("Copy URL", fontSize = 11.sp)
+                    Text(stringResource(Res.string.qa_copy_url), fontSize = 11.sp)
                 }
             }
 
@@ -834,7 +865,7 @@ fun QATab(
                     contentColor = MaterialTheme.colorScheme.onSurface
                 )
             ) {
-                Text(if (qaSettings.votingEnabled) "Voting Enabled" else "Voting Disabled")
+                Text(if (qaSettings.votingEnabled) stringResource(Res.string.qa_voting_enabled) else stringResource(Res.string.qa_voting_disabled))
             }
 
             Spacer(Modifier.height(16.dp))
@@ -882,7 +913,7 @@ fun QATab(
                 ColorPickerField(color = if (qaSettings.backgroundColor == "transparent") "#1E1E2E" else qaSettings.backgroundColor, onColorChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(backgroundColor = it)) } })
                 Spacer(Modifier.height(4.dp))
                 Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-                    Text("Opacity:", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)
+                    Text(stringResource(Res.string.qa_opacity), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)
                     Spacer(Modifier.width(4.dp))
                     androidx.compose.material3.Slider(
                         value = qaSettings.backgroundOpacity / 100f,
@@ -985,9 +1016,11 @@ private fun QuestionRow(
         QuestionStatus.DENIED -> Color(0xFFEF5350)
         QuestionStatus.DONE -> Color(0xFF42A5F5)
     }
+    val strDone = stringResource(Res.string.qa_done)
+    val strDenied = stringResource(Res.string.qa_denied)
     val statusLabel = when (question.status) {
-        QuestionStatus.DONE -> "Done"
-        QuestionStatus.DENIED -> "Denied"
+        QuestionStatus.DONE -> strDone
+        QuestionStatus.DENIED -> strDenied
         else -> null
     }
     val timeFormat = remember { SimpleDateFormat("HH:mm", Locale.getDefault()) }

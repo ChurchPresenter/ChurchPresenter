@@ -1076,6 +1076,13 @@
     <string name="qa_new_session">Neue Sitzung</string>
     <string name="qa_resume">Fortsetzen (%1$d)</string>
     <string name="qa_incoming">Eingehend</string>
+    <string name="qa_all">Alle</string>
+    <string name="qa_approved">Genehmigt</string>
+    <string name="qa_incoming_approved">Eingehend + Genehmigt</string>
+    <string name="qa_done">Erledigt</string>
+    <string name="qa_denied">Abgelehnt</string>
+    <string name="qa_questions">Fragen</string>
+
     <string name="qa_finished">Abgeschlossen</string>
     <string name="qa_history">Verlauf</string>
     <string name="qa_clear_all_questions">Alle Fragen löschen</string>
@@ -1137,6 +1144,56 @@
     <string name="qa_pos_bl">UL</string>
     <string name="qa_pos_bc">UM</string>
     <string name="qa_pos_br">UR</string>
+
+    <!-- QA: missing strings -->
+    <string name="qa_sort">Sortierung: %1$s</string>
+    <string name="qa_sort_newest">Neueste zuerst</string>
+    <string name="qa_sort_oldest">Älteste zuerst</string>
+    <string name="qa_sort_most_votes">Meiste Stimmen</string>
+    <string name="qa_sort_least_votes">Wenigste Stimmen</string>
+    <string name="qa_add">Hinzufügen</string>
+    <string name="qa_clear_all_confirm_message">Sind Sie sicher, dass Sie alle Fragen löschen möchten? Dies kann nicht rückgängig gemacht werden.</string>
+    <string name="qa_clear">Löschen</string>
+    <string name="qa_export_clear">Exportieren und löschen</string>
+    <string name="qa_copy_url">URL kopieren</string>
+    <string name="qa_voting_enabled">Abstimmung aktiviert</string>
+    <string name="qa_voting_disabled">Abstimmung deaktiviert</string>
+    <string name="qa_opacity">Deckkraft:</string>
+    <!-- STT tab -->
+    <string name="stt_server_url">STT-Server-URL</string>
+    <string name="stt_disconnect">Trennen</string>
+    <string name="stt_connect">Verbinden</string>
+    <string name="stt_go_live">Live gehen</string>
+    <string name="stt_display_mode">Anzeigemodus</string>
+    <string name="stt_mode_transcribe">Nur Transkription</string>
+    <string name="stt_mode_translate">Nur Übersetzung</string>
+    <string name="stt_mode_both">Beides</string>
+    <string name="stt_layout">Layout</string>
+    <string name="stt_layout_stacked">Gestapelt</string>
+    <string name="stt_layout_stacked_inverse">Gestapelt (Umgekehrt)</string>
+    <string name="stt_layout_side_by_side">Nebeneinander</string>
+    <string name="stt_layout_side_by_side_inverse">Nebeneinander (Umgekehrt)</string>
+    <string name="stt_max_segments">Max. Segmente:</string>
+    <string name="stt_max_lines">Max. Zeilen:</string>
+    <string name="stt_line_spacing">Zeilenabstand %:</string>
+    <string name="stt_word_highlighting">Worthervorhebung</string>
+    <string name="stt_in_progress_text">Text in Bearbeitung</string>
+    <string name="stt_translation_in_progress">Übersetzung in Bearbeitung</string>
+    <string name="stt_drip_feed">Schrittweise Anzeige</string>
+    <string name="stt_drip_feed_speed">Geschwindigkeit (ms/Wort):</string>
+    <string name="stt_live_preview">Live-Vorschau</string>
+    <string name="stt_not_connected">Nicht verbunden. Geben Sie die STT-Server-URL ein und klicken Sie auf Verbinden.</string>
+    <string name="stt_waiting_for_transcription">Warten auf Transkription…</string>
+    <string name="stt_transcription_label">Transkription</string>
+    <string name="stt_translation_label">Übersetzung</string>
+    <string name="stt_display_styling">Anzeigestil</string>
+    <string name="stt_text_color">Textfarbe</string>
+    <string name="stt_translation_color">Übersetzungsfarbe</string>
+    <string name="stt_font">Schriftart</string>
+    <string name="stt_size">Größe</string>
+    <string name="stt_background_color">Hintergrundfarbe</string>
+    <string name="stt_opacity">Deckkraft:</string>
+    <string name="stt_position">Position</string>
 
     <!-- CCLI Report -->
     <string name="ccli_report">CCLI-Bericht</string>
