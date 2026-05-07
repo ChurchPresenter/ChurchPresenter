@@ -119,7 +119,6 @@ import churchpresenter.composeapp.generated.resources.qa_size
 import churchpresenter.composeapp.generated.resources.qa_start_session_hint
 import churchpresenter.composeapp.generated.resources.qa_stop_session
 import churchpresenter.composeapp.generated.resources.qa_submit_questions
-import churchpresenter.composeapp.generated.resources.qa_transparent
 import churchpresenter.composeapp.generated.resources.qa_waiting
 import churchpresenter.composeapp.generated.resources.qa_public_access
 import churchpresenter.composeapp.generated.resources.qa_public_access_description
@@ -880,15 +879,17 @@ fun QATab(
             Spacer(Modifier.height(8.dp))
             Column(horizontalAlignment = Alignment.Start) {
                 Text(stringResource(Res.string.qa_background_color), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)
-                if (qaSettings.backgroundColor == "transparent") {
-                    Button(onClick = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(backgroundColor = "#1E1E2E")) } },
-                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary)
-                    ) { Text(stringResource(Res.string.qa_transparent), style = MaterialTheme.typography.labelMedium) }
-                } else {
-                    ColorPickerField(color = qaSettings.backgroundColor, onColorChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(backgroundColor = it)) } })
-                    Button(onClick = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(backgroundColor = "transparent")) } },
-                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surfaceVariant, contentColor = MaterialTheme.colorScheme.onSurfaceVariant)
-                    ) { Text(stringResource(Res.string.qa_transparent), style = MaterialTheme.typography.labelMedium) }
+                ColorPickerField(color = if (qaSettings.backgroundColor == "transparent") "#1E1E2E" else qaSettings.backgroundColor, onColorChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(backgroundColor = it)) } })
+                Spacer(Modifier.height(4.dp))
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+                    Text("Opacity:", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)
+                    Spacer(Modifier.width(4.dp))
+                    androidx.compose.material3.Slider(
+                        value = qaSettings.backgroundOpacity / 100f,
+                        onValueChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(backgroundOpacity = (it * 100).toInt())) } },
+                        modifier = Modifier.weight(1f)
+                    )
+                    Text("${qaSettings.backgroundOpacity}%", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(36.dp))
                 }
             }
 

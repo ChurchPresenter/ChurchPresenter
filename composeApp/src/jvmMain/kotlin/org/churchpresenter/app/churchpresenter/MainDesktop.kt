@@ -97,6 +97,7 @@ import org.churchpresenter.app.churchpresenter.tabs.LowerThirdTab
 import org.churchpresenter.app.churchpresenter.tabs.CanvasTab
 import org.churchpresenter.app.churchpresenter.tabs.QATab
 import org.churchpresenter.app.churchpresenter.server.TunnelStatus
+import org.churchpresenter.app.churchpresenter.tabs.STTTab
 import org.churchpresenter.app.churchpresenter.tabs.TabSection
 import org.churchpresenter.app.churchpresenter.tabs.Tabs
 import org.churchpresenter.app.churchpresenter.tabs.getStringName
@@ -108,6 +109,7 @@ import org.churchpresenter.app.churchpresenter.viewmodel.PicturesViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresentationViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.app.churchpresenter.viewmodel.QAManager
+import org.churchpresenter.app.churchpresenter.viewmodel.STTManager
 import org.churchpresenter.app.churchpresenter.viewmodel.SceneViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.ScheduleViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.SongsViewModel
@@ -178,6 +180,7 @@ fun MainDesktop(
     qaDisplayUrl: String = "",
     onQaDisplayUrlChanged: (String) -> Unit = {},
     onOpenLottieGen: (outputDir: String, onFileSaved: (() -> Unit)?) -> Unit = { _, _ -> },
+    sttManager: STTManager? = null,
 ) {
     val isDarkTheme = when (theme) {
         ThemeMode.LIGHT -> false
@@ -999,6 +1002,17 @@ fun MainDesktop(
                                     onQaDisplayUrlChanged = onQaDisplayUrlChanged,
                                 )
                             }
+
+                            Tabs.STT -> if (sttManager != null) {
+                                STTTab(
+                                    modifier = Modifier.fillMaxSize(),
+                                    sttManager = sttManager,
+                                    presenterManager = presenterManager,
+                                    presenting = presenting,
+                                    appSettings = appSettings,
+                                    onSettingsChange = onSettingsChange
+                                )
+                            }
                         }
                     }
                 }
@@ -1088,6 +1102,7 @@ fun MainDesktop(
                             modifier = Modifier.fillMaxWidth(),
                             serverUrl = serverUrl,
                             qaDisplayUrl = qaDisplayUrl,
+                            sttManager = sttManager,
                         )
                     }
                 }

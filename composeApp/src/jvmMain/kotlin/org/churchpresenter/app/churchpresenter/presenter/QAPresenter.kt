@@ -53,9 +53,9 @@ fun QAPresenter(
 ) {
     val isKey = outputRole == Constants.OUTPUT_ROLE_KEY
     val textColor = if (isKey) Color.White else parseHexColor(qaSettings.textColor)
+    val bgOpacity = (qaSettings.backgroundOpacity / 100f).coerceIn(0f, 1f)
     val cardBg = if (isKey) Color.White
-                 else if (qaSettings.backgroundColor == "transparent") Color.Transparent
-                 else parseHexColor(qaSettings.backgroundColor)
+                 else parseHexColor(if (qaSettings.backgroundColor == "transparent") "#1E1E2E" else qaSettings.backgroundColor).copy(alpha = bgOpacity)
     val fontFamily = systemFontFamilyOrDefault(qaSettings.fontType)
 
     val shadowColorBase = parseHexColor(qaSettings.shadowColor)
@@ -130,9 +130,9 @@ fun QAQRCodePresenter(
 ) {
     val isKey = outputRole == Constants.OUTPUT_ROLE_KEY
     val textColor = if (isKey) Color.White else parseHexColor(qaSettings.textColor)
+    val qrBgOpacity = (qaSettings.backgroundOpacity / 100f).coerceIn(0f, 1f)
     val bgColor = if (isKey) Color.Transparent
-                  else if (qaSettings.backgroundColor == "transparent") Color.Transparent
-                  else parseHexColor(qaSettings.backgroundColor)
+                  else parseHexColor(if (qaSettings.backgroundColor == "transparent") "#1E1E2E" else qaSettings.backgroundColor).copy(alpha = qrBgOpacity)
 
     val qrBitmap = remember(url) { generateQRCodeBitmap(url, 512) }
 

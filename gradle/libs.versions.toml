@@ -47,6 +47,7 @@ ktor-client-cio = { module = "io.ktor:ktor-client-cio-jvm", version.ref = "ktor"
 bouncycastle-pkix = { module = "org.bouncycastle:bcpkix-jdk18on", version.ref = "bouncycastle" }
 bouncycastle-prov = { module = "org.bouncycastle:bcprov-jdk18on", version.ref = "bouncycastle" }
 apache-poi = { module = "org.apache.poi:poi", version.ref = "apache-poi" }
+socket-io-client = { module = "io.socket:socket.io-client", version = "2.1.1" }
 
 [plugins]
 composeHotReload = { id = "org.jetbrains.compose.hot-reload", version.ref = "composeHotReload" }

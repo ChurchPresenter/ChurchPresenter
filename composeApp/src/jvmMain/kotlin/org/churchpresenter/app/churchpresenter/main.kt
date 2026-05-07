@@ -89,6 +89,7 @@ import org.churchpresenter.app.churchpresenter.dialogs.OptionsDialog
 import org.churchpresenter.app.churchpresenter.presenter.DeckLinkComposeOutput
 import org.churchpresenter.app.churchpresenter.presenter.AnnouncementsPresenter
 import org.churchpresenter.app.churchpresenter.presenter.QAPresenter
+import org.churchpresenter.app.churchpresenter.presenter.STTPresenter
 import org.churchpresenter.app.churchpresenter.presenter.QAQRCodePresenter
 import org.churchpresenter.app.churchpresenter.presenter.CefManager
 import org.churchpresenter.app.churchpresenter.presenter.WebsitePresenter
@@ -116,6 +117,7 @@ import org.churchpresenter.app.churchpresenter.data.Bible
 import org.churchpresenter.app.churchpresenter.server.CompanionServer
 import org.churchpresenter.app.churchpresenter.server.TunnelStatus
 import org.churchpresenter.app.churchpresenter.viewmodel.QAManager
+import org.churchpresenter.app.churchpresenter.viewmodel.STTManager
 import org.churchpresenter.app.churchpresenter.server.AddToScheduleRequest
 import org.churchpresenter.app.churchpresenter.server.PendingRemoteRequest
 import org.churchpresenter.app.churchpresenter.server.ProjectRequest
@@ -279,6 +281,7 @@ fun main() {
         }
         val companionServer = remember { CompanionServer() }
         val qaManager = remember { QAManager() }
+        val sttManager = remember { STTManager() }
         remember(qaManager) { companionServer.qaManager = qaManager; true }
         // Sync QA settings to server
         LaunchedEffect(appSettings.qaSettings.adminPassword, appSettings.qaSettings.rateLimitCooldownSeconds, appSettings.qaSettings.votingEnabled) {
@@ -1065,6 +1068,7 @@ fun main() {
                                             )
                                         }
                                     },
+                                    sttManager = sttManager
                                 )
                                 OptionsDialog(
                                     isVisible = showOptionsDialog,
@@ -1256,6 +1260,7 @@ fun main() {
                 identifyingScreen = identifyingScreen,
                 serverUrl = companionServer.serverUrl.collectAsState().value,
                 qaDisplayUrl = qaDisplayUrl,
+                sttManager = sttManager,
             )
         } else if (appReady) {
             LicenseDialog(
@@ -1439,6 +1444,7 @@ private fun PresenterWindows(
     identifyingScreen: Boolean,
     serverUrl: String = "",
     qaDisplayUrl: String = "",
+    sttManager: STTManager,
 ) {
     val showPresenterWindow by presenterManager.showPresenterWindow
     val presentingMode by presenterManager.presentingMode
@@ -1832,6 +1838,18 @@ private fun PresenterWindows(
                                 }
                             }
 
+
+                        Presenting.STT ->
+                            if (screenAssignment.showSTT) {
+                                STTPresenter(
+                                    segments = sttManager.segments,
+                                    inProgressText = sttManager.inProgressText.value,
+                                    translationSegments = sttManager.translationSegments,
+                                    inProgressTranslation = sttManager.inProgressTranslation.value,
+                                    highlightedWords = sttManager.highlightedWords,
+                                    sttSettings = appSettings.sttSettings,
+                                )
+                            }
                         Presenting.NONE -> { /* nothing */ }
                     }
                     }
@@ -1957,6 +1975,18 @@ private fun PresenterWindows(
                                 }
                             }
 
+
+                        Presenting.STT ->
+                            if (screenAssignment.showSTT) {
+                                STTPresenter(
+                                    segments = sttManager.segments,
+                                    inProgressText = sttManager.inProgressText.value,
+                                    translationSegments = sttManager.translationSegments,
+                                    inProgressTranslation = sttManager.inProgressTranslation.value,
+                                    highlightedWords = sttManager.highlightedWords,
+                                    sttSettings = appSettings.sttSettings,
+                                )
+                            }
                         Presenting.NONE -> { /* nothing */ }
                     }
                     }
@@ -2110,6 +2140,18 @@ private fun PresenterWindows(
                                                 }
                                             }
 
+
+                                        Presenting.STT ->
+                                            if (screenAssignment.showSTT) {
+                                                STTPresenter(
+                                                    segments = sttManager.segments,
+                                                    inProgressText = sttManager.inProgressText.value,
+                                                    translationSegments = sttManager.translationSegments,
+                                                    inProgressTranslation = sttManager.inProgressTranslation.value,
+                                                    highlightedWords = sttManager.highlightedWords,
+                                                    sttSettings = appSettings.sttSettings,
+                                                )
+                                            }
                                         Presenting.NONE -> { /* nothing */ }
                                     }
                                     }
@@ -2323,6 +2365,18 @@ private fun PresenterWindows(
                                     }
                                 }
 
+
+                            Presenting.STT ->
+                                if (screenAssignment.showSTT) {
+                                    STTPresenter(
+                                        segments = sttManager.segments,
+                                        inProgressText = sttManager.inProgressText.value,
+                                        translationSegments = sttManager.translationSegments,
+                                        inProgressTranslation = sttManager.inProgressTranslation.value,
+                                        highlightedWords = sttManager.highlightedWords,
+                                        sttSettings = appSettings.sttSettings,
+                                    )
+                                }
                             Presenting.NONE -> { /* nothing */
                             }
                         }
@@ -2517,6 +2571,18 @@ private fun PresenterWindows(
                                             }
                                         }
 
+
+                                    Presenting.STT ->
+                                        if (screenAssignment.showSTT) {
+                                            STTPresenter(
+                                                segments = sttManager.segments,
+                                                inProgressText = sttManager.inProgressText.value,
+                                                translationSegments = sttManager.translationSegments,
+                                                inProgressTranslation = sttManager.inProgressTranslation.value,
+                                                highlightedWords = sttManager.highlightedWords,
+                                                sttSettings = appSettings.sttSettings,
+                                            )
+                                        }
                                     Presenting.NONE -> { /* nothing */
                                     }
                                 }
@@ -2646,6 +2712,18 @@ private fun PresenterWindows(
                                 }
                             }
 
+
+                        Presenting.STT ->
+                            if (screenAssignment.showSTT) {
+                                STTPresenter(
+                                    segments = sttManager.segments,
+                                    inProgressText = sttManager.inProgressText.value,
+                                    translationSegments = sttManager.translationSegments,
+                                    inProgressTranslation = sttManager.inProgressTranslation.value,
+                                    highlightedWords = sttManager.highlightedWords,
+                                    sttSettings = appSettings.sttSettings,
+                                )
+                            }
                         Presenting.NONE -> { /* nothing */ }
                     }
                     }

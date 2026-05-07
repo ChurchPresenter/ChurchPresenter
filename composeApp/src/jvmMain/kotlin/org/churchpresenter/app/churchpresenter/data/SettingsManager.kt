@@ -59,6 +59,9 @@ class SettingsManager {
         if ("\"qaSettings\"" !in raw && "QA" !in result.hiddenTabs) {
             result = result.copy(hiddenTabs = result.hiddenTabs + "QA")
         }
+        if ("\"sttSettings\"" !in raw && "STT" !in result.hiddenTabs) {
+            result = result.copy(hiddenTabs = result.hiddenTabs + "STT")
+        }
         return result
     }
 
