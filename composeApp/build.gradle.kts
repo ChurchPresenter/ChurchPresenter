@@ -397,20 +397,24 @@ val generateBuildConfig by tasks.registering {
 }
 
 // Bake GA4 credentials into a generated Kotlin file at build time (like BuildConfig).
-// Source: $desktopSigningRepoPath/analytics.properties
-// When the file is absent credentials are empty strings and the reporter stays disabled.
+// Source priority: signing repo analytics.properties → GA4_MEASUREMENT_ID / GA4_API_SECRET env vars.
+// When neither is present credentials are empty strings and the reporter stays disabled.
 val generateAnalyticsConfig by tasks.registering {
     val analyticsProps = if (desktopSigningRepoPath != null)
         loadPropsFile("$desktopSigningRepoPath/analytics.properties")
     else Properties()
-    val measurementId = analyticsProps.getProperty("measurement_id", "").trim()
-    val apiSecret = analyticsProps.getProperty("api_secret", "").trim()
+    val measurementId = analyticsProps.getProperty("measurement_id", "")
+        .ifBlank { System.getenv("GA_MEASUREMENT_ID") ?: "" }.trim()
+    val apiSecret = analyticsProps.getProperty("api_secret", "")
+        .ifBlank { System.getenv("GA_API_SECRET") ?: "" }.trim()
     val outputDir = layout.buildDirectory.dir("generated/analyticsconfig")
 
     if (measurementId.isNotBlank() && apiSecret.isNotBlank()) {
-        logger.lifecycle("Analytics: credentials loaded from signing repo")
+        val source = if (desktopSigningRepoPath != null && analyticsProps.getProperty("measurement_id", "").isNotBlank())
+            "signing repo" else "environment variables"
+        logger.lifecycle("Analytics: credentials loaded from $source")
     } else {
-        logger.lifecycle("Analytics: analytics.properties not found or incomplete — reporter disabled")
+        logger.lifecycle("Analytics: no credentials found — reporter disabled")
     }
 
     outputs.upToDateWhen { false }
