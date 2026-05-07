@@ -494,10 +494,6 @@ private fun ScheduleItemRow(
         modifier = Modifier
             .fillMaxWidth()
             .background(rowBackgroundColor)
-            .then(
-                if (item !is ScheduleItem.LabelItem) Modifier.initialPassClickable { onSelect() }
-                else Modifier
-            )
             .padding(horizontal = 12.dp, vertical = 8.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -522,7 +518,12 @@ private fun ScheduleItemRow(
         )
 
         // Item content
-        Column(modifier = Modifier.weight(1f)) {
+        Column(modifier = Modifier.weight(1f)
+            .then(
+                if (item !is ScheduleItem.LabelItem) Modifier.initialPassClickable { onSelect() }
+                else Modifier
+            )
+        ) {
             when (item) {
                 is ScheduleItem.LabelItem -> {
                     // Display label text with custom text color

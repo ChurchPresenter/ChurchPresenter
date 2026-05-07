@@ -228,13 +228,6 @@ fun CanvasTab(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .initialPassCombinedClickable(
-                                onClick = { sceneViewModel.selectScene(scene.id) },
-                                onDoubleClick = {
-                                    renamingSceneId = scene.id
-                                    renameText = scene.name
-                                }
-                            )
                             .background(
                                 if (isSelected) MaterialTheme.colorScheme.primaryContainer
                                 else Color.Transparent,
@@ -272,6 +265,13 @@ fun CanvasTab(
                                 color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer
                                 else MaterialTheme.colorScheme.onSurface,
                                 modifier = Modifier.weight(1f)
+                                    .initialPassCombinedClickable(
+                                        onClick = { sceneViewModel.selectScene(scene.id) },
+                                        onDoubleClick = {
+                                            renamingSceneId = scene.id
+                                            renameText = scene.name
+                                        }
+                                    )
                             )
                             if (isMismatched) {
                                 Text("⚠", fontSize = 14.sp, color = MaterialTheme.colorScheme.error)
@@ -354,7 +354,6 @@ fun CanvasTab(
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .initialPassClickable { sceneViewModel.selectSource(source.id) }
                                 .background(
                                     if (isSelected) MaterialTheme.colorScheme.secondaryContainer
                                     else Color.Transparent,
@@ -411,6 +410,7 @@ fun CanvasTab(
                                 color = if (isSelected) MaterialTheme.colorScheme.onSecondaryContainer
                                 else MaterialTheme.colorScheme.onSurface,
                                 modifier = Modifier.weight(1f).alpha(if (source.visible) 1f else 0.5f)
+                                    .initialPassClickable { sceneViewModel.selectSource(source.id) }
                             )
                         }
                     }

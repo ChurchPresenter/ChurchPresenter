@@ -240,10 +240,7 @@ fun LowerThirdTab(
                         val confirmTitle = stringResource(Res.string.confirm_delete)
                         val confirmMsg = stringResource(Res.string.confirm_delete_file, file.name)
                         Surface(
-                            modifier = Modifier.fillMaxWidth().initialPassClickable {
-                                selectedFile = file
-                                isPlaying = false
-                            },
+                            modifier = Modifier.fillMaxWidth(),
                             color = if (isSelected) MaterialTheme.colorScheme.primary
                                     else MaterialTheme.colorScheme.surfaceVariant
                         ) {
@@ -257,6 +254,10 @@ fun LowerThirdTab(
                                     color = if (isSelected) MaterialTheme.colorScheme.onPrimary
                                             else MaterialTheme.colorScheme.onSurface,
                                     modifier = Modifier.weight(1f).padding(vertical = 8.dp)
+                                        .initialPassClickable {
+                                            selectedFile = file
+                                            isPlaying = false
+                                        }
                                 )
                                 Icon(
                                     painter = painterResource(Res.drawable.ic_close),
