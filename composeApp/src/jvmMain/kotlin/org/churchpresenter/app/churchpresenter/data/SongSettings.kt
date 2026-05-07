@@ -604,6 +604,7 @@ data class AnnouncementsSettings(
 data class QASettings(
     val textColor: String = "#FFFFFF",
     val backgroundColor: String = "#1E1E2E",
+    val backgroundOpacity: Int = 100,
     val fontSize: Int = 48,
     val fontType: String = "Arial",
     val bold: Boolean = false,
@@ -640,6 +641,7 @@ data class STTSettings(
     val textColor: String = "#FFFFFF",
     val translationTextColor: String = "#FFFFFF",
     val backgroundColor: String = "transparent",
+    val backgroundOpacity: Int = 0,
     val fontSize: Int = 42,
     val lineSpacing: Int = 130, // line height as percentage of font size (100 = no extra spacing)
     val fontType: String = "Arial",

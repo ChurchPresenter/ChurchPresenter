@@ -467,15 +467,17 @@ fun STTTab(
             Spacer(Modifier.height(8.dp))
             Column(horizontalAlignment = Alignment.Start) {
                 Text("Background Color", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)
-                if (sttSettings.backgroundColor == "transparent") {
-                    Button(onClick = { onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(backgroundColor = "#1E1E2E")) } },
-                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary)
-                    ) { Text("Transparent", style = MaterialTheme.typography.labelMedium) }
-                } else {
-                    ColorPickerField(color = sttSettings.backgroundColor, onColorChange = { onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(backgroundColor = it)) } })
-                    Button(onClick = { onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(backgroundColor = "transparent")) } },
-                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surfaceVariant, contentColor = MaterialTheme.colorScheme.onSurfaceVariant)
-                    ) { Text("Transparent", style = MaterialTheme.typography.labelMedium) }
+                ColorPickerField(color = if (sttSettings.backgroundColor == "transparent") "#1E1E2E" else sttSettings.backgroundColor, onColorChange = { onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(backgroundColor = it)) } })
+                Spacer(Modifier.height(4.dp))
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+                    Text("Opacity:", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)
+                    Spacer(Modifier.width(4.dp))
+                    androidx.compose.material3.Slider(
+                        value = sttSettings.backgroundOpacity / 100f,
+                        onValueChange = { onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(backgroundOpacity = (it * 100).toInt())) } },
+                        modifier = Modifier.weight(1f)
+                    )
+                    Text("${sttSettings.backgroundOpacity}%", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(36.dp))
                 }
             }
 
