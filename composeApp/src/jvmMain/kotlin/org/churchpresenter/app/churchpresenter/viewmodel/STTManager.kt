@@ -78,6 +78,12 @@ class STTManager {
 
     fun connect(url: String) {
         if (_connected.value || _connecting.value) return
+        // Clean up any leftover socket (e.g. from a previous failed connection)
+        socket?.off()
+        socket?.disconnect()
+        socket?.close()
+        socket = null
+
         _connecting.value = true
 
         scope.launch(Dispatchers.IO) {

@@ -93,7 +93,7 @@ fun STTTab(
         GraphicsEnvironment.getLocalGraphicsEnvironment().availableFontFamilyNames.toList()
     }
 
-    var urlInput by remember(sttSettings.serverUrl) { mutableStateOf(sttSettings.serverUrl) }
+    var urlInput by remember(sttSettings.serverUrl) { mutableStateOf(sttSettings.serverUrl.ifEmpty { "http://" }) }
 
     Row(modifier = modifier.fillMaxSize()) {
         // ── Left Panel: Connection + Live Preview ─────────────────────
@@ -140,8 +140,10 @@ fun STTTab(
                 } else {
                     IconButton(
                         onClick = {
-                            onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(serverUrl = urlInput)) }
-                            sttManager.connect(urlInput)
+                            val url = if (urlInput.isNotBlank() && !urlInput.startsWith("http://") && !urlInput.startsWith("https://")) "http://$urlInput" else urlInput
+                            urlInput = url
+                            onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(serverUrl = url)) }
+                            sttManager.connect(url)
                         },
                         enabled = !connecting && urlInput.isNotBlank(),
                         colors = IconButtonDefaults.iconButtonColors(
@@ -204,33 +206,12 @@ fun STTTab(
                 }
             }
 
-            // Toggles row
+            // Max segments, max lines, line spacing row
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Checkbox(
-                        checked = sttSettings.showWordHighlighting,
-                        onCheckedChange = { onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(showWordHighlighting = it)) } }
-                    )
-                    Text("Word Highlighting", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface)
-                }
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Checkbox(
-                        checked = sttSettings.showInProgress,
-                        onCheckedChange = { onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(showInProgress = it)) } }
-                    )
-                    Text("In-Progress Text", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface)
-                }
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Checkbox(
-                        checked = sttSettings.showTranslationInProgress,
-                        onCheckedChange = { onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(showTranslationInProgress = it)) } }
-                    )
-                    Text("Translation In-Progress", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface)
-                }
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text("Max Segments:", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface)
                     Spacer(Modifier.width(4.dp))
@@ -257,6 +238,35 @@ fun STTTab(
                         range = 80..300,
                         onValueChange = { onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(lineSpacing = it)) } }
                     )
+                }
+            }
+
+            // Toggles row
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Checkbox(
+                        checked = sttSettings.showWordHighlighting,
+                        onCheckedChange = { onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(showWordHighlighting = it)) } }
+                    )
+                    Text("Word Highlighting", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface)
+                }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Checkbox(
+                        checked = sttSettings.showInProgress,
+                        onCheckedChange = { onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(showInProgress = it)) } }
+                    )
+                    Text("In-Progress Text", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface)
+                }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Checkbox(
+                        checked = sttSettings.showTranslationInProgress,
+                        onCheckedChange = { onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(showTranslationInProgress = it)) } }
+                    )
+                    Text("Translation In-Progress", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface)
                 }
             }
 
