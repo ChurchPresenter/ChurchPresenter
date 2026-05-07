@@ -524,13 +524,6 @@ fun SongsTab(
                                     if (index == selectedSongIndex) MaterialTheme.colorScheme.surfaceVariant
                                     else MaterialTheme.colorScheme.surface
                                 )
-                                .initialPassClickable {
-                                    viewModel.selectSong(index)
-                                    if (isPresenting && liveSongIndex >= 0) {
-                                        viewModel.selectSection(-1)
-                                    }
-                                    tabFocusRequester.requestFocus()
-                                }
                                 .padding(vertical = 8.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
@@ -538,40 +531,52 @@ fun SongsTab(
                                 MaterialTheme.colorScheme.onSurfaceVariant
                             else
                                 MaterialTheme.colorScheme.onSurface
-                            Text(
-                                song.number,
-                                style = MaterialTheme.typography.bodySmall,
-                                modifier = Modifier.width(with(density) { colWNumber.toDp() }).padding(horizontal = 8.dp),
-                                color = textColor
-                            )
-                            Box(modifier = Modifier.width(6.dp)) // spacer matching drag handle
-                            Text(
-                                song.title,
-                                style = MaterialTheme.typography.bodySmall,
-                                modifier = Modifier.width(with(density) { colWTitle.toDp() }).padding(horizontal = 8.dp),
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                                color = textColor
-                            )
-                            Box(modifier = Modifier.width(6.dp))
-                            Text(
-                                song.songbook,
-                                style = MaterialTheme.typography.bodySmall,
-                                modifier = Modifier.width(with(density) { colWSongbook.toDp() }).padding(horizontal = 8.dp),
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                                color = textColor
-                            )
-                            Box(modifier = Modifier.width(6.dp))
-                            Text(
-                                song.tune,
-                                style = MaterialTheme.typography.bodySmall,
-                                modifier = Modifier.width(with(density) { colWTune.toDp() }).padding(horizontal = 8.dp),
-                                maxLines = 1,
-                                color = textColor
-                            )
-                            Box(modifier = Modifier.width(6.dp)) // spacer matching drag handle
+                            Row(
+                                modifier = Modifier
+                                    .initialPassClickable {
+                                        viewModel.selectSong(index)
+                                        if (isPresenting && liveSongIndex >= 0) {
+                                            viewModel.selectSection(-1)
+                                        }
+                                        tabFocusRequester.requestFocus()
+                                    },
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    song.number,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    modifier = Modifier.width(with(density) { colWNumber.toDp() }).padding(horizontal = 8.dp),
+                                    color = textColor
+                                )
+                                Box(modifier = Modifier.width(6.dp)) // spacer matching drag handle
+                                Text(
+                                    song.title,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    modifier = Modifier.width(with(density) { colWTitle.toDp() }).padding(horizontal = 8.dp),
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    color = textColor
+                                )
+                                Box(modifier = Modifier.width(6.dp))
+                                Text(
+                                    song.songbook,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    modifier = Modifier.width(with(density) { colWSongbook.toDp() }).padding(horizontal = 8.dp),
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    color = textColor
+                                )
+                                Box(modifier = Modifier.width(6.dp))
+                                Text(
+                                    song.tune,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    modifier = Modifier.width(with(density) { colWTune.toDp() }).padding(horizontal = 8.dp),
+                                    maxLines = 1,
+                                    color = textColor
+                                )
+                            }
                             if (onAddToSchedule != null) {
+                                Box(modifier = Modifier.width(6.dp)) // spacer matching drag handle
                                 IconButton(
                                     onClick = { onAddToSchedule(song.number.toIntOrNull() ?: 0, song.title, song.songbook, song.songId) },
                                     modifier = Modifier.size(24.dp)
