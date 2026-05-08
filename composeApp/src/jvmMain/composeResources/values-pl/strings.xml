@@ -345,6 +345,8 @@
     <string name="milliseconds_suffix">ms</string>
     <string name="settings">Ustawienia</string>
     <string name="images_suffix">obrazów</string>
+    <string name="pictures_arrow_key_hint">← → ↑ ↓ przełączaj między obrazami</string>
+    <string name="pictures_reorder_hint">Shift+przeciągnij aby zmienić kolejność</string>
     <string name="slideshow_settings">Ustawienia pokazu slajdów</string>
     <string name="transition_settings">Ustawienia przejścia</string>
     <string name="failed_to_load_image">Nie udało się załadować obrazu</string>

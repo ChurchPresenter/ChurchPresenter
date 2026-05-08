@@ -430,6 +430,8 @@
     <string name="milliseconds_suffix">ms</string>
     <string name="settings">Nastavení</string>
     <string name="images_suffix">obrázků</string>
+    <string name="pictures_arrow_key_hint">← → ↑ ↓ pro přepínání obrázků</string>
+    <string name="pictures_reorder_hint">Shift+přetáhnout pro změnu pořadí</string>
     <string name="slideshow_settings">Nastavení prezentace</string>
     <string name="transition_settings">Nastavení přechodu</string>
     <string name="failed_to_load_image">Obrázek se nepodařilo načíst</string>

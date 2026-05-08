@@ -345,6 +345,8 @@
     <string name="milliseconds_suffix">мс</string>
     <string name="settings">Параметрлер</string>
     <string name="images_suffix">сурет</string>
+    <string name="pictures_arrow_key_hint">← → ↑ ↓ суреттер арасында ауысу</string>
+    <string name="pictures_reorder_hint">Shift+сүйреу арқылы ретін өзгерту</string>
     <string name="slideshow_settings">Слайдшоу параметрлері</string>
     <string name="transition_settings">Өту параметрлері</string>
     <string name="failed_to_load_image">Суретті жүктеу мүмкін болмады</string>

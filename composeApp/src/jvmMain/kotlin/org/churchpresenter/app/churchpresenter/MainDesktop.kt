@@ -287,10 +287,11 @@ fun MainDesktop(
     val presentingMode by presenterManager.presentingMode
     val mainFocusRequester = remember { FocusRequester() }
 
-    // Notify server whenever the picture folder or image list changes
+    // Notify server whenever the picture folder, image list, or image order changes
     val pictureImages = picturesViewModel.images
     val pictureFolder = picturesViewModel.selectedFolder
-    LaunchedEffect(pictureFolder, pictureImages.size) {
+    val pictureOrderVersion = picturesViewModel.imageOrderVersion
+    LaunchedEffect(pictureFolder, pictureImages.size, pictureOrderVersion) {
         val folder = pictureFolder ?: return@LaunchedEffect
         if (pictureImages.isEmpty()) return@LaunchedEffect
         val folderId = folder.absolutePath.hashCode().toUInt().toString(16)

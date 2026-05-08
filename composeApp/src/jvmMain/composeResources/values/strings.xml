@@ -456,6 +456,8 @@
     <string name="milliseconds_suffix">ms</string>
     <string name="settings">Settings</string>
     <string name="images_suffix">images</string>
+    <string name="pictures_arrow_key_hint">← → next/prev image  ·  ↑ ↓ navigate rows</string>
+    <string name="pictures_reorder_hint">Shift+drag thumbnails to reorder</string>
     <string name="slideshow_settings">Media Slideshow Settings</string>
     <string name="transition_settings">Transition Settings</string>
     <string name="failed_to_load_image">Failed to load image</string>

@@ -345,6 +345,8 @@
     <string name="milliseconds_suffix">ms</string>
     <string name="settings">Einstellungen</string>
     <string name="images_suffix">Bilder</string>
+    <string name="pictures_arrow_key_hint">← → ↑ ↓ zwischen Bildern wechseln</string>
+    <string name="pictures_reorder_hint">Shift+ziehen zum Neuanordnen</string>
     <string name="slideshow_settings">Diashow-Einstellungen</string>
     <string name="transition_settings">Übergangseinstellungen</string>
     <string name="failed_to_load_image">Bild konnte nicht geladen werden</string>

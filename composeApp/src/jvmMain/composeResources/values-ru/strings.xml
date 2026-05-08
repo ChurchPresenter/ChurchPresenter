@@ -345,6 +345,8 @@
     <string name="milliseconds_suffix">мс</string>
     <string name="settings">Настройки</string>
     <string name="images_suffix">изображений</string>
+    <string name="pictures_arrow_key_hint">← → ↑ ↓ для переключения между изображениями</string>
+    <string name="pictures_reorder_hint">Shift+перетащить для изменения порядка</string>
     <string name="slideshow_settings">Настройки слайдшоу</string>
     <string name="transition_settings">Настройки перехода</string>
     <string name="failed_to_load_image">Не удалось загрузить изображение</string>

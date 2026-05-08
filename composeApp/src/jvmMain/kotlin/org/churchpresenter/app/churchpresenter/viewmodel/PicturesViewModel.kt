@@ -166,6 +166,21 @@ class PicturesViewModel(
         }
     }
 
+    private val _imageOrderVersion = mutableStateOf(0)
+    val imageOrderVersion: Int get() = _imageOrderVersion.value
+
+    fun moveImage(from: Int, to: Int) {
+        if (from == to) return
+        if (from !in _images.indices || to !in _images.indices) return
+        val currentFile = getCurrentImageFile()
+        _images.add(to, _images.removeAt(from))
+        _imageOrderVersion.value++
+        currentFile?.let { file ->
+            val newIndex = _images.indexOf(file)
+            if (newIndex >= 0) _selectedImageIndex.value = newIndex
+        }
+    }
+
     fun togglePlayPause() {
         _isPlaying.value = !_isPlaying.value
     }

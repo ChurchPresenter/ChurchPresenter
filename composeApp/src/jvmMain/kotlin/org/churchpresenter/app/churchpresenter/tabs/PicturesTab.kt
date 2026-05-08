@@ -7,6 +7,10 @@ import androidx.compose.foundation.TooltipPlacement
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.input.pointer.isShiftPressed
 import org.churchpresenter.app.churchpresenter.composables.initialPassCombinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -44,13 +48,17 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.zIndex
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
@@ -87,6 +95,8 @@ import churchpresenter.composeapp.generated.resources.select_image_folder_dialog
 import churchpresenter.composeapp.generated.resources.transition_duration
 import churchpresenter.composeapp.generated.resources.unit_s
 import churchpresenter.composeapp.generated.resources.unit_ms
+import churchpresenter.composeapp.generated.resources.pictures_arrow_key_hint
+import churchpresenter.composeapp.generated.resources.pictures_reorder_hint
 import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
 import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.models.AnimationType
@@ -138,15 +148,29 @@ fun PicturesTab(
         presenterManager?.let { viewModel.syncWithPresenter(it) }
     }
 
+    // Hoisted so onPreviewKeyEvent can read column count for row-based Up/Down navigation
+    val gridState = rememberLazyGridState()
+
     Column(
         modifier = modifier
             .fillMaxSize()
             .padding(16.dp)
             .onPreviewKeyEvent { keyEvent ->
                 if (keyEvent.type == KeyEventType.KeyDown && viewModel.images.isNotEmpty()) {
+                    val columnCount = (gridState.layoutInfo.visibleItemsInfo.maxOfOrNull { it.column } ?: 0) + 1
                     when (keyEvent.key) {
-                        Key.DirectionLeft, Key.DirectionUp -> { viewModel.previousImage(); true }
-                        Key.DirectionRight, Key.DirectionDown -> { viewModel.nextImage(); true }
+                        Key.DirectionLeft -> { viewModel.previousImage(); true }
+                        Key.DirectionRight -> { viewModel.nextImage(); true }
+                        Key.DirectionUp -> {
+                            val target = viewModel.selectedImageIndex - columnCount
+                            if (target >= 0) viewModel.selectImage(target)
+                            true
+                        }
+                        Key.DirectionDown -> {
+                            val target = viewModel.selectedImageIndex + columnCount
+                            if (target < viewModel.images.size) viewModel.selectImage(target)
+                            true
+                        }
                         Key.Spacebar -> { viewModel.togglePlayPause(); true }
                         else -> false
                     }
@@ -463,74 +487,205 @@ fun PicturesTab(
                 }
             }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(4.dp))
+
+        // Keyboard and drag hints
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = stringResource(Res.string.pictures_arrow_key_hint),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+            )
+            Text(
+                text = stringResource(Res.string.pictures_reorder_hint),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+            )
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
 
         if (viewModel.images.isNotEmpty()) {
-            // Image grid
-            val gridState = rememberLazyGridState()
+            // Drag-to-reorder state: shift+click+drag, ghost approach (no real-time swaps)
+            var draggingFile by remember { mutableStateOf<File?>(null) }
+            var draggingFromIndex by remember { mutableStateOf(-1) }
+            var dropTargetIndex by remember { mutableStateOf<Int?>(null) }
+            var isDragActive by remember { mutableStateOf(false) }
+            var dragCursorInGrid by remember { mutableStateOf(Offset.Zero) }
 
-            LazyVerticalGrid(
-                columns = GridCells.Adaptive(150.dp),
-                state = gridState,
-                modifier = Modifier.fillMaxSize(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                items(viewModel.images) { imageFile ->
-                    val isSelected = viewModel.images.indexOf(imageFile) == viewModel.selectedImageIndex
+            Box(modifier = Modifier.fillMaxSize()) {
+                LazyVerticalGrid(
+                    columns = GridCells.Adaptive(150.dp),
+                    state = gridState,
+                    modifier = Modifier.fillMaxSize(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(viewModel.images, key = { it.absolutePath }) { imageFile ->
+                        val index = viewModel.images.indexOf(imageFile)
+                        val isSelected = index == viewModel.selectedImageIndex
+                        val isDraggingThis = draggingFile == imageFile
+                        val isDropTarget = isDragActive && dropTargetIndex == index && !isDraggingThis
 
-                    Box(
-                        modifier = Modifier
-                            .aspectRatio(1f)
-                            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
-                            .border(
-                                width = if (isSelected) 3.dp else 1.dp,
-                                color = if (isSelected) MaterialTheme.colorScheme.primary
-                                        else MaterialTheme.colorScheme.outline,
-                                shape = RoundedCornerShape(8.dp)
-                            )
-                            .initialPassCombinedClickable(
-                                onClick = { viewModel.selectImage(viewModel.images.indexOf(imageFile)) },
-                                onDoubleClick = {
-                                    viewModel.selectImage(viewModel.images.indexOf(imageFile))
-                                    if (presenterManager != null) viewModel.goLive(presenterManager)
-                                }
-                            )
-                            .padding(4.dp)
-                    ) {
-                        viewModel.thumbnails[imageFile]?.let { bitmap ->
-                            Image(
-                                bitmap = bitmap,
-                                contentDescription = imageFile.name,
-                                modifier = Modifier.fillMaxSize(),
-                                contentScale = ContentScale.Crop
-                            )
-                        } ?: Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = stringResource(Res.string.loading),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-
-                        // File name overlay
                         Box(
                             modifier = Modifier
-                                .align(Alignment.BottomCenter)
-                                .fillMaxWidth()
-                                .background(Color.Black.copy(alpha = 0.7f))
+                                .animateItem()
+                                .aspectRatio(1f)
+                                .alpha(if (isDraggingThis) 0.35f else 1f)
+                                .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
+                                .border(
+                                    width = when {
+                                        isDropTarget -> 3.dp
+                                        isSelected -> 3.dp
+                                        else -> 1.dp
+                                    },
+                                    color = when {
+                                        isDropTarget -> MaterialTheme.colorScheme.tertiary
+                                        isSelected -> MaterialTheme.colorScheme.primary
+                                        else -> MaterialTheme.colorScheme.outline
+                                    },
+                                    shape = RoundedCornerShape(8.dp)
+                                )
+                                .pointerInput(imageFile) {
+                                    awaitPointerEventScope {
+                                        while (true) {
+                                            val pressEvent = awaitPointerEvent(PointerEventPass.Initial)
+                                            if (pressEvent.type != PointerEventType.Press) continue
+                                            if (!pressEvent.keyboardModifiers.isShiftPressed) continue
+
+                                            // Shift+click: consume and start drag immediately
+                                            pressEvent.changes.forEach { it.consume() }
+                                            val startPos = pressEvent.changes.first().position
+
+                                            val idx = viewModel.images.indexOf(imageFile)
+                                            val itemInfo = gridState.layoutInfo.visibleItemsInfo
+                                                .firstOrNull { it.index == idx }
+                                            draggingFile = imageFile
+                                            draggingFromIndex = idx
+                                            isDragActive = true
+                                            dropTargetIndex = idx
+                                            dragCursorInGrid = if (itemInfo != null) {
+                                                Offset(
+                                                    itemInfo.offset.x + startPos.x,
+                                                    itemInfo.offset.y + startPos.y
+                                                )
+                                            } else startPos
+
+                                            var lastPos = startPos
+                                            var dragging = true
+                                            while (dragging) {
+                                                val event = awaitPointerEvent(PointerEventPass.Initial)
+                                                event.changes.forEach { it.consume() }
+                                                when (event.type) {
+                                                    PointerEventType.Move -> {
+                                                        val pos = event.changes.firstOrNull()?.position ?: continue
+                                                        dragCursorInGrid += pos - lastPos
+                                                        lastPos = pos
+                                                        val target = gridState.layoutInfo.visibleItemsInfo
+                                                            .firstOrNull { info ->
+                                                                dragCursorInGrid.x >= info.offset.x &&
+                                                                dragCursorInGrid.x <= info.offset.x + info.size.width &&
+                                                                dragCursorInGrid.y >= info.offset.y &&
+                                                                dragCursorInGrid.y <= info.offset.y + info.size.height
+                                                            }
+                                                        if (target != null) dropTargetIndex = target.index
+                                                    }
+                                                    PointerEventType.Release -> {
+                                                        val from = draggingFromIndex
+                                                        val to = dropTargetIndex ?: from
+                                                        if (from >= 0 && from != to) viewModel.moveImage(from, to)
+                                                        draggingFile = null
+                                                        draggingFromIndex = -1
+                                                        dropTargetIndex = null
+                                                        isDragActive = false
+                                                        dragCursorInGrid = Offset.Zero
+                                                        dragging = false
+                                                    }
+                                                    else -> {}
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                                .initialPassCombinedClickable(
+                                    onClick = {
+                                        if (!isDragActive) viewModel.selectImage(viewModel.images.indexOf(imageFile))
+                                    },
+                                    onDoubleClick = {
+                                        if (!isDragActive) {
+                                            viewModel.selectImage(viewModel.images.indexOf(imageFile))
+                                            if (presenterManager != null) viewModel.goLive(presenterManager)
+                                        }
+                                    }
+                                )
                                 .padding(4.dp)
                         ) {
-                            Text(
-                                text = imageFile.nameWithoutExtension,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = Color.White,
-                                maxLines = 1,
-                                modifier = Modifier.align(Alignment.Center)
-                            )
+                            viewModel.thumbnails[imageFile]?.let { bitmap ->
+                                Image(
+                                    bitmap = bitmap,
+                                    contentDescription = imageFile.name,
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentScale = ContentScale.Crop
+                                )
+                            } ?: Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = stringResource(Res.string.loading),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+
+                            // File name overlay
+                            Box(
+                                modifier = Modifier
+                                    .align(Alignment.BottomCenter)
+                                    .fillMaxWidth()
+                                    .background(Color.Black.copy(alpha = 0.7f))
+                                    .padding(4.dp)
+                            ) {
+                                Text(
+                                    text = imageFile.nameWithoutExtension,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = Color.White,
+                                    maxLines = 1,
+                                    modifier = Modifier.align(Alignment.Center)
+                                )
+                            }
+                        }
+                    }
+                }
+
+                // Floating drag preview — follows cursor, rendered above the grid
+                if (isDragActive) {
+                    draggingFile?.let { file ->
+                        viewModel.thumbnails[file]?.let { bitmap ->
+                            Box(
+                                modifier = Modifier
+                                    .size(150.dp)
+                                    .zIndex(10f)
+                                    .graphicsLayer {
+                                        translationX = dragCursorInGrid.x - 75.dp.toPx()
+                                        translationY = dragCursorInGrid.y - 75.dp.toPx()
+                                        scaleX = 1.08f
+                                        scaleY = 1.08f
+                                        shadowElevation = 16f
+                                    }
+                                    .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(8.dp))
+                                    .border(2.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(8.dp))
+                            ) {
+                                Image(
+                                    bitmap = bitmap,
+                                    contentDescription = null,
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentScale = ContentScale.Crop
+                                )
+                            }
                         }
                     }
                 }
