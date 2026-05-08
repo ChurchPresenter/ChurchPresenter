@@ -1262,5 +1262,38 @@
     <string name="ccli_month_oct">Кас</string>
     <string name="ccli_month_nov">Ліс</string>
     <string name="ccli_month_dec">Сне</string>
+
+    <!-- OBS WebSocket integration -->
+    <string name="obs_settings">OBS</string>
+    <string name="obs_description">Аўтаматычна пераключаць сцэны OBS Studio пры змене кантэнту.</string>
+    <string name="obs_enable">Падключыцца да OBS Studio</string>
+    <string name="obs_host">Хост</string>
+    <string name="obs_host_hint">localhost</string>
+    <string name="obs_port">Порт</string>
+    <string name="obs_password">Пароль</string>
+    <string name="obs_password_hint">Пакіньце пустым, калі пароль не зададзены</string>
+    <string name="obs_connect">Падключыць</string>
+    <string name="obs_disconnect">Адключыць</string>
+    <string name="obs_status_connected">Падключана</string>
+    <string name="obs_status_connecting">Падключэнне…</string>
+    <string name="obs_status_disconnected">Не падключана</string>
+    <string name="obs_status_error">Памылка</string>
+    <string name="obs_scene_mappings">Прывязка сцэн</string>
+    <string name="obs_scene_mappings_desc">Укажыце назву сцэны OBS для пераключэння пры паказе кожнага тыпу кантэнту. Пакіньце пустым для выкарыстання сцэны па змаўчанні.</string>
+    <string name="obs_default_scene">Сцэна па змаўчанні</string>
+    <string name="obs_default_scene_hint">Выкарыстоўваецца, калі прывязка не зададзена</string>
+    <string name="obs_scene_hint">Назва сцэны OBS</string>
+    <string name="obs_mode_bible">Біблія</string>
+    <string name="obs_mode_songs">Песні</string>
+    <string name="obs_mode_pictures">Выявы</string>
+    <string name="obs_mode_presentation">Прэзентацыя</string>
+    <string name="obs_mode_media">Медыя</string>
+    <string name="obs_mode_lower_third">Ніжняя трэць</string>
+    <string name="obs_mode_announcements">Аб\'явы</string>
+    <string name="obs_mode_website">Вэб-старонка</string>
+    <string name="obs_mode_canvas">Палатно</string>
+    <string name="obs_mode_qa">Пытанні і адказы</string>
+    <string name="obs_mode_stt">Транскрыпцыя</string>
+    <string name="obs_mode_none">Ачысціць экран</string>
 </resources>
 

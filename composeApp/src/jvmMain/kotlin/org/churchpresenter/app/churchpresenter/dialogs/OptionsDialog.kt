@@ -45,11 +45,13 @@ import churchpresenter.composeapp.generated.resources.options
 import churchpresenter.composeapp.generated.resources.projection
 import churchpresenter.composeapp.generated.resources.server_settings
 import churchpresenter.composeapp.generated.resources.song
+import churchpresenter.composeapp.generated.resources.obs_settings
 import churchpresenter.composeapp.generated.resources.stage_monitor
 import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.data.RemoteClientManager
 import org.churchpresenter.app.churchpresenter.data.SettingsManager
 import org.churchpresenter.app.churchpresenter.server.CompanionServer
+import org.churchpresenter.app.churchpresenter.dialogs.tabs.OBSSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.SystemSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.BackgroundSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.BibleSettingsTab
@@ -60,6 +62,7 @@ import org.churchpresenter.app.churchpresenter.dialogs.tabs.LowerThirdSettingsTa
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.StageMonitorSettingsTab
 import org.churchpresenter.app.churchpresenter.ui.theme.AppThemeWrapper
 import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
+import org.churchpresenter.app.churchpresenter.viewmodel.OBSWebSocketManager
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.jetbrains.compose.resources.stringResource
 
@@ -76,12 +79,13 @@ fun OptionsDialog(
     onIdentifyScreen: () -> Unit = {},
     onThemeChange: (ThemeMode) -> Unit = {},
     scenes: List<org.churchpresenter.app.churchpresenter.models.Scene> = emptyList(),
-    onOpenLottieGen: (outputDir: String, onFileSaved: (() -> Unit)?) -> Unit = { _, _ -> }
+    onOpenLottieGen: (outputDir: String, onFileSaved: (() -> Unit)?) -> Unit = { _, _ -> },
+    obsManager: OBSWebSocketManager? = null
 ) {
     if (!isVisible) return
 
     var currentSettings by remember { mutableStateOf(settingsManager.loadSettings()) }
-    val tabCount = 8
+    val tabCount = if (obsManager != null) 9 else 8
     var selectedTabIndex by remember { mutableStateOf(0) }
     val safeTabIndex = selectedTabIndex.coerceIn(0, tabCount - 1)
     val isDarkTheme = when (theme) {
@@ -153,6 +157,13 @@ fun OptionsDialog(
                             onClick = { selectedTabIndex = 7 },
                             text = { Text(stringResource(Res.string.stage_monitor)) }
                         )
+                        if (obsManager != null) {
+                            Tab(
+                                selected = safeTabIndex == 8,
+                                onClick = { selectedTabIndex = 8 },
+                                text = { Text(stringResource(Res.string.obs_settings)) }
+                            )
+                        }
                     }
 
                     // Tab Content
@@ -219,6 +230,13 @@ fun OptionsDialog(
                                 onSettingsChange = { updateFn ->
                                     currentSettings = updateFn(currentSettings)
                                 }
+                            )
+                            8 -> if (obsManager != null) OBSSettingsTab(
+                                settings = currentSettings,
+                                onSettingsChange = { updateFn ->
+                                    currentSettings = updateFn(currentSettings)
+                                },
+                                obsManager = obsManager
                             )
                         }
                     }

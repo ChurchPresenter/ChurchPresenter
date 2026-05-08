@@ -155,6 +155,7 @@ kotlin {
             implementation(libs.ktor.server.status.pages)
             implementation(libs.ktor.client.core)
             implementation(libs.ktor.client.cio)
+            implementation(libs.ktor.client.websockets)
             // BouncyCastle for custom CA / PKI cert generation
             implementation(libs.bouncycastle.pkix)
             implementation(libs.bouncycastle.prov)

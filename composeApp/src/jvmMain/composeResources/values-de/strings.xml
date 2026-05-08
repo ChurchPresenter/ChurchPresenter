@@ -1262,5 +1262,38 @@
     <string name="ccli_month_oct">Okt</string>
     <string name="ccli_month_nov">Nov</string>
     <string name="ccli_month_dec">Dez</string>
+
+    <!-- OBS WebSocket integration -->
+    <string name="obs_settings">OBS</string>
+    <string name="obs_description">OBS Studio-Szenen automatisch wechseln, wenn sich der Inhalt ändert.</string>
+    <string name="obs_enable">Mit OBS Studio verbinden</string>
+    <string name="obs_host">Host</string>
+    <string name="obs_host_hint">localhost</string>
+    <string name="obs_port">Port</string>
+    <string name="obs_password">Passwort</string>
+    <string name="obs_password_hint">Leer lassen, wenn kein Passwort gesetzt</string>
+    <string name="obs_connect">Verbinden</string>
+    <string name="obs_disconnect">Trennen</string>
+    <string name="obs_status_connected">Verbunden</string>
+    <string name="obs_status_connecting">Verbinde…</string>
+    <string name="obs_status_disconnected">Nicht verbunden</string>
+    <string name="obs_status_error">Fehler</string>
+    <string name="obs_scene_mappings">Szenenzuordnung</string>
+    <string name="obs_scene_mappings_desc">Geben Sie den OBS-Szenennamen ein, zu dem gewechselt werden soll, wenn jeder Inhaltstyp live geht. Leer lassen für die Standardszene.</string>
+    <string name="obs_default_scene">Standardszene</string>
+    <string name="obs_default_scene_hint">Rückfall, wenn keine Zuordnung gesetzt</string>
+    <string name="obs_scene_hint">OBS-Szenenname</string>
+    <string name="obs_mode_bible">Bibel</string>
+    <string name="obs_mode_songs">Lieder</string>
+    <string name="obs_mode_pictures">Bilder</string>
+    <string name="obs_mode_presentation">Präsentation</string>
+    <string name="obs_mode_media">Medien</string>
+    <string name="obs_mode_lower_third">Bauchbinde</string>
+    <string name="obs_mode_announcements">Ankündigungen</string>
+    <string name="obs_mode_website">Website</string>
+    <string name="obs_mode_canvas">Leinwand</string>
+    <string name="obs_mode_qa">Fragen &amp; Antworten</string>
+    <string name="obs_mode_stt">Transkription</string>
+    <string name="obs_mode_none">Anzeige löschen</string>
 </resources>
 

@@ -760,6 +760,16 @@ data class StageMonitorSettings(
 )
 
 @Serializable
+data class OBSSettings(
+    val enabled: Boolean = false,
+    val host: String = "localhost",
+    val port: Int = 4455,
+    val password: String = "",
+    val defaultScene: String = "",
+    val sceneMappings: Map<String, String> = emptyMap()
+)
+
+@Serializable
 data class AppSettings(
     val songSettings: SongSettings = SongSettings(),
     val bibleSettings: BibleSettings = BibleSettings(),
@@ -787,5 +797,6 @@ data class AppSettings(
     val windowHeight: Int = 800,
     val windowX: Int = -1,
     val windowY: Int = -1,
-    val hiddenTabs: Set<String> = setOf("QA", "STT")
+    val hiddenTabs: Set<String> = setOf("QA", "STT"),
+    val obsSettings: OBSSettings = OBSSettings()
 )

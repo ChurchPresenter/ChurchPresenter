@@ -1262,5 +1262,38 @@
     <string name="ccli_month_oct">Қаз</string>
     <string name="ccli_month_nov">Қар</string>
     <string name="ccli_month_dec">Жел</string>
+
+    <!-- OBS WebSocket integration -->
+    <string name="obs_settings">OBS</string>
+    <string name="obs_description">Мазмұн өзгерген кезде OBS Studio сахналарын автоматты түрде ауыстырыңыз.</string>
+    <string name="obs_enable">OBS Studio-ға қосылу</string>
+    <string name="obs_host">Хост</string>
+    <string name="obs_host_hint">localhost</string>
+    <string name="obs_port">Порт</string>
+    <string name="obs_password">Құпиясөз</string>
+    <string name="obs_password_hint">Құпиясөз орнатылмаған болса, бос қалдырыңыз</string>
+    <string name="obs_connect">Қосылу</string>
+    <string name="obs_disconnect">Ажырату</string>
+    <string name="obs_status_connected">Қосылды</string>
+    <string name="obs_status_connecting">Қосылуда…</string>
+    <string name="obs_status_disconnected">Қосылмаған</string>
+    <string name="obs_status_error">Қате</string>
+    <string name="obs_scene_mappings">Сахна сәйкестендіру</string>
+    <string name="obs_scene_mappings_desc">Әр мазмұн түрі трансляцияланған кезде ауысатын OBS сахнасының атауын енгізіңіз. Әдепкі сахнаны пайдалану үшін бос қалдырыңыз.</string>
+    <string name="obs_default_scene">Әдепкі сахна</string>
+    <string name="obs_default_scene_hint">Сәйкестендіру орнатылмаған кездегі резервтік нұсқа</string>
+    <string name="obs_scene_hint">OBS сахнасының атауы</string>
+    <string name="obs_mode_bible">Інжіл</string>
+    <string name="obs_mode_songs">Әндер</string>
+    <string name="obs_mode_pictures">Суреттер</string>
+    <string name="obs_mode_presentation">Презентация</string>
+    <string name="obs_mode_media">Медиа</string>
+    <string name="obs_mode_lower_third">Төменгі үштен бір</string>
+    <string name="obs_mode_announcements">Хабарландырулар</string>
+    <string name="obs_mode_website">Веб-сайт</string>
+    <string name="obs_mode_canvas">Кенеп</string>
+    <string name="obs_mode_qa">Сұрақтар мен жауаптар</string>
+    <string name="obs_mode_stt">Транскрипция</string>
+    <string name="obs_mode_none">Экранды тазалау</string>
 </resources>
 

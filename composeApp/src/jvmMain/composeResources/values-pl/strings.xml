@@ -1261,5 +1261,38 @@
     <string name="ccli_month_oct">Paź</string>
     <string name="ccli_month_nov">Lis</string>
     <string name="ccli_month_dec">Gru</string>
+
+    <!-- OBS WebSocket integration -->
+    <string name="obs_settings">OBS</string>
+    <string name="obs_description">Automatycznie przełączaj sceny OBS Studio przy zmianie treści.</string>
+    <string name="obs_enable">Połącz z OBS Studio</string>
+    <string name="obs_host">Host</string>
+    <string name="obs_host_hint">localhost</string>
+    <string name="obs_port">Port</string>
+    <string name="obs_password">Hasło</string>
+    <string name="obs_password_hint">Pozostaw puste, jeśli nie ustawiono hasła</string>
+    <string name="obs_connect">Połącz</string>
+    <string name="obs_disconnect">Rozłącz</string>
+    <string name="obs_status_connected">Połączono</string>
+    <string name="obs_status_connecting">Łączenie…</string>
+    <string name="obs_status_disconnected">Nie połączono</string>
+    <string name="obs_status_error">Błąd</string>
+    <string name="obs_scene_mappings">Przypisanie scen</string>
+    <string name="obs_scene_mappings_desc">Podaj nazwę sceny OBS do przełączenia, gdy dany typ treści jest nadawany na żywo. Pozostaw puste, aby użyć domyślnej sceny.</string>
+    <string name="obs_default_scene">Domyślna scena</string>
+    <string name="obs_default_scene_hint">Używana, gdy brak przypisania</string>
+    <string name="obs_scene_hint">Nazwa sceny OBS</string>
+    <string name="obs_mode_bible">Biblia</string>
+    <string name="obs_mode_songs">Pieśni</string>
+    <string name="obs_mode_pictures">Obrazy</string>
+    <string name="obs_mode_presentation">Prezentacja</string>
+    <string name="obs_mode_media">Media</string>
+    <string name="obs_mode_lower_third">Pasek dolny</string>
+    <string name="obs_mode_announcements">Ogłoszenia</string>
+    <string name="obs_mode_website">Strona WWW</string>
+    <string name="obs_mode_canvas">Płótno</string>
+    <string name="obs_mode_qa">Pytania i odpowiedzi</string>
+    <string name="obs_mode_stt">Transkrypcja</string>
+    <string name="obs_mode_none">Wyczyść wyświetlanie</string>
 </resources>
 

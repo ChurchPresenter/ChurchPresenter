@@ -1340,5 +1340,38 @@
     <string name="ccli_month_oct">Říj</string>
     <string name="ccli_month_nov">Lis</string>
     <string name="ccli_month_dec">Pro</string>
+
+    <!-- OBS WebSocket integration -->
+    <string name="obs_settings">OBS</string>
+    <string name="obs_description">Automaticky přepínejte scény OBS Studio při změně obsahu.</string>
+    <string name="obs_enable">Připojit k OBS Studio</string>
+    <string name="obs_host">Hostitel</string>
+    <string name="obs_host_hint">localhost</string>
+    <string name="obs_port">Port</string>
+    <string name="obs_password">Heslo</string>
+    <string name="obs_password_hint">Nechte prázdné, pokud není heslo nastaveno</string>
+    <string name="obs_connect">Připojit</string>
+    <string name="obs_disconnect">Odpojit</string>
+    <string name="obs_status_connected">Připojeno</string>
+    <string name="obs_status_connecting">Připojování…</string>
+    <string name="obs_status_disconnected">Nepřipojeno</string>
+    <string name="obs_status_error">Chyba</string>
+    <string name="obs_scene_mappings">Mapování scén</string>
+    <string name="obs_scene_mappings_desc">Zadejte název scény OBS pro přepnutí při zobrazení každého typu obsahu. Ponechte prázdné pro použití výchozí scény.</string>
+    <string name="obs_default_scene">Výchozí scéna</string>
+    <string name="obs_default_scene_hint">Záloha, pokud není mapování nastaveno</string>
+    <string name="obs_scene_hint">Název scény OBS</string>
+    <string name="obs_mode_bible">Bible</string>
+    <string name="obs_mode_songs">Písně</string>
+    <string name="obs_mode_pictures">Obrázky</string>
+    <string name="obs_mode_presentation">Prezentace</string>
+    <string name="obs_mode_media">Média</string>
+    <string name="obs_mode_lower_third">Dolní třetina</string>
+    <string name="obs_mode_announcements">Oznámení</string>
+    <string name="obs_mode_website">Webová stránka</string>
+    <string name="obs_mode_canvas">Plátno</string>
+    <string name="obs_mode_qa">Otázky a odpovědi</string>
+    <string name="obs_mode_stt">Přepis</string>
+    <string name="obs_mode_none">Vymazat obrazovku</string>
 </resources>
 

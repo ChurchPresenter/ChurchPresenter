@@ -117,6 +117,7 @@ import org.churchpresenter.app.churchpresenter.data.Bible
 import org.churchpresenter.app.churchpresenter.server.CompanionServer
 import org.churchpresenter.app.churchpresenter.server.TunnelStatus
 import org.churchpresenter.app.churchpresenter.viewmodel.QAManager
+import org.churchpresenter.app.churchpresenter.viewmodel.OBSWebSocketManager
 import org.churchpresenter.app.churchpresenter.viewmodel.STTManager
 import org.churchpresenter.app.churchpresenter.server.AddToScheduleRequest
 import org.churchpresenter.app.churchpresenter.server.PendingRemoteRequest
@@ -282,7 +283,37 @@ fun main() {
         val companionServer = remember { CompanionServer() }
         val qaManager = remember { QAManager() }
         val sttManager = remember { STTManager() }
+        val obsManager = remember { OBSWebSocketManager() }
         remember(qaManager) { companionServer.qaManager = qaManager; true }
+        // Auto-connect OBS when settings change (or on first load if enabled)
+        LaunchedEffect(
+            appSettings.obsSettings.enabled,
+            appSettings.obsSettings.host,
+            appSettings.obsSettings.port,
+            appSettings.obsSettings.password
+        ) {
+            if (appSettings.obsSettings.enabled) {
+                obsManager.connect(
+                    appSettings.obsSettings.host,
+                    appSettings.obsSettings.port,
+                    appSettings.obsSettings.password
+                )
+            } else {
+                obsManager.disconnect()
+            }
+        }
+        // Switch OBS scene when presenting mode changes
+        LaunchedEffect(Unit) {
+            snapshotFlow { presenterManager.presentingMode.value }
+                .collect { mode ->
+                    val obs = appSettings.obsSettings
+                    if (!obs.enabled) return@collect
+                    val sceneName = obs.sceneMappings[mode.name]?.takeIf { it.isNotBlank() }
+                        ?: obs.defaultScene.takeIf { it.isNotBlank() }
+                        ?: return@collect
+                    obsManager.setScene(sceneName)
+                }
+        }
         // Sync QA settings to server
         LaunchedEffect(appSettings.qaSettings.adminPassword, appSettings.qaSettings.rateLimitCooldownSeconds, appSettings.qaSettings.votingEnabled) {
             companionServer.qaAdminPassword = appSettings.qaSettings.adminPassword
@@ -1119,7 +1150,8 @@ fun main() {
                                                 javax.swing.JOptionPane.WARNING_MESSAGE
                                             )
                                         }
-                                    }
+                                    },
+                                    obsManager = obsManager
                                 )
                                 KeyboardShortcutsDialog(
                                     isVisible = showKeyboardShortcutsDialog,
