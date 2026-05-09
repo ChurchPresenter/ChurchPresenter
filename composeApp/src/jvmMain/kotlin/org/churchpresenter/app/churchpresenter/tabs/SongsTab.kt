@@ -373,13 +373,15 @@ fun SongsTab(
                     )
                 )
 
-                DropdownSelector(
-                    modifier = Modifier.width(160.dp),
-                    label = "",
-                    items = songbookOptions,
-                    selected = selectedSongbook.ifEmpty { allSongBooksText },
-                    onSelectedChange = { viewModel.updateSelectedSongbook(it) }
-                )
+                if (songbooks.size > 1) {
+                    DropdownSelector(
+                        modifier = Modifier.width(160.dp),
+                        label = "",
+                        items = songbookOptions,
+                        selected = selectedSongbook.ifEmpty { allSongBooksText },
+                        onSelectedChange = { viewModel.updateSelectedSongbook(it) }
+                    )
+                }
 
                 DropdownSelector(
                     modifier = Modifier.width(160.dp),
@@ -455,20 +457,22 @@ fun SongsTab(
                     onDrag = { colWTitle = (colWTitle + it).coerceIn(with(density) { 60.dp.toPx() }, with(density) { 600.dp.toPx() }) },
                     onDragEnd = ::saveColWidths
                 )
-                Text(
-                    text = stringResource(Res.string.song_book) + viewModel.getSortIndicator(Constants.SORT_SONGBOOK),
-                    style = MaterialTheme.typography.labelMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.secondary,
-                    modifier = Modifier
-                        .width(with(density) { colWSongbook.toDp() })
-                        .padding(horizontal = 8.dp)
-                        .clickable { viewModel.updateSort(Constants.SORT_SONGBOOK) }
-                )
-                DragHandle(
-                    onDrag = { colWSongbook = (colWSongbook + it).coerceIn(with(density) { 40.dp.toPx() }, with(density) { 300.dp.toPx() }) },
-                    onDragEnd = ::saveColWidths
-                )
+                if (songbooks.size > 1) {
+                    Text(
+                        text = stringResource(Res.string.song_book) + viewModel.getSortIndicator(Constants.SORT_SONGBOOK),
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.secondary,
+                        modifier = Modifier
+                            .width(with(density) { colWSongbook.toDp() })
+                            .padding(horizontal = 8.dp)
+                            .clickable { viewModel.updateSort(Constants.SORT_SONGBOOK) }
+                    )
+                    DragHandle(
+                        onDrag = { colWSongbook = (colWSongbook + it).coerceIn(with(density) { 40.dp.toPx() }, with(density) { 300.dp.toPx() }) },
+                        onDragEnd = ::saveColWidths
+                    )
+                }
                 Text(
                     text = stringResource(Res.string.tune) + viewModel.getSortIndicator(Constants.SORT_TUNE),
                     style = MaterialTheme.typography.labelMedium,
@@ -557,15 +561,17 @@ fun SongsTab(
                                     overflow = TextOverflow.Ellipsis,
                                     color = textColor
                                 )
-                                Box(modifier = Modifier.width(6.dp))
-                                Text(
-                                    song.songbook,
-                                    style = MaterialTheme.typography.bodySmall,
-                                    modifier = Modifier.width(with(density) { colWSongbook.toDp() }).padding(horizontal = 8.dp),
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis,
-                                    color = textColor
-                                )
+                                if (songbooks.size > 1) {
+                                    Box(modifier = Modifier.width(6.dp))
+                                    Text(
+                                        song.songbook,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        modifier = Modifier.width(with(density) { colWSongbook.toDp() }).padding(horizontal = 8.dp),
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                        color = textColor
+                                    )
+                                }
                                 Box(modifier = Modifier.width(6.dp))
                                 Text(
                                     song.tune,
