@@ -325,6 +325,13 @@ class ScheduleViewModel(
         return index
     }
 
+    fun moveItem(from: Int, to: Int) {
+        if (from < 0 || to < 0 || from >= _scheduleItems.size || to >= _scheduleItems.size || from == to) return
+        val item = _scheduleItems.removeAt(from)
+        _scheduleItems.add(to, item)
+        notifyChanged()
+    }
+
     fun clearSchedule() {
         _scheduleItems.clear()
         notifyChanged()

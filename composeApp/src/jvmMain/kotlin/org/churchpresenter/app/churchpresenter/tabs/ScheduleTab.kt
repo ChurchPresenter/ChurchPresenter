@@ -3,6 +3,7 @@ package org.churchpresenter.app.churchpresenter.tabs
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.shape.RoundedCornerShape
 import org.churchpresenter.app.churchpresenter.composables.initialPassClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -29,12 +30,22 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.input.pointer.isShiftPressed
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.zIndex
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
@@ -305,6 +316,13 @@ fun ScheduleTab(
         Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
             val listState = rememberLazyListState()
 
+            // Drag-to-reorder state: shift+click+drag
+            var draggingFromIndex by remember { mutableStateOf(-1) }
+            var dropTargetIndex by remember { mutableStateOf<Int?>(null) }
+            var isDragActive by remember { mutableStateOf(false) }
+            var dragCursorY by remember { mutableStateOf(0f) }
+            var dragItemHeight by remember { mutableStateOf(50f) }
+
             // Register AWT DropTarget on the window for file drag-and-drop
             DisposableEffect(Unit) {
                 val awtWindow = java.awt.Window.getWindows().firstOrNull { it.isShowing }
@@ -351,38 +369,102 @@ fun ScheduleTab(
                     .background(MaterialTheme.colorScheme.surface)
                     .padding(end = 12.dp)
             ) {
-                itemsIndexed(scheduleItems) { index, item ->
-                    ScheduleItemRow(
-                        item = item,
-                        isSelected = item.id == selectedItemId,
-                        onSelect = {
-                            viewModel.selectItem(item.id)
-                            onItemClick(item)
-                        },
-                        onMoveUp   = { viewModel.moveItemUp(item.id) },
-                        onMoveDown = { viewModel.moveItemDown(item.id) },
-                        onRemove = {
-                            viewModel.removeItem(item.id)
-                            if (selectedItemId == item.id) viewModel.clearSelection()
-                        },
-                        onPresent = {
-                            viewModel.presentItem(
-                                item = item,
-                                onPresenting = onPresenting,
-                                onPresentSong = onPresentSong,
-                                onPresentBible = onPresentBible,
-                                onPresentPresentation = onPresentPresentation,
-                                onPresentPictures = onPresentPictures,
-                                onPresentMedia = onPresentMedia,
-                                onPresentAnnouncement = onPresentAnnouncement,
-                                onPresentLowerThird = onPresentLowerThird,
-                                onPresentWebsite = onPresentWebsite
-                            )
-                        },
-                        onEditLabel = {
-                            if (item is ScheduleItem.LabelItem) onEditLabel(item)
-                        }
-                    )
+                itemsIndexed(scheduleItems, key = { _, item -> item.id }) { index, item ->
+                    val isDraggingThis = isDragActive && draggingFromIndex == index
+
+                    Column(modifier = Modifier.animateItem()) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .alpha(if (isDraggingThis) 0.35f else 1f)
+                            .pointerInput(item.id) {
+                                awaitPointerEventScope {
+                                    while (true) {
+                                        val pressEvent = awaitPointerEvent(PointerEventPass.Initial)
+                                        if (pressEvent.type != PointerEventType.Press) continue
+                                        if (!pressEvent.keyboardModifiers.isShiftPressed) continue
+
+                                        pressEvent.changes.forEach { it.consume() }
+                                        val startPos = pressEvent.changes.first().position
+
+                                        val itemInfo = listState.layoutInfo.visibleItemsInfo
+                                            .firstOrNull { it.index == index }
+                                        draggingFromIndex = index
+                                        isDragActive = true
+                                        dropTargetIndex = index
+                                        dragItemHeight = itemInfo?.size?.toFloat() ?: 50f
+                                        dragCursorY = if (itemInfo != null) {
+                                            itemInfo.offset.toFloat() + startPos.y
+                                        } else startPos.y
+
+                                        var lastPos = startPos
+                                        var dragging = true
+                                        while (dragging) {
+                                            val event = awaitPointerEvent(PointerEventPass.Initial)
+                                            event.changes.forEach { it.consume() }
+                                            when (event.type) {
+                                                PointerEventType.Move -> {
+                                                    val pos = event.changes.firstOrNull()?.position ?: continue
+                                                    dragCursorY += (pos - lastPos).y
+                                                    lastPos = pos
+                                                    val target = listState.layoutInfo.visibleItemsInfo
+                                                        .firstOrNull { info ->
+                                                            dragCursorY >= info.offset &&
+                                                            dragCursorY <= info.offset + info.size
+                                                        }
+                                                    if (target != null) dropTargetIndex = target.index
+                                                }
+                                                PointerEventType.Release -> {
+                                                    val from = draggingFromIndex
+                                                    val to = dropTargetIndex ?: from
+                                                    if (from >= 0 && from != to) viewModel.moveItem(from, to)
+                                                    draggingFromIndex = -1
+                                                    dropTargetIndex = null
+                                                    isDragActive = false
+                                                    dragCursorY = 0f
+                                                    dragging = false
+                                                }
+                                                else -> {}
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                    ) {
+                        ScheduleItemRow(
+                            item = item,
+                            isSelected = item.id == selectedItemId,
+                            onSelect = {
+                                if (!isDragActive) {
+                                    viewModel.selectItem(item.id)
+                                    onItemClick(item)
+                                }
+                            },
+                            onMoveUp   = { viewModel.moveItemUp(item.id) },
+                            onMoveDown = { viewModel.moveItemDown(item.id) },
+                            onRemove = {
+                                viewModel.removeItem(item.id)
+                                if (selectedItemId == item.id) viewModel.clearSelection()
+                            },
+                            onPresent = {
+                                viewModel.presentItem(
+                                    item = item,
+                                    onPresenting = onPresenting,
+                                    onPresentSong = onPresentSong,
+                                    onPresentBible = onPresentBible,
+                                    onPresentPresentation = onPresentPresentation,
+                                    onPresentPictures = onPresentPictures,
+                                    onPresentMedia = onPresentMedia,
+                                    onPresentAnnouncement = onPresentAnnouncement,
+                                    onPresentLowerThird = onPresentLowerThird,
+                                    onPresentWebsite = onPresentWebsite
+                                )
+                            },
+                            onEditLabel = {
+                                if (item is ScheduleItem.LabelItem) onEditLabel(item)
+                            }
+                        )
+                    }
 
                     if (index < scheduleItems.size - 1) {
                         HorizontalDivider(
@@ -390,6 +472,7 @@ fun ScheduleTab(
                             color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
                         )
                     }
+                    } // Column
                 }
             }
 
@@ -397,6 +480,53 @@ fun ScheduleTab(
                 modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
                 adapter = rememberScrollbarAdapter(scrollState = listState)
             )
+
+            // Floating drag preview — elevated card follows cursor
+            if (isDragActive) {
+                val dragItem = scheduleItems.getOrNull(draggingFromIndex)
+                dragItem?.let { item ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .zIndex(10f)
+                            .graphicsLayer {
+                                translationY = dragCursorY - dragItemHeight / 2
+                                scaleX = 1.04f
+                                scaleY = 1.04f
+                                shadowElevation = 20f
+                            }
+                            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(4.dp))
+                            .padding(horizontal = 12.dp, vertical = 8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = when (item) {
+                                is ScheduleItem.SongItem -> "♪"
+                                is ScheduleItem.BibleVerseItem -> "✝"
+                                is ScheduleItem.LabelItem -> "🏷"
+                                is ScheduleItem.PictureItem -> "📷"
+                                is ScheduleItem.PresentationItem -> "📊"
+                                is ScheduleItem.MediaItem -> "🎬"
+                                is ScheduleItem.LowerThirdItem -> "▼"
+                                is ScheduleItem.AnnouncementItem -> "📢"
+                                is ScheduleItem.WebsiteItem -> "🌐"
+                                is ScheduleItem.SceneItem -> "🎬"
+                            },
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.width(24.dp)
+                        )
+                        Text(
+                            text = item.displayText,
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Medium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1
+                        )
+                    }
+                }
+            }
         }
 
         // Add Files button at the bottom
