@@ -31,6 +31,8 @@ import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -51,6 +53,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import kotlinx.coroutines.flow.first
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onSizeChanged
@@ -61,7 +64,10 @@ import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.isSecondary
 import org.churchpresenter.app.churchpresenter.data.StatisticsManager
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.input.pointer.pointerInput
@@ -116,7 +122,7 @@ import org.churchpresenter.app.churchpresenter.viewmodel.SongsViewModel
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalComposeUiApi::class)
 @Composable
 fun SongsTab(
     modifier: Modifier = Modifier,
@@ -521,6 +527,9 @@ fun SongsTab(
                         .padding(horizontal = 8.dp)
                 ) {
                     itemsIndexed(filteredSongs) { index, song ->
+                        var showContextMenu by remember { mutableStateOf(false) }
+                        var contextMenuOffset by remember { mutableStateOf(DpOffset.Zero) }
+                        Box {
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -528,7 +537,23 @@ fun SongsTab(
                                     if (index == selectedSongIndex) MaterialTheme.colorScheme.surfaceVariant
                                     else MaterialTheme.colorScheme.surface
                                 )
-                                .padding(vertical = 8.dp),
+                                .padding(vertical = 8.dp)
+                                .pointerInput(Unit) {
+                                    awaitPointerEventScope {
+                                        while (true) {
+                                            val event = awaitPointerEvent(PointerEventPass.Main)
+                                            if (event.type == PointerEventType.Press &&
+                                                event.button?.isSecondary == true
+                                            ) {
+                                                val pos = event.changes.first().position
+                                                contextMenuOffset = with(density) {
+                                                    DpOffset(pos.x.toDp(), pos.y.toDp())
+                                                }
+                                                showContextMenu = true
+                                            }
+                                        }
+                                    }
+                                },
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             val textColor = if (index == selectedSongIndex)
@@ -596,6 +621,65 @@ fun SongsTab(
                                 }
                             }
                         }
+                        DropdownMenu(
+                            expanded = showContextMenu,
+                            onDismissRequest = { showContextMenu = false },
+                            offset = contextMenuOffset
+                        ) {
+                            if (onAddToSchedule != null) {
+                                DropdownMenuItem(
+                                    text = { Text(stringResource(Res.string.add_to_schedule)) },
+                                    leadingIcon = {
+                                        Icon(
+                                            painter = painterResource(Res.drawable.ic_playlist_add),
+                                            contentDescription = null,
+                                            modifier = Modifier.size(18.dp),
+                                            tint = MaterialTheme.colorScheme.secondary
+                                        )
+                                    },
+                                    onClick = {
+                                        onAddToSchedule(song.number.toIntOrNull() ?: 0, song.title, song.songbook, song.songId)
+                                        showContextMenu = false
+                                    }
+                                )
+                            }
+                            DropdownMenuItem(
+                                text = { Text(stringResource(Res.string.edit_song)) },
+                                leadingIcon = {
+                                    Icon(
+                                        painter = painterResource(Res.drawable.ic_edit),
+                                        contentDescription = null,
+                                        modifier = Modifier.size(18.dp),
+                                        tint = MaterialTheme.colorScheme.tertiary
+                                    )
+                                },
+                                onClick = {
+                                    songToEdit = song
+                                    showEditDialog = true
+                                    tabFocusRequester.requestFocus()
+                                    showContextMenu = false
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = { Text(stringResource(Res.string.go_live)) },
+                                leadingIcon = {
+                                    Icon(
+                                        painter = painterResource(Res.drawable.ic_cast),
+                                        contentDescription = null,
+                                        modifier = Modifier.size(18.dp),
+                                        tint = MaterialTheme.colorScheme.primary
+                                    )
+                                },
+                                onClick = {
+                                    viewModel.selectSong(index)
+                                    sendToPresenter()
+                                    onPresenting(Presenting.LYRICS)
+                                    tabFocusRequester.requestFocus()
+                                    showContextMenu = false
+                                }
+                            )
+                        }
+                        } // Box
                         HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
                     }
                 }
