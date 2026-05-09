@@ -175,6 +175,15 @@
     <string name="shortcut_key_down_right_song">→ / ↓ (song list)</string>
     <string name="shortcut_key_space">Space</string>
     <string name="shortcut_key_m">M</string>
+    <string name="shortcut_key_delete_backspace">Delete / Backspace</string>
+    <string name="shortcut_category_canvas">Canvas Tab</string>
+    <string name="shortcut_description_delete_source">Delete Selected Source</string>
+    <string name="shortcut_key_right_click">Right-click</string>
+    <string name="shortcut_key_shift_drag">Shift+Drag</string>
+    <string name="shortcut_category_schedule">Schedule</string>
+    <string name="shortcut_description_context_menu">Show context menu</string>
+    <string name="shortcut_description_reorder_item">Reorder item</string>
+    <string name="shortcut_description_reorder_image">Reorder image</string>
 
     <!-- Options Dialog Strings -->
     <string name="text_settings_and_colors">Text Settings and Colors</string>

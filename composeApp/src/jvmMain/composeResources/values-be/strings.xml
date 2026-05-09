@@ -548,6 +548,15 @@
     <string name="shortcut_key_down_right_song">→ / ↓ (спіс песень)</string>
     <string name="shortcut_key_space">Прабел</string>
     <string name="shortcut_key_m">M</string>
+    <string name="shortcut_key_delete_backspace">Delete / Backspace</string>
+    <string name="shortcut_category_canvas">Укладка Палатно</string>
+    <string name="shortcut_description_delete_source">Выдаліць выбраную крыніцу</string>
+    <string name="shortcut_key_right_click">Правая кнопка мышы</string>
+    <string name="shortcut_key_shift_drag">Shift+Перацягванне</string>
+    <string name="shortcut_category_schedule">Расклад</string>
+    <string name="shortcut_description_context_menu">Паказаць кантэкстнае меню</string>
+    <string name="shortcut_description_reorder_item">Змяніць парадак элемента</string>
+    <string name="shortcut_description_reorder_image">Змяніць парадак выявы</string>
     <string name="license_title">Ліцэнзійнае пагадненне — GNU General Public License v3</string>
     <string name="license_accept_button">Прыняць</string>
     <string name="license_decline_button">Адхіліць і выйсці</string>

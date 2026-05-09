@@ -99,6 +99,15 @@ import churchpresenter.composeapp.generated.resources.shortcut_key_space
 import churchpresenter.composeapp.generated.resources.shortcut_key_up
 import churchpresenter.composeapp.generated.resources.shortcut_key_up_left
 import churchpresenter.composeapp.generated.resources.shortcut_key_up_left_song
+import churchpresenter.composeapp.generated.resources.shortcut_category_canvas
+import churchpresenter.composeapp.generated.resources.shortcut_category_schedule
+import churchpresenter.composeapp.generated.resources.shortcut_description_context_menu
+import churchpresenter.composeapp.generated.resources.shortcut_description_delete_source
+import churchpresenter.composeapp.generated.resources.shortcut_description_reorder_image
+import churchpresenter.composeapp.generated.resources.shortcut_description_reorder_item
+import churchpresenter.composeapp.generated.resources.shortcut_key_delete_backspace
+import churchpresenter.composeapp.generated.resources.shortcut_key_right_click
+import churchpresenter.composeapp.generated.resources.shortcut_key_shift_drag
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -158,10 +167,11 @@ fun KeyboardShortcutsDialog(
                     }
 
                     ShortcutsCategory(stringResource(Res.string.shortcut_category_bible)) {
-                        ShortcutRow(stringResource(Res.string.shortcut_key_up),    stringResource(Res.string.shortcut_description_prev_verse))
-                        ShortcutRow(stringResource(Res.string.shortcut_key_down),  stringResource(Res.string.shortcut_description_next_verse))
-                        ShortcutRow(stringResource(Res.string.shortcut_key_left),  stringResource(Res.string.shortcut_description_prev_chapter))
-                        ShortcutRow(stringResource(Res.string.shortcut_key_right), stringResource(Res.string.shortcut_description_next_chapter))
+                        ShortcutRow(stringResource(Res.string.shortcut_key_up),          stringResource(Res.string.shortcut_description_prev_verse))
+                        ShortcutRow(stringResource(Res.string.shortcut_key_down),        stringResource(Res.string.shortcut_description_next_verse))
+                        ShortcutRow(stringResource(Res.string.shortcut_key_left),        stringResource(Res.string.shortcut_description_prev_chapter))
+                        ShortcutRow(stringResource(Res.string.shortcut_key_right),       stringResource(Res.string.shortcut_description_next_chapter))
+                        ShortcutRow(stringResource(Res.string.shortcut_key_right_click), stringResource(Res.string.shortcut_description_context_menu))
                     }
 
                     ShortcutsCategory(stringResource(Res.string.shortcut_category_songs)) {
@@ -169,12 +179,18 @@ fun KeyboardShortcutsDialog(
                         ShortcutRow(stringResource(Res.string.shortcut_key_down),            stringResource(Res.string.shortcut_description_next_section))
                         ShortcutRow(stringResource(Res.string.shortcut_key_up_left_song),    stringResource(Res.string.shortcut_description_prev_song))
                         ShortcutRow(stringResource(Res.string.shortcut_key_down_right_song), stringResource(Res.string.shortcut_description_next_song))
+                        ShortcutRow(stringResource(Res.string.shortcut_key_right_click),     stringResource(Res.string.shortcut_description_context_menu))
                     }
 
                     ShortcutsCategory(stringResource(Res.string.shortcut_category_pictures)) {
                         ShortcutRow(stringResource(Res.string.shortcut_key_up_left),    stringResource(Res.string.shortcut_description_prev_image))
                         ShortcutRow(stringResource(Res.string.shortcut_key_down_right), stringResource(Res.string.shortcut_description_next_image))
                         ShortcutRow(stringResource(Res.string.shortcut_key_space),      stringResource(Res.string.shortcut_description_play_pause))
+                        ShortcutRow(stringResource(Res.string.shortcut_key_shift_drag), stringResource(Res.string.shortcut_description_reorder_image))
+                    }
+
+                    ShortcutsCategory(stringResource(Res.string.shortcut_category_schedule)) {
+                        ShortcutRow(stringResource(Res.string.shortcut_key_shift_drag), stringResource(Res.string.shortcut_description_reorder_item))
                     }
 
                     ShortcutsCategory(stringResource(Res.string.shortcut_category_presentation)) {
@@ -186,6 +202,10 @@ fun KeyboardShortcutsDialog(
                     ShortcutsCategory(stringResource(Res.string.shortcut_category_media)) {
                         ShortcutRow(stringResource(Res.string.shortcut_key_space), stringResource(Res.string.shortcut_description_spacebar))
                         ShortcutRow(stringResource(Res.string.shortcut_key_m),     stringResource(Res.string.shortcut_description_media_mute))
+                    }
+
+                    ShortcutsCategory(stringResource(Res.string.shortcut_category_canvas)) {
+                        ShortcutRow(stringResource(Res.string.shortcut_key_delete_backspace), stringResource(Res.string.shortcut_description_delete_source))
                     }
                 }
 

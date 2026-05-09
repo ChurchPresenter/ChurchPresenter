@@ -634,6 +634,15 @@
     <string name="shortcut_key_down_right_song">→ / ↓ (seznam písní)</string>
     <string name="shortcut_key_space">Mezerník</string>
     <string name="shortcut_key_m">M</string>
+    <string name="shortcut_key_delete_backspace">Delete / Backspace</string>
+    <string name="shortcut_category_canvas">Karta Plátno</string>
+    <string name="shortcut_description_delete_source">Smazat vybraný zdroj</string>
+    <string name="shortcut_key_right_click">Pravé tlačítko</string>
+    <string name="shortcut_key_shift_drag">Shift+Přetažení</string>
+    <string name="shortcut_category_schedule">Plán</string>
+    <string name="shortcut_description_context_menu">Zobrazit kontextové menu</string>
+    <string name="shortcut_description_reorder_item">Přeuspořádat položku</string>
+    <string name="shortcut_description_reorder_image">Přeuspořádat obrázek</string>
     <string name="license_title">Licenční smlouva — GNU General Public License v3</string>
     <string name="license_accept_button">Přijímám</string>
     <string name="license_decline_button">Odmítnout a ukončit</string>

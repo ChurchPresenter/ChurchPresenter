@@ -548,6 +548,15 @@
     <string name="shortcut_key_down_right_song">→ / ↓ (әндер тізімі)</string>
     <string name="shortcut_key_space">Бос орын</string>
     <string name="shortcut_key_m">M</string>
+    <string name="shortcut_key_delete_backspace">Delete / Backspace</string>
+    <string name="shortcut_category_canvas">Кенеп қойындысы</string>
+    <string name="shortcut_description_delete_source">Таңдалған дереккөзді жою</string>
+    <string name="shortcut_key_right_click">Оң жақ шерту</string>
+    <string name="shortcut_key_shift_drag">Shift+Сүйреу</string>
+    <string name="shortcut_category_schedule">Кесте</string>
+    <string name="shortcut_description_context_menu">Контекстік мәзірді ашу</string>
+    <string name="shortcut_description_reorder_item">Элементті қайта реттеу</string>
+    <string name="shortcut_description_reorder_image">Суретті қайта реттеу</string>
     <string name="license_title">Лицензиялық келісім — GNU General Public License v3</string>
     <string name="license_accept_button">Қабылдаймын</string>
     <string name="license_decline_button">Бас тарту және шығу</string>

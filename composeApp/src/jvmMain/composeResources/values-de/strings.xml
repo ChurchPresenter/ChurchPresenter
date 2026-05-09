@@ -548,6 +548,15 @@
     <string name="shortcut_key_down_right_song">→ / ↓ (Liedliste)</string>
     <string name="shortcut_key_space">Leertaste</string>
     <string name="shortcut_key_m">M</string>
+    <string name="shortcut_key_delete_backspace">Delete / Backspace</string>
+    <string name="shortcut_category_canvas">Leinwand-Tab</string>
+    <string name="shortcut_description_delete_source">Ausgewählte Quelle löschen</string>
+    <string name="shortcut_key_right_click">Rechtsklick</string>
+    <string name="shortcut_key_shift_drag">Shift+Ziehen</string>
+    <string name="shortcut_category_schedule">Zeitplan</string>
+    <string name="shortcut_description_context_menu">Kontextmenü anzeigen</string>
+    <string name="shortcut_description_reorder_item">Element neu anordnen</string>
+    <string name="shortcut_description_reorder_image">Bild neu anordnen</string>
     <string name="license_title">Lizenzvereinbarung — GNU General Public License v3</string>
     <string name="license_accept_button">Akzeptieren</string>
     <string name="license_decline_button">Ablehnen &amp; Beenden</string>
