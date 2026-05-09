@@ -6,6 +6,8 @@ import androidx.compose.foundation.TooltipArea
 import androidx.compose.foundation.TooltipPlacement
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.input.pointer.PointerEventPass
@@ -516,7 +518,7 @@ fun PicturesTab(
             var isDragActive by remember { mutableStateOf(false) }
             var dragCursorInGrid by remember { mutableStateOf(Offset.Zero) }
 
-            Box(modifier = Modifier.fillMaxSize()) {
+            Box(modifier = Modifier.fillMaxSize().clip(RectangleShape)) {
                 LazyVerticalGrid(
                     columns = GridCells.Adaptive(150.dp),
                     state = gridState,
