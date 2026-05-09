@@ -36,6 +36,8 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -54,6 +56,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import kotlinx.coroutines.flow.first
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -64,7 +67,10 @@ import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.isSecondary
 import org.churchpresenter.app.churchpresenter.data.StatisticsManager
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.input.pointer.pointerInput
@@ -124,7 +130,7 @@ import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalComposeUiApi::class)
 @Composable
 fun BibleTab(
     modifier: Modifier = Modifier,
@@ -757,7 +763,26 @@ fun BibleTab(
                                 Spacer(modifier = Modifier.width(8.dp))
                                 toolbarContent()
                             }
-                    Box(modifier = Modifier.weight(1f)) {
+                    var showVerseContextMenu by remember { mutableStateOf(false) }
+                    var verseContextMenuOffset by remember { mutableStateOf(DpOffset.Zero) }
+
+                    Box(modifier = Modifier.weight(1f)
+                        .pointerInput(Unit) {
+                            awaitPointerEventScope {
+                                while (true) {
+                                    val event = awaitPointerEvent(PointerEventPass.Main)
+                                    if (event.type == PointerEventType.Press &&
+                                        event.button?.isSecondary == true
+                                    ) {
+                                        val pos = event.changes.first().position
+                                        verseContextMenuOffset = with(density) {
+                                            DpOffset(pos.x.toDp(), pos.y.toDp())
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    ) {
                         // Always map multi-verse indices into the filtered verse list
                         val multiIndicesInFiltered = viewModel.selectedVerseIndices
                             .mapNotNull { realIdx ->
@@ -796,8 +821,57 @@ fun BibleTab(
                                     val realIndex = verses.indexOf(it)
                                     if (realIndex >= 0) viewModel.shiftClickVerse(realIndex)
                                 }
+                            },
+                            onRightClicked = { index ->
+                                val verseText = filteredVerses.getOrNull(index)
+                                verseText?.let {
+                                    val realIndex = verses.indexOf(it)
+                                    if (realIndex >= 0) viewModel.selectVerse(realIndex)
+                                }
+                                showVerseContextMenu = true
                             }
                         )
+
+                        DropdownMenu(
+                            expanded = showVerseContextMenu,
+                            onDismissRequest = { showVerseContextMenu = false },
+                            offset = verseContextMenuOffset
+                        ) {
+                            DropdownMenuItem(
+                                text = { Text(stringResource(Res.string.add_to_schedule)) },
+                                leadingIcon = {
+                                    Icon(
+                                        painter = painterResource(Res.drawable.ic_playlist_add),
+                                        contentDescription = null,
+                                        modifier = Modifier.size(18.dp),
+                                        tint = MaterialTheme.colorScheme.secondary
+                                    )
+                                },
+                                onClick = {
+                                    viewModel.addCurrentVerseToSchedule { bookName, chapter, verseNumber, verseText, verseRange ->
+                                        onAddToSchedule?.invoke(bookName, chapter, verseNumber, verseText, verseRange)
+                                    }
+                                    focusRequester.requestFocus()
+                                    showVerseContextMenu = false
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = { Text(stringResource(Res.string.go_live)) },
+                                leadingIcon = {
+                                    Icon(
+                                        painter = painterResource(Res.drawable.ic_cast),
+                                        contentDescription = null,
+                                        modifier = Modifier.size(18.dp),
+                                        tint = MaterialTheme.colorScheme.primary
+                                    )
+                                },
+                                onClick = {
+                                    goLiveWithHistory()
+                                    focusRequester.requestFocus()
+                                    showVerseContextMenu = false
+                                }
+                            )
+                        }
                     }
 
                     // ── History panel ─────────────────────────────────────

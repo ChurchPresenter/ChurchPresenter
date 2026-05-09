@@ -17,10 +17,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.isCtrlPressed
 import androidx.compose.ui.input.pointer.isMetaPressed
+import androidx.compose.ui.input.pointer.isSecondary
 import androidx.compose.ui.input.pointer.isShiftPressed
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
@@ -44,6 +46,7 @@ fun SelectionList(
 }
 
 // New version that passes both index and item
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun SelectionListWithIndex(
     modifier: Modifier = Modifier,
@@ -57,6 +60,8 @@ fun SelectionListWithIndex(
     onItemCtrlClicked: ((Int, String) -> Unit)? = null,
     /** Called when the item is clicked with Shift held. */
     onItemShiftClicked: ((Int, String) -> Unit)? = null,
+    /** Called when the item is right-clicked. */
+    onRightClicked: ((Int) -> Unit)? = null,
 ) {
     val listState = rememberLazyListState(
         initialFirstVisibleItemIndex = selectedIndex.coerceIn(0, (list.size - 1).coerceAtLeast(0))
@@ -129,6 +134,19 @@ fun SelectionListWithIndex(
                                                 onItemShiftClicked.invoke(index, item)
                                             else -> onItemSelected(index, item)
                                         }
+                                    }
+                                }
+                            }
+                        }
+                        .pointerInput(index) {
+                            awaitPointerEventScope {
+                                while (true) {
+                                    val event = awaitPointerEvent(PointerEventPass.Main)
+                                    if (event.type == PointerEventType.Press &&
+                                        event.button?.isSecondary == true &&
+                                        index >= 0 && index < list.size
+                                    ) {
+                                        onRightClicked?.invoke(index)
                                     }
                                 }
                             }
