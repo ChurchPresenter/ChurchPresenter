@@ -249,6 +249,7 @@ class BibleViewModel(
     fun loadBibles() {
         loadChapterJob?.cancel()
         loadChapterJob = null
+        val previousBookId = _primaryBible.value?.getBookId(_selectedBookIndex.value)
         viewModelScope.launch {
             _isLoading.value = true
             _isFullyLoadedFlow.value = false
@@ -313,9 +314,14 @@ class BibleViewModel(
 
                 if (primary != null) {
                     _books.value = primary.getCanonicalBooks()
-                    // Preserve current position, clamping to valid range
+                    // Preserve current book by canonical ID so swapping bibles stays on the same book
                     val bookCount = minOf(primary.getBookCount(), CANONICAL_BOOK_COUNT)
-                    val clampedBookIndex = _selectedBookIndex.value.coerceIn(0, (bookCount - 1).coerceAtLeast(0))
+                    val clampedBookIndex = if (previousBookId != null) {
+                        (0 until bookCount).firstOrNull { primary.getBookId(it) == previousBookId }
+                            ?: _selectedBookIndex.value.coerceIn(0, (bookCount - 1).coerceAtLeast(0))
+                    } else {
+                        _selectedBookIndex.value.coerceIn(0, (bookCount - 1).coerceAtLeast(0))
+                    }
                     _selectedBookIndex.value = clampedBookIndex
                     val bookId = primary.getBookId(clampedBookIndex)
                     val chapterResult = withContext(Dispatchers.IO) {
