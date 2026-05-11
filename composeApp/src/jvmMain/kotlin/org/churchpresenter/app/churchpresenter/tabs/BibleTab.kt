@@ -250,6 +250,7 @@ fun BibleTab(
             onVerseSelected(selectedVerses)
             viewModel.clearMultiVerseSelection()
         }
+        presenterManager?.let { if (it.bibleHold.value) it.setBibleHold(false) }
         onPresenting(Presenting.BIBLE)
     }
 
