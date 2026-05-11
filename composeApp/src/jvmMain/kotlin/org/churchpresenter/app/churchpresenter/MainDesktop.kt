@@ -79,6 +79,7 @@ import org.churchpresenter.app.churchpresenter.data.SongItem
 import org.churchpresenter.app.churchpresenter.data.StatisticsManager
 import org.churchpresenter.app.churchpresenter.dialogs.AddLabelDialog
 import org.churchpresenter.app.churchpresenter.dialogs.AddWebsiteDialog
+import org.churchpresenter.app.churchpresenter.dialogs.KonamiEasterEggDialog
 import org.churchpresenter.app.churchpresenter.models.LyricSection
 import org.churchpresenter.app.churchpresenter.models.ScheduleItem
 import org.churchpresenter.app.churchpresenter.models.SelectedVerse
@@ -286,6 +287,18 @@ fun MainDesktop(
 
     val presentingMode by presenterManager.presentingMode
     val mainFocusRequester = remember { FocusRequester() }
+
+    val konamiSequence = remember {
+        listOf(
+            Key.DirectionUp, Key.DirectionUp,
+            Key.DirectionDown, Key.DirectionDown,
+            Key.DirectionLeft, Key.DirectionRight,
+            Key.DirectionLeft, Key.DirectionRight,
+            Key.B, Key.A
+        )
+    }
+    var konamiProgress by remember { mutableStateOf(0) }
+    var showKonamiEasterEgg by remember { mutableStateOf(false) }
 
     // Notify server whenever the picture folder, image list, or image order changes
     val pictureImages = picturesViewModel.images
@@ -498,7 +511,19 @@ fun MainDesktop(
                             selectTab(Tabs.ANNOUNCEMENTS); true
                         }
 
-                        else -> false
+                        else -> {
+                            val expected = konamiSequence.getOrNull(konamiProgress)
+                            if (keyEvent.key == expected) {
+                                konamiProgress++
+                                if (konamiProgress == konamiSequence.size) {
+                                    konamiProgress = 0
+                                    showKonamiEasterEgg = true
+                                }
+                            } else {
+                                konamiProgress = if (keyEvent.key == konamiSequence[0]) 1 else 0
+                            }
+                            false
+                        }
                     }
                 } else false
             }
@@ -1142,4 +1167,10 @@ fun MainDesktop(
             }
         )
     }
+
+    KonamiEasterEggDialog(
+        isVisible = showKonamiEasterEgg,
+        onDismiss = { showKonamiEasterEgg = false },
+        theme = theme
+    )
 }

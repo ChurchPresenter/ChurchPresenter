@@ -1306,5 +1306,10 @@
     <string name="obs_mode_qa">Fragen &amp; Antworten</string>
     <string name="obs_mode_stt">Transkription</string>
     <string name="obs_mode_none">Anzeige löschen</string>
+    <string name="konami_dialog_title">Du hast es gefunden!</string>
+    <string name="konami_dialog_headline">Cheat-Code aktiviert</string>
+    <string name="konami_dialog_blessings">+30 Segnungen freigeschaltet</string>
+    <string name="konami_dialog_message">Du kennst den Code. Jetzt geh und präsentiere die Anbetung.</string>
+    <string name="konami_dialog_button">Los geht\'s</string>
 </resources>
 

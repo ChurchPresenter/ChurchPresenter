@@ -1392,4 +1392,9 @@
     <string name="obs_mode_qa">Q&amp;A</string>
     <string name="obs_mode_stt">Transcription</string>
     <string name="obs_mode_none">Clear Display</string>
+    <string name="konami_dialog_title">You found it!</string>
+    <string name="konami_dialog_headline">Cheat Code Activated</string>
+    <string name="konami_dialog_blessings">+30 Blessings Unlocked</string>
+    <string name="konami_dialog_message">You know the code. Now go present some worship.</string>
+    <string name="konami_dialog_button">Let\'s Go</string>
 </resources>

@@ -1306,5 +1306,10 @@
     <string name="obs_mode_qa">Сұрақтар мен жауаптар</string>
     <string name="obs_mode_stt">Транскрипция</string>
     <string name="obs_mode_none">Экранды тазалау</string>
+    <string name="konami_dialog_title">Сіз тауып алдыңыз!</string>
+    <string name="konami_dialog_headline">Читкод іске қосылды</string>
+    <string name="konami_dialog_blessings">+30 бата ашылды</string>
+    <string name="konami_dialog_message">Сіз кодты білесіз. Енді мадақтауды ұсыныңыз.</string>
+    <string name="konami_dialog_button">Жүрейік</string>
 </resources>
 

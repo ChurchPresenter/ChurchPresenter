@@ -1305,5 +1305,10 @@
     <string name="obs_mode_qa">Pytania i odpowiedzi</string>
     <string name="obs_mode_stt">Transkrypcja</string>
     <string name="obs_mode_none">Wyczyść wyświetlanie</string>
+    <string name="konami_dialog_title">Znalazłeś to!</string>
+    <string name="konami_dialog_headline">Kod cheat aktywowany</string>
+    <string name="konami_dialog_blessings">+30 Błogosławieństw odblokowane</string>
+    <string name="konami_dialog_message">Znasz kod. Teraz idź i prezentuj uwielbienie.</string>
+    <string name="konami_dialog_button">Zaczynamy</string>
 </resources>
 
