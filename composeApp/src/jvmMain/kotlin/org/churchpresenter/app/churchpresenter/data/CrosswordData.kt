@@ -149,30 +149,35 @@ object CrosswordLayoutEngine {
         }
     }
 
-    /** Returns (startRow, startCol, direction) of the best valid placement, or null. */
+    /** Returns (startRow, startCol, direction) of the best valid placement, or null.
+     *  Tries the clue's specified direction first; falls back to the opposite direction
+     *  if no valid placement is found, mirroring the admin tool's tryPlace() logic. */
     private fun findPlacement(
         grid: Map<Pair<Int, Int>, Char>,
         placed: List<PlacedEntry>,
         clue: CrosswordClue
     ): Triple<Int, Int, CrosswordDirection>? {
-        for (pw in placed) {
-            // Only intersect words running in the opposite direction
-            if (pw.direction == clue.direction) continue
+        val opposite = if (clue.direction == CrosswordDirection.ACROSS) CrosswordDirection.DOWN else CrosswordDirection.ACROSS
+        for (dir in listOf(clue.direction, opposite)) {
+            for (pw in placed) {
+                // Only intersect words running in the opposite direction
+                if (pw.direction == dir) continue
 
-            for ((i, ch) in clue.answer.withIndex()) {
-                for ((j, pwCh) in pw.answer.withIndex()) {
-                    if (ch != pwCh) continue
+                for ((i, ch) in clue.answer.withIndex()) {
+                    for ((j, pwCh) in pw.answer.withIndex()) {
+                        if (ch != pwCh) continue
 
-                    // The intersection cell in absolute coordinates
-                    val (intRow, intCol) = if (pw.direction == CrosswordDirection.ACROSS)
-                        pw.row to pw.col + j else pw.row + j to pw.col
+                        // The intersection cell in absolute coordinates
+                        val (intRow, intCol) = if (pw.direction == CrosswordDirection.ACROSS)
+                            pw.row to pw.col + j else pw.row + j to pw.col
 
-                    // Start of the new word given the intersection is at index i
-                    val (startRow, startCol) = if (clue.direction == CrosswordDirection.ACROSS)
-                        intRow to intCol - i else intRow - i to intCol
+                        // Start of the new word given the intersection is at index i
+                        val (startRow, startCol) = if (dir == CrosswordDirection.ACROSS)
+                            intRow to intCol - i else intRow - i to intCol
 
-                    if (isValid(grid, clue.answer, startRow, startCol, clue.direction))
-                        return Triple(startRow, startCol, clue.direction)
+                        if (isValid(grid, clue.answer, startRow, startCol, dir))
+                            return Triple(startRow, startCol, dir)
+                    }
                 }
             }
         }
