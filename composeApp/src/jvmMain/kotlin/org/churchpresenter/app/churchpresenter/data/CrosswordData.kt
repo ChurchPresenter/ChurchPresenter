@@ -59,7 +59,7 @@ object CrosswordDecoder {
     /**
      * Parses plaintext puzzle format:
      *
-     *   # Level 1: Title
+     *   # Title
      *   ACROSS:
      *   1. Clue text | ANSWER
      *   DOWN:
