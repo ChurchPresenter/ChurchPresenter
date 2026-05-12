@@ -387,8 +387,8 @@ private fun checkAnswers(puzzle: RenderedCrossword, userInput: Map<Pair<Int, Int
 private suspend fun loadLevelFile(level: Int): RenderedCrossword? = try {
     val bytes = Res.readBytes("files/crossword/level$level.xwp")
     val base64Content = String(bytes, Charsets.UTF_8)
-    val (title, clues) = CrosswordDecoder.decodeFile(base64Content) ?: return null
-    CrosswordLayoutEngine.build(level, title, clues)
+    val (title, clues, layout) = CrosswordDecoder.decodeFile(base64Content) ?: return null
+    CrosswordLayoutEngine.build(level, title, clues, layout)
 } catch (_: Exception) {
     null
 }

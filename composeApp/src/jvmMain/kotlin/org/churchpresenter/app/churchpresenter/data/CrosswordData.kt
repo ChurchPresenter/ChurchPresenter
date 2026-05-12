@@ -42,10 +42,12 @@ private data class PlacedEntry(
 object CrosswordDecoder {
 
     /**
-     * Decodes a Base64 + XOR encoded puzzle file into a (title, clues) pair.
-     * Returns null if the file is malformed or empty.
+     * Decodes a Base64 + XOR encoded puzzle file.
+     * Returns a Triple of (title, clues, layout) where layout maps clue number →
+     * (direction, row, col), or null if the file is malformed or empty.
+     * Layout is null when the file predates the LAYOUT section.
      */
-    fun decodeFile(base64Content: String): Pair<String, List<CrosswordClue>>? = try {
+    fun decodeFile(base64Content: String): Triple<String, List<CrosswordClue>, Map<Int, Triple<CrosswordDirection, Int, Int>>?>? = try {
         val bytes = Base64.getDecoder().decode(base64Content.trim())
         val keyBytes = CROSSWORD_XOR_KEY.encodeToByteArray()
         val decoded = ByteArray(bytes.size) { i ->
@@ -65,18 +67,35 @@ object CrosswordDecoder {
      *   DOWN:
      *   2. Clue text | ANSWER
      */
-    private fun parseText(text: String): Pair<String, List<CrosswordClue>>? {
+    private fun parseText(text: String): Triple<String, List<CrosswordClue>, Map<Int, Triple<CrosswordDirection, Int, Int>>?>? {
         var title = "Crossword"
         val clues = mutableListOf<CrosswordClue>()
+        val layout = mutableMapOf<Int, Triple<CrosswordDirection, Int, Int>>()
         var direction: CrosswordDirection? = null
+        var inLayout = false
 
         for (rawLine in text.lines()) {
             val line = rawLine.trim()
             when {
-                line.startsWith("#") -> title = line.removePrefix("#").trim()
+                line.startsWith("#") -> { title = line.removePrefix("#").trim(); inLayout = false }
                 line.isBlank() -> Unit
-                line.equals("ACROSS:", ignoreCase = true) -> direction = CrosswordDirection.ACROSS
-                line.equals("DOWN:", ignoreCase = true) -> direction = CrosswordDirection.DOWN
+                line.equals("ACROSS:", ignoreCase = true) -> { direction = CrosswordDirection.ACROSS; inLayout = false }
+                line.equals("DOWN:", ignoreCase = true) -> { direction = CrosswordDirection.DOWN; inLayout = false }
+                line.equals("LAYOUT:", ignoreCase = true) -> inLayout = true
+                inLayout -> {
+                    val parts = line.split(" ")
+                    if (parts.size == 4) {
+                        val num = parts[0].toIntOrNull() ?: continue
+                        val dir = when (parts[1].uppercase()) {
+                            "ACROSS" -> CrosswordDirection.ACROSS
+                            "DOWN"   -> CrosswordDirection.DOWN
+                            else     -> continue
+                        }
+                        val row = parts[2].toIntOrNull() ?: continue
+                        val col = parts[3].toIntOrNull() ?: continue
+                        layout[num] = Triple(dir, row, col)
+                    }
+                }
                 else -> {
                     val dir = direction ?: continue
                     val dotIdx = line.indexOf('.')
@@ -91,7 +110,8 @@ object CrosswordDecoder {
                 }
             }
         }
-        return if (clues.isEmpty()) null else Pair(title, clues)
+        return if (clues.isEmpty()) null
+        else Triple(title, clues, if (layout.isEmpty()) null else layout)
     }
 }
 
@@ -107,8 +127,27 @@ object CrosswordLayoutEngine {
      * an already-placed word sharing a common letter.
      * Returns null if no words could be placed.
      */
-    fun build(level: Int, title: String, clues: List<CrosswordClue>): RenderedCrossword? {
+    fun build(
+        level: Int,
+        title: String,
+        clues: List<CrosswordClue>,
+        precomputedLayout: Map<Int, Triple<CrosswordDirection, Int, Int>>? = null
+    ): RenderedCrossword? {
         if (clues.isEmpty()) return null
+
+        // Use pre-computed layout from the .xwp file when available — avoids re-running the
+        // placement algorithm which could produce a different (but equally valid) arrangement
+        if (precomputedLayout != null) {
+            val gridMap = mutableMapOf<Pair<Int, Int>, Char>()
+            val placed = mutableListOf<PlacedEntry>()
+            for (clue in clues) {
+                val (dir, row, col) = precomputedLayout[clue.number] ?: continue
+                placeWord(gridMap, clue.answer, row, col, dir)
+                placed += PlacedEntry(clue.number, clue.answer, row, col, dir)
+            }
+            if (placed.isNotEmpty()) return renderGrid(level, title, placed, gridMap, clues)
+            // Fall through to algorithmic placement if layout data was unusable
+        }
 
         val sorted = clues.sortedByDescending { it.answer.length }
         val gridMap = mutableMapOf<Pair<Int, Int>, Char>()
