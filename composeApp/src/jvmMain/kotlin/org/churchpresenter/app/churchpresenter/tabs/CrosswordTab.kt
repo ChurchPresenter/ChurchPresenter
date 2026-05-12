@@ -98,7 +98,7 @@ fun CrosswordTab(
     // Load all available level files from resources
     LaunchedEffect(Unit) {
         val loaded = mutableListOf<RenderedCrossword>()
-        for (n in 1..MAX_LEVELS) {
+        for (n in 0..MAX_LEVELS) {
             val puzzle = loadLevelFile(n) ?: break
             loaded.add(puzzle)
         }
@@ -139,8 +139,8 @@ fun CrosswordTab(
 
             else -> {
                 val puzzle = puzzles[currentLevelIdx]
+                // crosswordUnlockedLevel stores the next accessible index (0 = only first puzzle)
                 val unlockedLevel = appSettings.crosswordUnlockedLevel
-                // User may view any level from 1 up to unlockedLevel + 1 (next to solve)
                 val maxAccessibleIdx = unlockedLevel.coerceAtMost(puzzles.size - 1)
                 val allCompleted = unlockedLevel >= puzzles.size
 
@@ -160,7 +160,8 @@ fun CrosswordTab(
                     Text(
                         text = stringResource(Res.string.crossword_level_label, puzzle.level, puzzles.size),
                         style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
                     )
 
                     IconButton(
@@ -210,7 +211,8 @@ fun CrosswordTab(
                             Text(
                                 text = stringResource(Res.string.crossword_across),
                                 fontWeight = FontWeight.Bold,
-                                style = MaterialTheme.typography.labelLarge
+                                style = MaterialTheme.typography.labelLarge,
+                                color = MaterialTheme.colorScheme.onSurface
                             )
                             Spacer(Modifier.height(4.dp))
                             puzzle.acrossClues.forEach { (num, clue) ->
@@ -227,7 +229,8 @@ fun CrosswordTab(
                             Text(
                                 text = stringResource(Res.string.crossword_down),
                                 fontWeight = FontWeight.Bold,
-                                style = MaterialTheme.typography.labelLarge
+                                style = MaterialTheme.typography.labelLarge,
+                                color = MaterialTheme.colorScheme.onSurface
                             )
                             Spacer(Modifier.height(4.dp))
                             puzzle.downClues.forEach { (num, clue) ->
@@ -273,9 +276,9 @@ fun CrosswordTab(
                                         msgCorrect
 
                                     // Unlock next level if this is the furthest solved
-                                    if (puzzle.level > unlockedLevel) {
+                                    if (currentLevelIdx >= unlockedLevel) {
                                         onSettingsChange { s ->
-                                            s.copy(crosswordUnlockedLevel = maxOf(s.crosswordUnlockedLevel, puzzle.level))
+                                            s.copy(crosswordUnlockedLevel = maxOf(s.crosswordUnlockedLevel, currentLevelIdx + 1))
                                         }
                                     }
                                     // Advance to the next level automatically
