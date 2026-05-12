@@ -210,6 +210,7 @@ fun MainDesktop(
     var selectedLowerThirdItem by remember { mutableStateOf<ScheduleItem.LowerThirdItem?>(null) }
     var selectedWebsiteItem by remember { mutableStateOf<ScheduleItem.WebsiteItem?>(null) }
 
+    var showCrosswordTab by remember { mutableStateOf(false) }
     var selectedTabIndex by rememberSaveable { mutableStateOf(0) }
     val visibleTabs = remember(appSettings.hiddenTabs, showCrosswordTab) {
         (Tabs.entries.filter { tab ->
@@ -311,7 +312,6 @@ fun MainDesktop(
         )
     }
     var crosswordProgress by remember { mutableStateOf(0) }
-    var showCrosswordTab by remember { mutableStateOf(false) }
 
     // Notify server whenever the picture folder, image list, or image order changes
     val pictureImages = picturesViewModel.images
