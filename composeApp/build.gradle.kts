@@ -561,7 +561,10 @@ val syncCrosswordFiles by tasks.registering(Copy::class) {
         destinationDir.mkdirs()
     }
 }
-tasks.matching { it.name.contains("ProcessResources", ignoreCase = true) }.configureEach {
+tasks.matching {
+    it.name.contains("ProcessResources", ignoreCase = true) ||
+    it.name.contains("ResourcesForJvmMain", ignoreCase = true)
+}.configureEach {
     dependsOn(syncCrosswordFiles)
 }
 
