@@ -114,15 +114,24 @@ object CrosswordLayoutEngine {
         val gridMap = mutableMapOf<Pair<Int, Int>, Char>()
         val placed = mutableListOf<PlacedEntry>()
 
-        // Place first word horizontally at origin
+        // Place first word at origin in its specified direction
         val first = sorted[0]
-        placeWord(gridMap, first.answer, 0, 0, CrosswordDirection.ACROSS)
-        placed += PlacedEntry(first.number, first.answer, 0, 0, CrosswordDirection.ACROSS)
+        placeWord(gridMap, first.answer, 0, 0, first.direction)
+        placed += PlacedEntry(first.number, first.answer, 0, 0, first.direction)
 
-        for (clue in sorted.drop(1)) {
-            val pos = findPlacement(gridMap, placed, clue) ?: continue
-            placeWord(gridMap, clue.answer, pos.first, pos.second, pos.third)
-            placed += PlacedEntry(clue.number, clue.answer, pos.first, pos.second, pos.third)
+        // Place remaining words; retry until no more progress (later words may unlock earlier ones)
+        val deferred = sorted.drop(1).toMutableList()
+        var lastSize = -1
+        while (deferred.isNotEmpty() && deferred.size != lastSize) {
+            lastSize = deferred.size
+            val iter = deferred.iterator()
+            while (iter.hasNext()) {
+                val clue = iter.next()
+                val pos = findPlacement(gridMap, placed, clue) ?: continue
+                placeWord(gridMap, clue.answer, pos.first, pos.second, pos.third)
+                placed += PlacedEntry(clue.number, clue.answer, pos.first, pos.second, pos.third)
+                iter.remove()
+            }
         }
 
         if (placed.isEmpty()) return null
@@ -147,8 +156,8 @@ object CrosswordLayoutEngine {
         clue: CrosswordClue
     ): Triple<Int, Int, CrosswordDirection>? {
         for (pw in placed) {
-            val perpDir = if (pw.direction == CrosswordDirection.ACROSS)
-                CrosswordDirection.DOWN else CrosswordDirection.ACROSS
+            // Only intersect words running in the opposite direction
+            if (pw.direction == clue.direction) continue
 
             for ((i, ch) in clue.answer.withIndex()) {
                 for ((j, pwCh) in pw.answer.withIndex()) {
@@ -159,11 +168,11 @@ object CrosswordLayoutEngine {
                         pw.row to pw.col + j else pw.row + j to pw.col
 
                     // Start of the new word given the intersection is at index i
-                    val (startRow, startCol) = if (perpDir == CrosswordDirection.ACROSS)
+                    val (startRow, startCol) = if (clue.direction == CrosswordDirection.ACROSS)
                         intRow to intCol - i else intRow - i to intCol
 
-                    if (isValid(grid, clue.answer, startRow, startCol, perpDir))
-                        return Triple(startRow, startCol, perpDir)
+                    if (isValid(grid, clue.answer, startRow, startCol, clue.direction))
+                        return Triple(startRow, startCol, clue.direction)
                 }
             }
         }
