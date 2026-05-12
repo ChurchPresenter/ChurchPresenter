@@ -98,6 +98,7 @@ import org.churchpresenter.app.churchpresenter.tabs.LowerThirdTab
 import org.churchpresenter.app.churchpresenter.tabs.CanvasTab
 import org.churchpresenter.app.churchpresenter.tabs.QATab
 import org.churchpresenter.app.churchpresenter.server.TunnelStatus
+import org.churchpresenter.app.churchpresenter.tabs.CrosswordTab
 import org.churchpresenter.app.churchpresenter.tabs.STTTab
 import org.churchpresenter.app.churchpresenter.tabs.TabSection
 import org.churchpresenter.app.churchpresenter.tabs.Tabs
@@ -210,8 +211,11 @@ fun MainDesktop(
     var selectedWebsiteItem by remember { mutableStateOf<ScheduleItem.WebsiteItem?>(null) }
 
     var selectedTabIndex by rememberSaveable { mutableStateOf(0) }
-    val visibleTabs = remember(appSettings.hiddenTabs) {
-        Tabs.entries.filter { it.name !in appSettings.hiddenTabs }.ifEmpty { listOf(Tabs.BIBLE) }
+    val visibleTabs = remember(appSettings.hiddenTabs, showCrosswordTab) {
+        (Tabs.entries.filter { tab ->
+            tab != Tabs.CROSSWORD && tab.name !in appSettings.hiddenTabs
+        } + if (showCrosswordTab) listOf(Tabs.CROSSWORD) else emptyList())
+            .ifEmpty { listOf(Tabs.BIBLE) }
     }
     // Clamp synchronously so no composition pass ever sees an out-of-bounds index.
     val effectiveTabIndex = selectedTabIndex.coerceIn(visibleTabs.indices)
@@ -299,6 +303,15 @@ fun MainDesktop(
     }
     var konamiProgress by remember { mutableStateOf(0) }
     var showKonamiEasterEgg by remember { mutableStateOf(false) }
+
+    val crosswordSequence = remember {
+        listOf(
+            Key.DirectionLeft, Key.DirectionRight,
+            Key.DirectionLeft, Key.DirectionRight
+        )
+    }
+    var crosswordProgress by remember { mutableStateOf(0) }
+    var showCrosswordTab by remember { mutableStateOf(false) }
 
     // Notify server whenever the picture folder, image list, or image order changes
     val pictureImages = picturesViewModel.images
@@ -512,17 +525,39 @@ fun MainDesktop(
                         }
 
                         else -> {
-                            val expected = konamiSequence.getOrNull(konamiProgress)
-                            if (keyEvent.key == expected) {
-                                konamiProgress++
-                                if (konamiProgress == konamiSequence.size) {
-                                    konamiProgress = 0
-                                    showKonamiEasterEgg = true
-                                }
+                            if (presentingMode != Presenting.NONE) {
+                                // Suppress both easter egg sequences while live
+                                konamiProgress = 0
+                                crosswordProgress = 0
+                                false
                             } else {
-                                konamiProgress = if (keyEvent.key == konamiSequence[0]) 1 else 0
+                                // Konami code: ↑↑↓↓←→←→BA
+                                val konamiExpected = konamiSequence.getOrNull(konamiProgress)
+                                if (keyEvent.key == konamiExpected) {
+                                    konamiProgress++
+                                    if (konamiProgress == konamiSequence.size) {
+                                        konamiProgress = 0
+                                        showKonamiEasterEgg = true
+                                    }
+                                } else {
+                                    konamiProgress = if (keyEvent.key == konamiSequence[0]) 1 else 0
+                                }
+
+                                // Crossword: ←→←→
+                                val crosswordExpected = crosswordSequence.getOrNull(crosswordProgress)
+                                if (keyEvent.key == crosswordExpected) {
+                                    crosswordProgress++
+                                    if (crosswordProgress == crosswordSequence.size) {
+                                        crosswordProgress = 0
+                                        showCrosswordTab = true
+                                        selectTab(Tabs.CROSSWORD)
+                                    }
+                                } else {
+                                    crosswordProgress = if (keyEvent.key == crosswordSequence[0]) 1 else 0
+                                }
+
+                                false
                             }
-                            false
                         }
                     }
                 } else false
@@ -828,8 +863,8 @@ fun MainDesktop(
                                 expanded = showTabVisibilityMenu,
                                 onDismissRequest = { showTabVisibilityMenu = false }
                             ) {
-                                val visibleCount = Tabs.entries.count { it.name !in appSettings.hiddenTabs }
-                                Tabs.entries.forEach { tab ->
+                                val visibleCount = Tabs.entries.count { it != Tabs.CROSSWORD && it.name !in appSettings.hiddenTabs }
+                                Tabs.entries.filter { it != Tabs.CROSSWORD }.forEach { tab ->
                                     val isVisible = tab.name !in appSettings.hiddenTabs
                                     val isOnlyVisible = isVisible && visibleCount == 1
                                     DropdownMenuItem(
@@ -1039,6 +1074,12 @@ fun MainDesktop(
                                     onSettingsChange = onSettingsChange
                                 )
                             }
+
+                            Tabs.CROSSWORD -> CrosswordTab(
+                                modifier = Modifier.fillMaxSize(),
+                                appSettings = appSettings,
+                                onSettingsChange = onSettingsChange
+                            )
                         }
                     }
                 }

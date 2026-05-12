@@ -549,3 +549,19 @@ tasks.register("signLinuxDeb") {
     }
 }
 
+// ── Crossword puzzle sync ─────────────────────────────────────────────────────
+// Copies encrypted .xwp files from the ChurchPresenter-Cross submodule into
+// composeResources so they are bundled with the app. Run `git submodule update`
+// in ChurchPresenter-Cross to pull the latest puzzles, then rebuild.
+val syncCrosswordFiles by tasks.registering(Copy::class) {
+    from(rootProject.file("composeApp/src/jvmMain/appResources/common/ChurchPresenter-Cross/encoded"))
+    include("*.xwp")
+    into(layout.projectDirectory.file("src/jvmMain/composeResources/files/crossword"))
+    doFirst {
+        destinationDir.mkdirs()
+    }
+}
+tasks.matching { it.name.contains("ProcessResources", ignoreCase = true) }.configureEach {
+    dependsOn(syncCrosswordFiles)
+}
+

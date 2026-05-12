@@ -30,6 +30,7 @@ import churchpresenter.composeapp.generated.resources.tab_web
 import churchpresenter.composeapp.generated.resources.tab_canvas
 import churchpresenter.composeapp.generated.resources.tab_qa
 import churchpresenter.composeapp.generated.resources.tab_stt
+import churchpresenter.composeapp.generated.resources.crossword_tab
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -132,5 +133,6 @@ internal fun getStringName(tabs: Tabs): String {
         Tabs.CANVAS -> stringResource(Res.string.tab_canvas)
         Tabs.QA -> stringResource(Res.string.tab_qa)
         Tabs.STT -> stringResource(Res.string.tab_stt)
+        Tabs.CROSSWORD -> stringResource(Res.string.crossword_tab)
     }
 }

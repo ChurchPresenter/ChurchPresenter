@@ -39,6 +39,9 @@ native/decklink/DeckLinkAPI_i.c
 native/decklink/build/
 
 
+# Crossword .xwp files — owned by ChurchPresenter-Cross submodule, synced by Gradle at build time
+composeApp/src/jvmMain/composeResources/files/crossword/
+
 # Credential / config files
 firebase-config.json
 serviceAccountKey.json

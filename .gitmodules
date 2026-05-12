@@ -4,3 +4,6 @@
 [submodule "composeApp/src/jvmMain/appResources/common/ChurchPresenter-LottieGen"]
 	path = composeApp/src/jvmMain/appResources/common/ChurchPresenter-LottieGen
 	url = https://github.com/ChurchPresenter/ChurchPresenter-LottieGen
+[submodule "composeApp/src/jvmMain/appResources/common/ChurchPresenter-Cross"]
+	path = composeApp/src/jvmMain/appResources/common/ChurchPresenter-Cross
+	url = https://github.com/ChurchPresenter/ChurchPresenter-Cross

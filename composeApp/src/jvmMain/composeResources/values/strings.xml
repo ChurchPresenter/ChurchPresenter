@@ -1397,4 +1397,14 @@
     <string name="konami_dialog_blessings">+30 Blessings Unlocked</string>
     <string name="konami_dialog_message">You know the code. Now go present some worship.</string>
     <string name="konami_dialog_button">Let\'s Go</string>
+    <string name="crossword_tab">Crossword</string>
+    <string name="crossword_across">Across</string>
+    <string name="crossword_down">Down</string>
+    <string name="crossword_check">Check Answers</string>
+    <string name="crossword_wrong">Wrong — try again</string>
+    <string name="crossword_correct">Correct! Level complete!</string>
+    <string name="crossword_all_done">You\'ve completed all levels!</string>
+    <string name="crossword_loading">Loading puzzles…</string>
+    <string name="crossword_no_puzzles">No crossword puzzles available yet.</string>
+    <string name="crossword_level_label">Level %1$d of %2$d</string>
 </resources>
