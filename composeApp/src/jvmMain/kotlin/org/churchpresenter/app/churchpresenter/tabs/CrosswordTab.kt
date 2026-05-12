@@ -158,7 +158,7 @@ fun CrosswordTab(
                     }
 
                     Text(
-                        text = stringResource(Res.string.crossword_level_label, puzzle.level, puzzles.size),
+                        text = stringResource(Res.string.crossword_level_label, puzzle.level),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface
