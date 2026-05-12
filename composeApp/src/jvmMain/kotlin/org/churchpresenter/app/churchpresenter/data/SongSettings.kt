@@ -799,5 +799,6 @@ data class AppSettings(
     val windowY: Int = -1,
     val hiddenTabs: Set<String> = setOf("QA", "STT"),
     val crosswordUnlockedLevel: Int = 0,
+    val crosswordProgress: Map<Int, String> = emptyMap(),
     val obsSettings: OBSSettings = OBSSettings()
 )

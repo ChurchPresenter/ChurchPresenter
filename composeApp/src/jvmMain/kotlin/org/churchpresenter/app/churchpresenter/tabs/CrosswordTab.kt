@@ -32,7 +32,11 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -77,6 +81,24 @@ private val BlockedCell       = Color(0xFF1A1A1A)
 private val FocusedBorder     = Color(0xFF1565C0)
 private val FocusedBackground = Color(0xFFBBDEFB)
 
+// Serialise/deserialise user input as "row,col:C|row,col:C|…"
+private fun serializeInput(input: Map<Pair<Int, Int>, Char>): String =
+    input.entries.joinToString("|") { (pos, ch) -> "${pos.first},${pos.second}:$ch" }
+
+private fun deserializeInput(s: String): Map<Pair<Int, Int>, Char> {
+    if (s.isBlank()) return emptyMap()
+    return s.split("|").mapNotNull { entry ->
+        val colon = entry.indexOf(':')
+        if (colon < 0) return@mapNotNull null
+        val parts = entry.substring(0, colon).split(",")
+        if (parts.size != 2) return@mapNotNull null
+        val row = parts[0].toIntOrNull() ?: return@mapNotNull null
+        val col = parts[1].toIntOrNull() ?: return@mapNotNull null
+        val ch  = entry.getOrNull(colon + 1) ?: return@mapNotNull null
+        (row to col) to ch
+    }.toMap()
+}
+
 @OptIn(ExperimentalResourceApi::class)
 @Composable
 fun CrosswordTab(
@@ -88,12 +110,26 @@ fun CrosswordTab(
     val msgWrong = stringResource(Res.string.crossword_wrong)
     val msgAllDone = stringResource(Res.string.crossword_all_done)
 
+    val scope = rememberCoroutineScope()
+    var saveJob by remember { mutableStateOf<Job?>(null) }
+
     var isLoading by remember { mutableStateOf(true) }
     var puzzles by remember { mutableStateOf<List<RenderedCrossword>>(emptyList()) }
     var currentLevelIdx by remember { mutableStateOf(0) }
     var userInput by remember { mutableStateOf(mapOf<Pair<Int, Int>, Char>()) }
     var feedback by remember { mutableStateOf<String?>(null) }
     var feedbackIsCorrect by remember { mutableStateOf(false) }
+
+    fun saveProgress(levelIdx: Int, input: Map<Pair<Int, Int>, Char>) {
+        saveJob?.cancel()
+        saveJob = scope.launch {
+            delay(500)
+            val serialized = serializeInput(input)
+            onSettingsChange { s ->
+                s.copy(crosswordProgress = s.crosswordProgress + (levelIdx to serialized))
+            }
+        }
+    }
 
     // Load all available level files from resources
     LaunchedEffect(Unit) {
@@ -108,9 +144,9 @@ fun CrosswordTab(
         currentLevelIdx = appSettings.crosswordUnlockedLevel.coerceIn(0, (loaded.size - 1).coerceAtLeast(0))
     }
 
-    // Reset input and feedback when navigating to a different level
+    // Restore saved input and clear feedback when navigating to a different level
     LaunchedEffect(currentLevelIdx) {
-        userInput = emptyMap()
+        userInput = deserializeInput(appSettings.crosswordProgress[currentLevelIdx] ?: "")
         feedback = null
         feedbackIsCorrect = false
     }
@@ -186,12 +222,16 @@ fun CrosswordTab(
                                         cell = cell,
                                         inputChar = userInput[rowIdx to colIdx],
                                         onCharInput = { ch ->
-                                            userInput = userInput + ((rowIdx to colIdx) to ch)
+                                            val newInput = userInput + ((rowIdx to colIdx) to ch)
+                                            userInput = newInput
                                             feedback = null
+                                            saveProgress(currentLevelIdx, newInput)
                                         },
                                         onClear = {
-                                            userInput = userInput - (rowIdx to colIdx)
+                                            val newInput = userInput - (rowIdx to colIdx)
+                                            userInput = newInput
                                             feedback = null
+                                            saveProgress(currentLevelIdx, newInput)
                                         }
                                     )
                                 }
