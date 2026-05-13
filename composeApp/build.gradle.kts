@@ -469,6 +469,13 @@ tasks.matching { it.name in problematicTasks }.configureEach {
     doNotTrackState("Temporary workaround: OneDrive placeholder snapshot errors")
 }
 
+// prepareAppResources scans the entire appResourcesRootDir — exclude submodule build
+// artefacts (.gradle dirs) that contain lock files Gradle can't hash on Windows.
+afterEvaluate {
+    (tasks.findByName("prepareAppResources") as? org.gradle.api.tasks.AbstractCopyTask)
+        ?.exclude { it.path.contains(".gradle") }
+}
+
 
 // ── Windows Code Signing ──────────────────────────────────────────────────────
 // Runs signtool.exe on the packaged .msi / .exe after Compose Desktop packaging.
