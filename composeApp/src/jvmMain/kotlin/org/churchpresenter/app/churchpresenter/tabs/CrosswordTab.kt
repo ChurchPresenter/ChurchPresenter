@@ -181,6 +181,8 @@ fun CrosswordTab(
                 val allCompleted = unlockedLevel >= puzzles.size
 
                 // Header: level label + prev/next navigation
+                val canGoBack    = currentLevelIdx > 0
+                val canGoForward = currentLevelIdx < maxAccessibleIdx
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
@@ -188,9 +190,16 @@ fun CrosswordTab(
                 ) {
                     IconButton(
                         onClick = { currentLevelIdx-- },
-                        enabled = currentLevelIdx > 0
+                        enabled = canGoBack
                     ) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = null,
+                            tint = if (canGoBack)
+                                MaterialTheme.colorScheme.onSurface
+                            else
+                                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                        )
                     }
 
                     Text(
@@ -202,9 +211,16 @@ fun CrosswordTab(
 
                     IconButton(
                         onClick = { currentLevelIdx++ },
-                        enabled = currentLevelIdx < maxAccessibleIdx
+                        enabled = canGoForward
                     ) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null)
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowForward,
+                            contentDescription = null,
+                            tint = if (canGoForward)
+                                MaterialTheme.colorScheme.onSurface
+                            else
+                                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                        )
                     }
                 }
 

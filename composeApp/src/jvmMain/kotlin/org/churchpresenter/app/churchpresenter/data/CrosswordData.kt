@@ -47,7 +47,7 @@ object CrosswordDecoder {
      * (direction, row, col), or null if the file is malformed or empty.
      * Layout is null when the file predates the LAYOUT section.
      */
-    fun decodeFile(base64Content: String): Triple<String, List<CrosswordClue>, Map<Int, Triple<CrosswordDirection, Int, Int>>?>? = try {
+    fun decodeFile(base64Content: String): Triple<String, List<CrosswordClue>, Map<Pair<Int, CrosswordDirection>, Pair<Int, Int>>?>? = try {
         val bytes = Base64.getDecoder().decode(base64Content.trim())
         val keyBytes = CROSSWORD_XOR_KEY.encodeToByteArray()
         val decoded = ByteArray(bytes.size) { i ->
@@ -67,10 +67,12 @@ object CrosswordDecoder {
      *   DOWN:
      *   2. Clue text | ANSWER
      */
-    private fun parseText(text: String): Triple<String, List<CrosswordClue>, Map<Int, Triple<CrosswordDirection, Int, Int>>?>? {
+    private fun parseText(text: String): Triple<String, List<CrosswordClue>, Map<Pair<Int, CrosswordDirection>, Pair<Int, Int>>?>? {
         var title = "Crossword"
         val clues = mutableListOf<CrosswordClue>()
-        val layout = mutableMapOf<Int, Triple<CrosswordDirection, Int, Int>>()
+        // Key is (clueNumber, direction) so two words sharing the same sequential number
+        // but running in different directions both survive in the map.
+        val layout = mutableMapOf<Pair<Int, CrosswordDirection>, Pair<Int, Int>>()
         var direction: CrosswordDirection? = null
         var inLayout = false
 
@@ -93,7 +95,7 @@ object CrosswordDecoder {
                         }
                         val row = parts[2].toIntOrNull() ?: continue
                         val col = parts[3].toIntOrNull() ?: continue
-                        layout[num] = Triple(dir, row, col)
+                        layout[num to dir] = row to col
                     }
                 }
                 else -> {
@@ -131,19 +133,21 @@ object CrosswordLayoutEngine {
         level: Int,
         title: String,
         clues: List<CrosswordClue>,
-        precomputedLayout: Map<Int, Triple<CrosswordDirection, Int, Int>>? = null
+        precomputedLayout: Map<Pair<Int, CrosswordDirection>, Pair<Int, Int>>? = null
     ): RenderedCrossword? {
         if (clues.isEmpty()) return null
 
         // Use pre-computed layout from the .xwp file when available — avoids re-running the
-        // placement algorithm which could produce a different (but equally valid) arrangement
+        // placement algorithm which could produce a different (but equally valid) arrangement.
+        // Key is (clueNumber, direction) so ACROSS and DOWN words sharing the same cell number
+        // are both found correctly.
         if (precomputedLayout != null) {
             val gridMap = mutableMapOf<Pair<Int, Int>, Char>()
             val placed = mutableListOf<PlacedEntry>()
             for (clue in clues) {
-                val (dir, row, col) = precomputedLayout[clue.number] ?: continue
-                placeWord(gridMap, clue.answer, row, col, dir)
-                placed += PlacedEntry(clue.number, clue.answer, row, col, dir)
+                val (row, col) = precomputedLayout[clue.number to clue.direction] ?: continue
+                placeWord(gridMap, clue.answer, row, col, clue.direction)
+                placed += PlacedEntry(clue.number, clue.answer, row, col, clue.direction)
             }
             if (placed.isNotEmpty()) return renderGrid(level, title, placed, gridMap, clues)
             // Fall through to algorithmic placement if layout data was unusable
@@ -261,12 +265,18 @@ object CrosswordLayoutEngine {
         val minCol = grid.keys.minOf { it.second }
         val maxCol = grid.keys.maxOf { it.second }
 
-        // Map from (absolute row, col) -> smallest clue number starting there
-        val startNumbers = mutableMapOf<Pair<Int, Int>, Int>()
-        for (pe in placed) {
-            val pos = pe.row to pe.col
-            val existing = startNumbers[pos]
-            if (existing == null || pe.number < existing) startNumbers[pos] = pe.number
+        // Assign sequential cell numbers in reading order (top→bottom, left→right).
+        // Two words sharing the same start cell get one number — fixing the mismatch
+        // where the cell showed one number but the clue list referenced another.
+        val cellNumber = placed
+            .map { (it.row - minRow) to (it.col - minCol) }
+            .distinct()
+            .sortedWith(compareBy({ it.first }, { it.second }))
+            .mapIndexed { idx, pos -> pos to (idx + 1) }
+            .toMap()
+
+        val oldToNew = placed.associate { pe ->
+            pe.number to cellNumber[(pe.row - minRow) to (pe.col - minCol)]!!
         }
 
         val clueMap = originalClues.associateBy { it.number }
@@ -275,20 +285,20 @@ object CrosswordLayoutEngine {
             (minCol..maxCol).map { c ->
                 CrosswordCell(
                     answer = grid[r to c],
-                    clueNumber = startNumbers[r to c]
+                    clueNumber = cellNumber[(r - minRow) to (c - minCol)]
                 )
             }
         }
 
         val acrossClues = placed
             .filter { it.direction == CrosswordDirection.ACROSS }
-            .sortedBy { it.number }
-            .mapNotNull { pe -> clueMap[pe.number]?.let { pe.number to it.clue } }
+            .sortedBy { oldToNew[it.number] }
+            .mapNotNull { pe -> clueMap[pe.number]?.let { oldToNew[pe.number]!! to it.clue } }
 
         val downClues = placed
             .filter { it.direction == CrosswordDirection.DOWN }
-            .sortedBy { it.number }
-            .mapNotNull { pe -> clueMap[pe.number]?.let { pe.number to it.clue } }
+            .sortedBy { oldToNew[it.number] }
+            .mapNotNull { pe -> clueMap[pe.number]?.let { oldToNew[pe.number]!! to it.clue } }
 
         return RenderedCrossword(level, title, rows, acrossClues, downClues)
     }
