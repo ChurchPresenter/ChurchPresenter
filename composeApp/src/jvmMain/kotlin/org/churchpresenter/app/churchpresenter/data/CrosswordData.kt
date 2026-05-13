@@ -261,12 +261,18 @@ object CrosswordLayoutEngine {
         val minCol = grid.keys.minOf { it.second }
         val maxCol = grid.keys.maxOf { it.second }
 
-        // Map from (absolute row, col) -> smallest clue number starting there
-        val startNumbers = mutableMapOf<Pair<Int, Int>, Int>()
-        for (pe in placed) {
-            val pos = pe.row to pe.col
-            val existing = startNumbers[pos]
-            if (existing == null || pe.number < existing) startNumbers[pos] = pe.number
+        // Assign sequential cell numbers in reading order (top→bottom, left→right).
+        // Two words sharing the same start cell get one number — fixing the mismatch
+        // where the cell showed one number but the clue list referenced another.
+        val cellNumber = placed
+            .map { (it.row - minRow) to (it.col - minCol) }
+            .distinct()
+            .sortedWith(compareBy({ it.first }, { it.second }))
+            .mapIndexed { idx, pos -> pos to (idx + 1) }
+            .toMap()
+
+        val oldToNew = placed.associate { pe ->
+            pe.number to cellNumber[(pe.row - minRow) to (pe.col - minCol)]!!
         }
 
         val clueMap = originalClues.associateBy { it.number }
@@ -275,20 +281,20 @@ object CrosswordLayoutEngine {
             (minCol..maxCol).map { c ->
                 CrosswordCell(
                     answer = grid[r to c],
-                    clueNumber = startNumbers[r to c]
+                    clueNumber = cellNumber[(r - minRow) to (c - minCol)]
                 )
             }
         }
 
         val acrossClues = placed
             .filter { it.direction == CrosswordDirection.ACROSS }
-            .sortedBy { it.number }
-            .mapNotNull { pe -> clueMap[pe.number]?.let { pe.number to it.clue } }
+            .sortedBy { oldToNew[it.number] }
+            .mapNotNull { pe -> clueMap[pe.number]?.let { oldToNew[pe.number]!! to it.clue } }
 
         val downClues = placed
             .filter { it.direction == CrosswordDirection.DOWN }
-            .sortedBy { it.number }
-            .mapNotNull { pe -> clueMap[pe.number]?.let { pe.number to it.clue } }
+            .sortedBy { oldToNew[it.number] }
+            .mapNotNull { pe -> clueMap[pe.number]?.let { oldToNew[pe.number]!! to it.clue } }
 
         return RenderedCrossword(level, title, rows, acrossClues, downClues)
     }
