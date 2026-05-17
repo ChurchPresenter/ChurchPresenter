@@ -502,7 +502,7 @@ fun BibleTab(
                 )
                 Box(modifier = Modifier.fillMaxWidth().fillMaxHeight()) {
                     val listState = rememberLazyListState()
-                    LazyColumn(state = listState, modifier = Modifier.fillMaxSize()) {
+                    LazyColumn(state = listState, modifier = Modifier.fillMaxSize().padding(end = 8.dp)) {
                         itemsIndexed(searchResults) { _, result ->
                             val resultText = "${result.book} ${result.chapter}:${result.verse} - ${result.verseText}"
                             val highlightedText = buildAnnotatedString {
@@ -877,7 +877,7 @@ fun BibleTab(
 
                     // ── History panel ─────────────────────────────────────
                     if (viewModel.history.isNotEmpty()) {
-                        HorizontalDivider()
+                        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                         Row(
                             modifier = Modifier.fillMaxWidth()
                                 .clickable { historyExpanded = !historyExpanded }
@@ -923,14 +923,23 @@ fun BibleTab(
                                 historyListState.scrollToItem(0)
                             }
                             Box(modifier = Modifier.fillMaxWidth().height(120.dp)) {
-                                LazyColumn(state = historyListState, modifier = Modifier.fillMaxSize()) {
-                                    items(viewModel.history) { entry ->
+                                LazyColumn(state = historyListState, modifier = Modifier.fillMaxSize().padding(end = 8.dp)) {
+                                    itemsIndexed(viewModel.history) { idx, entry ->
                                         Text(
-                                            text = "${entry.displayText}  ${entry.verseText}",
+                                            text = buildAnnotatedString {
+                                                withStyle(SpanStyle(fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.primary)) {
+                                                    append(entry.displayText)
+                                                }
+                                                append("  ${entry.verseText}")
+                                            },
                                             style = MaterialTheme.typography.bodySmall,
                                             color = MaterialTheme.colorScheme.onSurface,
                                             maxLines = 1,
                                             modifier = Modifier.fillMaxWidth()
+                                                .background(
+                                                    if (idx % 2 == 0) MaterialTheme.colorScheme.surface
+                                                    else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                                                )
                                                 .initialPassClickable {
                                                     viewModel.selectVerseByDetails(entry.bookName, entry.chapter, entry.verseNumber)
                                                     focusRequester.requestFocus()

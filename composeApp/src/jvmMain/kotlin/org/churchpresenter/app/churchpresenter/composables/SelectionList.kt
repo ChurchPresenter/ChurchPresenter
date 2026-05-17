@@ -89,7 +89,7 @@ fun SelectionListWithIndex(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(MaterialTheme.colorScheme.surface)
-                .padding(4.dp)
+                .padding(start = 4.dp, top = 4.dp, bottom = 4.dp, end = 12.dp)
         ) {
             itemsIndexed(
                 items = list,
