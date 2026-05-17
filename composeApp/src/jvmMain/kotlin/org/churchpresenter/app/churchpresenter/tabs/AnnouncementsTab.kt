@@ -926,9 +926,11 @@ fun AnnouncementsTab(
                                         // If the announcement text was live and the timer is about to start,
                                         // push the initial countdown value immediately so the display
                                         // switches at once (onTick fires after 1 s otherwise).
+                                        val anyScreenOnAnnouncements = presenterManager?.presentingMode?.value == Presenting.ANNOUNCEMENTS ||
+                                            presenterManager?.screenLocks?.value?.values?.any { it == Presenting.ANNOUNCEMENTS } == true
                                         if (!viewModel.timerRunning &&
                                             presenterManager != null &&
-                                            presenterManager.presentingMode.value == Presenting.ANNOUNCEMENTS) {
+                                            anyScreenOnAnnouncements) {
                                             presenterManager.setAnnouncementText(
                                                 AnnouncementsViewModel.formatTimer(viewModel.timerRemaining)
                                             )
@@ -937,8 +939,9 @@ fun AnnouncementsTab(
                                         presenterManager?.setTimerState(viewModel.timerRemaining, !viewModel.timerRunning)
                                         viewModel.startPauseTimer(
                                             onTick = { remaining ->
-                                                if (presenterManager != null &&
-                                                    presenterManager.presentingMode.value == Presenting.ANNOUNCEMENTS) {
+                                                val anyScreenOnAnnouncements = presenterManager?.presentingMode?.value == Presenting.ANNOUNCEMENTS ||
+                                                    presenterManager?.screenLocks?.value?.values?.any { it == Presenting.ANNOUNCEMENTS } == true
+                                                if (presenterManager != null && anyScreenOnAnnouncements) {
                                                     presenterManager.setAnnouncementText(AnnouncementsViewModel.formatTimer(remaining))
                                                 }
                                                 presenterManager?.setTimerState(remaining, true)

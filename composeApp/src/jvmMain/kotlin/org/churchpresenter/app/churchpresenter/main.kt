@@ -1480,6 +1480,7 @@ private fun PresenterWindows(
 ) {
     val showPresenterWindow by presenterManager.showPresenterWindow
     val presentingMode by presenterManager.presentingMode
+    val screenLocks by presenterManager.screenLocks
     val selectedVerses by presenterManager.selectedVerses
     val displayedVerses by presenterManager.displayedVerses
     val bibleTransitionAlpha by presenterManager.bibleTransitionAlpha
@@ -1526,11 +1527,7 @@ private fun PresenterWindows(
 
     val proj = appSettings.projectionSettings
 
-    // Mode-level crossfade (between Bible ↔ Song etc.) — only between content modes, not to/from NONE
-    var previousPresentingMode by remember { mutableStateOf(presentingMode) }
-    val modeCrossfadeActive = (appSettings.bibleSettings.crossfade || appSettings.songSettings.crossfade)
-            && presentingMode != Presenting.NONE && previousPresentingMode != Presenting.NONE
-    if (presentingMode != previousPresentingMode) previousPresentingMode = presentingMode
+    // Mode-level crossfade duration (shared, per-screen active flag computed inside each window)
     val modeCrossfadeDuration = maxOf(
         if (appSettings.bibleSettings.crossfade) appSettings.bibleSettings.transitionDuration.toInt() else 0,
         if (appSettings.songSettings.crossfade) appSettings.songSettings.transitionDuration.toInt() else 0
@@ -1541,7 +1538,10 @@ private fun PresenterWindows(
     LaunchedEffect(clearRequested) {
         if (!clearRequested) return@LaunchedEffect
         val mode = presenterManager.presentingMode.value
-        val shouldFade = when (mode) {
+        // Don't fade the content alpha if any screen is locked to this mode —
+        // that screen is still showing the content and the alpha must stay at 1.
+        val modeIsLocked = presenterManager.screenLocks.value.values.any { it == mode }
+        val shouldFade = !modeIsLocked && when (mode) {
             Presenting.BIBLE -> appSettings.bibleSettings.fadeOut
             Presenting.LYRICS -> appSettings.songSettings.fadeOut
             else -> false
@@ -1753,6 +1753,7 @@ private fun PresenterWindows(
 
     for (i in 0 until windowCount) {
         val screenAssignment = proj.getAssignment(i)
+        val effectiveMode = screenLocks[i] ?: presentingMode
 
         // DeckLink outputs: render via offscreen Window + pixel capture
         if (screenAssignment.targetType == "decklink") {
@@ -1765,9 +1766,12 @@ private fun PresenterWindows(
                     mediaViewModel = mediaViewModel,
                     isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD,
                 ) {
+                    var prevEffectiveMode by remember { mutableStateOf(effectiveMode) }
+                    val screenCrossfadeActive = (appSettings.bibleSettings.crossfade || appSettings.songSettings.crossfade) && effectiveMode != Presenting.NONE && prevEffectiveMode != Presenting.NONE
+                    if (effectiveMode != prevEffectiveMode) prevEffectiveMode = effectiveMode
                     Crossfade(
-                        targetState = presentingMode,
-                        animationSpec = if (modeCrossfadeActive) tween(modeCrossfadeDuration) else snap()
+                        targetState = effectiveMode,
+                        animationSpec = if (screenCrossfadeActive) tween(modeCrossfadeDuration) else snap()
                     ) { mode ->
                     when (mode) {
                         Presenting.BIBLE ->
@@ -1897,7 +1901,10 @@ private fun PresenterWindows(
                     mediaViewModel = mediaViewModel,
                     isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD,
                 ) {
-                    Crossfade(targetState = presentingMode, animationSpec = if (modeCrossfadeActive) tween(modeCrossfadeDuration) else snap()) { mode ->
+                    var prevEffectiveMode by remember { mutableStateOf(effectiveMode) }
+                    val screenCrossfadeActive = (appSettings.bibleSettings.crossfade || appSettings.songSettings.crossfade) && effectiveMode != Presenting.NONE && prevEffectiveMode != Presenting.NONE
+                    if (effectiveMode != prevEffectiveMode) prevEffectiveMode = effectiveMode
+                    Crossfade(targetState = effectiveMode, animationSpec = if (screenCrossfadeActive) tween(modeCrossfadeDuration) else snap()) { mode ->
                     when (mode) {
                         Presenting.BIBLE ->
                             if (screenAssignment.showBible) {
@@ -2062,7 +2069,10 @@ private fun PresenterWindows(
                                 outputRole = Constants.OUTPUT_ROLE_KEY
                             ) {
                                 Box(modifier = Modifier.fillMaxSize()) {
-                                    Crossfade(targetState = presentingMode, animationSpec = if (modeCrossfadeActive) tween(modeCrossfadeDuration) else snap()) { mode ->
+                                    var prevEffectiveMode by remember { mutableStateOf(effectiveMode) }
+                                    val screenCrossfadeActive = (appSettings.bibleSettings.crossfade || appSettings.songSettings.crossfade) && effectiveMode != Presenting.NONE && prevEffectiveMode != Presenting.NONE
+                                    if (effectiveMode != prevEffectiveMode) prevEffectiveMode = effectiveMode
+                                    Crossfade(targetState = effectiveMode, animationSpec = if (screenCrossfadeActive) tween(modeCrossfadeDuration) else snap()) { mode ->
                     when (mode) {
                                         Presenting.BIBLE ->
                                             if (screenAssignment.showBible) {
@@ -2291,7 +2301,10 @@ private fun PresenterWindows(
                                 } else false
                             }
                     ) {
-                        Crossfade(targetState = presentingMode, animationSpec = if (modeCrossfadeActive) tween(modeCrossfadeDuration) else snap()) { mode ->
+                        var prevEffectiveMode by remember { mutableStateOf(effectiveMode) }
+                        val screenCrossfadeActive = (appSettings.bibleSettings.crossfade || appSettings.songSettings.crossfade) && effectiveMode != Presenting.NONE && prevEffectiveMode != Presenting.NONE
+                        if (effectiveMode != prevEffectiveMode) prevEffectiveMode = effectiveMode
+                        Crossfade(targetState = effectiveMode, animationSpec = if (screenCrossfadeActive) tween(modeCrossfadeDuration) else snap()) { mode ->
                     when (mode) {
                             Presenting.BIBLE ->
                                 if (screenAssignment.showBible) {
@@ -2491,7 +2504,10 @@ private fun PresenterWindows(
                                         } else false
                                     }
                             ) {
-                                Crossfade(targetState = presentingMode, animationSpec = if (modeCrossfadeActive) tween(modeCrossfadeDuration) else snap()) { mode ->
+                                var prevEffectiveMode by remember { mutableStateOf(effectiveMode) }
+                                val screenCrossfadeActive = (appSettings.bibleSettings.crossfade || appSettings.songSettings.crossfade) && effectiveMode != Presenting.NONE && prevEffectiveMode != Presenting.NONE
+                                if (effectiveMode != prevEffectiveMode) prevEffectiveMode = effectiveMode
+                                Crossfade(targetState = effectiveMode, animationSpec = if (screenCrossfadeActive) tween(modeCrossfadeDuration) else snap()) { mode ->
                     when (mode) {
                                     Presenting.BIBLE ->
                                         if (screenAssignment.showBible) {
@@ -2636,7 +2652,10 @@ private fun PresenterWindows(
                     mediaViewModel = mediaViewModel,
                     isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD,
                 ) {
-                    Crossfade(targetState = presentingMode, animationSpec = if (modeCrossfadeActive) tween(modeCrossfadeDuration) else snap()) { mode ->
+                    var prevEffectiveMode by remember { mutableStateOf(effectiveMode) }
+                    val screenCrossfadeActive = (appSettings.bibleSettings.crossfade || appSettings.songSettings.crossfade) && effectiveMode != Presenting.NONE && prevEffectiveMode != Presenting.NONE
+                    if (effectiveMode != prevEffectiveMode) prevEffectiveMode = effectiveMode
+                    Crossfade(targetState = effectiveMode, animationSpec = if (screenCrossfadeActive) tween(modeCrossfadeDuration) else snap()) { mode ->
                     when (mode) {
                         Presenting.BIBLE ->
                             if (screenAssignment.showBible) {

@@ -236,7 +236,9 @@ class PicturesViewModel(
      * Syncs the currently selected image with the presenter if pictures are being presented.
      */
     fun syncWithPresenter(presenterManager: PresenterManager) {
-        if (presenterManager.presentingMode.value == Presenting.PICTURES && _images.isNotEmpty()) {
+        val anyScreenOnPictures = presenterManager.presentingMode.value == Presenting.PICTURES ||
+            presenterManager.screenLocks.value.values.any { it == Presenting.PICTURES }
+        if (anyScreenOnPictures && _images.isNotEmpty()) {
             val currentImage = getCurrentImageFile()
             if (currentImage != null) {
                 presenterManager.setSelectedImagePath(currentImage.absolutePath)

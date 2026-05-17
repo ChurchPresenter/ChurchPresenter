@@ -41,6 +41,17 @@ class PresenterManager {
     private val _bibleHold = mutableStateOf(false)
     val bibleHold: State<Boolean> = _bibleHold
 
+    // Per-screen lock: maps screen slot index -> locked Presenting mode.
+    // Null entry means the screen follows the global presentingMode.
+    private val _screenLocks = mutableStateOf<Map<Int, Presenting>>(emptyMap())
+    val screenLocks: State<Map<Int, Presenting>> = _screenLocks
+
+    fun setScreenLock(screenIndex: Int, mode: Presenting?) {
+        val updated = _screenLocks.value.toMutableMap()
+        if (mode == null) updated.remove(screenIndex) else updated[screenIndex] = mode
+        _screenLocks.value = updated
+    }
+
     private val _lyricSection = mutableStateOf(LyricSection())
     val lyricSection: State<LyricSection> = _lyricSection
 

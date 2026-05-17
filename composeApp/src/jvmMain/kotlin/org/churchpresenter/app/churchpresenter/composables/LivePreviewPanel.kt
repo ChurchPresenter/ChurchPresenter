@@ -25,6 +25,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -142,6 +145,8 @@ private fun SingleDisplayPreview(
     sttManager: org.churchpresenter.app.churchpresenter.viewmodel.STTManager? = null,
 ) {
     val presentingMode by presenterManager.presentingMode
+    val screenLocks by presenterManager.screenLocks
+    val effectiveMode = screenLocks[screenIndex] ?: presentingMode
     val displayedVerses by presenterManager.displayedVerses
     val bibleTransitionAlpha by presenterManager.bibleTransitionAlpha
     val displayedLyricSection by presenterManager.displayedLyricSection
@@ -166,7 +171,7 @@ private fun SingleDisplayPreview(
     val isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD
 
     // Determine if this screen shows the current content
-    val showsContent = when (presentingMode) {
+    val showsContent = when (effectiveMode) {
         Presenting.BIBLE -> screenAssignment.showBible
         Presenting.LYRICS -> screenAssignment.showSongs
         Presenting.PICTURES, Presenting.PRESENTATION -> screenAssignment.showPictures
@@ -192,16 +197,16 @@ private fun SingleDisplayPreview(
         // ── Scaled presenter content (all modes except WEBSITE) ───────────────
         // JavaFX/Swing heavyweight components cannot be scaled by Compose layout,
         // so WEBSITE is handled separately below at native size.
-        if (presentingMode != Presenting.WEBSITE) {
+        if (effectiveMode != Presenting.WEBSITE) {
             ScaledPresenterContent {
                 PresenterScreen(appSettings = appSettings, outputRole = primaryRole, isLowerThird = isLowerThird) {
-                    if (presentingMode != Presenting.NONE && showsContent) {
+                    if (effectiveMode != Presenting.NONE && showsContent) {
                         val modeCrossfadeOn = appSettings.bibleSettings.crossfade || appSettings.songSettings.crossfade
                         val modeCrossfadeDur = maxOf(
                             if (appSettings.bibleSettings.crossfade) appSettings.bibleSettings.transitionDuration.toInt() else 0,
                             if (appSettings.songSettings.crossfade) appSettings.songSettings.transitionDuration.toInt() else 0
                         ).coerceAtLeast(100)
-                        Crossfade(targetState = presentingMode, animationSpec = tween(if (modeCrossfadeOn) modeCrossfadeDur else 0)) { mode ->
+                        Crossfade(targetState = effectiveMode, animationSpec = tween(if (modeCrossfadeOn) modeCrossfadeDur else 0)) { mode ->
                         when (mode) {
                             Presenting.BIBLE ->
                                 BiblePresenter(
@@ -282,7 +287,7 @@ private fun SingleDisplayPreview(
         // A second JFXPanel instance can't be scaled/clipped by Compose.
         // Instead, WebTab pushes a snapshot bitmap every 200ms via PresenterManager
         // so this panel shows a pixel-accurate mirror including scroll position.
-        if (presentingMode == Presenting.WEBSITE) {
+        if (effectiveMode == Presenting.WEBSITE) {
             val snapshot = webSnapshot
             if (snapshot != null) {
                 Image(
@@ -308,7 +313,7 @@ private fun SingleDisplayPreview(
         }
 
         // "LIVE" badge — only when this screen is showing content
-        if (presentingMode != Presenting.NONE && showsContent) {
+        if (effectiveMode != Presenting.NONE && showsContent) {
             Text(
                 text = stringResource(Res.string.live_preview_title),
                 color = Color.White,
@@ -335,6 +340,45 @@ private fun SingleDisplayPreview(
             )
         }
 
+        // LOCKED badge — shown when screen is locked to a specific tab
+        val lockedMode = screenLocks[screenIndex]
+        if (lockedMode != null) {
+            Text(
+                text = "LOCKED",
+                color = Color.White,
+                fontSize = 9.sp,
+                modifier = Modifier
+                    .align(Alignment.BottomStart)
+                    .padding(start = 4.dp, bottom = if (screenAssignment.hasKeyOutput) 24.dp else 4.dp)
+                    .background(Color(0xFFFFC107), RoundedCornerShape(3.dp))
+                    .padding(horizontal = 5.dp, vertical = 2.dp)
+            )
+        }
+
+        // Lock toggle button — bottom-right corner
+        IconButton(
+            onClick = {
+                if (lockedMode != null) {
+                    presenterManager.setScreenLock(screenIndex, null)
+                } else if (effectiveMode != Presenting.NONE) {
+                    presenterManager.setScreenLock(screenIndex, effectiveMode)
+                }
+            },
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(2.dp)
+                .size(24.dp),
+            colors = IconButtonDefaults.iconButtonColors(
+                contentColor = if (lockedMode != null) Color(0xFFFFC107) else Color.White.copy(alpha = 0.5f)
+            )
+        ) {
+            Icon(
+                imageVector = if (lockedMode != null) Icons.Filled.Lock else Icons.Filled.LockOpen,
+                contentDescription = if (lockedMode != null) "Unlock screen" else "Lock screen to current tab",
+                modifier = Modifier.size(13.dp)
+            )
+        }
+
         // Screen number label
         Text(
             text = stringResource(Res.string.screen_number, screenIndex + 1),
@@ -348,7 +392,7 @@ private fun SingleDisplayPreview(
         )
 
         // Animated audio indicator — only when presenting and media is playing
-        if (presentingMode != Presenting.NONE
+        if (effectiveMode != Presenting.NONE
             && mediaViewModel != null && mediaViewModel.isLoaded && mediaViewModel.isPlaying
         ) {
             Box(
