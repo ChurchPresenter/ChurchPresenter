@@ -667,6 +667,12 @@
     <!-- Bible history -->
     <string name="bible_history">History</string>
     <string name="bible_history_clear">Clear</string>
+
+    <!-- Song favorites -->
+    <string name="song_favorites">Favorites</string>
+    <string name="song_favorites_clear">Clear favorites</string>
+    <string name="add_to_favorites">Add to favorites</string>
+    <string name="remove_from_favorites">Remove from favorites</string>
     <string name="bible_no_primary_title">No Primary Bible Configured</string>
     <string name="bible_no_primary_hint">Open ⚙ Settings and go to the Bible tab, then:</string>
     <string name="bible_no_primary_step1">1. Set the Bible storage directory</string>

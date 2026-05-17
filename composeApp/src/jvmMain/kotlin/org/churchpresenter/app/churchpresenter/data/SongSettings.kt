@@ -800,5 +800,8 @@ data class AppSettings(
     val hiddenTabs: Set<String> = setOf("QA", "STT"),
     val crosswordUnlockedLevel: Int = 0,
     val crosswordProgress: Map<Int, String> = emptyMap(),
-    val obsSettings: OBSSettings = OBSSettings()
+    val obsSettings: OBSSettings = OBSSettings(),
+    val songFavorites: List<String> = emptyList(),
+    val songFavoritesPanelHeightDp: Int = 120,
+    val songColOrder: List<String> = emptyList()
 )

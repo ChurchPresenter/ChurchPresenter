@@ -62,6 +62,25 @@ class SongsViewModel(
     // After edit/reload, re-select the song by its sourceFile path
     private var _pendingSelectSourceFile: String? = null
 
+    // Favorites — persisted via AppSettings.songFavorites
+    private val _favorites = mutableStateOf<Set<String>>(appSettings.songFavorites.toSet())
+    val favorites: State<Set<String>> = _favorites
+
+    fun toggleFavorite(songId: String) {
+        val current = _favorites.value.toMutableSet()
+        if (songId in current) current.remove(songId) else current.add(songId)
+        _favorites.value = current
+    }
+
+    fun clearFavorites() {
+        _favorites.value = emptySet()
+    }
+
+    fun getFavoriteSongs(): List<SongItem> {
+        val favIds = _favorites.value
+        return _allSongItems.value.filter { it.songId in favIds }
+    }
+
     // Sort state — managed by ViewModel so it survives recomposition
     private val _sortColumn = mutableStateOf("")
     val sortColumn: State<String> = _sortColumn
@@ -79,6 +98,7 @@ class SongsViewModel(
 
     fun updateSettings(newSettings: AppSettings) {
         appSettings = newSettings
+        _favorites.value = newSettings.songFavorites.toSet()
         loadSongs()
     }
 
