@@ -148,24 +148,24 @@ fun ServerSettingsTab(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.surfaceVariant)
-            .padding(5.dp)
+            .padding(8.dp)
     ) {
-        // ── Settings column ───────────────────────────────────────────────────
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(4.dp))
-                .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f), RoundedCornerShape(4.dp))
-                .padding(start = 15.dp, end = 15.dp, top = 8.dp, bottom = 15.dp),
+                .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-                // ── Header ────────────────────────────────────────────────────
-                Text(
-                    text = stringResource(Res.string.companion_server),
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.primary
-                )
+            // ── Card 1: Server ────────────────────────────────────────────────
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(10.dp))
+                    .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f), RoundedCornerShape(10.dp))
+                    .padding(horizontal = 16.dp, vertical = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                SectionHeader(stringResource(Res.string.companion_server))
                 Text(
                     text = stringResource(Res.string.server_description),
                     style = MaterialTheme.typography.bodySmall,
@@ -417,15 +417,18 @@ fun ServerSettingsTab(
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
+            }
 
-                HorizontalDivider()
-
-                // ── Remote Clients ────────────────────────────────────────────
-                Text(
-                    text = stringResource(Res.string.remote_clients_title),
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.primary
-                )
+            // ── Card 2: Remote Clients ────────────────────────────────────────
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(10.dp))
+                    .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f), RoundedCornerShape(10.dp))
+                    .padding(horizontal = 16.dp, vertical = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                SectionHeader(stringResource(Res.string.remote_clients_title))
                 Text(
                     text = stringResource(Res.string.remote_clients_description),
                     style = MaterialTheme.typography.bodySmall,
@@ -507,6 +510,7 @@ fun ServerSettingsTab(
                         }
                     }
                 }
+            }
         }
     }
 }
@@ -643,6 +647,33 @@ private fun ClientRow(
 }
 
 @Composable
+private fun SectionHeader(text: String) {
+    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .width(3.dp)
+                    .height(18.dp)
+                    .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(2.dp))
+            )
+            Text(
+                text = text,
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+        }
+        HorizontalDivider(
+            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+            thickness = 1.dp,
+            modifier = Modifier.fillMaxWidth()
+        )
+    }
+}
+
+@Composable
 private fun SettingRow(
     label: String,
     content: @Composable () -> Unit
@@ -655,7 +686,7 @@ private fun SettingRow(
         Text(
             text = label,
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurface
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
         content()
     }

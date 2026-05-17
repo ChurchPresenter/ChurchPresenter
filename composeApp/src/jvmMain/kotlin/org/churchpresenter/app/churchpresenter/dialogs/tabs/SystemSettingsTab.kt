@@ -142,15 +142,15 @@ fun SystemSettingsTab(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.surfaceVariant)
-            .padding(5.dp)
+            .padding(8.dp)
     ) {
     Column(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(4.dp))
-            .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f), RoundedCornerShape(4.dp))
-            .padding(start = 15.dp, end = 15.dp, top = 8.dp, bottom = 15.dp)
+            .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(10.dp))
+            .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f), RoundedCornerShape(10.dp))
+            .padding(horizontal = 16.dp, vertical = 16.dp)
     ) {
         // Bible Storage Directory
         DirectoryPicker(

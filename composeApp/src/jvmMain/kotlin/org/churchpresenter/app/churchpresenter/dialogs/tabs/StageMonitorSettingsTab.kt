@@ -77,18 +77,18 @@ fun StageMonitorSettingsTab(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.surfaceVariant)
-            .padding(5.dp)
+            .padding(8.dp)
     ) {
         Row(
             modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()),
-            horizontalArrangement = Arrangement.spacedBy(4.dp)
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             val cardModifier = Modifier
                 .weight(1f)
                 .widthIn(min = 320.dp, max = 480.dp)
-                .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(4.dp))
-                .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f), RoundedCornerShape(4.dp))
-                .padding(start = 15.dp, end = 15.dp, top = 8.dp, bottom = 15.dp)
+                .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(10.dp))
+                .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f), RoundedCornerShape(10.dp))
+                .padding(horizontal = 16.dp, vertical = 16.dp)
 
             // ── Left column: Current + Next ──────────────────────────────────────
             Column(modifier = cardModifier, verticalArrangement = Arrangement.spacedBy(0.dp)) {
@@ -173,12 +173,12 @@ fun StageMonitorSettingsTab(
             // ── Right column: Timer + Clock + Notes + Label ──────────────────────
             Column(
                 modifier = Modifier.weight(1f).widthIn(min = 320.dp, max = 480.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 val cardMod = Modifier.fillMaxWidth()
-                    .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(4.dp))
-                    .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f), RoundedCornerShape(4.dp))
-                    .padding(start = 15.dp, end = 15.dp, top = 8.dp, bottom = 15.dp)
+                    .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(10.dp))
+                    .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f), RoundedCornerShape(10.dp))
+                    .padding(horizontal = 16.dp, vertical = 16.dp)
 
                 // Timer card
                 Column(modifier = cardMod) {
@@ -418,15 +418,25 @@ private fun QuadrantFontSettings(
 
 @Composable
 private fun SectionHeader(text: String, modifier: Modifier = Modifier) {
-    Column(modifier = modifier) {
-        Text(
-            text = text,
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.padding(bottom = 4.dp)
-        )
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .width(3.dp)
+                    .height(18.dp)
+                    .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(2.dp))
+            )
+            Text(
+                text = text,
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+        }
         HorizontalDivider(
-            color = MaterialTheme.colorScheme.outlineVariant,
+            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
             thickness = 1.dp,
             modifier = Modifier.fillMaxWidth()
         )
@@ -440,14 +450,14 @@ private fun SettingRow(
     content: @Composable () -> Unit
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth().padding(vertical = 5.dp),
+        modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
             text = label,
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurface,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.width(width)
         )
         Box(modifier = Modifier.weight(1f)) {

@@ -149,17 +149,17 @@ fun BibleSettingsTab(
     }
 
     Box(
-        modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surfaceVariant).padding(5.dp)
+        modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surfaceVariant).padding(8.dp)
     ) {
         Row(
             modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()),
-            horizontalArrangement = Arrangement.spacedBy(4.dp)
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Column(
                 modifier = Modifier.weight(0.48f).widthIn(min = 400.dp, max = 450.dp).heightIn(min = 600.dp)
-                    .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(4.dp))
-                    .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f), RoundedCornerShape(4.dp))
-                    .padding(start = 15.dp, end = 15.dp, top = 8.dp, bottom = 15.dp)
+                    .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(10.dp))
+                    .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f), RoundedCornerShape(10.dp))
+                    .padding(horizontal = 16.dp, vertical = 16.dp)
             ) {
                 LeftColumn(
                     settings,
@@ -170,17 +170,23 @@ fun BibleSettingsTab(
             }
             Column(
                 modifier = Modifier.weight(0.48f).widthIn(min = 400.dp, max = 450.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 val cardModifier = Modifier.fillMaxWidth()
-                    .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(4.dp))
-                    .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f), RoundedCornerShape(4.dp))
-                    .padding(start = 15.dp, end = 15.dp, top = 8.dp, bottom = 15.dp)
+                    .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(10.dp))
+                    .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f), RoundedCornerShape(10.dp))
+                    .padding(horizontal = 16.dp, vertical = 16.dp)
                 Column(modifier = cardModifier) {
-                    PrimaryBibleColumn(settings, onSettingsChange, availableFonts, presenterManager)
+                    PrimaryBibleTextColumn(settings, onSettingsChange, availableFonts, presenterManager)
                 }
                 Column(modifier = cardModifier) {
-                    SecondaryBibleColumn(settings, onSettingsChange, availableFonts, presenterManager)
+                    PrimaryBibleReferenceColumn(settings, onSettingsChange, availableFonts, presenterManager)
+                }
+                Column(modifier = cardModifier) {
+                    SecondaryBibleTextColumn(settings, onSettingsChange, availableFonts, presenterManager)
+                }
+                Column(modifier = cardModifier) {
+                    SecondaryBibleReferenceColumn(settings, onSettingsChange, availableFonts, presenterManager)
                 }
             }
         }
@@ -445,7 +451,7 @@ private fun LeftColumn(
 }
 
 @Composable
-private fun PrimaryBibleColumn(
+private fun PrimaryBibleTextColumn(
     settings: AppSettings,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
     availableFonts: List<String>,
@@ -669,9 +675,15 @@ private fun PrimaryBibleColumn(
         }
     }
 
-    Spacer(modifier = Modifier.height(20.dp))
+}
 
-    // Primary Bible Reference
+@Composable
+private fun PrimaryBibleReferenceColumn(
+    settings: AppSettings,
+    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
+    availableFonts: List<String>,
+    presenterManager: PresenterManager? = null
+) {
     SectionHeader(stringResource(Res.string.primary_bible_reference))
     Spacer(modifier = Modifier.height(8.dp))
     SettingRow(stringResource(Res.string.color)) {
@@ -841,11 +853,10 @@ private fun PrimaryBibleColumn(
             modifier = Modifier.padding(start = 4.dp)
         )
     }
-
 }
 
 @Composable
-private fun SecondaryBibleColumn(
+private fun SecondaryBibleTextColumn(
     settings: AppSettings,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
     availableFonts: List<String>,
@@ -1067,9 +1078,15 @@ private fun SecondaryBibleColumn(
         }
     }
 
-    Spacer(modifier = Modifier.height(20.dp))
+}
 
-    // Secondary Bible Reference
+@Composable
+private fun SecondaryBibleReferenceColumn(
+    settings: AppSettings,
+    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
+    availableFonts: List<String>,
+    presenterManager: PresenterManager? = null
+) {
     SectionHeader(stringResource(Res.string.secondary_bible_reference))
     Spacer(modifier = Modifier.height(8.dp))
     SettingRow(stringResource(Res.string.color)) {
@@ -1243,15 +1260,25 @@ private fun SecondaryBibleColumn(
 
 @Composable
 private fun SectionHeader(text: String) {
-    Column {
-        Text(
-            text = text,
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.padding(top = 2.dp, bottom = 8.dp)
-        )
+    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .width(3.dp)
+                    .height(18.dp)
+                    .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(2.dp))
+            )
+            Text(
+                text = text,
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+        }
         HorizontalDivider(
-            color = MaterialTheme.colorScheme.outlineVariant,
+            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
             thickness = 1.dp,
             modifier = Modifier.fillMaxWidth()
         )
@@ -1265,14 +1292,14 @@ private fun SettingRow(
     content: @Composable () -> Unit
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth().padding(vertical = 5.dp),
+        modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
             text = label,
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurface,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.width(width)
         )
         Box(modifier = Modifier.weight(1f)) {

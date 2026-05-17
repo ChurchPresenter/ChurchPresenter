@@ -105,9 +105,9 @@ fun OBSSettingsTab(
             val cardModifier = Modifier
                 .fillMaxWidth()
                 .widthIn(max = 600.dp)
-                .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(4.dp))
-                .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f), RoundedCornerShape(4.dp))
-                .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 16.dp)
+                .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(10.dp))
+                .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f), RoundedCornerShape(10.dp))
+                .padding(horizontal = 16.dp, vertical = 16.dp)
 
             // ── Connection card ────────────────────────────────────────────────
             Column(modifier = cardModifier, verticalArrangement = Arrangement.spacedBy(0.dp)) {
@@ -290,15 +290,25 @@ fun OBSSettingsTab(
 
 @Composable
 private fun ObsSectionHeader(text: String) {
-    Column {
-        Text(
-            text = text,
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.padding(bottom = 4.dp)
-        )
+    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .width(3.dp)
+                    .height(18.dp)
+                    .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(2.dp))
+            )
+            Text(
+                text = text,
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+        }
         HorizontalDivider(
-            color = MaterialTheme.colorScheme.outlineVariant,
+            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
             thickness = 1.dp,
             modifier = Modifier.fillMaxWidth()
         )

@@ -5,10 +5,8 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -74,272 +72,299 @@ fun BackgroundSettingsTab(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.surfaceVariant)
-            .padding(5.dp)
+            .padding(8.dp)
     ) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(4.dp))
-            .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f), RoundedCornerShape(4.dp))
-            .padding(start = 15.dp, end = 15.dp, top = 8.dp, bottom = 15.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        // Default Background Section — Full Screen | Lower Third
-        Row(
-            modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            // ── Full Screen default ──────────────────────────────
-            Column(modifier = Modifier.weight(1f)) {
-                GroupHeader(stringResource(Res.string.default_background_color))
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = stringResource(Res.string.default_background_color_help),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-
-                BackgroundTypeRadioGroup(
-                    selectedType = settings.backgroundSettings.defaultBackgroundType,
-                    onTypeSelected = { type ->
-                        onSettingsChange { s ->
-                            s.copy(backgroundSettings = s.backgroundSettings.copy(defaultBackgroundType = type))
-                        }
-                    },
-                    defaultLabel = stringResource(Res.string.background_color_option),
-                    colorLabel = stringResource(Res.string.background_image_option),
-                    imageLabel = stringResource(Res.string.background_video_option),
-                    videoLabel = stringResource(Res.string.background_transparent_option),
-                    types = listOf(
-                        Constants.BACKGROUND_COLOR,
-                        Constants.BACKGROUND_IMAGE,
-                        Constants.BACKGROUND_VIDEO,
-                        Constants.BACKGROUND_TRANSPARENT
-                    ),
-                    disabledTypes = if (!isVlcAvailable) setOf(Constants.BACKGROUND_VIDEO) else emptySet()
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-
-                when (settings.backgroundSettings.defaultBackgroundType) {
-                    Constants.BACKGROUND_COLOR -> {
-                        SettingRow(stringResource(Res.string.color)) {
-                            ColorPickerField(
-                                color = settings.backgroundSettings.defaultBackgroundColor,
-                                onColorChange = { viewModel.updateDefaultColor(it, onSettingsChange) }
-                            )
-                        }
-                        OpacitySlider(settings.backgroundSettings.defaultBackgroundOpacity) { opacity ->
+            // Row 1: Default Full Screen + Default Lower Third
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                // Card 1: Default Full Screen Background
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(10.dp))
+                        .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f), RoundedCornerShape(10.dp))
+                        .padding(horizontal = 16.dp, vertical = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    GroupHeader(stringResource(Res.string.default_background_color))
+                    Text(
+                        text = stringResource(Res.string.default_background_color_help),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                    )
+                    BackgroundTypeRadioGroup(
+                        selectedType = settings.backgroundSettings.defaultBackgroundType,
+                        onTypeSelected = { type ->
                             onSettingsChange { s ->
-                                s.copy(backgroundSettings = s.backgroundSettings.copy(defaultBackgroundOpacity = opacity))
+                                s.copy(backgroundSettings = s.backgroundSettings.copy(defaultBackgroundType = type))
                             }
-                        }
-                    }
-                    Constants.BACKGROUND_IMAGE -> {
-                        SettingRow(stringResource(Res.string.background_image)) {
-                            FileImagePicker(
-                                imagePath = settings.backgroundSettings.defaultBackgroundImage,
-                                onImagePathChange = { path ->
-                                    onSettingsChange { s ->
-                                        s.copy(backgroundSettings = s.backgroundSettings.copy(defaultBackgroundImage = path))
-                                    }
-                                },
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                        }
-                        OpacitySlider(settings.backgroundSettings.defaultBackgroundOpacity) { opacity ->
-                            onSettingsChange { s ->
-                                s.copy(backgroundSettings = s.backgroundSettings.copy(defaultBackgroundOpacity = opacity))
+                        },
+                        defaultLabel = stringResource(Res.string.background_color_option),
+                        colorLabel = stringResource(Res.string.background_image_option),
+                        imageLabel = stringResource(Res.string.background_video_option),
+                        videoLabel = stringResource(Res.string.background_transparent_option),
+                        types = listOf(
+                            Constants.BACKGROUND_COLOR,
+                            Constants.BACKGROUND_IMAGE,
+                            Constants.BACKGROUND_VIDEO,
+                            Constants.BACKGROUND_TRANSPARENT
+                        ),
+                        disabledTypes = if (!isVlcAvailable) setOf(Constants.BACKGROUND_VIDEO) else emptySet()
+                    )
+                    when (settings.backgroundSettings.defaultBackgroundType) {
+                        Constants.BACKGROUND_COLOR -> {
+                            SettingRow(stringResource(Res.string.color)) {
+                                ColorPickerField(
+                                    color = settings.backgroundSettings.defaultBackgroundColor,
+                                    onColorChange = { viewModel.updateDefaultColor(it, onSettingsChange) }
+                                )
                             }
-                        }
-                    }
-                    Constants.BACKGROUND_VIDEO -> {
-                        SettingRow(stringResource(Res.string.background_video)) {
-                            FileVideoPicker(
-                                videoPath = settings.backgroundSettings.defaultBackgroundVideo,
-                                onVideoPathChange = { path ->
-                                    onSettingsChange { s ->
-                                        s.copy(backgroundSettings = s.backgroundSettings.copy(defaultBackgroundVideo = path))
-                                    }
-                                },
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                        }
-                        OpacitySlider(settings.backgroundSettings.defaultBackgroundOpacity) { opacity ->
-                            onSettingsChange { s ->
-                                s.copy(backgroundSettings = s.backgroundSettings.copy(defaultBackgroundOpacity = opacity))
-                            }
-                        }
-                    }
-                }
-            }
-
-            ColumnDivider()
-
-            // ── Lower Third default ──────────────────────────────
-            Column(modifier = Modifier.weight(1f)) {
-                GroupHeader(stringResource(Res.string.default_lower_third_background))
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = stringResource(Res.string.default_lower_third_background_help),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-
-                BackgroundTypeRadioGroup(
-                    selectedType = settings.backgroundSettings.defaultLowerThirdBackgroundType,
-                    onTypeSelected = { type ->
-                        onSettingsChange { s ->
-                            s.copy(backgroundSettings = s.backgroundSettings.copy(defaultLowerThirdBackgroundType = type))
-                        }
-                    },
-                    defaultLabel = "Follow Default",
-                    colorLabel = stringResource(Res.string.background_color_option),
-                    imageLabel = stringResource(Res.string.background_image_option),
-                    videoLabel = stringResource(Res.string.background_video_option),
-                    transparentLabel = stringResource(Res.string.background_transparent_option),
-                    types = listOf(
-                        Constants.BACKGROUND_FOLLOW_DEFAULT,
-                        Constants.BACKGROUND_COLOR,
-                        Constants.BACKGROUND_IMAGE,
-                        Constants.BACKGROUND_VIDEO,
-                        Constants.BACKGROUND_TRANSPARENT
-                    ),
-                    disabledTypes = if (!isVlcAvailable) setOf(Constants.BACKGROUND_VIDEO) else emptySet()
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-
-                when (settings.backgroundSettings.defaultLowerThirdBackgroundType) {
-                    Constants.BACKGROUND_COLOR -> {
-                        SettingRow(stringResource(Res.string.color)) {
-                            ColorPickerField(
-                                color = settings.backgroundSettings.defaultLowerThirdBackgroundColor,
-                                onColorChange = { color ->
-                                    onSettingsChange { s ->
-                                        s.copy(backgroundSettings = s.backgroundSettings.copy(defaultLowerThirdBackgroundColor = color))
-                                    }
+                            OpacitySlider(settings.backgroundSettings.defaultBackgroundOpacity) { opacity ->
+                                onSettingsChange { s ->
+                                    s.copy(backgroundSettings = s.backgroundSettings.copy(defaultBackgroundOpacity = opacity))
                                 }
-                            )
+                            }
                         }
-                        OpacitySlider(settings.backgroundSettings.defaultLowerThirdBackgroundOpacity) { opacity ->
-                            onSettingsChange { s ->
-                                s.copy(backgroundSettings = s.backgroundSettings.copy(defaultLowerThirdBackgroundOpacity = opacity))
+                        Constants.BACKGROUND_IMAGE -> {
+                            SettingRow(stringResource(Res.string.background_image)) {
+                                FileImagePicker(
+                                    imagePath = settings.backgroundSettings.defaultBackgroundImage,
+                                    onImagePathChange = { path ->
+                                        onSettingsChange { s ->
+                                            s.copy(backgroundSettings = s.backgroundSettings.copy(defaultBackgroundImage = path))
+                                        }
+                                    },
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                            }
+                            OpacitySlider(settings.backgroundSettings.defaultBackgroundOpacity) { opacity ->
+                                onSettingsChange { s ->
+                                    s.copy(backgroundSettings = s.backgroundSettings.copy(defaultBackgroundOpacity = opacity))
+                                }
+                            }
+                        }
+                        Constants.BACKGROUND_VIDEO -> {
+                            SettingRow(stringResource(Res.string.background_video)) {
+                                FileVideoPicker(
+                                    videoPath = settings.backgroundSettings.defaultBackgroundVideo,
+                                    onVideoPathChange = { path ->
+                                        onSettingsChange { s ->
+                                            s.copy(backgroundSettings = s.backgroundSettings.copy(defaultBackgroundVideo = path))
+                                        }
+                                    },
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                            }
+                            OpacitySlider(settings.backgroundSettings.defaultBackgroundOpacity) { opacity ->
+                                onSettingsChange { s ->
+                                    s.copy(backgroundSettings = s.backgroundSettings.copy(defaultBackgroundOpacity = opacity))
+                                }
                             }
                         }
                     }
-                    Constants.BACKGROUND_IMAGE -> {
-                        SettingRow(stringResource(Res.string.background_image)) {
-                            FileImagePicker(
-                                imagePath = settings.backgroundSettings.defaultLowerThirdBackgroundImage,
-                                onImagePathChange = { path ->
-                                    onSettingsChange { s ->
-                                        s.copy(backgroundSettings = s.backgroundSettings.copy(defaultLowerThirdBackgroundImage = path))
-                                    }
-                                },
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                        }
-                        OpacitySlider(settings.backgroundSettings.defaultLowerThirdBackgroundOpacity) { opacity ->
+                }
+
+                // Card 2: Default Lower Third Background
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(10.dp))
+                        .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f), RoundedCornerShape(10.dp))
+                        .padding(horizontal = 16.dp, vertical = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    GroupHeader(stringResource(Res.string.default_lower_third_background))
+                    Text(
+                        text = stringResource(Res.string.default_lower_third_background_help),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                    )
+                    BackgroundTypeRadioGroup(
+                        selectedType = settings.backgroundSettings.defaultLowerThirdBackgroundType,
+                        onTypeSelected = { type ->
                             onSettingsChange { s ->
-                                s.copy(backgroundSettings = s.backgroundSettings.copy(defaultLowerThirdBackgroundOpacity = opacity))
+                                s.copy(backgroundSettings = s.backgroundSettings.copy(defaultLowerThirdBackgroundType = type))
+                            }
+                        },
+                        defaultLabel = "Follow Default",
+                        colorLabel = stringResource(Res.string.background_color_option),
+                        imageLabel = stringResource(Res.string.background_image_option),
+                        videoLabel = stringResource(Res.string.background_video_option),
+                        transparentLabel = stringResource(Res.string.background_transparent_option),
+                        types = listOf(
+                            Constants.BACKGROUND_FOLLOW_DEFAULT,
+                            Constants.BACKGROUND_COLOR,
+                            Constants.BACKGROUND_IMAGE,
+                            Constants.BACKGROUND_VIDEO,
+                            Constants.BACKGROUND_TRANSPARENT
+                        ),
+                        disabledTypes = if (!isVlcAvailable) setOf(Constants.BACKGROUND_VIDEO) else emptySet()
+                    )
+                    when (settings.backgroundSettings.defaultLowerThirdBackgroundType) {
+                        Constants.BACKGROUND_COLOR -> {
+                            SettingRow(stringResource(Res.string.color)) {
+                                ColorPickerField(
+                                    color = settings.backgroundSettings.defaultLowerThirdBackgroundColor,
+                                    onColorChange = { color ->
+                                        onSettingsChange { s ->
+                                            s.copy(backgroundSettings = s.backgroundSettings.copy(defaultLowerThirdBackgroundColor = color))
+                                        }
+                                    }
+                                )
+                            }
+                            OpacitySlider(settings.backgroundSettings.defaultLowerThirdBackgroundOpacity) { opacity ->
+                                onSettingsChange { s ->
+                                    s.copy(backgroundSettings = s.backgroundSettings.copy(defaultLowerThirdBackgroundOpacity = opacity))
+                                }
+                            }
+                        }
+                        Constants.BACKGROUND_IMAGE -> {
+                            SettingRow(stringResource(Res.string.background_image)) {
+                                FileImagePicker(
+                                    imagePath = settings.backgroundSettings.defaultLowerThirdBackgroundImage,
+                                    onImagePathChange = { path ->
+                                        onSettingsChange { s ->
+                                            s.copy(backgroundSettings = s.backgroundSettings.copy(defaultLowerThirdBackgroundImage = path))
+                                        }
+                                    },
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                            }
+                            OpacitySlider(settings.backgroundSettings.defaultLowerThirdBackgroundOpacity) { opacity ->
+                                onSettingsChange { s ->
+                                    s.copy(backgroundSettings = s.backgroundSettings.copy(defaultLowerThirdBackgroundOpacity = opacity))
+                                }
+                            }
+                        }
+                        Constants.BACKGROUND_VIDEO -> {
+                            SettingRow(stringResource(Res.string.background_video)) {
+                                FileVideoPicker(
+                                    videoPath = settings.backgroundSettings.defaultLowerThirdBackgroundVideo,
+                                    onVideoPathChange = { path ->
+                                        onSettingsChange { s ->
+                                            s.copy(backgroundSettings = s.backgroundSettings.copy(defaultLowerThirdBackgroundVideo = path))
+                                        }
+                                    },
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                            }
+                            OpacitySlider(settings.backgroundSettings.defaultLowerThirdBackgroundOpacity) { opacity ->
+                                onSettingsChange { s ->
+                                    s.copy(backgroundSettings = s.backgroundSettings.copy(defaultLowerThirdBackgroundOpacity = opacity))
+                                }
                             }
                         }
                     }
-                    Constants.BACKGROUND_VIDEO -> {
-                        SettingRow(stringResource(Res.string.background_video)) {
-                            FileVideoPicker(
-                                videoPath = settings.backgroundSettings.defaultLowerThirdBackgroundVideo,
-                                onVideoPathChange = { path ->
-                                    onSettingsChange { s ->
-                                        s.copy(backgroundSettings = s.backgroundSettings.copy(defaultLowerThirdBackgroundVideo = path))
-                                    }
-                                },
-                                modifier = Modifier.fillMaxWidth()
+                }
+            }
+
+            // Row 2: Bible + Songs
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                // Card 3: Bible
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(10.dp))
+                        .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f), RoundedCornerShape(10.dp))
+                        .padding(horizontal = 16.dp, vertical = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    GroupHeader(stringResource(Res.string.bible))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            BackgroundColumn(
+                                subtitle = stringResource(Res.string.full_screen),
+                                config = settings.backgroundSettings.bibleBackground,
+                                onConfigChange = { viewModel.updateBibleBackground(it, onSettingsChange) },
+                                isLowerThird = false
                             )
                         }
-                        OpacitySlider(settings.backgroundSettings.defaultLowerThirdBackgroundOpacity) { opacity ->
-                            onSettingsChange { s ->
-                                s.copy(backgroundSettings = s.backgroundSettings.copy(defaultLowerThirdBackgroundOpacity = opacity))
-                            }
+                        Column(modifier = Modifier.weight(1f)) {
+                            BackgroundColumn(
+                                subtitle = stringResource(Res.string.display_lower_third),
+                                config = settings.backgroundSettings.bibleLowerThirdBackground,
+                                onConfigChange = { viewModel.updateBibleLowerThirdBackground(it, onSettingsChange) },
+                                isLowerThird = true
+                            )
+                        }
+                    }
+                }
+
+                // Card 4: Songs
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(10.dp))
+                        .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f), RoundedCornerShape(10.dp))
+                        .padding(horizontal = 16.dp, vertical = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    GroupHeader(stringResource(Res.string.songs))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            BackgroundColumn(
+                                subtitle = stringResource(Res.string.full_screen),
+                                config = settings.backgroundSettings.songBackground,
+                                onConfigChange = { viewModel.updateSongBackground(it, onSettingsChange) },
+                                isLowerThird = false
+                            )
+                        }
+                        Column(modifier = Modifier.weight(1f)) {
+                            BackgroundColumn(
+                                subtitle = stringResource(Res.string.display_lower_third),
+                                config = settings.backgroundSettings.songLowerThirdBackground,
+                                onConfigChange = { viewModel.updateSongLowerThirdBackground(it, onSettingsChange) },
+                                isLowerThird = true
+                            )
                         }
                     }
                 }
             }
         }
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // 2-group layout: Bible | Songs, each with Full Screen + Lower Third sub-columns
-        Row(
-            modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            // ── Bible group ──────────────────────────────────────────
-            Column(modifier = Modifier.weight(1f)) {
-                GroupHeader(stringResource(Res.string.bible))
-                Spacer(modifier = Modifier.height(12.dp))
-                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        BackgroundColumn(
-                            subtitle = stringResource(Res.string.full_screen),
-                            config = settings.backgroundSettings.bibleBackground,
-                            onConfigChange = { viewModel.updateBibleBackground(it, onSettingsChange) },
-                            isLowerThird = false
-                        )
-                    }
-                    Column(modifier = Modifier.weight(1f)) {
-                        BackgroundColumn(
-                            subtitle = stringResource(Res.string.display_lower_third),
-                            config = settings.backgroundSettings.bibleLowerThirdBackground,
-                            onConfigChange = { viewModel.updateBibleLowerThirdBackground(it, onSettingsChange) },
-                            isLowerThird = true
-                        )
-                    }
-                }
-            }
-
-            ColumnDivider()
-
-            // ── Songs group ──────────────────────────────────────────
-            Column(modifier = Modifier.weight(1f)) {
-                GroupHeader(stringResource(Res.string.songs))
-                Spacer(modifier = Modifier.height(12.dp))
-                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        BackgroundColumn(
-                            subtitle = stringResource(Res.string.full_screen),
-                            config = settings.backgroundSettings.songBackground,
-                            onConfigChange = { viewModel.updateSongBackground(it, onSettingsChange) },
-                            isLowerThird = false
-                        )
-                    }
-                    Column(modifier = Modifier.weight(1f)) {
-                        BackgroundColumn(
-                            subtitle = stringResource(Res.string.display_lower_third),
-                            config = settings.backgroundSettings.songLowerThirdBackground,
-                            onConfigChange = { viewModel.updateSongLowerThirdBackground(it, onSettingsChange) },
-                            isLowerThird = true
-                        )
-                    }
-                }
-            }
-        }
-    }
     }
 }
 
 @Composable
 private fun GroupHeader(title: String) {
-    Column {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.titleLarge,
-            color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.padding(bottom = 8.dp)
+    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .width(3.dp)
+                    .height(20.dp)
+                    .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(2.dp))
+            )
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+        }
+        HorizontalDivider(
+            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+            thickness = 1.dp,
+            modifier = Modifier.fillMaxWidth()
         )
-        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant, thickness = 2.dp)
     }
 }
 
@@ -465,16 +490,6 @@ private fun BackgroundColumn(
 }
 
 @Composable
-private fun ColumnDivider() {
-    Box(
-        modifier = Modifier
-            .width(1.dp)
-            .fillMaxHeight()
-            .background(MaterialTheme.colorScheme.outlineVariant)
-    )
-}
-
-@Composable
 private fun BackgroundTypeRadioGroup(
     selectedType: String,
     onTypeSelected: (String) -> Unit,
@@ -530,14 +545,28 @@ private fun BackgroundTypeRadioGroup(
 
 @Composable
 private fun SectionHeader(title: String) {
-    Column {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.titleSmall,
-            color = MaterialTheme.colorScheme.secondary,
-            modifier = Modifier.padding(bottom = 6.dp)
+    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .width(3.dp)
+                    .height(16.dp)
+                    .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(2.dp))
+            )
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+        }
+        HorizontalDivider(
+            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+            thickness = 1.dp,
+            modifier = Modifier.fillMaxWidth()
         )
-        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant, thickness = 1.dp)
     }
 }
 
@@ -568,7 +597,7 @@ private fun SettingRow(
         Text(
             text = label,
             style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurface,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         content()
     }

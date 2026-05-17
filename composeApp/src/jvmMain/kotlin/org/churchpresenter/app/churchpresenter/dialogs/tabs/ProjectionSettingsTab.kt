@@ -231,18 +231,23 @@ fun ProjectionSettingsTab(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.surfaceVariant)
-            .padding(5.dp)
+            .padding(8.dp)
     ) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(4.dp))
-            .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f), RoundedCornerShape(4.dp))
-            .padding(start = 15.dp, end = 15.dp, top = 8.dp, bottom = 15.dp),
+            .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        // ── Screen Assignment Grid ──────────────────────────────────────────
+    // ── Card 1: Screen Assignment ───────────────────────────────────────────
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(10.dp))
+            .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f), RoundedCornerShape(10.dp))
+            .padding(horizontal = 16.dp, vertical = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
         SectionHeader(stringResource(Res.string.screen_assignment))
         Spacer(modifier = Modifier.height(4.dp))
 
@@ -771,9 +776,16 @@ fun ProjectionSettingsTab(
             )
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // ── Audio Output ────────────────────────────────────────────────────
+    }
+    // ── Card 2: Audio Output ─────────────────────────────────────────────────
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(10.dp))
+            .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f), RoundedCornerShape(10.dp))
+            .padding(horizontal = 16.dp, vertical = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
         SectionHeader(stringResource(Res.string.audio_output))
         Spacer(modifier = Modifier.height(4.dp))
 
@@ -914,9 +926,16 @@ fun ProjectionSettingsTab(
             }
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // ── Window Position Settings ────────────────────────────────────────
+    }
+    // ── Card 3: Window Position ──────────────────────────────────────────────
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(10.dp))
+            .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f), RoundedCornerShape(10.dp))
+            .padding(horizontal = 16.dp, vertical = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
         SectionHeader(stringResource(Res.string.window_position))
         Spacer(modifier = Modifier.height(8.dp))
 
@@ -1047,19 +1066,30 @@ fun ProjectionSettingsTab(
 
     }
     }
+    }
 }
 
 @Composable
 private fun SectionHeader(text: String) {
-    Column {
-        Text(
-            text = text,
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.padding(bottom = 4.dp)
-        )
+    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .width(3.dp)
+                    .height(18.dp)
+                    .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(2.dp))
+            )
+            Text(
+                text = text,
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+        }
         HorizontalDivider(
-            color = MaterialTheme.colorScheme.outlineVariant,
+            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
             thickness = 1.dp,
             modifier = Modifier.fillMaxWidth()
         )
