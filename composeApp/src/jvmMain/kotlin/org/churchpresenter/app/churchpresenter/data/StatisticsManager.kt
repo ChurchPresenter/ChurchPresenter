@@ -196,6 +196,9 @@ class StatisticsManager {
         eventLog.songEvents.isNotEmpty() || eventLog.verseEvents.isNotEmpty()
     }
 
+    fun getSongPlayCount(songbook: String, songNumber: Int): Int =
+        synchronized(lock) { statistics.songDisplayCounts["$songbook::$songNumber"]?.count ?: 0 }
+
     fun getAllSongsInRange(fromMs: Long, toMs: Long): List<SongSummary> = synchronized(lock) {
         eventLog.songEvents
             .filter { it.timestamp in fromMs..toMs }

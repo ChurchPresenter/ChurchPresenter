@@ -164,6 +164,8 @@ object Constants {
     const val SORT_TITLE = "title"
     const val SORT_SONGBOOK = "songbook"
     const val SORT_TUNE = "tune"
+    const val SORT_PLAY_COUNT = "play_count"
+    const val SORT_FAVORITES = "favorites"
 
     const val CURRENT_BOOK = "Current Book"
 

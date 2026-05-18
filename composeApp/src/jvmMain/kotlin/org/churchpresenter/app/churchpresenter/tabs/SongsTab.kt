@@ -80,6 +80,10 @@ import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.isSecondary
 import org.churchpresenter.app.churchpresenter.data.StatisticsManager
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Tune
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import org.churchpresenter.app.churchpresenter.composables.TooltipIconButton
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
@@ -119,6 +123,8 @@ import churchpresenter.composeapp.generated.resources.no_lyrics_available
 import churchpresenter.composeapp.generated.resources.remove_from_favorites
 import churchpresenter.composeapp.generated.resources.song_favorites
 import churchpresenter.composeapp.generated.resources.song_favorites_clear
+import churchpresenter.composeapp.generated.resources.song_play_count
+import churchpresenter.composeapp.generated.resources.song_columns
 import churchpresenter.composeapp.generated.resources.number
 import churchpresenter.composeapp.generated.resources.search
 import churchpresenter.composeapp.generated.resources.search_songs
@@ -161,6 +167,8 @@ fun SongsTab(
     theme: ThemeMode = ThemeMode.SYSTEM,
     statisticsManager: StatisticsManager? = null
 ) {
+    LaunchedEffect(statisticsManager) { viewModel.setStatisticsManager(statisticsManager) }
+
     // Reload songs whenever the storage directory changes (e.g. after settings are saved)
     val isFirstComposition = remember { mutableStateOf(true) }
     LaunchedEffect(appSettings.songSettings.storageDirectory) {
@@ -183,6 +191,8 @@ fun SongsTab(
     val selectedSectionIndex by viewModel.selectedSectionIndex
     val filteredSongs by viewModel.filteredSongItems
     val isLoading by viewModel.isLoading
+    val currentSortColumn by viewModel.sortColumn
+    val currentSortAscending by viewModel.sortAscending
 
     // Edit Song Dialog state (pure UI state — fine to keep here)
     var showEditDialog by remember { mutableStateOf(false) }
@@ -291,6 +301,9 @@ fun SongsTab(
     var colWTune by remember(appSettings.songSettings.colWidthTune) {
         mutableStateOf(with(density) { appSettings.songSettings.colWidthTune.dp.toPx() })
     }
+    var colWPlayCount by remember(appSettings.songSettings.colWidthPlayCount) {
+        mutableStateOf(with(density) { appSettings.songSettings.colWidthPlayCount.dp.toPx() })
+    }
 
     // Favorites panel height in px
     var favPanelHeightPx by remember(appSettings.songFavoritesPanelHeightDp) {
@@ -304,6 +317,7 @@ fun SongsTab(
         add("number"); add("title")
         if (songbooks.size > 1) add("songbook")
         add("tune")
+        add("play_count")
         if (onAddToSchedule != null) add("add_to_schedule")
         add("favorites")
     }
@@ -327,6 +341,7 @@ fun SongsTab(
     }
     var showColMenu by remember { mutableStateOf(false) }
     var colMenuOffset by remember { mutableStateOf(DpOffset.Zero) }
+    var showColumnsMenu by remember { mutableStateOf(false) }
     // Plain val — recomputed on every recomposition so it always reflects the current
     // colOrder and hiddenCols state objects (remember(key){} creates new MutableState on
     // each settings save, which would silently break a derivedStateOf subscription).
@@ -347,6 +362,7 @@ fun SongsTab(
                     colWidthTitle       = with(density) { colWTitle.toDp().value.toInt() },
                     colWidthSongbook    = with(density) { colWSongbook.toDp().value.toInt() },
                     colWidthTune        = with(density) { colWTune.toDp().value.toInt() },
+                    colWidthPlayCount   = with(density) { colWPlayCount.toDp().value.toInt() },
                     lyricsPanelWidthDp  = with(density) { lyricsPanelPx.toDp().value.toInt() }
                 ),
                 songColOrder = colOrder,
@@ -356,27 +372,32 @@ fun SongsTab(
     }
 
     fun colWidth(id: String) = when (id) {
-        "number"   -> colWNumber
-        "title"    -> colWTitle
-        "songbook" -> colWSongbook
-        "tune"     -> colWTune
-        else       -> with(density) { 30.dp.toPx() } // action columns: 6dp spacer + 24dp icon button
+        "number"     -> colWNumber
+        "title"      -> colWTitle
+        "songbook"   -> colWSongbook
+        "tune"       -> colWTune
+        "play_count" -> colWPlayCount
+        else         -> with(density) { 30.dp.toPx() } // action columns: 6dp spacer + 24dp icon button
     }
 
     fun setColWidth(id: String, px: Float) {
         when (id) {
-            "number"   -> colWNumber   = px.coerceIn(with(density) { 30.dp.toPx() },  with(density) { 200.dp.toPx() })
-            "title"    -> colWTitle    = px.coerceIn(with(density) { 60.dp.toPx() },  with(density) { 600.dp.toPx() })
-            "songbook" -> colWSongbook = px.coerceIn(with(density) { 40.dp.toPx() },  with(density) { 300.dp.toPx() })
-            "tune"     -> colWTune     = px.coerceIn(with(density) { 40.dp.toPx() },  with(density) { 300.dp.toPx() })
+            "number"     -> colWNumber    = px.coerceIn(with(density) { 30.dp.toPx() },  with(density) { 200.dp.toPx() })
+            "title"      -> colWTitle     = px.coerceIn(with(density) { 60.dp.toPx() },  with(density) { 600.dp.toPx() })
+            "songbook"   -> colWSongbook  = px.coerceIn(with(density) { 40.dp.toPx() },  with(density) { 300.dp.toPx() })
+            "tune"       -> colWTune      = px.coerceIn(with(density) { 40.dp.toPx() },  with(density) { 300.dp.toPx() })
+            "play_count" -> colWPlayCount = px.coerceIn(with(density) { 30.dp.toPx() },  with(density) { 150.dp.toPx() })
         }
     }
 
     fun sortKey(id: String) = when (id) {
-        "number"   -> Constants.SORT_NUMBER
-        "title"    -> Constants.SORT_TITLE
-        "songbook" -> Constants.SORT_SONGBOOK
-        else       -> Constants.SORT_TUNE
+        "number"     -> Constants.SORT_NUMBER
+        "title"      -> Constants.SORT_TITLE
+        "songbook"   -> Constants.SORT_SONGBOOK
+        "tune"       -> Constants.SORT_TUNE
+        "play_count" -> Constants.SORT_PLAY_COUNT
+        "favorites"  -> Constants.SORT_FAVORITES
+        else         -> ""
     }
 
     // NOTE: operates on visibleCols (set after state vars), returns index within visibleCols
@@ -473,6 +494,19 @@ fun SongsTab(
     ) {
         // Left panel — Search and song list (fills remaining space)
         Column(modifier = Modifier.weight(1f).fillMaxHeight()) {
+            // Pre-compute column labels (stringResource is @Composable, can't be called in forEach)
+            val colHeaderLabels = mapOf(
+                "number"     to stringResource(Res.string.number),
+                "title"      to stringResource(Res.string.title),
+                "songbook"   to stringResource(Res.string.song_book),
+                "tune"       to stringResource(Res.string.tune),
+                "play_count" to stringResource(Res.string.song_play_count)
+            )
+            val allColLabels = colHeaderLabels + mapOf(
+                "favorites"       to stringResource(Res.string.song_favorites),
+                "add_to_schedule" to stringResource(Res.string.add_to_schedule)
+            )
+
             // Search controls — wraps to new line if not enough space
             @OptIn(ExperimentalLayoutApi::class)
             FlowRow(
@@ -542,6 +576,43 @@ fun SongsTab(
                         Icon(painter = painterResource(Res.drawable.ic_search), contentDescription = stringResource(Res.string.search), modifier = Modifier.size(20.dp))
                     }
                 }
+
+                // Column visibility button
+                Box {
+                    TooltipIconButton(
+                        painter = rememberVectorPainter(Icons.Default.Tune),
+                        text = stringResource(Res.string.song_columns),
+                        onClick = { showColumnsMenu = true },
+                        buttonSize = 36.dp,
+                        iconTint = MaterialTheme.colorScheme.onSurface
+                    )
+                    DropdownMenu(
+                        expanded = showColumnsMenu,
+                        onDismissRequest = { showColumnsMenu = false }
+                    ) {
+                        availableCols.forEach { colId ->
+                            val isVisible = colId !in hiddenCols
+                            val isProtected = colId == "title"
+                            DropdownMenuItem(
+                                text = { Text(allColLabels[colId] ?: colId) },
+                                leadingIcon = {
+                                    Checkbox(
+                                        checked = isVisible,
+                                        onCheckedChange = null,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                },
+                                onClick = {
+                                    if (!(isProtected && isVisible)) {
+                                        hiddenCols = if (isVisible) hiddenCols + colId else hiddenCols - colId
+                                        onSettingsChangeState.value { s -> s.copy(songHiddenCols = hiddenCols) }
+                                    }
+                                },
+                                enabled = !(isProtected && isVisible)
+                            )
+                        }
+                    }
+                }
             }
 
             // Shared horizontal scroll state for header + song list
@@ -554,25 +625,12 @@ fun SongsTab(
                 (colsW + handlesW).toDp() + 16.dp
             }
 
-            // Pre-compute column header labels (stringResource is @Composable, can't be called in forEach)
-            val colHeaderLabels = mapOf(
-                "number"   to stringResource(Res.string.number),
-                "title"    to stringResource(Res.string.title),
-                "songbook" to stringResource(Res.string.song_book),
-                "tune"     to stringResource(Res.string.tune)
-            )
-            // Labels for action columns (not in colHeaderLabels)
-            val allColLabels = colHeaderLabels + mapOf(
-                "favorites"       to stringResource(Res.string.song_favorites),
-                "add_to_schedule" to stringResource(Res.string.add_to_schedule)
-            )
-
             // Column header row — scrolls horizontally with the song list
             // Wrapped in a Box so the right-click DropdownMenu can anchor here
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(32.dp)
+                    .height(36.dp)
                     .pointerInput(Unit) {
                         awaitPointerEventScope {
                             while (true) {
@@ -591,8 +649,8 @@ fun SongsTab(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(32.dp)
-                    .background(Color.Gray.copy(alpha = 0.2f))
+                    .height(36.dp)
+                    .background(MaterialTheme.colorScheme.surfaceContainerLow)
                     .horizontalScroll(hScrollState)
             ) {
             Row(
@@ -604,6 +662,9 @@ fun SongsTab(
             ) {
                 visibleCols.forEach { colId ->
                     val isBeingDragged = colId == draggingColId
+                    val sk = sortKey(colId)
+                    val isSortable = sk.isNotEmpty() && colId != "add_to_schedule"
+                    val isSorted = isSortable && currentSortColumn == sk
                     val reorderDragMod = Modifier.pointerInput(colId) {
                         detectHorizontalDragGestures(
                             onDragEnd = {
@@ -629,38 +690,82 @@ fun SongsTab(
                             dragAccumX += amount
                         }
                     }
+                    val cellColor = when {
+                        isBeingDragged -> MaterialTheme.colorScheme.primary
+                        isSorted -> MaterialTheme.colorScheme.primary
+                        else -> MaterialTheme.colorScheme.onSurfaceVariant
+                    }
+                    val cellBg = if (isSorted)
+                        MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f)
+                    else
+                        Color.Transparent
+
                     if (colId in actionCols) {
-                        // Action column: icon header, no DragHandle (fixed width, not resizable)
+                        // Action column — icon header, no resize handle
                         Box(
                             modifier = Modifier
                                 .width(with(density) { colWidth(colId).toDp() })
-                                .padding(start = 6.dp)
+                                .fillMaxHeight()
+                                .padding(start = 4.dp, top = 4.dp, bottom = 4.dp)
+                                .background(cellBg, shape = MaterialTheme.shapes.extraSmall)
+                                .then(if (isSortable) Modifier.clickable { viewModel.updateSort(sk) } else Modifier)
                                 .then(reorderDragMod),
                             contentAlignment = Alignment.Center
                         ) {
-                            Icon(
-                                painter = painterResource(
-                                    if (colId == "favorites") Res.drawable.ic_star else Res.drawable.ic_playlist_add
-                                ),
-                                contentDescription = null,
-                                modifier = Modifier.size(14.dp),
-                                tint = if (isBeingDragged) MaterialTheme.colorScheme.primary
-                                       else MaterialTheme.colorScheme.secondary
-                            )
+                            Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+                                Icon(
+                                    painter = painterResource(
+                                        if (colId == "favorites") Res.drawable.ic_star else Res.drawable.ic_playlist_add
+                                    ),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(13.dp),
+                                    tint = cellColor
+                                )
+                                if (isSorted) {
+                                    Icon(
+                                        painter = painterResource(if (currentSortAscending) Res.drawable.ic_arrow_up else Res.drawable.ic_arrow_down),
+                                        contentDescription = null,
+                                        modifier = Modifier.size(8.dp),
+                                        tint = cellColor
+                                    )
+                                }
+                            }
                         }
                     } else {
-                        Text(
-                            text = (colHeaderLabels[colId] ?: colId) + viewModel.getSortIndicator(sortKey(colId)),
-                            style = MaterialTheme.typography.labelMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = if (isBeingDragged) MaterialTheme.colorScheme.primary
-                                    else MaterialTheme.colorScheme.secondary,
+                        // Data column — text label + resize handle
+                        Box(
                             modifier = Modifier
                                 .width(with(density) { colWidth(colId).toDp() })
-                                .padding(horizontal = 8.dp)
-                                .clickable { viewModel.updateSort(sortKey(colId)) }
-                                .then(reorderDragMod)
-                        )
+                                .fillMaxHeight()
+                                .padding(vertical = 4.dp)
+                                .background(cellBg, shape = MaterialTheme.shapes.extraSmall)
+                                .then(if (isSortable) Modifier.clickable { viewModel.updateSort(sk) } else Modifier)
+                                .then(reorderDragMod),
+                            contentAlignment = Alignment.CenterStart
+                        ) {
+                            Row(
+                                modifier = Modifier.fillMaxSize().padding(horizontal = 8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = colHeaderLabels[colId] ?: colId,
+                                    style = MaterialTheme.typography.labelMedium,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = cellColor,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    modifier = Modifier.weight(1f)
+                                )
+                                if (isSorted) {
+                                    Icon(
+                                        painter = painterResource(if (currentSortAscending) Res.drawable.ic_arrow_up else Res.drawable.ic_arrow_down),
+                                        contentDescription = null,
+                                        modifier = Modifier.size(10.dp),
+                                        tint = cellColor
+                                    )
+                                }
+                            }
+                        }
                         DragHandle(
                             onDrag = { setColWidth(colId, colWidth(colId) + it) },
                             onDragEnd = ::saveColWidths
@@ -777,14 +882,20 @@ fun SongsTab(
                             visibleCols.forEach { colId ->
                                 if (colId !in actionCols) {
                                     val cellText = when (colId) {
-                                        "number"   -> song.number
-                                        "title"    -> song.title
-                                        "songbook" -> song.songbook
-                                        else       -> song.tune
+                                        "number"     -> song.number
+                                        "title"      -> song.title
+                                        "songbook"   -> song.songbook
+                                        "tune"       -> song.tune
+                                        "play_count" -> {
+                                            val count = statisticsManager?.getSongPlayCount(song.songbook, song.number.toIntOrNull() ?: 0) ?: 0
+                                            if (count > 0) count.toString() else ""
+                                        }
+                                        else         -> song.tune
                                     }
                                     Text(
                                         cellText,
                                         style = MaterialTheme.typography.bodySmall,
+                                        textAlign = if (colId == "play_count") TextAlign.End else TextAlign.Start,
                                         modifier = Modifier
                                             .width(with(density) { colWidth(colId).toDp() })
                                             .initialPassClickable {

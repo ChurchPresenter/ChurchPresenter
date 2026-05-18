@@ -10,6 +10,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.churchpresenter.app.churchpresenter.data.AppSettings
 import org.churchpresenter.app.churchpresenter.data.CachedSong
+import org.churchpresenter.app.churchpresenter.data.StatisticsManager
 import org.churchpresenter.app.churchpresenter.data.SongFileParser
 import org.churchpresenter.app.churchpresenter.data.SongItem
 import org.churchpresenter.app.churchpresenter.data.Songs
@@ -79,6 +80,14 @@ class SongsViewModel(
     fun getFavoriteSongs(): List<SongItem> {
         val favIds = _favorites.value
         return _allSongItems.value.filter { it.songId in favIds }
+    }
+
+    // Statistics — used for play-count sorting
+    private var statisticsManager: StatisticsManager? = null
+
+    fun setStatisticsManager(sm: StatisticsManager?) {
+        statisticsManager = sm
+        if (_sortColumn.value == Constants.SORT_PLAY_COUNT) refreshFilteredSongItems()
     }
 
     // Sort state — managed by ViewModel so it survives recomposition
@@ -531,6 +540,23 @@ class SongsViewModel(
                     items.sortedBy { it.tune.lowercase() }
                 else
                     items.sortedByDescending { it.tune.lowercase() }
+
+                Constants.SORT_PLAY_COUNT -> {
+                    val sm = statisticsManager
+                    if (sm != null) {
+                        val counts = items.associate { it.songId to sm.getSongPlayCount(it.songbook, it.number.toIntOrNull() ?: 0) }
+                        if (_sortAscending.value) items.sortedBy { counts[it.songId] ?: 0 }
+                        else items.sortedByDescending { counts[it.songId] ?: 0 }
+                    } else items
+                }
+
+                Constants.SORT_FAVORITES -> {
+                    val favIds = _favorites.value
+                    if (_sortAscending.value)
+                        items.sortedBy { if (it.songId in favIds) 0 else 1 }
+                    else
+                        items.sortedByDescending { if (it.songId in favIds) 0 else 1 }
+                }
 
                 else -> items
             }

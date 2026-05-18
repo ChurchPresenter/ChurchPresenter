@@ -47,6 +47,7 @@ data class SongSettings(
     val colWidthTitle: Int = 220,
     val colWidthSongbook: Int = 100,
     val colWidthTune: Int = 60,
+    val colWidthPlayCount: Int = 60,
 
     // Left/right panel split — lyrics panel width in dp (0 = use default weight)
     val lyricsPanelWidthDp: Int = 0,
