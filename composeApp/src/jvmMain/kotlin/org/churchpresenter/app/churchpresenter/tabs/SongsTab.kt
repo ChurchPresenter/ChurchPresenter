@@ -444,16 +444,18 @@ fun SongsTab(
     }
 
     @Composable
-    fun DragHandle(onDrag: (Float) -> Unit, onDragEnd: () -> Unit) {
+    fun DragHandle(colId: String, onDrag: (Float) -> Unit, onDragEnd: () -> Unit) {
+        val currentOnDrag by rememberUpdatedState(onDrag)
+        val currentOnDragEnd by rememberUpdatedState(onDragEnd)
         Box(
             modifier = Modifier
                 .width(6.dp)
                 .fillMaxHeight()
                 .background(MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f))
                 .pointerHoverIcon(PointerIcon.Hand)
-                .pointerInput(Unit) {
-                    detectHorizontalDragGestures(onDragEnd = onDragEnd) { _, amount ->
-                        onDrag(amount)
+                .pointerInput(colId) {
+                    detectHorizontalDragGestures(onDragEnd = { currentOnDragEnd() }) { _, amount ->
+                        currentOnDrag(amount)
                     }
                 }
         )
@@ -688,8 +690,9 @@ fun SongsTab(
                     val reorderDragMod = Modifier.pointerInput(colId) {
                         detectHorizontalDragGestures(
                             onDragEnd = {
-                                val newVisIdx = computeNewIdx(colId, dragAccumX, visibleCols)
-                                val targetId = visibleCols.getOrNull(newVisIdx)
+                                val vc = colOrder.filter { it !in hiddenCols }
+                                val newVisIdx = computeNewIdx(colId, dragAccumX, vc)
+                                val targetId = vc.getOrNull(newVisIdx)
                                 if (targetId != null) {
                                     val fromIdx = colOrder.indexOf(colId)
                                     val toIdx = colOrder.indexOf(targetId)
@@ -787,6 +790,7 @@ fun SongsTab(
                             }
                         }
                         DragHandle(
+                            colId = colId,
                             onDrag = { setColWidth(colId, colWidth(colId) + it) },
                             onDragEnd = ::saveColWidths
                         )
