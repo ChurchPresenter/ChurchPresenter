@@ -856,9 +856,12 @@ fun SongsTab(
                     }
                 }
 
+                Row(modifier = Modifier.fillMaxSize()) {
+                Spacer(modifier = Modifier.width(36.dp))
                 Box(
                     modifier = Modifier
-                        .fillMaxSize()
+                        .weight(1f)
+                        .fillMaxHeight()
                         .horizontalScroll(hScrollState)
                 ) {
                 LazyColumn(
@@ -1067,16 +1070,20 @@ fun SongsTab(
                     }
                 }
                 } // end horizontalScroll Box
+                } // end song list Row (spacer + scroll box)
                 VerticalScrollbar(
                     modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
                     adapter = rememberScrollbarAdapter(scrollState = lazyListState)
                 )
                 }
             }
-            HorizontalScrollbar(
-                modifier = Modifier.fillMaxWidth().padding(end = 8.dp),
-                adapter = rememberScrollbarAdapter(hScrollState)
-            )
+            Row(modifier = Modifier.fillMaxWidth()) {
+                Spacer(modifier = Modifier.width(36.dp))
+                HorizontalScrollbar(
+                    modifier = Modifier.weight(1f).padding(end = 8.dp),
+                    adapter = rememberScrollbarAdapter(hScrollState)
+                )
+            }
             } // end Column (song list + horizontal scrollbar)
 
             // ── Favorites panel ───────────────────────────────────────
