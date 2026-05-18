@@ -79,10 +79,48 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import java.io.File
 import javax.swing.filechooser.FileNameExtensionFilter
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items as lazyItems
+import androidx.compose.material3.SuggestionChip
+import androidx.compose.ui.text.style.TextOverflow
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.awt.image.BufferedImage
 import kotlin.io.path.Path
+
+private object RecentPresentationFiles {
+    private const val MAX = 10
+    private val file = java.io.File(System.getProperty("user.home"), ".churchpresenter/recent_presentation_files.json")
+    val files = androidx.compose.runtime.mutableStateListOf<String>()
+
+    init { load() }
+
+    fun add(path: String) {
+        files.remove(path)
+        files.add(0, path)
+        while (files.size > MAX) files.removeLast()
+        save()
+    }
+
+    private fun load() {
+        try {
+            if (file.exists()) {
+                val json = kotlinx.serialization.json.Json { ignoreUnknownKeys = true }
+                val list = json.decodeFromString<List<String>>(file.readText())
+                files.clear()
+                files.addAll(list.take(MAX))
+            }
+        } catch (_: Exception) {}
+    }
+
+    private fun save() {
+        try {
+            file.parentFile?.mkdirs()
+            val json = kotlinx.serialization.json.Json { encodeDefaults = true }
+            file.writeText(json.encodeToString(files.toList()))
+        } catch (_: Exception) {}
+    }
+}
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -205,6 +243,7 @@ fun PresentationTab(
                         )
                         files?.forEach { file ->
                             viewModel.addPresentation(file.toFile())
+                            RecentPresentationFiles.add(file.toFile().absolutePath)
                         }
                     }
                 }
@@ -225,6 +264,17 @@ fun PresentationTab(
                 color = MaterialTheme.colorScheme.primary
             )
         }
+
+        PresentationRecentsRow(
+            items = RecentPresentationFiles.files,
+            onSelect = { path ->
+                val f = java.io.File(path)
+                if (f.exists()) {
+                    viewModel.addPresentation(f)
+                    RecentPresentationFiles.add(path)
+                }
+            }
+        )
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -563,6 +613,37 @@ private fun PresentationChip(
                 tint = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer
                        else MaterialTheme.colorScheme.onSurface
             )
+        }
+    }
+}
+
+@Composable
+private fun PresentationRecentsRow(items: List<String>, onSelect: (String) -> Unit) {
+    if (items.isEmpty()) return
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Text(
+            text = "Recent:",
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+        )
+        LazyRow(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            lazyItems(items) { path ->
+                SuggestionChip(
+                    onClick = { onSelect(path) },
+                    label = {
+                        Text(
+                            text = java.io.File(path).name,
+                            style = MaterialTheme.typography.labelSmall,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                )
+            }
         }
     }
 }
