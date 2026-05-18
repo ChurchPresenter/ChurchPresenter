@@ -803,5 +803,6 @@ data class AppSettings(
     val obsSettings: OBSSettings = OBSSettings(),
     val songFavorites: List<String> = emptyList(),
     val songFavoritesPanelHeightDp: Int = 120,
-    val songColOrder: List<String> = emptyList()
+    val songColOrder: List<String> = emptyList(),
+    val songHiddenCols: Set<String> = emptySet()
 )

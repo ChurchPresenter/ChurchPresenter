@@ -39,6 +39,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -55,6 +56,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -295,11 +297,16 @@ fun SongsTab(
         mutableStateOf(with(density) { appSettings.songFavoritesPanelHeightDp.dp.toPx() })
     }
 
-    // Column order — "songbook" excluded when only one songbook loaded
-    val availableCols = if (songbooks.size > 1)
-        listOf("number", "title", "songbook", "tune")
-    else
-        listOf("number", "title", "tune")
+    // Column order — "songbook" excluded when only one songbook loaded;
+    // "add_to_schedule" excluded when the callback is absent
+    val actionCols = setOf("favorites", "add_to_schedule")
+    val availableCols = buildList {
+        add("number"); add("title")
+        if (songbooks.size > 1) add("songbook")
+        add("tune")
+        if (onAddToSchedule != null) add("add_to_schedule")
+        add("favorites")
+    }
     var colOrder by remember(appSettings.songColOrder, songbooks.size) {
         val saved = appSettings.songColOrder
         val order = if (saved.isEmpty()) availableCols
@@ -313,6 +320,17 @@ fun SongsTab(
     // Drag-to-reorder state
     var draggingColId by remember { mutableStateOf<String?>(null) }
     var dragAccumX by remember { mutableStateOf(0f) }
+
+    // Column visibility
+    var hiddenCols by remember(appSettings.songHiddenCols) {
+        mutableStateOf(appSettings.songHiddenCols)
+    }
+    var showColMenu by remember { mutableStateOf(false) }
+    var colMenuOffset by remember { mutableStateOf(DpOffset.Zero) }
+    // Plain val — recomputed on every recomposition so it always reflects the current
+    // colOrder and hiddenCols state objects (remember(key){} creates new MutableState on
+    // each settings save, which would silently break a derivedStateOf subscription).
+    val visibleCols = colOrder.filter { it !in hiddenCols }
 
     // Panel split — lyrics panel width in px; 0 means "not yet set, use half of row"
     var lyricsPanelPx by remember(appSettings.songSettings.lyricsPanelWidthDp) {
@@ -331,7 +349,8 @@ fun SongsTab(
                     colWidthTune        = with(density) { colWTune.toDp().value.toInt() },
                     lyricsPanelWidthDp  = with(density) { lyricsPanelPx.toDp().value.toInt() }
                 ),
-                songColOrder = colOrder
+                songColOrder = colOrder,
+                songHiddenCols = hiddenCols
             )
         }
     }
@@ -340,7 +359,8 @@ fun SongsTab(
         "number"   -> colWNumber
         "title"    -> colWTitle
         "songbook" -> colWSongbook
-        else       -> colWTune
+        "tune"     -> colWTune
+        else       -> with(density) { 30.dp.toPx() } // action columns: 6dp spacer + 24dp icon button
     }
 
     fun setColWidth(id: String, px: Float) {
@@ -359,23 +379,24 @@ fun SongsTab(
         else       -> Constants.SORT_TUNE
     }
 
-    fun computeNewIdx(draggedId: String, accumX: Float): Int {
-        val currentIdx = colOrder.indexOf(draggedId)
+    // NOTE: operates on visibleCols (set after state vars), returns index within visibleCols
+    fun computeNewIdx(draggedId: String, accumX: Float, visibleCols: List<String>): Int {
+        val currentIdx = visibleCols.indexOf(draggedId)
         if (currentIdx < 0) return 0
         val handleW = with(density) { 6.dp.toPx() }
         var remaining = accumX
         var newIdx = currentIdx
         if (remaining > 0f) {
             var i = currentIdx + 1
-            while (i < colOrder.size) {
-                val w = colWidth(colOrder[i]) + handleW
+            while (i < visibleCols.size) {
+                val w = colWidth(visibleCols[i]) + handleW
                 if (remaining >= w / 2f) { newIdx = i; remaining -= w } else break
                 i++
             }
         } else {
             var i = currentIdx - 1
             while (i >= 0) {
-                val w = colWidth(colOrder[i]) + handleW
+                val w = colWidth(visibleCols[i]) + handleW
                 if (-remaining >= w / 2f) { newIdx = i; remaining += w } else break
                 i--
             }
@@ -525,12 +546,12 @@ fun SongsTab(
 
             // Shared horizontal scroll state for header + song list
             val hScrollState = rememberScrollState()
+
             val contentMinWidthDp = with(density) {
-                val colsW = colOrder.fold(0f) { acc, id -> acc + colWidth(id) }
-                val handlesW = colOrder.size * 6.dp.toPx()
-                val starW = (6.dp + 24.dp).toPx()
-                val addW = if (onAddToSchedule != null) (6.dp + 24.dp).toPx() else 0f
-                (colsW + handlesW + starW + addW).toDp() + 16.dp
+                val colsW = visibleCols.fold(0f) { acc, id -> acc + colWidth(id) }
+                // DragHandles (6dp each) only appear after data columns, not after action columns
+                val handlesW = visibleCols.count { it !in actionCols } * 6.dp.toPx()
+                (colsW + handlesW).toDp() + 16.dp
             }
 
             // Pre-compute column header labels (stringResource is @Composable, can't be called in forEach)
@@ -540,8 +561,33 @@ fun SongsTab(
                 "songbook" to stringResource(Res.string.song_book),
                 "tune"     to stringResource(Res.string.tune)
             )
+            // Labels for action columns (not in colHeaderLabels)
+            val allColLabels = colHeaderLabels + mapOf(
+                "favorites"       to stringResource(Res.string.song_favorites),
+                "add_to_schedule" to stringResource(Res.string.add_to_schedule)
+            )
 
             // Column header row — scrolls horizontally with the song list
+            // Wrapped in a Box so the right-click DropdownMenu can anchor here
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(32.dp)
+                    .pointerInput(Unit) {
+                        awaitPointerEventScope {
+                            while (true) {
+                                val event = awaitPointerEvent(PointerEventPass.Initial)
+                                if (event.type == PointerEventType.Press &&
+                                    event.button?.isSecondary == true
+                                ) {
+                                    val pos = event.changes.firstOrNull()?.position
+                                    if (pos != null) colMenuOffset = with(density) { DpOffset(pos.x.toDp(), pos.y.toDp()) }
+                                    showColMenu = true
+                                }
+                            }
+                        }
+                    }
+            ) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -552,53 +598,107 @@ fun SongsTab(
             Row(
                 modifier = Modifier
                     .width(contentMinWidthDp)
-                    .fillMaxHeight(),
+                    .fillMaxHeight()
+                    .padding(horizontal = 8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                colOrder.forEach { colId ->
+                visibleCols.forEach { colId ->
                     val isBeingDragged = colId == draggingColId
-                    Text(
-                        text = (colHeaderLabels[colId] ?: colId) + viewModel.getSortIndicator(sortKey(colId)),
-                        style = MaterialTheme.typography.labelMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = if (isBeingDragged) MaterialTheme.colorScheme.primary
-                                else MaterialTheme.colorScheme.secondary,
-                        modifier = Modifier
-                            .width(with(density) { colWidth(colId).toDp() })
-                            .padding(horizontal = 8.dp)
-                            .clickable { viewModel.updateSort(sortKey(colId)) }
-                            .pointerInput(colId) {
-                                detectHorizontalDragGestures(
-                                    onDragEnd = {
-                                        val newIdx = computeNewIdx(colId, dragAccumX)
-                                        val fromIdx = colOrder.indexOf(colId)
-                                        if (newIdx != fromIdx) {
-                                            val mutable = colOrder.toMutableList()
-                                            mutable.removeAt(fromIdx)
-                                            mutable.add(newIdx.coerceIn(0, mutable.size), colId)
-                                            colOrder = mutable
-                                            onSettingsChangeState.value { s -> s.copy(songColOrder = colOrder) }
-                                        }
-                                        draggingColId = null
-                                        dragAccumX = 0f
-                                    },
-                                    onDragCancel = { draggingColId = null; dragAccumX = 0f }
-                                ) { _, amount ->
-                                    if (draggingColId != colId) {
-                                        draggingColId = colId
-                                        dragAccumX = 0f
+                    val reorderDragMod = Modifier.pointerInput(colId) {
+                        detectHorizontalDragGestures(
+                            onDragEnd = {
+                                val newVisIdx = computeNewIdx(colId, dragAccumX, visibleCols)
+                                val targetId = visibleCols.getOrNull(newVisIdx)
+                                if (targetId != null) {
+                                    val fromIdx = colOrder.indexOf(colId)
+                                    val toIdx = colOrder.indexOf(targetId)
+                                    if (toIdx != fromIdx) {
+                                        val mutable = colOrder.toMutableList()
+                                        mutable.removeAt(fromIdx)
+                                        mutable.add(toIdx.coerceIn(0, mutable.size), colId)
+                                        colOrder = mutable
+                                        onSettingsChangeState.value { s -> s.copy(songColOrder = colOrder) }
                                     }
-                                    dragAccumX += amount
                                 }
+                                draggingColId = null
+                                dragAccumX = 0f
+                            },
+                            onDragCancel = { draggingColId = null; dragAccumX = 0f }
+                        ) { _, amount ->
+                            if (draggingColId != colId) { draggingColId = colId; dragAccumX = 0f }
+                            dragAccumX += amount
+                        }
+                    }
+                    if (colId in actionCols) {
+                        // Action column: icon header, no DragHandle (fixed width, not resizable)
+                        Box(
+                            modifier = Modifier
+                                .width(with(density) { colWidth(colId).toDp() })
+                                .padding(start = 6.dp)
+                                .then(reorderDragMod),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                painter = painterResource(
+                                    if (colId == "favorites") Res.drawable.ic_star else Res.drawable.ic_playlist_add
+                                ),
+                                contentDescription = null,
+                                modifier = Modifier.size(14.dp),
+                                tint = if (isBeingDragged) MaterialTheme.colorScheme.primary
+                                       else MaterialTheme.colorScheme.secondary
+                            )
+                        }
+                    } else {
+                        Text(
+                            text = (colHeaderLabels[colId] ?: colId) + viewModel.getSortIndicator(sortKey(colId)),
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = if (isBeingDragged) MaterialTheme.colorScheme.primary
+                                    else MaterialTheme.colorScheme.secondary,
+                            modifier = Modifier
+                                .width(with(density) { colWidth(colId).toDp() })
+                                .padding(horizontal = 8.dp)
+                                .clickable { viewModel.updateSort(sortKey(colId)) }
+                                .then(reorderDragMod)
+                        )
+                        DragHandle(
+                            onDrag = { setColWidth(colId, colWidth(colId) + it) },
+                            onDragEnd = ::saveColWidths
+                        )
+                    }
+                }
+            }
+            } // end inner scrollable header Box
+
+            // Right-click dropdown — toggle column visibility
+            DropdownMenu(
+                expanded = showColMenu,
+                onDismissRequest = { showColMenu = false },
+                offset = colMenuOffset
+            ) {
+                availableCols.forEach { colId ->
+                    val isVisible = colId !in hiddenCols
+                    val isProtected = colId == "title"
+                    DropdownMenuItem(
+                        text = { Text(allColLabels[colId] ?: colId) },
+                        leadingIcon = {
+                            Checkbox(
+                                checked = isVisible,
+                                onCheckedChange = null,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        },
+                        onClick = {
+                            if (!(isProtected && isVisible)) {
+                                hiddenCols = if (isVisible) hiddenCols + colId else hiddenCols - colId
+                                onSettingsChangeState.value { s -> s.copy(songHiddenCols = hiddenCols) }
                             }
-                    )
-                    DragHandle(
-                        onDrag = { setColWidth(colId, colWidth(colId) + it) },
-                        onDragEnd = ::saveColWidths
+                        },
+                        enabled = !(isProtected && isVisible)
                     )
                 }
             }
-            } // end header Box (horizontalScroll)
+            } // end outer header Box (right-click + dropdown wrapper)
 
             // Song list + horizontal scrollbar
             Column(modifier = Modifier.weight(1f).fillMaxWidth()) {
@@ -672,18 +772,10 @@ fun SongsTab(
                                 MaterialTheme.colorScheme.onSurfaceVariant
                             else
                                 MaterialTheme.colorScheme.onSurface
-                            Row(
-                                modifier = Modifier
-                                    .initialPassClickable {
-                                        viewModel.selectSong(index)
-                                        if (isPresenting && liveSongIndex >= 0) {
-                                            viewModel.selectSection(-1)
-                                        }
-                                        tabFocusRequester.requestFocus()
-                                    },
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                colOrder.forEach { colId ->
+                            // All columns in visibleCols order — data cols use per-cell initialPassClickable,
+                            // action cols are inline so reordering them is reflected in both header and rows
+                            visibleCols.forEach { colId ->
+                                if (colId !in actionCols) {
                                     val cellText = when (colId) {
                                         "number"   -> song.number
                                         "title"    -> song.title
@@ -695,51 +787,60 @@ fun SongsTab(
                                         style = MaterialTheme.typography.bodySmall,
                                         modifier = Modifier
                                             .width(with(density) { colWidth(colId).toDp() })
+                                            .initialPassClickable {
+                                                viewModel.selectSong(index)
+                                                if (isPresenting && liveSongIndex >= 0) {
+                                                    viewModel.selectSection(-1)
+                                                }
+                                                tabFocusRequester.requestFocus()
+                                            }
                                             .padding(horizontal = 8.dp),
                                         maxLines = if (colId == "number") Int.MAX_VALUE else 1,
                                         overflow = TextOverflow.Ellipsis,
                                         color = textColor
                                     )
                                     Box(modifier = Modifier.width(6.dp))
-                                }
-                            }
-                            if (onAddToSchedule != null) {
-                                Box(modifier = Modifier.width(6.dp)) // spacer matching drag handle
-                                IconButton(
-                                    onClick = { onAddToSchedule(song.number.toIntOrNull() ?: 0, song.title, song.songbook, song.songId) },
-                                    modifier = Modifier.size(24.dp)
-                                ) {
-                                    Icon(
-                                        painter = painterResource(Res.drawable.ic_playlist_add),
-                                        contentDescription = null,
-                                        modifier = Modifier.size(16.dp),
-                                        tint = MaterialTheme.colorScheme.secondary
-                                    )
-                                }
-                            }
-                            Box(modifier = Modifier.width(6.dp))
-                            IconButton(
-                                onClick = {
-                                    viewModel.toggleFavorite(song.songId)
-                                    onSettingsChangeState.value { s ->
-                                        s.copy(songFavorites = viewModel.favorites.value.toList())
+                                } else {
+                                    Box(modifier = Modifier.width(6.dp))
+                                    when (colId) {
+                                        "add_to_schedule" -> IconButton(
+                                            onClick = { onAddToSchedule?.invoke(song.number.toIntOrNull() ?: 0, song.title, song.songbook, song.songId) },
+                                            modifier = Modifier.size(24.dp)
+                                        ) {
+                                            Icon(
+                                                painter = painterResource(Res.drawable.ic_playlist_add),
+                                                contentDescription = null,
+                                                modifier = Modifier.size(16.dp),
+                                                tint = MaterialTheme.colorScheme.secondary
+                                            )
+                                        }
+                                        "favorites" -> {
+                                            val isFav = song.songId in favorites
+                                            IconButton(
+                                                onClick = {
+                                                    viewModel.toggleFavorite(song.songId)
+                                                    onSettingsChangeState.value { s ->
+                                                        s.copy(songFavorites = viewModel.favorites.value.toList())
+                                                    }
+                                                },
+                                                modifier = Modifier.size(24.dp)
+                                            ) {
+                                                Icon(
+                                                    painter = painterResource(
+                                                        if (isFav) Res.drawable.ic_star_filled else Res.drawable.ic_star
+                                                    ),
+                                                    contentDescription = if (isFav)
+                                                        stringResource(Res.string.remove_from_favorites)
+                                                    else
+                                                        stringResource(Res.string.add_to_favorites),
+                                                    modifier = Modifier.size(16.dp),
+                                                    tint = if (isFav) Color(0xFFFFC107)
+                                                           else MaterialTheme.colorScheme.onSurfaceVariant
+                                                )
+                                            }
+                                        }
                                     }
-                                },
-                                modifier = Modifier.size(24.dp)
-                            ) {
-                                val isFav = song.songId in favorites
-                                Icon(
-                                    painter = painterResource(
-                                        if (isFav) Res.drawable.ic_star_filled else Res.drawable.ic_star
-                                    ),
-                                    contentDescription = if (isFav)
-                                        stringResource(Res.string.remove_from_favorites)
-                                    else
-                                        stringResource(Res.string.add_to_favorites),
-                                    modifier = Modifier.size(16.dp),
-                                    tint = if (isFav) Color(0xFFFFC107)
-                                           else MaterialTheme.colorScheme.onSurfaceVariant
-                                )
+                                }
                             }
                         }
                         DropdownMenu(
