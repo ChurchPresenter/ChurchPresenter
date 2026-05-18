@@ -48,6 +48,8 @@ data class SongSettings(
     val colWidthSongbook: Int = 100,
     val colWidthTune: Int = 60,
     val colWidthPlayCount: Int = 60,
+    val colWidthAuthor: Int = 120,
+    val colWidthComposer: Int = 120,
 
     // Left/right panel split — lyrics panel width in dp (0 = use default weight)
     val lyricsPanelWidthDp: Int = 0,
@@ -805,5 +807,5 @@ data class AppSettings(
     val songFavorites: List<String> = emptyList(),
     val songFavoritesPanelHeightDp: Int = 120,
     val songColOrder: List<String> = emptyList(),
-    val songHiddenCols: Set<String> = emptySet()
+    val songHiddenCols: Set<String> = setOf("tune", "play_count", "author", "composer")
 )

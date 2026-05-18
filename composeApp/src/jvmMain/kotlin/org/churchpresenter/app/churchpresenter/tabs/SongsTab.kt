@@ -133,6 +133,8 @@ import churchpresenter.composeapp.generated.resources.song_title_slide
 import churchpresenter.composeapp.generated.resources.starts_with
 import churchpresenter.composeapp.generated.resources.title
 import churchpresenter.composeapp.generated.resources.tune
+import churchpresenter.composeapp.generated.resources.author
+import churchpresenter.composeapp.generated.resources.composer
 import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
 import org.churchpresenter.app.churchpresenter.composables.initialPassClickable
 import org.churchpresenter.app.churchpresenter.composables.initialPassCombinedClickable
@@ -304,6 +306,12 @@ fun SongsTab(
     var colWPlayCount by remember(appSettings.songSettings.colWidthPlayCount) {
         mutableStateOf(with(density) { appSettings.songSettings.colWidthPlayCount.dp.toPx() })
     }
+    var colWAuthor by remember(appSettings.songSettings.colWidthAuthor) {
+        mutableStateOf(with(density) { appSettings.songSettings.colWidthAuthor.dp.toPx() })
+    }
+    var colWComposer by remember(appSettings.songSettings.colWidthComposer) {
+        mutableStateOf(with(density) { appSettings.songSettings.colWidthComposer.dp.toPx() })
+    }
 
     // Favorites panel height in px
     var favPanelHeightPx by remember(appSettings.songFavoritesPanelHeightDp) {
@@ -318,6 +326,8 @@ fun SongsTab(
         if (songbooks.size > 1) add("songbook")
         add("tune")
         add("play_count")
+        add("author")
+        add("composer")
         if (onAddToSchedule != null) add("add_to_schedule")
         add("favorites")
     }
@@ -363,6 +373,8 @@ fun SongsTab(
                     colWidthSongbook    = with(density) { colWSongbook.toDp().value.toInt() },
                     colWidthTune        = with(density) { colWTune.toDp().value.toInt() },
                     colWidthPlayCount   = with(density) { colWPlayCount.toDp().value.toInt() },
+                    colWidthAuthor      = with(density) { colWAuthor.toDp().value.toInt() },
+                    colWidthComposer    = with(density) { colWComposer.toDp().value.toInt() },
                     lyricsPanelWidthDp  = with(density) { lyricsPanelPx.toDp().value.toInt() }
                 ),
                 songColOrder = colOrder,
@@ -377,6 +389,8 @@ fun SongsTab(
         "songbook"   -> colWSongbook
         "tune"       -> colWTune
         "play_count" -> colWPlayCount
+        "author"     -> colWAuthor
+        "composer"   -> colWComposer
         else         -> with(density) { 30.dp.toPx() } // action columns: 6dp spacer + 24dp icon button
     }
 
@@ -387,6 +401,8 @@ fun SongsTab(
             "songbook"   -> colWSongbook  = px.coerceIn(with(density) { 40.dp.toPx() },  with(density) { 300.dp.toPx() })
             "tune"       -> colWTune      = px.coerceIn(with(density) { 40.dp.toPx() },  with(density) { 300.dp.toPx() })
             "play_count" -> colWPlayCount = px.coerceIn(with(density) { 30.dp.toPx() },  with(density) { 150.dp.toPx() })
+            "author"     -> colWAuthor    = px.coerceIn(with(density) { 40.dp.toPx() },  with(density) { 400.dp.toPx() })
+            "composer"   -> colWComposer  = px.coerceIn(with(density) { 40.dp.toPx() },  with(density) { 400.dp.toPx() })
         }
     }
 
@@ -397,6 +413,8 @@ fun SongsTab(
         "tune"       -> Constants.SORT_TUNE
         "play_count" -> Constants.SORT_PLAY_COUNT
         "favorites"  -> Constants.SORT_FAVORITES
+        "author"     -> Constants.SORT_AUTHOR
+        "composer"   -> Constants.SORT_COMPOSER
         else         -> ""
     }
 
@@ -500,7 +518,9 @@ fun SongsTab(
                 "title"      to stringResource(Res.string.title),
                 "songbook"   to stringResource(Res.string.song_book),
                 "tune"       to stringResource(Res.string.tune),
-                "play_count" to stringResource(Res.string.song_play_count)
+                "play_count" to stringResource(Res.string.song_play_count),
+                "author"     to stringResource(Res.string.author),
+                "composer"   to stringResource(Res.string.composer)
             )
             val allColLabels = colHeaderLabels + mapOf(
                 "favorites"       to stringResource(Res.string.song_favorites),
@@ -890,7 +910,9 @@ fun SongsTab(
                                             val count = statisticsManager?.getSongPlayCount(song.songbook, song.number.toIntOrNull() ?: 0) ?: 0
                                             if (count > 0) count.toString() else ""
                                         }
-                                        else         -> song.tune
+                                        "author"     -> song.author
+                                        "composer"   -> song.composer
+                                        else         -> ""
                                     }
                                     Text(
                                         cellText,

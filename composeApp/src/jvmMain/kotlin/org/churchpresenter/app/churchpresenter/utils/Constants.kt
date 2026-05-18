@@ -166,6 +166,8 @@ object Constants {
     const val SORT_TUNE = "tune"
     const val SORT_PLAY_COUNT = "play_count"
     const val SORT_FAVORITES = "favorites"
+    const val SORT_AUTHOR = "author"
+    const val SORT_COMPOSER = "composer"
 
     const val CURRENT_BOOK = "Current Book"
 

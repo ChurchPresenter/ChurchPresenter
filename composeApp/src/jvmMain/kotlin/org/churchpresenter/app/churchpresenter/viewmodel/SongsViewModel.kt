@@ -558,6 +558,16 @@ class SongsViewModel(
                         items.sortedByDescending { if (it.songId in favIds) 0 else 1 }
                 }
 
+                Constants.SORT_AUTHOR -> if (_sortAscending.value)
+                    items.sortedBy { it.author.lowercase() }
+                else
+                    items.sortedByDescending { it.author.lowercase() }
+
+                Constants.SORT_COMPOSER -> if (_sortAscending.value)
+                    items.sortedBy { it.composer.lowercase() }
+                else
+                    items.sortedByDescending { it.composer.lowercase() }
+
                 else -> items
             }
         }
