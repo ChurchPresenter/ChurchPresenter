@@ -1167,7 +1167,7 @@ fun SongsTab(
                                     Row(
                                         modifier = Modifier
                                             .fillMaxWidth()
-                                            .initialPassClickable {
+                                            .clickable {
                                                 viewModel.selectSongByDetails(
                                                     song.number.toIntOrNull() ?: 0,
                                                     song.title,
