@@ -76,6 +76,8 @@ import churchpresenter.composeapp.generated.resources.animation_type
 import churchpresenter.composeapp.generated.resources.auto_scroll_interval
 import churchpresenter.composeapp.generated.resources.go_live
 import churchpresenter.composeapp.generated.resources.ic_cast
+import churchpresenter.composeapp.generated.resources.ic_close
+import churchpresenter.composeapp.generated.resources.clear
 import churchpresenter.composeapp.generated.resources.ic_pause
 import churchpresenter.composeapp.generated.resources.ic_playlist_add
 import churchpresenter.composeapp.generated.resources.ic_play
@@ -139,6 +141,11 @@ private object RecentPictureFolders {
                 folders.addAll(list.take(MAX))
             }
         } catch (_: Exception) {}
+    }
+
+    fun clear() {
+        folders.clear()
+        save()
     }
 
     private fun save() {
@@ -251,6 +258,7 @@ fun PicturesTab(
 
         PicturesRecentsRow(
             items = RecentPictureFolders.folders,
+            onClear = { RecentPictureFolders.clear() },
             onSelect = { path ->
                 val folder = java.io.File(path)
                 if (folder.exists() && folder.isDirectory) {
@@ -775,7 +783,7 @@ fun PicturesTab(
 }
 
 @Composable
-private fun PicturesRecentsRow(items: List<String>, onSelect: (String) -> Unit) {
+private fun PicturesRecentsRow(items: List<String>, onClear: () -> Unit, onSelect: (String) -> Unit) {
     if (items.isEmpty()) return
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -787,6 +795,14 @@ private fun PicturesRecentsRow(items: List<String>, onSelect: (String) -> Unit) 
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
         )
+        IconButton(onClick = onClear, modifier = Modifier.size(20.dp)) {
+            Icon(
+                painter = painterResource(Res.drawable.ic_close),
+                contentDescription = stringResource(Res.string.clear),
+                modifier = Modifier.size(14.dp),
+                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+            )
+        }
         LazyRow(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
             lazyItems(items) { path ->
                 SuggestionChip(

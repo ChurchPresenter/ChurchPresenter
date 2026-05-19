@@ -59,6 +59,8 @@ import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.add_to_schedule
 import churchpresenter.composeapp.generated.resources.go_live
 import churchpresenter.composeapp.generated.resources.ic_cast
+import churchpresenter.composeapp.generated.resources.ic_close
+import churchpresenter.composeapp.generated.resources.clear
 import churchpresenter.composeapp.generated.resources.ic_fast_forward
 import churchpresenter.composeapp.generated.resources.ic_playlist_add
 import churchpresenter.composeapp.generated.resources.ic_fast_rewind
@@ -137,6 +139,11 @@ private object RecentMediaFiles {
                 paths.addAll(list.take(MAX))
             }
         } catch (_: Exception) {}
+    }
+
+    fun clear() {
+        paths.clear()
+        save()
     }
 
     private fun save() {
@@ -358,6 +365,7 @@ fun MediaTab(
 
         MediaRecentsRow(
             items = RecentMediaFiles.paths,
+            onClear = { RecentMediaFiles.clear() },
             onSelect = { path ->
                 val ext = java.io.File(path).extension.lowercase()
                 val type = when {
@@ -719,7 +727,7 @@ fun MediaTab(
 }
 
 @Composable
-private fun MediaRecentsRow(items: List<String>, onSelect: (String) -> Unit) {
+private fun MediaRecentsRow(items: List<String>, onClear: () -> Unit, onSelect: (String) -> Unit) {
     if (items.isEmpty()) return
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -731,6 +739,14 @@ private fun MediaRecentsRow(items: List<String>, onSelect: (String) -> Unit) {
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
         )
+        IconButton(onClick = onClear, modifier = Modifier.size(20.dp)) {
+            Icon(
+                painter = painterResource(Res.drawable.ic_close),
+                contentDescription = stringResource(Res.string.clear),
+                modifier = Modifier.size(14.dp),
+                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+            )
+        }
         LazyRow(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
             lazyItems(items) { path ->
                 SuggestionChip(
