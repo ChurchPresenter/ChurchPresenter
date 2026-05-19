@@ -634,42 +634,6 @@ fun SongsTab(
                     }
             ) {
             Row(modifier = Modifier.fillMaxWidth().fillMaxHeight()) {
-            // Column visibility button — fixed at start, does not scroll
-            Box {
-                TooltipIconButton(
-                    painter = rememberVectorPainter(Icons.Default.Tune),
-                    text = stringResource(Res.string.song_columns),
-                    onClick = { showColumnsMenu = true },
-                    buttonSize = 36.dp,
-                    iconTint = MaterialTheme.colorScheme.onSurface
-                )
-                DropdownMenu(
-                    expanded = showColumnsMenu,
-                    onDismissRequest = { showColumnsMenu = false }
-                ) {
-                    availableCols.forEach { colId ->
-                        val isVisible = colId !in hiddenCols
-                        val isProtected = colId == "title"
-                        DropdownMenuItem(
-                            text = { Text(allColLabels[colId] ?: colId) },
-                            leadingIcon = {
-                                Checkbox(
-                                    checked = isVisible,
-                                    onCheckedChange = null,
-                                    modifier = Modifier.size(20.dp)
-                                )
-                            },
-                            onClick = {
-                                if (!(isProtected && isVisible)) {
-                                    hiddenCols = if (isVisible) hiddenCols + colId else hiddenCols - colId
-                                    onSettingsChangeState.value { s -> s.copy(songHiddenCols = hiddenCols) }
-                                }
-                            },
-                            enabled = !(isProtected && isVisible)
-                        )
-                    }
-                }
-            }
             Box(
                 modifier = Modifier
                     .weight(1f)
@@ -801,6 +765,43 @@ fun SongsTab(
             } // end inner scrollable header Box
             } // end header Row
 
+            // Floating column filter button — right side
+            Box(modifier = Modifier.align(Alignment.CenterEnd).background(MaterialTheme.colorScheme.surfaceContainerLow)) {
+                TooltipIconButton(
+                    painter = rememberVectorPainter(Icons.Default.Tune),
+                    text = stringResource(Res.string.song_columns),
+                    onClick = { showColumnsMenu = true },
+                    buttonSize = 36.dp,
+                    iconTint = MaterialTheme.colorScheme.onSurface
+                )
+                DropdownMenu(
+                    expanded = showColumnsMenu,
+                    onDismissRequest = { showColumnsMenu = false }
+                ) {
+                    availableCols.forEach { colId ->
+                        val isVisible = colId !in hiddenCols
+                        val isProtected = colId == "title"
+                        DropdownMenuItem(
+                            text = { Text(allColLabels[colId] ?: colId) },
+                            leadingIcon = {
+                                Checkbox(
+                                    checked = isVisible,
+                                    onCheckedChange = null,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            },
+                            onClick = {
+                                if (!(isProtected && isVisible)) {
+                                    hiddenCols = if (isVisible) hiddenCols + colId else hiddenCols - colId
+                                    onSettingsChangeState.value { s -> s.copy(songHiddenCols = hiddenCols) }
+                                }
+                            },
+                            enabled = !(isProtected && isVisible)
+                        )
+                    }
+                }
+            }
+
             // Right-click dropdown — toggle column visibility
             DropdownMenu(
                 expanded = showColMenu,
@@ -857,7 +858,6 @@ fun SongsTab(
                 }
 
                 Row(modifier = Modifier.fillMaxSize()) {
-                Spacer(modifier = Modifier.width(36.dp))
                 Box(
                     modifier = Modifier
                         .weight(1f)
@@ -1078,7 +1078,6 @@ fun SongsTab(
                 }
             }
             Row(modifier = Modifier.fillMaxWidth()) {
-                Spacer(modifier = Modifier.width(36.dp))
                 HorizontalScrollbar(
                     modifier = Modifier.weight(1f).padding(end = 8.dp),
                     adapter = rememberScrollbarAdapter(hScrollState)
