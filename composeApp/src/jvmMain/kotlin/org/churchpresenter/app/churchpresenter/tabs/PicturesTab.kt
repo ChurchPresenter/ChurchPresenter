@@ -77,6 +77,8 @@ import churchpresenter.composeapp.generated.resources.auto_scroll_interval
 import churchpresenter.composeapp.generated.resources.go_live
 import churchpresenter.composeapp.generated.resources.ic_cast
 import churchpresenter.composeapp.generated.resources.ic_close
+import churchpresenter.composeapp.generated.resources.ic_star
+import churchpresenter.composeapp.generated.resources.ic_star_filled
 import churchpresenter.composeapp.generated.resources.clear
 import churchpresenter.composeapp.generated.resources.ic_pause
 import churchpresenter.composeapp.generated.resources.ic_playlist_add
@@ -121,7 +123,9 @@ import kotlinx.coroutines.launch
 private object RecentPictureFolders {
     private const val MAX = 10
     private val file = java.io.File(System.getProperty("user.home"), ".churchpresenter/recent_picture_folders.json")
+    private val pinnedFile = java.io.File(System.getProperty("user.home"), ".churchpresenter/pinned_picture_folders.json")
     val folders = androidx.compose.runtime.mutableStateListOf<String>()
+    val pinned = androidx.compose.runtime.mutableStateListOf<String>()
 
     init { load() }
 
@@ -129,6 +133,23 @@ private object RecentPictureFolders {
         folders.remove(path)
         folders.add(0, path)
         while (folders.size > MAX) folders.removeLast()
+        save()
+    }
+
+    fun togglePin(path: String) {
+        if (path in pinned) {
+            pinned.remove(path)
+        } else {
+            pinned.remove(path)
+            pinned.add(0, path)
+        }
+        savePinned()
+    }
+
+    fun clear() {
+        val keep = folders.filter { it in pinned }
+        folders.clear()
+        folders.addAll(keep)
         save()
     }
 
@@ -141,11 +162,14 @@ private object RecentPictureFolders {
                 folders.addAll(list.take(MAX))
             }
         } catch (_: Exception) {}
-    }
-
-    fun clear() {
-        folders.clear()
-        save()
+        try {
+            if (pinnedFile.exists()) {
+                val json = kotlinx.serialization.json.Json { ignoreUnknownKeys = true }
+                val list = json.decodeFromString<List<String>>(pinnedFile.readText())
+                pinned.clear()
+                pinned.addAll(list)
+            }
+        } catch (_: Exception) {}
     }
 
     private fun save() {
@@ -153,6 +177,14 @@ private object RecentPictureFolders {
             file.parentFile?.mkdirs()
             val json = kotlinx.serialization.json.Json { encodeDefaults = true }
             file.writeText(json.encodeToString(folders.toList()))
+        } catch (_: Exception) {}
+    }
+
+    private fun savePinned() {
+        try {
+            pinnedFile.parentFile?.mkdirs()
+            val json = kotlinx.serialization.json.Json { encodeDefaults = true }
+            pinnedFile.writeText(json.encodeToString(pinned.toList()))
         } catch (_: Exception) {}
     }
 }
@@ -258,7 +290,9 @@ fun PicturesTab(
 
         PicturesRecentsRow(
             items = RecentPictureFolders.folders,
+            pinned = RecentPictureFolders.pinned,
             onClear = { RecentPictureFolders.clear() },
+            onTogglePin = { RecentPictureFolders.togglePin(it) },
             onSelect = { path ->
                 val folder = java.io.File(path)
                 if (folder.exists() && folder.isDirectory) {
@@ -783,8 +817,15 @@ fun PicturesTab(
 }
 
 @Composable
-private fun PicturesRecentsRow(items: List<String>, onClear: () -> Unit, onSelect: (String) -> Unit) {
-    if (items.isEmpty()) return
+private fun PicturesRecentsRow(
+    items: List<String>,
+    pinned: List<String>,
+    onClear: () -> Unit,
+    onTogglePin: (String) -> Unit,
+    onSelect: (String) -> Unit
+) {
+    val ordered = remember(items, pinned) { pinned + items.filter { it !in pinned } }
+    if (ordered.isEmpty()) return
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
@@ -795,27 +836,44 @@ private fun PicturesRecentsRow(items: List<String>, onClear: () -> Unit, onSelec
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
         )
-        IconButton(onClick = onClear, modifier = Modifier.size(20.dp)) {
-            Icon(
-                painter = painterResource(Res.drawable.ic_close),
-                contentDescription = stringResource(Res.string.clear),
-                modifier = Modifier.size(14.dp),
-                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-            )
+        TooltipArea(
+            tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text("Clear recents", color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
+            tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
+        ) {
+            IconButton(onClick = onClear, modifier = Modifier.size(20.dp)) {
+                Icon(
+                    painter = painterResource(Res.drawable.ic_close),
+                    contentDescription = stringResource(Res.string.clear),
+                    modifier = Modifier.size(14.dp),
+                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                )
+            }
         }
         LazyRow(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-            lazyItems(items) { path ->
-                SuggestionChip(
-                    onClick = { onSelect(path) },
-                    label = {
-                        Text(
-                            text = java.io.File(path).name,
-                            style = MaterialTheme.typography.labelSmall,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
+            lazyItems(ordered) { path ->
+                val isPinned = path in pinned
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    SuggestionChip(
+                        onClick = { onSelect(path) },
+                        label = {
+                            Text(
+                                text = java.io.File(path).name,
+                                style = MaterialTheme.typography.labelSmall,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
+                    )
+                    IconButton(onClick = { onTogglePin(path) }, modifier = Modifier.size(20.dp)) {
+                        Icon(
+                            painter = painterResource(if (isPinned) Res.drawable.ic_star_filled else Res.drawable.ic_star),
+                            contentDescription = null,
+                            modifier = Modifier.size(12.dp),
+                            tint = if (isPinned) MaterialTheme.colorScheme.primary
+                                   else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
                         )
                     }
-                )
+                }
             }
         }
     }
