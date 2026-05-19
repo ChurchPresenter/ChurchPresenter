@@ -96,6 +96,24 @@ class MediaViewModel {
         _isPlaying.value = false
     }
 
+    fun stop() {
+        _isPlaying.value = false
+        _currentPosition.value = 0L
+        _seekVersion.intValue++
+    }
+
+    fun unload() {
+        _isPlaying.value = false
+        _mediaUrl.value = ""
+        _mediaTitle.value = ""
+        _mediaType.value = Constants.MEDIA_TYPE_LOCAL
+        _isLoaded.value = false
+        _currentPosition.value = 0L
+        _duration.value = 0L
+        _isAudioFile.value = false
+        _seekVersion.intValue++
+    }
+
     fun seekForward(ms: Long = 10_000L) {
         if (_duration.value > 0) {
             _currentPosition.value = (_currentPosition.value + ms).coerceAtMost(_duration.value)

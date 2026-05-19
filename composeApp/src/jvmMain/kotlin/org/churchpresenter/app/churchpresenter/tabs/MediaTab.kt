@@ -68,6 +68,7 @@ import churchpresenter.composeapp.generated.resources.ic_playlist_add
 import churchpresenter.composeapp.generated.resources.ic_fast_rewind
 import churchpresenter.composeapp.generated.resources.ic_pause
 import churchpresenter.composeapp.generated.resources.ic_play
+import churchpresenter.composeapp.generated.resources.ic_stop
 import churchpresenter.composeapp.generated.resources.ic_volume_off
 import churchpresenter.composeapp.generated.resources.ic_volume_up
 import churchpresenter.composeapp.generated.resources.media_mute
@@ -489,6 +490,24 @@ fun MediaTab(
                             ),
                             modifier = Modifier.size(28.dp),
                             tint = if (viewModel.isLoaded) Color.White
+                                   else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                        )
+                    }
+                }
+
+                TooltipArea(
+                    tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text("Stop", color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
+                    tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
+                ) {
+                    IconButton(
+                        onClick = { viewModel.stop() },
+                        enabled = viewModel.isLoaded
+                    ) {
+                        Icon(
+                            painter = painterResource(Res.drawable.ic_stop),
+                            contentDescription = "Stop",
+                            modifier = Modifier.size(28.dp),
+                            tint = if (viewModel.isLoaded) MaterialTheme.colorScheme.onSurface
                                    else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
                         )
                     }
