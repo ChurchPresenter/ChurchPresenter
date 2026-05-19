@@ -658,6 +658,7 @@ private fun PresentationChip(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun PresentationRecentsRow(
     items: List<String>,

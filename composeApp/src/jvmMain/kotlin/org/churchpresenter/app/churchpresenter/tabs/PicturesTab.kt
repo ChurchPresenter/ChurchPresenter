@@ -816,6 +816,7 @@ fun PicturesTab(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun PicturesRecentsRow(
     items: List<String>,

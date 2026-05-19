@@ -760,6 +760,7 @@ fun MediaTab(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun MediaRecentsRow(
     items: List<String>,
