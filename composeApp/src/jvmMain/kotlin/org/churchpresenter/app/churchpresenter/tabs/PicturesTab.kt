@@ -825,7 +825,7 @@ private fun PicturesRecentsRow(
     onTogglePin: (String) -> Unit,
     onSelect: (String) -> Unit
 ) {
-    val ordered = remember(items, pinned) { pinned + items.filter { it !in pinned } }
+    val ordered = pinned + items.filter { it !in pinned }
     if (ordered.isEmpty()) return
     Row(
         modifier = Modifier.fillMaxWidth(),
