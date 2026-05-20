@@ -1741,6 +1741,7 @@ private fun PresenterWindows(
                 )
             ) { presenterManager.setLottieProgress(value) }
         }
+        presenterManager.requestClearDisplay()
     }
 
     // Identify the OS primary monitor and build list of non-primary screens
