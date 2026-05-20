@@ -31,6 +31,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -40,7 +41,11 @@ import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Text
+import androidx.compose.material3.TooltipBox
+import androidx.compose.material3.TooltipDefaults
+import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -173,49 +178,70 @@ fun STTTab(
                 )
 
                 if (connected) {
-                    IconButton(
-                        onClick = { sttManager.disconnect() },
-                        colors = IconButtonDefaults.iconButtonColors(
-                            containerColor = Color(0xFFE53935),
-                            contentColor = Color.White
-                        )
+                    @OptIn(ExperimentalMaterial3Api::class)
+                    TooltipBox(
+                        positionProvider = TooltipDefaults.rememberTooltipPositionProvider(),
+                        tooltip = { PlainTooltip { Text(stringResource(Res.string.stt_disconnect)) } },
+                        state = rememberTooltipState()
                     ) {
-                        Icon(Icons.Default.Stop, contentDescription = stringResource(Res.string.stt_disconnect), modifier = Modifier.size(20.dp))
+                        IconButton(
+                            onClick = { sttManager.disconnect() },
+                            colors = IconButtonDefaults.iconButtonColors(
+                                containerColor = Color(0xFFE53935),
+                                contentColor = Color.White
+                            )
+                        ) {
+                            Icon(Icons.Default.Stop, contentDescription = stringResource(Res.string.stt_disconnect), modifier = Modifier.size(20.dp))
+                        }
                     }
                 } else {
-                    IconButton(
-                        onClick = {
-                            val url = if (urlInput.isNotBlank() && !urlInput.startsWith("http://") && !urlInput.startsWith("https://")) "http://$urlInput" else urlInput
-                            urlInput = url
-                            onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(serverUrl = url)) }
-                            sttManager.connect(url)
-                        },
-                        enabled = !connecting && urlInput.isNotBlank(),
-                        colors = IconButtonDefaults.iconButtonColors(
-                            containerColor = Color(0xFF43A047),
-                            contentColor = Color.White,
-                            disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                            disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                        )
+                    @OptIn(ExperimentalMaterial3Api::class)
+                    TooltipBox(
+                        positionProvider = TooltipDefaults.rememberTooltipPositionProvider(),
+                        tooltip = { PlainTooltip { Text(stringResource(Res.string.stt_connect)) } },
+                        state = rememberTooltipState()
                     ) {
-                        Icon(Icons.Default.PlayArrow, contentDescription = stringResource(Res.string.stt_connect), modifier = Modifier.size(20.dp))
+                        IconButton(
+                            onClick = {
+                                val url = if (urlInput.isNotBlank() && !urlInput.startsWith("http://") && !urlInput.startsWith("https://")) "http://$urlInput" else urlInput
+                                urlInput = url
+                                onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(serverUrl = url)) }
+                                sttManager.connect(url)
+                            },
+                            enabled = !connecting && urlInput.isNotBlank(),
+                            colors = IconButtonDefaults.iconButtonColors(
+                                containerColor = Color(0xFF43A047),
+                                contentColor = Color.White,
+                                disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                            )
+                        ) {
+                            Icon(Icons.Default.PlayArrow, contentDescription = stringResource(Res.string.stt_connect), modifier = Modifier.size(20.dp))
+                        }
                     }
                 }
 
                 // Go Live
-                IconButton(
-                    onClick = {
-                        presenting(Presenting.STT)
-                    },
-                    enabled = connected && !isLive,
-                    colors = IconButtonDefaults.iconButtonColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary,
-                        disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                        disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                    )
+                @OptIn(ExperimentalMaterial3Api::class)
+                TooltipBox(
+                    positionProvider = TooltipDefaults.rememberTooltipPositionProvider(),
+                    tooltip = { PlainTooltip { Text(stringResource(Res.string.stt_go_live)) } },
+                    state = rememberTooltipState()
                 ) {
-                    Icon(Icons.Default.Tv, contentDescription = stringResource(Res.string.stt_go_live), modifier = Modifier.size(20.dp))
+                    IconButton(
+                        onClick = {
+                            presenting(Presenting.STT)
+                        },
+                        enabled = connected && !isLive,
+                        colors = IconButtonDefaults.iconButtonColors(
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = MaterialTheme.colorScheme.onPrimary,
+                            disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                            disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                        )
+                    ) {
+                        Icon(Icons.Default.Tv, contentDescription = stringResource(Res.string.stt_go_live), modifier = Modifier.size(20.dp))
+                    }
                 }
             }
 
