@@ -1208,7 +1208,7 @@
     <string name="qa_transparent">Transparent</string>
     <string name="qa_position">Position</string>
     <string name="qa_settings_section">Settings</string>
-    <string name="qa_cooldown_label">Cooldown between questions (seconds)</string>
+    <string name="qa_cooldown_label">Cooldown between questions (sec)</string>
     <string name="qa_qr_message_label">QR Code Message</string>
     <string name="qa_qr_message_reset">Reset to default</string>
     <string name="qa_admin_password">Admin Password</string>

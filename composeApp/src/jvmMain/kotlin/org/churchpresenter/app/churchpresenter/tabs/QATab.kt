@@ -3,6 +3,12 @@ package org.churchpresenter.app.churchpresenter.tabs
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
+import androidx.compose.ui.graphics.ColorFilter
+import org.jetbrains.compose.resources.painterResource
+import churchpresenter.composeapp.generated.resources.arrow_up
+import churchpresenter.composeapp.generated.resources.arrow_down
+import churchpresenter.composeapp.generated.resources.increment
+import churchpresenter.composeapp.generated.resources.decrement
 import androidx.compose.foundation.TooltipArea
 import androidx.compose.foundation.TooltipPlacement
 import androidx.compose.foundation.background
@@ -1025,8 +1031,9 @@ fun QATab(
             OutlinedTextField(
                 value = cooldownText,
                 onValueChange = { raw ->
-                    cooldownText = raw
-                    val v = raw.toIntOrNull()
+                    val filtered = raw.filter { it.isDigit() }
+                    cooldownText = filtered
+                    val v = filtered.toIntOrNull()
                     if (v != null && v in 0..600) {
                         onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(rateLimitCooldownSeconds = v)) }
                     }
@@ -1036,6 +1043,32 @@ fun QATab(
                 singleLine = true,
                 label = { Text(stringResource(Res.string.qa_cooldown_label), style = MaterialTheme.typography.bodySmall) },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                trailingIcon = {
+                    Column(
+                        modifier = Modifier.padding(end = 4.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        IconButton(
+                            onClick = {
+                                val v = (cooldownText.toIntOrNull() ?: 0) + 1
+                                if (v in 0..600) { cooldownText = v.toString(); onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(rateLimitCooldownSeconds = v)) } }
+                            },
+                            modifier = Modifier.size(20.dp, 16.dp)
+                        ) {
+                            Image(painter = painterResource(Res.drawable.arrow_up), contentDescription = stringResource(Res.string.increment), colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface), modifier = Modifier.size(12.dp))
+                        }
+                        IconButton(
+                            onClick = {
+                                val v = (cooldownText.toIntOrNull() ?: 0) - 1
+                                if (v in 0..600) { cooldownText = v.toString(); onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(rateLimitCooldownSeconds = v)) } }
+                            },
+                            modifier = Modifier.size(20.dp, 16.dp)
+                        ) {
+                            Image(painter = painterResource(Res.drawable.arrow_down), contentDescription = stringResource(Res.string.decrement), colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface), modifier = Modifier.size(12.dp))
+                        }
+                    }
+                },
                 colors = OutlinedTextFieldDefaults.colors().copy(
                     unfocusedContainerColor = MaterialTheme.colorScheme.surface,
                     focusedContainerColor = MaterialTheme.colorScheme.surface,
