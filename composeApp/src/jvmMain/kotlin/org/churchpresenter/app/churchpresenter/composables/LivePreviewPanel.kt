@@ -360,7 +360,7 @@ private fun SingleDisplayPreview(
             onClick = {
                 if (lockedMode != null) {
                     presenterManager.setScreenLock(screenIndex, null)
-                } else if (effectiveMode != Presenting.NONE) {
+                } else {
                     presenterManager.setScreenLock(screenIndex, effectiveMode)
                 }
             },
