@@ -1125,6 +1125,8 @@
     <string name="qa_position">Положение</string>
     <string name="qa_settings_section">Настройки</string>
     <string name="qa_cooldown_label">Пауза между вопросами (секунды)</string>
+    <string name="qa_qr_message_label">QR Code Message</string>
+    <string name="qa_qr_message_reset">Reset to default</string>
     <string name="qa_admin_password">Пароль администратора</string>
     <string name="qa_no_password">Без пароля</string>
     <string name="qa_approve">Одобрить</string>

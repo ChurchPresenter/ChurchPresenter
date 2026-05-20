@@ -622,6 +622,7 @@ data class QASettings(
     val adminPassword: String = generateDefaultPassword(),
     val rateLimitCooldownSeconds: Int = 30,
     val votingEnabled: Boolean = false,
+    val qrCodeMessage: String = "Scan to ask a question",
 )
 
 private fun generateDefaultPassword(): String {

@@ -1123,6 +1123,8 @@
     <string name="qa_position">Орын</string>
     <string name="qa_settings_section">Параметрлер</string>
     <string name="qa_cooldown_label">Сұрақтар арасындағы үзіліс (секунд)</string>
+    <string name="qa_qr_message_label">QR Code Message</string>
+    <string name="qa_qr_message_reset">Reset to default</string>
     <string name="qa_admin_password">Әкімші құпия сөзі</string>
     <string name="qa_no_password">Құпия сөзсіз</string>
     <string name="qa_approve">Мақұлдау</string>

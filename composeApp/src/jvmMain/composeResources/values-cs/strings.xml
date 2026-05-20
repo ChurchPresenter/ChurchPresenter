@@ -1201,6 +1201,8 @@
     <string name="qa_position">Poloha</string>
     <string name="qa_settings_section">Nastavení</string>
     <string name="qa_cooldown_label">Prodleva mezi otázkami (sekundy)</string>
+    <string name="qa_qr_message_label">QR Code Message</string>
+    <string name="qa_qr_message_reset">Reset to default</string>
     <string name="qa_admin_password">Heslo administrátora</string>
     <string name="qa_no_password">Bez hesla</string>
     <string name="qa_approve">Schválit</string>

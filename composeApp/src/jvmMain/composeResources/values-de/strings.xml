@@ -1123,6 +1123,8 @@
     <string name="qa_position">Position</string>
     <string name="qa_settings_section">Einstellungen</string>
     <string name="qa_cooldown_label">Wartezeit zwischen Fragen (Sekunden)</string>
+    <string name="qa_qr_message_label">QR Code Message</string>
+    <string name="qa_qr_message_reset">Reset to default</string>
     <string name="qa_admin_password">Admin-Passwort</string>
     <string name="qa_no_password">Kein Passwort</string>
     <string name="qa_approve">Genehmigen</string>

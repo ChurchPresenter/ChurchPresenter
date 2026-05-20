@@ -49,6 +49,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -78,6 +79,8 @@ import churchpresenter.composeapp.generated.resources.go_live
 import churchpresenter.composeapp.generated.resources.qa_admin_panel
 import churchpresenter.composeapp.generated.resources.qa_add_question_hint
 import churchpresenter.composeapp.generated.resources.qa_admin_password
+import churchpresenter.composeapp.generated.resources.qa_qr_message_label
+import churchpresenter.composeapp.generated.resources.qa_qr_message_reset
 import churchpresenter.composeapp.generated.resources.qa_approve
 import churchpresenter.composeapp.generated.resources.qa_back_to_incoming
 import churchpresenter.composeapp.generated.resources.qa_background_color
@@ -875,6 +878,28 @@ fun QATab(
             Text(stringResource(Res.string.qa_display_styling), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
             Spacer(Modifier.height(8.dp))
 
+            OutlinedTextField(
+                value = qaSettings.qrCodeMessage,
+                onValueChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(qrCodeMessage = it)) } },
+                modifier = Modifier.fillMaxWidth(),
+                textStyle = MaterialTheme.typography.bodyMedium,
+                singleLine = true,
+                label = { Text(stringResource(Res.string.qa_qr_message_label), style = MaterialTheme.typography.bodySmall) },
+                trailingIcon = {
+                    IconButton(
+                        onClick = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(qrCodeMessage = "Scan to ask a question")) } },
+                        modifier = Modifier.size(28.dp),
+                    ) {
+                        Icon(Icons.Default.Refresh, contentDescription = stringResource(Res.string.qa_qr_message_reset), modifier = Modifier.size(16.dp))
+                    }
+                },
+                colors = OutlinedTextFieldDefaults.colors().copy(
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                    focusedContainerColor = MaterialTheme.colorScheme.surface,
+                ),
+            )
+            Spacer(Modifier.height(8.dp))
+
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 ColorPickerField(color = qaSettings.textColor, onColorChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(textColor = it)) } })
                 TextStyleButtons(
@@ -972,15 +997,19 @@ fun QATab(
 
             Spacer(Modifier.height(12.dp))
 
-            Text(stringResource(Res.string.qa_admin_password), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)
             var passwordVisible by remember { mutableStateOf(false) }
             OutlinedTextField(
                 value = qaSettings.adminPassword,
                 onValueChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(adminPassword = it)) } },
                 modifier = Modifier.fillMaxWidth(),
-                textStyle = MaterialTheme.typography.bodySmall,
+                textStyle = MaterialTheme.typography.bodyMedium,
                 singleLine = true,
+                label = { Text(stringResource(Res.string.qa_admin_password), style = MaterialTheme.typography.bodySmall) },
                 placeholder = { Text(stringResource(Res.string.qa_no_password), style = MaterialTheme.typography.bodySmall) },
+                colors = OutlinedTextFieldDefaults.colors().copy(
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                    focusedContainerColor = MaterialTheme.colorScheme.surface,
+                ),
                 visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                 trailingIcon = {
                     IconButton(onClick = { passwordVisible = !passwordVisible }) {

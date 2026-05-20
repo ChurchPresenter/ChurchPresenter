@@ -167,7 +167,7 @@ fun QAQRCodePresenter(
                 }
             }
             Text(
-                text = "Scan to ask a question",
+                text = qaSettings.qrCodeMessage,
                 color = textColor,
                 fontSize = 32.sp,
                 fontWeight = FontWeight.Medium,
