@@ -66,6 +66,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
@@ -1019,11 +1021,25 @@ fun QATab(
             Text(stringResource(Res.string.qa_settings_section), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
             Spacer(Modifier.height(8.dp))
 
-            Text(stringResource(Res.string.qa_cooldown_label), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)
-            NumberSettingsTextField(
-                initialText = qaSettings.rateLimitCooldownSeconds,
-                range = 0..600,
-                onValueChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(rateLimitCooldownSeconds = it)) } }
+            var cooldownText by remember(qaSettings.rateLimitCooldownSeconds) { mutableStateOf(qaSettings.rateLimitCooldownSeconds.toString()) }
+            OutlinedTextField(
+                value = cooldownText,
+                onValueChange = { raw ->
+                    cooldownText = raw
+                    val v = raw.toIntOrNull()
+                    if (v != null && v in 0..600) {
+                        onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(rateLimitCooldownSeconds = v)) }
+                    }
+                },
+                modifier = Modifier.fillMaxWidth(),
+                textStyle = MaterialTheme.typography.bodyMedium,
+                singleLine = true,
+                label = { Text(stringResource(Res.string.qa_cooldown_label), style = MaterialTheme.typography.bodySmall) },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                colors = OutlinedTextFieldDefaults.colors().copy(
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                    focusedContainerColor = MaterialTheme.colorScheme.surface,
+                ),
             )
 
             Spacer(Modifier.height(12.dp))
