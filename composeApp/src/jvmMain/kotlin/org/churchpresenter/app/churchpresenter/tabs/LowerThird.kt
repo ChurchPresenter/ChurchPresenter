@@ -145,7 +145,7 @@ fun LowerThirdTab(
     }
 
     // Reset when file changes
-    LaunchedEffect(composition) {
+    LaunchedEffect(selectedFile) {
         animJob?.cancel()
         animJob = null
         animatedProgress.snapTo(0f)
