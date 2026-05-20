@@ -19,6 +19,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.toComposeImageBitmap
@@ -134,7 +135,11 @@ fun QAQRCodePresenter(
     val bgColor = if (isKey) Color.Transparent
                   else parseHexColor(if (qaSettings.backgroundColor == "transparent") "#1E1E2E" else qaSettings.backgroundColor).copy(alpha = qrBgOpacity)
 
-    val qrBitmap = remember(url) { generateQRCodeBitmap(url, 512) }
+    val qrFgArgb = remember(qaSettings.qrForegroundColor) { parseHexColor(qaSettings.qrForegroundColor).toArgb() }
+    val qrBgArgb = remember(qaSettings.qrBackgroundColor, qaSettings.qrBackgroundOpacity) {
+        parseHexColor(qaSettings.qrBackgroundColor).copy(alpha = qaSettings.qrBackgroundOpacity / 100f).toArgb()
+    }
+    val qrBitmap = remember(url, qrFgArgb, qrBgArgb) { generateQRCodeBitmap(url, 512, qrFgArgb, qrBgArgb) }
 
     Box(
         modifier = modifier
@@ -190,17 +195,22 @@ private fun positionToAlignment(position: String): Alignment = when (position) {
     else -> Alignment.Center
 }
 
-fun generateQRCodeBitmap(content: String, size: Int): ImageBitmap? {
+fun generateQRCodeBitmap(
+    content: String,
+    size: Int,
+    foregroundArgb: Int = 0xFF000000.toInt(),
+    backgroundArgb: Int = 0xFFFFFFFF.toInt(),
+): ImageBitmap? {
     return try {
         val hints = mapOf(
             EncodeHintType.ERROR_CORRECTION to ErrorCorrectionLevel.M,
             EncodeHintType.MARGIN to 1
         )
         val bitMatrix = QRCodeWriter().encode(content, BarcodeFormat.QR_CODE, size, size, hints)
-        val image = BufferedImage(size, size, BufferedImage.TYPE_INT_RGB)
+        val image = BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB)
         for (x in 0 until size) {
             for (y in 0 until size) {
-                image.setRGB(x, y, if (bitMatrix.get(x, y)) 0xFF000000.toInt() else 0xFFFFFFFF.toInt())
+                image.setRGB(x, y, if (bitMatrix.get(x, y)) foregroundArgb else backgroundArgb)
             }
         }
         image.toComposeImageBitmap()

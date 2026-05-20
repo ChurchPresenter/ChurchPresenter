@@ -1116,6 +1116,9 @@
     <string name="qa_admin_panel">Әкімші панелі</string>
     <string name="qa_server_hint">Q&amp;A қосу үшін companion серверін іске қосыңыз</string>
     <string name="qa_display_styling">Дисплей стилі</string>
+    <string name="qa_text_color">Text Color</string>
+    <string name="qa_qr_fg_color">QR Foreground</string>
+    <string name="qa_qr_bg_color">QR Background</string>
     <string name="qa_font">Қаріп</string>
     <string name="qa_size">Өлшем</string>
     <string name="qa_background_color">Фон түсі</string>

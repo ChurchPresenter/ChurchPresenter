@@ -1199,6 +1199,9 @@
     <string name="qa_admin_panel">Admin Panel</string>
     <string name="qa_server_hint">Start the companion server to enable Q&amp;A</string>
     <string name="qa_display_styling">Display Styling</string>
+    <string name="qa_text_color">Text Color</string>
+    <string name="qa_qr_fg_color">QR Foreground</string>
+    <string name="qa_qr_bg_color">QR Background</string>
     <string name="qa_font">Font</string>
     <string name="qa_size">Size</string>
     <string name="qa_background_color">Background Color</string>

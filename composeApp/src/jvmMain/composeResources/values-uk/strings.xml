@@ -1121,6 +1121,9 @@
     <string name="qa_admin_panel">Панель адміністратора</string>
     <string name="qa_server_hint">Запустіть companion-сервер для включення Q&amp;A</string>
     <string name="qa_display_styling">Оформлення відображення</string>
+    <string name="qa_text_color">Text Color</string>
+    <string name="qa_qr_fg_color">QR Foreground</string>
+    <string name="qa_qr_bg_color">QR Background</string>
     <string name="qa_font">Шрифт</string>
     <string name="qa_size">Розмір</string>
     <string name="qa_background_color">Колір фону</string>

@@ -84,6 +84,9 @@ import churchpresenter.composeapp.generated.resources.qa_qr_message_reset
 import churchpresenter.composeapp.generated.resources.qa_approve
 import churchpresenter.composeapp.generated.resources.qa_back_to_incoming
 import churchpresenter.composeapp.generated.resources.qa_background_color
+import churchpresenter.composeapp.generated.resources.qa_text_color
+import churchpresenter.composeapp.generated.resources.qa_qr_fg_color
+import churchpresenter.composeapp.generated.resources.qa_qr_bg_color
 import churchpresenter.composeapp.generated.resources.qa_clear_all_questions
 import churchpresenter.composeapp.generated.resources.qa_confirm_go_live
 import churchpresenter.composeapp.generated.resources.qa_confirm_go_live_prompt
@@ -902,9 +905,34 @@ fun QATab(
                 ),
             )
             Spacer(Modifier.height(8.dp))
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(stringResource(Res.string.qa_qr_fg_color), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)
+                    ColorPickerField(color = qaSettings.qrForegroundColor, onColorChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(qrForegroundColor = it)) } }, modifier = Modifier.fillMaxWidth())
+                }
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(stringResource(Res.string.qa_qr_bg_color), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)
+                    ColorPickerField(color = qaSettings.qrBackgroundColor, onColorChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(qrBackgroundColor = it)) } }, modifier = Modifier.fillMaxWidth())
+                }
+            }
+            Spacer(Modifier.height(4.dp))
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+                Text(stringResource(Res.string.qa_opacity), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)
+                Spacer(Modifier.width(4.dp))
+                androidx.compose.material3.Slider(
+                    value = qaSettings.qrBackgroundOpacity / 100f,
+                    onValueChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(qrBackgroundOpacity = (it * 100).toInt())) } },
+                    modifier = Modifier.weight(1f)
+                )
+                Text("${qaSettings.qrBackgroundOpacity}%", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(36.dp))
+            }
 
+            Spacer(Modifier.height(8.dp))
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                ColorPickerField(color = qaSettings.textColor, onColorChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(textColor = it)) } })
+                Column {
+                    Text(stringResource(Res.string.qa_text_color), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)
+                    ColorPickerField(color = qaSettings.textColor, onColorChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(textColor = it)) } })
+                }
                 TextStyleButtons(
                     bold = qaSettings.bold, italic = qaSettings.italic, underline = qaSettings.underline, shadow = qaSettings.shadow,
                     onBoldChange = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(bold = it)) } },

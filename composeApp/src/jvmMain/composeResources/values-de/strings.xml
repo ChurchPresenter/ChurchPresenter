@@ -1116,6 +1116,9 @@
     <string name="qa_admin_panel">Admin-Bereich</string>
     <string name="qa_server_hint">Starten Sie den Companion-Server, um Q&amp;A zu aktivieren</string>
     <string name="qa_display_styling">Anzeigegestaltung</string>
+    <string name="qa_text_color">Text Color</string>
+    <string name="qa_qr_fg_color">QR Foreground</string>
+    <string name="qa_qr_bg_color">QR Background</string>
     <string name="qa_font">Schriftart</string>
     <string name="qa_size">Größe</string>
     <string name="qa_background_color">Hintergrundfarbe</string>

@@ -1194,6 +1194,9 @@
     <string name="qa_admin_panel">Administrační panel</string>
     <string name="qa_server_hint">Spusťte companion server pro aktivaci Q&amp;A</string>
     <string name="qa_display_styling">Styl zobrazení</string>
+    <string name="qa_text_color">Text Color</string>
+    <string name="qa_qr_fg_color">QR Foreground</string>
+    <string name="qa_qr_bg_color">QR Background</string>
     <string name="qa_font">Písmo</string>
     <string name="qa_size">Velikost</string>
     <string name="qa_background_color">Barva pozadí</string>
