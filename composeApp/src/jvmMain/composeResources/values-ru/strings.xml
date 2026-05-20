@@ -244,7 +244,7 @@
     <string name="please_select_file_first">Пожалуйста, сначала выберите файл из списка.</string>
     <string name="no_file_selected_title">Файл не выбран</string>
     <string name="confirm_delete">Подтвердите удаление</string>
-    <string name="confirm_delete_file">Вы уверены, что хотите удалить \'%s\'?</string>
+    <string name="confirm_delete_file">Вы уверены, что хотите удалить '%s'?</string>
     <string name="import_error">Ошибка импорта</string>
     <string name="delete_error">Ошибка удаления</string>
 

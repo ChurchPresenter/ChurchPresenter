@@ -244,7 +244,7 @@
     <string name="please_select_file_first">Najpierw wybierz plik z listy.</string>
     <string name="no_file_selected_title">Nie wybrano pliku</string>
     <string name="confirm_delete">Potwierdź usunięcie</string>
-    <string name="confirm_delete_file">Czy na pewno chcesz usunąć \'%s\'?</string>
+    <string name="confirm_delete_file">Czy na pewno chcesz usunąć '%s'?</string>
     <string name="import_error">Błąd importu</string>
     <string name="delete_error">Błąd usuwania</string>
 
@@ -621,7 +621,7 @@
     <string name="copy_api_key">Kopiuj</string>
     <string name="copy_url">Kopiuj URL</string>
     <string name="default_lower_third_background">Domyślne tło dolnej trzeciej</string>
-    <string name="default_lower_third_background_help">Używane, gdy opcja \'Domyślne\' jest wybrana dla Biblii lub Pieśni w trybie wyświetlania dolnej trzeciej</string>
+    <string name="default_lower_third_background_help">Używane, gdy opcja 'Domyślne' jest wybrana dla Biblii lub Pieśni w trybie wyświetlania dolnej trzeciej</string>
     <string name="enable_server">Włącz serwer</string>
     <string name="font_preview_text">ABCDabcd1234</string>
     <string name="generate_api_key">Generuj</string>

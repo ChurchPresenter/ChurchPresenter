@@ -518,9 +518,9 @@
 
     <!-- Background Settings Tab -->
     <string name="default_background_color">Fundal Implicit</string>
-    <string name="default_background_color_help">Folosit când \'Implicit\' este selectat pentru Biblie sau Cântări</string>
+    <string name="default_background_color_help">Folosit când 'Implicit' este selectat pentru Biblie sau Cântări</string>
     <string name="default_lower_third_background">Fundal Implicit Lower Third</string>
-    <string name="default_lower_third_background_help">Folosit când \'Implicit\' este selectat pentru Biblie sau Cântări în modul lower third</string>
+    <string name="default_lower_third_background_help">Folosit când 'Implicit' este selectat pentru Biblie sau Cântări în modul lower third</string>
     <!-- Gradient Settings -->
     <string name="gradient_enabled">Gradient</string>
     <string name="gradient_top_color">Culoare Sus:</string>

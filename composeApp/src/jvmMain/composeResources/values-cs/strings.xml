@@ -362,7 +362,7 @@
     <string name="please_select_file_first">Nejprve vyberte soubor ze seznamu.</string>
     <string name="no_file_selected_title">Není vybrán žádný soubor</string>
     <string name="confirm_delete">Potvrdit smazání</string>
-    <string name="confirm_delete_file">Opravdu chcete smazat \'%s\'?</string>
+    <string name="confirm_delete_file">Opravdu chcete smazat '%s'?</string>
     <string name="import_error">Chyba importu</string>
     <string name="delete_error">Chyba smazání</string>
 
@@ -708,7 +708,7 @@
     <string name="copy_api_key">Kopírovat</string>
     <string name="copy_url">Kopírovat URL</string>
     <string name="default_lower_third_background">Výchozí pozadí dolní třetiny</string>
-    <string name="default_lower_third_background_help">Použije se, když je pro Bibli nebo Písně v režimu zobrazení dolní třetiny vybráno \'Výchozí\'</string>
+    <string name="default_lower_third_background_help">Použije se, když je pro Bibli nebo Písně v režimu zobrazení dolní třetiny vybráno 'Výchozí'</string>
     <string name="enable_server">Povolit server</string>
     <string name="font_preview_text">ABCDabcd1234</string>
     <string name="generate_api_key">Vygenerovat</string>

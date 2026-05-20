@@ -815,7 +815,7 @@
     <string name="canvas_qr_type_vcard">vCard</string>
     <string name="canvas_clock_mode_clock">Clock</string>
     <string name="canvas_clock_mode_countdown">Countdown</string>
-    <string name="canvas_decklink_io_warning">This device is currently used for output. Input may not be available on devices that don\'t support simultaneous I/O.</string>
+    <string name="canvas_decklink_io_warning">This device is currently used for output. Input may not be available on devices that don't support simultaneous I/O.</string>
     <string name="canvas_tool_select">Select</string>
     <string name="canvas_tool_rectangle">Rectangle</string>
     <string name="canvas_tool_ellipse">Ellipse</string>
@@ -926,7 +926,7 @@
     <string name="cert_install_android_title">🤖  Android Setup</string>
     <string name="cert_install_android_step1">In the mobile app tap "Scan QR Code" and scan this code. The app will resolve the certificate URL automatically.</string>
     <string name="cert_install_android_step2">Tap "Open Certificate URL" — Chrome downloads ChurchPresenter-CA.crt. Tap the file in the notification or Downloads to install it directly.</string>
-    <string name="cert_install_android_cant_title">🚫  Can\'t install certificate / only from known sources?</string>
+    <string name="cert_install_android_cant_title">🚫  Can't install certificate / only from known sources?</string>
     <string name="cert_install_android_cant_intro">Some Android versions block direct certificate installs. Use the manual path instead:</string>
     <string name="cert_install_android_cant_step1">Settings → Security (or Biometrics &amp; security on Samsung).</string>
     <string name="cert_install_android_cant_step2">Tap Encryption &amp; credentials → Install a certificate → CA certificate.</string>
@@ -1415,14 +1415,14 @@
     <string name="konami_dialog_headline">Cheat Code Activated</string>
     <string name="konami_dialog_blessings">+30 Blessings Unlocked</string>
     <string name="konami_dialog_message">You know the code. Now go present some worship.</string>
-    <string name="konami_dialog_button">Let\'s Go</string>
+    <string name="konami_dialog_button">Let's Go</string>
     <string name="crossword_tab">Crossword</string>
     <string name="crossword_across">Across</string>
     <string name="crossword_down">Down</string>
     <string name="crossword_check">Check Answers</string>
     <string name="crossword_wrong">Wrong — try again</string>
     <string name="crossword_correct">Correct! Level complete!</string>
-    <string name="crossword_all_done">You\'ve completed all levels!</string>
+    <string name="crossword_all_done">You've completed all levels!</string>
     <string name="crossword_loading">Loading puzzles…</string>
     <string name="crossword_no_puzzles">No crossword puzzles available yet.</string>
     <string name="crossword_level_label">Level %1$d</string>

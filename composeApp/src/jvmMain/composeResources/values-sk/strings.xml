@@ -518,9 +518,9 @@
 
     <!-- Background Settings Tab -->
     <string name="default_background_color">Predvolené pozadie</string>
-    <string name="default_background_color_help">Používa sa, keď je pre Bibliu alebo Piesne vybrané \'Predvolené\'</string>
+    <string name="default_background_color_help">Používa sa, keď je pre Bibliu alebo Piesne vybrané 'Predvolené'</string>
     <string name="default_lower_third_background">Predvolené pozadie lower third</string>
-    <string name="default_lower_third_background_help">Používa sa, keď je pre Bibliu alebo Piesne vybrané \'Predvolené\' v režime zobrazenia lower third</string>
+    <string name="default_lower_third_background_help">Používa sa, keď je pre Bibliu alebo Piesne vybrané 'Predvolené' v režime zobrazenia lower third</string>
     <!-- Gradient Settings -->
     <string name="gradient_enabled">Prechod</string>
     <string name="gradient_top_color">Horná farba:</string>

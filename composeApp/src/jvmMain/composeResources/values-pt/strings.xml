@@ -518,9 +518,9 @@
 
     <!-- Background Settings Tab -->
     <string name="default_background_color">Fundo Padrão</string>
-    <string name="default_background_color_help">Usado quando \'Padrão\' está selecionado para Bíblia ou Músicas</string>
+    <string name="default_background_color_help">Usado quando 'Padrão' está selecionado para Bíblia ou Músicas</string>
     <string name="default_lower_third_background">Fundo Padrão de Lower Third</string>
-    <string name="default_lower_third_background_help">Usado quando \'Padrão\' está selecionado para Bíblia ou Músicas no modo de exibição lower third</string>
+    <string name="default_lower_third_background_help">Usado quando 'Padrão' está selecionado para Bíblia ou Músicas no modo de exibição lower third</string>
     <!-- Gradient Settings -->
     <string name="gradient_enabled">Gradiente</string>
     <string name="gradient_top_color">Cor Superior:</string>

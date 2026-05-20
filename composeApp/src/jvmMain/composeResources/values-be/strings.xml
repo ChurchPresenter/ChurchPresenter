@@ -244,7 +244,7 @@
     <string name="please_select_file_first">Калі ласка, спачатку выберыце файл са спіса.</string>
     <string name="no_file_selected_title">Файл не абраны</string>
     <string name="confirm_delete">Пацвердзіце выдаленне</string>
-    <string name="confirm_delete_file">Вы ўпэўненыя, што хочаце выдаліць \'%s\'?</string>
+    <string name="confirm_delete_file">Вы ўпэўненыя, што хочаце выдаліць '%s'?</string>
     <string name="import_error">Памылка імпарту</string>
     <string name="delete_error">Памылка выдалення</string>
 
@@ -622,7 +622,7 @@
     <string name="copy_api_key">Капіяваць</string>
     <string name="copy_url">Капіяваць URL</string>
     <string name="default_lower_third_background">Фон ніжняй траціны па змаўчанні</string>
-    <string name="default_lower_third_background_help">Выкарыстоўваецца, калі для Бібліі або Песень абраны рэжым \'Па змаўчанні\' ў рэжыме адлюстравання ніжняй траціны</string>
+    <string name="default_lower_third_background_help">Выкарыстоўваецца, калі для Бібліі або Песень абраны рэжым 'Па змаўчанні' ў рэжыме адлюстравання ніжняй траціны</string>
     <string name="enable_server">Уключыць сервер</string>
     <string name="font_preview_text">ABCDabcd1234</string>
     <string name="generate_api_key">Згенераваць</string>
@@ -633,7 +633,7 @@
     <string name="gradient_top_color">Верхні колер:</string>
     <string name="key_output">Ключавы выхад</string>
     <string name="key_output_none">Няма</string>
-    <string name="live_preview_announcement">Аб\'ява</string>
+    <string name="live_preview_announcement">Аб'ява</string>
     <string name="live_preview_bible">Біблія</string>
     <string name="live_preview_lower_third">Ніжняя траціна</string>
     <string name="live_preview_media">Медыя</string>
@@ -740,7 +740,7 @@
     <string name="web_url_hint">https://example.com</string>
     <string name="web_url_label">URL</string>
     <string name="website_dialog_title">Дадаць вэб-сайт</string>
-    <string name="website_disclaimer">Мы не нясём адказнасці за любую рэкламу або змесціва, якое можа з\'явіцца на паказваным вэб-сайце.</string>
+    <string name="website_disclaimer">Мы не нясём адказнасці за любую рэкламу або змесціва, якое можа з'явіцца на паказваным вэб-сайце.</string>
     <string name="website_go_live">У эфір</string>
     <string name="website_title_hint">Увядзіце назву для адлюстравання…</string>
     <string name="website_title_label">Назва (неабавязкова)</string>
@@ -1311,7 +1311,7 @@
     <string name="obs_mode_presentation">Прэзентацыя</string>
     <string name="obs_mode_media">Медыя</string>
     <string name="obs_mode_lower_third">Ніжняя трэць</string>
-    <string name="obs_mode_announcements">Аб\'явы</string>
+    <string name="obs_mode_announcements">Аб'явы</string>
     <string name="obs_mode_website">Вэб-старонка</string>
     <string name="obs_mode_canvas">Палатно</string>
     <string name="obs_mode_qa">Пытанні і адказы</string>
@@ -1396,8 +1396,8 @@
     <string name="songs_no_db_title">База дадзеных песень не настроена</string>
     <string name="songs_no_db_hint">Адкрыйце ⚙ Налады і перайдзіце на ўкладку «Песні», затым:</string>
     <string name="songs_no_db_step">Укажыце папку з файлам базы дадзеных песень</string>
-    <string name="tooltip_announcement_show">Паказаць аб\'яву на экране</string>
-    <string name="tooltip_announcement_hide">Схаваць аб\'яву з экрана</string>
+    <string name="tooltip_announcement_show">Паказаць аб'яву на экране</string>
+    <string name="tooltip_announcement_hide">Схаваць аб'яву з экрана</string>
     <string name="web_type_to_page_label">Увод на старонку</string>
     <string name="web_type_to_page_placeholder">Спачатку націсніце на поле ўводу на жывой старонцы</string>
     <string name="web_focus_first_input">Фокус на першае поле ўводу</string>

@@ -244,7 +244,7 @@
     <string name="please_select_file_first">Алдымен тізімнен файлды таңдаңыз.</string>
     <string name="no_file_selected_title">Файл таңдалмаған</string>
     <string name="confirm_delete">Жоюды растау</string>
-    <string name="confirm_delete_file">\'%s\' жоюға сенімдісіз бе?</string>
+    <string name="confirm_delete_file">'%s' жоюға сенімдісіз бе?</string>
     <string name="import_error">Импорттау қатесі</string>
     <string name="delete_error">Жою қатесі</string>
 
@@ -622,7 +622,7 @@
     <string name="copy_api_key">Көшіру</string>
     <string name="copy_url">URL көшіру</string>
     <string name="default_lower_third_background">Әдепкі төменгі үштен бір фоны</string>
-    <string name="default_lower_third_background_help">Төменгі үштен бір көрсету режимінде Киелі Кітап немесе Әндер үшін \'Әдепкі\' таңдалғанда қолданылады</string>
+    <string name="default_lower_third_background_help">Төменгі үштен бір көрсету режимінде Киелі Кітап немесе Әндер үшін 'Әдепкі' таңдалғанда қолданылады</string>
     <string name="enable_server">Серверді қосу</string>
     <string name="font_preview_text">ABCDabcd1234</string>
     <string name="generate_api_key">Жасау</string>

@@ -244,7 +244,7 @@
     <string name="please_select_file_first">Будь ласка, спочатку оберіть файл зі списку.</string>
     <string name="no_file_selected_title">Файл не обрано</string>
     <string name="confirm_delete">Підтвердіть видалення</string>
-    <string name="confirm_delete_file">Ви впевнені, що хочете видалити \'%s\'?</string>
+    <string name="confirm_delete_file">Ви впевнені, що хочете видалити '%s'?</string>
     <string name="import_error">Помилка імпорту</string>
     <string name="delete_error">Помилка видалення</string>
 
@@ -745,10 +745,10 @@
     <string name="web_url_hint">https://example.com</string>
     <string name="web_url_label">URL</string>
     <string name="website_dialog_title">Додати вебсайт</string>
-    <string name="website_disclaimer">Ми не несемо відповідальності за будь-яку рекламу або вміст, що може з\'являтися на відображуваному вебсайті.</string>
+    <string name="website_disclaimer">Ми не несемо відповідальності за будь-яку рекламу або вміст, що може з'являтися на відображуваному вебсайті.</string>
     <string name="website_go_live">В ефір</string>
     <string name="website_title_hint">Введіть назву для відображення…</string>
-    <string name="website_title_label">Назва (необов\'язково)</string>
+    <string name="website_title_label">Назва (необов'язково)</string>
     <string name="website_url_hint">https://example.com</string>
     <string name="website_url_label">URL</string>
     <string name="new_song">Нова пісня</string>
@@ -980,7 +980,7 @@
     <string name="canvas_aspect_ratio_warning">Сцена %1$s, дисплей %2$s</string>
     <string name="canvas_fix_aspect_ratio">Виправити</string>
     <!-- Source Properties Panel -->
-    <string name="canvas_source_name">Ім\'я</string>
+    <string name="canvas_source_name">Ім'я</string>
     <string name="canvas_rotation">Поворот</string>
     <string name="canvas_file_path">Шлях до файлу</string>
     <string name="canvas_browse">Огляд</string>
@@ -1029,8 +1029,8 @@
     <string name="cert_install_ios_step1">Відскануйте QR-код — камера покаже банер із URL вгорі екрана.</string>
     <string name="cert_install_ios_step2">Натисніть банер, щоб відкрити посилання в Safari. На запит натисніть «Дозволити» для завантаження профілю.</string>
     <string name="cert_install_ios_step3">Відкрийте Налаштування → Основні → VPN і керування пристроєм → натисніть ChurchPresenter CA → Встановити → введіть код-пароль.</string>
-    <string name="cert_install_ios_trust_title">⚠️  Обов\'язково після встановлення</string>
-    <string name="cert_install_ios_trust_step">Налаштування → Основні → Про цей пристрій → Довіра сертифікатам → увімкніть повну довіру для ChurchPresenter CA. Без цього кроку застосунок не зможе встановити захищене з\'єднання.</string>
+    <string name="cert_install_ios_trust_title">⚠️  Обов'язково після встановлення</string>
+    <string name="cert_install_ios_trust_step">Налаштування → Основні → Про цей пристрій → Довіра сертифікатам → увімкніть повну довіру для ChurchPresenter CA. Без цього кроку застосунок не зможе встановити захищене з'єднання.</string>
     <string name="cert_install_android_title">🤖  Встановлення на Android</string>
     <string name="cert_install_android_step1">Відскануйте QR-код — натисніть URL, показаний камерою, щоб відкрити його в Chrome.</string>
     <string name="cert_install_android_step2">Chrome завантажить ChurchPresenter-CA.crt. Натисніть файл у сповіщенні або в «Завантаженнях», щоб встановити його.</string>
@@ -1044,7 +1044,7 @@
     <string name="connection_qr_title">QR-код підключення</string>
     <string name="server_host_label">Хост (перевизначення)</string>
     <string name="server_host_hint">наприклад, 192.168.1.50 або church-mac.local</string>
-    <string name="server_host_note">Фіксований IP або ім\'я хоста, що відображається в URL. Залиште порожнім для автовизначення.</string>
+    <string name="server_host_note">Фіксований IP або ім'я хоста, що відображається в URL. Залиште порожнім для автовизначення.</string>
 
     <!-- Update checker -->
     <string name="update_dialog_title">Доступне оновлення</string>
@@ -1305,10 +1305,10 @@
     <string name="obs_status_connecting">Підключення…</string>
     <string name="obs_status_disconnected">Не підключено</string>
     <string name="obs_status_error">Помилка</string>
-    <string name="obs_scene_mappings">Прив\'язка сцен</string>
+    <string name="obs_scene_mappings">Прив'язка сцен</string>
     <string name="obs_scene_mappings_desc">Вкажіть назву сцени OBS для перемикання при показі кожного типу контенту. Залиште порожнім для використання сцени за замовчуванням.</string>
     <string name="obs_default_scene">Сцена за замовчуванням</string>
-    <string name="obs_default_scene_hint">Використовується, якщо прив\'язку не задано</string>
+    <string name="obs_default_scene_hint">Використовується, якщо прив'язку не задано</string>
     <string name="obs_scene_hint">Назва сцени OBS</string>
     <string name="obs_mode_bible">Біблія</string>
     <string name="obs_mode_songs">Пісні</string>

@@ -98,7 +98,7 @@
     <string name="menu_help">Aide</string>
     <string name="menu_about">À propos</string>
     <string name="about_title">À propos de Church Presenter</string>
-    <string name="open_crash_logs">Ouvrir les journaux d\'erreurs</string>
+    <string name="open_crash_logs">Ouvrir les journaux d'erreurs</string>
     <string name="open_converter">Convertisseur</string>
     <string name="report_bug">Signaler un bogue</string>
     <string name="submit_feature_request">Soumettre une demande de fonctionnalité</string>
@@ -117,7 +117,7 @@
     <string name="shortcut_description_open_schedule">Ouvrir un programme</string>
     <string name="shortcut_description_save_schedule">Enregistrer le programme</string>
     <string name="shortcut_description_close_schedule">Fermer le programme</string>
-    <string name="shortcut_description_exit">Quitter l\'application</string>
+    <string name="shortcut_description_exit">Quitter l'application</string>
     <string name="shortcut_description_settings">Ouvrir les paramètres</string>
     <string name="shortcut_description_add_to_schedule">Ajouter au programme</string>
     <string name="shortcut_description_remove_from_schedule">Retirer du programme</string>
@@ -153,15 +153,15 @@
     <string name="shortcut_key_f10">F10</string>
     <string name="shortcut_key_f11">F11</string>
     <string name="shortcut_key_f12">F12</string>
-    <string name="shortcut_category_tab_switching">Changement d\'onglet</string>
+    <string name="shortcut_category_tab_switching">Changement d'onglet</string>
     <string name="shortcut_description_f1_keyboard_shortcuts">Ouvrir les raccourcis clavier</string>
-    <string name="shortcut_description_f6_bible">Aller à l\'onglet Bible</string>
-    <string name="shortcut_description_f7_songs">Aller à l\'onglet Cantiques</string>
-    <string name="shortcut_description_f8_pictures">Aller à l\'onglet Images</string>
-    <string name="shortcut_description_f9_presentation">Aller à l\'onglet Présentation</string>
-    <string name="shortcut_description_f10_media">Aller à l\'onglet Médias</string>
-    <string name="shortcut_description_f11_lower_third">Aller à l\'onglet Bandeau inférieur</string>
-    <string name="shortcut_description_f12_announcements">Aller à l\'onglet Annonces</string>
+    <string name="shortcut_description_f6_bible">Aller à l'onglet Bible</string>
+    <string name="shortcut_description_f7_songs">Aller à l'onglet Cantiques</string>
+    <string name="shortcut_description_f8_pictures">Aller à l'onglet Images</string>
+    <string name="shortcut_description_f9_presentation">Aller à l'onglet Présentation</string>
+    <string name="shortcut_description_f10_media">Aller à l'onglet Médias</string>
+    <string name="shortcut_description_f11_lower_third">Aller à l'onglet Bandeau inférieur</string>
+    <string name="shortcut_description_f12_announcements">Aller à l'onglet Annonces</string>
     <string name="shortcut_key_delete">Delete</string>
     <string name="shortcut_key_escape">Escape</string>
     <string name="shortcut_key_double_click">Double-click</string>
@@ -182,13 +182,13 @@
     <string name="shortcut_key_shift_drag">Shift+Drag</string>
     <string name="shortcut_category_schedule">Programme</string>
     <string name="shortcut_description_context_menu">Afficher le menu contextuel</string>
-    <string name="shortcut_description_reorder_item">Réorganiser l\'élément</string>
-    <string name="shortcut_description_reorder_image">Réorganiser l\'image</string>
+    <string name="shortcut_description_reorder_item">Réorganiser l'élément</string>
+    <string name="shortcut_description_reorder_image">Réorganiser l'image</string>
 
     <!-- Options Dialog Strings -->
     <string name="text_settings_and_colors">Paramètres de texte et couleurs</string>
     <string name="background">Arrière-plan</string>
-    <string name="background_images">Images d\'arrière-plan</string>
+    <string name="background_images">Images d'arrière-plan</string>
     <string name="folders">Dossiers</string>
     <string name="projection">Projection</string>
     <string name="other">Autre</string>
@@ -224,7 +224,7 @@
     <string name="no_song_files">Aucun fichier de cantique chargé</string>
     <string name="word_wrap">Retour à la ligne automatique</string>
     <string name="show_on_first_page_only">Afficher uniquement sur la première page</string>
-    <string name="position_on_screen">Position à l\'écran :</string>
+    <string name="position_on_screen">Position à l'écran :</string>
     <string name="top_left">Haut gauche</string>
     <string name="top_right">Haut droite</string>
     <string name="bottom_left">Bas gauche</string>
@@ -234,13 +234,13 @@
     <string name="light_theme">Thème clair</string>
     <string name="system_theme">Thème système</string>
     <!-- Placeholder strings for other tabs -->
-    <string name="bible_tab_content">Le contenu de l\'onglet Bible sera implémenté</string>
-    <string name="text_settings_tab_content">Le contenu de l\'onglet Paramètres de texte et couleurs sera implémenté</string>
-    <string name="background_tab_content">Le contenu de l\'onglet Arrière-plan sera implémenté</string>
-    <string name="background_images_tab_content">Le contenu de l\'onglet Images d\'arrière-plan sera implémenté</string>
-    <string name="folders_tab_content">Le contenu de l\'onglet Dossiers sera implémenté</string>
-    <string name="projection_tab_content">Le contenu de l\'onglet Projection sera implémenté</string>
-    <string name="other_tab_content">Le contenu de l\'onglet Autre sera implémenté</string>
+    <string name="bible_tab_content">Le contenu de l'onglet Bible sera implémenté</string>
+    <string name="text_settings_tab_content">Le contenu de l'onglet Paramètres de texte et couleurs sera implémenté</string>
+    <string name="background_tab_content">Le contenu de l'onglet Arrière-plan sera implémenté</string>
+    <string name="background_images_tab_content">Le contenu de l'onglet Images d'arrière-plan sera implémenté</string>
+    <string name="folders_tab_content">Le contenu de l'onglet Dossiers sera implémenté</string>
+    <string name="projection_tab_content">Le contenu de l'onglet Projection sera implémenté</string>
+    <string name="other_tab_content">Le contenu de l'onglet Autre sera implémenté</string>
 
     <string name="bible_book_1">Genèse</string>
     <string name="bible_book_2">Exode</string>
@@ -318,26 +318,26 @@
     <string name="bible_selection">Sélection de la Bible</string>
     <string name="primary_bible">Bible principale :</string>
     <string name="secondary_bible">Bible secondaire :</string>
-    <string name="background_type">Type d\'arrière-plan :</string>
-    <string name="background_color">Couleur d\'arrière-plan :</string>
-    <string name="background_image">Image d\'arrière-plan :</string>
+    <string name="background_type">Type d'arrière-plan :</string>
+    <string name="background_color">Couleur d'arrière-plan :</string>
+    <string name="background_image">Image d'arrière-plan :</string>
     <string name="select_image">Sélectionner une image</string>
     <string name="primary_bible_text">Texte de la Bible principale</string>
     <string name="primary_bible_reference">Référence du livre de la Bible principale</string>
     <string name="secondary_bible_text">Texte de la Bible secondaire</string>
     <string name="show_in_lower_third">Afficher dans le bandeau inférieur</string>
     <string name="secondary_bible_reference">Référence du livre de la Bible secondaire</string>
-    <string name="show_abbreviation">Afficher l\'abréviation du livre</string>
+    <string name="show_abbreviation">Afficher l'abréviation du livre</string>
     <string name="caption_language">Langue des sous-titres</string>
     <string name="language_source">Source de langue :</string>
 
     <!-- Dialog Messages -->
-    <string name="please_select_directory_first">Veuillez d\'abord sélectionner un répertoire de stockage.</string>
-    <string name="please_select_file_first">Veuillez d\'abord sélectionner un fichier dans la liste.</string>
+    <string name="please_select_directory_first">Veuillez d'abord sélectionner un répertoire de stockage.</string>
+    <string name="please_select_file_first">Veuillez d'abord sélectionner un fichier dans la liste.</string>
     <string name="no_file_selected_title">Aucun fichier sélectionné</string>
     <string name="confirm_delete">Confirmer la suppression</string>
     <string name="confirm_delete_file">Êtes-vous sûr de vouloir supprimer « %1$s » ?</string>
-    <string name="import_error">Erreur d\'importation</string>
+    <string name="import_error">Erreur d'importation</string>
     <string name="delete_error">Erreur de suppression</string>
 
     <!-- Background Type Options -->
@@ -347,13 +347,13 @@
     <string name="background_video_option">Boucle vidéo</string>
     <string name="background_transparent_option">Transparent</string>
     <string name="background_follow_default_option">Suivre le défaut</string>
-    <string name="background_video">Vidéo d\'arrière-plan :</string>
+    <string name="background_video">Vidéo d'arrière-plan :</string>
 
     <!-- Projection Settings -->
     <string name="projection_content_web">Web</string>
     <string name="projection_content_background">Arrière-plan</string>
     <string name="projection_content_lt_background">Arrière-plan du bandeau inférieur</string>
-    <string name="projection_web_decklink_tooltip">Le navigateur web ne peut pas s\'afficher sur les sorties DeckLink</string>
+    <string name="projection_web_decklink_tooltip">Le navigateur web ne peut pas s'afficher sur les sorties DeckLink</string>
     <string name="projection_web_go_live_tooltip">Nécessite un écran standard (non DeckLink) avec le Web activé dans les paramètres de projection</string>
 
     <!-- Bible Tab -->
@@ -385,7 +385,7 @@
     <string name="no_results_found">Aucun résultat trouvé pour « %1$s »</string>
 
     <!-- File Manager Error Messages -->
-    <string name="error_target_directory_not_exist">Le répertoire cible n\'existe pas : %1$s</string>
+    <string name="error_target_directory_not_exist">Le répertoire cible n'existe pas : %1$s</string>
     <string name="error_copying_file">Erreur lors de la copie de %1$s : %2$s</string>
     <string name="error_failed_delete">Échec de la suppression du fichier</string>
     <string name="error_deleting_file">Erreur lors de la suppression du fichier : %1$s</string>
@@ -411,7 +411,7 @@
     <string name="tooltip_add_to_schedule">Ajouter au programme</string>
     <string name="tooltip_remove_from_schedule">Retirer du programme</string>
     <string name="tooltip_clear_schedule">Effacer le programme</string>
-    <string name="tooltip_clear_display">Effacer l\'affichage</string>
+    <string name="tooltip_clear_display">Effacer l'affichage</string>
     <string name="tooltip_toggle_displays">Basculer les écrans du présentateur</string>
     <string name="tooltip_settings">Paramètres</string>
     <string name="tooltip_theme_light">Thème clair</string>
@@ -419,7 +419,7 @@
     <string name="tooltip_theme_system">Thème système</string>
     <string name="tooltip_remove">Supprimer</string>
     <string name="tooltip_edit">Modifier</string>
-    <string name="tooltip_edit_label">Modifier l\'étiquette</string>
+    <string name="tooltip_edit_label">Modifier l'étiquette</string>
     <string name="tooltip_go_live">Diffuser en direct</string>
     <string name="tooltip_add_label">Ajouter une étiquette</string>
     <string name="tooltip_collapse_schedule">Réduire le programme</string>
@@ -429,11 +429,11 @@
 
     <!-- Add Label Dialog -->
     <string name="add_label">Ajouter une étiquette</string>
-    <string name="edit_label">Modifier l\'étiquette</string>
-    <string name="label_text">Texte de l\'étiquette</string>
+    <string name="edit_label">Modifier l'étiquette</string>
+    <string name="label_text">Texte de l'étiquette</string>
     <string name="text_color">Couleur du texte</string>
-    <string name="background_color_label">Couleur d\'arrière-plan</string>
-    <string name="enter_label_text">Saisir le texte de l\'étiquette...</string>
+    <string name="background_color_label">Couleur d'arrière-plan</string>
+    <string name="enter_label_text">Saisir le texte de l'étiquette...</string>
 
     <!-- Pictures Tab Strings -->
     <string name="select_folder">Sélectionner un dossier</string>
@@ -449,14 +449,14 @@
     <string name="seconds_suffix">s</string>
     <string name="loading">Chargement...</string>
     <string name="select_folder_to_view">Sélectionnez un dossier pour afficher les images</string>
-    <string name="select_image_folder_dialog">Sélectionner un dossier d\'images</string>
+    <string name="select_image_folder_dialog">Sélectionner un dossier d'images</string>
     <string name="loop">Boucle</string>
     <string name="loop_on">Boucle activée</string>
     <string name="loop_off">Boucle désactivée</string>
     <string name="transition_duration">Durée de transition :</string>
     <string name="unit_s">s</string>
     <string name="unit_ms">ms</string>
-    <string name="animation_type">Type d\'animation :</string>
+    <string name="animation_type">Type d'animation :</string>
     <string name="animation_crossfade">Fondu enchaîné</string>
     <string name="animation_fade">Fondu</string>
     <string name="animation_slide_left">Glisser à gauche</string>
@@ -469,7 +469,7 @@
     <string name="pictures_reorder_hint">Maj+glisser les vignettes pour réorganiser</string>
     <string name="slideshow_settings">Paramètres du diaporama multimédia</string>
     <string name="transition_settings">Paramètres de transition</string>
-    <string name="failed_to_load_image">Échec du chargement de l\'image</string>
+    <string name="failed_to_load_image">Échec du chargement de l'image</string>
 
     <!-- Presentation Tab Strings -->
     <string name="no_file_selected_presentation">Aucun fichier sélectionné</string>
@@ -490,12 +490,12 @@
     <string name="text_margins">Marges du texte</string>
     <string name="end_of_song_spacing">Espacement fin de cantique (*)</string>
     <string name="auto_fit">Auto</string>
-    <string name="auto_fit_checkbox_tooltip">Ajuster automatiquement le texte à l\'écran, en utilisant la taille de police comme maximum</string>
+    <string name="auto_fit_checkbox_tooltip">Ajuster automatiquement le texte à l'écran, en utilisant la taille de police comme maximum</string>
     <string name="auto_fit_button_tooltip">Calculer la taille de police optimale pour le verset actuel</string>
     <string name="screen">Écran</string>
-    <string name="projection_position_help">Les valeurs de position représentent des décalages en pixels par rapport aux bords de l\'écran. Utilisez-les pour ajuster le placement de la fenêtre de projection sur les écrans secondaires.</string>
+    <string name="projection_position_help">Les valeurs de position représentent des décalages en pixels par rapport aux bords de l'écran. Utilisez-les pour ajuster le placement de la fenêtre de projection sur les écrans secondaires.</string>
     <string name="screen_assignment">Attribution des écrans</string>
-    <string name="num_screens_label">Nombre d\'écrans :</string>
+    <string name="num_screens_label">Nombre d'écrans :</string>
     <string name="screen_col_label">Écran %1$d</string>
     <string name="detected_screens">Écrans détectés : %1$d</string>
     <string name="presenter_windows_count">Fenêtres du présentateur : %1$d</string>
@@ -505,7 +505,7 @@
     <string name="content_media">Médias</string>
     <string name="content_streaming">Bandeau inférieur</string>
     <string name="content_announcements">Annonces</string>
-    <string name="display_mode">Mode d\'affichage</string>
+    <string name="display_mode">Mode d'affichage</string>
     <string name="display_fullscreen">Plein écran</string>
     <string name="display_lower_third">Bandeau inférieur</string>
     <string name="lower_third_height">Hauteur du bandeau inférieur % (pour Bible et Cantiques)</string>
@@ -530,17 +530,17 @@
 
     <!-- System Settings -->
     <string name="reset_settings">Réinitialiser tous les paramètres</string>
-    <string name="reset_settings_confirm">Êtes-vous sûr de vouloir réinitialiser tous les paramètres par défaut ?\n\nL\'application va redémarrer.</string>
+    <string name="reset_settings_confirm">Êtes-vous sûr de vouloir réinitialiser tous les paramètres par défaut ?\n\nL'application va redémarrer.</string>
     <string name="clear_lottie_cache_confirm">Voulez-vous également effacer le cache du générateur Lottie ?\n\nCela supprimera les préréglages enregistrés, les thèmes de couleur et les logos téléchargés.</string>
     <string name="clear_remote_uploads">Effacer les téléchargements distants</string>
-    <string name="clear_remote_uploads_confirm">Êtes-vous sûr de vouloir supprimer tous les fichiers téléchargés à distance ?\n\nCela supprimera définitivement tous les fichiers du dossier de téléchargements de l\'appareil.</string>
+    <string name="clear_remote_uploads_confirm">Êtes-vous sûr de vouloir supprimer tous les fichiers téléchargés à distance ?\n\nCela supprimera définitivement tous les fichiers du dossier de téléchargements de l'appareil.</string>
     <string name="remote_uploads_cleared">Le dossier de téléchargements distants a été effacé avec succès.</string>
     <string name="export_settings">Exporter les paramètres</string>
     <string name="import_settings">Importer les paramètres</string>
-    <string name="import_settings_confirm">Êtes-vous sûr de vouloir importer les paramètres ?\n\nCela remplacera vos paramètres actuels et l\'application va redémarrer.</string>
+    <string name="import_settings_confirm">Êtes-vous sûr de vouloir importer les paramètres ?\n\nCela remplacera vos paramètres actuels et l'application va redémarrer.</string>
     <string name="settings_exported">Paramètres exportés avec succès.</string>
-    <string name="settings_export_failed">Échec de l\'exportation des paramètres.</string>
-    <string name="settings_import_failed">Échec de l\'importation des paramètres. Le fichier est peut-être invalide.</string>
+    <string name="settings_export_failed">Échec de l'exportation des paramètres.</string>
+    <string name="settings_import_failed">Échec de l'importation des paramètres. Le fichier est peut-être invalide.</string>
 
     <!-- Media Tab Strings -->
     <string name="media_tab_title">Médias</string>
@@ -557,15 +557,15 @@
     <string name="audio_output_device">Périphérique de sortie</string>
     <string name="audio_output_default">Système par défaut</string>
     <string name="media_vlc_required">VLC media player est requis pour la lecture multimédia</string>
-    <string name="media_vlc_install">Veuillez installer VLC depuis videolan.org et redémarrer l\'application</string>
+    <string name="media_vlc_install">Veuillez installer VLC depuis videolan.org et redémarrer l'application</string>
     <string name="media_vlc_arch_mismatch">Architecture VLC incorrecte. Votre Mac utilise Apple Silicon (arm64) mais le VLC installé est uniquement Intel (x86_64). Téléchargez la version Apple Silicon de VLC depuis videolan.org et redémarrez.</string>
     <string name="vlc_custom_path">Chemin VLC personnalisé</string>
     <string name="vlc_browse">Parcourir</string>
-    <string name="vlc_path_hint">Sélectionner le répertoire d\'installation de VLC</string>
+    <string name="vlc_path_hint">Sélectionner le répertoire d'installation de VLC</string>
     <string name="vlc_path_invalid">Le répertoire ne contient pas les bibliothèques VLC</string>
-    <string name="media_audio_continues">L\'audio continuera à jouer en arrière-plan lors du changement d\'onglet ou de l\'affichage d\'autre contenu</string>
+    <string name="media_audio_continues">L'audio continuera à jouer en arrière-plan lors du changement d'onglet ou de l'affichage d'autre contenu</string>
     <string name="media_now_playing">En lecture :</string>
-    <string name="media_now_presenting">En présentation à l\'écran</string>
+    <string name="media_now_presenting">En présentation à l'écran</string>
     <string name="media_seek_backward">Reculer de 10s</string>
     <string name="media_seek_forward">Avancer de 10s</string>
     <string name="media_preview">Aperçu</string>
@@ -581,9 +581,9 @@
     <string name="streaming_settings">Paramètres du bandeau inférieur</string>
     <string name="lower_third_folder">Dossier des animations du bandeau inférieur</string>
     <string name="lower_third_folder_hint">Aucun dossier sélectionné</string>
-    <string name="lower_third_folder_help">Sélectionnez un dossier contenant des fichiers d\'animation Lottie JSON (.json) pour les incrustations du bandeau inférieur.</string>
+    <string name="lower_third_folder_help">Sélectionnez un dossier contenant des fichiers d'animation Lottie JSON (.json) pour les incrustations du bandeau inférieur.</string>
     <string name="clear_folder">Effacer</string>
-    <string name="lower_third_files_found">%1$d fichier(s) d\'animation trouvé(s)</string>
+    <string name="lower_third_files_found">%1$d fichier(s) d'animation trouvé(s)</string>
     <string name="lower_third_no_files">Aucun fichier .json trouvé dans le dossier sélectionné</string>
     <string name="save_string">Enregistrer</string>
     <string name="saved_strings">Valeurs enregistrées</string>
@@ -602,14 +602,14 @@
     <string name="lottie_preset_add_pair">+ Ajouter une paire</string>
     <string name="lottie_preset_saved">Préréglage enregistré</string>
     <string name="lottie_presets_list">Préréglages enregistrés</string>
-    <string name="lottie_no_presets">Aucun préréglage enregistré pour l\'instant</string>
-    <string name="lottie_select_preset">Sélectionnez un préréglage pour l\'aperçu</string>
+    <string name="lottie_no_presets">Aucun préréglage enregistré pour l'instant</string>
+    <string name="lottie_select_preset">Sélectionnez un préréglage pour l'aperçu</string>
     <string name="lottie_pause_frame">Image de pause</string>
     <string name="lottie_pause_frame_none">Aucune</string>
-    <string name="lottie_pause_at_frame">Pause à l\'image</string>
+    <string name="lottie_pause_at_frame">Pause à l'image</string>
     <string name="lottie_pause_duration">Durée de la pause (ms)</string>
     <string name="lottie_play_next">Lire le suivant</string>
-    <string name="lottie_run_to_end">Exécuter jusqu\'à la fin</string>
+    <string name="lottie_run_to_end">Exécuter jusqu'à la fin</string>
     <string name="lottie_files_folder">Dossier des fichiers Lottie</string>
     <string name="lottie_files">Fichiers Lottie</string>
     <string name="no_lottie_files">Aucun fichier JSON trouvé</string>
@@ -619,13 +619,13 @@
     <string name="song_transition_settings">Transition</string>
     <string name="bible_transition_settings">Transition</string>
     <string name="announcements">Annonces</string>
-    <string name="announcement_text">Texte de l\'annonce</string>
-    <string name="announcement_text_hint">Saisir le texte de l\'annonce ici…</string>
+    <string name="announcement_text">Texte de l'annonce</string>
+    <string name="announcement_text_hint">Saisir le texte de l'annonce ici…</string>
     <string name="top_center">Haut centre</string>
     <string name="center_left">Centre gauche</string>
     <string name="center_right">Centre droite</string>
     <string name="bottom_center">Bas centre</string>
-    <string name="announcement_background_color_label">Couleur d\'arrière-plan</string>
+    <string name="announcement_background_color_label">Couleur d'arrière-plan</string>
     <string name="transparent_default">Transparent (par défaut)</string>
     <string name="announcement_animation">Animation</string>
     <string name="animation_slide_up">Glisser vers le haut (bas vers haut)</string>
@@ -643,10 +643,10 @@
     <string name="announcement_animation_speed">Vitesse</string>
     <string name="announcement_loop_count">Nombre de boucles</string>
     <string name="announcement_loop_tooltip">0 = boucle infinie</string>
-    <string name="tooltip_announcement_show">Afficher l\'annonce à l\'écran</string>
-    <string name="tooltip_announcement_hide">Masquer l\'annonce de l\'écran</string>
+    <string name="tooltip_announcement_show">Afficher l'annonce à l'écran</string>
+    <string name="tooltip_announcement_hide">Masquer l'annonce de l'écran</string>
     <string name="license_title">Contrat de licence — Licence publique générale GNU v3</string>
-    <string name="license_accept_button">J\'accepte</string>
+    <string name="license_accept_button">J'accepte</string>
     <string name="license_decline_button">Refuser &amp; Quitter</string>
     <string name="license_prompt">Vous devez accepter la licence GNU GPL v3 pour utiliser Church Presenter.</string>
 
@@ -660,7 +660,7 @@
     <string name="timer_resume">Reprendre</string>
     <string name="timer_reset">Réinitialiser</string>
     <string name="timer_text_color">Couleur de la minuterie</string>
-    <string name="timer_expired_text_label">Texte à l\'expiration de la minuterie</string>
+    <string name="timer_expired_text_label">Texte à l'expiration de la minuterie</string>
     <string name="timer_expired_text_hint">Saisir le message à afficher à la fin…</string>
     <string name="timer_expired">Temps écoulé !</string>
 
@@ -676,12 +676,12 @@
     <string name="song_play_count">Lectures</string>
     <string name="song_columns">Filtrer les colonnes</string>
     <string name="bible_no_primary_title">Aucune Bible principale configurée</string>
-    <string name="bible_no_primary_hint">Ouvrez ⚙ Paramètres et allez dans l\'onglet Bible, puis :</string>
+    <string name="bible_no_primary_hint">Ouvrez ⚙ Paramètres et allez dans l'onglet Bible, puis :</string>
     <string name="bible_no_primary_step1">1. Définissez le répertoire de stockage de la Bible</string>
     <string name="bible_no_primary_step2">2. Sélectionnez un fichier Bible principal</string>
     <string name="songs_indexing">Indexation des cantiques…</string>
     <string name="songs_no_db_title">Aucune base de données de cantiques configurée</string>
-    <string name="songs_no_db_hint">Ouvrez ⚙ Paramètres et allez dans l\'onglet Cantiques, puis :</string>
+    <string name="songs_no_db_hint">Ouvrez ⚙ Paramètres et allez dans l'onglet Cantiques, puis :</string>
     <string name="songs_no_db_step">Définissez un répertoire contenant un fichier de base de données de cantiques</string>
 
     <!-- Output role (fill+key) -->
@@ -713,7 +713,7 @@
     <string name="web_preview_hint">Saisissez une URL et appuyez sur Diffuser en direct</string>
     <string name="web_live_badge">LIVE</string>
     <string name="web_type_to_page_label">Écrire sur la page</string>
-    <string name="web_type_to_page_placeholder">Cliquez d\'abord sur un champ de la page en direct</string>
+    <string name="web_type_to_page_placeholder">Cliquez d'abord sur un champ de la page en direct</string>
     <string name="web_focus_first_input">Mettre le focus sur le premier champ</string>
     <string name="web_bookmarks">Signets</string>
     <string name="web_clear_cache">Effacer le cache</string>
@@ -727,7 +727,7 @@
     <string name="website_url_label">URL</string>
     <string name="website_url_hint">https://example.com</string>
     <string name="website_title_label">Titre (facultatif)</string>
-    <string name="website_title_hint">Saisir un nom d\'affichage…</string>
+    <string name="website_title_hint">Saisir un nom d'affichage…</string>
     <string name="website_go_live">Diffuser en direct</string>
     <string name="website_disclaimer">Nous ne sommes pas responsables des publicités ou du contenu qui pourrait apparaître sur le site web affiché.</string>
     <string name="tab_web">Web</string>
@@ -755,7 +755,7 @@
     <string name="canvas_video_loading">Chargement…</string>
     <string name="canvas_transform">Transformer</string>
     <string name="canvas_font_color">Couleur de police</string>
-    <string name="canvas_bg_color">Couleur d\'arrière-plan</string>
+    <string name="canvas_bg_color">Couleur d'arrière-plan</string>
     <string name="canvas_transparent_bg">Arrière-plan transparent</string>
     <string name="canvas_color_1">Couleur 1</string>
     <string name="canvas_color_2">Couleur 2</string>
@@ -773,7 +773,7 @@
     <string name="canvas_source_move_backward">Reculer</string>
     <string name="canvas_toggle_visibility">Basculer la visibilité</string>
     <string name="canvas_toggle_lock">Basculer le verrouillage</string>
-    <string name="canvas_aspect_ratio_warning">La scène est %1$s mais l\'écran est %2$s</string>
+    <string name="canvas_aspect_ratio_warning">La scène est %1$s mais l'écran est %2$s</string>
     <string name="canvas_fix_aspect_ratio">Corriger</string>
     <!-- Source Properties Panel -->
     <string name="canvas_source_name">Nom</string>
@@ -809,7 +809,7 @@
     <string name="canvas_qr_type_vcard">vCard</string>
     <string name="canvas_clock_mode_clock">Horloge</string>
     <string name="canvas_clock_mode_countdown">Compte à rebours</string>
-    <string name="canvas_decklink_io_warning">Ce périphérique est actuellement utilisé pour la sortie. L\'entrée peut ne pas être disponible sur les périphériques qui ne prennent pas en charge l\'E/S simultanée.</string>
+    <string name="canvas_decklink_io_warning">Ce périphérique est actuellement utilisé pour la sortie. L'entrée peut ne pas être disponible sur les périphériques qui ne prennent pas en charge l'E/S simultanée.</string>
     <string name="canvas_tool_select">Sélectionner</string>
     <string name="canvas_tool_rectangle">Rectangle</string>
     <string name="canvas_tool_ellipse">Ellipse</string>
@@ -822,7 +822,7 @@
     <string name="canvas_source_clock">Horloge</string>
     <string name="canvas_source_qrcode">Code QR</string>
     <string name="canvas_source_camera">Caméra</string>
-    <string name="canvas_source_screen_capture">Capture d\'écran</string>
+    <string name="canvas_source_screen_capture">Capture d'écran</string>
     <string name="canvas_source_bible">Bible</string>
     <string name="canvas_bible_version">Version de la Bible</string>
     <string name="canvas_bible_verse_text">Texte du verset</string>
@@ -835,7 +835,7 @@
     <string name="canvas_bible_ref_bold">Référence en gras</string>
     <string name="canvas_bible_ref_italic">Référence en italique</string>
     <string name="canvas_text_color">Couleur du texte</string>
-    <string name="canvas_text_bg_color">Couleur d\'arrière-plan</string>
+    <string name="canvas_text_bg_color">Couleur d'arrière-plan</string>
     <string name="canvas_text_bold">Gras</string>
     <string name="canvas_text_italic">Italique</string>
     <string name="canvas_clock_mode">Mode</string>
@@ -856,7 +856,7 @@
     <string name="canvas_qr_wifi_password">Mot de passe</string>
     <string name="canvas_qr_wifi_encryption">Chiffrement</string>
     <string name="canvas_qr_wifi_hidden">Réseau caché</string>
-    <string name="canvas_qr_error_correction">Correction d\'erreur</string>
+    <string name="canvas_qr_error_correction">Correction d'erreur</string>
     <string name="canvas_camera_device">Caméra</string>
     <string name="canvas_camera_name">Nom du périphérique</string>
     <string name="canvas_camera_none_found">Aucune caméra trouvée</string>
@@ -873,7 +873,7 @@
     <string name="canvas_capture_width">Largeur de capture</string>
     <string name="canvas_capture_height">Hauteur de capture</string>
     <string name="canvas_capture_mode">Mode de capture</string>
-    <string name="canvas_capture_mode_region">Région d\'écran</string>
+    <string name="canvas_capture_mode_region">Région d'écran</string>
     <string name="canvas_capture_mode_window">Fenêtre</string>
     <string name="canvas_capture_window">Fenêtre</string>
     <string name="canvas_capture_refresh_windows">Actualiser la liste des fenêtres</string>
@@ -881,7 +881,7 @@
     <string name="canvas_placeholder_qr">QR</string>
     <string name="canvas_placeholder_camera">Caméra : %1$s</string>
     <string name="canvas_placeholder_camera_default">Caméra</string>
-    <string name="canvas_placeholder_screen_capture">Capture d\'écran</string>
+    <string name="canvas_placeholder_screen_capture">Capture d'écran</string>
     <string name="canvas_transform_x">X</string>
     <string name="canvas_transform_y">Y</string>
     <string name="canvas_transform_w">L</string>
@@ -895,7 +895,7 @@
     <string name="companion_server">Serveur compagnon</string>
     <string name="server_description">Permet aux appareils mobiles et aux clients distants de recevoir des données de cantiques et de Bible depuis cette application.</string>
     <string name="enable_server">Activer le serveur</string>
-    <string name="server_running">En cours d\'exécution</string>
+    <string name="server_running">En cours d'exécution</string>
     <string name="server_stopped">Arrêté</string>
     <string name="server_port">Port</string>
     <string name="server_port_hint">8765</string>
@@ -910,33 +910,33 @@
     <string name="show_qr_code">QR</string>
     <string name="cert_download_button">Télécharger le certificat</string>
     <string name="cert_download_qr_title">Installer le certificat CA</string>
-    <string name="cert_download_scan_hint">Ouvrez l\'application mobile ChurchPresenter → appuyez sur ⚙ Paramètres → Confiance du certificat → Configuration, puis appuyez sur « Scanner le code QR » et pointez la caméra vers ce code.</string>
+    <string name="cert_download_scan_hint">Ouvrez l'application mobile ChurchPresenter → appuyez sur ⚙ Paramètres → Confiance du certificat → Configuration, puis appuyez sur « Scanner le code QR » et pointez la caméra vers ce code.</string>
     <string name="cert_install_ios_title">🍎  Configuration iOS</string>
-    <string name="cert_install_ios_step1">Dans l\'application mobile, appuyez sur « Scanner le code QR » et scannez ce code. L\'application résoudra l\'URL du certificat automatiquement.</string>
-    <string name="cert_install_ios_step2">Appuyez sur « Ouvrir l\'URL du certificat » dans l\'application — Safari s\'ouvre et demande de télécharger le profil. Appuyez sur Autoriser.</string>
+    <string name="cert_install_ios_step1">Dans l'application mobile, appuyez sur « Scanner le code QR » et scannez ce code. L'application résoudra l'URL du certificat automatiquement.</string>
+    <string name="cert_install_ios_step2">Appuyez sur « Ouvrir l'URL du certificat » dans l'application — Safari s'ouvre et demande de télécharger le profil. Appuyez sur Autoriser.</string>
     <string name="cert_install_ios_step3">Ouvrez Réglages → Général → Gestion des appareils et VPN → appuyez sur ChurchPresenter CA → Installer → saisissez votre code.</string>
-    <string name="cert_install_ios_trust_title">⚠️  Requis après l\'installation</string>
-    <string name="cert_install_ios_trust_step">Réglages → Général → À propos → Réglages de confiance des certificats → activez la confiance totale pour ChurchPresenter CA. Sans cette étape, l\'application ne peut pas établir de connexion sécurisée.</string>
+    <string name="cert_install_ios_trust_title">⚠️  Requis après l'installation</string>
+    <string name="cert_install_ios_trust_step">Réglages → Général → À propos → Réglages de confiance des certificats → activez la confiance totale pour ChurchPresenter CA. Sans cette étape, l'application ne peut pas établir de connexion sécurisée.</string>
     <string name="cert_install_android_title">🤖  Configuration Android</string>
-    <string name="cert_install_android_step1">Dans l\'application mobile, appuyez sur « Scanner le code QR » et scannez ce code. L\'application résoudra l\'URL du certificat automatiquement.</string>
-    <string name="cert_install_android_step2">Appuyez sur « Ouvrir l\'URL du certificat » — Chrome télécharge ChurchPresenter-CA.crt. Appuyez sur le fichier dans la notification ou dans Téléchargements pour l\'installer directement.</string>
-    <string name="cert_install_android_cant_title">🚫  Impossible d\'installer le certificat / sources connues uniquement ?</string>
-    <string name="cert_install_android_cant_intro">Certaines versions d\'Android bloquent les installations directes de certificats. Utilisez le chemin manuel à la place :</string>
+    <string name="cert_install_android_step1">Dans l'application mobile, appuyez sur « Scanner le code QR » et scannez ce code. L'application résoudra l'URL du certificat automatiquement.</string>
+    <string name="cert_install_android_step2">Appuyez sur « Ouvrir l'URL du certificat » — Chrome télécharge ChurchPresenter-CA.crt. Appuyez sur le fichier dans la notification ou dans Téléchargements pour l'installer directement.</string>
+    <string name="cert_install_android_cant_title">🚫  Impossible d'installer le certificat / sources connues uniquement ?</string>
+    <string name="cert_install_android_cant_intro">Certaines versions d'Android bloquent les installations directes de certificats. Utilisez le chemin manuel à la place :</string>
     <string name="cert_install_android_cant_step1">Paramètres → Sécurité (ou Biométrie et sécurité sur Samsung).</string>
     <string name="cert_install_android_cant_step2">Appuyez sur Chiffrement et identifiants → Installer un certificat → Certificat CA.</string>
     <string name="cert_install_android_cant_step3">Accédez aux Téléchargements, sélectionnez ChurchPresenter-CA.crt et confirmez.</string>
     <string name="cert_fingerprint_label">Empreinte SHA-256</string>
-    <string name="cert_fingerprint_verify">Vérifiez que cette empreinte correspond après l\'installation — garantit que vous avez installé le bon certificat.</string>
+    <string name="cert_fingerprint_verify">Vérifiez que cette empreinte correspond après l'installation — garantit que vous avez installé le bon certificat.</string>
     <string name="api_key_qr_title">Code QR de la clé API</string>
     <string name="connection_qr_title">Code QR de connexion</string>
     <string name="connection_qr_url_label">URL du serveur</string>
     <string name="connection_qr_key_label">Clé API</string>
     <string name="close">Fermer</string>
     <string name="server_url_label">URL du serveur</string>
-    <string name="copy_url">Copier l\'URL</string>
-    <string name="server_host_label">Remplacement d\'hôte</string>
+    <string name="copy_url">Copier l'URL</string>
+    <string name="server_host_label">Remplacement d'hôte</string>
     <string name="server_host_hint">ex. 192.168.1.50 ou church-mac.local</string>
-    <string name="server_host_note">IP fixe ou nom d\'hôte affiché dans l\'URL. Laissez vide pour la détection automatique.</string>
+    <string name="server_host_note">IP fixe ou nom d'hôte affiché dans l'URL. Laissez vide pour la détection automatique.</string>
     <string name="server_endpoints">Points de terminaison disponibles</string>
     <string name="server_restart">Redémarrer</string>
     <string name="server_endpoints_read">Lecture</string>
@@ -954,7 +954,7 @@
     <string name="endpoint_desc_schedule">programme actuel</string>
     <string name="endpoint_desc_presentation_catalog">catalogue des présentations</string>
     <string name="endpoint_desc_slide_image">image de diapositive (JPEG)</string>
-    <string name="endpoint_desc_picture_catalog">catalogue du dossier d\'images</string>
+    <string name="endpoint_desc_picture_catalog">catalogue du dossier d'images</string>
     <string name="endpoint_desc_picture_image">image (JPEG)</string>
     <string name="endpoint_desc_select_picture">sélectionner une image par index</string>
     <string name="endpoint_desc_ws_select_picture">sélectionner une image (WS)</string>
@@ -1019,7 +1019,7 @@
     <string name="menu_statistics">Statistiques</string>
     <string name="export_to_xls">Exporter en XLS</string>
     <string name="statistics_exported_success">Statistiques exportées avec succès.</string>
-    <string name="statistics_exported_error">Échec de l\'exportation des statistiques.</string>
+    <string name="statistics_exported_error">Échec de l'exportation des statistiques.</string>
     <string name="file_chooser_save_statistics">Enregistrer les statistiques sous</string>
     <string name="file_filter_xls">Tableur Excel (*.xls)</string>
 
@@ -1033,7 +1033,7 @@
     <string name="remote_api_qa_deny">Q&amp;R : Refuser la question</string>
     <string name="remote_api_qa_done">Q&amp;R : Marquer comme terminée</string>
     <string name="remote_api_qa_display">Q&amp;R : Diffuser en direct</string>
-    <string name="remote_api_qa_clear_display">Q&amp;R : Effacer l\'affichage</string>
+    <string name="remote_api_qa_clear_display">Q&amp;R : Effacer l'affichage</string>
     <string name="remote_api_request_title">Requête API distante</string>
     <string name="remote_api_request_title_queued">Requête API distante (%1$d en attente)</string>
     <string name="remote_client_label">Client :</string>
@@ -1067,7 +1067,7 @@
 
     <!-- Remote Clients settings section (Server Settings tab) -->
     <string name="remote_clients_title">Clients distants</string>
-    <string name="remote_clients_description">Gérez les clients compagnons définitivement autorisés et bloqués. Les clients sont identifiés par l\'en-tête X-Device-Id envoyé avec chaque requête.</string>
+    <string name="remote_clients_description">Gérez les clients compagnons définitivement autorisés et bloqués. Les clients sont identifiés par l'en-tête X-Device-Id envoyé avec chaque requête.</string>
     <string name="allowed_clients">✓  Clients autorisés</string>
     <string name="allowed_clients_description">Les requêtes de ces clients sont automatiquement approuvées sans afficher de boîte de dialogue.</string>
     <string name="blocked_clients">⛔  Clients bloqués</string>
@@ -1101,13 +1101,13 @@
     <string name="convert">Convertir</string>
     <string name="tooltip_directory_writable">Le répertoire est accessible en écriture</string>
     <string name="tooltip_directory_not_found">Répertoire introuvable. Créez-le ou choisissez un autre emplacement.</string>
-    <string name="tooltip_directory_not_writable">Impossible d\'écrire dans ce répertoire. Choisissez un autre emplacement ou modifiez les permissions.</string>
+    <string name="tooltip_directory_not_writable">Impossible d'écrire dans ce répertoire. Choisissez un autre emplacement ou modifiez les permissions.</string>
     <string name="song_folder_with_count">%1$s (%2$d cantiques)</string>
 
     <!-- Song Settings - Display Modes and Language Options -->
     <string name="number_before_title">Numéro avant le titre</string>
     <string name="fullscreen_display">Plein écran</string>
-    <string name="display_mode_label">Mode d\'affichage :</string>
+    <string name="display_mode_label">Mode d'affichage :</string>
     <string name="display_mode_one_verse">1 verset</string>
     <string name="display_mode_one_line">1 ligne</string>
     <string name="song_language_both">Les deux</string>
@@ -1135,19 +1135,19 @@
     <string name="stage_monitor_enable">Activer le moniteur de scène</string>
     <string name="stage_monitor_display">Écran cible</string>
     <string name="stage_monitor_display_none">Aucun (désactivé)</string>
-    <string name="stage_monitor_show_next_slide">Afficher l\'aperçu de la prochaine diapositive</string>
-    <string name="stage_monitor_show_clock">Afficher l\'horloge</string>
+    <string name="stage_monitor_show_next_slide">Afficher l'aperçu de la prochaine diapositive</string>
+    <string name="stage_monitor_show_clock">Afficher l'horloge</string>
     <string name="stage_monitor_show_timer">Afficher le compte à rebours</string>
-    <string name="stage_monitor_show_section_label">Afficher l\'étiquette de section</string>
+    <string name="stage_monitor_show_section_label">Afficher l'étiquette de section</string>
     <string name="stage_monitor_show_notes">Afficher les notes du présentateur</string>
     <string name="stage_monitor_section_general">Général</string>
     <string name="stage_monitor_section_current">Diapositive actuelle</string>
     <string name="stage_monitor_section_next">Aperçu de la prochaine diapositive</string>
-    <string name="stage_monitor_section_label_style">Style d\'étiquette</string>
+    <string name="stage_monitor_section_label_style">Style d'étiquette</string>
     <string name="stage_monitor_section_clock">Horloge et minuterie</string>
     <string name="stage_monitor_text_color">Couleur du texte</string>
     <string name="stage_monitor_font_size">Taille de police</string>
-    <string name="stage_monitor_background_color">Couleur d\'arrière-plan</string>
+    <string name="stage_monitor_background_color">Couleur d'arrière-plan</string>
     <string name="stage_monitor_layout">Disposition</string>
     <string name="stage_monitor_layout_vertical">Vertical</string>
     <string name="stage_monitor_layout_horizontal">Horizontal</string>
@@ -1159,8 +1159,8 @@
     <string name="stage_monitor_quadrant_timer">Haut droite : compte à rebours</string>
     <string name="stage_monitor_quadrant_clock">Bas centre : horloge</string>
     <string name="stage_monitor_quadrant_notes">Bas droite : notes du présentateur</string>
-    <string name="stage_monitor_show_label">Afficher l\'étiquette cantique/Bible</string>
-    <string name="stage_monitor_label_style_section">Style d\'étiquette</string>
+    <string name="stage_monitor_show_label">Afficher l'étiquette cantique/Bible</string>
+    <string name="stage_monitor_label_style_section">Style d'étiquette</string>
     <string name="stage_monitor_clock_show_seconds">Afficher les secondes</string>
     <string name="stage_monitor_clock_24h">Format 24 heures</string>
     <string name="stage_monitor_notes_from_presentation">Les notes sont automatiquement affichées depuis la diapositive active de PowerPoint ou Keynote.</string>
@@ -1190,18 +1190,18 @@
     <string name="qa_no_history">Aucun historique des sessions précédentes</string>
     <string name="qa_export_to_file">Exporter vers un fichier</string>
     <string name="qa_import_from_file">Importer depuis un fichier</string>
-    <string name="qa_delete_all_history">Supprimer tout l\'historique</string>
+    <string name="qa_delete_all_history">Supprimer tout l'historique</string>
     <string name="qa_export_dialog_title">Exporter les questions</string>
     <string name="qa_import_dialog_title">Importer des questions</string>
     <string name="qa_submit_questions">Soumettre des questions</string>
-    <string name="qa_hide_qr">Masquer le QR de l\'affichage</string>
-    <string name="qa_show_qr">Afficher le QR à l\'écran</string>
-    <string name="qa_admin_panel">Panneau d\'administration</string>
+    <string name="qa_hide_qr">Masquer le QR de l'affichage</string>
+    <string name="qa_show_qr">Afficher le QR à l'écran</string>
+    <string name="qa_admin_panel">Panneau d'administration</string>
     <string name="qa_server_hint">Démarrez le serveur compagnon pour activer Q&amp;R</string>
-    <string name="qa_display_styling">Style d\'affichage</string>
+    <string name="qa_display_styling">Style d'affichage</string>
     <string name="qa_font">Police</string>
     <string name="qa_size">Taille</string>
-    <string name="qa_background_color">Couleur d\'arrière-plan</string>
+    <string name="qa_background_color">Couleur d'arrière-plan</string>
     <string name="qa_transparent">Transparent</string>
     <string name="qa_position">Position</string>
     <string name="qa_settings_section">Paramètres</string>
@@ -1222,8 +1222,8 @@
     <string name="qa_submitter_device">Appareil : %1$s</string>
     <string name="qa_public_access">Accès public</string>
     <string name="qa_public_access_description">Permet aux utilisateurs de soumettre des questions via les données mobiles sans rejoindre votre WiFi</string>
-    <string name="qa_enable_public_access">Activer l\'accès public</string>
-    <string name="qa_disable_public_access">Désactiver l\'accès public</string>
+    <string name="qa_enable_public_access">Activer l'accès public</string>
+    <string name="qa_disable_public_access">Désactiver l'accès public</string>
     <string name="qa_downloading_tunnel">Téléchargement du client tunnel…</string>
     <string name="qa_starting_tunnel">Démarrage du tunnel…</string>
     <string name="qa_qr_code_shows">Le code QR affiche :</string>
@@ -1242,15 +1242,15 @@
 
     <!-- QA: missing strings -->
     <string name="qa_sort">Trier : %1$s</string>
-    <string name="qa_sort_newest">Plus récentes d\'abord</string>
-    <string name="qa_sort_oldest">Plus anciennes d\'abord</string>
+    <string name="qa_sort_newest">Plus récentes d'abord</string>
+    <string name="qa_sort_oldest">Plus anciennes d'abord</string>
     <string name="qa_sort_most_votes">Plus de votes</string>
     <string name="qa_sort_least_votes">Moins de votes</string>
     <string name="qa_add">Ajouter</string>
     <string name="qa_clear_all_confirm_message">Êtes-vous sûr de vouloir effacer toutes les questions ? Cette action est irréversible.</string>
     <string name="qa_clear">Effacer</string>
     <string name="qa_export_clear">Exporter &amp; Effacer</string>
-    <string name="qa_copy_url">Copier l\'URL</string>
+    <string name="qa_copy_url">Copier l'URL</string>
     <string name="qa_voting_enabled">Vote activé</string>
     <string name="qa_voting_disabled">Vote désactivé</string>
     <string name="qa_opacity">Opacité :</string>
@@ -1260,7 +1260,7 @@
     <string name="stt_disconnect">Déconnecter</string>
     <string name="stt_connect">Connecter</string>
     <string name="stt_go_live">Diffuser en direct</string>
-    <string name="stt_display_mode">Mode d\'affichage</string>
+    <string name="stt_display_mode">Mode d'affichage</string>
     <string name="stt_mode_transcribe">Transcription uniquement</string>
     <string name="stt_mode_translate">Traduction uniquement</string>
     <string name="stt_mode_both">Les deux</string>
@@ -1278,22 +1278,22 @@
     <string name="stt_drip_feed">Flux progressif</string>
     <string name="stt_drip_feed_speed">Vitesse (ms/mot) :</string>
     <string name="stt_live_preview">Aperçu en direct</string>
-    <string name="stt_not_connected">Non connecté. Saisissez l\'URL du serveur STT et cliquez sur Connecter.</string>
+    <string name="stt_not_connected">Non connecté. Saisissez l'URL du serveur STT et cliquez sur Connecter.</string>
     <string name="stt_waiting_for_transcription">En attente de transcription…</string>
     <string name="stt_transcription_label">Transcription</string>
     <string name="stt_translation_label">Traduction</string>
-    <string name="stt_display_styling">Style d\'affichage</string>
+    <string name="stt_display_styling">Style d'affichage</string>
     <string name="stt_text_color">Couleur du texte</string>
     <string name="stt_translation_color">Couleur de la traduction</string>
     <string name="stt_font">Police</string>
     <string name="stt_size">Taille</string>
-    <string name="stt_background_color">Couleur d\'arrière-plan</string>
+    <string name="stt_background_color">Couleur d'arrière-plan</string>
     <string name="stt_opacity">Opacité :</string>
     <string name="stt_position">Position</string>
 
     <!-- CCLI Report -->
     <string name="ccli_report">Rapport CCLI</string>
-    <string name="ccli_report_title">Rapport d\'utilisation CCLI</string>
+    <string name="ccli_report_title">Rapport d'utilisation CCLI</string>
     <string name="ccli_preset_30d">30 derniers jours</string>
     <string name="ccli_preset_90d">90 derniers jours</string>
     <string name="ccli_preset_this_year">Cette année</string>
@@ -1305,7 +1305,7 @@
     <string name="ccli_songs_summary">%1$d cantiques uniques · %2$d lectures au total</string>
     <string name="ccli_bible_summary">%1$d versets uniques · %2$d lectures au total</string>
     <string name="ccli_no_data">Aucune donnée pour cette période.</string>
-    <string name="ccli_no_events">Aucun journal d\'événements. Les présentations de cantiques et versets sont suivies automatiquement à partir de maintenant.</string>
+    <string name="ccli_no_events">Aucun journal d'événements. Les présentations de cantiques et versets sont suivies automatiquement à partir de maintenant.</string>
     <string name="ccli_songs_chart">Cantiques les plus utilisés</string>
     <string name="ccli_bible_books_chart">Livres bibliques les plus utilisés</string>
     <string name="ccli_activity_title">Présentations au fil du temps</string>
@@ -1329,7 +1329,7 @@
     <string name="ccli_export_csv">Exporter CSV CCLI</string>
     <string name="ccli_export_xls">Exporter XLS</string>
     <string name="ccli_exported_success">Rapport exporté avec succès.</string>
-    <string name="ccli_exported_error">Échec de l\'exportation du rapport.</string>
+    <string name="ccli_exported_error">Échec de l'exportation du rapport.</string>
     <string name="ccli_file_chooser_csv">Enregistrer le rapport CCLI sous</string>
     <string name="ccli_file_filter_csv">Fichiers CSV</string>
     <string name="ccli_file_chooser_xls">Enregistrer le rapport sous XLS</string>
@@ -1370,13 +1370,13 @@
 
     <!-- OBS WebSocket integration -->
     <string name="obs_settings">OBS</string>
-    <string name="obs_description">Change automatiquement les scènes d\'OBS Studio lorsque le contenu change.</string>
+    <string name="obs_description">Change automatiquement les scènes d'OBS Studio lorsque le contenu change.</string>
     <string name="obs_enable">Se connecter à OBS Studio</string>
     <string name="obs_host">Hôte</string>
     <string name="obs_host_hint">localhost</string>
     <string name="obs_port">Port</string>
     <string name="obs_password">Mot de passe</string>
-    <string name="obs_password_hint">Laisser vide si aucun mot de passe n\'est défini</string>
+    <string name="obs_password_hint">Laisser vide si aucun mot de passe n'est défini</string>
     <string name="obs_connect">Connecter</string>
     <string name="obs_disconnect">Déconnecter</string>
     <string name="obs_status_connected">Connecté</string>
@@ -1386,7 +1386,7 @@
     <string name="obs_scene_mappings">Mappages de scènes</string>
     <string name="obs_scene_mappings_desc">Saisissez le nom de la scène OBS vers laquelle basculer lorsque chaque type de contenu est diffusé en direct. Laissez vide pour utiliser la scène par défaut.</string>
     <string name="obs_default_scene">Scène par défaut</string>
-    <string name="obs_default_scene_hint">Scène de repli lorsqu\'aucun mappage n\'est défini</string>
+    <string name="obs_default_scene_hint">Scène de repli lorsqu'aucun mappage n'est défini</string>
     <string name="obs_scene_hint">Nom de scène OBS</string>
     <string name="obs_mode_bible">Bible</string>
     <string name="obs_mode_songs">Cantiques</string>
@@ -1399,12 +1399,12 @@
     <string name="obs_mode_canvas">Canevas</string>
     <string name="obs_mode_qa">Q&amp;R</string>
     <string name="obs_mode_stt">Transcription</string>
-    <string name="obs_mode_none">Effacer l\'affichage</string>
-    <string name="konami_dialog_title">Vous l\'avez trouvé !</string>
+    <string name="obs_mode_none">Effacer l'affichage</string>
+    <string name="konami_dialog_title">Vous l'avez trouvé !</string>
     <string name="konami_dialog_headline">Code de triche activé</string>
     <string name="konami_dialog_blessings">+30 bénédictions débloquées</string>
     <string name="konami_dialog_message">Vous connaissez le code. Allez maintenant présenter le culte.</string>
-    <string name="konami_dialog_button">C\'est parti !</string>
+    <string name="konami_dialog_button">C'est parti !</string>
     <string name="crossword_tab">Mots croisés</string>
     <string name="crossword_across">Horizontal</string>
     <string name="crossword_down">Vertical</string>
@@ -1413,7 +1413,7 @@
     <string name="crossword_correct">Correct ! Niveau terminé !</string>
     <string name="crossword_all_done">Vous avez terminé tous les niveaux !</string>
     <string name="crossword_loading">Chargement des grilles…</string>
-    <string name="crossword_no_puzzles">Aucune grille de mots croisés disponible pour l\'instant.</string>
+    <string name="crossword_no_puzzles">Aucune grille de mots croisés disponible pour l'instant.</string>
     <string name="crossword_level_label">Niveau %1$d</string>
 
     <!-- Additional language names -->

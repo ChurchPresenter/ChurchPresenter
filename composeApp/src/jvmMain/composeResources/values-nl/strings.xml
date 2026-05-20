@@ -473,10 +473,10 @@
 
     <!-- Presentation Tab Strings -->
     <string name="no_file_selected_presentation">Geen bestand geselecteerd</string>
-    <string name="slide_count">%1$d dia\'s</string>
+    <string name="slide_count">%1$d dia's</string>
     <string name="slide_counter">Dia %1$d van %2$d</string>
-    <string name="loading_slides">Dia\'s laden...</string>
-    <string name="select_presentation_file">Selecteer een presentatiebestand om dia\'s te bekijken</string>
+    <string name="loading_slides">Dia's laden...</string>
+    <string name="select_presentation_file">Selecteer een presentatiebestand om dia's te bekijken</string>
     <string name="supported_formats">Ondersteund: PowerPoint (.ppt, .pptx), Keynote (.key), PDF (.pdf)</string>
     <string name="slide_number">Dia %1$d</string>
     <string name="remove">Verwijderen</string>
@@ -518,9 +518,9 @@
 
     <!-- Background Settings Tab -->
     <string name="default_background_color">Standaard achtergrond</string>
-    <string name="default_background_color_help">Gebruikt wanneer \'Standaard\' is geselecteerd voor Bijbel of Liederen</string>
+    <string name="default_background_color_help">Gebruikt wanneer 'Standaard' is geselecteerd voor Bijbel of Liederen</string>
     <string name="default_lower_third_background">Standaard Lower Third achtergrond</string>
-    <string name="default_lower_third_background_help">Gebruikt wanneer \'Standaard\' is geselecteerd voor Bijbel of Liederen in lower third weergavemodus</string>
+    <string name="default_lower_third_background_help">Gebruikt wanneer 'Standaard' is geselecteerd voor Bijbel of Liederen in lower third weergavemodus</string>
     <!-- Gradient Settings -->
     <string name="gradient_enabled">Verloop</string>
     <string name="gradient_top_color">Bovenkleur:</string>
@@ -531,7 +531,7 @@
     <!-- System Settings -->
     <string name="reset_settings">Alle instellingen resetten</string>
     <string name="reset_settings_confirm">Weet u zeker dat u alle instellingen naar standaard wilt resetten?\n\nDe toepassing wordt opnieuw gestart.</string>
-    <string name="clear_lottie_cache_confirm">Wilt u ook de Lottie generatorcache wissen?\n\nDit verwijdert opgeslagen presets, kleurthema\'s en geüploade logo\'s.</string>
+    <string name="clear_lottie_cache_confirm">Wilt u ook de Lottie generatorcache wissen?\n\nDit verwijdert opgeslagen presets, kleurthema's en geüploade logo's.</string>
     <string name="clear_remote_uploads">Externe uploads wissen</string>
     <string name="clear_remote_uploads_confirm">Weet u zeker dat u alle extern geüploade bestanden wilt verwijderen?\n\nDit verwijdert permanent alle bestanden in de map voor apparaatuploads.</string>
     <string name="remote_uploads_cleared">Map voor externe uploads succesvol gewist.</string>
@@ -859,10 +859,10 @@
     <string name="canvas_qr_error_correction">Foutcorrectie</string>
     <string name="canvas_camera_device">Camera</string>
     <string name="canvas_camera_name">Apparaatnaam</string>
-    <string name="canvas_camera_none_found">Geen camera\'s gevonden</string>
-    <string name="canvas_camera_ffmpeg_hint">Installeer ffmpeg om virtuele camera\'s te detecteren (OBS, NDI, enz.)</string>
-    <string name="canvas_camera_v4l2_hint">Installeer v4l2loopback voor virtuele camera\'s: sudo apt install v4l2loopback-dkms</string>
-    <string name="canvas_camera_refresh">Camera\'s vernieuwen</string>
+    <string name="canvas_camera_none_found">Geen camera's gevonden</string>
+    <string name="canvas_camera_ffmpeg_hint">Installeer ffmpeg om virtuele camera's te detecteren (OBS, NDI, enz.)</string>
+    <string name="canvas_camera_v4l2_hint">Installeer v4l2loopback voor virtuele camera's: sudo apt install v4l2loopback-dkms</string>
+    <string name="canvas_camera_refresh">Camera's vernieuwen</string>
     <string name="canvas_camera_format">Videoformaat</string>
     <string name="canvas_camera_format_auto">Automatisch (standaard)</string>
     <string name="canvas_camera_connection">Videoverbinding</string>
@@ -902,7 +902,7 @@
     <string name="server_port_note">Wijzig de poort voordat u de server start.</string>
     <string name="api_key_protection">API-sleutelbeveiliging</string>
     <string name="allow_file_upload">Bestandsupload toestaan</string>
-    <string name="allow_file_upload_description">Mobiele apparaten toestaan bestanden (foto\'s en presentaties) naar deze computer te uploaden.</string>
+    <string name="allow_file_upload_description">Mobiele apparaten toestaan bestanden (foto's en presentaties) naar deze computer te uploaden.</string>
     <string name="api_key_label">API-sleutel</string>
     <string name="api_key_hint">Voer een geheime sleutel in…</string>
     <string name="generate_api_key">Genereren</string>

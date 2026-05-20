@@ -244,7 +244,7 @@
     <string name="please_select_file_first">Bitte wählen Sie zuerst eine Datei aus der Liste aus.</string>
     <string name="no_file_selected_title">Keine Datei ausgewählt</string>
     <string name="confirm_delete">Löschen bestätigen</string>
-    <string name="confirm_delete_file">Sind Sie sicher, dass Sie \'%s\' löschen möchten?</string>
+    <string name="confirm_delete_file">Sind Sie sicher, dass Sie '%s' löschen möchten?</string>
     <string name="import_error">Importfehler</string>
     <string name="delete_error">Löschfehler</string>
 
@@ -622,7 +622,7 @@
     <string name="copy_api_key">Kopieren</string>
     <string name="copy_url">URL kopieren</string>
     <string name="default_lower_third_background">Standard-Lower-Third-Hintergrund</string>
-    <string name="default_lower_third_background_help">Wird verwendet, wenn \'Standard\' für Bibel oder Lieder im Lower-Third-Anzeigemodus ausgewählt ist</string>
+    <string name="default_lower_third_background_help">Wird verwendet, wenn 'Standard' für Bibel oder Lieder im Lower-Third-Anzeigemodus ausgewählt ist</string>
     <string name="enable_server">Server aktivieren</string>
     <string name="font_preview_text">ABCDabcd1234</string>
     <string name="generate_api_key">Generieren</string>
@@ -1321,7 +1321,7 @@
     <string name="konami_dialog_headline">Cheat-Code aktiviert</string>
     <string name="konami_dialog_blessings">+30 Segnungen freigeschaltet</string>
     <string name="konami_dialog_message">Du kennst den Code. Jetzt geh und präsentiere die Anbetung.</string>
-    <string name="konami_dialog_button">Los geht\'s</string>
+    <string name="konami_dialog_button">Los geht's</string>
     <string name="add_to_favorites">Zu Favoriten hinzufügen</string>
     <string name="remove_from_favorites">Aus Favoriten entfernen</string>
     <string name="song_favorites">Favoriten</string>
