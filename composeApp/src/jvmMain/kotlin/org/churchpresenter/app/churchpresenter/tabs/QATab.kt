@@ -208,6 +208,8 @@ fun QATab(
     val displayedQuestion = qaManager.displayedQuestion
     val showQROnDisplay = qaManager.showQRCodeOnDisplay
     val presentingMode by presenterManager.presentingMode
+    val screenLocks by presenterManager.screenLocks
+    val isQALocked = screenLocks.values.any { it == Presenting.QA }
 
     // Reset QA display state when display is cleared (e.g. via Escape or Clear Display)
     LaunchedEffect(presentingMode) {
@@ -675,6 +677,7 @@ fun QATab(
                 Spacer(Modifier.height(8.dp))
                 OutlinedButton(
                     onClick = {
+                        if (qaManager.showQRCodeOnDisplay && isQALocked) return@OutlinedButton
                         qaManager.toggleQRCodeDisplay()
                         presenterManager.setShowQRCodeOnDisplay(qaManager.showQRCodeOnDisplay)
                         if (qaManager.showQRCodeOnDisplay) { presenterManager.setDisplayedQuestion(null); presenting(Presenting.QA) }
