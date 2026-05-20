@@ -128,9 +128,9 @@ class StatisticsManager {
 
     // ── Recording ─────────────────────────────────────────────────────────────
 
-    fun recordSongDisplay(songNumber: Int, title: String, songbook: String, author: String = "") {
+    fun recordSongDisplay(songId: String, songNumber: Int, title: String, songbook: String, author: String = "") {
         synchronized(lock) {
-            val key = "$songbook::$songNumber"
+            val key = songId.ifBlank { "$songbook::$songNumber" }
             val existing = statistics.songDisplayCounts[key]
             statistics = statistics.copy(
                 songDisplayCounts = statistics.songDisplayCounts + (key to SongDisplayEntry(
@@ -196,8 +196,8 @@ class StatisticsManager {
         eventLog.songEvents.isNotEmpty() || eventLog.verseEvents.isNotEmpty()
     }
 
-    fun getSongPlayCount(songbook: String, songNumber: Int): Int =
-        synchronized(lock) { statistics.songDisplayCounts["$songbook::$songNumber"]?.count ?: 0 }
+    fun getSongPlayCount(songId: String): Int =
+        synchronized(lock) { statistics.songDisplayCounts[songId]?.count ?: 0 }
 
     fun getAllSongsInRange(fromMs: Long, toMs: Long): List<SongSummary> = synchronized(lock) {
         eventLog.songEvents

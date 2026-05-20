@@ -620,6 +620,7 @@ fun MainDesktop(
                                 )
                             )
                             statisticsManager?.recordSongDisplay(
+                                songId = item.songId,
                                 songNumber = item.songNumber,
                                 title = item.title,
                                 songbook = item.songbook

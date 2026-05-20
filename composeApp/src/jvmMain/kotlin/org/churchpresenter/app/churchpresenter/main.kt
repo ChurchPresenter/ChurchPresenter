@@ -1360,7 +1360,7 @@ private fun executeProjectItem(
                     type = Constants.SECTION_TYPE_SONG
                 )
             )
-            statisticsManager?.recordSongDisplay(item.songNumber, item.title, item.songbook)
+            statisticsManager?.recordSongDisplay(songId = item.songId, songNumber = item.songNumber, title = item.title, songbook = item.songbook)
             presenterManager.setPresentingMode(Presenting.LYRICS)
             presenterManager.setShowPresenterWindow(true)
         }

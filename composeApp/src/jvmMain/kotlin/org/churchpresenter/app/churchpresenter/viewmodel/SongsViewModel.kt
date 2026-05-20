@@ -544,7 +544,7 @@ class SongsViewModel(
                 Constants.SORT_PLAY_COUNT -> {
                     val sm = statisticsManager
                     if (sm != null) {
-                        val counts = items.associate { it.songId to sm.getSongPlayCount(it.songbook, it.number.toIntOrNull() ?: 0) }
+                        val counts = items.associate { it.songId to sm.getSongPlayCount(it.songId) }
                         if (_sortAscending.value) items.sortedBy { counts[it.songId] ?: 0 }
                         else items.sortedByDescending { counts[it.songId] ?: 0 }
                     } else items

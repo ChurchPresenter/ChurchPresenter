@@ -229,6 +229,7 @@ fun SongsTab(
             if (idx in items.indices) {
                 val song = items[idx]
                 statisticsManager?.recordSongDisplay(
+                    songId = song.songId,
                     songNumber = song.number.toIntOrNull() ?: 0,
                     title = song.title,
                     songbook = song.songbook,
@@ -916,7 +917,7 @@ fun SongsTab(
                                         "songbook"   -> song.songbook
                                         "tune"       -> song.tune
                                         "play_count" -> {
-                                            val count = statisticsManager?.getSongPlayCount(song.songbook, song.number.toIntOrNull() ?: 0) ?: 0
+                                            val count = statisticsManager?.getSongPlayCount(song.songId) ?: 0
                                             if (count > 0) count.toString() else ""
                                         }
                                         "author"     -> song.author
