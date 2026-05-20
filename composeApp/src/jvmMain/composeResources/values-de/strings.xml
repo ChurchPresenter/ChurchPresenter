@@ -271,6 +271,12 @@
     <string name="language_polish">Polnisch</string>
     <string name="language_belarusian">Weißrussisch</string>
     <string name="language_czech">Tschechisch</string>
+    <string name="language_spanish">Spanisch</string>
+    <string name="language_french">Französisch</string>
+    <string name="language_dutch">Niederländisch</string>
+    <string name="language_portuguese">Portugiesisch</string>
+    <string name="language_romanian">Rumänisch</string>
+    <string name="language_slovak">Slowakisch</string>
 
     <!-- Search Results -->
     <string name="no_results_found">Keine Ergebnisse gefunden für "%1$s"</string>

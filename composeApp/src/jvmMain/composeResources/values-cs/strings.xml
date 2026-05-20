@@ -227,6 +227,12 @@
     <string name="language_polish">Polština</string>
     <string name="language_belarusian">Běloruština</string>
     <string name="language_czech">Čeština</string>
+    <string name="language_spanish">Španělština</string>
+    <string name="language_french">Francouzština</string>
+    <string name="language_dutch">Nizozemština</string>
+    <string name="language_portuguese">Portugalština</string>
+    <string name="language_romanian">Rumunština</string>
+    <string name="language_slovak">Slovenština</string>
 
     <!-- Search Results -->
     <string name="no_results_found">Pro "%1$s" nebyly nalezeny žádné výsledky</string>

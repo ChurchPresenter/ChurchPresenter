@@ -271,6 +271,12 @@
     <string name="language_polish">Поляк</string>
     <string name="language_belarusian">Беларус</string>
     <string name="language_czech">Чех</string>
+    <string name="language_spanish">Испан</string>
+    <string name="language_french">Француз</string>
+    <string name="language_dutch">Нидерланд</string>
+    <string name="language_portuguese">Португал</string>
+    <string name="language_romanian">Румын</string>
+    <string name="language_slovak">Словак</string>
 
     <!-- Search Results -->
     <string name="no_results_found">"%1$s" үшін нәтижелер табылмады</string>

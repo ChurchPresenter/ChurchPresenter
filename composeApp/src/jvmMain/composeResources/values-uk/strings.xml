@@ -271,6 +271,12 @@
     <string name="language_polish">Польська</string>
     <string name="language_belarusian">Білоруська</string>
     <string name="language_czech">Чеська</string>
+    <string name="language_spanish">Іспанська</string>
+    <string name="language_french">Французька</string>
+    <string name="language_dutch">Нідерландська</string>
+    <string name="language_portuguese">Португальська</string>
+    <string name="language_romanian">Румунська</string>
+    <string name="language_slovak">Словацька</string>
 
     <!-- Search Results -->
     <string name="no_results_found">Результати не знайдені для "%1$s"</string>

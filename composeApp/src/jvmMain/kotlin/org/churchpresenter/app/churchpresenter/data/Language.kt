@@ -8,6 +8,12 @@ enum class Language(val code: String, val nativeName: String) {
     GERMAN("de", "Deutsch"),
     POLISH("pl", "Polski"),
     BELARUSIAN("be", "Беларуская"),
-    CZECH("cs", "Čeština")
+    CZECH("cs", "Čeština"),
+    SPANISH("es", "Español"),
+    FRENCH("fr", "Français"),
+    DUTCH("nl", "Nederlands"),
+    PORTUGUESE("pt", "Português"),
+    ROMANIAN("ro", "Română"),
+    SLOVAK("sk", "Slovenčina")
 }
 

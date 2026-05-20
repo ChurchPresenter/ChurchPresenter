@@ -10,11 +10,17 @@ import churchpresenter.composeapp.generated.resources.dark_theme
 import churchpresenter.composeapp.generated.resources.light_theme
 import churchpresenter.composeapp.generated.resources.language_belarusian
 import churchpresenter.composeapp.generated.resources.language_czech
+import churchpresenter.composeapp.generated.resources.language_dutch
 import churchpresenter.composeapp.generated.resources.language_english
+import churchpresenter.composeapp.generated.resources.language_french
 import churchpresenter.composeapp.generated.resources.language_german
 import churchpresenter.composeapp.generated.resources.language_kazakh
 import churchpresenter.composeapp.generated.resources.language_polish
+import churchpresenter.composeapp.generated.resources.language_portuguese
+import churchpresenter.composeapp.generated.resources.language_romanian
 import churchpresenter.composeapp.generated.resources.language_russian
+import churchpresenter.composeapp.generated.resources.language_slovak
+import churchpresenter.composeapp.generated.resources.language_spanish
 import churchpresenter.composeapp.generated.resources.language_ukrainian
 import churchpresenter.composeapp.generated.resources.menu_about
 import churchpresenter.composeapp.generated.resources.menu_add_to_schedule
@@ -189,6 +195,30 @@ fun FrameWindowScope.NavigationTopBar(
             Item(
                 text = "🇨🇿 ${stringResource(Res.string.language_czech)}",
                 onClick = { onLanguageChange(Language.CZECH) }
+            )
+            Item(
+                text = "🇪🇸 ${stringResource(Res.string.language_spanish)}",
+                onClick = { onLanguageChange(Language.SPANISH) }
+            )
+            Item(
+                text = "🇫🇷 ${stringResource(Res.string.language_french)}",
+                onClick = { onLanguageChange(Language.FRENCH) }
+            )
+            Item(
+                text = "🇳🇱 ${stringResource(Res.string.language_dutch)}",
+                onClick = { onLanguageChange(Language.DUTCH) }
+            )
+            Item(
+                text = "🇵🇹 ${stringResource(Res.string.language_portuguese)}",
+                onClick = { onLanguageChange(Language.PORTUGUESE) }
+            )
+            Item(
+                text = "🇷🇴 ${stringResource(Res.string.language_romanian)}",
+                onClick = { onLanguageChange(Language.ROMANIAN) }
+            )
+            Item(
+                text = "🇸🇰 ${stringResource(Res.string.language_slovak)}",
+                onClick = { onLanguageChange(Language.SLOVAK) }
             )
         }
 
