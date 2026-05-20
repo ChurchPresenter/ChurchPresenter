@@ -213,7 +213,7 @@ fun QATab(
 
     // Reset QA display state when display is cleared (e.g. via Escape or Clear Display)
     LaunchedEffect(presentingMode) {
-        if (presentingMode == Presenting.NONE && (showQROnDisplay || displayedQuestion != null)) {
+        if (presentingMode == Presenting.NONE && !isQALocked && (showQROnDisplay || displayedQuestion != null)) {
             qaManager.clearDisplay()
         }
     }
