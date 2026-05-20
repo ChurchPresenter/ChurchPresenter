@@ -1186,7 +1186,7 @@ fun SongsTab(
                                             color = MaterialTheme.colorScheme.onSurface,
                                             maxLines = 1,
                                             overflow = TextOverflow.Ellipsis,
-                                            modifier = Modifier.weight(1f)
+                                            modifier = Modifier.weight(1f, fill = false)
                                         )
                                         if (onAddToSchedule != null) {
                                             IconButton(
