@@ -174,7 +174,6 @@ fun LowerThirdTab(
         }
     }
 
-    val displayProgress = animatedProgress.value
     val canPlay = composition != null && jsonContent.isNotBlank()
 
     val density = LocalDensity.current
@@ -473,7 +472,7 @@ fun LowerThirdTab(
                 ) {
                     if (canPlay) {
                         Image(
-                            painter = rememberLottiePainter(composition = composition, progress = { displayProgress }),
+                            painter = rememberLottiePainter(composition = composition, progress = { animatedProgress.value }),
                             contentDescription = null,
                             contentScale = ContentScale.Fit,
                             modifier = Modifier.fillMaxSize()

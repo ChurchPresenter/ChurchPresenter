@@ -1831,7 +1831,7 @@ private fun PresenterWindows(
                             if (screenAssignment.showStreaming)
                                 LowerThirdPresenter(
                                     jsonContent = lottieJsonContent,
-                                    progress = lottieProgress,
+                                    progress = { presenterManager.lottieProgress.value },
                                     appSettings = appSettings
                                 )
 
@@ -1965,7 +1965,7 @@ private fun PresenterWindows(
                             if (screenAssignment.showStreaming)
                                 LowerThirdPresenter(
                                     jsonContent = lottieJsonContent,
-                                    progress = lottieProgress,
+                                    progress = { presenterManager.lottieProgress.value },
                                     appSettings = appSettings,
                                     outputRole = Constants.OUTPUT_ROLE_KEY
                                 )
@@ -2133,7 +2133,7 @@ private fun PresenterWindows(
                                             if (screenAssignment.showStreaming)
                                                 LowerThirdPresenter(
                                                     jsonContent = lottieJsonContent,
-                                                    progress = lottieProgress,
+                                                    progress = { presenterManager.lottieProgress.value },
                                                     appSettings = appSettings,
                                                     outputRole = Constants.OUTPUT_ROLE_KEY
                                                 )
@@ -2366,7 +2366,7 @@ private fun PresenterWindows(
                                 if (screenAssignment.showStreaming)
                                     LowerThirdPresenter(
                                         jsonContent = lottieJsonContent,
-                                        progress = lottieProgress,
+                                        progress = { presenterManager.lottieProgress.value },
                                         appSettings = appSettings
                                     )
 
@@ -2572,7 +2572,7 @@ private fun PresenterWindows(
                                         if (screenAssignment.showStreaming)
                                             LowerThirdPresenter(
                                                 jsonContent = lottieJsonContent,
-                                                progress = lottieProgress,
+                                                progress = { presenterManager.lottieProgress.value },
                                                 appSettings = appSettings,
                                                 outputRole = Constants.OUTPUT_ROLE_KEY
                                             )
@@ -2716,7 +2716,7 @@ private fun PresenterWindows(
                             if (screenAssignment.showStreaming)
                                 LowerThirdPresenter(
                                     jsonContent = lottieJsonContent,
-                                    progress = lottieProgress,
+                                    progress = { presenterManager.lottieProgress.value },
                                     appSettings = appSettings,
                                     outputRole = Constants.OUTPUT_ROLE_KEY
                                 )

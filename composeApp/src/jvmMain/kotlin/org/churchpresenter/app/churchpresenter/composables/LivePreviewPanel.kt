@@ -241,7 +241,7 @@ private fun SingleDisplayPreview(
                             Presenting.LOWER_THIRD ->
                                 LowerThirdPresenter(
                                     jsonContent = lottieJsonContent,
-                                    progress = lottieProgress,
+                                    progress = { presenterManager.lottieProgress.value },
                                     appSettings = appSettings
                                 )
                             Presenting.ANNOUNCEMENTS ->

@@ -26,7 +26,7 @@ import org.churchpresenter.app.churchpresenter.utils.Constants
 @Composable
 fun LowerThirdPresenter(
     jsonContent: String,
-    progress: Float,
+    progress: () -> Float,
     appSettings: AppSettings,
     outputRole: String = Constants.OUTPUT_ROLE_NORMAL
 ) {
@@ -45,7 +45,7 @@ fun LowerThirdPresenter(
         Image(
             painter = rememberLottiePainter(
                 composition = composition,
-                progress = { progress }
+                progress = progress
             ),
             contentDescription = null,
             contentScale = ContentScale.Fit,
