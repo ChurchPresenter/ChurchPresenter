@@ -28,9 +28,12 @@ import androidx.compose.ui.window.rememberWindowState
 import org.churchpresenter.app.churchpresenter.LocalMainWindowState
 import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
 import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.about_copyright
 import churchpresenter.composeapp.generated.resources.about_title
 import churchpresenter.composeapp.generated.resources.app_name
 import churchpresenter.composeapp.generated.resources.action_ok
+import churchpresenter.composeapp.generated.resources.converter_window_title
+import churchpresenter.composeapp.generated.resources.lottie_gen_window_title
 import churchpresenter.composeapp.generated.resources.open_crash_logs
 import churchpresenter.composeapp.generated.resources.open_converter
 import churchpresenter.composeapp.generated.resources.report_bug
@@ -87,7 +90,7 @@ fun AboutDialog(
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = "© 2025 Church Presenter",
+                    text = stringResource(Res.string.about_copyright),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -132,7 +135,7 @@ fun AboutDialog(
 fun ConverterWindow(theme: ThemeMode, onClose: () -> Unit) {
     Window(
         onCloseRequest = onClose,
-        title = "ChurchPresenter Converter",
+        title = stringResource(Res.string.converter_window_title),
         icon = painterResource(Res.drawable.ic_app_icon),
         state = rememberWindowState(width = 1100.dp, height = 800.dp)
     ) {
@@ -146,7 +149,7 @@ fun ConverterWindow(theme: ThemeMode, onClose: () -> Unit) {
 fun LottieGenWindow(theme: ThemeMode, outputDir: File?, onClose: () -> Unit, onFileSaved: (() -> Unit)? = null, canvasWidth: Int? = null, canvasHeight: Int? = null) {
     Window(
         onCloseRequest = onClose,
-        title = "Lottie Lower Third Generator",
+        title = stringResource(Res.string.lottie_gen_window_title),
         icon = painterResource(Res.drawable.ic_app_icon),
         state = rememberWindowState(width = 1200.dp, height = 800.dp)
     ) {
