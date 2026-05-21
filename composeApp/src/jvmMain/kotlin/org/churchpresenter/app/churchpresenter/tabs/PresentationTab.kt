@@ -208,7 +208,6 @@ fun PresentationTab(
         val mode = presenterManager?.presentingMode?.value
         val notesList = viewModel.slideNotes
         val idx = viewModel.selectedSlideIndex
-        println("[PresentationTab] LaunchedEffect: mode=$mode slides=${viewModel.slides.size} notesCount=${notesList.size} selectedIdx=$idx")
         // Also push when any screen is locked to PRESENTATION, even if global mode changed
         val anyScreenOnPresentation = mode == Presenting.PRESENTATION ||
             presenterManager?.screenLocks?.value?.values?.any { it == Presenting.PRESENTATION } == true
