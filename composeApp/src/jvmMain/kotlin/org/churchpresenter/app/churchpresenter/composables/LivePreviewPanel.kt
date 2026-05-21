@@ -55,7 +55,10 @@ import churchpresenter.composeapp.generated.resources.ic_play
 import churchpresenter.composeapp.generated.resources.fill_badge
 import churchpresenter.composeapp.generated.resources.live_preview_nothing
 import churchpresenter.composeapp.generated.resources.live_preview_title
+import churchpresenter.composeapp.generated.resources.lock_screen_to_tab
+import churchpresenter.composeapp.generated.resources.screen_locked_badge
 import churchpresenter.composeapp.generated.resources.screen_number
+import churchpresenter.composeapp.generated.resources.unlock_screen
 import churchpresenter.composeapp.generated.resources.pause
 import churchpresenter.composeapp.generated.resources.play
 import org.churchpresenter.app.churchpresenter.PresenterScreen
@@ -350,7 +353,7 @@ private fun SingleDisplayPreview(
         val lockedMode = screenLocks[screenIndex]
         if (lockedMode != null) {
             Text(
-                text = "LOCKED",
+                text = stringResource(Res.string.screen_locked_badge),
                 color = Color.White,
                 fontSize = 9.sp,
                 modifier = Modifier
@@ -380,7 +383,7 @@ private fun SingleDisplayPreview(
         ) {
             Icon(
                 imageVector = if (lockedMode != null) Icons.Filled.Lock else Icons.Filled.LockOpen,
-                contentDescription = if (lockedMode != null) "Unlock screen" else "Lock screen to current tab",
+                contentDescription = if (lockedMode != null) stringResource(Res.string.unlock_screen) else stringResource(Res.string.lock_screen_to_tab),
                 modifier = Modifier.size(13.dp)
             )
         }

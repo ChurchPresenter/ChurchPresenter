@@ -715,6 +715,10 @@
     <string name="live_preview_lower_third">Lower Third</string>
     <string name="live_preview_announcement">Announcement</string>
     <string name="live_preview_website">Website</string>
+    <string name="screen_locked_badge">LOCKED</string>
+    <string name="unlock_screen">Unlock screen</string>
+    <string name="lock_screen_to_tab">Lock screen to current tab</string>
+    <string name="qr_code">QR Code</string>
 
     <!-- Website / Web Tab -->
     <string name="web_url_label">URL</string>

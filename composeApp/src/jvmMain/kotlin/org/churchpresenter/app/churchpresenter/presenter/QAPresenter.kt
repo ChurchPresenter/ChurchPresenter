@@ -36,8 +36,11 @@ import com.google.zxing.BarcodeFormat
 import com.google.zxing.EncodeHintType
 import com.google.zxing.qrcode.QRCodeWriter
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
+import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.qr_code
 import org.churchpresenter.app.churchpresenter.data.QASettings
 import org.churchpresenter.app.churchpresenter.models.Question
+import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
 import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDefault
@@ -166,7 +169,7 @@ fun QAQRCodePresenter(
                 } else {
                     Image(
                         bitmap = qrBitmap,
-                        contentDescription = "QR Code",
+                        contentDescription = stringResource(Res.string.qr_code),
                         modifier = Modifier.padding(bottom = 24.dp)
                     )
                 }

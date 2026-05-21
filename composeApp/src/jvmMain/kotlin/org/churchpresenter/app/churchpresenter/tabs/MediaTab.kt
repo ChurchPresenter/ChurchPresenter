@@ -517,7 +517,7 @@ fun MediaTab(
                     ) {
                         Icon(
                             painter = painterResource(Res.drawable.ic_stop),
-                            contentDescription = "Stop",
+                            contentDescription = stringResource(Res.string.stop),
                             modifier = Modifier.size(28.dp),
                             tint = if (viewModel.isLoaded) MaterialTheme.colorScheme.onSurface
                                    else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
