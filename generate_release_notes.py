@@ -8,6 +8,10 @@ import subprocess
 import sys
 import re
 
+# Ensure UTF-8 output on Windows
+if sys.stdout.encoding != "utf-8":
+    sys.stdout.reconfigure(encoding="utf-8")
+
 CATEGORIES = [
     ("Songs",          r"song|favorite|column|composer|writer|songbook"),
     ("Recents",        r"recent"),
