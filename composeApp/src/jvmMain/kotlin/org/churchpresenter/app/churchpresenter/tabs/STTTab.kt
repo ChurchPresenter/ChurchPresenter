@@ -44,6 +44,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Text
 import androidx.compose.material3.TooltipBox
+import androidx.compose.material3.TooltipAnchorPosition
 import androidx.compose.material3.TooltipDefaults
 import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
@@ -180,7 +181,7 @@ fun STTTab(
                 if (connected) {
                     @OptIn(ExperimentalMaterial3Api::class)
                     TooltipBox(
-                        positionProvider = TooltipDefaults.rememberTooltipPositionProvider(),
+                        positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
                         tooltip = { PlainTooltip { Text(stringResource(Res.string.stt_disconnect)) } },
                         state = rememberTooltipState()
                     ) {
@@ -197,7 +198,7 @@ fun STTTab(
                 } else {
                     @OptIn(ExperimentalMaterial3Api::class)
                     TooltipBox(
-                        positionProvider = TooltipDefaults.rememberTooltipPositionProvider(),
+                        positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
                         tooltip = { PlainTooltip { Text(stringResource(Res.string.stt_connect)) } },
                         state = rememberTooltipState()
                     ) {
@@ -224,7 +225,7 @@ fun STTTab(
                 // Go Live
                 @OptIn(ExperimentalMaterial3Api::class)
                 TooltipBox(
-                    positionProvider = TooltipDefaults.rememberTooltipPositionProvider(),
+                    positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
                     tooltip = { PlainTooltip { Text(stringResource(Res.string.stt_go_live)) } },
                     state = rememberTooltipState()
                 ) {

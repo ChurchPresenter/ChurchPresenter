@@ -291,6 +291,7 @@ fun QATab(
     }
 
     val qaSettings = appSettings.qaSettings
+    @Suppress("DEPRECATION")
     val clipboardManager = LocalClipboardManager.current
     val availableFonts = remember {
         GraphicsEnvironment.getLocalGraphicsEnvironment().availableFontFamilyNames.toList()

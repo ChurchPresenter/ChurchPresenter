@@ -121,6 +121,7 @@ fun ServerSettingsTab(
 ) {
     val isRunning by companionServer.isRunning.collectAsState()
     val serverUrl by companionServer.serverUrl.collectAsState()
+    @Suppress("DEPRECATION")
     val clipboardManager = LocalClipboardManager.current
 
     var portText by remember(settings.serverSettings.port) {
