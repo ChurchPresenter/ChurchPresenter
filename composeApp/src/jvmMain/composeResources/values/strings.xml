@@ -1423,6 +1423,7 @@
     <string name="crossword_wrong">Wrong — try again</string>
     <string name="crossword_correct">Correct! Level complete!</string>
     <string name="crossword_all_done">You've completed all levels!</string>
+    <string name="crossword_ask_more">Want more? Ask the developers for new puzzles!</string>
     <string name="crossword_loading">Loading puzzles…</string>
     <string name="crossword_no_puzzles">No crossword puzzles available yet.</string>
     <string name="crossword_level_label">Level %1$d</string>

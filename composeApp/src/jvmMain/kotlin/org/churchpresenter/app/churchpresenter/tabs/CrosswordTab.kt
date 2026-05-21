@@ -55,6 +55,7 @@ import androidx.compose.ui.unit.sp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.crossword_across
 import churchpresenter.composeapp.generated.resources.crossword_all_done
+import churchpresenter.composeapp.generated.resources.crossword_ask_more
 import churchpresenter.composeapp.generated.resources.crossword_check
 import churchpresenter.composeapp.generated.resources.crossword_correct
 import churchpresenter.composeapp.generated.resources.crossword_down
@@ -109,6 +110,7 @@ fun CrosswordTab(
     val msgCorrect = stringResource(Res.string.crossword_correct)
     val msgWrong = stringResource(Res.string.crossword_wrong)
     val msgAllDone = stringResource(Res.string.crossword_all_done)
+    val msgAskMore = stringResource(Res.string.crossword_ask_more)
 
     val scope = rememberCoroutineScope()
     var saveJob by remember { mutableStateOf<Job?>(null) }
@@ -350,12 +352,19 @@ fun CrosswordTab(
                             Text(stringResource(Res.string.crossword_check))
                         }
                     } else {
-                        Text(
-                            text = msgAllDone,
-                            color = MaterialTheme.colorScheme.primary,
-                            style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = FontWeight.SemiBold
-                        )
+                        Column(horizontalAlignment = Alignment.End) {
+                            Text(
+                                text = msgAllDone,
+                                color = MaterialTheme.colorScheme.primary,
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                            Text(
+                                text = msgAskMore,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        }
                     }
                 }
             }
