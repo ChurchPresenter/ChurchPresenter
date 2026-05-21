@@ -41,6 +41,10 @@ private object JfxInit {
             synchronized(this) {
                 if (!initialised) {
                     initialised = true
+                    // Suppress "unnamed module" warning — JavaFX is intentionally loaded
+                    // from the classpath in this Compose Desktop build configuration
+                    java.util.logging.Logger.getLogger("com.sun.javafx.application.PlatformImpl")
+                        .level = java.util.logging.Level.SEVERE
                     JFXPanel()
                 }
             }
