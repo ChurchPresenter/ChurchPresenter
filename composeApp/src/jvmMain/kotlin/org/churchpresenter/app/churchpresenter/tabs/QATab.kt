@@ -35,6 +35,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
@@ -389,7 +390,7 @@ fun QATab(
                             if (selectedFilter < 6) filterLabels[selectedFilter] else stringResource(Res.string.qa_questions),
                             style = MaterialTheme.typography.labelMedium
                         )
-                        Text(" \u25BE", style = MaterialTheme.typography.labelSmall)
+                        Icon(Icons.Filled.ArrowDropDown, contentDescription = null, modifier = Modifier.size(16.dp))
                     }
                     androidx.compose.material3.DropdownMenu(
                         expanded = filterDropdownExpanded,

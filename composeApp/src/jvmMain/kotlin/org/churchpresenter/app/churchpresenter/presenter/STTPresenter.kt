@@ -38,6 +38,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.churchpresenter.app.churchpresenter.data.STTSettings
@@ -215,11 +216,11 @@ private fun BottomAlignedText(
         },
         modifier = modifier.clipToBounds()
     ) { measurables, constraints ->
-        val unconstrainedConstraints = androidx.compose.ui.unit.Constraints(
+        val unconstrainedConstraints = Constraints(
             minWidth = constraints.minWidth,
             maxWidth = constraints.maxWidth,
             minHeight = 0,
-            maxHeight = androidx.compose.ui.unit.Constraints.Infinity
+            maxHeight = Constraints.Infinity
         )
         // Measure reference to get exact N-line height
         val refPlaceable = measurables[0].measure(unconstrainedConstraints)

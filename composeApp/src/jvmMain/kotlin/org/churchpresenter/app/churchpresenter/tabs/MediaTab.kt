@@ -57,6 +57,12 @@ import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.add_to_schedule
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Movie
+import androidx.compose.material.icons.filled.Videocam
+import androidx.compose.material.icons.filled.Warning
+import churchpresenter.composeapp.generated.resources.clear_recents
+import churchpresenter.composeapp.generated.resources.stop
 import churchpresenter.composeapp.generated.resources.go_live
 import churchpresenter.composeapp.generated.resources.ic_cast
 import churchpresenter.composeapp.generated.resources.ic_close
@@ -207,7 +213,12 @@ fun MediaTab(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(if (isVlcArchMismatch) "⚠️" else "🎬", style = MaterialTheme.typography.displayLarge)
+            Icon(
+                    imageVector = if (isVlcArchMismatch) Icons.Default.Warning else Icons.Default.Videocam,
+                    contentDescription = null,
+                    modifier = Modifier.size(72.dp),
+                    tint = if (isVlcArchMismatch) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                )
             Spacer(modifier = Modifier.size(16.dp))
             Text(
                 text = stringResource(Res.string.media_vlc_required),
@@ -496,7 +507,7 @@ fun MediaTab(
                 }
 
                 TooltipArea(
-                    tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text("Stop", color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
+                    tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.stop), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
                     tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
                 ) {
                     IconButton(
@@ -735,7 +746,7 @@ fun MediaTab(
                                 horizontalAlignment = Alignment.CenterHorizontally,
                                 verticalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
-                                Text("📽️", style = MaterialTheme.typography.displayMedium)
+                                Icon(imageVector = Icons.Default.Movie, contentDescription = null, modifier = Modifier.size(56.dp), tint = Color.White.copy(alpha = 0.6f))
                                 Text(
                                     text = stringResource(Res.string.media_now_presenting),
                                     style = MaterialTheme.typography.bodyLarge,
@@ -759,7 +770,7 @@ fun MediaTab(
                                 horizontalAlignment = Alignment.CenterHorizontally,
                                 verticalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
-                                Text("🎬", style = MaterialTheme.typography.displayMedium)
+                                Icon(imageVector = Icons.Default.Videocam, contentDescription = null, modifier = Modifier.size(56.dp), tint = Color.White.copy(alpha = 0.6f))
                                 Text(
                                     text = stringResource(Res.string.media_no_source),
                                     style = MaterialTheme.typography.bodyLarge,
@@ -801,7 +812,7 @@ private fun MediaRecentsRow(
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
         )
         TooltipArea(
-            tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text("Clear recents", color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
+            tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.clear_recents), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
             tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
         ) {
             IconButton(onClick = onClear, modifier = Modifier.size(20.dp)) {

@@ -697,16 +697,16 @@ class SongsViewModel(
      * Adds the currently selected song to the schedule.
      * Returns true if successfully added, false otherwise.
      */
-    fun addCurrentSongToSchedule(scheduleViewModel: ScheduleViewModel): Boolean {
+    fun addCurrentSongToSchedule(onAdd: (songNumber: Int, title: String, songbook: String, songId: String) -> Unit): Boolean {
         val items = _filteredSongItems.value
         val idx = _selectedSongIndex.value
         if (idx < 0 || idx >= items.size) return false
         val song = items[idx]
-        scheduleViewModel.addSong(
-            songNumber = song.number.toIntOrNull() ?: 0,
-            title = song.title,
-            songbook = song.songbook,
-            songId = song.songId
+        onAdd(
+            song.number.toIntOrNull() ?: 0,
+            song.title,
+            song.songbook,
+            song.songId
         )
         return true
     }

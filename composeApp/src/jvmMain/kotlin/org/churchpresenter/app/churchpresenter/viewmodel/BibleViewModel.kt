@@ -753,12 +753,6 @@ class BibleViewModel(
         return true
     }
 
-    // Keep legacy overload for callers that still pass a ScheduleViewModel
-    fun addCurrentVerseToSchedule(scheduleViewModel: ScheduleViewModel): Boolean =
-        addCurrentVerseToSchedule { bookName, chapter, verseNumber, verseText, verseRange ->
-            scheduleViewModel.addBibleVerse(bookName, chapter, verseNumber, verseText, verseRange)
-        }
-
     fun updateSearchQuery(query: String) {
         _searchQuery.value = query
     }

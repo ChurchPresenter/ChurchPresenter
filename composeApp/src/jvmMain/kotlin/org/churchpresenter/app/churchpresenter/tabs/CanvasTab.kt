@@ -60,6 +60,9 @@ import androidx.compose.ui.input.key.type
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Warning
 import churchpresenter.composeapp.generated.resources.ic_add
 import churchpresenter.composeapp.generated.resources.ic_arrow_down
 import churchpresenter.composeapp.generated.resources.ic_arrow_up
@@ -256,7 +259,7 @@ fun CanvasTab(
                                 },
                                 modifier = Modifier.size(20.dp)
                             ) {
-                                Text("✓", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
+                                Icon(Icons.Filled.Check, contentDescription = null, modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.primary)
                             }
                         } else {
                             Text(
@@ -274,7 +277,7 @@ fun CanvasTab(
                                     )
                             )
                             if (isMismatched) {
-                                Text("⚠", fontSize = 14.sp, color = MaterialTheme.colorScheme.error)
+                                Icon(Icons.Filled.Warning, contentDescription = null, modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.error)
                             }
                             TooltipArea(
                                 tooltip = {

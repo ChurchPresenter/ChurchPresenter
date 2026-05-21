@@ -77,7 +77,6 @@ import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.presenterAspectRatio
 import org.churchpresenter.app.churchpresenter.utils.presenterScreenBounds
 import org.churchpresenter.app.churchpresenter.viewmodel.LocalMediaViewModel
-import org.churchpresenter.app.churchpresenter.viewmodel.MediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -128,7 +127,14 @@ fun LivePreviewPanel(
         if (presentingMode != Presenting.NONE
             && mediaViewModel != null && mediaViewModel.isLoaded
         ) {
-            MediaPreviewControls(mediaViewModel)
+            MediaPreviewControls(
+                    isPlaying = mediaViewModel.isPlaying,
+                    duration = mediaViewModel.duration,
+                    currentPosition = mediaViewModel.currentPosition,
+                    formatTime = { mediaViewModel.formatTime(it) },
+                    onTogglePlayPause = { mediaViewModel.togglePlayPause() },
+                    onSeekTo = { mediaViewModel.seekTo(it) }
+                )
         }
     }
 }
@@ -442,41 +448,48 @@ private fun AnimatedEqualizer() {
 }
 
 @Composable
-private fun MediaPreviewControls(viewModel: MediaViewModel) {
+private fun MediaPreviewControls(
+    isPlaying: Boolean,
+    duration: Long,
+    currentPosition: Long,
+    formatTime: (Long) -> String,
+    onTogglePlayPause: () -> Unit,
+    onSeekTo: (Long) -> Unit,
+) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(4.dp)
     ) {
         IconButton(
-            onClick = { viewModel.togglePlayPause() },
+            onClick = onTogglePlayPause,
             modifier = Modifier.size(32.dp),
             colors = IconButtonDefaults.iconButtonColors(
-                containerColor = if (viewModel.isPlaying) MaterialTheme.colorScheme.error.copy(alpha = 0.8f)
+                containerColor = if (isPlaying) MaterialTheme.colorScheme.error.copy(alpha = 0.8f)
                 else MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
             )
         ) {
             Icon(
                 painter = painterResource(
-                    if (viewModel.isPlaying) Res.drawable.ic_pause else Res.drawable.ic_play
+                    if (isPlaying) Res.drawable.ic_pause else Res.drawable.ic_play
                 ),
                 contentDescription = stringResource(
-                    if (viewModel.isPlaying) Res.string.pause else Res.string.play
+                    if (isPlaying) Res.string.pause else Res.string.play
                 ),
                 modifier = Modifier.size(18.dp),
                 tint = Color.White
             )
         }
 
-        if (viewModel.duration > 0) {
+        if (duration > 0) {
             Slider(
-                value = viewModel.currentPosition.toFloat(),
-                onValueChange = { viewModel.seekTo(it.toLong()) },
-                valueRange = 0f..viewModel.duration.toFloat(),
+                value = currentPosition.toFloat(),
+                onValueChange = { onSeekTo(it.toLong()) },
+                valueRange = 0f..duration.toFloat(),
                 modifier = Modifier.weight(1f)
             )
             Text(
-                text = viewModel.formatTime(viewModel.currentPosition),
+                text = formatTime(currentPosition),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

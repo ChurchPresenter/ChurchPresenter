@@ -90,6 +90,7 @@
     <string name="clear_schedule">Clear Schedule</string>
     <string name="search_results">Search Results</string>
     <string name="clear">Clear</string>
+    <string name="clear_recents">Clear recents</string>
     <string name="found_results">Found %1$d result(s)</string>
 
     <string name="menu_edit">Edit</string>
@@ -576,6 +577,7 @@
     <string name="media_seek_forward">Seek Forward 10s</string>
     <string name="media_preview">Preview</string>
     <string name="media_volume">Volume</string>
+    <string name="stop">Stop</string>
     <string name="media_mute">Mute</string>
     <string name="media_unmute">Unmute</string>
     <string name="media_open_in_browser">Open in Browser</string>
