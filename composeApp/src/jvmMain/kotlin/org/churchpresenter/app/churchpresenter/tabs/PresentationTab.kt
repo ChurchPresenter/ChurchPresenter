@@ -54,7 +54,10 @@ import churchpresenter.composeapp.generated.resources.ic_close
 import churchpresenter.composeapp.generated.resources.ic_star
 import churchpresenter.composeapp.generated.resources.ic_star_filled
 import churchpresenter.composeapp.generated.resources.clear
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Slideshow
 import churchpresenter.composeapp.generated.resources.clear_recents
+import churchpresenter.composeapp.generated.resources.recent
 import churchpresenter.composeapp.generated.resources.ic_pause
 import churchpresenter.composeapp.generated.resources.ic_playlist_add
 import churchpresenter.composeapp.generated.resources.ic_play
@@ -529,9 +532,11 @@ fun PresentationTab(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Text(
-                        text = "📊",
-                        style = MaterialTheme.typography.displayLarge
+                    Icon(
+                        imageVector = Icons.Default.Slideshow,
+                        contentDescription = null,
+                        modifier = Modifier.size(72.dp),
+                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                     )
                     Text(
                         text = stringResource(Res.string.select_presentation_file),
@@ -675,7 +680,7 @@ private fun PresentationRecentsRow(
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Text(
-            text = "Recent:",
+            text = stringResource(Res.string.recent),
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
         )

@@ -184,6 +184,11 @@ import churchpresenter.composeapp.generated.resources.canvas_transform_w
 import churchpresenter.composeapp.generated.resources.canvas_transform_h
 import churchpresenter.composeapp.generated.resources.canvas_qr_default_text
 import churchpresenter.composeapp.generated.resources.canvas_decklink_device
+import churchpresenter.composeapp.generated.resources.canvas_verse_style
+import churchpresenter.composeapp.generated.resources.canvas_reference_style
+import churchpresenter.composeapp.generated.resources.timer_start
+import churchpresenter.composeapp.generated.resources.timer_reset
+import churchpresenter.composeapp.generated.resources.pause
 import churchpresenter.composeapp.generated.resources.ic_folder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -850,14 +855,14 @@ private fun ClockProperties(source: SceneSource.ClockSource, onUpdate: (SceneSou
                 modifier = Modifier.weight(1f).height(32.dp),
                 contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 8.dp, vertical = 0.dp)
             ) {
-                Text(if (isRunning) "⏸ Pause" else "▶ Start", style = MaterialTheme.typography.labelSmall)
+                Text(if (isRunning) stringResource(Res.string.pause) else stringResource(Res.string.timer_start), style = MaterialTheme.typography.labelSmall)
             }
             Button(
                 onClick = { TimerStateManager.reset(source.id, totalSeconds) },
                 modifier = Modifier.weight(1f).height(32.dp),
                 contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 8.dp, vertical = 0.dp)
             ) {
-                Text("⟳ Reset", style = MaterialTheme.typography.labelSmall)
+                Text(stringResource(Res.string.timer_reset), style = MaterialTheme.typography.labelSmall)
             }
         }
     }
@@ -1982,7 +1987,7 @@ private fun BibleProperties(
     Spacer(modifier = Modifier.height(4.dp))
 
     // Font styling for verse text
-    Text("Verse Style", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    Text(stringResource(Res.string.canvas_verse_style), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
     FontDropdown(
         label = stringResource(Res.string.canvas_font),
         selected = source.fontFamily,
@@ -2007,7 +2012,7 @@ private fun BibleProperties(
     Spacer(modifier = Modifier.height(4.dp))
 
     // Font styling for reference
-    Text("Reference Style", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    Text(stringResource(Res.string.canvas_reference_style), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
     PropertyTextField(stringResource(Res.string.canvas_bible_ref_font_size), source.referenceFontSize.toString()) { v ->
         v.toIntOrNull()?.let { onUpdate(source.copy(referenceFontSize = it)) }
     }

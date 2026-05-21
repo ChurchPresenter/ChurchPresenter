@@ -9,6 +9,9 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Videocam
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -74,10 +77,10 @@ fun FileVideoPicker(
             maxLines = 1
         )
         Spacer(modifier = Modifier.weight(1f))
-        Text(
-            text = "🎬",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.primary
+        Icon(
+            imageVector = Icons.Default.Videocam,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary
         )
     }
 }

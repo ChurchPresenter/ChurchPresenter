@@ -62,6 +62,7 @@ import androidx.compose.material.icons.filled.Movie
 import androidx.compose.material.icons.filled.Videocam
 import androidx.compose.material.icons.filled.Warning
 import churchpresenter.composeapp.generated.resources.clear_recents
+import churchpresenter.composeapp.generated.resources.recent
 import churchpresenter.composeapp.generated.resources.stop
 import churchpresenter.composeapp.generated.resources.go_live
 import churchpresenter.composeapp.generated.resources.ic_cast
@@ -807,7 +808,7 @@ private fun MediaRecentsRow(
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Text(
-            text = "Recent:",
+            text = stringResource(Res.string.recent),
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
         )
