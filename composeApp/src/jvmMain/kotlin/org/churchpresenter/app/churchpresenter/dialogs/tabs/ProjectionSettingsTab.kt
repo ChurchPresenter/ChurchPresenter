@@ -48,6 +48,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
@@ -84,6 +85,8 @@ import churchpresenter.composeapp.generated.resources.top
 import churchpresenter.composeapp.generated.resources.vlc_browse
 import churchpresenter.composeapp.generated.resources.vlc_custom_path
 import churchpresenter.composeapp.generated.resources.vlc_path_hint
+import churchpresenter.composeapp.generated.resources.projection_decklink_io_conflict_tooltip
+import churchpresenter.composeapp.generated.resources.projection_web_decklink_tooltip
 import churchpresenter.composeapp.generated.resources.vlc_path_invalid
 import churchpresenter.composeapp.generated.resources.window_position
 import kotlinx.coroutines.launch
@@ -423,14 +426,14 @@ fun ProjectionSettingsTab(
                     if (hasInputConflict) {
                         TooltipBox(
                             positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
-                            tooltip = { PlainTooltip { Text("Also used for input — may not work on devices without simultaneous I/O") } },
+                            tooltip = { PlainTooltip { Text(stringResource(Res.string.projection_decklink_io_conflict_tooltip)) } },
                             state = rememberTooltipState()
                         ) {
                             OutlinedButton(
                                 onClick = { dropdownExpanded = true },
                                 contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
-                                colors = ButtonDefaults.outlinedButtonColors(contentColor = androidx.compose.ui.graphics.Color(0xFFFF8888)),
-                                border = BorderStroke(1.dp, androidx.compose.ui.graphics.Color(0xFFFF8888))
+                                colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFFFF8888)),
+                                border = BorderStroke(1.dp, Color(0xFFFF8888))
                             ) {
                                 Text(
                                     text = currentOption.shortLabel,
@@ -578,14 +581,14 @@ fun ProjectionSettingsTab(
                     if (hasKeyInputConflict) {
                         TooltipBox(
                             positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
-                            tooltip = { PlainTooltip { Text("Also used for input — may not work on devices without simultaneous I/O") } },
+                            tooltip = { PlainTooltip { Text(stringResource(Res.string.projection_decklink_io_conflict_tooltip)) } },
                             state = rememberTooltipState()
                         ) {
                             OutlinedButton(
                                 onClick = { keyExpanded = true },
                                 contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
-                                colors = ButtonDefaults.outlinedButtonColors(contentColor = androidx.compose.ui.graphics.Color(0xFFFF8888)),
-                                border = BorderStroke(1.dp, androidx.compose.ui.graphics.Color(0xFFFF8888))
+                                colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFFFF8888)),
+                                border = BorderStroke(1.dp, Color(0xFFFF8888))
                             ) {
                                 Text(
                                     text = currentKeyOption.shortLabel,
@@ -694,7 +697,7 @@ fun ProjectionSettingsTab(
                             if (isWebOnDeckLink) {
                                 TooltipBox(
                                     positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
-                                    tooltip = { PlainTooltip { Text("Web browser cannot render on DeckLink outputs") } },
+                                    tooltip = { PlainTooltip { Text(stringResource(Res.string.projection_web_decklink_tooltip)) } },
                                     state = rememberTooltipState()
                                 ) {
                                     Checkbox(checked = false, enabled = false, onCheckedChange = {})

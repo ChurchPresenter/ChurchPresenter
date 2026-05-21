@@ -50,6 +50,7 @@ import churchpresenter.composeapp.generated.resources.cancel
 import churchpresenter.composeapp.generated.resources.dialog_choose_color
 import churchpresenter.composeapp.generated.resources.label_hex
 import churchpresenter.composeapp.generated.resources.ok
+import churchpresenter.composeapp.generated.resources.recent
 import org.jetbrains.compose.resources.stringResource
 import androidx.compose.runtime.mutableStateListOf
 import kotlin.math.abs
@@ -214,7 +215,7 @@ fun ColorPickerDialog(
                 // ── Recent colors ─────────────────────────────────────────
                 if (RecentColors.colors.isNotEmpty()) {
                     Text(
-                        "Recent",
+                        stringResource(Res.string.recent),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
