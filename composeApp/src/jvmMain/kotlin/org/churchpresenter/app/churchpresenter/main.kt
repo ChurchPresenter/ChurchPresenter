@@ -127,6 +127,7 @@ import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.presenterScreenBounds
 import org.churchpresenter.app.churchpresenter.utils.AnalyticsReporter
 import org.churchpresenter.app.churchpresenter.utils.CrashReporter
+import org.churchpresenter.app.churchpresenter.utils.LiveMapReporter
 import org.churchpresenter.app.churchpresenter.utils.UpdateChecker
 import org.churchpresenter.app.churchpresenter.utils.UpdateInfo
 import org.churchpresenter.app.churchpresenter.dialogs.StatisticsDialog
@@ -175,6 +176,7 @@ fun main() {
     CrashReporter.initialize()
     AnalyticsReporter.initialize()
     AnalyticsReporter.logAppOpen()
+    LiveMapReporter.pingOnOpen()
 
     // Catch exceptions thrown inside coroutines / Compose lambdas —
     // these never reach Thread.setDefaultUncaughtExceptionHandler on their own.
