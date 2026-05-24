@@ -841,7 +841,7 @@ fun BibleTab(
                     // Shared toolbar row (verse search + buttons)
                     Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                         SearchTextField(
-                            modifier = Modifier.width(with(density) { colWChapter.toDp() }),
+                            modifier = Modifier.width(220.dp),
                             label = stringResource(Res.string.verse),
                         ) { query ->
                             viewModel.updateVerseSearchQuery(query)
