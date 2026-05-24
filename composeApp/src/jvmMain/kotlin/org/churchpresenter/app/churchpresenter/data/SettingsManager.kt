@@ -20,6 +20,8 @@ class SettingsManager {
         encodeDefaults = true    // always write defaults when saving
     }
 
+    private var cachedSettings: AppSettings? = null
+
     init {
         // Create app data directory if it doesn't exist
         if (!appDataDir.exists()) {
@@ -31,6 +33,7 @@ class SettingsManager {
     }
 
     fun loadSettings(): AppSettings {
+        cachedSettings?.let { return it }
         return try {
             if (settingsFile.exists()) {
                 val raw = settingsFile.readText()
@@ -46,7 +49,7 @@ class SettingsManager {
             }
         } catch (e: Exception) {
             AppSettings() // Return default settings on error
-        }
+        }.also { cachedSettings = it }
     }
 
     /**
@@ -91,6 +94,7 @@ class SettingsManager {
     }
 
     fun saveSettings(settings: AppSettings) {
+        cachedSettings = settings
         try {
             val json = jsonFormat.encodeToString(settings)
             settingsFile.writeText(json)
