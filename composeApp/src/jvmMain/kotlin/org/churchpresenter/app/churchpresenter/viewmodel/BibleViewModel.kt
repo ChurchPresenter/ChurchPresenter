@@ -343,6 +343,61 @@ class BibleViewModel(
         }
     }
 
+    suspend fun getVersesForDisplay(bookName: String, chapter: Int, verseNum: Int): List<SelectedVerse> {
+        val primaryBible = _primaryBible.value ?: return emptyList()
+        val bookIndex = _books.value.indexOfFirst { it.equals(bookName, ignoreCase = true) }
+        if (bookIndex < 0) return emptyList()
+        val bookId = primaryBible.getBookId(bookIndex)
+        return withContext(Dispatchers.IO) {
+            val verseList = mutableListOf<SelectedVerse>()
+            val chapterVerses = primaryBible.getChapter(bookId, chapter).verses
+            val verseStr = chapterVerses.firstOrNull { v ->
+                v.substringBefore(". ").toIntOrNull() == verseNum
+            }
+            val primaryVerseText = verseStr?.substringAfter(". ", "") ?: ""
+            val primaryBookName = primaryBible.getBookName(bookId) ?: bookName
+            if (primaryVerseText.isNotEmpty()) {
+                verseList.add(
+                    SelectedVerse(
+                        bibleAbbreviation = primaryBible.getBibleAbbreviation() ?: "",
+                        bibleName = primaryBible.getBibleTitle() ?: "",
+                        bookName = primaryBookName,
+                        chapter = chapter,
+                        verseNumber = verseNum,
+                        verseText = primaryVerseText
+                    )
+                )
+            }
+            val codeRef = primaryBible.getCodeReference(bookId, chapter, verseNum)
+            val secBook = codeRef?.first ?: bookId
+            val secChapter = codeRef?.second ?: chapter
+            val secVerse = codeRef?.third ?: verseNum
+            _secondaryBible.value?.getVerseDetailsByCode(secBook, secChapter, secVerse)?.let { result ->
+                verseList.add(
+                    SelectedVerse(
+                        bibleAbbreviation = _secondaryBible.value?.getBibleAbbreviation() ?: "",
+                        bibleName = _secondaryBible.value?.getBibleTitle() ?: "",
+                        bookName = result.bookName,
+                        chapter = result.displayChapter,
+                        verseNumber = result.displayVerse,
+                        verseText = result.verseText
+                    )
+                )
+            }
+            verseList
+        }
+    }
+
+    suspend fun getChapterVerses(bookName: String, chapter: Int): List<String> {
+        val bible = _primaryBible.value ?: return emptyList()
+        val bookIndex = _books.value.indexOfFirst { it.equals(bookName, ignoreCase = true) }
+        if (bookIndex < 0) return emptyList()
+        val bookId = bible.getBookId(bookIndex)
+        return withContext(Dispatchers.IO) {
+            bible.getChapter(bookId, chapter).verses
+        }
+    }
+
     fun loadChapter(bookIndex: Int, chapter: Int) {
         _primaryBible.value?.let { bible ->
             val bookCount = minOf(bible.getBookCount(), CANONICAL_BOOK_COUNT)

@@ -44,7 +44,9 @@ import churchpresenter.composeapp.generated.resources.animation_slide_left
 import churchpresenter.composeapp.generated.resources.animation_slide_right
 import churchpresenter.composeapp.generated.resources.animation_type
 import churchpresenter.composeapp.generated.resources.bible_files
+import churchpresenter.composeapp.generated.resources.bible_live_view
 import churchpresenter.composeapp.generated.resources.bible_selection
+import churchpresenter.composeapp.generated.resources.bible_split_browse_mode
 import churchpresenter.composeapp.generated.resources.bible_transition_settings
 import churchpresenter.composeapp.generated.resources.browse_directory
 import churchpresenter.composeapp.generated.resources.color
@@ -264,6 +266,30 @@ private fun LeftColumn(
                 )
             }
         }
+    }
+
+    Spacer(modifier = Modifier.height(20.dp))
+
+    // Split Browse Mode
+    SectionHeader(stringResource(Res.string.bible_split_browse_mode))
+    Spacer(modifier = Modifier.height(8.dp))
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Checkbox(
+            checked = settings.bibleSettings.splitBrowseMode,
+            onCheckedChange = { enabled ->
+                onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(splitBrowseMode = enabled)) }
+            },
+            modifier = Modifier.size(24.dp)
+        )
+        Text(
+            text = stringResource(Res.string.bible_split_browse_mode),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.padding(start = 8.dp)
+        )
     }
 
     Spacer(modifier = Modifier.height(20.dp))

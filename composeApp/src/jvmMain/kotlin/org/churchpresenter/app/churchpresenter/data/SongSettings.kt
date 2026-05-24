@@ -379,7 +379,9 @@ data class BibleSettings(
     val fadeIn: Boolean = true,
     val fadeOut: Boolean = true,
     val crossfade: Boolean = false,
-    val transitionDuration: Float = 500f
+    val transitionDuration: Float = 500f,
+    val splitBrowseMode: Boolean = false,
+    val splitLivePanelWidth: Int = 300,
 ) {
     /** Returns a copy with primary and secondary bible settings swapped. */
     fun swapped() = copy(

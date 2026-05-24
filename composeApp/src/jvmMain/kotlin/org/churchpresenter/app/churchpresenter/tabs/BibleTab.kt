@@ -39,6 +39,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -52,9 +53,11 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -99,7 +102,10 @@ import churchpresenter.composeapp.generated.resources.exact_match
 import churchpresenter.composeapp.generated.resources.found_results
 import churchpresenter.composeapp.generated.resources.bible_history
 import churchpresenter.composeapp.generated.resources.bible_history_clear
+import churchpresenter.composeapp.generated.resources.bible_split_browse_mode
+import churchpresenter.composeapp.generated.resources.copy_verse
 import churchpresenter.composeapp.generated.resources.go_live
+import churchpresenter.composeapp.generated.resources.ic_copy
 import churchpresenter.composeapp.generated.resources.ic_arrow_down
 import churchpresenter.composeapp.generated.resources.ic_arrow_up
 import churchpresenter.composeapp.generated.resources.ic_cast
@@ -201,27 +207,47 @@ fun BibleTab(
 
     val currentIsPresenting by rememberUpdatedState(isPresenting)
 
-    // Only push to presenter when:
-    //  - not currently presenting (free browsing always updates preview), OR
-    //  - an explicit verse selection happened (token changed) while presenting
-    LaunchedEffect(verseSelectionToken) {
-        // In multi-verse mode while presenting, don't update until Go Live is pressed
-        if (viewModel.multiVerseEnabled.value && currentIsPresenting) return@LaunchedEffect
-        if (verses.isNotEmpty() && selectedVerseIndex >= 0 && selectedVerseIndex < verses.size) {
-            val selectedVerses = viewModel.getSelectedVerses()
-            if (selectedVerses.isNotEmpty()) onVerseSelected(selectedVerses)
-        }
+    val splitBrowseMode = appSettings.bibleSettings.splitBrowseMode
+    // Split view is always visible when splitBrowseMode is ON (panel just has no content until live)
+    val isSplitActive = splitBrowseMode
+
+    // Live chapter state for split view (right panel)
+    var liveChapterVerses by remember { mutableStateOf<List<String>>(emptyList()) }
+    var liveBookName by remember { mutableStateOf("") }
+    var liveChapterNum by remember { mutableStateOf(0) }
+    var liveVerseNumbers by remember { mutableStateOf<Set<Int>>(emptySet()) }
+    // Keyboard navigation state for the live panel
+    var liveNavTargetVerse by remember { mutableStateOf(0) }
+    var liveNavToken       by remember { mutableStateOf(0) }
+
+    val fallbackDisplayedVerses = remember { mutableStateOf<List<SelectedVerse>>(emptyList()) }
+    val displayedVerses by (presenterManager?.displayedVerses ?: fallbackDisplayedVerses)
+
+    val scope = rememberCoroutineScope()
+
+    LaunchedEffect(displayedVerses, splitBrowseMode) {
+        if (!splitBrowseMode || displayedVerses.isEmpty()) return@LaunchedEffect
+        val first = displayedVerses.first()
+        liveBookName = first.bookName
+        liveChapterNum = first.chapter
+        liveVerseNumbers = displayedVerses.map { it.verseNumber }.toSet()
+        liveNavTargetVerse = liveVerseNumbers.minOrNull() ?: 0
+        liveChapterVerses = viewModel.getChapterVerses(first.bookName, first.chapter)
     }
 
-    // While not presenting, also update preview when chapter loads so the first verse shows
-    LaunchedEffect(verses.size) {
-        if (!currentIsPresenting && verses.isNotEmpty()) {
-            val selectedVerses = viewModel.getSelectedVerses()
-            if (selectedVerses.isNotEmpty()) onVerseSelected(selectedVerses)
+    LaunchedEffect(liveNavToken) {
+        if (liveNavToken == 0 || liveNavTargetVerse == 0) return@LaunchedEffect
+        val verses = viewModel.getVersesForDisplay(liveBookName, liveChapterNum, liveNavTargetVerse)
+        if (verses.isNotEmpty()) {
+            val primary = verses.first()
+            statisticsManager?.recordVerseDisplay(
+                primary.bibleName, primary.bookName, primary.chapter, primary.verseNumber
+            )
+            onVerseSelected(verses)
+            presenterManager?.let { if (it.bibleHold.value) it.setBibleHold(false) }
+            onPresenting(Presenting.BIBLE)
         }
     }
-
-    var historyExpanded by remember { mutableStateOf(true) }
 
     fun goLiveWithHistory() {
         val selectedVerses = viewModel.getSelectedVerses()
@@ -245,14 +271,40 @@ fun BibleTab(
                 statisticsManager.recordVerseDisplay(primaryVerse.bibleName, primaryVerse.bookName, primaryVerse.chapter, primaryVerse.verseNumber)
             }
         }
-        // In multi-verse mode, explicitly push verses and clear selection for next pick
-        if (viewModel.multiVerseEnabled.value && selectedVerses.isNotEmpty()) {
+        // Always push verse content so the output updates immediately
+        if (selectedVerses.isNotEmpty()) {
             onVerseSelected(selectedVerses)
+        }
+        if (viewModel.multiVerseEnabled.value) {
             viewModel.clearMultiVerseSelection()
         }
         presenterManager?.let { if (it.bibleHold.value) it.setBibleHold(false) }
         onPresenting(Presenting.BIBLE)
     }
+
+    // Only push to presenter when:
+    //  - not currently presenting (free browsing always updates preview), OR
+    //  - an explicit verse selection happened (token changed) while presenting
+    LaunchedEffect(verseSelectionToken) {
+        // In multi-verse mode while presenting, don't update until Go Live is pressed
+        if (viewModel.multiVerseEnabled.value && currentIsPresenting) return@LaunchedEffect
+        // In split browse mode while presenting: suppress auto-live (explicit Go Live button still works)
+        if (splitBrowseMode && currentIsPresenting) return@LaunchedEffect
+        if (verses.isNotEmpty() && selectedVerseIndex >= 0 && selectedVerseIndex < verses.size) {
+            val selectedVerses = viewModel.getSelectedVerses()
+            if (selectedVerses.isNotEmpty()) onVerseSelected(selectedVerses)
+        }
+    }
+
+    // While not presenting, also update preview when chapter loads so the first verse shows
+    LaunchedEffect(verses.size) {
+        if (!currentIsPresenting && verses.isNotEmpty()) {
+            val selectedVerses = viewModel.getSelectedVerses()
+            if (selectedVerses.isNotEmpty()) onVerseSelected(selectedVerses)
+        }
+    }
+
+    var historyExpanded by remember { mutableStateOf(true) }
 
     var searchFieldFocused by remember { mutableStateOf(false) }
 
@@ -260,6 +312,29 @@ fun BibleTab(
         if (event.type != KeyEventType.KeyDown) return false
         // Don't intercept arrow keys when the search field has focus (cursor navigation)
         if (searchFieldFocused) return false
+
+        // In split mode, Up/Down navigate the live (right) panel
+        if (splitBrowseMode && liveChapterVerses.isNotEmpty() &&
+            (event.key == Key.DirectionUp || event.key == Key.DirectionDown)
+        ) {
+            val refVerse = if (liveNavTargetVerse > 0) liveNavTargetVerse
+                           else liveVerseNumbers.minOrNull() ?: 1
+            val currentIdx = liveChapterVerses.indexOfFirst { v ->
+                v.substringBefore(". ").toIntOrNull() == refVerse
+            }.takeIf { it >= 0 } ?: 0
+            val nextIdx = if (event.key == Key.DirectionUp)
+                (currentIdx - 1).coerceAtLeast(0)
+            else
+                (currentIdx + 1).coerceAtMost(liveChapterVerses.size - 1)
+            val nextVerseNum = liveChapterVerses.getOrNull(nextIdx)
+                ?.substringBefore(". ")?.toIntOrNull()
+            if (nextVerseNum != null) {
+                liveNavTargetVerse = nextVerseNum
+                liveNavToken++
+            }
+            return true
+        }
+
         return when (event.key) {
             Key.DirectionUp    -> viewModel.navigatePreviousVerse()
             Key.DirectionDown  -> viewModel.navigateNextVerse()
@@ -285,6 +360,18 @@ fun BibleTab(
             s.copy(bibleSettings = s.bibleSettings.copy(
                 bibleColWidthBook    = with(density) { colWBook.toDp().value.toInt() },
                 bibleColWidthChapter = with(density) { colWChapter.toDp().value.toInt() }
+            ))
+        }
+    }
+
+    var colWSplit by remember(appSettings.bibleSettings.splitLivePanelWidth) {
+        mutableStateOf(with(density) { appSettings.bibleSettings.splitLivePanelWidth.dp.toPx() })
+    }
+
+    fun saveColWSplit() {
+        onSettingsChangeState.value { s ->
+            s.copy(bibleSettings = s.bibleSettings.copy(
+                splitLivePanelWidth = with(density) { colWSplit.toDp().value.toInt() }
             ))
         }
     }
@@ -574,7 +661,7 @@ fun BibleTab(
                     verticalArrangement = Arrangement.spacedBy(4.dp),
                     itemVerticalAlignment = Alignment.CenterVertically
                 ) {
-                        if (presenterManager != null) {
+                        if (presenterManager != null && !splitBrowseMode) {
                             val holdLive by presenterManager.bibleHold
                             TooltipArea(
                                     tooltip = {
@@ -698,184 +785,242 @@ fun BibleTab(
                     }
                 }
 
-            BoxWithConstraints(modifier = Modifier.fillMaxWidth().fillMaxHeight()) {
-                Column(modifier = Modifier.fillMaxSize()) {
+            Row(modifier = Modifier.fillMaxWidth().fillMaxHeight().padding(start = 4.dp)) {
 
-                    // ── Book / Chapter / Verse columns ───────────────────────
-                    Row(modifier = Modifier.fillMaxWidth().weight(1f).padding(start = 4.dp)) {
-
-                        // Book column (resizable)
-                        Column(modifier = Modifier.width(with(density) { colWBook.toDp() }).fillMaxHeight()) {
-                            SearchTextField(label = stringResource(Res.string.book)) { query ->
-                                viewModel.updateBookSearchQuery(query)
+                // Book column (resizable)
+                Column(modifier = Modifier.width(with(density) { colWBook.toDp() }).fillMaxHeight()) {
+                    SearchTextField(label = stringResource(Res.string.book)) { query ->
+                        viewModel.updateBookSearchQuery(query)
+                    }
+                    SelectionListWithIndex(
+                        list = filteredBooks,
+                        selectedIndex = filteredBooks.indexOf(books.getOrNull(selectedBookIndex) ?: "").coerceAtLeast(0),
+                        singleLine = true,
+                        onItemSelected = { index, _ ->
+                            val bookName = filteredBooks.getOrNull(index)
+                            bookName?.let {
+                                val realIndex = books.indexOf(it)
+                                if (realIndex >= 0) viewModel.selectBook(realIndex)
                             }
-                            SelectionListWithIndex(
-                                list = filteredBooks,
-                                selectedIndex = filteredBooks.indexOf(books.getOrNull(selectedBookIndex) ?: "").coerceAtLeast(0),
-                                singleLine = true,
-                                onItemSelected = { index, _ ->
-                                    val bookName = filteredBooks.getOrNull(index)
-                                    bookName?.let {
-                                        val realIndex = books.indexOf(it)
-                                        if (realIndex >= 0) viewModel.selectBook(realIndex)
-                                    }
-                                }
-                            )
                         }
+                    )
+                }
 
-                        DragHandle { amount ->
-                            colWBook = (colWBook + amount).coerceIn(
-                                with(density) { 80.dp.toPx() },
-                                with(density) { 400.dp.toPx() }
-                            )
+                DragHandle { amount ->
+                    colWBook = (colWBook + amount).coerceIn(
+                        with(density) { 80.dp.toPx() },
+                        with(density) { 400.dp.toPx() }
+                    )
+                }
+
+                // Chapter column (resizable)
+                Column(modifier = Modifier.width(with(density) { colWChapter.toDp() }).fillMaxHeight()) {
+                    SearchTextField(label = stringResource(Res.string.chapter)) { query ->
+                        viewModel.updateChapterSearchQuery(query)
+                    }
+                    SelectionListWithIndex(
+                        list = filteredChapters,
+                        selectedIndex = filteredChapters.indexOf(selectedChapter.toString()).coerceAtLeast(0),
+                        onItemSelected = { index, _ ->
+                            val chapterStr = filteredChapters.getOrNull(index)
+                            chapterStr?.toIntOrNull()?.let { chapter -> viewModel.selectChapter(chapter) }
                         }
+                    )
+                }
 
-                        // Chapter column (resizable)
-                        Column(modifier = Modifier.width(with(density) { colWChapter.toDp() }).fillMaxHeight()) {
-                            SearchTextField(label = stringResource(Res.string.chapter)) { query ->
-                                viewModel.updateChapterSearchQuery(query)
-                            }
-                            SelectionListWithIndex(
-                                list = filteredChapters,
-                                selectedIndex = filteredChapters.indexOf(selectedChapter.toString()).coerceAtLeast(0),
-                                onItemSelected = { index, _ ->
-                                    val chapterStr = filteredChapters.getOrNull(index)
-                                    chapterStr?.toIntOrNull()?.let { chapter -> viewModel.selectChapter(chapter) }
-                                }
-                            )
+                DragHandle { amount ->
+                    colWChapter = (colWChapter + amount).coerceIn(
+                        with(density) { 60.dp.toPx() },
+                        with(density) { 300.dp.toPx() }
+                    )
+                }
+
+                // Right area: toolbar + (verse list + live panel) + history
+                Column(modifier = Modifier.weight(1f).fillMaxHeight()) {
+
+                    // Shared toolbar row (verse search + buttons)
+                    Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                        SearchTextField(
+                            modifier = Modifier.width(with(density) { colWChapter.toDp() }),
+                            label = stringResource(Res.string.verse),
+                        ) { query ->
+                            viewModel.updateVerseSearchQuery(query)
                         }
+                        Spacer(modifier = Modifier.width(8.dp))
+                        toolbarContent()
+                    }
 
-                        DragHandle { amount ->
-                            colWChapter = (colWChapter + amount).coerceIn(
-                                with(density) { 60.dp.toPx() },
-                                with(density) { 300.dp.toPx() }
-                            )
-                        }
+                    // Verse list + live panel (drag handle starts here, below toolbar)
+                    Row(modifier = Modifier.weight(1f).fillMaxWidth()) {
 
-                        // Verse column (fills remaining space)
+                        // Verse list column
                         Column(modifier = Modifier.weight(1f).fillMaxHeight()) {
-                            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                                SearchTextField(
-                                    modifier = Modifier.width(with(density) { colWChapter.toDp() }),
-                                    label = stringResource(Res.string.verse),
-                                ) { query ->
-                                    viewModel.updateVerseSearchQuery(query)
-                                }
-                                Spacer(modifier = Modifier.width(8.dp))
-                                toolbarContent()
-                            }
-                    var showVerseContextMenu by remember { mutableStateOf(false) }
-                    var verseContextMenuOffset by remember { mutableStateOf(DpOffset.Zero) }
+                            var showVerseContextMenu by remember { mutableStateOf(false) }
+                            var verseContextMenuOffset by remember { mutableStateOf(DpOffset.Zero) }
 
-                    Box(modifier = Modifier.weight(1f)
-                        .pointerInput(Unit) {
-                            awaitPointerEventScope {
-                                while (true) {
-                                    val event = awaitPointerEvent(PointerEventPass.Main)
-                                    if (event.type == PointerEventType.Press &&
-                                        event.button?.isSecondary == true
-                                    ) {
-                                        val pos = event.changes.first().position
-                                        verseContextMenuOffset = with(density) {
-                                            DpOffset(pos.x.toDp(), pos.y.toDp())
+                            Box(modifier = Modifier.fillMaxSize()
+                                .pointerInput(Unit) {
+                                    awaitPointerEventScope {
+                                        while (true) {
+                                            val event = awaitPointerEvent(PointerEventPass.Main)
+                                            if (event.type == PointerEventType.Press &&
+                                                event.button?.isSecondary == true
+                                            ) {
+                                                val pos = event.changes.first().position
+                                                verseContextMenuOffset = with(density) {
+                                                    DpOffset(pos.x.toDp(), pos.y.toDp())
+                                                }
+                                            }
                                         }
                                     }
                                 }
-                            }
-                        }
-                    ) {
-                        // Always map multi-verse indices into the filtered verse list
-                        val multiIndicesInFiltered = viewModel.selectedVerseIndices
-                            .mapNotNull { realIdx ->
-                                val verseStr = verses.getOrNull(realIdx)
-                                verseStr?.let { filteredVerses.indexOf(it).takeIf { i -> i >= 0 } }
-                            }
-                            .toSet()
-                            .takeIf { it.isNotEmpty() }
-
-                        SelectionListWithIndex(
-                            list = filteredVerses,
-                            selectedIndex = if (filteredVerses.isEmpty()) -1 else {
-                                val currentVerse = verses.getOrNull(selectedVerseIndex)
-                                filteredVerses.indexOf(currentVerse).coerceAtLeast(0)
-                            },
-                            selectedIndices = multiIndicesInFiltered,
-                            onItemSelected = { index, _ ->
-                                val verseText = filteredVerses.getOrNull(index)
-                                verseText?.let {
-                                    val realIndex = verses.indexOf(it)
-                                    if (realIndex >= 0) viewModel.selectVerse(realIndex)
-                                }
-                                focusRequester.requestFocus()
-                            },
-                            onItemDoubleClicked = { _, _ -> goLiveWithHistory() },
-                            onItemCtrlClicked = { index, _ ->
-                                val verseText = filteredVerses.getOrNull(index)
-                                verseText?.let {
-                                    val realIndex = verses.indexOf(it)
-                                    if (realIndex >= 0) viewModel.ctrlClickVerse(realIndex)
-                                }
-                            },
-                            onItemShiftClicked = { index, _ ->
-                                val verseText = filteredVerses.getOrNull(index)
-                                verseText?.let {
-                                    val realIndex = verses.indexOf(it)
-                                    if (realIndex >= 0) viewModel.shiftClickVerse(realIndex)
-                                }
-                            },
-                            onRightClicked = { index ->
-                                val verseText = filteredVerses.getOrNull(index)
-                                verseText?.let {
-                                    val realIndex = verses.indexOf(it)
-                                    if (realIndex >= 0) viewModel.selectVerse(realIndex)
-                                }
-                                showVerseContextMenu = true
-                            }
-                        )
-
-                        DropdownMenu(
-                            expanded = showVerseContextMenu,
-                            onDismissRequest = { showVerseContextMenu = false },
-                            offset = verseContextMenuOffset
-                        ) {
-                            DropdownMenuItem(
-                                text = { Text(stringResource(Res.string.add_to_schedule)) },
-                                leadingIcon = {
-                                    Icon(
-                                        painter = painterResource(Res.drawable.ic_playlist_add),
-                                        contentDescription = null,
-                                        modifier = Modifier.size(18.dp),
-                                        tint = MaterialTheme.colorScheme.secondary
-                                    )
-                                },
-                                onClick = {
-                                    viewModel.addCurrentVerseToSchedule { bookName, chapter, verseNumber, verseText, verseRange ->
-                                        onAddToSchedule?.invoke(bookName, chapter, verseNumber, verseText, verseRange)
+                            ) {
+                                // Always map multi-verse indices into the filtered verse list
+                                val multiIndicesInFiltered = viewModel.selectedVerseIndices
+                                    .mapNotNull { realIdx ->
+                                        val verseStr = verses.getOrNull(realIdx)
+                                        verseStr?.let { filteredVerses.indexOf(it).takeIf { i -> i >= 0 } }
                                     }
-                                    focusRequester.requestFocus()
-                                    showVerseContextMenu = false
-                                }
-                            )
-                            DropdownMenuItem(
-                                text = { Text(stringResource(Res.string.go_live)) },
-                                leadingIcon = {
-                                    Icon(
-                                        painter = painterResource(Res.drawable.ic_cast),
-                                        contentDescription = null,
-                                        modifier = Modifier.size(18.dp),
-                                        tint = MaterialTheme.colorScheme.primary
-                                    )
-                                },
-                                onClick = {
-                                    goLiveWithHistory()
-                                    focusRequester.requestFocus()
-                                    showVerseContextMenu = false
-                                }
-                            )
-                        }
-                    }
+                                    .toSet()
+                                    .takeIf { it.isNotEmpty() }
 
-                    // ── History panel ─────────────────────────────────────
+                                SelectionListWithIndex(
+                                    list = filteredVerses,
+                                    selectedIndex = if (filteredVerses.isEmpty()) -1 else {
+                                        val currentVerse = verses.getOrNull(selectedVerseIndex)
+                                        filteredVerses.indexOf(currentVerse).coerceAtLeast(0)
+                                    },
+                                    selectedIndices = multiIndicesInFiltered,
+                                    onItemSelected = { index, _ ->
+                                        val verseText = filteredVerses.getOrNull(index)
+                                        verseText?.let {
+                                            val realIndex = verses.indexOf(it)
+                                            if (realIndex >= 0) viewModel.selectVerse(realIndex)
+                                        }
+                                        focusRequester.requestFocus()
+                                    },
+                                    onItemDoubleClicked = { _, _ -> goLiveWithHistory() },
+                                    onItemCtrlClicked = { index, _ ->
+                                        val verseText = filteredVerses.getOrNull(index)
+                                        verseText?.let {
+                                            val realIndex = verses.indexOf(it)
+                                            if (realIndex >= 0) viewModel.ctrlClickVerse(realIndex)
+                                        }
+                                    },
+                                    onItemShiftClicked = { index, _ ->
+                                        val verseText = filteredVerses.getOrNull(index)
+                                        verseText?.let {
+                                            val realIndex = verses.indexOf(it)
+                                            if (realIndex >= 0) viewModel.shiftClickVerse(realIndex)
+                                        }
+                                    },
+                                    onRightClicked = { index ->
+                                        val verseText = filteredVerses.getOrNull(index)
+                                        verseText?.let {
+                                            val realIndex = verses.indexOf(it)
+                                            if (realIndex >= 0) viewModel.selectVerse(realIndex)
+                                        }
+                                        showVerseContextMenu = true
+                                    }
+                                )
+
+                                DropdownMenu(
+                                    expanded = showVerseContextMenu,
+                                    onDismissRequest = { showVerseContextMenu = false },
+                                    offset = verseContextMenuOffset
+                                ) {
+                                    DropdownMenuItem(
+                                        text = { Text(stringResource(Res.string.copy_verse)) },
+                                        leadingIcon = {
+                                            Icon(
+                                                painter = painterResource(Res.drawable.ic_copy),
+                                                contentDescription = null,
+                                                modifier = Modifier.size(18.dp),
+                                                tint = MaterialTheme.colorScheme.onSurface
+                                            )
+                                        },
+                                        onClick = {
+                                            val verseStr = verses.getOrNull(selectedVerseIndex) ?: ""
+                                            val verseNum = verseStr.substringBefore(". ").toIntOrNull()
+                                            val verseText = verseStr.substringAfter(". ", verseStr)
+                                            val bookName = books.getOrNull(selectedBookIndex) ?: ""
+                                            val reference = if (verseNum != null) "$bookName $selectedChapter:$verseNum" else "$bookName $selectedChapter"
+                                            val clipboard = java.awt.Toolkit.getDefaultToolkit().systemClipboard
+                                            clipboard.setContents(java.awt.datatransfer.StringSelection("$reference\n$verseText"), null)
+                                            showVerseContextMenu = false
+                                        }
+                                    )
+                                    DropdownMenuItem(
+                                        text = { Text(stringResource(Res.string.add_to_schedule)) },
+                                        leadingIcon = {
+                                            Icon(
+                                                painter = painterResource(Res.drawable.ic_playlist_add),
+                                                contentDescription = null,
+                                                modifier = Modifier.size(18.dp),
+                                                tint = MaterialTheme.colorScheme.secondary
+                                            )
+                                        },
+                                        onClick = {
+                                            viewModel.addCurrentVerseToSchedule { bookName, chapter, verseNumber, verseText, verseRange ->
+                                                onAddToSchedule?.invoke(bookName, chapter, verseNumber, verseText, verseRange)
+                                            }
+                                            focusRequester.requestFocus()
+                                            showVerseContextMenu = false
+                                        }
+                                    )
+                                    DropdownMenuItem(
+                                        text = { Text(stringResource(Res.string.go_live)) },
+                                        leadingIcon = {
+                                            Icon(
+                                                painter = painterResource(Res.drawable.ic_cast),
+                                                contentDescription = null,
+                                                modifier = Modifier.size(18.dp),
+                                                tint = MaterialTheme.colorScheme.primary
+                                            )
+                                        },
+                                        onClick = {
+                                            goLiveWithHistory()
+                                            focusRequester.requestFocus()
+                                            showVerseContextMenu = false
+                                        }
+                                    )
+                                }
+                            }
+                        }
+
+                        // Live panel (split mode) — drag handle starts below toolbar
+                        if (isSplitActive) {
+                            DragHandle { amount ->
+                                colWSplit = (colWSplit - amount).coerceIn(
+                                    with(density) { 150.dp.toPx() },
+                                    with(density) { 600.dp.toPx() }
+                                )
+                                saveColWSplit()
+                            }
+                            Column(modifier = Modifier.width(with(density) { colWSplit.toDp() }).fillMaxHeight()) {
+                                LiveChapterPanel(
+                                    verses = liveChapterVerses,
+                                    liveVerseNumbers = liveVerseNumbers,
+                                    onVerseClicked = { verseNum ->
+                                        scope.launch {
+                                            val verses = viewModel.getVersesForDisplay(liveBookName, liveChapterNum, verseNum)
+                                            if (verses.isNotEmpty()) {
+                                                val primary = verses.first()
+                                                statisticsManager?.recordVerseDisplay(primary.bibleName, primary.bookName, primary.chapter, primary.verseNumber)
+                                                onVerseSelected(verses)
+                                                presenterManager?.let { if (it.bibleHold.value) it.setBibleHold(false) }
+                                                onPresenting(Presenting.BIBLE)
+                                            }
+                                        }
+                                    },
+                                    modifier = Modifier.fillMaxSize()
+                                )
+                            }
+                        }
+
+                    } // end verse + live Row
+
+                    // ── History panel — spans verse + live columns ──────────
                     if (viewModel.history.isNotEmpty()) {
                         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                         Row(
@@ -956,10 +1101,63 @@ fun BibleTab(
                             }
                         }
                     }
-                }
-            }
-                }
-                }
+
+                } // end right area Column
+
+            } // end outer Row
         }
+    }
+}
+
+@Composable
+private fun LiveChapterPanel(
+    verses: List<String>,
+    liveVerseNumbers: Set<Int>,
+    onVerseClicked: ((verseNumber: Int) -> Unit)? = null,
+    modifier: Modifier = Modifier
+) {
+    val listState = rememberLazyListState()
+
+    LaunchedEffect(liveVerseNumbers) {
+        val firstLiveIndex = verses.indexOfFirst { verse ->
+            verse.substringBefore(". ").toIntOrNull()?.let { it in liveVerseNumbers } == true
+        }
+        if (firstLiveIndex >= 0) listState.animateScrollToItem(firstLiveIndex)
+    }
+
+    Box(modifier = modifier.fillMaxWidth().padding(top = 8.dp).fillMaxHeight()) {
+        LazyColumn(
+            state = listState,
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(MaterialTheme.colorScheme.surface)
+                .padding(start = 4.dp, top = 4.dp, bottom = 4.dp, end = 12.dp)
+        ) {
+            itemsIndexed(verses) { _, verseStr ->
+                val verseNum = verseStr.substringBefore(". ").toIntOrNull()
+                val isLive = verseNum != null && verseNum in liveVerseNumbers
+                Text(
+                    text = verseStr,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(
+                            if (isLive) MaterialTheme.colorScheme.primaryContainer
+                            else MaterialTheme.colorScheme.surface
+                        )
+                        .then(
+                            if (onVerseClicked != null && verseNum != null)
+                                Modifier.clickable { onVerseClicked(verseNum) }
+                            else Modifier
+                        )
+                        .padding(6.dp)
+                )
+            }
+        }
+        VerticalScrollbar(
+            modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
+            adapter = rememberScrollbarAdapter(listState)
+        )
     }
 }
