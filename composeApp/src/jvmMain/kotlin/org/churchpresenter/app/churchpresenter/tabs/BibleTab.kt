@@ -851,7 +851,13 @@ fun BibleTab(
                     }
 
                     // Verse list + live panel (drag handle starts here, below toolbar)
-                    Row(modifier = Modifier.weight(1f).fillMaxWidth()) {
+                    BoxWithConstraints(modifier = Modifier.weight(1f).fillMaxWidth()) {
+                    val effectiveSplitWidth = if (isSplitActive)
+                        colWSplit.coerceAtMost(
+                            (constraints.maxWidth - with(density) { (100.dp + 6.dp).toPx() }).coerceAtLeast(0f)
+                        )
+                    else 0f
+                    Row(modifier = Modifier.fillMaxSize()) {
 
                         // Verse list column
                         Column(modifier = Modifier.weight(1f).fillMaxHeight()) {
@@ -997,7 +1003,7 @@ fun BibleTab(
                                 )
                                 saveColWSplit()
                             }
-                            Column(modifier = Modifier.width(with(density) { colWSplit.toDp() }).fillMaxHeight()) {
+                            Column(modifier = Modifier.width(with(density) { effectiveSplitWidth.toDp() }).fillMaxHeight()) {
                                 LiveChapterPanel(
                                     verses = liveChapterVerses,
                                     liveVerseNumbers = liveVerseNumbers,
@@ -1019,6 +1025,7 @@ fun BibleTab(
                         }
 
                     } // end verse + live Row
+                    } // end BoxWithConstraints
 
                     // ── History panel — spans verse + live columns ──────────
                     if (viewModel.history.isNotEmpty()) {
