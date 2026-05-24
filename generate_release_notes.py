@@ -39,7 +39,7 @@ def run(cmd):
 def last_release_tag():
     if len(sys.argv) > 1:
         return sys.argv[1]
-    return run(["gh", "release", "list", "--limit", "1", "--json", "tagName", "-q", ".[0].tagName"])
+    return run(["gh", "release", "list", "--limit", "2", "--json", "tagName", "-q", ".[1].tagName"])
 
 def categorize(msg):
     lower = msg.lower()
@@ -50,13 +50,15 @@ def categorize(msg):
 
 def main():
     from_tag = last_release_tag()
-    new_tag = run(["git", "describe", "--tags", "--abbrev=0"])
-    version = new_tag.lstrip("v")
+    latest_tag = run(["git", "describe", "--tags", "--abbrev=0"])
+    # If no new tag exists yet, show commits from last release to HEAD
+    end_ref = "HEAD" if latest_tag == from_tag else latest_tag
+    version = latest_tag.lstrip("v") if end_ref != "HEAD" else "unreleased"
 
-    print(f"Release notes: {from_tag} → {new_tag}")
+    print(f"Release notes: {from_tag} → {end_ref}")
     print("---\n")
 
-    raw = run(["git", "log", f"{from_tag}..HEAD", "--pretty=format:%s"])
+    raw = run(["git", "log", f"{from_tag}..{end_ref}", "--pretty=format:%s"])
     commits = [line for line in raw.splitlines() if line and not NOISE.match(line.strip())]
 
     buckets = {name: [] for name, _ in CATEGORIES}
