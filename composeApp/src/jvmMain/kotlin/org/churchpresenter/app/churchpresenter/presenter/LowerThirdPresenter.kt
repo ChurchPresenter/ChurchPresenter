@@ -8,11 +8,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.app.churchpresenter.data.AppSettings
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
-import io.github.alexzhirkevich.compottie.LottieCompositionSpec
-import io.github.alexzhirkevich.compottie.rememberLottieComposition
+import io.github.alexzhirkevich.compottie.LottieComposition
 import io.github.alexzhirkevich.compottie.rememberLottiePainter
 import org.churchpresenter.app.churchpresenter.composables.keyColorFilter
 import org.churchpresenter.app.churchpresenter.utils.Constants
@@ -25,17 +23,13 @@ import org.churchpresenter.app.churchpresenter.utils.Constants
  */
 @Composable
 fun LowerThirdPresenter(
-    jsonContent: String,
+    composition: LottieComposition?,
     progress: () -> Float,
     appSettings: AppSettings,
     outputRole: String = Constants.OUTPUT_ROLE_NORMAL
 ) {
     val isKey = outputRole == Constants.OUTPUT_ROLE_KEY
-    if (jsonContent.isBlank()) return
-
-    val composition by rememberLottieComposition(key = jsonContent) {
-        LottieCompositionSpec.JsonString(jsonContent)
-    }
+    if (composition == null) return
 
     val s = appSettings.streamingSettings
     Box(

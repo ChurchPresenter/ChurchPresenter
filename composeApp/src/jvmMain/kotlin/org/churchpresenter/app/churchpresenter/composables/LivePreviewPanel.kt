@@ -79,6 +79,8 @@ import org.churchpresenter.app.churchpresenter.presenter.SongPresenter
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.presenterAspectRatio
 import org.churchpresenter.app.churchpresenter.utils.presenterScreenBounds
+import io.github.alexzhirkevich.compottie.LottieCompositionSpec
+import io.github.alexzhirkevich.compottie.rememberLottieComposition
 import org.churchpresenter.app.churchpresenter.viewmodel.LocalMediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.jetbrains.compose.resources.painterResource
@@ -168,6 +170,9 @@ private fun SingleDisplayPreview(
     val displayedSlide by presenterManager.displayedSlide
     val slideTransitionAlpha by presenterManager.slideTransitionAlpha
     val lottieJsonContent by presenterManager.lottieJsonContent
+    val lottieComposition by rememberLottieComposition(key = lottieJsonContent) {
+        LottieCompositionSpec.JsonString(lottieJsonContent)
+    }
     val lottieProgress by presenterManager.lottieProgress
     val displayedAnnouncementText by presenterManager.displayedAnnouncementText
     val announcementTransitionAlpha by presenterManager.announcementTransitionAlpha
@@ -249,7 +254,7 @@ private fun SingleDisplayPreview(
                                 }
                             Presenting.LOWER_THIRD ->
                                 LowerThirdPresenter(
-                                    jsonContent = lottieJsonContent,
+                                    composition = lottieComposition,
                                     progress = { presenterManager.lottieProgress.value },
                                     appSettings = appSettings
                                 )

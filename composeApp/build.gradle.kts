@@ -236,7 +236,7 @@ compose.desktop {
             "-XX:G1ReservePercent=20",
             "-XX:MaxGCPauseMillis=50",
             "-XX:+UseStringDeduplication",
-            // Rendering - macOS requires Metal, other platforms use OpenGL
+            // Rendering - macOS requires Metal, Windows uses Direct3D, Linux uses OpenGL
             "-Dawt.useSystemAAFontSettings=on",
             "-Dswing.aatext=true",
             // Reflective access needed by Apache POI, PDFBox, and JavaFX internals
@@ -257,6 +257,13 @@ compose.desktop {
             "--add-opens=java.desktop/sun.lwawt=ALL-UNNAMED",
             "--add-opens=java.desktop/sun.lwawt.macosx=ALL-UNNAMED"
         )
+        // Explicitly set Skiko GPU backend to prevent software fallback
+        val osName = System.getProperty("os.name").lowercase()
+        when {
+            osName.contains("mac") -> jvmArgs("-Dskiko.renderApi=METAL")
+            osName.contains("win") -> jvmArgs("-Dskiko.renderApi=DIRECT3D")
+            else -> jvmArgs("-Dskiko.renderApi=OPENGL")
+        }
 
         buildTypes.release.proguard {
             isEnabled.set(false)
