@@ -304,6 +304,19 @@ fun BibleTab(
         }
     }
 
+    // Auto-pause when user navigates to a different chapter or book while presenting
+    val prevBookRef = remember { mutableStateOf(selectedBookIndex) }
+    val prevChapterRef = remember { mutableStateOf(selectedChapter) }
+    LaunchedEffect(selectedBookIndex, selectedChapter) {
+        val bookChanged = selectedBookIndex != prevBookRef.value
+        val chapterChanged = selectedChapter != prevChapterRef.value
+        prevBookRef.value = selectedBookIndex
+        prevChapterRef.value = selectedChapter
+        if ((bookChanged || chapterChanged) && !splitBrowseMode && currentIsPresenting) {
+            presenterManager?.setBibleHold(true)
+        }
+    }
+
     var historyExpanded by remember { mutableStateOf(true) }
 
     var searchFieldFocused by remember { mutableStateOf(false) }
