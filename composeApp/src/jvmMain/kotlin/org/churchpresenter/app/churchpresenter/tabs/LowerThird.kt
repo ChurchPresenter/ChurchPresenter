@@ -75,8 +75,14 @@ import churchpresenter.composeapp.generated.resources.tooltip_remove
 import io.github.alexzhirkevich.compottie.LottieCompositionSpec
 import io.github.alexzhirkevich.compottie.rememberLottieComposition
 import io.github.alexzhirkevich.compottie.rememberLottiePainter
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.nio.file.FileSystems
+import java.nio.file.StandardWatchEventKinds
 import javax.swing.JOptionPane
 import org.churchpresenter.app.churchpresenter.composables.ImageIconButton
 import org.churchpresenter.app.churchpresenter.data.AppSettings
@@ -106,6 +112,39 @@ fun LowerThirdTab(
 ) {
     val lottieFolder = appSettings.streamingSettings.lowerThirdFolder
     var refreshKey by remember { mutableStateOf(0) }
+
+    // Watch for external file changes (add/remove via file explorer, etc.)
+    LaunchedEffect(lottieFolder) {
+        if (lottieFolder.isEmpty()) return@LaunchedEffect
+        val folder = File(lottieFolder)
+        if (!folder.exists() || !folder.isDirectory) return@LaunchedEffect
+        withContext(Dispatchers.IO) {
+            try {
+                val watchService = FileSystems.getDefault().newWatchService()
+                folder.toPath().register(
+                    watchService,
+                    StandardWatchEventKinds.ENTRY_CREATE,
+                    StandardWatchEventKinds.ENTRY_DELETE
+                )
+                try {
+                    while (isActive) {
+                        val key = watchService.take()
+                        val hasJsonChange = key.pollEvents().any { event ->
+                            event.kind() != StandardWatchEventKinds.OVERFLOW &&
+                                event.context().toString().lowercase().endsWith(".json")
+                        }
+                        if (hasJsonChange) {
+                            withContext(Dispatchers.Main) { refreshKey++ }
+                        }
+                        if (!key.reset()) break
+                    }
+                } finally {
+                    watchService.close()
+                }
+            } catch (_: java.nio.file.ClosedWatchServiceException) {}
+            catch (_: InterruptedException) {}
+        }
+    }
 
     // Build file list from user-chosen folder
     val lottieFiles = remember(lottieFolder, refreshKey) {
@@ -145,6 +184,11 @@ fun LowerThirdTab(
     val composition by rememberLottieComposition(key = jsonContent) {
         LottieCompositionSpec.JsonString(jsonContent.ifBlank { "{}" })
     }
+
+    // True while composition is loading — prevents flashing warning triangle during async load
+    var isCompositionLoading by remember(jsonContent) { mutableStateOf(jsonContent.isNotBlank()) }
+    LaunchedEffect(composition) { if (composition != null) isCompositionLoading = false }
+    LaunchedEffect(jsonContent) { if (jsonContent.isNotBlank()) { delay(3000); isCompositionLoading = false } }
 
     // Reset when file changes
     LaunchedEffect(selectedFile) {
@@ -479,6 +523,8 @@ fun LowerThirdTab(
                             contentScale = ContentScale.Fit,
                             modifier = Modifier.fillMaxSize()
                         )
+                    } else if (selectedFile != null && isCompositionLoading) {
+                        androidx.compose.material3.CircularProgressIndicator(modifier = Modifier.size(36.dp))
                     } else if (selectedFile != null) {
                         Icon(Icons.Filled.Warning, contentDescription = null, modifier = Modifier.size(40.dp), tint = MaterialTheme.colorScheme.error.copy(alpha = 0.5f))
                     }
