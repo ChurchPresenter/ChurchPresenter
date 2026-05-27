@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
 Generates categorized release notes from commits since the last GitHub release.
-Usage: python3 generate_release_notes.py [from_tag]
+Usage: python3 generate_release_notes.py [from_tag [version [windows macos_arm64 macos_x64 linux]]]
+Platform args are 'true'/'false' strings; omit to include all platforms.
 """
 
 import subprocess
@@ -77,12 +78,22 @@ def main():
                 print(f"- {item}")
             print()
 
+    def flag(i): return len(sys.argv) <= i or sys.argv[i].lower() != 'false'
+    build_windows    = flag(3)
+    build_macos_arm  = flag(4)
+    build_macos_x64  = flag(5)
+    build_linux      = flag(6)
+
     print("---")
     print("Download the installer for your platform below.\n")
-    print(f"- **Windows:** ChurchPresenter-{version}-WINDOWS-x64.msi")
-    print(f"- **macOS (Apple Silicon / M-series):** ChurchPresenter-{version}-MACOS-arm64.dmg")
-    print(f"- **macOS (Intel):** ChurchPresenter-{version}-MACOS-x64.dmg")
-    print(f"- **Linux:** churchpresenter_{version}_amd64-DEBIAN-x64.deb")
+    if build_windows:
+        print(f"- **Windows:** ChurchPresenter-{version}-WINDOWS-x64.msi")
+    if build_macos_arm:
+        print(f"- **macOS (Apple Silicon / M-series):** ChurchPresenter-{version}-MACOS-arm64.dmg")
+    if build_macos_x64:
+        print(f"- **macOS (Intel):** ChurchPresenter-{version}-MACOS-x64.dmg")
+    if build_linux:
+        print(f"- **Linux:** churchpresenter_{version}_amd64-DEBIAN-x64.deb")
 
 if __name__ == "__main__":
     main()

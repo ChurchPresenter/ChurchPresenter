@@ -3,17 +3,22 @@ name: Build Platforms (Self-Hosted)
 on:
   workflow_dispatch:
     inputs:
-      platform:
-        description: 'Platform to build'
-        required: true
-        type: choice
-        default: 'All'
-        options:
-          - Windows
-          - macOS (ARM64)
-          - macOS (x64)
-          - Linux
-          - All
+      windows:
+        description: 'Build Windows'
+        type: boolean
+        default: true
+      macos_arm64:
+        description: 'Build macOS (Apple Silicon / ARM64)'
+        type: boolean
+        default: true
+      macos_x64:
+        description: 'Build macOS (Intel / x64)'
+        type: boolean
+        default: true
+      linux:
+        description: 'Build Linux'
+        type: boolean
+        default: true
       version:
         description: 'Release version (e.g. v1.2.3) — leave empty to auto-generate from commit count'
         required: false
@@ -64,7 +69,7 @@ jobs:
           echo "Version: $VERSION"
 
   build-windows:
-    if: ${{ inputs.platform == 'Windows' || inputs.platform == 'All' }}
+    if: ${{ inputs.windows }}
     runs-on: [self-hosted, Windows, X64]
     env:
       WINDOWS_SIGNING_ENABLED: ${{ secrets.WINDOWS_CERTIFICATE_PFX != '' && 'true' || 'false' }}
@@ -147,7 +152,7 @@ jobs:
           retention-days: 2
 
   build-macos:
-    if: ${{ inputs.platform == 'macOS (ARM64)' || inputs.platform == 'All' }}
+    if: ${{ inputs.macos_arm64 }}
     runs-on: [self-hosted, macOS, ARM64]
     env:
       MACOS_SIGNING_ENABLED: ${{ secrets.MACOS_CERTIFICATE_P12 != '' && 'true' || 'false' }}
@@ -319,7 +324,7 @@ jobs:
           fi
 
   build-macos-x64:
-    if: ${{ inputs.platform == 'macOS (x64)' || inputs.platform == 'All' }}
+    if: ${{ inputs.macos_x64 }}
     runs-on: [self-hosted, macOS, X64]
     env:
       MACOS_SIGNING_ENABLED: ${{ secrets.MACOS_CERTIFICATE_P12 != '' && 'true' || 'false' }}
@@ -492,7 +497,7 @@ jobs:
           fi
 
   build-linux:
-    if: ${{ inputs.platform == 'Linux' || inputs.platform == 'All' }}
+    if: ${{ inputs.linux }}
     runs-on: [self-hosted, Linux, X64]
     env:
       LINUX_SIGNING_ENABLED: ${{ secrets.LINUX_GPG_PRIVATE_KEY != '' && 'true' || 'false' }}
@@ -581,28 +586,28 @@ jobs:
           fetch-depth: 0
 
       - name: Download Windows artifact
-        if: ${{ (inputs.platform == 'Windows' || inputs.platform == 'All') && needs.build-windows.result == 'success' }}
+        if: ${{ inputs.windows && needs.build-windows.result == 'success' }}
         uses: actions/download-artifact@v4
         with:
           name: windows-msi
           path: release/windows
 
       - name: Download macOS artifact
-        if: ${{ (inputs.platform == 'macOS (ARM64)' || inputs.platform == 'All') && needs.build-macos.result == 'success' }}
+        if: ${{ inputs.macos_arm64 && needs.build-macos.result == 'success' }}
         uses: actions/download-artifact@v4
         with:
           name: macos-dmg
           path: release/macos
 
       - name: Download macOS x64 artifact
-        if: ${{ (inputs.platform == 'macOS (x64)' || inputs.platform == 'All') && needs.build-macos-x64.result == 'success' }}
+        if: ${{ inputs.macos_x64 && needs.build-macos-x64.result == 'success' }}
         uses: actions/download-artifact@v4
         with:
           name: macos-dmg-x64
           path: release/macos
 
       - name: Download Linux artifact
-        if: ${{ (inputs.platform == 'Linux' || inputs.platform == 'All') && needs.build-linux.result == 'success' }}
+        if: ${{ inputs.linux && needs.build-linux.result == 'success' }}
         uses: actions/download-artifact@v4
         with:
           name: linux-deb
@@ -628,7 +633,7 @@ jobs:
           VERSION="${{ needs.version.outputs.version }}"
           PREV_TAG=$(gh release list --limit 1 --json tagName -q ".[0].tagName" 2>/dev/null || echo "")
           if [ -n "$PREV_TAG" ]; then
-            NOTES=$(python3 generate_release_notes.py "$PREV_TAG" "$VERSION")
+            NOTES=$(python3 generate_release_notes.py "$PREV_TAG" "$VERSION" "${{ inputs.windows }}" "${{ inputs.macos_arm64 }}" "${{ inputs.macos_x64 }}" "${{ inputs.linux }}")
           else
             NOTES="Download the installer for your platform below."
           fi
