@@ -80,8 +80,8 @@ def main():
     print("---")
     print("Download the installer for your platform below.\n")
     print(f"- **Windows:** ChurchPresenter-{version}-WINDOWS-x64.msi")
-    print(f"- **macOS:** ChurchPresenter-{version}-MACOS-arm64.dmg")
-    print(f"- **macOS:** ChurchPresenter-{version}-MACOS-x64.dmg")
+    print(f"- **macOS (Apple Silicon / M-series):** ChurchPresenter-{version}-MACOS-arm64.dmg")
+    print(f"- **macOS (Intel):** ChurchPresenter-{version}-MACOS-x64.dmg")
     print(f"- **Linux:** churchpresenter_{version}_amd64-DEBIAN-x64.deb")
 
 if __name__ == "__main__":
