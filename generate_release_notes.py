@@ -53,7 +53,11 @@ def main():
     latest_tag = run(["git", "describe", "--tags", "--abbrev=0"])
     # If no new tag exists yet, show commits from last release to HEAD
     end_ref = "HEAD" if latest_tag == from_tag else latest_tag
-    version = latest_tag.lstrip("v") if end_ref != "HEAD" else "unreleased"
+    # Allow version override via second argument (used by CI before the tag is pushed)
+    if len(sys.argv) > 2:
+        version = sys.argv[2].lstrip("v")
+    else:
+        version = latest_tag.lstrip("v") if end_ref != "HEAD" else "unreleased"
 
     print(f"Release notes: {from_tag} → {end_ref}")
     print("---\n")
