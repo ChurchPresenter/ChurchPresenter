@@ -29,6 +29,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -167,8 +168,14 @@ fun SystemSettingsTab(
             },
             onSetAll = setAllDirectories
         )
+        var bibleFiles by remember(settings.bibleSettings.storageDirectory) { mutableStateOf(emptyList<String>()) }
+        LaunchedEffect(settings.bibleSettings.storageDirectory) {
+            bibleFiles = withContext(Dispatchers.IO) {
+                fileManager.getBibleFilesInDirectory(settings.bibleSettings.storageDirectory)
+            }
+        }
         DetectedFilesList(
-            files = fileManager.getBibleFilesInDirectory(settings.bibleSettings.storageDirectory),
+            files = bibleFiles,
             directorySet = settings.bibleSettings.storageDirectory.isNotEmpty(),
             detectedLabel = stringResource(Res.string.detected_files_label),
             noFilesText = stringResource(Res.string.no_files_detected)
@@ -194,8 +201,13 @@ fun SystemSettingsTab(
         if (settings.songSettings.storageDirectory.isNotEmpty()) {
             var convertingFile by remember { mutableStateOf<String?>(null) }
             val coroutineScope = rememberCoroutineScope()
-            val spsFiles = fileManager.getSongFilesInDirectory(settings.songSettings.storageDirectory)
-            val songFolders = fileManager.getSongFoldersInDirectory(settings.songSettings.storageDirectory)
+            var spsFiles by remember(settings.songSettings.storageDirectory) { mutableStateOf(emptyList<String>()) }
+            var songFolders by remember(settings.songSettings.storageDirectory) { mutableStateOf(emptyList<Pair<String, Int>>()) }
+            LaunchedEffect(settings.songSettings.storageDirectory) {
+                val dir = settings.songSettings.storageDirectory
+                spsFiles = withContext(Dispatchers.IO) { fileManager.getSongFilesInDirectory(dir) }
+                songFolders = withContext(Dispatchers.IO) { fileManager.getSongFoldersInDirectory(dir) }
+            }
 
             // Add Song Samples button
             val sampleScope = rememberCoroutineScope()
@@ -642,16 +654,28 @@ private fun DirectoryPicker(
         )
         if (currentPath.isNotEmpty()) {
             val dirFile = remember(currentPath) { java.io.File(currentPath) }
-            val dirExists = remember(currentPath) { dirFile.exists() }
-            val isWritable = remember(currentPath) { dirExists && dirFile.canWrite() }
+            // null = still checking, true = writable, false = not writable / not found
+            var isWritable by remember(currentPath) { mutableStateOf<Boolean?>(null) }
+            LaunchedEffect(currentPath) {
+                isWritable = withContext(Dispatchers.IO) {
+                    if (!dirFile.exists()) false
+                    else try {
+                        val tempFile = java.io.File(dirFile, ".churchpresenter_write_test")
+                        tempFile.createNewFile() && tempFile.delete()
+                    } catch (_: Exception) {
+                        false
+                    }
+                }
+            }
             TooltipArea(
                 tooltip = {
                     Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
                         Text(
-                            when {
-                                isWritable -> stringResource(Res.string.tooltip_directory_writable)
-                                !dirExists -> stringResource(Res.string.tooltip_directory_not_found)
-                                else -> stringResource(Res.string.tooltip_directory_not_writable)
+                            when (isWritable) {
+                                null -> "…"
+                                true -> stringResource(Res.string.tooltip_directory_writable)
+                                false -> if (!dirFile.exists()) stringResource(Res.string.tooltip_directory_not_found)
+                                        else stringResource(Res.string.tooltip_directory_not_writable)
                             },
                             color = MaterialTheme.colorScheme.inverseOnSurface,
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
@@ -665,7 +689,11 @@ private fun DirectoryPicker(
                     modifier = Modifier
                         .size(12.dp)
                         .background(
-                            if (isWritable) Color(0xFF4CAF50) else Color(0xFFF44336),
+                            when (isWritable) {
+                                null -> Color(0xFF9E9E9E)
+                                true -> Color(0xFF4CAF50)
+                                false -> Color(0xFFF44336)
+                            },
                             shape = CircleShape
                         )
                 )
