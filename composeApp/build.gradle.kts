@@ -236,7 +236,7 @@ compose.desktop {
             "-XX:G1ReservePercent=20",
             "-XX:MaxGCPauseMillis=50",
             "-XX:+UseStringDeduplication",
-            // Rendering - macOS requires Metal, Windows uses Direct3D, Linux uses OpenGL
+            // Rendering hints (renderApi is set per-platform in the blocks below / jvmArgs above)
             "-Dawt.useSystemAAFontSettings=on",
             "-Dswing.aatext=true",
             // Reflective access needed by Apache POI, PDFBox, and JavaFX internals
@@ -261,7 +261,7 @@ compose.desktop {
         val osName = System.getProperty("os.name").lowercase()
         when {
             osName.contains("mac") -> jvmArgs("-Dskiko.renderApi=METAL")
-            osName.contains("win") -> jvmArgs("-Dskiko.renderApi=DIRECT3D")
+            osName.contains("win") -> jvmArgs("-Dskiko.renderApi=OPENGL")
             else -> jvmArgs("-Dskiko.renderApi=OPENGL")
         }
 
@@ -342,6 +342,7 @@ compose.desktop {
                 upgradeUuid = "A1B2C3D4-E5F6-4789-A012-3456789ABCDE"
                 iconFile.set(project.file("src/jvmMain/appResources/windows/icon.ico"))
                 jvmArgs(*commonJvmArgs.toTypedArray())
+                jvmArgs("-Dskiko.renderApi=OPENGL")
             }
 
             linux {
