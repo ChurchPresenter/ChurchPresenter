@@ -149,7 +149,7 @@ jobs:
 
   build-macos:
     if: ${{ inputs.macos_arm64 }}
-    runs-on: macos-latest
+    runs-on: macos-15
     env:
       MACOS_SIGNING_ENABLED: ${{ secrets.MACOS_CERTIFICATE_P12 != '' && 'true' || 'false' }}
     steps:
@@ -321,7 +321,7 @@ jobs:
 
   build-macos-x64:
     if: ${{ inputs.macos_x64 }}
-    runs-on: [self-hosted, macOS, X64]
+    runs-on: macos-15-intel
     env:
       MACOS_SIGNING_ENABLED: ${{ secrets.MACOS_CERTIFICATE_P12 != '' && 'true' || 'false' }}
     steps:
