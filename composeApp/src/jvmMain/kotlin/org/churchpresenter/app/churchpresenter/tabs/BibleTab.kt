@@ -363,25 +363,25 @@ fun BibleTab(
     val density = LocalDensity.current
     val onSettingsChangeState = rememberUpdatedState(onSettingsChange)
 
-    var colWBook by remember(appSettings.bibleSettings.bibleColWidthBook) {
-        mutableStateOf(with(density) { appSettings.bibleSettings.bibleColWidthBook.dp.toPx() })
-    }
-    var colWChapter by remember(appSettings.bibleSettings.bibleColWidthChapter) {
-        mutableStateOf(with(density) { appSettings.bibleSettings.bibleColWidthChapter.dp.toPx() })
-    }
-
-    fun saveColWidths() {
-        onSettingsChangeState.value { s ->
-            s.copy(bibleSettings = s.bibleSettings.copy(
-                bibleColWidthBook    = with(density) { colWBook.toDp().value.toInt() },
-                bibleColWidthChapter = with(density) { colWChapter.toDp().value.toInt() }
-            ))
-        }
-    }
-
     val windowState = LocalMainWindowState.current
     val isMaximized = windowState?.placement != WindowPlacement.Floating
     val currentLayout = if (isMaximized) appSettings.maximizedLayout else appSettings.windowedLayout
+
+    var colWBook by remember(currentLayout.bibleColWidthBook, isMaximized) {
+        mutableStateOf(with(density) { currentLayout.bibleColWidthBook.dp.toPx() })
+    }
+    var colWChapter by remember(currentLayout.bibleColWidthChapter, isMaximized) {
+        mutableStateOf(with(density) { currentLayout.bibleColWidthChapter.dp.toPx() })
+    }
+
+    fun saveColWidths() {
+        val bookDp = with(density) { colWBook.toDp().value.toInt() }
+        val chapterDp = with(density) { colWChapter.toDp().value.toInt() }
+        onSettingsChangeState.value { s ->
+            if (isMaximized) s.copy(maximizedLayout = s.maximizedLayout.copy(bibleColWidthBook = bookDp, bibleColWidthChapter = chapterDp))
+            else s.copy(windowedLayout = s.windowedLayout.copy(bibleColWidthBook = bookDp, bibleColWidthChapter = chapterDp))
+        }
+    }
 
     var colWSplit by remember(currentLayout.splitLivePanelWidth, isMaximized) {
         mutableStateOf(with(density) { currentLayout.splitLivePanelWidth.dp.toPx() })
