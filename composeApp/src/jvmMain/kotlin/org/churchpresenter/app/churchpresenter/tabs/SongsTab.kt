@@ -397,13 +397,13 @@ fun SongsTab(
 
     fun setColWidth(id: String, px: Float) {
         when (id) {
-            "number"     -> colWNumber    = px.coerceIn(with(density) { 30.dp.toPx() },  with(density) { 200.dp.toPx() })
-            "title"      -> colWTitle     = px.coerceIn(with(density) { 60.dp.toPx() },  with(density) { 600.dp.toPx() })
-            "songbook"   -> colWSongbook  = px.coerceIn(with(density) { 40.dp.toPx() },  with(density) { 300.dp.toPx() })
-            "tune"       -> colWTune      = px.coerceIn(with(density) { 40.dp.toPx() },  with(density) { 300.dp.toPx() })
-            "play_count" -> colWPlayCount = px.coerceIn(with(density) { 30.dp.toPx() },  with(density) { 150.dp.toPx() })
-            "author"     -> colWAuthor    = px.coerceIn(with(density) { 40.dp.toPx() },  with(density) { 400.dp.toPx() })
-            "composer"   -> colWComposer  = px.coerceIn(with(density) { 40.dp.toPx() },  with(density) { 400.dp.toPx() })
+            "number"     -> colWNumber    = px.coerceAtLeast(with(density) { 30.dp.toPx() })
+            "title"      -> colWTitle     = px.coerceAtLeast(with(density) { 60.dp.toPx() })
+            "songbook"   -> colWSongbook  = px.coerceAtLeast(with(density) { 40.dp.toPx() })
+            "tune"       -> colWTune      = px.coerceAtLeast(with(density) { 40.dp.toPx() })
+            "play_count" -> colWPlayCount = px.coerceAtLeast(with(density) { 30.dp.toPx() })
+            "author"     -> colWAuthor    = px.coerceAtLeast(with(density) { 40.dp.toPx() })
+            "composer"   -> colWComposer  = px.coerceAtLeast(with(density) { 40.dp.toPx() })
         }
     }
 
