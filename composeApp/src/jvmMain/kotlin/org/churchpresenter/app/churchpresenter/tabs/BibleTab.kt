@@ -230,10 +230,7 @@ fun BibleTab(
         val first = displayedVerses.first()
         liveBookName = first.bookName
         liveChapterNum = first.chapter
-        val primaryAbbr = displayedVerses.first().bibleAbbreviation
-        liveVerseNumbers = displayedVerses
-            .filter { it.bibleAbbreviation == primaryAbbr }
-            .map { it.verseNumber }.toSet()
+        liveVerseNumbers = setOf(displayedVerses.first().verseNumber)
         liveNavTargetVerse = liveVerseNumbers.minOrNull() ?: 0
         liveChapterVerses = viewModel.getChapterVerses(first.bookName, first.chapter)
     }
