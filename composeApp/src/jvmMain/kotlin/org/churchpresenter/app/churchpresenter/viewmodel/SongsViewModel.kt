@@ -677,6 +677,23 @@ class SongsViewModel(
         }
     }
 
+    fun deleteSong(song: SongItem): Boolean {
+        return try {
+            if (song.sourceFile.isNotEmpty()) {
+                val file = File(song.sourceFile)
+                if (file.exists()) file.delete()
+                val dir = file.parentFile
+                if (dir != null && dir.isDirectory && dir.listFiles()?.isEmpty() == true) {
+                    dir.delete()
+                }
+            }
+            loadSongs()
+            true
+        } catch (_: Exception) {
+            false
+        }
+    }
+
     fun updateSort(column: String) {
         if (_sortColumn.value == column) {
             _sortAscending.value = !_sortAscending.value

@@ -37,7 +37,9 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.rememberScrollbarAdapter
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
@@ -199,6 +201,8 @@ fun SongsTab(
     // Edit Song Dialog state (pure UI state — fine to keep here)
     var showEditDialog by remember { mutableStateOf(false) }
     var songToEdit by remember { mutableStateOf<SongItem?>(null) }
+    var showDeleteConfirm by remember { mutableStateOf(false) }
+    var songToDelete by remember { mutableStateOf<SongItem?>(null) }
     var showNewSongDialog by remember { mutableStateOf(false) }
 
     // Favorites panel state
@@ -1047,6 +1051,23 @@ fun SongsTab(
                                     showContextMenu = false
                                 }
                             )
+                            HorizontalDivider()
+                            DropdownMenuItem(
+                                text = { Text(stringResource(Res.string.delete_saved_string), color = Color(0xFFE53935)) },
+                                leadingIcon = {
+                                    Icon(
+                                        painter = painterResource(Res.drawable.ic_delete),
+                                        contentDescription = null,
+                                        modifier = Modifier.size(18.dp),
+                                        tint = Color(0xFFE53935)
+                                    )
+                                },
+                                onClick = {
+                                    songToDelete = song
+                                    showDeleteConfirm = true
+                                    showContextMenu = false
+                                }
+                            )
                             DropdownMenuItem(
                                 text = { Text(stringResource(Res.string.go_live)) },
                                 leadingIcon = {
@@ -1637,6 +1658,44 @@ fun SongsTab(
             }
         }
     )
+
+    // Delete Song Confirmation Dialog
+    if (showDeleteConfirm) {
+        val s = songToDelete
+        if (s != null) {
+            AlertDialog(
+                onDismissRequest = { showDeleteConfirm = false; songToDelete = null },
+                title = { Text(stringResource(Res.string.confirm_delete)) },
+                text = {
+                    Column {
+                        Text(s.title, style = MaterialTheme.typography.titleMedium)
+                        if (s.sourceFile.isNotEmpty()) {
+                            Spacer(Modifier.height(4.dp))
+                            Text(
+                                s.sourceFile,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = {
+                        viewModel.deleteSong(s)
+                        showDeleteConfirm = false
+                        songToDelete = null
+                    }) {
+                        Text(stringResource(Res.string.delete_saved_string), color = Color(0xFFE53935))
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showDeleteConfirm = false; songToDelete = null }) {
+                        Text(stringResource(Res.string.cancel))
+                    }
+                }
+            )
+        }
+    }
 
     // New Song Dialog
     val newSongTemplate = remember {
