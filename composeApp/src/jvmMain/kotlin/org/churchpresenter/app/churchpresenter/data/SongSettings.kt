@@ -779,6 +779,14 @@ data class OBSSettings(
 )
 
 @Serializable
+data class WindowLayoutSettings(
+    val schedulePanelWidthDp: Int = 280,
+    val schedulePanelCollapsed: Boolean = false,
+    val previewPanelWidthDp: Int = 280,
+    val previewPanelCollapsed: Boolean = false,
+)
+
+@Serializable
 data class AppSettings(
     val songSettings: SongSettings = SongSettings(),
     val bibleSettings: BibleSettings = BibleSettings(),
@@ -797,6 +805,8 @@ data class AppSettings(
     val schedulePanelCollapsed: Boolean = false,
     val previewPanelWidthDp: Int = 280,
     val previewPanelCollapsed: Boolean = false,
+    val maximizedLayout: WindowLayoutSettings = WindowLayoutSettings(),
+    val windowedLayout: WindowLayoutSettings = WindowLayoutSettings(),
     val theme: String = Constants.SYSTEM,
     val language: String = "en",
     val licenseAccepted: Boolean = false,

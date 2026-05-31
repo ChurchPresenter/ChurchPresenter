@@ -1,6 +1,7 @@
 package org.churchpresenter.app.churchpresenter
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.ui.window.WindowPlacement
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.shrinkHorizontally
@@ -564,29 +565,37 @@ fun MainDesktop(
             }
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
-            var scheduleCollapsed by remember { mutableStateOf(appSettings.schedulePanelCollapsed) }
-
             val density = LocalDensity.current
             val onSettingsChangeState = rememberUpdatedState(onSettingsChange)
 
+            val windowState = LocalMainWindowState.current
+            val isMaximized = windowState?.placement != WindowPlacement.Floating
+            val currentLayout = if (isMaximized) appSettings.maximizedLayout else appSettings.windowedLayout
+
+            var scheduleCollapsed by remember(isMaximized) { mutableStateOf(currentLayout.schedulePanelCollapsed) }
+
             // Schedule panel width — loaded from settings, local state for smooth dragging
-            var schedulePanelPx by remember(appSettings.schedulePanelWidthDp) {
-                mutableStateOf(with(density) { appSettings.schedulePanelWidthDp.dp.toPx() })
+            var schedulePanelPx by remember(currentLayout.schedulePanelWidthDp, isMaximized) {
+                mutableStateOf(with(density) { currentLayout.schedulePanelWidthDp.dp.toPx() })
             }
-            var previewCollapsed by remember { mutableStateOf(appSettings.previewPanelCollapsed) }
-            var previewPanelPx by remember(appSettings.previewPanelWidthDp) {
-                mutableStateOf(with(density) { appSettings.previewPanelWidthDp.dp.toPx() })
+            var previewCollapsed by remember(isMaximized) { mutableStateOf(currentLayout.previewPanelCollapsed) }
+            var previewPanelPx by remember(currentLayout.previewPanelWidthDp, isMaximized) {
+                mutableStateOf(with(density) { currentLayout.previewPanelWidthDp.dp.toPx() })
             }
 
             fun saveScheduleWidth() {
+                val widthDp = with(density) { schedulePanelPx.toDp().value.toInt() }
                 onSettingsChangeState.value { s ->
-                    s.copy(schedulePanelWidthDp = with(density) { schedulePanelPx.toDp().value.toInt() })
+                    if (isMaximized) s.copy(maximizedLayout = s.maximizedLayout.copy(schedulePanelWidthDp = widthDp))
+                    else s.copy(windowedLayout = s.windowedLayout.copy(schedulePanelWidthDp = widthDp))
                 }
             }
 
             fun savePreviewWidth() {
+                val widthDp = with(density) { previewPanelPx.toDp().value.toInt() }
                 onSettingsChangeState.value { s ->
-                    s.copy(previewPanelWidthDp = with(density) { previewPanelPx.toDp().value.toInt() })
+                    if (isMaximized) s.copy(maximizedLayout = s.maximizedLayout.copy(previewPanelWidthDp = widthDp))
+                    else s.copy(windowedLayout = s.windowedLayout.copy(previewPanelWidthDp = widthDp))
                 }
             }
 
@@ -820,7 +829,10 @@ fun MainDesktop(
                     IconButton(
                         onClick = {
                             scheduleCollapsed = !scheduleCollapsed
-                            onSettingsChangeState.value { s -> s.copy(schedulePanelCollapsed = scheduleCollapsed) }
+                            onSettingsChangeState.value { s ->
+                                if (isMaximized) s.copy(maximizedLayout = s.maximizedLayout.copy(schedulePanelCollapsed = scheduleCollapsed))
+                                else s.copy(windowedLayout = s.windowedLayout.copy(schedulePanelCollapsed = scheduleCollapsed))
+                            }
                         },
                         modifier = Modifier.wrapContentHeight()
                     ) {
@@ -1112,7 +1124,10 @@ fun MainDesktop(
                     IconButton(
                         onClick = {
                             previewCollapsed = !previewCollapsed
-                            onSettingsChangeState.value { s -> s.copy(previewPanelCollapsed = previewCollapsed) }
+                            onSettingsChangeState.value { s ->
+                                if (isMaximized) s.copy(maximizedLayout = s.maximizedLayout.copy(previewPanelCollapsed = previewCollapsed))
+                                else s.copy(windowedLayout = s.windowedLayout.copy(previewPanelCollapsed = previewCollapsed))
+                            }
                         },
                         modifier = Modifier.wrapContentHeight()
                     ) {
