@@ -1052,6 +1052,7 @@ fun MainDesktop(
                             Tabs.CANVAS -> CanvasTab(
                                 modifier = Modifier.fillMaxSize(),
                                 appSettings = appSettings,
+                                onSettingsChange = onSettingsChange,
                                 presenterManager = presenterManager,
                                 sceneViewModel = sceneViewModel,
                                 onAddToSchedule = { sceneId, sceneName ->

@@ -789,6 +789,8 @@ data class WindowLayoutSettings(
     val bibleColWidthBook: Int = 200,
     val bibleColWidthChapter: Int = 120,
     val lowerThirdListWidthDp: Int = 240,
+    val canvasLeftPanelWidthDp: Int = 200,
+    val canvasRightPanelWidthDp: Int = 200,
 )
 
 @Serializable

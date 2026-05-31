@@ -1,6 +1,14 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.pointerHoverIcon
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.window.WindowPlacement
+import org.churchpresenter.app.churchpresenter.LocalMainWindowState
 import androidx.compose.foundation.TooltipArea
 import androidx.compose.foundation.TooltipPlacement
 import androidx.compose.foundation.background
@@ -127,10 +135,39 @@ import churchpresenter.composeapp.generated.resources.canvas_fix_aspect_ratio
 fun CanvasTab(
     modifier: Modifier = Modifier,
     appSettings: AppSettings,
+    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit = {},
     presenterManager: PresenterManager,
     sceneViewModel: SceneViewModel,
     onAddToSchedule: (sceneId: String, sceneName: String) -> Unit
 ) {
+    val density = LocalDensity.current
+    val onSettingsChangeState = rememberUpdatedState(onSettingsChange)
+    val windowState = LocalMainWindowState.current
+    val isMaximized = windowState?.placement != WindowPlacement.Floating
+    val currentLayout = if (isMaximized) appSettings.maximizedLayout else appSettings.windowedLayout
+
+    var leftPanelPx by remember(currentLayout.canvasLeftPanelWidthDp, isMaximized) {
+        mutableStateOf(with(density) { currentLayout.canvasLeftPanelWidthDp.dp.toPx() })
+    }
+    var rightPanelPx by remember(currentLayout.canvasRightPanelWidthDp, isMaximized) {
+        mutableStateOf(with(density) { currentLayout.canvasRightPanelWidthDp.dp.toPx() })
+    }
+
+    fun saveLeftPanel() {
+        val dp = with(density) { leftPanelPx.toDp().value.toInt() }
+        onSettingsChangeState.value { s ->
+            if (isMaximized) s.copy(maximizedLayout = s.maximizedLayout.copy(canvasLeftPanelWidthDp = dp))
+            else s.copy(windowedLayout = s.windowedLayout.copy(canvasLeftPanelWidthDp = dp))
+        }
+    }
+
+    fun saveRightPanel() {
+        val dp = with(density) { rightPanelPx.toDp().value.toInt() }
+        onSettingsChangeState.value { s ->
+            if (isMaximized) s.copy(maximizedLayout = s.maximizedLayout.copy(canvasRightPanelWidthDp = dp))
+            else s.copy(windowedLayout = s.windowedLayout.copy(canvasRightPanelWidthDp = dp))
+        }
+    }
     var renamingSceneId by remember { mutableStateOf<String?>(null) }
     var renameText by remember { mutableStateOf("") }
     val currentScene = sceneViewModel.currentScene
@@ -188,8 +225,7 @@ fun CanvasTab(
         // Left panel: Scene selector + Source list
         Column(
             modifier = Modifier
-                .widthIn(min = 160.dp, max = 220.dp)
-                .weight(0.2f)
+                .width(with(density) { leftPanelPx.toDp() })
                 .fillMaxHeight()
                 .background(MaterialTheme.colorScheme.surface)
                 .padding(8.dp)
@@ -664,7 +700,19 @@ fun CanvasTab(
             }
         }
 
-        VerticalDivider(color = MaterialTheme.colorScheme.outlineVariant, thickness = 1.dp)
+        // Draggable separator: left panel | center
+        Box(
+            modifier = Modifier
+                .width(6.dp)
+                .fillMaxHeight()
+                .background(MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f))
+                .pointerHoverIcon(PointerIcon.Hand)
+                .pointerInput(Unit) {
+                    detectHorizontalDragGestures(onDragEnd = ::saveLeftPanel) { _, amount ->
+                        leftPanelPx = (leftPanelPx + amount).coerceAtLeast(with(density) { 120.dp.toPx() })
+                    }
+                }
+        )
 
         // Center panel: Toolbar + Canvas
         Column(
@@ -903,13 +951,24 @@ fun CanvasTab(
             }
         }
 
-        VerticalDivider(color = MaterialTheme.colorScheme.outlineVariant, thickness = 1.dp)
+        // Draggable separator: center | right panel
+        Box(
+            modifier = Modifier
+                .width(6.dp)
+                .fillMaxHeight()
+                .background(MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f))
+                .pointerHoverIcon(PointerIcon.Hand)
+                .pointerInput(Unit) {
+                    detectHorizontalDragGestures(onDragEnd = ::saveRightPanel) { _, amount ->
+                        rightPanelPx = (rightPanelPx - amount).coerceAtLeast(with(density) { 120.dp.toPx() })
+                    }
+                }
+        )
 
         // Right panel: Properties
         Column(
             modifier = Modifier
-                .widthIn(min = 160.dp, max = 220.dp)
-                .weight(0.2f)
+                .width(with(density) { rightPanelPx.toDp() })
                 .fillMaxHeight()
                 .background(MaterialTheme.colorScheme.surface)
         ) {
