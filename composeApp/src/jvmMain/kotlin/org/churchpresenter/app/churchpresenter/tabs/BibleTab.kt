@@ -1,6 +1,8 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.ui.window.WindowPlacement
+import org.churchpresenter.app.churchpresenter.LocalMainWindowState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.TooltipArea
 import androidx.compose.foundation.TooltipPlacement
@@ -377,15 +379,19 @@ fun BibleTab(
         }
     }
 
-    var colWSplit by remember(appSettings.bibleSettings.splitLivePanelWidth) {
-        mutableStateOf(with(density) { appSettings.bibleSettings.splitLivePanelWidth.dp.toPx() })
+    val windowState = LocalMainWindowState.current
+    val isMaximized = windowState?.placement != WindowPlacement.Floating
+    val currentLayout = if (isMaximized) appSettings.maximizedLayout else appSettings.windowedLayout
+
+    var colWSplit by remember(currentLayout.splitLivePanelWidth, isMaximized) {
+        mutableStateOf(with(density) { currentLayout.splitLivePanelWidth.dp.toPx() })
     }
 
     fun saveColWSplit() {
+        val widthDp = with(density) { colWSplit.toDp().value.toInt() }
         onSettingsChangeState.value { s ->
-            s.copy(bibleSettings = s.bibleSettings.copy(
-                splitLivePanelWidth = with(density) { colWSplit.toDp().value.toInt() }
-            ))
+            if (isMaximized) s.copy(maximizedLayout = s.maximizedLayout.copy(splitLivePanelWidth = widthDp))
+            else s.copy(windowedLayout = s.windowedLayout.copy(splitLivePanelWidth = widthDp))
         }
     }
 

@@ -1,6 +1,8 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.ui.window.WindowPlacement
+import org.churchpresenter.app.churchpresenter.LocalMainWindowState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.TooltipArea
 import androidx.compose.foundation.TooltipPlacement
@@ -116,6 +118,9 @@ import churchpresenter.composeapp.generated.resources.ic_arrow_down
 import churchpresenter.composeapp.generated.resources.ic_arrow_up
 import churchpresenter.composeapp.generated.resources.ic_cast
 import churchpresenter.composeapp.generated.resources.ic_delete
+import churchpresenter.composeapp.generated.resources.delete_saved_string
+import churchpresenter.composeapp.generated.resources.confirm_delete
+import churchpresenter.composeapp.generated.resources.cancel
 import churchpresenter.composeapp.generated.resources.ic_search
 import churchpresenter.composeapp.generated.resources.ic_star
 import churchpresenter.composeapp.generated.resources.ic_star_filled
@@ -362,9 +367,13 @@ fun SongsTab(
     // each settings save, which would silently break a derivedStateOf subscription).
     val visibleCols = colOrder.filter { it !in hiddenCols }
 
+    val windowState = LocalMainWindowState.current
+    val isMaximized = windowState?.placement != WindowPlacement.Floating
+    val currentLayout = if (isMaximized) appSettings.maximizedLayout else appSettings.windowedLayout
+
     // Panel split — lyrics panel width in px; 0 means "not yet set, use half of row"
-    var lyricsPanelPx by remember(appSettings.songSettings.lyricsPanelWidthDp) {
-        val saved = appSettings.songSettings.lyricsPanelWidthDp
+    var lyricsPanelPx by remember(currentLayout.lyricsPanelWidthDp, isMaximized) {
+        val saved = currentLayout.lyricsPanelWidthDp
         mutableStateOf(if (saved > 0) with(density) { saved.dp.toPx() } else 0f)
     }
     var rowTotalWidth by remember { mutableStateOf(0f) }
@@ -380,11 +389,18 @@ fun SongsTab(
                     colWidthPlayCount   = with(density) { colWPlayCount.toDp().value.toInt() },
                     colWidthAuthor      = with(density) { colWAuthor.toDp().value.toInt() },
                     colWidthComposer    = with(density) { colWComposer.toDp().value.toInt() },
-                    lyricsPanelWidthDp  = with(density) { lyricsPanelPx.toDp().value.toInt() }
                 ),
                 songColOrder = colOrder,
                 songHiddenCols = hiddenCols
             )
+        }
+    }
+
+    fun saveLyricsPanelWidth() {
+        val widthDp = with(density) { lyricsPanelPx.toDp().value.toInt() }
+        onSettingsChangeState.value { s ->
+            if (isMaximized) s.copy(maximizedLayout = s.maximizedLayout.copy(lyricsPanelWidthDp = widthDp))
+            else s.copy(windowedLayout = s.windowedLayout.copy(lyricsPanelWidthDp = widthDp))
         }
     }
 
@@ -1269,7 +1285,7 @@ fun SongsTab(
                 .pointerHoverIcon(PointerIcon.Hand)
                 .pointerInput(Unit) {
                     detectHorizontalDragGestures(
-                        onDragEnd = { saveColWidths() }
+                        onDragEnd = { saveLyricsPanelWidth() }
                     ) { _, amount ->
                         lyricsPanelPx = (lyricsPanelPx - amount)
                             .coerceIn(

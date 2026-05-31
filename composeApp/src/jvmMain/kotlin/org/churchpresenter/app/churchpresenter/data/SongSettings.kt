@@ -784,6 +784,8 @@ data class WindowLayoutSettings(
     val schedulePanelCollapsed: Boolean = false,
     val previewPanelWidthDp: Int = 280,
     val previewPanelCollapsed: Boolean = false,
+    val lyricsPanelWidthDp: Int = 0,
+    val splitLivePanelWidth: Int = 300,
 )
 
 @Serializable
