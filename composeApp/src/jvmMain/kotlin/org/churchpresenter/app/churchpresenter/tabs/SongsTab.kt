@@ -928,24 +928,47 @@ fun SongsTab(
                                         "composer"   -> song.composer
                                         else         -> ""
                                     }
-                                    Text(
-                                        cellText,
-                                        style = MaterialTheme.typography.bodySmall,
-                                        textAlign = if (colId == "play_count") TextAlign.End else TextAlign.Start,
-                                        modifier = Modifier
-                                            .width(with(density) { colWidth(colId).toDp() })
-                                            .initialPassClickable {
-                                                viewModel.selectSong(index)
-                                                if (isPresenting && liveSongIndex >= 0) {
-                                                    viewModel.selectSection(-1)
+                                    TooltipArea(
+                                        tooltip = {
+                                            if (cellText.isNotEmpty()) {
+                                                Surface(
+                                                    color = MaterialTheme.colorScheme.inverseSurface,
+                                                    shape = MaterialTheme.shapes.extraSmall,
+                                                    tonalElevation = 4.dp
+                                                ) {
+                                                    Text(
+                                                        cellText,
+                                                        color = MaterialTheme.colorScheme.inverseOnSurface,
+                                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                                        style = MaterialTheme.typography.bodySmall
+                                                    )
                                                 }
-                                                tabFocusRequester.requestFocus()
                                             }
-                                            .padding(horizontal = 8.dp),
-                                        maxLines = if (colId == "number") Int.MAX_VALUE else 1,
-                                        overflow = TextOverflow.Ellipsis,
-                                        color = textColor
-                                    )
+                                        },
+                                        tooltipPlacement = TooltipPlacement.ComponentRect(
+                                            anchor = Alignment.BottomStart,
+                                            offset = DpOffset(0.dp, 4.dp)
+                                        )
+                                    ) {
+                                        Text(
+                                            cellText,
+                                            style = MaterialTheme.typography.bodySmall,
+                                            textAlign = if (colId == "play_count") TextAlign.End else TextAlign.Start,
+                                            modifier = Modifier
+                                                .width(with(density) { colWidth(colId).toDp() })
+                                                .initialPassClickable {
+                                                    viewModel.selectSong(index)
+                                                    if (isPresenting && liveSongIndex >= 0) {
+                                                        viewModel.selectSection(-1)
+                                                    }
+                                                    tabFocusRequester.requestFocus()
+                                                }
+                                                .padding(horizontal = 8.dp),
+                                            maxLines = if (colId == "number") Int.MAX_VALUE else 1,
+                                            overflow = TextOverflow.Ellipsis,
+                                            color = textColor
+                                        )
+                                    }
                                     Box(modifier = Modifier.width(6.dp))
                                 } else {
                                     Box(modifier = Modifier.width(6.dp))
