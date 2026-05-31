@@ -1,6 +1,14 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.pointerHoverIcon
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.window.WindowPlacement
+import org.churchpresenter.app.churchpresenter.LocalMainWindowState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.ui.graphics.ColorFilter
@@ -301,6 +309,24 @@ fun QATab(
     // Hoist strings needed inside non-composable lambdas
     val strExportTitle = stringResource(Res.string.qa_export_dialog_title)
     val strImportTitle = stringResource(Res.string.qa_import_dialog_title)
+
+    val density = LocalDensity.current
+    val onSettingsChangeState = rememberUpdatedState(onSettingsChange)
+    val windowState = LocalMainWindowState.current
+    val isMaximized = windowState?.placement != WindowPlacement.Floating
+    val currentLayout = if (isMaximized) appSettings.maximizedLayout else appSettings.windowedLayout
+
+    var rightPanelPx by remember(currentLayout.qaRightPanelWidthDp, isMaximized) {
+        mutableStateOf(with(density) { currentLayout.qaRightPanelWidthDp.dp.toPx() })
+    }
+
+    fun saveRightPanel() {
+        val dp = with(density) { rightPanelPx.toDp().value.toInt() }
+        onSettingsChangeState.value { s ->
+            if (isMaximized) s.copy(maximizedLayout = s.maximizedLayout.copy(qaRightPanelWidthDp = dp))
+            else s.copy(windowedLayout = s.windowedLayout.copy(qaRightPanelWidthDp = dp))
+        }
+    }
 
     Row(modifier = modifier.fillMaxSize()) {
         // ── Left Panel: Question List ────────────────────────────────
@@ -659,10 +685,24 @@ fun QATab(
             )
         }
 
+        // Draggable separator
+        Box(
+            modifier = Modifier
+                .width(6.dp)
+                .fillMaxHeight()
+                .background(MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f))
+                .pointerHoverIcon(PointerIcon.Hand)
+                .pointerInput(Unit) {
+                    detectHorizontalDragGestures(onDragEnd = ::saveRightPanel) { _, amount ->
+                        rightPanelPx = (rightPanelPx - amount).coerceAtLeast(with(density) { 160.dp.toPx() })
+                    }
+                }
+        )
+
         // ── Right Panel: QR Codes, Styling & Settings ────────────────
         Column(
             modifier = Modifier
-                .width(280.dp)
+                .width(with(density) { rightPanelPx.toDp() })
                 .fillMaxHeight()
                 .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
                 .verticalScroll(rememberScrollState())

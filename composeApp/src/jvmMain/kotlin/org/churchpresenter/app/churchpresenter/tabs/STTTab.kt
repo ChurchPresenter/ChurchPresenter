@@ -1,6 +1,14 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.pointerHoverIcon
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.window.WindowPlacement
+import org.churchpresenter.app.churchpresenter.LocalMainWindowState
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -145,6 +153,24 @@ fun STTTab(
     }
 
     var urlInput by remember(sttSettings.serverUrl) { mutableStateOf(sttSettings.serverUrl.ifEmpty { "http://" }) }
+
+    val density = LocalDensity.current
+    val onSettingsChangeState = rememberUpdatedState(onSettingsChange)
+    val windowState = LocalMainWindowState.current
+    val isMaximized = windowState?.placement != WindowPlacement.Floating
+    val currentLayout = if (isMaximized) appSettings.maximizedLayout else appSettings.windowedLayout
+
+    var rightPanelPx by remember(currentLayout.sttRightPanelWidthDp, isMaximized) {
+        mutableStateOf(with(density) { currentLayout.sttRightPanelWidthDp.dp.toPx() })
+    }
+
+    fun saveRightPanel() {
+        val dp = with(density) { rightPanelPx.toDp().value.toInt() }
+        onSettingsChangeState.value { s ->
+            if (isMaximized) s.copy(maximizedLayout = s.maximizedLayout.copy(sttRightPanelWidthDp = dp))
+            else s.copy(windowedLayout = s.windowedLayout.copy(sttRightPanelWidthDp = dp))
+        }
+    }
 
     Row(modifier = modifier.fillMaxSize()) {
         // ── Left Panel: Connection + Live Preview ─────────────────────
@@ -486,10 +512,24 @@ fun STTTab(
             }
         }
 
+        // Draggable separator
+        Box(
+            modifier = Modifier
+                .width(6.dp)
+                .fillMaxHeight()
+                .background(MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f))
+                .pointerHoverIcon(PointerIcon.Hand)
+                .pointerInput(Unit) {
+                    detectHorizontalDragGestures(onDragEnd = ::saveRightPanel) { _, amount ->
+                        rightPanelPx = (rightPanelPx - amount).coerceAtLeast(with(density) { 160.dp.toPx() })
+                    }
+                }
+        )
+
         // ── Right Panel: Display Styling ──────────────────────────────
         Column(
             modifier = Modifier
-                .width(280.dp)
+                .width(with(density) { rightPanelPx.toDp() })
                 .fillMaxHeight()
                 .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
                 .verticalScroll(rememberScrollState())

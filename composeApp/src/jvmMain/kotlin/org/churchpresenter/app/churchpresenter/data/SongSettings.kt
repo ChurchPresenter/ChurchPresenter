@@ -791,6 +791,8 @@ data class WindowLayoutSettings(
     val lowerThirdListWidthDp: Int = 240,
     val canvasLeftPanelWidthDp: Int = 200,
     val canvasRightPanelWidthDp: Int = 200,
+    val qaRightPanelWidthDp: Int = 280,
+    val sttRightPanelWidthDp: Int = 280,
 )
 
 @Serializable
