@@ -1,6 +1,8 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
 import androidx.compose.animation.core.Animatable
+import androidx.compose.ui.window.WindowPlacement
+import org.churchpresenter.app.churchpresenter.LocalMainWindowState
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -223,11 +225,15 @@ fun LowerThirdTab(
     val canPlay = composition != null && jsonContent.isNotBlank()
 
     val density = LocalDensity.current
-    var listWidthPx by remember(appSettings.streamingSettings.lowerThirdListWidthDp) {
-        mutableStateOf(with(density) { appSettings.streamingSettings.lowerThirdListWidthDp.dp.toPx() })
+    val onSettingsChangeState = rememberUpdatedState(onSettingsChange)
+    val windowState = LocalMainWindowState.current
+    val isMaximized = windowState?.placement != WindowPlacement.Floating
+    val currentLayout = if (isMaximized) appSettings.maximizedLayout else appSettings.windowedLayout
+
+    var listWidthPx by remember(currentLayout.lowerThirdListWidthDp, isMaximized) {
+        mutableStateOf(with(density) { currentLayout.lowerThirdListWidthDp.dp.toPx() })
     }
     val listWidthDp = with(density) { listWidthPx.toDp() }
-    val onSettingsChangeState = rememberUpdatedState(onSettingsChange)
 
     @Composable
     fun Tooltip(text: String, content: @Composable () -> Unit) {
@@ -367,11 +373,8 @@ fun LowerThirdTab(
                         onDragEnd = {
                             val newWidthDp = with(density) { listWidthPx.toDp().value.toInt() }
                             onSettingsChangeState.value { s ->
-                                s.copy(
-                                    streamingSettings = s.streamingSettings.copy(
-                                        lowerThirdListWidthDp = newWidthDp
-                                    )
-                                )
+                                if (isMaximized) s.copy(maximizedLayout = s.maximizedLayout.copy(lowerThirdListWidthDp = newWidthDp))
+                                else s.copy(windowedLayout = s.windowedLayout.copy(lowerThirdListWidthDp = newWidthDp))
                             }
                         }
                     ) { _, dragAmount ->
