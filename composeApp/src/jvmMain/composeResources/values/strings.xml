@@ -668,6 +668,9 @@
 
     <!-- Announcements timer -->
     <string name="timer_title">Timer</string>
+    <string name="timer_mode_duration">Duration</string>
+    <string name="timer_mode_clock">Specific Time</string>
+    <string name="timer_target_time">Count down to</string>
     <string name="timer_hours">hr</string>
     <string name="timer_minutes">min</string>
     <string name="timer_seconds">sec</string>

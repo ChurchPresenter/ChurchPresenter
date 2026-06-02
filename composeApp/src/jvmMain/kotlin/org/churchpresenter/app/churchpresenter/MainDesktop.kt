@@ -210,6 +210,7 @@ fun MainDesktop(
     var selectedMediaItem by remember { mutableStateOf<ScheduleItem.MediaItem?>(null) }
     var selectedLowerThirdItem by remember { mutableStateOf<ScheduleItem.LowerThirdItem?>(null) }
     var selectedWebsiteItem by remember { mutableStateOf<ScheduleItem.WebsiteItem?>(null) }
+    var scheduleTimerVersion by remember { mutableStateOf(0) }
 
     var showCrosswordTab by remember { mutableStateOf(false) }
     var selectedTabIndex by rememberSaveable { mutableStateOf(0) }
@@ -670,11 +671,19 @@ fun MainDesktop(
                                         timerMinutes        = item.timerMinutes,
                                         timerSeconds        = item.timerSeconds,
                                         timerTextColor      = item.timerTextColor,
-                                        timerExpiredText    = item.timerExpiredText
+                                        timerExpiredText    = item.timerExpiredText,
+                                        timerMode           = item.timerMode,
+                                        targetHour          = item.targetHour,
+                                        targetMinute        = item.targetMinute,
+                                        targetSecond        = item.targetSecond
                                     )
                                 )
                             }
-                            presenterManager.setAnnouncementText(item.text)
+                            if (item.isTimer) {
+                                scheduleTimerVersion++
+                            } else {
+                                presenterManager.setAnnouncementText(item.text)
+                            }
                             presenting(Presenting.ANNOUNCEMENTS)
                         },
                         onPresentLowerThird = { item ->
@@ -1009,8 +1018,10 @@ fun MainDesktop(
                                 appSettings = appSettings,
                                 onSettingsChange = onSettingsChange,
                                 presenterManager = presenterManager,
+                                scheduleTimerVersion = scheduleTimerVersion,
                                 onAddToSchedule = { settings ->
-                                    val isTimer = settings.timerHours > 0 || settings.timerMinutes > 0 || settings.timerSeconds > 0
+                                    val isTimer = settings.timerMode == "clock" ||
+                                        settings.timerHours > 0 || settings.timerMinutes > 0 || settings.timerSeconds > 0
                                     currentScheduleActions.addAnnouncement(
                                         settings.text,
                                         settings.textColor,
@@ -1030,7 +1041,11 @@ fun MainDesktop(
                                         settings.timerMinutes,
                                         settings.timerSeconds,
                                         settings.timerTextColor,
-                                        settings.timerExpiredText
+                                        settings.timerExpiredText,
+                                        settings.timerMode,
+                                        settings.targetHour,
+                                        settings.targetMinute,
+                                        settings.targetSecond
                                     )
                                 }
                             )

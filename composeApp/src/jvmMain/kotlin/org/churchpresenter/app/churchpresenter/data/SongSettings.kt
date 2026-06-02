@@ -602,7 +602,11 @@ data class AnnouncementsSettings(
     val timerMinutes: Int = 0,
     val timerSeconds: Int = 0,
     val timerTextColor: String = "#FFFFFF",
-    val timerExpiredText: String = ""
+    val timerExpiredText: String = "",
+    val timerMode: String = Constants.TIMER_MODE_DURATION,
+    val targetHour: Int = 0,
+    val targetMinute: Int = 0,
+    val targetSecond: Int = 0
 )
 
 @Serializable
@@ -793,6 +797,8 @@ data class WindowLayoutSettings(
     val canvasRightPanelWidthDp: Int = 200,
     val qaRightPanelWidthDp: Int = 280,
     val sttRightPanelWidthDp: Int = 280,
+    val announcementsPreviewPanelWidthDp: Int = 260,
+    val announcementsLeftPanelWidthDp: Int = 300,
 )
 
 @Serializable

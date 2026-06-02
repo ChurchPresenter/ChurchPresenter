@@ -92,8 +92,24 @@ class AnnouncementsViewModel {
     private val _timerTextColor = mutableStateOf("#FFFFFF")
     val timerTextColor: String get() = _timerTextColor.value
 
+    /** Whether the timer counts a duration or counts down to a specific clock time */
+    private val _timerMode = mutableStateOf(Constants.TIMER_MODE_DURATION)
+    val timerMode: String get() = _timerMode.value
+
+    /** Target clock time fields (used when timerMode == TIMER_MODE_CLOCK) */
+    private val _targetHour = mutableStateOf(0)
+    val targetHour: Int get() = _targetHour.value
+
+    private val _targetMinute = mutableStateOf(0)
+    val targetMinute: Int get() = _targetMinute.value
+
+    private val _targetSecond = mutableStateOf(0)
+    val targetSecond: Int get() = _targetSecond.value
+
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private var timerJob: Job? = null
+    /** Ticks every second in clock mode while the timer is not running, keeping the display current. */
+    private var clockPreviewJob: Job? = null
 
     // ── Sync from settings ───────────────────────────────────────────
     fun syncFromSettings(settings: AnnouncementsSettings) {
@@ -119,8 +135,13 @@ class AnnouncementsViewModel {
         _timerSeconds.value = settings.timerSeconds
         _timerTextColor.value = settings.timerTextColor
         _timerExpiredText.value = settings.timerExpiredText
+        _timerMode.value = settings.timerMode
+        _targetHour.value = settings.targetHour
+        _targetMinute.value = settings.targetMinute
+        _targetSecond.value = settings.targetSecond
         if (!_timerRunning.value) {
-            _timerRemaining.value = totalSeconds()
+            _timerRemaining.value = if (settings.timerMode == Constants.TIMER_MODE_CLOCK) secondsUntilTarget() else totalSeconds()
+            if (settings.timerMode == Constants.TIMER_MODE_CLOCK) startClockPreview()
         }
     }
 
@@ -192,7 +213,7 @@ class AnnouncementsViewModel {
     fun stepTimerSeconds(delta: Int) {
         val cur = _timerSeconds.value
         if (delta > 0) {
-            val next = if (cur >= 45) 0 else ((cur / 15) + 1) * 15
+            val next = if (cur >= 55) 0 else ((cur / 5) + 1) * 5
             if (next == 0) {
                 _timerSeconds.value = 0
                 stepTimerMinutes(1)
@@ -200,10 +221,10 @@ class AnnouncementsViewModel {
                 setTimerSeconds(next)
             }
         } else {
-            val next = if (cur <= 0) 45 else ((cur - 1) / 15) * 15
+            val next = if (cur <= 0) 55 else ((cur - 1) / 5) * 5
             if (cur <= 0) {
                 if (_timerHours.value > 0 || _timerMinutes.value > 0) {
-                    _timerSeconds.value = 45
+                    _timerSeconds.value = 55
                     stepTimerMinutes(-1)
                 }
             } else {
@@ -214,6 +235,86 @@ class AnnouncementsViewModel {
 
     fun setTimerExpiredText(value: String) { _timerExpiredText.value = value }
     fun setTimerTextColor(value: String) { _timerTextColor.value = value }
+
+    private fun startClockPreview() {
+        clockPreviewJob?.cancel()
+        clockPreviewJob = scope.launch {
+            while (true) {
+                delay(1000L)
+                if (!_timerRunning.value && _timerMode.value == Constants.TIMER_MODE_CLOCK) {
+                    _timerRemaining.value = secondsUntilTarget()
+                }
+            }
+        }
+    }
+
+    private fun stopClockPreview() {
+        clockPreviewJob?.cancel()
+        clockPreviewJob = null
+    }
+
+    fun setTimerMode(value: String) {
+        _timerMode.value = value
+        if (!_timerRunning.value) {
+            _timerRemaining.value = if (value == Constants.TIMER_MODE_CLOCK) secondsUntilTarget() else totalSeconds()
+        }
+        if (value == Constants.TIMER_MODE_CLOCK) startClockPreview() else stopClockPreview()
+    }
+
+    private fun secondsUntilTarget(): Int {
+        val now = java.time.LocalTime.now()
+        val nowSec = now.toSecondOfDay()
+        val targetSec = _targetHour.value * 3600 + _targetMinute.value * 60 + _targetSecond.value
+        val diff = targetSec - nowSec
+        return if (diff > 0) diff else diff + 86400
+    }
+
+    fun setTargetHour(value: Int) {
+        _targetHour.value = value.coerceIn(0, 23)
+        if (!_timerRunning.value && _timerMode.value == Constants.TIMER_MODE_CLOCK) {
+            _timerRemaining.value = secondsUntilTarget()
+        }
+    }
+
+    fun stepTargetHour(delta: Int) { setTargetHour(_targetHour.value + delta) }
+
+    fun setTargetMinute(value: Int) {
+        _targetMinute.value = value.coerceIn(0, 59)
+        if (!_timerRunning.value && _timerMode.value == Constants.TIMER_MODE_CLOCK) {
+            _timerRemaining.value = secondsUntilTarget()
+        }
+    }
+
+    fun stepTargetMinute(delta: Int) {
+        val cur = _targetMinute.value
+        if (delta > 0) {
+            if (cur >= 59) { _targetMinute.value = 0; setTargetHour(_targetHour.value + 1) }
+            else setTargetMinute(cur + 1)
+        } else {
+            if (cur <= 0) { _targetMinute.value = 59; setTargetHour(_targetHour.value - 1) }
+            else setTargetMinute(cur - 1)
+        }
+    }
+
+    fun setTargetSecond(value: Int) {
+        _targetSecond.value = value.coerceIn(0, 59)
+        if (!_timerRunning.value && _timerMode.value == Constants.TIMER_MODE_CLOCK) {
+            _timerRemaining.value = secondsUntilTarget()
+        }
+    }
+
+    fun stepTargetSecond(delta: Int) {
+        val cur = _targetSecond.value
+        if (delta > 0) {
+            val next = if (cur >= 55) 0 else ((cur / 5) + 1) * 5
+            if (next == 0) { _targetSecond.value = 0; stepTargetMinute(1) }
+            else setTargetSecond(next)
+        } else {
+            val next = if (cur <= 0) 55 else ((cur - 1) / 5) * 5
+            if (cur <= 0) { _targetSecond.value = 55; stepTargetMinute(-1) }
+            else setTargetSecond(next)
+        }
+    }
 
     // ── Timer control ────────────────────────────────────────────────
     fun startPauseTimer(
@@ -229,10 +330,12 @@ class AnnouncementsViewModel {
             timerJob?.cancel()
             timerJob = null
             _timerRunning.value = false
+            if (_timerMode.value == Constants.TIMER_MODE_CLOCK) startClockPreview()
         } else {
             // Start / resume
+            stopClockPreview()
             if (_timerRemaining.value <= 0) {
-                val total = totalSeconds()
+                val total = if (_timerMode.value == Constants.TIMER_MODE_CLOCK) secondsUntilTarget() else totalSeconds()
                 if (total <= 0) return
                 _timerRemaining.value = total
             }
@@ -246,6 +349,7 @@ class AnnouncementsViewModel {
                 }
                 _timerRunning.value = false
                 _timerExpired.value = true
+                if (_timerMode.value == Constants.TIMER_MODE_CLOCK) startClockPreview()
                 onExpired(_timerExpiredText.value)
             }
         }
@@ -256,6 +360,7 @@ class AnnouncementsViewModel {
             timerJob?.cancel()
             timerJob = null
             _timerRunning.value = false
+            if (_timerMode.value == Constants.TIMER_MODE_CLOCK) startClockPreview()
         }
     }
 
@@ -264,10 +369,12 @@ class AnnouncementsViewModel {
         timerJob = null
         _timerRunning.value = false
         _timerExpired.value = false
-        _timerRemaining.value = totalSeconds()
+        _timerRemaining.value = if (_timerMode.value == Constants.TIMER_MODE_CLOCK) secondsUntilTarget() else totalSeconds()
+        if (_timerMode.value == Constants.TIMER_MODE_CLOCK) startClockPreview()
     }
 
     fun dispose() {
+        stopClockPreview()
         scope.cancel()
     }
 
@@ -299,7 +406,11 @@ class AnnouncementsViewModel {
         timerMinutes = _timerMinutes.value,
         timerSeconds = _timerSeconds.value,
         timerTextColor = _timerTextColor.value,
-        timerExpiredText = _timerExpiredText.value
+        timerExpiredText = _timerExpiredText.value,
+        timerMode = _timerMode.value,
+        targetHour = _targetHour.value,
+        targetMinute = _targetMinute.value,
+        targetSecond = _targetSecond.value
     )
 
     companion object {

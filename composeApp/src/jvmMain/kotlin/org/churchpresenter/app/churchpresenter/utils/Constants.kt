@@ -81,7 +81,10 @@ fun isChorusHeader(line: String): Boolean {
 object Constants {
     /** Localhost port used to enforce single-instance via ServerSocket lock. */
     const val SINGLE_INSTANCE_PORT = 47632
-    
+
+    const val TIMER_MODE_DURATION = "duration"
+    const val TIMER_MODE_CLOCK    = "clock"
+
     const val NONE = "None"
     const val FIRST_PAGE = "First Page"
     const val EVERY_PAGE = "Every Page"

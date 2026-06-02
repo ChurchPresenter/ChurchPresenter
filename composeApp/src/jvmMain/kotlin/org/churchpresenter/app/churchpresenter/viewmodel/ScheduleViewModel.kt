@@ -215,7 +215,11 @@ class ScheduleViewModel(
         timerMinutes: Int = 0,
         timerSeconds: Int = 0,
         timerTextColor: String = "#FFFFFF",
-        timerExpiredText: String = ""
+        timerExpiredText: String = "",
+        timerMode: String = "duration",
+        targetHour: Int = 0,
+        targetMinute: Int = 0,
+        targetSecond: Int = 0
     ) {
         val id = UUID.randomUUID().toString()
         _scheduleItems.add(
@@ -239,7 +243,11 @@ class ScheduleViewModel(
                 timerMinutes = timerMinutes,
                 timerSeconds = timerSeconds,
                 timerTextColor = timerTextColor,
-                timerExpiredText = timerExpiredText
+                timerExpiredText = timerExpiredText,
+                timerMode = timerMode,
+                targetHour = targetHour,
+                targetMinute = targetMinute,
+                targetSecond = targetSecond
             )
         )
         notifyChanged()

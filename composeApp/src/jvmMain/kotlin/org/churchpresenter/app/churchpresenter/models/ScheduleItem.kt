@@ -1,6 +1,7 @@
 package org.churchpresenter.app.churchpresenter.models
 
 import kotlinx.serialization.Serializable
+import org.churchpresenter.app.churchpresenter.utils.Constants
 
 @Serializable
 sealed class ScheduleItem {
@@ -104,10 +105,18 @@ sealed class ScheduleItem {
         val timerSeconds: Int = 0,
         val timerTextColor: String = "#FFFFFF",
         val timerExpiredText: String = "",
+        val timerMode: String = Constants.TIMER_MODE_DURATION,
+        val targetHour: Int = 0,
+        val targetMinute: Int = 0,
+        val targetSecond: Int = 0,
         override val displayText: String = if (isTimer) {
-            val total = timerHours * 3600 + timerMinutes * 60 + timerSeconds
-            if (timerHours > 0) "Timer %d:%02d:%02d".format(timerHours, timerMinutes, timerSeconds)
-            else "Timer %02d:%02d".format(timerMinutes, timerSeconds)
+            if (timerMode == Constants.TIMER_MODE_CLOCK) {
+                "Until %02d:%02d:%02d".format(targetHour, targetMinute, targetSecond)
+            } else if (timerHours > 0) {
+                "Timer %d:%02d:%02d".format(timerHours, timerMinutes, timerSeconds)
+            } else {
+                "Timer %02d:%02d".format(timerMinutes, timerSeconds)
+            }
         } else {
             "${text.take(50)}${if (text.length > 50) "…" else ""}"
         }
