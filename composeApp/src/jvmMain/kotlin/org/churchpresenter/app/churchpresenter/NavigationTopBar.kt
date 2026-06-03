@@ -58,6 +58,7 @@ import org.jetbrains.compose.resources.stringResource
 @Composable
 fun FrameWindowScope.NavigationTopBar(
     theme: (ThemeMode) -> Unit,
+    currentTheme: ThemeMode = ThemeMode.SYSTEM,
     onLanguageChange: (Language) -> Unit = {},
     onNewSchedule: () -> Unit = {},
     onOpenSchedule: () -> Unit = {},
@@ -149,40 +150,49 @@ fun FrameWindowScope.NavigationTopBar(
         }
 
         Menu(stringResource(Res.string.menu_view), mnemonic = 'V') {
-            Item(
+            RadioButtonItem(
                 text = stringResource(Res.string.light_theme),
+                selected = currentTheme == ThemeMode.LIGHT,
                 onClick = { theme.invoke(ThemeMode.LIGHT) }
             )
-            Item(
+            RadioButtonItem(
                 text = stringResource(Res.string.dark_theme),
+                selected = currentTheme == ThemeMode.DARK,
                 onClick = { theme.invoke(ThemeMode.DARK) }
             )
-            Item(
+            RadioButtonItem(
                 text = stringResource(Res.string.system_theme),
+                selected = currentTheme == ThemeMode.SYSTEM,
                 onClick = { theme.invoke(ThemeMode.SYSTEM) }
             )
-            Item(
+            RadioButtonItem(
                 text = stringResource(Res.string.warm_theme),
+                selected = currentTheme == ThemeMode.WARM,
                 onClick = { theme.invoke(ThemeMode.WARM) }
             )
-            Item(
+            RadioButtonItem(
                 text = stringResource(Res.string.ocean_theme),
+                selected = currentTheme == ThemeMode.OCEAN,
                 onClick = { theme.invoke(ThemeMode.OCEAN) }
             )
-            Item(
+            RadioButtonItem(
                 text = stringResource(Res.string.rose_theme),
+                selected = currentTheme == ThemeMode.ROSE,
                 onClick = { theme.invoke(ThemeMode.ROSE) }
             )
-            Item(
+            RadioButtonItem(
                 text = stringResource(Res.string.midnight_theme),
+                selected = currentTheme == ThemeMode.MIDNIGHT,
                 onClick = { theme.invoke(ThemeMode.MIDNIGHT) }
             )
-            Item(
+            RadioButtonItem(
                 text = stringResource(Res.string.forest_theme),
+                selected = currentTheme == ThemeMode.FOREST,
                 onClick = { theme.invoke(ThemeMode.FOREST) }
             )
-            Item(
+            RadioButtonItem(
                 text = stringResource(Res.string.mocha_theme),
+                selected = currentTheme == ThemeMode.MOCHA,
                 onClick = { theme.invoke(ThemeMode.MOCHA) }
             )
         }

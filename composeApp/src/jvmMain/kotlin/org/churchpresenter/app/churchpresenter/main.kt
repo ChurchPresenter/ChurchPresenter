@@ -935,6 +935,7 @@ fun main() {
                                 }
 
                                 NavigationTopBar(
+                                    currentTheme = theme,
                                     onAbout = { showAboutDialog = true },
                                     onStatistics = { showStatisticsDialog = true },
                                     onConverter = { showConverterWindow = true },
