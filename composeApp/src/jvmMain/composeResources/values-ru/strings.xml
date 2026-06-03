@@ -1111,7 +1111,9 @@
     <string name="qa_displaying">Отображается: %1$s…</string>
     <string name="qa_waiting">Ожидание вопросов…</string>
     <string name="qa_start_session_hint">Начните сеанс для получения вопросов</string>
+    <string name="qa_no_approved">Нет одобренных вопросов</string>
     <string name="qa_no_finished">Нет завершённых вопросов</string>
+    <string name="qa_no_denied">Нет отклонённых вопросов</string>
     <string name="qa_no_history">Нет истории предыдущих сеансов</string>
     <string name="qa_export_to_file">Экспорт в файл</string>
     <string name="qa_import_from_file">Импорт из файла</string>
@@ -1124,9 +1126,9 @@
     <string name="qa_admin_panel">Панель администратора</string>
     <string name="qa_server_hint">Запустите companion-сервер для включения Q&amp;A</string>
     <string name="qa_display_styling">Оформление отображения</string>
-    <string name="qa_text_color">Text Color</string>
-    <string name="qa_qr_fg_color">QR Foreground</string>
-    <string name="qa_qr_bg_color">QR Background</string>
+    <string name="qa_text_color">Цвет текста</string>
+    <string name="qa_qr_fg_color">Передний план QR</string>
+    <string name="qa_qr_bg_color">Фон QR</string>
     <string name="qa_font">Шрифт</string>
     <string name="qa_size">Размер</string>
     <string name="qa_background_color">Цвет фона</string>
@@ -1134,8 +1136,8 @@
     <string name="qa_position">Положение</string>
     <string name="qa_settings_section">Настройки</string>
     <string name="qa_cooldown_label">Пауза между вопросами (секунды)</string>
-    <string name="qa_qr_message_label">QR Code Message</string>
-    <string name="qa_qr_message_reset">Reset to default</string>
+    <string name="qa_qr_message_label">Сообщение QR-кода</string>
+    <string name="qa_qr_message_reset">Сбросить до значения по умолчанию</string>
     <string name="qa_admin_password">Пароль администратора</string>
     <string name="qa_no_password">Без пароля</string>
     <string name="qa_approve">Одобрить</string>

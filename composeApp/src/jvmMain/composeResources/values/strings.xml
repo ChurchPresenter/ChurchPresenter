@@ -1211,7 +1211,9 @@
     <string name="qa_displaying">Displaying: %1$s…</string>
     <string name="qa_waiting">Waiting for questions…</string>
     <string name="qa_start_session_hint">Start a session to receive questions</string>
+    <string name="qa_no_approved">No approved questions yet</string>
     <string name="qa_no_finished">No finished questions</string>
+    <string name="qa_no_denied">No denied questions</string>
     <string name="qa_no_history">No history from previous sessions</string>
     <string name="qa_export_to_file">Export to File</string>
     <string name="qa_import_from_file">Import from File</string>

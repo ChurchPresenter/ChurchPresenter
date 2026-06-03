@@ -1186,7 +1186,9 @@
     <string name="qa_displaying">Se afișează: %1$s…</string>
     <string name="qa_waiting">Se așteaptă întrebări…</string>
     <string name="qa_start_session_hint">Porniți o sesiune pentru a primi întrebări</string>
+    <string name="qa_no_approved">Nicio întrebare aprobată</string>
     <string name="qa_no_finished">Nicio întrebare finalizată</string>
+    <string name="qa_no_denied">Nicio întrebare respinsă</string>
     <string name="qa_no_history">Niciun istoric din sesiunile anterioare</string>
     <string name="qa_export_to_file">Exportă în Fișier</string>
     <string name="qa_import_from_file">Importă din Fișier</string>
@@ -1199,6 +1201,11 @@
     <string name="qa_admin_panel">Panou Admin</string>
     <string name="qa_server_hint">Porniți serverul companion pentru a activa Î&amp;R</string>
     <string name="qa_display_styling">Stilizare Afișaj</string>
+    <string name="qa_text_color">Culoare Text</string>
+    <string name="qa_qr_fg_color">Prim-plan QR</string>
+    <string name="qa_qr_bg_color">Fundal QR</string>
+    <string name="qa_qr_message_label">Mesaj Cod QR</string>
+    <string name="qa_qr_message_reset">Resetați la implicit</string>
     <string name="qa_font">Font</string>
     <string name="qa_size">Dimensiune</string>
     <string name="qa_background_color">Culoare Fundal</string>

@@ -1187,7 +1187,9 @@
     <string name="qa_displaying">Zobrazuje se: %1$s…</string>
     <string name="qa_waiting">Čekání na otázky…</string>
     <string name="qa_start_session_hint">Spusťte relaci pro příjem otázek</string>
+    <string name="qa_no_approved">Žádné schválené otázky</string>
     <string name="qa_no_finished">Žádné dokončené otázky</string>
+    <string name="qa_no_denied">Žádné odmítnuté otázky</string>
     <string name="qa_no_history">Žádná historie z předchozích relací</string>
     <string name="qa_export_to_file">Exportovat do souboru</string>
     <string name="qa_import_from_file">Importovat ze souboru</string>
@@ -1200,9 +1202,9 @@
     <string name="qa_admin_panel">Administrační panel</string>
     <string name="qa_server_hint">Spusťte companion server pro aktivaci Q&amp;A</string>
     <string name="qa_display_styling">Styl zobrazení</string>
-    <string name="qa_text_color">Text Color</string>
-    <string name="qa_qr_fg_color">QR Foreground</string>
-    <string name="qa_qr_bg_color">QR Background</string>
+    <string name="qa_text_color">Barva textu</string>
+    <string name="qa_qr_fg_color">Popředí QR</string>
+    <string name="qa_qr_bg_color">Pozadí QR</string>
     <string name="qa_font">Písmo</string>
     <string name="qa_size">Velikost</string>
     <string name="qa_background_color">Barva pozadí</string>
@@ -1210,8 +1212,8 @@
     <string name="qa_position">Poloha</string>
     <string name="qa_settings_section">Nastavení</string>
     <string name="qa_cooldown_label">Prodleva mezi otázkami (sekundy)</string>
-    <string name="qa_qr_message_label">QR Code Message</string>
-    <string name="qa_qr_message_reset">Reset to default</string>
+    <string name="qa_qr_message_label">Zpráva QR kódu</string>
+    <string name="qa_qr_message_reset">Obnovit výchozí</string>
     <string name="qa_admin_password">Heslo administrátora</string>
     <string name="qa_no_password">Bez hesla</string>
     <string name="qa_approve">Schválit</string>

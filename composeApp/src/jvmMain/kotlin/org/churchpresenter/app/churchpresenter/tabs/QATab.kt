@@ -129,6 +129,8 @@ import churchpresenter.composeapp.generated.resources.qa_incoming
 import churchpresenter.composeapp.generated.resources.qa_incoming_tab
 import churchpresenter.composeapp.generated.resources.qa_mark_done
 import churchpresenter.composeapp.generated.resources.qa_new_session
+import churchpresenter.composeapp.generated.resources.qa_no_approved
+import churchpresenter.composeapp.generated.resources.qa_no_denied
 import churchpresenter.composeapp.generated.resources.qa_no_finished
 import churchpresenter.composeapp.generated.resources.qa_no_history
 import churchpresenter.composeapp.generated.resources.qa_no_password
@@ -538,10 +540,10 @@ fun QATab(
                         when (selectedFilter) {
                             0 -> if (sessionActive) stringResource(Res.string.qa_waiting) else stringResource(Res.string.qa_start_session_hint)
                             1 -> if (sessionActive) stringResource(Res.string.qa_waiting) else stringResource(Res.string.qa_start_session_hint)
-                            2 -> "No approved questions yet"
+                            2 -> stringResource(Res.string.qa_no_approved)
                             3 -> if (sessionActive) stringResource(Res.string.qa_waiting) else stringResource(Res.string.qa_start_session_hint)
-                            4 -> "No done questions"
-                            5 -> "No denied questions"
+                            4 -> stringResource(Res.string.qa_no_finished)
+                            5 -> stringResource(Res.string.qa_no_denied)
                             6 -> stringResource(Res.string.qa_no_history)
                             else -> ""
                         },
