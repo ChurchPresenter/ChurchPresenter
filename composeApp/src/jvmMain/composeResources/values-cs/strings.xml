@@ -212,6 +212,12 @@
     <string name="light_theme">Světlý motiv</string>
     <string name="dark_theme">Tmavý motiv</string>
     <string name="system_theme">Systémový motiv</string>
+    <string name="warm_theme">Teplý motiv</string>
+    <string name="ocean_theme">Oceánský motiv</string>
+    <string name="rose_theme">Růžový motiv</string>
+    <string name="midnight_theme">Půlnoční motiv</string>
+    <string name="forest_theme">Lesní motiv</string>
+    <string name="mocha_theme">Mocha motiv</string>
 
     <string name="menu_language">Jazyk</string>
 

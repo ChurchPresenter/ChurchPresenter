@@ -22,8 +22,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.dark_theme
+import churchpresenter.composeapp.generated.resources.forest_theme
+import churchpresenter.composeapp.generated.resources.light_theme
+import churchpresenter.composeapp.generated.resources.midnight_theme
+import churchpresenter.composeapp.generated.resources.mocha_theme
+import churchpresenter.composeapp.generated.resources.ocean_theme
+import churchpresenter.composeapp.generated.resources.rose_theme
+import churchpresenter.composeapp.generated.resources.system_theme
+import churchpresenter.composeapp.generated.resources.warm_theme
 import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
 import org.churchpresenter.app.churchpresenter.ui.theme.rememberThemeManager
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun ThemeSwitcher(
@@ -48,11 +59,7 @@ fun ThemeSwitcher(
             )
         ) {
             Text(
-                text = when (currentTheme) {
-                    ThemeMode.LIGHT -> "☀"
-                    ThemeMode.DARK -> "🌙"
-                    ThemeMode.SYSTEM -> "⚙"
-                },
+                text = themeIcon(currentTheme),
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold
             )
@@ -75,22 +82,24 @@ fun ThemeSwitcher(
                             modifier = Modifier.padding(horizontal = 8.dp)
                         ) {
                             Text(
-                                text = when (mode) {
-                                    ThemeMode.LIGHT -> "☀"
-                                    ThemeMode.DARK -> "🌙"
-                                    ThemeMode.SYSTEM -> "⚙"
-                                },
+                                text = themeIcon(mode),
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.onSurface,
                                 modifier = Modifier.padding(end = 8.dp)
                             )
                             Text(
-                                text = when (mode) {
-                                    ThemeMode.LIGHT -> "Light Theme"
-                                    ThemeMode.DARK -> "Dark Theme"
-                                    ThemeMode.SYSTEM -> "System Theme"
-                                },
+                                text = stringResource(when (mode) {
+                                    ThemeMode.LIGHT -> Res.string.light_theme
+                                    ThemeMode.DARK -> Res.string.dark_theme
+                                    ThemeMode.SYSTEM -> Res.string.system_theme
+                                    ThemeMode.WARM -> Res.string.warm_theme
+                                    ThemeMode.OCEAN -> Res.string.ocean_theme
+                                    ThemeMode.ROSE -> Res.string.rose_theme
+                                    ThemeMode.MIDNIGHT -> Res.string.midnight_theme
+                                    ThemeMode.FOREST -> Res.string.forest_theme
+                                    ThemeMode.MOCHA -> Res.string.mocha_theme
+                                }),
                                 color = MaterialTheme.colorScheme.onSurface
                             )
                         }
@@ -106,3 +115,16 @@ fun ThemeSwitcher(
         }
     }
 }
+
+private fun themeIcon(mode: ThemeMode): String = when (mode) {
+    ThemeMode.LIGHT -> "☀"
+    ThemeMode.DARK -> "🌙"
+    ThemeMode.SYSTEM -> "⚙"
+    ThemeMode.WARM -> "🌅"
+    ThemeMode.OCEAN -> "🌊"
+    ThemeMode.ROSE -> "🌸"
+    ThemeMode.MIDNIGHT -> "🌃"
+    ThemeMode.FOREST -> "🌲"
+    ThemeMode.MOCHA -> "☕"
+}
+

@@ -2,7 +2,6 @@ package org.churchpresenter.app.churchpresenter
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.ui.window.WindowPlacement
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.foundation.background
@@ -185,12 +184,6 @@ fun MainDesktop(
     onOpenLottieGen: (outputDir: String, onFileSaved: (() -> Unit)?) -> Unit = { _, _ -> },
     sttManager: STTManager? = null,
 ) {
-    val isDarkTheme = when (theme) {
-        ThemeMode.LIGHT -> false
-        ThemeMode.DARK -> true
-        ThemeMode.SYSTEM -> isSystemInDarkTheme()
-    }
-
     // ScheduleViewModel lives inside ScheduleTab — MainDesktop drives it via callbacks.
     // rememberUpdatedState ensures toolbar lambdas always read the latest actions without
     // needing to be recreated on every scheduleActions update.

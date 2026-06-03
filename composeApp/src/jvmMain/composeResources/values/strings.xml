@@ -242,6 +242,12 @@
     <string name="dark_theme">Dark Theme</string>
     <string name="light_theme">Light Theme</string>
     <string name="system_theme">System Theme</string>
+    <string name="warm_theme">Warm Theme</string>
+    <string name="ocean_theme">Ocean Theme</string>
+    <string name="rose_theme">Rose Theme</string>
+    <string name="midnight_theme">Midnight Theme</string>
+    <string name="forest_theme">Forest Theme</string>
+    <string name="mocha_theme">Mocha Theme</string>
     <!-- Placeholder strings for other tabs -->
     <string name="bible_tab_content">Bible tab content will be implemented</string>
     <string name="text_settings_tab_content">Text Settings and Colors tab content will be implemented</string>

@@ -278,6 +278,12 @@ fun main() {
             val savedTheme = when (appSettings.theme.uppercase()) {
                 "LIGHT" -> ThemeMode.LIGHT
                 "DARK" -> ThemeMode.DARK
+                "WARM" -> ThemeMode.WARM
+                "OCEAN" -> ThemeMode.OCEAN
+                "ROSE" -> ThemeMode.ROSE
+                "MIDNIGHT" -> ThemeMode.MIDNIGHT
+                "FOREST" -> ThemeMode.FOREST
+                "MOCHA" -> ThemeMode.MOCHA
                 else -> ThemeMode.SYSTEM
             }
             mutableStateOf(savedTheme)

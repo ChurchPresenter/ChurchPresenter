@@ -17,7 +17,6 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import org.churchpresenter.app.churchpresenter.utils.Constants
 
 // Typography definition
 val AppTypography = Typography(
@@ -157,6 +156,90 @@ private val LightColorScheme = lightColorScheme(
     inverseOnSurface = Color.White,        // Success button text
 )
 
+// Warm light theme — cream/amber tones
+private val WarmColorScheme = lightColorScheme(
+    primary = Color(0xFF7C5C3A),
+    onPrimary = Color.White,
+    primaryContainer = Color(0xFFEDD9BC),
+    onPrimaryContainer = Color(0xFF2E1A05),
+    secondary = Color(0xFF8D6E4A),
+    onSecondary = Color.White,
+    secondaryContainer = Color(0xFFE8D0B5),
+    onSecondaryContainer = Color(0xFF2E1A05),
+    tertiary = Color(0xFFA07850),
+    onTertiary = Color.White,
+    error = Color(0xFFB00020),
+    onError = Color.White,
+    errorContainer = Color(0xFFFDE7E7),
+    onErrorContainer = Color(0xFF790000),
+    background = Color(0xFFFAF3E8),
+    onBackground = Color(0xFF1E150A),
+    surface = Color(0xFFF5ECD8),
+    onSurface = Color(0xFF1E150A),
+    surfaceVariant = Color(0xFFEBDFC8),
+    onSurfaceVariant = Color(0xFF4A3820),
+    outline = Color(0xFF9C8060),
+    outlineVariant = Color(0xFFD9C8A8),
+    inverseSurface = Color(0xFF4CAF50),
+    inverseOnSurface = Color.White,
+)
+
+// Ocean light theme — soft blue-tinted surfaces
+private val OceanColorScheme = lightColorScheme(
+    primary = Color(0xFF2A6B8A),
+    onPrimary = Color.White,
+    primaryContainer = Color(0xFFBFDDED),
+    onPrimaryContainer = Color(0xFF001F2E),
+    secondary = Color(0xFF4A7E96),
+    onSecondary = Color.White,
+    secondaryContainer = Color(0xFFCAE3EF),
+    onSecondaryContainer = Color(0xFF001F2E),
+    tertiary = Color(0xFF3A8FA8),
+    onTertiary = Color.White,
+    error = Color(0xFFB00020),
+    onError = Color.White,
+    errorContainer = Color(0xFFFDE7E7),
+    onErrorContainer = Color(0xFF790000),
+    background = Color(0xFFEDF5FA),
+    onBackground = Color(0xFF0A1A22),
+    surface = Color(0xFFE0EEF6),
+    onSurface = Color(0xFF0A1A22),
+    surfaceVariant = Color(0xFFCCE2EE),
+    onSurfaceVariant = Color(0xFF1E3D50),
+    outline = Color(0xFF5A8FAA),
+    outlineVariant = Color(0xFFAAD0E0),
+    inverseSurface = Color(0xFF4CAF50),
+    inverseOnSurface = Color.White,
+)
+
+// Rose light theme — warm pinkish-grey palette
+private val RoseColorScheme = lightColorScheme(
+    primary = Color(0xFF8E4A5A),
+    onPrimary = Color.White,
+    primaryContainer = Color(0xFFEDD0D6),
+    onPrimaryContainer = Color(0xFF2E0A12),
+    secondary = Color(0xFF9E6070),
+    onSecondary = Color.White,
+    secondaryContainer = Color(0xFFEFD5DA),
+    onSecondaryContainer = Color(0xFF2E0A12),
+    tertiary = Color(0xFFAA7080),
+    onTertiary = Color.White,
+    error = Color(0xFFB00020),
+    onError = Color.White,
+    errorContainer = Color(0xFFFDE7E7),
+    onErrorContainer = Color(0xFF790000),
+    background = Color(0xFFFAF0F2),
+    onBackground = Color(0xFF1E0A10),
+    surface = Color(0xFFF5E6E9),
+    onSurface = Color(0xFF1E0A10),
+    surfaceVariant = Color(0xFFEDD5DA),
+    onSurfaceVariant = Color(0xFF4A2030),
+    outline = Color(0xFFA06070),
+    outlineVariant = Color(0xFFDDB8C0),
+    inverseSurface = Color(0xFF4CAF50),
+    inverseOnSurface = Color.White,
+)
+
 // Dark theme colors
 private val DarkColorScheme = darkColorScheme(
     primary = Color(0xFF90CAF9),
@@ -186,14 +269,106 @@ private val DarkColorScheme = darkColorScheme(
     inverseOnSurface = Color.Black, // Success button text (black on light green)
 )
 
+// Midnight dark theme — deep navy blue
+private val MidnightColorScheme = darkColorScheme(
+    primary = Color(0xFF82AAFF),
+    onPrimary = Color(0xFF001A45),
+    primaryContainer = Color(0xFF003180),
+    onPrimaryContainer = Color(0xFFD6E3FF),
+    secondary = Color(0xFF7EB8D4),
+    onSecondary = Color(0xFF003547),
+    secondaryContainer = Color(0xFF004D66),
+    onSecondaryContainer = Color(0xFFBDE9FF),
+    tertiary = Color(0xFFA8C8E8),
+    onTertiary = Color(0xFF0A2540),
+    error = Color(0xFFF44336),
+    onError = Color.White,
+    errorContainer = Color(0xFFD32F2F),
+    onErrorContainer = Color.White,
+    background = Color(0xFF080E1A),
+    onBackground = Color(0xFFDDE4F0),
+    surface = Color(0xFF0E1520),
+    onSurface = Color(0xFFDDE4F0),
+    surfaceVariant = Color(0xFF1E2A3A),
+    onSurfaceVariant = Color(0xFFB0BDD0),
+    outline = Color(0xFF5A7090),
+    outlineVariant = Color(0xFF1E2A3A),
+    inverseSurface = Color(0xFF66BB6A),
+    inverseOnSurface = Color.Black,
+)
+
+// Forest dark theme — dark green-tinted surfaces
+private val ForestColorScheme = darkColorScheme(
+    primary = Color(0xFF80C8A0),
+    onPrimary = Color(0xFF003820),
+    primaryContainer = Color(0xFF005030),
+    onPrimaryContainer = Color(0xFFB0E8C8),
+    secondary = Color(0xFF60A880),
+    onSecondary = Color(0xFF003018),
+    secondaryContainer = Color(0xFF004020),
+    onSecondaryContainer = Color(0xFF90D8A8),
+    tertiary = Color(0xFF90C8A0),
+    onTertiary = Color(0xFF003818),
+    error = Color(0xFFF44336),
+    onError = Color.White,
+    errorContainer = Color(0xFFD32F2F),
+    onErrorContainer = Color.White,
+    background = Color(0xFF080E0A),
+    onBackground = Color(0xFFD0E8D8),
+    surface = Color(0xFF0E1810),
+    onSurface = Color(0xFFD0E8D8),
+    surfaceVariant = Color(0xFF1A2A1E),
+    onSurfaceVariant = Color(0xFFA8C8B0),
+    outline = Color(0xFF486858),
+    outlineVariant = Color(0xFF1A2A1E),
+    inverseSurface = Color(0xFF66BB6A),
+    inverseOnSurface = Color.Black,
+)
+
+// Mocha dark theme — warm dark brown (Catppuccin-style)
+private val MochaColorScheme = darkColorScheme(
+    primary = Color(0xFFCBA6F7),
+    onPrimary = Color(0xFF1E0040),
+    primaryContainer = Color(0xFF301050),
+    onPrimaryContainer = Color(0xFFEDD8FF),
+    secondary = Color(0xFFF5C2E7),
+    onSecondary = Color(0xFF3A0030),
+    secondaryContainer = Color(0xFF4A1040),
+    onSecondaryContainer = Color(0xFFFFD6F0),
+    tertiary = Color(0xFF89DCEB),
+    onTertiary = Color(0xFF003040),
+    error = Color(0xFFF38BA8),
+    onError = Color(0xFF300010),
+    errorContainer = Color(0xFF4A0020),
+    onErrorContainer = Color(0xFFFFB3C6),
+    background = Color(0xFF1E1928),
+    onBackground = Color(0xFFCDD6F4),
+    surface = Color(0xFF181622),
+    onSurface = Color(0xFFCDD6F4),
+    surfaceVariant = Color(0xFF302840),
+    onSurfaceVariant = Color(0xFFBAC2E8),
+    outline = Color(0xFF6C7086),
+    outlineVariant = Color(0xFF302840),
+    inverseSurface = Color(0xFF66BB6A),
+    inverseOnSurface = Color.Black,
+)
+
 @Composable
 fun ChurchPresenterTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    themeMode: ThemeMode = ThemeMode.SYSTEM,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = when {
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
+    val systemDark = isSystemInDarkTheme()
+    val colorScheme = when (themeMode) {
+        ThemeMode.LIGHT -> LightColorScheme
+        ThemeMode.DARK -> DarkColorScheme
+        ThemeMode.SYSTEM -> if (systemDark) DarkColorScheme else LightColorScheme
+        ThemeMode.WARM -> WarmColorScheme
+        ThemeMode.OCEAN -> OceanColorScheme
+        ThemeMode.ROSE -> RoseColorScheme
+        ThemeMode.MIDNIGHT -> MidnightColorScheme
+        ThemeMode.FOREST -> ForestColorScheme
+        ThemeMode.MOCHA -> MochaColorScheme
     }
 
     MaterialTheme(
@@ -215,12 +390,3 @@ fun ChurchPresenterTheme(
     }
 }
 
-@Composable
-fun setTheme(theme: String) {
-    val themeManager = rememberThemeManager()
-    when (theme) {
-        Constants.SYSTEM -> themeManager.setThemeMode(ThemeMode.SYSTEM)
-        Constants.DARK -> themeManager.setThemeMode(ThemeMode.DARK)
-        else -> themeManager.setThemeMode(ThemeMode.LIGHT)
-    }
-}

@@ -10,7 +10,13 @@ import androidx.compose.runtime.remember
 enum class ThemeMode {
     LIGHT,
     DARK,
-    SYSTEM
+    SYSTEM,
+    WARM,
+    OCEAN,
+    ROSE,
+    MIDNIGHT,
+    FOREST,
+    MOCHA
 }
 
 class ThemeManager {

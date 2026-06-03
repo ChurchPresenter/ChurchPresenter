@@ -7,7 +7,13 @@ import androidx.compose.ui.window.FrameWindowScope
 import androidx.compose.ui.window.MenuBar
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.dark_theme
+import churchpresenter.composeapp.generated.resources.forest_theme
 import churchpresenter.composeapp.generated.resources.light_theme
+import churchpresenter.composeapp.generated.resources.midnight_theme
+import churchpresenter.composeapp.generated.resources.mocha_theme
+import churchpresenter.composeapp.generated.resources.ocean_theme
+import churchpresenter.composeapp.generated.resources.rose_theme
+import churchpresenter.composeapp.generated.resources.warm_theme
 import churchpresenter.composeapp.generated.resources.language_belarusian
 import churchpresenter.composeapp.generated.resources.language_czech
 import churchpresenter.composeapp.generated.resources.language_dutch
@@ -145,21 +151,39 @@ fun FrameWindowScope.NavigationTopBar(
         Menu(stringResource(Res.string.menu_view), mnemonic = 'V') {
             Item(
                 text = stringResource(Res.string.light_theme),
-                onClick = {
-                    theme.invoke(ThemeMode.LIGHT)
-                }
+                onClick = { theme.invoke(ThemeMode.LIGHT) }
             )
             Item(
                 text = stringResource(Res.string.dark_theme),
-                onClick = {
-                    theme.invoke(ThemeMode.DARK)
-                }
+                onClick = { theme.invoke(ThemeMode.DARK) }
             )
             Item(
                 text = stringResource(Res.string.system_theme),
-                onClick = {
-                    theme.invoke(ThemeMode.SYSTEM)
-                }
+                onClick = { theme.invoke(ThemeMode.SYSTEM) }
+            )
+            Item(
+                text = stringResource(Res.string.warm_theme),
+                onClick = { theme.invoke(ThemeMode.WARM) }
+            )
+            Item(
+                text = stringResource(Res.string.ocean_theme),
+                onClick = { theme.invoke(ThemeMode.OCEAN) }
+            )
+            Item(
+                text = stringResource(Res.string.rose_theme),
+                onClick = { theme.invoke(ThemeMode.ROSE) }
+            )
+            Item(
+                text = stringResource(Res.string.midnight_theme),
+                onClick = { theme.invoke(ThemeMode.MIDNIGHT) }
+            )
+            Item(
+                text = stringResource(Res.string.forest_theme),
+                onClick = { theme.invoke(ThemeMode.FOREST) }
+            )
+            Item(
+                text = stringResource(Res.string.mocha_theme),
+                onClick = { theme.invoke(ThemeMode.MOCHA) }
             )
         }
 

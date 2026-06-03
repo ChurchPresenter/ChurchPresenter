@@ -1,7 +1,6 @@
 package org.churchpresenter.app.churchpresenter.dialogs
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -88,11 +87,6 @@ fun OptionsDialog(
     val tabCount = if (obsManager != null) 9 else 8
     var selectedTabIndex by remember { mutableStateOf(0) }
     val safeTabIndex = selectedTabIndex.coerceIn(0, tabCount - 1)
-    val isDarkTheme = when (theme) {
-        ThemeMode.LIGHT -> false
-        ThemeMode.DARK -> true
-        ThemeMode.SYSTEM -> isSystemInDarkTheme()
-    }
     val mainWindowState = LocalMainWindowState.current
     DialogWindow(
         onCloseRequest = onDismiss,

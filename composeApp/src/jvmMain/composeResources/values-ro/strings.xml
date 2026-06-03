@@ -234,6 +234,12 @@
     <string name="dark_theme">Temă Întunecată</string>
     <string name="light_theme">Temă Deschisă</string>
     <string name="system_theme">Tema Sistemului</string>
+    <string name="warm_theme">Temă Caldă</string>
+    <string name="ocean_theme">Temă Ocean</string>
+    <string name="rose_theme">Temă Trandafir</string>
+    <string name="midnight_theme">Temă Miezul Nopții</string>
+    <string name="forest_theme">Temă Pădure</string>
+    <string name="mocha_theme">Temă Mocha</string>
     <!-- Placeholder strings for other tabs -->
     <string name="bible_tab_content">Conținutul filei Biblie va fi implementat</string>
     <string name="text_settings_tab_content">Conținutul filei Setări Text și Culori va fi implementat</string>
