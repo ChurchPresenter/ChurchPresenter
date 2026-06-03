@@ -1423,4 +1423,17 @@
     <string name="language_romanian">Rumunčina</string>
     <string name="language_dutch">Holandčina</string>
     <string name="language_slovak">Slovenčina</string>
+    <string name="tab_dictionary">Slovník</string>
+    <string name="dictionary_search_hint">Hľadať podľa čísla, slova alebo definície…</string>
+    <string name="dictionary_filter_all">Všetko</string>
+    <string name="dictionary_filter_hebrew">Hebrejčina</string>
+    <string name="dictionary_filter_greek">Gréčtina</string>
+    <string name="dictionary_transliteration">Transkripcia</string>
+    <string name="dictionary_pronunciation">Výslovnosť</string>
+    <string name="dictionary_definition">Definícia</string>
+    <string name="dictionary_kjv_usage">Použitie KJV</string>
+    <string name="dictionary_no_results">Nenašli sa žiadne výsledky</string>
+    <string name="dictionary_select_entry">Vyberte záznam pre zobrazenie podrobností</string>
+    <string name="dictionary_loading">Načítanie slovníka…</string>
+    <string name="dictionary_entry_count">%1$d záznamov</string>
 </resources>

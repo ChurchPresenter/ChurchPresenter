@@ -1401,5 +1401,18 @@
     <string name="web_type_to_page_label">Wpisz na stronie</string>
     <string name="web_type_to_page_placeholder">Najpierw kliknij pole wejściowe na żywej stronie</string>
     <string name="web_focus_first_input">Skup się na pierwszym polu wejściowym</string>
+    <string name="tab_dictionary">Słownik</string>
+    <string name="dictionary_search_hint">Szukaj według numeru, słowa lub definicji…</string>
+    <string name="dictionary_filter_all">Wszystkie</string>
+    <string name="dictionary_filter_hebrew">Hebrajski</string>
+    <string name="dictionary_filter_greek">Grecki</string>
+    <string name="dictionary_transliteration">Transliteracja</string>
+    <string name="dictionary_pronunciation">Wymowa</string>
+    <string name="dictionary_definition">Definicja</string>
+    <string name="dictionary_kjv_usage">Użycie KJV</string>
+    <string name="dictionary_no_results">Nie znaleziono wyników</string>
+    <string name="dictionary_select_entry">Wybierz wpis, aby zobaczyć szczegóły</string>
+    <string name="dictionary_loading">Ładowanie słownika…</string>
+    <string name="dictionary_entry_count">%1$d wpisów</string>
 </resources>
 

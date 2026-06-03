@@ -1423,4 +1423,17 @@
     <string name="language_romanian">Rumano</string>
     <string name="language_dutch">Neerlandés</string>
     <string name="language_slovak">Eslovaco</string>
+    <string name="tab_dictionary">Diccionario</string>
+    <string name="dictionary_search_hint">Buscar por número, palabra o definición…</string>
+    <string name="dictionary_filter_all">Todo</string>
+    <string name="dictionary_filter_hebrew">Hebreo</string>
+    <string name="dictionary_filter_greek">Griego</string>
+    <string name="dictionary_transliteration">Transliteración</string>
+    <string name="dictionary_pronunciation">Pronunciación</string>
+    <string name="dictionary_definition">Definición</string>
+    <string name="dictionary_kjv_usage">Uso en KJV</string>
+    <string name="dictionary_no_results">No se encontraron resultados</string>
+    <string name="dictionary_select_entry">Selecciona una entrada para ver los detalles</string>
+    <string name="dictionary_loading">Cargando diccionario…</string>
+    <string name="dictionary_entry_count">%1$d entradas</string>
 </resources>

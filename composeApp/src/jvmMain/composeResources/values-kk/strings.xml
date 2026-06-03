@@ -1401,5 +1401,18 @@
     <string name="web_type_to_page_label">Бетке теру</string>
     <string name="web_type_to_page_placeholder">Алдымен тікелей беттегі енгізу өрісін басыңыз</string>
     <string name="web_focus_first_input">Беттегі бірінші енгізу өрісіне фокус</string>
+    <string name="tab_dictionary">Сөздік</string>
+    <string name="dictionary_search_hint">Нөмір, сөз немесе анықтама бойынша іздеу…</string>
+    <string name="dictionary_filter_all">Барлығы</string>
+    <string name="dictionary_filter_hebrew">Еврей</string>
+    <string name="dictionary_filter_greek">Грек</string>
+    <string name="dictionary_transliteration">Транслитерация</string>
+    <string name="dictionary_pronunciation">Айтылуы</string>
+    <string name="dictionary_definition">Анықтама</string>
+    <string name="dictionary_kjv_usage">KJV қолданысы</string>
+    <string name="dictionary_no_results">Нәтиже табылмады</string>
+    <string name="dictionary_select_entry">Толық ақпарат үшін жазбаны таңдаңыз</string>
+    <string name="dictionary_loading">Сөздік жүктелуде…</string>
+    <string name="dictionary_entry_count">%1$d жазба</string>
 </resources>
 

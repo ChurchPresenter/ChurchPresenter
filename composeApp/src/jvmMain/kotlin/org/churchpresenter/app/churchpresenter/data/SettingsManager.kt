@@ -65,6 +65,9 @@ class SettingsManager {
         if ("\"sttSettings\"" !in raw && "STT" !in result.hiddenTabs) {
             result = result.copy(hiddenTabs = result.hiddenTabs + "STT")
         }
+        if ("DICTIONARY" !in result.hiddenTabs) {
+            result = result.copy(hiddenTabs = result.hiddenTabs + "DICTIONARY")
+        }
         return result
     }
 

@@ -1423,4 +1423,17 @@
     <string name="language_romanian">Roemeens</string>
     <string name="language_dutch">Nederlands</string>
     <string name="language_slovak">Slowaaks</string>
+    <string name="tab_dictionary">Woordenboek</string>
+    <string name="dictionary_search_hint">Zoek op nummer, woord of definitie…</string>
+    <string name="dictionary_filter_all">Alles</string>
+    <string name="dictionary_filter_hebrew">Hebreeuws</string>
+    <string name="dictionary_filter_greek">Grieks</string>
+    <string name="dictionary_transliteration">Transliteratie</string>
+    <string name="dictionary_pronunciation">Uitspraak</string>
+    <string name="dictionary_definition">Definitie</string>
+    <string name="dictionary_kjv_usage">KJV-gebruik</string>
+    <string name="dictionary_no_results">Geen resultaten gevonden</string>
+    <string name="dictionary_select_entry">Selecteer een invoer om details te bekijken</string>
+    <string name="dictionary_loading">Woordenboek laden…</string>
+    <string name="dictionary_entry_count">%1$d vermeldingen</string>
 </resources>

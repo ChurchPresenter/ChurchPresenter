@@ -1406,5 +1406,18 @@
     <string name="web_type_to_page_label">Введення на сторінку</string>
     <string name="web_type_to_page_placeholder">Спочатку натисніть на поле введення на живій сторінці</string>
     <string name="web_focus_first_input">Фокус на перше поле введення</string>
+    <string name="tab_dictionary">Словник</string>
+    <string name="dictionary_search_hint">Пошук за номером, словом або визначенням…</string>
+    <string name="dictionary_filter_all">Усі</string>
+    <string name="dictionary_filter_hebrew">Давньоєврейська</string>
+    <string name="dictionary_filter_greek">Давньогрецька</string>
+    <string name="dictionary_transliteration">Транслітерація</string>
+    <string name="dictionary_pronunciation">Вимова</string>
+    <string name="dictionary_definition">Визначення</string>
+    <string name="dictionary_kjv_usage">Вживання (KJV)</string>
+    <string name="dictionary_no_results">Результатів не знайдено</string>
+    <string name="dictionary_select_entry">Оберіть запис для перегляду</string>
+    <string name="dictionary_loading">Завантаження словника…</string>
+    <string name="dictionary_entry_count">%1$d записів</string>
 </resources>
 

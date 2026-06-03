@@ -1456,4 +1456,17 @@
     <string name="crossword_loading">Loading puzzles…</string>
     <string name="crossword_no_puzzles">No crossword puzzles available yet.</string>
     <string name="crossword_level_label">Level %1$d</string>
+    <string name="tab_dictionary">Dictionary</string>
+    <string name="dictionary_search_hint">Search by number, word, or definition…</string>
+    <string name="dictionary_filter_all">All</string>
+    <string name="dictionary_filter_hebrew">Hebrew</string>
+    <string name="dictionary_filter_greek">Greek</string>
+    <string name="dictionary_transliteration">Transliteration</string>
+    <string name="dictionary_pronunciation">Pronunciation</string>
+    <string name="dictionary_definition">Definition</string>
+    <string name="dictionary_kjv_usage">KJV Usage</string>
+    <string name="dictionary_no_results">No results found</string>
+    <string name="dictionary_select_entry">Select an entry to view details</string>
+    <string name="dictionary_loading">Loading dictionary…</string>
+    <string name="dictionary_entry_count">%1$d entries</string>
 </resources>

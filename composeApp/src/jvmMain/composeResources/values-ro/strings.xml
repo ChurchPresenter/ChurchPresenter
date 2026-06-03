@@ -1438,4 +1438,17 @@
     <string name="language_romanian">Română</string>
     <string name="language_dutch">Olandeză</string>
     <string name="language_slovak">Slovacă</string>
+    <string name="tab_dictionary">Dicționar</string>
+    <string name="dictionary_search_hint">Căutați după număr, cuvânt sau definiție…</string>
+    <string name="dictionary_filter_all">Toate</string>
+    <string name="dictionary_filter_hebrew">Ebraică</string>
+    <string name="dictionary_filter_greek">Greacă</string>
+    <string name="dictionary_transliteration">Transliterare</string>
+    <string name="dictionary_pronunciation">Pronunție</string>
+    <string name="dictionary_definition">Definiție</string>
+    <string name="dictionary_kjv_usage">Utilizare KJV</string>
+    <string name="dictionary_no_results">Nu s-au găsit rezultate</string>
+    <string name="dictionary_select_entry">Selectați o intrare pentru a vedea detaliile</string>
+    <string name="dictionary_loading">Se încarcă dicționarul…</string>
+    <string name="dictionary_entry_count">%1$d intrări</string>
 </resources>

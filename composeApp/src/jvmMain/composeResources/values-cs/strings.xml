@@ -1493,5 +1493,18 @@
     <string name="web_type_to_page_label">Psát na stránku</string>
     <string name="web_type_to_page_placeholder">Nejdřív klikni na vstupní pole na živé stránce</string>
     <string name="web_focus_first_input">Zaměřit první vstupní pole na stránce</string>
+    <string name="tab_dictionary">Slovník</string>
+    <string name="dictionary_search_hint">Hledat podle čísla, slova nebo definice…</string>
+    <string name="dictionary_filter_all">Vše</string>
+    <string name="dictionary_filter_hebrew">Hebrejština</string>
+    <string name="dictionary_filter_greek">Řečtina</string>
+    <string name="dictionary_transliteration">Transkripce</string>
+    <string name="dictionary_pronunciation">Výslovnost</string>
+    <string name="dictionary_definition">Definice</string>
+    <string name="dictionary_kjv_usage">Použití KJV</string>
+    <string name="dictionary_no_results">Žádné výsledky</string>
+    <string name="dictionary_select_entry">Vyberte záznam pro zobrazení podrobností</string>
+    <string name="dictionary_loading">Načítání slovníku…</string>
+    <string name="dictionary_entry_count">%1$d záznamů</string>
 </resources>
 

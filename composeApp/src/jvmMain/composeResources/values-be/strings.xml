@@ -1401,5 +1401,18 @@
     <string name="web_type_to_page_label">Увод на старонку</string>
     <string name="web_type_to_page_placeholder">Спачатку націсніце на поле ўводу на жывой старонцы</string>
     <string name="web_focus_first_input">Фокус на першае поле ўводу</string>
+    <string name="tab_dictionary">Слоўнік</string>
+    <string name="dictionary_search_hint">Пошук па нумары, слову або вызначэнні…</string>
+    <string name="dictionary_filter_all">Усе</string>
+    <string name="dictionary_filter_hebrew">Іўрыт</string>
+    <string name="dictionary_filter_greek">Грэчаская</string>
+    <string name="dictionary_transliteration">Транслітарацыя</string>
+    <string name="dictionary_pronunciation">Вымаўленне</string>
+    <string name="dictionary_definition">Вызначэнне</string>
+    <string name="dictionary_kjv_usage">Ужыванне (KJV)</string>
+    <string name="dictionary_no_results">Вынікаў не знойдзена</string>
+    <string name="dictionary_select_entry">Выберыце запіс для прагляду</string>
+    <string name="dictionary_loading">Загрузка слоўніка…</string>
+    <string name="dictionary_entry_count">%1$d запісаў</string>
 </resources>
 

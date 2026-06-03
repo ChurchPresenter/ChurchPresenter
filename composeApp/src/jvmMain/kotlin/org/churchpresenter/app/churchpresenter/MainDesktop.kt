@@ -99,6 +99,7 @@ import org.churchpresenter.app.churchpresenter.tabs.CanvasTab
 import org.churchpresenter.app.churchpresenter.tabs.QATab
 import org.churchpresenter.app.churchpresenter.server.TunnelStatus
 import org.churchpresenter.app.churchpresenter.tabs.CrosswordTab
+import org.churchpresenter.app.churchpresenter.tabs.DictionaryTab
 import org.churchpresenter.app.churchpresenter.tabs.STTTab
 import org.churchpresenter.app.churchpresenter.tabs.TabSection
 import org.churchpresenter.app.churchpresenter.tabs.Tabs
@@ -111,6 +112,7 @@ import org.churchpresenter.app.churchpresenter.viewmodel.PicturesViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresentationViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.churchpresenter.app.churchpresenter.viewmodel.QAManager
+import org.churchpresenter.app.churchpresenter.viewmodel.DictionaryViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.STTManager
 import org.churchpresenter.app.churchpresenter.viewmodel.SceneViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.ScheduleViewModel
@@ -279,6 +281,9 @@ fun MainDesktop(
     val currentOnBibleLoaded by rememberUpdatedState(onBibleLoaded)
     val bibleViewModel = remember { BibleViewModel(appSettings, onBibleLoaded = { bible, translation -> currentOnBibleLoaded?.invoke(bible, translation) }) }
     DisposableEffect(Unit) { onDispose { bibleViewModel.dispose() } }
+
+    val dictionaryViewModel = remember { DictionaryViewModel() }
+    DisposableEffect(Unit) { onDispose { dictionaryViewModel.dispose() } }
 
     // ScheduleViewModel is hoisted here (outside AnimatedVisibility) so that collapsing/
     // expanding the schedule panel does NOT destroy the schedule items.
@@ -1101,6 +1106,11 @@ fun MainDesktop(
                                 modifier = Modifier.fillMaxSize(),
                                 appSettings = appSettings,
                                 onSettingsChange = onSettingsChange
+                            )
+
+                            Tabs.DICTIONARY -> DictionaryTab(
+                                modifier = Modifier.fillMaxSize(),
+                                viewModel = dictionaryViewModel,
                             )
                         }
                     }

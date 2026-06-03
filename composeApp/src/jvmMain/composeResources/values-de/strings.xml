@@ -1401,5 +1401,18 @@
     <string name="web_type_to_page_label">Auf Seite tippen</string>
     <string name="web_type_to_page_placeholder">Zuerst ein Eingabefeld auf der Live-Seite anklicken</string>
     <string name="web_focus_first_input">Erstes Eingabefeld fokussieren</string>
+    <string name="tab_dictionary">Wörterbuch</string>
+    <string name="dictionary_search_hint">Nach Nummer, Wort oder Definition suchen…</string>
+    <string name="dictionary_filter_all">Alle</string>
+    <string name="dictionary_filter_hebrew">Hebräisch</string>
+    <string name="dictionary_filter_greek">Griechisch</string>
+    <string name="dictionary_transliteration">Transliteration</string>
+    <string name="dictionary_pronunciation">Aussprache</string>
+    <string name="dictionary_definition">Definition</string>
+    <string name="dictionary_kjv_usage">KJV-Verwendung</string>
+    <string name="dictionary_no_results">Keine Ergebnisse gefunden</string>
+    <string name="dictionary_select_entry">Eintrag auswählen, um Details anzuzeigen</string>
+    <string name="dictionary_loading">Wörterbuch wird geladen…</string>
+    <string name="dictionary_entry_count">%1$d Einträge</string>
 </resources>
 

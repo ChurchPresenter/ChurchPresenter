@@ -1412,5 +1412,18 @@
     <string name="web_type_to_page_label">Ввод на страницу</string>
     <string name="web_type_to_page_placeholder">Сначала нажмите на поле ввода на живой странице</string>
     <string name="web_focus_first_input">Фокус на первое поле ввода</string>
+    <string name="tab_dictionary">Словарь</string>
+    <string name="dictionary_search_hint">Поиск по номеру, слову или определению…</string>
+    <string name="dictionary_filter_all">Все</string>
+    <string name="dictionary_filter_hebrew">Иврит</string>
+    <string name="dictionary_filter_greek">Греческий</string>
+    <string name="dictionary_transliteration">Транслитерация</string>
+    <string name="dictionary_pronunciation">Произношение</string>
+    <string name="dictionary_definition">Определение</string>
+    <string name="dictionary_kjv_usage">Использование (KJV)</string>
+    <string name="dictionary_no_results">Результаты не найдены</string>
+    <string name="dictionary_select_entry">Выберите запись для просмотра</string>
+    <string name="dictionary_loading">Загрузка словаря…</string>
+    <string name="dictionary_entry_count">%1$d записей</string>
 </resources>
 
