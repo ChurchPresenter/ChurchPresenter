@@ -628,7 +628,7 @@ data class QASettings(
     val adminPassword: String = generateDefaultPassword(),
     val rateLimitCooldownSeconds: Int = 30,
     val votingEnabled: Boolean = false,
-    val qrCodeMessage: String = "Scan to ask a question",
+    val qrCodeMessage: String = "",
     val qrForegroundColor: String = "#000000",
     val qrBackgroundColor: String = "#FFFFFF",
     val qrBackgroundOpacity: Int = 100,

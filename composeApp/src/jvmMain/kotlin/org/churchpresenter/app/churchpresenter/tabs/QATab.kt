@@ -96,6 +96,7 @@ import churchpresenter.composeapp.generated.resources.go_live
 import churchpresenter.composeapp.generated.resources.qa_admin_panel
 import churchpresenter.composeapp.generated.resources.qa_add_question_hint
 import churchpresenter.composeapp.generated.resources.qa_admin_password
+import churchpresenter.composeapp.generated.resources.qa_qr_message_default
 import churchpresenter.composeapp.generated.resources.qa_qr_message_label
 import churchpresenter.composeapp.generated.resources.qa_qr_message_reset
 import churchpresenter.composeapp.generated.resources.qa_approve
@@ -311,6 +312,7 @@ fun QATab(
     // Hoist strings needed inside non-composable lambdas
     val strExportTitle = stringResource(Res.string.qa_export_dialog_title)
     val strImportTitle = stringResource(Res.string.qa_import_dialog_title)
+    val strQrMessageDefault = stringResource(Res.string.qa_qr_message_default)
 
     val density = LocalDensity.current
     val onSettingsChangeState = rememberUpdatedState(onSettingsChange)
@@ -943,9 +945,10 @@ fun QATab(
                 textStyle = MaterialTheme.typography.bodyMedium,
                 singleLine = true,
                 label = { Text(stringResource(Res.string.qa_qr_message_label), style = MaterialTheme.typography.bodySmall) },
+                placeholder = { Text(strQrMessageDefault, style = MaterialTheme.typography.bodySmall) },
                 trailingIcon = {
                     IconButton(
-                        onClick = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(qrCodeMessage = "Scan to ask a question")) } },
+                        onClick = { onSettingsChange { s -> s.copy(qaSettings = s.qaSettings.copy(qrCodeMessage = "")) } },
                         modifier = Modifier.size(28.dp),
                     ) {
                         Icon(Icons.Default.Refresh, contentDescription = stringResource(Res.string.qa_qr_message_reset), modifier = Modifier.size(16.dp))

@@ -32,6 +32,7 @@ import churchpresenter.composeapp.generated.resources.background_color
 import churchpresenter.composeapp.generated.resources.color
 import churchpresenter.composeapp.generated.resources.font_size
 import churchpresenter.composeapp.generated.resources.font_type
+import churchpresenter.composeapp.generated.resources.style
 import churchpresenter.composeapp.generated.resources.horizontal_alignment
 import churchpresenter.composeapp.generated.resources.vertical_alignment
 import churchpresenter.composeapp.generated.resources.stage_monitor_clock_24h
@@ -352,7 +353,7 @@ fun StageMonitorSettingsTab(
                             onColorChange = { update { copy(labelColor = it) } }
                         )
                     }
-                    SettingRow("Style") {
+                    SettingRow(stringResource(Res.string.style)) {
                         TextStyleButtons(
                             bold = sm.labelBold,
                             italic = sm.labelItalic,
@@ -401,7 +402,7 @@ private fun QuadrantFontSettings(
     SettingRow(stringResource(Res.string.background_color)) {
         ColorPickerField(color = bgColor, onColorChange = onBgColorChange)
     }
-    SettingRow("Style") {
+    SettingRow(stringResource(Res.string.style)) {
         TextStyleButtons(
             bold = bold, italic = italic, underline = underline, shadow = shadow,
             onBoldChange = onBoldChange, onItalicChange = onItalicChange,

@@ -37,6 +37,7 @@ import com.google.zxing.EncodeHintType
 import com.google.zxing.qrcode.QRCodeWriter
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
 import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.qa_qr_message_default
 import churchpresenter.composeapp.generated.resources.qr_code
 import org.churchpresenter.app.churchpresenter.data.QASettings
 import org.churchpresenter.app.churchpresenter.models.Question
@@ -175,7 +176,7 @@ fun QAQRCodePresenter(
                 }
             }
             Text(
-                text = qaSettings.qrCodeMessage,
+                text = qaSettings.qrCodeMessage.ifEmpty { stringResource(Res.string.qa_qr_message_default) },
                 color = textColor,
                 fontSize = 32.sp,
                 fontWeight = FontWeight.Medium,

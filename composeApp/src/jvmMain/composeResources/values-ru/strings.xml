@@ -43,6 +43,7 @@
     <string name="show_number">Показать номер:</string>
     <string name="font_size">Размер шрифта:</string>
     <string name="font_type">Тип шрифта:</string>
+    <string name="style">Стиль</string>
     <string name="text_style_bold">B</string>
     <string name="text_style_italic">I</string>
     <string name="text_style_underline">U</string>
@@ -1137,6 +1138,7 @@
     <string name="qa_settings_section">Настройки</string>
     <string name="qa_cooldown_label">Пауза между вопросами (секунды)</string>
     <string name="qa_qr_message_label">Сообщение QR-кода</string>
+    <string name="qa_qr_message_default">Отсканируйте, чтобы задать вопрос</string>
     <string name="qa_qr_message_reset">Сбросить до значения по умолчанию</string>
     <string name="qa_admin_password">Пароль администратора</string>
     <string name="qa_no_password">Без пароля</string>

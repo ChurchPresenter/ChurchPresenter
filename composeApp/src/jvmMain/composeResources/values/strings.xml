@@ -55,6 +55,7 @@
     <string name="show_number">Show Number:</string>
     <string name="font_size">Font Size:</string>
     <string name="font_type">Font Type:</string>
+    <string name="style">Style</string>
     <string name="text_style_bold">B</string>
     <string name="text_style_italic">I</string>
     <string name="text_style_underline">U</string>
@@ -1237,6 +1238,7 @@
     <string name="qa_settings_section">Settings</string>
     <string name="qa_cooldown_label">Cooldown between questions (sec)</string>
     <string name="qa_qr_message_label">QR Code Message</string>
+    <string name="qa_qr_message_default">Scan to ask a question</string>
     <string name="qa_qr_message_reset">Reset to default</string>
     <string name="qa_admin_password">Admin Password</string>
     <string name="qa_no_password">No password</string>

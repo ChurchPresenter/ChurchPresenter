@@ -43,6 +43,7 @@
     <string name="show_number">Zobrazit číslo:</string>
     <string name="font_size">Velikost písma:</string>
     <string name="font_type">Typ písma:</string>
+    <string name="style">Styl</string>
     <string name="text_style_bold">B</string>
     <string name="text_style_italic">I</string>
     <string name="text_style_underline">U</string>
@@ -1213,6 +1214,7 @@
     <string name="qa_settings_section">Nastavení</string>
     <string name="qa_cooldown_label">Prodleva mezi otázkami (sekundy)</string>
     <string name="qa_qr_message_label">Zpráva QR kódu</string>
+    <string name="qa_qr_message_default">Naskenujte pro zadání otázky</string>
     <string name="qa_qr_message_reset">Obnovit výchozí</string>
     <string name="qa_admin_password">Heslo administrátora</string>
     <string name="qa_no_password">Bez hesla</string>

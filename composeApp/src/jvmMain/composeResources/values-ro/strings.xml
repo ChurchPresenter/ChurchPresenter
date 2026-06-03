@@ -54,6 +54,7 @@
     <string name="show_number">Afișează Numărul:</string>
     <string name="font_size">Dimensiune Font:</string>
     <string name="font_type">Tip Font:</string>
+    <string name="style">Stil</string>
     <string name="text_style_bold">B</string>
     <string name="text_style_italic">I</string>
     <string name="text_style_underline">S</string>
@@ -1205,6 +1206,7 @@
     <string name="qa_qr_fg_color">Prim-plan QR</string>
     <string name="qa_qr_bg_color">Fundal QR</string>
     <string name="qa_qr_message_label">Mesaj Cod QR</string>
+    <string name="qa_qr_message_default">Scanați pentru a adresa o întrebare</string>
     <string name="qa_qr_message_reset">Resetați la implicit</string>
     <string name="qa_font">Font</string>
     <string name="qa_size">Dimensiune</string>
