@@ -483,10 +483,11 @@ fun BiblePresenter(
                 val secondary = verses.getOrNull(1)
                 val primaryVerseRef = if (primary.verseRange.isNotEmpty()) primary.verseRange else primary.verseNumber.toString()
                 val secondaryVerseRef = secondary?.let { if (it.verseRange.isNotEmpty()) it.verseRange else it.verseNumber.toString() } ?: ""
-                val showSecondary =
-                    secondary != null && (!isLowerThird || appSettings.bibleSettings.secondaryBibleLowerThirdEnabled)
+                val isParallelIntended = appSettings.bibleSettings.secondaryBible.isNotEmpty()
+                val showParallelLayout = isParallelIntended && (!isLowerThird || appSettings.bibleSettings.secondaryBibleLowerThirdEnabled)
+                val showSecondary = secondary != null && showParallelLayout
 
-                if (showSecondary && isLowerThird) {
+                if (showParallelLayout && isLowerThird) {
                     val sec = secondary
                     // Lower third: side-by-side Row layout (50/50) with matched auto-fit
                     BoxWithConstraints(
@@ -500,29 +501,29 @@ fun BiblePresenter(
                         val availH = (constraints.maxHeight * 0.90f).toInt()
 
                         val primaryRefText = buildRefText(primary, appSettings.bibleSettings.primaryShowAbbreviation)
-                        val secondaryRefText = buildRefText(sec, appSettings.bibleSettings.secondaryShowAbbreviation)
+                        val secondaryRefText = if (sec != null) buildRefText(sec, appSettings.bibleSettings.secondaryShowAbbreviation) else ""
 
                         // Binary search for the largest scale where both primary and secondary fit
                         // Scale both verse AND reference text together so everything shrinks proportionally
                         val initialPRefH = textMeasurer.measure(primaryRefText, primaryReferenceTextStyle.copy(fontFamily = primaryBibleReferenceFontStyle, fontSize = scaledPrimaryReferenceSize), constraints = halfConstraint).size.height
-                        val initialSRefH = textMeasurer.measure(secondaryRefText, secondaryReferenceTextStyle.copy(fontFamily = secondaryBibleReferenceFontStyle, fontSize = scaledSecondaryReferenceSize), constraints = halfConstraint).size.height
+                        val initialSRefH = if (sec != null) textMeasurer.measure(secondaryRefText, secondaryReferenceTextStyle.copy(fontFamily = secondaryBibleReferenceFontStyle, fontSize = scaledSecondaryReferenceSize), constraints = halfConstraint).size.height else 0
                         val initialPH = textMeasurer.measure(primary.verseText, primaryBibleTextStyle.copy(fontFamily = primaryBibleFontStyle, fontSize = scaledPrimaryBibleSize), constraints = halfConstraint).size.height
-                        val initialSH = textMeasurer.measure(sec.verseText, secondaryBibleTextStyle.copy(fontFamily = secondaryBibleFontStyle, fontSize = scaledSecondaryBibleSize), constraints = halfConstraint).size.height
-                        val needsScaling = (initialPRefH + initialPH > availH) || (initialSRefH + initialSH > availH)
+                        val initialSH = if (sec != null) textMeasurer.measure(sec.verseText, secondaryBibleTextStyle.copy(fontFamily = secondaryBibleFontStyle, fontSize = scaledSecondaryBibleSize), constraints = halfConstraint).size.height else 0
+                        val needsScaling = (initialPRefH + initialPH > availH) || (sec != null && initialSRefH + initialSH > availH)
 
                         val matchedScale = if (needsScaling) {
                             binarySearchFitScale { scale ->
                                 val pRefH = textMeasurer.measure(primaryRefText, primaryReferenceTextStyle.copy(fontFamily = primaryBibleReferenceFontStyle, fontSize = scaledPrimaryReferenceSize * scale), constraints = halfConstraint).size.height
-                                val sRefH = textMeasurer.measure(secondaryRefText, secondaryReferenceTextStyle.copy(fontFamily = secondaryBibleReferenceFontStyle, fontSize = scaledSecondaryReferenceSize * scale), constraints = halfConstraint).size.height
+                                val sRefH = if (sec != null) textMeasurer.measure(secondaryRefText, secondaryReferenceTextStyle.copy(fontFamily = secondaryBibleReferenceFontStyle, fontSize = scaledSecondaryReferenceSize * scale), constraints = halfConstraint).size.height else 0
                                 val pH = textMeasurer.measure(primary.verseText, primaryBibleTextStyle.copy(fontFamily = primaryBibleFontStyle, fontSize = scaledPrimaryBibleSize * scale), constraints = halfConstraint).size.height
-                                val sH = textMeasurer.measure(sec.verseText, secondaryBibleTextStyle.copy(fontFamily = secondaryBibleFontStyle, fontSize = scaledSecondaryBibleSize * scale), constraints = halfConstraint).size.height
-                                (pRefH + pH <= availH) && (sRefH + sH <= availH)
+                                val sH = if (sec != null) textMeasurer.measure(sec.verseText, secondaryBibleTextStyle.copy(fontFamily = secondaryBibleFontStyle, fontSize = scaledSecondaryBibleSize * scale), constraints = halfConstraint).size.height else 0
+                                (pRefH + pH <= availH) && (sec == null || sRefH + sH <= availH)
                             }
                         } else 1f
                         val pBibleSize = scaledPrimaryBibleSize * matchedScale
                         val sBibleSize = scaledSecondaryBibleSize * matchedScale
                         // Use the smaller of the two so both sides display at the same visual size
-                        val matchedBibleSize = if (pBibleSize.value <= sBibleSize.value) pBibleSize else sBibleSize
+                        val matchedBibleSize = if (sec != null && sBibleSize.value < pBibleSize.value) sBibleSize else pBibleSize
                         val scaledPrimaryRefSize = scaledPrimaryReferenceSize * matchedScale
                         val scaledSecondaryRefSize = scaledSecondaryReferenceSize * matchedScale
 
@@ -542,17 +543,19 @@ fun BiblePresenter(
                             }
                             // Right half: secondary bible
                             Column(Modifier.weight(1f).fillMaxHeight().wrapContentHeight(Alignment.Bottom)) {
-                                if (secondaryBibleReferencePosition == Constants.POSITION_ABOVE) {
-                                    Text(modifier = Modifier.fillMaxWidth(), textAlign = secondaryBibleReferenceHorizontalAlignment, fontFamily = secondaryBibleReferenceFontStyle, fontSize = scaledSecondaryRefSize, text = secondaryRefText, color = secondaryBibleReferenceTextColor, style = secondaryReferenceTextStyleScaled)
-                                }
-                                Text(modifier = Modifier.fillMaxWidth(), textAlign = secondaryBibleHorizontalAlignment, fontFamily = secondaryBibleFontStyle, fontSize = matchedBibleSize, text = sec.verseText, color = secondaryBibleTextColor, style = secondaryBibleTextStyleScaled)
-                                if (secondaryBibleReferencePosition == Constants.POSITION_BELOW) {
-                                    Text(modifier = Modifier.fillMaxWidth(), textAlign = secondaryBibleReferenceHorizontalAlignment, fontFamily = secondaryBibleReferenceFontStyle, fontSize = scaledSecondaryRefSize, text = secondaryRefText, color = secondaryBibleReferenceTextColor, style = secondaryReferenceTextStyleScaled)
+                                if (sec != null) {
+                                    if (secondaryBibleReferencePosition == Constants.POSITION_ABOVE) {
+                                        Text(modifier = Modifier.fillMaxWidth(), textAlign = secondaryBibleReferenceHorizontalAlignment, fontFamily = secondaryBibleReferenceFontStyle, fontSize = scaledSecondaryRefSize, text = secondaryRefText, color = secondaryBibleReferenceTextColor, style = secondaryReferenceTextStyleScaled)
+                                    }
+                                    Text(modifier = Modifier.fillMaxWidth(), textAlign = secondaryBibleHorizontalAlignment, fontFamily = secondaryBibleFontStyle, fontSize = matchedBibleSize, text = sec.verseText, color = secondaryBibleTextColor, style = secondaryBibleTextStyleScaled)
+                                    if (secondaryBibleReferencePosition == Constants.POSITION_BELOW) {
+                                        Text(modifier = Modifier.fillMaxWidth(), textAlign = secondaryBibleReferenceHorizontalAlignment, fontFamily = secondaryBibleReferenceFontStyle, fontSize = scaledSecondaryRefSize, text = secondaryRefText, color = secondaryBibleReferenceTextColor, style = secondaryReferenceTextStyleScaled)
+                                    }
                                 }
                             }
                         }
                     }
-                } else if (showSecondary) {
+                } else if (showParallelLayout) {
                     // Parallel layout: rigid 50/50 split with matched auto-fit
                     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
                         val widthConstraint = Constraints(maxWidth = constraints.maxWidth)
@@ -560,25 +563,25 @@ fun BiblePresenter(
 
                         val primaryRefText = buildRefText(primary, appSettings.bibleSettings.primaryShowAbbreviation)
                         val primaryRefH = textMeasurer.measure(primaryRefText, primaryReferenceTextStyle.copy(fontFamily = primaryBibleReferenceFontStyle, fontSize = scaledPrimaryReferenceSize), constraints = widthConstraint).size.height
-                        val secondaryRefText = buildRefText(secondary, appSettings.bibleSettings.secondaryShowAbbreviation)
-                        val secondaryRefH = textMeasurer.measure(secondaryRefText, secondaryReferenceTextStyle.copy(fontFamily = secondaryBibleReferenceFontStyle, fontSize = scaledSecondaryReferenceSize), constraints = widthConstraint).size.height
+                        val secondaryRefText = if (secondary != null) buildRefText(secondary, appSettings.bibleSettings.secondaryShowAbbreviation) else ""
+                        val secondaryRefH = if (secondary != null) textMeasurer.measure(secondaryRefText, secondaryReferenceTextStyle.copy(fontFamily = secondaryBibleReferenceFontStyle, fontSize = scaledSecondaryReferenceSize), constraints = widthConstraint).size.height else 0
 
                         // Binary search for the largest scale where both primary and secondary fit their halves
                         val initialPH = textMeasurer.measure(primary.verseText, primaryBibleTextStyle.copy(fontFamily = primaryBibleFontStyle, fontSize = scaledPrimaryBibleSize), constraints = widthConstraint).size.height
-                        val initialSH = textMeasurer.measure(secondary.verseText, secondaryBibleTextStyle.copy(fontFamily = secondaryBibleFontStyle, fontSize = scaledSecondaryBibleSize), constraints = widthConstraint).size.height
-                        val needsScaling = (primaryRefH + initialPH > halfH) || (secondaryRefH + initialSH > halfH)
+                        val initialSH = if (secondary != null) textMeasurer.measure(secondary.verseText, secondaryBibleTextStyle.copy(fontFamily = secondaryBibleFontStyle, fontSize = scaledSecondaryBibleSize), constraints = widthConstraint).size.height else 0
+                        val needsScaling = (primaryRefH + initialPH > halfH) || (secondary != null && secondaryRefH + initialSH > halfH)
 
                         val matchedScale = if (needsScaling) {
                             binarySearchFitScale { scale ->
                                 val pH = textMeasurer.measure(primary.verseText, primaryBibleTextStyle.copy(fontFamily = primaryBibleFontStyle, fontSize = scaledPrimaryBibleSize * scale), constraints = widthConstraint).size.height
-                                val sH = textMeasurer.measure(secondary.verseText, secondaryBibleTextStyle.copy(fontFamily = secondaryBibleFontStyle, fontSize = scaledSecondaryBibleSize * scale), constraints = widthConstraint).size.height
-                                (primaryRefH + pH <= halfH) && (secondaryRefH + sH <= halfH)
+                                val sH = if (secondary != null) textMeasurer.measure(secondary.verseText, secondaryBibleTextStyle.copy(fontFamily = secondaryBibleFontStyle, fontSize = scaledSecondaryBibleSize * scale), constraints = widthConstraint).size.height else 0
+                                (primaryRefH + pH <= halfH) && (secondary == null || secondaryRefH + sH <= halfH)
                             }
                         } else 1f
                         val pBibleSize = scaledPrimaryBibleSize * matchedScale
                         val sBibleSize = scaledSecondaryBibleSize * matchedScale
                         // Use the smaller of the two so both halves display at the same visual size
-                        val matchedBibleSize = if (pBibleSize.value <= sBibleSize.value) pBibleSize else sBibleSize
+                        val matchedBibleSize = if (secondary != null && sBibleSize.value < pBibleSize.value) sBibleSize else pBibleSize
 
                         Column(modifier = Modifier.fillMaxSize()) {
                             // ── Top half: primary bible ──
@@ -601,13 +604,15 @@ fun BiblePresenter(
                                 modifier = Modifier.weight(1f).fillMaxWidth(),
                                 contentAlignment = contentAlignment
                             ) {
-                                Column(Modifier.fillMaxWidth().wrapContentHeight()) {
-                                    if (secondaryBibleReferencePosition == Constants.POSITION_ABOVE) {
-                                        Text(modifier = Modifier.fillMaxWidth(), textAlign = secondaryBibleReferenceHorizontalAlignment, fontFamily = secondaryBibleReferenceFontStyle, fontSize = scaledSecondaryReferenceSize, text = secondaryRefText, color = secondaryBibleReferenceTextColor, style = secondaryReferenceTextStyleScaled)
-                                    }
-                                    Text(modifier = Modifier.fillMaxWidth(), textAlign = secondaryBibleHorizontalAlignment, fontFamily = secondaryBibleFontStyle, fontSize = matchedBibleSize, text = secondary.verseText, color = secondaryBibleTextColor, style = secondaryBibleTextStyleScaled)
-                                    if (secondaryBibleReferencePosition == Constants.POSITION_BELOW) {
-                                        Text(modifier = Modifier.fillMaxWidth(), textAlign = secondaryBibleReferenceHorizontalAlignment, fontFamily = secondaryBibleReferenceFontStyle, fontSize = scaledSecondaryReferenceSize, text = secondaryRefText, color = secondaryBibleReferenceTextColor, style = secondaryReferenceTextStyleScaled)
+                                if (secondary != null) {
+                                    Column(Modifier.fillMaxWidth().wrapContentHeight()) {
+                                        if (secondaryBibleReferencePosition == Constants.POSITION_ABOVE) {
+                                            Text(modifier = Modifier.fillMaxWidth(), textAlign = secondaryBibleReferenceHorizontalAlignment, fontFamily = secondaryBibleReferenceFontStyle, fontSize = scaledSecondaryReferenceSize, text = secondaryRefText, color = secondaryBibleReferenceTextColor, style = secondaryReferenceTextStyleScaled)
+                                        }
+                                        Text(modifier = Modifier.fillMaxWidth(), textAlign = secondaryBibleHorizontalAlignment, fontFamily = secondaryBibleFontStyle, fontSize = matchedBibleSize, text = secondary.verseText, color = secondaryBibleTextColor, style = secondaryBibleTextStyleScaled)
+                                        if (secondaryBibleReferencePosition == Constants.POSITION_BELOW) {
+                                            Text(modifier = Modifier.fillMaxWidth(), textAlign = secondaryBibleReferenceHorizontalAlignment, fontFamily = secondaryBibleReferenceFontStyle, fontSize = scaledSecondaryReferenceSize, text = secondaryRefText, color = secondaryBibleReferenceTextColor, style = secondaryReferenceTextStyleScaled)
+                                        }
                                     }
                                 }
                             }
