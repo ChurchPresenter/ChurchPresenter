@@ -145,7 +145,7 @@ sealed class ScheduleItem {
         val word: String,
         val transliteration: String,
         val definition: String,
-        override val displayText: String = "📖 $word ($number)"
+        override val displayText: String = "$word ($number)"
     ) : ScheduleItem()
 }
 
