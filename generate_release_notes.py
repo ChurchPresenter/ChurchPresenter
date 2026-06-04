@@ -60,9 +60,6 @@ def main():
     else:
         version = latest_tag.lstrip("v") if end_ref != "HEAD" else "unreleased"
 
-    print(f"Release notes: {from_tag} → {end_ref}")
-    print("---\n")
-
     raw = run(["git", "log", f"{from_tag}..{end_ref}", "--pretty=format:%s"])
     commits = [line for line in raw.splitlines() if line and not NOISE.match(line.strip())]
 

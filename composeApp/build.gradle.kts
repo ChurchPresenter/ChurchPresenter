@@ -316,6 +316,7 @@ compose.desktop {
                 bundleID = "org.churchpresenter.app"
                 iconFile.set(project.file("src/jvmMain/appResources/macos/icon.icns"))
                 jvmArgs(*commonJvmArgs.toTypedArray())
+                jvmArgs("-Dskiko.renderApi=METAL")
 
                 // ── macOS Code Signing ────────────────────────────────────────
                 val macIdentity = macSigningProps.getProperty("identityName", "")
