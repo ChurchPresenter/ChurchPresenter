@@ -124,7 +124,8 @@ data class ScheduleTabActions(
     val addAnnouncement: (text: String, textColor: String, backgroundColor: String, fontSize: Int, fontType: String, bold: Boolean, italic: Boolean, underline: Boolean, shadow: Boolean, horizontalAlignment: String, position: String, animationType: String, animationDuration: Int, isTimer: Boolean, timerHours: Int, timerMinutes: Int, timerSeconds: Int, timerTextColor: String, timerExpiredText: String, timerMode: String, targetHour: Int, targetMinute: Int, targetSecond: Int) -> Unit = { _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _ -> },
     val addWebsite: (url: String, title: String) -> Unit = { _, _ -> },
     val updateWebsiteTitle: (url: String, title: String) -> Unit = { _, _ -> },
-    val addScene: (sceneId: String, sceneName: String) -> Unit = { _, _ -> }
+    val addScene: (sceneId: String, sceneName: String) -> Unit = { _, _ -> },
+    val addDictionary: (number: String, word: String, transliteration: String, definition: String) -> Unit = { _, _, _, _ -> }
 )
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -146,6 +147,7 @@ fun ScheduleTab(
     onPresentAnnouncement: ((ScheduleItem.AnnouncementItem) -> Unit)? = null,
     onPresentLowerThird: ((ScheduleItem.LowerThirdItem) -> Unit)? = null,
     onPresentWebsite: ((ScheduleItem.WebsiteItem) -> Unit)? = null,
+    onPresentDictionary: ((ScheduleItem.DictionaryItem) -> Unit)? = null,
     onActionsReady: (ScheduleTabActions) -> Unit = {},
     onSelectedItemChanged: (String?) -> Unit = {},
     onScheduleChanged: ((List<ScheduleItem>) -> Unit)? = null,
@@ -190,7 +192,8 @@ fun ScheduleTab(
                 },
                 addWebsite       = { url, title -> viewModel.addWebsite(url, title) },
                 updateWebsiteTitle = { url, title -> viewModel.updateWebsiteTitle(url, title) },
-                addScene         = { sceneId, sceneName -> viewModel.addScene(sceneId, sceneName) }
+                addScene         = { sceneId, sceneName -> viewModel.addScene(sceneId, sceneName) },
+                addDictionary    = { number, word, transliteration, definition -> viewModel.addDictionary(number, word, transliteration, definition) }
             )
         )
     }
@@ -457,7 +460,8 @@ fun ScheduleTab(
                                     onPresentMedia = onPresentMedia,
                                     onPresentAnnouncement = onPresentAnnouncement,
                                     onPresentLowerThird = onPresentLowerThird,
-                                    onPresentWebsite = onPresentWebsite
+                                    onPresentWebsite = onPresentWebsite,
+                                    onPresentDictionary = onPresentDictionary
                                 )
                             },
                             onEditLabel = {
@@ -512,6 +516,7 @@ fun ScheduleTab(
                                 is ScheduleItem.AnnouncementItem -> "📢"
                                 is ScheduleItem.WebsiteItem -> "🌐"
                                 is ScheduleItem.SceneItem -> "🎬"
+                                is ScheduleItem.DictionaryItem -> "📖"
                             },
                             style = MaterialTheme.typography.titleMedium,
                             color = MaterialTheme.colorScheme.primary,
@@ -641,6 +646,7 @@ private fun ScheduleItemRow(
                 is ScheduleItem.AnnouncementItem -> "📢"
                 is ScheduleItem.WebsiteItem -> "🌐"
                 is ScheduleItem.SceneItem -> "🎬"
+                is ScheduleItem.DictionaryItem -> "📖"
             },
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.primary,
@@ -767,6 +773,13 @@ private fun ScheduleItemRow(
                             else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                 )
                 is ScheduleItem.SceneItem -> { /* no secondary text */ }
+                is ScheduleItem.DictionaryItem -> Text(
+                    maxLines = 1,
+                    text = item.transliteration,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = if (isSelected) MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                            else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                )
             }
         }
 

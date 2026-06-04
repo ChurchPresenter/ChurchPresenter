@@ -137,5 +137,15 @@ sealed class ScheduleItem {
         val sceneName: String,
         override val displayText: String = "Scene: $sceneName"
     ) : ScheduleItem()
+
+    @Serializable
+    data class DictionaryItem(
+        override val id: String,
+        val number: String,
+        val word: String,
+        val transliteration: String,
+        val definition: String,
+        override val displayText: String = "📖 $word ($number)"
+    ) : ScheduleItem()
 }
 

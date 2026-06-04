@@ -1349,6 +1349,7 @@ private fun remoteEventLabel(item: ScheduleItem): Pair<String, String> = when (i
     is ScheduleItem.LowerThirdItem -> item.presetLabel to ""
     is ScheduleItem.WebsiteItem -> item.title to item.url
     is ScheduleItem.SceneItem -> item.sceneName to "Scene"
+    is ScheduleItem.DictionaryItem -> item.word to item.number
 }
 
 /**

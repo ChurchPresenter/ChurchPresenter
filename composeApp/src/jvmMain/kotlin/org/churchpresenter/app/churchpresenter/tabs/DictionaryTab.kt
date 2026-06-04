@@ -1,5 +1,8 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.TooltipArea
+import androidx.compose.foundation.TooltipPlacement
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -13,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
@@ -26,6 +30,9 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
@@ -39,9 +46,11 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.add_to_schedule
 import churchpresenter.composeapp.generated.resources.dictionary_definition
 import churchpresenter.composeapp.generated.resources.dictionary_entry_count
 import churchpresenter.composeapp.generated.resources.dictionary_filter_all
@@ -54,9 +63,13 @@ import churchpresenter.composeapp.generated.resources.dictionary_pronunciation
 import churchpresenter.composeapp.generated.resources.dictionary_search_hint
 import churchpresenter.composeapp.generated.resources.dictionary_select_entry
 import churchpresenter.composeapp.generated.resources.dictionary_transliteration
+import churchpresenter.composeapp.generated.resources.go_live
+import churchpresenter.composeapp.generated.resources.ic_cast
+import churchpresenter.composeapp.generated.resources.ic_playlist_add
 import org.churchpresenter.app.churchpresenter.data.StrongsEntry
 import org.churchpresenter.app.churchpresenter.viewmodel.DictionaryLanguageFilter
 import org.churchpresenter.app.churchpresenter.viewmodel.DictionaryViewModel
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
 private val hebrewNumberColor = Color(0xFFB45309)
@@ -66,6 +79,8 @@ private val greekNumberColor = Color(0xFF1D4ED8)
 fun DictionaryTab(
     modifier: Modifier = Modifier,
     viewModel: DictionaryViewModel,
+    onAddToSchedule: ((number: String, word: String, transliteration: String, definition: String) -> Unit)? = null,
+    onGoLive: ((StrongsEntry) -> Unit)? = null,
 ) {
     LaunchedEffect(Unit) { viewModel.load() }
 
@@ -81,6 +96,8 @@ fun DictionaryTab(
         DictionaryDetailPane(
             modifier = Modifier.weight(1f).fillMaxHeight(),
             entry = viewModel.selectedEntry,
+            onAddToSchedule = onAddToSchedule?.let { cb -> { e -> cb(e.number, e.word, e.transliteration, e.definition) } },
+            onGoLive = onGoLive,
         )
     }
 }
@@ -264,10 +281,13 @@ private fun DictionaryEntryRow(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun DictionaryDetailPane(
     modifier: Modifier = Modifier,
     entry: StrongsEntry?,
+    onAddToSchedule: ((StrongsEntry) -> Unit)? = null,
+    onGoLive: ((StrongsEntry) -> Unit)? = null,
 ) {
     if (entry == null) {
         Box(modifier = modifier, contentAlignment = Alignment.Center) {
@@ -288,15 +308,71 @@ private fun DictionaryDetailPane(
     else
         stringResource(Res.string.dictionary_filter_greek).uppercase()
 
-    val scrollState = rememberScrollState()
-    Box(modifier = modifier) {
-        Column(
+    val addScheduleStr = stringResource(Res.string.add_to_schedule)
+    val goLiveStr = stringResource(Res.string.go_live)
+
+    Column(modifier = modifier) {
+        // Action toolbar
+        Row(
             modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(scrollState)
-                .padding(24.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp, vertical = 4.dp),
+            horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.End),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
+            if (onAddToSchedule != null) {
+                TooltipArea(
+                    tooltip = {
+                        Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
+                            Text(addScheduleStr, color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
+                        }
+                    },
+                    tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp)),
+                ) {
+                    IconButton(
+                        onClick = { onAddToSchedule(entry) },
+                        colors = IconButtonDefaults.iconButtonColors(
+                            containerColor = MaterialTheme.colorScheme.secondary,
+                            contentColor = MaterialTheme.colorScheme.onSecondary,
+                        ),
+                    ) {
+                        Icon(painter = painterResource(Res.drawable.ic_playlist_add), contentDescription = addScheduleStr, modifier = Modifier.size(20.dp))
+                    }
+                }
+            }
+            if (onGoLive != null) {
+                TooltipArea(
+                    tooltip = {
+                        Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
+                            Text(goLiveStr, color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
+                        }
+                    },
+                    tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp)),
+                ) {
+                    IconButton(
+                        onClick = { onGoLive(entry) },
+                        colors = IconButtonDefaults.iconButtonColors(
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = MaterialTheme.colorScheme.onPrimary,
+                        ),
+                    ) {
+                        Icon(painter = painterResource(Res.drawable.ic_cast), contentDescription = goLiveStr, modifier = Modifier.size(20.dp))
+                    }
+                }
+            }
+        }
+
+        HorizontalDivider()
+
+        val scrollState = rememberScrollState()
+        Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(scrollState)
+                    .padding(24.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
             // Header: number + language badge
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -368,7 +444,8 @@ private fun DictionaryDetailPane(
             adapter = rememberScrollbarAdapter(scrollState),
             modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
         )
-    }
+        } // Box (scrollable content)
+    } // Column (outer)
 }
 
 @Composable

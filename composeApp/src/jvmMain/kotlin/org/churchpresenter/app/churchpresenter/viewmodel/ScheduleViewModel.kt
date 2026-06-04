@@ -263,6 +263,11 @@ class ScheduleViewModel(
         notifyChanged()
     }
 
+    fun addDictionary(number: String, word: String, transliteration: String, definition: String) {
+        _scheduleItems.add(ScheduleItem.DictionaryItem(id = UUID.randomUUID().toString(), number = number, word = word, transliteration = transliteration, definition = definition))
+        notifyChanged()
+    }
+
     fun updateWebsiteTitle(url: String, title: String) {
         if (title.isBlank()) return
         val index = _scheduleItems.indexOfFirst { it is ScheduleItem.WebsiteItem && it.url == url }
@@ -368,7 +373,8 @@ class ScheduleViewModel(
         onPresentAnnouncement: ((ScheduleItem.AnnouncementItem) -> Unit)? = null,
         onPresentLowerThird: ((ScheduleItem.LowerThirdItem) -> Unit)? = null,
         onPresentWebsite: ((ScheduleItem.WebsiteItem) -> Unit)? = null,
-        onPresentScene: ((ScheduleItem.SceneItem) -> Unit)? = null
+        onPresentScene: ((ScheduleItem.SceneItem) -> Unit)? = null,
+        onPresentDictionary: ((ScheduleItem.DictionaryItem) -> Unit)? = null
     ) {
         when (item) {
             is ScheduleItem.SongItem -> onPresentSong?.invoke(item) ?: onPresenting(Presenting.LYRICS)
@@ -381,6 +387,7 @@ class ScheduleViewModel(
             is ScheduleItem.AnnouncementItem -> onPresentAnnouncement?.invoke(item) ?: onPresenting(Presenting.ANNOUNCEMENTS)
             is ScheduleItem.WebsiteItem -> onPresentWebsite?.invoke(item) ?: onPresenting(Presenting.WEBSITE)
             is ScheduleItem.SceneItem -> onPresentScene?.invoke(item) ?: onPresenting(Presenting.CANVAS)
+            is ScheduleItem.DictionaryItem -> onPresentDictionary?.invoke(item) ?: onPresenting(Presenting.ANNOUNCEMENTS)
         }
     }
 }

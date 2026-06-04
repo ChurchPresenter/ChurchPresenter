@@ -1230,6 +1230,10 @@ class CompanionServer {
                 is ScheduleItem.SceneItem -> ScheduleItemDto(
                     id = item.id, type = "scene", displayText = item.displayText
                 )
+                is ScheduleItem.DictionaryItem -> ScheduleItemDto(
+                    id = item.id, type = "dictionary", displayText = item.displayText,
+                    text = "${item.word} (${item.transliteration}): ${item.definition}"
+                )
             }
         }
         _schedule.value = dtos

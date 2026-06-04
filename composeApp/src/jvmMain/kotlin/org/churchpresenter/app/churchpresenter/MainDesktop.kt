@@ -134,7 +134,8 @@ data class ScheduleActions(
     val addPicture: (folderPath: String, folderName: String, imageCount: Int) -> Unit = { _, _, _ -> },
     val addPresentation: (filePath: String, fileName: String, slideCount: Int, fileType: String) -> Unit = { _, _, _, _ -> },
     val addMedia: (mediaUrl: String, mediaTitle: String, mediaType: String) -> Unit = { _, _, _ -> },
-    val addScene: (sceneId: String, sceneName: String) -> Unit = { _, _ -> }
+    val addScene: (sceneId: String, sceneName: String) -> Unit = { _, _ -> },
+    val addDictionary: (number: String, word: String, transliteration: String, definition: String) -> Unit = { _, _, _, _ -> }
 )
 
 @Composable
@@ -702,6 +703,11 @@ fun MainDesktop(
                             presenterManager.setWebsiteUrl(item.url)
                             presenting(Presenting.WEBSITE)
                         },
+                        onPresentDictionary = { item ->
+                            presenterManager.setAnnouncementText("${item.word} (${item.transliteration})\n\n${item.definition}")
+                            presenterManager.setShowPresenterWindow(true)
+                            presenting(Presenting.ANNOUNCEMENTS)
+                        },
                         onItemClick = { item ->
                             when (item) {
                                 is ScheduleItem.SongItem -> {
@@ -777,6 +783,11 @@ fun MainDesktop(
                                     sceneViewModel.selectScene(item.sceneId)
                                     selectTab(Tabs.CANVAS)
                                 }
+
+                                is ScheduleItem.DictionaryItem -> {
+                                    selectTab(Tabs.DICTIONARY)
+                                    dictionaryViewModel.selectByNumber(item.number)
+                                }
                             }
                         },
                         onEditLabel = { labelItem ->
@@ -798,7 +809,8 @@ fun MainDesktop(
                                     addPicture = actions.addPicture,
                                     addPresentation = actions.addPresentation,
                                     addMedia = actions.addMedia,
-                                    addScene = actions.addScene
+                                    addScene = actions.addScene,
+                                    addDictionary = actions.addDictionary
                                 )
                             )
                         },
@@ -1111,6 +1123,14 @@ fun MainDesktop(
                             Tabs.DICTIONARY -> DictionaryTab(
                                 modifier = Modifier.fillMaxSize(),
                                 viewModel = dictionaryViewModel,
+                                onAddToSchedule = { number, word, transliteration, definition ->
+                                    scheduleActions.addDictionary(number, word, transliteration, definition)
+                                },
+                                onGoLive = { entry ->
+                                    presenterManager.setAnnouncementText("${entry.word} (${entry.transliteration})\n\n${entry.definition}")
+                                    presenterManager.setShowPresenterWindow(true)
+                                    presenting(Presenting.ANNOUNCEMENTS)
+                                },
                             )
                         }
                     }

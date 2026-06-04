@@ -26,6 +26,7 @@ class DictionaryViewModel {
     var searchQuery by mutableStateOf("")
     var filterLanguage by mutableStateOf(DictionaryLanguageFilter.ALL)
     var selectedEntry by mutableStateOf<StrongsEntry?>(null)
+    private var pendingSelectionNumber: String? = null
 
     val searchResults: List<StrongsEntry>
         get() {
@@ -62,10 +63,23 @@ class DictionaryViewModel {
                 val hEntries = json.decodeFromString<List<StrongsEntry>>(hBytes.decodeToString())
                 val gEntries = json.decodeFromString<List<StrongsEntry>>(gBytes.decodeToString())
                 entries = hEntries.sortedBy { it.numericValue } + gEntries.sortedBy { it.numericValue }
+                pendingSelectionNumber?.let { num ->
+                    selectedEntry = entries.find { it.number == num }
+                    pendingSelectionNumber = null
+                }
             } catch (_: Exception) {
             } finally {
                 isLoading = false
             }
+        }
+    }
+
+    fun selectByNumber(number: String) {
+        val found = entries.find { it.number == number }
+        if (found != null) {
+            selectedEntry = found
+        } else if (number.isNotEmpty()) {
+            pendingSelectionNumber = number
         }
     }
 
