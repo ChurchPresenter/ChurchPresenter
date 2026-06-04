@@ -159,6 +159,10 @@ private fun acquireSingleInstanceLock(): Boolean {
 }
 
 fun main() {
+    // Ensure Skiko uses Metal on macOS — prevents OPENGL fallback crash
+    if (System.getProperty("os.name", "").lowercase().contains("mac")) {
+        System.setProperty("skiko.renderApi", "METAL")
+    }
     // Enforce single instance — exit immediately if another is already running
     if (!acquireSingleInstanceLock()) {
         System.err.println("ChurchPresenter is already running.")
