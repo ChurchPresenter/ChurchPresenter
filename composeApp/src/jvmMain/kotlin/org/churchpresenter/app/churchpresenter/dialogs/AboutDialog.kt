@@ -5,8 +5,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -61,9 +63,9 @@ fun AboutDialog(
     DialogWindow(
         onCloseRequest = onDismiss,
         state = rememberDialogState(
-            position = centeredOnMainWindow(mainWindowState, 360.dp, 300.dp),
-            width = 360.dp,
-            height = 300.dp
+            position = centeredOnMainWindow(mainWindowState, 400.dp, 320.dp),
+            width = 400.dp,
+            height = 320.dp
         ),
         title = stringResource(Res.string.about_title),
         resizable = false
@@ -99,15 +101,21 @@ fun AboutDialog(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    OutlinedButton(onClick = {
-                        Desktop.getDesktop().browse(java.net.URI("https://github.com/ChurchPresenter/ChurchPresenter/issues/new?template=bug_report.md"))
-                    }) {
-                        Text(stringResource(Res.string.report_bug))
+                    OutlinedButton(
+                        modifier = Modifier.weight(1f),
+                        onClick = {
+                            Desktop.getDesktop().browse(java.net.URI("https://github.com/ChurchPresenter/ChurchPresenter/issues/new?template=bug_report.md"))
+                        }
+                    ) {
+                        Text(stringResource(Res.string.report_bug), maxLines = 2, textAlign = TextAlign.Center)
                     }
-                    OutlinedButton(onClick = {
-                        Desktop.getDesktop().browse(java.net.URI("https://github.com/ChurchPresenter/ChurchPresenter/issues/new?template=feature_request.md"))
-                    }) {
-                        Text(stringResource(Res.string.submit_feature_request))
+                    OutlinedButton(
+                        modifier = Modifier.weight(1f),
+                        onClick = {
+                            Desktop.getDesktop().browse(java.net.URI("https://github.com/ChurchPresenter/ChurchPresenter/issues/new?template=feature_request.md"))
+                        }
+                    ) {
+                        Text(stringResource(Res.string.submit_feature_request), maxLines = 2, textAlign = TextAlign.Center)
                     }
                 }
                 Spacer(modifier = Modifier.height(8.dp))
@@ -115,14 +123,20 @@ fun AboutDialog(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    OutlinedButton(onClick = {
-                        val crashDir = File(System.getProperty("user.home"), ".churchpresenter/crash-reports")
-                        crashDir.mkdirs()
-                        Desktop.getDesktop().open(crashDir)
-                    }) {
-                        Text(stringResource(Res.string.open_crash_logs))
+                    OutlinedButton(
+                        modifier = Modifier.weight(1f),
+                        onClick = {
+                            val crashDir = File(System.getProperty("user.home"), ".churchpresenter/crash-reports")
+                            crashDir.mkdirs()
+                            Desktop.getDesktop().open(crashDir)
+                        }
+                    ) {
+                        Text(stringResource(Res.string.open_crash_logs), maxLines = 2, textAlign = TextAlign.Center)
                     }
-                    Button(onClick = onDismiss) {
+                    Button(
+                        modifier = Modifier.weight(1f),
+                        onClick = onDismiss
+                    ) {
                         Text(stringResource(Res.string.action_ok))
                     }
                 }
