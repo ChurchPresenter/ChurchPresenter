@@ -29,6 +29,7 @@ import churchpresenter.composeapp.generated.resources.language_slovak
 import churchpresenter.composeapp.generated.resources.language_spanish
 import churchpresenter.composeapp.generated.resources.language_ukrainian
 import churchpresenter.composeapp.generated.resources.menu_about
+import churchpresenter.composeapp.generated.resources.menu_getting_started
 import churchpresenter.composeapp.generated.resources.menu_add_to_schedule
 import churchpresenter.composeapp.generated.resources.menu_keyboard_shortcuts
 import churchpresenter.composeapp.generated.resources.menu_clear_schedule
@@ -73,6 +74,7 @@ fun FrameWindowScope.NavigationTopBar(
     onStatistics: () -> Unit = {},
     onAbout: () -> Unit = {},
     onHelp: () -> Unit = {},
+    onGettingStarted: () -> Unit = {},
     onConverter: () -> Unit = {},
     onKeyboardShortcuts: () -> Unit = {},
     onCheckForUpdates: () -> Unit = {}
@@ -257,6 +259,7 @@ fun FrameWindowScope.NavigationTopBar(
         }
 
         Menu(helpLabel, mnemonic = helpMnemonic) {
+            Item(stringResource(Res.string.menu_getting_started), onClick = onGettingStarted)
             Item(stringResource(Res.string.menu_keyboard_shortcuts), onClick = onKeyboardShortcuts, shortcut = KeyShortcut(key = Key.F1))
             Item(stringResource(Res.string.open_converter), onClick = onConverter)
             Item(stringResource(Res.string.menu_about), onClick = onAbout)

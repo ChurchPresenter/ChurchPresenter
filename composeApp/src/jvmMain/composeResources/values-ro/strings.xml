@@ -100,8 +100,14 @@
     <string name="menu_settings">Setări</string>
 
     <string name="menu_help">Ajutor</string>
+    <string name="menu_getting_started">Noțiuni de bază…</string>
     <string name="menu_about">Despre</string>
     <string name="about_title">Despre Church Presenter</string>
+    <string name="about_copyright">© 2025 Church Presenter</string>
+    <string name="converter_window_title">ChurchPresenter Converter</string>
+    <string name="lottie_gen_window_title">Lottie Lower Third Generator</string>
+    <string name="clear_recents">Șterge recente</string>
+    <string name="recent">Recent:</string>
     <string name="open_crash_logs">Deschide Jurnalele de Erori</string>
     <string name="open_converter">Convertor</string>
     <string name="report_bug">Raportează o Eroare</string>
@@ -451,6 +457,7 @@
     <string name="images_count">%1$d imagini</string>
     <string name="previous_image">Imaginea Anterioară</string>
     <string name="pause">Pauză</string>
+    <string name="stop">Oprire</string>
     <string name="play">Redă</string>
     <string name="next_image">Imaginea Următoare</string>
     <string name="image_counter">Imaginea %1$d din %2$d</string>
@@ -713,6 +720,11 @@
     <string name="live_preview_presentation">Prezentare</string>
     <string name="live_preview_media">Media</string>
     <string name="live_preview_lower_third">Lower Third</string>
+    <string name="screen_locked_badge">BLOCAT</string>
+    <string name="unlock_screen">Deblochează ecranul</string>
+    <string name="lock_screen_to_tab">Blochează ecranul la fila curentă</string>
+    <string name="qr_code">Cod QR</string>
+    <string name="projection_decklink_io_conflict_tooltip">Folosit și pentru intrare — poate să nu funcționeze pe dispozitive fără I/O simultan</string>
     <string name="live_preview_announcement">Anunț</string>
     <string name="live_preview_website">Website</string>
 
@@ -749,6 +761,8 @@
     <string name="tab_stt">STT</string>
     <string name="tab_visibility">Vizibilitate File</string>
     <string name="canvas_scenes">Scene</string>
+    <string name="canvas_verse_style">Stil verset</string>
+    <string name="canvas_reference_style">Stil referință</string>
     <string name="canvas_sources">Surse</string>
     <string name="canvas_properties">Proprietăți</string>
     <string name="canvas_new_scene">Nouă</string>
@@ -1433,6 +1447,7 @@
     <string name="crossword_wrong">Greșit — încearcă din nou</string>
     <string name="crossword_correct">Corect! Nivel complet!</string>
     <string name="crossword_all_done">Ați completat toate nivelurile!</string>
+    <string name="crossword_ask_more">Vreți mai mult? Cereți dezvoltatorilor puzzle-uri noi!</string>
     <string name="crossword_loading">Se încarcă puzzle-urile…</string>
     <string name="crossword_no_puzzles">Niciun puzzle de cuvinte încrucișate disponibil încă.</string>
     <string name="crossword_level_label">Nivelul %1$d</string>
@@ -1457,4 +1472,37 @@
     <string name="dictionary_select_entry">Selectați o intrare pentru a vedea detaliile</string>
     <string name="dictionary_loading">Se încarcă dicționarul…</string>
     <string name="dictionary_entry_count">%1$d intrări</string>
+
+    <!-- Setup Wizard -->
+    <string name="setup_step0_title">Selectați limba</string>
+    <string name="setup_step0_subtitle">Alegeți limba pentru interfața aplicației</string>
+    <string name="setup_step1_theme_title">Alegeți o temă</string>
+    <string name="setup_step1_theme_subtitle">Selectați aspectul care funcționează cel mai bine în mediul dvs.</string>
+    <string name="setup_wizard_title">Noțiuni de bază</string>
+    <string name="setup_wizard_skip">Omite</string>
+    <string name="setup_wizard_back">Înapoi</string>
+    <string name="setup_wizard_next">Înainte</string>
+    <string name="setup_wizard_done">Începe</string>
+    <string name="setup_wizard_step">Pasul %1$d din %2$d</string>
+    <string name="setup_step1_title">Bun venit în ChurchPresenter</string>
+    <string name="setup_step1_body">Acest ghid rapid vă va ajuta să configurați traducerile Bibliei și cărțile de cântece pentru a putea prezenta imediat.</string>
+    <string name="setup_step2_title">Adăugați traduceri ale Bibliei</string>
+    <string name="setup_step2_subtitle">Configurați fișierele Bibliei pentru afișarea versetelor</string>
+    <string name="setup_step2_step1">1. Deschideți Setări folosind butonul ⚙ din bara de instrumente</string>
+    <string name="setup_step2_step2">2. Mergeți la fila Sistem</string>
+    <string name="setup_step2_step3">3. Faceți clic pe „Răsfoire…" lângă Directorul Bibliei</string>
+    <string name="setup_step2_step4">4. Selectați un dosar cu fișierele dvs. de Biblie (.db3)</string>
+    <string name="setup_step2_step5">5. Mergeți la fila Biblie și alegeți o Biblie primară</string>
+    <string name="setup_step2_tip">Căutați pe internet un fișier XML al Bibliei în limba dvs.</string>
+    <string name="setup_step2_tip2">Odată ce aveți fișierul XML, folosiți Instrumentul de conversie (Ajutor → Convertor) pentru a-l converti în formatul necesar.</string>
+    <string name="setup_step3_title">Adăugați cărți de cântece</string>
+    <string name="setup_step3_subtitle">Indicați aplicației dosarul cu biblioteca dvs. de cântece</string>
+    <string name="setup_step3_step1">1. Deschideți Setări folosind butonul ⚙ din bara de instrumente</string>
+    <string name="setup_step3_step2">2. Mergeți la fila Sistem</string>
+    <string name="setup_step3_step3">3. Faceți clic pe „Răsfoire…" lângă Directorul de cântece</string>
+    <string name="setup_step3_step4">4. Selectați un dosar cu fișierele dvs. de cântece</string>
+    <string name="setup_step3_tip">Cântecele pot fi în format OpenLyrics, SongPro sau ChurchPresenter.</string>
+    <string name="setup_step4_title">Ești gata!</string>
+    <string name="setup_step4_body">Puteți adăuga oricând conținut suplimentar sau ajusta setările folosind butonul ⚙ Setări din bara de instrumente.</string>
+    <string name="setup_step4_hint">Acest ghid este disponibil oricând din Ajutor → Noțiuni de bază.</string>
 </resources>

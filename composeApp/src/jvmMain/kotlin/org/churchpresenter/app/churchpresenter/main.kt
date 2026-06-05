@@ -80,6 +80,7 @@ import org.churchpresenter.app.churchpresenter.dialogs.ConverterWindow
 import org.churchpresenter.app.churchpresenter.dialogs.LottieGenWindow
 import org.churchpresenter.app.churchpresenter.dialogs.KeyboardShortcutsDialog
 import org.churchpresenter.app.churchpresenter.dialogs.LicenseDialog
+import org.churchpresenter.app.churchpresenter.dialogs.SetupWizardDialog
 import org.churchpresenter.app.churchpresenter.dialogs.RemoteActivityNotification
 import org.churchpresenter.app.churchpresenter.dialogs.RemoteActivityToastHost
 import org.churchpresenter.app.churchpresenter.dialogs.RemoteEvent
@@ -262,6 +263,7 @@ fun main() {
         val presenterManager = remember { PresenterManager() }
 
         var licenseAccepted by remember { mutableStateOf(appSettings.licenseAccepted) }
+        var showSetupWizard by remember { mutableStateOf(!appSettings.setupWizardShown) }
 
         var currentLanguage by remember {
             val savedLanguageCode = appSettings.language
@@ -941,6 +943,7 @@ fun main() {
                                 NavigationTopBar(
                                     currentTheme = theme,
                                     onAbout = { showAboutDialog = true },
+                                    onGettingStarted = { showSetupWizard = true },
                                     onStatistics = { showStatisticsDialog = true },
                                     onConverter = { showConverterWindow = true },
                                     onHelp = {
@@ -1307,7 +1310,33 @@ fun main() {
                 qaDisplayUrl = qaDisplayUrl,
                 sttManager = sttManager,
             )
-        } else if (appReady) {
+        }
+
+        if (appReady && licenseAccepted && showSetupWizard) {
+            SetupWizardDialog(
+                theme = theme,
+                selectedLanguage = currentLanguage,
+                onLanguageSelected = { language ->
+                    currentLanguage = language
+                    appSettings = appSettings.copy(language = language.code)
+                    settingsManager.saveSettings(appSettings)
+                    Locale.setDefault(Locale.forLanguageTag(language.code))
+                },
+                onThemeSelected = { newTheme ->
+                    theme = newTheme
+                    appSettings = appSettings.copy(theme = newTheme.toString())
+                    settingsManager.saveSettings(appSettings)
+                },
+                onDismiss = {
+                    val updated = appSettings.copy(setupWizardShown = true)
+                    settingsManager.saveSettings(updated)
+                    appSettings = updated
+                    showSetupWizard = false
+                }
+            )
+        }
+
+        if (appReady && !licenseAccepted) {
             LicenseDialog(
                 onAccept = {
                     val updated = appSettings.copy(licenseAccepted = true)

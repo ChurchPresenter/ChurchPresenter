@@ -102,6 +102,7 @@
     <string name="menu_settings">Settings</string>
 
     <string name="menu_help">Help</string>
+    <string name="menu_getting_started">Getting Started…</string>
     <string name="menu_about">About</string>
     <string name="about_title">About Church Presenter</string>
     <string name="about_copyright">© 2025 Church Presenter</string>
@@ -1469,4 +1470,37 @@
     <string name="dictionary_select_entry">Select an entry to view details</string>
     <string name="dictionary_loading">Loading dictionary…</string>
     <string name="dictionary_entry_count">%1$d entries</string>
+
+    <!-- Setup Wizard -->
+    <string name="setup_wizard_title">Getting Started</string>
+    <string name="setup_wizard_skip">Skip</string>
+    <string name="setup_wizard_back">Back</string>
+    <string name="setup_wizard_next">Next</string>
+    <string name="setup_wizard_done">Get Started</string>
+    <string name="setup_wizard_step">Step %1$d of %2$d</string>
+    <string name="setup_step0_title">Select Your Language</string>
+    <string name="setup_step0_subtitle">Choose the language for the app interface</string>
+    <string name="setup_step1_theme_title">Choose a Theme</string>
+    <string name="setup_step1_theme_subtitle">Pick the look that works best for your environment</string>
+    <string name="setup_step1_title">Welcome to ChurchPresenter</string>
+    <string name="setup_step1_body">This quick guide will help you set up Bible translations and song books so you can start presenting right away.</string>
+    <string name="setup_step2_title">Add Bible Translations</string>
+    <string name="setup_step2_subtitle">Set up your Bible files for verse display</string>
+    <string name="setup_step2_step1">1. Open Settings using the ⚙ button in the toolbar</string>
+    <string name="setup_step2_step2">2. Go to the System tab</string>
+    <string name="setup_step2_step3">3. Click "Browse…" next to Bible Storage Directory</string>
+    <string name="setup_step2_step4">4. Select a folder containing your Bible files (.db3)</string>
+    <string name="setup_step2_step5">5. Go to the Bible tab and choose a Primary Bible</string>
+    <string name="setup_step2_tip">Search the internet for a Bible XML file in your language.</string>
+    <string name="setup_step2_tip2">Once you have an XML file, use the Conversion Tool (Help → Converter) to convert it to the required format.</string>
+    <string name="setup_step3_title">Add Song Books</string>
+    <string name="setup_step3_subtitle">Point the app to your song library folder</string>
+    <string name="setup_step3_step1">1. Open Settings using the ⚙ button in the toolbar</string>
+    <string name="setup_step3_step2">2. Go to the System tab</string>
+    <string name="setup_step3_step3">3. Click "Browse…" next to Songs Storage Directory</string>
+    <string name="setup_step3_step4">4. Select a folder containing your song files</string>
+    <string name="setup_step3_tip">Songs can be in OpenLyrics, SongPro, or ChurchPresenter format.</string>
+    <string name="setup_step4_title">You're All Set!</string>
+    <string name="setup_step4_body">You can always add more content or adjust settings later by clicking the ⚙ Settings button in the toolbar.</string>
+    <string name="setup_step4_hint">This guide is available anytime from Help → Getting Started.</string>
 </resources>

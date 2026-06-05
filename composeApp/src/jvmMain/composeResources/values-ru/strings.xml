@@ -90,8 +90,14 @@
     <string name="menu_settings">Настройки</string>
 
     <string name="menu_help">Справка</string>
+    <string name="menu_getting_started">Начало работы…</string>
     <string name="menu_about">О программе</string>
     <string name="about_title">О Church Presenter</string>
+    <string name="about_copyright">© 2025 Church Presenter</string>
+    <string name="converter_window_title">ChurchPresenter Converter</string>
+    <string name="lottie_gen_window_title">Lottie Lower Third Generator</string>
+    <string name="clear_recents">Очистить недавние</string>
+    <string name="recent">Недавние:</string>
     <string name="open_crash_logs">Открыть журнал ошибок</string>
     <string name="report_bug">Сообщить об ошибке</string>
     <string name="submit_feature_request">Отправить запрос функции</string>
@@ -339,6 +345,7 @@
     <string name="images_count">%1$d изображений</string>
     <string name="previous_image">Предыдущее изображение</string>
     <string name="pause">Пауза</string>
+    <string name="stop">Стоп</string>
     <string name="play">Воспроизвести</string>
     <string name="next_image">Следующее изображение</string>
     <string name="image_counter">Изображение %1$d из %2$d</string>
@@ -644,6 +651,11 @@
     <string name="gradient_top_color">Верхний цвет:</string>
     <string name="key_output">Ключевой выход</string>
     <string name="key_output_none">Нет</string>
+    <string name="screen_locked_badge">ЗАБЛОКИРОВАНО</string>
+    <string name="unlock_screen">Разблокировать экран</string>
+    <string name="lock_screen_to_tab">Закрепить экран за текущей вкладкой</string>
+    <string name="qr_code">QR-код</string>
+    <string name="projection_decklink_io_conflict_tooltip">Также используется для ввода — может не работать на устройствах без одновременного ввода/вывода</string>
     <string name="live_preview_announcement">Объявление</string>
     <string name="live_preview_bible">Библия</string>
     <string name="live_preview_lower_third">Нижняя треть</string>
@@ -891,6 +903,8 @@
 
     <!-- Canvas Tab -->
     <string name="canvas_scenes">Сцены</string>
+    <string name="canvas_verse_style">Стиль стиха</string>
+    <string name="canvas_reference_style">Стиль ссылки</string>
     <string name="canvas_sources">Источники</string>
     <string name="canvas_properties">Свойства</string>
     <string name="canvas_new_scene">Новая</string>
@@ -1376,6 +1390,7 @@
     <string name="crossword_wrong">Неверно — попробуйте ещё раз</string>
     <string name="crossword_correct">Правильно! Уровень пройден!</string>
     <string name="crossword_all_done">Вы прошли все уровни!</string>
+    <string name="crossword_ask_more">Хотите больше? Попросите разработчиков добавить новые головоломки!</string>
     <string name="crossword_loading">Загрузка кроссвордов…</string>
     <string name="crossword_no_puzzles">Кроссвордов пока нет.</string>
     <string name="crossword_level_label">Уровень %1$d</string>
@@ -1431,5 +1446,38 @@
     <string name="dictionary_select_entry">Выберите запись для просмотра</string>
     <string name="dictionary_loading">Загрузка словаря…</string>
     <string name="dictionary_entry_count">%1$d записей</string>
+
+    <!-- Setup Wizard -->
+    <string name="setup_step0_title">Выберите язык</string>
+    <string name="setup_step0_subtitle">Выберите язык интерфейса приложения</string>
+    <string name="setup_step1_theme_title">Выберите тему</string>
+    <string name="setup_step1_theme_subtitle">Выберите оформление, подходящее для вашей обстановки</string>
+    <string name="setup_wizard_title">Начало работы</string>
+    <string name="setup_wizard_skip">Пропустить</string>
+    <string name="setup_wizard_back">Назад</string>
+    <string name="setup_wizard_next">Далее</string>
+    <string name="setup_wizard_done">Начать</string>
+    <string name="setup_wizard_step">Шаг %1$d из %2$d</string>
+    <string name="setup_step1_title">Добро пожаловать в ChurchPresenter</string>
+    <string name="setup_step1_body">Это краткое руководство поможет вам настроить переводы Библии и песенники, чтобы вы могли сразу начать презентацию.</string>
+    <string name="setup_step2_title">Добавить переводы Библии</string>
+    <string name="setup_step2_subtitle">Настройте файлы Библии для отображения стихов</string>
+    <string name="setup_step2_step1">1. Откройте Настройки с помощью кнопки ⚙ на панели инструментов</string>
+    <string name="setup_step2_step2">2. Перейдите на вкладку Система</string>
+    <string name="setup_step2_step3">3. Нажмите «Обзор…» рядом с директорией хранения Библии</string>
+    <string name="setup_step2_step4">4. Выберите папку с файлами Библии (.db3)</string>
+    <string name="setup_step2_step5">5. Перейдите на вкладку Библия и выберите основную Библию</string>
+    <string name="setup_step2_tip">Найдите в интернете XML-файл Библии на вашем языке.</string>
+    <string name="setup_step2_tip2">Получив XML-файл, используйте Инструмент конвертации (Справка → Конвертор) для преобразования в нужный формат.</string>
+    <string name="setup_step3_title">Добавить песенники</string>
+    <string name="setup_step3_subtitle">Укажите приложению папку с вашей библиотекой песен</string>
+    <string name="setup_step3_step1">1. Откройте Настройки с помощью кнопки ⚙ на панели инструментов</string>
+    <string name="setup_step3_step2">2. Перейдите на вкладку Система</string>
+    <string name="setup_step3_step3">3. Нажмите «Обзор…» рядом с директорией хранения песен</string>
+    <string name="setup_step3_step4">4. Выберите папку с вашими файлами песен</string>
+    <string name="setup_step3_tip">Песни могут быть в формате OpenLyrics, SongPro или ChurchPresenter.</string>
+    <string name="setup_step4_title">Всё готово!</string>
+    <string name="setup_step4_body">Вы всегда можете добавить контент или изменить настройки с помощью кнопки ⚙ Настройки на панели инструментов.</string>
+    <string name="setup_step4_hint">Это руководство доступно в любое время через Справка → Начало работы.</string>
 </resources>
 

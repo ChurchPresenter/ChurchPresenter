@@ -90,8 +90,14 @@
     <string name="menu_settings">Nastavení</string>
 
     <string name="menu_help">Nápověda</string>
+    <string name="menu_getting_started">Začínáme…</string>
     <string name="menu_about">O programu</string>
     <string name="about_title">O Church Presenter</string>
+    <string name="about_copyright">© 2025 Church Presenter</string>
+    <string name="converter_window_title">ChurchPresenter Converter</string>
+    <string name="lottie_gen_window_title">Lottie Lower Third Generator</string>
+    <string name="clear_recents">Vymazat nedávné</string>
+    <string name="recent">Nedávné:</string>
     <string name="open_crash_logs">Otevřít protokoly chyb</string>
     <string name="report_bug">Nahlásit chybu</string>
     <string name="submit_feature_request">Navrhnout funkci</string>
@@ -424,6 +430,7 @@
     <string name="images_count">%1$d obrázků</string>
     <string name="previous_image">Předchozí obrázek</string>
     <string name="pause">Pozastavit</string>
+    <string name="stop">Zastavit</string>
     <string name="play">Přehrát</string>
     <string name="next_image">Další obrázek</string>
     <string name="image_counter">Obrázek %1$d z %2$d</string>
@@ -729,6 +736,11 @@
     <string name="gradient_top_color">Horní barva:</string>
     <string name="key_output">Klíčový výstup</string>
     <string name="key_output_none">Žádný</string>
+    <string name="screen_locked_badge">UZAMČENO</string>
+    <string name="unlock_screen">Odemknout obrazovku</string>
+    <string name="lock_screen_to_tab">Uzamknout obrazovku na aktuální záložku</string>
+    <string name="qr_code">QR kód</string>
+    <string name="projection_decklink_io_conflict_tooltip">Používáno také pro vstup — nemusí fungovat na zařízeních bez současného I/O</string>
     <string name="live_preview_announcement">Oznámení</string>
     <string name="live_preview_bible">Bible</string>
     <string name="live_preview_lower_third">Dolní třetina</string>
@@ -968,6 +980,8 @@
 
     <!-- Canvas Tab -->
     <string name="canvas_scenes">Scény</string>
+    <string name="canvas_verse_style">Styl verše</string>
+    <string name="canvas_reference_style">Styl reference</string>
     <string name="canvas_sources">Zdroje</string>
     <string name="canvas_properties">Vlastnosti</string>
     <string name="canvas_new_scene">Nová</string>
@@ -1454,6 +1468,7 @@
     <string name="crossword_wrong">Špatně — zkus to znovu</string>
     <string name="crossword_correct">Správně! Úroveň dokončena!</string>
     <string name="crossword_all_done">Dokončil jsi všechny úrovně!</string>
+    <string name="crossword_ask_more">Chcete více? Požádejte vývojáře o nové hádanky!</string>
     <string name="crossword_loading">Načítání křížovek…</string>
     <string name="crossword_no_puzzles">Zatím nejsou k dispozici žádné křížovky.</string>
     <string name="crossword_level_label">Úroveň %1$d</string>
@@ -1512,5 +1527,38 @@
     <string name="dictionary_select_entry">Vyberte záznam pro zobrazení podrobností</string>
     <string name="dictionary_loading">Načítání slovníku…</string>
     <string name="dictionary_entry_count">%1$d záznamů</string>
+
+    <!-- Setup Wizard -->
+    <string name="setup_step0_title">Vyberte jazyk</string>
+    <string name="setup_step0_subtitle">Zvolte jazyk rozhraní aplikace</string>
+    <string name="setup_step1_theme_title">Vyberte téma</string>
+    <string name="setup_step1_theme_subtitle">Vyberte vzhled, který nejlépe vyhovuje vašemu prostředí</string>
+    <string name="setup_wizard_title">Začínáme</string>
+    <string name="setup_wizard_skip">Přeskočit</string>
+    <string name="setup_wizard_back">Zpět</string>
+    <string name="setup_wizard_next">Další</string>
+    <string name="setup_wizard_done">Začít</string>
+    <string name="setup_wizard_step">Krok %1$d z %2$d</string>
+    <string name="setup_step1_title">Vítejte v ChurchPresenteru</string>
+    <string name="setup_step1_body">Tento průvodce vám pomůže nastavit překlady Bible a zpěvníky, abyste mohli ihned začít prezentovat.</string>
+    <string name="setup_step2_title">Přidat překlady Bible</string>
+    <string name="setup_step2_subtitle">Nastavte soubory Bible pro zobrazení veršů</string>
+    <string name="setup_step2_step1">1. Otevřete Nastavení pomocí tlačítka ⚙ v panelu nástrojů</string>
+    <string name="setup_step2_step2">2. Přejděte na záložku Systém</string>
+    <string name="setup_step2_step3">3. Klikněte na „Procházet…" vedle Adresáře pro Bibli</string>
+    <string name="setup_step2_step4">4. Vyberte složku s vašimi soubory Bible (.db3)</string>
+    <string name="setup_step2_step5">5. Přejděte na záložku Bible a vyberte primární Bibli</string>
+    <string name="setup_step2_tip">Hledejte na internetu XML soubor Bible ve vašem jazyce.</string>
+    <string name="setup_step2_tip2">Jakmile máte XML soubor, použijte Nástroj pro převod (Nápověda → Konvertor) k převodu do požadovaného formátu.</string>
+    <string name="setup_step3_title">Přidat zpěvníky</string>
+    <string name="setup_step3_subtitle">Nasměrujte aplikaci na složku s vaší knihovnou písní</string>
+    <string name="setup_step3_step1">1. Otevřete Nastavení pomocí tlačítka ⚙ v panelu nástrojů</string>
+    <string name="setup_step3_step2">2. Přejděte na záložku Systém</string>
+    <string name="setup_step3_step3">3. Klikněte na „Procházet…" vedle Adresáře pro písně</string>
+    <string name="setup_step3_step4">4. Vyberte složku s vašimi soubory písní</string>
+    <string name="setup_step3_tip">Písně mohou být ve formátu OpenLyrics, SongPro nebo ChurchPresenter.</string>
+    <string name="setup_step4_title">Vše je připraveno!</string>
+    <string name="setup_step4_body">Obsah nebo nastavení můžete kdykoli upravit pomocí tlačítka ⚙ Nastavení v panelu nástrojů.</string>
+    <string name="setup_step4_hint">Tento průvodce je vždy dostupný přes Nápověda → Začínáme.</string>
 </resources>
 

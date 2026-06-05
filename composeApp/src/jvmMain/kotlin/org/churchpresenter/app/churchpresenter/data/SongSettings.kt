@@ -838,5 +838,6 @@ data class AppSettings(
     val songFavorites: List<String> = emptyList(),
     val songFavoritesPanelHeightDp: Int = 120,
     val songColOrder: List<String> = emptyList(),
-    val songHiddenCols: Set<String> = setOf("tune", "play_count", "author", "composer")
+    val songHiddenCols: Set<String> = setOf("tune", "play_count", "author", "composer"),
+    val setupWizardShown: Boolean = false
 )
