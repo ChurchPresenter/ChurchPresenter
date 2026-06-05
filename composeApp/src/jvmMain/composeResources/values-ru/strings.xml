@@ -56,6 +56,9 @@
     <string name="shadow_size">Размер (%)</string>
     <string name="shadow_opacity">Интенсивность (%)</string>
     <string name="hold_live">Удержать эфир</string>
+    <string name="bible_split_browse_mode">Режим раздельного просмотра</string>
+    <string name="bible_live_view">Эфир</string>
+    <string name="copy_verse">Копировать стих</string>
     <string name="fade_in">Плавное появление</string>
     <string name="fade_out">Плавное исчезание</string>
     <string name="announcements">Объявления</string>
@@ -721,6 +724,9 @@
     <string name="timer_start">Старт</string>
     <string name="timer_text_color">Цвет таймера</string>
     <string name="timer_title">Таймер</string>
+    <string name="timer_mode_duration">Длительность</string>
+    <string name="timer_mode_clock">Конкретное время</string>
+    <string name="timer_target_time">Отсчёт до</string>
     <string name="tooltip_add_website">Добавить веб-сайт</string>
     <string name="tooltip_clear_display">Очистить экран</string>
     <string name="tooltip_toggle_displays">Вкл/Выкл экраны презентации</string>

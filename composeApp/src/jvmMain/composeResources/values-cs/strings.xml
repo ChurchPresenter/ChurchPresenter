@@ -56,6 +56,9 @@
     <string name="shadow_size">Velikost (%)</string>
     <string name="shadow_opacity">Intenzita (%)</string>
     <string name="hold_live">Podržet živě</string>
+    <string name="bible_split_browse_mode">Režim rozděleného prohlížení</string>
+    <string name="bible_live_view">Živě</string>
+    <string name="copy_verse">Kopírovat verš</string>
     <string name="fade_in">Postupné zobrazení</string>
     <string name="fade_out">Postupné zmizení</string>
     <string name="announcements">Oznámení</string>
@@ -806,6 +809,9 @@
     <string name="timer_start">Spustit</string>
     <string name="timer_text_color">Barva časovače</string>
     <string name="timer_title">Časovač</string>
+    <string name="timer_mode_duration">Trvání</string>
+    <string name="timer_mode_clock">Konkrétní čas</string>
+    <string name="timer_target_time">Odpočítávat do</string>
     <string name="tooltip_add_website">Přidat webovou stránku</string>
     <string name="tooltip_clear_display">Vymazat zobrazení</string>
     <string name="tooltip_toggle_displays">Přepnout zobrazení prezentace</string>

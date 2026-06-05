@@ -67,6 +67,9 @@
     <string name="shadow_size">Dimensiune (%)</string>
     <string name="shadow_opacity">Intensitate (%)</string>
     <string name="hold_live">Menține Proiectat</string>
+    <string name="bible_split_browse_mode">Mod Navigare Divizat</string>
+    <string name="bible_live_view">Live</string>
+    <string name="copy_verse">Copiați Versetul</string>
     <string name="fade_in">Apariție</string>
     <string name="fade_out">Dispariție</string>
     <string name="menu_file">Fișier</string>
@@ -659,6 +662,9 @@
 
     <!-- Announcements timer -->
     <string name="timer_title">Cronometru</string>
+    <string name="timer_mode_duration">Durată</string>
+    <string name="timer_mode_clock">Oră specifică</string>
+    <string name="timer_target_time">Numără până la</string>
     <string name="timer_hours">ore</string>
     <string name="timer_minutes">min</string>
     <string name="timer_seconds">sec</string>
