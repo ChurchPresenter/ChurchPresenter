@@ -86,7 +86,10 @@ fun TabSection(
                     text = {
                         Text(
                             style = MaterialTheme.typography.titleSmall,
-                            color = MaterialTheme.colorScheme.onSurface,
+                            color = if (selectedTabIndex == index)
+                                MaterialTheme.colorScheme.primary
+                            else
+                                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.60f),
                             text = getStringName(tab),
                             maxLines = 1,
                             softWrap = false,

@@ -1,9 +1,15 @@
 package org.churchpresenter.app.churchpresenter
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.ui.window.WindowPlacement
 import androidx.compose.animation.expandHorizontally
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkHorizontally
+import androidx.compose.animation.togetherWith
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Box
@@ -845,6 +851,19 @@ fun MainDesktop(
                         ),
                     contentAlignment = Alignment.Center
                 ) {
+                    if (!scheduleCollapsed) {
+                        val dotColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
+                        Column(
+                            modifier = Modifier.align(Alignment.TopCenter).padding(top = 8.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(4.dp)
+                        ) { repeat(3) { Box(Modifier.size(3.dp).background(dotColor, CircleShape)) } }
+                        Column(
+                            modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 8.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(4.dp)
+                        ) { repeat(3) { Box(Modifier.size(3.dp).background(dotColor, CircleShape)) } }
+                    }
                     IconButton(
                         onClick = {
                             scheduleCollapsed = !scheduleCollapsed
@@ -935,8 +954,13 @@ fun MainDesktop(
                     }
                     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant, thickness = 1.dp)
 
-                    Box(modifier = Modifier.fillMaxSize()) {
-                        when (currentTab) {
+                    AnimatedContent(
+                        targetState = currentTab,
+                        transitionSpec = { fadeIn(tween(120)) togetherWith fadeOut(tween(120)) },
+                        modifier = Modifier.fillMaxSize(),
+                        label = "tab_content"
+                    ) { tab ->
+                        when (tab) {
                             Tabs.BIBLE -> BibleTab(
                                 modifier = Modifier.fillMaxSize(),
                                 viewModel = bibleViewModel,
@@ -1160,6 +1184,19 @@ fun MainDesktop(
                         ),
                     contentAlignment = Alignment.Center
                 ) {
+                    if (!previewCollapsed) {
+                        val dotColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
+                        Column(
+                            modifier = Modifier.align(Alignment.TopCenter).padding(top = 8.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(4.dp)
+                        ) { repeat(3) { Box(Modifier.size(3.dp).background(dotColor, CircleShape)) } }
+                        Column(
+                            modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 8.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(4.dp)
+                        ) { repeat(3) { Box(Modifier.size(3.dp).background(dotColor, CircleShape)) } }
+                    }
                     IconButton(
                         onClick = {
                             previewCollapsed = !previewCollapsed

@@ -7,6 +7,7 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import org.churchpresenter.app.churchpresenter.utils.rememberScreenDevices
 import androidx.compose.animation.Crossfade
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -199,12 +200,30 @@ private fun SingleDisplayPreview(
         Presenting.NONE -> false
     }
 
+    val isLive = effectiveMode != Presenting.NONE && showsContent
+    val liveTransition = rememberInfiniteTransition(label = "live")
+    val livePulse by liveTransition.animateFloat(
+        initialValue = 0.70f,
+        targetValue = 1.0f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(550, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "live_pulse"
+    )
+    val borderColor by animateColorAsState(
+        targetValue = if (isLive) Color.Red.copy(alpha = 0.85f)
+                      else MaterialTheme.colorScheme.outlineVariant,
+        animationSpec = tween(300),
+        label = "border_color"
+    )
+
     Box(
         modifier = modifier
             .fillMaxWidth()
             .aspectRatio(presenterAspectRatio())
             .clip(RoundedCornerShape(6.dp))
-            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(6.dp))
+            .border(1.dp, borderColor, RoundedCornerShape(6.dp))
     ) {
         val primaryRole = screenAssignment.primaryOutputRole
 
@@ -327,7 +346,7 @@ private fun SingleDisplayPreview(
         }
 
         // "LIVE" badge — only when this screen is showing content
-        if (effectiveMode != Presenting.NONE && showsContent) {
+        if (isLive) {
             Text(
                 text = stringResource(Res.string.live_preview_title),
                 color = Color.White,
@@ -335,7 +354,7 @@ private fun SingleDisplayPreview(
                 modifier = Modifier
                     .align(Alignment.TopStart)
                     .padding(4.dp)
-                    .background(Color.Red, RoundedCornerShape(3.dp))
+                    .background(Color.Red.copy(alpha = livePulse), RoundedCornerShape(3.dp))
                     .padding(horizontal = 6.dp, vertical = 2.dp)
             )
         }
