@@ -105,7 +105,7 @@ import churchpresenter.composeapp.generated.resources.server_host_hint
 import churchpresenter.composeapp.generated.resources.server_host_label
 import churchpresenter.composeapp.generated.resources.server_host_note
 import churchpresenter.composeapp.generated.resources.server_url_label
-import org.churchpresenter.app.churchpresenter.data.AppSettings
+import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.data.RemoteClientManager
 import org.churchpresenter.app.churchpresenter.server.CompanionServer
 import org.churchpresenter.app.churchpresenter.utils.Constants

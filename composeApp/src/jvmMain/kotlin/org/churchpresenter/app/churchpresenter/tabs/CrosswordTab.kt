@@ -63,7 +63,7 @@ import churchpresenter.composeapp.generated.resources.crossword_wrong
 import churchpresenter.composeapp.generated.resources.crossword_level_label
 import churchpresenter.composeapp.generated.resources.crossword_loading
 import churchpresenter.composeapp.generated.resources.crossword_no_puzzles
-import org.churchpresenter.app.churchpresenter.data.AppSettings
+import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.data.CrosswordCell
 import org.churchpresenter.app.churchpresenter.data.CrosswordDecoder
 import org.churchpresenter.app.churchpresenter.data.CrosswordLayoutEngine

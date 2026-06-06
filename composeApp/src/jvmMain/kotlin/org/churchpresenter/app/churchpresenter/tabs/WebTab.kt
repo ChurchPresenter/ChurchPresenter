@@ -87,8 +87,8 @@ import churchpresenter.composeapp.generated.resources.web_url_hint
 import churchpresenter.composeapp.generated.resources.web_url_label
 import churchpresenter.composeapp.generated.resources.web_zoom_in
 import churchpresenter.composeapp.generated.resources.web_zoom_out
-import org.churchpresenter.app.churchpresenter.data.AppSettings
-import org.churchpresenter.app.churchpresenter.data.WebBookmark
+import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
+import org.churchpresenter.app.churchpresenter.data.settings.WebBookmark
 import org.churchpresenter.app.churchpresenter.presenter.CefManager
 import org.churchpresenter.app.churchpresenter.presenter.EmbeddedWebView
 import org.churchpresenter.app.churchpresenter.presenter.Presenting

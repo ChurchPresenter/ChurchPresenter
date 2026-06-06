@@ -39,7 +39,7 @@ import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.qa_qr_message_default
 import churchpresenter.composeapp.generated.resources.qr_code
-import org.churchpresenter.app.churchpresenter.data.QASettings
+import org.churchpresenter.app.churchpresenter.data.settings.QASettings
 import org.churchpresenter.app.churchpresenter.models.Question
 import org.jetbrains.compose.resources.stringResource
 import org.churchpresenter.app.churchpresenter.utils.Constants

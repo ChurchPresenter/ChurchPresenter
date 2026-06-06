@@ -195,6 +195,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
+import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.models.SceneSource
 import org.churchpresenter.app.churchpresenter.models.SourceTransform
 import org.churchpresenter.app.churchpresenter.utils.Utils
@@ -209,7 +210,7 @@ import kotlin.io.path.absolutePathString
 fun SourcePropertiesPanel(
     source: SceneSource,
     modifier: Modifier = Modifier,
-    appSettings: org.churchpresenter.app.churchpresenter.data.AppSettings? = null,
+    appSettings: AppSettings? = null,
     onSourceUpdate: (SceneSource) -> Unit
 ) {
     Column(
@@ -1755,7 +1756,7 @@ private fun PropertySliderWithInput(label: String, value: Float, min: Float, max
 private fun BibleProperties(
     source: SceneSource.BibleSource,
     onUpdate: (SceneSource) -> Unit,
-    appSettings: org.churchpresenter.app.churchpresenter.data.AppSettings?
+    appSettings: AppSettings?
 ) {
     val availableFonts = remember { Utils.getAvailableSystemFonts() }
 
