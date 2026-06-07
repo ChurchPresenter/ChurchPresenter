@@ -241,20 +241,15 @@ class SongsViewModel(
 
         if (songData == null) return false
 
-        // Find index in _filteredSongItems (what the UI renders) by songId — never change filter
+        // Find index in _filteredSongItems (what the UI renders) by songId
         var idx = _filteredSongItems.value.indexOfFirst { it.songId == songData.songId }
 
         if (idx < 0) {
-            // Song is outside current filter — bypass temporarily, restore immediately
-            val savedSongbook = _selectedSongbook.value
-            val savedSearch   = _searchQuery.value
+            // Song is outside current filter — clear filters so the song stays visible at the correct index
             _selectedSongbook.value = ""
             _searchQuery.value = ""
             applyFilters()
             idx = _filteredSongItems.value.indexOfFirst { it.songId == songData.songId }
-            _selectedSongbook.value = savedSongbook
-            _searchQuery.value = savedSearch
-            applyFilters()
             if (idx < 0) return false
         }
 
