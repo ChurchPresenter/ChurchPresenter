@@ -107,7 +107,11 @@ import churchpresenter.composeapp.generated.resources.shortcut_description_reord
 import churchpresenter.composeapp.generated.resources.shortcut_description_reorder_item
 import churchpresenter.composeapp.generated.resources.shortcut_key_delete_backspace
 import churchpresenter.composeapp.generated.resources.shortcut_key_right_click
+import churchpresenter.composeapp.generated.resources.shortcut_key_ctrl_z
+import churchpresenter.composeapp.generated.resources.shortcut_key_ctrl_shift_z
 import churchpresenter.composeapp.generated.resources.shortcut_key_shift_drag
+import churchpresenter.composeapp.generated.resources.shortcut_description_undo
+import churchpresenter.composeapp.generated.resources.shortcut_description_redo
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -190,7 +194,9 @@ fun KeyboardShortcutsDialog(
                     }
 
                     ShortcutsCategory(stringResource(Res.string.shortcut_category_schedule)) {
-                        ShortcutRow(stringResource(Res.string.shortcut_key_shift_drag), stringResource(Res.string.shortcut_description_reorder_item))
+                        ShortcutRow(stringResource(Res.string.shortcut_key_ctrl_z),       stringResource(Res.string.shortcut_description_undo))
+                        ShortcutRow(stringResource(Res.string.shortcut_key_ctrl_shift_z), stringResource(Res.string.shortcut_description_redo))
+                        ShortcutRow(stringResource(Res.string.shortcut_key_shift_drag),   stringResource(Res.string.shortcut_description_reorder_item))
                     }
 
                     ShortcutsCategory(stringResource(Res.string.shortcut_category_presentation)) {

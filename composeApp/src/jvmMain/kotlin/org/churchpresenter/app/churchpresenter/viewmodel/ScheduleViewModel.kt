@@ -1,6 +1,7 @@
 package org.churchpresenter.app.churchpresenter.viewmodel
 
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
@@ -21,6 +22,7 @@ import kotlin.io.path.exists
 import kotlin.io.path.name
 import kotlin.io.path.readText
 import kotlin.io.path.writeText
+import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 
@@ -39,6 +41,65 @@ class ScheduleViewModel(
 
     private val json = Json { prettyPrint = true; encodeDefaults = true }
     private var currentFilePath: String? = null
+
+    // ── Undo / Redo ───────────────────────────────────────────────────────────
+
+    private data class ScheduleSnapshot(
+        val items: List<ScheduleItem>,
+        val notes: Map<String, String>
+    )
+
+    private val undoStack = ArrayDeque<ScheduleSnapshot>()
+    private val redoStack = ArrayDeque<ScheduleSnapshot>()
+
+    private val _canUndo = mutableStateOf(false)
+    private val _canRedo = mutableStateOf(false)
+    val canUndo: Boolean get() = _canUndo.value
+    val canRedo: Boolean get() = _canRedo.value
+
+    private fun pushUndoSnapshot() {
+        undoStack.addLast(ScheduleSnapshot(_scheduleItems.toList(), _notes.toMap()))
+        if (undoStack.size > 50) undoStack.removeFirst()
+        redoStack.clear()
+        _canUndo.value = true
+        _canRedo.value = false
+    }
+
+    fun undo() {
+        if (undoStack.isEmpty()) return
+        redoStack.addLast(ScheduleSnapshot(_scheduleItems.toList(), _notes.toMap()))
+        val snapshot = undoStack.removeLast()
+        _scheduleItems.clear()
+        _scheduleItems.addAll(snapshot.items)
+        _notes.clear()
+        _notes.putAll(snapshot.notes)
+        _canUndo.value = undoStack.isNotEmpty()
+        _canRedo.value = true
+        notifyChanged()
+    }
+
+    fun redo() {
+        if (redoStack.isEmpty()) return
+        undoStack.addLast(ScheduleSnapshot(_scheduleItems.toList(), _notes.toMap()))
+        val snapshot = redoStack.removeLast()
+        _scheduleItems.clear()
+        _scheduleItems.addAll(snapshot.items)
+        _notes.clear()
+        _notes.putAll(snapshot.notes)
+        _canUndo.value = true
+        _canRedo.value = redoStack.isNotEmpty()
+        notifyChanged()
+    }
+
+    // ── Notes ─────────────────────────────────────────────────────────────────
+
+    private val _notes = mutableStateMapOf<String, String>()
+
+    fun getNote(itemId: String): String = _notes[itemId] ?: ""
+
+    fun setNote(itemId: String, note: String) {
+        if (note.isBlank()) _notes.remove(itemId) else _notes[itemId] = note
+    }
 
     // ── Encryption ────────────────────────────────────────────────────────────
 
@@ -89,7 +150,8 @@ class ScheduleViewModel(
         val existing = currentFilePath
         if (existing != null) {
             val file = File(existing)
-            val serialized = json.encodeToString(ListSerializer(ScheduleItem.serializer()), _scheduleItems.toList())
+            val scheduleFile = ScheduleFileV2(items = _scheduleItems.toList(), notes = _notes.toMap())
+            val serialized = json.encodeToString(ScheduleFileV2.serializer(), scheduleFile)
             file.writeText(encrypt(serialized))
         } else {
             saveScheduleAs(dialogTitle, fileFilterDescription)
@@ -111,7 +173,8 @@ class ScheduleViewModel(
             if (!file.name.endsWith(".cps", ignoreCase = true)) {
                 file = file.resolveSibling("${file.name}.cps")
             }
-            val serialized = json.encodeToString(ListSerializer(ScheduleItem.serializer()), _scheduleItems.toList())
+            val scheduleFile = ScheduleFileV2(items = _scheduleItems.toList(), notes = _notes.toMap())
+            val serialized = json.encodeToString(ScheduleFileV2.serializer(), scheduleFile)
             file.writeText(encrypt(serialized))
             currentFilePath = file.absolutePathString()
         }
@@ -133,10 +196,25 @@ class ScheduleViewModel(
                 try {
                     val raw = file.readText()
                     val jsonText = try { decrypt(raw) } catch (_: Exception) { raw }
-                    val items = json.decodeFromString(ListSerializer(ScheduleItem.serializer()), jsonText)
+                    // Try new format (v2 with notes), fall back to legacy plain array
+                    val (items, notes) = try {
+                        val schedFile = json.decodeFromString(ScheduleFileV2.serializer(), jsonText)
+                        Pair(schedFile.items, schedFile.notes)
+                    } catch (_: Exception) {
+                        Pair(
+                            json.decodeFromString(ListSerializer(ScheduleItem.serializer()), jsonText),
+                            emptyMap()
+                        )
+                    }
                     _scheduleItems.clear()
                     _scheduleItems.addAll(items)
+                    _notes.clear()
+                    _notes.putAll(notes)
                     currentFilePath = file.absolutePathString()
+                    undoStack.clear()
+                    redoStack.clear()
+                    _canUndo.value = false
+                    _canRedo.value = false
                     notifyChanged()
                 } catch (e: Exception) {
                     e.printStackTrace()
@@ -148,18 +226,25 @@ class ScheduleViewModel(
     /** Clears the schedule and forgets the current file path. */
     fun newSchedule() {
         _scheduleItems.clear()
+        _notes.clear()
         currentFilePath = null
+        undoStack.clear()
+        redoStack.clear()
+        _canUndo.value = false
+        _canRedo.value = false
         notifyChanged()
     }
 
     // ── Existing methods ──────────────────────────────────────────────────────
 
     fun addSong(songNumber: Int, title: String, songbook: String, songId: String = "") {
+        pushUndoSnapshot()
         _scheduleItems.add(ScheduleItem.SongItem(id = UUID.randomUUID().toString(), songNumber = songNumber, title = title, songbook = songbook, songId = songId))
         notifyChanged()
     }
 
     fun addBibleVerse(bookName: String, chapter: Int, verseNumber: Int, verseText: String, verseRange: String = "") {
+        pushUndoSnapshot()
         _scheduleItems.add(ScheduleItem.BibleVerseItem(
             id = UUID.randomUUID().toString(),
             bookName = bookName,
@@ -172,26 +257,31 @@ class ScheduleViewModel(
     }
 
     fun addLabel(text: String, textColor: String, backgroundColor: String) {
+        pushUndoSnapshot()
         _scheduleItems.add(ScheduleItem.LabelItem(id = UUID.randomUUID().toString(), text = text, textColor = textColor, backgroundColor = backgroundColor))
         notifyChanged()
     }
 
     fun addPicture(folderPath: String, folderName: String, imageCount: Int) {
+        pushUndoSnapshot()
         _scheduleItems.add(ScheduleItem.PictureItem(id = UUID.randomUUID().toString(), folderPath = folderPath, folderName = folderName, imageCount = imageCount))
         notifyChanged()
     }
 
     fun addPresentation(filePath: String, fileName: String, slideCount: Int, fileType: String) {
+        pushUndoSnapshot()
         _scheduleItems.add(ScheduleItem.PresentationItem(id = UUID.randomUUID().toString(), filePath = filePath, fileName = fileName, slideCount = slideCount, fileType = fileType))
         notifyChanged()
     }
 
     fun addMedia(mediaUrl: String, mediaTitle: String, mediaType: String) {
+        pushUndoSnapshot()
         _scheduleItems.add(ScheduleItem.MediaItem(id = UUID.randomUUID().toString(), mediaUrl = mediaUrl, mediaTitle = mediaTitle, mediaType = mediaType))
         notifyChanged()
     }
 
     fun addLowerThird(presetId: String, presetLabel: String, pauseAtFrame: Boolean, pauseDurationMs: Long) {
+        pushUndoSnapshot()
         _scheduleItems.add(ScheduleItem.LowerThirdItem(id = UUID.randomUUID().toString(), presetId = presetId, presetLabel = presetLabel, pauseAtFrame = pauseAtFrame, pauseDurationMs = pauseDurationMs))
         notifyChanged()
     }
@@ -221,6 +311,7 @@ class ScheduleViewModel(
         targetMinute: Int = 0,
         targetSecond: Int = 0
     ) {
+        pushUndoSnapshot()
         val id = UUID.randomUUID().toString()
         _scheduleItems.add(
             ScheduleItem.AnnouncementItem(
@@ -254,16 +345,19 @@ class ScheduleViewModel(
     }
 
     fun addWebsite(url: String, title: String) {
+        pushUndoSnapshot()
         _scheduleItems.add(ScheduleItem.WebsiteItem(id = UUID.randomUUID().toString(), url = url, title = title.ifBlank { url }))
         notifyChanged()
     }
 
     fun addScene(sceneId: String, sceneName: String) {
+        pushUndoSnapshot()
         _scheduleItems.add(ScheduleItem.SceneItem(id = UUID.randomUUID().toString(), sceneId = sceneId, sceneName = sceneName))
         notifyChanged()
     }
 
     fun addDictionary(number: String, word: String, transliteration: String, definition: String) {
+        pushUndoSnapshot()
         _scheduleItems.add(ScheduleItem.DictionaryItem(id = UUID.randomUUID().toString(), number = number, word = word, transliteration = transliteration, definition = definition))
         notifyChanged()
     }
@@ -275,6 +369,7 @@ class ScheduleViewModel(
             val existing = _scheduleItems[index] as ScheduleItem.WebsiteItem
             // Only update if the current title is still the URL (i.e. no real title was set yet)
             if (existing.title == existing.url || existing.title.isBlank()) {
+                pushUndoSnapshot()
                 _scheduleItems[index] = existing.copy(title = title)
                 notifyChanged()
             }
@@ -284,19 +379,23 @@ class ScheduleViewModel(
     fun updateLabel(id: String, text: String, textColor: String, backgroundColor: String) {
         val index = _scheduleItems.indexOfFirst { it.id == id }
         if (index >= 0 && _scheduleItems[index] is ScheduleItem.LabelItem) {
+            pushUndoSnapshot()
             _scheduleItems[index] = ScheduleItem.LabelItem(id = id, text = text, textColor = textColor, backgroundColor = backgroundColor)
             notifyChanged()
         }
     }
 
     fun removeItem(id: String) {
+        pushUndoSnapshot()
         _scheduleItems.removeAll { it.id == id }
+        _notes.remove(id)
         notifyChanged()
     }
 
     fun moveItemUp(id: String): Int {
         val index = _scheduleItems.indexOfFirst { it.id == id }
         if (index > 0) {
+            pushUndoSnapshot()
             val item = _scheduleItems.removeAt(index)
             _scheduleItems.add(index - 1, item)
             notifyChanged()
@@ -308,6 +407,7 @@ class ScheduleViewModel(
     fun moveItemDown(id: String): Int {
         val index = _scheduleItems.indexOfFirst { it.id == id }
         if (index >= 0 && index < _scheduleItems.size - 1) {
+            pushUndoSnapshot()
             val item = _scheduleItems.removeAt(index)
             _scheduleItems.add(index + 1, item)
             notifyChanged()
@@ -319,6 +419,7 @@ class ScheduleViewModel(
     fun moveItemToTop(id: String): Int {
         val index = _scheduleItems.indexOfFirst { it.id == id }
         if (index > 0) {
+            pushUndoSnapshot()
             val item = _scheduleItems.removeAt(index)
             _scheduleItems.add(0, item)
             notifyChanged()
@@ -330,6 +431,7 @@ class ScheduleViewModel(
     fun moveItemToBottom(id: String): Int {
         val index = _scheduleItems.indexOfFirst { it.id == id }
         if (index >= 0 && index < _scheduleItems.size - 1) {
+            pushUndoSnapshot()
             val item = _scheduleItems.removeAt(index)
             _scheduleItems.add(item)
             notifyChanged()
@@ -340,13 +442,16 @@ class ScheduleViewModel(
 
     fun moveItem(from: Int, to: Int) {
         if (from < 0 || to < 0 || from >= _scheduleItems.size || to >= _scheduleItems.size || from == to) return
+        pushUndoSnapshot()
         val item = _scheduleItems.removeAt(from)
         _scheduleItems.add(to, item)
         notifyChanged()
     }
 
     fun clearSchedule() {
+        pushUndoSnapshot()
         _scheduleItems.clear()
+        _notes.clear()
         notifyChanged()
     }
 
@@ -392,3 +497,9 @@ class ScheduleViewModel(
     }
 }
 
+@Serializable
+private data class ScheduleFileV2(
+    val version: Int = 2,
+    val items: List<ScheduleItem>,
+    val notes: Map<String, String> = emptyMap()
+)

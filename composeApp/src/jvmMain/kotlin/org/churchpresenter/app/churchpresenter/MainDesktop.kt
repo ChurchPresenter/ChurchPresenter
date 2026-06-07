@@ -46,6 +46,8 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.isCtrlPressed
+import androidx.compose.ui.input.key.isShiftPressed
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
@@ -496,41 +498,25 @@ fun MainDesktop(
             .focusable()
             .onPreviewKeyEvent { keyEvent ->
                 if (keyEvent.type == KeyEventType.KeyDown) {
-                    when (keyEvent.key) {
-                        Key.Escape -> {
+                    when {
+                        keyEvent.key == Key.Z && keyEvent.isCtrlPressed && keyEvent.isShiftPressed -> {
+                            scheduleViewModel.redo(); true
+                        }
+                        keyEvent.key == Key.Z && keyEvent.isCtrlPressed -> {
+                            scheduleViewModel.undo(); true
+                        }
+                        keyEvent.key == Key.Escape -> {
                             mediaViewModel?.pause()
                             presenterManager.requestClearDisplay()
                             true
                         }
-
-                        Key.F6 -> {
-                            selectTab(Tabs.BIBLE); true
-                        }
-
-                        Key.F7 -> {
-                            selectTab(Tabs.SONGS); true
-                        }
-
-                        Key.F8 -> {
-                            selectTab(Tabs.PICTURES); true
-                        }
-
-                        Key.F9 -> {
-                            selectTab(Tabs.PRESENTATION); true
-                        }
-
-                        Key.F10 -> {
-                            selectTab(Tabs.MEDIA); true
-                        }
-
-                        Key.F11 -> {
-                            selectTab(Tabs.LOWER_THIRD); true
-                        }
-
-                        Key.F12 -> {
-                            selectTab(Tabs.ANNOUNCEMENTS); true
-                        }
-
+                        keyEvent.key == Key.F6 -> { selectTab(Tabs.BIBLE); true }
+                        keyEvent.key == Key.F7 -> { selectTab(Tabs.SONGS); true }
+                        keyEvent.key == Key.F8 -> { selectTab(Tabs.PICTURES); true }
+                        keyEvent.key == Key.F9 -> { selectTab(Tabs.PRESENTATION); true }
+                        keyEvent.key == Key.F10 -> { selectTab(Tabs.MEDIA); true }
+                        keyEvent.key == Key.F11 -> { selectTab(Tabs.LOWER_THIRD); true }
+                        keyEvent.key == Key.F12 -> { selectTab(Tabs.ANNOUNCEMENTS); true }
                         else -> {
                             if (presentingMode != Presenting.NONE) {
                                 // Suppress both easter egg sequences while live

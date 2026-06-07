@@ -1,5 +1,6 @@
 package org.churchpresenter.app.churchpresenter.tabs
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -26,6 +27,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -44,6 +46,7 @@ import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.isShiftPressed
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.zIndex
 import androidx.compose.ui.text.style.TextAlign
@@ -63,9 +66,16 @@ import churchpresenter.composeapp.generated.resources.ic_edit
 import churchpresenter.composeapp.generated.resources.ic_folder
 import churchpresenter.composeapp.generated.resources.ic_label
 import churchpresenter.composeapp.generated.resources.ic_play
+import churchpresenter.composeapp.generated.resources.ic_note
+import churchpresenter.composeapp.generated.resources.ic_redo
 import churchpresenter.composeapp.generated.resources.ic_save
+import churchpresenter.composeapp.generated.resources.ic_undo
 import churchpresenter.composeapp.generated.resources.pause_duration_ms
 import churchpresenter.composeapp.generated.resources.schedule
+import churchpresenter.composeapp.generated.resources.schedule_note_placeholder
+import churchpresenter.composeapp.generated.resources.tooltip_note
+import churchpresenter.composeapp.generated.resources.tooltip_redo
+import churchpresenter.composeapp.generated.resources.tooltip_undo
 import churchpresenter.composeapp.generated.resources.schedule_add_files
 import churchpresenter.composeapp.generated.resources.schedule_drop_hint
 import churchpresenter.composeapp.generated.resources.tooltip_add_label
@@ -235,6 +245,28 @@ fun ScheduleTab(
                 onClick = { scope.launch { viewModel.saveSchedule(strSaveScheduleAs.value, strFileFilter.value) } },
                 buttonSize = 32.dp,
                 iconTint = MaterialTheme.colorScheme.onSurface
+            )
+
+            Spacer(modifier = Modifier.width(4.dp))
+
+            // Undo / Redo
+            TooltipIconButton(
+                painter = painterResource(Res.drawable.ic_undo),
+                text = stringResource(Res.string.tooltip_undo),
+                onClick = { viewModel.undo() },
+                enabled = viewModel.canUndo,
+                buttonSize = 32.dp,
+                iconTint = if (viewModel.canUndo) MaterialTheme.colorScheme.onSurface
+                           else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
+            )
+            TooltipIconButton(
+                painter = painterResource(Res.drawable.ic_redo),
+                text = stringResource(Res.string.tooltip_redo),
+                onClick = { viewModel.redo() },
+                enabled = viewModel.canRedo,
+                buttonSize = 32.dp,
+                iconTint = if (viewModel.canRedo) MaterialTheme.colorScheme.onSurface
+                           else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
             )
 
             Spacer(modifier = Modifier.width(4.dp))
@@ -437,6 +469,7 @@ fun ScheduleTab(
                         ScheduleItemRow(
                             item = item,
                             isSelected = item.id == selectedItemId,
+                            note = viewModel.getNote(item.id),
                             onSelect = {
                                 if (!isDragActive) {
                                     viewModel.selectItem(item.id)
@@ -466,7 +499,8 @@ fun ScheduleTab(
                             },
                             onEditLabel = {
                                 if (item is ScheduleItem.LabelItem) onEditLabel(item)
-                            }
+                            },
+                            onNoteChanged = { viewModel.setNote(item.id, it) }
                         )
                     }
 
@@ -611,12 +645,14 @@ private fun handleDroppedFiles(files: List<File>, viewModel: ScheduleViewModel) 
 private fun ScheduleItemRow(
     item: ScheduleItem,
     isSelected: Boolean,
+    note: String,
     onSelect: () -> Unit,
     onMoveUp: () -> Unit,
     onMoveDown: () -> Unit,
     onRemove: () -> Unit,
     onPresent: () -> Unit,
-    onEditLabel: () -> Unit = {}
+    onEditLabel: () -> Unit = {},
+    onNoteChanged: (String) -> Unit = {}
 ) {
     val rowBackgroundColor = if (item is ScheduleItem.LabelItem) {
         Utils.parseHexColor(item.backgroundColor)
@@ -625,223 +661,282 @@ private fun ScheduleItemRow(
         else MaterialTheme.colorScheme.surface
     }
 
-    Row(
+    var noteExpanded by remember(item.id) { mutableStateOf(false) }
+    var noteText by remember(item.id) { mutableStateOf(note) }
+
+    // Sync local noteText when external note changes (e.g. after undo/redo)
+    LaunchedEffect(note) {
+        if (noteText != note) noteText = note
+    }
+
+    Column(
         modifier = Modifier
             .fillMaxWidth()
             .background(rowBackgroundColor)
-            .padding(horizontal = 12.dp, vertical = 8.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalAlignment = Alignment.CenterVertically
     ) {
-        // Type indicator
-        Text(
-            text = when (item) {
-                is ScheduleItem.SongItem -> "♪"
-                is ScheduleItem.BibleVerseItem -> "✝"
-                is ScheduleItem.LabelItem -> "🏷"
-                is ScheduleItem.PictureItem -> "📷"
-                is ScheduleItem.PresentationItem -> "📊"
-                is ScheduleItem.MediaItem -> "🎬"
-                is ScheduleItem.LowerThirdItem -> "▼"
-                is ScheduleItem.AnnouncementItem -> "📢"
-                is ScheduleItem.WebsiteItem -> "🌐"
-                is ScheduleItem.SceneItem -> "🎬"
-                is ScheduleItem.DictionaryItem -> "📖"
-            },
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.width(24.dp)
-        )
-
-        // Item content
-        Column(modifier = Modifier.weight(1f)
-            .then(
-                if (item !is ScheduleItem.LabelItem) Modifier.initialPassClickable { onSelect() }
-                else Modifier
-            )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp, vertical = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            when (item) {
-                is ScheduleItem.LabelItem -> {
-                    // Display label text with custom text color
-                    Text(
-                        text = item.text,
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.Medium,
-                        color = Utils.parseHexColor(item.textColor),
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
-                is ScheduleItem.SongItem -> {
-                    val textColor = if (isSelected) MaterialTheme.colorScheme.onSurfaceVariant
-                            else MaterialTheme.colorScheme.onSurface
-                    if (item.songNumber > 0) {
+            // Type indicator
+            Text(
+                text = when (item) {
+                    is ScheduleItem.SongItem -> "♪"
+                    is ScheduleItem.BibleVerseItem -> "✝"
+                    is ScheduleItem.LabelItem -> "🏷"
+                    is ScheduleItem.PictureItem -> "📷"
+                    is ScheduleItem.PresentationItem -> "📊"
+                    is ScheduleItem.MediaItem -> "🎬"
+                    is ScheduleItem.LowerThirdItem -> "▼"
+                    is ScheduleItem.AnnouncementItem -> "📢"
+                    is ScheduleItem.WebsiteItem -> "🌐"
+                    is ScheduleItem.SceneItem -> "🎬"
+                    is ScheduleItem.DictionaryItem -> "📖"
+                },
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.width(24.dp)
+            )
+
+            // Item content
+            Column(modifier = Modifier.weight(1f)
+                .then(
+                    if (item !is ScheduleItem.LabelItem) Modifier.initialPassClickable { onSelect() }
+                    else Modifier
+                )
+            ) {
+                when (item) {
+                    is ScheduleItem.LabelItem -> {
+                        // Display label text with custom text color
+                        Text(
+                            text = item.text,
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Medium,
+                            color = Utils.parseHexColor(item.textColor),
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+                    is ScheduleItem.SongItem -> {
+                        val textColor = if (isSelected) MaterialTheme.colorScheme.onSurfaceVariant
+                                else MaterialTheme.colorScheme.onSurface
+                        if (item.songNumber > 0) {
+                            Text(
+                                maxLines = 1,
+                                text = item.songNumber.toString(),
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = textColor
+                            )
+                        }
                         Text(
                             maxLines = 1,
-                            text = item.songNumber.toString(),
+                            text = item.title,
                             style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = FontWeight.Bold,
+                            fontWeight = FontWeight.Medium,
                             color = textColor
                         )
+                        if (item.songbook.isNotBlank()) {
+                            Text(
+                                maxLines = 1,
+                                text = item.songbook,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = if (isSelected) MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                                        else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                            )
+                        }
                     }
-                    Text(
-                        maxLines = 1,
-                        text = item.title,
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.Medium,
-                        color = textColor
-                    )
-                    if (item.songbook.isNotBlank()) {
+                    else -> {
                         Text(
                             maxLines = 1,
-                            text = item.songbook,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = if (isSelected) MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-                                    else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                            text = item.displayText,
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Medium,
+                            color = if (isSelected) MaterialTheme.colorScheme.onSurfaceVariant
+                                    else MaterialTheme.colorScheme.onSurface
                         )
                     }
                 }
-                else -> {
-                    Text(
+
+                when (item) {
+                    is ScheduleItem.SongItem -> {} // already handled above
+                    is ScheduleItem.BibleVerseItem -> Text(
                         maxLines = 1,
-                        text = item.displayText,
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.Medium,
-                        color = if (isSelected) MaterialTheme.colorScheme.onSurfaceVariant
-                                else MaterialTheme.colorScheme.onSurface
+                        text = item.verseText.take(100) + if (item.verseText.length > 100) "..." else "",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = if (isSelected) MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                                else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                    )
+                    is ScheduleItem.PictureItem -> Text(
+                        maxLines = 1,
+                        text = item.folderPath,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = if (isSelected) MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                                else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                    )
+                    is ScheduleItem.PresentationItem -> Text(
+                        maxLines = 1,
+                        text = "${item.fileType.uppercase()} - ${item.filePath}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = if (isSelected) MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                                else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                    )
+                    is ScheduleItem.MediaItem -> Text(
+                        maxLines = 1,
+                        text = "${item.mediaType.uppercase()} - ${item.mediaUrl}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = if (isSelected) MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                                else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                    )
+                    is ScheduleItem.LowerThirdItem -> Text(
+                        maxLines = 1,
+                        text = if (item.pauseAtFrame) stringResource(Res.string.pause_duration_ms, item.pauseDurationMs) else "",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = if (isSelected) MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                                else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                    )
+                    is ScheduleItem.LabelItem -> { /* no secondary text */ }
+                    is ScheduleItem.AnnouncementItem -> {
+                        if (item.isTimer) {
+                            val timerSubtext = if (item.timerMode == "clock")
+                                "%02d:%02d:%02d".format(item.targetHour, item.targetMinute, item.targetSecond)
+                            else
+                                "%02d:%02d".format(item.timerMinutes, item.timerSeconds)
+                            Text(
+                                maxLines = 1,
+                                text = timerSubtext,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = if (isSelected) MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                                        else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                            )
+                        }
+                    }
+                    is ScheduleItem.WebsiteItem -> Text(
+                        maxLines = 1,
+                        text = item.url,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = if (isSelected) MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                                else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                    )
+                    is ScheduleItem.SceneItem -> { /* no secondary text */ }
+                    is ScheduleItem.DictionaryItem -> Text(
+                        maxLines = 1,
+                        text = item.transliteration,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = if (isSelected) MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                                else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                    )
+                }
+
+                // Note preview when collapsed
+                if (note.isNotEmpty() && !noteExpanded) {
+                    Text(
+                        text = note,
+                        style = MaterialTheme.typography.bodySmall,
+                        fontStyle = FontStyle.Italic,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                        maxLines = 1,
+                        modifier = Modifier.padding(top = 2.dp)
                     )
                 }
             }
 
-            when (item) {
-                is ScheduleItem.SongItem -> {} // already handled above
-                is ScheduleItem.BibleVerseItem -> Text(
-                    maxLines = 1,
-                    text = item.verseText.take(100) + if (item.verseText.length > 100) "..." else "",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = if (isSelected) MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-                            else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+            // Action buttons
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(2.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Move up button
+                TooltipIconButton(
+                    painter = painterResource(Res.drawable.ic_arrow_up),
+                    text = stringResource(Res.string.tooltip_move_up),
+                    onClick = onMoveUp,
+                    buttonSize = 32.dp,
+                    iconTint = MaterialTheme.colorScheme.onSurface
                 )
-                is ScheduleItem.PictureItem -> Text(
-                    maxLines = 1,
-                    text = item.folderPath,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = if (isSelected) MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-                            else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+
+                // Move down button
+                TooltipIconButton(
+                    painter = painterResource(Res.drawable.ic_arrow_down),
+                    text = stringResource(Res.string.tooltip_move_down),
+                    onClick = onMoveDown,
+                    buttonSize = 32.dp,
+                    iconTint = MaterialTheme.colorScheme.onSurface
                 )
-                is ScheduleItem.PresentationItem -> Text(
-                    maxLines = 1,
-                    text = "${item.fileType.uppercase()} - ${item.filePath}",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = if (isSelected) MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-                            else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+
+                // Note toggle button
+                TooltipIconButton(
+                    painter = painterResource(Res.drawable.ic_note),
+                    text = stringResource(Res.string.tooltip_note),
+                    onClick = { noteExpanded = !noteExpanded },
+                    buttonSize = 32.dp,
+                    iconSize = 18.dp,
+                    iconTint = if (note.isNotEmpty() || noteExpanded) MaterialTheme.colorScheme.primary
+                               else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
                 )
-                is ScheduleItem.MediaItem -> Text(
-                    maxLines = 1,
-                    text = "${item.mediaType.uppercase()} - ${item.mediaUrl}",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = if (isSelected) MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-                            else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                )
-                is ScheduleItem.LowerThirdItem -> Text(
-                    maxLines = 1,
-                    text = if (item.pauseAtFrame) stringResource(Res.string.pause_duration_ms, item.pauseDurationMs) else "",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = if (isSelected) MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-                            else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                )
-                is ScheduleItem.LabelItem -> { /* no secondary text */ }
-                is ScheduleItem.AnnouncementItem -> {
-                    if (item.isTimer) {
-                        val timerSubtext = if (item.timerMode == "clock")
-                            "%02d:%02d:%02d".format(item.targetHour, item.targetMinute, item.targetSecond)
-                        else
-                            "%02d:%02d".format(item.timerMinutes, item.timerSeconds)
-                        Text(
-                            maxLines = 1,
-                            text = timerSubtext,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = if (isSelected) MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-                                    else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                        )
-                    }
+
+                // Show Edit button for labels, Go Live button for other items
+                if (item is ScheduleItem.LabelItem) {
+                    TooltipIconButton(
+                        painter = painterResource(Res.drawable.ic_edit),
+                        text = stringResource(Res.string.tooltip_edit_label),
+                        onClick = onEditLabel,
+                        buttonSize = 32.dp,
+                        iconSize = 18.dp,
+                        colors = IconButtonDefaults.iconButtonColors(
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = MaterialTheme.colorScheme.onPrimary
+                        ),
+                        iconTint = MaterialTheme.colorScheme.onPrimary
+                    )
+                } else {
+                    TooltipIconButton(
+                        painter = painterResource(Res.drawable.ic_play),
+                        text = stringResource(Res.string.tooltip_go_live),
+                        onClick = onPresent,
+                        buttonSize = 32.dp,
+                        iconSize = 18.dp,
+                        colors = IconButtonDefaults.iconButtonColors(
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = MaterialTheme.colorScheme.onPrimary
+                        ),
+                        iconTint = MaterialTheme.colorScheme.onPrimary
+                    )
                 }
-                is ScheduleItem.WebsiteItem -> Text(
-                    maxLines = 1,
-                    text = item.url,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = if (isSelected) MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-                            else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                )
-                is ScheduleItem.SceneItem -> { /* no secondary text */ }
-                is ScheduleItem.DictionaryItem -> Text(
-                    maxLines = 1,
-                    text = item.transliteration,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = if (isSelected) MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-                            else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+
+                // Remove button
+                TooltipIconButton(
+                    painter = painterResource(Res.drawable.ic_close),
+                    text = stringResource(Res.string.tooltip_remove),
+                    onClick = onRemove,
+                    buttonSize = 32.dp,
+                    iconTint = MaterialTheme.colorScheme.error
                 )
             }
         }
 
-        // Action buttons
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(2.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // Move up button
-            TooltipIconButton(
-                painter = painterResource(Res.drawable.ic_arrow_up),
-                text = stringResource(Res.string.tooltip_move_up),
-                onClick = onMoveUp,
-                buttonSize = 32.dp,
-                iconTint = MaterialTheme.colorScheme.onSurface
-            )
-
-            // Move down button
-            TooltipIconButton(
-                painter = painterResource(Res.drawable.ic_arrow_down),
-                text = stringResource(Res.string.tooltip_move_down),
-                onClick = onMoveDown,
-                buttonSize = 32.dp,
-                iconTint = MaterialTheme.colorScheme.onSurface
-            )
-
-            // Show Edit button for labels, Go Live button for other items
-            if (item is ScheduleItem.LabelItem) {
-                TooltipIconButton(
-                    painter = painterResource(Res.drawable.ic_edit),
-                    text = stringResource(Res.string.tooltip_edit_label),
-                    onClick = onEditLabel,
-                    buttonSize = 32.dp,
-                    iconSize = 18.dp,
-                    colors = IconButtonDefaults.iconButtonColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary
-                    ),
-                    iconTint = MaterialTheme.colorScheme.onPrimary
-                )
-            } else {
-                TooltipIconButton(
-                    painter = painterResource(Res.drawable.ic_play),
-                    text = stringResource(Res.string.tooltip_go_live),
-                    onClick = onPresent,
-                    buttonSize = 32.dp,
-                    iconSize = 18.dp,
-                    colors = IconButtonDefaults.iconButtonColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary
-                    ),
-                    iconTint = MaterialTheme.colorScheme.onPrimary
-                )
-            }
-
-            // Remove button
-            TooltipIconButton(
-                painter = painterResource(Res.drawable.ic_close),
-                text = stringResource(Res.string.tooltip_remove),
-                onClick = onRemove,
-                buttonSize = 32.dp,
-                iconTint = MaterialTheme.colorScheme.error
+        // Inline note editor
+        AnimatedVisibility(visible = noteExpanded) {
+            OutlinedTextField(
+                value = noteText,
+                onValueChange = { v ->
+                    noteText = v
+                    onNoteChanged(v)
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 36.dp, end = 12.dp, bottom = 8.dp),
+                placeholder = {
+                    Text(
+                        stringResource(Res.string.schedule_note_placeholder),
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                },
+                textStyle = MaterialTheme.typography.bodySmall,
+                singleLine = false,
+                maxLines = 3
             )
         }
     }

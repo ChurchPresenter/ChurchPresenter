@@ -148,6 +148,8 @@
     <string name="shortcut_description_next_slide">Next Slide</string>
     <string name="shortcut_description_media_mute">Mute / Unmute (M key)</string>
     <string name="shortcut_description_spacebar">Play / Pause (Spacebar)</string>
+    <string name="shortcut_key_ctrl_z">Ctrl+Z</string>
+    <string name="shortcut_key_ctrl_shift_z">Ctrl+Shift+Z</string>
     <string name="shortcut_key_ctrl_shift_n">Ctrl+Shift+N</string>
     <string name="shortcut_key_ctrl_o">Ctrl+O</string>
     <string name="shortcut_key_ctrl_s">Ctrl+S</string>
@@ -192,6 +194,8 @@
     <string name="shortcut_key_shift_drag">Shift+Drag</string>
     <string name="shortcut_category_schedule">Schedule</string>
     <string name="shortcut_description_context_menu">Show context menu</string>
+    <string name="shortcut_description_undo">Undo last schedule change</string>
+    <string name="shortcut_description_redo">Redo last undone change</string>
     <string name="shortcut_description_reorder_item">Reorder item</string>
     <string name="shortcut_description_reorder_image">Reorder image</string>
 
@@ -427,6 +431,10 @@
     <string name="tooltip_new_schedule">New Schedule</string>
     <string name="tooltip_open_schedule">Open Schedule</string>
     <string name="tooltip_save_schedule">Save Schedule</string>
+    <string name="tooltip_undo">Undo (Ctrl+Z)</string>
+    <string name="tooltip_redo">Redo (Ctrl+Shift+Z)</string>
+    <string name="tooltip_note">Note</string>
+    <string name="schedule_note_placeholder">Add note…</string>
     <string name="tooltip_move_to_top">Move to Top</string>
     <string name="tooltip_move_up">Move Up</string>
     <string name="tooltip_move_down">Move Down</string>
