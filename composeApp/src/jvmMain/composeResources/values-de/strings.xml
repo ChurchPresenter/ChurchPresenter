@@ -301,6 +301,11 @@
     <string name="tooltip_new_schedule">Neues Programm</string>
     <string name="tooltip_open_schedule">Programm öffnen</string>
     <string name="tooltip_save_schedule">Programm speichern</string>
+    <string name="tooltip_undo">Rückgängig (Ctrl+Z)</string>
+    <string name="tooltip_redo">Wiederholen (Ctrl+Shift+Z)</string>
+    <string name="tooltip_note">Notiz</string>
+    <string name="tooltip_note_done">Notiz speichern</string>
+    <string name="tooltip_note_clear">Notiz löschen</string>
     <string name="tooltip_move_to_top">Nach oben verschieben</string>
     <string name="tooltip_move_up">Nach oben</string>
     <string name="tooltip_move_down">Nach unten</string>
@@ -562,6 +567,8 @@
     <string name="shortcut_category_schedule">Zeitplan</string>
     <string name="shortcut_description_context_menu">Kontextmenü anzeigen</string>
     <string name="shortcut_description_reorder_item">Element neu anordnen</string>
+    <string name="shortcut_description_undo">Letzte Programmänderung rückgängig machen</string>
+    <string name="shortcut_description_redo">Letzte rückgängig gemachte Änderung wiederholen</string>
     <string name="shortcut_description_reorder_image">Bild neu anordnen</string>
     <string name="license_title">Lizenzvereinbarung — GNU General Public License v3</string>
     <string name="license_accept_button">Akzeptieren</string>
@@ -679,6 +686,7 @@
     <string name="settings_import_failed">Einstellungen konnten nicht importiert werden. Die Datei ist möglicherweise ungültig.</string>
     <string name="schedule_add_files">Dateien hinzufügen…</string>
     <string name="schedule_drop_hint">Dateien hierher ziehen, um sie zum Programm hinzuzufügen</string>
+    <string name="schedule_note_placeholder">Notiz hinzufügen…</string>
     <string name="screen_number">Bildschirm %1$d</string>
     <string name="server_description">Ermöglicht Mobilgeräten und Remote-Clients, Lied- und Bibeldaten von dieser App zu empfangen.</string>
     <string name="server_endpoints">Verfügbare Endpunkte</string>

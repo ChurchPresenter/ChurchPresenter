@@ -183,6 +183,8 @@
     <string name="shortcut_category_schedule">Programme</string>
     <string name="shortcut_description_context_menu">Afficher le menu contextuel</string>
     <string name="shortcut_description_reorder_item">Réorganiser l'élément</string>
+    <string name="shortcut_description_undo">Annuler la dernière modification du programme</string>
+    <string name="shortcut_description_redo">Rétablir la dernière modification annulée</string>
     <string name="shortcut_description_reorder_image">Réorganiser l'image</string>
 
     <!-- Options Dialog Strings -->
@@ -404,6 +406,11 @@
     <string name="tooltip_new_schedule">Nouveau programme</string>
     <string name="tooltip_open_schedule">Ouvrir un programme</string>
     <string name="tooltip_save_schedule">Enregistrer le programme</string>
+    <string name="tooltip_undo">Annuler (Ctrl+Z)</string>
+    <string name="tooltip_redo">Rétablir (Ctrl+Shift+Z)</string>
+    <string name="tooltip_note">Note</string>
+    <string name="tooltip_note_done">Enregistrer la note</string>
+    <string name="tooltip_note_clear">Effacer la note</string>
     <string name="tooltip_move_to_top">Déplacer en haut</string>
     <string name="tooltip_move_up">Déplacer vers le haut</string>
     <string name="tooltip_move_down">Déplacer vers le bas</string>
@@ -425,6 +432,7 @@
     <string name="tooltip_collapse_schedule">Réduire le programme</string>
     <string name="tooltip_expand_schedule">Développer le programme</string>
     <string name="schedule_drop_hint">Faites glisser des fichiers ici pour les ajouter au programme</string>
+    <string name="schedule_note_placeholder">Ajouter une note…</string>
     <string name="schedule_add_files">Ajouter des fichiers…</string>
 
     <!-- Add Label Dialog -->

@@ -434,6 +434,8 @@
     <string name="tooltip_undo">Undo (Ctrl+Z)</string>
     <string name="tooltip_redo">Redo (Ctrl+Shift+Z)</string>
     <string name="tooltip_note">Note</string>
+    <string name="tooltip_note_done">Save note</string>
+    <string name="tooltip_note_clear">Clear note</string>
     <string name="schedule_note_placeholder">Add note…</string>
     <string name="tooltip_move_to_top">Move to Top</string>
     <string name="tooltip_move_up">Move Up</string>

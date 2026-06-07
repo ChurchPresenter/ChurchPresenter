@@ -193,6 +193,8 @@
     <string name="shortcut_category_schedule">Program</string>
     <string name="shortcut_description_context_menu">Afișează meniu contextual</string>
     <string name="shortcut_description_reorder_item">Reordonează element</string>
+    <string name="shortcut_description_undo">Anulați ultima modificare a programului</string>
+    <string name="shortcut_description_redo">Refaceți ultima modificare anulată</string>
     <string name="shortcut_description_reorder_image">Reordonează imagine</string>
 
     <!-- Options Dialog Strings -->
@@ -420,6 +422,11 @@
     <string name="tooltip_new_schedule">Program Nou</string>
     <string name="tooltip_open_schedule">Deschide Program</string>
     <string name="tooltip_save_schedule">Salvează Program</string>
+    <string name="tooltip_undo">Anulare (Ctrl+Z)</string>
+    <string name="tooltip_redo">Refacere (Ctrl+Shift+Z)</string>
+    <string name="tooltip_note">Notă</string>
+    <string name="tooltip_note_done">Salvează nota</string>
+    <string name="tooltip_note_clear">Șterge nota</string>
     <string name="tooltip_move_to_top">Mută în Vârf</string>
     <string name="tooltip_move_up">Mută Sus</string>
     <string name="tooltip_move_down">Mută Jos</string>
@@ -441,6 +448,7 @@
     <string name="tooltip_collapse_schedule">Restrânge Programul</string>
     <string name="tooltip_expand_schedule">Extinde Programul</string>
     <string name="schedule_drop_hint">Glisați fișiere aici pentru a le adăuga la program</string>
+    <string name="schedule_note_placeholder">Adaugă notă…</string>
     <string name="schedule_add_files">Adaugă Fișiere…</string>
 
     <!-- Add Label Dialog -->

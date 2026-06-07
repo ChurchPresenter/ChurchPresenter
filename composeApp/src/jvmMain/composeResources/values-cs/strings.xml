@@ -257,6 +257,11 @@
     <string name="tooltip_new_schedule">Nový program</string>
     <string name="tooltip_open_schedule">Otevřít program</string>
     <string name="tooltip_save_schedule">Uložit program</string>
+    <string name="tooltip_undo">Zpět (Ctrl+Z)</string>
+    <string name="tooltip_redo">Znovu (Ctrl+Shift+Z)</string>
+    <string name="tooltip_note">Poznámka</string>
+    <string name="tooltip_note_done">Uložit poznámku</string>
+    <string name="tooltip_note_clear">Vymazat poznámku</string>
     <string name="tooltip_save_as_schedule">Uložit program jako</string>
     <string name="tooltip_move_to_top">Přesunout nahoru</string>
     <string name="tooltip_move_up">Posunout nahoru</string>
@@ -665,6 +670,8 @@
     <string name="shortcut_category_schedule">Plán</string>
     <string name="shortcut_description_context_menu">Zobrazit kontextové menu</string>
     <string name="shortcut_description_reorder_item">Přeuspořádat položku</string>
+    <string name="shortcut_description_undo">Zpět poslední změna programu</string>
+    <string name="shortcut_description_redo">Znovu provést poslední zrušenou změnu</string>
     <string name="shortcut_description_reorder_image">Přeuspořádat obrázek</string>
     <string name="license_title">Licenční smlouva — GNU General Public License v3</string>
     <string name="license_accept_button">Přijímám</string>
@@ -787,6 +794,7 @@
     <string name="settings_import_failed">Import nastavení se nezdařil. Soubor může být neplatný.</string>
     <string name="schedule_add_files">Přidat soubory…</string>
     <string name="schedule_drop_hint">Přetáhněte soubory sem pro přidání do programu</string>
+    <string name="schedule_note_placeholder">Přidat poznámku…</string>
     <string name="screen_number">Obrazovka %1$d</string>
     <string name="server_description">Umožňuje mobilním zařízením a vzdáleným klientům přijímat data písní a Bible z této aplikace.</string>
     <string name="server_endpoints">Dostupné koncové body</string>

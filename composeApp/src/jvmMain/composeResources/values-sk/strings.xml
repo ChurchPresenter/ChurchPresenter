@@ -183,6 +183,8 @@
     <string name="shortcut_category_schedule">Program</string>
     <string name="shortcut_description_context_menu">Zobraziť kontextové menu</string>
     <string name="shortcut_description_reorder_item">Zmeniť poradie položky</string>
+    <string name="shortcut_description_undo">Späť posledná zmena programu</string>
+    <string name="shortcut_description_redo">Znovu vykonať poslednú zrušenú zmenu</string>
     <string name="shortcut_description_reorder_image">Zmeniť poradie obrázka</string>
 
     <!-- Options Dialog Strings -->
@@ -404,6 +406,11 @@
     <string name="tooltip_new_schedule">Nový program</string>
     <string name="tooltip_open_schedule">Otvoriť program</string>
     <string name="tooltip_save_schedule">Uložiť program</string>
+    <string name="tooltip_undo">Späť (Ctrl+Z)</string>
+    <string name="tooltip_redo">Znovu (Ctrl+Shift+Z)</string>
+    <string name="tooltip_note">Poznámka</string>
+    <string name="tooltip_note_done">Uložiť poznámku</string>
+    <string name="tooltip_note_clear">Vymazať poznámku</string>
     <string name="tooltip_move_to_top">Presunúť na začiatok</string>
     <string name="tooltip_move_up">Presunúť nahor</string>
     <string name="tooltip_move_down">Presunúť nadol</string>
@@ -425,6 +432,7 @@
     <string name="tooltip_collapse_schedule">Zbaliť program</string>
     <string name="tooltip_expand_schedule">Rozbaliť program</string>
     <string name="schedule_drop_hint">Pretiahnite súbory sem a pridajte ich do programu</string>
+    <string name="schedule_note_placeholder">Pridať poznámku…</string>
     <string name="schedule_add_files">Pridať súbory…</string>
 
     <!-- Add Label Dialog -->

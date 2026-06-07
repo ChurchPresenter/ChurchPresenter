@@ -183,6 +183,8 @@
     <string name="shortcut_category_schedule">Programa</string>
     <string name="shortcut_description_context_menu">Mostrar menú contextual</string>
     <string name="shortcut_description_reorder_item">Reordenar elemento</string>
+    <string name="shortcut_description_undo">Deshacer el último cambio del programa</string>
+    <string name="shortcut_description_redo">Rehacer el último cambio deshecho</string>
     <string name="shortcut_description_reorder_image">Reordenar imagen</string>
 
     <!-- Options Dialog Strings -->
@@ -404,6 +406,11 @@
     <string name="tooltip_new_schedule">Nuevo programa</string>
     <string name="tooltip_open_schedule">Abrir programa</string>
     <string name="tooltip_save_schedule">Guardar programa</string>
+    <string name="tooltip_undo">Deshacer (Ctrl+Z)</string>
+    <string name="tooltip_redo">Rehacer (Ctrl+Shift+Z)</string>
+    <string name="tooltip_note">Nota</string>
+    <string name="tooltip_note_done">Guardar nota</string>
+    <string name="tooltip_note_clear">Borrar nota</string>
     <string name="tooltip_move_to_top">Mover al principio</string>
     <string name="tooltip_move_up">Mover arriba</string>
     <string name="tooltip_move_down">Mover abajo</string>
@@ -425,6 +432,7 @@
     <string name="tooltip_collapse_schedule">Colapsar programa</string>
     <string name="tooltip_expand_schedule">Expandir programa</string>
     <string name="schedule_drop_hint">Arrastra archivos aquí para añadirlos al programa</string>
+    <string name="schedule_note_placeholder">Añadir nota…</string>
     <string name="schedule_add_files">Añadir archivos…</string>
 
     <!-- Add Label Dialog -->

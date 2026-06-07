@@ -317,6 +317,11 @@
     <string name="tooltip_new_schedule">Новая программа</string>
     <string name="tooltip_open_schedule">Открыть программу</string>
     <string name="tooltip_save_schedule">Сохранить программу</string>
+    <string name="tooltip_undo">Отменить (Ctrl+Z)</string>
+    <string name="tooltip_redo">Повторить (Ctrl+Shift+Z)</string>
+    <string name="tooltip_note">Заметка</string>
+    <string name="tooltip_note_done">Сохранить заметку</string>
+    <string name="tooltip_note_clear">Очистить заметку</string>
     <string name="tooltip_move_to_top">Переместить наверх</string>
     <string name="tooltip_move_up">Переместить вверх</string>
     <string name="tooltip_move_down">Переместить вниз</string>
@@ -580,6 +585,8 @@
     <string name="shortcut_category_schedule">Расписание</string>
     <string name="shortcut_description_context_menu">Контекстное меню</string>
     <string name="shortcut_description_reorder_item">Изменить порядок элемента</string>
+    <string name="shortcut_description_undo">Отменить последнее изменение программы</string>
+    <string name="shortcut_description_redo">Повторить последнее отменённое изменение</string>
     <string name="shortcut_description_reorder_image">Изменить порядок изображения</string>
     <string name="license_title">Лицензионное соглашение — GNU General Public License v3</string>
     <string name="license_accept_button">Принять</string>
@@ -702,6 +709,7 @@
     <string name="settings_import_failed">Не удалось импортировать настройки. Файл может быть повреждён.</string>
     <string name="schedule_add_files">Добавить файлы…</string>
     <string name="schedule_drop_hint">Перетащите файлы сюда, чтобы добавить в программу</string>
+    <string name="schedule_note_placeholder">Добавить заметку…</string>
     <string name="screen_number">Экран %1$d</string>
     <string name="server_description">Позволяет мобильным устройствам и удалённым клиентам получать данные песен и Библии из этого приложения.</string>
     <string name="server_endpoints">Доступные точки подключения</string>

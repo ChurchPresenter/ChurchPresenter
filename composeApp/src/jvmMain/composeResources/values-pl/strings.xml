@@ -301,6 +301,11 @@
     <string name="tooltip_new_schedule">Nowy program</string>
     <string name="tooltip_open_schedule">Otwórz program</string>
     <string name="tooltip_save_schedule">Zapisz program</string>
+    <string name="tooltip_undo">Cofnij (Ctrl+Z)</string>
+    <string name="tooltip_redo">Ponów (Ctrl+Shift+Z)</string>
+    <string name="tooltip_note">Notatka</string>
+    <string name="tooltip_note_done">Zapisz notatkę</string>
+    <string name="tooltip_note_clear">Wyczyść notatkę</string>
     <string name="tooltip_move_to_top">Przenieś na górę</string>
     <string name="tooltip_move_up">Przenieś w górę</string>
     <string name="tooltip_move_down">Przenieś w dół</string>
@@ -562,6 +567,8 @@
     <string name="shortcut_category_schedule">Plan</string>
     <string name="shortcut_description_context_menu">Pokaż menu kontekstowe</string>
     <string name="shortcut_description_reorder_item">Zmień kolejność elementu</string>
+    <string name="shortcut_description_undo">Cofnij ostatnią zmianę programu</string>
+    <string name="shortcut_description_redo">Ponów ostatnią cofniętą zmianę</string>
     <string name="shortcut_description_reorder_image">Zmień kolejność obrazu</string>
     <string name="license_title">Umowa licencyjna — GNU General Public License v3</string>
     <string name="license_accept_button">Akceptuję</string>
@@ -678,6 +685,7 @@
     <string name="settings_import_failed">Nie udało się zaimportować ustawień. Plik może być nieprawidłowy.</string>
     <string name="schedule_add_files">Dodaj pliki…</string>
     <string name="schedule_drop_hint">Przeciągnij pliki tutaj, aby dodać do programu</string>
+    <string name="schedule_note_placeholder">Dodaj notatkę…</string>
     <string name="screen_number">Ekran %1$d</string>
     <string name="server_description">Umożliwia urządzeniom mobilnym i zdalnym klientom odbieranie danych pieśni i Biblii z tej aplikacji.</string>
     <string name="server_endpoints">Dostępne punkty końcowe</string>

@@ -183,6 +183,8 @@
     <string name="shortcut_category_schedule">Programma</string>
     <string name="shortcut_description_context_menu">Contextmenu tonen</string>
     <string name="shortcut_description_reorder_item">Item herordenen</string>
+    <string name="shortcut_description_undo">Laatste programmawijziging ongedaan maken</string>
+    <string name="shortcut_description_redo">Laatste ongedaan gemaakte wijziging opnieuw uitvoeren</string>
     <string name="shortcut_description_reorder_image">Afbeelding herordenen</string>
 
     <!-- Options Dialog Strings -->
@@ -404,6 +406,11 @@
     <string name="tooltip_new_schedule">Nieuw programma</string>
     <string name="tooltip_open_schedule">Programma openen</string>
     <string name="tooltip_save_schedule">Programma opslaan</string>
+    <string name="tooltip_undo">Ongedaan maken (Ctrl+Z)</string>
+    <string name="tooltip_redo">Opnieuw (Ctrl+Shift+Z)</string>
+    <string name="tooltip_note">Notitie</string>
+    <string name="tooltip_note_done">Notitie opslaan</string>
+    <string name="tooltip_note_clear">Notitie wissen</string>
     <string name="tooltip_move_to_top">Naar boven verplaatsen</string>
     <string name="tooltip_move_up">Omhoog verplaatsen</string>
     <string name="tooltip_move_down">Omlaag verplaatsen</string>
@@ -425,6 +432,7 @@
     <string name="tooltip_collapse_schedule">Programma inklappen</string>
     <string name="tooltip_expand_schedule">Programma uitklappen</string>
     <string name="schedule_drop_hint">Sleep bestanden hier om toe te voegen aan programma</string>
+    <string name="schedule_note_placeholder">Notitie toevoegen…</string>
     <string name="schedule_add_files">Bestanden toevoegen…</string>
 
     <!-- Add Label Dialog -->

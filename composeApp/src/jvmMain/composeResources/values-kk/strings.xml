@@ -301,6 +301,11 @@
     <string name="tooltip_new_schedule">Жаңа бағдарлама</string>
     <string name="tooltip_open_schedule">Бағдарламаны ашу</string>
     <string name="tooltip_save_schedule">Бағдарламаны сақтау</string>
+    <string name="tooltip_undo">Болдырмау (Ctrl+Z)</string>
+    <string name="tooltip_redo">Қайталау (Ctrl+Shift+Z)</string>
+    <string name="tooltip_note">Ескертпе</string>
+    <string name="tooltip_note_done">Ескертпені сақтау</string>
+    <string name="tooltip_note_clear">Ескертпені тазалау</string>
     <string name="tooltip_move_to_top">Жоғарыға жылжыту</string>
     <string name="tooltip_move_up">Жоғары жылжыту</string>
     <string name="tooltip_move_down">Төмен жылжыту</string>
@@ -562,6 +567,8 @@
     <string name="shortcut_category_schedule">Кесте</string>
     <string name="shortcut_description_context_menu">Контекстік мәзірді ашу</string>
     <string name="shortcut_description_reorder_item">Элементті қайта реттеу</string>
+    <string name="shortcut_description_undo">Соңғы бағдарлама өзгерісін болдырмау</string>
+    <string name="shortcut_description_redo">Соңғы болдырылмаған өзгерісті қайталау</string>
     <string name="shortcut_description_reorder_image">Суретті қайта реттеу</string>
     <string name="license_title">Лицензиялық келісім — GNU General Public License v3</string>
     <string name="license_accept_button">Қабылдаймын</string>
@@ -679,6 +686,7 @@
     <string name="settings_import_failed">Параметрлерді импорттау сәтсіз аяқталды. Файл жарамсыз болуы мүмкін.</string>
     <string name="schedule_add_files">Файлдар қосу…</string>
     <string name="schedule_drop_hint">Бағдарламаға қосу үшін файлдарды осында сүйреңіз</string>
+    <string name="schedule_note_placeholder">Ескертпе қосу…</string>
     <string name="screen_number">Экран %1$d</string>
     <string name="server_description">Мобильді құрылғылар мен қашықтағы клиенттерге осы қосымшадан ән мен Киелі Кітап деректерін алуға мүмкіндік береді.</string>
     <string name="server_endpoints">Қолжетімді соңғы нүктелер</string>

@@ -183,6 +183,8 @@
     <string name="shortcut_category_schedule">Roteiro</string>
     <string name="shortcut_description_context_menu">Exibir menu de contexto</string>
     <string name="shortcut_description_reorder_item">Reordenar item</string>
+    <string name="shortcut_description_undo">Desfazer a última alteração do programa</string>
+    <string name="shortcut_description_redo">Refazer a última alteração desfeita</string>
     <string name="shortcut_description_reorder_image">Reordenar imagem</string>
 
     <!-- Options Dialog Strings -->
@@ -404,6 +406,11 @@
     <string name="tooltip_new_schedule">Novo Roteiro</string>
     <string name="tooltip_open_schedule">Abrir Roteiro</string>
     <string name="tooltip_save_schedule">Salvar Roteiro</string>
+    <string name="tooltip_undo">Desfazer (Ctrl+Z)</string>
+    <string name="tooltip_redo">Refazer (Ctrl+Shift+Z)</string>
+    <string name="tooltip_note">Nota</string>
+    <string name="tooltip_note_done">Guardar nota</string>
+    <string name="tooltip_note_clear">Limpar nota</string>
     <string name="tooltip_move_to_top">Mover para o Topo</string>
     <string name="tooltip_move_up">Mover para Cima</string>
     <string name="tooltip_move_down">Mover para Baixo</string>
@@ -425,6 +432,7 @@
     <string name="tooltip_collapse_schedule">Recolher Roteiro</string>
     <string name="tooltip_expand_schedule">Expandir Roteiro</string>
     <string name="schedule_drop_hint">Arraste arquivos aqui para adicionar ao roteiro</string>
+    <string name="schedule_note_placeholder">Adicionar nota…</string>
     <string name="schedule_add_files">Adicionar Arquivos…</string>
 
     <!-- Add Label Dialog -->

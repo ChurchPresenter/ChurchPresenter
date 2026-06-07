@@ -301,6 +301,11 @@
     <string name="tooltip_new_schedule">Новая праграма</string>
     <string name="tooltip_open_schedule">Адкрыць праграму</string>
     <string name="tooltip_save_schedule">Захаваць праграму</string>
+    <string name="tooltip_undo">Адмяніць (Ctrl+Z)</string>
+    <string name="tooltip_redo">Паўтарыць (Ctrl+Shift+Z)</string>
+    <string name="tooltip_note">Нататка</string>
+    <string name="tooltip_note_done">Захаваць нататку</string>
+    <string name="tooltip_note_clear">Ачысціць нататку</string>
     <string name="tooltip_move_to_top">Перамясціць наверх</string>
     <string name="tooltip_move_up">Перамясціць уверх</string>
     <string name="tooltip_move_down">Перамясціць уніз</string>
@@ -562,6 +567,8 @@
     <string name="shortcut_category_schedule">Расклад</string>
     <string name="shortcut_description_context_menu">Паказаць кантэкстнае меню</string>
     <string name="shortcut_description_reorder_item">Змяніць парадак элемента</string>
+    <string name="shortcut_description_undo">Адмяніць апошняе змяненне праграмы</string>
+    <string name="shortcut_description_redo">Паўтарыць апошняе адменена змяненне</string>
     <string name="shortcut_description_reorder_image">Змяніць парадак выявы</string>
     <string name="license_title">Ліцэнзійнае пагадненне — GNU General Public License v3</string>
     <string name="license_accept_button">Прыняць</string>
@@ -679,6 +686,7 @@
     <string name="settings_import_failed">Не ўдалося імпартаваць налады. Файл можа быць пашкоджаны.</string>
     <string name="schedule_add_files">Дадаць файлы…</string>
     <string name="schedule_drop_hint">Перацягніце файлы сюды, каб дадаць у праграму</string>
+    <string name="schedule_note_placeholder">Дадаць нататку…</string>
     <string name="screen_number">Экран %1$d</string>
     <string name="server_description">Дазваляе мабільным прыладам і аддаленым кліентам атрымліваць дадзеныя песень і Бібліі з гэтай праграмы.</string>
     <string name="server_endpoints">Даступныя канчатковыя кропкі</string>

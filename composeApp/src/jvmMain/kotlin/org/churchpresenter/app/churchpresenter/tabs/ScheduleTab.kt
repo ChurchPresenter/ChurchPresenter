@@ -3,6 +3,7 @@ package org.churchpresenter.app.churchpresenter.tabs
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import org.churchpresenter.app.churchpresenter.composables.initialPassClickable
@@ -27,8 +28,11 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -41,6 +45,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.PointerEventType
@@ -66,6 +71,7 @@ import churchpresenter.composeapp.generated.resources.ic_edit
 import churchpresenter.composeapp.generated.resources.ic_folder
 import churchpresenter.composeapp.generated.resources.ic_label
 import churchpresenter.composeapp.generated.resources.ic_play
+import churchpresenter.composeapp.generated.resources.ic_check
 import churchpresenter.composeapp.generated.resources.ic_note
 import churchpresenter.composeapp.generated.resources.ic_redo
 import churchpresenter.composeapp.generated.resources.ic_save
@@ -74,6 +80,8 @@ import churchpresenter.composeapp.generated.resources.pause_duration_ms
 import churchpresenter.composeapp.generated.resources.schedule
 import churchpresenter.composeapp.generated.resources.schedule_note_placeholder
 import churchpresenter.composeapp.generated.resources.tooltip_note
+import churchpresenter.composeapp.generated.resources.tooltip_note_clear
+import churchpresenter.composeapp.generated.resources.tooltip_note_done
 import churchpresenter.composeapp.generated.resources.tooltip_redo
 import churchpresenter.composeapp.generated.resources.tooltip_undo
 import churchpresenter.composeapp.generated.resources.schedule_add_files
@@ -919,25 +927,76 @@ private fun ScheduleItemRow(
 
         // Inline note editor
         AnimatedVisibility(visible = noteExpanded) {
-            OutlinedTextField(
-                value = noteText,
-                onValueChange = { v ->
-                    noteText = v
-                    onNoteChanged(v)
-                },
+            val noteInteractionSource = remember { MutableInteractionSource() }
+            val noteFieldFocused by noteInteractionSource.collectIsFocusedAsState()
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = 36.dp, end = 12.dp, bottom = 8.dp),
-                placeholder = {
-                    Text(
-                        stringResource(Res.string.schedule_note_placeholder),
-                        style = MaterialTheme.typography.bodySmall
-                    )
-                },
-                textStyle = MaterialTheme.typography.bodySmall,
-                singleLine = false,
-                maxLines = 3
-            )
+                    .padding(start = 36.dp, end = 12.dp, bottom = 8.dp)
+                    .border(
+                        width = 1.dp,
+                        color = if (noteFieldFocused) MaterialTheme.colorScheme.primary
+                                else MaterialTheme.colorScheme.outline,
+                        shape = RoundedCornerShape(4.dp)
+                    ),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                BasicTextField(
+                    value = noteText,
+                    onValueChange = { noteText = it },
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(horizontal = 12.dp, vertical = 10.dp),
+                    textStyle = MaterialTheme.typography.bodySmall.copy(
+                        color = MaterialTheme.colorScheme.onSurface
+                    ),
+                    cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                    maxLines = 3,
+                    interactionSource = noteInteractionSource,
+                    decorationBox = { innerTextField ->
+                        Box {
+                            if (noteText.isEmpty()) {
+                                Text(
+                                    stringResource(Res.string.schedule_note_placeholder),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                                )
+                            }
+                            innerTextField()
+                        }
+                    }
+                )
+                VerticalDivider(
+                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.4f),
+                    thickness = 1.dp
+                )
+                TooltipIconButton(
+                    painter = painterResource(Res.drawable.ic_check),
+                    text = stringResource(Res.string.tooltip_note_done),
+                    onClick = {
+                        onNoteChanged(noteText)
+                        noteExpanded = false
+                    },
+                    buttonSize = 36.dp,
+                    iconSize = 18.dp,
+                    iconTint = MaterialTheme.colorScheme.inverseSurface
+                )
+                VerticalDivider(
+                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.4f),
+                    thickness = 1.dp
+                )
+                TooltipIconButton(
+                    painter = painterResource(Res.drawable.ic_close),
+                    text = stringResource(Res.string.tooltip_note_clear),
+                    onClick = {
+                        noteText = ""
+                        onNoteChanged("")
+                    },
+                    buttonSize = 36.dp,
+                    iconSize = 18.dp,
+                    iconTint = MaterialTheme.colorScheme.error
+                )
+            }
         }
     }
 }
