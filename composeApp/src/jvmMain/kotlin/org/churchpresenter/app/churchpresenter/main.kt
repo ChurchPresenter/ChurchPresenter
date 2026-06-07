@@ -263,7 +263,11 @@ fun main() {
         val presenterManager = remember { PresenterManager() }
 
         var licenseAccepted by remember { mutableStateOf(appSettings.licenseAccepted) }
-        var showSetupWizard by remember { mutableStateOf(!appSettings.setupWizardShown) }
+        var showSetupWizard by remember {
+            val bibleReady = appSettings.bibleSettings.primaryBible.isNotEmpty()
+            val songsReady = appSettings.songSettings.storageDirectory.isNotEmpty()
+            mutableStateOf(!appSettings.setupWizardShown && !(bibleReady && songsReady))
+        }
 
         var currentLanguage by remember {
             val savedLanguageCode = appSettings.language
