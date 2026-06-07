@@ -1495,6 +1495,17 @@
     <string name="setup_step3_step3">3. Klik op "Bladeren…" naast Liederen Opslagmap</string>
     <string name="setup_step3_step4">4. Selecteer een map met uw liedbestanden</string>
     <string name="setup_step3_tip">Liederen kunnen in OpenLyrics-, SongPro- of ChurchPresenter-formaat zijn.</string>
+    <string name="setup_step5_title">VLC Media Player</string>
+    <string name="setup_step5_subtitle">Vereist voor video- en audioweergave in dia's</string>
+    <string name="setup_step5_vlc_ok">VLC is geïnstalleerd en klaar</string>
+    <string name="setup_step5_vlc_missing">VLC is niet gevonden op dit systeem</string>
+    <string name="setup_step5_vlc_wrong_arch">Verkeerde VLC-architectuur geïnstalleerd</string>
+    <string name="setup_step5_vlc_wrong_arch_detail">Uw CPU-architectuur verschilt van de geïnstalleerde VLC. Download de juiste versie hieronder.</string>
+    <string name="setup_step5_download_silicon">VLC downloaden (Apple Silicon)</string>
+    <string name="setup_step5_download_intel">VLC downloaden (Intel)</string>
+    <string name="setup_step5_download">VLC downloaden</string>
+    <string name="setup_step5_recheck">Opnieuw controleren</string>
+    <string name="setup_step5_linux_tip">Op Linux installeert u VLC via uw pakketbeheerder (bijv. sudo apt install vlc).</string>
     <string name="setup_step4_title">U bent klaar!</string>
     <string name="setup_step4_body">U kunt altijd meer inhoud toevoegen of instellingen aanpassen door op de ⚙ Instellingen knop in de werkbalk te klikken.</string>
     <string name="setup_step4_hint">Deze gids is altijd beschikbaar via Help → Aan de slag.</string>

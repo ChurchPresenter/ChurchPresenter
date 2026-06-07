@@ -1473,6 +1473,17 @@
     <string name="setup_step3_step3">3. Klicken Sie auf "Durchsuchen…" neben Lieder-Speicherverzeichnis</string>
     <string name="setup_step3_step4">4. Wählen Sie einen Ordner mit Ihren Liederdateien</string>
     <string name="setup_step3_tip">Lieder können im OpenLyrics-, SongPro- oder ChurchPresenter-Format vorliegen.</string>
+    <string name="setup_step5_title">VLC Media Player</string>
+    <string name="setup_step5_subtitle">Erforderlich für die Video- und Audiowiedergabe in Folien</string>
+    <string name="setup_step5_vlc_ok">VLC ist installiert und bereit</string>
+    <string name="setup_step5_vlc_missing">VLC wurde auf diesem System nicht gefunden</string>
+    <string name="setup_step5_vlc_wrong_arch">Falsche VLC-Architektur installiert</string>
+    <string name="setup_step5_vlc_wrong_arch_detail">Ihre CPU-Architektur unterscheidet sich von der installierten VLC-Version. Laden Sie den richtigen Build unten herunter.</string>
+    <string name="setup_step5_download_silicon">VLC herunterladen (Apple Silicon)</string>
+    <string name="setup_step5_download_intel">VLC herunterladen (Intel)</string>
+    <string name="setup_step5_download">VLC herunterladen</string>
+    <string name="setup_step5_recheck">Erneut prüfen</string>
+    <string name="setup_step5_linux_tip">Unter Linux installieren Sie VLC über Ihren Paketmanager (z.B. sudo apt install vlc).</string>
     <string name="setup_step4_title">Alles bereit!</string>
     <string name="setup_step4_body">Sie können jederzeit weitere Inhalte hinzufügen oder Einstellungen anpassen, indem Sie in der Symbolleiste auf die Schaltfläche ⚙ Einstellungen klicken.</string>
     <string name="setup_step4_hint">Diese Anleitung ist jederzeit über Hilfe → Erste Schritte verfügbar.</string>

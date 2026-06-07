@@ -1473,6 +1473,17 @@
     <string name="setup_step3_step3">3. Әндер сақтау каталогының жанындағы "Шолу…" түймесін басыңыз</string>
     <string name="setup_step3_step4">4. Ән файлдары бар қалтаны таңдаңыз</string>
     <string name="setup_step3_tip">Әндер OpenLyrics, SongPro немесе ChurchPresenter форматында болуы мүмкін.</string>
+    <string name="setup_step5_title">VLC Media Player</string>
+    <string name="setup_step5_subtitle">Слайдтардағы бейне мен дыбысты ойнату үшін қажет</string>
+    <string name="setup_step5_vlc_ok">VLC орнатылған және дайын</string>
+    <string name="setup_step5_vlc_missing">VLC осы жүйеде табылмады</string>
+    <string name="setup_step5_vlc_wrong_arch">VLC-тің қате архитектурасы орнатылған</string>
+    <string name="setup_step5_vlc_wrong_arch_detail">Процессор архитектурасы орнатылған VLC-тен ерекшеленеді. Төменде дұрыс нұсқаны жүктеп алыңыз.</string>
+    <string name="setup_step5_download_silicon">VLC жүктеп алу (Apple Silicon)</string>
+    <string name="setup_step5_download_intel">VLC жүктеп алу (Intel)</string>
+    <string name="setup_step5_download">VLC жүктеп алу</string>
+    <string name="setup_step5_recheck">Қайта тексеру</string>
+    <string name="setup_step5_linux_tip">Linux-та VLC-ті пакет менеджері арқылы орнатыңыз (мыс., sudo apt install vlc).</string>
     <string name="setup_step4_title">Бәрі дайын!</string>
     <string name="setup_step4_body">Саймандар тақтасындағы ⚙ Параметрлер түймесін басу арқылы кез келген уақытта мазмұн қосуға немесе параметрлерді реттеуге болады.</string>
     <string name="setup_step4_hint">Бұл нұсқаулық кез келген уақытта Анықтама → Бастау арқылы қол жетімді.</string>

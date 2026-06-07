@@ -1500,6 +1500,17 @@
     <string name="setup_step3_step3">3. Click "Browse…" next to Songs Storage Directory</string>
     <string name="setup_step3_step4">4. Select a folder containing your song files</string>
     <string name="setup_step3_tip">Songs can be in OpenLyrics, SongPro, or ChurchPresenter format.</string>
+    <string name="setup_step5_title">VLC Media Player</string>
+    <string name="setup_step5_subtitle">Needed for video and audio playback in slides</string>
+    <string name="setup_step5_vlc_ok">VLC is installed and ready</string>
+    <string name="setup_step5_vlc_missing">VLC was not found on this system</string>
+    <string name="setup_step5_vlc_wrong_arch">Wrong VLC architecture installed</string>
+    <string name="setup_step5_vlc_wrong_arch_detail">Your CPU architecture differs from the installed VLC. Download the correct build below.</string>
+    <string name="setup_step5_download">Download VLC</string>
+    <string name="setup_step5_download_silicon">Download VLC (Apple Silicon)</string>
+    <string name="setup_step5_download_intel">Download VLC (Intel)</string>
+    <string name="setup_step5_recheck">Recheck</string>
+    <string name="setup_step5_linux_tip">On Linux, install VLC via your package manager (e.g. sudo apt install vlc).</string>
     <string name="setup_step4_title">You're All Set!</string>
     <string name="setup_step4_body">You can always add more content or adjust settings later by clicking the ⚙ Settings button in the toolbar.</string>
     <string name="setup_step4_hint">This guide is available anytime from Help → Getting Started.</string>

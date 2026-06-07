@@ -1502,6 +1502,17 @@
     <string name="setup_step3_step3">3. Faceți clic pe „Răsfoire…" lângă Directorul de cântece</string>
     <string name="setup_step3_step4">4. Selectați un dosar cu fișierele dvs. de cântece</string>
     <string name="setup_step3_tip">Cântecele pot fi în format OpenLyrics, SongPro sau ChurchPresenter.</string>
+    <string name="setup_step5_title">VLC Media Player</string>
+    <string name="setup_step5_subtitle">Necesar pentru redarea video și audio în diapozitive</string>
+    <string name="setup_step5_vlc_ok">VLC este instalat și gata</string>
+    <string name="setup_step5_vlc_missing">VLC nu a fost găsit pe acest sistem</string>
+    <string name="setup_step5_vlc_wrong_arch">Arhitectură VLC incorectă instalată</string>
+    <string name="setup_step5_vlc_wrong_arch_detail">Arhitectura procesorului diferă de cea a VLC-ului instalat. Descărcați versiunea corectă mai jos.</string>
+    <string name="setup_step5_download_silicon">Descărcați VLC (Apple Silicon)</string>
+    <string name="setup_step5_download_intel">Descărcați VLC (Intel)</string>
+    <string name="setup_step5_download">Descărcați VLC</string>
+    <string name="setup_step5_recheck">Reverificați</string>
+    <string name="setup_step5_linux_tip">Pe Linux, instalați VLC prin managerul de pachete (ex. sudo apt install vlc).</string>
     <string name="setup_step4_title">Ești gata!</string>
     <string name="setup_step4_body">Puteți adăuga oricând conținut suplimentar sau ajusta setările folosind butonul ⚙ Setări din bara de instrumente.</string>
     <string name="setup_step4_hint">Acest ghid este disponibil oricând din Ajutor → Noțiuni de bază.</string>

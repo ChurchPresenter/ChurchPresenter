@@ -1495,6 +1495,17 @@
     <string name="setup_step3_step3">3. Cliquez sur "Parcourir…" à côté de Répertoire de stockage des cantiques</string>
     <string name="setup_step3_step4">4. Sélectionnez un dossier contenant vos fichiers de cantiques</string>
     <string name="setup_step3_tip">Les cantiques peuvent être au format OpenLyrics, SongPro ou ChurchPresenter.</string>
+    <string name="setup_step5_title">VLC Media Player</string>
+    <string name="setup_step5_subtitle">Nécessaire pour la lecture de vidéo et audio dans les diapositives</string>
+    <string name="setup_step5_vlc_ok">VLC est installé et prêt</string>
+    <string name="setup_step5_vlc_missing">VLC n'a pas été trouvé sur ce système</string>
+    <string name="setup_step5_vlc_wrong_arch">Mauvaise architecture VLC installée</string>
+    <string name="setup_step5_vlc_wrong_arch_detail">L'architecture de votre processeur diffère de celle du VLC installé. Téléchargez la bonne version ci-dessous.</string>
+    <string name="setup_step5_download_silicon">Télécharger VLC (Apple Silicon)</string>
+    <string name="setup_step5_download_intel">Télécharger VLC (Intel)</string>
+    <string name="setup_step5_download">Télécharger VLC</string>
+    <string name="setup_step5_recheck">Revérifier</string>
+    <string name="setup_step5_linux_tip">Sous Linux, installez VLC via votre gestionnaire de paquets (ex. sudo apt install vlc).</string>
     <string name="setup_step4_title">Vous êtes prêt !</string>
     <string name="setup_step4_body">Vous pouvez toujours ajouter du contenu ou ajuster les paramètres en cliquant sur le bouton ⚙ Paramètres dans la barre d'outils.</string>
     <string name="setup_step4_hint">Ce guide est disponible à tout moment depuis Aide → Prise en main.</string>

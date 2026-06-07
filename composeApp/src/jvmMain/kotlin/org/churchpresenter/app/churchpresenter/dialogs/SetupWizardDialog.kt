@@ -31,6 +31,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.MusicNote
+import androidx.compose.material.icons.filled.OndemandVideo
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -39,6 +41,15 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import org.churchpresenter.app.churchpresenter.composables.isVlcArchMismatch
+import org.churchpresenter.app.churchpresenter.composables.isVlcAvailable
+import org.churchpresenter.app.churchpresenter.composables.recheckVlcAvailability
+import java.awt.Desktop
+import java.net.URI
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -47,6 +58,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -55,6 +68,7 @@ import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.rememberWindowState
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.ic_app_icon
+import churchpresenter.composeapp.generated.resources.ic_settings
 import churchpresenter.composeapp.generated.resources.dark_theme
 import churchpresenter.composeapp.generated.resources.forest_theme
 import churchpresenter.composeapp.generated.resources.light_theme
@@ -89,6 +103,23 @@ import churchpresenter.composeapp.generated.resources.setup_step3_title
 import churchpresenter.composeapp.generated.resources.setup_step4_body
 import churchpresenter.composeapp.generated.resources.setup_step4_hint
 import churchpresenter.composeapp.generated.resources.setup_step4_title
+import churchpresenter.composeapp.generated.resources.setup_step5_download
+import churchpresenter.composeapp.generated.resources.setup_step5_download_intel
+import churchpresenter.composeapp.generated.resources.setup_step5_download_silicon
+import churchpresenter.composeapp.generated.resources.setup_step5_linux_tip
+import churchpresenter.composeapp.generated.resources.setup_step5_recheck
+import churchpresenter.composeapp.generated.resources.setup_step5_subtitle
+import churchpresenter.composeapp.generated.resources.setup_step5_title
+import churchpresenter.composeapp.generated.resources.setup_step5_vlc_missing
+import churchpresenter.composeapp.generated.resources.setup_step5_vlc_ok
+import churchpresenter.composeapp.generated.resources.setup_step5_vlc_wrong_arch
+import churchpresenter.composeapp.generated.resources.setup_step5_vlc_wrong_arch_detail
+import churchpresenter.composeapp.generated.resources.shortcut_description_settings
+import churchpresenter.composeapp.generated.resources.appearance
+import churchpresenter.composeapp.generated.resources.bible
+import churchpresenter.composeapp.generated.resources.song
+import churchpresenter.composeapp.generated.resources.background
+import churchpresenter.composeapp.generated.resources.projection
 import churchpresenter.composeapp.generated.resources.setup_wizard_back
 import churchpresenter.composeapp.generated.resources.setup_wizard_done
 import churchpresenter.composeapp.generated.resources.setup_wizard_next
@@ -102,22 +133,24 @@ import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
-private const val TOTAL_STEPS = 6
+private const val TOTAL_STEPS = 7
 
 @Composable
 fun SetupWizardDialog(
     theme: ThemeMode,
     selectedLanguage: Language,
+    alwaysOnTop: Boolean = true,
     onLanguageSelected: (Language) -> Unit,
     onThemeSelected: (ThemeMode) -> Unit,
+    onOpenSettings: () -> Unit = {},
     onDismiss: () -> Unit
 ) {
     var step by remember { mutableStateOf(0) }
     var goingForward by remember { mutableStateOf(true) }
 
     val windowState = rememberWindowState(
-        width = 640.dp,
-        height = 540.dp,
+        width = 700.dp,
+        height = 620.dp,
         position = WindowPosition(Alignment.Center)
     )
 
@@ -127,7 +160,7 @@ fun SetupWizardDialog(
         icon = painterResource(Res.drawable.ic_app_icon),
         state = windowState,
         resizable = false,
-        alwaysOnTop = true
+        alwaysOnTop = alwaysOnTop
     ) {
         LanguageProvider(language = selectedLanguage) {
             AppThemeWrapper(theme = theme) {
@@ -196,9 +229,10 @@ fun SetupWizardDialog(
                                         onThemeSelected = onThemeSelected
                                     )
                                     2 -> WelcomeStep()
-                                    3 -> BibleStep()
-                                    4 -> SongsStep()
-                                    5 -> ReadyStep()
+                                    3 -> BibleStep(onOpenSettings = onOpenSettings)
+                                    4 -> SongsStep(onOpenSettings = onOpenSettings)
+                                    5 -> VlcStep()
+                                    6 -> ReadyStep()
                                 }
                             }
                         }
@@ -432,7 +466,7 @@ private fun WelcomeStep() {
 }
 
 @Composable
-private fun BibleStep() {
+private fun BibleStep(onOpenSettings: () -> Unit) {
     val scrollState = rememberScrollState()
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
@@ -460,16 +494,48 @@ private fun BibleStep() {
                 color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
             )
             Spacer(modifier = Modifier.height(4.dp))
-            StepList(
-                steps = listOf(
-                    stringResource(Res.string.setup_step2_step1),
-                    stringResource(Res.string.setup_step2_step2),
-                    stringResource(Res.string.setup_step2_step3),
-                    stringResource(Res.string.setup_step2_step4),
-                    stringResource(Res.string.setup_step2_step5),
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                Text(
+                    text = stringResource(Res.string.setup_step2_step1),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.85f)
                 )
-            )
-            Spacer(modifier = Modifier.height(4.dp))
+                OutlinedButton(onClick = onOpenSettings) {
+                    Image(
+                        painter = painterResource(Res.drawable.ic_settings),
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp),
+                        colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface)
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(stringResource(Res.string.shortcut_description_settings))
+                }
+                Text(
+                    text = stringResource(Res.string.setup_step2_step2),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.85f)
+                )
+                SettingsTabHint(highlightedTab = stringResource(Res.string.appearance))
+                Text(
+                    text = stringResource(Res.string.setup_step2_step3),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.85f)
+                )
+                Text(
+                    text = stringResource(Res.string.setup_step2_step4),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.85f)
+                )
+                Text(
+                    text = stringResource(Res.string.setup_step2_step5),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.85f)
+                )
+                SettingsTabHint(highlightedTab = stringResource(Res.string.bible))
+            }
             TipBox(text = stringResource(Res.string.setup_step2_tip))
             TipBox(text = stringResource(Res.string.setup_step2_tip2))
         }
@@ -481,7 +547,7 @@ private fun BibleStep() {
 }
 
 @Composable
-private fun SongsStep() {
+private fun SongsStep(onOpenSettings: () -> Unit) {
     val scrollState = rememberScrollState()
     Box(modifier = Modifier.fillMaxSize()) {
     Column(
@@ -509,21 +575,196 @@ private fun SongsStep() {
             color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
         )
         Spacer(modifier = Modifier.height(4.dp))
-        StepList(
-            steps = listOf(
-                stringResource(Res.string.setup_step3_step1),
-                stringResource(Res.string.setup_step3_step2),
-                stringResource(Res.string.setup_step3_step3),
-                stringResource(Res.string.setup_step3_step4),
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            Text(
+                text = stringResource(Res.string.setup_step3_step1),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.85f)
             )
-        )
-        Spacer(modifier = Modifier.height(4.dp))
+            OutlinedButton(onClick = onOpenSettings) {
+                Icon(
+                    painter = painterResource(Res.drawable.ic_settings),
+                    contentDescription = null,
+                    modifier = Modifier.size(16.dp)
+                )
+                Spacer(modifier = Modifier.width(6.dp))
+                Text(stringResource(Res.string.shortcut_description_settings))
+            }
+            Text(
+                text = stringResource(Res.string.setup_step3_step2),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.85f)
+            )
+            SettingsTabHint(highlightedTab = stringResource(Res.string.appearance))
+            Text(
+                text = stringResource(Res.string.setup_step3_step3),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.85f)
+            )
+            Text(
+                text = stringResource(Res.string.setup_step3_step4),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.85f)
+            )
+        }
         TipBox(text = stringResource(Res.string.setup_step3_tip))
     }
     VerticalScrollbar(
         adapter = rememberScrollbarAdapter(scrollState),
         modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight()
     )
+    }
+}
+
+@Composable
+private fun VlcStep() {
+    val osName = remember { System.getProperty("os.name", "").lowercase() }
+    val arch = remember { System.getProperty("os.arch", "").lowercase() }
+    val isMac = remember { "mac" in osName || "darwin" in osName }
+    val isWin = remember { "win" in osName }
+    val isArm = remember { "aarch64" in arch || "arm" in arch }
+    val isLinux = remember { !isMac && !isWin }
+
+    var vlcOk by remember { mutableStateOf(isVlcAvailable) }
+    var archMismatch by remember { mutableStateOf(isVlcArchMismatch) }
+    var rechecking by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
+
+    val downloadUrl = remember {
+        when {
+            isWin -> "https://www.videolan.org/vlc/download-windows.html"
+            isMac && isArm -> "https://www.videolan.org/vlc/download-macosx.html"
+            isMac -> "https://www.videolan.org/vlc/download-macosx.html"
+            else -> "https://www.videolan.org/vlc/download-linux.html"
+        }
+    }
+
+    val scrollState = rememberScrollState()
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier.fillMaxWidth().verticalScroll(scrollState).padding(end = 12.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Filled.OndemandVideo,
+                contentDescription = null,
+                modifier = Modifier.size(52.dp),
+                tint = MaterialTheme.colorScheme.primary
+            )
+            Text(
+                text = stringResource(Res.string.setup_step5_title),
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+            Text(
+                text = stringResource(Res.string.setup_step5_subtitle),
+                style = MaterialTheme.typography.bodyMedium,
+                textAlign = TextAlign.Center,
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+
+            // Status card
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(MaterialTheme.shapes.medium)
+                    .background(
+                        when {
+                            vlcOk -> Color(0xFF1B5E20).copy(alpha = 0.12f)
+                            archMismatch -> Color(0xFFE65100).copy(alpha = 0.12f)
+                            else -> MaterialTheme.colorScheme.errorContainer
+                        }
+                    )
+                    .padding(16.dp)
+            ) {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        Icon(
+                            imageVector = when {
+                                vlcOk -> Icons.Filled.CheckCircle
+                                archMismatch -> Icons.Filled.Warning
+                                else -> Icons.Filled.Warning
+                            },
+                            contentDescription = null,
+                            modifier = Modifier.size(24.dp),
+                            tint = when {
+                                vlcOk -> Color(0xFF2E7D32)
+                                archMismatch -> Color(0xFFE65100)
+                                else -> MaterialTheme.colorScheme.error
+                            }
+                        )
+                        Text(
+                            text = stringResource(
+                                when {
+                                    vlcOk -> Res.string.setup_step5_vlc_ok
+                                    archMismatch -> Res.string.setup_step5_vlc_wrong_arch
+                                    else -> Res.string.setup_step5_vlc_missing
+                                }
+                            ),
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            color = when {
+                                vlcOk -> Color(0xFF2E7D32)
+                                archMismatch -> Color(0xFFE65100)
+                                else -> MaterialTheme.colorScheme.error
+                            }
+                        )
+                    }
+                    if (!vlcOk) {
+                        if (archMismatch) {
+                            Text(
+                                text = stringResource(Res.string.setup_step5_vlc_wrong_arch_detail),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.75f)
+                            )
+                        }
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Button(onClick = {
+                                runCatching { Desktop.getDesktop().browse(URI(downloadUrl)) }
+                            }) {
+                                Text(stringResource(when {
+                                    isMac && isArm -> Res.string.setup_step5_download_silicon
+                                    isMac -> Res.string.setup_step5_download_intel
+                                    else -> Res.string.setup_step5_download
+                                }))
+                            }
+                            OutlinedButton(
+                                onClick = {
+                                    scope.launch {
+                                        rechecking = true
+                                        val result = withContext(Dispatchers.IO) { recheckVlcAvailability() }
+                                        vlcOk = result
+                                        archMismatch = isVlcArchMismatch
+                                        rechecking = false
+                                    }
+                                },
+                                enabled = !rechecking
+                            ) {
+                                Text(stringResource(Res.string.setup_step5_recheck))
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (isLinux) {
+                TipBox(text = stringResource(Res.string.setup_step5_linux_tip))
+            }
+        }
+        VerticalScrollbar(
+            adapter = rememberScrollbarAdapter(scrollState),
+            modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight()
+        )
     }
 }
 
@@ -575,6 +816,52 @@ private fun StepList(steps: List<String>) {
                 color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.85f)
             )
         }
+    }
+}
+
+@Composable
+private fun SettingsTabHint(highlightedTab: String) {
+    val tabs = listOf(
+        stringResource(Res.string.appearance),
+        stringResource(Res.string.bible),
+        stringResource(Res.string.song),
+        stringResource(Res.string.background),
+        stringResource(Res.string.projection),
+    )
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(MaterialTheme.shapes.small)
+            .background(MaterialTheme.colorScheme.surfaceVariant)
+            .padding(horizontal = 8.dp, vertical = 6.dp),
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        tabs.forEach { tab ->
+            val active = tab == highlightedTab
+            Box(
+                modifier = Modifier
+                    .clip(MaterialTheme.shapes.extraSmall)
+                    .background(
+                        if (active) MaterialTheme.colorScheme.primary
+                        else MaterialTheme.colorScheme.surfaceVariant
+                    )
+                    .padding(horizontal = 10.dp, vertical = 4.dp)
+            ) {
+                Text(
+                    text = tab,
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = if (active) FontWeight.Bold else FontWeight.Normal,
+                    color = if (active) MaterialTheme.colorScheme.onPrimary
+                            else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                )
+            }
+        }
+        Text(
+            text = "…",
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
+        )
     }
 }
 

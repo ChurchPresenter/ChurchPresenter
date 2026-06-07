@@ -1476,6 +1476,17 @@
     <string name="setup_step3_step3">3. Нажмите «Обзор…» рядом с директорией хранения песен</string>
     <string name="setup_step3_step4">4. Выберите папку с вашими файлами песен</string>
     <string name="setup_step3_tip">Песни могут быть в формате OpenLyrics, SongPro или ChurchPresenter.</string>
+    <string name="setup_step5_title">VLC Media Player</string>
+    <string name="setup_step5_subtitle">Необходим для воспроизведения видео и аудио в слайдах</string>
+    <string name="setup_step5_vlc_ok">VLC установлен и готов к работе</string>
+    <string name="setup_step5_vlc_missing">VLC не найден на этом компьютере</string>
+    <string name="setup_step5_vlc_wrong_arch">Установлена неподходящая версия VLC (несовместимая архитектура)</string>
+    <string name="setup_step5_vlc_wrong_arch_detail">Архитектура процессора отличается от той, под которую собран установленный VLC. Скачайте подходящую версию ниже.</string>
+    <string name="setup_step5_download_silicon">Скачать VLC (Apple Silicon)</string>
+    <string name="setup_step5_download_intel">Скачать VLC (Intel)</string>
+    <string name="setup_step5_download">Скачать VLC</string>
+    <string name="setup_step5_recheck">Проверить снова</string>
+    <string name="setup_step5_linux_tip">На Linux установите VLC через менеджер пакетов (например, sudo apt install vlc).</string>
     <string name="setup_step4_title">Всё готово!</string>
     <string name="setup_step4_body">Вы всегда можете добавить контент или изменить настройки с помощью кнопки ⚙ Настройки на панели инструментов.</string>
     <string name="setup_step4_hint">Это руководство доступно в любое время через Справка → Начало работы.</string>

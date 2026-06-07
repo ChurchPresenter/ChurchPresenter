@@ -1495,6 +1495,17 @@
     <string name="setup_step3_step3">3. Haga clic en "Examinar…" junto a Directorio de almacenamiento de canciones</string>
     <string name="setup_step3_step4">4. Seleccione una carpeta que contenga sus archivos de canciones</string>
     <string name="setup_step3_tip">Las canciones pueden estar en formato OpenLyrics, SongPro o ChurchPresenter.</string>
+    <string name="setup_step5_title">VLC Media Player</string>
+    <string name="setup_step5_subtitle">Necesario para la reproducción de vídeo y audio en diapositivas</string>
+    <string name="setup_step5_vlc_ok">VLC está instalado y listo</string>
+    <string name="setup_step5_vlc_missing">VLC no se encontró en este sistema</string>
+    <string name="setup_step5_vlc_wrong_arch">Arquitectura de VLC incorrecta instalada</string>
+    <string name="setup_step5_vlc_wrong_arch_detail">La arquitectura de su CPU difiere de la del VLC instalado. Descargue la versión correcta a continuación.</string>
+    <string name="setup_step5_download_silicon">Descargar VLC (Apple Silicon)</string>
+    <string name="setup_step5_download_intel">Descargar VLC (Intel)</string>
+    <string name="setup_step5_download">Descargar VLC</string>
+    <string name="setup_step5_recheck">Volver a verificar</string>
+    <string name="setup_step5_linux_tip">En Linux, instale VLC a través de su gestor de paquetes (p.ej. sudo apt install vlc).</string>
     <string name="setup_step4_title">¡Todo listo!</string>
     <string name="setup_step4_body">Siempre puede agregar más contenido o ajustar la configuración haciendo clic en el botón ⚙ Configuración en la barra de herramientas.</string>
     <string name="setup_step4_hint">Esta guía está disponible en cualquier momento desde Ayuda → Primeros pasos.</string>

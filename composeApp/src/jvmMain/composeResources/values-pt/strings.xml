@@ -1495,6 +1495,17 @@
     <string name="setup_step3_step3">3. Clique em "Procurar…" ao lado do Diretório de armazenamento de hinos</string>
     <string name="setup_step3_step4">4. Selecione uma pasta contendo seus arquivos de hinos</string>
     <string name="setup_step3_tip">Hinos podem estar no formato OpenLyrics, SongPro ou ChurchPresenter.</string>
+    <string name="setup_step5_title">VLC Media Player</string>
+    <string name="setup_step5_subtitle">Necessário para reprodução de vídeo e áudio em slides</string>
+    <string name="setup_step5_vlc_ok">VLC está instalado e pronto</string>
+    <string name="setup_step5_vlc_missing">VLC não foi encontrado neste sistema</string>
+    <string name="setup_step5_vlc_wrong_arch">Arquitetura VLC incorreta instalada</string>
+    <string name="setup_step5_vlc_wrong_arch_detail">A arquitetura do seu processador é diferente do VLC instalado. Baixe a versão correta abaixo.</string>
+    <string name="setup_step5_download_silicon">Baixar VLC (Apple Silicon)</string>
+    <string name="setup_step5_download_intel">Baixar VLC (Intel)</string>
+    <string name="setup_step5_download">Baixar VLC</string>
+    <string name="setup_step5_recheck">Reverificar</string>
+    <string name="setup_step5_linux_tip">No Linux, instale o VLC pelo gerenciador de pacotes (ex. sudo apt install vlc).</string>
     <string name="setup_step4_title">Tudo pronto!</string>
     <string name="setup_step4_body">Você sempre pode adicionar mais conteúdo ou ajustar as configurações clicando no botão ⚙ Configurações na barra de ferramentas.</string>
     <string name="setup_step4_hint">Este guia está disponível a qualquer momento em Ajuda → Introdução.</string>

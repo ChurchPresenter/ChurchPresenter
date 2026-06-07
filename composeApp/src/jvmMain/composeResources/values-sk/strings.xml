@@ -1495,6 +1495,17 @@
     <string name="setup_step3_step3">3. Kliknite na "Prehľadávať…" vedľa Adresára úložiska piesní</string>
     <string name="setup_step3_step4">4. Vyberte priečinok obsahujúci vaše súbory piesní</string>
     <string name="setup_step3_tip">Piesne môžu byť vo formáte OpenLyrics, SongPro alebo ChurchPresenter.</string>
+    <string name="setup_step5_title">VLC Media Player</string>
+    <string name="setup_step5_subtitle">Potrebný na prehrávanie videa a zvuku v snímkach</string>
+    <string name="setup_step5_vlc_ok">VLC je nainštalované a pripravené</string>
+    <string name="setup_step5_vlc_missing">VLC sa nenašlo na tomto systéme</string>
+    <string name="setup_step5_vlc_wrong_arch">Nainštalovaná nesprávna architektúra VLC</string>
+    <string name="setup_step5_vlc_wrong_arch_detail">Architektúra vášho procesora sa líši od nainštalovaného VLC. Stiahnite správnu verziu nižšie.</string>
+    <string name="setup_step5_download_silicon">Stiahnuť VLC (Apple Silicon)</string>
+    <string name="setup_step5_download_intel">Stiahnuť VLC (Intel)</string>
+    <string name="setup_step5_download">Stiahnuť VLC</string>
+    <string name="setup_step5_recheck">Znovu skontrolovať</string>
+    <string name="setup_step5_linux_tip">Na Linuxe nainštalujte VLC cez správcu balíkov (napr. sudo apt install vlc).</string>
     <string name="setup_step4_title">Všetko je pripravené!</string>
     <string name="setup_step4_body">Vždy môžete pridať ďalší obsah alebo upraviť nastavenia kliknutím na tlačidlo ⚙ Nastavenia na paneli nástrojov.</string>
     <string name="setup_step4_hint">Tento sprievodca je dostupný kedykoľvek z Pomoc → Začíname.</string>

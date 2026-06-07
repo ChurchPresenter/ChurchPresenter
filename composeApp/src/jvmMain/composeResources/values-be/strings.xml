@@ -1473,6 +1473,17 @@
     <string name="setup_step3_step3">3. Націсніце "Агляд…" побач з Каталогам захоўвання песняў</string>
     <string name="setup_step3_step4">4. Выберыце папку з файламі песняў</string>
     <string name="setup_step3_tip">Песні могуць быць у фармаце OpenLyrics, SongPro або ChurchPresenter.</string>
+    <string name="setup_step5_title">VLC Media Player</string>
+    <string name="setup_step5_subtitle">Неабходны для прайгравання відэа і аўдыё ў слайдах</string>
+    <string name="setup_step5_vlc_ok">VLC усталяваны і гатовы да работы</string>
+    <string name="setup_step5_vlc_missing">VLC не знойдзены на гэтым кампутары</string>
+    <string name="setup_step5_vlc_wrong_arch">Усталявана несумяшчальная версія VLC (няправільная архітэктура)</string>
+    <string name="setup_step5_vlc_wrong_arch_detail">Архітэктура працэсара адрозніваецца ад той, пад якую сабраны ўсталяваны VLC. Спампуйце патрэбную версію ніжэй.</string>
+    <string name="setup_step5_download_silicon">Спампаваць VLC (Apple Silicon)</string>
+    <string name="setup_step5_download_intel">Спампаваць VLC (Intel)</string>
+    <string name="setup_step5_download">Спампаваць VLC</string>
+    <string name="setup_step5_recheck">Праверыць зноў</string>
+    <string name="setup_step5_linux_tip">На Linux усталюйце VLC праз менеджар пакетаў (напрыклад, sudo apt install vlc).</string>
     <string name="setup_step4_title">Усё гатова!</string>
     <string name="setup_step4_body">Вы заўсёды можаце дадаць больш змесціва або наладзіць параметры, націснуўшы кнопку ⚙ Налады на панэлі інструментаў.</string>
     <string name="setup_step4_hint">Гэты кіраўнік даступны ў любы час у Даведка → Пачатак працы.</string>

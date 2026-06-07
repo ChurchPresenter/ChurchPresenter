@@ -1316,6 +1316,7 @@ fun main() {
             SetupWizardDialog(
                 theme = theme,
                 selectedLanguage = currentLanguage,
+                alwaysOnTop = !showOptionsDialog,
                 onLanguageSelected = { language ->
                     currentLanguage = language
                     appSettings = appSettings.copy(language = language.code)
@@ -1327,6 +1328,7 @@ fun main() {
                     appSettings = appSettings.copy(theme = newTheme.toString())
                     settingsManager.saveSettings(appSettings)
                 },
+                onOpenSettings = { showOptionsDialog = true },
                 onDismiss = {
                     val updated = appSettings.copy(setupWizardShown = true)
                     settingsManager.saveSettings(updated)
