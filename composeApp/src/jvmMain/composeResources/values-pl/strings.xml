@@ -1499,5 +1499,9 @@
     <string name="setup_step4_title">Wszystko gotowe!</string>
     <string name="setup_step4_body">Zawsze możesz dodać więcej treści lub dostosować ustawienia, klikając przycisk ⚙ Ustawienia w pasku narzędzi.</string>
     <string name="setup_step4_hint">Ten przewodnik jest dostępny w dowolnym momencie z Pomoc → Pierwsze kroki.</string>
+    <string name="autosave_restore_title">Przywrócić niezapisany plan?</string>
+    <string name="autosave_restore_message">Znaleziono niezapisany plan z %1$s. Czy chcesz go przywrócić?</string>
+    <string name="autosave_restore_confirm">Przywróć</string>
+    <string name="autosave_restore_discard">Odrzuć</string>
 </resources>
 

@@ -1521,4 +1521,8 @@
     <string name="setup_step4_title">Vous êtes prêt !</string>
     <string name="setup_step4_body">Vous pouvez toujours ajouter du contenu ou ajuster les paramètres en cliquant sur le bouton ⚙ Paramètres dans la barre d'outils.</string>
     <string name="setup_step4_hint">Ce guide est disponible à tout moment depuis Aide → Prise en main.</string>
+    <string name="autosave_restore_title">Restaurer le plan non sauvegardé ?</string>
+    <string name="autosave_restore_message">Un plan non sauvegardé de %1$s a été trouvé. Voulez-vous le restaurer ?</string>
+    <string name="autosave_restore_confirm">Restaurer</string>
+    <string name="autosave_restore_discard">Ignorer</string>
 </resources>

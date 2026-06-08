@@ -1499,5 +1499,9 @@
     <string name="setup_step4_title">Alles bereit!</string>
     <string name="setup_step4_body">Sie können jederzeit weitere Inhalte hinzufügen oder Einstellungen anpassen, indem Sie in der Symbolleiste auf die Schaltfläche ⚙ Einstellungen klicken.</string>
     <string name="setup_step4_hint">Diese Anleitung ist jederzeit über Hilfe → Erste Schritte verfügbar.</string>
+    <string name="autosave_restore_title">Nicht gespeicherten Plan wiederherstellen?</string>
+    <string name="autosave_restore_message">Es wurde ein nicht gespeicherter Plan von %1$s gefunden. Möchten Sie ihn wiederherstellen?</string>
+    <string name="autosave_restore_confirm">Wiederherstellen</string>
+    <string name="autosave_restore_discard">Verwerfen</string>
 </resources>
 

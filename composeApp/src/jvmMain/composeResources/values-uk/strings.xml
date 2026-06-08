@@ -1504,5 +1504,9 @@
     <string name="setup_step4_title">Все готово!</string>
     <string name="setup_step4_body">Ви завжди можете додати більше вмісту або налаштувати параметри, натиснувши кнопку ⚙ Налаштування на панелі інструментів.</string>
     <string name="setup_step4_hint">Цей посібник доступний в будь-який час у Довідка → Початок роботи.</string>
+    <string name="autosave_restore_title">Відновити незбережений розклад?</string>
+    <string name="autosave_restore_message">Знайдено незбережений розклад від %1$s. Бажаєте відновити його?</string>
+    <string name="autosave_restore_confirm">Відновити</string>
+    <string name="autosave_restore_discard">Відхилити</string>
 </resources>
 

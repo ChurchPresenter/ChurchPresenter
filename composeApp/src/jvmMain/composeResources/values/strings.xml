@@ -1528,4 +1528,8 @@
     <string name="setup_step4_title">You're All Set!</string>
     <string name="setup_step4_body">You can always add more content or adjust settings later by clicking the ⚙ Settings button in the toolbar.</string>
     <string name="setup_step4_hint">This guide is available anytime from Help → Getting Started.</string>
+    <string name="autosave_restore_title">Restore unsaved schedule?</string>
+    <string name="autosave_restore_message">An unsaved schedule from %1$s was found. Would you like to restore it?</string>
+    <string name="autosave_restore_confirm">Restore</string>
+    <string name="autosave_restore_discard">Discard</string>
 </resources>

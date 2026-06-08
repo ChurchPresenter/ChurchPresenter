@@ -298,6 +298,7 @@ fun MainDesktop(
     // expanding the schedule panel does NOT destroy the schedule items.
     val onScheduleChangedState = rememberUpdatedState(onScheduleChanged)
     val scheduleViewModel = remember { ScheduleViewModel(onScheduleChanged = { items -> onScheduleChangedState.value?.invoke(items) }) }
+    DisposableEffect(Unit) { onDispose { scheduleViewModel.dispose() } }
 
     val presentingMode by presenterManager.presentingMode
     val mainFocusRequester = remember { FocusRequester() }

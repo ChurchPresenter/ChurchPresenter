@@ -1528,4 +1528,8 @@
     <string name="setup_step4_title">Ești gata!</string>
     <string name="setup_step4_body">Puteți adăuga oricând conținut suplimentar sau ajusta setările folosind butonul ⚙ Setări din bara de instrumente.</string>
     <string name="setup_step4_hint">Acest ghid este disponibil oricând din Ajutor → Noțiuni de bază.</string>
+    <string name="autosave_restore_title">Restaurați planul nesalvat?</string>
+    <string name="autosave_restore_message">A fost găsit un plan nesalvat de la %1$s. Doriți să îl restaurați?</string>
+    <string name="autosave_restore_confirm">Restaurați</string>
+    <string name="autosave_restore_discard">Renunțați</string>
 </resources>

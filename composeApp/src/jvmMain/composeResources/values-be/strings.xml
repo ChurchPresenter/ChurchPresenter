@@ -1499,5 +1499,9 @@
     <string name="setup_step4_title">Усё гатова!</string>
     <string name="setup_step4_body">Вы заўсёды можаце дадаць больш змесціва або наладзіць параметры, націснуўшы кнопку ⚙ Налады на панэлі інструментаў.</string>
     <string name="setup_step4_hint">Гэты кіраўнік даступны ў любы час у Даведка → Пачатак працы.</string>
+    <string name="autosave_restore_title">Аднавіць незахаваны расклад?</string>
+    <string name="autosave_restore_message">Знойдзены незахаваны расклад ад %1$s. Хочаце аднавіць яго?</string>
+    <string name="autosave_restore_confirm">Аднавіць</string>
+    <string name="autosave_restore_discard">Адхіліць</string>
 </resources>
 

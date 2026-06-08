@@ -1521,4 +1521,8 @@
     <string name="setup_step4_title">¡Todo listo!</string>
     <string name="setup_step4_body">Siempre puede agregar más contenido o ajustar la configuración haciendo clic en el botón ⚙ Configuración en la barra de herramientas.</string>
     <string name="setup_step4_hint">Esta guía está disponible en cualquier momento desde Ayuda → Primeros pasos.</string>
+    <string name="autosave_restore_title">¿Restaurar el plan no guardado?</string>
+    <string name="autosave_restore_message">Se encontró un plan no guardado de %1$s. ¿Desea restaurarlo?</string>
+    <string name="autosave_restore_confirm">Restaurar</string>
+    <string name="autosave_restore_discard">Descartar</string>
 </resources>

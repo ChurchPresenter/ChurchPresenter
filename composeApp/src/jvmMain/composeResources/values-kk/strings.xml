@@ -1499,5 +1499,9 @@
     <string name="setup_step4_title">Бәрі дайын!</string>
     <string name="setup_step4_body">Саймандар тақтасындағы ⚙ Параметрлер түймесін басу арқылы кез келген уақытта мазмұн қосуға немесе параметрлерді реттеуге болады.</string>
     <string name="setup_step4_hint">Бұл нұсқаулық кез келген уақытта Анықтама → Бастау арқылы қол жетімді.</string>
+    <string name="autosave_restore_title">Сақталмаған кестені қалпына келтіру?</string>
+    <string name="autosave_restore_message">%1$s уақытынан сақталмаған кесте табылды. Оны қалпына келтіру керек пе?</string>
+    <string name="autosave_restore_confirm">Қалпына келтіру</string>
+    <string name="autosave_restore_discard">Жою</string>
 </resources>
 

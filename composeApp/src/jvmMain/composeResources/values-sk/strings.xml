@@ -1521,4 +1521,8 @@
     <string name="setup_step4_title">Všetko je pripravené!</string>
     <string name="setup_step4_body">Vždy môžete pridať ďalší obsah alebo upraviť nastavenia kliknutím na tlačidlo ⚙ Nastavenia na paneli nástrojov.</string>
     <string name="setup_step4_hint">Tento sprievodca je dostupný kedykoľvek z Pomoc → Začíname.</string>
+    <string name="autosave_restore_title">Obnoviť neuložený plán?</string>
+    <string name="autosave_restore_message">Bol nájdený neuložený plán z %1$s. Chcete ho obnoviť?</string>
+    <string name="autosave_restore_confirm">Obnoviť</string>
+    <string name="autosave_restore_discard">Zahodiť</string>
 </resources>

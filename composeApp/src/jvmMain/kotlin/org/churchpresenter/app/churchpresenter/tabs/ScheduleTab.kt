@@ -23,11 +23,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollbarAdapter
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.TextButton
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.text.BasicTextField
@@ -84,6 +86,10 @@ import churchpresenter.composeapp.generated.resources.tooltip_note_clear
 import churchpresenter.composeapp.generated.resources.tooltip_note_done
 import churchpresenter.composeapp.generated.resources.tooltip_redo
 import churchpresenter.composeapp.generated.resources.tooltip_undo
+import churchpresenter.composeapp.generated.resources.autosave_restore_confirm
+import churchpresenter.composeapp.generated.resources.autosave_restore_discard
+import churchpresenter.composeapp.generated.resources.autosave_restore_message
+import churchpresenter.composeapp.generated.resources.autosave_restore_title
 import churchpresenter.composeapp.generated.resources.schedule_add_files
 import churchpresenter.composeapp.generated.resources.schedule_drop_hint
 import churchpresenter.composeapp.generated.resources.tooltip_add_label
@@ -115,6 +121,8 @@ import java.awt.dnd.DropTargetAdapter
 import java.awt.dnd.DropTargetDropEvent
 import java.io.File
 import java.nio.file.Path
+import java.text.SimpleDateFormat
+import java.util.Date
 
 /**
  * Actions exposed to the parent composable so toolbar/menu can drive the schedule
@@ -176,6 +184,31 @@ fun ScheduleTab(
     // Use the provided view model, or fall back to a locally-owned one.
     val viewModel = scheduleViewModel ?: remember { ScheduleViewModel(onScheduleChanged = { items -> onScheduleChangedState.value?.invoke(items) }) }
     val scope = rememberCoroutineScope()
+
+    var showAutoRestoreDialog by remember { mutableStateOf(viewModel.autoSaveAvailable()) }
+    if (showAutoRestoreDialog) {
+        val savedAt = remember { viewModel.autoSaveSavedAt() }
+        val timeStr = remember(savedAt) {
+            SimpleDateFormat("h:mm a").format(Date(savedAt))
+        }
+        AlertDialog(
+            onDismissRequest = { showAutoRestoreDialog = false },
+            title = { Text(stringResource(Res.string.autosave_restore_title)) },
+            text = { Text(stringResource(Res.string.autosave_restore_message, timeStr)) },
+            confirmButton = {
+                Button(onClick = {
+                    viewModel.restoreAutoSave()
+                    showAutoRestoreDialog = false
+                }) { Text(stringResource(Res.string.autosave_restore_confirm)) }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    viewModel.clearAutoSave()
+                    showAutoRestoreDialog = false
+                }) { Text(stringResource(Res.string.autosave_restore_discard)) }
+            }
+        )
+    }
 
     // State holders — lambdas capture the State object, not the string value,
     // so they always read the latest value via .value without re-registering.

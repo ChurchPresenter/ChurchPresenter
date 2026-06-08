@@ -10,6 +10,7 @@ import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import java.io.File
 import java.security.SecureRandom
 import java.util.Base64
+import java.util.Calendar
 import java.util.UUID
 import javax.crypto.Cipher
 import javax.crypto.SecretKeyFactory
@@ -22,6 +23,12 @@ import kotlin.io.path.exists
 import kotlin.io.path.name
 import kotlin.io.path.readText
 import kotlin.io.path.writeText
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
@@ -32,7 +39,84 @@ class ScheduleViewModel(
     private val _scheduleItems: SnapshotStateList<ScheduleItem> = mutableStateListOf()
     val scheduleItems: List<ScheduleItem> get() = _scheduleItems
 
+    // ── Auto-save ─────────────────────────────────────────────────────────────
+
+    private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    private val autoSaveFile = File(System.getProperty("user.home"), ".churchpresenter/autosave_schedule.tmp")
+    @Volatile private var isDirty = false
+
+    init {
+        scope.launch {
+            while (true) {
+                delay(60_000)
+                if (isDirty && _scheduleItems.isNotEmpty()) {
+                    try {
+                        autoSaveFile.parentFile?.mkdirs()
+                        val scheduleFile = ScheduleFileV2(items = _scheduleItems.toList(), notes = _notes.toMap())
+                        val serialized = json.encodeToString(ScheduleFileV2.serializer(), scheduleFile)
+                        autoSaveFile.writeText(encrypt(serialized))
+                        isDirty = false
+                    } catch (_: Exception) {}
+                }
+            }
+        }
+    }
+
+    /** Returns true if there is an autosave from today that is less than 4 hours old. */
+    fun autoSaveAvailable(): Boolean {
+        if (!autoSaveFile.exists() || autoSaveFile.length() == 0L) return false
+        val lastModified = autoSaveFile.lastModified()
+        val now = System.currentTimeMillis()
+        val cal = Calendar.getInstance()
+        cal.timeInMillis = lastModified
+        val savedDay = cal.get(Calendar.DAY_OF_YEAR)
+        val savedYear = cal.get(Calendar.YEAR)
+        cal.timeInMillis = now
+        val isSameDay = savedDay == cal.get(Calendar.DAY_OF_YEAR) && savedYear == cal.get(Calendar.YEAR)
+        val isWithin4Hours = (now - lastModified) < 4 * 60 * 60 * 1000L
+        return isSameDay && isWithin4Hours
+    }
+
+    /** Epoch millis of last autosave write, or 0 if no autosave. */
+    fun autoSaveSavedAt(): Long = if (autoSaveFile.exists()) autoSaveFile.lastModified() else 0L
+
+    /** Loads the autosave into the current schedule. Returns true on success. */
+    fun restoreAutoSave(): Boolean {
+        if (!autoSaveFile.exists()) return false
+        return try {
+            val raw = autoSaveFile.readText()
+            val jsonText = try { decrypt(raw) } catch (_: Exception) { raw }
+            val (items, notes) = try {
+                val schedFile = json.decodeFromString(ScheduleFileV2.serializer(), jsonText)
+                Pair(schedFile.items, schedFile.notes)
+            } catch (_: Exception) {
+                Pair(json.decodeFromString(ListSerializer(ScheduleItem.serializer()), jsonText), emptyMap())
+            }
+            _scheduleItems.clear()
+            _scheduleItems.addAll(items)
+            _notes.clear()
+            _notes.putAll(notes)
+            currentFilePath = null
+            undoStack.clear()
+            redoStack.clear()
+            _canUndo.value = false
+            _canRedo.value = false
+            clearAutoSave()
+            notifyChanged()
+            true
+        } catch (_: Exception) { false }
+    }
+
+    fun clearAutoSave() {
+        try { autoSaveFile.delete() } catch (_: Exception) {}
+    }
+
+    fun dispose() {
+        scope.cancel()
+    }
+
     private fun notifyChanged() {
+        isDirty = true
         onScheduleChanged?.invoke(_scheduleItems.toList())
     }
 
@@ -153,6 +237,7 @@ class ScheduleViewModel(
             val scheduleFile = ScheduleFileV2(items = _scheduleItems.toList(), notes = _notes.toMap())
             val serialized = json.encodeToString(ScheduleFileV2.serializer(), scheduleFile)
             file.writeText(encrypt(serialized))
+            clearAutoSave()
         } else {
             saveScheduleAs(dialogTitle, fileFilterDescription)
         }
@@ -177,6 +262,7 @@ class ScheduleViewModel(
             val serialized = json.encodeToString(ScheduleFileV2.serializer(), scheduleFile)
             file.writeText(encrypt(serialized))
             currentFilePath = file.absolutePathString()
+            clearAutoSave()
         }
     }
 
@@ -215,6 +301,7 @@ class ScheduleViewModel(
                     redoStack.clear()
                     _canUndo.value = false
                     _canRedo.value = false
+                    clearAutoSave()
                     notifyChanged()
                 } catch (e: Exception) {
                     e.printStackTrace()
@@ -232,6 +319,7 @@ class ScheduleViewModel(
         redoStack.clear()
         _canUndo.value = false
         _canRedo.value = false
+        clearAutoSave()
         notifyChanged()
     }
 

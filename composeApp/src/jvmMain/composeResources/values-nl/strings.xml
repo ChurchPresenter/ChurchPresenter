@@ -1521,4 +1521,8 @@
     <string name="setup_step4_title">U bent klaar!</string>
     <string name="setup_step4_body">U kunt altijd meer inhoud toevoegen of instellingen aanpassen door op de ⚙ Instellingen knop in de werkbalk te klikken.</string>
     <string name="setup_step4_hint">Deze gids is altijd beschikbaar via Help → Aan de slag.</string>
+    <string name="autosave_restore_title">Niet-opgeslagen plan herstellen?</string>
+    <string name="autosave_restore_message">Er is een niet-opgeslagen plan van %1$s gevonden. Wilt u het herstellen?</string>
+    <string name="autosave_restore_confirm">Herstellen</string>
+    <string name="autosave_restore_discard">Verwijderen</string>
 </resources>

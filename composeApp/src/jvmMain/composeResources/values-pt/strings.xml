@@ -1521,4 +1521,8 @@
     <string name="setup_step4_title">Tudo pronto!</string>
     <string name="setup_step4_body">Você sempre pode adicionar mais conteúdo ou ajustar as configurações clicando no botão ⚙ Configurações na barra de ferramentas.</string>
     <string name="setup_step4_hint">Este guia está disponível a qualquer momento em Ajuda → Introdução.</string>
+    <string name="autosave_restore_title">Restaurar plano não salvo?</string>
+    <string name="autosave_restore_message">Um plano não salvo de %1$s foi encontrado. Deseja restaurá-lo?</string>
+    <string name="autosave_restore_confirm">Restaurar</string>
+    <string name="autosave_restore_discard">Descartar</string>
 </resources>

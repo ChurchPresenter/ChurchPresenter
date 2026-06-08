@@ -1502,5 +1502,9 @@
     <string name="setup_step4_title">Всё готово!</string>
     <string name="setup_step4_body">Вы всегда можете добавить контент или изменить настройки с помощью кнопки ⚙ Настройки на панели инструментов.</string>
     <string name="setup_step4_hint">Это руководство доступно в любое время через Справка → Начало работы.</string>
+    <string name="autosave_restore_title">Восстановить несохранённое расписание?</string>
+    <string name="autosave_restore_message">Найдено несохранённое расписание от %1$s. Хотите восстановить его?</string>
+    <string name="autosave_restore_confirm">Восстановить</string>
+    <string name="autosave_restore_discard">Отклонить</string>
 </resources>
 
