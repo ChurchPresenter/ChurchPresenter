@@ -1160,6 +1160,10 @@
     <string name="update_dialog_download">Stáhnout</string>
     <string name="update_dialog_dismiss">Později</string>
     <string name="update_dialog_release_notes">Co je nového:</string>
+    <string name="update_dialog_download_install">Stáhnout a nainstalovat</string>
+    <string name="update_dialog_downloading">Stahování...</string>
+    <string name="update_dialog_install_now">Nainstalovat nyní</string>
+    <string name="update_dialog_open_page">Otevřít stránku ke stažení</string>
     <string name="update_check_menu">Zkontrolovat aktualizace…</string>
     <string name="update_already_latest">Máte nainstalovanou nejnovější verzi.</string>
 

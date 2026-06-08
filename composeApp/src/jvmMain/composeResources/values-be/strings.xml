@@ -1055,6 +1055,10 @@
     <string name="update_dialog_download">Спампаваць</string>
     <string name="update_dialog_dismiss">Пазней</string>
     <string name="update_dialog_release_notes">Што новага:</string>
+    <string name="update_dialog_download_install">Спампаваць і ўсталяваць</string>
+    <string name="update_dialog_downloading">Спампоўванне...</string>
+    <string name="update_dialog_install_now">Усталяваць зараз</string>
+    <string name="update_dialog_open_page">Адкрыць старонку загрузкі</string>
     <string name="update_check_menu">Праверыць абнаўленні…</string>
     <string name="update_already_latest">У вас усталявана апошняя версія.</string>
 

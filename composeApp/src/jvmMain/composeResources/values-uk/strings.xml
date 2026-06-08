@@ -1060,6 +1060,10 @@
     <string name="update_dialog_download">Завантажити</string>
     <string name="update_dialog_dismiss">Пізніше</string>
     <string name="update_dialog_release_notes">Що нового:</string>
+    <string name="update_dialog_download_install">Завантажити та встановити</string>
+    <string name="update_dialog_downloading">Завантаження...</string>
+    <string name="update_dialog_install_now">Встановити зараз</string>
+    <string name="update_dialog_open_page">Відкрити сторінку завантаження</string>
     <string name="update_check_menu">Перевірити оновлення…</string>
     <string name="update_already_latest">У вас встановлена остання версія.</string>
 

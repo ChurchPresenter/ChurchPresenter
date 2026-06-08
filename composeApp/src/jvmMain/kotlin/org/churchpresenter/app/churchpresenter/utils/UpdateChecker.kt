@@ -9,7 +9,8 @@ import java.net.URI
 data class UpdateInfo(
     val latestVersion: String,
     val releaseUrl: String,
-    val releaseNotes: String
+    val releaseNotes: String,
+    val downloadUrl: String? = null
 )
 
 object UpdateChecker {
@@ -43,18 +44,81 @@ object UpdateChecker {
             val latestVersion = tagName.removePrefix("v")
             val releaseNotes = parseJsonString(body, "body") ?: ""
             val releaseUrl = parseJsonString(body, "html_url") ?: RELEASES_URL
+            val allDownloadUrls = parseAllJsonStringValues(body, "browser_download_url")
+            val downloadUrl = selectDownloadUrl(allDownloadUrls)
 
             if (isNewerVersion(latestVersion, BuildConfig.APP_VERSION)) {
                 UpdateInfo(
                     latestVersion = latestVersion,
                     releaseUrl = releaseUrl,
-                    releaseNotes = releaseNotes.take(500)
+                    releaseNotes = releaseNotes.take(500),
+                    downloadUrl = downloadUrl
                 )
             } else {
                 null
             }
         } catch (_: Exception) {
             null
+        }
+    }
+
+    /**
+     * Extracts every JSON string value associated with [key] across the entire document.
+     * Used to gather all browser_download_url values from the assets array.
+     */
+    private fun parseAllJsonStringValues(json: String, key: String): List<String> {
+        val needle = "\"$key\""
+        val results = mutableListOf<String>()
+        var searchFrom = 0
+        while (true) {
+            val keyIdx = json.indexOf(needle, searchFrom)
+            if (keyIdx < 0) break
+            var i = keyIdx + needle.length
+            while (i < json.length && json[i].isWhitespace()) i++
+            if (i >= json.length || json[i] != ':') { searchFrom = keyIdx + 1; continue }
+            i++
+            while (i < json.length && json[i].isWhitespace()) i++
+            if (i >= json.length || json[i] != '"') { searchFrom = keyIdx + 1; continue }
+            i++
+            val sb = StringBuilder()
+            var valid = false
+            while (i < json.length) {
+                val c = json[i]
+                if (c == '\\' && i + 1 < json.length) {
+                    when (json[i + 1]) {
+                        'n' -> sb.append('\n')
+                        't' -> sb.append('\t')
+                        'r' -> sb.append('\r')
+                        '"' -> sb.append('"')
+                        '\\' -> sb.append('\\')
+                        '/' -> sb.append('/')
+                        else -> { sb.append('\\'); sb.append(json[i + 1]) }
+                    }
+                    i += 2
+                } else if (c == '"') {
+                    valid = true; i++; break
+                } else {
+                    sb.append(c); i++
+                }
+            }
+            if (valid) results.add(sb.toString())
+            searchFrom = i
+        }
+        return results
+    }
+
+    private fun selectDownloadUrl(urls: List<String>): String? {
+        val os = System.getProperty("os.name", "").lowercase()
+        val arch = System.getProperty("os.arch", "").lowercase()
+        return when {
+            os.contains("win") ->
+                urls.firstOrNull { it.endsWith(".msi", ignoreCase = true) }
+            os.contains("mac") && arch == "aarch64" ->
+                urls.firstOrNull { it.contains("arm64", ignoreCase = true) && it.endsWith(".dmg", ignoreCase = true) }
+            os.contains("mac") ->
+                urls.firstOrNull { !it.contains("arm64", ignoreCase = true) && it.endsWith(".dmg", ignoreCase = true) }
+            else ->
+                urls.firstOrNull { it.endsWith(".deb", ignoreCase = true) }
         }
     }
 

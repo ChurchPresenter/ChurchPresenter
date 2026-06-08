@@ -1055,6 +1055,10 @@
     <string name="update_dialog_download">Жүктеу</string>
     <string name="update_dialog_dismiss">Кейінірек</string>
     <string name="update_dialog_release_notes">Жаңалықтар:</string>
+    <string name="update_dialog_download_install">Жүктеп орнату</string>
+    <string name="update_dialog_downloading">Жүктелуде...</string>
+    <string name="update_dialog_install_now">Қазір орнату</string>
+    <string name="update_dialog_open_page">Жүктеу бетін ашу</string>
     <string name="update_check_menu">Жаңартуларды тексеру…</string>
     <string name="update_already_latest">Сізде ең соңғы нұсқа орнатылған.</string>
 

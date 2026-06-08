@@ -1373,6 +1373,10 @@
     <string name="update_dialog_download">Downloaden</string>
     <string name="update_dialog_dismiss">Later</string>
     <string name="update_dialog_release_notes">Wat is nieuw:</string>
+    <string name="update_dialog_download_install">Downloaden &amp; Installeren</string>
+    <string name="update_dialog_downloading">Downloaden...</string>
+    <string name="update_dialog_install_now">Nu installeren</string>
+    <string name="update_dialog_open_page">Downloadpagina openen</string>
     <string name="update_check_menu">Controleer op updates…</string>
     <string name="update_already_latest">U gebruikt de nieuwste versie.</string>
 

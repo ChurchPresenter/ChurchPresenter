@@ -1055,6 +1055,10 @@
     <string name="update_dialog_download">Herunterladen</string>
     <string name="update_dialog_dismiss">Später</string>
     <string name="update_dialog_release_notes">Was ist neu:</string>
+    <string name="update_dialog_download_install">Herunterladen &amp; Installieren</string>
+    <string name="update_dialog_downloading">Wird heruntergeladen...</string>
+    <string name="update_dialog_install_now">Jetzt installieren</string>
+    <string name="update_dialog_open_page">Download-Seite öffnen</string>
     <string name="update_check_menu">Nach Updates suchen…</string>
     <string name="update_already_latest">Sie verwenden die neueste Version.</string>
 

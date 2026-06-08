@@ -1373,6 +1373,10 @@
     <string name="update_dialog_download">Stiahnuť</string>
     <string name="update_dialog_dismiss">Neskôr</string>
     <string name="update_dialog_release_notes">Čo je nové:</string>
+    <string name="update_dialog_download_install">Stiahnuť a nainštalovať</string>
+    <string name="update_dialog_downloading">Sťahovanie...</string>
+    <string name="update_dialog_install_now">Nainštalovať teraz</string>
+    <string name="update_dialog_open_page">Otvoriť stránku na stiahnutie</string>
     <string name="update_check_menu">Skontrolovať aktualizácie…</string>
     <string name="update_already_latest">Máte nainštalovanú najnovšiu verziu.</string>
 

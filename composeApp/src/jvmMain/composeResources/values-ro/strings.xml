@@ -1408,6 +1408,10 @@
     <string name="update_dialog_download">Descarcă</string>
     <string name="update_dialog_dismiss">Mai Târziu</string>
     <string name="update_dialog_release_notes">Ce este nou:</string>
+    <string name="update_dialog_download_install">Descarcă &amp; Instalează</string>
+    <string name="update_dialog_downloading">Se descarcă...</string>
+    <string name="update_dialog_install_now">Instalează acum</string>
+    <string name="update_dialog_open_page">Deschide pagina de descărcare</string>
     <string name="update_check_menu">Verifică Actualizări…</string>
     <string name="update_already_latest">Folosiți cea mai recentă versiune.</string>
 

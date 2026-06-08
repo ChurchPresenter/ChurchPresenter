@@ -1084,6 +1084,10 @@
     <string name="update_dialog_download">Скачать</string>
     <string name="update_dialog_dismiss">Позже</string>
     <string name="update_dialog_release_notes">Что нового:</string>
+    <string name="update_dialog_download_install">Скачать и установить</string>
+    <string name="update_dialog_downloading">Загрузка...</string>
+    <string name="update_dialog_install_now">Установить сейчас</string>
+    <string name="update_dialog_open_page">Открыть страницу загрузки</string>
     <string name="update_check_menu">Проверить обновления…</string>
     <string name="update_already_latest">У вас установлена последняя версия.</string>
 

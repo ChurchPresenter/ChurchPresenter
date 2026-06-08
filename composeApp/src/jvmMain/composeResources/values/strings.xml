@@ -1416,6 +1416,10 @@
     <string name="update_dialog_download">Download</string>
     <string name="update_dialog_dismiss">Later</string>
     <string name="update_dialog_release_notes">What's new:</string>
+    <string name="update_dialog_download_install">Download &amp; Install</string>
+    <string name="update_dialog_downloading">Downloading...</string>
+    <string name="update_dialog_install_now">Install Now</string>
+    <string name="update_dialog_open_page">Open Download Page</string>
     <string name="update_check_menu">Check for Updates…</string>
     <string name="update_already_latest">You are running the latest version.</string>
 

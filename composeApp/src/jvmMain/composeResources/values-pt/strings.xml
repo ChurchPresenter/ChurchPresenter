@@ -1373,6 +1373,10 @@
     <string name="update_dialog_download">Baixar</string>
     <string name="update_dialog_dismiss">Depois</string>
     <string name="update_dialog_release_notes">O que há de novo:</string>
+    <string name="update_dialog_download_install">Baixar e Instalar</string>
+    <string name="update_dialog_downloading">Baixando...</string>
+    <string name="update_dialog_install_now">Instalar agora</string>
+    <string name="update_dialog_open_page">Abrir página de download</string>
     <string name="update_check_menu">Verificar Atualizações…</string>
     <string name="update_already_latest">Você está usando a versão mais recente.</string>
 
