@@ -56,6 +56,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Tune
+import androidx.compose.material.icons.filled.Wallpaper
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
@@ -69,6 +70,7 @@ import churchpresenter.composeapp.generated.resources.tooltip_collapse_schedule
 import churchpresenter.composeapp.generated.resources.tooltip_expand_schedule
 import churchpresenter.composeapp.generated.resources.tooltip_clear_display
 import churchpresenter.composeapp.generated.resources.tooltip_toggle_displays
+import churchpresenter.composeapp.generated.resources.background
 import churchpresenter.composeapp.generated.resources.tooltip_settings
 import churchpresenter.composeapp.generated.resources.tab_visibility
 import churchpresenter.composeapp.generated.resources.ic_cast
@@ -161,6 +163,7 @@ fun MainDesktop(
     onTabChange: (Int) -> Unit = {},
     onScheduleItemSelected: (String?) -> Unit = {},
     onShowSettings: () -> Unit = {},
+    onShowBackgroundSettings: () -> Unit = {},
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit = {},
     onScheduleActionsReady: (ScheduleActions) -> Unit = {},
     theme: ThemeMode = ThemeMode.SYSTEM,
@@ -931,6 +934,13 @@ fun MainDesktop(
                                 }
                             }
                         }
+                        TooltipIconButton(
+                            painter = rememberVectorPainter(Icons.Default.Wallpaper),
+                            text = stringResource(Res.string.background),
+                            onClick = onShowBackgroundSettings,
+                            buttonSize = 36.dp,
+                            iconTint = MaterialTheme.colorScheme.onSurface
+                        )
                         TooltipIconButton(
                             painter = painterResource(Res.drawable.ic_settings),
                             text = stringResource(Res.string.tooltip_settings),

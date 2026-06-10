@@ -347,6 +347,7 @@ fun main() {
         val remoteSelectSongFlow =
             remember { kotlinx.coroutines.flow.MutableSharedFlow<ScheduleItem.SongItem>(extraBufferCapacity = 8) }
         var showOptionsDialog by remember { mutableStateOf(false) }
+        var optionsDialogInitialTab by remember { mutableStateOf(0) }
         var showStatisticsDialog by remember { mutableStateOf(false) }
         var showKeyboardShortcutsDialog by remember { mutableStateOf(false) }
         var showAboutDialog by remember { mutableStateOf(false) }
@@ -981,6 +982,7 @@ fun main() {
                                         Locale.setDefault(Locale.forLanguageTag(language.code))
                                     },
                                     onSettings = {
+                                        optionsDialogInitialTab = 0
                                         showOptionsDialog = true
                                     },
                                     onExit = { exitApplication() },
@@ -1056,7 +1058,14 @@ fun main() {
                                         if (mode != Presenting.NONE) presenterManager.setShowPresenterWindow(true)
                                     },
                                     onScheduleItemSelected = { itemId -> selectedScheduleItemId = itemId },
-                                    onShowSettings = { showOptionsDialog = true },
+                                    onShowSettings = {
+                                        optionsDialogInitialTab = 0
+                                        showOptionsDialog = true
+                                    },
+                                    onShowBackgroundSettings = {
+                                        optionsDialogInitialTab = 3
+                                        showOptionsDialog = true
+                                    },
                                     onSettingsChange = { updateFn ->
                                         appSettings = updateFn(appSettings)
                                         settingsManager.saveSettings(appSettings)
@@ -1126,6 +1135,7 @@ fun main() {
                                 )
                                 OptionsDialog(
                                     isVisible = showOptionsDialog,
+                                    initialTab = optionsDialogInitialTab,
                                     theme = theme,
                                     settingsManager = settingsManager,
                                     companionServer = companionServer,
@@ -1335,7 +1345,10 @@ fun main() {
                     appSettings = appSettings.copy(theme = newTheme.toString())
                     settingsManager.saveSettings(appSettings)
                 },
-                onOpenSettings = { showOptionsDialog = true },
+                onOpenSettings = {
+                    optionsDialogInitialTab = 0
+                    showOptionsDialog = true
+                },
                 onDismiss = {
                     val updated = appSettings.copy(setupWizardShown = true)
                     settingsManager.saveSettings(updated)
