@@ -26,6 +26,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -58,6 +59,7 @@ import churchpresenter.composeapp.generated.resources.folder_already_exists
 import churchpresenter.composeapp.generated.resources.folder_overwrite_confirm
 import churchpresenter.composeapp.generated.resources.import_settings
 import churchpresenter.composeapp.generated.resources.import_settings_confirm
+import churchpresenter.composeapp.generated.resources.launch_on_login
 import churchpresenter.composeapp.generated.resources.lower_third_storage_directory
 import churchpresenter.composeapp.generated.resources.media_storage_directory
 import churchpresenter.composeapp.generated.resources.no_directory_selected
@@ -87,6 +89,7 @@ import org.churchpresenter.app.churchpresenter.data.SettingsManager
 import org.churchpresenter.app.churchpresenter.data.SpsConverter
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
 import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
+import org.churchpresenter.app.churchpresenter.utils.AutoStartManager
 import org.churchpresenter.app.churchpresenter.viewmodel.FileManager
 import org.jetbrains.compose.resources.stringResource
 import java.awt.Window
@@ -416,6 +419,33 @@ fun SystemSettingsTab(
         )
 
         Spacer(modifier = Modifier.height(24.dp))
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant, thickness = 1.dp)
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Launch at login — the OS registration is the source of truth, not settings.json
+        var autoStartEnabled by remember { mutableStateOf(AutoStartManager.isEnabled()) }
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Text(
+                text = stringResource(Res.string.launch_on_login),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Switch(
+                checked = autoStartEnabled,
+                enabled = AutoStartManager.isSupported,
+                onCheckedChange = { enabled ->
+                    scope.launch {
+                        val ok = withContext(Dispatchers.IO) { AutoStartManager.setEnabled(enabled) }
+                        if (ok) autoStartEnabled = enabled
+                    }
+                }
+            )
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant, thickness = 1.dp)
         Spacer(modifier = Modifier.height(16.dp))
 

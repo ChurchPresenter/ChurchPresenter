@@ -860,6 +860,7 @@
     <string name="tooltip_directory_writable">Папка доступна для запису</string>
     <string name="tooltip_directory_not_found">Папку не знайдено. Створіть її або виберіть інше місце.</string>
     <string name="tooltip_directory_not_writable">Немає прав запису в цю папку. Виберіть інше місце або змініть права доступу.</string>
+    <string name="launch_on_login">Запускати під час входу в систему</string>
     <string name="song_folder_with_count">%1$s (%2$d пісень)</string>
 
     <!-- Song Settings - Display Modes and Language Options -->

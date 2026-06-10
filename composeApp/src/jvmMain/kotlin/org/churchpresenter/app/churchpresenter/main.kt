@@ -127,6 +127,7 @@ import org.churchpresenter.app.churchpresenter.ui.theme.AppThemeWrapper
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.presenterScreenBounds
 import org.churchpresenter.app.churchpresenter.utils.AnalyticsReporter
+import org.churchpresenter.app.churchpresenter.utils.AutoStartManager
 import org.churchpresenter.app.churchpresenter.utils.CrashReporter
 import org.churchpresenter.app.churchpresenter.utils.LiveMapReporter
 import org.churchpresenter.app.churchpresenter.utils.UpdateChecker
@@ -197,6 +198,9 @@ fun main() {
 
     // Initialize FileKit so native file dialogs can resolve app directories
     io.github.vinceglb.filekit.FileKit.init(appId = "ChurchPresenter")
+
+    // Repair a stale login-launch registration if the install path changed (e.g. after an update)
+    Thread { AutoStartManager.syncRegistration() }.apply { isDaemon = true }.start()
 
     // Set custom VLC path from saved settings before any composable checks isVlcAvailable
     vlcCustomPath = SettingsManager().loadSettings().projectionSettings.vlcPath
