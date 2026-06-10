@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -30,15 +31,26 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuAnchorType
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -63,6 +75,21 @@ import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.ic_pause
 import churchpresenter.composeapp.generated.resources.ic_play
 import churchpresenter.composeapp.generated.resources.add_to_schedule
+import churchpresenter.composeapp.generated.resources.atem_loop
+import churchpresenter.composeapp.generated.resources.atem_loading_slots
+import churchpresenter.composeapp.generated.resources.atem_media_player
+import churchpresenter.composeapp.generated.resources.atem_mode_clip
+import churchpresenter.composeapp.generated.resources.atem_mode_still
+import churchpresenter.composeapp.generated.resources.atem_rendering
+import churchpresenter.composeapp.generated.resources.atem_send_to_atem
+import churchpresenter.composeapp.generated.resources.atem_slot
+import churchpresenter.composeapp.generated.resources.atem_slots_error
+import churchpresenter.composeapp.generated.resources.atem_upload
+import churchpresenter.composeapp.generated.resources.atem_upload_error
+import churchpresenter.composeapp.generated.resources.atem_upload_mode
+import churchpresenter.composeapp.generated.resources.atem_uploading
+import org.churchpresenter.app.churchpresenter.server.AtemMediaSlot
+import churchpresenter.composeapp.generated.resources.cancel
 import churchpresenter.composeapp.generated.resources.confirm_delete
 import churchpresenter.composeapp.generated.resources.confirm_delete_file
 import churchpresenter.composeapp.generated.resources.go_live
@@ -88,6 +115,8 @@ import java.nio.file.StandardWatchEventKinds
 import javax.swing.JOptionPane
 import org.churchpresenter.app.churchpresenter.composables.ImageIconButton
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
+import org.churchpresenter.app.churchpresenter.presenter.LowerThirdOffscreenRenderer
+import org.churchpresenter.app.churchpresenter.server.AtemClient
 import org.churchpresenter.app.churchpresenter.models.ScheduleItem
 import org.churchpresenter.app.churchpresenter.utils.presenterAspectRatio
 import org.churchpresenter.app.churchpresenter.utils.formatAspectRatio
@@ -101,7 +130,7 @@ import java.awt.Window
 import java.io.File
 import javax.swing.SwingUtilities
 
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun LowerThirdTab(
     modifier: Modifier = Modifier,
@@ -162,6 +191,39 @@ fun LowerThirdTab(
     var selectedFile by remember { mutableStateOf<File?>(null) }
     val animatedProgress = remember { Animatable(0f) }
     var isPlaying by remember { mutableStateOf(false) }
+
+    // ATEM upload dialog state
+    val atemConfigured = appSettings.atemSettings.host.isNotBlank()
+    var showAtemDialog by remember { mutableStateOf(false) }
+    var atemIsClip by remember { mutableStateOf(false) }
+    var atemSlot by remember { mutableStateOf(0) }
+    var atemLoop by remember { mutableStateOf(false) }
+    var atemMediaPlayer by remember { mutableStateOf(1) }
+    var atemProgress by remember { mutableStateOf<Float?>(null) }   // null = idle
+    var atemError by remember { mutableStateOf<String?>(null) }
+    var atemSlots by remember { mutableStateOf<List<AtemMediaSlot>>(emptyList()) }
+    var atemSlotsLoading by remember { mutableStateOf(false) }
+    var atemSlotsError by remember { mutableStateOf<String?>(null) }
+    var atemDetectedFps by remember { mutableStateOf<Double?>(null) }
+
+    // Fetch media pool slot info + FPS when dialog opens or mode toggles
+    LaunchedEffect(showAtemDialog, atemIsClip) {
+        if (!showAtemDialog) return@LaunchedEffect
+        atemSlotsLoading = true
+        atemSlotsError = null
+        try {
+            val state = withContext(Dispatchers.IO) {
+                AtemClient(appSettings.atemSettings.host, appSettings.atemSettings.port).queryState()
+            }
+            atemSlots = if (atemIsClip) state.clipSlots else state.stillSlots
+            atemDetectedFps = state.fps
+        } catch (e: Exception) {
+            atemSlotsError = e.message
+            atemSlots = emptyList()
+        } finally {
+            atemSlotsLoading = false
+        }
+    }
 
     // When a schedule item is clicked, find the matching file by name
     LaunchedEffect(selectedLowerThirdItem) {
@@ -257,6 +319,204 @@ fun LowerThirdTab(
         )
     }
 
+
+    // ATEM upload dialog
+    if (showAtemDialog) {
+        AlertDialog(
+            onDismissRequest = { if (atemProgress == null) showAtemDialog = false },
+            title = { Text(stringResource(Res.string.atem_send_to_atem)) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    // Mode selection
+                    Text(stringResource(Res.string.atem_upload_mode), style = MaterialTheme.typography.labelMedium)
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        RadioButton(selected = !atemIsClip, onClick = {
+                            atemIsClip = false
+                            atemSlot = appSettings.atemSettings.defaultStillSlot
+                        })
+                        Text(stringResource(Res.string.atem_mode_still), style = MaterialTheme.typography.bodyMedium)
+                        Spacer(Modifier.width(16.dp))
+                        RadioButton(selected = atemIsClip, onClick = {
+                            atemIsClip = true
+                            atemSlot = appSettings.atemSettings.defaultClipSlot
+                        })
+                        Text(stringResource(Res.string.atem_mode_clip), style = MaterialTheme.typography.bodyMedium)
+                    }
+
+                    // Slot — dropdown when slots are loaded, text field fallback
+                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Text(stringResource(Res.string.atem_slot), style = MaterialTheme.typography.labelMedium)
+                        when {
+                            atemSlotsLoading -> {
+                                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
+                                    Text(stringResource(Res.string.atem_loading_slots), style = MaterialTheme.typography.bodySmall)
+                                }
+                            }
+                            atemSlots.isNotEmpty() -> {
+                                var slotExpanded by remember { mutableStateOf(false) }
+                                ExposedDropdownMenuBox(
+                                    expanded = slotExpanded,
+                                    onExpandedChange = { slotExpanded = !slotExpanded }
+                                ) {
+                                    OutlinedTextField(
+                                        value = atemSlotLabel(atemSlot, atemSlots),
+                                        onValueChange = {},
+                                        readOnly = true,
+                                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(slotExpanded) },
+                                        singleLine = true,
+                                        modifier = Modifier.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable).fillMaxWidth()
+                                    )
+                                    ExposedDropdownMenu(
+                                        expanded = slotExpanded,
+                                        onDismissRequest = { slotExpanded = false }
+                                    ) {
+                                        atemSlots.forEach { slot ->
+                                            DropdownMenuItem(
+                                                text = { Text(atemSlotLabel(slot.index, atemSlots)) },
+                                                onClick = { atemSlot = slot.index; slotExpanded = false }
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                            else -> {
+                                OutlinedTextField(
+                                    value = atemSlot.toString(),
+                                    onValueChange = { it.toIntOrNull()?.let { v -> atemSlot = v } },
+                                    singleLine = true,
+                                    modifier = Modifier.width(100.dp)
+                                )
+                                val slotsErr = atemSlotsError
+                                if (slotsErr != null) {
+                                    Text(
+                                        stringResource(Res.string.atem_slots_error, slotsErr),
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.error
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    // Media player
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(stringResource(Res.string.atem_media_player), style = MaterialTheme.typography.bodyMedium)
+                        Spacer(Modifier.width(8.dp))
+                        RadioButton(selected = atemMediaPlayer == 1, onClick = { atemMediaPlayer = 1 })
+                        Text("1", style = MaterialTheme.typography.bodyMedium)
+                        Spacer(Modifier.width(8.dp))
+                        RadioButton(selected = atemMediaPlayer == 2, onClick = { atemMediaPlayer = 2 })
+                        Text("2", style = MaterialTheme.typography.bodyMedium)
+                    }
+
+                    // Loop + detected FPS (clips only)
+                    if (atemIsClip) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            androidx.compose.material3.Checkbox(
+                                checked = atemLoop,
+                                onCheckedChange = { atemLoop = it }
+                            )
+                            Spacer(Modifier.width(4.dp))
+                            Text(stringResource(Res.string.atem_loop), style = MaterialTheme.typography.bodyMedium)
+                        }
+                        val detectedFps = atemDetectedFps
+                        if (detectedFps != null) {
+                            val fpsLabel = if (detectedFps == kotlin.math.floor(detectedFps))
+                                detectedFps.toInt().toString()
+                            else "%.2f".format(detectedFps).trimEnd('0')
+                            Text(
+                                "ATEM: $fpsLabel fps",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                            )
+                        }
+                    }
+
+                    // Progress
+                    val p = atemProgress
+                    if (p != null) {
+                        Text(
+                            if (p < 0.5f) stringResource(Res.string.atem_rendering)
+                            else stringResource(Res.string.atem_uploading),
+                            style = MaterialTheme.typography.labelSmall
+                        )
+                        LinearProgressIndicator(progress = { p }, modifier = Modifier.fillMaxWidth())
+                    }
+                    val e = atemError
+                    if (e != null) {
+                        Text(
+                            stringResource(Res.string.atem_upload_error, e),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    }
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        val presetName = selectedFile?.nameWithoutExtension ?: ""
+                        val atemSettings = appSettings.atemSettings
+                        atemProgress = 0f
+                        atemError = null
+                        scope.launch {
+                            try {
+                                val renderer = LowerThirdOffscreenRenderer(atemSettings.renderWidth, atemSettings.renderHeight)
+                                val client = AtemClient(atemSettings.host, atemSettings.port)
+                                withContext(Dispatchers.IO) { client.connect() }
+                                if (!atemIsClip) {
+                                    val frame = renderer.renderStill(jsonContent)
+                                    withContext(Dispatchers.IO) {
+                                        client.uploadStill(
+                                            atemSlot, frame,
+                                            atemSettings.renderWidth, atemSettings.renderHeight,
+                                            presetName
+                                        ) { p -> atemProgress = 0.5f + p * 0.5f }
+                                    }
+                                } else {
+                                    val fpsExact = atemDetectedFps ?: atemSettings.clipFps.toDouble()
+                                    val durationMs = totalDurationMs()
+                                    val frames = renderer.renderClip(
+                                        jsonContent, durationMs, fpsExact
+                                    ) { p -> atemProgress = p * 0.5f }
+                                    withContext(Dispatchers.IO) {
+                                        client.uploadClip(
+                                            atemSlot, frames,
+                                            atemSettings.renderWidth, atemSettings.renderHeight,
+                                            fpsExact.toInt(), presetName
+                                        ) { p -> atemProgress = 0.5f + p * 0.5f }
+                                    }
+                                }
+                                withContext(Dispatchers.IO) { client.disconnect() }
+                                atemProgress = 1f
+                                delay(800)
+                                showAtemDialog = false
+                                atemProgress = null
+                            } catch (e: Exception) {
+                                atemError = e.message ?: "Upload failed"
+                                atemProgress = null
+                            }
+                        }
+                    },
+                    enabled = atemProgress == null
+                ) {
+                    Text(stringResource(Res.string.atem_upload))
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { showAtemDialog = false },
+                    enabled = atemProgress == null
+                ) {
+                    Text(stringResource(Res.string.cancel))
+                }
+            }
+        )
+    }
 
     Row(modifier = modifier.fillMaxSize()) {
         // Left column — file list (resizable) + generate button
@@ -502,6 +762,47 @@ fun LowerThirdTab(
                         Icon(painter = painterResource(Res.drawable.ic_cast), contentDescription = stringResource(Res.string.go_live), modifier = Modifier.size(20.dp))
                     }
                 }
+
+                // Send to ATEM — only shown when ATEM is configured
+                if (atemConfigured) {
+                    Tooltip(stringResource(Res.string.atem_send_to_atem)) {
+                        IconButton(
+                            onClick = {
+                                atemSlot = if (atemIsClip) appSettings.atemSettings.defaultClipSlot
+                                           else appSettings.atemSettings.defaultStillSlot
+                                atemError = null
+                                atemProgress = null
+                                showAtemDialog = true
+                            },
+                            enabled = canPlay && atemProgress == null,
+                            colors = IconButtonDefaults.iconButtonColors(
+                                containerColor = MaterialTheme.colorScheme.tertiary,
+                                contentColor = MaterialTheme.colorScheme.onTertiary,
+                                disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                            )
+                        ) {
+                            Text("A", style = MaterialTheme.typography.labelLarge)
+                        }
+                    }
+                }
+            }
+
+            // ATEM upload progress bar (shown while uploading)
+            val progress = atemProgress
+            if (progress != null) {
+                LinearProgressIndicator(
+                    progress = { progress },
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+            val err = atemError
+            if (err != null) {
+                Text(
+                    stringResource(Res.string.atem_upload_error, err),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.error
+                )
             }
 
             // Lottie preview — weight(1f) fills remaining space, aspectRatio inside
@@ -534,5 +835,15 @@ fun LowerThirdTab(
                 }
             }
         }
+    }
+}
+
+private fun atemSlotLabel(index: Int, slots: List<AtemMediaSlot>): String {
+    val slot = slots.find { it.index == index }
+    return when {
+        slot == null           -> "Slot $index"
+        slot.name.isNotBlank() -> "Slot $index – ${slot.name}"
+        slot.isUsed            -> "Slot $index (in use)"
+        else                   -> "Slot $index (empty)"
     }
 }

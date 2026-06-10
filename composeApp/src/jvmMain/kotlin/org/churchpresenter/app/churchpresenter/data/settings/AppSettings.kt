@@ -37,6 +37,7 @@ data class AppSettings(
     val crosswordUnlockedLevel: Int = 0,
     val crosswordProgress: Map<Int, String> = emptyMap(),
     val obsSettings: OBSSettings = OBSSettings(),
+    val atemSettings: AtemSettings = AtemSettings(),
     val songFavorites: List<String> = emptyList(),
     val songFavoritesPanelHeightDp: Int = 120,
     val songColOrder: List<String> = emptyList(),
