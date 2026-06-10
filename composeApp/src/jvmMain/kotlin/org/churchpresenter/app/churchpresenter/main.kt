@@ -1544,10 +1544,14 @@ private fun PresenterWindows(
     val displayedImagePath by presenterManager.displayedImagePath
     val nextImagePath by presenterManager.nextImagePath
     val pictureTransitionAlpha by presenterManager.pictureTransitionAlpha
+    val previousDisplayedImagePath by presenterManager.previousDisplayedImagePath
+    val pictureSlideOffset by presenterManager.pictureSlideOffset
     val selectedSlide by presenterManager.selectedSlide
     val displayedSlide by presenterManager.displayedSlide
     val nextSlide by presenterManager.nextSlide
     val slideTransitionAlpha by presenterManager.slideTransitionAlpha
+    val previousDisplayedSlide by presenterManager.previousDisplayedSlide
+    val slideSlideOffset by presenterManager.slideSlideOffset
     val animationType by presenterManager.animationType
     val transitionDuration by presenterManager.transitionDuration
     val announcementText by presenterManager.announcementText
@@ -1650,40 +1654,90 @@ private fun PresenterWindows(
 
     // Centralized Picture transition
     LaunchedEffect(selectedImagePath) {
-        if (presenterManager.displayedImagePath.value == null ||
-            animationType == AnimationType.NONE
-        ) {
-            presenterManager.setDisplayedImagePath(selectedImagePath)
-            presenterManager.setPictureTransitionAlpha(1f)
-        } else {
-            val halfDuration = transitionDuration / 2
-            val anim = Animatable(1f)
-            anim.animateTo(0f, tween(halfDuration)) {
-                presenterManager.setPictureTransitionAlpha(value)
+        val current = presenterManager.displayedImagePath.value
+        when {
+            current == null || animationType == AnimationType.NONE -> {
+                presenterManager.setDisplayedImagePath(selectedImagePath)
+                presenterManager.setPictureTransitionAlpha(1f)
+                presenterManager.setPreviousDisplayedImagePath(null)
             }
-            presenterManager.setDisplayedImagePath(selectedImagePath)
-            anim.animateTo(1f, tween(halfDuration)) {
-                presenterManager.setPictureTransitionAlpha(value)
+            animationType == AnimationType.FADE -> {
+                val halfDuration = transitionDuration / 2
+                val anim = Animatable(1f)
+                anim.animateTo(0f, tween(halfDuration)) {
+                    presenterManager.setPictureTransitionAlpha(value)
+                }
+                presenterManager.setDisplayedImagePath(selectedImagePath)
+                anim.animateTo(1f, tween(halfDuration)) {
+                    presenterManager.setPictureTransitionAlpha(value)
+                }
+            }
+            animationType == AnimationType.CROSSFADE -> {
+                presenterManager.setPreviousDisplayedImagePath(current)
+                presenterManager.setDisplayedImagePath(selectedImagePath)
+                presenterManager.setPictureTransitionAlpha(0f)
+                val anim = Animatable(0f)
+                anim.animateTo(1f, tween(transitionDuration)) {
+                    presenterManager.setPictureTransitionAlpha(value)
+                }
+                presenterManager.setPreviousDisplayedImagePath(null)
+            }
+            animationType == AnimationType.SLIDE_LEFT || animationType == AnimationType.SLIDE_RIGHT -> {
+                presenterManager.setPreviousDisplayedImagePath(current)
+                presenterManager.setDisplayedImagePath(selectedImagePath)
+                presenterManager.setPictureTransitionAlpha(1f)
+                presenterManager.setPictureSlideOffset(0f)
+                val anim = Animatable(0f)
+                anim.animateTo(1f, tween(transitionDuration)) {
+                    presenterManager.setPictureSlideOffset(value)
+                }
+                presenterManager.setPreviousDisplayedImagePath(null)
+                presenterManager.setPictureSlideOffset(1f)
             }
         }
     }
 
     // Centralized Slide transition
     LaunchedEffect(selectedSlide) {
-        if (presenterManager.displayedSlide.value == null ||
-            animationType == AnimationType.NONE
-        ) {
-            presenterManager.setDisplayedSlide(selectedSlide)
-            presenterManager.setSlideTransitionAlpha(1f)
-        } else {
-            val halfDuration = transitionDuration / 2
-            val anim = Animatable(1f)
-            anim.animateTo(0f, tween(halfDuration)) {
-                presenterManager.setSlideTransitionAlpha(value)
+        val current = presenterManager.displayedSlide.value
+        when {
+            current == null || animationType == AnimationType.NONE -> {
+                presenterManager.setDisplayedSlide(selectedSlide)
+                presenterManager.setSlideTransitionAlpha(1f)
+                presenterManager.setPreviousDisplayedSlide(null)
             }
-            presenterManager.setDisplayedSlide(selectedSlide)
-            anim.animateTo(1f, tween(halfDuration)) {
-                presenterManager.setSlideTransitionAlpha(value)
+            animationType == AnimationType.FADE -> {
+                val halfDuration = transitionDuration / 2
+                val anim = Animatable(1f)
+                anim.animateTo(0f, tween(halfDuration)) {
+                    presenterManager.setSlideTransitionAlpha(value)
+                }
+                presenterManager.setDisplayedSlide(selectedSlide)
+                anim.animateTo(1f, tween(halfDuration)) {
+                    presenterManager.setSlideTransitionAlpha(value)
+                }
+            }
+            animationType == AnimationType.CROSSFADE -> {
+                presenterManager.setPreviousDisplayedSlide(current)
+                presenterManager.setDisplayedSlide(selectedSlide)
+                presenterManager.setSlideTransitionAlpha(0f)
+                val anim = Animatable(0f)
+                anim.animateTo(1f, tween(transitionDuration)) {
+                    presenterManager.setSlideTransitionAlpha(value)
+                }
+                presenterManager.setPreviousDisplayedSlide(null)
+            }
+            animationType == AnimationType.SLIDE_LEFT || animationType == AnimationType.SLIDE_RIGHT -> {
+                presenterManager.setPreviousDisplayedSlide(current)
+                presenterManager.setDisplayedSlide(selectedSlide)
+                presenterManager.setSlideTransitionAlpha(1f)
+                presenterManager.setSlideSlideOffset(0f)
+                val anim = Animatable(0f)
+                anim.animateTo(1f, tween(transitionDuration)) {
+                    presenterManager.setSlideSlideOffset(value)
+                }
+                presenterManager.setPreviousDisplayedSlide(null)
+                presenterManager.setSlideSlideOffset(1f)
             }
         }
     }
@@ -1856,12 +1910,21 @@ private fun PresenterWindows(
                             if (screenAssignment.showPictures)
                                 PicturePresenter(
                                     imagePath = displayedImagePath,
-                                    transitionAlpha = pictureTransitionAlpha
+                                    previousImagePath = previousDisplayedImagePath,
+                                    transitionAlpha = pictureTransitionAlpha,
+                                    slideOffset = pictureSlideOffset,
+                                    animationType = animationType
                                 )
 
                         Presenting.PRESENTATION ->
                             if (screenAssignment.showPictures)
-                                SlidePresenter(slide = displayedSlide, transitionAlpha = slideTransitionAlpha)
+                                SlidePresenter(
+                                    slide = displayedSlide,
+                                    previousSlide = previousDisplayedSlide,
+                                    transitionAlpha = slideTransitionAlpha,
+                                    slideOffset = slideSlideOffset,
+                                    animationType = animationType
+                                )
 
                         Presenting.MEDIA ->
                             if (screenAssignment.showMedia) {
@@ -1988,13 +2051,23 @@ private fun PresenterWindows(
                             if (screenAssignment.showPictures)
                                 PicturePresenter(
                                     imagePath = displayedImagePath,
+                                    previousImagePath = previousDisplayedImagePath,
                                     transitionAlpha = pictureTransitionAlpha,
+                                    slideOffset = pictureSlideOffset,
+                                    animationType = animationType,
                                     outputRole = Constants.OUTPUT_ROLE_KEY
                                 )
 
                         Presenting.PRESENTATION ->
                             if (screenAssignment.showPictures)
-                                SlidePresenter(slide = displayedSlide, transitionAlpha = slideTransitionAlpha, outputRole = Constants.OUTPUT_ROLE_KEY)
+                                SlidePresenter(
+                                    slide = displayedSlide,
+                                    previousSlide = previousDisplayedSlide,
+                                    transitionAlpha = slideTransitionAlpha,
+                                    slideOffset = slideSlideOffset,
+                                    animationType = animationType,
+                                    outputRole = Constants.OUTPUT_ROLE_KEY
+                                )
 
                         Presenting.MEDIA ->
                             if (screenAssignment.showMedia) {
@@ -2156,13 +2229,23 @@ private fun PresenterWindows(
                                             if (screenAssignment.showPictures)
                                                 PicturePresenter(
                                                     imagePath = displayedImagePath,
+                                                    previousImagePath = previousDisplayedImagePath,
                                                     transitionAlpha = pictureTransitionAlpha,
+                                                    slideOffset = pictureSlideOffset,
+                                                    animationType = animationType,
                                                     outputRole = Constants.OUTPUT_ROLE_KEY
                                                 )
 
                                         Presenting.PRESENTATION ->
                                             if (screenAssignment.showPictures)
-                                                SlidePresenter(slide = displayedSlide, transitionAlpha = slideTransitionAlpha, outputRole = Constants.OUTPUT_ROLE_KEY)
+                                                SlidePresenter(
+                                    slide = displayedSlide,
+                                    previousSlide = previousDisplayedSlide,
+                                    transitionAlpha = slideTransitionAlpha,
+                                    slideOffset = slideSlideOffset,
+                                    animationType = animationType,
+                                    outputRole = Constants.OUTPUT_ROLE_KEY
+                                )
 
                                         Presenting.MEDIA ->
                                             if (screenAssignment.showMedia) {
@@ -2390,12 +2473,21 @@ private fun PresenterWindows(
                                 if (screenAssignment.showPictures)
                                     PicturePresenter(
                                         imagePath = displayedImagePath,
-                                        transitionAlpha = pictureTransitionAlpha
+                                        previousImagePath = previousDisplayedImagePath,
+                                        transitionAlpha = pictureTransitionAlpha,
+                                        slideOffset = pictureSlideOffset,
+                                        animationType = animationType
                                     )
 
                             Presenting.PRESENTATION ->
                                 if (screenAssignment.showPictures)
-                                    SlidePresenter(slide = displayedSlide, transitionAlpha = slideTransitionAlpha)
+                                    SlidePresenter(
+                                    slide = displayedSlide,
+                                    previousSlide = previousDisplayedSlide,
+                                    transitionAlpha = slideTransitionAlpha,
+                                    slideOffset = slideSlideOffset,
+                                    animationType = animationType
+                                )
 
                             Presenting.MEDIA ->
                                 if (screenAssignment.showMedia) {
@@ -2591,7 +2683,10 @@ private fun PresenterWindows(
                                         if (screenAssignment.showPictures)
                                             PicturePresenter(
                                                 imagePath = displayedImagePath,
+                                                previousImagePath = previousDisplayedImagePath,
                                                 transitionAlpha = pictureTransitionAlpha,
+                                                slideOffset = pictureSlideOffset,
+                                                animationType = animationType,
                                                 outputRole = Constants.OUTPUT_ROLE_KEY
                                             )
 
@@ -2599,7 +2694,10 @@ private fun PresenterWindows(
                                         if (screenAssignment.showPictures)
                                             SlidePresenter(
                                                 slide = displayedSlide,
+                                                previousSlide = previousDisplayedSlide,
                                                 transitionAlpha = slideTransitionAlpha,
+                                                slideOffset = slideSlideOffset,
+                                                animationType = animationType,
                                                 outputRole = Constants.OUTPUT_ROLE_KEY
                                             )
 
@@ -2739,13 +2837,23 @@ private fun PresenterWindows(
                             if (screenAssignment.showPictures)
                                 PicturePresenter(
                                     imagePath = displayedImagePath,
+                                    previousImagePath = previousDisplayedImagePath,
                                     transitionAlpha = pictureTransitionAlpha,
+                                    slideOffset = pictureSlideOffset,
+                                    animationType = animationType,
                                     outputRole = Constants.OUTPUT_ROLE_KEY
                                 )
 
                         Presenting.PRESENTATION ->
                             if (screenAssignment.showPictures)
-                                SlidePresenter(slide = displayedSlide, transitionAlpha = slideTransitionAlpha, outputRole = Constants.OUTPUT_ROLE_KEY)
+                                SlidePresenter(
+                                    slide = displayedSlide,
+                                    previousSlide = previousDisplayedSlide,
+                                    transitionAlpha = slideTransitionAlpha,
+                                    slideOffset = slideSlideOffset,
+                                    animationType = animationType,
+                                    outputRole = Constants.OUTPUT_ROLE_KEY
+                                )
 
                         Presenting.MEDIA ->
                             if (screenAssignment.showMedia) {

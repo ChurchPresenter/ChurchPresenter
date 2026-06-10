@@ -232,6 +232,12 @@ fun PicturesTab(
         presenterManager?.let { viewModel.syncWithPresenter(it) }
     }
 
+    // Sync animation settings to presenter whenever they change
+    LaunchedEffect(viewModel.animationType, viewModel.transitionDuration) {
+        presenterManager?.setAnimationType(viewModel.animationType)
+        presenterManager?.setTransitionDuration(viewModel.transitionDuration.toInt())
+    }
+
     // Hoisted so onPreviewKeyEvent can read column count for row-based Up/Down navigation
     val gridState = rememberLazyGridState()
 

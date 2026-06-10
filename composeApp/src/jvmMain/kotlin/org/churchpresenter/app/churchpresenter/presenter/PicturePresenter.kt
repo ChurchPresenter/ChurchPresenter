@@ -11,8 +11,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.toComposeImageBitmap
 import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.layout.ContentScale
@@ -25,6 +27,7 @@ import churchpresenter.composeapp.generated.resources.presented_slide
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.skia.Image
 import java.io.File
+import org.churchpresenter.app.churchpresenter.models.AnimationType
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.HeicDecoder
 
@@ -32,23 +35,84 @@ import org.churchpresenter.app.churchpresenter.utils.HeicDecoder
 fun PicturePresenter(
     modifier: Modifier = Modifier,
     imagePath: String?,
+    previousImagePath: String? = null,
     transitionAlpha: Float = 1f,
+    slideOffset: Float = 1f,
+    animationType: AnimationType = AnimationType.FADE,
     outputRole: String = Constants.OUTPUT_ROLE_NORMAL,
 ) {
     val isKey = outputRole == Constants.OUTPUT_ROLE_KEY
-    // Key mode: solid white frame (mixer sees "fully visible")
-    if (isKey) {
-        Box(modifier = modifier.fillMaxSize().background(Color.White).alpha(transitionAlpha))
-        return
-    }
-    Box(
-        modifier = modifier
-            .fillMaxSize()
-            .background(Color.Black)
-            .alpha(transitionAlpha),
-        contentAlignment = Alignment.Center
-    ) {
-        ImageContent(imagePath)
+    val windowInfo = LocalWindowInfo.current
+    val screenWidthPx = windowInfo.containerSize.width.toFloat().takeIf { it > 0 } ?: 1920f
+
+    when {
+        // Key mode: always solid white at the appropriate alpha
+        isKey -> {
+            val keyAlpha = when {
+                animationType == AnimationType.CROSSFADE -> transitionAlpha
+                animationType == AnimationType.SLIDE_LEFT || animationType == AnimationType.SLIDE_RIGHT -> 1f
+                else -> transitionAlpha
+            }
+            Box(modifier = modifier.fillMaxSize().background(Color.White).alpha(keyAlpha))
+        }
+
+        // Crossfade: both images visible simultaneously, old fades out as new fades in
+        animationType == AnimationType.CROSSFADE && previousImagePath != null -> {
+            Box(
+                modifier = modifier.fillMaxSize().background(Color.Black).clipToBounds(),
+                contentAlignment = Alignment.Center
+            ) {
+                Box(modifier = Modifier.fillMaxSize().graphicsLayer { alpha = 1f - transitionAlpha }) {
+                    ImageContent(previousImagePath)
+                }
+                Box(modifier = Modifier.fillMaxSize().graphicsLayer { alpha = transitionAlpha }) {
+                    ImageContent(imagePath)
+                }
+            }
+        }
+
+        // Slide Left: new image slides in from the right, old slides out to the left
+        animationType == AnimationType.SLIDE_LEFT && previousImagePath != null -> {
+            Box(
+                modifier = modifier.fillMaxSize().background(Color.Black).clipToBounds(),
+                contentAlignment = Alignment.Center
+            ) {
+                Box(modifier = Modifier.fillMaxSize().graphicsLayer { translationX = -slideOffset * screenWidthPx }) {
+                    ImageContent(previousImagePath)
+                }
+                Box(modifier = Modifier.fillMaxSize().graphicsLayer { translationX = (1f - slideOffset) * screenWidthPx }) {
+                    ImageContent(imagePath)
+                }
+            }
+        }
+
+        // Slide Right: new image slides in from the left, old slides out to the right
+        animationType == AnimationType.SLIDE_RIGHT && previousImagePath != null -> {
+            Box(
+                modifier = modifier.fillMaxSize().background(Color.Black).clipToBounds(),
+                contentAlignment = Alignment.Center
+            ) {
+                Box(modifier = Modifier.fillMaxSize().graphicsLayer { translationX = slideOffset * screenWidthPx }) {
+                    ImageContent(previousImagePath)
+                }
+                Box(modifier = Modifier.fillMaxSize().graphicsLayer { translationX = -(1f - slideOffset) * screenWidthPx }) {
+                    ImageContent(imagePath)
+                }
+            }
+        }
+
+        // Default: single image with alpha (FADE, NONE, or no previous image)
+        else -> {
+            Box(
+                modifier = modifier
+                    .fillMaxSize()
+                    .background(Color.Black)
+                    .alpha(transitionAlpha),
+                contentAlignment = Alignment.Center
+            ) {
+                ImageContent(imagePath)
+            }
+        }
     }
 }
 
@@ -149,23 +213,78 @@ private fun loadAndDownscaleImage(imagePath: String, maxWidth: Int = 1920, maxHe
 fun SlidePresenter(
     modifier: Modifier = Modifier,
     slide: ImageBitmap?,
+    previousSlide: ImageBitmap? = null,
     transitionAlpha: Float = 1f,
+    slideOffset: Float = 1f,
+    animationType: AnimationType = AnimationType.FADE,
     outputRole: String = Constants.OUTPUT_ROLE_NORMAL,
 ) {
     val isKey = outputRole == Constants.OUTPUT_ROLE_KEY
-    // Key mode: solid white frame (mixer sees "fully visible")
-    if (isKey) {
-        Box(modifier = modifier.fillMaxSize().background(Color.White).alpha(transitionAlpha))
-        return
-    }
-    Box(
-        modifier = modifier
-            .fillMaxSize()
-            .background(Color.Black)
-            .alpha(transitionAlpha),
-        contentAlignment = Alignment.Center
-    ) {
-        SlideBitmapContent(slide)
+    val windowInfo = LocalWindowInfo.current
+    val screenWidthPx = windowInfo.containerSize.width.toFloat().takeIf { it > 0 } ?: 1920f
+
+    when {
+        isKey -> {
+            val keyAlpha = when {
+                animationType == AnimationType.SLIDE_LEFT || animationType == AnimationType.SLIDE_RIGHT -> 1f
+                else -> transitionAlpha
+            }
+            Box(modifier = modifier.fillMaxSize().background(Color.White).alpha(keyAlpha))
+        }
+
+        animationType == AnimationType.CROSSFADE && previousSlide != null -> {
+            Box(
+                modifier = modifier.fillMaxSize().background(Color.Black).clipToBounds(),
+                contentAlignment = Alignment.Center
+            ) {
+                Box(modifier = Modifier.fillMaxSize().graphicsLayer { alpha = 1f - transitionAlpha }) {
+                    SlideBitmapContent(previousSlide)
+                }
+                Box(modifier = Modifier.fillMaxSize().graphicsLayer { alpha = transitionAlpha }) {
+                    SlideBitmapContent(slide)
+                }
+            }
+        }
+
+        animationType == AnimationType.SLIDE_LEFT && previousSlide != null -> {
+            Box(
+                modifier = modifier.fillMaxSize().background(Color.Black).clipToBounds(),
+                contentAlignment = Alignment.Center
+            ) {
+                Box(modifier = Modifier.fillMaxSize().graphicsLayer { translationX = -slideOffset * screenWidthPx }) {
+                    SlideBitmapContent(previousSlide)
+                }
+                Box(modifier = Modifier.fillMaxSize().graphicsLayer { translationX = (1f - slideOffset) * screenWidthPx }) {
+                    SlideBitmapContent(slide)
+                }
+            }
+        }
+
+        animationType == AnimationType.SLIDE_RIGHT && previousSlide != null -> {
+            Box(
+                modifier = modifier.fillMaxSize().background(Color.Black).clipToBounds(),
+                contentAlignment = Alignment.Center
+            ) {
+                Box(modifier = Modifier.fillMaxSize().graphicsLayer { translationX = slideOffset * screenWidthPx }) {
+                    SlideBitmapContent(previousSlide)
+                }
+                Box(modifier = Modifier.fillMaxSize().graphicsLayer { translationX = -(1f - slideOffset) * screenWidthPx }) {
+                    SlideBitmapContent(slide)
+                }
+            }
+        }
+
+        else -> {
+            Box(
+                modifier = modifier
+                    .fillMaxSize()
+                    .background(Color.Black)
+                    .alpha(transitionAlpha),
+                contentAlignment = Alignment.Center
+            ) {
+                SlideBitmapContent(slide)
+            }
+        }
     }
 }
 
