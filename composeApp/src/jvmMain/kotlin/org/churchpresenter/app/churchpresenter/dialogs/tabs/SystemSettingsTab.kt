@@ -618,6 +618,18 @@ fun SystemSettingsTab(
     }
 }
 
+private enum class DirStatus { CHECKING, WRITABLE, READ_ONLY, INVALID }
+
+private fun isWritableDir(dir: java.io.File): Boolean = try {
+    // File.createTempFile generates a unique name per call — concurrent checks
+    // from multiple pickers on the same directory cannot collide
+    val tmp = java.io.File.createTempFile(".cp_write_test", ".tmp", dir)
+    tmp.delete()
+    true
+} catch (_: Exception) {
+    false
+}
+
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun DirectoryPicker(
@@ -654,16 +666,18 @@ private fun DirectoryPicker(
         )
         if (currentPath.isNotEmpty()) {
             val dirFile = remember(currentPath) { java.io.File(currentPath) }
-            // null = still checking, true = writable, false = not writable / not found
-            var isWritable by remember(currentPath) { mutableStateOf<Boolean?>(null) }
+            var status by remember(currentPath) { mutableStateOf(DirStatus.CHECKING) }
             LaunchedEffect(currentPath) {
-                isWritable = withContext(Dispatchers.IO) {
-                    if (!dirFile.exists()) false
-                    else try {
-                        val tempFile = java.io.File(dirFile, ".churchpresenter_write_test")
-                        tempFile.createNewFile() && tempFile.delete()
+                status = withContext(Dispatchers.IO) {
+                    try {
+                        when {
+                            !dirFile.isDirectory -> DirStatus.INVALID
+                            isWritableDir(dirFile) -> DirStatus.WRITABLE
+                            dirFile.canRead() -> DirStatus.READ_ONLY
+                            else -> DirStatus.INVALID
+                        }
                     } catch (_: Exception) {
-                        false
+                        DirStatus.INVALID
                     }
                 }
             }
@@ -671,10 +685,11 @@ private fun DirectoryPicker(
                 tooltip = {
                     Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
                         Text(
-                            when (isWritable) {
-                                null -> "…"
-                                true -> stringResource(Res.string.tooltip_directory_writable)
-                                false -> if (!dirFile.exists()) stringResource(Res.string.tooltip_directory_not_found)
+                            when (status) {
+                                DirStatus.CHECKING -> "…"
+                                DirStatus.WRITABLE -> stringResource(Res.string.tooltip_directory_writable)
+                                DirStatus.READ_ONLY -> stringResource(Res.string.tooltip_directory_not_writable)
+                                DirStatus.INVALID -> if (!dirFile.exists()) stringResource(Res.string.tooltip_directory_not_found)
                                         else stringResource(Res.string.tooltip_directory_not_writable)
                             },
                             color = MaterialTheme.colorScheme.inverseOnSurface,
@@ -689,10 +704,11 @@ private fun DirectoryPicker(
                     modifier = Modifier
                         .size(12.dp)
                         .background(
-                            when (isWritable) {
-                                null -> Color(0xFF9E9E9E)
-                                true -> Color(0xFF4CAF50)
-                                false -> Color(0xFFF44336)
+                            when (status) {
+                                DirStatus.CHECKING -> Color(0xFF9E9E9E)
+                                DirStatus.WRITABLE -> Color(0xFF4CAF50)
+                                DirStatus.READ_ONLY -> Color(0xFFFFC107)
+                                DirStatus.INVALID -> Color(0xFFF44336)
                             },
                             shape = CircleShape
                         )
