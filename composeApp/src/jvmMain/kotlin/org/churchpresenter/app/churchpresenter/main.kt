@@ -353,6 +353,11 @@ fun main() {
             remember { kotlinx.coroutines.flow.MutableSharedFlow<ScheduleItem.SongItem>(extraBufferCapacity = 8) }
         var showOptionsDialog by remember { mutableStateOf(false) }
         var optionsDialogInitialTab by remember { mutableStateOf(0) }
+        // Single entry point so every open site picks its tab explicitly
+        val openOptionsDialog: (Int) -> Unit = { tab ->
+            optionsDialogInitialTab = tab
+            showOptionsDialog = true
+        }
         var showStatisticsDialog by remember { mutableStateOf(false) }
         var showKeyboardShortcutsDialog by remember { mutableStateOf(false) }
         var showAboutDialog by remember { mutableStateOf(false) }
@@ -444,8 +449,6 @@ fun main() {
                 icon = painterResource(Res.drawable.ic_app_icon),
                 state = state
             ) {
-                // macOS: re-activate the app after the splash window closed, otherwise
-                // the screen menu bar can stay greyed out until the app is refocused
                 MacMenuBarActivationFix()
                 LanguageProvider(language = currentLanguage) {
                     AppThemeWrapper(theme = theme) {
@@ -989,10 +992,7 @@ fun main() {
                                         settingsManager.saveSettings(appSettings)
                                         Locale.setDefault(Locale.forLanguageTag(language.code))
                                     },
-                                    onSettings = {
-                                        optionsDialogInitialTab = 0
-                                        showOptionsDialog = true
-                                    },
+                                    onSettings = { openOptionsDialog(0) },
                                     onExit = { exitApplication() },
                                     onAddToSchedule = { },
                                     onNewSchedule = { currentScheduleActions.newSchedule() },
@@ -1066,14 +1066,8 @@ fun main() {
                                         if (mode != Presenting.NONE) presenterManager.setShowPresenterWindow(true)
                                     },
                                     onScheduleItemSelected = { itemId -> selectedScheduleItemId = itemId },
-                                    onShowSettings = {
-                                        optionsDialogInitialTab = 0
-                                        showOptionsDialog = true
-                                    },
-                                    onShowBackgroundSettings = {
-                                        optionsDialogInitialTab = 3
-                                        showOptionsDialog = true
-                                    },
+                                    onShowSettings = { openOptionsDialog(0) },
+                                    onShowBackgroundSettings = { openOptionsDialog(3) },
                                     onSettingsChange = { updateFn ->
                                         appSettings = updateFn(appSettings)
                                         settingsManager.saveSettings(appSettings)
@@ -1353,10 +1347,7 @@ fun main() {
                     appSettings = appSettings.copy(theme = newTheme.toString())
                     settingsManager.saveSettings(appSettings)
                 },
-                onOpenSettings = {
-                    optionsDialogInitialTab = 0
-                    showOptionsDialog = true
-                },
+                onOpenSettings = { openOptionsDialog(0) },
                 onDismiss = {
                     val updated = appSettings.copy(setupWizardShown = true)
                     settingsManager.saveSettings(updated)

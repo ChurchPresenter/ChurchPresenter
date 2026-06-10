@@ -248,16 +248,13 @@ class ScheduleViewModel(
         dialogTitle: String = "Save Schedule As",
         fileFilterDescription: String = "Church Presenter Schedule (*.cps)"
     ) {
-        var file = FileChooser.platformInstance.save(
+        val file = FileChooser.platformInstance.save(
             location = null,
             suggestedName = "schedule.cps",
             filters = listOf(FileNameExtensionFilter(fileFilterDescription, "cps")),
             title = dialogTitle
         )
         if (file != null) {
-            if (!file.name.endsWith(".cps", ignoreCase = true)) {
-                file = file.resolveSibling("${file.name}.cps")
-            }
             val scheduleFile = ScheduleFileV2(items = _scheduleItems.toList(), notes = _notes.toMap())
             val serialized = json.encodeToString(ScheduleFileV2.serializer(), scheduleFile)
             file.writeText(encrypt(serialized))

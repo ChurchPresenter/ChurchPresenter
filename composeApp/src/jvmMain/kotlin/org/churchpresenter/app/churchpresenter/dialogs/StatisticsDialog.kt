@@ -56,7 +56,6 @@ import org.churchpresenter.app.churchpresenter.data.StatisticsManager
 import org.churchpresenter.app.churchpresenter.ui.theme.AppThemeWrapper
 import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
 import org.jetbrains.compose.resources.stringResource
-import java.io.File
 import javax.swing.filechooser.FileNameExtensionFilter
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
 
@@ -275,9 +274,7 @@ fun StatisticsDialog(
                                         title = saveTitle
                                     )
                                     if (path != null) {
-                                        var file = path.toFile()
-                                        if (!file.name.endsWith(".xls", ignoreCase = true)) file = File(file.absolutePath + ".xls")
-                                        val ok = withContext(Dispatchers.IO) { statisticsManager.exportStatisticsToXls(file) }
+                                        val ok = withContext(Dispatchers.IO) { statisticsManager.exportStatisticsToXls(path.toFile()) }
                                         statusMessage = if (ok) successMsg else errorMsg
                                     }
                                 }

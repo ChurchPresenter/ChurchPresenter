@@ -62,49 +62,77 @@ object AutoStartManager {
         val exe = exePath ?: return
         try {
             if (!isEnabled()) return
-            if (isWindows) {
-                val registered = Advapi32Util.registryGetStringValue(WinReg.HKEY_CURRENT_USER, RUN_KEY, APP_NAME)
-                if (registered == "\"$exe\"") return
+            val current = when {
+                // Value removed or retyped between the checks (Task Manager, cleaner
+                // apps) is an expected race, not a crash — just re-register
+                isWindows -> try {
+                    Advapi32Util.registryGetStringValue(WinReg.HKEY_CURRENT_USER, RUN_KEY, APP_NAME)
+                } catch (_: Exception) { null }
+                isMac -> try { macPlistFile.readText() } catch (_: Exception) { null }
+                else -> try { linuxDesktopFile.readText() } catch (_: Exception) { null }
             }
-            // macOS/Linux: rewriting the small file unconditionally is simpler than parsing it
+            if (current == registrationContent(exe)) return
             register(exe)
         } catch (e: Exception) {
             CrashReporter.reportException(e, context = "AutoStartManager.syncRegistration")
         }
     }
 
+    /** The exact registration payload per platform — registry value or file content. */
+    private fun registrationContent(exe: String): String = when {
+        isWindows -> windowsRunValue(exe)
+        isMac -> macPlistContent(exe)
+        else -> linuxDesktopContent(exe)
+    }
+
     private fun register(exe: String) {
         when {
-            isWindows -> Advapi32Util.registrySetStringValue(WinReg.HKEY_CURRENT_USER, RUN_KEY, APP_NAME, "\"$exe\"")
-            isMac -> macPlistFile.apply { parentFile?.mkdirs() }.writeText(
-                """
-                <?xml version="1.0" encoding="UTF-8"?>
-                <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-                <plist version="1.0">
-                <dict>
-                    <key>Label</key>
-                    <string>org.churchpresenter.app</string>
-                    <key>ProgramArguments</key>
-                    <array>
-                        <string>$exe</string>
-                    </array>
-                    <key>RunAtLoad</key>
-                    <true/>
-                </dict>
-                </plist>
-                """.trimIndent()
-            )
-            else -> linuxDesktopFile.apply { parentFile?.mkdirs() }.writeText(
-                """
-                [Desktop Entry]
-                Type=Application
-                Name=$APP_NAME
-                Exec="$exe"
-                X-GNOME-Autostart-enabled=true
-                """.trimIndent()
-            )
+            isWindows -> Advapi32Util.registrySetStringValue(WinReg.HKEY_CURRENT_USER, RUN_KEY, APP_NAME, windowsRunValue(exe))
+            isMac -> macPlistFile.apply { parentFile?.mkdirs() }.writeText(macPlistContent(exe))
+            else -> linuxDesktopFile.apply { parentFile?.mkdirs() }.writeText(linuxDesktopContent(exe))
         }
     }
+
+    private fun windowsRunValue(exe: String): String = "\"$exe\""
+
+    private fun macPlistContent(exe: String): String = """
+        <?xml version="1.0" encoding="UTF-8"?>
+        <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+        <plist version="1.0">
+        <dict>
+            <key>Label</key>
+            <string>org.churchpresenter.app</string>
+            <key>ProgramArguments</key>
+            <array>
+                <string>${escapeXml(exe)}</string>
+            </array>
+            <key>RunAtLoad</key>
+            <true/>
+        </dict>
+        </plist>
+        """.trimIndent()
+
+    private fun linuxDesktopContent(exe: String): String = """
+        [Desktop Entry]
+        Type=Application
+        Name=$APP_NAME
+        Exec="${escapeExec(exe)}"
+        X-GNOME-Autostart-enabled=true
+        """.trimIndent()
+
+    private fun escapeXml(s: String): String = s
+        .replace("&", "&amp;")
+        .replace("<", "&lt;")
+        .replace(">", "&gt;")
+        .replace("\"", "&quot;")
+        .replace("'", "&apos;")
+
+    /** Escapes reserved characters inside a quoted Exec value per the freedesktop spec. */
+    private fun escapeExec(s: String): String = s
+        .replace("\\", "\\\\")
+        .replace("\"", "\\\"")
+        .replace("$", "\\$")
+        .replace("`", "\\`")
 
     private fun unregister() {
         when {

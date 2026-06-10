@@ -52,11 +52,20 @@ abstract class FileChooser {
      * @param suggestedName A suggested file name to pre-fill in the dialog.
      * @param filters the filters to apply when showing files in the dialog. If empty, no filtering will be applied.
      * @param title The title of the file chooser dialog.
-     * @return The path of the selected file, or null if the user canceled the dialog
+     * @return The path of the selected file, or null if the user canceled the dialog.
+     * When filters are provided, the returned path is guaranteed to carry one of the
+     * filter extensions (the first one is appended if the user omitted it).
      */
     suspend fun save(location: Path?, suggestedName: String, filters: List<FileNameExtensionFilter>, title: String): Path? {
         val initialLocation = location ?: Path(System.getProperty(Constants.SystemProperties.USER_HOME))
-        return withContext(Dispatchers.IO) { saveImpl(initialLocation, suggestedName, filters, title) }
+        val result = withContext(Dispatchers.IO) { saveImpl(initialLocation, suggestedName, filters, title) } ?: return null
+        val extensions = filters.flatMap { it.extensions.toList() }
+        val name = result.fileName.toString()
+        return if (extensions.isEmpty() || extensions.any { name.endsWith(".$it", ignoreCase = true) }) {
+            result
+        } else {
+            result.resolveSibling("$name.${extensions.first()}")
+        }
     }
 
     protected abstract suspend fun saveImpl(location: Path, suggestedName: String, filters: List<FileNameExtensionFilter>, title: String): Path?

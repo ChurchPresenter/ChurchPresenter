@@ -648,13 +648,22 @@ fun SystemSettingsTab(
     }
 }
 
-private enum class DirStatus { CHECKING, WRITABLE, READ_ONLY, INVALID }
+private enum class DirStatus { CHECKING, WRITABLE, READ_ONLY, NOT_FOUND, INVALID }
 
 private fun isWritableDir(dir: java.io.File): Boolean = try {
     // File.createTempFile generates a unique name per call — concurrent checks
     // from multiple pickers on the same directory cannot collide
     val tmp = java.io.File.createTempFile(".cp_write_test", ".tmp", dir)
-    tmp.delete()
+    if (!tmp.delete()) tmp.deleteOnExit()
+    true
+} catch (_: Exception) {
+    false
+}
+
+private fun isReadableDir(dir: java.io.File): Boolean = try {
+    // File.canRead() ignores ACLs on Windows; actually opening a directory
+    // stream surfaces access-denied errors reliably
+    java.nio.file.Files.newDirectoryStream(dir.toPath()).use { }
     true
 } catch (_: Exception) {
     false
@@ -701,9 +710,9 @@ private fun DirectoryPicker(
                 status = withContext(Dispatchers.IO) {
                     try {
                         when {
-                            !dirFile.isDirectory -> DirStatus.INVALID
+                            !dirFile.isDirectory -> DirStatus.NOT_FOUND
                             isWritableDir(dirFile) -> DirStatus.WRITABLE
-                            dirFile.canRead() -> DirStatus.READ_ONLY
+                            isReadableDir(dirFile) -> DirStatus.READ_ONLY
                             else -> DirStatus.INVALID
                         }
                     } catch (_: Exception) {
@@ -719,8 +728,8 @@ private fun DirectoryPicker(
                                 DirStatus.CHECKING -> "…"
                                 DirStatus.WRITABLE -> stringResource(Res.string.tooltip_directory_writable)
                                 DirStatus.READ_ONLY -> stringResource(Res.string.tooltip_directory_not_writable)
-                                DirStatus.INVALID -> if (!dirFile.exists()) stringResource(Res.string.tooltip_directory_not_found)
-                                        else stringResource(Res.string.tooltip_directory_not_writable)
+                                DirStatus.NOT_FOUND -> stringResource(Res.string.tooltip_directory_not_found)
+                                DirStatus.INVALID -> stringResource(Res.string.tooltip_directory_not_writable)
                             },
                             color = MaterialTheme.colorScheme.inverseOnSurface,
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
@@ -738,7 +747,7 @@ private fun DirectoryPicker(
                                 DirStatus.CHECKING -> Color(0xFF9E9E9E)
                                 DirStatus.WRITABLE -> Color(0xFF4CAF50)
                                 DirStatus.READ_ONLY -> Color(0xFFFFC107)
-                                DirStatus.INVALID -> Color(0xFFF44336)
+                                DirStatus.NOT_FOUND, DirStatus.INVALID -> Color(0xFFF44336)
                             },
                             shape = CircleShape
                         )

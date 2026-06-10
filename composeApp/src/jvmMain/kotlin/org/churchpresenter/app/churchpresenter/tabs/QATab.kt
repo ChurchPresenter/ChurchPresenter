@@ -75,8 +75,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
+import org.churchpresenter.app.churchpresenter.utils.CrashReporter
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
@@ -580,7 +583,11 @@ fun QATab(
                                             .format(java.util.Date(q.timestamp))
                                         "[$time] [$status] ${q.text}"
                                     }
-                                    path.toFile().writeText(export)
+                                    try {
+                                        withContext(Dispatchers.IO) { path.toFile().writeText(export) }
+                                    } catch (e: Exception) {
+                                        CrashReporter.reportException(e, context = "QATab.exportQuestions")
+                                    }
                                 }
                             }
                         }) {
@@ -595,7 +602,12 @@ fun QATab(
                                     selectDirectory = false
                                 )
                                 if (path != null) {
-                                    val lines = path.toFile().readLines()
+                                    val lines = try {
+                                        withContext(Dispatchers.IO) { path.toFile().readLines() }
+                                    } catch (e: Exception) {
+                                        CrashReporter.reportException(e, context = "QATab.importQuestions")
+                                        emptyList()
+                                    }
                                     for (line in lines) {
                                         val text = line.replace(Regex("^\\[.*?\\]\\s*\\[.*?\\]\\s*"), "").trim()
                                         if (text.isNotBlank()) qaManager.addQuestion(text)
@@ -677,25 +689,36 @@ fun QATab(
                 dismissButton = {
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         TextButton(onClick = {
+                            // Close the confirm dialog before the save dialog opens and snapshot
+                            // the questions so a concurrent clear cannot empty the export
+                            showClearConfirm = false
+                            val toExport = questions.toList()
                             coroutineScope.launch {
                                 val path = FileChooser.platformInstance.save(
                                     location = null,
                                     suggestedName = "questions.txt",
-                                    filters = emptyList(),
+                                    filters = listOf(javax.swing.filechooser.FileNameExtensionFilter("Text files", "txt")),
                                     title = strExportTitle
                                 )
+                                // Cancelling the save dialog aborts the clear — never delete unexported questions
                                 if (path != null) {
-                                    path.toFile().writeText(
-                                        questions.joinToString("\n") { q ->
-                                            "[${java.text.SimpleDateFormat("HH:mm", java.util.Locale.getDefault()).format(java.util.Date(q.timestamp))}] [${q.status}] ${q.text}"
+                                    try {
+                                        withContext(Dispatchers.IO) {
+                                            path.toFile().writeText(
+                                                toExport.joinToString("\n") { q ->
+                                                    "[${java.text.SimpleDateFormat("HH:mm", java.util.Locale.getDefault()).format(java.util.Date(q.timestamp))}] [${q.status}] ${q.text}"
+                                                }
+                                            )
                                         }
-                                    )
+                                    } catch (e: Exception) {
+                                        CrashReporter.reportException(e, context = "QATab.exportAndClear")
+                                        return@launch
+                                    }
+                                    qaManager.clearAll()
+                                    presenterManager.setDisplayedQuestion(null)
+                                    presenterManager.setShowQRCodeOnDisplay(false)
+                                    presenting(Presenting.NONE)
                                 }
-                                qaManager.clearAll()
-                                presenterManager.setDisplayedQuestion(null)
-                                presenterManager.setShowQRCodeOnDisplay(false)
-                                presenting(Presenting.NONE)
-                                showClearConfirm = false
                             }
                         }) { Text(stringResource(Res.string.qa_export_clear)) }
                         TextButton(onClick = { showClearConfirm = false }) { Text(stringResource(Res.string.cancel)) }

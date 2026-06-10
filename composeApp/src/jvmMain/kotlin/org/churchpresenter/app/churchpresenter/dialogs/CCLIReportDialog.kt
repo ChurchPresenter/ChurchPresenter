@@ -134,7 +134,6 @@ import org.churchpresenter.app.churchpresenter.data.VerseSummary
 import org.churchpresenter.app.churchpresenter.ui.theme.AppThemeWrapper
 import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
 import org.jetbrains.compose.resources.stringResource
-import java.io.File
 import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.ZoneId
@@ -333,9 +332,7 @@ fun CCLIReportDialog(
                                         title = csvChooserTitle
                                     )
                                     if (path != null) {
-                                        var file = path.toFile()
-                                        if (!file.name.endsWith(".csv", ignoreCase = true)) file = File("${file.absolutePath}.csv")
-                                        val ok = withContext(Dispatchers.IO) { statisticsManager.exportCcliCsv(file, f, t) }
+                                        val ok = withContext(Dispatchers.IO) { statisticsManager.exportCcliCsv(path.toFile(), f, t) }
                                         statusIsSuccess = ok; statusMessage = if (ok) successMsg else errorMsg
                                     }
                                 }
@@ -353,9 +350,7 @@ fun CCLIReportDialog(
                                         title = xlsChooserTitle
                                     )
                                     if (path != null) {
-                                        var file = path.toFile()
-                                        if (!file.name.endsWith(".xls", ignoreCase = true)) file = File("${file.absolutePath}.xls")
-                                        val ok = withContext(Dispatchers.IO) { statisticsManager.exportFilteredXls(file, f, t) }
+                                        val ok = withContext(Dispatchers.IO) { statisticsManager.exportFilteredXls(path.toFile(), f, t) }
                                         statusIsSuccess = ok; statusMessage = if (ok) successMsg else errorMsg
                                     }
                                 }

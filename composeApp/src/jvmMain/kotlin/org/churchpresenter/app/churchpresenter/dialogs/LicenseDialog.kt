@@ -70,8 +70,6 @@ fun LicenseDialog(
         resizable = true,
         alwaysOnTop = true
     ) {
-        // macOS: re-activate the app after the splash window closed, otherwise
-        // the screen menu bar can stay greyed out until the app is refocused
         MacMenuBarActivationFix()
         Surface(
             modifier = Modifier.fillMaxSize(),
