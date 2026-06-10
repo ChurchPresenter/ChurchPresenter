@@ -1005,6 +1005,7 @@ fun MainDesktop(
                                 selectedPresentationItem = selectedPresentationItem,
                                 presenterManager = presenterManager,
                                 onSlidesLoaded = onPresentationSlidesLoaded,
+                                onSettingsChange = onSettingsChange,
                                 viewModel = presentationViewModel
                             )
 
