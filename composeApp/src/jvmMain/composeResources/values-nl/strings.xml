@@ -1110,6 +1110,7 @@
     <string name="tooltip_directory_writable">Map is beschrijfbaar</string>
     <string name="tooltip_directory_not_found">Map niet gevonden. Maak hem aan of kies een andere locatie.</string>
     <string name="tooltip_directory_not_writable">Kan niet schrijven naar deze map. Kies een andere locatie of wijzig de rechten.</string>
+    <string name="launch_on_login">Starten bij aanmelden</string>
     <string name="song_folder_with_count">%1$s (%2$d liederen)</string>
 
     <!-- Song Settings - Display Modes and Language Options -->

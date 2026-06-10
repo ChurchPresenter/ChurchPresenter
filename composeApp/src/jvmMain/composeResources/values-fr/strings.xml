@@ -1110,6 +1110,7 @@
     <string name="tooltip_directory_writable">Le répertoire est accessible en écriture</string>
     <string name="tooltip_directory_not_found">Répertoire introuvable. Créez-le ou choisissez un autre emplacement.</string>
     <string name="tooltip_directory_not_writable">Impossible d'écrire dans ce répertoire. Choisissez un autre emplacement ou modifiez les permissions.</string>
+    <string name="launch_on_login">Lancer à la connexion</string>
     <string name="song_folder_with_count">%1$s (%2$d cantiques)</string>
 
     <!-- Song Settings - Display Modes and Language Options -->

@@ -10,6 +10,7 @@ data class AppSettings(
     val backgroundSettings: BackgroundSettings = BackgroundSettings(),
     val projectionSettings: ProjectionSettings = ProjectionSettings(),
     val pictureSettings: PictureSettings = PictureSettings(),
+    val presentationSettings: PresentationSettings = PresentationSettings(),
     val streamingSettings: StreamingSettings = StreamingSettings(),
     val announcementsSettings: AnnouncementsSettings = AnnouncementsSettings(),
     val qaSettings: QASettings = QASettings(),

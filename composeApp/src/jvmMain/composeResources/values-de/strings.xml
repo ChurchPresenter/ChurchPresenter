@@ -855,6 +855,7 @@
     <string name="tooltip_directory_writable">Verzeichnis ist beschreibbar</string>
     <string name="tooltip_directory_not_found">Verzeichnis nicht gefunden. Erstellen Sie es oder wählen Sie einen anderen Speicherort.</string>
     <string name="tooltip_directory_not_writable">Kein Schreibzugriff auf dieses Verzeichnis. Wählen Sie einen anderen Speicherort oder ändern Sie die Berechtigungen.</string>
+    <string name="launch_on_login">Beim Anmelden starten</string>
     <string name="song_folder_with_count">%1$s (%2$d Lieder)</string>
 
     <!-- Song Settings - Display Modes and Language Options -->

@@ -13,6 +13,8 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
+import org.churchpresenter.app.churchpresenter.models.AnimationType
+import org.churchpresenter.app.churchpresenter.utils.Constants
 import java.awt.image.BufferedImage
 import java.io.BufferedInputStream
 import java.io.BufferedOutputStream
@@ -50,15 +52,37 @@ class PresentationViewModel(appSettings: AppSettings? = null) {
     val isPlaying: Boolean
         get() = _isPlaying.value
 
-    private val _autoScrollInterval = mutableStateOf(appSettings?.pictureSettings?.autoScrollInterval ?: 5f)
+    private val _isLoading = mutableStateOf(false)
+    val isLoading: Boolean
+        get() = _isLoading.value
+
+    private val _autoScrollInterval = mutableStateOf(appSettings?.presentationSettings?.autoScrollInterval ?: 5f)
     var autoScrollInterval: Float
         get() = _autoScrollInterval.value
         set(value) { _autoScrollInterval.value = value }
 
-    private val _isLooping = mutableStateOf(appSettings?.pictureSettings?.isLooping ?: true)
+    private val _isLooping = mutableStateOf(appSettings?.presentationSettings?.isLooping ?: true)
     var isLooping: Boolean
         get() = _isLooping.value
         set(value) { _isLooping.value = value }
+
+    private val _transitionDuration = mutableStateOf(appSettings?.presentationSettings?.transitionDuration ?: 500f)
+    var transitionDuration: Float
+        get() = _transitionDuration.value
+        set(value) { _transitionDuration.value = value }
+
+    private val _animationType = mutableStateOf(
+        when (appSettings?.presentationSettings?.animationType) {
+            Constants.ANIMATION_FADE -> AnimationType.FADE
+            Constants.ANIMATION_SLIDE_LEFT -> AnimationType.SLIDE_LEFT
+            Constants.ANIMATION_SLIDE_RIGHT -> AnimationType.SLIDE_RIGHT
+            Constants.ANIMATION_NONE -> AnimationType.NONE
+            else -> AnimationType.CROSSFADE
+        }
+    )
+    var animationType: AnimationType
+        get() = _animationType.value
+        set(value) { _animationType.value = value }
 
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private var activeLoadJob: Job? = null  // Track current load job to cancel on switch
@@ -134,12 +158,14 @@ class PresentationViewModel(appSettings: AppSettings? = null) {
     }
 
     fun clearPresentations() {
+        activeLoadJob?.cancel()
         _presentations.clear()
         _selectedPresentation.value = null
         _slides.clear()
         _bufferedSlides.clear()
         _slideNotes.clear()
         _selectedSlideIndex.value = 0
+        _isLoading.value = false
     }
 
     private fun isValidPresentationFile(file: File): Boolean {
@@ -154,6 +180,7 @@ class PresentationViewModel(appSettings: AppSettings? = null) {
                     _slides.clear()
                     _bufferedSlides.clear()
                     _slideNotes.clear()
+                    _isLoading.value = true
                 }
                 when (file.extension.lowercase()) {
                     "pdf" -> loadPdfSlides(file)
@@ -162,6 +189,10 @@ class PresentationViewModel(appSettings: AppSettings? = null) {
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
+            } finally {
+                withContext(Dispatchers.Main) {
+                    _isLoading.value = false
+                }
             }
         }
     }

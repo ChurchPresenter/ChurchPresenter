@@ -41,6 +41,7 @@ import churchpresenter.composeapp.generated.resources.license_accept_button
 import churchpresenter.composeapp.generated.resources.license_decline_button
 import churchpresenter.composeapp.generated.resources.license_prompt
 import churchpresenter.composeapp.generated.resources.license_title
+import org.churchpresenter.app.churchpresenter.utils.MacMenuBarActivationFix
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
@@ -69,6 +70,7 @@ fun LicenseDialog(
         resizable = true,
         alwaysOnTop = true
     ) {
+        MacMenuBarActivationFix()
         Surface(
             modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colorScheme.background

@@ -1145,6 +1145,7 @@
     <string name="tooltip_directory_writable">Directory is writable</string>
     <string name="tooltip_directory_not_found">Directory not found. Create it or choose a different location.</string>
     <string name="tooltip_directory_not_writable">Cannot write to this directory. Choose a different location or change permissions.</string>
+    <string name="launch_on_login">Launch at login</string>
     <string name="song_folder_with_count">%1$s (%2$d songs)</string>
 
     <!-- Song Settings - Display Modes and Language Options -->

@@ -1137,6 +1137,7 @@
     <string name="tooltip_directory_writable">Directorul permite scrierea</string>
     <string name="tooltip_directory_not_found">Directorul nu a fost găsit. Creați-l sau alegeți o altă locație.</string>
     <string name="tooltip_directory_not_writable">Nu se poate scrie în acest director. Alegeți o altă locație sau modificați permisiunile.</string>
+    <string name="launch_on_login">Pornește la autentificare</string>
     <string name="song_folder_with_count">%1$s (%2$d cântări)</string>
 
     <!-- Song Settings - Display Modes and Language Options -->

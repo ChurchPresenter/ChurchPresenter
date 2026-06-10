@@ -65,6 +65,7 @@ import churchpresenter.composeapp.generated.resources.play
 import org.churchpresenter.app.churchpresenter.PresenterScreen
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.data.settings.ScreenAssignment
+import org.churchpresenter.app.churchpresenter.models.AnimationType
 import org.churchpresenter.app.churchpresenter.presenter.AnnouncementsPresenter
 import org.churchpresenter.app.churchpresenter.presenter.BiblePresenter
 import org.churchpresenter.app.churchpresenter.presenter.LowerThirdPresenter
@@ -167,9 +168,14 @@ private fun SingleDisplayPreview(
     val allLyricSections by presenterManager.allLyricSections
     val songDisplaySectionIndex by presenterManager.songDisplaySectionIndex
     val displayedImagePath by presenterManager.displayedImagePath
+    val previousDisplayedImagePath by presenterManager.previousDisplayedImagePath
     val pictureTransitionAlpha by presenterManager.pictureTransitionAlpha
+    val pictureSlideOffset by presenterManager.pictureSlideOffset
     val displayedSlide by presenterManager.displayedSlide
+    val previousDisplayedSlide by presenterManager.previousDisplayedSlide
     val slideTransitionAlpha by presenterManager.slideTransitionAlpha
+    val slideSlideOffset by presenterManager.slideSlideOffset
+    val animationType by presenterManager.animationType
     val lottieJsonContent by presenterManager.lottieJsonContent
     val lottieComposition by rememberLottieComposition(key = lottieJsonContent) {
         LottieCompositionSpec.JsonString(lottieJsonContent)
@@ -264,9 +270,21 @@ private fun SingleDisplayPreview(
                                     crossfadeEnabled = appSettings.songSettings.crossfade
                                 )
                             Presenting.PICTURES ->
-                                PicturePresenter(imagePath = displayedImagePath, transitionAlpha = pictureTransitionAlpha)
+                                PicturePresenter(
+                                    imagePath = displayedImagePath,
+                                    previousImagePath = previousDisplayedImagePath,
+                                    transitionAlpha = pictureTransitionAlpha,
+                                    slideOffset = pictureSlideOffset,
+                                    animationType = animationType,
+                                )
                             Presenting.PRESENTATION ->
-                                SlidePresenter(slide = displayedSlide, transitionAlpha = slideTransitionAlpha)
+                                SlidePresenter(
+                                    slide = displayedSlide,
+                                    previousSlide = previousDisplayedSlide,
+                                    transitionAlpha = slideTransitionAlpha,
+                                    slideOffset = slideSlideOffset,
+                                    animationType = animationType,
+                                )
                             Presenting.MEDIA ->
                                 if (mediaViewModel != null && !mediaViewModel.isAudioFile) {
                                     MediaPresenter(modifier = Modifier.fillMaxSize(), audioEnabled = false, transitionAlpha = mediaTransitionAlpha)

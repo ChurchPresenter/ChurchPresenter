@@ -26,6 +26,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -58,6 +59,7 @@ import churchpresenter.composeapp.generated.resources.folder_already_exists
 import churchpresenter.composeapp.generated.resources.folder_overwrite_confirm
 import churchpresenter.composeapp.generated.resources.import_settings
 import churchpresenter.composeapp.generated.resources.import_settings_confirm
+import churchpresenter.composeapp.generated.resources.launch_on_login
 import churchpresenter.composeapp.generated.resources.lower_third_storage_directory
 import churchpresenter.composeapp.generated.resources.media_storage_directory
 import churchpresenter.composeapp.generated.resources.no_directory_selected
@@ -87,6 +89,7 @@ import org.churchpresenter.app.churchpresenter.data.SettingsManager
 import org.churchpresenter.app.churchpresenter.data.SpsConverter
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
 import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
+import org.churchpresenter.app.churchpresenter.utils.AutoStartManager
 import org.churchpresenter.app.churchpresenter.viewmodel.FileManager
 import org.jetbrains.compose.resources.stringResource
 import java.awt.Window
@@ -419,6 +422,33 @@ fun SystemSettingsTab(
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant, thickness = 1.dp)
         Spacer(modifier = Modifier.height(16.dp))
 
+        // Launch at login — the OS registration is the source of truth, not settings.json
+        var autoStartEnabled by remember { mutableStateOf(AutoStartManager.isEnabled()) }
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Text(
+                text = stringResource(Res.string.launch_on_login),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Switch(
+                checked = autoStartEnabled,
+                enabled = AutoStartManager.isSupported,
+                onCheckedChange = { enabled ->
+                    scope.launch {
+                        val ok = withContext(Dispatchers.IO) { AutoStartManager.setEnabled(enabled) }
+                        if (ok) autoStartEnabled = enabled
+                    }
+                }
+            )
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant, thickness = 1.dp)
+        Spacer(modifier = Modifier.height(16.dp))
+
         // Export / Import / Reset Settings
         val resetConfirmMsg = stringResource(Res.string.reset_settings_confirm)
         val resetTitle = stringResource(Res.string.reset_settings)
@@ -618,6 +648,27 @@ fun SystemSettingsTab(
     }
 }
 
+private enum class DirStatus { CHECKING, WRITABLE, READ_ONLY, NOT_FOUND, INVALID }
+
+private fun isWritableDir(dir: java.io.File): Boolean = try {
+    // File.createTempFile generates a unique name per call — concurrent checks
+    // from multiple pickers on the same directory cannot collide
+    val tmp = java.io.File.createTempFile(".cp_write_test", ".tmp", dir)
+    if (!tmp.delete()) tmp.deleteOnExit()
+    true
+} catch (_: Exception) {
+    false
+}
+
+private fun isReadableDir(dir: java.io.File): Boolean = try {
+    // File.canRead() ignores ACLs on Windows; actually opening a directory
+    // stream surfaces access-denied errors reliably
+    java.nio.file.Files.newDirectoryStream(dir.toPath()).use { }
+    true
+} catch (_: Exception) {
+    false
+}
+
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun DirectoryPicker(
@@ -654,16 +705,18 @@ private fun DirectoryPicker(
         )
         if (currentPath.isNotEmpty()) {
             val dirFile = remember(currentPath) { java.io.File(currentPath) }
-            // null = still checking, true = writable, false = not writable / not found
-            var isWritable by remember(currentPath) { mutableStateOf<Boolean?>(null) }
+            var status by remember(currentPath) { mutableStateOf(DirStatus.CHECKING) }
             LaunchedEffect(currentPath) {
-                isWritable = withContext(Dispatchers.IO) {
-                    if (!dirFile.exists()) false
-                    else try {
-                        val tempFile = java.io.File(dirFile, ".churchpresenter_write_test")
-                        tempFile.createNewFile() && tempFile.delete()
+                status = withContext(Dispatchers.IO) {
+                    try {
+                        when {
+                            !dirFile.isDirectory -> DirStatus.NOT_FOUND
+                            isWritableDir(dirFile) -> DirStatus.WRITABLE
+                            isReadableDir(dirFile) -> DirStatus.READ_ONLY
+                            else -> DirStatus.INVALID
+                        }
                     } catch (_: Exception) {
-                        false
+                        DirStatus.INVALID
                     }
                 }
             }
@@ -671,11 +724,12 @@ private fun DirectoryPicker(
                 tooltip = {
                     Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
                         Text(
-                            when (isWritable) {
-                                null -> "…"
-                                true -> stringResource(Res.string.tooltip_directory_writable)
-                                false -> if (!dirFile.exists()) stringResource(Res.string.tooltip_directory_not_found)
-                                        else stringResource(Res.string.tooltip_directory_not_writable)
+                            when (status) {
+                                DirStatus.CHECKING -> "…"
+                                DirStatus.WRITABLE -> stringResource(Res.string.tooltip_directory_writable)
+                                DirStatus.READ_ONLY -> stringResource(Res.string.tooltip_directory_not_writable)
+                                DirStatus.NOT_FOUND -> stringResource(Res.string.tooltip_directory_not_found)
+                                DirStatus.INVALID -> stringResource(Res.string.tooltip_directory_not_writable)
                             },
                             color = MaterialTheme.colorScheme.inverseOnSurface,
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
@@ -689,10 +743,11 @@ private fun DirectoryPicker(
                     modifier = Modifier
                         .size(12.dp)
                         .background(
-                            when (isWritable) {
-                                null -> Color(0xFF9E9E9E)
-                                true -> Color(0xFF4CAF50)
-                                false -> Color(0xFFF44336)
+                            when (status) {
+                                DirStatus.CHECKING -> Color(0xFF9E9E9E)
+                                DirStatus.WRITABLE -> Color(0xFF4CAF50)
+                                DirStatus.READ_ONLY -> Color(0xFFFFC107)
+                                DirStatus.NOT_FOUND, DirStatus.INVALID -> Color(0xFFF44336)
                             },
                             shape = CircleShape
                         )

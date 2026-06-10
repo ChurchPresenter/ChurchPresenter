@@ -97,6 +97,12 @@ class PresenterManager {
     private val _pictureTransitionAlpha = mutableStateOf(1f)
     val pictureTransitionAlpha: State<Float> = _pictureTransitionAlpha
 
+    private val _previousDisplayedImagePath = mutableStateOf<String?>(null)
+    val previousDisplayedImagePath: State<String?> = _previousDisplayedImagePath
+
+    private val _pictureSlideOffset = mutableStateOf(1f)
+    val pictureSlideOffset: State<Float> = _pictureSlideOffset
+
     private val _animationType = mutableStateOf(AnimationType.CROSSFADE)
     val animationType: State<AnimationType> = _animationType
 
@@ -122,6 +128,12 @@ class PresenterManager {
 
     private val _slideTransitionAlpha = mutableStateOf(1f)
     val slideTransitionAlpha: State<Float> = _slideTransitionAlpha
+
+    private val _previousDisplayedSlide = mutableStateOf<ImageBitmap?>(null)
+    val previousDisplayedSlide: State<ImageBitmap?> = _previousDisplayedSlide
+
+    private val _slideSlideOffset = mutableStateOf(1f)
+    val slideSlideOffset: State<Float> = _slideSlideOffset
 
     // Shared Announcements transition state
     private val _displayedAnnouncementText = mutableStateOf("")
@@ -238,6 +250,14 @@ class PresenterManager {
         _pictureTransitionAlpha.value = alpha
     }
 
+    fun setPreviousDisplayedImagePath(path: String?) {
+        _previousDisplayedImagePath.value = path
+    }
+
+    fun setPictureSlideOffset(offset: Float) {
+        _pictureSlideOffset.value = offset
+    }
+
     fun setAnimationType(type: AnimationType) {
         _animationType.value = type
     }
@@ -272,6 +292,14 @@ class PresenterManager {
 
     fun setSlideTransitionAlpha(alpha: Float) {
         _slideTransitionAlpha.value = alpha
+    }
+
+    fun setPreviousDisplayedSlide(slide: ImageBitmap?) {
+        _previousDisplayedSlide.value = slide
+    }
+
+    fun setSlideSlideOffset(offset: Float) {
+        _slideSlideOffset.value = offset
     }
 
     fun setDisplayedAnnouncementText(text: String) {

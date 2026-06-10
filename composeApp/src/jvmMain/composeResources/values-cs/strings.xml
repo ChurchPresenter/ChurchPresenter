@@ -966,6 +966,7 @@
     <string name="tooltip_directory_writable">Adresář je zapisovatelný</string>
     <string name="tooltip_directory_not_found">Adresář nebyl nalezen. Vytvořte ho nebo zvolte jiné umístění.</string>
     <string name="tooltip_directory_not_writable">Do tohoto adresáře nelze zapisovat. Zvolte jiné umístění nebo změňte oprávnění.</string>
+    <string name="launch_on_login">Spustit při přihlášení</string>
     <string name="song_folder_with_count">%1$s (%2$d písní)</string>
 
     <!-- Song Settings - Display Modes and Language Options -->
