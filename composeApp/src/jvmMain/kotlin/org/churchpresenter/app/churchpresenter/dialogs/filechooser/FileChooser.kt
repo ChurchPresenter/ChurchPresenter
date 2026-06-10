@@ -86,7 +86,7 @@ abstract class FileChooser {
             if ("nix" in osName || "nux" in osName) {
                 XdgFileChooser
             } else {
-                SwingFileChooser
+                FileKitFileChooser
             }
         }
     }

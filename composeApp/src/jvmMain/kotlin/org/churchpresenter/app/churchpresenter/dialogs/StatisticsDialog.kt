@@ -57,8 +57,8 @@ import org.churchpresenter.app.churchpresenter.ui.theme.AppThemeWrapper
 import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
 import org.jetbrains.compose.resources.stringResource
 import java.io.File
-import javax.swing.JFileChooser
 import javax.swing.filechooser.FileNameExtensionFilter
+import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
 
 @Composable
 fun StatisticsDialog(
@@ -268,20 +268,15 @@ fun StatisticsDialog(
                         OutlinedButton(
                             onClick = {
                                 coroutineScope.launch {
-                                    val file = withContext(Dispatchers.IO) {
-                                        val chooser = JFileChooser().apply {
-                                            dialogTitle = saveTitle
-                                            fileSelectionMode = JFileChooser.FILES_ONLY
-                                            fileFilter = FileNameExtensionFilter(filterDesc, "xls")
-                                            selectedFile = File("statistics.xls")
-                                        }
-                                        if (chooser.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
-                                            var f = chooser.selectedFile
-                                            if (!f.name.endsWith(".xls", ignoreCase = true)) f = File(f.absolutePath + ".xls")
-                                            f
-                                        } else null
-                                    }
-                                    if (file != null) {
+                                    val path = FileChooser.platformInstance.save(
+                                        location = null,
+                                        suggestedName = "statistics.xls",
+                                        filters = listOf(FileNameExtensionFilter(filterDesc, "xls")),
+                                        title = saveTitle
+                                    )
+                                    if (path != null) {
+                                        var file = path.toFile()
+                                        if (!file.name.endsWith(".xls", ignoreCase = true)) file = File(file.absolutePath + ".xls")
                                         val ok = withContext(Dispatchers.IO) { statisticsManager.exportStatisticsToXls(file) }
                                         statusMessage = if (ok) successMsg else errorMsg
                                     }

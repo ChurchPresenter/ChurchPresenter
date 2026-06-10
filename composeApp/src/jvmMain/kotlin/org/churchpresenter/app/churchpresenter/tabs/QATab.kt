@@ -73,7 +73,10 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import kotlinx.coroutines.launch
+import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
@@ -313,6 +316,8 @@ fun QATab(
     val strExportTitle = stringResource(Res.string.qa_export_dialog_title)
     val strImportTitle = stringResource(Res.string.qa_import_dialog_title)
     val strQrMessageDefault = stringResource(Res.string.qa_qr_message_default)
+
+    val coroutineScope = rememberCoroutineScope()
 
     val density = LocalDensity.current
     val onSettingsChangeState = rememberUpdatedState(onSettingsChange)
@@ -561,34 +566,40 @@ fun QATab(
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         OutlinedButton(onClick = {
-                            val chooser = javax.swing.JFileChooser().apply {
-                                dialogTitle = strExportTitle
-                                selectedFile = java.io.File("questions.txt")
-                                fileFilter = javax.swing.filechooser.FileNameExtensionFilter("Text files", "txt")
-                            }
-                            if (chooser.showSaveDialog(null) == javax.swing.JFileChooser.APPROVE_OPTION) {
-                                val file = chooser.selectedFile
-                                val export = filteredQuestions.joinToString("\n") { q ->
-                                    val status = q.status.name.lowercase().replaceFirstChar { it.uppercase() }
-                                    val time = java.text.SimpleDateFormat("yyyy-MM-dd HH:mm", java.util.Locale.getDefault())
-                                        .format(java.util.Date(q.timestamp))
-                                    "[$time] [$status] ${q.text}"
+                            coroutineScope.launch {
+                                val path = FileChooser.platformInstance.save(
+                                    location = null,
+                                    suggestedName = "questions.txt",
+                                    filters = listOf(javax.swing.filechooser.FileNameExtensionFilter("Text files", "txt")),
+                                    title = strExportTitle
+                                )
+                                if (path != null) {
+                                    val export = filteredQuestions.joinToString("\n") { q ->
+                                        val status = q.status.name.lowercase().replaceFirstChar { it.uppercase() }
+                                        val time = java.text.SimpleDateFormat("yyyy-MM-dd HH:mm", java.util.Locale.getDefault())
+                                            .format(java.util.Date(q.timestamp))
+                                        "[$time] [$status] ${q.text}"
+                                    }
+                                    path.toFile().writeText(export)
                                 }
-                                file.writeText(export)
                             }
                         }) {
                             Text(stringResource(Res.string.qa_export_to_file), color = MaterialTheme.colorScheme.onSurface)
                         }
                         OutlinedButton(onClick = {
-                            val chooser = javax.swing.JFileChooser().apply {
-                                dialogTitle = strImportTitle
-                                fileFilter = javax.swing.filechooser.FileNameExtensionFilter("Text files", "txt")
-                            }
-                            if (chooser.showOpenDialog(null) == javax.swing.JFileChooser.APPROVE_OPTION) {
-                                val lines = chooser.selectedFile.readLines()
-                                for (line in lines) {
-                                    val text = line.replace(Regex("^\\[.*?\\]\\s*\\[.*?\\]\\s*"), "").trim()
-                                    if (text.isNotBlank()) qaManager.addQuestion(text)
+                            coroutineScope.launch {
+                                val path = FileChooser.platformInstance.chooseSingle(
+                                    path = null,
+                                    filters = listOf(javax.swing.filechooser.FileNameExtensionFilter("Text files", "txt")),
+                                    title = strImportTitle,
+                                    selectDirectory = false
+                                )
+                                if (path != null) {
+                                    val lines = path.toFile().readLines()
+                                    for (line in lines) {
+                                        val text = line.replace(Regex("^\\[.*?\\]\\s*\\[.*?\\]\\s*"), "").trim()
+                                        if (text.isNotBlank()) qaManager.addQuestion(text)
+                                    }
                                 }
                             }
                         }) {
@@ -666,22 +677,26 @@ fun QATab(
                 dismissButton = {
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         TextButton(onClick = {
-                            val chooser = javax.swing.JFileChooser().apply {
-                                dialogTitle = strExportTitle
-                                selectedFile = java.io.File("questions.txt")
-                            }
-                            if (chooser.showSaveDialog(null) == javax.swing.JFileChooser.APPROVE_OPTION) {
-                                chooser.selectedFile.writeText(
-                                    questions.joinToString("\n") { q ->
-                                        "[${java.text.SimpleDateFormat("HH:mm", java.util.Locale.getDefault()).format(java.util.Date(q.timestamp))}] [${q.status}] ${q.text}"
-                                    }
+                            coroutineScope.launch {
+                                val path = FileChooser.platformInstance.save(
+                                    location = null,
+                                    suggestedName = "questions.txt",
+                                    filters = emptyList(),
+                                    title = strExportTitle
                                 )
+                                if (path != null) {
+                                    path.toFile().writeText(
+                                        questions.joinToString("\n") { q ->
+                                            "[${java.text.SimpleDateFormat("HH:mm", java.util.Locale.getDefault()).format(java.util.Date(q.timestamp))}] [${q.status}] ${q.text}"
+                                        }
+                                    )
+                                }
+                                qaManager.clearAll()
+                                presenterManager.setDisplayedQuestion(null)
+                                presenterManager.setShowQRCodeOnDisplay(false)
+                                presenting(Presenting.NONE)
+                                showClearConfirm = false
                             }
-                            qaManager.clearAll()
-                            presenterManager.setDisplayedQuestion(null)
-                            presenterManager.setShowQRCodeOnDisplay(false)
-                            presenting(Presenting.NONE)
-                            showClearConfirm = false
                         }) { Text(stringResource(Res.string.qa_export_clear)) }
                         TextButton(onClick = { showClearConfirm = false }) { Text(stringResource(Res.string.cancel)) }
                     }

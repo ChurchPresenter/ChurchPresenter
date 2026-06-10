@@ -14,6 +14,7 @@ sqliteJdbc = "3.47.1.0"
 ktor = "3.4.0"
 bouncycastle = "1.78.1"
 apache-poi = "5.3.0"
+filekit = "0.14.1"
 
 [libraries]
 kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin" }
@@ -49,6 +50,7 @@ bouncycastle-pkix = { module = "org.bouncycastle:bcpkix-jdk18on", version.ref = 
 bouncycastle-prov = { module = "org.bouncycastle:bcprov-jdk18on", version.ref = "bouncycastle" }
 apache-poi = { module = "org.apache.poi:poi", version.ref = "apache-poi" }
 socket-io-client = { module = "io.socket:socket.io-client", version = "2.1.1" }
+filekit-dialogs = { module = "io.github.vinceglb:filekit-dialogs", version.ref = "filekit" }
 
 [plugins]
 composeHotReload = { id = "org.jetbrains.compose.hot-reload", version.ref = "composeHotReload" }

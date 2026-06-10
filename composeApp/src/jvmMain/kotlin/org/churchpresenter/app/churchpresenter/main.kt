@@ -195,6 +195,9 @@ fun main() {
     // Initialize JCEF (Chromium) for embedded web browsing
     CefManager.init()
 
+    // Initialize FileKit so native file dialogs can resolve app directories
+    io.github.vinceglb.filekit.FileKit.init(appId = "ChurchPresenter")
+
     // Set custom VLC path from saved settings before any composable checks isVlcAvailable
     vlcCustomPath = SettingsManager().loadSettings().projectionSettings.vlcPath
 

@@ -140,8 +140,8 @@ import java.time.LocalDate
 import java.time.ZoneId
 import java.util.Date
 import java.util.Locale
-import javax.swing.JFileChooser
 import javax.swing.filechooser.FileNameExtensionFilter
+import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
 
 private val VERSE_BAR_COLOR = Color(0xFF43A047)
 
@@ -326,19 +326,15 @@ fun CCLIReportDialog(
                             onClick = {
                                 coroutineScope.launch {
                                     val f = fromMs(); val t = toMs()
-                                    val file = withContext(Dispatchers.IO) {
-                                        val chooser = JFileChooser().apply {
-                                            dialogTitle = csvChooserTitle
-                                            fileFilter = FileNameExtensionFilter(csvFilterDesc, "csv")
-                                            selectedFile = File("ccli_report.csv")
-                                        }
-                                        if (chooser.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
-                                            var fl = chooser.selectedFile
-                                            if (!fl.name.endsWith(".csv", ignoreCase = true)) fl = File("${fl.absolutePath}.csv")
-                                            fl
-                                        } else null
-                                    }
-                                    if (file != null) {
+                                    val path = FileChooser.platformInstance.save(
+                                        location = null,
+                                        suggestedName = "ccli_report.csv",
+                                        filters = listOf(FileNameExtensionFilter(csvFilterDesc, "csv")),
+                                        title = csvChooserTitle
+                                    )
+                                    if (path != null) {
+                                        var file = path.toFile()
+                                        if (!file.name.endsWith(".csv", ignoreCase = true)) file = File("${file.absolutePath}.csv")
                                         val ok = withContext(Dispatchers.IO) { statisticsManager.exportCcliCsv(file, f, t) }
                                         statusIsSuccess = ok; statusMessage = if (ok) successMsg else errorMsg
                                     }
@@ -350,19 +346,15 @@ fun CCLIReportDialog(
                             onClick = {
                                 coroutineScope.launch {
                                     val f = fromMs(); val t = toMs()
-                                    val file = withContext(Dispatchers.IO) {
-                                        val chooser = JFileChooser().apply {
-                                            dialogTitle = xlsChooserTitle
-                                            fileFilter = FileNameExtensionFilter(xlsFilterDesc, "xls")
-                                            selectedFile = File("ccli_report.xls")
-                                        }
-                                        if (chooser.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
-                                            var fl = chooser.selectedFile
-                                            if (!fl.name.endsWith(".xls", ignoreCase = true)) fl = File("${fl.absolutePath}.xls")
-                                            fl
-                                        } else null
-                                    }
-                                    if (file != null) {
+                                    val path = FileChooser.platformInstance.save(
+                                        location = null,
+                                        suggestedName = "ccli_report.xls",
+                                        filters = listOf(FileNameExtensionFilter(xlsFilterDesc, "xls")),
+                                        title = xlsChooserTitle
+                                    )
+                                    if (path != null) {
+                                        var file = path.toFile()
+                                        if (!file.name.endsWith(".xls", ignoreCase = true)) file = File("${file.absolutePath}.xls")
                                         val ok = withContext(Dispatchers.IO) { statisticsManager.exportFilteredXls(file, f, t) }
                                         statusIsSuccess = ok; statusMessage = if (ok) successMsg else errorMsg
                                     }

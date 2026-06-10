@@ -11,6 +11,22 @@ import javax.swing.filechooser.FileNameExtensionFilter
 
 object SwingFileChooser : FileChooser() {
 
+    /** Bridges allowing FileKitFileChooser to fall back to the Swing dialog if the native one fails. */
+    internal suspend fun fallbackChoose(
+        path: Path,
+        filters: List<FileNameExtensionFilter>,
+        title: String,
+        selectDirectory: Boolean,
+        multiple: Boolean
+    ): List<Path>? = chooseImpl(path, filters, title, selectDirectory, multiple)
+
+    internal suspend fun fallbackSave(
+        location: Path,
+        suggestedName: String,
+        filters: List<FileNameExtensionFilter>,
+        title: String
+    ): Path? = saveImpl(location, suggestedName, filters, title)
+
     /** Hidden owner frame that provides the app icon to file chooser dialogs. */
     private val ownerFrame: JFrame by lazy {
         JFrame().apply {

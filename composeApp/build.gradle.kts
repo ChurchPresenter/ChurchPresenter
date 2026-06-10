@@ -161,8 +161,8 @@ kotlin {
             implementation(libs.bouncycastle.prov)
             // VLCJ for media playback (requires VLC installed on system)
             implementation("uk.co.caprica:vlcj:4.8.3")
-            implementation("net.java.dev.jna:jna:5.16.0")
-            implementation("net.java.dev.jna:jna-platform:5.16.0")
+            implementation("net.java.dev.jna:jna:5.18.1")
+            implementation("net.java.dev.jna:jna-platform:5.18.1")
             implementation("com.google.zxing:core:3.5.3")
             implementation("com.google.zxing:javase:3.5.3")
             // Socket.IO client for STT integration
@@ -187,6 +187,8 @@ kotlin {
             // DBus for Linux file chooser integration
             implementation("com.github.hypfvieh:dbus-java-core:5.2.0")
             implementation("com.github.hypfvieh:dbus-java-transport-junixsocket:5.2.0")
+            // FileKit — native OS file dialogs (Windows Explorer dialog, macOS NSOpenPanel)
+            implementation(libs.filekit.dialogs)
         }
     }
 }
