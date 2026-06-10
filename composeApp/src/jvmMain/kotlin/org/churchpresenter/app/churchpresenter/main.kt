@@ -130,6 +130,7 @@ import org.churchpresenter.app.churchpresenter.utils.AnalyticsReporter
 import org.churchpresenter.app.churchpresenter.utils.AutoStartManager
 import org.churchpresenter.app.churchpresenter.utils.CrashReporter
 import org.churchpresenter.app.churchpresenter.utils.LiveMapReporter
+import org.churchpresenter.app.churchpresenter.utils.MacMenuBarActivationFix
 import org.churchpresenter.app.churchpresenter.utils.UpdateChecker
 import org.churchpresenter.app.churchpresenter.utils.UpdateInfo
 import org.churchpresenter.app.churchpresenter.dialogs.StatisticsDialog
@@ -443,6 +444,9 @@ fun main() {
                 icon = painterResource(Res.drawable.ic_app_icon),
                 state = state
             ) {
+                // macOS: re-activate the app after the splash window closed, otherwise
+                // the screen menu bar can stay greyed out until the app is refocused
+                MacMenuBarActivationFix()
                 LanguageProvider(language = currentLanguage) {
                     AppThemeWrapper(theme = theme) {
                         CompositionLocalProvider(
