@@ -1,5 +1,6 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.gradle.jvm.toolchain.JavaLanguageVersion
+import java.io.File
 import java.util.Calendar
 import java.util.Properties
 
@@ -11,7 +12,9 @@ fun gitCommitCount(): Int {
             .directory(rootProject.projectDir)
             .redirectErrorStream(true)
             .start()
-        process.inputStream.bufferedReader().readText().trim().toInt()
+        val output = process.inputStream.bufferedReader().readText().trim()
+        process.waitFor()
+        output.toInt()
     } catch (_: Exception) { 0 }
 }
 
@@ -21,7 +24,9 @@ fun gitCommitHash(): String {
             .directory(rootProject.projectDir)
             .redirectErrorStream(true)
             .start()
-        process.inputStream.bufferedReader().readText().trim()
+        val output = process.inputStream.bufferedReader().readText().trim()
+        process.waitFor()
+        output
     } catch (_: Exception) { "unknown" }
 }
 
@@ -550,19 +555,32 @@ tasks.register("signLinuxDeb") {
     }
     doLast {
         val debDir = layout.buildDirectory.dir("compose/binaries/main/deb").get().asFile
-        debDir.listFiles { f -> f.extension.equals("deb", ignoreCase = true) }?.forEach { debFile ->
-            val cmd = buildList {
-                add("dpkg-sig")
-                add("--sign"); add("builder")
-                add("-k"); add(linuxGpgKeyId)
-                if (linuxGpgPassphrase.isConfigured()) {
-                    add("--gpg-options"); add("--batch --pinentry-mode loopback --passphrase $linuxGpgPassphrase")
-                }
-                add(debFile.absolutePath)
+        // Pass the passphrase via a user-only temp file rather than on the command
+        // line, where it would be visible in process listings while gpg runs.
+        val passphraseFile = if (linuxGpgPassphrase.isConfigured()) {
+            File.createTempFile("gpg-pass", null).apply {
+                setReadable(false, false); setReadable(true, true)
+                setWritable(false, false); setWritable(true, true)
+                writeText(linuxGpgPassphrase)
             }
-            val result = ProcessBuilder(cmd).inheritIO().start().waitFor()
-            if (result != 0) error("dpkg-sig failed with exit code $result for ${debFile.name}")
-            logger.lifecycle("Linux signed: ${debFile.name}")
+        } else null
+        try {
+            debDir.listFiles { f -> f.extension.equals("deb", ignoreCase = true) }?.forEach { debFile ->
+                val cmd = buildList {
+                    add("dpkg-sig")
+                    add("--sign"); add("builder")
+                    add("-k"); add(linuxGpgKeyId)
+                    if (passphraseFile != null) {
+                        add("--gpg-options"); add("--batch --pinentry-mode loopback --passphrase-file ${passphraseFile.absolutePath}")
+                    }
+                    add(debFile.absolutePath)
+                }
+                val result = ProcessBuilder(cmd).inheritIO().start().waitFor()
+                if (result != 0) error("dpkg-sig failed with exit code $result for ${debFile.name}")
+                logger.lifecycle("Linux signed: ${debFile.name}")
+            }
+        } finally {
+            passphraseFile?.delete()
         }
     }
 }

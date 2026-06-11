@@ -2,6 +2,7 @@ package org.churchpresenter.app.churchpresenter.utils
 
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
+import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.request.parameter
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
@@ -30,7 +31,14 @@ import java.util.UUID
 object AnalyticsReporter {
 
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
-    private val http by lazy { HttpClient(CIO) }
+    private val http by lazy {
+        HttpClient(CIO) {
+            install(HttpTimeout) {
+                requestTimeoutMillis = 10_000
+                connectTimeoutMillis = 5_000
+            }
+        }
+    }
 
     private val clientId: String by lazy { resolveClientId() }
     private val sessionId: String = System.currentTimeMillis().toString()

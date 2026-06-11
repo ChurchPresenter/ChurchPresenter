@@ -614,18 +614,24 @@ fun BibleTab(
                             val highlightedText = buildAnnotatedString {
                                 var lastIndex = 0
                                 val lowerText = resultText.lowercase()
-                                val lowerQuery = searchQuery.lowercase()
-                                var startIndex = lowerText.indexOf(lowerQuery, lastIndex)
+                                // Match against the same trimmed query that produced the results;
+                                // an empty query would make indexOf() loop forever below.
+                                val lowerQuery = searchQuery.trim().lowercase()
+                                var startIndex = if (lowerQuery.isEmpty()) -1 else lowerText.indexOf(lowerQuery, lastIndex)
                                 while (startIndex != -1) {
-                                    append(resultText.substring(lastIndex, startIndex))
+                                    // lowercase() can change string length in some locales, so clamp
+                                    // indices derived from lowerText before slicing resultText
+                                    val safeStart = startIndex.coerceAtMost(resultText.length)
+                                    val safeEnd = (startIndex + lowerQuery.length).coerceAtMost(resultText.length)
+                                    append(resultText.substring(lastIndex.coerceAtMost(safeStart), safeStart))
                                     withStyle(style = SpanStyle(
                                         background = MaterialTheme.colorScheme.primaryContainer,
                                         color = MaterialTheme.colorScheme.onPrimaryContainer,
                                         fontWeight = FontWeight.Bold
                                     )) {
-                                        append(resultText.substring(startIndex, startIndex + searchQuery.length))
+                                        append(resultText.substring(safeStart, safeEnd))
                                     }
-                                    lastIndex = startIndex + searchQuery.length
+                                    lastIndex = startIndex + lowerQuery.length
                                     startIndex = lowerText.indexOf(lowerQuery, lastIndex)
                                 }
                                 if (lastIndex < resultText.length) append(resultText.substring(lastIndex))

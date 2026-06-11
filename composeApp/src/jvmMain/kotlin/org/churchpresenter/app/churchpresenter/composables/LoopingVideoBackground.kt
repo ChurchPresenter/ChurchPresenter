@@ -46,7 +46,9 @@ fun LoopingVideoBackground(
     val bufferedImageHolder = remember { mutableStateOf<BufferedImage?>(null) }
 
     val factory = remember {
-        try { MediaPlayerFactory("--no-video-title-show") } catch (_: Throwable) { null }
+        try { MediaPlayerFactory("--no-video-title-show") } catch (t: Throwable) {
+            CrashReporter.reportException(t, "LoopingVideoBackground: VLC MediaPlayerFactory init failed"); null
+        }
     } ?: return
 
     val mediaPlayer = remember(factory) {

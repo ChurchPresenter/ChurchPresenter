@@ -2,6 +2,7 @@ package org.churchpresenter.app.churchpresenter.utils
 
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
+import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.request.get
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -18,7 +19,14 @@ import kotlinx.coroutines.launch
 object LiveMapReporter {
 
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
-    private val http by lazy { HttpClient(CIO) }
+    private val http by lazy {
+        HttpClient(CIO) {
+            install(HttpTimeout) {
+                requestTimeoutMillis = 10_000
+                connectTimeoutMillis = 5_000
+            }
+        }
+    }
 
     private const val PING_URL = "https://www.churchpresenter.app/api/ping"
 

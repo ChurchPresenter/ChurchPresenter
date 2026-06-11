@@ -296,7 +296,6 @@ private fun SlideBitmapContent(slide: ImageBitmap?) {
         val containerSize = windowInfo.containerSize
         val screenW = containerSize.width.takeIf { it > 0 } ?: 1920
         val screenH = containerSize.height.takeIf { it > 0 } ?: 1080
-        println("[SlidePresenter] bitmap=${slide.width}×${slide.height}  container=${screenW}×${screenH}")
         Image(
             bitmap = slide,
             contentDescription = stringResource(Res.string.presented_slide),

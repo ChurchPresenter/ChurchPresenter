@@ -2,6 +2,7 @@ package org.churchpresenter.app.churchpresenter.composables
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import org.churchpresenter.app.churchpresenter.utils.CrashReporter
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -235,7 +236,9 @@ private fun VideoSourceContent(
     val bufferedImageHolder = remember { mutableStateOf<BufferedImage?>(null) }
 
     val factory = remember {
-        try { MediaPlayerFactory("--no-video-title-show") } catch (_: Throwable) { null }
+        try { MediaPlayerFactory("--no-video-title-show") } catch (t: Throwable) {
+            CrashReporter.reportException(t, "SceneSourceRenderer: VLC MediaPlayerFactory init failed"); null
+        }
     } ?: return
 
     val mediaPlayer = remember(factory) {

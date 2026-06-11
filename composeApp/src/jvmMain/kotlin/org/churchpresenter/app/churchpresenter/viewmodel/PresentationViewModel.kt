@@ -211,7 +211,6 @@ class PresentationViewModel(appSettings: AppSettings? = null) {
             val targetDpi = 300f
             for (page in 0 until numberOfPages) {
                 val image = renderMethod.invoke(renderer, page, targetDpi) as BufferedImage
-                println("[PDF] page $page rendered at ${image.width}×${image.height}px")
                 val imageBitmap = bufferedImageToImageBitmap(image)
                 val notes = notesPerSlide.getOrElse(page) { "" }
                 withContext(Dispatchers.Main) {
@@ -241,7 +240,6 @@ class PresentationViewModel(appSettings: AppSettings? = null) {
                     // Scale to a fixed 3840-wide target so the bitmap is always 4K-ready.
                     // This covers Retina/HiDPI screens (logical 1920×1080 = 3840×2160 physical).
                     val renderScale = 3840.0 / pageSize.width
-                    println("[Slides] PPTX pageSize=${pageSize.width}×${pageSize.height}  renderScale=$renderScale  → ${(pageSize.width*renderScale).toInt()}×${(pageSize.height*renderScale).toInt()}")
                     slides.forEach { slide ->
                         val s = slide ?: return@forEach
                         try {
@@ -364,7 +362,7 @@ class PresentationViewModel(appSettings: AppSettings? = null) {
         }
 
         // Step 4: Fallback: extract embedded thumbnails (low quality)
-        println("[Keynote] Falling back to embedded thumbnails for ${file.name}")
+        System.err.println("[Keynote] Falling back to embedded thumbnails for ${file.name}")
         loadKeynoteViaUnzip(file)
     }
 
@@ -394,19 +392,18 @@ class PresentationViewModel(appSettings: AppSettings? = null) {
             val exited = process.waitFor(120, java.util.concurrent.TimeUnit.SECONDS)
             if (!exited) {
                 process.destroyForcibly()
-                println("[Keynote] osascript timed out")
+                System.err.println("[Keynote] osascript timed out")
                 dest.delete()
                 return@withContext null
             }
             if (dest.exists() && dest.length() > 0) {
-                println("[Keynote] Keynote app exported PDF: ${dest.absolutePath} (${dest.length()} bytes)")
                 return@withContext dest
             }
-            println("[Keynote] osascript finished but no PDF produced. Output: $output")
+            System.err.println("[Keynote] osascript finished but no PDF produced. Output: $output")
             dest.delete()
             null
         } catch (e: Exception) {
-            println("[Keynote] tryExportKeynoteViaApp failed: ${e.message}")
+            System.err.println("[Keynote] tryExportKeynoteViaApp failed: ${e.message}")
             null
         }
     }
@@ -427,7 +424,6 @@ class PresentationViewModel(appSettings: AppSettings? = null) {
                         BufferedOutputStream(FileOutputStream(dest)).use { out -> zip.copyTo(out) }
                         zip.closeEntry()
                         if (dest.length() > 0) {
-                            println("[Keynote] Extracted QuickLook/Preview.pdf: ${dest.absolutePath} (${dest.length()} bytes)")
                             return@withContext dest
                         }
                     }
@@ -438,7 +434,7 @@ class PresentationViewModel(appSettings: AppSettings? = null) {
             dest.delete()
             null
         } catch (e: Exception) {
-            println("[Keynote] Failed to extract QuickLook/Preview.pdf: ${e.message}")
+            System.err.println("[Keynote] Failed to extract QuickLook/Preview.pdf: ${e.message}")
             null
         }
     }
@@ -486,7 +482,6 @@ class PresentationViewModel(appSettings: AppSettings? = null) {
             }
 
             if (apxlNotes.isNotEmpty()) {
-                println("[Keynote] Extracted ${apxlNotes.size} notes from index.apxl")
                 return@withContext apxlNotes
             }
 
@@ -495,7 +490,7 @@ class PresentationViewModel(appSettings: AppSettings? = null) {
                 return@withContext iwaNotesMap.entries.sortedBy { it.key }.map { it.value }
             }
         } catch (e: Exception) {
-            println("[Keynote] extractKeynoteNotes failed: ${e.message}")
+            System.err.println("[Keynote] extractKeynoteNotes failed: ${e.message}")
         }
         emptyList()
     }
@@ -527,7 +522,7 @@ class PresentationViewModel(appSettings: AppSettings? = null) {
                 result.add(notesSb.toString().trim())
             }
         } catch (e: Exception) {
-            println("[Keynote] parseApxlNotes failed: ${e.message}")
+            System.err.println("[Keynote] parseApxlNotes failed: ${e.message}")
         }
         return result
     }
@@ -604,14 +599,13 @@ class PresentationViewModel(appSettings: AppSettings? = null) {
                 val dest = File(System.getProperty("java.io.tmpdir"), "keynote_preview_${System.currentTimeMillis()}.pdf")
                 pdfOut.copyTo(dest, overwrite = true)
                 outDir.deleteRecursively()
-                println("[Keynote] qlmanage PDF: ${dest.absolutePath}  (${dest.length()} bytes)")
                 dest
             } else {
                 outDir.deleteRecursively()
                 null
             }
         } catch (e: Exception) {
-            println("[Keynote] qlmanage failed: ${e.message}")
+            System.err.println("[Keynote] qlmanage failed: ${e.message}")
             null
         }
     }

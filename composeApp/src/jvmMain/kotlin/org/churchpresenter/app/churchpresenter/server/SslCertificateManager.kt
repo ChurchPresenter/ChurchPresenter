@@ -130,7 +130,9 @@ object SslCertificateManager {
                     cert.notAfter.after(Date.from(Instant.now().plus(30, ChronoUnit.DAYS)))) {
                     return key to cert
                 }
-            } catch (_: Exception) { }
+            } catch (e: Exception) {
+                System.err.println("[SslCertificateManager] Existing CA keystore unreadable, regenerating: ${e.message}")
+            }
             caKeystoreFile.delete()
         }
 

@@ -2,6 +2,7 @@ package org.churchpresenter.app.churchpresenter.composables
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import org.churchpresenter.app.churchpresenter.utils.CrashReporter
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -423,7 +424,9 @@ fun SoftwareVideoPlayer(
     // A small factory used only to create the CallbackVideoSurface; the component
     // above manages its own internal factory for actual media playback.
     val surfaceFactory = remember {
-        try { MediaPlayerFactory() } catch (_: Throwable) { null }
+        try { MediaPlayerFactory() } catch (t: Throwable) {
+            CrashReporter.reportException(t, "VideoPlayer: VLC MediaPlayerFactory init failed"); null
+        }
     } ?: return
 
     // True once the render callback has delivered at least one frame for the current URL.

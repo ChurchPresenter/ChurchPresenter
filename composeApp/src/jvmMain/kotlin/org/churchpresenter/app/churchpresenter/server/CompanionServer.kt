@@ -820,13 +820,17 @@ class CompanionServer {
                         dir.listFiles { f -> f.extension.lowercase() == Constants.EXTENSION_SPS }
                             ?.sortedBy { it.name }
                             ?.forEach { file ->
-                                try { songs.loadFromSpsAppend(file.absolutePath) } catch (_: Exception) {}
+                                try { songs.loadFromSpsAppend(file.absolutePath) } catch (e: Exception) {
+                                    System.err.println("[CompanionServer] Failed to load song ${file.name}: ${e.message}")
+                                }
                             }
                         if (songs.getSongCount() > 0) {
                             updateSongs(songs.getSongs())
                         }
                     }
-                } catch (_: Exception) {}
+                } catch (e: Exception) {
+                    System.err.println("[CompanionServer] Failed to load songs from $songStorageDir: ${e.message}")
+                }
             }
 
             // ── Bible ──────────────────────────────────────────────────────────
@@ -838,7 +842,9 @@ class CompanionServer {
                         bible.loadFromSpb(file.absolutePath)
                         updateBible(bible, primaryBibleFileName)
                     }
-                } catch (_: Exception) {}
+                } catch (e: Exception) {
+                    System.err.println("[CompanionServer] Failed to load bible $primaryBibleFileName: ${e.message}")
+                }
             }
         }
     }
@@ -1111,7 +1117,9 @@ class CompanionServer {
                                 .toLongOrNull()?.let { slideIwaOrder.add(it) }
                         }
                 }
-            } catch (_: Exception) {}
+            } catch (e: Exception) {
+                System.err.println("[CompanionServer] Keynote slide-order scan failed for ${file.name}: ${e.message}")
+            }
         }
         var tempDir: File? = null
         val keynoteDir: File
