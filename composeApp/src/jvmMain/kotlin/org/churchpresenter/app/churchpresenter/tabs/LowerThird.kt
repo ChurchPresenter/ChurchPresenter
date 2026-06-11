@@ -75,9 +75,7 @@ import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.ic_pause
 import churchpresenter.composeapp.generated.resources.ic_play
 import churchpresenter.composeapp.generated.resources.add_to_schedule
-import churchpresenter.composeapp.generated.resources.atem_loop
 import churchpresenter.composeapp.generated.resources.atem_loading_slots
-import churchpresenter.composeapp.generated.resources.atem_media_player
 import churchpresenter.composeapp.generated.resources.atem_mode_clip
 import churchpresenter.composeapp.generated.resources.atem_mode_still
 import churchpresenter.composeapp.generated.resources.atem_rendering
@@ -197,8 +195,6 @@ fun LowerThirdTab(
     var showAtemDialog by remember { mutableStateOf(false) }
     var atemIsClip by remember { mutableStateOf(false) }
     var atemSlot by remember { mutableStateOf(0) }
-    var atemLoop by remember { mutableStateOf(false) }
-    var atemMediaPlayer by remember { mutableStateOf(1) }
     var atemProgress by remember { mutableStateOf<Float?>(null) }   // null = idle
     var atemError by remember { mutableStateOf<String?>(null) }
     var atemSlots by remember { mutableStateOf<List<AtemMediaSlot>>(emptyList()) }
@@ -402,27 +398,8 @@ fun LowerThirdTab(
                         }
                     }
 
-                    // Media player
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(stringResource(Res.string.atem_media_player), style = MaterialTheme.typography.bodyMedium)
-                        Spacer(Modifier.width(8.dp))
-                        RadioButton(selected = atemMediaPlayer == 1, onClick = { atemMediaPlayer = 1 })
-                        Text("1", style = MaterialTheme.typography.bodyMedium)
-                        Spacer(Modifier.width(8.dp))
-                        RadioButton(selected = atemMediaPlayer == 2, onClick = { atemMediaPlayer = 2 })
-                        Text("2", style = MaterialTheme.typography.bodyMedium)
-                    }
-
-                    // Loop + detected FPS (clips only)
+                    // Detected FPS (clips only)
                     if (atemIsClip) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            androidx.compose.material3.Checkbox(
-                                checked = atemLoop,
-                                onCheckedChange = { atemLoop = it }
-                            )
-                            Spacer(Modifier.width(4.dp))
-                            Text(stringResource(Res.string.atem_loop), style = MaterialTheme.typography.bodyMedium)
-                        }
                         val detectedFps = atemDetectedFps
                         if (detectedFps != null) {
                             val fpsLabel = if (detectedFps == kotlin.math.floor(detectedFps))
@@ -468,30 +445,33 @@ fun LowerThirdTab(
                                 val renderer = LowerThirdOffscreenRenderer(atemSettings.renderWidth, atemSettings.renderHeight)
                                 val client = AtemClient(atemSettings.host, atemSettings.port)
                                 withContext(Dispatchers.IO) { client.connect() }
-                                if (!atemIsClip) {
-                                    val frame = renderer.renderStill(jsonContent)
-                                    withContext(Dispatchers.IO) {
-                                        client.uploadStill(
-                                            atemSlot, frame,
-                                            atemSettings.renderWidth, atemSettings.renderHeight,
-                                            presetName
-                                        ) { p -> atemProgress = 0.5f + p * 0.5f }
+                                try {
+                                    if (!atemIsClip) {
+                                        val frame = renderer.renderStill(jsonContent)
+                                        withContext(Dispatchers.IO) {
+                                            client.uploadStill(
+                                                atemSlot, frame,
+                                                atemSettings.renderWidth, atemSettings.renderHeight,
+                                                presetName
+                                            ) { p -> atemProgress = 0.5f + p * 0.5f }
+                                        }
+                                    } else {
+                                        val fpsExact = atemDetectedFps ?: atemSettings.clipFps.toDouble()
+                                        val durationMs = totalDurationMs()
+                                        val frames = renderer.renderClip(
+                                            jsonContent, durationMs, fpsExact
+                                        ) { p -> atemProgress = p * 0.5f }
+                                        withContext(Dispatchers.IO) {
+                                            client.uploadClip(
+                                                atemSlot, frames,
+                                                atemSettings.renderWidth, atemSettings.renderHeight,
+                                                fpsExact.toInt(), presetName
+                                            ) { p -> atemProgress = 0.5f + p * 0.5f }
+                                        }
                                     }
-                                } else {
-                                    val fpsExact = atemDetectedFps ?: atemSettings.clipFps.toDouble()
-                                    val durationMs = totalDurationMs()
-                                    val frames = renderer.renderClip(
-                                        jsonContent, durationMs, fpsExact
-                                    ) { p -> atemProgress = p * 0.5f }
-                                    withContext(Dispatchers.IO) {
-                                        client.uploadClip(
-                                            atemSlot, frames,
-                                            atemSettings.renderWidth, atemSettings.renderHeight,
-                                            fpsExact.toInt(), presetName
-                                        ) { p -> atemProgress = 0.5f + p * 0.5f }
-                                    }
+                                } finally {
+                                    client.disconnect()
                                 }
-                                withContext(Dispatchers.IO) { client.disconnect() }
                                 atemProgress = 1f
                                 delay(800)
                                 showAtemDialog = false

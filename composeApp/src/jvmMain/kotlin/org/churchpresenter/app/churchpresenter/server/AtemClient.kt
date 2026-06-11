@@ -89,21 +89,29 @@ class AtemClient(val host: String, val port: Int = 9910) {
         sock.soTimeout = CONNECT_TIMEOUT_MS
         socket = sock
 
-        // Send Hello packet
-        val helloPayload = ByteArray(8).also { it[0] = 0x01 }
-        sendPacket(FLAG_HELLO, helloPayload, forcePktId = 1)
+        try {
+            // Send Hello packet
+            val helloPayload = ByteArray(8).also { it[0] = 0x01 }
+            sendPacket(FLAG_HELLO, helloPayload, forcePktId = 1)
+            // The hello consumed packet id 1 — start the counter past it so the
+            // first real command doesn't reuse the same id
+            localPacketId.set(1)
 
-        // Receive ATEM's Hello response — extract session ID
-        val resp = receivePacket() ?: throw Exception("No response from ATEM at $host:$port")
-        sessionId = ((resp[2].toInt() and 0xFF) shl 8) or (resp[3].toInt() and 0xFF)
-        lastRemotePacketId = ((resp[10].toInt() and 0xFF) shl 8) or (resp[11].toInt() and 0xFF)
+            // Receive ATEM's Hello response — extract session ID
+            val resp = receivePacket() ?: throw Exception("No response from ATEM at $host:$port")
+            sessionId = ((resp[2].toInt() and 0xFF) shl 8) or (resp[3].toInt() and 0xFF)
+            lastRemotePacketId = ((resp[10].toInt() and 0xFF) shl 8) or (resp[11].toInt() and 0xFF)
 
-        // ACK the ATEM's hello
-        sendAck()
+            // ACK the ATEM's hello
+            sendAck()
 
-        // Collect and parse the ATEM state dump
-        val stateMap = collectState(sock)
-        lastKnownState = parseAtemState(stateMap)
+            // Collect and parse the ATEM state dump
+            val stateMap = collectState(sock)
+            lastKnownState = parseAtemState(stateMap)
+        } catch (e: Exception) {
+            disconnect()
+            throw e
+        }
     }
 
     /** Disconnect and release the socket. */
@@ -118,10 +126,12 @@ class AtemClient(val host: String, val port: Int = 9910) {
      * connect/disconnect themselves.
      */
     suspend fun queryState(): AtemState = withContext(Dispatchers.IO) {
-        connect()
-        val state = lastKnownState ?: AtemState(30.0, "Unknown", emptyList(), emptyList())
-        disconnect()
-        state
+        try {
+            connect()
+            lastKnownState ?: AtemState(30.0, "Unknown", emptyList(), emptyList())
+        } finally {
+            disconnect()
+        }
     }
 
     /**
@@ -142,37 +152,41 @@ class AtemClient(val host: String, val port: Int = 9910) {
         name: String,
         onProgress: (Float) -> Unit = {}
     ) = withContext(Dispatchers.IO) {
+        if (argbPixels.isEmpty()) throw Exception("Nothing to upload — frame rendering produced no pixels")
         val data = argbToBytes(argbPixels)
         val transferId = transferIdCounter.getAndIncrement()
 
         // Lock still store (storeId = 0)
         sendCommandAndWait("LKST", buildUInt16(0), "LKOB", timeout = CMD_TIMEOUT_MS.toLong())
 
-        // Create file transfer descriptor
-        sendCommandAndWait(
-            "FTCD",
-            buildFtcdPayload(transferId, storeId = 0, slotIndex = slot, size = data.size, name = name),
-            expectedResponse = null
-        )
-
-        // Send data in chunks
-        val totalChunks = (data.size + CHUNK_SIZE - 1) / CHUNK_SIZE
-        for (chunkIdx in 0 until totalChunks) {
-            val offset = chunkIdx * CHUNK_SIZE
-            val len = minOf(CHUNK_SIZE, data.size - offset)
+        try {
+            // Create file transfer descriptor
             sendCommandAndWait(
-                "FTDA",
-                buildFtdaPayload(transferId, data, offset, len),
+                "FTCD",
+                buildFtcdPayload(transferId, storeId = 0, slotIndex = slot, size = data.size, name = name),
                 expectedResponse = null
             )
-            onProgress((chunkIdx + 1).toFloat() / totalChunks)
+
+            // Send data in chunks
+            val totalChunks = (data.size + CHUNK_SIZE - 1) / CHUNK_SIZE
+            for (chunkIdx in 0 until totalChunks) {
+                val offset = chunkIdx * CHUNK_SIZE
+                val len = minOf(CHUNK_SIZE, data.size - offset)
+                sendCommandAndWait(
+                    "FTDA",
+                    buildFtdaPayload(transferId, data, offset, len),
+                    expectedResponse = null
+                )
+                onProgress((chunkIdx + 1).toFloat() / totalChunks)
+            }
+
+            // End transfer
+            sendCommandAndWait("FTDE", buildFtdePayload(transferId), expectedResponse = null)
+        } finally {
+            // Unlock still store even if the transfer failed midway; best-effort so a
+            // dead socket here can't mask the original failure
+            runCatching { sendCommand("LKSU", buildUInt16(0)) }
         }
-
-        // End transfer
-        sendCommandAndWait("FTDE", buildFtdePayload(transferId), expectedResponse = null)
-
-        // Unlock still store
-        sendCommand("LKSU", buildUInt16(0))
     }
 
     /**
@@ -195,41 +209,44 @@ class AtemClient(val host: String, val port: Int = 9910) {
         name: String,
         onProgress: (Float) -> Unit = {}
     ) = withContext(Dispatchers.IO) {
-        if (frames.isEmpty()) return@withContext
+        if (frames.isEmpty()) throw Exception("Nothing to upload — clip rendering produced no frames")
 
         // Lock clip store (storeId = 1)
         sendCommandAndWait("LKCP", buildUInt16(slot.toUShort()), "LKOB", timeout = CMD_TIMEOUT_MS.toLong())
 
-        for ((frameIdx, argbPixels) in frames.withIndex()) {
-            val data = argbToBytes(argbPixels)
-            val transferId = transferIdCounter.getAndIncrement()
+        try {
+            for ((frameIdx, argbPixels) in frames.withIndex()) {
+                val data = argbToBytes(argbPixels)
+                val transferId = transferIdCounter.getAndIncrement()
 
-            sendCommandAndWait(
-                "FTCD",
-                buildFtcdPayload(
-                    transferId,
-                    storeId = 1,
-                    slotIndex = frameIdx,  // frame index within the clip
-                    size = data.size,
-                    name = if (frameIdx == 0) name else ""
-                ),
-                expectedResponse = null
-            )
+                sendCommandAndWait(
+                    "FTCD",
+                    buildFtcdPayload(
+                        transferId,
+                        storeId = 1,
+                        slotIndex = frameIdx,  // frame index within the clip
+                        size = data.size,
+                        name = if (frameIdx == 0) name else ""
+                    ),
+                    expectedResponse = null
+                )
 
-            val totalChunks = (data.size + CHUNK_SIZE - 1) / CHUNK_SIZE
-            for (chunkIdx in 0 until totalChunks) {
-                val offset = chunkIdx * CHUNK_SIZE
-                val len = minOf(CHUNK_SIZE, data.size - offset)
-                sendCommandAndWait("FTDA", buildFtdaPayload(transferId, data, offset, len), null)
+                val totalChunks = (data.size + CHUNK_SIZE - 1) / CHUNK_SIZE
+                for (chunkIdx in 0 until totalChunks) {
+                    val offset = chunkIdx * CHUNK_SIZE
+                    val len = minOf(CHUNK_SIZE, data.size - offset)
+                    sendCommandAndWait("FTDA", buildFtdaPayload(transferId, data, offset, len), null)
+                }
+
+                sendCommandAndWait("FTDE", buildFtdePayload(transferId), null)
+
+                onProgress((frameIdx + 1).toFloat() / frames.size)
             }
-
-            sendCommandAndWait("FTDE", buildFtdePayload(transferId), null)
-
-            onProgress((frameIdx + 1).toFloat() / frames.size)
+        } finally {
+            // Unlock clip store even if the transfer failed midway; best-effort so a
+            // dead socket here can't mask the original failure
+            runCatching { sendCommand("LKCU", buildUInt16(slot.toUShort())) }
         }
-
-        // Unlock clip store
-        sendCommand("LKCU", buildUInt16(slot.toUShort()))
     }
 
     // ── Packet building ──────────────────────────────────────────────────────
@@ -300,7 +317,7 @@ class AtemClient(val host: String, val port: Int = 9910) {
         }
     }
 
-    /** Receive packets until we get an ACK (flags=0x80 in byte 0) or timeout. */
+    /** Receive packets until we get an ACK (flags=0x80 in byte 0); throws on timeout. */
     private fun waitForAck(timeoutMs: Long) {
         val deadline = System.currentTimeMillis() + timeoutMs
         while (System.currentTimeMillis() < deadline) {
@@ -313,9 +330,10 @@ class AtemClient(val host: String, val port: Int = 9910) {
             // ACK any incoming data packets
             if (flags and FLAG_ACK_REQUEST != 0) sendAck()
         }
+        throw Exception("ATEM did not acknowledge within ${timeoutMs}ms")
     }
 
-    /** Receive packets until we find a specific command name, ACKing everything else. */
+    /** Receive packets until we find a specific command name, ACKing everything else; throws on timeout. */
     private fun waitForCommand(cmdName: String, timeoutMs: Long) {
         val deadline = System.currentTimeMillis() + timeoutMs
         while (System.currentTimeMillis() < deadline) {
@@ -327,17 +345,19 @@ class AtemClient(val host: String, val port: Int = 9910) {
             if (flags and FLAG_ACK_REQUEST != 0) sendAck()
             if (findCommand(pkt, cmdName) != null) return
         }
+        throw Exception("ATEM did not respond with $cmdName within ${timeoutMs}ms")
     }
 
     /**
      * Receive and ACK all ATEM state-dump packets, collecting every command by name.
-     * Uses a 2-second deadline; exits early if no packet arrives within the remaining time.
+     * Uses a 2-second overall deadline; exits early once the device goes idle
+     * (no packet for 300 ms), so a fast dump doesn't wait out the full deadline.
      */
     private fun collectState(sock: DatagramSocket): Map<String, List<ByteArray>> {
         val result = mutableMapOf<String, MutableList<ByteArray>>()
-        val deadline = System.currentTimeMillis() + 500
+        val deadline = System.currentTimeMillis() + 2000
         while (System.currentTimeMillis() < deadline) {
-            sock.soTimeout = (deadline - System.currentTimeMillis()).coerceAtLeast(1).toInt()
+            sock.soTimeout = (deadline - System.currentTimeMillis()).coerceAtLeast(1).toInt().coerceAtMost(300)
             val pkt = receivePacket() ?: break
             if (pkt.size < HEADER_SIZE) continue
             updateRemotePacketId(pkt)

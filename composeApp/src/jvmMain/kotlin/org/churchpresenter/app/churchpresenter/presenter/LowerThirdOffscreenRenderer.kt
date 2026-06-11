@@ -80,7 +80,9 @@ class LowerThirdOffscreenRenderer(
         lottieJson: String,
         progressValues: List<Float>,
         onFrameCaptured: ((Int) -> Unit)? = null
-    ): List<IntArray> = withContext(Dispatchers.Main) {
+    ): List<IntArray> = withContext(Dispatchers.Default) {
+        // Must NOT run on Dispatchers.Main: invokeAndWait throws java.lang.Error when
+        // called from the EDT. Capture runs on Default like DeckLinkComposeOutput.
         var currentProgress by mutableStateOf(progressValues.firstOrNull() ?: 0f)
         val results = mutableListOf<IntArray>()
 
@@ -88,61 +90,60 @@ class LowerThirdOffscreenRenderer(
         var jframe: JFrame? = null
         var composePanel: ComposePanel? = null
 
-        withContext(Dispatchers.Main) {
-            SwingUtilities.invokeAndWait {
-                jframe = JFrame("ATEM Renderer").apply {
-                    isUndecorated = true
-                    setSize(width, height)
-                    // Position outside visible screen area
-                    val ge = java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment()
-                    val virtualBounds = ge.screenDevices.fold(java.awt.Rectangle()) { acc, sd ->
-                        acc.union(sd.defaultConfiguration.bounds)
-                    }
-                    setLocation(virtualBounds.x - width - 10, virtualBounds.y)
+        SwingUtilities.invokeAndWait {
+            jframe = JFrame("ATEM Renderer").apply {
+                isUndecorated = true
+                setSize(width, height)
+                // Position outside visible screen area
+                val ge = java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment()
+                val virtualBounds = ge.screenDevices.fold(java.awt.Rectangle()) { acc, sd ->
+                    acc.union(sd.defaultConfiguration.bounds)
                 }
-                composePanel = ComposePanel().apply {
-                    preferredSize = Dimension(width, height)
-                    setSize(width, height)
-                }
-                jframe!!.contentPane.add(composePanel!!)
-                jframe!!.isVisible = true
+                setLocation(virtualBounds.x - width - 10, virtualBounds.y)
             }
+            composePanel = ComposePanel().apply {
+                preferredSize = Dimension(width, height)
+                setSize(width, height)
+            }
+            jframe!!.contentPane.add(composePanel!!)
+            jframe!!.isVisible = true
         }
 
         val panel = composePanel ?: return@withContext emptyList()
         val frame = jframe ?: return@withContext emptyList()
 
-        // Set Compose content on the EDT
-        SwingUtilities.invokeAndWait {
-            panel.setContent {
-                val composition by rememberLottieComposition {
-                    LottieCompositionSpec.JsonString(lottieJson.ifBlank { "{}" })
+        try {
+            // Set Compose content on the EDT
+            SwingUtilities.invokeAndWait {
+                panel.setContent {
+                    val composition by rememberLottieComposition {
+                        LottieCompositionSpec.JsonString(lottieJson.ifBlank { "{}" })
+                    }
+                    Image(
+                        painter = rememberLottiePainter(
+                            composition = composition,
+                            progress = { currentProgress }
+                        ),
+                        contentDescription = null,
+                        contentScale = ContentScale.Fit,
+                        modifier = Modifier.fillMaxSize()
+                    )
                 }
-                Image(
-                    painter = rememberLottiePainter(
-                        composition = composition,
-                        progress = { currentProgress }
-                    ),
-                    contentDescription = null,
-                    contentScale = ContentScale.Fit,
-                    modifier = Modifier.fillMaxSize()
-                )
             }
-        }
 
-        // Wait for ComposePanel to initialize and SkiaLayer to appear
-        delay(1500)
-        var skiaLayer: SkiaLayer? = null
-        repeat(30) {
-            skiaLayer = findSkiaLayer(panel)
-            if (skiaLayer != null) return@repeat
-            delay(100)
-        }
+            // Wait for ComposePanel to initialize and SkiaLayer to appear
+            delay(1500)
+            var skiaLayer: SkiaLayer? = findSkiaLayer(panel)
+            var attempts = 0
+            while (skiaLayer == null && attempts < 30) {
+                delay(100)
+                skiaLayer = findSkiaLayer(panel)
+                attempts++
+            }
+            val layer = skiaLayer
+                ?: throw Exception("Off-screen renderer failed to initialize (no SkiaLayer)")
 
-        val layer = skiaLayer
-        if (layer != null) {
             val pixelsBuf = ByteArray(width * height * 4)
-
             for ((idx, progress) in progressValues.withIndex()) {
                 currentProgress = progress
                 // Allow Compose to re-render at the new progress value
@@ -152,12 +153,11 @@ class LowerThirdOffscreenRenderer(
                 results.add(captured)
                 onFrameCaptured?.invoke(idx + 1)
             }
-        }
-
-        // Clean up
-        SwingUtilities.invokeLater {
-            frame.isVisible = false
-            frame.dispose()
+        } finally {
+            SwingUtilities.invokeLater {
+                frame.isVisible = false
+                frame.dispose()
+            }
         }
 
         results
