@@ -245,7 +245,6 @@ fun PresentationTab(
             presenterManager.setSelectedSlide(slide)
             presenterManager.setNextSlide(viewModel.slides.getOrNull(idx + 1))
             val notes = notesList.getOrElse(idx) { "" }
-            println("[PresentationTab] Setting presenterNotes='$notes'")
             presenterManager.setPresenterNotes(notes)
         }
     }

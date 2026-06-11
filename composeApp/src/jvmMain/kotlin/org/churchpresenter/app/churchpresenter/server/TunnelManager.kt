@@ -109,7 +109,8 @@ class TunnelManager {
         tmpFile.delete()
 
         val client = HttpClient.newBuilder()
-            .followRedirects(HttpClient.Redirect.ALWAYS)
+            // NORMAL follows redirects but refuses HTTPS→HTTP downgrades — we're fetching an executable
+            .followRedirects(HttpClient.Redirect.NORMAL)
             .connectTimeout(Duration.ofSeconds(15))
             .build()
 
