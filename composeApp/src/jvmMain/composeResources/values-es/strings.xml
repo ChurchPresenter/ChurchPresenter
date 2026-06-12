@@ -1580,4 +1580,6 @@
     <string name="atem_quick_upload_hint">Omitir el diálogo — subir inmediatamente a las ranuras predeterminadas</string>
     <string name="atem_quick_still_tooltip">Subir imagen a la ranura %1$d del ATEM</string>
     <string name="atem_quick_clip_tooltip">Subir vídeo a la ranura %1$d del ATEM</string>
+    <string name="atem_dsk_preroll">Pre-roll de DSK (ms)</string>
+    <string name="atem_dsk_postroll">Post-roll de DSK (ms)</string>
 </resources>

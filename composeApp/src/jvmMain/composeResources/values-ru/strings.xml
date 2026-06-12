@@ -1561,5 +1561,7 @@
     <string name="atem_quick_upload_hint">Пропустить диалог — сразу загружать в слоты по умолчанию</string>
     <string name="atem_quick_still_tooltip">Загрузить изображение в слот %1$d ATEM</string>
     <string name="atem_quick_clip_tooltip">Загрузить видео в слот %1$d ATEM</string>
+    <string name="atem_dsk_preroll">Задержка перед DSK (мс)</string>
+    <string name="atem_dsk_postroll">Задержка после DSK (мс)</string>
 </resources>
 

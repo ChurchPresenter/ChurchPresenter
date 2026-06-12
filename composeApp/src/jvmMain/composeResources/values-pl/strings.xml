@@ -1558,5 +1558,7 @@
     <string name="atem_quick_upload_hint">Pomiń okno dialogowe — prześlij od razu do domyślnych slotów</string>
     <string name="atem_quick_still_tooltip">Prześlij obraz do slotu %1$d ATEM</string>
     <string name="atem_quick_clip_tooltip">Prześlij wideo do slotu %1$d ATEM</string>
+    <string name="atem_dsk_preroll">Wyprzedzenie DSK (ms)</string>
+    <string name="atem_dsk_postroll">Opóźnienie DSK (ms)</string>
 </resources>
 

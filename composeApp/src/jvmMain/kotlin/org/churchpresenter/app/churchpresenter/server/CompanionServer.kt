@@ -41,7 +41,9 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonObject
 import org.churchpresenter.app.churchpresenter.data.SongItem
+import org.churchpresenter.app.churchpresenter.data.settings.AtemSettings
 import org.churchpresenter.app.churchpresenter.models.ScheduleItem
+import org.churchpresenter.app.churchpresenter.viewmodel.isLottieFile
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.HeicDecoder
 import org.churchpresenter.app.churchpresenter.utils.isChorusHeader
@@ -585,6 +587,83 @@ class CompanionServer {
     @Volatile var qaAdminPassword: String = ""
     @Volatile var qaCooldownSeconds: Int = 30
     @Volatile var qaVotingEnabled: Boolean = false
+
+    // ATEM + lower-third folder config for the Companion lower-third sequencer
+    @Volatile private var _atemSettings: AtemSettings? = null
+    @Volatile private var _lowerThirdFolder: String = ""
+
+    fun updateAtemConfig(atem: AtemSettings, lowerThirdFolder: String) {
+        _atemSettings = atem
+        _lowerThirdFolder = lowerThirdFolder
+    }
+
+    /** Lottie files in the configured lower-third folder. */
+    private fun lowerThirdFiles(): List<java.io.File> =
+        java.io.File(_lowerThirdFolder).takeIf { _lowerThirdFolder.isNotEmpty() && it.isDirectory }
+            ?.listFiles { f -> f.extension.lowercase() == "json" && isLottieFile(f) }
+            ?.sortedBy { it.nameWithoutExtension.lowercase() } ?: emptyList()
+
+    private fun jsonStr(s: String): String =
+        json.encodeToString(kotlinx.serialization.serializer<String>(), s)
+
+    /** Shared body of the run/show endpoints. */
+    private suspend fun handleLowerThirdTrigger(
+        call: io.ktor.server.application.ApplicationCall,
+        autoEnd: Boolean
+    ) {
+        val rawName = call.parameters["name"] ?: ""
+        val file = lowerThirdFiles().firstOrNull { it.nameWithoutExtension.equals(rawName, ignoreCase = true) }
+        if (file == null) {
+            call.respond(io.ktor.http.HttpStatusCode.NotFound, """{"error":"lower third not found"}""")
+            return
+        }
+        val ltJson = try { file.readText() } catch (_: Exception) {
+            call.respond(io.ktor.http.HttpStatusCode.InternalServerError, """{"error":"could not read lottie file"}""")
+            return
+        }
+        val durationMs = AtemRenderCache.lottieDurationMs(ltJson)
+        if (durationMs == null) {
+            call.respond(io.ktor.http.HttpStatusCode.UnprocessableEntity, """{"error":"lottie has no timing information"}""")
+            return
+        }
+        val atem = _atemSettings ?: AtemSettings()
+
+        // DSK: default keyer from settings; ?dsk=N (1-based) overrides; ?dsk=0 skips DSK control
+        val dskParam = call.request.queryParameters["dsk"]?.toIntOrNull()
+        val keyer: Int? = when {
+            dskParam == null -> atem.dskIndex
+            dskParam == 0 -> null
+            else -> dskParam - 1
+        }
+        if (keyer != null && atem.detectedDskCount > 0 && keyer !in 0 until atem.detectedDskCount) {
+            call.respond(
+                io.ktor.http.HttpStatusCode.BadRequest,
+                """{"error":"DSK ${keyer + 1} does not exist (available: 1-${atem.detectedDskCount})"}"""
+            )
+            return
+        }
+
+        val pause = call.request.queryParameters["pause"]?.toBooleanStrictOrNull() ?: false
+        val pauseDurationMs = call.request.queryParameters["pauseDurationMs"]?.toLongOrNull() ?: 2000L
+
+        val dskError = LowerThirdSequencer.run(
+            name = file.nameWithoutExtension,
+            json = ltJson,
+            durationMs = durationMs,
+            pauseAtFrame = pause,
+            pauseDurationMs = pauseDurationMs,
+            keyer = keyer,
+            atem = atem,
+            autoEnd = autoEnd
+        )
+        val totalMs = atem.dskPreRollMs + durationMs +
+            (if (pause) pauseDurationMs else 0L) + atem.dskPostRollMs
+        call.respondText(
+            """{"status":"started","name":${jsonStr(file.nameWithoutExtension)},"durationMs":$durationMs,""" +
+                """"totalMs":${if (autoEnd) totalMs else -1},"dskError":${dskError?.let { jsonStr(it) } ?: "null"}}""",
+            ContentType.Application.Json
+        )
+    }
 
     // Current data — thread-safe StateFlows
     // All songs flat list
@@ -2300,6 +2379,36 @@ class CompanionServer {
                     } finally {
                         broadcastJob.cancel()
                     }
+                }
+
+                // ── Lower Third Sequencer (Bitfocus Companion) ───────────────────
+                // One HTTP call runs the whole timed sequence: ATEM DSK on → play
+                // the lower third → DSK off when the animation ends.
+
+                get("/api/lowerthirds") {
+                    if (!checkApiKey(call)) return@get
+                    val items = lowerThirdFiles().map { f ->
+                        val dur = try { AtemRenderCache.lottieDurationMs(f.readText()) ?: 0L } catch (_: Exception) { 0L }
+                        val nameJson = json.encodeToString(kotlinx.serialization.serializer<String>(), f.nameWithoutExtension)
+                        """{"name":$nameJson,"durationMs":$dur}"""
+                    }
+                    call.respondText("[${items.joinToString(",")}]", ContentType.Application.Json)
+                }
+
+                post("/api/lowerthirds/{name}/run") {
+                    if (!checkApiKey(call)) return@post
+                    handleLowerThirdTrigger(call, autoEnd = true)
+                }
+
+                post("/api/lowerthirds/{name}/show") {
+                    if (!checkApiKey(call)) return@post
+                    handleLowerThirdTrigger(call, autoEnd = false)
+                }
+
+                post("/api/lowerthirds/hide") {
+                    if (!checkApiKey(call)) return@post
+                    LowerThirdSequencer.stop()
+                    call.respondText("""{"status":"stopped"}""", ContentType.Application.Json)
                 }
 
                 // ── Q&A Endpoints ─────────────────────────────────────────────────

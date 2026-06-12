@@ -45,6 +45,8 @@ import churchpresenter.composeapp.generated.resources.atem_clip_fps_hint
 import churchpresenter.composeapp.generated.resources.atem_default_clip_slot
 import churchpresenter.composeapp.generated.resources.atem_default_still_slot
 import churchpresenter.composeapp.generated.resources.atem_description
+import churchpresenter.composeapp.generated.resources.atem_dsk_postroll
+import churchpresenter.composeapp.generated.resources.atem_dsk_preroll
 import churchpresenter.composeapp.generated.resources.atem_host
 import churchpresenter.composeapp.generated.resources.atem_host_hint
 import churchpresenter.composeapp.generated.resources.atem_port
@@ -86,6 +88,9 @@ fun AtemSettingsTab(
     var renderWidthText by remember(atem.renderWidth) { mutableStateOf(atem.renderWidth.toString()) }
     var renderHeightText by remember(atem.renderHeight) { mutableStateOf(atem.renderHeight.toString()) }
     var clipFpsText by remember(atem.clipFps) { mutableStateOf(formatAtemFps(atem.clipFps)) }
+    var dskText by remember(atem.dskIndex) { mutableStateOf((atem.dskIndex + 1).toString()) }
+    var dskPreRollText by remember(atem.dskPreRollMs) { mutableStateOf(atem.dskPreRollMs.toString()) }
+    var dskPostRollText by remember(atem.dskPostRollMs) { mutableStateOf(atem.dskPostRollMs.toString()) }
 
     var connectionStatus by remember { mutableStateOf<String?>(null) }
     var connectionError by remember { mutableStateOf<String?>(null) }
@@ -197,7 +202,8 @@ fun AtemSettingsTab(
                                             detectedStillSlots = state.stillSlots.size,
                                             detectedClipSlots = state.clipSlots.size,
                                             detectedClipMaxFrames = state.clipMaxFrames,
-                                            detectedUnassignedFrames = state.unassignedFrames
+                                            detectedUnassignedFrames = state.unassignedFrames,
+                                            detectedDskCount = state.dskCount
                                         )
                                     }
                                     connectionStatus = "connected"
@@ -364,6 +370,53 @@ fun AtemSettingsTab(
                 }
 
                 Spacer(Modifier.height(8.dp))
+
+                // DSK sequencing defaults for the Companion lower-third trigger:
+                // keyer index plus the margins around the animation
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    OutlinedTextField(
+                        value = dskText,
+                        onValueChange = { v ->
+                            dskText = v
+                            v.toIntOrNull()?.let { update { copy(dskIndex = (it - 1).coerceAtLeast(0)) } }
+                        },
+                        supportingText = {
+                            Text(if (atem.detectedDskCount > 0) "DSK (1–${atem.detectedDskCount})" else "DSK")
+                        },
+                        isError = atem.detectedDskCount > 0 &&
+                            dskText.toIntOrNull()?.let { it !in 1..atem.detectedDskCount } != false,
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        modifier = Modifier.weight(1f)
+                    )
+                    OutlinedTextField(
+                        value = dskPreRollText,
+                        onValueChange = { v ->
+                            dskPreRollText = v
+                            v.toIntOrNull()?.let { update { copy(dskPreRollMs = it.coerceAtLeast(0)) } }
+                        },
+                        supportingText = { Text(stringResource(Res.string.atem_dsk_preroll)) },
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        modifier = Modifier.weight(1f)
+                    )
+                    OutlinedTextField(
+                        value = dskPostRollText,
+                        onValueChange = { v ->
+                            dskPostRollText = v
+                            v.toIntOrNull()?.let { update { copy(dskPostRollMs = it.coerceAtLeast(0)) } }
+                        },
+                        supportingText = { Text(stringResource(Res.string.atem_dsk_postroll)) },
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+
+                Spacer(Modifier.height(4.dp))
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
                 Spacer(Modifier.height(8.dp))
 

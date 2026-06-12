@@ -1558,5 +1558,7 @@
     <string name="atem_quick_upload_hint">Dialog überspringen — sofort in die Standard-Slots hochladen</string>
     <string name="atem_quick_still_tooltip">Bild in ATEM-Slot %1$d hochladen</string>
     <string name="atem_quick_clip_tooltip">Video in ATEM-Slot %1$d hochladen</string>
+    <string name="atem_dsk_preroll">DSK-Vorlauf (ms)</string>
+    <string name="atem_dsk_postroll">DSK-Nachlauf (ms)</string>
 </resources>
 

@@ -1580,4 +1580,6 @@
     <string name="atem_quick_upload_hint">Preskočiť dialóg — nahrať ihneď do predvolených slotov</string>
     <string name="atem_quick_still_tooltip">Nahrať obrázok do slotu %1$d ATEM</string>
     <string name="atem_quick_clip_tooltip">Nahrať video do slotu %1$d ATEM</string>
+    <string name="atem_dsk_preroll">Predstih DSK (ms)</string>
+    <string name="atem_dsk_postroll">Dobeh DSK (ms)</string>
 </resources>

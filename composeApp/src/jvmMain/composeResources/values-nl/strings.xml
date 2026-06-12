@@ -1580,4 +1580,6 @@
     <string name="atem_quick_upload_hint">Dialoog overslaan — direct uploaden naar de standaardslots</string>
     <string name="atem_quick_still_tooltip">Afbeelding uploaden naar ATEM-slot %1$d</string>
     <string name="atem_quick_clip_tooltip">Video uploaden naar ATEM-slot %1$d</string>
+    <string name="atem_dsk_preroll">DSK pre-roll (ms)</string>
+    <string name="atem_dsk_postroll">DSK post-roll (ms)</string>
 </resources>

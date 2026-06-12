@@ -27,7 +27,9 @@ data class AtemState(
     val stillSlots: List<AtemMediaSlot>,
     val clipSlots: List<AtemMediaSlot>,
     val clipMaxFrames: List<Int> = emptyList(),
-    val unassignedFrames: Int = 0
+    val unassignedFrames: Int = 0,
+    /** Number of downstream keyers (from _top topology; 0 = unknown). */
+    val dskCount: Int = 0
 )
 
 /**
@@ -142,8 +144,12 @@ class AtemClient(val host: String, val port: Int = 9910) {
     /**
      * Connect to the ATEM and perform the hello handshake.
      * Must be called before any upload function.
+     *
+     * @param collectState drain and parse the ~2s state dump into [lastKnownState].
+     *   Pass false for fast control connections (e.g. DSK switching) that only need
+     *   the handshake — those complete in tens of milliseconds.
      */
-    suspend fun connect() = withContext(Dispatchers.IO) {
+    suspend fun connect(collectState: Boolean = true) = withContext(Dispatchers.IO) {
         val sock = DatagramSocket()
         sock.soTimeout = CONNECT_TIMEOUT_MS
         socket = sock
@@ -167,12 +173,26 @@ class AtemClient(val host: String, val port: Int = 9910) {
             }
 
             // Collect and parse the ATEM state dump
-            val stateMap = collectState(sock)
-            lastKnownState = parseAtemState(stateMap)
+            if (collectState) {
+                val stateMap = collectState(sock)
+                lastKnownState = parseAtemState(stateMap)
+            }
         } catch (e: Exception) {
             disconnect()
             throw e
         }
+    }
+
+    /**
+     * Cut a downstream keyer on or off air (CDsL — hard cut, no transition).
+     * @param keyer 0-based DSK index
+     */
+    suspend fun setDownstreamKeyerOnAir(keyer: Int, onAir: Boolean) = withContext(Dispatchers.IO) {
+        sendCommandAndWait(
+            "CDsL",
+            byteArrayOf(keyer.toByte(), if (onAir) 1 else 0, 0, 0),
+            expectedResponse = null
+        )
     }
 
     /** Disconnect and release the socket. */
@@ -618,7 +638,9 @@ class AtemClient(val host: String, val port: Int = 9910) {
             else -> "Unknown"        to 30.0
         }
         val (clipMaxFrames, unassigned) = parseMediaPoolSettings(m)
-        return AtemState(fps, mode, parseStillSlots(m), parseClipSlots(m), clipMaxFrames, unassigned)
+        // _top topology: downstream keyer count at byte 2 (per atem-connection TopologyCommand)
+        val dskCount = m["_top"]?.firstOrNull()?.getOrNull(2)?.toInt()?.and(0xFF) ?: 0
+        return AtemState(fps, mode, parseStillSlots(m), parseClipSlots(m), clipMaxFrames, unassigned, dskCount)
     }
 
     /**

@@ -391,6 +391,10 @@ fun main() {
                     key = appSettings.serverSettings.apiKey
                 )
                 companionServer.updateFileUploadEnabled(appSettings.serverSettings.fileUploadEnabled)
+                companionServer.updateAtemConfig(
+                    appSettings.atemSettings,
+                    appSettings.streamingSettings.lowerThirdFolder
+                )
                 // Auto-start server if user previously enabled it
                 if (appSettings.serverSettings.enabled) {
                     companionServer.start(
@@ -869,6 +873,26 @@ fun main() {
                                         presenterManager.requestClearDisplay()
                                     }
                                 }
+
+                                // ── Companion lower-third sequence (POST /api/lowerthirds/{name}/run) ───────
+                                // The sequencer handles the ATEM DSK and timing; these collectors do the
+                                // same go-live / off-air the Lower Third tab does.
+                                LaunchedEffect(Unit) {
+                                    org.churchpresenter.app.churchpresenter.server.LowerThirdSequencer.onShow.collect { req ->
+                                        presenterManager.setLottieContent(
+                                            req.json, req.pauseAtFrame, req.pauseFrame, req.pauseDurationMs
+                                        )
+                                        presenterManager.setPresentingMode(Presenting.LOWER_THIRD)
+                                        presenterManager.setShowPresenterWindow(true)
+                                    }
+                                }
+                                LaunchedEffect(Unit) {
+                                    org.churchpresenter.app.churchpresenter.server.LowerThirdSequencer.onClear.collect {
+                                        if (presenterManager.presentingMode.value == Presenting.LOWER_THIRD) {
+                                            presenterManager.requestClearDisplay()
+                                        }
+                                    }
+                                }
                                 LaunchedEffect(Unit) {
                                     companionServer.onQADisplay.collect { question ->
                                         if (question != null) {
@@ -1167,6 +1191,10 @@ fun main() {
                                             key = updated.serverSettings.apiKey
                                         )
                                         companionServer.updateFileUploadEnabled(updated.serverSettings.fileUploadEnabled)
+                                        companionServer.updateAtemConfig(
+                                            updated.atemSettings,
+                                            updated.streamingSettings.lowerThirdFolder
+                                        )
                                     },
                                     onThemeChange = { newTheme ->
                                         appSettings = appSettings.copy(theme = newTheme.toString())

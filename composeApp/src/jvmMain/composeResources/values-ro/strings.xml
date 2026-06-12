@@ -1587,4 +1587,6 @@
     <string name="atem_quick_upload_hint">Omite dialogul — încarcă imediat în sloturile implicite</string>
     <string name="atem_quick_still_tooltip">Încarcă imaginea în slotul %1$d al ATEM</string>
     <string name="atem_quick_clip_tooltip">Încarcă videoclipul în slotul %1$d al ATEM</string>
+    <string name="atem_dsk_preroll">Pre-roll DSK (ms)</string>
+    <string name="atem_dsk_postroll">Post-roll DSK (ms)</string>
 </resources>

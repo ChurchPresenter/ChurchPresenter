@@ -683,6 +683,81 @@ curl -k -X POST https://192.168.1.10:8765/api/clear
 
 ---
 
+### Lower Thirds (Bitfocus Companion)
+
+One HTTP call runs the entire lower-third sequence — the app cuts the ATEM DSK
+on air, plays the animation on its output, waits the animation's exact duration
+(which only the app knows), then cuts the DSK off and clears. The cuts are
+invisible because the output is transparent before and after the animation.
+
+Configure the ATEM IP, default DSK and pre/post-roll margins in
+**Settings → ATEM**. Without an ATEM configured the endpoints still play the
+lower third with correct timing — only the DSK steps are skipped.
+
+#### `GET /api/lowerthirds`
+
+Lists the lower thirds in the configured folder with their animation durations.
+
+```json
+[
+  { "name": "Pastor John", "durationMs": 5500 },
+  { "name": "Welcome", "durationMs": 3000 }
+]
+```
+
+#### `POST /api/lowerthirds/{name}/run`
+
+Runs the full timed sequence for the named lower third (file name without
+`.json`, case-insensitive). Responds as soon as the sequence starts.
+
+Query parameters (all optional):
+
+| Param | Default | Meaning |
+|-------|---------|---------|
+| `dsk` | settings default | 1-based downstream keyer to drive; `0` = don't touch the DSK |
+| `pause` | `false` | pause mid-animation (hold the lower third on screen) |
+| `pauseDurationMs` | `2000` | how long to hold when `pause=true` |
+
+```bash
+curl -k -X POST "https://192.168.1.10:8765/api/lowerthirds/Pastor%20John/run"
+```
+
+```json
+{ "status": "started", "name": "Pastor John", "durationMs": 5500, "totalMs": 6100, "dskError": null }
+```
+
+`totalMs` = pre-roll + duration (+ pause) + post-roll — when the button should
+be considered "done". `dskError` is non-null when the ATEM could not be reached;
+the lower third still plays.
+
+#### `POST /api/lowerthirds/{name}/show`
+
+Like `run` but stays on air (DSK on + animation shown) until `hide` is called.
+Same `dsk` query parameter. `totalMs` is `-1`.
+
+#### `POST /api/lowerthirds/hide`
+
+Ends the running sequence immediately: DSK off, lower third cleared.
+
+```json
+{ "status": "stopped" }
+```
+
+#### Bitfocus Companion setup
+
+Use the **Generic HTTP** connection:
+
+1. Add a connection: *Generic: HTTP Requests*, base URL `https://<app-ip>:8765`.
+2. Button action: *HTTP POST* with URL `/api/lowerthirds/Pastor%20John/run`.
+3. If the API key is enabled in Settings → Server, add header
+   `X-Api-Key: <your key>`.
+
+One button per lower third — press it and the whole DSK + animation sequence
+runs with correct timing. Add a second button with `/api/lowerthirds/hide` as a
+panic/manual-end key.
+
+---
+
 ### `POST /api/bible/select`
 
 Instantly displays a Bible verse on the projection output. **No approval dialog** — fires immediately like `select_picture`.

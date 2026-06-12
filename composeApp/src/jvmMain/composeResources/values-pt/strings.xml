@@ -1580,4 +1580,6 @@
     <string name="atem_quick_upload_hint">Pular o diálogo — enviar imediatamente para os slots padrão</string>
     <string name="atem_quick_still_tooltip">Enviar imagem para o slot %1$d do ATEM</string>
     <string name="atem_quick_clip_tooltip">Enviar vídeo para o slot %1$d do ATEM</string>
+    <string name="atem_dsk_preroll">Pré-roll do DSK (ms)</string>
+    <string name="atem_dsk_postroll">Pós-roll do DSK (ms)</string>
 </resources>

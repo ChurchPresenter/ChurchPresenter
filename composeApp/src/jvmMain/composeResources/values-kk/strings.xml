@@ -1558,5 +1558,7 @@
     <string name="atem_quick_upload_hint">Диалогты өткізіп жіберу — әдепкі ұяшықтарға бірден жүктеу</string>
     <string name="atem_quick_still_tooltip">Суретті ATEM %1$d ұяшығына жүктеу</string>
     <string name="atem_quick_clip_tooltip">Бейнені ATEM %1$d ұяшығына жүктеу</string>
+    <string name="atem_dsk_preroll">DSK алдындағы кідіріс (мс)</string>
+    <string name="atem_dsk_postroll">DSK кейінгі кідіріс (мс)</string>
 </resources>
 

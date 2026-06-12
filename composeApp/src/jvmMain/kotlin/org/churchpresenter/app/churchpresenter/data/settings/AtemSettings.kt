@@ -20,5 +20,13 @@ data class AtemSettings(
     /** Media pool frames not allocated to any clip bank, from the last test connection. */
     val detectedUnassignedFrames: Int = 0,
     /** Skip the upload dialog: one-press upload straight to the default slots. */
-    val quickUpload: Boolean = false
+    val quickUpload: Boolean = false,
+    /** Default downstream keyer for the Companion lower-third sequence (0-based; shown 1-based). */
+    val dskIndex: Int = 0,
+    /** Delay between DSK on-air and starting the animation (lets the cut settle). */
+    val dskPreRollMs: Int = 300,
+    /** Delay between the animation ending and DSK off-air. */
+    val dskPostRollMs: Int = 300,
+    /** Downstream keyer count from the last test connection; 0 = unknown. */
+    val detectedDskCount: Int = 0
 )

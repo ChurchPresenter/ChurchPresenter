@@ -1580,4 +1580,6 @@
     <string name="atem_quick_upload_hint">Ignorer la boîte de dialogue — envoyer immédiatement vers les emplacements par défaut</string>
     <string name="atem_quick_still_tooltip">Envoyer l'image vers l'emplacement %1$d de l'ATEM</string>
     <string name="atem_quick_clip_tooltip">Envoyer la vidéo vers l'emplacement %1$d de l'ATEM</string>
+    <string name="atem_dsk_preroll">Pré-roll DSK (ms)</string>
+    <string name="atem_dsk_postroll">Post-roll DSK (ms)</string>
 </resources>
