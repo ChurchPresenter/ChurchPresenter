@@ -113,6 +113,7 @@ import java.nio.file.StandardWatchEventKinds
 import javax.swing.JOptionPane
 import org.churchpresenter.app.churchpresenter.composables.ImageIconButton
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
+import org.churchpresenter.app.churchpresenter.dialogs.tabs.formatAtemFps
 import org.churchpresenter.app.churchpresenter.presenter.LowerThirdOffscreenRenderer
 import org.churchpresenter.app.churchpresenter.server.AtemClient
 import org.churchpresenter.app.churchpresenter.models.ScheduleItem
@@ -213,6 +214,10 @@ fun LowerThirdTab(
             }
             atemSlots = if (atemIsClip) state.clipSlots else state.stillSlots
             atemDetectedFps = state.fps
+            // Snap to a valid slot if the configured default doesn't exist on this device
+            if (atemSlots.isNotEmpty() && atemSlots.none { it.index == atemSlot }) {
+                atemSlot = atemSlots.first().index
+            }
         } catch (e: Exception) {
             atemSlotsError = e.message
             atemSlots = emptyList()
@@ -402,11 +407,8 @@ fun LowerThirdTab(
                     if (atemIsClip) {
                         val detectedFps = atemDetectedFps
                         if (detectedFps != null) {
-                            val fpsLabel = if (detectedFps == kotlin.math.floor(detectedFps))
-                                detectedFps.toInt().toString()
-                            else "%.2f".format(detectedFps).trimEnd('0')
                             Text(
-                                "ATEM: $fpsLabel fps",
+                                "ATEM: ${formatAtemFps(detectedFps)} fps",
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                             )
@@ -417,7 +419,9 @@ fun LowerThirdTab(
                     val p = atemProgress
                     if (p != null) {
                         Text(
-                            if (p < 0.5f) stringResource(Res.string.atem_rendering)
+                            // Clips render+upload interleaved per frame; stills render in
+                            // the first half (no progress) and upload in the second
+                            if (!atemIsClip && p < 0.5f) stringResource(Res.string.atem_rendering)
                             else stringResource(Res.string.atem_uploading),
                             style = MaterialTheme.typography.labelSmall
                         )
@@ -456,17 +460,20 @@ fun LowerThirdTab(
                                             ) { p -> atemProgress = 0.5f + p * 0.5f }
                                         }
                                     } else {
-                                        val fpsExact = atemDetectedFps ?: atemSettings.clipFps.toDouble()
+                                        val fpsExact = atemDetectedFps ?: atemSettings.clipFps
                                         val durationMs = totalDurationMs()
-                                        val frames = renderer.renderClip(
-                                            jsonContent, durationMs, fpsExact
-                                        ) { p -> atemProgress = p * 0.5f }
-                                        withContext(Dispatchers.IO) {
-                                            client.uploadClip(
-                                                atemSlot, frames,
-                                                atemSettings.renderWidth, atemSettings.renderHeight,
-                                                fpsExact.toInt(), presetName
-                                            ) { p -> atemProgress = 0.5f + p * 0.5f }
+                                        val totalFrames = ((durationMs / 1000.0) * fpsExact).toInt().coerceAtLeast(1)
+                                        // Render and upload one frame at a time — buffering a whole
+                                        // clip of ~8MB frames would exhaust the heap
+                                        renderer.withSession(jsonContent) { renderFrame ->
+                                            withContext(Dispatchers.IO) {
+                                                client.uploadClip(
+                                                    atemSlot, totalFrames,
+                                                    atemSettings.renderWidth, atemSettings.renderHeight,
+                                                    presetName,
+                                                    nextFrame = { idx -> renderFrame(idx.toFloat() / totalFrames) }
+                                                ) { p -> atemProgress = p }
+                                            }
                                         }
                                     }
                                 } finally {

@@ -47,6 +47,7 @@ import churchpresenter.composeapp.generated.resources.atem_port
 import churchpresenter.composeapp.generated.resources.atem_render_height
 import churchpresenter.composeapp.generated.resources.atem_render_resolution
 import churchpresenter.composeapp.generated.resources.atem_render_width
+import churchpresenter.composeapp.generated.resources.atem_slot_range
 import churchpresenter.composeapp.generated.resources.atem_detected_video_mode
 import churchpresenter.composeapp.generated.resources.atem_status_connected
 import churchpresenter.composeapp.generated.resources.atem_status_connecting
@@ -78,7 +79,7 @@ fun AtemSettingsTab(
     var clipSlotText by remember(atem.defaultClipSlot) { mutableStateOf(atem.defaultClipSlot.toString()) }
     var renderWidthText by remember(atem.renderWidth) { mutableStateOf(atem.renderWidth.toString()) }
     var renderHeightText by remember(atem.renderHeight) { mutableStateOf(atem.renderHeight.toString()) }
-    var clipFpsText by remember(atem.clipFps) { mutableStateOf(atem.clipFps.toString()) }
+    var clipFpsText by remember(atem.clipFps) { mutableStateOf(formatAtemFps(atem.clipFps)) }
 
     var connectionStatus by remember { mutableStateOf<String?>(null) }
     var connectionError by remember { mutableStateOf<String?>(null) }
@@ -168,12 +169,16 @@ fun AtemSettingsTab(
                                     val state = withContext(Dispatchers.IO) {
                                         AtemClient(hostText, portText.toIntOrNull() ?: 9910).queryState()
                                     }
-                                    val fpsLabel = if (state.fps == kotlin.math.floor(state.fps))
-                                        state.fps.toInt().toString()
-                                    else "%.2f".format(state.fps).trimEnd('0')
+                                    val fpsLabel = formatAtemFps(state.fps)
                                     detectedVideoMode = "${state.videoMode} ($fpsLabel fps)"
-                                    clipFpsText = state.fps.toInt().toString()
-                                    update { copy(clipFps = state.fps.toInt()) }
+                                    clipFpsText = fpsLabel
+                                    update {
+                                        copy(
+                                            clipFps = state.fps,
+                                            detectedStillSlots = state.stillSlots.size,
+                                            detectedClipSlots = state.clipSlots.size
+                                        )
+                                    }
                                     connectionStatus = "connected"
                                     connectionError = null
                                 } catch (e: Exception) {
@@ -240,6 +245,11 @@ fun AtemSettingsTab(
                             v.toIntOrNull()?.let { update { copy(defaultStillSlot = it) } }
                         },
                         label = { Text(stringResource(Res.string.atem_default_still_slot)) },
+                        supportingText = if (atem.detectedStillSlots > 0) {
+                            { Text(stringResource(Res.string.atem_slot_range, atem.detectedStillSlots - 1)) }
+                        } else null,
+                        isError = atem.detectedStillSlots > 0 &&
+                            stillSlotText.toIntOrNull()?.let { it !in 0 until atem.detectedStillSlots } != false,
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         modifier = Modifier.weight(1f)
@@ -251,6 +261,11 @@ fun AtemSettingsTab(
                             v.toIntOrNull()?.let { update { copy(defaultClipSlot = it) } }
                         },
                         label = { Text(stringResource(Res.string.atem_default_clip_slot)) },
+                        supportingText = if (atem.detectedClipSlots > 0) {
+                            { Text(stringResource(Res.string.atem_slot_range, atem.detectedClipSlots - 1)) }
+                        } else null,
+                        isError = atem.detectedClipSlots > 0 &&
+                            clipSlotText.toIntOrNull()?.let { it !in 0 until atem.detectedClipSlots } != false,
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         modifier = Modifier.weight(1f)
@@ -302,18 +317,23 @@ fun AtemSettingsTab(
                     value = clipFpsText,
                     onValueChange = { v ->
                         clipFpsText = v
-                        v.toIntOrNull()?.let { update { copy(clipFps = it) } }
+                        v.toDoubleOrNull()?.let { update { copy(clipFps = it) } }
                     },
                     label = { Text(stringResource(Res.string.atem_clip_fps)) },
                     placeholder = { Text(stringResource(Res.string.atem_clip_fps_hint)) },
                     singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                     modifier = Modifier.fillMaxWidth()
                 )
             }
         }
     }
 }
+
+/** "25", "59.94" — exact fps without truncation, locale-independent decimal point. */
+internal fun formatAtemFps(fps: Double): String =
+    if (fps == kotlin.math.floor(fps)) fps.toInt().toString()
+    else String.format(java.util.Locale.US, "%.2f", fps).trimEnd('0').trimEnd('.')
 
 @Composable
 private fun AtemSectionHeader(text: String) {

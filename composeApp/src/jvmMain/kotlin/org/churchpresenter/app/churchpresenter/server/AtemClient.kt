@@ -5,6 +5,7 @@ import kotlinx.coroutines.withContext
 import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.InetAddress
+import java.security.MessageDigest
 import java.util.concurrent.atomic.AtomicInteger
 
 /** A single slot in the ATEM media pool (still or clip). */
@@ -34,12 +35,20 @@ data class AtemState(
  *   - Uploading a still (single ARGB frame) to the still store
  *   - Uploading a clip (list of ARGB frames) to the clip store
  *
- * Pixel format: ARGB, 4 bytes per pixel, big-endian byte order (A, R, G, B in memory).
- * Skia screenshots give BGRA — convert before passing to this client.
+ * Input pixel format: ARGB ints — converted internally to the ATEM's native
+ * 10-bit YUVA 4:2:2 media pool format (BT.709 for >=720p, BT.601 below).
  *
- * Protocol reference: community-documented ATEM UDP protocol used by atem-connection
- * (https://github.com/nrkno/sofie-atem-connection). Tested against ATEM Mini family.
- * Other ATEM models may require minor adjustments.
+ * Upload flow (per sofie-atem-connection, https://github.com/nrkno/sofie-atem-connection):
+ *   LOCK(store, 1) → LKOB                              lock the media pool store
+ *   FTSD(transferId, store, index, size, mode=1)       request the upload
+ *   ← FTCD(transferId, chunkSize, chunkCount)          ATEM grants a batch of chunks
+ *   FTFD(transferId, name, md5) once + FTDa chunks     description, then granted data chunks
+ *   …more FTCD grants / FTDa batches until all sent…
+ *   ← FTDC(transferId)                                 transfer complete
+ *   LOCK(store, 0)                                     unlock
+ * FTDE(transferId, code) is the error response; code 1 means "please retry".
+ * Clips additionally send CMPC (clear clip) before and SMPC (set name/frames) after,
+ * and use store id = clipIndex + 1 (store 0 is the still pool).
  *
  * Packet header (12 bytes):
  *   byte 0   : (flags shl 3) or ((totalLength shr 8) and 0x07)
@@ -48,12 +57,16 @@ data class AtemState(
  *   bytes 4-5: lastRemotePacketId (big-endian uint16) — ATEM's most recent packet ID, for ACK
  *   bytes 6-7: ackPacketId (big-endian uint16) — usually 0
  *   bytes 8-9: unknown (usually 0)
- *   bytes 10-11: localPacketId (big-endian uint16) — our own sequence number
+ *   bytes 10-11: packetId (big-endian uint16, wraps at 0x8000) — sender's sequence number
  *
  * Flag bit values (before left-shift-3):
- *   0x01 = AckRequest — client asks ATEM to ACK this packet
- *   0x02 = Hello      — sent during connection handshake
- *   0x10 = Ack        — pure ACK from client to ATEM
+ *   0x01 = AckRequest         — receiver must ACK this packet
+ *   0x02 = Hello/NewSessionId — connection handshake
+ *   0x08 = RetransmitRequest  — receiver asks for packets to be resent (from id at bytes 6-7)
+ *   0x10 = AckReply           — pure ACK; acked packet id at bytes 4-5
+ *
+ * The real session id is NOT in the hello response — the ATEM assigns it in its first
+ * post-handshake packet, so it is re-read from every incoming packet.
  */
 class AtemClient(val host: String, val port: Int = 9910) {
 
@@ -61,18 +74,39 @@ class AtemClient(val host: String, val port: Int = 9910) {
         private const val HEADER_SIZE = 12
         private const val FLAG_ACK_REQUEST = 0x01
         private const val FLAG_HELLO = 0x02
+        private const val FLAG_RETRANSMIT_REQUEST = 0x08
         private const val FLAG_ACK = 0x10
-        private const val CHUNK_SIZE = 1396        // bytes of ARGB data per FTDA packet
+        private const val MAX_PACKET_ID = 0x8000   // ATEM wraps packet ids at 15 bits
         private const val CONNECT_TIMEOUT_MS = 5000
         private const val CMD_TIMEOUT_MS = 8000
         private const val MAX_RECV_BUF = 65536
+        private const val MAX_TRANSFER_RETRIES = 40   // ATEM sends "retry" while busy, e.g. clearing the clip pool
+        private const val RETRY_BACKOFF_MS = 250L
+        private const val MAX_IN_FLIGHT = 2048
+
+        /** Client hello packet, verbatim from sofie-atem-connection (COMMAND_CONNECT_HELLO). */
+        private val CONNECT_HELLO = byteArrayOf(
+            0x10, 0x14, 0x53, 0xAB.toByte(), 0x00, 0x00, 0x00, 0x00, 0x00, 0x3A, 0x00, 0x00,
+            0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+        )
+
+        /** Commands worth buffering when received while waiting for something else. */
+        private val INTERESTING_COMMANDS = setOf("FTCD", "FTDC", "FTDE", "FTUA", "LKOB", "LKST")
     }
 
     private var socket: DatagramSocket? = null
+    private val address: InetAddress by lazy { InetAddress.getByName(host) }
     private var sessionId: Int = 0
-    private var lastRemotePacketId: Int = 0
-    private val localPacketId = AtomicInteger(0)
+    private var lastReceivedPacketId: Int = 0
+    private var nextSendPacketId: Int = 1
+    private var helloReceived = false
     private val transferIdCounter = AtomicInteger(1)
+
+    /** Sent-but-unacked packets, kept verbatim for ATEM retransmit requests (insertion order). */
+    private val inFlight = LinkedHashMap<Int, ByteArray>()
+
+    /** Interesting commands received while waiting for something else; consumed first on the next wait. */
+    private val pendingCommands = ArrayDeque<Pair<String, ByteArray>>()
 
     /** State parsed from the ATEM state dump received on connect. Populated after [connect]. */
     var lastKnownState: AtemState? = null
@@ -90,20 +124,22 @@ class AtemClient(val host: String, val port: Int = 9910) {
         socket = sock
 
         try {
-            // Send Hello packet
-            val helloPayload = ByteArray(8).also { it[0] = 0x01 }
-            sendPacket(FLAG_HELLO, helloPayload, forcePktId = 1)
-            // The hello consumed packet id 1 — start the counter past it so the
-            // first real command doesn't reuse the same id
-            localPacketId.set(1)
+            sessionId = 0x53AB   // temporary client session id, replaced by the ATEM's
+            lastReceivedPacketId = 0
+            nextSendPacketId = 1
+            helloReceived = false
+            inFlight.clear()
+            pendingCommands.clear()
 
-            // Receive ATEM's Hello response — extract session ID
-            val resp = receivePacket() ?: throw Exception("No response from ATEM at $host:$port")
-            sessionId = ((resp[2].toInt() and 0xFF) shl 8) or (resp[3].toInt() and 0xFF)
-            lastRemotePacketId = ((resp[10].toInt() and 0xFF) shl 8) or (resp[11].toInt() and 0xFF)
+            sendRaw(CONNECT_HELLO)
 
-            // ACK the ATEM's hello
-            sendAck()
+            // Wait for the hello response (receiveAndProcess ACKs it and flips the flag)
+            val deadline = System.currentTimeMillis() + CONNECT_TIMEOUT_MS
+            while (!helloReceived) {
+                if (System.currentTimeMillis() >= deadline ||
+                    receiveAndProcess() == null
+                ) throw Exception("No response from ATEM at $host:$port")
+            }
 
             // Collect and parse the ATEM state dump
             val stateMap = collectState(sock)
@@ -118,6 +154,8 @@ class AtemClient(val host: String, val port: Int = 9910) {
     fun disconnect() {
         socket?.close()
         socket = null
+        inFlight.clear()
+        pendingCommands.clear()
     }
 
     /**
@@ -153,123 +191,168 @@ class AtemClient(val host: String, val port: Int = 9910) {
         onProgress: (Float) -> Unit = {}
     ) = withContext(Dispatchers.IO) {
         if (argbPixels.isEmpty()) throw Exception("Nothing to upload — frame rendering produced no pixels")
-        val data = argbToBytes(argbPixels)
-        val transferId = transferIdCounter.getAndIncrement()
+        if (argbPixels.size != width * height) {
+            throw Exception("Pixel buffer is ${argbPixels.size} pixels, expected ${width}×${height}")
+        }
+        val knownStills = lastKnownState?.stillSlots
+        if (!knownStills.isNullOrEmpty() && knownStills.none { it.index == slot }) {
+            throw Exception("Still slot $slot does not exist on this ATEM (available: 0–${knownStills.maxOf { it.index }})")
+        }
+        val data = argbToYuv422(width, height, argbPixels)
 
-        // Lock still store (storeId = 0)
-        sendCommandAndWait("LKST", buildUInt16(0), "LKOB", timeout = CMD_TIMEOUT_MS.toLong())
-
+        // Lock still store (storeId 0)
+        sendCommandAndWait("LOCK", buildLockPayload(0, locked = true), "LKOB", timeout = CMD_TIMEOUT_MS.toLong())
         try {
-            // Create file transfer descriptor
-            sendCommandAndWait(
-                "FTCD",
-                buildFtcdPayload(transferId, storeId = 0, slotIndex = slot, size = data.size, name = name),
-                expectedResponse = null
-            )
-
-            // Send data in chunks
-            val totalChunks = (data.size + CHUNK_SIZE - 1) / CHUNK_SIZE
-            for (chunkIdx in 0 until totalChunks) {
-                val offset = chunkIdx * CHUNK_SIZE
-                val len = minOf(CHUNK_SIZE, data.size - offset)
-                sendCommandAndWait(
-                    "FTDA",
-                    buildFtdaPayload(transferId, data, offset, len),
-                    expectedResponse = null
-                )
-                onProgress((chunkIdx + 1).toFloat() / totalChunks)
-            }
-
-            // End transfer
-            sendCommandAndWait("FTDE", buildFtdePayload(transferId), expectedResponse = null)
+            performTransfer(storeId = 0, frameIndex = slot, data = data, name = name, onProgress = onProgress)
         } finally {
-            // Unlock still store even if the transfer failed midway; best-effort so a
-            // dead socket here can't mask the original failure
-            runCatching { sendCommand("LKSU", buildUInt16(0)) }
+            // Unlock even if the transfer failed midway; best-effort so a dead socket
+            // here can't mask the original failure
+            runCatching { sendCommand("LOCK", buildLockPayload(0, locked = false)) }
         }
     }
 
     /**
-     * Upload an animated clip to the ATEM clip store.
+     * Upload an animated clip to the ATEM clip store, one frame at a time.
+     *
+     * Frames are pulled lazily through [nextFrame] so only a single frame is ever in
+     * memory — a 1080p frame is ~8 MB, so buffering a whole clip would exhaust the heap.
      *
      * @param slot       0-based clip store slot index
-     * @param frames     list of ARGB IntArrays, one per frame
+     * @param frameCount total number of frames in the clip
      * @param width      frame width
      * @param height     frame height
-     * @param fps        frames per second (informational — ATEM plays at its own rate)
      * @param name       clip name
+     * @param nextFrame  returns the ARGB pixels for a frame index; called in order 0..frameCount-1.
+     *                   The returned array may be a reused buffer — it is consumed before the next call.
      * @param onProgress called with 0f..1f
      */
     suspend fun uploadClip(
         slot: Int,
-        frames: List<IntArray>,
+        frameCount: Int,
         width: Int,
         height: Int,
-        fps: Int,
         name: String,
+        nextFrame: suspend (Int) -> IntArray,
         onProgress: (Float) -> Unit = {}
     ) = withContext(Dispatchers.IO) {
-        if (frames.isEmpty()) throw Exception("Nothing to upload — clip rendering produced no frames")
+        if (frameCount <= 0) throw Exception("Nothing to upload — clip rendering produced no frames")
+        // Locking a nonexistent store is silently ignored by the ATEM (LKOB never comes),
+        // so validate the slot against the state dump up front for a clear error
+        val knownClips = lastKnownState?.clipSlots
+        if (!knownClips.isNullOrEmpty() && knownClips.none { it.index == slot }) {
+            throw Exception("Clip slot $slot does not exist on this ATEM (available: 0–${knownClips.maxOf { it.index }})")
+        }
+        val storeId = slot + 1   // clip stores are 1-based; store 0 is the still pool
 
-        // Lock clip store (storeId = 1)
-        sendCommandAndWait("LKCP", buildUInt16(slot.toUShort()), "LKOB", timeout = CMD_TIMEOUT_MS.toLong())
-
+        sendCommandAndWait("LOCK", buildLockPayload(storeId, locked = true), "LKOB", timeout = CMD_TIMEOUT_MS.toLong())
         try {
-            for ((frameIdx, argbPixels) in frames.withIndex()) {
-                val data = argbToBytes(argbPixels)
-                val transferId = transferIdCounter.getAndIncrement()
+            // Clear the clip slot before uploading new frames
+            sendCommandAndWait("CMPC", ByteArray(4).also { it[0] = slot.toByte() }, expectedResponse = null)
 
-                sendCommandAndWait(
-                    "FTCD",
-                    buildFtcdPayload(
-                        transferId,
-                        storeId = 1,
-                        slotIndex = frameIdx,  // frame index within the clip
-                        size = data.size,
-                        name = if (frameIdx == 0) name else ""
-                    ),
-                    expectedResponse = null
-                )
-
-                val totalChunks = (data.size + CHUNK_SIZE - 1) / CHUNK_SIZE
-                for (chunkIdx in 0 until totalChunks) {
-                    val offset = chunkIdx * CHUNK_SIZE
-                    val len = minOf(CHUNK_SIZE, data.size - offset)
-                    sendCommandAndWait("FTDA", buildFtdaPayload(transferId, data, offset, len), null)
+            for (frameIdx in 0 until frameCount) {
+                val argbPixels = nextFrame(frameIdx)
+                if (argbPixels.size != width * height) {
+                    throw Exception("Frame $frameIdx is ${argbPixels.size} pixels, expected ${width}×${height}")
                 }
-
-                sendCommandAndWait("FTDE", buildFtdePayload(transferId), null)
-
-                onProgress((frameIdx + 1).toFloat() / frames.size)
+                val data = argbToYuv422(width, height, argbPixels)
+                performTransfer(storeId = storeId, frameIndex = frameIdx, data = data, name = null) { p ->
+                    onProgress((frameIdx + p) / frameCount)
+                }
             }
+
+            // Commit the clip: set its name and frame count
+            sendCommandAndWait("SMPC", buildSetClipPayload(slot, name, frameCount), expectedResponse = null)
         } finally {
-            // Unlock clip store even if the transfer failed midway; best-effort so a
-            // dead socket here can't mask the original failure
-            runCatching { sendCommand("LKCU", buildUInt16(slot.toUShort())) }
+            // Unlock even if the transfer failed midway; best-effort so a dead socket
+            // here can't mask the original failure
+            runCatching { sendCommand("LOCK", buildLockPayload(storeId, locked = false)) }
+        }
+    }
+
+    /**
+     * Runs one FTSD upload transfer, honoring the ATEM's FTCD flow-control grants.
+     * Sends the FTFD description on the first grant; finishes when FTDC arrives.
+     * FTDE code 1 means the ATEM wants the transfer restarted (e.g. it was busy).
+     */
+    private fun performTransfer(
+        storeId: Int,
+        frameIndex: Int,
+        data: ByteArray,
+        name: String?,
+        onProgress: (Float) -> Unit
+    ) {
+        val hash = MessageDigest.getInstance("MD5").digest(data)
+        val transferId = transferIdCounter.getAndIncrement()
+        var bytesSent = 0
+        var descriptionSent = false
+        var retries = 0
+
+        sendCommand("FTSD", buildUploadRequestPayload(transferId, storeId, frameIndex, data.size))
+
+        while (true) {
+            val (cmd, payload) = waitForAnyCommand(setOf("FTCD", "FTDC", "FTDE"), CMD_TIMEOUT_MS.toLong())
+            if (payload.size < 2) continue
+            // Ignore messages that belong to other transfers
+            val cmdTransferId = ((payload[0].toInt() and 0xFF) shl 8) or (payload[1].toInt() and 0xFF)
+            if (cmdTransferId != transferId) continue
+
+            when (cmd) {
+                "FTCD" -> {
+                    if (!descriptionSent) {
+                        sendCommand("FTFD", buildFileDescriptionPayload(transferId, name, hash))
+                        descriptionSent = true
+                    }
+                    if (payload.size < 10) continue
+                    // ATEM grants chunkCount chunks of chunkSize bytes (rounded to 8)
+                    val chunkSize = ((((payload[6].toInt() and 0xFF) shl 8) or (payload[7].toInt() and 0xFF)) / 8) * 8
+                    val chunkCount = ((payload[8].toInt() and 0xFF) shl 8) or (payload[9].toInt() and 0xFF)
+                    if (chunkSize <= 0) continue
+                    var sent = 0
+                    while (sent < chunkCount && bytesSent < data.size) {
+                        val len = minOf(chunkSize, data.size - bytesSent)
+                        sendCommand("FTDa", buildDataChunkPayload(transferId, data, bytesSent, len))
+                        bytesSent += len
+                        sent++
+                    }
+                    onProgress(bytesSent.toFloat() / data.size)
+                }
+                "FTDC" -> return
+                "FTDE" -> {
+                    val code = payload.getOrNull(2)?.toInt()?.and(0xFF) ?: -1
+                    if (code == 1 && retries < MAX_TRANSFER_RETRIES) {
+                        // Code 1 = "retry": the ATEM is busy (e.g. still clearing the clip
+                        // pool after CMPC). Back off briefly, then restart the same transfer.
+                        retries++
+                        bytesSent = 0
+                        descriptionSent = false
+                        Thread.sleep(RETRY_BACKOFF_MS)
+                        sendCommand("FTSD", buildUploadRequestPayload(transferId, storeId, frameIndex, data.size))
+                    } else {
+                        // Clip frames past index 0 usually fail because the device's clip
+                        // pool ran out of frame capacity — surface an actionable hint
+                        val what = if (name == null) "clip frame $frameIndex" else "still"
+                        val hint = if (name == null && frameIndex > 0)
+                            " — the clip may exceed the ATEM's clip pool capacity; try a shorter duration or lower fps"
+                        else ""
+                        if (code == 1) {
+                            throw Exception("ATEM stayed busy uploading $what after $retries retries$hint")
+                        } else {
+                            throw Exception("ATEM rejected $what (error code $code)$hint")
+                        }
+                    }
+                }
+            }
         }
     }
 
     // ── Packet building ──────────────────────────────────────────────────────
 
-    private fun sendPacket(flags: Int, payload: ByteArray = ByteArray(0), forcePktId: Int? = null) {
-        val totalLen = HEADER_SIZE + payload.size
-        val pkt = ByteArray(totalLen)
-        pkt[0] = ((flags shl 3) or ((totalLen shr 8) and 0x07)).toByte()
-        pkt[1] = (totalLen and 0xFF).toByte()
-        pkt[2] = ((sessionId shr 8) and 0xFF).toByte()
-        pkt[3] = (sessionId and 0xFF).toByte()
-        pkt[4] = ((lastRemotePacketId shr 8) and 0xFF).toByte()
-        pkt[5] = (lastRemotePacketId and 0xFF).toByte()
-        // bytes 6-9 = 0
-        val pktId = forcePktId ?: localPacketId.incrementAndGet()
-        pkt[10] = ((pktId shr 8) and 0xFF).toByte()
-        pkt[11] = (pktId and 0xFF).toByte()
-        if (payload.isNotEmpty()) System.arraycopy(payload, 0, pkt, HEADER_SIZE, payload.size)
-        val addr = InetAddress.getByName(host)
-        socket?.send(DatagramPacket(pkt, pkt.size, addr, port))
-    }
+    private fun u16(b: ByteArray, offset: Int): Int =
+        ((b[offset].toInt() and 0xFF) shl 8) or (b[offset + 1].toInt() and 0xFF)
 
-    private fun sendAck() = sendPacket(FLAG_ACK)
+    private fun sendRaw(bytes: ByteArray) {
+        socket?.send(DatagramPacket(bytes, bytes.size, address, port))
+    }
 
     private fun buildCommandBytes(name: String, data: ByteArray): ByteArray {
         val cmdLen = 8 + data.size
@@ -283,23 +366,48 @@ class AtemClient(val host: String, val port: Int = 9910) {
         return cmd
     }
 
-    private fun sendCommand(name: String, data: ByteArray) {
-        sendPacket(FLAG_ACK_REQUEST, buildCommandBytes(name, data))
+    /**
+     * Send a command in an AckRequest packet. The packet is kept in [inFlight] until the
+     * ATEM acks it, so retransmit requests can be honored. Returns the packet id used.
+     */
+    private fun sendCommand(name: String, data: ByteArray): Int {
+        val payload = buildCommandBytes(name, data)
+        val totalLen = HEADER_SIZE + payload.size
+        val pktId = nextSendPacketId
+        nextSendPacketId = (nextSendPacketId + 1) % MAX_PACKET_ID
+        val pkt = ByteArray(totalLen)
+        pkt[0] = ((FLAG_ACK_REQUEST shl 3) or ((totalLen shr 8) and 0x07)).toByte()
+        pkt[1] = (totalLen and 0xFF).toByte()
+        writeU16(pkt, 2, sessionId)
+        writeU16(pkt, 10, pktId)
+        System.arraycopy(payload, 0, pkt, HEADER_SIZE, payload.size)
+        inFlight[pktId] = pkt
+        while (inFlight.size > MAX_IN_FLIGHT) inFlight.remove(inFlight.keys.first())
+        sendRaw(pkt)
+        return pktId
     }
 
-    /** Send a command and optionally wait for a named response command from ATEM. */
+    /** Pure ACK packet: AckReply flag, acked packet id at bytes 4-5, packet id 0. */
+    private fun sendAck(ackId: Int) {
+        val pkt = ByteArray(HEADER_SIZE)
+        pkt[0] = (FLAG_ACK shl 3).toByte()
+        pkt[1] = HEADER_SIZE.toByte()
+        writeU16(pkt, 2, sessionId)
+        writeU16(pkt, 4, ackId)
+        sendRaw(pkt)
+    }
+
+    /** Send a command and wait for either its packet-level ACK or a named response command. */
     private fun sendCommandAndWait(
         name: String,
         data: ByteArray,
         expectedResponse: String?,
         timeout: Long = CMD_TIMEOUT_MS.toLong()
     ) {
-        sendCommand(name, data)
+        val pktId = sendCommand(name, data)
         if (expectedResponse == null) {
-            // Wait for ATEM's packet-level ACK (flags bit = Ack)
-            waitForAck(timeout)
+            waitForAckOf(pktId, timeout)
         } else {
-            // Wait for a specific command response
             waitForCommand(expectedResponse, timeout)
         }
     }
@@ -317,35 +425,118 @@ class AtemClient(val host: String, val port: Int = 9910) {
         }
     }
 
-    /** Receive packets until we get an ACK (flags=0x80 in byte 0); throws on timeout. */
-    private fun waitForAck(timeoutMs: Long) {
-        val deadline = System.currentTimeMillis() + timeoutMs
-        while (System.currentTimeMillis() < deadline) {
-            socket?.soTimeout = (deadline - System.currentTimeMillis()).coerceAtLeast(1).toInt()
-            val pkt = receivePacket() ?: break
-            if (pkt.size < HEADER_SIZE) continue
-            updateRemotePacketId(pkt)
-            val flags = (pkt[0].toInt() and 0xFF) shr 3
-            if (flags and FLAG_ACK != 0) return   // got ACK
-            // ACK any incoming data packets
-            if (flags and FLAG_ACK_REQUEST != 0) sendAck()
+    /**
+     * Receive one packet and run the reliable-layer bookkeeping (mirrors
+     * sofie-atem-connection's _receivePacket): adopt the session id, handle hello /
+     * retransmit-request / ack flags, ACK and deduplicate data packets by sequence id.
+     *
+     * Returns the commands carried by an in-sequence data packet (often empty),
+     * or null if the socket timed out / closed.
+     */
+    private fun receiveAndProcess(): List<Pair<String, ByteArray>>? {
+        val pkt = receivePacket() ?: return null
+        if (pkt.size < HEADER_SIZE) return emptyList()
+        val flags = (pkt[0].toInt() and 0xFF) shr 3
+        // The ATEM assigns the real session id after the handshake — track it always
+        sessionId = u16(pkt, 2)
+        val remoteId = u16(pkt, 10)
+
+        if (flags and FLAG_HELLO != 0) {
+            helloReceived = true
+            lastReceivedPacketId = remoteId
+            sendAck(remoteId)
+            return emptyList()
         }
-        throw Exception("ATEM did not acknowledge within ${timeoutMs}ms")
+
+        if (flags and FLAG_RETRANSMIT_REQUEST != 0) {
+            retransmitFrom(u16(pkt, 6) % MAX_PACKET_ID)
+        }
+
+        var commands: List<Pair<String, ByteArray>> = emptyList()
+        if (flags and FLAG_ACK_REQUEST != 0) {
+            if (remoteId == (lastReceivedPacketId + 1) % MAX_PACKET_ID) {
+                lastReceivedPacketId = remoteId
+                sendAck(remoteId)
+                commands = parseAllCommands(pkt)
+            } else if (isCoveredByAck(lastReceivedPacketId, remoteId)) {
+                // Retransmit of something we already processed — re-ack, don't reprocess
+                sendAck(lastReceivedPacketId)
+            }
+            // else: a future packet — a gap means loss; the ATEM will retransmit
+        }
+
+        if (flags and FLAG_ACK != 0) {
+            val ackId = u16(pkt, 4)
+            inFlight.keys.removeAll { isCoveredByAck(ackId, it) }
+        }
+
+        return commands
     }
 
-    /** Receive packets until we find a specific command name, ACKing everything else; throws on timeout. */
+    /** Whether [packetId] is acknowledged by an ack for [ackId], allowing for 15-bit wrap. */
+    private fun isCoveredByAck(ackId: Int, packetId: Int): Boolean {
+        val tolerance = MAX_PACKET_ID / 2
+        val shortlyBefore = packetId < ackId && packetId + tolerance > ackId
+        val shortlyAfter = packetId > ackId && packetId < ackId + tolerance
+        val beforeWrap = packetId > ackId + tolerance
+        return packetId == ackId || ((shortlyBefore || beforeWrap) && !shortlyAfter)
+    }
+
+    /** Resend buffered in-flight packets starting from [fromId] (ATEM retransmit request). */
+    private fun retransmitFrom(fromId: Int) {
+        if (!inFlight.containsKey(fromId)) {
+            throw Exception("ATEM requested retransmit of packet $fromId, which is no longer buffered")
+        }
+        var resending = false
+        for ((id, bytes) in inFlight) {
+            if (id == fromId) resending = true
+            if (resending) sendRaw(bytes)
+        }
+    }
+
+    /** Buffer any interesting commands so a later wait can consume them. */
+    private fun stashInteresting(commands: List<Pair<String, ByteArray>>) {
+        for (c in commands) {
+            if (c.first in INTERESTING_COMMANDS) pendingCommands.add(c)
+        }
+    }
+
+    /** Receive until the ATEM acks our packet [pktId]; throws on timeout. */
+    private fun waitForAckOf(pktId: Int, timeoutMs: Long) {
+        val deadline = System.currentTimeMillis() + timeoutMs
+        while (inFlight.containsKey(pktId)) {
+            val remaining = deadline - System.currentTimeMillis()
+            if (remaining <= 0) throw Exception("ATEM did not acknowledge within ${timeoutMs}ms")
+            socket?.soTimeout = remaining.coerceAtLeast(1).toInt()
+            val commands = receiveAndProcess()
+                ?: throw Exception("ATEM did not acknowledge within ${timeoutMs}ms")
+            stashInteresting(commands)
+        }
+    }
+
     private fun waitForCommand(cmdName: String, timeoutMs: Long) {
+        waitForAnyCommand(setOf(cmdName), timeoutMs)
+    }
+
+    /**
+     * Receive packets until one contains a command named in [names]; other interesting
+     * commands are buffered for later waits. Throws on timeout.
+     */
+    private fun waitForAnyCommand(names: Set<String>, timeoutMs: Long): Pair<String, ByteArray> {
+        val pendingIdx = pendingCommands.indexOfFirst { it.first in names }
+        if (pendingIdx >= 0) return pendingCommands.removeAt(pendingIdx)
         val deadline = System.currentTimeMillis() + timeoutMs
         while (System.currentTimeMillis() < deadline) {
             socket?.soTimeout = (deadline - System.currentTimeMillis()).coerceAtLeast(1).toInt()
-            val pkt = receivePacket() ?: break
-            if (pkt.size < HEADER_SIZE) continue
-            updateRemotePacketId(pkt)
-            val flags = (pkt[0].toInt() and 0xFF) shr 3
-            if (flags and FLAG_ACK_REQUEST != 0) sendAck()
-            if (findCommand(pkt, cmdName) != null) return
+            val commands = receiveAndProcess() ?: break
+            var result: Pair<String, ByteArray>? = null
+            for (c in commands) {
+                if (result == null && c.first in names) result = c
+                else if (c.first in INTERESTING_COMMANDS) pendingCommands.add(c)
+            }
+            if (result != null) return result
         }
-        throw Exception("ATEM did not respond with $cmdName within ${timeoutMs}ms")
+        throw Exception("ATEM did not respond with ${names.joinToString("/")} within ${timeoutMs}ms")
     }
 
     /**
@@ -358,12 +549,8 @@ class AtemClient(val host: String, val port: Int = 9910) {
         val deadline = System.currentTimeMillis() + 2000
         while (System.currentTimeMillis() < deadline) {
             sock.soTimeout = (deadline - System.currentTimeMillis()).coerceAtLeast(1).toInt().coerceAtMost(300)
-            val pkt = receivePacket() ?: break
-            if (pkt.size < HEADER_SIZE) continue
-            updateRemotePacketId(pkt)
-            val flags = (pkt[0].toInt() and 0xFF) shr 3
-            if (flags and FLAG_ACK_REQUEST != 0) sendAck()
-            parseAllCommands(pkt).forEach { (name, payload) ->
+            val commands = receiveAndProcess() ?: break
+            commands.forEach { (name, payload) ->
                 result.getOrPut(name) { mutableListOf() }.add(payload)
             }
         }
@@ -446,116 +633,150 @@ class AtemClient(val host: String, val port: Int = 9910) {
             AtemMediaSlot(idx, name, used)
         } ?: emptyList()
 
-    private fun updateRemotePacketId(pkt: ByteArray) {
-        if (pkt.size < HEADER_SIZE) return
-        val id = ((pkt[10].toInt() and 0xFF) shl 8) or (pkt[11].toInt() and 0xFF)
-        if (id > 0) lastRemotePacketId = id
-    }
-
-    private fun findCommand(packet: ByteArray, name: String): ByteArray? {
-        var offset = HEADER_SIZE
-        while (offset + 8 <= packet.size) {
-            val cmdLen = ((packet[offset].toInt() and 0xFF) shl 8) or (packet[offset + 1].toInt() and 0xFF)
-            if (cmdLen < 8 || offset + cmdLen > packet.size) break
-            val cmdName = String(packet, offset + 4, 4, Charsets.US_ASCII)
-            if (cmdName == name) return packet.copyOfRange(offset + 8, offset + cmdLen)
-            offset += cmdLen
-        }
-        return null
-    }
-
     // ── Payload builders ─────────────────────────────────────────────────────
 
-    private fun buildUInt16(value: Int): ByteArray {
-        val b = ByteArray(2)
-        b[0] = ((value shr 8) and 0xFF).toByte()
-        b[1] = (value and 0xFF).toByte()
-        return b
+    private fun writeU16(buf: ByteArray, offset: Int, value: Int) {
+        buf[offset] = ((value shr 8) and 0xFF).toByte()
+        buf[offset + 1] = (value and 0xFF).toByte()
     }
 
-    private fun buildUInt16(value: UShort): ByteArray = buildUInt16(value.toInt())
+    /** LOCK payload (4 bytes): storeId (uint16), locked (uint8), padding. */
+    private fun buildLockPayload(storeId: Int, locked: Boolean): ByteArray {
+        val buf = ByteArray(4)
+        writeU16(buf, 0, storeId)
+        buf[2] = if (locked) 1 else 0
+        return buf
+    }
 
-    private fun buildFtcdPayload(
-        transferId: Int,
-        storeId: Int,
-        slotIndex: Int,
-        size: Int,
-        name: String
-    ): ByteArray {
-        // FTCD payload (92 bytes):
-        // bytes 0-1:  transferId (uint16)
-        // bytes 2-3:  storeId (uint16)
-        // bytes 4-7:  slotIndex / frameIndex (uint32)
-        // bytes 8-11: total data size (uint32)
-        // bytes 12-27: hash (16 bytes, zeros = no integrity check)
-        // bytes 28-91: name (64 bytes, null-padded UTF-8)
-        val buf = ByteArray(92)
-        buf[0] = ((transferId shr 8) and 0xFF).toByte()
-        buf[1] = (transferId and 0xFF).toByte()
-        buf[2] = ((storeId shr 8) and 0xFF).toByte()
-        buf[3] = (storeId and 0xFF).toByte()
-        buf[4] = ((slotIndex shr 24) and 0xFF).toByte()
-        buf[5] = ((slotIndex shr 16) and 0xFF).toByte()
-        buf[6] = ((slotIndex shr 8) and 0xFF).toByte()
-        buf[7] = (slotIndex and 0xFF).toByte()
+    /**
+     * FTSD payload (16 bytes):
+     *   bytes 0-1:  transferId (uint16)
+     *   bytes 2-3:  storeId (uint16)
+     *   bytes 4-5:  unknown (0)
+     *   bytes 6-7:  slot / frame index (uint16)
+     *   bytes 8-11: total data size (uint32, pre-RLE length)
+     *   bytes 12-13: mode (uint16, 1 = write)
+     */
+    private fun buildUploadRequestPayload(transferId: Int, storeId: Int, frameIndex: Int, size: Int): ByteArray {
+        val buf = ByteArray(16)
+        writeU16(buf, 0, transferId)
+        writeU16(buf, 2, storeId)
+        writeU16(buf, 6, frameIndex)
         buf[8] = ((size shr 24) and 0xFF).toByte()
         buf[9] = ((size shr 16) and 0xFF).toByte()
         buf[10] = ((size shr 8) and 0xFF).toByte()
         buf[11] = (size and 0xFF).toByte()
-        // bytes 12-27: hash (all zeros)
-        val nameBytes = name.toByteArray(Charsets.UTF_8).copyOf(64)
-        System.arraycopy(nameBytes, 0, buf, 28, minOf(64, nameBytes.size))
+        writeU16(buf, 12, 1)   // mode
         return buf
     }
 
-    private fun buildFtdaPayload(
-        transferId: Int,
-        data: ByteArray,
-        offset: Int,
-        length: Int
-    ): ByteArray {
-        // FTDA payload:
-        // bytes 0-1: transferId (uint16)
-        // bytes 2-3: chunk length (uint16)
-        // bytes 4+:  chunk data
+    /**
+     * FTFD payload (212 bytes):
+     *   bytes 0-1:    transferId (uint16)
+     *   bytes 2-65:   name (64 bytes, null-padded UTF-8)
+     *   bytes 66-193: description (128 bytes, unused)
+     *   bytes 194-209: MD5 hash of the encoded data (16 bytes)
+     */
+    private fun buildFileDescriptionPayload(transferId: Int, name: String?, md5: ByteArray): ByteArray {
+        val buf = ByteArray(212)
+        writeU16(buf, 0, transferId)
+        if (!name.isNullOrEmpty()) {
+            val nameBytes = name.toByteArray(Charsets.UTF_8)
+            System.arraycopy(nameBytes, 0, buf, 2, minOf(64, nameBytes.size))
+        }
+        System.arraycopy(md5, 0, buf, 194, minOf(16, md5.size))
+        return buf
+    }
+
+    /** FTDa payload: transferId (uint16), chunk length (uint16), chunk data. */
+    private fun buildDataChunkPayload(transferId: Int, data: ByteArray, offset: Int, length: Int): ByteArray {
         val buf = ByteArray(4 + length)
-        buf[0] = ((transferId shr 8) and 0xFF).toByte()
-        buf[1] = (transferId and 0xFF).toByte()
-        buf[2] = ((length shr 8) and 0xFF).toByte()
-        buf[3] = (length and 0xFF).toByte()
+        writeU16(buf, 0, transferId)
+        writeU16(buf, 2, length)
         System.arraycopy(data, offset, buf, 4, length)
         return buf
     }
 
-    private fun buildFtdePayload(transferId: Int): ByteArray {
-        // FTDE payload:
-        // bytes 0-1: transferId (uint16)
-        // bytes 2-3: status (0 = success)
-        val buf = ByteArray(4)
-        buf[0] = ((transferId shr 8) and 0xFF).toByte()
-        buf[1] = (transferId and 0xFF).toByte()
+    /**
+     * SMPC payload (68 bytes): mask (uint8, 3 = name+frames), clip index (uint8),
+     * name (44 bytes UTF-8 at offset 2), frame count (uint16 at offset 66).
+     */
+    private fun buildSetClipPayload(clipIndex: Int, name: String, frames: Int): ByteArray {
+        val buf = ByteArray(68)
+        buf[0] = 3
+        buf[1] = clipIndex.toByte()
+        val nameBytes = name.toByteArray(Charsets.UTF_8)
+        System.arraycopy(nameBytes, 0, buf, 2, minOf(44, nameBytes.size))
+        writeU16(buf, 66, frames)
         return buf
     }
 
     // ── Pixel conversion ─────────────────────────────────────────────────────
 
     /**
-     * Convert ARGB IntArray (from SkiaLayer screenshot after BGRA→ARGB conversion)
-     * to a byte array in ARGB byte order for the ATEM media protocol.
+     * Convert ARGB ints to the ATEM media pool's native 10-bit YUVA 4:2:2 format.
      *
-     * The DeckLinkComposeOutput pixel array stores pixels as ARGB Int:
-     *   int = (A shl 24) or (R shl 16) or (G shl 8) or B
-     * ATEM wants bytes in order: A, R, G, B (big-endian ARGB).
+     * Port of sofie-atem-connection's convertRGBAToYUV422: each pixel pair packs into
+     * two big-endian 32-bit words — (A1, Cb, Y1) and (A2, Cr, Y2) — with 10-bit
+     * components at broadcast levels (Y 64–940, CbCr 64–960, alpha scaled to 64–940).
+     * BT.709 coefficients for >=720p, BT.601 below.
      */
-    private fun argbToBytes(pixels: IntArray): ByteArray {
-        val bytes = ByteArray(pixels.size * 4)
-        for (i in pixels.indices) {
-            val px = pixels[i]
-            bytes[i * 4 + 0] = ((px shr 24) and 0xFF).toByte()  // A
-            bytes[i * 4 + 1] = ((px shr 16) and 0xFF).toByte()  // R
-            bytes[i * 4 + 2] = ((px shr 8) and 0xFF).toByte()   // G
-            bytes[i * 4 + 3] = (px and 0xFF).toByte()            // B
+    private fun argbToYuv422(width: Int, height: Int, pixels: IntArray): ByteArray {
+        val kr = if (height >= 720) 0.2126 else 0.299
+        val kb = if (height >= 720) 0.0722 else 0.114
+        val kg = 1.0 - kr - kb
+        val kri = 1.0 - kr
+        val kbi = 1.0 - kb
+        val yRange = 219.0
+        val halfCbCrRange = 224.0 / 2
+        val yOffset = (16 shl 8).toDouble()
+        val cbCrOffset = (128 shl 8).toDouble()
+        val krOKbi = kr / kbi * halfCbCrRange
+        val kgOKbi = kg / kbi * halfCbCrRange
+        val kbOKri = kb / kri * halfCbCrRange
+        val kgOKri = kg / kri * halfCbCrRange
+
+        fun genColor(rawA: Int, uv16: Double, y16: Double): Int {
+            val a = ((rawA shl 2) * 219) / 255 + (16 shl 2)
+            val y = (Math.round(y16) shr 6).toInt()
+            val uv = (Math.round(uv16) shr 6).toInt()
+            return (a shl 20) or (uv shl 10) or y
         }
-        return bytes
+
+        val out = ByteArray(width * height * 4)
+        var o = 0
+        var i = 0
+        while (i < pixels.size) {
+            val px1 = pixels[i]
+            val px2 = pixels[i + 1]
+            val a1 = (px1 ushr 24) and 0xFF
+            val r1 = (px1 shr 16) and 0xFF
+            val g1 = (px1 shr 8) and 0xFF
+            val b1 = px1 and 0xFF
+            val a2 = (px2 ushr 24) and 0xFF
+            val r2 = (px2 shr 16) and 0xFF
+            val g2 = (px2 shr 8) and 0xFF
+            val b2 = px2 and 0xFF
+
+            val y16a = yOffset + kr * yRange * r1 + kg * yRange * g1 + kb * yRange * b1
+            val cb16 = cbCrOffset + (-krOKbi * r1 - kgOKbi * g1 + halfCbCrRange * b1)
+            val y16b = yOffset + kr * yRange * r2 + kg * yRange * g2 + kb * yRange * b2
+            val cr16 = cbCrOffset + (halfCbCrRange * r1 - kgOKri * g1 - kbOKri * b1)
+
+            val word1 = genColor(a1, cb16, y16a)
+            val word2 = genColor(a2, cr16, y16b)
+            out[o]     = ((word1 ushr 24) and 0xFF).toByte()
+            out[o + 1] = ((word1 shr 16) and 0xFF).toByte()
+            out[o + 2] = ((word1 shr 8) and 0xFF).toByte()
+            out[o + 3] = (word1 and 0xFF).toByte()
+            out[o + 4] = ((word2 ushr 24) and 0xFF).toByte()
+            out[o + 5] = ((word2 shr 16) and 0xFF).toByte()
+            out[o + 6] = ((word2 shr 8) and 0xFF).toByte()
+            out[o + 7] = (word2 and 0xFF).toByte()
+
+            i += 2
+            o += 8
+        }
+        return out
     }
 }

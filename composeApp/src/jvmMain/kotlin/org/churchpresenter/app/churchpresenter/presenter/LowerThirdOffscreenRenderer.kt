@@ -43,48 +43,26 @@ class LowerThirdOffscreenRenderer(
      *
      * @param lottieJson  raw JSON string of the Lottie animation
      * @param progress    animation progress 0f (start) to 1f (end); default 0.5f (midpoint)
-     * @return            ARGB IntArray of size width*height, or empty array on failure
+     * @return            ARGB IntArray of size width*height
      */
-    suspend fun renderStill(lottieJson: String, progress: Float = 0.5f): IntArray {
-        return renderFrames(lottieJson, listOf(progress)).firstOrNull() ?: IntArray(0)
-    }
+    suspend fun renderStill(lottieJson: String, progress: Float = 0.5f): IntArray =
+        withSession(lottieJson) { renderFrame -> renderFrame(progress).copyOf() }
 
     /**
-     * Renders all frames of the animation at [fps] frames per second.
+     * Opens an off-screen render session and runs [block] with a frame-render function.
      *
-     * @param lottieJson  raw JSON string of the Lottie animation
-     * @param durationMs  total animation duration in milliseconds
-     * @param fps         frames per second (should match your ATEM video standard: 25/30/50/60)
-     * @param onProgress  called with 0f..1f as frames are captured
-     * @return            list of ARGB IntArrays, one per frame
+     * The render function returns an INTERNAL BUFFER that is overwritten by the next
+     * call — consume each frame (convert/upload) before requesting the next one and do
+     * not retain references. This keeps memory flat regardless of clip length: a single
+     * 1080p frame is ~8 MB, so buffering a whole clip of frames would exhaust the heap.
      */
-    suspend fun renderClip(
+    suspend fun <T> withSession(
         lottieJson: String,
-        durationMs: Long,
-        fps: Double = 30.0,
-        onProgress: (Float) -> Unit = {}
-    ): List<IntArray> {
-        val totalFrames = ((durationMs / 1000.0) * fps).toInt().coerceAtLeast(1)
-        val progressValues = (0 until totalFrames).map { it.toFloat() / totalFrames.toFloat() }
-        val result = mutableListOf<IntArray>()
-        val frames = renderFrames(lottieJson, progressValues) { captured ->
-            onProgress(captured.toFloat() / progressValues.size)
-        }
-        result.addAll(frames)
-        return result
-    }
-
-    // ── Internal rendering ────────────────────────────────────────────────────
-
-    private suspend fun renderFrames(
-        lottieJson: String,
-        progressValues: List<Float>,
-        onFrameCaptured: ((Int) -> Unit)? = null
-    ): List<IntArray> = withContext(Dispatchers.Default) {
+        block: suspend (renderFrame: suspend (Float) -> IntArray) -> T
+    ): T = withContext(Dispatchers.Default) {
         // Must NOT run on Dispatchers.Main: invokeAndWait throws java.lang.Error when
         // called from the EDT. Capture runs on Default like DeckLinkComposeOutput.
-        var currentProgress by mutableStateOf(progressValues.firstOrNull() ?: 0f)
-        val results = mutableListOf<IntArray>()
+        var currentProgress by mutableStateOf(0f)
 
         // Create the off-screen JFrame and ComposePanel on the EDT
         var jframe: JFrame? = null
@@ -109,8 +87,8 @@ class LowerThirdOffscreenRenderer(
             jframe!!.isVisible = true
         }
 
-        val panel = composePanel ?: return@withContext emptyList()
-        val frame = jframe ?: return@withContext emptyList()
+        val panel = composePanel ?: throw Exception("Off-screen renderer failed to initialize (no ComposePanel)")
+        val frame = jframe ?: throw Exception("Off-screen renderer failed to initialize (no window)")
 
         try {
             // Set Compose content on the EDT
@@ -143,15 +121,14 @@ class LowerThirdOffscreenRenderer(
             val layer = skiaLayer
                 ?: throw Exception("Off-screen renderer failed to initialize (no SkiaLayer)")
 
-            val pixelsBuf = ByteArray(width * height * 4)
-            for ((idx, progress) in progressValues.withIndex()) {
+            // Buffers reused for every frame — see the contract in the kdoc above
+            val byteBuf = ByteArray(width * height * 4)
+            val intBuf = IntArray(width * height)
+            block { progress ->
                 currentProgress = progress
                 // Allow Compose to re-render at the new progress value
                 delay(150)
-
-                val captured = captureFrame(layer, pixelsBuf)
-                results.add(captured)
-                onFrameCaptured?.invoke(idx + 1)
+                captureFrame(layer, byteBuf, intBuf)
             }
         } finally {
             SwingUtilities.invokeLater {
@@ -159,12 +136,9 @@ class LowerThirdOffscreenRenderer(
                 frame.dispose()
             }
         }
-
-        results
     }
 
-    private fun captureFrame(layer: SkiaLayer, byteBuf: ByteArray): IntArray {
-        val pixels = IntArray(width * height)
+    private fun captureFrame(layer: SkiaLayer, byteBuf: ByteArray, pixels: IntArray): IntArray {
         return try {
             val bitmap = layer.screenshot() ?: return pixels
             val pixmap = bitmap.peekPixels()

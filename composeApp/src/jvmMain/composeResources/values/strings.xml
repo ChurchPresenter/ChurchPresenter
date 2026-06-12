@@ -1558,6 +1558,7 @@
     <string name="atem_mode_still">Still (single frame)</string>
     <string name="atem_mode_clip">Clip (full animation)</string>
     <string name="atem_slot">Slot</string>
+    <string name="atem_slot_range">Available: 0–%1$d</string>
     <string name="atem_upload">Upload</string>
     <string name="atem_uploading">Uploading…</string>
     <string name="atem_rendering">Rendering frames…</string>
