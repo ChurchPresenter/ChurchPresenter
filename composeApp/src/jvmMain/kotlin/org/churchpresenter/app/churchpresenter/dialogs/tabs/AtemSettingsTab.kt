@@ -23,6 +23,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -48,6 +49,8 @@ import churchpresenter.composeapp.generated.resources.atem_description
 import churchpresenter.composeapp.generated.resources.atem_host
 import churchpresenter.composeapp.generated.resources.atem_host_hint
 import churchpresenter.composeapp.generated.resources.atem_port
+import churchpresenter.composeapp.generated.resources.atem_quick_upload
+import churchpresenter.composeapp.generated.resources.atem_quick_upload_hint
 import churchpresenter.composeapp.generated.resources.atem_render_height
 import churchpresenter.composeapp.generated.resources.atem_render_resolution
 import churchpresenter.composeapp.generated.resources.atem_render_width
@@ -375,6 +378,33 @@ fun AtemSettingsTab(
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                     )
+                }
+
+                Spacer(Modifier.height(8.dp))
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+                Spacer(Modifier.height(8.dp))
+
+                // Quick upload: one-press upload to the default slots, no dialog
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Switch(
+                        checked = atem.quickUpload,
+                        onCheckedChange = { update { copy(quickUpload = it) } }
+                    )
+                    Column {
+                        Text(
+                            stringResource(Res.string.atem_quick_upload),
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                        Text(
+                            stringResource(Res.string.atem_quick_upload_hint),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                        )
+                    }
                 }
             }
         }

@@ -70,6 +70,8 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.Movie
 import androidx.compose.material.icons.filled.Warning
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.ic_pause
@@ -88,6 +90,8 @@ import churchpresenter.composeapp.generated.resources.atem_clip_too_long
 import churchpresenter.composeapp.generated.resources.atem_unreachable
 import churchpresenter.composeapp.generated.resources.atem_upscale_notice
 import churchpresenter.composeapp.generated.resources.atem_preparing
+import churchpresenter.composeapp.generated.resources.atem_quick_clip_tooltip
+import churchpresenter.composeapp.generated.resources.atem_quick_still_tooltip
 import churchpresenter.composeapp.generated.resources.atem_ready
 import churchpresenter.composeapp.generated.resources.atem_send_to_atem
 import churchpresenter.composeapp.generated.resources.atem_slot
@@ -307,12 +311,13 @@ fun LowerThirdTab(
         ((composition?.durationFrames ?: 0f) / (composition?.frameRate ?: 30f) * 1000f)
             .toLong().coerceAtLeast(1L)
 
-    // Cache variant for the current ATEM dialog mode. Frame count comes from the lottie
-    // JSON itself (same source as background pre-generation) so both hit the same key.
-    fun atemVariant(): AtemRenderCache.Variant {
+    // Cache variant for an ATEM upload. Frame count comes from the lottie JSON itself
+    // (same source as background pre-generation) so both hit the same key.
+    // Quick upload passes useDetectedFps=false so it always hits the pre-generated cache.
+    fun atemVariant(isClip: Boolean, useDetectedFps: Boolean = true): AtemRenderCache.Variant {
         val s = appSettings.atemSettings
-        if (!atemIsClip) return AtemRenderCache.Variant(clip = false, width = s.renderWidth, height = s.renderHeight)
-        val fps = atemDetectedFps ?: s.clipFps
+        if (!isClip) return AtemRenderCache.Variant(clip = false, width = s.renderWidth, height = s.renderHeight)
+        val fps = (if (useDetectedFps) atemDetectedFps else null) ?: s.clipFps
         val frames = AtemRenderCache.clipFrameCount(jsonContent, fps)
             ?: ((totalDurationMs() / 1000.0) * fps).toInt().coerceAtLeast(1)
         return AtemRenderCache.Variant(true, s.renderWidth, s.renderHeight, fps, frames)
@@ -322,9 +327,57 @@ fun LowerThirdTab(
     // and mirror the render progress into the dialog
     LaunchedEffect(showAtemDialog, atemIsClip, jsonContent, atemDetectedFps) {
         if (!showAtemDialog || jsonContent.isBlank()) return@LaunchedEffect
-        val variant = atemVariant()
+        val variant = atemVariant(atemIsClip)
         AtemRenderCache.prepare(jsonContent, variant)
         AtemRenderCache.progressFlow(jsonContent, variant).collect { atemPrepareProgress = it }
+    }
+
+    /**
+     * Render-from-cache + upload, shared by the dialog's Upload button and the
+     * quick-upload buttons. [variant] decides still vs clip and the fps/frame count.
+     */
+    fun startAtemUpload(variant: AtemRenderCache.Variant, slot: Int, closeDialogOnSuccess: Boolean) {
+        val presetName = selectedFile?.nameWithoutExtension ?: ""
+        val atemSettings = appSettings.atemSettings
+        atemBusy = true
+        atemError = null
+        scope.launch {
+            try {
+                // Awaits the background render when it isn't done yet;
+                // instant when the cache file already exists
+                val cached = AtemRenderCache.prepare(jsonContent, variant).await()
+                atemProgress = 0f
+                val client = AtemClient(atemSettings.host, atemSettings.port)
+                withContext(Dispatchers.IO) { client.connect() }
+                try {
+                    withContext(Dispatchers.IO) {
+                        AtemRenderCache.Reader(cached).use { reader ->
+                            if (!variant.clip) {
+                                client.uploadStillEncoded(slot, reader.nextFrame(), presetName) { p ->
+                                    atemProgress = p
+                                }
+                            } else {
+                                client.uploadClipEncoded(
+                                    slot, reader.frameCount, presetName,
+                                    nextFrame = { reader.nextFrame() }
+                                ) { p -> atemProgress = p }
+                            }
+                        }
+                    }
+                } finally {
+                    client.disconnect()
+                }
+                atemReachable = true
+                atemProgress = 1f
+                delay(800)
+                if (closeDialogOnSuccess) showAtemDialog = false
+            } catch (e: Exception) {
+                atemError = e.message ?: "Upload failed"
+            } finally {
+                atemProgress = null
+                atemBusy = false
+            }
+        }
     }
 
     fun startPlaying() {
@@ -385,7 +438,7 @@ fun LowerThirdTab(
     if (showAtemDialog) {
         // Pre-upload capacity check: an over-capacity clip upload is guaranteed to fail,
         // so block it up front instead of minutes into the transfer
-        val atemClipFramesNeeded = if (atemIsClip) atemVariant().frameCount else 0
+        val atemClipFramesNeeded = if (atemIsClip) atemVariant(atemIsClip).frameCount else 0
         val atemSlotCapacity = atemClipMaxFrames.getOrNull(atemSlot)
         val atemClipTooLong = atemIsClip && atemSlotCapacity != null && atemClipFramesNeeded > atemSlotCapacity
         AlertDialog(
@@ -570,46 +623,7 @@ fun LowerThirdTab(
             confirmButton = {
                 Button(
                     onClick = {
-                        val presetName = selectedFile?.nameWithoutExtension ?: ""
-                        val atemSettings = appSettings.atemSettings
-                        atemBusy = true
-                        atemError = null
-                        scope.launch {
-                            try {
-                                // Awaits the background render when it isn't done yet;
-                                // instant when the cache file already exists
-                                val cached = AtemRenderCache.prepare(jsonContent, atemVariant()).await()
-                                atemProgress = 0f
-                                val client = AtemClient(atemSettings.host, atemSettings.port)
-                                withContext(Dispatchers.IO) { client.connect() }
-                                try {
-                                    withContext(Dispatchers.IO) {
-                                        AtemRenderCache.Reader(cached).use { reader ->
-                                            if (!atemIsClip) {
-                                                client.uploadStillEncoded(atemSlot, reader.nextFrame(), presetName) { p ->
-                                                    atemProgress = p
-                                                }
-                                            } else {
-                                                client.uploadClipEncoded(
-                                                    atemSlot, reader.frameCount, presetName,
-                                                    nextFrame = { reader.nextFrame() }
-                                                ) { p -> atemProgress = p }
-                                            }
-                                        }
-                                    }
-                                } finally {
-                                    client.disconnect()
-                                }
-                                atemProgress = 1f
-                                delay(800)
-                                showAtemDialog = false
-                            } catch (e: Exception) {
-                                atemError = e.message ?: "Upload failed"
-                            } finally {
-                                atemProgress = null
-                                atemBusy = false
-                            }
-                        }
+                        startAtemUpload(atemVariant(atemIsClip), atemSlot, closeDialogOnSuccess = true)
                     },
                     enabled = !atemBusy && !atemClipTooLong
                 ) {
@@ -875,26 +889,86 @@ fun LowerThirdTab(
                 // Send to ATEM — only shown when ATEM is configured; greyed out while
                 // the device is unreachable (reachability poll above)
                 if (atemConfigured) {
-                    val atemTooltip = if (atemReachable) stringResource(Res.string.atem_send_to_atem)
-                        else stringResource(Res.string.atem_unreachable, appSettings.atemSettings.host)
-                    Tooltip(atemTooltip) {
-                        IconButton(
-                            onClick = {
-                                atemSlot = if (atemIsClip) appSettings.atemSettings.defaultClipSlot
-                                           else appSettings.atemSettings.defaultStillSlot
-                                atemError = null
-                                atemProgress = null
-                                showAtemDialog = true
-                            },
-                            enabled = canPlay && !atemBusy && atemReachable,
-                            colors = IconButtonDefaults.iconButtonColors(
-                                containerColor = MaterialTheme.colorScheme.tertiary,
-                                contentColor = MaterialTheme.colorScheme.onTertiary,
-                                disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                                disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                            )
+                    val atemButtonColors = IconButtonDefaults.iconButtonColors(
+                        containerColor = MaterialTheme.colorScheme.tertiary,
+                        contentColor = MaterialTheme.colorScheme.onTertiary,
+                        disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                        disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                    )
+                    val unreachableTooltip = stringResource(Res.string.atem_unreachable, appSettings.atemSettings.host)
+
+                    if (appSettings.atemSettings.quickUpload) {
+                        // Quick upload: one press → default slot, no dialog
+                        val stillSlot = appSettings.atemSettings.defaultStillSlot
+                        val clipSlot = appSettings.atemSettings.defaultClipSlot
+                        val quickEnabled = canPlay && !atemBusy && atemReachable
+
+                        // Capacity pre-flight for the clip button: block a doomed upload up front
+                        val quickClipVariant = if (jsonContent.isNotBlank())
+                            atemVariant(isClip = true, useDetectedFps = false) else null
+                        val quickClipCapacity = appSettings.atemSettings.detectedClipMaxFrames.getOrNull(clipSlot)
+                        val quickClipTooLong = quickClipVariant != null && quickClipCapacity != null &&
+                            quickClipVariant.frameCount > quickClipCapacity
+
+                        Tooltip(
+                            if (!atemReachable) unreachableTooltip
+                            else stringResource(Res.string.atem_quick_still_tooltip, stillSlot + 1)
                         ) {
-                            Text("A", style = MaterialTheme.typography.labelLarge)
+                            IconButton(
+                                onClick = {
+                                    startAtemUpload(
+                                        atemVariant(isClip = false, useDetectedFps = false),
+                                        stillSlot, closeDialogOnSuccess = false
+                                    )
+                                },
+                                enabled = quickEnabled,
+                                colors = atemButtonColors
+                            ) {
+                                Icon(Icons.Filled.Image, contentDescription = null, modifier = Modifier.size(20.dp))
+                            }
+                        }
+                        Tooltip(
+                            when {
+                                !atemReachable -> unreachableTooltip
+                                quickClipTooLong && quickClipVariant != null && quickClipCapacity != null -> {
+                                    val secs = String.format(java.util.Locale.US, "%.1f", quickClipCapacity / quickClipVariant.fps)
+                                    stringResource(
+                                        Res.string.atem_clip_too_long,
+                                        quickClipVariant.frameCount, clipSlot + 1, quickClipCapacity, secs
+                                    )
+                                }
+                                else -> stringResource(Res.string.atem_quick_clip_tooltip, clipSlot + 1)
+                            }
+                        ) {
+                            IconButton(
+                                onClick = {
+                                    quickClipVariant?.let {
+                                        startAtemUpload(it, clipSlot, closeDialogOnSuccess = false)
+                                    }
+                                },
+                                enabled = quickEnabled && !quickClipTooLong,
+                                colors = atemButtonColors
+                            ) {
+                                Icon(Icons.Filled.Movie, contentDescription = null, modifier = Modifier.size(20.dp))
+                            }
+                        }
+                    } else {
+                        val atemTooltip = if (atemReachable) stringResource(Res.string.atem_send_to_atem)
+                            else unreachableTooltip
+                        Tooltip(atemTooltip) {
+                            IconButton(
+                                onClick = {
+                                    atemSlot = if (atemIsClip) appSettings.atemSettings.defaultClipSlot
+                                               else appSettings.atemSettings.defaultStillSlot
+                                    atemError = null
+                                    atemProgress = null
+                                    showAtemDialog = true
+                                },
+                                enabled = canPlay && !atemBusy && atemReachable,
+                                colors = atemButtonColors
+                            ) {
+                                Text("A", style = MaterialTheme.typography.labelLarge)
+                            }
                         }
                     }
                 }

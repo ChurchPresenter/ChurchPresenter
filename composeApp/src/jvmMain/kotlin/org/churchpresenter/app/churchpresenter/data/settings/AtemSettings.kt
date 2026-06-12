@@ -18,5 +18,7 @@ data class AtemSettings(
     /** Frame capacity per clip bank from the last test connection; empty = unknown. */
     val detectedClipMaxFrames: List<Int> = emptyList(),
     /** Media pool frames not allocated to any clip bank, from the last test connection. */
-    val detectedUnassignedFrames: Int = 0
+    val detectedUnassignedFrames: Int = 0,
+    /** Skip the upload dialog: one-press upload straight to the default slots. */
+    val quickUpload: Boolean = false
 )

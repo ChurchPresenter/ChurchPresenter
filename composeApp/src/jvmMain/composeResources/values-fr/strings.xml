@@ -1576,4 +1576,8 @@
     <string name="atem_capacity_mixed">Capacité des clips : %1$d banques, jusqu'à %2$s images à %3$s fps</string>
     <string name="atem_capacity_unassigned">, %1$d images non attribuées</string>
     <string name="atem_capacity_unknown">Lancez le test de connexion pour détecter la capacité des clips</string>
+    <string name="atem_quick_upload">Envoi rapide</string>
+    <string name="atem_quick_upload_hint">Ignorer la boîte de dialogue — envoyer immédiatement vers les emplacements par défaut</string>
+    <string name="atem_quick_still_tooltip">Envoyer l'image vers l'emplacement %1$d de l'ATEM</string>
+    <string name="atem_quick_clip_tooltip">Envoyer la vidéo vers l'emplacement %1$d de l'ATEM</string>
 </resources>

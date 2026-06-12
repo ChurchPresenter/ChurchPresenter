@@ -1554,5 +1554,9 @@
     <string name="atem_capacity_mixed">Clip-Kapazität: %1$d Bänke, bis zu %2$s Frames bei %3$s fps</string>
     <string name="atem_capacity_unassigned">, %1$d Frames nicht zugewiesen</string>
     <string name="atem_capacity_unknown">Verbindungstest ausführen, um die Clip-Kapazität zu ermitteln</string>
+    <string name="atem_quick_upload">Schnell-Upload</string>
+    <string name="atem_quick_upload_hint">Dialog überspringen — sofort in die Standard-Slots hochladen</string>
+    <string name="atem_quick_still_tooltip">Bild in ATEM-Slot %1$d hochladen</string>
+    <string name="atem_quick_clip_tooltip">Video in ATEM-Slot %1$d hochladen</string>
 </resources>
 

@@ -1559,5 +1559,9 @@
     <string name="atem_capacity_mixed">Ємність кліпів: %1$d банки, до %2$s кадрів при %3$s fps</string>
     <string name="atem_capacity_unassigned">, %1$d кадрів не розподілено</string>
     <string name="atem_capacity_unknown">Запустіть перевірку з'єднання, щоб визначити ємність кліпів</string>
+    <string name="atem_quick_upload">Швидке завантаження</string>
+    <string name="atem_quick_upload_hint">Пропустити діалог — одразу завантажувати у слоти за замовчуванням</string>
+    <string name="atem_quick_still_tooltip">Завантажити зображення у слот %1$d ATEM</string>
+    <string name="atem_quick_clip_tooltip">Завантажити відео у слот %1$d ATEM</string>
 </resources>
 

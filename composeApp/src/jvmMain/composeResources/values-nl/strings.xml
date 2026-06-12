@@ -1576,4 +1576,8 @@
     <string name="atem_capacity_mixed">Clipcapaciteit: %1$d banken, tot %2$s frames bij %3$s fps</string>
     <string name="atem_capacity_unassigned">, %1$d frames niet toegewezen</string>
     <string name="atem_capacity_unknown">Voer de verbindingstest uit om de clipcapaciteit te bepalen</string>
+    <string name="atem_quick_upload">Snel uploaden</string>
+    <string name="atem_quick_upload_hint">Dialoog overslaan — direct uploaden naar de standaardslots</string>
+    <string name="atem_quick_still_tooltip">Afbeelding uploaden naar ATEM-slot %1$d</string>
+    <string name="atem_quick_clip_tooltip">Video uploaden naar ATEM-slot %1$d</string>
 </resources>

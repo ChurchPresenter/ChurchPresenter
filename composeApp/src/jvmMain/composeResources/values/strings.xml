@@ -1559,6 +1559,10 @@
     <string name="atem_capacity_unknown">Run Test Connection to detect clip capacity</string>
     <string name="atem_send_to_atem">Send to ATEM</string>
     <string name="atem_unreachable">ATEM not reachable at %1$s</string>
+    <string name="atem_quick_upload">Quick upload</string>
+    <string name="atem_quick_upload_hint">Skip the dialog — upload immediately to the default slots</string>
+    <string name="atem_quick_still_tooltip">Upload image to ATEM slot %1$d</string>
+    <string name="atem_quick_clip_tooltip">Upload video to ATEM slot %1$d</string>
     <string name="atem_upload_mode">Upload mode</string>
     <string name="atem_mode_still">Still (single frame)</string>
     <string name="atem_mode_clip">Clip (full animation)</string>
