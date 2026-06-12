@@ -36,7 +36,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
-import churchpresenter.composeapp.generated.resources.atem_capacity_line
+import churchpresenter.composeapp.generated.resources.atem_capacity_equal
+import churchpresenter.composeapp.generated.resources.atem_capacity_mixed
+import churchpresenter.composeapp.generated.resources.atem_capacity_unassigned
 import churchpresenter.composeapp.generated.resources.atem_capacity_unknown
 import churchpresenter.composeapp.generated.resources.atem_clip_fps
 import churchpresenter.composeapp.generated.resources.atem_clip_fps_hint
@@ -350,20 +352,20 @@ fun AtemSettingsTab(
                 // Standing reference: how much clip the ATEM can hold (persisted from the
                 // last successful Test Connection)
                 if (atem.detectedClipMaxFrames.isNotEmpty() && atem.clipFps > 0) {
-                    val capacity = buildString {
-                        val banks = atem.detectedClipMaxFrames
-                        val perBank = banks.distinct().joinToString(" / ") { frames ->
-                            val secs = String.format(java.util.Locale.US, "%.1f", frames / atem.clipFps)
-                            "$frames frames (≈$secs s)"
-                        }
-                        val each = if (banks.distinct().size == 1 && banks.size > 1) "each up to" else "up to"
-                        append("${banks.size} bank${if (banks.size == 1) "" else "s"}, $each $perBank at ${formatAtemFps(atem.clipFps)} fps")
-                        if (atem.detectedUnassignedFrames > 0) {
-                            append(", ${atem.detectedUnassignedFrames} frames unassigned")
-                        }
+                    val banks = atem.detectedClipMaxFrames
+                    val distinct = banks.distinct()
+                    val fpsLabel = formatAtemFps(atem.clipFps)
+                    val base = if (distinct.size == 1) {
+                        val secs = String.format(java.util.Locale.US, "%.1f", distinct[0] / atem.clipFps)
+                        stringResource(Res.string.atem_capacity_equal, banks.size, distinct[0], secs, fpsLabel)
+                    } else {
+                        stringResource(Res.string.atem_capacity_mixed, banks.size, distinct.joinToString(" / "), fpsLabel)
                     }
+                    val suffix = if (atem.detectedUnassignedFrames > 0) {
+                        stringResource(Res.string.atem_capacity_unassigned, atem.detectedUnassignedFrames)
+                    } else ""
                     Text(
-                        stringResource(Res.string.atem_capacity_line, capacity),
+                        base + suffix,
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                     )

@@ -1549,5 +1549,10 @@
     <string name="atem_slot_named">Слот %1$d – %2$s</string>
     <string name="atem_slot_in_use">Слот %1$d (пайдаланылуда)</string>
     <string name="atem_slot_empty">Слот %1$d (бос)</string>
+    <string name="atem_unreachable">%1$s мекенжайындағы ATEM қолжетімсіз</string>
+    <string name="atem_capacity_equal">Клип сыйымдылығы: %1$d банк, әрқайсысы %2$d кадрға дейін (≈%3$s с), %4$s fps</string>
+    <string name="atem_capacity_mixed">Клип сыйымдылығы: %1$d банк, %2$s кадрға дейін, %3$s fps</string>
+    <string name="atem_capacity_unassigned">, %1$d кадр тағайындалмаған</string>
+    <string name="atem_capacity_unknown">Клип сыйымдылығын анықтау үшін қосылым сынағын іске қосыңыз</string>
 </resources>
 

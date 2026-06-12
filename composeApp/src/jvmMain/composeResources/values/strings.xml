@@ -1553,7 +1553,9 @@
     <string name="atem_render_height">Height</string>
     <string name="atem_clip_fps">Clip FPS (match ATEM video standard)</string>
     <string name="atem_clip_fps_hint">25, 30, 50 or 60</string>
-    <string name="atem_capacity_line">Clip capacity: %1$s</string>
+    <string name="atem_capacity_equal">Clip capacity: %1$d banks, each up to %2$d frames (≈%3$s s) at %4$s fps</string>
+    <string name="atem_capacity_mixed">Clip capacity: %1$d banks, up to %2$s frames at %3$s fps</string>
+    <string name="atem_capacity_unassigned">, %1$d frames unassigned</string>
     <string name="atem_capacity_unknown">Run Test Connection to detect clip capacity</string>
     <string name="atem_send_to_atem">Send to ATEM</string>
     <string name="atem_unreachable">ATEM not reachable at %1$s</string>

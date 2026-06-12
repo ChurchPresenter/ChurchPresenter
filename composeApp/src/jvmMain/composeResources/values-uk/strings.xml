@@ -1554,5 +1554,10 @@
     <string name="atem_slot_named">Слот %1$d – %2$s</string>
     <string name="atem_slot_in_use">Слот %1$d (використовується)</string>
     <string name="atem_slot_empty">Слот %1$d (порожній)</string>
+    <string name="atem_unreachable">ATEM недоступний за адресою %1$s</string>
+    <string name="atem_capacity_equal">Ємність кліпів: %1$d банки, кожен до %2$d кадрів (≈%3$s с) при %4$s fps</string>
+    <string name="atem_capacity_mixed">Ємність кліпів: %1$d банки, до %2$s кадрів при %3$s fps</string>
+    <string name="atem_capacity_unassigned">, %1$d кадрів не розподілено</string>
+    <string name="atem_capacity_unknown">Запустіть перевірку з'єднання, щоб визначити ємність кліпів</string>
 </resources>
 

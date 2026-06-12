@@ -1571,4 +1571,9 @@
     <string name="atem_slot_named">Slot %1$d – %2$s</string>
     <string name="atem_slot_in_use">Slot %1$d (používa sa)</string>
     <string name="atem_slot_empty">Slot %1$d (prázdny)</string>
+    <string name="atem_unreachable">ATEM nie je dostupný na %1$s</string>
+    <string name="atem_capacity_equal">Kapacita klipov: %1$d banky, každá až %2$d snímok (≈%3$s s) pri %4$s fps</string>
+    <string name="atem_capacity_mixed">Kapacita klipov: %1$d banky, až %2$s snímok pri %3$s fps</string>
+    <string name="atem_capacity_unassigned">, %1$d snímok nepriradených</string>
+    <string name="atem_capacity_unknown">Spustite test pripojenia na zistenie kapacity klipov</string>
 </resources>

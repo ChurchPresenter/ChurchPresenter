@@ -1571,4 +1571,9 @@
     <string name="atem_slot_named">Ranura %1$d – %2$s</string>
     <string name="atem_slot_in_use">Ranura %1$d (en uso)</string>
     <string name="atem_slot_empty">Ranura %1$d (vacía)</string>
+    <string name="atem_unreachable">No se puede conectar con el ATEM en %1$s</string>
+    <string name="atem_capacity_equal">Capacidad de clips: %1$d bancos, cada uno hasta %2$d fotogramas (≈%3$s s) a %4$s fps</string>
+    <string name="atem_capacity_mixed">Capacidad de clips: %1$d bancos, hasta %2$s fotogramas a %3$s fps</string>
+    <string name="atem_capacity_unassigned">, %1$d fotogramas sin asignar</string>
+    <string name="atem_capacity_unknown">Ejecute la prueba de conexión para detectar la capacidad de clips</string>
 </resources>

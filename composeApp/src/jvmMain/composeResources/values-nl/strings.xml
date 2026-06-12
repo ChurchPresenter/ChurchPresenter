@@ -1571,4 +1571,9 @@
     <string name="atem_slot_named">Slot %1$d – %2$s</string>
     <string name="atem_slot_in_use">Slot %1$d (in gebruik)</string>
     <string name="atem_slot_empty">Slot %1$d (leeg)</string>
+    <string name="atem_unreachable">ATEM niet bereikbaar op %1$s</string>
+    <string name="atem_capacity_equal">Clipcapaciteit: %1$d banken, elk tot %2$d frames (≈%3$s s) bij %4$s fps</string>
+    <string name="atem_capacity_mixed">Clipcapaciteit: %1$d banken, tot %2$s frames bij %3$s fps</string>
+    <string name="atem_capacity_unassigned">, %1$d frames niet toegewezen</string>
+    <string name="atem_capacity_unknown">Voer de verbindingstest uit om de clipcapaciteit te bepalen</string>
 </resources>

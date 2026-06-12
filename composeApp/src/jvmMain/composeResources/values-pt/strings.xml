@@ -1571,4 +1571,9 @@
     <string name="atem_slot_named">Slot %1$d – %2$s</string>
     <string name="atem_slot_in_use">Slot %1$d (em uso)</string>
     <string name="atem_slot_empty">Slot %1$d (vazio)</string>
+    <string name="atem_unreachable">ATEM inacessível em %1$s</string>
+    <string name="atem_capacity_equal">Capacidade de clipes: %1$d bancos, cada um até %2$d quadros (≈%3$s s) a %4$s fps</string>
+    <string name="atem_capacity_mixed">Capacidade de clipes: %1$d bancos, até %2$s quadros a %3$s fps</string>
+    <string name="atem_capacity_unassigned">, %1$d quadros não atribuídos</string>
+    <string name="atem_capacity_unknown">Execute o teste de conexão para detectar a capacidade de clipes</string>
 </resources>

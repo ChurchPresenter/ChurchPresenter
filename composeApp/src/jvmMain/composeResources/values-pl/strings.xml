@@ -1549,5 +1549,10 @@
     <string name="atem_slot_named">Slot %1$d – %2$s</string>
     <string name="atem_slot_in_use">Slot %1$d (w użyciu)</string>
     <string name="atem_slot_empty">Slot %1$d (pusty)</string>
+    <string name="atem_unreachable">ATEM nieosiągalny pod adresem %1$s</string>
+    <string name="atem_capacity_equal">Pojemność klipów: %1$d banki, każdy do %2$d klatek (≈%3$s s) przy %4$s fps</string>
+    <string name="atem_capacity_mixed">Pojemność klipów: %1$d banki, do %2$s klatek przy %3$s fps</string>
+    <string name="atem_capacity_unassigned">, %1$d klatek nieprzydzielonych</string>
+    <string name="atem_capacity_unknown">Uruchom test połączenia, aby wykryć pojemność klipów</string>
 </resources>
 

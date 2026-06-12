@@ -1578,4 +1578,9 @@
     <string name="atem_slot_named">Slot %1$d – %2$s</string>
     <string name="atem_slot_in_use">Slot %1$d (utilizat)</string>
     <string name="atem_slot_empty">Slot %1$d (gol)</string>
+    <string name="atem_unreachable">ATEM inaccesibil la %1$s</string>
+    <string name="atem_capacity_equal">Capacitate clipuri: %1$d bănci, fiecare până la %2$d cadre (≈%3$s s) la %4$s fps</string>
+    <string name="atem_capacity_mixed">Capacitate clipuri: %1$d bănci, până la %2$s cadre la %3$s fps</string>
+    <string name="atem_capacity_unassigned">, %1$d cadre nealocate</string>
+    <string name="atem_capacity_unknown">Rulați testul de conexiune pentru a detecta capacitatea clipurilor</string>
 </resources>

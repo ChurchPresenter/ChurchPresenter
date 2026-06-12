@@ -1549,5 +1549,10 @@
     <string name="atem_slot_named">Slot %1$d – %2$s</string>
     <string name="atem_slot_in_use">Slot %1$d (belegt)</string>
     <string name="atem_slot_empty">Slot %1$d (leer)</string>
+    <string name="atem_unreachable">ATEM unter %1$s nicht erreichbar</string>
+    <string name="atem_capacity_equal">Clip-Kapazität: %1$d Bänke, je bis zu %2$d Frames (≈%3$s s) bei %4$s fps</string>
+    <string name="atem_capacity_mixed">Clip-Kapazität: %1$d Bänke, bis zu %2$s Frames bei %3$s fps</string>
+    <string name="atem_capacity_unassigned">, %1$d Frames nicht zugewiesen</string>
+    <string name="atem_capacity_unknown">Verbindungstest ausführen, um die Clip-Kapazität zu ermitteln</string>
 </resources>
 
