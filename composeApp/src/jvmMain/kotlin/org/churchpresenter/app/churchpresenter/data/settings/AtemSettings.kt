@@ -14,5 +14,7 @@ data class AtemSettings(
     val clipFps: Double = 30.0,
     /** Slot counts detected on the last successful test connection; 0 = unknown. */
     val detectedStillSlots: Int = 0,
-    val detectedClipSlots: Int = 0
+    val detectedClipSlots: Int = 0,
+    /** Frame capacity per clip bank from the last test connection; empty = unknown. */
+    val detectedClipMaxFrames: List<Int> = emptyList()
 )

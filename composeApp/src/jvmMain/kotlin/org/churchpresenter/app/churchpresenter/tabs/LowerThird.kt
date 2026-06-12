@@ -79,6 +79,8 @@ import churchpresenter.composeapp.generated.resources.atem_loading_slots
 import churchpresenter.composeapp.generated.resources.atem_mode_clip
 import churchpresenter.composeapp.generated.resources.atem_mode_still
 import churchpresenter.composeapp.generated.resources.atem_aspect_mismatch
+import churchpresenter.composeapp.generated.resources.atem_clip_capacity_info
+import churchpresenter.composeapp.generated.resources.atem_clip_too_long
 import churchpresenter.composeapp.generated.resources.atem_upscale_notice
 import churchpresenter.composeapp.generated.resources.atem_preparing
 import churchpresenter.composeapp.generated.resources.atem_ready
@@ -211,6 +213,7 @@ fun LowerThirdTab(
     var atemProgress by remember { mutableStateOf<Float?>(null) }   // upload progress, null = idle
     var atemError by remember { mutableStateOf<String?>(null) }
     var atemSlots by remember { mutableStateOf<List<AtemMediaSlot>>(emptyList()) }
+    var atemClipMaxFrames by remember { mutableStateOf(appSettings.atemSettings.detectedClipMaxFrames) }
     var atemSlotsLoading by remember { mutableStateOf(false) }
     var atemSlotsError by remember { mutableStateOf<String?>(null) }
     var atemDetectedFps by remember { mutableStateOf<Double?>(null) }
@@ -226,6 +229,7 @@ fun LowerThirdTab(
             }
             atemSlots = if (atemIsClip) state.clipSlots else state.stillSlots
             atemDetectedFps = state.fps
+            if (state.clipMaxFrames.isNotEmpty()) atemClipMaxFrames = state.clipMaxFrames
             // Snap to a valid slot if the configured default doesn't exist on this device
             if (atemSlots.isNotEmpty() && atemSlots.none { it.index == atemSlot }) {
                 atemSlot = atemSlots.first().index
@@ -355,6 +359,11 @@ fun LowerThirdTab(
 
     // ATEM upload dialog
     if (showAtemDialog) {
+        // Pre-upload capacity check: an over-capacity clip upload is guaranteed to fail,
+        // so block it up front instead of minutes into the transfer
+        val atemClipFramesNeeded = if (atemIsClip) atemVariant().frameCount else 0
+        val atemSlotCapacity = atemClipMaxFrames.getOrNull(atemSlot)
+        val atemClipTooLong = atemIsClip && atemSlotCapacity != null && atemClipFramesNeeded > atemSlotCapacity
         AlertDialog(
             onDismissRequest = { if (!atemBusy) showAtemDialog = false },
             title = { Text(stringResource(Res.string.atem_send_to_atem)) },
@@ -469,14 +478,38 @@ fun LowerThirdTab(
                         }
                     }
 
-                    // Detected FPS (clips only)
+                    // Detected FPS + clip pool capacity (clips only)
                     if (atemIsClip) {
                         val detectedFps = atemDetectedFps
-                        if (detectedFps != null) {
+                        val fpsUsed = detectedFps ?: appSettings.atemSettings.clipFps
+                        if (detectedFps != null || atemSlotCapacity != null) {
+                            val parts = buildList {
+                                if (detectedFps != null) add("${formatAtemFps(detectedFps)} fps")
+                                if (atemSlotCapacity != null) {
+                                    val secs = String.format(java.util.Locale.US, "%.1f", atemSlotCapacity / fpsUsed)
+                                    add(
+                                        stringResource(
+                                            Res.string.atem_clip_capacity_info,
+                                            atemClipFramesNeeded, atemSlotCapacity, secs
+                                        )
+                                    )
+                                }
+                            }
                             Text(
-                                "ATEM: ${formatAtemFps(detectedFps)} fps",
+                                "ATEM: ${parts.joinToString(", ")}",
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                            )
+                        }
+                        if (atemClipTooLong && atemSlotCapacity != null) {
+                            val maxSecs = String.format(java.util.Locale.US, "%.1f", atemSlotCapacity / fpsUsed)
+                            Text(
+                                stringResource(
+                                    Res.string.atem_clip_too_long,
+                                    atemClipFramesNeeded, atemSlot + 1, atemSlotCapacity, maxSecs
+                                ),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.error
                             )
                         }
                     }
@@ -554,7 +587,7 @@ fun LowerThirdTab(
                             }
                         }
                     },
-                    enabled = !atemBusy
+                    enabled = !atemBusy && !atemClipTooLong
                 ) {
                     Text(stringResource(Res.string.atem_upload))
                 }

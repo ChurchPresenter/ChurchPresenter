@@ -171,13 +171,27 @@ fun AtemSettingsTab(
                                         AtemClient(hostText, portText.toIntOrNull() ?: 9910).queryState()
                                     }
                                     val fpsLabel = formatAtemFps(state.fps)
-                                    detectedVideoMode = "${state.videoMode} ($fpsLabel fps)"
+                                    detectedVideoMode = buildString {
+                                        append("${state.videoMode} ($fpsLabel fps)")
+                                        if (state.clipMaxFrames.isNotEmpty()) {
+                                            val capacity = state.clipMaxFrames.distinct()
+                                                .joinToString("/") { frames ->
+                                                    val secs = String.format(java.util.Locale.US, "%.1f", frames / state.fps)
+                                                    "$frames frames (≈${secs}s)"
+                                                }
+                                            append(" — ${state.clipSlots.size} clips × up to $capacity")
+                                            if (state.unassignedFrames > 0) {
+                                                append(", ${state.unassignedFrames} frames unassigned")
+                                            }
+                                        }
+                                    }
                                     clipFpsText = fpsLabel
                                     update {
                                         copy(
                                             clipFps = state.fps,
                                             detectedStillSlots = state.stillSlots.size,
-                                            detectedClipSlots = state.clipSlots.size
+                                            detectedClipSlots = state.clipSlots.size,
+                                            detectedClipMaxFrames = state.clipMaxFrames
                                         )
                                     }
                                     connectionStatus = "connected"

@@ -1564,6 +1564,8 @@
     <string name="atem_preparing">Preparing frames…</string>
     <string name="atem_aspect_mismatch">Design is %1$s but the ATEM frame is %2$s — it will be centered with empty space at the sides</string>
     <string name="atem_upscale_notice">Design is %1$s — scaled up %2$s× to fit the ATEM frame, so it may look soft. Generate at %3$s for best quality</string>
+    <string name="atem_clip_capacity_info">clip needs %1$d of %2$d frames (≈%3$ss max)</string>
+    <string name="atem_clip_too_long">Clip needs %1$d frames but slot %2$d holds up to %3$d (≈%4$ss) — shorten the clip, lower the fps, or enlarge the clip allocation in ATEM Software Control</string>
     <string name="atem_ready">Ready to upload</string>
     <string name="atem_upload_done">Upload complete</string>
     <string name="atem_upload_error">Upload failed: %1$s</string>

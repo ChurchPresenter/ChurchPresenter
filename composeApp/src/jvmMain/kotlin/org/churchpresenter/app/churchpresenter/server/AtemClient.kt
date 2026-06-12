@@ -14,16 +14,20 @@ data class AtemMediaSlot(val index: Int, val name: String, val isUsed: Boolean)
 /**
  * ATEM device state read on connect.
  *
- * @param fps        exact frame rate derived from [videoMode], e.g. 25.0, 29.97, 59.94
- * @param videoMode  human-readable video standard, e.g. "1080p25", "1080p29.97"
- * @param stillSlots list of still-store slots (from MPSP commands)
- * @param clipSlots  list of clip-store slots (from MPCP commands)
+ * @param fps              exact frame rate derived from [videoMode], e.g. 25.0, 29.97, 59.94
+ * @param videoMode        human-readable video standard, e.g. "1080p25", "1080p29.97"
+ * @param stillSlots       list of still-store slots (from MPfe commands, pool 0)
+ * @param clipSlots        list of clip-store slots (from MPCS commands)
+ * @param clipMaxFrames    frame capacity per clip bank (from MPSp; empty on pre-8.0 firmware)
+ * @param unassignedFrames media pool frames not allocated to any clip bank (from MPSp)
  */
 data class AtemState(
     val fps: Double,
     val videoMode: String,
     val stillSlots: List<AtemMediaSlot>,
-    val clipSlots: List<AtemMediaSlot>
+    val clipSlots: List<AtemMediaSlot>,
+    val clipMaxFrames: List<Int> = emptyList(),
+    val unassignedFrames: Int = 0
 )
 
 /**
@@ -592,45 +596,62 @@ class AtemClient(val host: String, val port: Int = 9910) {
             17   -> "2160p29.97"     to 30000.0 / 1001.0
             else -> "Unknown"        to 30.0
         }
-        return AtemState(fps, mode, parseStillSlots(m), parseClipSlots(m))
+        val (clipMaxFrames, unassigned) = parseMediaPoolSettings(m)
+        return AtemState(fps, mode, parseStillSlots(m), parseClipSlots(m), clipMaxFrames, unassigned)
     }
 
     /**
-     * MPSP (Media Pool Still Properties) payload layout:
-     *   bytes 0-1:  index (uint16)
-     *   byte  2:    flags (bit 0 = isUsed)
-     *   byte  3:    padding
-     *   bytes 4-19: hash (16 bytes)
-     *   bytes 20+:  filename (null-terminated UTF-8, max 64 bytes)
+     * MPfe (Media Pool Frame dEscription) payload layout - verified against hardware:
+     *   byte  0:     media pool (0 = still store)
+     *   bytes 2-3:   frame index (uint16)
+     *   byte  4:     isUsed (uint8)
+     *   bytes 5-20:  hash (16 bytes)
+     *   byte  23:    name length (uint8)
+     *   bytes 24+:   name (UTF-8)
      */
     private fun parseStillSlots(m: Map<String, List<ByteArray>>): List<AtemMediaSlot> =
-        m["MPSP"]?.mapNotNull { p ->
-            if (p.size < 4) return@mapNotNull null
-            val idx  = ((p[0].toInt() and 0xFF) shl 8) or (p[1].toInt() and 0xFF)
-            val used = (p[2].toInt() and 0x01) != 0
-            val name = if (p.size > 20)
-                String(p, 20, (p.size - 20).coerceAtMost(64), Charsets.UTF_8).trimEnd('\u0000')
-            else ""
+        m["MPfe"]?.mapNotNull { p ->
+            if (p.size < 24 || p[0].toInt() != 0) return@mapNotNull null   // still store only
+            val idx  = ((p[2].toInt() and 0xFF) shl 8) or (p[3].toInt() and 0xFF)
+            val used = p[4].toInt() == 1
+            val nameLen = (p[23].toInt() and 0xFF).coerceAtMost(p.size - 24)
+            val name = if (used && nameLen > 0) String(p, 24, nameLen, Charsets.UTF_8) else ""
             AtemMediaSlot(idx, name, used)
-        } ?: emptyList()
+        }?.sortedBy { it.index } ?: emptyList()
 
     /**
-     * MPCP (Media Pool Clip Properties) payload layout:
-     *   bytes 0-1:  index (uint16)
-     *   byte  2:    isUsed (uint8, 0=no)
-     *   byte  3:    padding
-     *   bytes 4-67: name (64 bytes, null-padded UTF-8)
+     * MPCS (Media Pool Clip deScription) payload layout - verified against hardware:
+     *   byte  0:     clip bank index (uint8)
+     *   byte  1:     isUsed (uint8)
+     *   bytes 2-65:  name (null-terminated UTF-8; garbage when unused)
+     *   bytes 66-67: current frame count (uint16)
      */
     private fun parseClipSlots(m: Map<String, List<ByteArray>>): List<AtemMediaSlot> =
-        m["MPCP"]?.mapNotNull { p ->
-            if (p.size < 4) return@mapNotNull null
-            val idx  = ((p[0].toInt() and 0xFF) shl 8) or (p[1].toInt() and 0xFF)
-            val used = (p[2].toInt() and 0xFF) != 0
-            val name = if (p.size > 4)
-                String(p, 4, (p.size - 4).coerceAtMost(64), Charsets.UTF_8).trimEnd('\u0000')
-            else ""
+        m["MPCS"]?.mapNotNull { p ->
+            if (p.size < 68) return@mapNotNull null
+            val idx  = p[0].toInt() and 0xFF
+            val used = p[1].toInt() == 1
+            val name = if (used) {
+                val raw = p.copyOfRange(2, 66)
+                val end = raw.indexOfFirst { it.toInt() == 0 }.let { if (it < 0) raw.size else it }
+                String(raw, 0, end, Charsets.UTF_8)
+            } else ""
             AtemMediaSlot(idx, name, used)
-        } ?: emptyList()
+        }?.sortedBy { it.index } ?: emptyList()
+
+    /**
+     * MPSp (Media Pool Settings) payload layout - verified against hardware:
+     *   bytes 0-7: max frames per clip bank (4 x uint16)
+     *   bytes 8-9: unassigned frames (uint16)
+     * Absent on pre-8.0 firmware - capacity stays unknown (empty list) in that case.
+     */
+    private fun parseMediaPoolSettings(m: Map<String, List<ByteArray>>): Pair<List<Int>, Int> {
+        val p = m["MPSp"]?.firstOrNull() ?: return emptyList<Int>() to 0
+        if (p.size < 10) return emptyList<Int>() to 0
+        val clipCount = m["_mpl"]?.firstOrNull()?.getOrNull(1)?.toInt()?.and(0xFF) ?: 4
+        val maxFrames = (0 until minOf(4, clipCount)).map { u16(p, it * 2) }
+        return maxFrames to u16(p, 8)
+    }
 
     // ── Payload builders ─────────────────────────────────────────────────────
 
