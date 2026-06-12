@@ -96,6 +96,27 @@ class AtemClient(val host: String, val port: Int = 9910) {
 
         /** Commands worth buffering when received while waiting for something else. */
         private val INTERESTING_COMMANDS = setOf("FTCD", "FTDC", "FTDE", "FTUA", "LKOB", "LKST")
+
+        /**
+         * Lightweight reachability probe: one hello packet, true if anything answers.
+         * The half-open session is never ACKed — the ATEM expires it on its own.
+         * Cheap enough to poll (single ~20-byte UDP round-trip).
+         */
+        suspend fun isReachable(host: String, port: Int = 9910, timeoutMs: Int = 2000): Boolean =
+            withContext(Dispatchers.IO) {
+                try {
+                    DatagramSocket().use { sock ->
+                        sock.soTimeout = timeoutMs
+                        val addr = InetAddress.getByName(host)
+                        sock.send(DatagramPacket(CONNECT_HELLO, CONNECT_HELLO.size, addr, port))
+                        val buf = ByteArray(MAX_RECV_BUF)
+                        sock.receive(DatagramPacket(buf, buf.size))
+                        true
+                    }
+                } catch (_: Exception) {
+                    false
+                }
+            }
     }
 
     private var socket: DatagramSocket? = null

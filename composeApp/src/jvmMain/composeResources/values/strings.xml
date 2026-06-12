@@ -1553,7 +1553,10 @@
     <string name="atem_render_height">Height</string>
     <string name="atem_clip_fps">Clip FPS (match ATEM video standard)</string>
     <string name="atem_clip_fps_hint">25, 30, 50 or 60</string>
+    <string name="atem_capacity_line">Clip capacity: %1$s</string>
+    <string name="atem_capacity_unknown">Run Test Connection to detect clip capacity</string>
     <string name="atem_send_to_atem">Send to ATEM</string>
+    <string name="atem_unreachable">ATEM not reachable at %1$s</string>
     <string name="atem_upload_mode">Upload mode</string>
     <string name="atem_mode_still">Still (single frame)</string>
     <string name="atem_mode_clip">Clip (full animation)</string>

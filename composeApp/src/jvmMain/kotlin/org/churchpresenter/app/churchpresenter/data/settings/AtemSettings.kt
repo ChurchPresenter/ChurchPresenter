@@ -16,5 +16,7 @@ data class AtemSettings(
     val detectedStillSlots: Int = 0,
     val detectedClipSlots: Int = 0,
     /** Frame capacity per clip bank from the last test connection; empty = unknown. */
-    val detectedClipMaxFrames: List<Int> = emptyList()
+    val detectedClipMaxFrames: List<Int> = emptyList(),
+    /** Media pool frames not allocated to any clip bank, from the last test connection. */
+    val detectedUnassignedFrames: Int = 0
 )

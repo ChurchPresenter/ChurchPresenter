@@ -85,6 +85,7 @@ import churchpresenter.composeapp.generated.resources.atem_mode_still
 import churchpresenter.composeapp.generated.resources.atem_aspect_mismatch
 import churchpresenter.composeapp.generated.resources.atem_clip_capacity_info
 import churchpresenter.composeapp.generated.resources.atem_clip_too_long
+import churchpresenter.composeapp.generated.resources.atem_unreachable
 import churchpresenter.composeapp.generated.resources.atem_upscale_notice
 import churchpresenter.composeapp.generated.resources.atem_preparing
 import churchpresenter.composeapp.generated.resources.atem_ready
@@ -209,7 +210,24 @@ fun LowerThirdTab(
 
     // ATEM upload dialog state
     val atemConfigured = appSettings.atemSettings.host.isNotBlank()
+    var atemReachable by remember { mutableStateOf(false) }
     var showAtemDialog by remember { mutableStateOf(false) }
+
+    // Reachability poll — one hello packet per cycle, only while this tab is composed.
+    // Keyed on host/port so changing the IP in settings re-checks immediately,
+    // no Test Connection required.
+    LaunchedEffect(appSettings.atemSettings.host, appSettings.atemSettings.port) {
+        val host = appSettings.atemSettings.host
+        val port = appSettings.atemSettings.port
+        if (host.isBlank()) {
+            atemReachable = false
+            return@LaunchedEffect
+        }
+        while (isActive) {
+            atemReachable = AtemClient.isReachable(host, port)
+            delay(if (atemReachable) 30_000L else 10_000L)
+        }
+    }
     var atemIsClip by remember { mutableStateOf(false) }
     var atemSlot by remember { mutableStateOf(0) }
     var atemBusy by remember { mutableStateOf(false) }              // upload click in progress
@@ -234,6 +252,7 @@ fun LowerThirdTab(
             atemSlots = if (atemIsClip) state.clipSlots else state.stillSlots
             atemDetectedFps = state.fps
             if (state.clipMaxFrames.isNotEmpty()) atemClipMaxFrames = state.clipMaxFrames
+            atemReachable = true
             // Snap to a valid slot if the configured default doesn't exist on this device
             if (atemSlots.isNotEmpty() && atemSlots.none { it.index == atemSlot }) {
                 atemSlot = atemSlots.first().index
@@ -241,6 +260,7 @@ fun LowerThirdTab(
         } catch (e: Exception) {
             atemSlotsError = e.message
             atemSlots = emptyList()
+            atemReachable = false
         } finally {
             atemSlotsLoading = false
         }
@@ -852,9 +872,12 @@ fun LowerThirdTab(
                     }
                 }
 
-                // Send to ATEM — only shown when ATEM is configured
+                // Send to ATEM — only shown when ATEM is configured; greyed out while
+                // the device is unreachable (reachability poll above)
                 if (atemConfigured) {
-                    Tooltip(stringResource(Res.string.atem_send_to_atem)) {
+                    val atemTooltip = if (atemReachable) stringResource(Res.string.atem_send_to_atem)
+                        else stringResource(Res.string.atem_unreachable, appSettings.atemSettings.host)
+                    Tooltip(atemTooltip) {
                         IconButton(
                             onClick = {
                                 atemSlot = if (atemIsClip) appSettings.atemSettings.defaultClipSlot
@@ -863,7 +886,7 @@ fun LowerThirdTab(
                                 atemProgress = null
                                 showAtemDialog = true
                             },
-                            enabled = canPlay && !atemBusy,
+                            enabled = canPlay && !atemBusy && atemReachable,
                             colors = IconButtonDefaults.iconButtonColors(
                                 containerColor = MaterialTheme.colorScheme.tertiary,
                                 contentColor = MaterialTheme.colorScheme.onTertiary,
