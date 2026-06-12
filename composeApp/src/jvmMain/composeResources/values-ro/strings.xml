@@ -1589,4 +1589,6 @@
     <string name="atem_quick_clip_tooltip">Încarcă videoclipul în slotul %1$d al ATEM</string>
     <string name="atem_dsk_preroll">Pre-roll DSK (ms)</string>
     <string name="atem_dsk_postroll">Post-roll DSK (ms)</string>
+    <string name="atem_golive_dsk">Go Live controlează DSK-ul ATEM</string>
+    <string name="atem_golive_dsk_hint">Go Live pune DSK-ul în emisie și îl scoate când animația se termină</string>
 </resources>

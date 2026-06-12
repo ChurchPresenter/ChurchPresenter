@@ -1560,5 +1560,7 @@
     <string name="atem_quick_clip_tooltip">Prześlij wideo do slotu %1$d ATEM</string>
     <string name="atem_dsk_preroll">Wyprzedzenie DSK (ms)</string>
     <string name="atem_dsk_postroll">Opóźnienie DSK (ms)</string>
+    <string name="atem_golive_dsk">Go Live steruje DSK ATEM</string>
+    <string name="atem_golive_dsk_hint">Go Live włącza DSK na antenę i wyłącza go po zakończeniu animacji</string>
 </resources>
 

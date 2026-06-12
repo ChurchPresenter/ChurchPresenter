@@ -87,6 +87,7 @@ import churchpresenter.composeapp.generated.resources.atem_mode_still
 import churchpresenter.composeapp.generated.resources.atem_aspect_mismatch
 import churchpresenter.composeapp.generated.resources.atem_clip_capacity_info
 import churchpresenter.composeapp.generated.resources.atem_clip_too_long
+import churchpresenter.composeapp.generated.resources.atem_golive_dsk
 import churchpresenter.composeapp.generated.resources.atem_unreachable
 import churchpresenter.composeapp.generated.resources.atem_upscale_notice
 import churchpresenter.composeapp.generated.resources.atem_preparing
@@ -130,6 +131,7 @@ import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.formatAtemFps
 import org.churchpresenter.app.churchpresenter.server.AtemClient
 import org.churchpresenter.app.churchpresenter.server.AtemRenderCache
+import org.churchpresenter.app.churchpresenter.server.LowerThirdSequencer
 import org.churchpresenter.app.churchpresenter.models.ScheduleItem
 import org.churchpresenter.app.churchpresenter.utils.presenterAspectRatio
 import org.churchpresenter.app.churchpresenter.utils.formatAspectRatio
@@ -870,10 +872,32 @@ fun LowerThirdTab(
                     }
                 }
 
-                // Go Live
+                // Go Live — with the DSK toggle on, routes through the sequencer so the
+                // ATEM DSK cuts on, the animation plays, and the DSK cuts off at the end.
+                // (Schedule items and the mobile remote keep the direct path.)
                 Tooltip(stringResource(Res.string.go_live)) {
                     IconButton(
-                        onClick = { onGoLive(jsonContent, false, -1f, 0L) },
+                        onClick = {
+                            val atemSettings = appSettings.atemSettings
+                            if (atemSettings.goLiveDsk && atemConfigured) {
+                                val durationMs = AtemRenderCache.lottieDurationMs(jsonContent) ?: totalDurationMs()
+                                val name = selectedFile?.nameWithoutExtension ?: ""
+                                scope.launch {
+                                    val dskError = LowerThirdSequencer.run(
+                                        name = name,
+                                        json = jsonContent,
+                                        durationMs = durationMs,
+                                        pauseAtFrame = false,
+                                        pauseDurationMs = 0L,
+                                        keyer = atemSettings.dskIndex,
+                                        atem = atemSettings
+                                    )
+                                    if (dskError != null) atemError = dskError
+                                }
+                            } else {
+                                onGoLive(jsonContent, false, -1f, 0L)
+                            }
+                        },
                         enabled = canPlay,
                         colors = IconButtonDefaults.iconButtonColors(
                             containerColor = MaterialTheme.colorScheme.primary,
@@ -896,6 +920,27 @@ fun LowerThirdTab(
                         disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
                     )
                     val unreachableTooltip = stringResource(Res.string.atem_unreachable, appSettings.atemSettings.host)
+
+                    // Toggle: Go Live drives the ATEM DSK sequence (mirrors the
+                    // switch in ATEM settings — same persisted setting)
+                    val goLiveDsk = appSettings.atemSettings.goLiveDsk
+                    Tooltip(stringResource(Res.string.atem_golive_dsk)) {
+                        IconButton(
+                            onClick = {
+                                onSettingsChangeState.value { s ->
+                                    s.copy(atemSettings = s.atemSettings.copy(goLiveDsk = !s.atemSettings.goLiveDsk))
+                                }
+                            },
+                            colors = IconButtonDefaults.iconButtonColors(
+                                containerColor = if (goLiveDsk) MaterialTheme.colorScheme.tertiary
+                                    else MaterialTheme.colorScheme.surfaceVariant,
+                                contentColor = if (goLiveDsk) MaterialTheme.colorScheme.onTertiary
+                                    else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                            )
+                        ) {
+                            Text("DSK", style = MaterialTheme.typography.labelSmall)
+                        }
+                    }
 
                     if (appSettings.atemSettings.quickUpload) {
                         // Quick upload: one press → default slot, no dialog

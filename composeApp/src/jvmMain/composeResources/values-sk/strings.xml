@@ -1582,4 +1582,6 @@
     <string name="atem_quick_clip_tooltip">Nahrať video do slotu %1$d ATEM</string>
     <string name="atem_dsk_preroll">Predstih DSK (ms)</string>
     <string name="atem_dsk_postroll">Dobeh DSK (ms)</string>
+    <string name="atem_golive_dsk">Go Live ovláda DSK ATEM</string>
+    <string name="atem_golive_dsk_hint">Go Live nasadí DSK do vysielania a po skončení animácie ho opäť vypne</string>
 </resources>

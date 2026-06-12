@@ -1582,4 +1582,6 @@
     <string name="atem_quick_clip_tooltip">Subir vídeo a la ranura %1$d del ATEM</string>
     <string name="atem_dsk_preroll">Pre-roll de DSK (ms)</string>
     <string name="atem_dsk_postroll">Post-roll de DSK (ms)</string>
+    <string name="atem_golive_dsk">Go Live controla el DSK del ATEM</string>
+    <string name="atem_golive_dsk_hint">Al pulsar Go Live, el DSK entra al aire y vuelve a salir cuando termina la animación</string>
 </resources>

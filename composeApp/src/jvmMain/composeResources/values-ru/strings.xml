@@ -1563,5 +1563,7 @@
     <string name="atem_quick_clip_tooltip">Загрузить видео в слот %1$d ATEM</string>
     <string name="atem_dsk_preroll">Задержка перед DSK (мс)</string>
     <string name="atem_dsk_postroll">Задержка после DSK (мс)</string>
+    <string name="atem_golive_dsk">Go Live управляет DSK ATEM</string>
+    <string name="atem_golive_dsk_hint">Go Live выводит DSK в эфир и убирает его по окончании анимации</string>
 </resources>
 

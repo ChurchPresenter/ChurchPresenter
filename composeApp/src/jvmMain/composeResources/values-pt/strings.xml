@@ -1582,4 +1582,6 @@
     <string name="atem_quick_clip_tooltip">Enviar vídeo para o slot %1$d do ATEM</string>
     <string name="atem_dsk_preroll">Pré-roll do DSK (ms)</string>
     <string name="atem_dsk_postroll">Pós-roll do DSK (ms)</string>
+    <string name="atem_golive_dsk">Go Live controla o DSK do ATEM</string>
+    <string name="atem_golive_dsk_hint">Go Live coloca o DSK no ar e o retira quando a animação termina</string>
 </resources>

@@ -1559,6 +1559,8 @@
     <string name="atem_capacity_unknown">Run Test Connection to detect clip capacity</string>
     <string name="atem_dsk_preroll">DSK pre-roll (ms)</string>
     <string name="atem_dsk_postroll">DSK post-roll (ms)</string>
+    <string name="atem_golive_dsk">Go Live drives ATEM DSK</string>
+    <string name="atem_golive_dsk_hint">Pressing Go Live also cuts the DSK on air and off again when the animation ends</string>
     <string name="atem_send_to_atem">Send to ATEM</string>
     <string name="atem_unreachable">ATEM not reachable at %1$s</string>
     <string name="atem_quick_upload">Quick upload</string>

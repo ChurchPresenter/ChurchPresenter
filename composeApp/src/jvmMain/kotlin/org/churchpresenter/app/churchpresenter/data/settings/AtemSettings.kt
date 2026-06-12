@@ -28,5 +28,7 @@ data class AtemSettings(
     /** Delay between the animation ending and DSK off-air. */
     val dskPostRollMs: Int = 300,
     /** Downstream keyer count from the last test connection; 0 = unknown. */
-    val detectedDskCount: Int = 0
+    val detectedDskCount: Int = 0,
+    /** Go Live in the Lower Third tab also runs the timed DSK sequence. */
+    val goLiveDsk: Boolean = false
 )

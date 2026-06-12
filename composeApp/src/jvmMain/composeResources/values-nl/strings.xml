@@ -1582,4 +1582,6 @@
     <string name="atem_quick_clip_tooltip">Video uploaden naar ATEM-slot %1$d</string>
     <string name="atem_dsk_preroll">DSK pre-roll (ms)</string>
     <string name="atem_dsk_postroll">DSK post-roll (ms)</string>
+    <string name="atem_golive_dsk">Go Live stuurt ATEM-DSK aan</string>
+    <string name="atem_golive_dsk_hint">Go Live zet de DSK in beeld en weer uit wanneer de animatie eindigt</string>
 </resources>

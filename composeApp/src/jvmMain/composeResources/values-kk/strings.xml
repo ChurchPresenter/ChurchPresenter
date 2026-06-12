@@ -1560,5 +1560,7 @@
     <string name="atem_quick_clip_tooltip">Бейнені ATEM %1$d ұяшығына жүктеу</string>
     <string name="atem_dsk_preroll">DSK алдындағы кідіріс (мс)</string>
     <string name="atem_dsk_postroll">DSK кейінгі кідіріс (мс)</string>
+    <string name="atem_golive_dsk">Go Live ATEM DSK-ны басқарады</string>
+    <string name="atem_golive_dsk_hint">Go Live DSK-ны эфирге шығарады және анимация аяқталғанда өшіреді</string>
 </resources>
 

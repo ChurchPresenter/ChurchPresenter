@@ -47,6 +47,8 @@ import churchpresenter.composeapp.generated.resources.atem_default_still_slot
 import churchpresenter.composeapp.generated.resources.atem_description
 import churchpresenter.composeapp.generated.resources.atem_dsk_postroll
 import churchpresenter.composeapp.generated.resources.atem_dsk_preroll
+import churchpresenter.composeapp.generated.resources.atem_golive_dsk
+import churchpresenter.composeapp.generated.resources.atem_golive_dsk_hint
 import churchpresenter.composeapp.generated.resources.atem_host
 import churchpresenter.composeapp.generated.resources.atem_host_hint
 import churchpresenter.composeapp.generated.resources.atem_port
@@ -437,6 +439,31 @@ fun AtemSettingsTab(
                         )
                         Text(
                             stringResource(Res.string.atem_quick_upload_hint),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                        )
+                    }
+                }
+
+                Spacer(Modifier.height(8.dp))
+
+                // Go Live drives the DSK: the tab's Go Live runs the timed DSK sequence
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Switch(
+                        checked = atem.goLiveDsk,
+                        onCheckedChange = { update { copy(goLiveDsk = it) } }
+                    )
+                    Column {
+                        Text(
+                            stringResource(Res.string.atem_golive_dsk),
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                        Text(
+                            stringResource(Res.string.atem_golive_dsk_hint),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                         )
