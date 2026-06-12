@@ -54,6 +54,7 @@ import churchpresenter.composeapp.generated.resources.atem_status_connecting
 import churchpresenter.composeapp.generated.resources.atem_status_disconnected
 import churchpresenter.composeapp.generated.resources.atem_status_error
 import churchpresenter.composeapp.generated.resources.atem_test_connection
+import churchpresenter.composeapp.generated.resources.atem_section_upload_defaults
 import churchpresenter.composeapp.generated.resources.atem_test_connection_hint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -246,7 +247,7 @@ fun AtemSettingsTab(
 
             // ── Defaults card ────────────────────────────────────────────────
             Column(modifier = cardMod, verticalArrangement = Arrangement.spacedBy(0.dp)) {
-                AtemSectionHeader("Upload Defaults")
+                AtemSectionHeader(stringResource(Res.string.atem_section_upload_defaults))
                 Spacer(Modifier.height(12.dp))
 
                 Row(

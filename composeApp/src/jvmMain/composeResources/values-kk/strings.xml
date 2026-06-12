@@ -1504,5 +1504,50 @@
     <string name="autosave_restore_message">%1$s уақытынан сақталмаған кесте табылды. Оны қалпына келтіру керек пе?</string>
     <string name="autosave_restore_confirm">Қалпына келтіру</string>
     <string name="autosave_restore_discard">Жою</string>
+
+    <!-- ATEM Switcher integration -->
+    <string name="atem_settings">ATEM</string>
+    <string name="atem_description">Blackmagic ATEM ауыстырғышының медиапулына төменгі үшіншісі анимацияларын жүктеңіз. DSK-ны қосу/өшіру үшін Bitfocus Companion пайдаланыңыз.</string>
+    <string name="atem_host">ATEM IP мекенжайы</string>
+    <string name="atem_host_hint">мыс. 192.168.1.100</string>
+    <string name="atem_port">Порт</string>
+    <string name="atem_test_connection">Байланысты тексеру</string>
+    <string name="atem_test_connection_hint">ATEM видео форматы мен FPS-ті автоматты түрде анықтау үшін «Байланысты тексеру» басыңыз.</string>
+    <string name="atem_status_connected">Қосылды</string>
+    <string name="atem_status_connecting">Қосылуда…</string>
+    <string name="atem_status_disconnected">Қосылмаған</string>
+    <string name="atem_status_error">Қате: %1$s</string>
+    <string name="atem_default_still_slot">Үнсіз бейне слоты (әдепкі)</string>
+    <string name="atem_default_clip_slot">Клип слоты (әдепкі)</string>
+    <string name="atem_render_resolution">Рендерлеу ажыратымдылығы</string>
+    <string name="atem_render_width">Ені</string>
+    <string name="atem_render_height">Биіктігі</string>
+    <string name="atem_clip_fps">Клип FPS (ATEM бейне стандартына сәйкес)</string>
+    <string name="atem_clip_fps_hint">25, 30, 50 немесе 60</string>
+    <string name="atem_send_to_atem">ATEM-ге жіберу</string>
+    <string name="atem_upload_mode">Жүктеу режимі</string>
+    <string name="atem_mode_still">Тұрақты сурет (бір кадр)</string>
+    <string name="atem_mode_clip">Клип (толық анимация)</string>
+    <string name="atem_slot">Слот</string>
+    <string name="atem_slot_range">Қолжетімді: 1–%1$d</string>
+    <string name="atem_upload">Жүктеу</string>
+    <string name="atem_uploading">Жүктелуде…</string>
+    <string name="atem_preparing">Кадрлар дайындалуда…</string>
+    <string name="atem_aspect_mismatch">Дизайн %1$s, бірақ ATEM кадры %2$s — бүйірлерінде бос орынмен ортаға орналастырылады</string>
+    <string name="atem_upscale_notice">Дизайн %1$s — ATEM кадрына сәйкес %2$s× үлкейтілді, бұлдыр көрінуі мүмкін. Жақсы сапа үшін %3$s-де жасаңыз</string>
+    <string name="atem_clip_capacity_info">клип %2$d кадрдың %1$d-ін қажет етеді (≈%3$s с макс.)</string>
+    <string name="atem_clip_too_long">Клипке %1$d кадр қажет, бірақ %2$d слот тек %3$d дейін сақтайды (≈%4$s с) — клипті қысқартыңыз, FPS-ті төмендетіңіз немесе ATEM Software Control-де клип бөлуін арттырыңыз</string>
+    <string name="atem_ready">Жүктеуге дайын</string>
+    <string name="atem_upload_done">Жүктеу аяқталды</string>
+    <string name="atem_upload_error">Жүктеу сәтсіз аяқталды: %1$s</string>
+    <string name="atem_detected_video_mode">Анықталды: %1$s</string>
+    <string name="atem_loading_slots">Слоттар жүктелуде…</string>
+    <string name="atem_slots_error">Слоттарды жүктеу мүмкін болмады: %1$s</string>
+    <string name="atem_not_configured">Осы түймені іске қосу үшін Параметрлерде ATEM параметрін орнатыңыз.</string>
+    <string name="atem_section_upload_defaults">Жүктеудің әдепкі параметрлері</string>
+    <string name="atem_slot_unnamed">Слот %1$d</string>
+    <string name="atem_slot_named">Слот %1$d – %2$s</string>
+    <string name="atem_slot_in_use">Слот %1$d (пайдаланылуда)</string>
+    <string name="atem_slot_empty">Слот %1$d (бос)</string>
 </resources>
 

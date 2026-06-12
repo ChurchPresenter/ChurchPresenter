@@ -1504,5 +1504,50 @@
     <string name="autosave_restore_message">Es wurde ein nicht gespeicherter Plan von %1$s gefunden. Möchten Sie ihn wiederherstellen?</string>
     <string name="autosave_restore_confirm">Wiederherstellen</string>
     <string name="autosave_restore_discard">Verwerfen</string>
+
+    <!-- ATEM Switcher integration -->
+    <string name="atem_settings">ATEM</string>
+    <string name="atem_description">Lädt Lower-Third-Animationen in den Medienspeicher eines Blackmagic ATEM-Mischers hoch. Verwenden Sie Bitfocus Companion, um den DSK ein- und auszuschalten.</string>
+    <string name="atem_host">ATEM IP-Adresse</string>
+    <string name="atem_host_hint">z.B. 192.168.1.100</string>
+    <string name="atem_port">Port</string>
+    <string name="atem_test_connection">Verbindung testen</string>
+    <string name="atem_test_connection_hint">Klicken Sie auf «Verbindung testen», um Videoformat und FPS Ihres ATEM automatisch zu erkennen.</string>
+    <string name="atem_status_connected">Verbunden</string>
+    <string name="atem_status_connecting">Verbinde…</string>
+    <string name="atem_status_disconnected">Nicht verbunden</string>
+    <string name="atem_status_error">Fehler: %1$s</string>
+    <string name="atem_default_still_slot">Standard-Standbild-Slot</string>
+    <string name="atem_default_clip_slot">Standard-Clip-Slot</string>
+    <string name="atem_render_resolution">Render-Auflösung</string>
+    <string name="atem_render_width">Breite</string>
+    <string name="atem_render_height">Höhe</string>
+    <string name="atem_clip_fps">Clip-FPS (ATEM-Videostandard anpassen)</string>
+    <string name="atem_clip_fps_hint">25, 30, 50 oder 60</string>
+    <string name="atem_send_to_atem">An ATEM senden</string>
+    <string name="atem_upload_mode">Upload-Modus</string>
+    <string name="atem_mode_still">Standbild (Einzelbild)</string>
+    <string name="atem_mode_clip">Clip (vollständige Animation)</string>
+    <string name="atem_slot">Slot</string>
+    <string name="atem_slot_range">Verfügbar: 1–%1$d</string>
+    <string name="atem_upload">Hochladen</string>
+    <string name="atem_uploading">Wird hochgeladen…</string>
+    <string name="atem_preparing">Frames werden vorbereitet…</string>
+    <string name="atem_aspect_mismatch">Design ist %1$s, aber der ATEM-Frame ist %2$s — das Bild wird zentriert mit leeren Bereichen an den Seiten</string>
+    <string name="atem_upscale_notice">Design ist %1$s — %2$s× hochskaliert für den ATEM-Frame, kann unscharf wirken. Für beste Qualität bei %3$s generieren</string>
+    <string name="atem_clip_capacity_info">Clip benötigt %1$d von %2$d Frames (≈%3$s s max.)</string>
+    <string name="atem_clip_too_long">Clip benötigt %1$d Frames, Slot %2$d fasst jedoch nur %3$d (≈%4$s s) — kürzen Sie den Clip, reduzieren Sie die FPS oder vergrößern Sie die Clip-Zuweisung in ATEM Software Control</string>
+    <string name="atem_ready">Bereit zum Hochladen</string>
+    <string name="atem_upload_done">Upload abgeschlossen</string>
+    <string name="atem_upload_error">Upload fehlgeschlagen: %1$s</string>
+    <string name="atem_detected_video_mode">Erkannt: %1$s</string>
+    <string name="atem_loading_slots">Slots werden geladen…</string>
+    <string name="atem_slots_error">Slots konnten nicht geladen werden: %1$s</string>
+    <string name="atem_not_configured">Konfigurieren Sie ATEM in den Einstellungen, um diese Schaltfläche zu aktivieren.</string>
+    <string name="atem_section_upload_defaults">Upload-Standardeinstellungen</string>
+    <string name="atem_slot_unnamed">Slot %1$d</string>
+    <string name="atem_slot_named">Slot %1$d – %2$s</string>
+    <string name="atem_slot_in_use">Slot %1$d (belegt)</string>
+    <string name="atem_slot_empty">Slot %1$d (leer)</string>
 </resources>
 

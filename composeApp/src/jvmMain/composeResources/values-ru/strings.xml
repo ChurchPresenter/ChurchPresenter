@@ -1507,5 +1507,50 @@
     <string name="autosave_restore_message">Найдено несохранённое расписание от %1$s. Хотите восстановить его?</string>
     <string name="autosave_restore_confirm">Восстановить</string>
     <string name="autosave_restore_discard">Отклонить</string>
+
+    <!-- ATEM Switcher integration -->
+    <string name="atem_settings">ATEM</string>
+    <string name="atem_description">Загрузка анимаций нижней трети в медиапул коммутатора Blackmagic ATEM. Используйте Bitfocus Companion для управления DSK.</string>
+    <string name="atem_host">IP-адрес ATEM</string>
+    <string name="atem_host_hint">например, 192.168.1.100</string>
+    <string name="atem_port">Порт</string>
+    <string name="atem_test_connection">Проверить подключение</string>
+    <string name="atem_test_connection_hint">Нажмите «Проверить подключение», чтобы автоматически определить видеоформат и FPS вашего ATEM.</string>
+    <string name="atem_status_connected">Подключено</string>
+    <string name="atem_status_connecting">Подключение…</string>
+    <string name="atem_status_disconnected">Не подключено</string>
+    <string name="atem_status_error">Ошибка: %1$s</string>
+    <string name="atem_default_still_slot">Слот для статичных изображений</string>
+    <string name="atem_default_clip_slot">Слот для клипов</string>
+    <string name="atem_render_resolution">Разрешение рендеринга</string>
+    <string name="atem_render_width">Ширина</string>
+    <string name="atem_render_height">Высота</string>
+    <string name="atem_clip_fps">FPS клипа (должен совпадать с видеостандартом ATEM)</string>
+    <string name="atem_clip_fps_hint">25, 30, 50 или 60</string>
+    <string name="atem_send_to_atem">Отправить на ATEM</string>
+    <string name="atem_upload_mode">Режим загрузки</string>
+    <string name="atem_mode_still">Статичное изображение (один кадр)</string>
+    <string name="atem_mode_clip">Клип (полная анимация)</string>
+    <string name="atem_slot">Слот</string>
+    <string name="atem_slot_range">Доступно: 1–%1$d</string>
+    <string name="atem_upload">Загрузить</string>
+    <string name="atem_uploading">Загрузка…</string>
+    <string name="atem_preparing">Подготовка кадров…</string>
+    <string name="atem_aspect_mismatch">Дизайн %1$s, но кадр ATEM %2$s — изображение будет центрировано с пустыми полями по бокам</string>
+    <string name="atem_upscale_notice">Дизайн %1$s — увеличен в %2$s× для соответствия кадру ATEM, изображение может быть нечётким. Для лучшего качества генерируйте в %3$s</string>
+    <string name="atem_clip_capacity_info">клип требует %1$d из %2$d кадров (≈%3$s с макс.)</string>
+    <string name="atem_clip_too_long">Клип требует %1$d кадров, но слот %2$d вмещает до %3$d (≈%4$s с) — сократите клип, уменьшите FPS или увеличьте выделение кадров в ATEM Software Control</string>
+    <string name="atem_ready">Готово к загрузке</string>
+    <string name="atem_upload_done">Загрузка завершена</string>
+    <string name="atem_upload_error">Ошибка загрузки: %1$s</string>
+    <string name="atem_detected_video_mode">Определено: %1$s</string>
+    <string name="atem_loading_slots">Загрузка слотов…</string>
+    <string name="atem_slots_error">Не удалось загрузить слоты: %1$s</string>
+    <string name="atem_not_configured">Настройте ATEM в Настройках для активации этой кнопки.</string>
+    <string name="atem_section_upload_defaults">Параметры загрузки</string>
+    <string name="atem_slot_unnamed">Слот %1$d</string>
+    <string name="atem_slot_named">Слот %1$d – %2$s</string>
+    <string name="atem_slot_in_use">Слот %1$d (используется)</string>
+    <string name="atem_slot_empty">Слот %1$d (пуст)</string>
 </resources>
 

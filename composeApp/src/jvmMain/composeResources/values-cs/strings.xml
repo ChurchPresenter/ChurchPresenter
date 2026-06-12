@@ -1588,5 +1588,50 @@
     <string name="autosave_restore_message">Byl nalezen neuložený plán z %1$s. Chcete jej obnovit?</string>
     <string name="autosave_restore_confirm">Obnovit</string>
     <string name="autosave_restore_discard">Zahodit</string>
+
+    <!-- ATEM Switcher integration -->
+    <string name="atem_settings">ATEM</string>
+    <string name="atem_description">Nahrávání animací dolní třetiny do mediálního úložiště přepínače Blackmagic ATEM. Pro spouštění DSK použijte Bitfocus Companion.</string>
+    <string name="atem_host">IP adresa ATEM</string>
+    <string name="atem_host_hint">např. 192.168.1.100</string>
+    <string name="atem_port">Port</string>
+    <string name="atem_test_connection">Otestovat připojení</string>
+    <string name="atem_test_connection_hint">Stiskněte «Otestovat připojení» pro automatické zjištění formátu videa a FPS vašeho ATEM.</string>
+    <string name="atem_status_connected">Připojeno</string>
+    <string name="atem_status_connecting">Připojování…</string>
+    <string name="atem_status_disconnected">Nepřipojeno</string>
+    <string name="atem_status_error">Chyba: %1$s</string>
+    <string name="atem_default_still_slot">Výchozí slot pro statický obraz</string>
+    <string name="atem_default_clip_slot">Výchozí slot pro klip</string>
+    <string name="atem_render_resolution">Rozlišení vykreslování</string>
+    <string name="atem_render_width">Šířka</string>
+    <string name="atem_render_height">Výška</string>
+    <string name="atem_clip_fps">FPS klipu (odpovídá videostandartu ATEM)</string>
+    <string name="atem_clip_fps_hint">25, 30, 50 nebo 60</string>
+    <string name="atem_send_to_atem">Odeslat do ATEM</string>
+    <string name="atem_upload_mode">Režim nahrávání</string>
+    <string name="atem_mode_still">Statický obraz (jeden snímek)</string>
+    <string name="atem_mode_clip">Klip (plná animace)</string>
+    <string name="atem_slot">Slot</string>
+    <string name="atem_slot_range">Dostupné: 1–%1$d</string>
+    <string name="atem_upload">Nahrát</string>
+    <string name="atem_uploading">Nahrávání…</string>
+    <string name="atem_preparing">Příprava snímků…</string>
+    <string name="atem_aspect_mismatch">Design je %1$s, ale snímek ATEM je %2$s — bude vycentrován s prázdnými oblastmi po stranách</string>
+    <string name="atem_upscale_notice">Design je %1$s — zvětšen %2$s× pro snímek ATEM, může vypadat rozmazaně. Pro nejlepší kvalitu generujte v %3$s</string>
+    <string name="atem_clip_capacity_info">klip potřebuje %1$d z %2$d snímků (≈%3$s s max.)</string>
+    <string name="atem_clip_too_long">Klip potřebuje %1$d snímků, ale slot %2$d pojme nejvýše %3$d (≈%4$s s) — zkraťte klip, snižte FPS nebo zvětšete alokaci klipů v ATEM Software Control</string>
+    <string name="atem_ready">Připraveno k nahrání</string>
+    <string name="atem_upload_done">Nahrávání dokončeno</string>
+    <string name="atem_upload_error">Nahrávání selhalo: %1$s</string>
+    <string name="atem_detected_video_mode">Zjištěno: %1$s</string>
+    <string name="atem_loading_slots">Načítání slotů…</string>
+    <string name="atem_slots_error">Sloty se nepodařilo načíst: %1$s</string>
+    <string name="atem_not_configured">Nakonfigurujte ATEM v Nastavení pro aktivaci tohoto tlačítka.</string>
+    <string name="atem_section_upload_defaults">Výchozí nastavení nahrávání</string>
+    <string name="atem_slot_unnamed">Slot %1$d</string>
+    <string name="atem_slot_named">Slot %1$d – %2$s</string>
+    <string name="atem_slot_in_use">Slot %1$d (použit)</string>
+    <string name="atem_slot_empty">Slot %1$d (prázdný)</string>
 </resources>
 

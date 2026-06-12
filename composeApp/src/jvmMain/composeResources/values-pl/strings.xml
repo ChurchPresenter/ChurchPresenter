@@ -1504,5 +1504,50 @@
     <string name="autosave_restore_message">Znaleziono niezapisany plan z %1$s. Czy chcesz go przywrócić?</string>
     <string name="autosave_restore_confirm">Przywróć</string>
     <string name="autosave_restore_discard">Odrzuć</string>
+
+    <!-- ATEM Switcher integration -->
+    <string name="atem_settings">ATEM</string>
+    <string name="atem_description">Przesyłanie animacji dolnej trzeciej do puli mediów przełącznika Blackmagic ATEM. Użyj Bitfocus Companion, aby wyzwalać DSK.</string>
+    <string name="atem_host">Adres IP ATEM</string>
+    <string name="atem_host_hint">np. 192.168.1.100</string>
+    <string name="atem_port">Port</string>
+    <string name="atem_test_connection">Testuj połączenie</string>
+    <string name="atem_test_connection_hint">Naciśnij «Testuj połączenie», aby automatycznie wykryć format wideo i FPS urządzenia ATEM.</string>
+    <string name="atem_status_connected">Połączono</string>
+    <string name="atem_status_connecting">Łączenie…</string>
+    <string name="atem_status_disconnected">Nie połączono</string>
+    <string name="atem_status_error">Błąd: %1$s</string>
+    <string name="atem_default_still_slot">Domyślny slot dla nieruchomych obrazów</string>
+    <string name="atem_default_clip_slot">Domyślny slot dla klipów</string>
+    <string name="atem_render_resolution">Rozdzielczość renderowania</string>
+    <string name="atem_render_width">Szerokość</string>
+    <string name="atem_render_height">Wysokość</string>
+    <string name="atem_clip_fps">FPS klipu (zgodny ze standardem wideo ATEM)</string>
+    <string name="atem_clip_fps_hint">25, 30, 50 lub 60</string>
+    <string name="atem_send_to_atem">Wyślij do ATEM</string>
+    <string name="atem_upload_mode">Tryb przesyłania</string>
+    <string name="atem_mode_still">Nieruchomy obraz (pojedyncza klatka)</string>
+    <string name="atem_mode_clip">Klip (pełna animacja)</string>
+    <string name="atem_slot">Slot</string>
+    <string name="atem_slot_range">Dostępne: 1–%1$d</string>
+    <string name="atem_upload">Prześlij</string>
+    <string name="atem_uploading">Przesyłanie…</string>
+    <string name="atem_preparing">Przygotowywanie klatek…</string>
+    <string name="atem_aspect_mismatch">Projekt to %1$s, ale klatka ATEM to %2$s — zostanie wyśrodkowany z pustymi obszarami po bokach</string>
+    <string name="atem_upscale_notice">Projekt to %1$s — powiększony %2$s× do klatki ATEM, może wyglądać niewyraźnie. Generuj w %3$s dla najlepszej jakości</string>
+    <string name="atem_clip_capacity_info">klip wymaga %1$d z %2$d klatek (≈%3$s s maks.)</string>
+    <string name="atem_clip_too_long">Klip wymaga %1$d klatek, ale slot %2$d mieści do %3$d (≈%4$s s) — skróć klip, obniż FPS lub zwiększ przydział klatek w ATEM Software Control</string>
+    <string name="atem_ready">Gotowy do przesłania</string>
+    <string name="atem_upload_done">Przesyłanie zakończone</string>
+    <string name="atem_upload_error">Przesyłanie nie powiodło się: %1$s</string>
+    <string name="atem_detected_video_mode">Wykryto: %1$s</string>
+    <string name="atem_loading_slots">Ładowanie slotów…</string>
+    <string name="atem_slots_error">Nie udało się załadować slotów: %1$s</string>
+    <string name="atem_not_configured">Skonfiguruj ATEM w Ustawieniach, aby aktywować ten przycisk.</string>
+    <string name="atem_section_upload_defaults">Domyślne ustawienia przesyłania</string>
+    <string name="atem_slot_unnamed">Slot %1$d</string>
+    <string name="atem_slot_named">Slot %1$d – %2$s</string>
+    <string name="atem_slot_in_use">Slot %1$d (w użyciu)</string>
+    <string name="atem_slot_empty">Slot %1$d (pusty)</string>
 </resources>
 

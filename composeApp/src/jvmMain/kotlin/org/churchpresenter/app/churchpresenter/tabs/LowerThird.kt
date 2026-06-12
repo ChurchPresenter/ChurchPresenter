@@ -76,6 +76,10 @@ import churchpresenter.composeapp.generated.resources.ic_pause
 import churchpresenter.composeapp.generated.resources.ic_play
 import churchpresenter.composeapp.generated.resources.add_to_schedule
 import churchpresenter.composeapp.generated.resources.atem_loading_slots
+import churchpresenter.composeapp.generated.resources.atem_slot_empty
+import churchpresenter.composeapp.generated.resources.atem_slot_in_use
+import churchpresenter.composeapp.generated.resources.atem_slot_named
+import churchpresenter.composeapp.generated.resources.atem_slot_unnamed
 import churchpresenter.composeapp.generated.resources.atem_mode_clip
 import churchpresenter.composeapp.generated.resources.atem_mode_still
 import churchpresenter.composeapp.generated.resources.atem_aspect_mismatch
@@ -923,14 +927,15 @@ fun LowerThirdTab(
     }
 }
 
+@Composable
 private fun atemSlotLabel(index: Int, slots: List<AtemMediaSlot>): String {
     // Display 1-based to match ATEM Software Control's numbering (protocol is 0-based)
     val display = index + 1
     val slot = slots.find { it.index == index }
     return when {
-        slot == null           -> "Slot $display"
-        slot.name.isNotBlank() -> "Slot $display – ${slot.name}"
-        slot.isUsed            -> "Slot $display (in use)"
-        else                   -> "Slot $display (empty)"
+        slot == null           -> stringResource(Res.string.atem_slot_unnamed, display)
+        slot.name.isNotBlank() -> stringResource(Res.string.atem_slot_named, display, slot.name)
+        slot.isUsed            -> stringResource(Res.string.atem_slot_in_use, display)
+        else                   -> stringResource(Res.string.atem_slot_empty, display)
     }
 }

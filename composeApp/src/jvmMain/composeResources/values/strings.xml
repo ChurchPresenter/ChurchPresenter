@@ -1536,7 +1536,7 @@
 
     <!-- ATEM Switcher integration -->
     <string name="atem_settings">ATEM</string>
-    <string name="atem_description">Upload lower third animations to a Blackmagic ATEM switcher\'s media pool. Use Bitfocus Companion to trigger the DSK on/off.</string>
+    <string name="atem_description">Upload lower third animations to a Blackmagic ATEM switcher's media pool. Use Bitfocus Companion to trigger the DSK on/off.</string>
     <string name="atem_host">ATEM IP Address</string>
     <string name="atem_host_hint">e.g. 192.168.1.100</string>
     <string name="atem_port">Port</string>
@@ -1573,4 +1573,9 @@
     <string name="atem_loading_slots">Loading slots…</string>
     <string name="atem_slots_error">Could not load slots: %1$s</string>
     <string name="atem_not_configured">Configure ATEM in Settings to enable this button.</string>
+    <string name="atem_section_upload_defaults">Upload Defaults</string>
+    <string name="atem_slot_unnamed">Slot %1$d</string>
+    <string name="atem_slot_named">Slot %1$d – %2$s</string>
+    <string name="atem_slot_in_use">Slot %1$d (in use)</string>
+    <string name="atem_slot_empty">Slot %1$d (empty)</string>
 </resources>
