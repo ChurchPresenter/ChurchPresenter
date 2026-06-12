@@ -41,7 +41,6 @@ import churchpresenter.composeapp.generated.resources.atem_capacity_equal
 import churchpresenter.composeapp.generated.resources.atem_capacity_mixed
 import churchpresenter.composeapp.generated.resources.atem_capacity_unassigned
 import churchpresenter.composeapp.generated.resources.atem_capacity_unknown
-import churchpresenter.composeapp.generated.resources.atem_clip_fps
 import churchpresenter.composeapp.generated.resources.atem_clip_fps_hint
 import churchpresenter.composeapp.generated.resources.atem_default_clip_slot
 import churchpresenter.composeapp.generated.resources.atem_default_still_slot
@@ -52,9 +51,7 @@ import churchpresenter.composeapp.generated.resources.atem_port
 import churchpresenter.composeapp.generated.resources.atem_quick_upload
 import churchpresenter.composeapp.generated.resources.atem_quick_upload_hint
 import churchpresenter.composeapp.generated.resources.atem_render_height
-import churchpresenter.composeapp.generated.resources.atem_render_resolution
 import churchpresenter.composeapp.generated.resources.atem_render_width
-import churchpresenter.composeapp.generated.resources.atem_slot_range
 import churchpresenter.composeapp.generated.resources.atem_detected_video_mode
 import churchpresenter.composeapp.generated.resources.atem_status_connected
 import churchpresenter.composeapp.generated.resources.atem_status_connecting
@@ -258,20 +255,58 @@ fun AtemSettingsTab(
                 AtemSectionHeader(stringResource(Res.string.atem_section_upload_defaults))
                 Spacer(Modifier.height(12.dp))
 
+                // Everything on one line: width / height / fps / still slot / clip slot,
+                // labels (and detected ranges) directly underneath each field
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
+                    OutlinedTextField(
+                        value = renderWidthText,
+                        onValueChange = { v ->
+                            renderWidthText = v
+                            v.toIntOrNull()?.let { update { copy(renderWidth = it) } }
+                        },
+                        supportingText = { Text(stringResource(Res.string.atem_render_width)) },
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        modifier = Modifier.weight(1f)
+                    )
+                    OutlinedTextField(
+                        value = renderHeightText,
+                        onValueChange = { v ->
+                            renderHeightText = v
+                            v.toIntOrNull()?.let { update { copy(renderHeight = it) } }
+                        },
+                        supportingText = { Text(stringResource(Res.string.atem_render_height)) },
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        modifier = Modifier.weight(1f)
+                    )
+                    OutlinedTextField(
+                        value = clipFpsText,
+                        onValueChange = { v ->
+                            clipFpsText = v
+                            v.toDoubleOrNull()?.let { update { copy(clipFps = it) } }
+                        },
+                        supportingText = { Text("FPS") },
+                        placeholder = { Text(stringResource(Res.string.atem_clip_fps_hint)) },
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                        modifier = Modifier.weight(1f)
+                    )
                     OutlinedTextField(
                         value = stillSlotText,
                         onValueChange = { v ->
                             stillSlotText = v
                             v.toIntOrNull()?.let { update { copy(defaultStillSlot = (it - 1).coerceAtLeast(0)) } }
                         },
-                        label = { Text(stringResource(Res.string.atem_default_still_slot)) },
-                        supportingText = if (atem.detectedStillSlots > 0) {
-                            { Text(stringResource(Res.string.atem_slot_range, atem.detectedStillSlots)) }
-                        } else null,
+                        supportingText = {
+                            val label = stringResource(Res.string.atem_default_still_slot)
+                            Text(
+                                if (atem.detectedStillSlots > 0) "$label (1–${atem.detectedStillSlots})" else label
+                            )
+                        },
                         isError = atem.detectedStillSlots > 0 &&
                             stillSlotText.toIntOrNull()?.let { it !in 1..atem.detectedStillSlots } != false,
                         singleLine = true,
@@ -284,10 +319,12 @@ fun AtemSettingsTab(
                             clipSlotText = v
                             v.toIntOrNull()?.let { update { copy(defaultClipSlot = (it - 1).coerceAtLeast(0)) } }
                         },
-                        label = { Text(stringResource(Res.string.atem_default_clip_slot)) },
-                        supportingText = if (atem.detectedClipSlots > 0) {
-                            { Text(stringResource(Res.string.atem_slot_range, atem.detectedClipSlots)) }
-                        } else null,
+                        supportingText = {
+                            val label = stringResource(Res.string.atem_default_clip_slot)
+                            Text(
+                                if (atem.detectedClipSlots > 0) "$label (1–${atem.detectedClipSlots})" else label
+                            )
+                        },
                         isError = atem.detectedClipSlots > 0 &&
                             clipSlotText.toIntOrNull()?.let { it !in 1..atem.detectedClipSlots } != false,
                         singleLine = true,
@@ -296,61 +333,7 @@ fun AtemSettingsTab(
                     )
                 }
 
-                Spacer(Modifier.height(8.dp))
-                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
-                Spacer(Modifier.height(8.dp))
-
-                Text(
-                    stringResource(Res.string.atem_render_resolution),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                )
-                Spacer(Modifier.height(6.dp))
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    OutlinedTextField(
-                        value = renderWidthText,
-                        onValueChange = { v ->
-                            renderWidthText = v
-                            v.toIntOrNull()?.let { update { copy(renderWidth = it) } }
-                        },
-                        label = { Text(stringResource(Res.string.atem_render_width)) },
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        modifier = Modifier.weight(1f)
-                    )
-                    OutlinedTextField(
-                        value = renderHeightText,
-                        onValueChange = { v ->
-                            renderHeightText = v
-                            v.toIntOrNull()?.let { update { copy(renderHeight = it) } }
-                        },
-                        label = { Text(stringResource(Res.string.atem_render_height)) },
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        modifier = Modifier.weight(1f)
-                    )
-                }
-
-                Spacer(Modifier.height(8.dp))
-
-                OutlinedTextField(
-                    value = clipFpsText,
-                    onValueChange = { v ->
-                        clipFpsText = v
-                        v.toDoubleOrNull()?.let { update { copy(clipFps = it) } }
-                    },
-                    label = { Text(stringResource(Res.string.atem_clip_fps)) },
-                    placeholder = { Text(stringResource(Res.string.atem_clip_fps_hint)) },
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                Spacer(Modifier.height(8.dp))
+                Spacer(Modifier.height(4.dp))
 
                 // Standing reference: how much clip the ATEM can hold (persisted from the
                 // last successful Test Connection)
