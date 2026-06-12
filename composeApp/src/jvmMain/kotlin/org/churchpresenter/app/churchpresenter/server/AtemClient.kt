@@ -173,37 +173,30 @@ class AtemClient(val host: String, val port: Int = 9910) {
     }
 
     /**
-     * Upload a single ARGB frame to the ATEM still store.
+     * Upload one encoded frame (see [AtemFrameEncoder.encodeFrame]) to the still store.
      *
-     * @param slot         0-based still store slot index
-     * @param argbPixels   width*height ARGB ints (A=byte0, R=byte1, G=byte2, B=byte3)
-     * @param width        frame width in pixels
-     * @param height       frame height in pixels
-     * @param name         display name for the still (max 64 chars)
-     * @param onProgress   called with 0f..1f as upload progresses
+     * @param slot       0-based still store slot index
+     * @param frame      RLE-encoded YUVA frame
+     * @param name       display name for the still (max 64 chars)
+     * @param onProgress called with 0f..1f as upload progresses
      */
-    suspend fun uploadStill(
+    suspend fun uploadStillEncoded(
         slot: Int,
-        argbPixels: IntArray,
-        width: Int,
-        height: Int,
+        frame: EncodedFrame,
         name: String,
         onProgress: (Float) -> Unit = {}
     ) = withContext(Dispatchers.IO) {
-        if (argbPixels.isEmpty()) throw Exception("Nothing to upload — frame rendering produced no pixels")
-        if (argbPixels.size != width * height) {
-            throw Exception("Pixel buffer is ${argbPixels.size} pixels, expected ${width}×${height}")
-        }
+        if (frame.data.isEmpty()) throw Exception("Nothing to upload — frame rendering produced no pixels")
         val knownStills = lastKnownState?.stillSlots
         if (!knownStills.isNullOrEmpty() && knownStills.none { it.index == slot }) {
-            throw Exception("Still slot $slot does not exist on this ATEM (available: 0–${knownStills.maxOf { it.index }})")
+            // 1-based in messages to match ATEM Software Control's numbering
+            throw Exception("Still slot ${slot + 1} does not exist on this ATEM (available: 1–${knownStills.maxOf { it.index } + 1})")
         }
-        val data = argbToYuv422(width, height, argbPixels)
 
         // Lock still store (storeId 0)
         sendCommandAndWait("LOCK", buildLockPayload(0, locked = true), "LKOB", timeout = CMD_TIMEOUT_MS.toLong())
         try {
-            performTransfer(storeId = 0, frameIndex = slot, data = data, name = name, onProgress = onProgress)
+            performTransfer(storeId = 0, frameIndex = slot, frame = frame, name = name, onProgress = onProgress)
         } finally {
             // Unlock even if the transfer failed midway; best-effort so a dead socket
             // here can't mask the original failure
@@ -215,24 +208,19 @@ class AtemClient(val host: String, val port: Int = 9910) {
      * Upload an animated clip to the ATEM clip store, one frame at a time.
      *
      * Frames are pulled lazily through [nextFrame] so only a single frame is ever in
-     * memory — a 1080p frame is ~8 MB, so buffering a whole clip would exhaust the heap.
+     * memory — a raw 1080p frame is ~8 MB, so buffering a whole clip would exhaust the heap.
      *
      * @param slot       0-based clip store slot index
      * @param frameCount total number of frames in the clip
-     * @param width      frame width
-     * @param height     frame height
      * @param name       clip name
-     * @param nextFrame  returns the ARGB pixels for a frame index; called in order 0..frameCount-1.
-     *                   The returned array may be a reused buffer — it is consumed before the next call.
+     * @param nextFrame  returns the encoded frame for an index; called in order 0..frameCount-1
      * @param onProgress called with 0f..1f
      */
-    suspend fun uploadClip(
+    suspend fun uploadClipEncoded(
         slot: Int,
         frameCount: Int,
-        width: Int,
-        height: Int,
         name: String,
-        nextFrame: suspend (Int) -> IntArray,
+        nextFrame: suspend (Int) -> EncodedFrame,
         onProgress: (Float) -> Unit = {}
     ) = withContext(Dispatchers.IO) {
         if (frameCount <= 0) throw Exception("Nothing to upload — clip rendering produced no frames")
@@ -240,7 +228,8 @@ class AtemClient(val host: String, val port: Int = 9910) {
         // so validate the slot against the state dump up front for a clear error
         val knownClips = lastKnownState?.clipSlots
         if (!knownClips.isNullOrEmpty() && knownClips.none { it.index == slot }) {
-            throw Exception("Clip slot $slot does not exist on this ATEM (available: 0–${knownClips.maxOf { it.index }})")
+            // 1-based in messages to match ATEM Software Control's numbering
+            throw Exception("Clip slot ${slot + 1} does not exist on this ATEM (available: 1–${knownClips.maxOf { it.index } + 1})")
         }
         val storeId = slot + 1   // clip stores are 1-based; store 0 is the still pool
 
@@ -250,12 +239,8 @@ class AtemClient(val host: String, val port: Int = 9910) {
             sendCommandAndWait("CMPC", ByteArray(4).also { it[0] = slot.toByte() }, expectedResponse = null)
 
             for (frameIdx in 0 until frameCount) {
-                val argbPixels = nextFrame(frameIdx)
-                if (argbPixels.size != width * height) {
-                    throw Exception("Frame $frameIdx is ${argbPixels.size} pixels, expected ${width}×${height}")
-                }
-                val data = argbToYuv422(width, height, argbPixels)
-                performTransfer(storeId = storeId, frameIndex = frameIdx, data = data, name = null) { p ->
+                val frame = nextFrame(frameIdx)
+                performTransfer(storeId = storeId, frameIndex = frameIdx, frame = frame, name = null) { p ->
                     onProgress((frameIdx + p) / frameCount)
                 }
             }
@@ -273,21 +258,26 @@ class AtemClient(val host: String, val port: Int = 9910) {
      * Runs one FTSD upload transfer, honoring the ATEM's FTCD flow-control grants.
      * Sends the FTFD description on the first grant; finishes when FTDC arrives.
      * FTDE code 1 means the ATEM wants the transfer restarted (e.g. it was busy).
+     *
+     * FTSD's size field is the PRE-RLE length; the FTDa chunks carry the encoded bytes,
+     * and a chunk must never end in the middle of an RLE block (header/count/pattern).
      */
     private fun performTransfer(
         storeId: Int,
         frameIndex: Int,
-        data: ByteArray,
+        frame: EncodedFrame,
         name: String?,
         onProgress: (Float) -> Unit
     ) {
+        val data = frame.data
+        val dataBuf = java.nio.ByteBuffer.wrap(data)
         val hash = MessageDigest.getInstance("MD5").digest(data)
         val transferId = transferIdCounter.getAndIncrement()
         var bytesSent = 0
         var descriptionSent = false
         var retries = 0
 
-        sendCommand("FTSD", buildUploadRequestPayload(transferId, storeId, frameIndex, data.size))
+        sendCommand("FTSD", buildUploadRequestPayload(transferId, storeId, frameIndex, frame.rawLen))
 
         while (true) {
             val (cmd, payload) = waitForAnyCommand(setOf("FTCD", "FTDC", "FTDE"), CMD_TIMEOUT_MS.toLong())
@@ -309,7 +299,16 @@ class AtemClient(val host: String, val port: Int = 9910) {
                     if (chunkSize <= 0) continue
                     var sent = 0
                     while (sent < chunkCount && bytesSent < data.size) {
-                        val len = minOf(chunkSize, data.size - bytesSent)
+                        var len = minOf(chunkSize, data.size - bytesSent)
+                        // Don't end a chunk mid RLE block: shorten if an RLE header starts
+                        // 8 or 16 bytes before the chunk end (header+count+pattern = 24B unit)
+                        if (bytesSent + len < data.size) {
+                            if (len >= 8 && dataBuf.getLong(bytesSent + len - 8) == AtemFrameEncoder.RLE_HEADER) {
+                                len -= 8
+                            } else if (len >= 16 && dataBuf.getLong(bytesSent + len - 16) == AtemFrameEncoder.RLE_HEADER) {
+                                len -= 16
+                            }
+                        }
                         sendCommand("FTDa", buildDataChunkPayload(transferId, data, bytesSent, len))
                         bytesSent += len
                         sent++
@@ -326,7 +325,7 @@ class AtemClient(val host: String, val port: Int = 9910) {
                         bytesSent = 0
                         descriptionSent = false
                         Thread.sleep(RETRY_BACKOFF_MS)
-                        sendCommand("FTSD", buildUploadRequestPayload(transferId, storeId, frameIndex, data.size))
+                        sendCommand("FTSD", buildUploadRequestPayload(transferId, storeId, frameIndex, frame.rawLen))
                     } else {
                         // Clip frames past index 0 usually fail because the device's clip
                         // pool ran out of frame capacity — surface an actionable hint
@@ -711,72 +710,4 @@ class AtemClient(val host: String, val port: Int = 9910) {
         return buf
     }
 
-    // ── Pixel conversion ─────────────────────────────────────────────────────
-
-    /**
-     * Convert ARGB ints to the ATEM media pool's native 10-bit YUVA 4:2:2 format.
-     *
-     * Port of sofie-atem-connection's convertRGBAToYUV422: each pixel pair packs into
-     * two big-endian 32-bit words — (A1, Cb, Y1) and (A2, Cr, Y2) — with 10-bit
-     * components at broadcast levels (Y 64–940, CbCr 64–960, alpha scaled to 64–940).
-     * BT.709 coefficients for >=720p, BT.601 below.
-     */
-    private fun argbToYuv422(width: Int, height: Int, pixels: IntArray): ByteArray {
-        val kr = if (height >= 720) 0.2126 else 0.299
-        val kb = if (height >= 720) 0.0722 else 0.114
-        val kg = 1.0 - kr - kb
-        val kri = 1.0 - kr
-        val kbi = 1.0 - kb
-        val yRange = 219.0
-        val halfCbCrRange = 224.0 / 2
-        val yOffset = (16 shl 8).toDouble()
-        val cbCrOffset = (128 shl 8).toDouble()
-        val krOKbi = kr / kbi * halfCbCrRange
-        val kgOKbi = kg / kbi * halfCbCrRange
-        val kbOKri = kb / kri * halfCbCrRange
-        val kgOKri = kg / kri * halfCbCrRange
-
-        fun genColor(rawA: Int, uv16: Double, y16: Double): Int {
-            val a = ((rawA shl 2) * 219) / 255 + (16 shl 2)
-            val y = (Math.round(y16) shr 6).toInt()
-            val uv = (Math.round(uv16) shr 6).toInt()
-            return (a shl 20) or (uv shl 10) or y
-        }
-
-        val out = ByteArray(width * height * 4)
-        var o = 0
-        var i = 0
-        while (i < pixels.size) {
-            val px1 = pixels[i]
-            val px2 = pixels[i + 1]
-            val a1 = (px1 ushr 24) and 0xFF
-            val r1 = (px1 shr 16) and 0xFF
-            val g1 = (px1 shr 8) and 0xFF
-            val b1 = px1 and 0xFF
-            val a2 = (px2 ushr 24) and 0xFF
-            val r2 = (px2 shr 16) and 0xFF
-            val g2 = (px2 shr 8) and 0xFF
-            val b2 = px2 and 0xFF
-
-            val y16a = yOffset + kr * yRange * r1 + kg * yRange * g1 + kb * yRange * b1
-            val cb16 = cbCrOffset + (-krOKbi * r1 - kgOKbi * g1 + halfCbCrRange * b1)
-            val y16b = yOffset + kr * yRange * r2 + kg * yRange * g2 + kb * yRange * b2
-            val cr16 = cbCrOffset + (halfCbCrRange * r1 - kgOKri * g1 - kbOKri * b1)
-
-            val word1 = genColor(a1, cb16, y16a)
-            val word2 = genColor(a2, cr16, y16b)
-            out[o]     = ((word1 ushr 24) and 0xFF).toByte()
-            out[o + 1] = ((word1 shr 16) and 0xFF).toByte()
-            out[o + 2] = ((word1 shr 8) and 0xFF).toByte()
-            out[o + 3] = (word1 and 0xFF).toByte()
-            out[o + 4] = ((word2 ushr 24) and 0xFF).toByte()
-            out[o + 5] = ((word2 shr 16) and 0xFF).toByte()
-            out[o + 6] = ((word2 shr 8) and 0xFF).toByte()
-            out[o + 7] = (word2 and 0xFF).toByte()
-
-            i += 2
-            o += 8
-        }
-        return out
-    }
 }

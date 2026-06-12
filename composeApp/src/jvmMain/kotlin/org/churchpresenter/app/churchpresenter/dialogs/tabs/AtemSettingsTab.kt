@@ -75,8 +75,9 @@ fun AtemSettingsTab(
 
     var hostText by remember(atem.host) { mutableStateOf(atem.host) }
     var portText by remember(atem.port) { mutableStateOf(atem.port.toString()) }
-    var stillSlotText by remember(atem.defaultStillSlot) { mutableStateOf(atem.defaultStillSlot.toString()) }
-    var clipSlotText by remember(atem.defaultClipSlot) { mutableStateOf(atem.defaultClipSlot.toString()) }
+    // Slots are stored 0-based (protocol) but displayed 1-based like ATEM Software Control
+    var stillSlotText by remember(atem.defaultStillSlot) { mutableStateOf((atem.defaultStillSlot + 1).toString()) }
+    var clipSlotText by remember(atem.defaultClipSlot) { mutableStateOf((atem.defaultClipSlot + 1).toString()) }
     var renderWidthText by remember(atem.renderWidth) { mutableStateOf(atem.renderWidth.toString()) }
     var renderHeightText by remember(atem.renderHeight) { mutableStateOf(atem.renderHeight.toString()) }
     var clipFpsText by remember(atem.clipFps) { mutableStateOf(formatAtemFps(atem.clipFps)) }
@@ -242,14 +243,14 @@ fun AtemSettingsTab(
                         value = stillSlotText,
                         onValueChange = { v ->
                             stillSlotText = v
-                            v.toIntOrNull()?.let { update { copy(defaultStillSlot = it) } }
+                            v.toIntOrNull()?.let { update { copy(defaultStillSlot = (it - 1).coerceAtLeast(0)) } }
                         },
                         label = { Text(stringResource(Res.string.atem_default_still_slot)) },
                         supportingText = if (atem.detectedStillSlots > 0) {
-                            { Text(stringResource(Res.string.atem_slot_range, atem.detectedStillSlots - 1)) }
+                            { Text(stringResource(Res.string.atem_slot_range, atem.detectedStillSlots)) }
                         } else null,
                         isError = atem.detectedStillSlots > 0 &&
-                            stillSlotText.toIntOrNull()?.let { it !in 0 until atem.detectedStillSlots } != false,
+                            stillSlotText.toIntOrNull()?.let { it !in 1..atem.detectedStillSlots } != false,
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         modifier = Modifier.weight(1f)
@@ -258,14 +259,14 @@ fun AtemSettingsTab(
                         value = clipSlotText,
                         onValueChange = { v ->
                             clipSlotText = v
-                            v.toIntOrNull()?.let { update { copy(defaultClipSlot = it) } }
+                            v.toIntOrNull()?.let { update { copy(defaultClipSlot = (it - 1).coerceAtLeast(0)) } }
                         },
                         label = { Text(stringResource(Res.string.atem_default_clip_slot)) },
                         supportingText = if (atem.detectedClipSlots > 0) {
-                            { Text(stringResource(Res.string.atem_slot_range, atem.detectedClipSlots - 1)) }
+                            { Text(stringResource(Res.string.atem_slot_range, atem.detectedClipSlots)) }
                         } else null,
                         isError = atem.detectedClipSlots > 0 &&
-                            clipSlotText.toIntOrNull()?.let { it !in 0 until atem.detectedClipSlots } != false,
+                            clipSlotText.toIntOrNull()?.let { it !in 1..atem.detectedClipSlots } != false,
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         modifier = Modifier.weight(1f)

@@ -78,7 +78,10 @@ import churchpresenter.composeapp.generated.resources.add_to_schedule
 import churchpresenter.composeapp.generated.resources.atem_loading_slots
 import churchpresenter.composeapp.generated.resources.atem_mode_clip
 import churchpresenter.composeapp.generated.resources.atem_mode_still
-import churchpresenter.composeapp.generated.resources.atem_rendering
+import churchpresenter.composeapp.generated.resources.atem_aspect_mismatch
+import churchpresenter.composeapp.generated.resources.atem_upscale_notice
+import churchpresenter.composeapp.generated.resources.atem_preparing
+import churchpresenter.composeapp.generated.resources.atem_ready
 import churchpresenter.composeapp.generated.resources.atem_send_to_atem
 import churchpresenter.composeapp.generated.resources.atem_slot
 import churchpresenter.composeapp.generated.resources.atem_slots_error
@@ -114,8 +117,8 @@ import javax.swing.JOptionPane
 import org.churchpresenter.app.churchpresenter.composables.ImageIconButton
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.formatAtemFps
-import org.churchpresenter.app.churchpresenter.presenter.LowerThirdOffscreenRenderer
 import org.churchpresenter.app.churchpresenter.server.AtemClient
+import org.churchpresenter.app.churchpresenter.server.AtemRenderCache
 import org.churchpresenter.app.churchpresenter.models.ScheduleItem
 import org.churchpresenter.app.churchpresenter.utils.presenterAspectRatio
 import org.churchpresenter.app.churchpresenter.utils.formatAspectRatio
@@ -154,7 +157,8 @@ fun LowerThirdTab(
                 folder.toPath().register(
                     watchService,
                     StandardWatchEventKinds.ENTRY_CREATE,
-                    StandardWatchEventKinds.ENTRY_DELETE
+                    StandardWatchEventKinds.ENTRY_DELETE,
+                    StandardWatchEventKinds.ENTRY_MODIFY
                 )
                 try {
                     while (isActive) {
@@ -184,6 +188,12 @@ fun LowerThirdTab(
             ?.sortedBy { it.nameWithoutExtension.lowercase() } ?: emptyList()
     }
 
+    // Pre-render ATEM uploads in the background for every lottie file as soon as it
+    // appears (generator save, file drop, edit) — Send to ATEM then streams a ready file
+    LaunchedEffect(lottieFiles, appSettings.atemSettings) {
+        lottieFiles.forEach { AtemRenderCache.ensureForFile(it, appSettings.atemSettings) }
+    }
+
     val scope = rememberCoroutineScope()
     var animJob by remember { mutableStateOf<Job?>(null) }
 
@@ -196,7 +206,9 @@ fun LowerThirdTab(
     var showAtemDialog by remember { mutableStateOf(false) }
     var atemIsClip by remember { mutableStateOf(false) }
     var atemSlot by remember { mutableStateOf(0) }
-    var atemProgress by remember { mutableStateOf<Float?>(null) }   // null = idle
+    var atemBusy by remember { mutableStateOf(false) }              // upload click in progress
+    var atemPrepareProgress by remember { mutableStateOf(1f) }      // cache render progress, 1f = ready
+    var atemProgress by remember { mutableStateOf<Float?>(null) }   // upload progress, null = idle
     var atemError by remember { mutableStateOf<String?>(null) }
     var atemSlots by remember { mutableStateOf<List<AtemMediaSlot>>(emptyList()) }
     var atemSlotsLoading by remember { mutableStateOf(false) }
@@ -267,6 +279,26 @@ fun LowerThirdTab(
         ((composition?.durationFrames ?: 0f) / (composition?.frameRate ?: 30f) * 1000f)
             .toLong().coerceAtLeast(1L)
 
+    // Cache variant for the current ATEM dialog mode. Frame count comes from the lottie
+    // JSON itself (same source as background pre-generation) so both hit the same key.
+    fun atemVariant(): AtemRenderCache.Variant {
+        val s = appSettings.atemSettings
+        if (!atemIsClip) return AtemRenderCache.Variant(clip = false, width = s.renderWidth, height = s.renderHeight)
+        val fps = atemDetectedFps ?: s.clipFps
+        val frames = AtemRenderCache.clipFrameCount(jsonContent, fps)
+            ?: ((totalDurationMs() / 1000.0) * fps).toInt().coerceAtLeast(1)
+        return AtemRenderCache.Variant(true, s.renderWidth, s.renderHeight, fps, frames)
+    }
+
+    // Kick off (or attach to) cache preparation when the dialog opens or its mode changes,
+    // and mirror the render progress into the dialog
+    LaunchedEffect(showAtemDialog, atemIsClip, jsonContent, atemDetectedFps) {
+        if (!showAtemDialog || jsonContent.isBlank()) return@LaunchedEffect
+        val variant = atemVariant()
+        AtemRenderCache.prepare(jsonContent, variant)
+        AtemRenderCache.progressFlow(jsonContent, variant).collect { atemPrepareProgress = it }
+    }
+
     fun startPlaying() {
         val oldJob = animJob
         animJob = null
@@ -324,7 +356,7 @@ fun LowerThirdTab(
     // ATEM upload dialog
     if (showAtemDialog) {
         AlertDialog(
-            onDismissRequest = { if (atemProgress == null) showAtemDialog = false },
+            onDismissRequest = { if (!atemBusy) showAtemDialog = false },
             title = { Text(stringResource(Res.string.atem_send_to_atem)) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -345,6 +377,39 @@ fun LowerThirdTab(
                             atemSlot = appSettings.atemSettings.defaultClipSlot
                         })
                         Text(stringResource(Res.string.atem_mode_clip), style = MaterialTheme.typography.bodyMedium)
+                    }
+
+                    // Warn when the design doesn't match the ATEM frame: aspect mismatches
+                    // get centered with side bars, smaller designs get upscaled (soft look)
+                    val canvasSize = remember(jsonContent) { AtemRenderCache.lottieCanvasSize(jsonContent) }
+                    if (canvasSize != null) {
+                        val (cw, ch) = canvasSize
+                        val s = appSettings.atemSettings
+                        val designAspect = cw.toFloat() / ch
+                        val frameAspect = s.renderWidth.toFloat() / s.renderHeight
+                        if (kotlin.math.abs(designAspect - frameAspect) > 0.01f) {
+                            Text(
+                                stringResource(
+                                    Res.string.atem_aspect_mismatch,
+                                    "${cw}×${ch}", "${s.renderWidth}×${s.renderHeight}"
+                                ),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = Color(0xFFFFC107)
+                            )
+                        }
+                        val fitScale = minOf(s.renderWidth.toFloat() / cw, s.renderHeight.toFloat() / ch)
+                        if (fitScale > 1.01f) {
+                            Text(
+                                stringResource(
+                                    Res.string.atem_upscale_notice,
+                                    "${cw}×${ch}",
+                                    String.format(java.util.Locale.US, "%.1f", fitScale),
+                                    "${s.renderWidth}×${s.renderHeight}"
+                                ),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = Color(0xFFFFC107)
+                            )
+                        }
                     }
 
                     // Slot — dropdown when slots are loaded, text field fallback
@@ -385,9 +450,10 @@ fun LowerThirdTab(
                                 }
                             }
                             else -> {
+                                // Manual entry fallback — displayed 1-based like ATEM Software Control
                                 OutlinedTextField(
-                                    value = atemSlot.toString(),
-                                    onValueChange = { it.toIntOrNull()?.let { v -> atemSlot = v } },
+                                    value = (atemSlot + 1).toString(),
+                                    onValueChange = { it.toIntOrNull()?.let { v -> atemSlot = (v - 1).coerceAtLeast(0) } },
                                     singleLine = true,
                                     modifier = Modifier.width(100.dp)
                                 )
@@ -415,17 +481,24 @@ fun LowerThirdTab(
                         }
                     }
 
-                    // Progress
+                    // Preparation / upload status
                     val p = atemProgress
-                    if (p != null) {
-                        Text(
-                            // Clips render+upload interleaved per frame; stills render in
-                            // the first half (no progress) and upload in the second
-                            if (!atemIsClip && p < 0.5f) stringResource(Res.string.atem_rendering)
-                            else stringResource(Res.string.atem_uploading),
-                            style = MaterialTheme.typography.labelSmall
-                        )
-                        LinearProgressIndicator(progress = { p }, modifier = Modifier.fillMaxWidth())
+                    when {
+                        p != null -> {
+                            Text(stringResource(Res.string.atem_uploading), style = MaterialTheme.typography.labelSmall)
+                            LinearProgressIndicator(progress = { p }, modifier = Modifier.fillMaxWidth())
+                        }
+                        atemPrepareProgress < 1f -> {
+                            Text(stringResource(Res.string.atem_preparing), style = MaterialTheme.typography.labelSmall)
+                            LinearProgressIndicator(progress = { atemPrepareProgress }, modifier = Modifier.fillMaxWidth())
+                        }
+                        else -> {
+                            Text(
+                                stringResource(Res.string.atem_ready),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = Color(0xFF4CAF50)
+                            )
+                        }
                     }
                     val e = atemError
                     if (e != null) {
@@ -442,36 +515,27 @@ fun LowerThirdTab(
                     onClick = {
                         val presetName = selectedFile?.nameWithoutExtension ?: ""
                         val atemSettings = appSettings.atemSettings
-                        atemProgress = 0f
+                        atemBusy = true
                         atemError = null
                         scope.launch {
                             try {
-                                val renderer = LowerThirdOffscreenRenderer(atemSettings.renderWidth, atemSettings.renderHeight)
+                                // Awaits the background render when it isn't done yet;
+                                // instant when the cache file already exists
+                                val cached = AtemRenderCache.prepare(jsonContent, atemVariant()).await()
+                                atemProgress = 0f
                                 val client = AtemClient(atemSettings.host, atemSettings.port)
                                 withContext(Dispatchers.IO) { client.connect() }
                                 try {
-                                    if (!atemIsClip) {
-                                        val frame = renderer.renderStill(jsonContent)
-                                        withContext(Dispatchers.IO) {
-                                            client.uploadStill(
-                                                atemSlot, frame,
-                                                atemSettings.renderWidth, atemSettings.renderHeight,
-                                                presetName
-                                            ) { p -> atemProgress = 0.5f + p * 0.5f }
-                                        }
-                                    } else {
-                                        val fpsExact = atemDetectedFps ?: atemSettings.clipFps
-                                        val durationMs = totalDurationMs()
-                                        val totalFrames = ((durationMs / 1000.0) * fpsExact).toInt().coerceAtLeast(1)
-                                        // Render and upload one frame at a time — buffering a whole
-                                        // clip of ~8MB frames would exhaust the heap
-                                        renderer.withSession(jsonContent) { renderFrame ->
-                                            withContext(Dispatchers.IO) {
-                                                client.uploadClip(
-                                                    atemSlot, totalFrames,
-                                                    atemSettings.renderWidth, atemSettings.renderHeight,
-                                                    presetName,
-                                                    nextFrame = { idx -> renderFrame(idx.toFloat() / totalFrames) }
+                                    withContext(Dispatchers.IO) {
+                                        AtemRenderCache.Reader(cached).use { reader ->
+                                            if (!atemIsClip) {
+                                                client.uploadStillEncoded(atemSlot, reader.nextFrame(), presetName) { p ->
+                                                    atemProgress = p
+                                                }
+                                            } else {
+                                                client.uploadClipEncoded(
+                                                    atemSlot, reader.frameCount, presetName,
+                                                    nextFrame = { reader.nextFrame() }
                                                 ) { p -> atemProgress = p }
                                             }
                                         }
@@ -482,14 +546,15 @@ fun LowerThirdTab(
                                 atemProgress = 1f
                                 delay(800)
                                 showAtemDialog = false
-                                atemProgress = null
                             } catch (e: Exception) {
                                 atemError = e.message ?: "Upload failed"
+                            } finally {
                                 atemProgress = null
+                                atemBusy = false
                             }
                         }
                     },
-                    enabled = atemProgress == null
+                    enabled = !atemBusy
                 ) {
                     Text(stringResource(Res.string.atem_upload))
                 }
@@ -497,7 +562,7 @@ fun LowerThirdTab(
             dismissButton = {
                 TextButton(
                     onClick = { showAtemDialog = false },
-                    enabled = atemProgress == null
+                    enabled = !atemBusy
                 ) {
                     Text(stringResource(Res.string.cancel))
                 }
@@ -761,7 +826,7 @@ fun LowerThirdTab(
                                 atemProgress = null
                                 showAtemDialog = true
                             },
-                            enabled = canPlay && atemProgress == null,
+                            enabled = canPlay && !atemBusy,
                             colors = IconButtonDefaults.iconButtonColors(
                                 containerColor = MaterialTheme.colorScheme.tertiary,
                                 contentColor = MaterialTheme.colorScheme.onTertiary,
@@ -826,11 +891,13 @@ fun LowerThirdTab(
 }
 
 private fun atemSlotLabel(index: Int, slots: List<AtemMediaSlot>): String {
+    // Display 1-based to match ATEM Software Control's numbering (protocol is 0-based)
+    val display = index + 1
     val slot = slots.find { it.index == index }
     return when {
-        slot == null           -> "Slot $index"
-        slot.name.isNotBlank() -> "Slot $index – ${slot.name}"
-        slot.isUsed            -> "Slot $index (in use)"
-        else                   -> "Slot $index (empty)"
+        slot == null           -> "Slot $display"
+        slot.name.isNotBlank() -> "Slot $display – ${slot.name}"
+        slot.isUsed            -> "Slot $display (in use)"
+        else                   -> "Slot $display (empty)"
     }
 }

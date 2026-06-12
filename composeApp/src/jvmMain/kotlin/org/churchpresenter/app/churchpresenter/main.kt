@@ -204,7 +204,15 @@ fun main() {
     Thread { AutoStartManager.syncRegistration() }.apply { isDaemon = true }.start()
 
     // Set custom VLC path from saved settings before any composable checks isVlcAvailable
-    vlcCustomPath = SettingsManager().loadSettings().projectionSettings.vlcPath
+    val startupSettings = SettingsManager().loadSettings()
+    vlcCustomPath = startupSettings.projectionSettings.vlcPath
+
+    // Pre-render ATEM upload caches for lower thirds in the background so
+    // "Send to ATEM" is instant even before the Lower Third tab is opened
+    org.churchpresenter.app.churchpresenter.server.AtemRenderCache.ensureForFolder(
+        startupSettings.streamingSettings.lowerThirdFolder,
+        startupSettings.atemSettings
+    )
 
     application(exitProcessOnExit = true) {
         var appReady by remember { mutableStateOf(false) }

@@ -1558,10 +1558,13 @@
     <string name="atem_mode_still">Still (single frame)</string>
     <string name="atem_mode_clip">Clip (full animation)</string>
     <string name="atem_slot">Slot</string>
-    <string name="atem_slot_range">Available: 0–%1$d</string>
+    <string name="atem_slot_range">Available: 1–%1$d</string>
     <string name="atem_upload">Upload</string>
     <string name="atem_uploading">Uploading…</string>
-    <string name="atem_rendering">Rendering frames…</string>
+    <string name="atem_preparing">Preparing frames…</string>
+    <string name="atem_aspect_mismatch">Design is %1$s but the ATEM frame is %2$s — it will be centered with empty space at the sides</string>
+    <string name="atem_upscale_notice">Design is %1$s — scaled up %2$s× to fit the ATEM frame, so it may look soft. Generate at %3$s for best quality</string>
+    <string name="atem_ready">Ready to upload</string>
     <string name="atem_upload_done">Upload complete</string>
     <string name="atem_upload_error">Upload failed: %1$s</string>
     <string name="atem_detected_video_mode">Detected: %1$s</string>
