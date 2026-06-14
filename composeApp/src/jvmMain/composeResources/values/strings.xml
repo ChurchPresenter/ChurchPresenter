@@ -1570,6 +1570,7 @@
     <string name="atem_golive_key">Go Live drives ATEM key</string>
     <string name="atem_golive_key_hint">Pressing Go Live also cuts the upstream key on air and off again when the animation ends</string>
     <string name="atem_send_to_atem">Send to ATEM</string>
+    <string name="atem_clip_fps_unit">FPS</string>
     <string name="atem_unreachable">ATEM not reachable at %1$s</string>
     <string name="atem_quick_upload">Quick upload</string>
     <string name="atem_quick_upload_hint">Skip the dialog — upload immediately to the default slots</string>

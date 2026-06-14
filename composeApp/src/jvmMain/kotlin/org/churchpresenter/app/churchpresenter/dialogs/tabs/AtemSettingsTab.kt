@@ -42,6 +42,7 @@ import churchpresenter.composeapp.generated.resources.atem_capacity_mixed
 import churchpresenter.composeapp.generated.resources.atem_capacity_unassigned
 import churchpresenter.composeapp.generated.resources.atem_capacity_unknown
 import churchpresenter.composeapp.generated.resources.atem_clip_fps_hint
+import churchpresenter.composeapp.generated.resources.atem_clip_fps_unit
 import churchpresenter.composeapp.generated.resources.atem_default_clip_slot
 import churchpresenter.composeapp.generated.resources.atem_default_still_slot
 import churchpresenter.composeapp.generated.resources.atem_description
@@ -301,7 +302,7 @@ fun AtemSettingsTab(
                             clipFpsText = v
                             v.toDoubleOrNull()?.let { update { copy(clipFps = it) } }
                         },
-                        supportingText = { Text("FPS") },
+                        supportingText = { Text(stringResource(Res.string.atem_clip_fps_unit)) },
                         placeholder = { Text(stringResource(Res.string.atem_clip_fps_hint)) },
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),

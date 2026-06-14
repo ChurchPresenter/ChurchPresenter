@@ -108,7 +108,9 @@ import churchpresenter.composeapp.generated.resources.confirm_delete_file
 import churchpresenter.composeapp.generated.resources.go_live
 import churchpresenter.composeapp.generated.resources.ic_cast
 import churchpresenter.composeapp.generated.resources.ic_close
+import churchpresenter.composeapp.generated.resources.ic_key
 import churchpresenter.composeapp.generated.resources.ic_playlist_add
+import churchpresenter.composeapp.generated.resources.ic_upload
 import churchpresenter.composeapp.generated.resources.lottie_no_presets
 import churchpresenter.composeapp.generated.resources.lottie_select_preset
 import churchpresenter.composeapp.generated.resources.pause
@@ -940,7 +942,11 @@ fun LowerThirdTab(
                                     else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                             )
                         ) {
-                            Text("KEY", style = MaterialTheme.typography.labelSmall)
+                            Icon(
+                                painter = painterResource(Res.drawable.ic_key),
+                                contentDescription = stringResource(Res.string.atem_golive_key),
+                                modifier = Modifier.size(20.dp)
+                            )
                         }
                     }
 
@@ -1014,7 +1020,11 @@ fun LowerThirdTab(
                                 enabled = canPlay && !atemBusy && atemReachable,
                                 colors = atemButtonColors
                             ) {
-                                Text("A", style = MaterialTheme.typography.labelLarge)
+                                Icon(
+                                    painter = painterResource(Res.drawable.ic_upload),
+                                    contentDescription = stringResource(Res.string.atem_send_to_atem),
+                                    modifier = Modifier.size(20.dp)
+                                )
                             }
                         }
                     }
