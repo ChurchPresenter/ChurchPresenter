@@ -1580,8 +1580,16 @@
     <string name="atem_quick_upload_hint">Preskočiť dialóg — nahrať ihneď do predvolených slotov</string>
     <string name="atem_quick_still_tooltip">Nahrať obrázok do slotu %1$d ATEM</string>
     <string name="atem_quick_clip_tooltip">Nahrať video do slotu %1$d ATEM</string>
-    <string name="atem_dsk_preroll">Predstih DSK (ms)</string>
-    <string name="atem_dsk_postroll">Dobeh DSK (ms)</string>
-    <string name="atem_golive_dsk">Go Live ovláda DSK ATEM</string>
-    <string name="atem_golive_dsk_hint">Go Live nasadí DSK do vysielania a po skončení animácie ho opäť vypne</string>
+    <string name="atem_key_preroll">Predstih DSK (ms)</string>
+    <string name="atem_key_postroll">Dobeh DSK (ms)</string>
+    <string name="atem_golive_key">Go Live ovláda DSK ATEM</string>
+    <string name="atem_golive_key_hint">Go Live nasadí DSK do vysielania a po skončení animácie ho opäť vypne</string>
+    <string name="companion_lt_triggers">Spúšťače titulkov</string>
+    <string name="companion_lt_triggers_desc">Skopírujte URL do HTTP tlačidla Bitfocus Companion na spustenie tohto titulku. POST /api/lowerthirds/hide zastaví prebiehajúcu sekvenciu.</string>
+    <string name="companion_lt_copy_key">Kopírovať (s DSK)</string>
+    <string name="companion_lt_copy_nokey">Kopírovať (bez DSK)</string>
+    <string name="companion_lt_none">V nastavenom priečinku sa nenašli žiadne titulky</string>
+    <string name="companion_lt_server_off">Spustite server na získanie spúšťacích URL</string>
+    <string name="atem_detected_keyers">Zistené: %1$s</string>
+    <string name="atem_detected_keyers_unknown">Spustite test pripojenia na zistenie počtu M/E a kľúčov</string>
 </resources>

@@ -1561,9 +1561,17 @@
     <string name="atem_quick_upload_hint">Пропустить диалог — сразу загружать в слоты по умолчанию</string>
     <string name="atem_quick_still_tooltip">Загрузить изображение в слот %1$d ATEM</string>
     <string name="atem_quick_clip_tooltip">Загрузить видео в слот %1$d ATEM</string>
-    <string name="atem_dsk_preroll">Задержка перед DSK (мс)</string>
-    <string name="atem_dsk_postroll">Задержка после DSK (мс)</string>
-    <string name="atem_golive_dsk">Go Live управляет DSK ATEM</string>
-    <string name="atem_golive_dsk_hint">Go Live выводит DSK в эфир и убирает его по окончании анимации</string>
+    <string name="atem_key_preroll">Задержка перед DSK (мс)</string>
+    <string name="atem_key_postroll">Задержка после DSK (мс)</string>
+    <string name="atem_golive_key">Go Live управляет DSK ATEM</string>
+    <string name="atem_golive_key_hint">Go Live выводит DSK в эфир и убирает его по окончании анимации</string>
+    <string name="companion_lt_triggers">Триггеры титров</string>
+    <string name="companion_lt_triggers_desc">Скопируйте URL в HTTP-кнопку Bitfocus Companion, чтобы запустить этот титр. POST /api/lowerthirds/hide останавливает текущую последовательность.</string>
+    <string name="companion_lt_copy_key">Копировать (с DSK)</string>
+    <string name="companion_lt_copy_nokey">Копировать (без DSK)</string>
+    <string name="companion_lt_none">В указанной папке титры не найдены</string>
+    <string name="companion_lt_server_off">Запустите сервер, чтобы получить URL триггеров</string>
+    <string name="atem_detected_keyers">Обнаружено: %1$s</string>
+    <string name="atem_detected_keyers_unknown">Выполните проверку подключения, чтобы определить число M/E и ключей</string>
 </resources>
 

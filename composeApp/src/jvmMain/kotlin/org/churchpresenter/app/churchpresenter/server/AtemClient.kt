@@ -1,6 +1,15 @@
 package org.churchpresenter.app.churchpresenter.server
 
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.net.DatagramPacket
 import java.net.DatagramSocket
@@ -20,6 +29,8 @@ data class AtemMediaSlot(val index: Int, val name: String, val isUsed: Boolean)
  * @param clipSlots        list of clip-store slots (from MPCS commands)
  * @param clipMaxFrames    frame capacity per clip bank (from MPSp; empty on pre-8.0 firmware)
  * @param unassignedFrames media pool frames not allocated to any clip bank (from MPSp)
+ * @param mixEffectCount   number of M/E buses / program outputs (from _top topology; 0 = unknown)
+ * @param keyersPerMe      upstream keyer count per M/E, indexed by M/E (from _MeC)
  */
 data class AtemState(
     val fps: Double,
@@ -28,8 +39,8 @@ data class AtemState(
     val clipSlots: List<AtemMediaSlot>,
     val clipMaxFrames: List<Int> = emptyList(),
     val unassignedFrames: Int = 0,
-    /** Number of downstream keyers (from _top topology; 0 = unknown). */
-    val dskCount: Int = 0
+    val mixEffectCount: Int = 0,
+    val keyersPerMe: List<Int> = emptyList()
 )
 
 /**
@@ -89,6 +100,10 @@ class AtemClient(val host: String, val port: Int = 9910) {
         private const val MAX_TRANSFER_RETRIES = 40   // ATEM sends "retry" while busy, e.g. clearing the clip pool
         private const val RETRY_BACKOFF_MS = 250L
         private const val MAX_IN_FLIGHT = 2048
+        private const val KEEPALIVE_INTERVAL_MS = 1500L   // drain+ack cadence; 3x margin under the 5s timeout
+        private const val DRAIN_SOTIMEOUT_MS = 30         // short read window when draining the queue
+        private const val TEMP_SESSION_ID = 0x53AB        // client's placeholder until the ATEM assigns the real one
+        private const val SESSION_WAIT_MS = 1500L         // how long to wait for the real session id post-handshake
 
         /** Client hello packet, verbatim from sofie-atem-connection (COMMAND_CONNECT_HELLO). */
         private val CONNECT_HELLO = byteArrayOf(
@@ -104,6 +119,21 @@ class AtemClient(val host: String, val port: Int = 9910) {
          * The half-open session is never ACKed — the ATEM expires it on its own.
          * Cheap enough to poll (single ~20-byte UDP round-trip).
          */
+        /**
+         * Cut an upstream keyer using a fresh short-lived connection. Used as the fallback
+         * when the shared upload connection is busy, so a key cut never waits behind an upload.
+         */
+        suspend fun cutUpstreamKeyer(host: String, port: Int, mixEffect: Int, keyer: Int, onAir: Boolean) =
+            withContext(Dispatchers.IO) {
+                val c = AtemClient(host, port)
+                try {
+                    c.connect(collectState = false)
+                    c.setUpstreamKeyerOnAir(mixEffect, keyer, onAir)
+                } finally {
+                    c.disconnect()
+                }
+            }
+
         suspend fun isReachable(host: String, port: Int = 9910, timeoutMs: Int = 2000): Boolean =
             withContext(Dispatchers.IO) {
                 try {
@@ -129,6 +159,14 @@ class AtemClient(val host: String, val port: Int = 9910) {
     private var helloReceived = false
     private val transferIdCounter = AtomicInteger(1)
 
+    // Keepalive: a persistent connection runs a background drain+ack loop so the ATEM
+    // never drops the idle session. opMutex serialises that loop against the synchronous
+    // send/wait operations so they never touch the socket concurrently.
+    private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    private val opMutex = Mutex()
+    private var keepAliveJob: Job? = null
+    @Volatile private var lastReceivedAt: Long = 0L
+
     /** Sent-but-unacked packets, kept verbatim for ATEM retransmit requests (insertion order). */
     private val inFlight = LinkedHashMap<Int, ByteArray>()
 
@@ -148,14 +186,16 @@ class AtemClient(val host: String, val port: Int = 9910) {
      * @param collectState drain and parse the ~2s state dump into [lastKnownState].
      *   Pass false for fast control connections (e.g. DSK switching) that only need
      *   the handshake — those complete in tens of milliseconds.
+     * @param keepAlive keep the session alive with a background drain+ack loop. Use for a
+     *   long-lived reused connection (AtemConnectionManager); leave false for one-shot use.
      */
-    suspend fun connect(collectState: Boolean = true) = withContext(Dispatchers.IO) {
+    suspend fun connect(collectState: Boolean = true, keepAlive: Boolean = false) = withContext(Dispatchers.IO) {
         val sock = DatagramSocket()
         sock.soTimeout = CONNECT_TIMEOUT_MS
         socket = sock
 
         try {
-            sessionId = 0x53AB   // temporary client session id, replaced by the ATEM's
+            sessionId = TEMP_SESSION_ID   // temporary client session id, replaced by the ATEM's
             lastReceivedPacketId = 0
             nextSendPacketId = 1
             helloReceived = false
@@ -172,31 +212,108 @@ class AtemClient(val host: String, val port: Int = 9910) {
                 ) throw Exception("No response from ATEM at $host:$port")
             }
 
-            // Collect and parse the ATEM state dump
+            // The hello response still carries our placeholder session id — the ATEM only
+            // sends the REAL session id in the packets right after the handshake. We must
+            // capture it before sending any command, or the ATEM ignores them (8s timeout).
             if (collectState) {
-                val stateMap = collectState(sock)
+                val stateMap = collectState(sock)   // 2s drain also captures the real session
                 lastKnownState = parseAtemState(stateMap)
+            } else {
+                awaitRealSession(SESSION_WAIT_MS)
             }
+
+            if (keepAlive) startKeepAlive()
         } catch (e: Exception) {
             disconnect()
             throw e
         }
     }
 
+    /** True while the socket is open (keepalive nulls it when the ATEM goes silent). */
+    fun isAlive(): Boolean = socket != null
+
     /**
-     * Cut a downstream keyer on or off air (CDsL — hard cut, no transition).
-     * @param keyer 0-based DSK index
+     * Background loop that keeps a persistent session alive: every [KEEPALIVE_INTERVAL_MS]
+     * it drains and ACKs whatever the ATEM has sent (the ATEM drops a client that stops
+     * acking for ~5s). If the ATEM goes silent past [CONNECT_TIMEOUT_MS] the socket is
+     * torn down so the next AtemConnectionManager.use() reconnects fresh.
      */
-    suspend fun setDownstreamKeyerOnAir(keyer: Int, onAir: Boolean) = withContext(Dispatchers.IO) {
-        sendCommandAndWait(
-            "CDsL",
-            byteArrayOf(keyer.toByte(), if (onAir) 1 else 0, 0, 0),
-            expectedResponse = null
-        )
+    private fun startKeepAlive() {
+        lastReceivedAt = System.currentTimeMillis()
+        keepAliveJob = scope.launch {
+            while (isActive) {
+                delay(KEEPALIVE_INTERVAL_MS)
+                opMutex.withLock {
+                    if (socket == null) return@withLock
+                    runCatching { drainAndAck() }
+                    if (System.currentTimeMillis() - lastReceivedAt > CONNECT_TIMEOUT_MS) {
+                        closeSocketOnly()
+                    }
+                }
+                if (socket == null) break
+            }
+        }
     }
 
-    /** Disconnect and release the socket. */
+    /**
+     * Read post-handshake packets until the ATEM's real session id arrives (it is NOT in the
+     * hello response — that echoes our placeholder). Without this, commands sent on a
+     * collectState=false connection go out with the wrong session id and are ignored.
+     */
+    private fun awaitRealSession(timeoutMs: Long) {
+        val sock = socket ?: return
+        val prev = sock.soTimeout
+        sock.soTimeout = DRAIN_SOTIMEOUT_MS
+        try {
+            val deadline = System.currentTimeMillis() + timeoutMs
+            while (sessionId == TEMP_SESSION_ID && System.currentTimeMillis() < deadline) {
+                receiveAndProcess()   // null on a read-window timeout — keep trying until deadline
+            }
+        } finally {
+            runCatching { socket?.soTimeout = prev }
+        }
+    }
+
+    /** Read and ACK every queued packet, then return (does not buffer command responses). */
+    private fun drainAndAck() {
+        val sock = socket ?: return
+        val prev = sock.soTimeout
+        sock.soTimeout = DRAIN_SOTIMEOUT_MS
+        try {
+            while (receiveAndProcess() != null) { /* ack + advance only */ }
+        } finally {
+            runCatching { socket?.soTimeout = prev }
+        }
+    }
+
+    /** Close the socket without tearing down the keepalive scope (used by the liveness check). */
+    private fun closeSocketOnly() {
+        socket?.close()
+        socket = null
+        inFlight.clear()
+        pendingCommands.clear()
+    }
+
+    /**
+     * Cut an upstream keyer on or off air (CKOn — hard cut, no transition).
+     * @param mixEffect 0-based M/E index
+     * @param keyer     0-based upstream keyer index on that M/E
+     */
+    suspend fun setUpstreamKeyerOnAir(mixEffect: Int, keyer: Int, onAir: Boolean) = withContext(Dispatchers.IO) {
+        opMutex.withLock {
+            sendCommandAndWait(
+                "CKOn",
+                byteArrayOf(mixEffect.toByte(), keyer.toByte(), if (onAir) 1 else 0, 0),
+                expectedResponse = null
+            )
+        }
+    }
+
+    /** Disconnect and release the socket and the keepalive loop. The client is not reused after this. */
     fun disconnect() {
+        keepAliveJob?.cancel()
+        keepAliveJob = null
+        scope.cancel()
         socket?.close()
         socket = null
         inFlight.clear()
@@ -238,14 +355,16 @@ class AtemClient(val host: String, val port: Int = 9910) {
             throw Exception("Still slot ${slot + 1} does not exist on this ATEM (available: 1–${knownStills.maxOf { it.index } + 1})")
         }
 
-        // Lock still store (storeId 0)
-        sendCommandAndWait("LOCK", buildLockPayload(0, locked = true), "LKOB", timeout = CMD_TIMEOUT_MS.toLong())
-        try {
-            performTransfer(storeId = 0, frameIndex = slot, frame = frame, name = name, onProgress = onProgress)
-        } finally {
-            // Unlock even if the transfer failed midway; best-effort so a dead socket
-            // here can't mask the original failure
-            runCatching { sendCommand("LOCK", buildLockPayload(0, locked = false)) }
+        opMutex.withLock {
+            // Lock still store (storeId 0)
+            sendCommandAndWait("LOCK", buildLockPayload(0, locked = true), "LKOB", timeout = CMD_TIMEOUT_MS.toLong())
+            try {
+                performTransfer(storeId = 0, frameIndex = slot, frame = frame, name = name, onProgress = onProgress)
+            } finally {
+                // Unlock even if the transfer failed midway; best-effort so a dead socket
+                // here can't mask the original failure
+                runCatching { sendCommand("LOCK", buildLockPayload(0, locked = false)) }
+            }
         }
     }
 
@@ -278,24 +397,26 @@ class AtemClient(val host: String, val port: Int = 9910) {
         }
         val storeId = slot + 1   // clip stores are 1-based; store 0 is the still pool
 
-        sendCommandAndWait("LOCK", buildLockPayload(storeId, locked = true), "LKOB", timeout = CMD_TIMEOUT_MS.toLong())
-        try {
-            // Clear the clip slot before uploading new frames
-            sendCommandAndWait("CMPC", ByteArray(4).also { it[0] = slot.toByte() }, expectedResponse = null)
+        opMutex.withLock {
+            sendCommandAndWait("LOCK", buildLockPayload(storeId, locked = true), "LKOB", timeout = CMD_TIMEOUT_MS.toLong())
+            try {
+                // Clear the clip slot before uploading new frames
+                sendCommandAndWait("CMPC", ByteArray(4).also { it[0] = slot.toByte() }, expectedResponse = null)
 
-            for (frameIdx in 0 until frameCount) {
-                val frame = nextFrame(frameIdx)
-                performTransfer(storeId = storeId, frameIndex = frameIdx, frame = frame, name = null) { p ->
-                    onProgress((frameIdx + p) / frameCount)
+                for (frameIdx in 0 until frameCount) {
+                    val frame = nextFrame(frameIdx)
+                    performTransfer(storeId = storeId, frameIndex = frameIdx, frame = frame, name = null) { p ->
+                        onProgress((frameIdx + p) / frameCount)
+                    }
                 }
-            }
 
-            // Commit the clip: set its name and frame count
-            sendCommandAndWait("SMPC", buildSetClipPayload(slot, name, frameCount), expectedResponse = null)
-        } finally {
-            // Unlock even if the transfer failed midway; best-effort so a dead socket
-            // here can't mask the original failure
-            runCatching { sendCommand("LOCK", buildLockPayload(storeId, locked = false)) }
+                // Commit the clip: set its name and frame count
+                sendCommandAndWait("SMPC", buildSetClipPayload(slot, name, frameCount), expectedResponse = null)
+            } finally {
+                // Unlock even if the transfer failed midway; best-effort so a dead socket
+                // here can't mask the original failure
+                runCatching { sendCommand("LOCK", buildLockPayload(storeId, locked = false)) }
+            }
         }
     }
 
@@ -479,6 +600,7 @@ class AtemClient(val host: String, val port: Int = 9910) {
      */
     private fun receiveAndProcess(): List<Pair<String, ByteArray>>? {
         val pkt = receivePacket() ?: return null
+        lastReceivedAt = System.currentTimeMillis()   // liveness signal for the keepalive loop
         if (pkt.size < HEADER_SIZE) return emptyList()
         val flags = (pkt[0].toInt() and 0xFF) shr 3
         // The ATEM assigns the real session id after the handshake — track it always
@@ -638,9 +760,17 @@ class AtemClient(val host: String, val port: Int = 9910) {
             else -> "Unknown"        to 30.0
         }
         val (clipMaxFrames, unassigned) = parseMediaPoolSettings(m)
-        // _top topology: downstream keyer count at byte 2 (per atem-connection TopologyCommand)
-        val dskCount = m["_top"]?.firstOrNull()?.getOrNull(2)?.toInt()?.and(0xFF) ?: 0
-        return AtemState(fps, mode, parseStillSlots(m), parseClipSlots(m), clipMaxFrames, unassigned, dskCount)
+        // _top topology byte 0 = number of M/E buses (program outputs)
+        val mixEffectCount = m["_top"]?.firstOrNull()?.getOrNull(0)?.toInt()?.and(0xFF) ?: 0
+        // _MeC: one per M/E — byte 0 = M/E index, byte 1 = upstream keyer count
+        val keyersPerMe = if (mixEffectCount > 0) {
+            val byMe = HashMap<Int, Int>()
+            m["_MeC"]?.forEach { p ->
+                if (p.size >= 2) byMe[p[0].toInt() and 0xFF] = p[1].toInt() and 0xFF
+            }
+            (0 until mixEffectCount).map { byMe[it] ?: 0 }
+        } else emptyList()
+        return AtemState(fps, mode, parseStillSlots(m), parseClipSlots(m), clipMaxFrames, unassigned, mixEffectCount, keyersPerMe)
     }
 
     /**

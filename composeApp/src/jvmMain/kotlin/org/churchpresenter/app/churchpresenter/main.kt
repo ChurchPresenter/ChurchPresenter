@@ -1170,6 +1170,7 @@ fun main() {
                                 OptionsDialog(
                                     isVisible = showOptionsDialog,
                                     initialTab = optionsDialogInitialTab,
+                                    initialSettings = appSettings,
                                     theme = theme,
                                     settingsManager = settingsManager,
                                     companionServer = companionServer,

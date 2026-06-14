@@ -685,14 +685,15 @@ curl -k -X POST https://192.168.1.10:8765/api/clear
 
 ### Lower Thirds (Bitfocus Companion)
 
-One HTTP call runs the entire lower-third sequence — the app cuts the ATEM DSK
-on air, plays the animation on its output, waits the animation's exact duration
-(which only the app knows), then cuts the DSK off and clears. The cuts are
-invisible because the output is transparent before and after the animation.
+One HTTP call runs the entire lower-third sequence — the app cuts the ATEM
+upstream key on air, plays the animation on its output, waits the animation's
+exact duration (which only the app knows), then cuts the key off and clears. The
+cuts are invisible because the output is transparent before and after the animation.
 
-Configure the ATEM IP, default DSK and pre/post-roll margins in
-**Settings → ATEM**. Without an ATEM configured the endpoints still play the
-lower third with correct timing — only the DSK steps are skipped.
+Configure the ATEM IP, default M/E + keyer and pre/post-roll margins in
+**Settings → ATEM** (pre-configure each keyer's source on the ATEM; the app only
+toggles it on air). Without an ATEM configured the endpoints still play the lower
+third with correct timing — only the key steps are skipped.
 
 #### `GET /api/lowerthirds`
 
@@ -714,30 +715,31 @@ Query parameters (all optional):
 
 | Param | Default | Meaning |
 |-------|---------|---------|
-| `dsk` | settings default | 1-based downstream keyer to drive; `0` = don't touch the DSK |
+| `me` | settings default | 1-based M/E (program output) the keyer is on |
+| `key` | settings default | 1-based upstream keyer to drive; `0` = don't touch any key |
 | `pause` | `false` | pause mid-animation (hold the lower third on screen) |
 | `pauseDurationMs` | `2000` | how long to hold when `pause=true` |
 
 ```bash
-curl -k -X POST "https://192.168.1.10:8765/api/lowerthirds/Pastor%20John/run"
+curl -k -X POST "https://192.168.1.10:8765/api/lowerthirds/Pastor%20John/run?me=1&key=1"
 ```
 
 ```json
-{ "status": "started", "name": "Pastor John", "durationMs": 5500, "totalMs": 6100, "dskError": null }
+{ "status": "started", "name": "Pastor John", "durationMs": 5500, "totalMs": 6100, "keyError": null }
 ```
 
 `totalMs` = pre-roll + duration (+ pause) + post-roll — when the button should
-be considered "done". `dskError` is non-null when the ATEM could not be reached;
+be considered "done". `keyError` is non-null when the ATEM could not be reached;
 the lower third still plays.
 
 #### `POST /api/lowerthirds/{name}/show`
 
-Like `run` but stays on air (DSK on + animation shown) until `hide` is called.
-Same `dsk` query parameter. `totalMs` is `-1`.
+Like `run` but stays on air (key on + animation shown) until `hide` is called.
+Same `me`/`key` query parameters. `totalMs` is `-1`.
 
 #### `POST /api/lowerthirds/hide`
 
-Ends the running sequence immediately: DSK off, lower third cleared.
+Ends the running sequence immediately: key off, lower third cleared.
 
 ```json
 { "status": "stopped" }
@@ -752,9 +754,31 @@ Use the **Generic HTTP** connection:
 3. If the API key is enabled in Settings → Server, add header
    `X-Api-Key: <your key>`.
 
-One button per lower third — press it and the whole DSK + animation sequence
+One button per lower third — press it and the whole key + animation sequence
 runs with correct timing. Add a second button with `/api/lowerthirds/hide` as a
 panic/manual-end key.
+
+There are also standalone upstream-key toggles:
+`POST /api/atem/key/on?me=E&key=M` and `POST /api/atem/key/off?me=E&key=M`
+(both default to the configured M/E + keyer), which respond with the real
+on-air result (`502` on an ATEM error).
+
+> **Tip:** **Settings → Server** lists every lower third with one-click *Go Live
+> + Key* / *Go Live* buttons that produce the exact URL (API key
+> included when enabled) — paste straight into a Companion HTTP action.
+
+#### Triggering other content from Companion
+
+The same Generic HTTP module can drive the rest of the app — these endpoints
+already exist and fire instantly (no approval dialog):
+
+- **Songs** — `POST /api/songs/{number}/select?section=N` shows a song section.
+  List songs/sections first with `GET /api/songs` and `GET /api/songs/{number}`.
+- **Bible** — `POST /api/bible/select` with the verse JSON (fetch it via
+  `GET /api/bible?book={id}&chapter={num}`).
+- **Pictures / presentations** — `POST /api/pictures/select`,
+  `POST /api/presentations/{id}/select`.
+- **Clear** — `POST /api/clear` hides the current output.
 
 ---
 

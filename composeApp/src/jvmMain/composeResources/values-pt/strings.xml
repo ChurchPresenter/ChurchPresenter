@@ -1580,8 +1580,16 @@
     <string name="atem_quick_upload_hint">Pular o diálogo — enviar imediatamente para os slots padrão</string>
     <string name="atem_quick_still_tooltip">Enviar imagem para o slot %1$d do ATEM</string>
     <string name="atem_quick_clip_tooltip">Enviar vídeo para o slot %1$d do ATEM</string>
-    <string name="atem_dsk_preroll">Pré-roll do DSK (ms)</string>
-    <string name="atem_dsk_postroll">Pós-roll do DSK (ms)</string>
-    <string name="atem_golive_dsk">Go Live controla o DSK do ATEM</string>
-    <string name="atem_golive_dsk_hint">Go Live coloca o DSK no ar e o retira quando a animação termina</string>
+    <string name="atem_key_preroll">Pré-roll do DSK (ms)</string>
+    <string name="atem_key_postroll">Pós-roll do DSK (ms)</string>
+    <string name="atem_golive_key">Go Live controla o DSK do ATEM</string>
+    <string name="atem_golive_key_hint">Go Live coloca o DSK no ar e o retira quando a animação termina</string>
+    <string name="companion_lt_triggers">Gatilhos de geradores de caracteres</string>
+    <string name="companion_lt_triggers_desc">Copie um URL para um botão HTTP do Bitfocus Companion para acionar este gerador de caracteres. POST /api/lowerthirds/hide para uma sequência em andamento.</string>
+    <string name="companion_lt_copy_key">Copiar (com DSK)</string>
+    <string name="companion_lt_copy_nokey">Copiar (sem DSK)</string>
+    <string name="companion_lt_none">Nenhum gerador de caracteres encontrado na pasta configurada</string>
+    <string name="companion_lt_server_off">Inicie o servidor para obter os URLs de acionamento</string>
+    <string name="atem_detected_keyers">Detectado: %1$s</string>
+    <string name="atem_detected_keyers_unknown">Execute o teste de conexão para detectar o número de M/E e chaves</string>
 </resources>

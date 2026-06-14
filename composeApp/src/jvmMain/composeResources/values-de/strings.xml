@@ -1558,9 +1558,17 @@
     <string name="atem_quick_upload_hint">Dialog überspringen — sofort in die Standard-Slots hochladen</string>
     <string name="atem_quick_still_tooltip">Bild in ATEM-Slot %1$d hochladen</string>
     <string name="atem_quick_clip_tooltip">Video in ATEM-Slot %1$d hochladen</string>
-    <string name="atem_dsk_preroll">DSK-Vorlauf (ms)</string>
-    <string name="atem_dsk_postroll">DSK-Nachlauf (ms)</string>
-    <string name="atem_golive_dsk">Go Live steuert ATEM-DSK</string>
-    <string name="atem_golive_dsk_hint">Go Live schaltet den DSK auf Sendung und nach Ende der Animation wieder aus</string>
+    <string name="atem_key_preroll">DSK-Vorlauf (ms)</string>
+    <string name="atem_key_postroll">DSK-Nachlauf (ms)</string>
+    <string name="atem_golive_key">Go Live steuert ATEM-DSK</string>
+    <string name="atem_golive_key_hint">Go Live schaltet den DSK auf Sendung und nach Ende der Animation wieder aus</string>
+    <string name="companion_lt_triggers">Bauchbinden-Auslöser</string>
+    <string name="companion_lt_triggers_desc">Kopiere eine URL in einen Bitfocus-Companion-HTTP-Button, um diese Bauchbinde auszulösen. POST /api/lowerthirds/hide stoppt eine laufende Sequenz.</string>
+    <string name="companion_lt_copy_key">Kopieren (mit DSK)</string>
+    <string name="companion_lt_copy_nokey">Kopieren (ohne DSK)</string>
+    <string name="companion_lt_none">Keine Bauchbinden im konfigurierten Ordner gefunden</string>
+    <string name="companion_lt_server_off">Server starten, um Auslöser-URLs zu erhalten</string>
+    <string name="atem_detected_keyers">Erkannt: %1$s</string>
+    <string name="atem_detected_keyers_unknown">Verbindungstest ausführen, um M/E- und Key-Anzahl zu ermitteln</string>
 </resources>
 

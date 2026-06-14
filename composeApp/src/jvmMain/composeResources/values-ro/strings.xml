@@ -1587,8 +1587,16 @@
     <string name="atem_quick_upload_hint">Omite dialogul — încarcă imediat în sloturile implicite</string>
     <string name="atem_quick_still_tooltip">Încarcă imaginea în slotul %1$d al ATEM</string>
     <string name="atem_quick_clip_tooltip">Încarcă videoclipul în slotul %1$d al ATEM</string>
-    <string name="atem_dsk_preroll">Pre-roll DSK (ms)</string>
-    <string name="atem_dsk_postroll">Post-roll DSK (ms)</string>
-    <string name="atem_golive_dsk">Go Live controlează DSK-ul ATEM</string>
-    <string name="atem_golive_dsk_hint">Go Live pune DSK-ul în emisie și îl scoate când animația se termină</string>
+    <string name="atem_key_preroll">Pre-roll DSK (ms)</string>
+    <string name="atem_key_postroll">Post-roll DSK (ms)</string>
+    <string name="atem_golive_key">Go Live controlează DSK-ul ATEM</string>
+    <string name="atem_golive_key_hint">Go Live pune DSK-ul în emisie și îl scoate când animația se termină</string>
+    <string name="companion_lt_triggers">Declanșatoare de burtiere</string>
+    <string name="companion_lt_triggers_desc">Copiază un URL într-un buton HTTP Bitfocus Companion pentru a declanșa această burtieră. POST /api/lowerthirds/hide oprește o secvență în curs.</string>
+    <string name="companion_lt_copy_key">Copiază (cu DSK)</string>
+    <string name="companion_lt_copy_nokey">Copiază (fără DSK)</string>
+    <string name="companion_lt_none">Nicio burtieră găsită în folderul configurat</string>
+    <string name="companion_lt_server_off">Pornește serverul pentru a obține URL-urile de declanșare</string>
+    <string name="atem_detected_keyers">Detectat: %1$s</string>
+    <string name="atem_detected_keyers_unknown">Rulează testul de conexiune pentru a detecta numărul de M/E și chei</string>
 </resources>

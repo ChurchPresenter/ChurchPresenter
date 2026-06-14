@@ -1580,8 +1580,16 @@
     <string name="atem_quick_upload_hint">Omitir el diálogo — subir inmediatamente a las ranuras predeterminadas</string>
     <string name="atem_quick_still_tooltip">Subir imagen a la ranura %1$d del ATEM</string>
     <string name="atem_quick_clip_tooltip">Subir vídeo a la ranura %1$d del ATEM</string>
-    <string name="atem_dsk_preroll">Pre-roll de DSK (ms)</string>
-    <string name="atem_dsk_postroll">Post-roll de DSK (ms)</string>
-    <string name="atem_golive_dsk">Go Live controla el DSK del ATEM</string>
-    <string name="atem_golive_dsk_hint">Al pulsar Go Live, el DSK entra al aire y vuelve a salir cuando termina la animación</string>
+    <string name="atem_key_preroll">Pre-roll de DSK (ms)</string>
+    <string name="atem_key_postroll">Post-roll de DSK (ms)</string>
+    <string name="atem_golive_key">Go Live controla el DSK del ATEM</string>
+    <string name="atem_golive_key_hint">Al pulsar Go Live, el DSK entra al aire y vuelve a salir cuando termina la animación</string>
+    <string name="companion_lt_triggers">Disparadores de rótulos</string>
+    <string name="companion_lt_triggers_desc">Copia una URL en un botón HTTP de Bitfocus Companion para activar este rótulo. POST /api/lowerthirds/hide detiene una secuencia en curso.</string>
+    <string name="companion_lt_copy_key">Copiar (con DSK)</string>
+    <string name="companion_lt_copy_nokey">Copiar (sin DSK)</string>
+    <string name="companion_lt_none">No se encontraron rótulos en la carpeta configurada</string>
+    <string name="companion_lt_server_off">Inicia el servidor para obtener las URL de activación</string>
+    <string name="atem_detected_keyers">Detectado: %1$s</string>
+    <string name="atem_detected_keyers_unknown">Ejecuta la prueba de conexión para detectar el número de M/E y claves</string>
 </resources>

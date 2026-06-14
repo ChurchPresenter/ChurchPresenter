@@ -87,7 +87,7 @@ import churchpresenter.composeapp.generated.resources.atem_mode_still
 import churchpresenter.composeapp.generated.resources.atem_aspect_mismatch
 import churchpresenter.composeapp.generated.resources.atem_clip_capacity_info
 import churchpresenter.composeapp.generated.resources.atem_clip_too_long
-import churchpresenter.composeapp.generated.resources.atem_golive_dsk
+import churchpresenter.composeapp.generated.resources.atem_golive_key
 import churchpresenter.composeapp.generated.resources.atem_unreachable
 import churchpresenter.composeapp.generated.resources.atem_upscale_notice
 import churchpresenter.composeapp.generated.resources.atem_preparing
@@ -879,20 +879,21 @@ fun LowerThirdTab(
                     IconButton(
                         onClick = {
                             val atemSettings = appSettings.atemSettings
-                            if (atemSettings.goLiveDsk && atemConfigured) {
+                            if (atemSettings.goLiveKey && atemConfigured) {
                                 val durationMs = AtemRenderCache.lottieDurationMs(jsonContent) ?: totalDurationMs()
                                 val name = selectedFile?.nameWithoutExtension ?: ""
                                 scope.launch {
-                                    val dskError = LowerThirdSequencer.run(
+                                    val keyError = LowerThirdSequencer.run(
                                         name = name,
                                         json = jsonContent,
                                         durationMs = durationMs,
                                         pauseAtFrame = false,
                                         pauseDurationMs = 0L,
-                                        keyer = atemSettings.dskIndex,
+                                        mixEffect = atemSettings.keyMixEffect,
+                                        keyer = atemSettings.keyIndex,
                                         atem = atemSettings
                                     )
-                                    if (dskError != null) atemError = dskError
+                                    if (keyError != null) atemError = keyError
                                 }
                             } else {
                                 onGoLive(jsonContent, false, -1f, 0L)
@@ -923,22 +924,22 @@ fun LowerThirdTab(
 
                     // Toggle: Go Live drives the ATEM DSK sequence (mirrors the
                     // switch in ATEM settings — same persisted setting)
-                    val goLiveDsk = appSettings.atemSettings.goLiveDsk
-                    Tooltip(stringResource(Res.string.atem_golive_dsk)) {
+                    val goLiveKey = appSettings.atemSettings.goLiveKey
+                    Tooltip(stringResource(Res.string.atem_golive_key)) {
                         IconButton(
                             onClick = {
                                 onSettingsChangeState.value { s ->
-                                    s.copy(atemSettings = s.atemSettings.copy(goLiveDsk = !s.atemSettings.goLiveDsk))
+                                    s.copy(atemSettings = s.atemSettings.copy(goLiveKey = !s.atemSettings.goLiveKey))
                                 }
                             },
                             colors = IconButtonDefaults.iconButtonColors(
-                                containerColor = if (goLiveDsk) MaterialTheme.colorScheme.tertiary
+                                containerColor = if (goLiveKey) MaterialTheme.colorScheme.tertiary
                                     else MaterialTheme.colorScheme.surfaceVariant,
-                                contentColor = if (goLiveDsk) MaterialTheme.colorScheme.onTertiary
+                                contentColor = if (goLiveKey) MaterialTheme.colorScheme.onTertiary
                                     else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                             )
                         ) {
-                            Text("DSK", style = MaterialTheme.typography.labelSmall)
+                            Text("KEY", style = MaterialTheme.typography.labelSmall)
                         }
                     }
 

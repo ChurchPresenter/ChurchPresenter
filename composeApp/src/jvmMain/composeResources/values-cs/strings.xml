@@ -1642,9 +1642,17 @@
     <string name="atem_quick_upload_hint">Přeskočit dialog — nahrát ihned do výchozích slotů</string>
     <string name="atem_quick_still_tooltip">Nahrát obrázek do slotu %1$d ATEM</string>
     <string name="atem_quick_clip_tooltip">Nahrát video do slotu %1$d ATEM</string>
-    <string name="atem_dsk_preroll">Předstih DSK (ms)</string>
-    <string name="atem_dsk_postroll">Doběh DSK (ms)</string>
-    <string name="atem_golive_dsk">Go Live ovládá DSK ATEM</string>
-    <string name="atem_golive_dsk_hint">Go Live nasadí DSK do vysílání a po skončení animace jej zase vypne</string>
+    <string name="atem_key_preroll">Předstih DSK (ms)</string>
+    <string name="atem_key_postroll">Doběh DSK (ms)</string>
+    <string name="atem_golive_key">Go Live ovládá DSK ATEM</string>
+    <string name="atem_golive_key_hint">Go Live nasadí DSK do vysílání a po skončení animace jej zase vypne</string>
+    <string name="companion_lt_triggers">Spouštěče titulků</string>
+    <string name="companion_lt_triggers_desc">Zkopírujte URL do HTTP tlačítka Bitfocus Companion pro spuštění tohoto titulku. POST /api/lowerthirds/hide zastaví probíhající sekvenci.</string>
+    <string name="companion_lt_copy_key">Kopírovat (s DSK)</string>
+    <string name="companion_lt_copy_nokey">Kopírovat (bez DSK)</string>
+    <string name="companion_lt_none">V nastavené složce nebyly nalezeny žádné titulky</string>
+    <string name="companion_lt_server_off">Spusťte server pro získání spouštěcích URL</string>
+    <string name="atem_detected_keyers">Zjištěno: %1$s</string>
+    <string name="atem_detected_keyers_unknown">Spusťte test připojení ke zjištění počtu M/E a klíčů</string>
 </resources>
 

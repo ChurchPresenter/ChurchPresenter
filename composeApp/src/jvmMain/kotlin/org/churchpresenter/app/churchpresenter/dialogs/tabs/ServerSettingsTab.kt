@@ -70,6 +70,25 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.allowed_clients
+import churchpresenter.composeapp.generated.resources.companion_lt_copy_key
+import churchpresenter.composeapp.generated.resources.companion_lt_copy_hide
+import churchpresenter.composeapp.generated.resources.companion_lt_copy_nokey
+import churchpresenter.composeapp.generated.resources.companion_lt_none
+import churchpresenter.composeapp.generated.resources.companion_lt_server_off
+import churchpresenter.composeapp.generated.resources.companion_atem_clip_key
+import churchpresenter.composeapp.generated.resources.companion_atem_clip_only
+import churchpresenter.composeapp.generated.resources.companion_atem_key_desc
+import churchpresenter.composeapp.generated.resources.companion_atem_key_off
+import churchpresenter.composeapp.generated.resources.companion_atem_key_on
+import churchpresenter.composeapp.generated.resources.companion_atem_key_section
+import churchpresenter.composeapp.generated.resources.companion_atem_not_configured
+import churchpresenter.composeapp.generated.resources.companion_atem_still_key
+import churchpresenter.composeapp.generated.resources.companion_atem_still_only
+import churchpresenter.composeapp.generated.resources.companion_atem_triggers
+import churchpresenter.composeapp.generated.resources.companion_atem_triggers_desc
+import churchpresenter.composeapp.generated.resources.companion_atem_upload_note
+import churchpresenter.composeapp.generated.resources.companion_lt_triggers
+import churchpresenter.composeapp.generated.resources.companion_lt_triggers_desc
 import churchpresenter.composeapp.generated.resources.allowed_clients_description
 import churchpresenter.composeapp.generated.resources.api_key_hint
 import churchpresenter.composeapp.generated.resources.api_key_label
@@ -109,6 +128,7 @@ import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.data.RemoteClientManager
 import org.churchpresenter.app.churchpresenter.server.CompanionServer
 import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.app.churchpresenter.viewmodel.isLottieFile
 import org.jetbrains.compose.resources.stringResource
 import java.util.UUID
 
@@ -509,6 +529,208 @@ fun ServerSettingsTab(
                                 onRemove = { remoteClientManager.removeBlocked(clientId) }
                             )
                         }
+                    }
+                }
+            }
+
+            // ── Card: Lower Third Triggers (Bitfocus Companion) ───────────────
+            run {
+                val lowerThirdFolder = settings.streamingSettings.lowerThirdFolder
+                val lowerThirds = remember(lowerThirdFolder, isRunning) {
+                    java.io.File(lowerThirdFolder)
+                        .takeIf { lowerThirdFolder.isNotEmpty() && it.isDirectory }
+                        ?.listFiles { f -> f.extension.lowercase() == "json" && isLottieFile(f) }
+                        ?.sortedBy { it.nameWithoutExtension.lowercase() }
+                        ?.toList()
+                        ?: emptyList()
+                }
+                val atemConfigured = settings.atemSettings.host.isNotBlank()
+
+                fun apiQuery(extra: String = ""): String {
+                    val params = buildList {
+                        if (extra.isNotEmpty()) add(extra)
+                        if (settings.serverSettings.apiKeyEnabled && settings.serverSettings.apiKey.isNotBlank())
+                            add("apiKey=" + java.net.URLEncoder.encode(settings.serverSettings.apiKey, "UTF-8"))
+                    }
+                    return if (params.isEmpty()) "" else "?" + params.joinToString("&")
+                }
+
+                // Default key target (1-based) for the "+ key" URLs
+                val keyTarget = "me=${settings.atemSettings.keyMixEffect + 1}&key=${settings.atemSettings.keyIndex + 1}"
+
+                fun triggerUrl(name: String, withKey: Boolean): String {
+                    val encoded = java.net.URLEncoder.encode(name, "UTF-8").replace("+", "%20")
+                    val params = buildList {
+                        if (!withKey) add("key=0")   // run defaults to keying; key=0 skips it
+                        if (settings.serverSettings.apiKeyEnabled && settings.serverSettings.apiKey.isNotBlank())
+                            add("apiKey=" + java.net.URLEncoder.encode(settings.serverSettings.apiKey, "UTF-8"))
+                    }
+                    val query = if (params.isEmpty()) "" else "?" + params.joinToString("&")
+                    return "$serverUrl/api/lowerthirds/$encoded/run$query"
+                }
+
+                fun stillUrl(name: String, withKey: Boolean): String {
+                    val encoded = java.net.URLEncoder.encode(name, "UTF-8").replace("+", "%20")
+                    return "$serverUrl/api/atem/still/$encoded${apiQuery(if (withKey) keyTarget else "")}"
+                }
+
+                fun clipUrl(name: String, withKey: Boolean): String {
+                    val encoded = java.net.URLEncoder.encode(name, "UTF-8").replace("+", "%20")
+                    return "$serverUrl/api/atem/clip/$encoded${apiQuery(if (withKey) keyTarget else "")}"
+                }
+
+                fun keyOnUrl()  = "$serverUrl/api/atem/key/on${apiQuery()}"
+                fun keyOffUrl() = "$serverUrl/api/atem/key/off${apiQuery()}"
+
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(10.dp))
+                        .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f), RoundedCornerShape(10.dp))
+                        .padding(horizontal = 16.dp, vertical = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    SectionHeader(stringResource(Res.string.companion_lt_triggers))
+                    Text(
+                        text = stringResource(Res.string.companion_lt_triggers_desc),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Text(
+                        text = stringResource(Res.string.companion_atem_upload_note),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error.copy(alpha = 0.85f)
+                    )
+
+                    when {
+                        !isRunning || serverUrl.isBlank() -> Text(
+                            text = stringResource(Res.string.companion_lt_server_off),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                        )
+                        lowerThirds.isEmpty() -> Text(
+                            text = stringResource(Res.string.companion_lt_none),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                        )
+                        else -> lowerThirds.forEach { file ->
+                            val name = file.nameWithoutExtension
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text(
+                                    text = name,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    modifier = Modifier.weight(1f)
+                                )
+                                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                    Button(
+                                        onClick = { clipboardManager.setText(AnnotatedString(triggerUrl(name, withKey = true))) },
+                                        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp),
+                                        colors = ButtonDefaults.buttonColors(
+                                            containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                                        )
+                                    ) { Text(stringResource(Res.string.companion_lt_copy_key), style = MaterialTheme.typography.labelSmall) }
+                                    Button(
+                                        onClick = { clipboardManager.setText(AnnotatedString(triggerUrl(name, withKey = false))) },
+                                        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp),
+                                        colors = ButtonDefaults.buttonColors(
+                                            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                                            contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                                        )
+                                    ) { Text(stringResource(Res.string.companion_lt_copy_nokey), style = MaterialTheme.typography.labelSmall) }
+                                    if (atemConfigured) {
+                                        Button(
+                                            onClick = { clipboardManager.setText(AnnotatedString(stillUrl(name, withKey = true))) },
+                                            contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp),
+                                            colors = ButtonDefaults.buttonColors(
+                                                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                                            )
+                                        ) { Text(stringResource(Res.string.companion_atem_still_key), style = MaterialTheme.typography.labelSmall) }
+                                        Button(
+                                            onClick = { clipboardManager.setText(AnnotatedString(stillUrl(name, withKey = false))) },
+                                            contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp),
+                                            colors = ButtonDefaults.buttonColors(
+                                                containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                                                contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                                            )
+                                        ) { Text(stringResource(Res.string.companion_atem_still_only), style = MaterialTheme.typography.labelSmall) }
+                                        Button(
+                                            onClick = { clipboardManager.setText(AnnotatedString(clipUrl(name, withKey = true))) },
+                                            contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp),
+                                            colors = ButtonDefaults.buttonColors(
+                                                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                                            )
+                                        ) { Text(stringResource(Res.string.companion_atem_clip_key), style = MaterialTheme.typography.labelSmall) }
+                                        Button(
+                                            onClick = { clipboardManager.setText(AnnotatedString(clipUrl(name, withKey = false))) },
+                                            contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp),
+                                            colors = ButtonDefaults.buttonColors(
+                                                containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                                                contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                                            )
+                                        ) { Text(stringResource(Res.string.companion_atem_clip_only), style = MaterialTheme.typography.labelSmall) }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    if (isRunning && serverUrl.isNotBlank()) {
+                        Spacer(Modifier.height(4.dp))
+                        HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                        Spacer(Modifier.height(4.dp))
+
+                        // Key controls — only when ATEM is configured
+                        if (atemConfigured) {
+                            Text(
+                                text = stringResource(Res.string.companion_atem_key_section),
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                            Text(
+                                text = stringResource(Res.string.companion_atem_key_desc),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Button(
+                                    onClick = { clipboardManager.setText(AnnotatedString(keyOnUrl())) },
+                                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                                    )
+                                ) { Text(stringResource(Res.string.companion_atem_key_on), style = MaterialTheme.typography.labelSmall) }
+                                Button(
+                                    onClick = { clipboardManager.setText(AnnotatedString(keyOffUrl())) },
+                                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                                        contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                                    )
+                                ) { Text(stringResource(Res.string.companion_atem_key_off), style = MaterialTheme.typography.labelSmall) }
+                            }
+                            Spacer(Modifier.height(4.dp))
+                        }
+
+                        // Hide lower third — available whenever server is running
+                        Button(
+                            onClick = {
+                                clipboardManager.setText(AnnotatedString("$serverUrl/api/lowerthirds/hide${apiQuery()}"))
+                            },
+                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.errorContainer,
+                                contentColor = MaterialTheme.colorScheme.onErrorContainer
+                            )
+                        ) { Text(stringResource(Res.string.companion_lt_copy_hide), style = MaterialTheme.typography.labelSmall) }
                     }
                 }
             }

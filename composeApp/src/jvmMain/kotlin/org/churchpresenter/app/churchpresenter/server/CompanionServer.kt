@@ -593,6 +593,10 @@ class CompanionServer {
     @Volatile private var _lowerThirdFolder: String = ""
 
     fun updateAtemConfig(atem: AtemSettings, lowerThirdFolder: String) {
+        val prev = _atemSettings
+        if (prev?.host != atem.host || prev?.port != atem.port) {
+            AtemConnectionManager.invalidate()
+        }
         _atemSettings = atem
         _lowerThirdFolder = lowerThirdFolder
     }
@@ -628,41 +632,89 @@ class CompanionServer {
         }
         val atem = _atemSettings ?: AtemSettings()
 
-        // DSK: default keyer from settings; ?dsk=N (1-based) overrides; ?dsk=0 skips DSK control
-        val dskParam = call.request.queryParameters["dsk"]?.toIntOrNull()
-        val keyer: Int? = when {
-            dskParam == null -> atem.dskIndex
-            dskParam == 0 -> null
-            else -> dskParam - 1
-        }
-        if (keyer != null && atem.detectedDskCount > 0 && keyer !in 0 until atem.detectedDskCount) {
-            call.respond(
-                io.ktor.http.HttpStatusCode.BadRequest,
-                """{"error":"DSK ${keyer + 1} does not exist (available: 1-${atem.detectedDskCount})"}"""
-            )
-            return
+        // Key target: default M/E + keyer from settings; ?me=N&key=M (1-based) override; ?key=0 skips
+        val meParam = call.request.queryParameters["me"]?.toIntOrNull()
+        val keyParam = call.request.queryParameters["key"]?.toIntOrNull()
+        val mixEffect: Int?
+        val keyer: Int?
+        if (keyParam == 0) {
+            mixEffect = null; keyer = null
+        } else {
+            mixEffect = if (meParam != null) meParam - 1 else atem.keyMixEffect
+            keyer = if (keyParam != null) keyParam - 1 else atem.keyIndex
+            validateKeyTarget(atem, mixEffect, keyer)?.let {
+                call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":${jsonStr(it)}}""")
+                return
+            }
         }
 
         val pause = call.request.queryParameters["pause"]?.toBooleanStrictOrNull() ?: false
         val pauseDurationMs = call.request.queryParameters["pauseDurationMs"]?.toLongOrNull() ?: 2000L
 
-        val dskError = LowerThirdSequencer.run(
+        val keyError = LowerThirdSequencer.run(
             name = file.nameWithoutExtension,
             json = ltJson,
             durationMs = durationMs,
             pauseAtFrame = pause,
             pauseDurationMs = pauseDurationMs,
+            mixEffect = mixEffect,
             keyer = keyer,
             atem = atem,
             autoEnd = autoEnd
         )
-        val totalMs = atem.dskPreRollMs + durationMs +
-            (if (pause) pauseDurationMs else 0L) + atem.dskPostRollMs
+        val totalMs = atem.keyPreRollMs + durationMs +
+            (if (pause) pauseDurationMs else 0L) + atem.keyPostRollMs
         call.respondText(
             """{"status":"started","name":${jsonStr(file.nameWithoutExtension)},"durationMs":$durationMs,""" +
-                """"totalMs":${if (autoEnd) totalMs else -1},"dskError":${dskError?.let { jsonStr(it) } ?: "null"}}""",
+                """"totalMs":${if (autoEnd) totalMs else -1},"keyError":${keyError?.let { jsonStr(it) } ?: "null"}}""",
             ContentType.Application.Json
         )
+    }
+
+    /**
+     * Standalone upstream-key on/off (POST /api/atem/key/on|off). Reuses the shared
+     * keepalive connection when free; falls back to a short-lived connection when an
+     * upload holds it, so a key cut never waits behind an upload. Synchronous 200/502.
+     */
+    private suspend fun handleKeyToggle(call: io.ktor.server.application.ApplicationCall, onAir: Boolean) {
+        val atem = _atemSettings
+        if (atem == null || atem.host.isBlank()) {
+            call.respond(io.ktor.http.HttpStatusCode.ServiceUnavailable, """{"error":"ATEM not configured"}""")
+            return
+        }
+        val meParam = call.request.queryParameters["me"]?.toIntOrNull()
+        val keyParam = call.request.queryParameters["key"]?.toIntOrNull()
+        val mixEffect = if (meParam != null) meParam - 1 else atem.keyMixEffect
+        val keyer = if (keyParam != null) keyParam - 1 else atem.keyIndex
+        validateKeyTarget(atem, mixEffect, keyer)?.let {
+            call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":${jsonStr(it)}}""")
+            return
+        }
+        try {
+            val ran = AtemConnectionManager.tryRun(atem.host, atem.port) { client ->
+                client.setUpstreamKeyerOnAir(mixEffect, keyer, onAir)
+            }
+            if (!ran) AtemClient.cutUpstreamKeyer(atem.host, atem.port, mixEffect, keyer, onAir)
+            call.respondText(
+                """{"status":"${if (onAir) "on" else "off"}","me":${mixEffect + 1},"key":${keyer + 1}}""",
+                ContentType.Application.Json
+            )
+        } catch (e: Exception) {
+            call.respond(
+                io.ktor.http.HttpStatusCode.BadGateway,
+                """{"error":${jsonStr(e.message ?: "ATEM command failed")}}"""
+            )
+        }
+    }
+
+    /** Validate a 0-based (M/E, keyer) target against the detected topology. Null = OK. */
+    private fun validateKeyTarget(atem: AtemSettings, mixEffect: Int, keyer: Int): String? {
+        if (atem.detectedMixEffects > 0 && mixEffect !in 0 until atem.detectedMixEffects)
+            return "M/E ${mixEffect + 1} does not exist (available: 1-${atem.detectedMixEffects})"
+        val keyers = atem.detectedKeyersPerMe.getOrNull(mixEffect)
+        if (keyers != null && keyers > 0 && keyer !in 0 until keyers)
+            return "Key ${keyer + 1} does not exist on M/E ${mixEffect + 1} (available: 1-$keyers)"
+        return null
     }
 
     // Current data — thread-safe StateFlows
@@ -2382,8 +2434,8 @@ class CompanionServer {
                 }
 
                 // ── Lower Third Sequencer (Bitfocus Companion) ───────────────────
-                // One HTTP call runs the whole timed sequence: ATEM DSK on → play
-                // the lower third → DSK off when the animation ends.
+                // One HTTP call runs the whole timed sequence: ATEM key on → play
+                // the lower third → key off when the animation ends.
 
                 get("/api/lowerthirds") {
                     if (!checkApiKey(call)) return@get
@@ -2409,6 +2461,131 @@ class CompanionServer {
                     if (!checkApiKey(call)) return@post
                     LowerThirdSequencer.stop()
                     call.respondText("""{"status":"stopped"}""", ContentType.Application.Json)
+                }
+
+                // ── ATEM Media Upload Endpoints ────────────────────────────────────
+
+                // POST /api/atem/still/{name}?slot=N&me=E&key=M
+                // Renders the named lower third as a single still frame and uploads it
+                // to ATEM still slot N (1-based; defaults to atemSettings.defaultStillSlot).
+                // If ?key=M (M > 0) is provided, turns upstream key M on M/E E on after upload.
+                // Responds immediately; upload runs in background.
+                post("/api/atem/still/{name}") {
+                    if (!checkApiKey(call)) return@post
+                    val name = call.parameters["name"] ?: run {
+                        call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":"name required"}""")
+                        return@post
+                    }
+                    val file = lowerThirdFiles().firstOrNull { it.nameWithoutExtension.equals(name, ignoreCase = true) }
+                    if (file == null) {
+                        call.respond(io.ktor.http.HttpStatusCode.NotFound, """{"error":"lower third not found"}""")
+                        return@post
+                    }
+                    val atem = _atemSettings
+                    if (atem == null || atem.host.isBlank()) {
+                        call.respond(io.ktor.http.HttpStatusCode.ServiceUnavailable, """{"error":"ATEM not configured"}""")
+                        return@post
+                    }
+                    val slotParam = call.request.queryParameters["slot"]?.toIntOrNull()
+                    val slot = if (slotParam != null) slotParam - 1 else atem.defaultStillSlot
+                    // Optional key-on after upload: present key>0 ⇒ key it; absent/0 ⇒ upload only
+                    val keyParam = call.request.queryParameters["key"]?.toIntOrNull()
+                    val meParam = call.request.queryParameters["me"]?.toIntOrNull()
+                    val keyOn = keyParam != null && keyParam > 0
+                    val mixEffect = if (meParam != null) meParam - 1 else atem.keyMixEffect
+                    val keyer = if (keyParam != null && keyParam > 0) keyParam - 1 else atem.keyIndex
+                    scope.launch {
+                        try {
+                            val lottieJson = file.readText()
+                            val (w, h) = AtemRenderCache.lottieCanvasSize(lottieJson) ?: (1920 to 1080)
+                            val variant = AtemRenderCache.Variant(clip = false, width = w, height = h, frameCount = 1)
+                            val cached = AtemRenderCache.prepare(lottieJson, variant).await()
+                            AtemConnectionManager.use(atem.host, atem.port, needsState = true) { client ->
+                                AtemRenderCache.Reader(cached).use { reader ->
+                                    client.uploadStillEncoded(slot, reader.nextFrame(), file.nameWithoutExtension)
+                                }
+                                if (keyOn) client.setUpstreamKeyerOnAir(mixEffect, keyer, true)
+                            }
+                        } catch (_: Exception) { }
+                    }
+                    val keyInfo = if (keyOn) ""","me":${mixEffect + 1},"key":${keyer + 1}""" else ""
+                    call.respondText(
+                        """{"status":"uploading","type":"still","name":${jsonStr(name)},"slot":${slot + 1}$keyInfo}""",
+                        ContentType.Application.Json
+                    )
+                }
+
+                // POST /api/atem/clip/{name}?slot=N&me=E&key=M
+                // Renders the named lower third as a full animated clip and uploads it
+                // to ATEM clip slot N (1-based; defaults to atemSettings.defaultClipSlot).
+                // If ?key=M (M > 0) is provided, turns upstream key M on M/E E on after upload,
+                // then off after the clip duration. Responds immediately; upload runs in background.
+                post("/api/atem/clip/{name}") {
+                    if (!checkApiKey(call)) return@post
+                    val name = call.parameters["name"] ?: run {
+                        call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":"name required"}""")
+                        return@post
+                    }
+                    val file = lowerThirdFiles().firstOrNull { it.nameWithoutExtension.equals(name, ignoreCase = true) }
+                    if (file == null) {
+                        call.respond(io.ktor.http.HttpStatusCode.NotFound, """{"error":"lower third not found"}""")
+                        return@post
+                    }
+                    val atem = _atemSettings
+                    if (atem == null || atem.host.isBlank()) {
+                        call.respond(io.ktor.http.HttpStatusCode.ServiceUnavailable, """{"error":"ATEM not configured"}""")
+                        return@post
+                    }
+                    val slotParam = call.request.queryParameters["slot"]?.toIntOrNull()
+                    val slot = if (slotParam != null) slotParam - 1 else atem.defaultClipSlot
+                    val keyParam = call.request.queryParameters["key"]?.toIntOrNull()
+                    val meParam = call.request.queryParameters["me"]?.toIntOrNull()
+                    val keyOn = keyParam != null && keyParam > 0
+                    val mixEffect = if (meParam != null) meParam - 1 else atem.keyMixEffect
+                    val keyer = if (keyParam != null && keyParam > 0) keyParam - 1 else atem.keyIndex
+                    scope.launch {
+                        try {
+                            val lottieJson = file.readText()
+                            val (w, h) = AtemRenderCache.lottieCanvasSize(lottieJson) ?: (1920 to 1080)
+                            val fps = atem.clipFps
+                            val frameCount = AtemRenderCache.clipFrameCount(lottieJson, fps) ?: 1
+                            val variant = AtemRenderCache.Variant(clip = true, width = w, height = h, fps = fps, frameCount = frameCount)
+                            val cached = AtemRenderCache.prepare(lottieJson, variant).await()
+                            AtemConnectionManager.use(atem.host, atem.port, needsState = true) { client ->
+                                AtemRenderCache.Reader(cached).use { reader ->
+                                    client.uploadClipEncoded(slot, reader.frameCount, file.nameWithoutExtension,
+                                        nextFrame = { reader.nextFrame() })
+                                }
+                                if (keyOn) client.setUpstreamKeyerOnAir(mixEffect, keyer, true)
+                            }
+                            // Wait for the clip to finish playing, then turn the key off automatically.
+                            // Mutex is released between the two use() calls so other operations can proceed.
+                            if (keyOn) {
+                                val clipDurationMs = (frameCount.toLong() * 1000L) / fps.toLong()
+                                kotlinx.coroutines.delay(clipDurationMs)
+                                AtemConnectionManager.use(atem.host, atem.port, needsState = false) { client ->
+                                    client.setUpstreamKeyerOnAir(mixEffect, keyer, false)
+                                }
+                            }
+                        } catch (_: Exception) { }
+                    }
+                    val keyInfoClip = if (keyOn) ""","me":${mixEffect + 1},"key":${keyer + 1}""" else ""
+                    call.respondText(
+                        """{"status":"uploading","type":"clip","name":${jsonStr(name)},"slot":${slot + 1}$keyInfoClip}""",
+                        ContentType.Application.Json
+                    )
+                }
+
+                // POST /api/atem/key/on?me=E&key=M  — turn upstream key M on M/E E on air (standalone)
+                post("/api/atem/key/on") {
+                    if (!checkApiKey(call)) return@post
+                    handleKeyToggle(call, onAir = true)
+                }
+
+                // POST /api/atem/key/off?me=E&key=M  — turn upstream key M on M/E E off air (standalone)
+                post("/api/atem/key/off") {
+                    if (!checkApiKey(call)) return@post
+                    handleKeyToggle(call, onAir = false)
                 }
 
                 // ── Q&A Endpoints ─────────────────────────────────────────────────

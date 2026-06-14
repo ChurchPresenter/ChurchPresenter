@@ -18,15 +18,15 @@ import org.churchpresenter.app.churchpresenter.data.settings.AtemSettings
  * Orchestrates the Bitfocus Companion lower-third sequence so one HTTP call does
  * the whole timed dance the app alone knows the timing for:
  *
- *   DSK cut ON → pre-roll → lower third goes live → animation duration (+ pause)
- *   → post-roll → DSK cut OFF → clear
+ *   key cut ON → pre-roll → lower third goes live → animation duration (+ pause)
+ *   → post-roll → key cut OFF → clear
  *
- * The DSK cuts are invisible because the app's output is transparent at both
+ * The key cuts are invisible because the app's output is transparent at both
  * moments — the lottie's own animate-in/out is all the viewer sees.
  *
  * The actual go-live/clear happen in the UI layer: main.kt collects [onShow] and
  * [onClear] next to the other CompanionServer remote-control flows. ATEM failures
- * never block the lower third itself — the sequence continues without the DSK.
+ * never block the lower third itself — the sequence continues without the key.
  */
 object LowerThirdSequencer {
 
@@ -47,21 +47,27 @@ object LowerThirdSequencer {
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
     private val mutex = Mutex()
     private var job: Job? = null
-    private var activeClient: AtemClient? = null
+    // The active key target is driven through AtemConnectionManager's keepalive
+    // connection so the off (which can fire many seconds after the on) lands on a
+    // live session instead of a stale short-lived socket.
+    private var activeHost: String? = null
+    private var activePort: Int = 9910
+    private var activeMixEffect: Int = -1
     private var activeKeyer: Int = -1
 
-    /** Bumped on every run/stop so a preempted job's cleanup can tell it no longer owns the DSK. */
+    /** Bumped on every run/stop so a preempted job's cleanup can tell it no longer owns the key. */
     private var generation = 0
 
     /**
      * Start the full sequence. Cancels any sequence already running.
      *
-     * The DSK-on happens synchronously so the caller can report a connection
+     * The key-on happens synchronously so the caller can report a connection
      * problem in the HTTP response; the timed remainder runs in the background.
      *
-     * @param keyer   0-based DSK index to drive, or null to skip DSK control
-     * @param autoEnd false = "show" mode: stay on air until [stop] is called
-     * @return DSK error message, or null when the keyer went on air (or was skipped)
+     * @param mixEffect 0-based M/E index, or null to skip key control
+     * @param keyer     0-based upstream keyer index, or null to skip key control
+     * @param autoEnd   false = "show" mode: stay on air until [stop] is called
+     * @return key error message, or null when the key went on air (or was skipped)
      */
     suspend fun run(
         name: String,
@@ -69,25 +75,28 @@ object LowerThirdSequencer {
         durationMs: Long,
         pauseAtFrame: Boolean,
         pauseDurationMs: Long,
+        mixEffect: Int?,
         keyer: Int?,
         atem: AtemSettings,
         autoEnd: Boolean = true
     ): String? = mutex.withLock {
         stopLocked()
 
-        var dskError: String? = null
-        if (keyer != null && atem.host.isNotBlank()) {
+        var keyError: String? = null
+        if (mixEffect != null && keyer != null && atem.host.isNotBlank()) {
             try {
-                val client = AtemClient(atem.host, atem.port)
-                client.connect(collectState = false)
-                client.setDownstreamKeyerOnAir(keyer, true)
-                activeClient = client
+                AtemConnectionManager.use(atem.host, atem.port, needsState = false) { client ->
+                    client.setUpstreamKeyerOnAir(mixEffect, keyer, true)
+                }
+                activeHost = atem.host
+                activePort = atem.port
+                activeMixEffect = mixEffect
                 activeKeyer = keyer
             } catch (e: Exception) {
-                dskError = e.message ?: "ATEM unreachable"
-                System.err.println("[LowerThirdSequencer] DSK on failed: $dskError")
-                activeClient?.disconnect()
-                activeClient = null
+                keyError = e.message ?: "ATEM unreachable"
+                System.err.println("[LowerThirdSequencer] key on failed: $keyError")
+                activeHost = null
+                activeMixEffect = -1
                 activeKeyer = -1
             }
         }
@@ -97,9 +106,9 @@ object LowerThirdSequencer {
         val gen = ++generation
         job = scope.launch {
             try {
-                delay(atem.dskPreRollMs.toLong())
+                delay(atem.keyPreRollMs.toLong())
                 onShow.emit(ShowRequest(json, pauseAtFrame, pauseFrame = -1f, pauseDurationMs = pauseDurationMs))
-                if (autoEnd) delay(totalMs + atem.dskPostRollMs)
+                if (autoEnd) delay(totalMs + atem.keyPostRollMs)
                 else delay(Long.MAX_VALUE)   // "show" mode: on air until stop()
             } finally {
                 // On natural completion only — when preempted or stopped, the new
@@ -108,7 +117,7 @@ object LowerThirdSequencer {
                 var ownsSequence = false
                 mutex.withLock {
                     if (generation == gen) {
-                        releaseDskLocked()
+                        releaseKeyLocked()
                         _status.value = "idle"
                         ownsSequence = true
                     }
@@ -116,30 +125,36 @@ object LowerThirdSequencer {
                 if (ownsSequence) onClear.emit(Unit)
             }
         }
-        dskError
+        keyError
     }
 
-    /** Abort the running sequence immediately: DSK off, clear, idle. */
+    /** Abort the running sequence immediately: key off, clear, idle. */
     suspend fun stop() = mutex.withLock { stopLocked() }
 
-    private fun stopLocked() {
+    private suspend fun stopLocked() {
         generation++
         job?.cancel()
         job = null
-        releaseDskLocked()
+        releaseKeyLocked()
         _status.value = "idle"
         onClear.tryEmit(Unit)
     }
 
-    private fun releaseDskLocked() {
-        val client = activeClient ?: return
-        activeClient = null
+    /**
+     * Turn off the active key (if any) through the keepalive-managed connection and
+     * await it, so preemption is deterministic: a previous key is off before the next
+     * one is turned on, and the natural-end off lands on the live session.
+     */
+    private suspend fun releaseKeyLocked() {
+        val host = activeHost ?: return
+        val port = activePort
+        val mixEffect = activeMixEffect
         val keyer = activeKeyer
+        activeHost = null
+        activeMixEffect = -1
         activeKeyer = -1
-        scope.launch {
-            runCatching { client.setDownstreamKeyerOnAir(keyer, false) }
-                .onFailure { System.err.println("[LowerThirdSequencer] DSK off failed: ${it.message}") }
-            client.disconnect()
-        }
+        runCatching {
+            AtemConnectionManager.use(host, port) { it.setUpstreamKeyerOnAir(mixEffect, keyer, false) }
+        }.onFailure { System.err.println("[LowerThirdSequencer] key off failed: ${it.message}") }
     }
 }

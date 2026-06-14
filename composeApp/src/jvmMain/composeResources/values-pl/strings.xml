@@ -1558,9 +1558,17 @@
     <string name="atem_quick_upload_hint">Pomiń okno dialogowe — prześlij od razu do domyślnych slotów</string>
     <string name="atem_quick_still_tooltip">Prześlij obraz do slotu %1$d ATEM</string>
     <string name="atem_quick_clip_tooltip">Prześlij wideo do slotu %1$d ATEM</string>
-    <string name="atem_dsk_preroll">Wyprzedzenie DSK (ms)</string>
-    <string name="atem_dsk_postroll">Opóźnienie DSK (ms)</string>
-    <string name="atem_golive_dsk">Go Live steruje DSK ATEM</string>
-    <string name="atem_golive_dsk_hint">Go Live włącza DSK na antenę i wyłącza go po zakończeniu animacji</string>
+    <string name="atem_key_preroll">Wyprzedzenie DSK (ms)</string>
+    <string name="atem_key_postroll">Opóźnienie DSK (ms)</string>
+    <string name="atem_golive_key">Go Live steruje DSK ATEM</string>
+    <string name="atem_golive_key_hint">Go Live włącza DSK na antenę i wyłącza go po zakończeniu animacji</string>
+    <string name="companion_lt_triggers">Wyzwalacze belek</string>
+    <string name="companion_lt_triggers_desc">Skopiuj adres URL do przycisku HTTP Bitfocus Companion, aby wyzwolić tę belkę. POST /api/lowerthirds/hide zatrzymuje trwającą sekwencję.</string>
+    <string name="companion_lt_copy_key">Kopiuj (z DSK)</string>
+    <string name="companion_lt_copy_nokey">Kopiuj (bez DSK)</string>
+    <string name="companion_lt_none">Nie znaleziono belek w skonfigurowanym folderze</string>
+    <string name="companion_lt_server_off">Uruchom serwer, aby uzyskać adresy URL wyzwalaczy</string>
+    <string name="atem_detected_keyers">Wykryto: %1$s</string>
+    <string name="atem_detected_keyers_unknown">Uruchom test połączenia, aby wykryć liczbę M/E i kluczy</string>
 </resources>
 

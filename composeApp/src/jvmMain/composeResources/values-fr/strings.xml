@@ -1580,8 +1580,16 @@
     <string name="atem_quick_upload_hint">Ignorer la boîte de dialogue — envoyer immédiatement vers les emplacements par défaut</string>
     <string name="atem_quick_still_tooltip">Envoyer l'image vers l'emplacement %1$d de l'ATEM</string>
     <string name="atem_quick_clip_tooltip">Envoyer la vidéo vers l'emplacement %1$d de l'ATEM</string>
-    <string name="atem_dsk_preroll">Pré-roll DSK (ms)</string>
-    <string name="atem_dsk_postroll">Post-roll DSK (ms)</string>
-    <string name="atem_golive_dsk">Go Live pilote le DSK de l'ATEM</string>
-    <string name="atem_golive_dsk_hint">Go Live met le DSK à l'antenne puis le retire à la fin de l'animation</string>
+    <string name="atem_key_preroll">Pré-roll DSK (ms)</string>
+    <string name="atem_key_postroll">Post-roll DSK (ms)</string>
+    <string name="atem_golive_key">Go Live pilote le DSK de l'ATEM</string>
+    <string name="atem_golive_key_hint">Go Live met le DSK à l'antenne puis le retire à la fin de l'animation</string>
+    <string name="companion_lt_triggers">Déclencheurs de synthés</string>
+    <string name="companion_lt_triggers_desc">Copiez une URL dans un bouton HTTP Bitfocus Companion pour déclencher ce synthé. POST /api/lowerthirds/hide arrête une séquence en cours.</string>
+    <string name="companion_lt_copy_key">Copier (avec DSK)</string>
+    <string name="companion_lt_copy_nokey">Copier (sans DSK)</string>
+    <string name="companion_lt_none">Aucun synthé trouvé dans le dossier configuré</string>
+    <string name="companion_lt_server_off">Démarrez le serveur pour obtenir les URL de déclenchement</string>
+    <string name="atem_detected_keyers">Détecté : %1$s</string>
+    <string name="atem_detected_keyers_unknown">Lancez le test de connexion pour détecter le nombre de M/E et de clés</string>
 </resources>

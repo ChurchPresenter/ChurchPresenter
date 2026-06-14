@@ -129,6 +129,12 @@ fun LowerThirdSettingsTab(
         ) {
             // Lottie Files list
             SectionHeader(stringResource(Res.string.lottie_files))
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = "To trigger lower thirds via API visit the Server tab.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
             Spacer(modifier = Modifier.height(8.dp))
             Box(
                 modifier = Modifier

@@ -45,10 +45,12 @@ import churchpresenter.composeapp.generated.resources.atem_clip_fps_hint
 import churchpresenter.composeapp.generated.resources.atem_default_clip_slot
 import churchpresenter.composeapp.generated.resources.atem_default_still_slot
 import churchpresenter.composeapp.generated.resources.atem_description
-import churchpresenter.composeapp.generated.resources.atem_dsk_postroll
-import churchpresenter.composeapp.generated.resources.atem_dsk_preroll
-import churchpresenter.composeapp.generated.resources.atem_golive_dsk
-import churchpresenter.composeapp.generated.resources.atem_golive_dsk_hint
+import churchpresenter.composeapp.generated.resources.atem_detected_keyers
+import churchpresenter.composeapp.generated.resources.atem_detected_keyers_unknown
+import churchpresenter.composeapp.generated.resources.atem_key_postroll
+import churchpresenter.composeapp.generated.resources.atem_key_preroll
+import churchpresenter.composeapp.generated.resources.atem_golive_key
+import churchpresenter.composeapp.generated.resources.atem_golive_key_hint
 import churchpresenter.composeapp.generated.resources.atem_host
 import churchpresenter.composeapp.generated.resources.atem_host_hint
 import churchpresenter.composeapp.generated.resources.atem_port
@@ -90,9 +92,10 @@ fun AtemSettingsTab(
     var renderWidthText by remember(atem.renderWidth) { mutableStateOf(atem.renderWidth.toString()) }
     var renderHeightText by remember(atem.renderHeight) { mutableStateOf(atem.renderHeight.toString()) }
     var clipFpsText by remember(atem.clipFps) { mutableStateOf(formatAtemFps(atem.clipFps)) }
-    var dskText by remember(atem.dskIndex) { mutableStateOf((atem.dskIndex + 1).toString()) }
-    var dskPreRollText by remember(atem.dskPreRollMs) { mutableStateOf(atem.dskPreRollMs.toString()) }
-    var dskPostRollText by remember(atem.dskPostRollMs) { mutableStateOf(atem.dskPostRollMs.toString()) }
+    var meText by remember(atem.keyMixEffect) { mutableStateOf((atem.keyMixEffect + 1).toString()) }
+    var keyText by remember(atem.keyIndex) { mutableStateOf((atem.keyIndex + 1).toString()) }
+    var keyPreRollText by remember(atem.keyPreRollMs) { mutableStateOf(atem.keyPreRollMs.toString()) }
+    var keyPostRollText by remember(atem.keyPostRollMs) { mutableStateOf(atem.keyPostRollMs.toString()) }
 
     var connectionStatus by remember { mutableStateOf<String?>(null) }
     var connectionError by remember { mutableStateOf<String?>(null) }
@@ -205,7 +208,8 @@ fun AtemSettingsTab(
                                             detectedClipSlots = state.clipSlots.size,
                                             detectedClipMaxFrames = state.clipMaxFrames,
                                             detectedUnassignedFrames = state.unassignedFrames,
-                                            detectedDskCount = state.dskCount
+                                            detectedMixEffects = state.mixEffectCount,
+                                            detectedKeyersPerMe = state.keyersPerMe
                                         )
                                     }
                                     connectionStatus = "connected"
@@ -373,48 +377,83 @@ fun AtemSettingsTab(
 
                 Spacer(Modifier.height(8.dp))
 
-                // DSK sequencing defaults for the Companion lower-third trigger:
-                // keyer index plus the margins around the animation
+                // Upstream-key sequencing defaults for the Companion trigger: M/E + keyer
+                // plus the margins around the animation
+                val keyersOnMe = atem.detectedKeyersPerMe.getOrNull(atem.keyMixEffect) ?: 0
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     OutlinedTextField(
-                        value = dskText,
+                        value = meText,
                         onValueChange = { v ->
-                            dskText = v
-                            v.toIntOrNull()?.let { update { copy(dskIndex = (it - 1).coerceAtLeast(0)) } }
+                            meText = v
+                            v.toIntOrNull()?.let { update { copy(keyMixEffect = (it - 1).coerceAtLeast(0)) } }
                         },
                         supportingText = {
-                            Text(if (atem.detectedDskCount > 0) "DSK (1–${atem.detectedDskCount})" else "DSK")
+                            Text(if (atem.detectedMixEffects > 0) "M/E (1–${atem.detectedMixEffects})" else "M/E")
                         },
-                        isError = atem.detectedDskCount > 0 &&
-                            dskText.toIntOrNull()?.let { it !in 1..atem.detectedDskCount } != false,
+                        isError = atem.detectedMixEffects > 0 &&
+                            meText.toIntOrNull()?.let { it !in 1..atem.detectedMixEffects } != false,
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         modifier = Modifier.weight(1f)
                     )
                     OutlinedTextField(
-                        value = dskPreRollText,
+                        value = keyText,
                         onValueChange = { v ->
-                            dskPreRollText = v
-                            v.toIntOrNull()?.let { update { copy(dskPreRollMs = it.coerceAtLeast(0)) } }
+                            keyText = v
+                            v.toIntOrNull()?.let { update { copy(keyIndex = (it - 1).coerceAtLeast(0)) } }
                         },
-                        supportingText = { Text(stringResource(Res.string.atem_dsk_preroll)) },
+                        supportingText = {
+                            Text(if (keyersOnMe > 0) "Key (1–$keyersOnMe)" else "Key")
+                        },
+                        isError = keyersOnMe > 0 &&
+                            keyText.toIntOrNull()?.let { it !in 1..keyersOnMe } != false,
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         modifier = Modifier.weight(1f)
                     )
                     OutlinedTextField(
-                        value = dskPostRollText,
+                        value = keyPreRollText,
                         onValueChange = { v ->
-                            dskPostRollText = v
-                            v.toIntOrNull()?.let { update { copy(dskPostRollMs = it.coerceAtLeast(0)) } }
+                            keyPreRollText = v
+                            v.toIntOrNull()?.let { update { copy(keyPreRollMs = it.coerceAtLeast(0)) } }
                         },
-                        supportingText = { Text(stringResource(Res.string.atem_dsk_postroll)) },
+                        supportingText = { Text(stringResource(Res.string.atem_key_preroll)) },
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         modifier = Modifier.weight(1f)
+                    )
+                    OutlinedTextField(
+                        value = keyPostRollText,
+                        onValueChange = { v ->
+                            keyPostRollText = v
+                            v.toIntOrNull()?.let { update { copy(keyPostRollMs = it.coerceAtLeast(0)) } }
+                        },
+                        supportingText = { Text(stringResource(Res.string.atem_key_postroll)) },
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+
+                Spacer(Modifier.height(4.dp))
+
+                // Detected M/E + keyer matrix, so the user knows the valid ranges
+                if (atem.detectedKeyersPerMe.isNotEmpty()) {
+                    val perMe = atem.detectedKeyersPerMe.mapIndexed { i, k -> "M/E ${i + 1}: ${k} keys" }
+                        .joinToString("   ")
+                    Text(
+                        stringResource(Res.string.atem_detected_keyers, perMe),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                    )
+                } else {
+                    Text(
+                        stringResource(Res.string.atem_detected_keyers_unknown),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                     )
                 }
 
@@ -447,23 +486,23 @@ fun AtemSettingsTab(
 
                 Spacer(Modifier.height(8.dp))
 
-                // Go Live drives the DSK: the tab's Go Live runs the timed DSK sequence
+                // Go Live drives the key: the tab's Go Live runs the timed key sequence
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     Switch(
-                        checked = atem.goLiveDsk,
-                        onCheckedChange = { update { copy(goLiveDsk = it) } }
+                        checked = atem.goLiveKey,
+                        onCheckedChange = { update { copy(goLiveKey = it) } }
                     )
                     Column {
                         Text(
-                            stringResource(Res.string.atem_golive_dsk),
+                            stringResource(Res.string.atem_golive_key),
                             style = MaterialTheme.typography.bodyMedium
                         )
                         Text(
-                            stringResource(Res.string.atem_golive_dsk_hint),
+                            stringResource(Res.string.atem_golive_key_hint),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                         )

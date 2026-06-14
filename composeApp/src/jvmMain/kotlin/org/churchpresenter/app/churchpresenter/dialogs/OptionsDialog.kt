@@ -82,11 +82,12 @@ fun OptionsDialog(
     scenes: List<org.churchpresenter.app.churchpresenter.models.Scene> = emptyList(),
     onOpenLottieGen: (outputDir: String, onFileSaved: (() -> Unit)?) -> Unit = { _, _ -> },
     obsManager: OBSWebSocketManager? = null,
-    initialTab: Int = 0
+    initialTab: Int = 0,
+    initialSettings: AppSettings? = null
 ) {
     if (!isVisible) return
 
-    var currentSettings by remember { mutableStateOf(settingsManager.loadSettings()) }
+    var currentSettings by remember { mutableStateOf(initialSettings ?: settingsManager.loadSettings()) }
     val tabCount = if (obsManager != null) 10 else 9
     var selectedTabIndex by remember(initialTab) { mutableStateOf(initialTab) }
     val safeTabIndex = selectedTabIndex.coerceIn(0, tabCount - 1)

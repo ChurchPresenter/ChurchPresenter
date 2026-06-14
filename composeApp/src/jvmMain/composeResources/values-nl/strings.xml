@@ -1580,8 +1580,16 @@
     <string name="atem_quick_upload_hint">Dialoog overslaan — direct uploaden naar de standaardslots</string>
     <string name="atem_quick_still_tooltip">Afbeelding uploaden naar ATEM-slot %1$d</string>
     <string name="atem_quick_clip_tooltip">Video uploaden naar ATEM-slot %1$d</string>
-    <string name="atem_dsk_preroll">DSK pre-roll (ms)</string>
-    <string name="atem_dsk_postroll">DSK post-roll (ms)</string>
-    <string name="atem_golive_dsk">Go Live stuurt ATEM-DSK aan</string>
-    <string name="atem_golive_dsk_hint">Go Live zet de DSK in beeld en weer uit wanneer de animatie eindigt</string>
+    <string name="atem_key_preroll">DSK pre-roll (ms)</string>
+    <string name="atem_key_postroll">DSK post-roll (ms)</string>
+    <string name="atem_golive_key">Go Live stuurt ATEM-DSK aan</string>
+    <string name="atem_golive_key_hint">Go Live zet de DSK in beeld en weer uit wanneer de animatie eindigt</string>
+    <string name="companion_lt_triggers">Ondertitel-triggers</string>
+    <string name="companion_lt_triggers_desc">Kopieer een URL naar een Bitfocus Companion HTTP-knop om deze ondertitel te activeren. POST /api/lowerthirds/hide stopt een lopende reeks.</string>
+    <string name="companion_lt_copy_key">Kopiëren (met DSK)</string>
+    <string name="companion_lt_copy_nokey">Kopiëren (zonder DSK)</string>
+    <string name="companion_lt_none">Geen ondertitels gevonden in de ingestelde map</string>
+    <string name="companion_lt_server_off">Start de server om trigger-URL's te krijgen</string>
+    <string name="atem_detected_keyers">Gedetecteerd: %1$s</string>
+    <string name="atem_detected_keyers_unknown">Voer de verbindingstest uit om het aantal M/E's en keys te bepalen</string>
 </resources>

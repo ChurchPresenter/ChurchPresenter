@@ -1558,9 +1558,17 @@
     <string name="atem_quick_upload_hint">Диалогты өткізіп жіберу — әдепкі ұяшықтарға бірден жүктеу</string>
     <string name="atem_quick_still_tooltip">Суретті ATEM %1$d ұяшығына жүктеу</string>
     <string name="atem_quick_clip_tooltip">Бейнені ATEM %1$d ұяшығына жүктеу</string>
-    <string name="atem_dsk_preroll">DSK алдындағы кідіріс (мс)</string>
-    <string name="atem_dsk_postroll">DSK кейінгі кідіріс (мс)</string>
-    <string name="atem_golive_dsk">Go Live ATEM DSK-ны басқарады</string>
-    <string name="atem_golive_dsk_hint">Go Live DSK-ны эфирге шығарады және анимация аяқталғанда өшіреді</string>
+    <string name="atem_key_preroll">DSK алдындағы кідіріс (мс)</string>
+    <string name="atem_key_postroll">DSK кейінгі кідіріс (мс)</string>
+    <string name="atem_golive_key">Go Live ATEM DSK-ны басқарады</string>
+    <string name="atem_golive_key_hint">Go Live DSK-ны эфирге шығарады және анимация аяқталғанда өшіреді</string>
+    <string name="companion_lt_triggers">Титр триггерлері</string>
+    <string name="companion_lt_triggers_desc">Осы титрді іске қосу үшін URL мекенжайын Bitfocus Companion HTTP түймесіне көшіріңіз. POST /api/lowerthirds/hide ағымдағы тізбекті тоқтатады.</string>
+    <string name="companion_lt_copy_key">Көшіру (DSK-мен)</string>
+    <string name="companion_lt_copy_nokey">Көшіру (DSK-сыз)</string>
+    <string name="companion_lt_none">Бапталған қалтада титрлер табылмады</string>
+    <string name="companion_lt_server_off">Триггер URL мекенжайларын алу үшін серверді іске қосыңыз</string>
+    <string name="atem_detected_keyers">Анықталды: %1$s</string>
+    <string name="atem_detected_keyers_unknown">M/E және кілт санын анықтау үшін қосылым сынағын іске қосыңыз</string>
 </resources>
 
