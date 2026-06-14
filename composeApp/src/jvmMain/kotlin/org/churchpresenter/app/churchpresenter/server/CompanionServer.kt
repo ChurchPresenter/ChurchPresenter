@@ -45,6 +45,7 @@ import org.churchpresenter.app.churchpresenter.data.settings.AtemSettings
 import org.churchpresenter.app.churchpresenter.models.ScheduleItem
 import org.churchpresenter.app.churchpresenter.viewmodel.isLottieFile
 import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.app.churchpresenter.utils.CrashReporter
 import org.churchpresenter.app.churchpresenter.utils.HeicDecoder
 import org.churchpresenter.app.churchpresenter.utils.isChorusHeader
 import org.churchpresenter.app.churchpresenter.utils.isHeaderLine
@@ -2494,19 +2495,33 @@ class CompanionServer {
                     val keyOn = keyParam != null && keyParam > 0
                     val mixEffect = if (meParam != null) meParam - 1 else atem.keyMixEffect
                     val keyer = if (keyParam != null && keyParam > 0) keyParam - 1 else atem.keyIndex
+                    if (keyOn) validateKeyTarget(atem, mixEffect, keyer)?.let {
+                        call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":${jsonStr(it)}}""")
+                        return@post
+                    }
                     scope.launch {
                         try {
+                            AtemUploadStatus.begin(file.nameWithoutExtension, clip = false, slot = slot + 1)
                             val lottieJson = file.readText()
-                            val (w, h) = AtemRenderCache.renderSize(lottieJson, atem)
+                            val (w, h) = AtemRenderCache.renderSize(atem)
                             val variant = AtemRenderCache.Variant(clip = false, width = w, height = h, frameCount = 1)
                             val cached = AtemRenderCache.prepare(lottieJson, variant).await()
                             AtemConnectionManager.use(atem.host, atem.port, needsState = true) { client ->
                                 AtemRenderCache.Reader(cached).use { reader ->
-                                    client.uploadStillEncoded(slot, reader.nextFrame(), file.nameWithoutExtension)
+                                    client.uploadStillEncoded(slot, reader.nextFrame(), file.nameWithoutExtension) { p ->
+                                        AtemUploadStatus.progress(p)
+                                    }
                                 }
                                 if (keyOn) client.setUpstreamKeyerOnAir(mixEffect, keyer, true)
                             }
-                        } catch (_: Exception) { }
+                            AtemUploadStatus.complete()
+                            kotlinx.coroutines.delay(800)
+                            AtemUploadStatus.clear()
+                        } catch (e: Exception) {
+                            System.err.println("[CompanionServer] ATEM still upload failed for '$name': ${e.message}")
+                            CrashReporter.reportException(e, "ATEM still upload: $name")
+                            AtemUploadStatus.fail(e.message)
+                        }
                     }
                     val keyInfo = if (keyOn) ""","me":${mixEffect + 1},"key":${keyer + 1}""" else ""
                     call.respondText(
@@ -2543,21 +2558,40 @@ class CompanionServer {
                     val keyOn = keyParam != null && keyParam > 0
                     val mixEffect = if (meParam != null) meParam - 1 else atem.keyMixEffect
                     val keyer = if (keyParam != null && keyParam > 0) keyParam - 1 else atem.keyIndex
+                    if (keyOn) validateKeyTarget(atem, mixEffect, keyer)?.let {
+                        call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":${jsonStr(it)}}""")
+                        return@post
+                    }
+                    val lottieJson = file.readText()
+                    val fps = atem.clipFps
+                    val frameCount = AtemRenderCache.clipFrameCount(lottieJson, fps) ?: 1
+                    // Capacity pre-flight (mirrors the Lower Third UI): block a clip that can't
+                    // fit the slot before responding "uploading", so the caller gets a real error.
+                    val clipCapacity = atem.detectedClipMaxFrames.getOrNull(slot)
+                    if (clipCapacity != null && frameCount > clipCapacity) {
+                        val secs = String.format(java.util.Locale.US, "%.1f", clipCapacity / fps)
+                        call.respond(
+                            io.ktor.http.HttpStatusCode.UnprocessableEntity,
+                            """{"error":${jsonStr("Clip is $frameCount frames but slot ${slot + 1} holds at most $clipCapacity frames (≈$secs s); use a shorter clip or lower fps")}}"""
+                        )
+                        return@post
+                    }
                     scope.launch {
                         try {
-                            val lottieJson = file.readText()
-                            val (w, h) = AtemRenderCache.renderSize(lottieJson, atem)
-                            val fps = atem.clipFps
-                            val frameCount = AtemRenderCache.clipFrameCount(lottieJson, fps) ?: 1
+                            AtemUploadStatus.begin(file.nameWithoutExtension, clip = true, slot = slot + 1)
+                            val (w, h) = AtemRenderCache.renderSize(atem)
                             val variant = AtemRenderCache.Variant(clip = true, width = w, height = h, fps = fps, frameCount = frameCount)
                             val cached = AtemRenderCache.prepare(lottieJson, variant).await()
                             AtemConnectionManager.use(atem.host, atem.port, needsState = true) { client ->
                                 AtemRenderCache.Reader(cached).use { reader ->
                                     client.uploadClipEncoded(slot, reader.frameCount, file.nameWithoutExtension,
-                                        nextFrame = { reader.nextFrame() })
+                                        nextFrame = { reader.nextFrame() }) { p -> AtemUploadStatus.progress(p) }
                                 }
                                 if (keyOn) client.setUpstreamKeyerOnAir(mixEffect, keyer, true)
                             }
+                            AtemUploadStatus.complete()
+                            kotlinx.coroutines.delay(800)
+                            AtemUploadStatus.clear()
                             // Wait for the clip to finish playing, then turn the key off automatically.
                             // Mutex is released between the two use() calls so other operations can proceed.
                             if (keyOn) {
@@ -2567,7 +2601,11 @@ class CompanionServer {
                                     client.setUpstreamKeyerOnAir(mixEffect, keyer, false)
                                 }
                             }
-                        } catch (_: Exception) { }
+                        } catch (e: Exception) {
+                            System.err.println("[CompanionServer] ATEM clip upload failed for '$name': ${e.message}")
+                            CrashReporter.reportException(e, "ATEM clip upload: $name")
+                            AtemUploadStatus.fail(e.message)
+                        }
                     }
                     val keyInfoClip = if (keyOn) ""","me":${mixEffect + 1},"key":${keyer + 1}""" else ""
                     call.respondText(

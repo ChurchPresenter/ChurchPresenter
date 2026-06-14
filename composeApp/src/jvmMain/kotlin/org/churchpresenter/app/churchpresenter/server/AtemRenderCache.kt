@@ -78,9 +78,13 @@ object AtemRenderCache {
         null
     }
 
-    /** ATEM render size for a lottie: its own canvas, falling back to the configured frame. */
-    fun renderSize(lottieJson: String, atem: AtemSettings): Pair<Int, Int> =
-        lottieCanvasSize(lottieJson) ?: (atem.renderWidth to atem.renderHeight)
+    /**
+     * Render size for an ATEM upload: the configured switcher raster (e.g. 1920×1080).
+     * ATEM media must match the switcher's video mode — rendering at the lottie's own
+     * canvas instead produces a stride/chroma-shifted (purplish, half) image. The lottie
+     * is composited into this raster by [LowerThirdOffscreenRenderer].
+     */
+    fun renderSize(atem: AtemSettings): Pair<Int, Int> = atem.renderWidth to atem.renderHeight
 
     /** Clip duration straight from the lottie JSON: (op - ip) / fr seconds. */
     fun lottieDurationMs(lottieJson: String): Long? = try {
@@ -156,7 +160,7 @@ object AtemRenderCache {
         scope.launch(Dispatchers.IO) {
             try {
                 val json = file.readText()
-                val (w, h) = renderSize(json, atem)
+                val (w, h) = renderSize(atem)
                 prepare(json, Variant(clip = false, width = w, height = h))
                 val frames = clipFrameCount(json, atem.clipFps) ?: return@launch
                 prepare(json, Variant(true, w, h, atem.clipFps, frames))

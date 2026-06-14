@@ -53,6 +53,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -99,6 +100,8 @@ import churchpresenter.composeapp.generated.resources.atem_slot
 import churchpresenter.composeapp.generated.resources.atem_slots_error
 import churchpresenter.composeapp.generated.resources.atem_upload
 import churchpresenter.composeapp.generated.resources.atem_upload_error
+import churchpresenter.composeapp.generated.resources.atem_uploading_image
+import churchpresenter.composeapp.generated.resources.atem_uploading_video
 import churchpresenter.composeapp.generated.resources.atem_upload_mode
 import churchpresenter.composeapp.generated.resources.atem_uploading
 import org.churchpresenter.app.churchpresenter.server.AtemMediaSlot
@@ -133,6 +136,7 @@ import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.formatAtemFps
 import org.churchpresenter.app.churchpresenter.server.AtemClient
 import org.churchpresenter.app.churchpresenter.server.AtemRenderCache
+import org.churchpresenter.app.churchpresenter.server.AtemUploadStatus
 import org.churchpresenter.app.churchpresenter.server.LowerThirdSequencer
 import org.churchpresenter.app.churchpresenter.models.ScheduleItem
 import org.churchpresenter.app.churchpresenter.utils.presenterAspectRatio
@@ -247,6 +251,12 @@ fun LowerThirdTab(
     var atemSlotsLoading by remember { mutableStateOf(false) }
     var atemSlotsError by remember { mutableStateOf<String?>(null) }
     var atemDetectedFps by remember { mutableStateOf<Double?>(null) }
+    // Status of an API/Companion-triggered upload, so the same bar reflects those too
+    val remoteUpload by AtemUploadStatus.state.collectAsState()
+    // Auto-dismiss a remote upload error after a while (success self-clears server-side)
+    LaunchedEffect(remoteUpload?.error) {
+        if (remoteUpload?.error != null) { delay(8000); AtemUploadStatus.clear() }
+    }
 
     // Fetch media pool slot info + FPS when dialog opens or mode toggles
     LaunchedEffect(showAtemDialog, atemIsClip) {
@@ -320,7 +330,7 @@ fun LowerThirdTab(
     // Quick upload passes useDetectedFps=false so it always hits the pre-generated cache.
     fun atemVariant(isClip: Boolean, useDetectedFps: Boolean = true): AtemRenderCache.Variant {
         val s = appSettings.atemSettings
-        val (w, h) = AtemRenderCache.renderSize(jsonContent, s)
+        val (w, h) = AtemRenderCache.renderSize(s)
         if (!isClip) return AtemRenderCache.Variant(clip = false, width = w, height = h)
         val fps = (if (useDetectedFps) atemDetectedFps else null) ?: s.clipFps
         val frames = AtemRenderCache.clipFrameCount(jsonContent, fps)
@@ -352,6 +362,9 @@ fun LowerThirdTab(
                 // instant when the cache file already exists
                 val cached = AtemRenderCache.prepare(jsonContent, variant).await()
                 atemProgress = 0f
+                // Publish to the shared status so the tab's upload bar shows the file +
+                // slot for in-app uploads too (same source the API uploads use)
+                AtemUploadStatus.begin(presetName, variant.clip, slot + 1)
                 val client = AtemClient(atemSettings.host, atemSettings.port)
                 withContext(Dispatchers.IO) { client.connect() }
                 try {
@@ -360,12 +373,13 @@ fun LowerThirdTab(
                             if (!variant.clip) {
                                 client.uploadStillEncoded(slot, reader.nextFrame(), presetName) { p ->
                                     atemProgress = p
+                                    AtemUploadStatus.progress(p)
                                 }
                             } else {
                                 client.uploadClipEncoded(
                                     slot, reader.frameCount, presetName,
                                     nextFrame = { reader.nextFrame() }
-                                ) { p -> atemProgress = p }
+                                ) { p -> atemProgress = p; AtemUploadStatus.progress(p) }
                             }
                         }
                     }
@@ -374,10 +388,13 @@ fun LowerThirdTab(
                 }
                 atemReachable = true
                 atemProgress = 1f
+                AtemUploadStatus.complete()
                 delay(800)
+                AtemUploadStatus.clear()
                 if (closeDialogOnSuccess) showAtemDialog = false
             } catch (e: Exception) {
                 atemError = e.message ?: "Upload failed"
+                AtemUploadStatus.fail(e.message)
             } finally {
                 atemProgress = null
                 atemBusy = false
@@ -1031,20 +1048,32 @@ fun LowerThirdTab(
                 }
             }
 
-            // ATEM upload progress bar (shown while uploading)
-            val progress = atemProgress
-            if (progress != null) {
+            // ATEM upload status bar — shows for both in-app and API uploads (both publish
+            // to AtemUploadStatus), labelled with the file name and target slot.
+            val upload = remoteUpload
+            if (upload != null && upload.error == null) {
+                val uploadingMsg = if (upload.clip)
+                    stringResource(Res.string.atem_uploading_video, upload.name, upload.slot)
+                else
+                    stringResource(Res.string.atem_uploading_image, upload.name, upload.slot)
+                Text(
+                    uploadingMsg,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.fillMaxWidth()
+                )
                 LinearProgressIndicator(
-                    progress = { progress },
+                    progress = { upload.progress },
                     modifier = Modifier.fillMaxWidth()
                 )
             }
-            val err = atemError
+            val err = upload?.error
             if (err != null) {
                 Text(
                     stringResource(Res.string.atem_upload_error, err),
                     style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.error
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.fillMaxWidth()
                 )
             }
 

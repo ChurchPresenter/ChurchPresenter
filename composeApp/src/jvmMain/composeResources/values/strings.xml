@@ -1591,6 +1591,8 @@
     <string name="atem_ready">Ready to upload</string>
     <string name="atem_upload_done">Upload complete</string>
     <string name="atem_upload_error">Upload failed: %1$s</string>
+    <string name="atem_uploading_image">Uploading %1$s → image slot %2$d</string>
+    <string name="atem_uploading_video">Uploading %1$s → video slot %2$d</string>
     <string name="atem_detected_video_mode">Detected: %1$s</string>
     <string name="atem_loading_slots">Loading slots…</string>
     <string name="atem_slots_error">Could not load slots: %1$s</string>
