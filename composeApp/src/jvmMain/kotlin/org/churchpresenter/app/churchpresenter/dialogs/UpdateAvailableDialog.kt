@@ -57,6 +57,26 @@ private sealed class DownloadState {
     data class Error(val message: String) : DownloadState()
 }
 
+/**
+ * Launches the downloaded installer using the platform's native mechanism.
+ *
+ * Deliberately avoids [Desktop.open], which on Windows rejects `.msi` files with
+ * "Unsupported URI content". [ProcessBuilder] takes its arguments as a list, so
+ * installer paths containing spaces need no shell quoting.
+ */
+private fun launchInstaller(file: File) {
+    val os = System.getProperty("os.name", "").lowercase()
+    val path = file.absolutePath
+    when {
+        // msiexec is the supported way to run an .msi; /i = install.
+        os.contains("win") -> ProcessBuilder("msiexec", "/i", path).start()
+        // mounts the .dmg in Finder; same as what Desktop.open() does on mac.
+        os.contains("mac") -> ProcessBuilder("open", path).start()
+        // .deb: hand to the desktop installer Desktop.open() delegates to on Linux.
+        else -> ProcessBuilder("xdg-open", path).start()
+    }
+}
+
 @Composable
 fun UpdateAvailableDialog(
     updateInfo: UpdateInfo?,
@@ -86,8 +106,10 @@ fun UpdateAvailableDialog(
                     updateInfo.downloadUrl.endsWith(".deb", ignoreCase = true) -> ".deb"
                     else -> ".bin"
                 }
+                // NB: do not deleteOnExit() — the installer is launched as the
+                // app exits via exitProcess(0), and the shutdown hook would
+                // delete the file out from under the installer.
                 val tempFile = File.createTempFile("ChurchPresenter-update", suffix)
-                tempFile.deleteOnExit()
 
                 connection.inputStream.use { input ->
                     tempFile.outputStream().use { output ->
@@ -219,8 +241,15 @@ fun UpdateAvailableDialog(
                     when {
                         downloadState is DownloadState.Done -> {
                             Button(onClick = {
-                                Desktop.getDesktop().open((downloadState as DownloadState.Done).file)
-                                exitProcess(0)
+                                val file = (downloadState as DownloadState.Done).file
+                                try {
+                                    launchInstaller(file)
+                                    exitProcess(0)
+                                } catch (e: Exception) {
+                                    downloadState = DownloadState.Error(
+                                        e.message ?: "Failed to launch installer"
+                                    )
+                                }
                             }) {
                                 Text(stringResource(Res.string.update_dialog_install_now))
                             }
