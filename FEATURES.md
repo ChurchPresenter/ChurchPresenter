@@ -1,0 +1,101 @@
+# Church Presenter — Features
+
+**Everything your church needs to put words on the screen — songs, scripture, slides, video, captions and broadcast graphics — in one free, open-source app.** 
+
+
+## Songs & Lyrics
+- **Unlimited song library** — organize thousands of songs across as many songbooks as you like, indexed straight from a folder.
+- **Powerful search** — find songs by title or number with contains, starts-with, exact-match and phrase filters, plus category and songbook filters.
+- **Built-in song editor** — add and edit songs with simple verse/chorus formatting; no external tools needed.
+- **Bilingual worship** — show two languages at once, side-by-side or stacked, or switch between primary and secondary on the fly.
+- **Look-ahead for the band** — see the current and next section in advance so transitions stay smooth.
+- **Favorites & play counts** — star the songs you use most and see how often each has been sung.
+- **Bring your existing library** — imports OpenLyrics, SongPro and ChurchPresenter formats, with a bundled converter and ready-to-use sample songs.
+- **Flexible display** — one verse or one line at a time, optional title slides, and full control over how numbers and titles appear.
+
+## Bible & Scripture
+- **Instant verse display** — browse any of the 66 books and put a verse on screen in seconds.
+- **Dual translations** — show a primary and secondary Bible together, and swap them with one click.
+- **Multi-verse ranges** — select and present several verses at once with Ctrl/Shift click.
+- **Search the whole Bible** — search across the entire text or just the current book.
+- **History** — jump back to recently shown passages instantly.
+- **Strong's dictionary** — explore original Hebrew and Greek words with transliteration, pronunciation, definitions and KJV usage.
+
+## Slides & Presentations
+- **PowerPoint, Keynote & PDF** — drop in `.pptx`, `.ppt`, `.key` or `.pdf` files and present them as slides — no Microsoft or Apple software required.
+- **Slide thumbnails & navigation** — see every slide at a glance and jump anywhere.
+- **Presenter notes** — speaker notes from PowerPoint and Keynote flow straight to your stage monitor.
+
+## Images & Media
+- **Image slideshows** — point to a folder and present photos with crossfade, fade and slide transitions, auto-advance and looping.
+- **Audio & video playback** — play local files or network streams (HTTP, RTSP and more), powered by VLC.
+- **Full transport controls** — play, pause, seek, volume, mute, and choose your audio output device.
+- **Background audio** — music keeps playing while you switch tabs or show other content.
+
+## Lower Thirds & Graphics
+- **Animated lower thirds** — display polished Lottie animations for names, titles and welcomes.
+- **Reusable presets** — save lower thirds with editable text fields and recall them instantly.
+- **Built-in generator** — design your own animated lower thirds with the included Lottie generator — no After Effects needed.
+- **Fine timing control** — pause on a frame, hold, and play through with smooth fade in/out.
+
+## Announcements & Timers
+- **On-screen announcements** — show text anywhere on screen with a wide range of slide and scroll animations, custom colors, speed and looping.
+- **Countdown timers** — count down to a duration or to a specific clock time, with custom colors and an end-of-countdown message — perfect for "service starts in…".
+
+## Web & Canvas
+- **Live websites on screen** — present any web page with bookmarks, navigation and zoom, and even type into live pages.
+- **Canvas scene compositor** — build layered scenes from images, text, video, shapes, gradients, clocks, QR codes, live cameras, screen capture, web pages and Bible verses — like a mini production switcher inside the app.
+- **QR codes made easy** — generate QR codes for URLs, WiFi, contact cards, email, SMS and more, right on the slide.
+
+## Live Captions & Translation
+- **Real-time captions** — connect a speech-to-text server to caption your service live.
+- **Live translation** — show transcription, translation, or both together in stacked or side-by-side layouts.
+
+
+## Audience Q&A
+- **Questions from the congregation** — people scan a QR code and submit questions from their phones.
+- **Full moderation** — approve, deny, sort and queue questions before any go live.
+- **Anywhere access** — optional public access lets people ask over mobile data without joining your WiFi.
+- **Voting & history** — let the room upvote approved questions, and export the session afterward.
+
+## Service Planning
+- **Drag-and-drop schedules** — build your whole service from songs, scripture, slides, media, lower thirds, announcements and websites.
+- **Save & reopen services** — store schedules as files and pick up exactly where you left off, with autosave and crash recovery.
+- **Stay organized** — color-coded labels, per-item notes, quick reordering, recents and full undo/redo.
+
+## Projection & Output
+- **Unlimited outputs** — drive as many screens as you have — one window per connected display, plus every DeckLink/SDI device. No artificial limit.
+- **Full screen or lower third** — present full-screen or as a lower-third band, per content type.
+- **Beautiful backgrounds** — solid colors, images, looping video, gradients or transparent — set defaults and per-type overrides.
+- **Broadcast fill + key** — output separate fill and key signals for hardware keying, including SDI via Blackmagic DeckLink.
+- **Typography that fits** — auto-fit text to the screen, with control over fonts, size, alignment, shadows and margins.
+- **Live preview** — always see exactly what's on screen, and lock any output to a chosen tab.
+
+## Stage Monitor
+- **Confidence display for the platform** — give worship leaders and speakers their own screen showing the current slide, next slide, a clock, the countdown timer, section labels and presenter notes — in vertical, horizontal or four-quadrant layouts.
+
+## Mobile & Remote Control
+- **Control from your phone** — a built-in server lets phones and tablets browse songs and scripture, build the schedule and go live — all over your local network.
+- **You stay in charge** — remote actions ask for approval on the desktop, with per-device allow/block lists and optional API-key protection.
+- **Real-time sync** — connected devices update instantly as the schedule and content change.
+
+## Broadcast Integrations
+- **Blackmagic ATEM** — upload animated lower thirds straight into the ATEM media pool and drive the upstream key automatically when you go live — one tap, perfectly timed.
+- **OBS Studio** — automatically switch OBS scenes as your content changes, with per-content-type scene mapping.
+- **Bitfocus Companion** — trigger lower thirds, ATEM keys and any content from a Stream Deck with ready-made HTTP buttons.
+
+## Reporting & Licensing
+- **CCLI usage reports** — automatically track every song and verse you present and export date-filtered CSV/Excel reports for license reporting.
+- **Statistics & charts** — see your most-used songs and passages over any time period.
+
+## Personalization & Workflow
+- **14 languages** — full interface translation including English, Spanish, French, German, Portuguese, Dutch, Polish, Czech, Slovak, Romanian, Ukrainian, Russian, Belarusian and Kazakh.
+- **9 themes** — light, dark, system and six accent themes to match your booth.
+- **Guided setup** — a friendly first-run wizard gets your Bibles, songs and media ready in minutes.
+- **Keyboard-driven** — comprehensive shortcuts for fast, mouse-free operation during a live service.
+- **Portable settings** — export and import your entire configuration to set up another machine instantly.
+- **Stays running** — automatic update checks, crash recovery and launch-at-login keep things reliable.
+
+## Free & Open
+- **Free and open-source** — released under the GNU GPL v3. No subscriptions, no per-seat fees.
+- **Cross-platform desktop** — built on Kotlin/Compose for Windows, macOS and Linux.
