@@ -1,0 +1,188 @@
+CHURCH PRESENTER — END USER LICENSE AGREEMENT (EULA)
+Last Updated: June 2026
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. ACCEPTANCE OF AGREEMENT
+
+This End User License Agreement ("Agreement") governs your use of Church
+Presenter software, applications, websites, documentation, and related services
+(collectively, the "Software").
+
+By downloading, installing, accessing, or using Church Presenter, you
+acknowledge that you have read, understood, and agree to be bound by this
+Agreement.
+
+If you do not agree to this Agreement, do not install or use the Software.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+2. OPEN-SOURCE LICENSE
+
+Church Presenter is free and open-source software distributed under the terms
+of the GNU General Public License Version 3 ("GPLv3"), or any later version
+published by the Free Software Foundation.
+
+Nothing in this Agreement is intended to limit, modify, or restrict any rights
+granted to you under the GPLv3. If any provision of this Agreement conflicts
+with the GPLv3, the GPLv3 shall control.
+
+A copy of the GPLv3 license is included with the Software and is available at:
+https://www.gnu.org/licenses/gpl-3.0.html
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+3. LICENSE GRANT
+
+Subject to compliance with this Agreement and the GPLv3, Church Presenter
+grants you the right to:
+
+  • Installation and use of the Software.
+  • Copy and distribute the Software.
+  • Modify the Software.
+  • Create derivative works.
+  • Share modified versions in accordance with GPLv3 requirements.
+  • Use the Software for personal, ministry, educational, nonprofit, and
+    commercial purposes.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+4. OWNERSHIP
+
+The Software is owned by its respective copyright holders and contributors.
+This Agreement does not transfer ownership of the Software to you.
+
+The Church Presenter name, logos, trademarks, website content, and branding
+elements remain the property of their respective owners unless otherwise stated.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+5. COMMUNITY CONTRIBUTIONS
+
+By voluntarily submitting code, documentation, translations, artwork, bug
+reports, feature requests, or other contributions to the Church Presenter
+Project, you represent that:
+
+  • You have the right to submit the contribution.
+  • Your contribution does not knowingly violate the rights of others.
+  • You grant the Church Presenter Project the right to use, modify,
+    distribute, and sublicense your contribution as part of the project under
+    applicable open-source licensing terms.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+6. THIRD-PARTY COMPONENTS
+
+Church Presenter may include or depend upon third-party software, libraries,
+fonts, media components, or services that are licensed separately. Such
+third-party components remain subject to their respective licenses and terms.
+Examples may include:
+
+  • Firebase services
+  • Google Analytics services
+  • Sentry error reporting
+  • VLC libraries
+  • Java Runtime components
+  • Open-source libraries used for the project
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+7. UPDATES
+
+Church Presenter may provide software updates, bug fixes, security
+improvements, and new features. You are not required to install updates unless
+necessary for compatibility, security, or functionality. The Church Presenter
+Project does not guarantee the availability of future updates.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+8. USER RESPONSIBILITIES
+
+You are responsible for:
+
+  • Maintaining backups of your data.
+  • Protecting access to your systems.
+  • Ensuring compliance with applicable laws and regulations.
+  • Reviewing modified versions before deployment in production environments.
+
+You acknowledge that churches and organizations are responsible for verifying
+the accuracy of presentation content and schedules used during services or
+events.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+9. NO WARRANTY
+
+TO THE MAXIMUM EXTENT PERMITTED BY LAW, THE SOFTWARE IS PROVIDED "AS IS" AND
+"AS AVAILABLE" WITHOUT WARRANTIES OF ANY KIND.
+
+THE CHURCH PRESENTER PROJECT, ITS CONTRIBUTORS, MAINTAINERS, DEVELOPERS,
+VOLUNTEERS, AND COPYRIGHT HOLDERS DISCLAIM ALL WARRANTIES, INCLUDING:
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, NON-INFRINGEMENT, ACCURACY,
+RELIABILITY, AND AVAILABILITY.
+
+YOU ASSUME ALL RISKS ASSOCIATED WITH THE INSTALLATION AND USE OF THE SOFTWARE.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+10. LIMITATION OF LIABILITY
+
+TO THE MAXIMUM EXTENT PERMITTED BY LAW, THE CHURCH PRESENTER PROJECT,
+CONTRIBUTORS, COPYRIGHT HOLDERS, DEVELOPERS, VOLUNTEERS, AND AFFILIATES SHALL
+NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL DAMAGES,
+LOSS OF DATA, LOSS OF PROFITS, LOSS OF GOODWILL, BUSINESS INTERRUPTION, OR
+SERVICE DISRUPTION ARISING FROM OR RELATED TO THE USE OR INABILITY TO USE THE
+SOFTWARE. THIS LIMITATION APPLIES EVEN IF THE POSSIBILITY OF SUCH DAMAGES HAS
+BEEN ADVISED.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+11. TRADEMARKS AND BRANDING
+
+The Church Presenter name, logos, graphics, website design elements, and
+related branding may be protected by trademarks or other intellectual property
+laws. GPLv3 does not grant rights to use Church Presenter trademarks or
+branding in a manner that implies endorsement, sponsorship, or official
+affiliation. Modified versions of the Software should not be represented as
+official Church Presenter releases without permission.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+12. TERMINATION
+
+Your rights under this Agreement automatically terminate if you violate the
+GPLv3 or applicable laws governing the use of the Software. Termination does
+not affect rights already granted to third parties under open-source licensing
+terms.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+13. EXPORT COMPLIANCE
+
+You agree to comply with all applicable export control and sanctions laws
+governing the distribution and use of software.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+14. GOVERNING LAW
+
+To the extent permitted by applicable law, this Agreement shall be governed by
+the laws applicable to the Church Presenter Project's principal place of
+operation, without regard to conflict-of-law principles.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+15. ENTIRE AGREEMENT
+
+This Agreement, together with the GPLv3 license and any applicable open-source
+licenses, constitutes the entire agreement governing your use of the Software.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+16. CONTACT INFORMATION
+
+Church Presenter Project
+Website: https://churchpresenter.org
+GitHub:  https://github.com/ChurchPresenter/ChurchPresenter
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

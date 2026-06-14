@@ -679,10 +679,10 @@
     <string name="announcement_loop_tooltip">0 = infinite loop</string>
     <string name="tooltip_announcement_show">Show Announcement on Display</string>
     <string name="tooltip_announcement_hide">Hide Announcement from Display</string>
-    <string name="license_title">License Agreement — GNU General Public License v3</string>
+    <string name="license_title">End User License Agreement (EULA)</string>
     <string name="license_accept_button">I Accept</string>
     <string name="license_decline_button">Decline &amp; Exit</string>
-    <string name="license_prompt">You must accept the GNU GPL v3 license to use Church Presenter.</string>
+    <string name="license_prompt">Please read and accept the End User License Agreement to use Church Presenter.</string>
 
     <!-- Announcements timer -->
     <string name="timer_title">Timer</string>

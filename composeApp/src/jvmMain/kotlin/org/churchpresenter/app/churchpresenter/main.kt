@@ -145,6 +145,8 @@ import kotlinx.coroutines.CoroutineExceptionHandler
 import org.churchpresenter.app.churchpresenter.models.SelectedVerse
 
 
+private const val CURRENT_EULA_VERSION = 1
+
 private var singleInstanceSocket: java.net.ServerSocket? = null
 
 /**
@@ -278,7 +280,7 @@ fun main() {
 
         val presenterManager = remember { PresenterManager() }
 
-        var licenseAccepted by remember { mutableStateOf(appSettings.licenseAccepted) }
+        var eulaAccepted by remember { mutableStateOf(appSettings.eulaAcceptedVersion >= CURRENT_EULA_VERSION) }
         var showSetupWizard by remember {
             val bibleReady = appSettings.bibleSettings.primaryBible.isNotEmpty()
             val songsReady = appSettings.songSettings.storageDirectory.isNotEmpty()
@@ -436,7 +438,7 @@ fun main() {
             SplashWindow()
         }
 
-        if (appReady && licenseAccepted) {
+        if (appReady && eulaAccepted) {
             Window(
                 onCloseRequest = {
                     val placementStr = when (state.placement) {
@@ -1368,7 +1370,7 @@ fun main() {
             )
         }
 
-        if (appReady && licenseAccepted && showSetupWizard) {
+        if (appReady && eulaAccepted && showSetupWizard) {
             SetupWizardDialog(
                 theme = theme,
                 selectedLanguage = currentLanguage,
@@ -1394,13 +1396,13 @@ fun main() {
             )
         }
 
-        if (appReady && !licenseAccepted) {
+        if (appReady && !eulaAccepted) {
             LicenseDialog(
                 onAccept = {
-                    val updated = appSettings.copy(licenseAccepted = true)
+                    val updated = appSettings.copy(eulaAcceptedVersion = CURRENT_EULA_VERSION)
                     settingsManager.saveSettings(updated)
                     appSettings = updated
-                    licenseAccepted = true
+                    eulaAccepted = true
                 },
                 onDecline = { exitApplication() }
             )

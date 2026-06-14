@@ -59,7 +59,7 @@ fun LicenseDialog(
     // Load license text from resource file
     var licenseText by remember { mutableStateOf("") }
     LaunchedEffect(Unit) {
-        licenseText = Res.readBytes("files/gpl3.txt").toString(Charsets.UTF_8)
+        licenseText = Res.readBytes("files/eula.txt").toString(Charsets.UTF_8)
     }
 
     Window(

@@ -27,7 +27,7 @@ data class AppSettings(
     val windowedLayout: WindowLayoutSettings = WindowLayoutSettings(),
     val theme: String = Constants.SYSTEM,
     val language: String = "en",
-    val licenseAccepted: Boolean = false,
+    val eulaAcceptedVersion: Int = 0,
     val webBookmarks: List<WebBookmark> = emptyList(),
     val windowPlacement: String = "maximized",
     val windowWidth: Int = 1280,
