@@ -2497,7 +2497,7 @@ class CompanionServer {
                     scope.launch {
                         try {
                             val lottieJson = file.readText()
-                            val (w, h) = AtemRenderCache.lottieCanvasSize(lottieJson) ?: (1920 to 1080)
+                            val (w, h) = AtemRenderCache.renderSize(lottieJson, atem)
                             val variant = AtemRenderCache.Variant(clip = false, width = w, height = h, frameCount = 1)
                             val cached = AtemRenderCache.prepare(lottieJson, variant).await()
                             AtemConnectionManager.use(atem.host, atem.port, needsState = true) { client ->
@@ -2546,7 +2546,7 @@ class CompanionServer {
                     scope.launch {
                         try {
                             val lottieJson = file.readText()
-                            val (w, h) = AtemRenderCache.lottieCanvasSize(lottieJson) ?: (1920 to 1080)
+                            val (w, h) = AtemRenderCache.renderSize(lottieJson, atem)
                             val fps = atem.clipFps
                             val frameCount = AtemRenderCache.clipFrameCount(lottieJson, fps) ?: 1
                             val variant = AtemRenderCache.Variant(clip = true, width = w, height = h, fps = fps, frameCount = frameCount)

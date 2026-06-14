@@ -318,11 +318,12 @@ fun LowerThirdTab(
     // Quick upload passes useDetectedFps=false so it always hits the pre-generated cache.
     fun atemVariant(isClip: Boolean, useDetectedFps: Boolean = true): AtemRenderCache.Variant {
         val s = appSettings.atemSettings
-        if (!isClip) return AtemRenderCache.Variant(clip = false, width = s.renderWidth, height = s.renderHeight)
+        val (w, h) = AtemRenderCache.renderSize(jsonContent, s)
+        if (!isClip) return AtemRenderCache.Variant(clip = false, width = w, height = h)
         val fps = (if (useDetectedFps) atemDetectedFps else null) ?: s.clipFps
         val frames = AtemRenderCache.clipFrameCount(jsonContent, fps)
             ?: ((totalDurationMs() / 1000.0) * fps).toInt().coerceAtLeast(1)
-        return AtemRenderCache.Variant(true, s.renderWidth, s.renderHeight, fps, frames)
+        return AtemRenderCache.Variant(true, w, h, fps, frames)
     }
 
     // Kick off (or attach to) cache preparation when the dialog opens or its mode changes,

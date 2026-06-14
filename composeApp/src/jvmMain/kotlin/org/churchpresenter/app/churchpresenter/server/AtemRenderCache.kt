@@ -78,6 +78,10 @@ object AtemRenderCache {
         null
     }
 
+    /** ATEM render size for a lottie: its own canvas, falling back to the configured frame. */
+    fun renderSize(lottieJson: String, atem: AtemSettings): Pair<Int, Int> =
+        lottieCanvasSize(lottieJson) ?: (atem.renderWidth to atem.renderHeight)
+
     /** Clip duration straight from the lottie JSON: (op - ip) / fr seconds. */
     fun lottieDurationMs(lottieJson: String): Long? = try {
         val obj = Json.parseToJsonElement(lottieJson).jsonObject
@@ -152,9 +156,10 @@ object AtemRenderCache {
         scope.launch(Dispatchers.IO) {
             try {
                 val json = file.readText()
-                prepare(json, Variant(clip = false, width = atem.renderWidth, height = atem.renderHeight))
+                val (w, h) = renderSize(json, atem)
+                prepare(json, Variant(clip = false, width = w, height = h))
                 val frames = clipFrameCount(json, atem.clipFps) ?: return@launch
-                prepare(json, Variant(true, atem.renderWidth, atem.renderHeight, atem.clipFps, frames))
+                prepare(json, Variant(true, w, h, atem.clipFps, frames))
             } catch (e: Exception) {
                 System.err.println("[AtemRenderCache] Failed to prepare ${file.name}: ${e.message}")
             }
