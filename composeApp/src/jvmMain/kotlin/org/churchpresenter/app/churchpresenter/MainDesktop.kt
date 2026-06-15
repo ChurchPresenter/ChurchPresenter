@@ -989,7 +989,8 @@ fun MainDesktop(
                                 onPresenting = presenting,
                                 isPresenting = presentingMode == Presenting.BIBLE,
                                 presenterManager = presenterManager,
-                                statisticsManager = statisticsManager
+                                statisticsManager = statisticsManager,
+                                sttManager = sttManager
                             )
 
                             Tabs.SONGS -> SongsTab(

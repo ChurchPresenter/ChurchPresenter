@@ -48,6 +48,8 @@ import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -55,6 +57,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
@@ -113,6 +116,27 @@ import churchpresenter.composeapp.generated.resources.ic_arrow_down
 import churchpresenter.composeapp.generated.resources.ic_arrow_up
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Tv
+import androidx.compose.material.icons.filled.Mic
+import androidx.compose.material.icons.filled.Translate
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.FormatQuote
+import org.churchpresenter.app.churchpresenter.viewmodel.STTManager
+import org.churchpresenter.app.churchpresenter.viewmodel.DetectionSource
+import org.churchpresenter.app.churchpresenter.viewmodel.TextMatchLevel
+import churchpresenter.composeapp.generated.resources.bible_stt_heard
+import churchpresenter.composeapp.generated.resources.bible_stt_listening
+import churchpresenter.composeapp.generated.resources.bible_stt_auto_follow
+import churchpresenter.composeapp.generated.resources.bible_stt_auto_follow_hint
+import churchpresenter.composeapp.generated.resources.bible_stt_clear
+import churchpresenter.composeapp.generated.resources.bible_stt_src_transcribed
+import churchpresenter.composeapp.generated.resources.bible_stt_src_translated
+import churchpresenter.composeapp.generated.resources.bible_stt_src_highlighted
+import churchpresenter.composeapp.generated.resources.bible_stt_src_matched
+import churchpresenter.composeapp.generated.resources.bible_stt_match_label
+import churchpresenter.composeapp.generated.resources.bible_stt_level_off
+import churchpresenter.composeapp.generated.resources.bible_stt_level_conservative
+import churchpresenter.composeapp.generated.resources.bible_stt_level_balanced
+import churchpresenter.composeapp.generated.resources.bible_stt_level_aggressive
 import churchpresenter.composeapp.generated.resources.ic_close
 import churchpresenter.composeapp.generated.resources.ic_pause
 import churchpresenter.composeapp.generated.resources.ic_search
@@ -159,6 +183,7 @@ fun BibleTab(
     isPresenting: Boolean = false,
     presenterManager: PresenterManager? = null,
     statisticsManager: StatisticsManager? = null,
+    sttManager: STTManager? = null,
 ) {
     // Update settings when bible paths change
     val isFirstComposition = remember { mutableStateOf(true) }
@@ -182,6 +207,36 @@ fun BibleTab(
             viewModel.selectVerseByDetails(item.bookName, item.chapter, item.verseNumber, item.verseRange)
         }
     }
+
+    // ── Speech-driven reference detection ──────────────────────────────────────
+    // The whole helper is tied to the STT connection: it only scans/shows while the STT tab is
+    // connected to the server, and clears its chips on disconnect so nothing stale lingers.
+    val sttConnected = sttManager?.connected?.value == true
+    if (sttManager != null) {
+        LaunchedEffect(sttManager, sttConnected) {
+            if (!sttConnected) {
+                viewModel.clearDetectedReferences()
+                return@LaunchedEffect
+            }
+            // Scan the tail of recent finalized segments + the live in-progress text; the ViewModel
+            // de-dupes, so re-sending overlapping/growing text is cheap and safe. The English
+            // translation of the same segments (aligned by id, so the delay doesn't matter) is sent
+            // too, to recover book names the Russian STT garbles.
+            snapshotFlow {
+                val window = sttManager.segments.takeLast(4)
+                val ruText = window.joinToString(" ") { it.text } + " " + sttManager.inProgressText.value
+                val transById = sttManager.translationSegments.associateBy { it.id }
+                val enText = window.mapNotNull { transById[it.id]?.text }.joinToString(" ") +
+                    " " + sttManager.inProgressTranslation.value
+                val highlights = if (sttManager.wordHighlightingEnabled.value)
+                    sttManager.highlightedWords.toList() else emptyList()
+                Triple(ruText, enText, highlights)
+            }.collect { (ru, en, hl) -> viewModel.ingestTranscript(ru, en, hl) }
+        }
+    }
+    val detectedReferences by viewModel.detectedReferences
+    val autoFollowEnabled by viewModel.autoFollowEnabled
+    val textMatchLevel by viewModel.textMatchLevel
 
     val books by viewModel.books
     val selectedBookIndex by viewModel.selectedBookIndex
@@ -625,6 +680,177 @@ fun BibleTab(
                     ) {
                         Icon(painter = painterResource(Res.drawable.ic_search), contentDescription = stringResource(Res.string.search), modifier = Modifier.size(20.dp))
                     }
+                }
+            }
+        }
+
+        // ── Detected references strip — visible whenever STT is connected ──
+        if (sttConnected) {
+            // Spoken references render as compact chips; reverse-lookup text matches render as
+            // History-style rows (reference + verse text) below them.
+            val spokenRefs = detectedReferences.filter { DetectionSource.MATCHED_TEXT !in it.sources }
+            val matchedRefs = detectedReferences.filter { DetectionSource.MATCHED_TEXT in it.sources }
+            val levelName = when (textMatchLevel) {
+                TextMatchLevel.OFF -> stringResource(Res.string.bible_stt_level_off)
+                TextMatchLevel.CONSERVATIVE -> stringResource(Res.string.bible_stt_level_conservative)
+                TextMatchLevel.BALANCED -> stringResource(Res.string.bible_stt_level_balanced)
+                TextMatchLevel.AGGRESSIVE -> stringResource(Res.string.bible_stt_level_aggressive)
+            }
+            FlowRow(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp).padding(bottom = 4.dp),
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.height(32.dp).padding(end = 2.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Mic,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(Modifier.width(4.dp))
+                    Text(
+                        text = stringResource(Res.string.bible_stt_heard),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                if (detectedReferences.isEmpty()) {
+                    // Nothing detected yet — confirm the helper is live and waiting.
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.height(32.dp)
+                    ) {
+                        Text(
+                            text = stringResource(Res.string.bible_stt_listening),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                        )
+                    }
+                }
+                spokenRefs.forEach { ref ->
+                    SuggestionChip(
+                        onClick = { viewModel.applyDetectedReference(ref) },
+                        label = {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                ref.sources.forEach { src ->
+                                    val (icon, descRes, tint) = when (src) {
+                                        DetectionSource.TRANSCRIBED -> Triple(
+                                            Icons.Filled.Mic, Res.string.bible_stt_src_transcribed,
+                                            MaterialTheme.colorScheme.primary
+                                        )
+                                        DetectionSource.TRANSLATED -> Triple(
+                                            Icons.Filled.Translate, Res.string.bible_stt_src_translated,
+                                            MaterialTheme.colorScheme.tertiary
+                                        )
+                                        DetectionSource.HIGHLIGHTED -> Triple(
+                                            Icons.Filled.Star, Res.string.bible_stt_src_highlighted,
+                                            MaterialTheme.colorScheme.secondary
+                                        )
+                                        DetectionSource.MATCHED_TEXT -> Triple(
+                                            Icons.Filled.FormatQuote, Res.string.bible_stt_src_matched,
+                                            MaterialTheme.colorScheme.tertiary
+                                        )
+                                    }
+                                    TooltipArea(tooltip = {
+                                        Surface(shadowElevation = 4.dp, color = MaterialTheme.colorScheme.surfaceVariant) {
+                                            Text(
+                                                text = stringResource(descRes),
+                                                style = MaterialTheme.typography.bodySmall,
+                                                modifier = Modifier.padding(8.dp)
+                                            )
+                                        }
+                                    }) {
+                                        Icon(
+                                            imageVector = icon,
+                                            contentDescription = stringResource(descRes),
+                                            tint = tint,
+                                            modifier = Modifier.size(13.dp)
+                                        )
+                                    }
+                                    Spacer(Modifier.width(3.dp))
+                                }
+                                Text(ref.label, style = MaterialTheme.typography.labelLarge)
+                            }
+                        }
+                    )
+                }
+                TooltipArea(tooltip = {
+                    Surface(shadowElevation = 4.dp, color = MaterialTheme.colorScheme.surfaceVariant) {
+                        Text(
+                            text = stringResource(Res.string.bible_stt_auto_follow_hint),
+                            style = MaterialTheme.typography.bodySmall,
+                            modifier = Modifier.padding(8.dp)
+                        )
+                    }
+                }) {
+                    FilterChip(
+                        selected = autoFollowEnabled,
+                        onClick = { viewModel.setAutoFollow(!autoFollowEnabled) },
+                        label = { Text(stringResource(Res.string.bible_stt_auto_follow)) },
+                        leadingIcon = {
+                            Icon(Icons.Filled.Tv, contentDescription = null, modifier = Modifier.size(16.dp))
+                        }
+                    )
+                }
+                // Reverse-lookup level: tap to cycle Off → Conservative → Balanced → Aggressive.
+                FilterChip(
+                    selected = textMatchLevel != TextMatchLevel.OFF,
+                    onClick = {
+                        val all = TextMatchLevel.values()
+                        viewModel.setTextMatchLevel(all[(textMatchLevel.ordinal + 1) % all.size])
+                    },
+                    label = { Text("${stringResource(Res.string.bible_stt_match_label)}: $levelName") },
+                    leadingIcon = {
+                        Icon(Icons.Filled.FormatQuote, contentDescription = null, modifier = Modifier.size(16.dp))
+                    }
+                )
+                if (detectedReferences.isNotEmpty()) {
+                    IconButton(
+                        onClick = { viewModel.clearDetectedReferences() },
+                        modifier = Modifier.size(32.dp)
+                    ) {
+                        Icon(
+                            painter = painterResource(Res.drawable.ic_close),
+                            contentDescription = stringResource(Res.string.bible_stt_clear),
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+                }
+            }
+
+            // ── Reverse-lookup matches — History-style rows (reference + verse text) ──
+            matchedRefs.forEach { ref ->
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                        .padding(horizontal = 6.dp)
+                        .clickable { viewModel.applyDetectedReference(ref); focusRequester.requestFocus() }
+                        .padding(vertical = 2.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.FormatQuote,
+                        contentDescription = stringResource(Res.string.bible_stt_src_matched),
+                        tint = MaterialTheme.colorScheme.tertiary,
+                        modifier = Modifier.size(14.dp)
+                    )
+                    Spacer(Modifier.width(4.dp))
+                    Text(
+                        text = buildAnnotatedString {
+                            withStyle(SpanStyle(fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.primary)) {
+                                append(ref.label)
+                            }
+                            ref.verseText?.let { append("  $it") }
+                        },
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.fillMaxWidth()
+                    )
                 }
             }
         }
