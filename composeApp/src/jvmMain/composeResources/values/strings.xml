@@ -11,6 +11,11 @@
     <string name="no_lyrics_available">No lyrics available for this song</string>
     <string name="tune">Tune</string>
     <string name="search">Search</string>
+    <string name="bible_smart_search_hint">Reference or text — e.g. John 3:16, mat 1, or a word</string>
+    <string name="bible_search_mode_auto">Auto</string>
+    <string name="bible_search_mode_reference">Reference</string>
+    <string name="bible_search_mode_text">Text</string>
+    <string name="bible_search_mode_tooltip">Tap to switch — Auto: jump to references, search everything else. Reference: navigate only. Text: always search verse text.</string>
     <string name="replace">Replace with</string>
     <string name="search_songs">Search songs...</string>
     <string name="song_book">Song Book</string>

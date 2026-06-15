@@ -123,17 +123,22 @@ import churchpresenter.composeapp.generated.resources.primary_bible
 import churchpresenter.composeapp.generated.resources.secondary_bible
 import churchpresenter.composeapp.generated.resources.scope
 import churchpresenter.composeapp.generated.resources.search
+import churchpresenter.composeapp.generated.resources.bible_smart_search_hint
+import churchpresenter.composeapp.generated.resources.bible_search_mode_auto
+import churchpresenter.composeapp.generated.resources.bible_search_mode_reference
+import churchpresenter.composeapp.generated.resources.bible_search_mode_text
+import churchpresenter.composeapp.generated.resources.bible_search_mode_tooltip
 import churchpresenter.composeapp.generated.resources.hold_live
 import churchpresenter.composeapp.generated.resources.swap_bibles
 import churchpresenter.composeapp.generated.resources.verse
 import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
 import org.churchpresenter.app.churchpresenter.composables.initialPassClickable
-import org.churchpresenter.app.churchpresenter.composables.SearchTextField
 import org.churchpresenter.app.churchpresenter.composables.SelectionListWithIndex
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.models.ScheduleItem
 import org.churchpresenter.app.churchpresenter.models.SelectedVerse
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
+import org.churchpresenter.app.churchpresenter.viewmodel.BibleSearchMode
 import org.churchpresenter.app.churchpresenter.viewmodel.BibleViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.jetbrains.compose.resources.painterResource
@@ -185,6 +190,7 @@ fun BibleTab(
     val searchQuery by viewModel.searchQuery
     val searchResults by viewModel.searchResults
     val isSearchMode by viewModel.isSearchMode
+    val searchMode by viewModel.searchMode
     val filteredBooks by viewModel.filteredBooks
     val filteredChapters by viewModel.filteredChapters
     val filteredVerses by viewModel.filteredVerses
@@ -396,6 +402,74 @@ fun BibleTab(
         }
     }
 
+    // Column header — keeps the Book/Chapter list tops aligned with the verse toolbar row
+    // now that the per-column filter fields have been replaced by the unified search box.
+    @Composable
+    fun ColumnHeader(label: String) {
+        Box(
+            modifier = Modifier.fillMaxWidth().height(48.dp).padding(start = 4.dp, end = 8.dp),
+            contentAlignment = Alignment.CenterStart
+        ) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+    }
+
+    // Compact Auto / Reference / Text mode chip, shown inside the search field (leading slot).
+    @Composable
+    fun SearchModeChip(modifier: Modifier = Modifier) {
+        val (label, container, content) = when (searchMode) {
+            BibleSearchMode.AUTO -> Triple(
+                Res.string.bible_search_mode_auto,
+                MaterialTheme.colorScheme.secondaryContainer,
+                MaterialTheme.colorScheme.onSecondaryContainer
+            )
+            BibleSearchMode.REFERENCE -> Triple(
+                Res.string.bible_search_mode_reference,
+                MaterialTheme.colorScheme.tertiaryContainer,
+                MaterialTheme.colorScheme.onTertiaryContainer
+            )
+            BibleSearchMode.TEXT -> Triple(
+                Res.string.bible_search_mode_text,
+                MaterialTheme.colorScheme.primaryContainer,
+                MaterialTheme.colorScheme.onPrimaryContainer
+            )
+        }
+        TooltipArea(
+            tooltip = {
+                Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
+                    Text(
+                        text = stringResource(Res.string.bible_search_mode_tooltip),
+                        color = MaterialTheme.colorScheme.inverseOnSurface,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+            },
+            tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
+        ) {
+            Surface(
+                onClick = { viewModel.cycleSearchMode(); focusRequester.requestFocus() },
+                modifier = modifier,
+                shape = MaterialTheme.shapes.small,
+                color = container,
+                contentColor = content
+            ) {
+                Text(
+                    text = stringResource(label),
+                    style = MaterialTheme.typography.labelMedium,
+                    maxLines = 1,
+                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
+                )
+            }
+        }
+    }
+
     @Composable
     fun DragHandle(onDrag: (Float) -> Unit) {
         Box(
@@ -428,11 +502,27 @@ fun BibleTab(
                 Column(modifier = Modifier.fillMaxWidth()) {
                     OutlinedTextField(
                         modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp)
-                            .onFocusChanged { searchFieldFocused = it.isFocused },
+                            .onFocusChanged { searchFieldFocused = it.isFocused }
+                            .onPreviewKeyEvent { e ->
+                                if (e.type == KeyEventType.KeyDown && e.key == Key.Enter) {
+                                    viewModel.submitSmartQuery(); focusRequester.requestFocus(); true
+                                } else false
+                            },
                         value = searchQuery,
-                        onValueChange = { viewModel.updateSearchQuery(it) },
+                        onValueChange = { viewModel.onSmartQueryChanged(it) },
                         textStyle = MaterialTheme.typography.bodyMedium,
                         label = { Text(text = stringResource(Res.string.search), style = MaterialTheme.typography.bodyMedium) },
+                        placeholder = { Text(text = stringResource(Res.string.bible_smart_search_hint), style = MaterialTheme.typography.bodyMedium) },
+                        trailingIcon = {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                if (searchQuery.isNotEmpty()) {
+                                    IconButton(onClick = { viewModel.clearSearch(); focusRequester.requestFocus() }) {
+                                        Icon(painter = painterResource(Res.drawable.ic_close), contentDescription = stringResource(Res.string.clear), modifier = Modifier.size(20.dp))
+                                    }
+                                }
+                                SearchModeChip(modifier = Modifier.padding(end = 8.dp))
+                            }
+                        },
                         singleLine = true,
                         maxLines = 1,
                         colors = OutlinedTextFieldDefaults.colors().copy(
@@ -462,25 +552,13 @@ fun BibleTab(
                             }
                         )
                         IconButton(
-                            onClick = { viewModel.performSearch() },
+                            onClick = { viewModel.submitSmartQuery(); focusRequester.requestFocus() },
                             colors = IconButtonDefaults.iconButtonColors(
                                 containerColor = MaterialTheme.colorScheme.primary,
                                 contentColor = MaterialTheme.colorScheme.onPrimary
                             )
                         ) {
                             Icon(painter = painterResource(Res.drawable.ic_search), contentDescription = stringResource(Res.string.search), modifier = Modifier.size(20.dp))
-                        }
-                        if (isSearchMode) {
-                            IconButton(
-                                modifier = Modifier.padding(start = 4.dp),
-                                onClick = { viewModel.clearSearch() },
-                                colors = IconButtonDefaults.iconButtonColors(
-                                    containerColor = MaterialTheme.colorScheme.secondary,
-                                    contentColor = MaterialTheme.colorScheme.onSecondary
-                                )
-                            ) {
-                                Icon(painter = painterResource(Res.drawable.ic_close), contentDescription = stringResource(Res.string.clear), modifier = Modifier.size(20.dp))
-                            }
                         }
                     }
                 }
@@ -489,11 +567,27 @@ fun BibleTab(
                 Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
                     OutlinedTextField(
                         modifier = Modifier.weight(1f).padding(end = 8.dp)
-                            .onFocusChanged { searchFieldFocused = it.isFocused },
+                            .onFocusChanged { searchFieldFocused = it.isFocused }
+                            .onPreviewKeyEvent { e ->
+                                if (e.type == KeyEventType.KeyDown && e.key == Key.Enter) {
+                                    viewModel.submitSmartQuery(); focusRequester.requestFocus(); true
+                                } else false
+                            },
                         value = searchQuery,
-                        onValueChange = { viewModel.updateSearchQuery(it) },
+                        onValueChange = { viewModel.onSmartQueryChanged(it) },
                         textStyle = MaterialTheme.typography.bodyMedium,
                         label = { Text(text = stringResource(Res.string.search), style = MaterialTheme.typography.bodyMedium) },
+                        placeholder = { Text(text = stringResource(Res.string.bible_smart_search_hint), style = MaterialTheme.typography.bodyMedium) },
+                        trailingIcon = {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                if (searchQuery.isNotEmpty()) {
+                                    IconButton(onClick = { viewModel.clearSearch(); focusRequester.requestFocus() }) {
+                                        Icon(painter = painterResource(Res.drawable.ic_close), contentDescription = stringResource(Res.string.clear), modifier = Modifier.size(20.dp))
+                                    }
+                                }
+                                SearchModeChip(modifier = Modifier.padding(end = 8.dp))
+                            }
+                        },
                         singleLine = true,
                         maxLines = 1,
                         colors = OutlinedTextFieldDefaults.colors().copy(
@@ -522,25 +616,13 @@ fun BibleTab(
                         }
                     )
                     IconButton(
-                        onClick = { viewModel.performSearch() },
+                        onClick = { viewModel.submitSmartQuery(); focusRequester.requestFocus() },
                         colors = IconButtonDefaults.iconButtonColors(
                             containerColor = MaterialTheme.colorScheme.primary,
                             contentColor = MaterialTheme.colorScheme.onPrimary
                         )
                     ) {
                         Icon(painter = painterResource(Res.drawable.ic_search), contentDescription = stringResource(Res.string.search), modifier = Modifier.size(20.dp))
-                    }
-                    if (isSearchMode) {
-                        IconButton(
-                            modifier = Modifier.padding(start = 4.dp),
-                            onClick = { viewModel.clearSearch() },
-                            colors = IconButtonDefaults.iconButtonColors(
-                                containerColor = MaterialTheme.colorScheme.secondary,
-                                contentColor = MaterialTheme.colorScheme.onSecondary
-                            )
-                        ) {
-                            Icon(painter = painterResource(Res.drawable.ic_close), contentDescription = stringResource(Res.string.clear), modifier = Modifier.size(20.dp))
-                        }
                     }
                 }
             }
@@ -815,9 +897,7 @@ fun BibleTab(
 
                 // Book column (resizable)
                 Column(modifier = Modifier.width(with(density) { colWBook.toDp() }).fillMaxHeight()) {
-                    SearchTextField(label = stringResource(Res.string.book)) { query ->
-                        viewModel.updateBookSearchQuery(query)
-                    }
+                    ColumnHeader(stringResource(Res.string.book))
                     SelectionListWithIndex(
                         list = filteredBooks,
                         selectedIndex = filteredBooks.indexOf(books.getOrNull(selectedBookIndex) ?: "").coerceAtLeast(0),
@@ -841,9 +921,7 @@ fun BibleTab(
 
                 // Chapter column (resizable)
                 Column(modifier = Modifier.width(with(density) { colWChapter.toDp() }).fillMaxHeight()) {
-                    SearchTextField(label = stringResource(Res.string.chapter)) { query ->
-                        viewModel.updateChapterSearchQuery(query)
-                    }
+                    ColumnHeader(stringResource(Res.string.chapter))
                     SelectionListWithIndex(
                         list = filteredChapters,
                         selectedIndex = filteredChapters.indexOf(selectedChapter.toString()).coerceAtLeast(0),
@@ -866,12 +944,14 @@ fun BibleTab(
 
                     // Shared toolbar row (verse search + buttons)
                     Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                        SearchTextField(
-                            modifier = Modifier.width(220.dp),
-                            label = stringResource(Res.string.verse),
-                        ) { query ->
-                            viewModel.updateVerseSearchQuery(query)
-                        }
+                        Text(
+                            text = stringResource(Res.string.verse),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.padding(start = 4.dp, end = 8.dp)
+                        )
                         Spacer(modifier = Modifier.width(8.dp))
                         toolbarContent()
                     }

@@ -3,11 +3,14 @@ package org.churchpresenter.app.churchpresenter.viewmodel
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -20,6 +23,9 @@ import org.churchpresenter.app.churchpresenter.data.BibleBookNames
 import org.churchpresenter.app.churchpresenter.data.BibleSearch
 import org.churchpresenter.app.churchpresenter.models.SelectedVerse
 import java.io.File
+
+/** Mode of the unified Bible search box. */
+enum class BibleSearchMode { AUTO, REFERENCE, TEXT }
 
 class BibleViewModel(
     private var appSettings: AppSettings,
@@ -79,6 +85,13 @@ class BibleViewModel(
 
     private val _isSearchMode = mutableStateOf(false)
     val isSearchMode: State<Boolean> = _isSearchMode
+
+    // Unified search box mode:
+    //  AUTO      — references navigate, anything else searches verse text
+    //  REFERENCE — only navigation; non-references do nothing (never searches)
+    //  TEXT      — everything is treated as verse text (nothing navigates)
+    private val _searchMode = mutableStateOf(BibleSearchMode.AUTO)
+    val searchMode: State<BibleSearchMode> = _searchMode
 
     // Dynamic book name mapping for cross-language search
     private val _bookNameMapping = mutableStateOf<Map<String, String>>(emptyMap())
@@ -214,6 +227,7 @@ class BibleViewModel(
     companion object {
         private const val CANONICAL_BOOK_COUNT = 66
         private const val CLICK_DEBOUNCE_MS = 300L
+        private const val LIVE_SEARCH_DEBOUNCE_MS = 300L
         private val STANDARD_ENGLISH_BOOKS = listOf(
             "genesis", "exodus", "leviticus", "numbers", "deuteronomy", "joshua", "judges", "ruth",
             "1 samuel", "2 samuel", "1 kings", "2 kings", "1 chronicles", "2 chronicles",
@@ -229,6 +243,7 @@ class BibleViewModel(
 
     private val viewModelScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     private var loadChapterJob: kotlinx.coroutines.Job? = null
+    private var searchJob: kotlinx.coroutines.Job? = null
     private var lastChapterSelectTime = 0L
     private var lastBookSelectTime = 0L
 
@@ -835,58 +850,286 @@ class BibleViewModel(
         refreshFilteredLists()
     }
 
-    fun performSearch() {
+    /** Runs an immediate full-text search of the verse text (used by the 🔍 button and Enter). */
+    fun performSearch() = launchSearch(debounceMs = 0L)
+
+    /** Debounced live text search — runs as the user types in the unified box. */
+    private fun scheduleLiveSearch() = launchSearch(debounceMs = LIVE_SEARCH_DEBOUNCE_MS)
+
+    /**
+     * Searches the verse text for the current query off the UI thread, latest-wins. Respects the
+     * Scope (Entire Bible / Current Book) and Mode (Contains / Exact) selections. Queries shorter
+     * than 2 chars are ignored so a single letter doesn't return the whole Bible.
+     */
+    private fun launchSearch(debounceMs: Long) {
         val query = _searchQuery.value.trim()
-        if (query.isEmpty()) {
-            // Clear search results
+        searchJob?.cancel()
+        if (query.length < 2) {
             _searchResults.value = emptyList()
             _isSearchMode.value = false
             return
         }
+        val bible = _primaryBible.value ?: return
+        val isExactMatch = _selectedModeIndex.value == 1
+        val scopeIndex = _selectedScopeIndex.value
+        val bookIndex = _selectedBookIndex.value
 
-        _primaryBible.value?.let { bible ->
-            try {
-                // Determine search mode based on selectedModeIndex
-                // 0 = Contains, 1 = Exact Match
-                val isExactMatch = _selectedModeIndex.value == 1
-
-                // Build regex pattern
-                val pattern = if (isExactMatch) {
-                    "\\b${Regex.escape(query)}\\b"
-                } else {
-                    Regex.escape(query)
-                }
-                val searchRegex = Regex(pattern, RegexOption.IGNORE_CASE)
-
-                // Determine scope based on selectedScopeIndex
-                // 0 = Entire Bible, 1 = Current Book
-                val results = when (_selectedScopeIndex.value) {
-                    1 -> {
-                        // Search in current book only
-                        val bookId = bible.getBookId(_selectedBookIndex.value)
-                        bible.searchBible(allWords = false, searchExp = searchRegex, book = bookId)
-                    }
-                    else -> {
-                        // Search entire Bible
+        searchJob = viewModelScope.launch {
+            if (debounceMs > 0) delay(debounceMs)
+            val results = withContext(Dispatchers.IO) {
+                try {
+                    val pattern = if (isExactMatch) "\\b${Regex.escape(query)}\\b" else Regex.escape(query)
+                    val searchRegex = Regex(pattern, RegexOption.IGNORE_CASE)
+                    if (scopeIndex == 1) {
+                        bible.searchBible(allWords = false, searchExp = searchRegex, book = bible.getBookId(bookIndex))
+                    } else {
                         bible.searchBible(allWords = false, searchExp = searchRegex)
                     }
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    emptyList()
                 }
-
+            }
+            if (isActive) {
                 _searchResults.value = results
                 _isSearchMode.value = true
-
-            } catch (e: Exception) {
-                e.printStackTrace()
-                _searchResults.value = emptyList()
-                _isSearchMode.value = false
             }
         }
     }
 
+    /** Cycles Auto → Reference → Text → Auto and re-evaluates the current query under the new mode. */
+    fun cycleSearchMode() {
+        _searchMode.value = when (_searchMode.value) {
+            BibleSearchMode.AUTO -> BibleSearchMode.REFERENCE
+            BibleSearchMode.REFERENCE -> BibleSearchMode.TEXT
+            BibleSearchMode.TEXT -> BibleSearchMode.AUTO
+        }
+        onSmartQueryChanged(_searchQuery.value)
+    }
+
     fun clearSearch() {
+        searchJob?.cancel()
         _searchQuery.value = ""
         _searchResults.value = emptyList()
         _isSearchMode.value = false
+    }
+
+    // ── Smart (unified) search ────────────────────────────────────────────
+    // A single box handles both Scripture references ("mat 1:6", "john 3", "ps 23:1-3")
+    // and free-text content search ("love your enemies"). References navigate live as the
+    // user types; free text runs a full-text search on Enter / the search button.
+
+    private data class SmartReference(
+        val bookIndex: Int,
+        val chapter: Int?,
+        val verseStart: Int?,
+        val verseEnd: Int?
+    )
+
+    /** Maps a canonical book id (1-based) to its index in the displayed [_books] list. */
+    private fun canonicalBookIdToIndex(canonicalId: Int): Int? {
+        val localized = _primaryBible.value?.getBookName(canonicalId) ?: return null
+        return _books.value.indexOf(localized).takeIf { it >= 0 }
+    }
+
+    /**
+     * Scores how well [name] matches the query (both already lowercased). Spaces are ignored on a
+     * second pass so e.g. "1cor"/"1 co" still match "1 corinthians". Higher is better; 0 = no match.
+     */
+    private fun scoreNameMatch(name: String, norm: String, normNoSpace: String): Int {
+        val nameNoSpace = name.replace(" ", "")
+        return when {
+            name == norm || nameNoSpace == normNoSpace -> 100
+            name.startsWith(norm) || nameNoSpace.startsWith(normNoSpace) -> 80
+            name.contains(norm) || nameNoSpace.contains(normNoSpace) -> 60
+            else -> 0
+        }
+    }
+
+    /**
+     * Returns `(bookIndex, score)` pairs for [token] ordered best-first, using a plain
+     * contains/prefix/exact search (no abbreviation table). Matches against the localized
+     * (displayed) names and, for cross-language support, the standard English names. Ties are
+     * broken by the shortest book name, then canonical order (so "john" beats "1 john"/"2 john").
+     */
+    private fun rankedBookMatches(token: String): List<Pair<Int, Int>> {
+        val norm = token.trim().lowercase().replace(Regex("\\s+"), " ")
+        if (norm.isEmpty()) return emptyList()
+        val normNoSpace = norm.replace(" ", "")
+        val books = _books.value
+        if (books.isEmpty()) return emptyList()
+
+        val scored = linkedMapOf<Int, Int>()
+        fun consider(index: Int?, score: Int) {
+            if (index == null || index < 0 || score <= 0) return
+            val prev = scored[index]
+            if (prev == null || score > prev) scored[index] = score
+        }
+
+        // Localized (displayed) book names
+        books.forEachIndexed { i, name ->
+            consider(i, scoreNameMatch(name.lowercase(), norm, normNoSpace))
+        }
+
+        // Standard English names (cross-language search)
+        STANDARD_ENGLISH_BOOKS.forEachIndexed { i, english ->
+            consider(canonicalBookIdToIndex(i + 1), scoreNameMatch(english, norm, normNoSpace))
+        }
+
+        return scored.entries
+            .sortedWith(
+                compareByDescending<Map.Entry<Int, Int>> { it.value }
+                    .thenBy { books.getOrNull(it.key)?.length ?: Int.MAX_VALUE }
+                    .thenBy { it.key }
+            )
+            .map { it.key to it.value }
+    }
+
+    /** Best book match for a reference where a chapter/verse is also present. */
+    private fun resolveBook(token: String): Int = rankedBookMatches(token).firstOrNull()?.first ?: -1
+
+    /**
+     * Book match for a bare book name (no chapter). Navigates only when there is a single best
+     * match — i.e. an exact match, or a unique top score — so live typing doesn't flicker through
+     * books on ambiguous input like "jo" (Joshua/Job/Joel/Jonah/John all tie) or "cor" (1 & 2 Cor).
+     */
+    private fun resolveBookForLiveNav(token: String): Int {
+        val norm = token.trim().lowercase()
+        if (norm.isEmpty()) return -1
+        _books.value.indexOfFirst { it.lowercase() == norm }.takeIf { it >= 0 }?.let { return it }
+        val ranked = rankedBookMatches(token)
+        val top = ranked.firstOrNull() ?: return -1
+        val topCount = ranked.count { it.second == top.second }
+        return if (topCount == 1) top.first else -1
+    }
+
+    /**
+     * Parses [input] as a Scripture reference. Recognizes an optional book token followed by a
+     * chapter and an optional `:verse` (or `:verse-verseEnd`). When the book token is empty the
+     * current book is used (e.g. "3:16" or "5"). Returns null when the input is not a reference.
+     */
+    private fun parseReference(input: String): SmartReference? {
+        val refRegex = Regex("^(.*?)\\s*(\\d+)(?:\\s*[:. ]\\s*(\\d+)(?:\\s*-\\s*(\\d+))?)?\\s*$")
+        val match = refRegex.find(input)
+        if (match != null) {
+            val bookToken = match.groupValues[1].trim()
+            val chapter = match.groupValues[2].toIntOrNull()
+            val verseStart = match.groupValues[3].toIntOrNull()
+            val verseEnd = match.groupValues[4].toIntOrNull()
+            val bookIndex = if (bookToken.isEmpty()) {
+                _selectedBookIndex.value
+            } else {
+                resolveBook(bookToken).takeIf { it >= 0 } ?: return null
+            }
+            return SmartReference(bookIndex, chapter, verseStart, verseEnd)
+        }
+        // No trailing number — treat as a bare book name if it resolves unambiguously
+        val bookIndex = resolveBookForLiveNav(input)
+        return if (bookIndex >= 0) SmartReference(bookIndex, null, null, null) else null
+    }
+
+    /** True when [query] resolves to a Scripture reference (book / chapter / verse). */
+    fun isReferenceQuery(query: String): Boolean = parseReference(query.trim()) != null
+
+    /**
+     * Navigates the browse columns to [bookIndex], [chapter] and optional verse range without the
+     * click debounce, so it stays responsive while the user types a reference.
+     */
+    private fun navigateToReference(ref: SmartReference) {
+        val bible = _primaryBible.value ?: return
+        val bookCount = minOf(bible.getBookCount(), CANONICAL_BOOK_COUNT)
+        if (bookCount == 0) return
+        val idx = ref.bookIndex.coerceIn(0, bookCount - 1)
+        val targetChapter = (ref.chapter ?: 1).coerceAtLeast(1)
+
+        searchJob?.cancel()
+        _isSearchMode.value = false
+        _searchResults.value = emptyList()
+        _selectedBookIndex.value = idx
+        _selectedChapter.value = targetChapter
+        _selectedVerseIndex.value = 0
+        _selectedVerseIndices.clear()
+        _multiVerseEnabled.value = false
+
+        loadChapterJob?.cancel()
+        loadChapterJob = viewModelScope.launch {
+            if (!_isFullyLoadedFlow.value) _isFullyLoadedFlow.first { it }
+            val bookId = bible.getBookId(idx)
+            val chapterVerses = withContext(Dispatchers.IO) {
+                bible.getChapter(bookId, targetChapter).verses
+            }
+            _verses.value = chapterVerses
+
+            val verseStart = ref.verseStart
+            if (verseStart != null) {
+                val startIdx = chapterVerses.indexOfFirst { it.startsWith("$verseStart. ") }
+                _selectedVerseIndex.value = if (startIdx >= 0) startIdx else 0
+                val verseEnd = ref.verseEnd
+                if (verseEnd != null && verseEnd > verseStart) {
+                    _selectedVerseIndices.clear()
+                    for (v in verseStart..verseEnd) {
+                        val vIdx = chapterVerses.indexOfFirst { it.startsWith("$v. ") }
+                        if (vIdx >= 0) _selectedVerseIndices.add(vIdx)
+                    }
+                    _multiVerseEnabled.value = _selectedVerseIndices.size > 1
+                }
+            }
+            _verseSelectionToken.value++
+            refreshFilteredLists()
+        }
+    }
+
+    /**
+     * Called on every keystroke in the unified search box. In Auto mode a recognized reference
+     * navigates live and anything else runs a debounced live text search; in Text mode everything
+     * is treated as verse text and live-searched (so book-name words like "john" are searchable).
+     */
+    fun onSmartQueryChanged(query: String) {
+        _searchQuery.value = query
+        val trimmed = query.trim()
+        if (trimmed.isEmpty()) {
+            searchJob?.cancel()
+            _isSearchMode.value = false
+            _searchResults.value = emptyList()
+            return
+        }
+        when (_searchMode.value) {
+            BibleSearchMode.TEXT -> scheduleLiveSearch()
+            BibleSearchMode.REFERENCE -> {
+                searchJob?.cancel()
+                _isSearchMode.value = false
+                _searchResults.value = emptyList()
+                parseReference(trimmed)?.let { navigateToReference(it) }
+            }
+            BibleSearchMode.AUTO -> {
+                val ref = parseReference(trimmed)
+                if (ref != null) {
+                    searchJob?.cancel()
+                    navigateToReference(ref)
+                } else {
+                    scheduleLiveSearch()
+                }
+            }
+        }
+    }
+
+    /** Called when the user presses Enter in the unified box. */
+    fun submitSmartQuery() {
+        val trimmed = _searchQuery.value.trim()
+        if (trimmed.isEmpty()) {
+            clearSearch()
+            return
+        }
+        when (_searchMode.value) {
+            BibleSearchMode.TEXT -> performSearch()
+            BibleSearchMode.REFERENCE -> parseReference(trimmed)?.let { navigateToReference(it) }
+            BibleSearchMode.AUTO -> {
+                val ref = parseReference(trimmed)
+                if (ref != null) navigateToReference(ref) else performSearch()
+            }
+        }
     }
 
     fun selectSearchResult(result: BibleSearch) {
