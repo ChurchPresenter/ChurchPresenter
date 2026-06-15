@@ -34,5 +34,11 @@ data class AtemSettings(
     /** Upstream keyer count per M/E from the last test connection; empty = unknown. */
     val detectedKeyersPerMe: List<Int> = emptyList(),
     /** Go Live in the Lower Third tab also runs the timed key sequence. */
-    val goLiveKey: Boolean = false
+    val goLiveKey: Boolean = false,
+    /** Drive the key as a downstream keyer (DSK) instead of an upstream keyer (USK). */
+    val useDownstreamKey: Boolean = false,
+    /** Downstream keyer to use when [useDownstreamKey] is on (0-based; shown 1-based). */
+    val dskIndex: Int = 0,
+    /** Downstream keyer count from the last test connection; 0 = unknown. */
+    val detectedDownstreamKeyers: Int = 0
 )

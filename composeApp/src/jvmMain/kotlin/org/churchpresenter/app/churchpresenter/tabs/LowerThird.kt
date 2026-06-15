@@ -103,6 +103,7 @@ import churchpresenter.composeapp.generated.resources.atem_upload
 import churchpresenter.composeapp.generated.resources.atem_upload_error
 import churchpresenter.composeapp.generated.resources.atem_uploading_image
 import churchpresenter.composeapp.generated.resources.atem_uploading_video
+import churchpresenter.composeapp.generated.resources.atem_processing
 import churchpresenter.composeapp.generated.resources.atem_upload_mode
 import churchpresenter.composeapp.generated.resources.atem_uploading
 import org.churchpresenter.app.churchpresenter.server.AtemMediaSlot
@@ -393,6 +394,14 @@ fun LowerThirdTab(
                                     slot, reader.frameCount, presetName,
                                     nextFrame = { reader.nextFrame() }
                                 ) { p -> atemProgress = p; AtemUploadStatus.progress(id, p) }
+                                // Wait for the ATEM to finish ingesting the clip (surfaced as the
+                                // "processing" phase) so the bar only completes once it's truly ready.
+                                AtemUploadStatus.startProcessing(id)
+                                atemProgress = 0f
+                                client.awaitClipReady(slot, reader.frameCount) { p ->
+                                    atemProgress = p
+                                    AtemUploadStatus.progress(id, p)
+                                }
                             }
                         }
                     }
@@ -915,6 +924,7 @@ fun LowerThirdTab(
                             if (atemSettings.goLiveKey && atemConfigured) {
                                 val durationMs = AtemRenderCache.lottieDurationMs(jsonContent) ?: totalDurationMs()
                                 val name = selectedFile?.nameWithoutExtension ?: ""
+                                val useDsk = atemSettings.useDownstreamKey
                                 scope.launch {
                                     val keyError = LowerThirdSequencer.run(
                                         name = name,
@@ -922,9 +932,10 @@ fun LowerThirdTab(
                                         durationMs = durationMs,
                                         pauseAtFrame = false,
                                         pauseDurationMs = 0L,
-                                        mixEffect = atemSettings.keyMixEffect,
-                                        keyer = atemSettings.keyIndex,
-                                        atem = atemSettings
+                                        mixEffect = if (useDsk) 0 else atemSettings.keyMixEffect,
+                                        keyer = if (useDsk) atemSettings.dskIndex else atemSettings.keyIndex,
+                                        atem = atemSettings,
+                                        useDownstreamKey = useDsk
                                     )
                                     if (keyError != null) atemError = keyError
                                 }
@@ -1066,7 +1077,9 @@ fun LowerThirdTab(
             // to AtemUploadStatus), labelled with the file name and target slot.
             val upload = remoteUpload
             if (upload != null && upload.error == null) {
-                val uploadingMsg = if (upload.clip)
+                val uploadingMsg = if (upload.processing)
+                    stringResource(Res.string.atem_processing, upload.name)
+                else if (upload.clip)
                     stringResource(Res.string.atem_uploading_video, upload.name, upload.slot)
                 else
                     stringResource(Res.string.atem_uploading_image, upload.name, upload.slot)

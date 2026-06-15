@@ -1598,6 +1598,7 @@
     <string name="atem_upload_error">Upload failed: %1$s</string>
     <string name="atem_uploading_image">Uploading %1$s → image slot %2$d</string>
     <string name="atem_uploading_video">Uploading %1$s → video slot %2$d</string>
+    <string name="atem_processing">Processing %1$s on the ATEM…</string>
     <string name="atem_detected_video_mode">Detected: %1$s</string>
     <string name="atem_loading_slots">Loading slots…</string>
     <string name="atem_slots_error">Could not load slots: %1$s</string>
@@ -1612,14 +1613,16 @@
     <string name="companion_atem_triggers">ATEM media upload triggers</string>
     <string name="companion_atem_triggers_desc">Copy a URL into a Bitfocus Companion HTTP button to upload this lower third to an ATEM media slot. Add a delay in Companion before triggering the key — uploads take a few seconds.</string>
     <string name="companion_atem_upload_note">⚠ Media uploads take a few seconds.</string>
+    <string name="companion_atem_clip_key_note">Clip + Key uploads the clip, waits for the ATEM to finish processing it, then turns the key on automatically — no Companion delay needed. (Clip only + a separate key still needs a manual delay.)</string>
     <string name="companion_atem_still_key">Still + Key</string>
     <string name="companion_atem_still_only">Still only</string>
     <string name="companion_atem_clip_key">Clip + Key</string>
     <string name="companion_atem_clip_only">Clip only</string>
     <string name="companion_atem_key_section">Key trigger</string>
-    <string name="companion_atem_key_desc">Trigger the upstream key independently.</string>
+    <string name="companion_atem_key_desc">Trigger the key independently (upstream or downstream, per ATEM settings).</string>
     <string name="companion_atem_key_on">Copy Key On</string>
     <string name="companion_atem_key_off">Copy Key Off</string>
     <string name="companion_atem_not_configured">Configure ATEM host in Settings › ATEM to enable upload triggers.</string>
-    <string name="companion_lt_copy_hide">Copy Hide</string>
+    <string name="companion_lt_copy_hide">Hide Lower Third</string>
+    <string name="companion_lt_takedown_desc">Hide Lower Third removes only a lower third. Clear Display clears any output (Bible, song, lower third…).</string>
 </resources>

@@ -686,8 +686,9 @@ curl -k -X POST https://192.168.1.10:8765/api/clear
 ### Lower Thirds (Bitfocus Companion)
 
 One HTTP call runs the entire lower-third sequence — the app cuts the ATEM
-upstream key on air, plays the animation on its output, waits the animation's
-exact duration (which only the app knows), then cuts the key off and clears. The
+key on air (upstream or downstream, per ATEM settings), plays the animation on
+its output, waits the animation's exact duration (which only the app knows),
+then cuts the key off and clears. The
 cuts are invisible because the output is transparent before and after the animation.
 
 Configure the ATEM IP, default M/E + keyer and pre/post-roll margins in
@@ -715,8 +716,9 @@ Query parameters (all optional):
 
 | Param | Default | Meaning |
 |-------|---------|---------|
-| `me` | settings default | 1-based M/E (program output) the keyer is on |
-| `key` | settings default | 1-based upstream keyer to drive; `0` = don't touch any key |
+| `me` | settings default | 1-based M/E (program output) the upstream keyer is on (ignored for downstream keys) |
+| `key` | settings default | 1-based keyer to drive — upstream keyer, or DSK number when downstream; `0` = don't touch any key |
+| `keytype` | settings default | `usk` (upstream) or `dsk` (downstream); defaults to the configured ATEM key type |
 | `pause` | `false` | pause mid-animation (hold the lower third on screen) |
 | `pauseDurationMs` | `2000` | how long to hold when `pause=true` |
 
@@ -758,10 +760,11 @@ One button per lower third — press it and the whole key + animation sequence
 runs with correct timing. Add a second button with `/api/lowerthirds/hide` as a
 panic/manual-end key.
 
-There are also standalone upstream-key toggles:
-`POST /api/atem/key/on?me=E&key=M` and `POST /api/atem/key/off?me=E&key=M`
-(both default to the configured M/E + keyer), which respond with the real
-on-air result (`502` on an ATEM error).
+There are also standalone key toggles:
+`POST /api/atem/key/on` and `POST /api/atem/key/off`
+(default to the configured key type and target — upstream M/E + keyer, or the
+downstream keyer; override with `?keytype=usk|dsk`, `?me=E`, `?key=M`), which
+respond with the real on-air result (`502` on an ATEM error).
 
 > **Tip:** **Settings → Server** lists every lower third with one-click *Go Live
 > + Key* / *Go Live* buttons that produce the exact URL (API key

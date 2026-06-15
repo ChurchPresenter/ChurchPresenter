@@ -31,6 +31,7 @@ data class AtemMediaSlot(val index: Int, val name: String, val isUsed: Boolean)
  * @param unassignedFrames media pool frames not allocated to any clip bank (from MPSp)
  * @param mixEffectCount   number of M/E buses / program outputs (from _top topology; 0 = unknown)
  * @param keyersPerMe      upstream keyer count per M/E, indexed by M/E (from _MeC)
+ * @param downstreamKeyers number of downstream keyers (from _top topology; 0 = unknown)
  */
 data class AtemState(
     val fps: Double,
@@ -40,7 +41,8 @@ data class AtemState(
     val clipMaxFrames: List<Int> = emptyList(),
     val unassignedFrames: Int = 0,
     val mixEffectCount: Int = 0,
-    val keyersPerMe: List<Int> = emptyList()
+    val keyersPerMe: List<Int> = emptyList(),
+    val downstreamKeyers: Int = 0
 )
 
 /**
@@ -112,7 +114,9 @@ class AtemClient(val host: String, val port: Int = 9910) {
         )
 
         /** Commands worth buffering when received while waiting for something else. */
-        private val INTERESTING_COMMANDS = setOf("FTCD", "FTDC", "FTDE", "FTUA", "LKOB", "LKST")
+        // MPCS is included so post-upload clip-store state updates (used to detect when the ATEM
+        // has finished ingesting a clip) aren't dropped by the keepalive drain loop.
+        private val INTERESTING_COMMANDS = setOf("FTCD", "FTDC", "FTDE", "FTUA", "LKOB", "LKST", "MPCS")
 
         /**
          * Lightweight reachability probe: one hello packet, true if anything answers.
@@ -129,6 +133,22 @@ class AtemClient(val host: String, val port: Int = 9910) {
                 try {
                     c.connect(collectState = false)
                     c.setUpstreamKeyerOnAir(mixEffect, keyer, onAir)
+                } finally {
+                    c.disconnect()
+                }
+            }
+
+        /**
+         * Cut a key (upstream or downstream) using a fresh short-lived connection — the DSK-aware
+         * counterpart of [cutUpstreamKeyer]. For a downstream key [mixEffect] is ignored and
+         * [keyer] is the DSK index.
+         */
+        suspend fun cutKey(host: String, port: Int, useDsk: Boolean, mixEffect: Int, keyer: Int, onAir: Boolean) =
+            withContext(Dispatchers.IO) {
+                val c = AtemClient(host, port)
+                try {
+                    c.connect(collectState = false)
+                    c.setKeyOnAir(useDsk, mixEffect, keyer, onAir)
                 } finally {
                     c.disconnect()
                 }
@@ -309,6 +329,30 @@ class AtemClient(val host: String, val port: Int = 9910) {
         }
     }
 
+    /**
+     * Cut a downstream keyer on or off air (CDsL — hard cut, no transition).
+     * Downstream keyers are global (not per-M/E).
+     * @param keyer 0-based downstream keyer index (DSK 1 = 0)
+     */
+    suspend fun setDownstreamKeyerOnAir(keyer: Int, onAir: Boolean) = withContext(Dispatchers.IO) {
+        opMutex.withLock {
+            sendCommandAndWait(
+                "CDsL",
+                byteArrayOf(keyer.toByte(), if (onAir) 1 else 0, 0, 0),
+                expectedResponse = null
+            )
+        }
+    }
+
+    /**
+     * Cut the configured key on or off air. When [useDsk] is true the key is driven as a downstream
+     * keyer ([keyer] is the DSK index and [mixEffect] is ignored); otherwise as an upstream keyer.
+     */
+    suspend fun setKeyOnAir(useDsk: Boolean, mixEffect: Int, keyer: Int, onAir: Boolean) {
+        if (useDsk) setDownstreamKeyerOnAir(keyer, onAir)
+        else setUpstreamKeyerOnAir(mixEffect, keyer, onAir)
+    }
+
     /** Disconnect and release the socket and the keepalive loop. The client is not reused after this. */
     fun disconnect() {
         keepAliveJob?.cancel()
@@ -398,6 +442,9 @@ class AtemClient(val host: String, val port: Int = 9910) {
         val storeId = slot + 1   // clip stores are 1-based; store 0 is the still pool
 
         opMutex.withLock {
+            // Drop any buffered clip-store state from before this upload so a later readiness wait
+            // (awaitClipReady) only reacts to MPCS updates produced by this upload.
+            pendingCommands.removeAll { it.first == "MPCS" }
             sendCommandAndWait("LOCK", buildLockPayload(storeId, locked = true), "LKOB", timeout = CMD_TIMEOUT_MS.toLong())
             try {
                 // Clear the clip slot before uploading new frames
@@ -417,6 +464,42 @@ class AtemClient(val host: String, val port: Int = 9910) {
                 // here can't mask the original failure
                 runCatching { sendCommand("LOCK", buildLockPayload(storeId, locked = false)) }
             }
+        }
+    }
+
+    /**
+     * After a clip upload, wait until the ATEM reports the clip bank fully ingested. The clip-store
+     * state command MPCS carries the bank's `isUsed` flag and current frame count (bytes 66-67);
+     * the clip is ready once `isUsed && currentFrames >= [expectedFrames]`. Some firmware reports the
+     * count climbing during ingest (→ smooth progress), others only once on completion — both work.
+     *
+     * @return true when the clip is reported ready; false on timeout (caller should proceed
+     *   best-effort, i.e. key on anyway). [onProgress] receives 0f..1f as the frame count climbs.
+     */
+    suspend fun awaitClipReady(
+        slot: Int,
+        expectedFrames: Int,
+        timeoutMs: Long = 15_000,
+        onProgress: (Float) -> Unit = {}
+    ): Boolean = withContext(Dispatchers.IO) {
+        if (expectedFrames <= 0) return@withContext true
+        opMutex.withLock {
+            val deadline = System.currentTimeMillis() + timeoutMs
+            while (System.currentTimeMillis() < deadline) {
+                val remaining = (deadline - System.currentTimeMillis()).coerceAtLeast(1)
+                val payload = try {
+                    waitForAnyCommand(setOf("MPCS"), remaining).second
+                } catch (_: Exception) {
+                    return@withLock false   // no MPCS within the timeout
+                }
+                if (payload.size >= 68 && (payload[0].toInt() and 0xFF) == slot) {
+                    val used = payload[1].toInt() == 1
+                    val frames = u16(payload, 66)
+                    onProgress((frames.toFloat() / expectedFrames).coerceIn(0f, 1f))
+                    if (used && frames >= expectedFrames) return@withLock true
+                }
+            }
+            false
         }
     }
 
@@ -760,8 +843,11 @@ class AtemClient(val host: String, val port: Int = 9910) {
             else -> "Unknown"        to 30.0
         }
         val (clipMaxFrames, unassigned) = parseMediaPoolSettings(m)
-        // _top topology byte 0 = number of M/E buses (program outputs)
-        val mixEffectCount = m["_top"]?.firstOrNull()?.getOrNull(0)?.toInt()?.and(0xFF) ?: 0
+        // _top topology byte 0 = number of M/E buses (program outputs); byte 2 = number of DSKs
+        // (sofie-atem-connection TopologyCommand layout: ME, sources, downstreamKeyers, …)
+        val topology = m["_top"]?.firstOrNull()
+        val mixEffectCount = topology?.getOrNull(0)?.toInt()?.and(0xFF) ?: 0
+        val downstreamKeyers = topology?.getOrNull(2)?.toInt()?.and(0xFF) ?: 0
         // _MeC: one per M/E — byte 0 = M/E index, byte 1 = upstream keyer count
         val keyersPerMe = if (mixEffectCount > 0) {
             val byMe = HashMap<Int, Int>()
@@ -770,7 +856,7 @@ class AtemClient(val host: String, val port: Int = 9910) {
             }
             (0 until mixEffectCount).map { byMe[it] ?: 0 }
         } else emptyList()
-        return AtemState(fps, mode, parseStillSlots(m), parseClipSlots(m), clipMaxFrames, unassigned, mixEffectCount, keyersPerMe)
+        return AtemState(fps, mode, parseStillSlots(m), parseClipSlots(m), clipMaxFrames, unassigned, mixEffectCount, keyersPerMe, downstreamKeyers)
     }
 
     /**

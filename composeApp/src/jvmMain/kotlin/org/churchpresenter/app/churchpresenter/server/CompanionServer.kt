@@ -633,7 +633,9 @@ class CompanionServer {
         }
         val atem = _atemSettings ?: AtemSettings()
 
-        // Key target: default M/E + keyer from settings; ?me=N&key=M (1-based) override; ?key=0 skips
+        // Key target: USK (M/E + keyer) or DSK (?keytype / setting) from settings;
+        // ?me=N&key=M (1-based) override; ?key=0 skips. For DSK ?key overrides the DSK index.
+        val useDsk = resolveUseDsk(call, atem)
         val meParam = call.request.queryParameters["me"]?.toIntOrNull()
         val keyParam = call.request.queryParameters["key"]?.toIntOrNull()
         val mixEffect: Int?
@@ -641,9 +643,10 @@ class CompanionServer {
         if (keyParam == 0) {
             mixEffect = null; keyer = null
         } else {
-            mixEffect = if (meParam != null) meParam - 1 else atem.keyMixEffect
-            keyer = if (keyParam != null) keyParam - 1 else atem.keyIndex
-            validateKeyTarget(atem, mixEffect, keyer)?.let {
+            mixEffect = if (useDsk) 0 else (if (meParam != null) meParam - 1 else atem.keyMixEffect)
+            keyer = if (keyParam != null) keyParam - 1
+                else if (useDsk) atem.dskIndex else atem.keyIndex
+            validateKeyTarget(atem, useDsk, mixEffect, keyer)?.let {
                 call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":${jsonStr(it)}}""")
                 return
             }
@@ -661,6 +664,7 @@ class CompanionServer {
             mixEffect = mixEffect,
             keyer = keyer,
             atem = atem,
+            useDownstreamKey = useDsk,
             autoEnd = autoEnd
         )
         val totalMs = atem.keyPreRollMs + durationMs +
@@ -683,21 +687,24 @@ class CompanionServer {
             call.respond(io.ktor.http.HttpStatusCode.ServiceUnavailable, """{"error":"ATEM not configured"}""")
             return
         }
+        val useDsk = resolveUseDsk(call, atem)
         val meParam = call.request.queryParameters["me"]?.toIntOrNull()
         val keyParam = call.request.queryParameters["key"]?.toIntOrNull()
-        val mixEffect = if (meParam != null) meParam - 1 else atem.keyMixEffect
-        val keyer = if (keyParam != null) keyParam - 1 else atem.keyIndex
-        validateKeyTarget(atem, mixEffect, keyer)?.let {
+        val mixEffect = if (useDsk) 0 else (if (meParam != null) meParam - 1 else atem.keyMixEffect)
+        val keyer = if (keyParam != null) keyParam - 1
+            else if (useDsk) atem.dskIndex else atem.keyIndex
+        validateKeyTarget(atem, useDsk, mixEffect, keyer)?.let {
             call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":${jsonStr(it)}}""")
             return
         }
         try {
             val ran = AtemConnectionManager.tryRun(atem.host, atem.port) { client ->
-                client.setUpstreamKeyerOnAir(mixEffect, keyer, onAir)
+                client.setKeyOnAir(useDsk, mixEffect, keyer, onAir)
             }
-            if (!ran) AtemClient.cutUpstreamKeyer(atem.host, atem.port, mixEffect, keyer, onAir)
+            if (!ran) AtemClient.cutKey(atem.host, atem.port, useDsk, mixEffect, keyer, onAir)
+            val target = if (useDsk) """"dsk":${keyer + 1}""" else """"me":${mixEffect + 1},"key":${keyer + 1}"""
             call.respondText(
-                """{"status":"${if (onAir) "on" else "off"}","me":${mixEffect + 1},"key":${keyer + 1}}""",
+                """{"status":"${if (onAir) "on" else "off"}",$target}""",
                 ContentType.Application.Json
             )
         } catch (e: Exception) {
@@ -708,8 +715,16 @@ class CompanionServer {
         }
     }
 
-    /** Validate a 0-based (M/E, keyer) target against the detected topology. Null = OK. */
-    private fun validateKeyTarget(atem: AtemSettings, mixEffect: Int, keyer: Int): String? {
+    /**
+     * Validate a 0-based key target against the detected topology. Null = OK.
+     * For a downstream key [keyer] is the DSK index and [mixEffect] is ignored.
+     */
+    private fun validateKeyTarget(atem: AtemSettings, useDsk: Boolean, mixEffect: Int, keyer: Int): String? {
+        if (useDsk) {
+            if (atem.detectedDownstreamKeyers > 0 && keyer !in 0 until atem.detectedDownstreamKeyers)
+                return "DSK ${keyer + 1} does not exist (available: 1-${atem.detectedDownstreamKeyers})"
+            return null
+        }
         if (atem.detectedMixEffects > 0 && mixEffect !in 0 until atem.detectedMixEffects)
             return "M/E ${mixEffect + 1} does not exist (available: 1-${atem.detectedMixEffects})"
         val keyers = atem.detectedKeyersPerMe.getOrNull(mixEffect)
@@ -717,6 +732,17 @@ class CompanionServer {
             return "Key ${keyer + 1} does not exist on M/E ${mixEffect + 1} (available: 1-$keyers)"
         return null
     }
+
+    /**
+     * Resolves whether a request should drive a downstream key: `?keytype=dsk|usk` (or
+     * `downstream|upstream`) overrides; otherwise the persisted [AtemSettings.useDownstreamKey].
+     */
+    private fun resolveUseDsk(call: io.ktor.server.application.ApplicationCall, atem: AtemSettings): Boolean =
+        when (call.request.queryParameters["keytype"]?.lowercase()) {
+            "dsk", "downstream" -> true
+            "usk", "upstream" -> false
+            else -> atem.useDownstreamKey
+        }
 
     // Current data — thread-safe StateFlows
     // All songs flat list
@@ -2493,9 +2519,11 @@ class CompanionServer {
                     val keyParam = call.request.queryParameters["key"]?.toIntOrNull()
                     val meParam = call.request.queryParameters["me"]?.toIntOrNull()
                     val keyOn = keyParam != null && keyParam > 0
-                    val mixEffect = if (meParam != null) meParam - 1 else atem.keyMixEffect
-                    val keyer = if (keyParam != null && keyParam > 0) keyParam - 1 else atem.keyIndex
-                    if (keyOn) validateKeyTarget(atem, mixEffect, keyer)?.let {
+                    val useDsk = resolveUseDsk(call, atem)
+                    val mixEffect = if (useDsk) 0 else (if (meParam != null) meParam - 1 else atem.keyMixEffect)
+                    val keyer = if (keyParam != null && keyParam > 0) keyParam - 1
+                        else if (useDsk) atem.dskIndex else atem.keyIndex
+                    if (keyOn) validateKeyTarget(atem, useDsk, mixEffect, keyer)?.let {
                         call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":${jsonStr(it)}}""")
                         return@post
                     }
@@ -2512,7 +2540,7 @@ class CompanionServer {
                                         AtemUploadStatus.progress(uploadId, p)
                                     }
                                 }
-                                if (keyOn) client.setUpstreamKeyerOnAir(mixEffect, keyer, true)
+                                if (keyOn) client.setKeyOnAir(useDsk, mixEffect, keyer, true)
                             }
                             AtemUploadStatus.complete(uploadId)
                             kotlinx.coroutines.delay(800)
@@ -2523,7 +2551,11 @@ class CompanionServer {
                             AtemUploadStatus.fail(uploadId, e.message)
                         }
                     }
-                    val keyInfo = if (keyOn) ""","me":${mixEffect + 1},"key":${keyer + 1}""" else ""
+                    val keyInfo = when {
+                        !keyOn -> ""
+                        useDsk -> ""","dsk":${keyer + 1}"""
+                        else -> ""","me":${mixEffect + 1},"key":${keyer + 1}"""
+                    }
                     call.respondText(
                         """{"status":"uploading","type":"still","name":${jsonStr(name)},"slot":${slot + 1}$keyInfo}""",
                         ContentType.Application.Json
@@ -2556,9 +2588,11 @@ class CompanionServer {
                     val keyParam = call.request.queryParameters["key"]?.toIntOrNull()
                     val meParam = call.request.queryParameters["me"]?.toIntOrNull()
                     val keyOn = keyParam != null && keyParam > 0
-                    val mixEffect = if (meParam != null) meParam - 1 else atem.keyMixEffect
-                    val keyer = if (keyParam != null && keyParam > 0) keyParam - 1 else atem.keyIndex
-                    if (keyOn) validateKeyTarget(atem, mixEffect, keyer)?.let {
+                    val useDsk = resolveUseDsk(call, atem)
+                    val mixEffect = if (useDsk) 0 else (if (meParam != null) meParam - 1 else atem.keyMixEffect)
+                    val keyer = if (keyParam != null && keyParam > 0) keyParam - 1
+                        else if (useDsk) atem.dskIndex else atem.keyIndex
+                    if (keyOn) validateKeyTarget(atem, useDsk, mixEffect, keyer)?.let {
                         call.respond(io.ktor.http.HttpStatusCode.BadRequest, """{"error":${jsonStr(it)}}""")
                         return@post
                     }
@@ -2587,7 +2621,12 @@ class CompanionServer {
                                     client.uploadClipEncoded(slot, reader.frameCount, file.nameWithoutExtension,
                                         nextFrame = { reader.nextFrame() }) { p -> AtemUploadStatus.progress(uploadId, p) }
                                 }
-                                if (keyOn) client.setUpstreamKeyerOnAir(mixEffect, keyer, true)
+                                // Wait for the ATEM to finish ingesting the clip before keying, so
+                                // the key never fires over a half-processed clip. Best-effort: key
+                                // anyway if the device never reports ready within the timeout.
+                                AtemUploadStatus.startProcessing(uploadId)
+                                client.awaitClipReady(slot, frameCount) { p -> AtemUploadStatus.progress(uploadId, p) }
+                                if (keyOn) client.setKeyOnAir(useDsk, mixEffect, keyer, true)
                             }
                             AtemUploadStatus.complete(uploadId)
                             kotlinx.coroutines.delay(800)
@@ -2598,7 +2637,7 @@ class CompanionServer {
                                 val clipDurationMs = (frameCount.toLong() * 1000L) / fps.toLong()
                                 kotlinx.coroutines.delay(clipDurationMs)
                                 AtemConnectionManager.use(atem.host, atem.port, needsState = false) { client ->
-                                    client.setUpstreamKeyerOnAir(mixEffect, keyer, false)
+                                    client.setKeyOnAir(useDsk, mixEffect, keyer, false)
                                 }
                             }
                         } catch (e: Exception) {
@@ -2607,7 +2646,11 @@ class CompanionServer {
                             AtemUploadStatus.fail(uploadId, e.message)
                         }
                     }
-                    val keyInfoClip = if (keyOn) ""","me":${mixEffect + 1},"key":${keyer + 1}""" else ""
+                    val keyInfoClip = when {
+                        !keyOn -> ""
+                        useDsk -> ""","dsk":${keyer + 1}"""
+                        else -> ""","me":${mixEffect + 1},"key":${keyer + 1}"""
+                    }
                     call.respondText(
                         """{"status":"uploading","type":"clip","name":${jsonStr(name)},"slot":${slot + 1}$keyInfoClip}""",
                         ContentType.Application.Json

@@ -25,6 +25,7 @@ object AtemUploadStatus {
         val clip: Boolean,
         val slot: Int,            // 1-based, for display
         val progress: Float,      // 0f..1f
+        val processing: Boolean = false,  // true = ATEM ingesting the clip (post-upload), not transferring
         val error: String? = null
     )
 
@@ -42,6 +43,10 @@ object AtemUploadStatus {
 
     fun progress(id: Long, p: Float) =
         _state.update { if (it?.id == id) it.copy(progress = p.coerceIn(0f, 1f)) else it }
+
+    /** Transition from the upload phase to the ATEM-side "processing" (ingest) phase. */
+    fun startProcessing(id: Long) =
+        _state.update { if (it?.id == id) it.copy(processing = true, progress = 0f) else it }
 
     fun complete(id: Long) =
         _state.update { if (it?.id == id) it.copy(progress = 1f) else it }

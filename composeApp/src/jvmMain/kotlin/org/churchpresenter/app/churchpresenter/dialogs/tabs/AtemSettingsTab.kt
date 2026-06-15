@@ -95,6 +95,7 @@ fun AtemSettingsTab(
     var clipFpsText by remember(atem.clipFps) { mutableStateOf(formatAtemFps(atem.clipFps)) }
     var meText by remember(atem.keyMixEffect) { mutableStateOf((atem.keyMixEffect + 1).toString()) }
     var keyText by remember(atem.keyIndex) { mutableStateOf((atem.keyIndex + 1).toString()) }
+    var dskText by remember(atem.dskIndex) { mutableStateOf((atem.dskIndex + 1).toString()) }
     var keyPreRollText by remember(atem.keyPreRollMs) { mutableStateOf(atem.keyPreRollMs.toString()) }
     var keyPostRollText by remember(atem.keyPostRollMs) { mutableStateOf(atem.keyPostRollMs.toString()) }
 
@@ -210,7 +211,8 @@ fun AtemSettingsTab(
                                             detectedClipMaxFrames = state.clipMaxFrames,
                                             detectedUnassignedFrames = state.unassignedFrames,
                                             detectedMixEffects = state.mixEffectCount,
-                                            detectedKeyersPerMe = state.keyersPerMe
+                                            detectedKeyersPerMe = state.keyersPerMe,
+                                            detectedDownstreamKeyers = state.downstreamKeyers
                                         )
                                     }
                                     connectionStatus = "connected"
@@ -378,43 +380,63 @@ fun AtemSettingsTab(
 
                 Spacer(Modifier.height(8.dp))
 
-                // Upstream-key sequencing defaults for the Companion trigger: M/E + keyer
-                // plus the margins around the animation
+                // Key sequencing defaults for the Companion / Go-Live trigger: an upstream keyer
+                // (M/E + keyer) or a downstream keyer (DSK), plus the margins around the animation.
+                val useDsk = atem.useDownstreamKey
                 val keyersOnMe = atem.detectedKeyersPerMe.getOrNull(atem.keyMixEffect) ?: 0
+
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    OutlinedTextField(
-                        value = meText,
-                        onValueChange = { v ->
-                            meText = v
-                            v.toIntOrNull()?.let { update { copy(keyMixEffect = (it - 1).coerceAtLeast(0)) } }
-                        },
-                        supportingText = {
-                            Text(if (atem.detectedMixEffects > 0) "M/E (1–${atem.detectedMixEffects})" else "M/E")
-                        },
-                        isError = atem.detectedMixEffects > 0 &&
-                            meText.toIntOrNull()?.let { it !in 1..atem.detectedMixEffects } != false,
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        modifier = Modifier.weight(1f)
-                    )
-                    OutlinedTextField(
-                        value = keyText,
-                        onValueChange = { v ->
-                            keyText = v
-                            v.toIntOrNull()?.let { update { copy(keyIndex = (it - 1).coerceAtLeast(0)) } }
-                        },
-                        supportingText = {
-                            Text(if (keyersOnMe > 0) "Key (1–$keyersOnMe)" else "Key")
-                        },
-                        isError = keyersOnMe > 0 &&
-                            keyText.toIntOrNull()?.let { it !in 1..keyersOnMe } != false,
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        modifier = Modifier.weight(1f)
-                    )
+                    if (useDsk) {
+                        OutlinedTextField(
+                            value = dskText,
+                            onValueChange = { v ->
+                                dskText = v
+                                v.toIntOrNull()?.let { update { copy(dskIndex = (it - 1).coerceAtLeast(0)) } }
+                            },
+                            supportingText = {
+                                Text(if (atem.detectedDownstreamKeyers > 0) "DSK (1–${atem.detectedDownstreamKeyers})" else "DSK")
+                            },
+                            isError = atem.detectedDownstreamKeyers > 0 &&
+                                dskText.toIntOrNull()?.let { it !in 1..atem.detectedDownstreamKeyers } != false,
+                            singleLine = true,
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                            modifier = Modifier.weight(1f)
+                        )
+                    } else {
+                        OutlinedTextField(
+                            value = meText,
+                            onValueChange = { v ->
+                                meText = v
+                                v.toIntOrNull()?.let { update { copy(keyMixEffect = (it - 1).coerceAtLeast(0)) } }
+                            },
+                            supportingText = {
+                                Text(if (atem.detectedMixEffects > 0) "M/E (1–${atem.detectedMixEffects})" else "M/E")
+                            },
+                            isError = atem.detectedMixEffects > 0 &&
+                                meText.toIntOrNull()?.let { it !in 1..atem.detectedMixEffects } != false,
+                            singleLine = true,
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                            modifier = Modifier.weight(1f)
+                        )
+                        OutlinedTextField(
+                            value = keyText,
+                            onValueChange = { v ->
+                                keyText = v
+                                v.toIntOrNull()?.let { update { copy(keyIndex = (it - 1).coerceAtLeast(0)) } }
+                            },
+                            supportingText = {
+                                Text(if (keyersOnMe > 0) "Key (1–$keyersOnMe)" else "Key")
+                            },
+                            isError = keyersOnMe > 0 &&
+                                keyText.toIntOrNull()?.let { it !in 1..keyersOnMe } != false,
+                            singleLine = true,
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
                     OutlinedTextField(
                         value = keyPreRollText,
                         onValueChange = { v ->
@@ -444,7 +466,8 @@ fun AtemSettingsTab(
                 // Detected M/E + keyer matrix, so the user knows the valid ranges
                 if (atem.detectedKeyersPerMe.isNotEmpty()) {
                     val perMe = atem.detectedKeyersPerMe.mapIndexed { i, k -> "M/E ${i + 1}: ${k} keys" }
-                        .joinToString("   ")
+                        .joinToString("   ") +
+                        (if (atem.detectedDownstreamKeyers > 0) "   DSK: ${atem.detectedDownstreamKeyers}" else "")
                     Text(
                         stringResource(Res.string.atem_detected_keyers, perMe),
                         style = MaterialTheme.typography.bodySmall,
@@ -460,6 +483,31 @@ fun AtemSettingsTab(
 
                 Spacer(Modifier.height(4.dp))
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+                Spacer(Modifier.height(8.dp))
+
+                // Key type: drive the API / Go Live key as a downstream keyer instead of upstream
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Switch(
+                        checked = atem.useDownstreamKey,
+                        onCheckedChange = { update { copy(useDownstreamKey = it) } }
+                    )
+                    Column {
+                        Text(
+                            "Downstream keyer (DSK)",
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                        Text(
+                            "Drive the key as a downstream keyer instead of an upstream keyer (USK)",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                        )
+                    }
+                }
+
                 Spacer(Modifier.height(8.dp))
 
                 // Quick upload: one-press upload to the default slots, no dialog

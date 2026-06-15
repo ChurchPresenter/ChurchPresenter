@@ -72,10 +72,13 @@ import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.allowed_clients
 import churchpresenter.composeapp.generated.resources.companion_lt_copy_key
 import churchpresenter.composeapp.generated.resources.companion_lt_copy_hide
+import churchpresenter.composeapp.generated.resources.companion_lt_takedown_desc
+import churchpresenter.composeapp.generated.resources.tooltip_clear_display
 import churchpresenter.composeapp.generated.resources.companion_lt_copy_nokey
 import churchpresenter.composeapp.generated.resources.companion_lt_none
 import churchpresenter.composeapp.generated.resources.companion_lt_server_off
 import churchpresenter.composeapp.generated.resources.companion_atem_clip_key
+import churchpresenter.composeapp.generated.resources.companion_atem_clip_key_note
 import churchpresenter.composeapp.generated.resources.companion_atem_clip_only
 import churchpresenter.composeapp.generated.resources.companion_atem_key_desc
 import churchpresenter.composeapp.generated.resources.companion_atem_key_off
@@ -555,8 +558,15 @@ fun ServerSettingsTab(
                     return if (params.isEmpty()) "" else "?" + params.joinToString("&")
                 }
 
-                // Default key target (1-based) for the "+ key" URLs
-                val keyTarget = "me=${settings.atemSettings.keyMixEffect + 1}&key=${settings.atemSettings.keyIndex + 1}"
+                // Default key target (1-based) for the "+ key" URLs, matching the configured key
+                // type. DSK ignores M/E and uses the DSK number; both carry an explicit keytype so
+                // the copied URL behaves as shown regardless of later setting changes.
+                val useDsk = settings.atemSettings.useDownstreamKey
+                val keyTypeParam = if (useDsk) "keytype=dsk" else "keytype=usk"
+                val keyTarget = if (useDsk)
+                    "keytype=dsk&key=${settings.atemSettings.dskIndex + 1}"
+                else
+                    "keytype=usk&me=${settings.atemSettings.keyMixEffect + 1}&key=${settings.atemSettings.keyIndex + 1}"
 
                 fun triggerUrl(name: String, withKey: Boolean): String {
                     val encoded = java.net.URLEncoder.encode(name, "UTF-8").replace("+", "%20")
@@ -579,8 +589,8 @@ fun ServerSettingsTab(
                     return "$serverUrl/api/atem/clip/$encoded${apiQuery(if (withKey) keyTarget else "")}"
                 }
 
-                fun keyOnUrl()  = "$serverUrl/api/atem/key/on${apiQuery()}"
-                fun keyOffUrl() = "$serverUrl/api/atem/key/off${apiQuery()}"
+                fun keyOnUrl()  = "$serverUrl/api/atem/key/on${apiQuery(keyTypeParam)}"
+                fun keyOffUrl() = "$serverUrl/api/atem/key/off${apiQuery(keyTypeParam)}"
 
                 Column(
                     modifier = Modifier
@@ -601,6 +611,13 @@ fun ServerSettingsTab(
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.error.copy(alpha = 0.85f)
                     )
+                    if (atemConfigured) {
+                        Text(
+                            text = stringResource(Res.string.companion_atem_clip_key_note),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
 
                     when {
                         !isRunning || serverUrl.isBlank() -> Text(
@@ -720,17 +737,36 @@ fun ServerSettingsTab(
                             Spacer(Modifier.height(4.dp))
                         }
 
-                        // Hide lower third — available whenever server is running
-                        Button(
-                            onClick = {
-                                clipboardManager.setText(AnnotatedString("$serverUrl/api/lowerthirds/hide${apiQuery()}"))
-                            },
-                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.errorContainer,
-                                contentColor = MaterialTheme.colorScheme.onErrorContainer
-                            )
-                        ) { Text(stringResource(Res.string.companion_lt_copy_hide), style = MaterialTheme.typography.labelSmall) }
+                        // Take-down actions — available whenever the server is running.
+                        // "Hide Lower Third" clears only a lower third; "Clear Display" clears any
+                        // output (Bible, song, lower third, …) via POST /api/clear.
+                        Text(
+                            text = stringResource(Res.string.companion_lt_takedown_desc),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Button(
+                                onClick = {
+                                    clipboardManager.setText(AnnotatedString("$serverUrl/api/lowerthirds/hide${apiQuery()}"))
+                                },
+                                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.errorContainer,
+                                    contentColor = MaterialTheme.colorScheme.onErrorContainer
+                                )
+                            ) { Text(stringResource(Res.string.companion_lt_copy_hide), style = MaterialTheme.typography.labelSmall) }
+                            Button(
+                                onClick = {
+                                    clipboardManager.setText(AnnotatedString("$serverUrl/api/clear${apiQuery()}"))
+                                },
+                                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.error,
+                                    contentColor = MaterialTheme.colorScheme.onError
+                                )
+                            ) { Text(stringResource(Res.string.tooltip_clear_display), style = MaterialTheme.typography.labelSmall) }
+                        }
                     }
                 }
             }

@@ -54,6 +54,7 @@ object LowerThirdSequencer {
     private var activePort: Int = 9910
     private var activeMixEffect: Int = -1
     private var activeKeyer: Int = -1
+    private var activeUseDsk: Boolean = false
 
     /** Bumped on every run/stop so a preempted job's cleanup can tell it no longer owns the key. */
     private var generation = 0
@@ -64,8 +65,10 @@ object LowerThirdSequencer {
      * The key-on happens synchronously so the caller can report a connection
      * problem in the HTTP response; the timed remainder runs in the background.
      *
-     * @param mixEffect 0-based M/E index, or null to skip key control
-     * @param keyer     0-based upstream keyer index, or null to skip key control
+     * @param mixEffect 0-based M/E index, or null to skip key control (ignored for downstream keys)
+     * @param keyer     0-based keyer index (upstream keyer, or DSK index when [useDownstreamKey]),
+     *                  or null to skip key control
+     * @param useDownstreamKey drive the key as a downstream keyer (DSK) instead of upstream
      * @param autoEnd   false = "show" mode: stay on air until [stop] is called
      * @return key error message, or null when the key went on air (or was skipped)
      */
@@ -78,6 +81,7 @@ object LowerThirdSequencer {
         mixEffect: Int?,
         keyer: Int?,
         atem: AtemSettings,
+        useDownstreamKey: Boolean = false,
         autoEnd: Boolean = true
     ): String? = mutex.withLock {
         stopLocked()
@@ -86,12 +90,13 @@ object LowerThirdSequencer {
         if (mixEffect != null && keyer != null && atem.host.isNotBlank()) {
             try {
                 AtemConnectionManager.use(atem.host, atem.port, needsState = false) { client ->
-                    client.setUpstreamKeyerOnAir(mixEffect, keyer, true)
+                    client.setKeyOnAir(useDownstreamKey, mixEffect, keyer, true)
                 }
                 activeHost = atem.host
                 activePort = atem.port
                 activeMixEffect = mixEffect
                 activeKeyer = keyer
+                activeUseDsk = useDownstreamKey
             } catch (e: Exception) {
                 keyError = e.message ?: "ATEM unreachable"
                 System.err.println("[LowerThirdSequencer] key on failed: $keyError")
@@ -150,11 +155,13 @@ object LowerThirdSequencer {
         val port = activePort
         val mixEffect = activeMixEffect
         val keyer = activeKeyer
+        val useDsk = activeUseDsk
         activeHost = null
         activeMixEffect = -1
         activeKeyer = -1
+        activeUseDsk = false
         runCatching {
-            AtemConnectionManager.use(host, port) { it.setUpstreamKeyerOnAir(mixEffect, keyer, false) }
+            AtemConnectionManager.use(host, port) { it.setKeyOnAir(useDsk, mixEffect, keyer, false) }
         }.onFailure { System.err.println("[LowerThirdSequencer] key off failed: ${it.message}") }
     }
 }
