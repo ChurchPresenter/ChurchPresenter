@@ -117,7 +117,7 @@ import churchpresenter.composeapp.generated.resources.line_navigation_hint
 import churchpresenter.composeapp.generated.resources.new_song
 import churchpresenter.composeapp.generated.resources.ic_arrow_down
 import churchpresenter.composeapp.generated.resources.ic_arrow_up
-import churchpresenter.composeapp.generated.resources.ic_cast
+import androidx.compose.material.icons.filled.Tv
 import churchpresenter.composeapp.generated.resources.ic_delete
 import churchpresenter.composeapp.generated.resources.delete_saved_string
 import churchpresenter.composeapp.generated.resources.confirm_delete
@@ -1112,7 +1112,7 @@ fun SongsTab(
                                 text = { Text(stringResource(Res.string.go_live)) },
                                 leadingIcon = {
                                     Icon(
-                                        painter = painterResource(Res.drawable.ic_cast),
+                                        imageVector = Icons.Default.Tv,
                                         contentDescription = null,
                                         modifier = Modifier.size(18.dp),
                                         tint = MaterialTheme.colorScheme.primary
@@ -1401,7 +1401,7 @@ fun SongsTab(
                             disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
                         )
                     ) {
-                        Icon(painter = painterResource(Res.drawable.ic_cast), contentDescription = goLiveStr, modifier = Modifier.size(20.dp))
+                        Icon(Icons.Default.Tv, contentDescription = goLiveStr, modifier = Modifier.size(20.dp))
                     }
                 }
             }

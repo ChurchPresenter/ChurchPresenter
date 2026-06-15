@@ -124,7 +124,8 @@ import churchpresenter.composeapp.generated.resources.center_right
 import churchpresenter.composeapp.generated.resources.font_size
 import churchpresenter.composeapp.generated.resources.font_type
 import churchpresenter.composeapp.generated.resources.go_live
-import churchpresenter.composeapp.generated.resources.ic_cast
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Tv
 import churchpresenter.composeapp.generated.resources.ic_playlist_add
 import churchpresenter.composeapp.generated.resources.ic_refresh
 import churchpresenter.composeapp.generated.resources.ic_pause
@@ -411,7 +412,7 @@ fun AnnouncementsTab(
                                             disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
                                         )
                                     ) {
-                                        Icon(painter = painterResource(Res.drawable.ic_cast), contentDescription = stringResource(Res.string.go_live), modifier = Modifier.size(20.dp))
+                                        Icon(Icons.Default.Tv, contentDescription = stringResource(Res.string.go_live), modifier = Modifier.size(20.dp))
                                     }
                                 }
                             }
@@ -798,7 +799,7 @@ fun AnnouncementsTab(
                             if (presenterManager != null) {
                                 ConditionalTooltipArea(tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.tooltip_go_live), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } }) {
                                     IconButton(onClick = { presenterManager.setAnnouncementText(AnnouncementsViewModel.formatTimer(viewModel.timerRemaining)); presenterManager.setPresentingMode(Presenting.ANNOUNCEMENTS) }, colors = IconButtonDefaults.iconButtonColors(containerColor = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary, disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant, disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f))) {
-                                        Icon(painter = painterResource(Res.drawable.ic_cast), contentDescription = stringResource(Res.string.go_live), modifier = Modifier.size(20.dp))
+                                        Icon(Icons.Default.Tv, contentDescription = stringResource(Res.string.go_live), modifier = Modifier.size(20.dp))
                                     }
                                 }
                             }

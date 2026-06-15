@@ -111,7 +111,8 @@ import churchpresenter.composeapp.generated.resources.go_live
 import churchpresenter.composeapp.generated.resources.ic_copy
 import churchpresenter.composeapp.generated.resources.ic_arrow_down
 import churchpresenter.composeapp.generated.resources.ic_arrow_up
-import churchpresenter.composeapp.generated.resources.ic_cast
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Tv
 import churchpresenter.composeapp.generated.resources.ic_close
 import churchpresenter.composeapp.generated.resources.ic_pause
 import churchpresenter.composeapp.generated.resources.ic_search
@@ -887,7 +888,7 @@ fun BibleTab(
                                         contentColor = MaterialTheme.colorScheme.onPrimary
                                     )
                                 ) {
-                                    Icon(painter = painterResource(Res.drawable.ic_cast), contentDescription = goLiveStr, modifier = Modifier.size(20.dp))
+                                    Icon(Icons.Default.Tv, contentDescription = goLiveStr, modifier = Modifier.size(20.dp))
                                 }
                             }
                     }
@@ -1084,7 +1085,7 @@ fun BibleTab(
                                         text = { Text(stringResource(Res.string.go_live)) },
                                         leadingIcon = {
                                             Icon(
-                                                painter = painterResource(Res.drawable.ic_cast),
+                                                imageVector = Icons.Default.Tv,
                                                 contentDescription = null,
                                                 modifier = Modifier.size(18.dp),
                                                 tint = MaterialTheme.colorScheme.primary

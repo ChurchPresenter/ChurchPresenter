@@ -74,6 +74,8 @@ import churchpresenter.composeapp.generated.resources.web_add_to_schedule
 import churchpresenter.composeapp.generated.resources.web_back
 import churchpresenter.composeapp.generated.resources.web_clear_cache
 import churchpresenter.composeapp.generated.resources.web_forward
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Tv
 import churchpresenter.composeapp.generated.resources.ic_cast
 import churchpresenter.composeapp.generated.resources.ic_playlist_add
 import churchpresenter.composeapp.generated.resources.web_go_live
@@ -363,7 +365,7 @@ fun WebTab(
                         disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
                     )
                 ) {
-                    Icon(painter = painterResource(Res.drawable.ic_cast), contentDescription = stringResource(Res.string.web_go_live), modifier = Modifier.size(20.dp))
+                    Icon(Icons.Default.Tv, contentDescription = stringResource(Res.string.web_go_live), modifier = Modifier.size(20.dp))
                 }
             }
         }

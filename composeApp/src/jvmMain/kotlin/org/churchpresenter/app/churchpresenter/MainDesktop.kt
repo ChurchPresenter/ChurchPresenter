@@ -57,6 +57,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Monitor
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.icons.filled.Wallpaper
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
@@ -75,7 +76,6 @@ import churchpresenter.composeapp.generated.resources.tooltip_toggle_displays
 import churchpresenter.composeapp.generated.resources.background
 import churchpresenter.composeapp.generated.resources.tooltip_settings
 import churchpresenter.composeapp.generated.resources.tab_visibility
-import churchpresenter.composeapp.generated.resources.ic_cast
 import churchpresenter.composeapp.generated.resources.ic_close
 import kotlinx.coroutines.flow.Flow
 import org.churchpresenter.app.churchpresenter.utils.AnalyticsReporter
@@ -1252,7 +1252,7 @@ fun MainDesktop(
                     ) {
                         Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                             TooltipIconButton(
-                                painter = painterResource(Res.drawable.ic_cast),
+                                painter = rememberVectorPainter(Icons.Default.Monitor),
                                 text = stringResource(Res.string.tooltip_toggle_displays),
                                 onClick = { presenterManager.togglePresenterWindow() },
                                 buttonSize = 36.dp,

@@ -64,7 +64,7 @@ import churchpresenter.composeapp.generated.resources.animation_slide_left
 import churchpresenter.composeapp.generated.resources.animation_slide_right
 import churchpresenter.composeapp.generated.resources.animation_type
 import churchpresenter.composeapp.generated.resources.auto_scroll_interval
-import churchpresenter.composeapp.generated.resources.ic_cast
+import androidx.compose.material.icons.filled.Tv
 import churchpresenter.composeapp.generated.resources.ic_close
 import churchpresenter.composeapp.generated.resources.ic_refresh
 import churchpresenter.composeapp.generated.resources.ic_star
@@ -596,7 +596,7 @@ fun PresentationTab(
                                 disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
                             )
                         ) {
-                            Icon(painter = painterResource(Res.drawable.ic_cast), contentDescription = stringResource(Res.string.go_live), modifier = Modifier.size(20.dp))
+                            Icon(Icons.Default.Tv, contentDescription = stringResource(Res.string.go_live), modifier = Modifier.size(20.dp))
                         }
                     }
                 }

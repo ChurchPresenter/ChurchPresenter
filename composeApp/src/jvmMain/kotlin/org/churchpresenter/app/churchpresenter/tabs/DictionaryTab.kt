@@ -64,7 +64,8 @@ import churchpresenter.composeapp.generated.resources.dictionary_search_hint
 import churchpresenter.composeapp.generated.resources.dictionary_select_entry
 import churchpresenter.composeapp.generated.resources.dictionary_transliteration
 import churchpresenter.composeapp.generated.resources.go_live
-import churchpresenter.composeapp.generated.resources.ic_cast
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Tv
 import churchpresenter.composeapp.generated.resources.ic_playlist_add
 import org.churchpresenter.app.churchpresenter.data.StrongsEntry
 import org.churchpresenter.app.churchpresenter.viewmodel.DictionaryLanguageFilter
@@ -356,7 +357,7 @@ private fun DictionaryDetailPane(
                             contentColor = MaterialTheme.colorScheme.onPrimary,
                         ),
                     ) {
-                        Icon(painter = painterResource(Res.drawable.ic_cast), contentDescription = goLiveStr, modifier = Modifier.size(20.dp))
+                        Icon(Icons.Default.Tv, contentDescription = goLiveStr, modifier = Modifier.size(20.dp))
                     }
                 }
             }

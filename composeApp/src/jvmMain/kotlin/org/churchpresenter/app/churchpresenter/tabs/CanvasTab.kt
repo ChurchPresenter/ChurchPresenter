@@ -75,7 +75,7 @@ import androidx.compose.material.icons.filled.Warning
 import churchpresenter.composeapp.generated.resources.ic_add
 import churchpresenter.composeapp.generated.resources.ic_arrow_down
 import churchpresenter.composeapp.generated.resources.ic_arrow_up
-import churchpresenter.composeapp.generated.resources.ic_cast
+import androidx.compose.material.icons.filled.Tv
 import churchpresenter.composeapp.generated.resources.ic_close
 import churchpresenter.composeapp.generated.resources.ic_delete
 import churchpresenter.composeapp.generated.resources.ic_edit
@@ -845,7 +845,7 @@ fun CanvasTab(
                                     contentColor = MaterialTheme.colorScheme.onPrimary
                                 )
                             ) {
-                                Icon(painter = painterResource(Res.drawable.ic_cast), contentDescription = stringResource(Res.string.go_live), modifier = Modifier.size(20.dp))
+                                Icon(Icons.Default.Tv, contentDescription = stringResource(Res.string.go_live), modifier = Modifier.size(20.dp))
                             }
                         }
                     }
