@@ -326,6 +326,46 @@ Derived from `file.absolutePath.hashCode().toUInt().toString(16)` — stable per
 3. Once fixed, document solution here
 4. Only then remove logs
 
+## Architecture Cheat Sheet
+
+### Package Responsibilities
+All source under `composeApp/src/jvmMain/kotlin/org/churchpresenter/app/churchpresenter/`:
+
+| Package          | Owns                                                                |
+|------------------|---------------------------------------------------------------------|
+| `tabs/`          | UI only — one file per tab, no logic                                |
+| `viewmodel/`     | State + business logic; owns its own ViewModel, never passed around |
+| `presenter/`     | Output window rendering (what the audience sees)                    |
+| `server/`        | Ktor REST/WebSocket server, ATEM client, tunnel, SSL                |
+| `data/`          | File I/O, database, song parsing, Bible data                        |
+| `data/settings/` | Data classes for all persisted settings                             |
+| `models/`        | Shared data models (ScheduleItem, SceneModels, etc.)                |
+| `composables/`   | Reusable UI components (VideoPlayer, SceneCanvas, etc.)             |
+| `dialogs/`       | All dialogs and settings dialog tabs                                |
+| `utils/`         | Stateless helpers (AutoFit, UpdateChecker, CrashReporter, etc.)     |
+| `ui/theme/`      | Theme, language provider, Material 3 wrappers                       |
+
+### App Startup Chain
+```
+main.kt → MainDesktop.kt → tabs/* + PresenterManager → presenter/*
+                        ↘ CompanionServer (server/)
+                        ↘ StageMonitorScreen.kt
+```
+- `MainDesktop.kt` is the root composable — wires all tabs, ViewModels, and server together
+- `presenter/Presenting.kt` — enum of what content type is currently live
+
+### String Resources
+- **Add new strings here**: `composeApp/src/jvmMain/composeResources/values/strings.xml`
+- Locale files live in `values-ru/`, `values-uk/`, `values-pl/`, etc. — **never edit these** (see rule 2a)
+- Access in code: `Res.string.your_key_name`
+
+### Common Build Commands
+```bash
+./gradlew :composeApp:run          # run the app
+./gradlew :composeApp:build        # full build + tests
+./gradlew compileKotlinJvm         # compile check only (fast)
+```
+
 ## Document Purpose
 
 This is an **AGENT-ONLY** document. It helps me (the AI agent):
