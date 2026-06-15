@@ -224,6 +224,12 @@ fun LowerThirdTab(
     // ATEM upload dialog state
     val atemConfigured = appSettings.atemSettings.host.isNotBlank()
     var atemReachable by remember { mutableStateOf(false) }
+    // Sticky: true once the current host/port has responded at least once. Gates whether the ATEM
+    // controls are shown at all — they appear only after a real response and stay shown if the
+    // device later drops; reset (hidden again) only when the IP/port changes.
+    var atemEverConnected by remember(appSettings.atemSettings.host, appSettings.atemSettings.port) {
+        mutableStateOf(false)
+    }
     var showAtemDialog by remember { mutableStateOf(false) }
 
     // Reachability poll — one hello packet per cycle, only while this tab is composed.
@@ -237,8 +243,10 @@ fun LowerThirdTab(
             return@LaunchedEffect
         }
         while (isActive) {
-            atemReachable = AtemClient.isReachable(host, port)
-            delay(if (atemReachable) 30_000L else 10_000L)
+            val reachable = AtemClient.isReachable(host, port)
+            atemReachable = reachable
+            if (reachable) atemEverConnected = true
+            delay(if (reachable) 30_000L else 10_000L)
         }
     }
     var atemIsClip by remember { mutableStateOf(false) }
@@ -273,6 +281,7 @@ fun LowerThirdTab(
             atemDetectedFps = state.fps
             if (state.clipMaxFrames.isNotEmpty()) atemClipMaxFrames = state.clipMaxFrames
             atemReachable = true
+            atemEverConnected = true
             // Snap to a valid slot if the configured default doesn't exist on this device
             if (atemSlots.isNotEmpty() && atemSlots.none { it.index == atemSlot }) {
                 atemSlot = atemSlots.first().index
@@ -935,9 +944,10 @@ fun LowerThirdTab(
                     }
                 }
 
-                // Send to ATEM — only shown when ATEM is configured; greyed out while
-                // the device is unreachable (reachability poll above)
-                if (atemConfigured) {
+                // Send to ATEM — shown only after the device has responded at least once for the
+                // current IP (atemEverConnected); stays shown but greys out if it later drops, and
+                // hides again only when the IP/port changes. Reachability poll is above.
+                if (atemConfigured && atemEverConnected) {
                     val atemButtonColors = IconButtonDefaults.iconButtonColors(
                         containerColor = MaterialTheme.colorScheme.tertiary,
                         contentColor = MaterialTheme.colorScheme.onTertiary,
