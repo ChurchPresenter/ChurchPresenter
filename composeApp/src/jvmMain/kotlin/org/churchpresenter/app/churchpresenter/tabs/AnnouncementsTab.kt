@@ -5,6 +5,7 @@ import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.input.pointer.pointerInput
+import java.awt.Cursor
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.window.WindowPlacement
@@ -1084,7 +1085,7 @@ fun AnnouncementsTab(
                     .width(6.dp)
                     .height(with(density) { twoColHeightPx.toDp() })
                     .background(MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f))
-                    .pointerHoverIcon(PointerIcon.Hand)
+                    .pointerHoverIcon(PointerIcon(Cursor(Cursor.E_RESIZE_CURSOR)))
                     .pointerInput(Unit) {
                         detectHorizontalDragGestures(
                             onDragEnd = { saveLeftPanel() }

@@ -79,6 +79,7 @@ import androidx.compose.ui.input.pointer.isSecondary
 import org.churchpresenter.app.churchpresenter.data.StatisticsManager
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.input.pointer.pointerInput
+import java.awt.Cursor
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -402,7 +403,7 @@ fun BibleTab(
                 .width(6.dp)
                 .fillMaxHeight()
                 .background(MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f))
-                .pointerHoverIcon(PointerIcon.Hand)
+                .pointerHoverIcon(PointerIcon(Cursor(Cursor.E_RESIZE_CURSOR)))
                 .pointerInput(Unit) {
                     detectHorizontalDragGestures(onDragEnd = ::saveColWidths) { _, amount ->
                         onDrag(amount)

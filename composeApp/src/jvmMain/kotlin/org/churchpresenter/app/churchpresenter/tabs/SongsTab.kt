@@ -90,6 +90,7 @@ import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import org.churchpresenter.app.churchpresenter.composables.TooltipIconButton
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.input.pointer.pointerInput
+import java.awt.Cursor
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -473,7 +474,7 @@ fun SongsTab(
                 .width(6.dp)
                 .fillMaxHeight()
                 .background(MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f))
-                .pointerHoverIcon(PointerIcon.Hand)
+                .pointerHoverIcon(PointerIcon(Cursor(Cursor.E_RESIZE_CURSOR)))
                 .pointerInput(colId) {
                     detectHorizontalDragGestures(onDragEnd = { currentOnDragEnd() }) { _, amount ->
                         currentOnDrag(amount)
@@ -1200,7 +1201,7 @@ fun SongsTab(
                                 .fillMaxWidth()
                                 .height(6.dp)
                                 .background(MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f))
-                                .pointerHoverIcon(PointerIcon.Hand)
+                                .pointerHoverIcon(PointerIcon(Cursor(Cursor.N_RESIZE_CURSOR)))
                                 .pointerInput(Unit) {
                                     detectVerticalDragGestures(
                                         onDragEnd = {
@@ -1282,7 +1283,7 @@ fun SongsTab(
                 .width(6.dp)
                 .fillMaxHeight()
                 .background(MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f))
-                .pointerHoverIcon(PointerIcon.Hand)
+                .pointerHoverIcon(PointerIcon(Cursor(Cursor.E_RESIZE_CURSOR)))
                 .pointerInput(Unit) {
                     detectHorizontalDragGestures(
                         onDragEnd = { saveLyricsPanelWidth() }

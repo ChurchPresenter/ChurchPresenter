@@ -13,6 +13,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -41,6 +42,7 @@ import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
+import java.awt.Cursor
 import androidx.compose.foundation.focusable
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -595,6 +597,21 @@ fun MainDesktop(
                 }
             }
 
+            BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+                // Keep the resize handles on screen at any window size (e.g. when the
+                // window is snapped to a half/quadrant): cap each side panel's width so
+                // both 16dp handles plus a minimum slice of main content always fit.
+                // Render/drag clamp only — saved widths are untouched and restore when
+                // the window grows again.
+                val availablePx = constraints.maxWidth.toFloat()
+                val reservePx = with(density) { (16 + 16 + 200).dp.toPx() } // 2 handles + min main
+                val absMaxPx = with(density) { 600.dp.toPx() }
+                fun panelCapPx(otherPanelPx: Float) =
+                    (availablePx - otherPanelPx - reservePx).coerceIn(0f, absMaxPx)
+
+                val maxSchedulePx = panelCapPx(if (previewCollapsed) 0f else previewPanelPx)
+                val maxPreviewPx = panelCapPx(if (scheduleCollapsed) 0f else schedulePanelPx)
+
             Row(modifier = Modifier.fillMaxSize()) {
                 // Collapsible schedule panel
                 AnimatedVisibility(
@@ -602,7 +619,7 @@ fun MainDesktop(
                     enter = expandHorizontally(expandFrom = Alignment.Start),
                     exit = shrinkHorizontally(shrinkTowards = Alignment.Start)
                 ) {
-                    Column(modifier = Modifier.width(with(density) { schedulePanelPx.toDp() }).fillMaxHeight()) {
+                    Column(modifier = Modifier.width(with(density) { schedulePanelPx.coerceAtMost(maxSchedulePx).toDp() }).fillMaxHeight()) {
                     ScheduleTab(
                         scheduleViewModel = scheduleViewModel,
                         onPresenting = presenting,
@@ -830,14 +847,15 @@ fun MainDesktop(
                                     onDragEnd = ::saveScheduleWidth
                                 ) { _, amount ->
                                     schedulePanelPx = (schedulePanelPx + amount).coerceIn(
-                                        with(density) { 160.dp.toPx() },
-                                        with(density) { 600.dp.toPx() }
+                                        minOf(with(density) { 160.dp.toPx() }, maxSchedulePx),
+                                        maxSchedulePx
                                     )
                                 }
                             }
                         }
                         .pointerHoverIcon(
-                            if (scheduleCollapsed) PointerIcon.Default else PointerIcon.Hand
+                            if (scheduleCollapsed) PointerIcon.Default
+                            else PointerIcon(Cursor(Cursor.E_RESIZE_CURSOR))
                         ),
                     contentAlignment = Alignment.Center
                 ) {
@@ -1171,14 +1189,15 @@ fun MainDesktop(
                                 ) { _, amount ->
                                     // Invert drag direction: dragging left increases width
                                     previewPanelPx = (previewPanelPx - amount).coerceIn(
-                                        with(density) { 150.dp.toPx() },
-                                        with(density) { 600.dp.toPx() }
+                                        minOf(with(density) { 150.dp.toPx() }, maxPreviewPx),
+                                        maxPreviewPx
                                     )
                                 }
                             }
                         }
                         .pointerHoverIcon(
-                            if (previewCollapsed) PointerIcon.Default else PointerIcon.Hand
+                            if (previewCollapsed) PointerIcon.Default
+                            else PointerIcon(Cursor(Cursor.E_RESIZE_CURSOR))
                         ),
                     contentAlignment = Alignment.Center
                 ) {
@@ -1227,7 +1246,7 @@ fun MainDesktop(
                 ) {
                     Column(
                         modifier = Modifier
-                            .width(with(density) { previewPanelPx.toDp() })
+                            .width(with(density) { previewPanelPx.coerceAtMost(maxPreviewPx).toDp() })
                             .fillMaxHeight()
                             .padding(8.dp)
                     ) {
@@ -1264,6 +1283,7 @@ fun MainDesktop(
                     }
                 }
             }
+            } // end BoxWithConstraints
         }
     }
 

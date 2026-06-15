@@ -6,6 +6,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.input.pointer.pointerInput
+import java.awt.Cursor
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.window.WindowPlacement
 import org.churchpresenter.app.churchpresenter.LocalMainWindowState
@@ -733,7 +734,7 @@ fun QATab(
                 .width(6.dp)
                 .fillMaxHeight()
                 .background(MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f))
-                .pointerHoverIcon(PointerIcon.Hand)
+                .pointerHoverIcon(PointerIcon(Cursor(Cursor.E_RESIZE_CURSOR)))
                 .pointerInput(Unit) {
                     detectHorizontalDragGestures(onDragEnd = ::saveRightPanel) { _, amount ->
                         rightPanelPx = (rightPanelPx - amount).coerceAtLeast(with(density) { 160.dp.toPx() })

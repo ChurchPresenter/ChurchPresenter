@@ -67,6 +67,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.layout.ContentScale
+import java.awt.Cursor
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
@@ -772,7 +773,7 @@ fun LowerThirdTab(
                 .width(6.dp)
                 .fillMaxHeight()
                 .background(MaterialTheme.colorScheme.outlineVariant)
-                .pointerHoverIcon(PointerIcon.Hand)
+                .pointerHoverIcon(PointerIcon(Cursor(Cursor.E_RESIZE_CURSOR)))
                 .pointerInput(Unit) {
                     detectHorizontalDragGestures(
                         onDragEnd = {
