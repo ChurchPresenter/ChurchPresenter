@@ -2500,8 +2500,8 @@ class CompanionServer {
                         return@post
                     }
                     scope.launch {
+                        val uploadId = AtemUploadStatus.begin(file.nameWithoutExtension, clip = false, slot = slot + 1)
                         try {
-                            AtemUploadStatus.begin(file.nameWithoutExtension, clip = false, slot = slot + 1)
                             val lottieJson = file.readText()
                             val (w, h) = AtemRenderCache.renderSize(atem)
                             val variant = AtemRenderCache.Variant(clip = false, width = w, height = h, frameCount = 1)
@@ -2509,18 +2509,18 @@ class CompanionServer {
                             AtemConnectionManager.use(atem.host, atem.port, needsState = true) { client ->
                                 AtemRenderCache.Reader(cached).use { reader ->
                                     client.uploadStillEncoded(slot, reader.nextFrame(), file.nameWithoutExtension) { p ->
-                                        AtemUploadStatus.progress(p)
+                                        AtemUploadStatus.progress(uploadId, p)
                                     }
                                 }
                                 if (keyOn) client.setUpstreamKeyerOnAir(mixEffect, keyer, true)
                             }
-                            AtemUploadStatus.complete()
+                            AtemUploadStatus.complete(uploadId)
                             kotlinx.coroutines.delay(800)
-                            AtemUploadStatus.clear()
+                            AtemUploadStatus.clear(uploadId)
                         } catch (e: Exception) {
                             System.err.println("[CompanionServer] ATEM still upload failed for '$name': ${e.message}")
                             CrashReporter.reportException(e, "ATEM still upload: $name")
-                            AtemUploadStatus.fail(e.message)
+                            AtemUploadStatus.fail(uploadId, e.message)
                         }
                     }
                     val keyInfo = if (keyOn) ""","me":${mixEffect + 1},"key":${keyer + 1}""" else ""
@@ -2577,21 +2577,21 @@ class CompanionServer {
                         return@post
                     }
                     scope.launch {
+                        val uploadId = AtemUploadStatus.begin(file.nameWithoutExtension, clip = true, slot = slot + 1)
                         try {
-                            AtemUploadStatus.begin(file.nameWithoutExtension, clip = true, slot = slot + 1)
                             val (w, h) = AtemRenderCache.renderSize(atem)
                             val variant = AtemRenderCache.Variant(clip = true, width = w, height = h, fps = fps, frameCount = frameCount)
                             val cached = AtemRenderCache.prepare(lottieJson, variant).await()
                             AtemConnectionManager.use(atem.host, atem.port, needsState = true) { client ->
                                 AtemRenderCache.Reader(cached).use { reader ->
                                     client.uploadClipEncoded(slot, reader.frameCount, file.nameWithoutExtension,
-                                        nextFrame = { reader.nextFrame() }) { p -> AtemUploadStatus.progress(p) }
+                                        nextFrame = { reader.nextFrame() }) { p -> AtemUploadStatus.progress(uploadId, p) }
                                 }
                                 if (keyOn) client.setUpstreamKeyerOnAir(mixEffect, keyer, true)
                             }
-                            AtemUploadStatus.complete()
+                            AtemUploadStatus.complete(uploadId)
                             kotlinx.coroutines.delay(800)
-                            AtemUploadStatus.clear()
+                            AtemUploadStatus.clear(uploadId)
                             // Wait for the clip to finish playing, then turn the key off automatically.
                             // Mutex is released between the two use() calls so other operations can proceed.
                             if (keyOn) {
@@ -2604,7 +2604,7 @@ class CompanionServer {
                         } catch (e: Exception) {
                             System.err.println("[CompanionServer] ATEM clip upload failed for '$name': ${e.message}")
                             CrashReporter.reportException(e, "ATEM clip upload: $name")
-                            AtemUploadStatus.fail(e.message)
+                            AtemUploadStatus.fail(uploadId, e.message)
                         }
                     }
                     val keyInfoClip = if (keyOn) ""","me":${mixEffect + 1},"key":${keyer + 1}""" else ""

@@ -256,7 +256,8 @@ fun LowerThirdTab(
     val remoteUpload by AtemUploadStatus.state.collectAsState()
     // Auto-dismiss a remote upload error after a while (success self-clears server-side)
     LaunchedEffect(remoteUpload?.error) {
-        if (remoteUpload?.error != null) { delay(8000); AtemUploadStatus.clear() }
+        val errored = remoteUpload
+        if (errored?.error != null) { delay(8000); AtemUploadStatus.clear(errored.id) }
     }
 
     // Fetch media pool slot info + FPS when dialog opens or mode toggles
@@ -358,6 +359,7 @@ fun LowerThirdTab(
         atemBusy = true
         atemError = null
         scope.launch {
+            var uploadId: Long? = null
             try {
                 // Awaits the background render when it isn't done yet;
                 // instant when the cache file already exists
@@ -365,7 +367,8 @@ fun LowerThirdTab(
                 atemProgress = 0f
                 // Publish to the shared status so the tab's upload bar shows the file +
                 // slot for in-app uploads too (same source the API uploads use)
-                AtemUploadStatus.begin(presetName, variant.clip, slot + 1)
+                val id = AtemUploadStatus.begin(presetName, variant.clip, slot + 1)
+                uploadId = id
                 val client = AtemClient(atemSettings.host, atemSettings.port)
                 withContext(Dispatchers.IO) { client.connect() }
                 try {
@@ -374,13 +377,13 @@ fun LowerThirdTab(
                             if (!variant.clip) {
                                 client.uploadStillEncoded(slot, reader.nextFrame(), presetName) { p ->
                                     atemProgress = p
-                                    AtemUploadStatus.progress(p)
+                                    AtemUploadStatus.progress(id, p)
                                 }
                             } else {
                                 client.uploadClipEncoded(
                                     slot, reader.frameCount, presetName,
                                     nextFrame = { reader.nextFrame() }
-                                ) { p -> atemProgress = p; AtemUploadStatus.progress(p) }
+                                ) { p -> atemProgress = p; AtemUploadStatus.progress(id, p) }
                             }
                         }
                     }
@@ -389,13 +392,13 @@ fun LowerThirdTab(
                 }
                 atemReachable = true
                 atemProgress = 1f
-                AtemUploadStatus.complete()
+                AtemUploadStatus.complete(id)
                 delay(800)
-                AtemUploadStatus.clear()
+                AtemUploadStatus.clear(id)
                 if (closeDialogOnSuccess) showAtemDialog = false
             } catch (e: Exception) {
                 atemError = e.message ?: "Upload failed"
-                AtemUploadStatus.fail(e.message)
+                uploadId?.let { AtemUploadStatus.fail(it, e.message) }
             } finally {
                 atemProgress = null
                 atemBusy = false
