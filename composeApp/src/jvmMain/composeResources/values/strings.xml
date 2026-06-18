@@ -1631,7 +1631,7 @@
     <string name="bible_stt_auto_follow_hint">Automatically open the latest spoken reference</string>
     <string name="bible_stt_clear">Clear detected references</string>
     <string name="bible_stt_src_transcribed">From speech</string>
-    <string name="bible_stt_src_translated">Book from translation</string>
+    <string name="bible_stt_src_translated">Matches the translation</string>
     <string name="bible_stt_src_highlighted">Matches a highlighted word</string>
     <string name="bible_stt_src_matched">Matched by quoted text</string>
     <string name="bible_stt_match_label">Text match</string>

@@ -148,7 +148,14 @@ class BibleViewModel(
 
     private val _autoFollowEnabled = mutableStateOf(false)
     val autoFollowEnabled: State<Boolean> = _autoFollowEnabled
-    fun setAutoFollow(enabled: Boolean) { _autoFollowEnabled.value = enabled }
+    fun setAutoFollow(enabled: Boolean) {
+        _autoFollowEnabled.value = enabled
+        // Turning it on jumps to the latest detection immediately (don't wait for the next new one).
+        if (enabled) {
+            _detectedReferences.value.firstOrNull { DetectionSource.MATCHED_TEXT !in it.sources }
+                ?.let { navigateToReference(SmartReference(it.bookIndex, it.chapter, it.verseStart, it.verseEnd)) }
+        }
+    }
 
     // Context carry-over so bare follow-ups ("8 стих") reuse the last named book/chapter.
     private var lastDetectedBookIndex = -1
@@ -292,7 +299,7 @@ class BibleViewModel(
         private const val CLICK_DEBOUNCE_MS = 300L
         private const val LIVE_SEARCH_DEBOUNCE_MS = 300L
         // Speech-driven detection tuning.
-        private const val MAX_DETECTED = 6              // chips kept on screen (newest first)
+        private const val MAX_DETECTED = 20             // detections kept (newest first); list scrolls
         private const val DETECTION_DEDUPE_WINDOW = 32  // recent keys remembered to avoid re-adding
         private const val SPOKEN_BOOK_MIN_SCORE = 60    // contains-level confidence to accept a book
         // "Let's read / open / turn to" cues that mark a following word as the book being opened.
@@ -1258,40 +1265,50 @@ class BibleViewModel(
 
         var newest: DetectedReference? = null
 
-        // ── Spoken references (book/chapter/verse said aloud) ──────────────────
-        val parsed = SpokenReferenceParser.parse(text, Locale.getDefault().language)
-        if (parsed.isNotEmpty()) {
-            // Books the server's word-highlighting flags inside the English translation — a
-            // corroboration signal only. (For this server the highlights are English book names.)
-            val highlightedBookIndices: Set<Int> =
-                if (translationText.isNullOrBlank() || highlightedWords.isEmpty()) emptySet()
-                else buildSet {
-                    for (hw in highlightedWords) {
-                        if (hw.word.isBlank()) continue
-                        val opts = if (hw.caseSensitive) emptySet() else setOf(RegexOption.IGNORE_CASE)
-                        val rx = runCatching {
-                            Regex(if (hw.isRegex) hw.word else Regex.escape(hw.word), opts)
-                        }.getOrNull() ?: continue
-                        for (m in rx.findAll(translationText)) {
-                            val idx = resolveSpokenBook(m.value)
-                            if (idx >= 0) add(idx)
-                        }
+        // Books the server's word-highlighting flags inside the English translation (corroboration).
+        val highlightedBookIndices: Set<Int> =
+            if (translationText.isNullOrBlank() || highlightedWords.isEmpty()) emptySet()
+            else buildSet {
+                for (hw in highlightedWords) {
+                    if (hw.word.isBlank()) continue
+                    val opts = if (hw.caseSensitive) emptySet() else setOf(RegexOption.IGNORE_CASE)
+                    val rx = runCatching {
+                        Regex(if (hw.isRegex) hw.word else Regex.escape(hw.word), opts)
+                    }.getOrNull() ?: continue
+                    for (m in rx.findAll(translationText)) {
+                        val idx = resolveSpokenBook(m.value)
+                        if (idx >= 0) add(idx)
                     }
                 }
-
-            // The English translation (id-aligned, slightly delayed) is often cleaner for the BOOK
-            // name when the Russian STT garbles it. We only ever borrow the book — never the numbers.
-            val englishBooks: List<Int> = translationText
-                ?.let { SpokenReferenceParser.parse(it, "en") }
-                ?.map { it.bookPhrase?.let { p -> resolveSpokenBook(p, highlightedBookIndices) } ?: -1 }
-                ?: emptyList()
-            val singleEnglishBook = englishBooks.filter { it >= 0 }.distinct().singleOrNull()
-
-            for (i in parsed.indices) {
-                val fallbackBook = englishBooks.getOrNull(i)?.takeIf { it >= 0 } ?: singleEnglishBook
-                val resolved = resolveSpokenRef(parsed[i], fallbackBook, highlightedBookIndices) ?: continue
-                if (addDetection(resolved)) newest = resolved
             }
+
+        // Parse the English translation once: used to cross-fill/confirm the Russian book, and to
+        // emit English-only references when the Russian transcription missed the passage entirely.
+        val translationRefs = if (translationText.isNullOrBlank()) emptyList()
+            else SpokenReferenceParser.parse(translationText, "en")
+        val englishBooks = translationRefs.map {
+            it.bookPhrase?.let { p -> resolveSpokenBook(p, highlightedBookIndices) } ?: -1
+        }
+        val singleEnglishBook = englishBooks.filter { it >= 0 }.distinct().singleOrNull()
+
+        // ── Spoken references (book/chapter/verse said aloud in Russian) ───────
+        val parsed = SpokenReferenceParser.parse(text, Locale.getDefault().language)
+        val russianBooks = HashSet<Int>()   // books Russian detected this tick — trust them over English
+        for (i in parsed.indices) {
+            val fallbackBook = englishBooks.getOrNull(i)?.takeIf { it >= 0 } ?: singleEnglishBook
+            val resolved = resolveSpokenRef(parsed[i], fallbackBook, highlightedBookIndices) ?: continue
+            russianBooks.add(resolved.bookIndex)
+            if (addDetection(resolved)) newest = resolved
+        }
+
+        // ── English-only references (translation caught a passage Russian missed) ──
+        // Only for books Russian didn't detect — so a passage both sides got stays one chip (the
+        // Russian one, already marked 🌐 by corroboration) and English fills genuine gaps. Drives
+        // auto-follow only when Russian produced nothing this tick (Russian is preferred).
+        for (er in translationRefs) {
+            val tref = resolveTranslationRef(er, highlightedBookIndices) ?: continue
+            if (tref.bookIndex in russianBooks) continue
+            if (addDetection(tref) && newest == null) newest = tref
         }
 
         // ── Reverse lookup (passage identified from the spoken verse text) ─────
@@ -1307,12 +1324,28 @@ class BibleViewModel(
         }
     }
 
-    /** Adds a detection if it isn't a recent duplicate. Returns true when actually added. */
+    /**
+     * Adds a detection, or — when the same reference is already showing — merges any new source
+     * markers into it (so late-arriving corroboration like the delayed English translation appears
+     * on the existing chip). Returns true only when a brand-new chip was added.
+     */
     private fun addDetection(ref: DetectedReference): Boolean {
-        if (recentDetectionKeys.contains(ref.key)) return false
+        val list = _detectedReferences.value
+        val idx = list.indexOfFirst { it.key == ref.key }
+        if (idx >= 0) {
+            val merged = list[idx].sources + ref.sources
+            val verseText = list[idx].verseText ?: ref.verseText
+            if (merged != list[idx].sources || verseText != list[idx].verseText) {
+                _detectedReferences.value = list.toMutableList().also {
+                    it[idx] = list[idx].copy(sources = merged, verseText = verseText)
+                }
+            }
+            return false
+        }
+        if (recentDetectionKeys.contains(ref.key)) return false   // shown earlier, scrolled off
         recentDetectionKeys.addLast(ref.key)
         while (recentDetectionKeys.size > DETECTION_DEDUPE_WINDOW) recentDetectionKeys.removeFirst()
-        _detectedReferences.value = (listOf(ref) + _detectedReferences.value).take(MAX_DETECTED)
+        _detectedReferences.value = (listOf(ref) + list).take(MAX_DETECTED)
         return true
     }
 
@@ -1373,16 +1406,22 @@ class BibleViewModel(
         englishFallbackBook: Int? = null,
         highlightedBookIndices: Set<Int> = emptySet(),
     ): DetectedReference? {
+        val namedABook = !sr.bookPhrase.isNullOrBlank()
         var source = DetectionSource.TRANSCRIBED
         var bookIndex = sr.bookPhrase?.let { resolveSpokenBook(it, highlightedBookIndices) } ?: -1
         if (bookIndex < 0 && englishFallbackBook != null && englishFallbackBook >= 0) {
             bookIndex = englishFallbackBook            // book recovered from the English translation
             source = DetectionSource.TRANSLATED
         }
-        if (bookIndex < 0) bookIndex = lastDetectedBookIndex   // else carry over the last book (still TRANSCRIBED)
-        if (bookIndex < 0 && pendingBookIndex >= 0) {
-            bookIndex = pendingBookIndex                        // book named earlier after a read-cue
-            pendingBookIndex = -1
+        // Carry-over / pending only when the speaker did NOT name a book this time. If they DID name a
+        // book we couldn't resolve (e.g. STT garbled "1 Иоанна" → "1 Яна"), never silently reuse the
+        // previous book — return null and wait for the English translation to supply the right one.
+        if (bookIndex < 0 && !namedABook) {
+            bookIndex = lastDetectedBookIndex
+            if (bookIndex < 0 && pendingBookIndex >= 0) {
+                bookIndex = pendingBookIndex            // book named earlier after a read-cue
+                pendingBookIndex = -1
+            }
         }
         if (bookIndex < 0) return null
 
@@ -1395,12 +1434,49 @@ class BibleViewModel(
         lastDetectedChapter = chapter
 
         val sources = buildSet {
-            add(source)
+            add(source) // TRANSCRIBED, or TRANSLATED when English supplied the book (recovery)
+            // Corroboration: the English translation independently resolves to the same book.
+            if (englishFallbackBook != null && englishFallbackBook >= 0 && englishFallbackBook == bookIndex)
+                add(DetectionSource.TRANSLATED)
             if (bookIndex in highlightedBookIndices) add(DetectionSource.HIGHLIGHTED)
         }
         val label = buildDetectionLabel(bookIndex, chapter, sr.verseStart, sr.verseEnd)
         val key = "$bookIndex|$chapter|${sr.verseStart}|${sr.verseEnd}"
-        return DetectedReference(bookIndex, chapter, sr.verseStart, sr.verseEnd, label, key, sources)
+        return DetectedReference(
+            bookIndex, chapter, sr.verseStart, sr.verseEnd, label, key, sources,
+            verseText = verseTextFor(bookIndex, chapter, sr.verseStart),
+        )
+    }
+
+    /** Verse text for the detection row (History-style display). Null for chapter-only references. */
+    private fun verseTextFor(bookIndex: Int, chapter: Int, verse: Int?): String? {
+        if (verse == null) return null
+        val bible = _primaryBible.value ?: return null
+        return bible.getVerseDetails(bible.getBookId(bookIndex), chapter, verse)?.second
+    }
+
+    /**
+     * Builds an English-only detection — the passage came purely from the translation (Russian
+     * missed it). Requires a resolvable book and a chapter; marked TRANSLATED so the operator sees it
+     * was translation-sourced. Does not touch Russian carry-over state.
+     */
+    private fun resolveTranslationRef(
+        er: SpokenReferenceParser.SpokenRef,
+        highlightedBookIndices: Set<Int>,
+    ): DetectedReference? {
+        val bookIndex = er.bookPhrase?.let { resolveSpokenBook(it, highlightedBookIndices) }
+            ?.takeIf { it >= 0 } ?: return null
+        val chapter = er.chapter ?: return null
+        val sources = buildSet {
+            add(DetectionSource.TRANSLATED)
+            if (bookIndex in highlightedBookIndices) add(DetectionSource.HIGHLIGHTED)
+        }
+        val label = buildDetectionLabel(bookIndex, chapter, er.verseStart, er.verseEnd)
+        val key = "$bookIndex|$chapter|${er.verseStart}|${er.verseEnd}"
+        return DetectedReference(
+            bookIndex, chapter, er.verseStart, er.verseEnd, label, key, sources,
+            verseText = verseTextFor(bookIndex, chapter, er.verseStart),
+        )
     }
 
     private fun buildDetectionLabel(bookIndex: Int, chapter: Int, vs: Int?, ve: Int?): String {

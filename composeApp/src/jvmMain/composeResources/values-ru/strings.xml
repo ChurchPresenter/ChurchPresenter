@@ -1579,7 +1579,7 @@
     <string name="bible_stt_auto_follow_hint">Автоматически открывать последнюю произнесённую ссылку</string>
     <string name="bible_stt_clear">Очистить распознанные ссылки</string>
     <string name="bible_stt_src_transcribed">Из речи</string>
-    <string name="bible_stt_src_translated">Книга из перевода</string>
+    <string name="bible_stt_src_translated">Совпадает с переводом</string>
     <string name="bible_stt_src_highlighted">Совпадает с подсветкой</string>
     <string name="bible_stt_src_matched">Найдено по тексту</string>
     <string name="bible_stt_match_label">Поиск по тексту</string>

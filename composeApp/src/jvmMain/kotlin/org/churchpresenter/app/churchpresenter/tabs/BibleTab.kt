@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -36,6 +37,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollbarAdapter
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
@@ -49,7 +52,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.FilterChip
-import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -686,18 +688,15 @@ fun BibleTab(
 
         // ── Detected references strip — visible whenever STT is connected ──
         if (sttConnected) {
-            // Spoken references render as compact chips; reverse-lookup text matches render as
-            // History-style rows (reference + verse text) below them.
-            val spokenRefs = detectedReferences.filter { DetectionSource.MATCHED_TEXT !in it.sources }
-            val matchedRefs = detectedReferences.filter { DetectionSource.MATCHED_TEXT in it.sources }
             val levelName = when (textMatchLevel) {
                 TextMatchLevel.OFF -> stringResource(Res.string.bible_stt_level_off)
                 TextMatchLevel.CONSERVATIVE -> stringResource(Res.string.bible_stt_level_conservative)
                 TextMatchLevel.BALANCED -> stringResource(Res.string.bible_stt_level_balanced)
                 TextMatchLevel.AGGRESSIVE -> stringResource(Res.string.bible_stt_level_aggressive)
             }
+            // ── Controls row: status + auto-follow + reverse-lookup level + clear ──
             FlowRow(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp).padding(bottom = 4.dp),
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp).padding(bottom = 2.dp),
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
                 verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
@@ -713,69 +712,11 @@ fun BibleTab(
                     )
                     Spacer(Modifier.width(4.dp))
                     Text(
-                        text = stringResource(Res.string.bible_stt_heard),
+                        text = if (detectedReferences.isEmpty()) stringResource(Res.string.bible_stt_listening)
+                               else stringResource(Res.string.bible_stt_heard),
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-                if (detectedReferences.isEmpty()) {
-                    // Nothing detected yet — confirm the helper is live and waiting.
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.height(32.dp)
-                    ) {
-                        Text(
-                            text = stringResource(Res.string.bible_stt_listening),
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-                        )
-                    }
-                }
-                spokenRefs.forEach { ref ->
-                    SuggestionChip(
-                        onClick = { viewModel.applyDetectedReference(ref) },
-                        label = {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                ref.sources.forEach { src ->
-                                    val (icon, descRes, tint) = when (src) {
-                                        DetectionSource.TRANSCRIBED -> Triple(
-                                            Icons.Filled.Mic, Res.string.bible_stt_src_transcribed,
-                                            MaterialTheme.colorScheme.primary
-                                        )
-                                        DetectionSource.TRANSLATED -> Triple(
-                                            Icons.Filled.Translate, Res.string.bible_stt_src_translated,
-                                            MaterialTheme.colorScheme.tertiary
-                                        )
-                                        DetectionSource.HIGHLIGHTED -> Triple(
-                                            Icons.Filled.Star, Res.string.bible_stt_src_highlighted,
-                                            MaterialTheme.colorScheme.secondary
-                                        )
-                                        DetectionSource.MATCHED_TEXT -> Triple(
-                                            Icons.Filled.FormatQuote, Res.string.bible_stt_src_matched,
-                                            MaterialTheme.colorScheme.tertiary
-                                        )
-                                    }
-                                    TooltipArea(tooltip = {
-                                        Surface(shadowElevation = 4.dp, color = MaterialTheme.colorScheme.surfaceVariant) {
-                                            Text(
-                                                text = stringResource(descRes),
-                                                style = MaterialTheme.typography.bodySmall,
-                                                modifier = Modifier.padding(8.dp)
-                                            )
-                                        }
-                                    }) {
-                                        Icon(
-                                            imageVector = icon,
-                                            contentDescription = stringResource(descRes),
-                                            tint = tint,
-                                            modifier = Modifier.size(13.dp)
-                                        )
-                                    }
-                                    Spacer(Modifier.width(3.dp))
-                                }
-                                Text(ref.label, style = MaterialTheme.typography.labelLarge)
-                            }
-                        }
+                            .copy(alpha = if (detectedReferences.isEmpty()) 0.6f else 1f)
                     )
                 }
                 TooltipArea(tooltip = {
@@ -822,8 +763,16 @@ fun BibleTab(
                 }
             }
 
-            // ── Reverse-lookup matches — History-style rows (reference + verse text) ──
-            matchedRefs.forEach { ref ->
+            // ── Detected references — History-style rows (max ~5 visible; scrolls beyond) ──
+            Box(modifier = Modifier.fillMaxWidth()) {
+                val detScroll = rememberScrollState()
+                Column(
+                    modifier = Modifier.fillMaxWidth()
+                        .heightIn(max = 132.dp)
+                        .verticalScroll(detScroll)
+                        .padding(end = 10.dp)
+                ) {
+                detectedReferences.forEach { ref ->
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.fillMaxWidth()
@@ -831,13 +780,50 @@ fun BibleTab(
                         .clickable { viewModel.applyDetectedReference(ref); focusRequester.requestFocus() }
                         .padding(vertical = 2.dp)
                 ) {
-                    Icon(
-                        imageVector = Icons.Filled.FormatQuote,
-                        contentDescription = stringResource(Res.string.bible_stt_src_matched),
-                        tint = MaterialTheme.colorScheme.tertiary,
-                        modifier = Modifier.size(14.dp)
-                    )
-                    Spacer(Modifier.width(4.dp))
+                    // Fixed-width icon column so every reference + verse text lines up vertically,
+                    // regardless of how many source markers a row has.
+                    Row(
+                        modifier = Modifier.width(68.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        ref.sources.forEach { src ->
+                            val (icon, descRes, tint) = when (src) {
+                                DetectionSource.TRANSCRIBED -> Triple(
+                                    Icons.Filled.Mic, Res.string.bible_stt_src_transcribed,
+                                    MaterialTheme.colorScheme.primary
+                                )
+                                DetectionSource.TRANSLATED -> Triple(
+                                    Icons.Filled.Translate, Res.string.bible_stt_src_translated,
+                                    MaterialTheme.colorScheme.tertiary
+                                )
+                                DetectionSource.HIGHLIGHTED -> Triple(
+                                    Icons.Filled.Star, Res.string.bible_stt_src_highlighted,
+                                    MaterialTheme.colorScheme.secondary
+                                )
+                                DetectionSource.MATCHED_TEXT -> Triple(
+                                    Icons.Filled.FormatQuote, Res.string.bible_stt_src_matched,
+                                    MaterialTheme.colorScheme.tertiary
+                                )
+                            }
+                            TooltipArea(tooltip = {
+                                Surface(shadowElevation = 4.dp, color = MaterialTheme.colorScheme.surfaceVariant) {
+                                    Text(
+                                        text = stringResource(descRes),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        modifier = Modifier.padding(8.dp)
+                                    )
+                                }
+                            }) {
+                                Icon(
+                                    imageVector = icon,
+                                    contentDescription = stringResource(descRes),
+                                    tint = tint,
+                                    modifier = Modifier.size(13.dp)
+                                )
+                            }
+                            Spacer(Modifier.width(3.dp))
+                        }
+                    }
                     Text(
                         text = buildAnnotatedString {
                             withStyle(SpanStyle(fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.primary)) {
@@ -849,9 +835,15 @@ fun BibleTab(
                         color = MaterialTheme.colorScheme.onSurface,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.weight(1f)
                     )
                 }
+                }
+                }
+                VerticalScrollbar(
+                    modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
+                    adapter = rememberScrollbarAdapter(detScroll)
+                )
             }
         }
 
