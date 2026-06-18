@@ -15,6 +15,7 @@ data class AppSettings(
     val announcementsSettings: AnnouncementsSettings = AnnouncementsSettings(),
     val qaSettings: QASettings = QASettings(),
     val sttSettings: STTSettings = STTSettings(),
+    val bibleEngineSettings: BibleEngineSettings = BibleEngineSettings(),
     val serverSettings: ServerSettings = ServerSettings(),
     val stageMonitorSettings: StageMonitorSettings = StageMonitorSettings(),
     val presentationStorageDirectory: String = "",

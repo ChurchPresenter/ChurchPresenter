@@ -7,3 +7,6 @@
 [submodule "composeApp/src/jvmMain/appResources/common/ChurchPresenter-Cross"]
 	path = composeApp/src/jvmMain/appResources/common/ChurchPresenter-Cross
 	url = https://github.com/ChurchPresenter/ChurchPresenter-Cross
+[submodule "composeApp/src/jvmMain/appResources/common/ChurchPresenter-BLE"]
+	path = composeApp/src/jvmMain/appResources/common/ChurchPresenter-BLE
+	url = https://github.com/ChurchPresenter/ChurchPresenter-BLE

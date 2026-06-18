@@ -120,6 +120,7 @@ import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.viewmodel.LocalMediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.BibleViewModel
+import org.churchpresenter.app.churchpresenter.viewmodel.BibleEngineClient
 import org.churchpresenter.app.churchpresenter.viewmodel.PicturesViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresentationViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
@@ -295,6 +296,15 @@ fun MainDesktop(
     val currentOnBibleLoaded by rememberUpdatedState(onBibleLoaded)
     val bibleViewModel = remember { BibleViewModel(appSettings, onBibleLoaded = { bible, translation -> currentOnBibleLoaded?.invoke(bible, translation) }) }
     DisposableEffect(Unit) { onDispose { bibleViewModel.dispose() } }
+
+    // Bible Lookup Engine client — feeds detected scripture into the Bible tab and forwards the
+    // reverse-lookup level to the engine. Started/stopped with the STT connection inside BibleTab.
+    val bibleEngineClient = remember {
+        BibleEngineClient(onScripture = bibleViewModel::onEngineScripture).also { client ->
+            bibleViewModel.onTextMatchLevelChanged = { level -> client.setLevel(level.name.lowercase()) }
+        }
+    }
+    DisposableEffect(Unit) { onDispose { bibleEngineClient.dispose() } }
 
     val dictionaryViewModel = remember { DictionaryViewModel() }
     DisposableEffect(Unit) { onDispose { dictionaryViewModel.dispose() } }
@@ -990,7 +1000,8 @@ fun MainDesktop(
                                 isPresenting = presentingMode == Presenting.BIBLE,
                                 presenterManager = presenterManager,
                                 statisticsManager = statisticsManager,
-                                sttManager = sttManager
+                                sttManager = sttManager,
+                                bibleEngineClient = bibleEngineClient
                             )
 
                             Tabs.SONGS -> SongsTab(

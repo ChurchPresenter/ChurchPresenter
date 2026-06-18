@@ -505,9 +505,6 @@ class Bible {
     fun getChapterVerses(book: Int, chapter: Int): List<BibleVerse> =
         chapterIndex[chapterKey(book, chapter)] ?: emptyList()
 
-    /** All verses, for building a full-text reverse-lookup index. Read-only snapshot. */
-    fun allVerses(): List<BibleVerse> = operatorBible.toList()
-
     /**
      * Returns the book name for the given 1-based book id, or null if not found.
      */

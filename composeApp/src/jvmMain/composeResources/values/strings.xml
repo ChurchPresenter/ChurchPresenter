@@ -1630,13 +1630,16 @@
     <string name="bible_stt_auto_follow">Auto-follow</string>
     <string name="bible_stt_auto_follow_hint">Automatically open the latest spoken reference</string>
     <string name="bible_stt_clear">Clear detected references</string>
-    <string name="bible_stt_src_transcribed">From speech</string>
-    <string name="bible_stt_src_translated">Matches the translation</string>
-    <string name="bible_stt_src_highlighted">Matches a highlighted word</string>
-    <string name="bible_stt_src_matched">Matched by quoted text</string>
+    <string name="bible_stt_src_explicit">Spoken reference</string>
+    <string name="bible_stt_src_reverse">Matched by text</string>
+    <string name="bible_stt_src_continuation">Following along</string>
     <string name="bible_stt_match_label">Text match</string>
     <string name="bible_stt_level_off">Off</string>
     <string name="bible_stt_level_conservative">Conservative</string>
     <string name="bible_stt_level_balanced">Balanced</string>
     <string name="bible_stt_level_aggressive">Aggressive</string>
+    <string name="bible_engine_detect">Detect scripture</string>
+    <string name="bible_engine_run_local">Run engine locally</string>
+    <string name="bible_engine_host">Engine host</string>
+    <string name="bible_engine_port">Port</string>
 </resources>

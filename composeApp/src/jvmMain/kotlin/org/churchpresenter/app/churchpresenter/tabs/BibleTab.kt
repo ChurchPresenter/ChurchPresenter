@@ -119,10 +119,10 @@ import churchpresenter.composeapp.generated.resources.ic_arrow_up
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Tv
 import androidx.compose.material.icons.filled.Mic
-import androidx.compose.material.icons.filled.Translate
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.FormatQuote
+import androidx.compose.material.icons.filled.ArrowForward
 import org.churchpresenter.app.churchpresenter.viewmodel.STTManager
+import org.churchpresenter.app.churchpresenter.viewmodel.BibleEngineClient
 import org.churchpresenter.app.churchpresenter.viewmodel.DetectionSource
 import org.churchpresenter.app.churchpresenter.viewmodel.TextMatchLevel
 import churchpresenter.composeapp.generated.resources.bible_stt_heard
@@ -130,10 +130,9 @@ import churchpresenter.composeapp.generated.resources.bible_stt_listening
 import churchpresenter.composeapp.generated.resources.bible_stt_auto_follow
 import churchpresenter.composeapp.generated.resources.bible_stt_auto_follow_hint
 import churchpresenter.composeapp.generated.resources.bible_stt_clear
-import churchpresenter.composeapp.generated.resources.bible_stt_src_transcribed
-import churchpresenter.composeapp.generated.resources.bible_stt_src_translated
-import churchpresenter.composeapp.generated.resources.bible_stt_src_highlighted
-import churchpresenter.composeapp.generated.resources.bible_stt_src_matched
+import churchpresenter.composeapp.generated.resources.bible_stt_src_explicit
+import churchpresenter.composeapp.generated.resources.bible_stt_src_reverse
+import churchpresenter.composeapp.generated.resources.bible_stt_src_continuation
 import churchpresenter.composeapp.generated.resources.bible_stt_match_label
 import churchpresenter.composeapp.generated.resources.bible_stt_level_off
 import churchpresenter.composeapp.generated.resources.bible_stt_level_conservative
@@ -186,6 +185,7 @@ fun BibleTab(
     presenterManager: PresenterManager? = null,
     statisticsManager: StatisticsManager? = null,
     sttManager: STTManager? = null,
+    bibleEngineClient: BibleEngineClient? = null,
 ) {
     // Update settings when bible paths change
     val isFirstComposition = remember { mutableStateOf(true) }
@@ -210,30 +210,35 @@ fun BibleTab(
         }
     }
 
-    // ── Speech-driven reference detection ──────────────────────────────────────
-    // The whole helper is tied to the STT connection: it only scans/shows while the STT tab is
-    // connected to the server, and clears its chips on disconnect so nothing stale lingers.
+    // ── Scripture detection via the Bible Lookup Engine ────────────────────────
+    // The engine is started when STT connects (pointed at the same STT server), and stopped on
+    // disconnect. Detection results arrive over the engine's WebSocket and feed the rows below.
     val sttConnected = sttManager?.connected?.value == true
-    if (sttManager != null) {
-        LaunchedEffect(sttManager, sttConnected) {
-            if (!sttConnected) {
+    val engineSettings = appSettings.bibleEngineSettings
+    // The SET of bibles to index (sorted, blanks removed). Keying the engine restart on this means
+    // swapping primary↔secondary (same set) does NOT trigger a re-index, while changing to a
+    // different bible does. Supports primary-only (secondary blank → single-element set).
+    val engineBibles = remember(appSettings.bibleSettings.primaryBible, appSettings.bibleSettings.secondaryBible) {
+        listOf(appSettings.bibleSettings.primaryBible, appSettings.bibleSettings.secondaryBible)
+            .filter { it.isNotBlank() }
+            .sorted()
+    }
+    if (sttManager != null && bibleEngineClient != null) {
+        LaunchedEffect(sttConnected, engineSettings.enabled, engineSettings.runLocal, engineSettings.host, engineSettings.port, engineBibles) {
+            if (sttConnected && engineSettings.enabled && engineBibles.isNotEmpty()) {
+                bibleEngineClient.start(
+                    sttUrl = appSettings.sttSettings.serverUrl,
+                    bibleRoot = appSettings.bibleSettings.storageDirectory,
+                    bibleFiles = engineBibles,
+                    runLocal = engineSettings.runLocal,
+                    host = engineSettings.host,
+                    port = engineSettings.port,
+                    level = viewModel.textMatchLevel.value.name.lowercase(),
+                )
+            } else {
+                bibleEngineClient.stop()
                 viewModel.clearDetectedReferences()
-                return@LaunchedEffect
             }
-            // Scan the tail of recent finalized segments + the live in-progress text; the ViewModel
-            // de-dupes, so re-sending overlapping/growing text is cheap and safe. The English
-            // translation of the same segments (aligned by id, so the delay doesn't matter) is sent
-            // too, to recover book names the Russian STT garbles.
-            snapshotFlow {
-                val window = sttManager.segments.takeLast(4)
-                val ruText = window.joinToString(" ") { it.text } + " " + sttManager.inProgressText.value
-                val transById = sttManager.translationSegments.associateBy { it.id }
-                val enText = window.mapNotNull { transById[it.id]?.text }.joinToString(" ") +
-                    " " + sttManager.inProgressTranslation.value
-                val highlights = if (sttManager.wordHighlightingEnabled.value)
-                    sttManager.highlightedWords.toList() else emptyList()
-                Triple(ruText, enText, highlights)
-            }.collect { (ru, en, hl) -> viewModel.ingestTranscript(ru, en, hl) }
         }
     }
     val detectedReferences by viewModel.detectedReferences
@@ -730,7 +735,11 @@ fun BibleTab(
                 }) {
                     FilterChip(
                         selected = autoFollowEnabled,
-                        onClick = { viewModel.setAutoFollow(!autoFollowEnabled) },
+                        onClick = {
+                            val next = !autoFollowEnabled
+                            viewModel.setAutoFollow(next)
+                            onSettingsChange { it.copy(bibleEngineSettings = it.bibleEngineSettings.copy(autoFollow = next)) }
+                        },
                         label = { Text(stringResource(Res.string.bible_stt_auto_follow)) },
                         leadingIcon = {
                             Icon(Icons.Filled.Tv, contentDescription = null, modifier = Modifier.size(16.dp))
@@ -742,7 +751,9 @@ fun BibleTab(
                     selected = textMatchLevel != TextMatchLevel.OFF,
                     onClick = {
                         val all = TextMatchLevel.values()
-                        viewModel.setTextMatchLevel(all[(textMatchLevel.ordinal + 1) % all.size])
+                        val next = all[(textMatchLevel.ordinal + 1) % all.size]
+                        viewModel.setTextMatchLevel(next)
+                        onSettingsChange { it.copy(bibleEngineSettings = it.bibleEngineSettings.copy(textMatchLevel = next.name.lowercase())) }
                     },
                     label = { Text("${stringResource(Res.string.bible_stt_match_label)}: $levelName") },
                     leadingIcon = {
@@ -788,21 +799,17 @@ fun BibleTab(
                     ) {
                         ref.sources.forEach { src ->
                             val (icon, descRes, tint) = when (src) {
-                                DetectionSource.TRANSCRIBED -> Triple(
-                                    Icons.Filled.Mic, Res.string.bible_stt_src_transcribed,
+                                DetectionSource.EXPLICIT -> Triple(
+                                    Icons.Filled.Mic, Res.string.bible_stt_src_explicit,
                                     MaterialTheme.colorScheme.primary
                                 )
-                                DetectionSource.TRANSLATED -> Triple(
-                                    Icons.Filled.Translate, Res.string.bible_stt_src_translated,
+                                DetectionSource.REVERSE -> Triple(
+                                    Icons.Filled.FormatQuote, Res.string.bible_stt_src_reverse,
                                     MaterialTheme.colorScheme.tertiary
                                 )
-                                DetectionSource.HIGHLIGHTED -> Triple(
-                                    Icons.Filled.Star, Res.string.bible_stt_src_highlighted,
+                                DetectionSource.CONTINUATION -> Triple(
+                                    Icons.Filled.ArrowForward, Res.string.bible_stt_src_continuation,
                                     MaterialTheme.colorScheme.secondary
-                                )
-                                DetectionSource.MATCHED_TEXT -> Triple(
-                                    Icons.Filled.FormatQuote, Res.string.bible_stt_src_matched,
-                                    MaterialTheme.colorScheme.tertiary
                                 )
                             }
                             TooltipArea(tooltip = {

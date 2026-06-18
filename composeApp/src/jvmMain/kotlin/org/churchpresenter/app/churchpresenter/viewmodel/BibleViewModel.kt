@@ -28,8 +28,11 @@ import java.util.Locale
 /** Mode of the unified Bible search box. */
 enum class BibleSearchMode { AUTO, REFERENCE, TEXT }
 
-/** How a detected reference's book was resolved/corroborated — shown as chip markers. */
-enum class DetectionSource { TRANSCRIBED, TRANSLATED, HIGHLIGHTED, MATCHED_TEXT }
+/** How the Bible Lookup Engine matched a reference — shown as a row marker. */
+enum class DetectionSource { EXPLICIT, REVERSE, CONTINUATION }
+
+/** Reverse-lookup (BM25) aggressiveness, sent to the engine; gates only the text-match stage. */
+enum class TextMatchLevel { OFF, CONSERVATIVE, BALANCED, AGGRESSIVE }
 
 /**
  * A Scripture reference detected in the live STT transcript and already resolved to a real book in
@@ -45,7 +48,7 @@ data class DetectedReference(
     val label: String,
     val key: String,
     val sources: Set<DetectionSource> = emptySet(),
-    val verseText: String? = null,   // set for MATCHED_TEXT results, shown History-style
+    val verseText: String? = null,   // verse text shown History-style on the row
 )
 
 class BibleViewModel(
@@ -142,53 +145,35 @@ class BibleViewModel(
     val isFullyLoadedFlow: StateFlow<Boolean> = _isFullyLoadedFlow.asStateFlow()
     val isFullyLoaded: Boolean get() = _isFullyLoadedFlow.value
 
-    // ── Speech-driven reference detection (fed by the live STT transcript) ──────
+    // ── Scripture detection (events from the Bible Lookup Engine over WebSocket) ──
     private val _detectedReferences = mutableStateOf<List<DetectedReference>>(emptyList())
     val detectedReferences: State<List<DetectedReference>> = _detectedReferences
 
-    private val _autoFollowEnabled = mutableStateOf(false)
+    private val _autoFollowEnabled = mutableStateOf(appSettings.bibleEngineSettings.autoFollow)
     val autoFollowEnabled: State<Boolean> = _autoFollowEnabled
     fun setAutoFollow(enabled: Boolean) {
         _autoFollowEnabled.value = enabled
-        // Turning it on jumps to the latest detection immediately (don't wait for the next new one).
+        // Turning it on jumps to the latest detection immediately.
         if (enabled) {
-            _detectedReferences.value.firstOrNull { DetectionSource.MATCHED_TEXT !in it.sources }
+            _detectedReferences.value.firstOrNull()
                 ?.let { navigateToReference(SmartReference(it.bookIndex, it.chapter, it.verseStart, it.verseEnd)) }
         }
     }
 
-    // Context carry-over so bare follow-ups ("8 стих") reuse the last named book/chapter.
-    private var lastDetectedBookIndex = -1
-    private var lastDetectedChapter = -1
-    // A book named after a "let's read…" cue but without a number yet — used to resolve a chapter/
-    // verse spoken in a later sentence ("Откроем Римлянам." → "Восьмая глава, тринадцатый стих.").
-    private var pendingBookIndex = -1
-
-    // Reverse lookup (identify the passage from the spoken verse text). Off by default.
-    private val _textMatchLevel = mutableStateOf(TextMatchLevel.OFF)
+    // Reverse-lookup aggressiveness (BM25). Pushed to the engine; seeded from persisted settings.
+    private val _textMatchLevel = mutableStateOf(
+        runCatching { TextMatchLevel.valueOf(appSettings.bibleEngineSettings.textMatchLevel.uppercase()) }
+            .getOrDefault(TextMatchLevel.OFF)
+    )
     val textMatchLevel: State<TextMatchLevel> = _textMatchLevel
-    private var textMatcher: BibleTextMatcher? = null
-    private var textMatcherForBible: Bible? = null
-    private var textMatcherBuilding = false
-
+    /** Registered by the engine client to forward level changes to the engine. */
+    var onTextMatchLevelChanged: ((TextMatchLevel) -> Unit)? = null
     fun setTextMatchLevel(level: TextMatchLevel) {
         _textMatchLevel.value = level
-        if (level != TextMatchLevel.OFF) ensureTextMatcher()
+        onTextMatchLevelChanged?.invoke(level)
     }
 
-    /** Builds the reverse-lookup index off-thread for the current primary Bible, once. */
-    private fun ensureTextMatcher() {
-        val bible = _primaryBible.value ?: return
-        if (textMatcherForBible === bible || textMatcherBuilding) return
-        textMatcherBuilding = true
-        viewModelScope.launch {
-            val built = withContext(Dispatchers.Default) { BibleTextMatcher(bible.allVerses()) }
-            textMatcher = built
-            textMatcherForBible = bible
-            textMatcherBuilding = false
-        }
-    }
-    // Ring of recently emitted keys so the same reference isn't re-added as the transcript grows.
+    // Recently emitted keys so repeated engine events don't add duplicate rows.
     private val recentDetectionKeys = ArrayDeque<String>()
 
     // History of presented verses (most recent first)
@@ -301,13 +286,6 @@ class BibleViewModel(
         // Speech-driven detection tuning.
         private const val MAX_DETECTED = 20             // detections kept (newest first); list scrolls
         private const val DETECTION_DEDUPE_WINDOW = 32  // recent keys remembered to avoid re-adding
-        private const val SPOKEN_BOOK_MIN_SCORE = 60    // contains-level confidence to accept a book
-        // "Let's read / open / turn to" cues that mark a following word as the book being opened.
-        private val READ_CUES = setOf(
-            "откроем", "откройте", "открываем", "открой", "прочитаем", "прочитайте",
-            "читаем", "читайте", "посмотрим", "посмотрите", "обратимся",
-            "open", "read", "turn",
-        )
         private val STANDARD_ENGLISH_BOOKS = listOf(
             "genesis", "exodus", "leviticus", "numbers", "deuteronomy", "joshua", "judges", "ruth",
             "1 samuel", "2 samuel", "1 kings", "2 kings", "1 chronicles", "2 chronicles",
@@ -1247,80 +1225,43 @@ class BibleViewModel(
     // ── Speech-driven reference detection ──────────────────────────────────────
 
     /**
-     * Feeds a chunk of live transcript through [SpokenReferenceParser], resolves each detection to a
-     * real book in the loaded Bible, de-dupes against recently seen references and prepends new ones
-     * to [detectedReferences] (newest first). When auto-follow is on, the newest detection navigates
-     * the browse columns. Safe to call repeatedly with overlapping/growing text.
+     * Handles a scripture event from the Bible Lookup Engine. [matchType] is "explicit", "reverse",
+     * or "continuation"; [bookId] is the canonical book number. Adds a row (de-duped, merging markers
+     * on repeats) and, when auto-follow is on, navigates to a newly-added one. Safe to call from the
+     * engine WebSocket coroutine.
      */
-    fun ingestTranscript(
-        text: String,
-        translationText: String? = null,
-        highlightedWords: List<HighlightedWord> = emptyList(),
+    fun onEngineScripture(
+        bookId: Int,
+        chapter: Int,
+        verseStart: Int,
+        verseEnd: Int?,
+        verseText: String,
+        matchType: String,
     ) {
-        if (_primaryBible.value == null || _books.value.isEmpty()) return
-
-        // A book named after a "let's read…" cue (no number yet) arms carry-over for a chapter/verse
-        // spoken in a later sentence.
-        detectCuedBook(text).takeIf { it >= 0 }?.let { pendingBookIndex = it }
-
-        var newest: DetectedReference? = null
-
-        // Books the server's word-highlighting flags inside the English translation (corroboration).
-        val highlightedBookIndices: Set<Int> =
-            if (translationText.isNullOrBlank() || highlightedWords.isEmpty()) emptySet()
-            else buildSet {
-                for (hw in highlightedWords) {
-                    if (hw.word.isBlank()) continue
-                    val opts = if (hw.caseSensitive) emptySet() else setOf(RegexOption.IGNORE_CASE)
-                    val rx = runCatching {
-                        Regex(if (hw.isRegex) hw.word else Regex.escape(hw.word), opts)
-                    }.getOrNull() ?: continue
-                    for (m in rx.findAll(translationText)) {
-                        val idx = resolveSpokenBook(m.value)
-                        if (idx >= 0) add(idx)
-                    }
-                }
-            }
-
-        // Parse the English translation once: used to cross-fill/confirm the Russian book, and to
-        // emit English-only references when the Russian transcription missed the passage entirely.
-        val translationRefs = if (translationText.isNullOrBlank()) emptyList()
-            else SpokenReferenceParser.parse(translationText, "en")
-        val englishBooks = translationRefs.map {
-            it.bookPhrase?.let { p -> resolveSpokenBook(p, highlightedBookIndices) } ?: -1
+        val bookIndex = canonicalBookIdToIndex(bookId) ?: return
+        val source = when (matchType) {
+            "explicit" -> DetectionSource.EXPLICIT
+            "continuation" -> DetectionSource.CONTINUATION
+            else -> DetectionSource.REVERSE
         }
-        val singleEnglishBook = englishBooks.filter { it >= 0 }.distinct().singleOrNull()
-
-        // ── Spoken references (book/chapter/verse said aloud in Russian) ───────
-        val parsed = SpokenReferenceParser.parse(text, Locale.getDefault().language)
-        val russianBooks = HashSet<Int>()   // books Russian detected this tick — trust them over English
-        for (i in parsed.indices) {
-            val fallbackBook = englishBooks.getOrNull(i)?.takeIf { it >= 0 } ?: singleEnglishBook
-            val resolved = resolveSpokenRef(parsed[i], fallbackBook, highlightedBookIndices) ?: continue
-            russianBooks.add(resolved.bookIndex)
-            if (addDetection(resolved)) newest = resolved
-        }
-
-        // ── English-only references (translation caught a passage Russian missed) ──
-        // Only for books Russian didn't detect — so a passage both sides got stays one chip (the
-        // Russian one, already marked 🌐 by corroboration) and English fills genuine gaps. Drives
-        // auto-follow only when Russian produced nothing this tick (Russian is preferred).
-        for (er in translationRefs) {
-            val tref = resolveTranslationRef(er, highlightedBookIndices) ?: continue
-            if (tref.bookIndex in russianBooks) continue
-            if (addDetection(tref) && newest == null) newest = tref
-        }
-
-        // ── Reverse lookup (passage identified from the spoken verse text) ─────
-        // Runs even when no reference was spoken. Never drives auto-follow.
-        if (_textMatchLevel.value != TextMatchLevel.OFF) {
-            ensureTextMatcher()
-            textMatcher?.match(text, _textMatchLevel.value)?.let { addTextMatch(it) }
-        }
-
-        val n = newest
-        if (n != null && _autoFollowEnabled.value) {
-            navigateToReference(SmartReference(n.bookIndex, n.chapter, n.verseStart, n.verseEnd))
+        val vEnd = verseEnd?.takeIf { it > verseStart }
+        val label = buildDetectionLabel(bookIndex, chapter, verseStart, vEnd)
+        val key = "$bookIndex|$chapter|$verseStart|$vEnd"
+        val added = addDetection(
+            DetectedReference(
+                bookIndex = bookIndex,
+                chapter = chapter,
+                verseStart = verseStart,
+                verseEnd = vEnd,
+                label = label,
+                key = key,
+                sources = setOf(source),
+                // Prefer the app's own primary-Bible text; fall back to the engine's matched text.
+                verseText = verseTextFor(bookIndex, chapter, verseStart) ?: verseText.ifBlank { null },
+            )
+        )
+        if (added && _autoFollowEnabled.value) {
+            navigateToReference(SmartReference(bookIndex, chapter, verseStart, vEnd))
         }
     }
 
@@ -1349,103 +1290,15 @@ class BibleViewModel(
         return true
     }
 
-    /** Turns a reverse-lookup [BibleTextMatcher.Match] into a chip (History-style, with verse text). */
-    private fun addTextMatch(m: BibleTextMatcher.Match) {
-        val bookIndex = canonicalBookIdToIndex(m.book) ?: return
-        val label = buildDetectionLabel(bookIndex, m.chapter, m.verse, null)
-        val key = "$bookIndex|${m.chapter}|${m.verse}|null"
-        addDetection(
-            DetectedReference(
-                bookIndex = bookIndex,
-                chapter = m.chapter,
-                verseStart = m.verse,
-                verseEnd = null,
-                label = label,
-                key = key,
-                sources = setOf(DetectionSource.MATCHED_TEXT),
-                verseText = m.verseText,
-            )
-        )
-    }
-
-    /** Navigates the Bible tab to a chip the operator tapped. */
+    /** Navigates the Bible tab to a row the operator tapped. */
     fun applyDetectedReference(ref: DetectedReference) {
         navigateToReference(SmartReference(ref.bookIndex, ref.chapter, ref.verseStart, ref.verseEnd))
     }
 
-    /** Clears the detected-reference chips (e.g. when the STT server disconnects). */
+    /** Clears the detected rows (e.g. when STT / the engine disconnects). */
     fun clearDetectedReferences() {
         if (_detectedReferences.value.isNotEmpty()) _detectedReferences.value = emptyList()
         recentDetectionKeys.clear()
-        lastDetectedBookIndex = -1
-        lastDetectedChapter = -1
-        pendingBookIndex = -1
-    }
-
-    /**
-     * Finds a book named right after a "let's read / open / turn to" cue, even with no number — so a
-     * chapter/verse spoken in a following sentence can still resolve. Requiring the cue keeps ordinary
-     * mentions of a book ("Павел писал Римлянам…") from arming carry-over.
-     */
-    private fun detectCuedBook(text: String): Int {
-        val words = text.lowercase().split(Regex("[^\\p{L}0-9]+")).filter { it.isNotEmpty() }
-        var found = -1
-        for (i in words.indices) {
-            if (words[i] in READ_CUES) {
-                val phrase = words.subList(i + 1, minOf(words.size, i + 6)).joinToString(" ")
-                val idx = resolveSpokenBook(phrase)
-                if (idx >= 0) found = idx   // keep the most recent cued book
-            }
-        }
-        return found
-    }
-
-    /** Resolves a raw [SpokenReferenceParser.SpokenRef] to a navigable reference with carry-over. */
-    private fun resolveSpokenRef(
-        sr: SpokenReferenceParser.SpokenRef,
-        englishFallbackBook: Int? = null,
-        highlightedBookIndices: Set<Int> = emptySet(),
-    ): DetectedReference? {
-        val namedABook = !sr.bookPhrase.isNullOrBlank()
-        var source = DetectionSource.TRANSCRIBED
-        var bookIndex = sr.bookPhrase?.let { resolveSpokenBook(it, highlightedBookIndices) } ?: -1
-        if (bookIndex < 0 && englishFallbackBook != null && englishFallbackBook >= 0) {
-            bookIndex = englishFallbackBook            // book recovered from the English translation
-            source = DetectionSource.TRANSLATED
-        }
-        // Carry-over / pending only when the speaker did NOT name a book this time. If they DID name a
-        // book we couldn't resolve (e.g. STT garbled "1 Иоанна" → "1 Яна"), never silently reuse the
-        // previous book — return null and wait for the English translation to supply the right one.
-        if (bookIndex < 0 && !namedABook) {
-            bookIndex = lastDetectedBookIndex
-            if (bookIndex < 0 && pendingBookIndex >= 0) {
-                bookIndex = pendingBookIndex            // book named earlier after a read-cue
-                pendingBookIndex = -1
-            }
-        }
-        if (bookIndex < 0) return null
-
-        // Chapter: stated, else carry over the last chapter when the book is unchanged.
-        val chapter = sr.chapter
-            ?: (if (bookIndex == lastDetectedBookIndex && lastDetectedChapter >= 1) lastDetectedChapter else null)
-            ?: return null
-
-        lastDetectedBookIndex = bookIndex
-        lastDetectedChapter = chapter
-
-        val sources = buildSet {
-            add(source) // TRANSCRIBED, or TRANSLATED when English supplied the book (recovery)
-            // Corroboration: the English translation independently resolves to the same book.
-            if (englishFallbackBook != null && englishFallbackBook >= 0 && englishFallbackBook == bookIndex)
-                add(DetectionSource.TRANSLATED)
-            if (bookIndex in highlightedBookIndices) add(DetectionSource.HIGHLIGHTED)
-        }
-        val label = buildDetectionLabel(bookIndex, chapter, sr.verseStart, sr.verseEnd)
-        val key = "$bookIndex|$chapter|${sr.verseStart}|${sr.verseEnd}"
-        return DetectedReference(
-            bookIndex, chapter, sr.verseStart, sr.verseEnd, label, key, sources,
-            verseText = verseTextFor(bookIndex, chapter, sr.verseStart),
-        )
     }
 
     /** Verse text for the detection row (History-style display). Null for chapter-only references. */
@@ -1453,30 +1306,6 @@ class BibleViewModel(
         if (verse == null) return null
         val bible = _primaryBible.value ?: return null
         return bible.getVerseDetails(bible.getBookId(bookIndex), chapter, verse)?.second
-    }
-
-    /**
-     * Builds an English-only detection — the passage came purely from the translation (Russian
-     * missed it). Requires a resolvable book and a chapter; marked TRANSLATED so the operator sees it
-     * was translation-sourced. Does not touch Russian carry-over state.
-     */
-    private fun resolveTranslationRef(
-        er: SpokenReferenceParser.SpokenRef,
-        highlightedBookIndices: Set<Int>,
-    ): DetectedReference? {
-        val bookIndex = er.bookPhrase?.let { resolveSpokenBook(it, highlightedBookIndices) }
-            ?.takeIf { it >= 0 } ?: return null
-        val chapter = er.chapter ?: return null
-        val sources = buildSet {
-            add(DetectionSource.TRANSLATED)
-            if (bookIndex in highlightedBookIndices) add(DetectionSource.HIGHLIGHTED)
-        }
-        val label = buildDetectionLabel(bookIndex, chapter, er.verseStart, er.verseEnd)
-        val key = "$bookIndex|$chapter|${er.verseStart}|${er.verseEnd}"
-        return DetectedReference(
-            bookIndex, chapter, er.verseStart, er.verseEnd, label, key, sources,
-            verseText = verseTextFor(bookIndex, chapter, er.verseStart),
-        )
     }
 
     private fun buildDetectionLabel(bookIndex: Int, chapter: Int, vs: Int?, ve: Int?): String {
@@ -1487,103 +1316,6 @@ class BibleViewModel(
             else -> ""
         }
         return "$bookName $chapter$versePart"
-    }
-
-    /**
-     * Resolves a spoken book phrase (possibly inflected, with filler words, or a leading "1"-"3") to
-     * a book index. More lenient than the typed-search matcher: besides the contains/prefix match it
-     * also tries a stem/prefix match and a small synonym table, so Russian case forms ("Даниила",
-     * "Деянии", "псалом") still resolve.
-     */
-    private fun resolveSpokenBook(phrase: String, highlightedBookIndices: Set<Int> = emptySet()): Int {
-        val words = phrase.trim().lowercase().split(Regex("\\s+")).filter { it.isNotBlank() }
-        if (words.isEmpty()) return -1
-        val bookNum = words.firstOrNull { it == "1" || it == "2" || it == "3" }?.toIntOrNull()
-        val content = words.filter { it.toIntOrNull() == null }
-        if (content.isEmpty()) return -1
-
-        // The book word is almost always the last content word; also try the last two joined and the
-        // whole phrase (for two-word names like "иисус навин").
-        val candidates = buildList {
-            content.lastOrNull()?.let { add(it) }
-            if (content.size >= 2) add(content.takeLast(2).joinToString(" "))
-            add(content.joinToString(" "))
-        }.distinct()
-
-        var bestIdx = -1
-        var bestScore = 0
-        for (c in candidates) {
-            val (idx, score) = matchSpokenBook(c, bookNum, highlightedBookIndices)
-            if (score > bestScore) { bestScore = score; bestIdx = idx }
-        }
-        return if (bestScore >= SPOKEN_BOOK_MIN_SCORE) bestIdx else -1
-    }
-
-    private fun matchSpokenBook(
-        token: String,
-        bookNum: Int?,
-        highlightedBookIndices: Set<Int> = emptySet(),
-    ): Pair<Int, Int> {
-        var bestIdx = -1
-        var bestScore = 0
-        fun consider(idx: Int, score: Int) {
-            if (idx < 0 || score <= 0) return
-            var s = score
-            if (bookNum != null && bookIndexHasNumber(idx, bookNum)) s += 15
-            // Word-highlighting corroboration: the server flagged this book in the English text.
-            if (idx in highlightedBookIndices) s += 20
-            if (s > bestScore) { bestScore = s; bestIdx = idx }
-        }
-        // 1. Reuse the typed-search matcher (localized + English names, contains/prefix).
-        for ((idx, score) in rankedBookMatches(token)) consider(idx, score)
-        // 2. Stem/prefix fallback for inflected forms the contains-matcher misses.
-        if (bestScore < 80) {
-            val (idx, score) = stemMatchBook(token)
-            consider(idx, score)
-        }
-        // 3. Synonyms (different root, e.g. "псалом" → Псалтирь).
-        spokenBookSynonym(token)?.let { canonId ->
-            canonicalBookIdToIndex(canonId)?.let { consider(it, 90) }
-        }
-        return bestIdx to bestScore
-    }
-
-    /** True when the localized book name at [idx] is the [n]-numbered variant (e.g. "1-е Коринфянам"). */
-    private fun bookIndexHasNumber(idx: Int, n: Int): Boolean =
-        _books.value.getOrNull(idx)?.trimStart()?.startsWith(n.toString()) == true
-
-    /** Longest-common-prefix match against each word of the localized & English book names. */
-    private fun stemMatchBook(token: String): Pair<Int, Int> {
-        if (token.length < 4) return -1 to 0
-        var bestIdx = -1
-        var bestLcp = 0
-        fun consider(idx: Int?, name: String) {
-            if (idx == null || idx < 0) return
-            for (word in name.lowercase().split(' ', '-')) {
-                if (word.length < 4) continue
-                val lcp = commonPrefixLength(word, token)
-                // token must be essentially the word minus a short inflection ending
-                if (lcp >= 4 && lcp >= minOf(word.length, token.length) - 2 && lcp > bestLcp) {
-                    bestLcp = lcp; bestIdx = idx
-                }
-            }
-        }
-        _books.value.forEachIndexed { i, name -> consider(i, name) }
-        STANDARD_ENGLISH_BOOKS.forEachIndexed { i, english -> consider(canonicalBookIdToIndex(i + 1), english) }
-        return if (bestIdx >= 0) bestIdx to (60 + bestLcp) else -1 to 0
-    }
-
-    private fun commonPrefixLength(a: String, b: String): Int {
-        val n = minOf(a.length, b.length)
-        var i = 0
-        while (i < n && a[i] == b[i]) i++
-        return i
-    }
-
-    /** Maps spoken roots that share no prefix with the stored name to a canonical book id. */
-    private fun spokenBookSynonym(token: String): Int? = when {
-        token.startsWith("псал") -> 19   // псалом / псалма / псалмы → Псалтирь (Psalms)
-        else -> null
     }
 
     fun dispose() {

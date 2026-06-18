@@ -1578,14 +1578,17 @@
     <string name="bible_stt_auto_follow">Авто-переход</string>
     <string name="bible_stt_auto_follow_hint">Автоматически открывать последнюю произнесённую ссылку</string>
     <string name="bible_stt_clear">Очистить распознанные ссылки</string>
-    <string name="bible_stt_src_transcribed">Из речи</string>
-    <string name="bible_stt_src_translated">Совпадает с переводом</string>
-    <string name="bible_stt_src_highlighted">Совпадает с подсветкой</string>
-    <string name="bible_stt_src_matched">Найдено по тексту</string>
+    <string name="bible_stt_src_explicit">Произнесённая ссылка</string>
+    <string name="bible_stt_src_reverse">Найдено по тексту</string>
+    <string name="bible_stt_src_continuation">Продолжение</string>
     <string name="bible_stt_match_label">Поиск по тексту</string>
     <string name="bible_stt_level_off">Выкл</string>
     <string name="bible_stt_level_conservative">Осторожно</string>
     <string name="bible_stt_level_balanced">Сбалансировано</string>
     <string name="bible_stt_level_aggressive">Агрессивно</string>
+    <string name="bible_engine_detect">Распознавать ссылки</string>
+    <string name="bible_engine_run_local">Запускать движок локально</string>
+    <string name="bible_engine_host">Адрес движка</string>
+    <string name="bible_engine_port">Порт</string>
 </resources>
 

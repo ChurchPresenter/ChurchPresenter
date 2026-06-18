@@ -109,6 +109,10 @@ import churchpresenter.composeapp.generated.resources.stt_not_connected
 import churchpresenter.composeapp.generated.resources.stt_opacity
 import churchpresenter.composeapp.generated.resources.stt_position
 import churchpresenter.composeapp.generated.resources.stt_server_url
+import churchpresenter.composeapp.generated.resources.bible_engine_detect
+import churchpresenter.composeapp.generated.resources.bible_engine_run_local
+import churchpresenter.composeapp.generated.resources.bible_engine_host
+import churchpresenter.composeapp.generated.resources.bible_engine_port
 import churchpresenter.composeapp.generated.resources.stt_size
 import churchpresenter.composeapp.generated.resources.stt_text_color
 import churchpresenter.composeapp.generated.resources.stt_transcription_label
@@ -270,6 +274,49 @@ fun STTTab(
                     ) {
                         Icon(Icons.Default.Tv, contentDescription = stringResource(Res.string.stt_go_live), modifier = Modifier.size(20.dp))
                     }
+                }
+            }
+
+            // Scripture detection (Bible Lookup Engine) — the engine starts with this STT connection.
+            val engine = appSettings.bibleEngineSettings
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Checkbox(
+                    checked = engine.enabled,
+                    onCheckedChange = { onSettingsChange { s -> s.copy(bibleEngineSettings = s.bibleEngineSettings.copy(enabled = it)) } }
+                )
+                Text(stringResource(Res.string.bible_engine_detect))
+                Spacer(Modifier.weight(1f))
+                Checkbox(
+                    checked = engine.runLocal,
+                    enabled = engine.enabled,
+                    onCheckedChange = { onSettingsChange { s -> s.copy(bibleEngineSettings = s.bibleEngineSettings.copy(runLocal = it)) } }
+                )
+                Text(stringResource(Res.string.bible_engine_run_local))
+            }
+            AnimatedVisibility(visible = engine.enabled && !engine.runLocal) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    OutlinedTextField(
+                        value = engine.host,
+                        onValueChange = { onSettingsChange { s -> s.copy(bibleEngineSettings = s.bibleEngineSettings.copy(host = it)) } },
+                        label = { Text(stringResource(Res.string.bible_engine_host)) },
+                        singleLine = true,
+                        modifier = Modifier.weight(1f)
+                    )
+                    OutlinedTextField(
+                        value = engine.port.toString(),
+                        onValueChange = { v -> v.toIntOrNull()?.let { p -> onSettingsChange { s -> s.copy(bibleEngineSettings = s.bibleEngineSettings.copy(port = p)) } } },
+                        label = { Text(stringResource(Res.string.bible_engine_port)) },
+                        singleLine = true,
+                        modifier = Modifier.width(120.dp)
+                    )
                 }
             }
 
