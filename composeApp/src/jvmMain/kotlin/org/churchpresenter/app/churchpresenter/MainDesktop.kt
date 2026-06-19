@@ -199,6 +199,7 @@ fun MainDesktop(
     onQaDisplayUrlChanged: (String) -> Unit = {},
     onOpenLottieGen: (outputDir: String, onFileSaved: (() -> Unit)?) -> Unit = { _, _ -> },
     sttManager: STTManager? = null,
+    dialogDismissSignal: Int = 0,
 ) {
     // ScheduleViewModel lives inside ScheduleTab — MainDesktop drives it via callbacks.
     // rememberUpdatedState ensures toolbar lambdas always read the latest actions without
@@ -494,6 +495,11 @@ fun MainDesktop(
         AnalyticsReporter.logPageView(visibleTabs.getOrNull(selectedTabIndex)?.name ?: "unknown")
         // Re-request focus so F-key shortcuts keep working after the new tab's children steal focus
         mainFocusRequester.requestFocus()
+    }
+    // Restore focus whenever a dialog closes (DialogWindow steals OS focus; without this, arrow
+    // keys and other shortcuts stop working until the user clicks back on the main window).
+    LaunchedEffect(dialogDismissSignal) {
+        if (dialogDismissSignal > 0) mainFocusRequester.requestFocus()
     }
 
     Box(
@@ -989,7 +995,8 @@ fun MainDesktop(
                                 onPresenting = presenting,
                                 isPresenting = presentingMode == Presenting.BIBLE,
                                 presenterManager = presenterManager,
-                                statisticsManager = statisticsManager
+                                statisticsManager = statisticsManager,
+                                dialogDismissSignal = dialogDismissSignal
                             )
 
                             Tabs.SONGS -> SongsTab(
@@ -1009,7 +1016,8 @@ fun MainDesktop(
                                 onPresenting = presenting,
                                 isPresenting = presentingMode == Presenting.LYRICS,
                                 theme = theme,
-                                statisticsManager = statisticsManager
+                                statisticsManager = statisticsManager,
+                                dialogDismissSignal = dialogDismissSignal
                             )
 
                             Tabs.PICTURES -> PicturesTab(
@@ -1122,7 +1130,8 @@ fun MainDesktop(
                                 sceneViewModel = sceneViewModel,
                                 onAddToSchedule = { sceneId, sceneName ->
                                     currentScheduleActions.addScene(sceneId, sceneName)
-                                }
+                                },
+                                dialogDismissSignal = dialogDismissSignal
                             )
 
                             Tabs.QA -> if (qaManager != null) {

@@ -361,6 +361,7 @@ fun main() {
         var qaDisplayUrl by remember { mutableStateOf("") }
         val remoteSelectSongFlow =
             remember { kotlinx.coroutines.flow.MutableSharedFlow<ScheduleItem.SongItem>(extraBufferCapacity = 8) }
+        var dialogDismissSignal by remember { mutableStateOf(0) }
         var showOptionsDialog by remember { mutableStateOf(false) }
         var optionsDialogInitialTab by remember { mutableStateOf(0) }
         // Single entry point so every open site picks its tab explicitly
@@ -1167,7 +1168,8 @@ fun main() {
                                             )
                                         }
                                     },
-                                    sttManager = sttManager
+                                    sttManager = sttManager,
+                                    dialogDismissSignal = dialogDismissSignal
                                 )
                                 OptionsDialog(
                                     isVisible = showOptionsDialog,
@@ -1178,7 +1180,7 @@ fun main() {
                                     companionServer = companionServer,
                                     remoteClientManager = remoteClientManager,
                                     presenterManager = presenterManager,
-                                    onDismiss = { showOptionsDialog = false },
+                                    onDismiss = { showOptionsDialog = false; dialogDismissSignal++ },
                                     onSave = { updated ->
                                         appSettings = updated
                                         settingsManager.saveSettings(updated)
@@ -1229,17 +1231,17 @@ fun main() {
                                 )
                                 KeyboardShortcutsDialog(
                                     isVisible = showKeyboardShortcutsDialog,
-                                    onDismiss = { showKeyboardShortcutsDialog = false }
+                                    onDismiss = { showKeyboardShortcutsDialog = false; dialogDismissSignal++ }
                                 )
                                 StatisticsDialog(
                                     isVisible = showStatisticsDialog,
                                     theme = theme,
                                     statisticsManager = statisticsManager,
-                                    onDismiss = { showStatisticsDialog = false }
+                                    onDismiss = { showStatisticsDialog = false; dialogDismissSignal++ }
                                 )
                                 AboutDialog(
                                     isVisible = showAboutDialog,
-                                    onDismiss = { showAboutDialog = false },
+                                    onDismiss = { showAboutDialog = false; dialogDismissSignal++ },
                                     theme = theme
                                 )
                                 if (showConverterWindow) {

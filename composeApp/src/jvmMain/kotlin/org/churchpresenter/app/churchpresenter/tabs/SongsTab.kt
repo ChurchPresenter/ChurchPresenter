@@ -175,7 +175,8 @@ fun SongsTab(
     onPresenting: (Presenting) -> Unit = { Presenting.NONE },
     isPresenting: Boolean = false,
     theme: ThemeMode = ThemeMode.SYSTEM,
-    statisticsManager: StatisticsManager? = null
+    statisticsManager: StatisticsManager? = null,
+    dialogDismissSignal: Int = 0,
 ) {
     LaunchedEffect(statisticsManager) { viewModel.setStatisticsManager(statisticsManager) }
 
@@ -299,7 +300,7 @@ fun SongsTab(
     val onSettingsChangeState = rememberUpdatedState(onSettingsChange)
 
     val tabFocusRequester = remember { FocusRequester() }
-    LaunchedEffect(Unit) { tabFocusRequester.requestFocus() }
+    LaunchedEffect(dialogDismissSignal) { tabFocusRequester.requestFocus() }
 
     // Column widths driven by settings; local state for smooth dragging
     var colWNumber by remember(appSettings.songSettings.colWidthNumber) {

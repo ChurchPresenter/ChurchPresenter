@@ -159,6 +159,7 @@ fun BibleTab(
     isPresenting: Boolean = false,
     presenterManager: PresenterManager? = null,
     statisticsManager: StatisticsManager? = null,
+    dialogDismissSignal: Int = 0,
 ) {
     // Update settings when bible paths change
     val isFirstComposition = remember { mutableStateOf(true) }
@@ -211,7 +212,7 @@ fun BibleTab(
     val selectedMode = modeOptions.getOrElse(selectedModeIndex) { modeOptions.first() }
 
     val focusRequester = remember { FocusRequester() }
-    LaunchedEffect(Unit) { focusRequester.requestFocus() }
+    LaunchedEffect(dialogDismissSignal) { focusRequester.requestFocus() }
 
     val verseSelectionToken by viewModel.verseSelectionToken
 

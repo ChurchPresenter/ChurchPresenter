@@ -139,7 +139,8 @@ fun CanvasTab(
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit = {},
     presenterManager: PresenterManager,
     sceneViewModel: SceneViewModel,
-    onAddToSchedule: (sceneId: String, sceneName: String) -> Unit
+    onAddToSchedule: (sceneId: String, sceneName: String) -> Unit,
+    dialogDismissSignal: Int = 0,
 ) {
     val density = LocalDensity.current
     val onSettingsChangeState = rememberUpdatedState(onSettingsChange)
@@ -195,7 +196,7 @@ fun CanvasTab(
     var drawingStrokeWidth by remember { mutableStateOf(3f) }
 
     val focusRequester = remember { FocusRequester() }
-    LaunchedEffect(Unit) {
+    LaunchedEffect(dialogDismissSignal) {
         focusRequester.requestFocus()
     }
     // Re-grab focus whenever a source is selected so Delete key works right after clicking canvas items
