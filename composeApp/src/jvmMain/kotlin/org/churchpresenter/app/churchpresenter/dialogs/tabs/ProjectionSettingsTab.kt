@@ -75,6 +75,7 @@ import churchpresenter.composeapp.generated.resources.lower_third_height
 import churchpresenter.composeapp.generated.resources.media_vlc_install
 import churchpresenter.composeapp.generated.resources.media_vlc_required
 import churchpresenter.composeapp.generated.resources.presenter_windows_count
+import churchpresenter.composeapp.generated.resources.projection_content_song_la
 import churchpresenter.composeapp.generated.resources.projection_position_help
 import churchpresenter.composeapp.generated.resources.projection_target_display
 import churchpresenter.composeapp.generated.resources.right
@@ -311,9 +312,10 @@ fun ProjectionSettingsTab(
         val bible2Label = stringResource(Res.string.screen_lang_bible_2)
         val lang1Label = stringResource(Res.string.screen_lang_language_1)
         val lang2Label = stringResource(Res.string.screen_lang_language_2)
+        val songLaLabel = stringResource(Res.string.projection_content_song_la)
 
-        val bibleLangModes = listOf("off" to offLabel, "primary" to bible1Label, "secondary" to bible2Label, "both" to bothLabel)
-        val songLangModes = listOf("off" to offLabel, "primary" to lang1Label, "secondary" to lang2Label, "both" to bothLabel)
+        val bibleLangModes = listOf(Constants.SONG_LANG_OFF to offLabel, Constants.SONG_LANG_PRIMARY to bible1Label, Constants.SONG_LANG_SECONDARY to bible2Label, Constants.SONG_LANG_BOTH to bothLabel)
+        val songLangModes = listOf(Constants.SONG_LANG_OFF to offLabel, Constants.SONG_LANG_PRIMARY to lang1Label, Constants.SONG_LANG_SECONDARY to lang2Label, Constants.SONG_LANG_BOTH to bothLabel)
         val langDropdownWidth = 95.dp
 
         val cellWidth = 82.dp
@@ -325,8 +327,8 @@ fun ProjectionSettingsTab(
         )
 
         val contentCols = listOf(
-            ContentCol("Song LA", { it.songLookAhead }, { a, v ->
-                if (v) a.copy(songMode = if (a.songMode == "off") "both" else a.songMode, songLookAhead = true)
+            ContentCol(songLaLabel, { it.songLookAhead }, { a, v ->
+                if (v) a.copy(songMode = if (a.songMode == Constants.SONG_LANG_OFF) Constants.SONG_LANG_BOTH else a.songMode, songLookAhead = true)
                 else a.copy(songLookAhead = false)
             }),
             ContentCol(picturesLabel, { it.showPictures }, { a, v -> a.copy(showPictures = v) }),
@@ -775,7 +777,11 @@ fun ProjectionSettingsTab(
                                     onClick = {
                                         songModeExpanded = false
                                         onSettingsChange { s ->
-                                            s.copy(projectionSettings = s.projectionSettings.withAssignment(i, assignment.copy(songMode = value)))
+                                            val updated = if (value == Constants.SONG_LANG_OFF)
+                                                assignment.copy(songMode = value, songLookAhead = false)
+                                            else
+                                                assignment.copy(songMode = value)
+                                            s.copy(projectionSettings = s.projectionSettings.withAssignment(i, updated))
                                         }
                                     }
                                 )

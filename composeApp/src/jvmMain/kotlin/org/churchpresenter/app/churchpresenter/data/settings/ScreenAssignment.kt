@@ -17,8 +17,8 @@ data class ScreenAssignment(
     val keyTargetBoundsY: Int = Int.MIN_VALUE,
     val keyTargetBoundsW: Int = 0,
     val keyTargetBoundsH: Int = 0,
-    val bibleMode: String = "both",  // "off" | "primary" | "secondary" | "both"
-    val songMode: String = "both",   // "off" | "primary" | "secondary" | "both"
+    val bibleMode: String = Constants.SONG_LANG_BOTH,  // "off" | "primary" | "secondary" | "both"
+    val songMode: String = Constants.SONG_LANG_BOTH,   // "off" | "primary" | "secondary" | "both"
     val showPictures: Boolean = true,
     val showMedia: Boolean = true,
     val showStreaming: Boolean = true,
@@ -31,8 +31,8 @@ data class ScreenAssignment(
     val showFullscreenBackground: Boolean = true, // show configured background in fullscreen mode
     val showLowerThirdBackground: Boolean = true  // show configured background in lower third mode
 ) {
-    val showBible: Boolean get() = bibleMode != "off"
-    val showSongs: Boolean get() = songMode != "off"
+    val showBible: Boolean get() = bibleMode != Constants.SONG_LANG_OFF
+    val showSongs: Boolean get() = songMode != Constants.SONG_LANG_OFF
 
     /** Whether a key output target is configured */
     val hasKeyOutput: Boolean get() = keyTargetDisplay >= 0

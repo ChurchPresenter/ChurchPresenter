@@ -85,8 +85,8 @@ fun BiblePresenter(
     // "secondary" → promote secondary to primary position (renders full-screen in primary style)
     // "both"      → keep both (default behaviour)
     val effectiveVerses = when (languageMode) {
-        "primary" -> selectedVerses.take(1)
-        "secondary" -> selectedVerses.drop(1).ifEmpty { selectedVerses.take(1) }
+        Constants.SONG_LANG_PRIMARY -> selectedVerses.take(1)
+        Constants.SONG_LANG_SECONDARY -> selectedVerses.drop(1).ifEmpty { selectedVerses.take(1) }
         else -> selectedVerses
     }
     val isKey = outputRole == Constants.OUTPUT_ROLE_KEY

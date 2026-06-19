@@ -149,6 +149,7 @@ object Constants {
     const val SONG_LANG_BOTH = "both"
     const val SONG_LANG_PRIMARY = "primary"
     const val SONG_LANG_SECONDARY = "secondary"
+    const val SONG_LANG_OFF = "off"
 
     // Bilingual Layout
     const val BILINGUAL_SIDE_BY_SIDE = "side_by_side"

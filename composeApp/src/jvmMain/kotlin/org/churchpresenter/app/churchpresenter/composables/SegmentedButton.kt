@@ -46,7 +46,8 @@ fun <T> SegmentedButton(
     modifier: Modifier = Modifier,
     buttonWidth: Dp = 40.dp,
     buttonHeight: Dp = 40.dp,
-    fontSize: TextUnit = 16.sp
+    fontSize: TextUnit = 16.sp,
+    contentPadding: PaddingValues = PaddingValues(horizontal = 12.dp, vertical = 0.dp)
 ) {
     require(items.isNotEmpty()) { "SegmentedButton requires at least one item" }
 
@@ -81,7 +82,7 @@ fun <T> SegmentedButton(
                             Color.Transparent,
                         contentColor = MaterialTheme.colorScheme.onSurface
                     ),
-                    contentPadding = PaddingValues(horizontal = 4.dp, vertical = 0.dp)
+                    contentPadding = contentPadding
                 ) {
                     if (item.icon != null) {
                         Icon(
