@@ -494,7 +494,7 @@ fun BiblePresenter(
                 val primaryVerseRef = if (primary.verseRange.isNotEmpty()) primary.verseRange else primary.verseNumber.toString()
                 val secondaryVerseRef = secondary?.let { if (it.verseRange.isNotEmpty()) it.verseRange else it.verseNumber.toString() } ?: ""
                 val isParallelIntended = appSettings.bibleSettings.secondaryBible.isNotEmpty()
-                val showParallelLayout = isParallelIntended && (!isLowerThird || appSettings.bibleSettings.secondaryBibleLowerThirdEnabled)
+                val showParallelLayout = isParallelIntended && secondary != null && (!isLowerThird || appSettings.bibleSettings.secondaryBibleLowerThirdEnabled)
                 val showSecondary = secondary != null && showParallelLayout
 
                 if (showParallelLayout && isLowerThird) {
