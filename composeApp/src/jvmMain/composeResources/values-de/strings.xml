@@ -867,6 +867,11 @@
     <string name="song_language_both">Beide</string>
     <string name="song_language_primary">Primär</string>
     <string name="song_language_secondary">Sekundär</string>
+    <string name="screen_lang_off">Aus</string>
+    <string name="screen_lang_language_1">Sprache 1</string>
+    <string name="screen_lang_language_2">Sprache 2</string>
+    <string name="screen_lang_bible_1">Bibel 1</string>
+    <string name="screen_lang_bible_2">Bibel 2</string>
     <string name="lower_third_display">Unteres-Drittel-Anzeige</string>
     <string name="bilingual_layout">Zweisprachiges Layout:</string>
     <string name="bilingual_left_right">Links / Rechts</string>

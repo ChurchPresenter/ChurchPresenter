@@ -978,6 +978,11 @@
     <string name="song_language_both">Obojí</string>
     <string name="song_language_primary">Primární</string>
     <string name="song_language_secondary">Sekundární</string>
+    <string name="screen_lang_off">Vypnuto</string>
+    <string name="screen_lang_language_1">Jazyk 1</string>
+    <string name="screen_lang_language_2">Jazyk 2</string>
+    <string name="screen_lang_bible_1">Bible 1</string>
+    <string name="screen_lang_bible_2">Bible 2</string>
     <string name="lower_third_display">Zobrazení dolní třetiny</string>
     <string name="bilingual_layout">Dvojjazyčné rozložení:</string>
     <string name="bilingual_left_right">Vlevo / Vpravo</string>

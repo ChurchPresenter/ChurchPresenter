@@ -867,6 +867,11 @@
     <string name="song_language_both">Абодва</string>
     <string name="song_language_primary">Асноўны</string>
     <string name="song_language_secondary">Дадатковы</string>
+    <string name="screen_lang_off">Выкл.</string>
+    <string name="screen_lang_language_1">Мова 1</string>
+    <string name="screen_lang_language_2">Мова 2</string>
+    <string name="screen_lang_bible_1">Біблія 1</string>
+    <string name="screen_lang_bible_2">Біблія 2</string>
     <string name="lower_third_display">Ніжняя трэць</string>
     <string name="bilingual_layout">Двухмоўны макет:</string>
     <string name="bilingual_left_right">Злева / Справа</string>

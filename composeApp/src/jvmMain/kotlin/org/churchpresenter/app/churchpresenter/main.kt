@@ -1907,14 +1907,12 @@ private fun PresenterWindows(
     val defaultDevice = GraphicsEnvironment.getLocalGraphicsEnvironment().defaultScreenDevice
     val availableScreens = screens.indices.filter { screens[it] != defaultDevice }
 
-    // Create windows for non-primary screens + DeckLink device slots
     val deckLinkDeviceCount = if (DeckLinkManager.isAvailable()) DeckLinkManager.listDevices().size else 0
     val windowCount = availableScreens.size + deckLinkDeviceCount
 
     for (i in 0 until windowCount) {
         val screenAssignment = proj.getAssignment(i)
         val effectiveMode = screenLocks[i] ?: presentingMode
-
         // DeckLink outputs: render via offscreen Window + pixel capture
         if (screenAssignment.targetType == "decklink") {
             if (showPresenterWindow && screenAssignment.targetDisplay >= 0) {
@@ -2402,10 +2400,9 @@ private fun PresenterWindows(
             continue
         }
 
-        // Skip "None" — user disabled this output
         if (screenAssignment.targetDisplay == Constants.KEY_TARGET_NONE) continue
 
-        // Resolve target display: try bounds first (reliable), fall back to index, then auto-assign
+        // Resolve target display
         val targetScreenIndex = findScreenIndexByBounds(
             screens,
             screenAssignment.targetBoundsX,
@@ -2415,7 +2412,6 @@ private fun PresenterWindows(
         ) ?: if (screenAssignment.targetDisplay >= 0 && screenAssignment.targetDisplay < screens.size) {
             screenAssignment.targetDisplay
         } else {
-            // Auto-assign to next available non-primary screen
             availableScreens.getOrNull(i) ?: continue
         }
 
@@ -2438,7 +2434,6 @@ private fun PresenterWindows(
             )
         }
 
-        // Reposition window when target display changes
         LaunchedEffect(targetScreenIndex) {
             val b = screens[targetScreenIndex].defaultConfiguration.bounds
             windowState.position = WindowPosition(b.x.dp, b.y.dp)
@@ -2662,7 +2657,7 @@ private fun PresenterWindows(
             }
         }
 
-        // Key output window — spawned when a key target is configured
+        // Key output window — spawned when a key target is configured (not for simulated slots)
         if (screenAssignment.hasKeyOutput && screenAssignment.keyTargetType != "decklink") {
             val keyScreenIndex = findScreenIndexByBounds(
                 screens,
@@ -2856,7 +2851,7 @@ private fun PresenterWindows(
             }
         }
 
-        // Key output on DeckLink when primary is a regular screen
+        // Key output on DeckLink when primary is a regular screen (not for simulated slots)
         if (screenAssignment.targetType != "decklink" && screenAssignment.hasKeyOutput && screenAssignment.keyTargetType == "decklink" && screenAssignment.keyTargetDisplay >= 0) {
             if (showPresenterWindow) {
                 DeckLinkComposeOutput(

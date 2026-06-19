@@ -867,6 +867,11 @@
     <string name="song_language_both">Екеуі де</string>
     <string name="song_language_primary">Негізгі</string>
     <string name="song_language_secondary">Қосымша</string>
+    <string name="screen_lang_off">Өшірулі</string>
+    <string name="screen_lang_language_1">Тіл 1</string>
+    <string name="screen_lang_language_2">Тіл 2</string>
+    <string name="screen_lang_bible_1">Библия 1</string>
+    <string name="screen_lang_bible_2">Библия 2</string>
     <string name="lower_third_display">Төменгі үштен бір бөлік</string>
     <string name="bilingual_layout">Екітілді орналасу:</string>
     <string name="bilingual_left_right">Солға / Оңға</string>

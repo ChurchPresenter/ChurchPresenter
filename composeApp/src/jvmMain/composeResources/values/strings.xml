@@ -1163,6 +1163,10 @@
     <string name="song_language_primary">Primary</string>
     <string name="song_language_secondary">Secondary</string>
     <string name="screen_lang_off">Off</string>
+    <string name="screen_lang_language_1">Language 1</string>
+    <string name="screen_lang_language_2">Language 2</string>
+    <string name="screen_lang_bible_1">Bible 1</string>
+    <string name="screen_lang_bible_2">Bible 2</string>
     <string name="screen_lang_tooltip_off">Do not show on this screen</string>
     <string name="screen_lang_tooltip_primary">Show primary language only</string>
     <string name="screen_lang_tooltip_secondary">Show secondary language only</string>

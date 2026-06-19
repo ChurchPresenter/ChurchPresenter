@@ -1122,6 +1122,11 @@
     <string name="song_language_both">Oba</string>
     <string name="song_language_primary">Primárny</string>
     <string name="song_language_secondary">Sekundárny</string>
+    <string name="screen_lang_off">Vypnuté</string>
+    <string name="screen_lang_language_1">Jazyk 1</string>
+    <string name="screen_lang_language_2">Jazyk 2</string>
+    <string name="screen_lang_bible_1">Biblia 1</string>
+    <string name="screen_lang_bible_2">Biblia 2</string>
     <string name="lower_third_display">Zobrazenie lower third</string>
     <string name="bilingual_layout">Dvojjazyčné rozloženie:</string>
     <string name="bilingual_left_right">Vľavo / Vpravo</string>

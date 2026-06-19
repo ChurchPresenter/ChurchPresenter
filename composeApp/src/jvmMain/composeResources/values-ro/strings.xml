@@ -1149,6 +1149,11 @@
     <string name="song_language_both">Ambele</string>
     <string name="song_language_primary">Principală</string>
     <string name="song_language_secondary">Secundară</string>
+    <string name="screen_lang_off">Oprit</string>
+    <string name="screen_lang_language_1">Limbă 1</string>
+    <string name="screen_lang_language_2">Limbă 2</string>
+    <string name="screen_lang_bible_1">Biblie 1</string>
+    <string name="screen_lang_bible_2">Biblie 2</string>
     <string name="lower_third_display">Afișare Lower Third</string>
     <string name="bilingual_layout">Aspect Bilingv:</string>
     <string name="bilingual_left_right">Stânga / Dreapta</string>
