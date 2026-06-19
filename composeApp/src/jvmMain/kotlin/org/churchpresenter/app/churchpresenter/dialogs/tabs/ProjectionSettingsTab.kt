@@ -46,11 +46,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.audio_output
 import churchpresenter.composeapp.generated.resources.audio_output_default
@@ -81,6 +84,14 @@ import churchpresenter.composeapp.generated.resources.right
 import churchpresenter.composeapp.generated.resources.screen
 import churchpresenter.composeapp.generated.resources.screen_assignment
 import churchpresenter.composeapp.generated.resources.screen_col_label
+import churchpresenter.composeapp.generated.resources.screen_lang_off
+import churchpresenter.composeapp.generated.resources.screen_lang_tooltip_both
+import churchpresenter.composeapp.generated.resources.screen_lang_tooltip_off
+import churchpresenter.composeapp.generated.resources.screen_lang_tooltip_primary
+import churchpresenter.composeapp.generated.resources.screen_lang_tooltip_secondary
+import churchpresenter.composeapp.generated.resources.song_language_both
+import churchpresenter.composeapp.generated.resources.song_language_primary
+import churchpresenter.composeapp.generated.resources.song_language_secondary
 import churchpresenter.composeapp.generated.resources.top
 import churchpresenter.composeapp.generated.resources.vlc_browse
 import churchpresenter.composeapp.generated.resources.vlc_custom_path
@@ -92,6 +103,8 @@ import churchpresenter.composeapp.generated.resources.window_position
 import kotlinx.coroutines.launch
 import org.churchpresenter.app.churchpresenter.composables.DeckLinkManager
 import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
+import org.churchpresenter.app.churchpresenter.composables.SegmentedButton
+import org.churchpresenter.app.churchpresenter.composables.SegmentedButtonItem
 import org.churchpresenter.app.churchpresenter.composables.detectVlcInstallPath
 import org.churchpresenter.app.churchpresenter.composables.isVlcAvailable
 import org.churchpresenter.app.churchpresenter.composables.listVlcAudioDevices
@@ -298,6 +311,23 @@ fun ProjectionSettingsTab(
         val lowerThirdLabel = stringResource(Res.string.display_lower_third)
         val stageMonitorLabel = stringResource(Res.string.display_stage_monitor)
 
+        val offLabel = stringResource(Res.string.screen_lang_off)
+        val primaryLabel = stringResource(Res.string.song_language_primary)
+        val secondaryLabel = stringResource(Res.string.song_language_secondary)
+        val bothLabel = stringResource(Res.string.song_language_both)
+        val tooltipOff = stringResource(Res.string.screen_lang_tooltip_off)
+        val tooltipPrimary = stringResource(Res.string.screen_lang_tooltip_primary)
+        val tooltipSecondary = stringResource(Res.string.screen_lang_tooltip_secondary)
+        val tooltipBoth = stringResource(Res.string.screen_lang_tooltip_both)
+
+        val langModeItems = listOf(
+            SegmentedButtonItem("off", offLabel, tooltipOff, icon = Icons.Default.Close),
+            SegmentedButtonItem("primary", "1", tooltipPrimary),
+            SegmentedButtonItem("secondary", "2", tooltipSecondary),
+            SegmentedButtonItem("both", "½", tooltipBoth),
+        )
+        val langSegColWidth = 118.dp
+
         val cellWidth = 82.dp
 
         data class ContentCol(
@@ -307,14 +337,9 @@ fun ProjectionSettingsTab(
         )
 
         val contentCols = listOf(
-            ContentCol(bibleLabel, { it.showBible }, { a, v -> a.copy(showBible = v) }),
-            ContentCol(songsLabel, { it.showSongs && !it.songLookAhead }, { a, v ->
-                if (v) a.copy(showSongs = true, songLookAhead = false)
-                else a.copy(showSongs = false, songLookAhead = false)
-            }),
-            ContentCol("Song with Look Ahead", { it.songLookAhead }, { a, v ->
-                if (v) a.copy(showSongs = true, songLookAhead = true)
-                else a.copy(showSongs = false, songLookAhead = false)
+            ContentCol("Song LA", { it.songLookAhead }, { a, v ->
+                if (v) a.copy(songMode = if (a.songMode == "off") "both" else a.songMode, songLookAhead = true)
+                else a.copy(songLookAhead = false)
             }),
             ContentCol(picturesLabel, { it.showPictures }, { a, v -> a.copy(showPictures = v) }),
             ContentCol(mediaLabel, { it.showMedia }, { a, v -> a.copy(showMedia = v) }),
@@ -353,6 +378,20 @@ fun ProjectionSettingsTab(
                 modifier = Modifier.width(displayDropdownWidth)
             )
             Row(modifier = Modifier.weight(1f).horizontalScroll(contentScrollState)) {
+                Text(
+                    text = bibleLabel,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.primary,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.width(langSegColWidth)
+                )
+                Text(
+                    text = songsLabel,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.primary,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.width(langSegColWidth)
+                )
                 contentCols.forEach { col ->
                     Text(
                         text = col.label,
@@ -688,9 +727,40 @@ fun ProjectionSettingsTab(
                     }
                 }
 
-                // Scrollable content: checkboxes only
+                // Scrollable content: Bible/Songs segmented buttons + checkboxes
                 @OptIn(ExperimentalMaterial3Api::class)
-                Row(modifier = Modifier.weight(1f).horizontalScroll(contentScrollState)) {
+                Row(
+                    modifier = Modifier.weight(1f).horizontalScroll(contentScrollState),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(modifier = Modifier.width(langSegColWidth), contentAlignment = Alignment.Center) {
+                        SegmentedButton(
+                            items = langModeItems,
+                            selectedValue = assignment.bibleMode,
+                            onValueChange = { mode ->
+                                onSettingsChange { s ->
+                                    s.copy(projectionSettings = s.projectionSettings.withAssignment(i, assignment.copy(bibleMode = mode)))
+                                }
+                            },
+                            buttonWidth = 28.dp,
+                            buttonHeight = 28.dp,
+                            fontSize = 10.sp
+                        )
+                    }
+                    Box(modifier = Modifier.width(langSegColWidth), contentAlignment = Alignment.Center) {
+                        SegmentedButton(
+                            items = langModeItems,
+                            selectedValue = assignment.songMode,
+                            onValueChange = { mode ->
+                                onSettingsChange { s ->
+                                    s.copy(projectionSettings = s.projectionSettings.withAssignment(i, assignment.copy(songMode = mode)))
+                                }
+                            },
+                            buttonWidth = 28.dp,
+                            buttonHeight = 28.dp,
+                            fontSize = 10.sp
+                        )
+                    }
                     contentCols.forEach { col ->
                         val isWebOnDeckLink = col.label == "Web" && assignment.targetType == "decklink"
                         Box(modifier = Modifier.width(cellWidth), contentAlignment = Alignment.Center) {

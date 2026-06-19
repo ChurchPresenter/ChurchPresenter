@@ -1942,7 +1942,8 @@ private fun PresenterWindows(
                                     isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD,
                                     outputRole = deckLinkRole,
                                     transitionAlpha = bibleTransitionAlpha,
-                                    crossfadeEnabled = appSettings.bibleSettings.crossfade
+                                    crossfadeEnabled = appSettings.bibleSettings.crossfade,
+                                    languageMode = screenAssignment.bibleMode
                                 )
                             }
 
@@ -1958,7 +1959,8 @@ private fun PresenterWindows(
                                     lookAheadEnabled = screenAssignment.songLookAhead,
                                     allLyricSections = allLyricSections,
                                     displaySectionIndex = songDisplaySectionIndex,
-                                    crossfadeEnabled = appSettings.songSettings.crossfade
+                                    crossfadeEnabled = appSettings.songSettings.crossfade,
+                                    languageOverride = screenAssignment.songMode
                                 )
                             }
 
@@ -2083,7 +2085,8 @@ private fun PresenterWindows(
                                     isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD,
                                     outputRole = Constants.OUTPUT_ROLE_KEY,
                                     transitionAlpha = bibleTransitionAlpha,
-                                    crossfadeEnabled = appSettings.bibleSettings.crossfade
+                                    crossfadeEnabled = appSettings.bibleSettings.crossfade,
+                                    languageMode = screenAssignment.bibleMode
                                 )
                             }
 
@@ -2099,7 +2102,8 @@ private fun PresenterWindows(
                                     lookAheadEnabled = screenAssignment.songLookAhead,
                                     allLyricSections = allLyricSections,
                                     displaySectionIndex = songDisplaySectionIndex,
-                                    crossfadeEnabled = appSettings.songSettings.crossfade
+                                    crossfadeEnabled = appSettings.songSettings.crossfade,
+                                    languageOverride = screenAssignment.songMode
                                 )
                             }
 
@@ -2261,7 +2265,8 @@ private fun PresenterWindows(
                                                     isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD,
                                                     outputRole = Constants.OUTPUT_ROLE_KEY,
                                                     transitionAlpha = bibleTransitionAlpha,
-                                                    crossfadeEnabled = appSettings.bibleSettings.crossfade
+                                                    crossfadeEnabled = appSettings.bibleSettings.crossfade,
+                                                    languageMode = screenAssignment.bibleMode
                                                 )
                                             }
 
@@ -2277,7 +2282,8 @@ private fun PresenterWindows(
                                                     lookAheadEnabled = screenAssignment.songLookAhead,
                                                     allLyricSections = allLyricSections,
                                                     displaySectionIndex = songDisplaySectionIndex,
-                                                    crossfadeEnabled = appSettings.songSettings.crossfade
+                                                    crossfadeEnabled = appSettings.songSettings.crossfade,
+                                                    languageOverride = screenAssignment.songMode
                                                 )
                                             }
 
@@ -2504,7 +2510,8 @@ private fun PresenterWindows(
                                         outputRole = primaryRole,
                                         transitionAlpha = bibleTransitionAlpha,
                                         showBackground = showBg,
-                                        crossfadeEnabled = appSettings.bibleSettings.crossfade
+                                        crossfadeEnabled = appSettings.bibleSettings.crossfade,
+                                        languageMode = screenAssignment.bibleMode
                                     )
                                 }
 
@@ -2521,7 +2528,8 @@ private fun PresenterWindows(
                                         allLyricSections = allLyricSections,
                                         displaySectionIndex = songDisplaySectionIndex,
                                         showBackground = showBg,
-                                        crossfadeEnabled = appSettings.songSettings.crossfade
+                                        crossfadeEnabled = appSettings.songSettings.crossfade,
+                                        languageOverride = screenAssignment.songMode
                                     )
                                 }
 
@@ -2715,7 +2723,8 @@ private fun PresenterWindows(
                                                 isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD,
                                                 outputRole = Constants.OUTPUT_ROLE_KEY,
                                                 transitionAlpha = bibleTransitionAlpha,
-                                                crossfadeEnabled = appSettings.bibleSettings.crossfade
+                                                crossfadeEnabled = appSettings.bibleSettings.crossfade,
+                                                languageMode = screenAssignment.bibleMode
                                             )
                                         }
 
@@ -2731,7 +2740,8 @@ private fun PresenterWindows(
                                                 lookAheadEnabled = screenAssignment.songLookAhead,
                                                 allLyricSections = allLyricSections,
                                                 displaySectionIndex = songDisplaySectionIndex,
-                                                crossfadeEnabled = appSettings.songSettings.crossfade
+                                                crossfadeEnabled = appSettings.songSettings.crossfade,
+                                                languageOverride = screenAssignment.songMode
                                             )
                                         }
 
@@ -2869,7 +2879,8 @@ private fun PresenterWindows(
                                     isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD,
                                     outputRole = Constants.OUTPUT_ROLE_KEY,
                                     transitionAlpha = bibleTransitionAlpha,
-                                    crossfadeEnabled = appSettings.bibleSettings.crossfade
+                                    crossfadeEnabled = appSettings.bibleSettings.crossfade,
+                                    languageMode = screenAssignment.bibleMode
                                 )
                             }
 
@@ -2885,7 +2896,8 @@ private fun PresenterWindows(
                                     lookAheadEnabled = screenAssignment.songLookAhead,
                                     allLyricSections = allLyricSections,
                                     displaySectionIndex = songDisplaySectionIndex,
-                                    crossfadeEnabled = appSettings.songSettings.crossfade
+                                    crossfadeEnabled = appSettings.songSettings.crossfade,
+                                    languageOverride = screenAssignment.songMode
                                 )
                             }
 
