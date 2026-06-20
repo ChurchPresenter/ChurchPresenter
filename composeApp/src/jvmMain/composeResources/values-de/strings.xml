@@ -1502,6 +1502,16 @@
     <string name="setup_step5_download">VLC herunterladen</string>
     <string name="setup_step5_recheck">Erneut prüfen</string>
     <string name="setup_step5_linux_tip">Unter Linux installieren Sie VLC über Ihren Paketmanager (z.B. sudo apt install vlc).</string>
+    <string name="setup_proj_title">Projektion einrichten</string>
+    <string name="setup_proj_subtitle">Konfigurieren Sie, wie Inhalte auf Ihren Bildschirmen angezeigt werden</string>
+    <string name="setup_proj_step1">1. Verbinden Sie Ihren Beamer oder Zweitbildschirm mit dem Computer</string>
+    <string name="setup_proj_step2">2. Öffnen Sie die Einstellungen und wechseln Sie zur Registerkarte Projektion</string>
+    <string name="setup_proj_step3">3. Legen Sie die Anzahl der Projektionsfenster entsprechend Ihren Bildschirmen fest</string>
+    <string name="setup_proj_step4">4. Wählen Sie für jeden Bildschirm einen Zielbildschirm und einen Anzeigemodus. Wählen Sie dann in den Dropdown-Listen für Bibel und Lieder die gewünschte Sprache — durch Auswahl eines Werts wird dieser Inhalt auf diesem Bildschirm aktiviert. Das Aktivieren einer Checkbox für andere Registerkarten (Bilder, Medien usw.) funktioniert genauso.</string>
+    <string name="setup_proj_step5">5. Klicken Sie auf Identifizieren, um zu bestätigen, welcher Bildschirm welcher ist</string>
+    <string name="setup_proj_tip">Jede Registerkarte — Lieder, Bibel, Folien, Medien, Leinwand — sendet Inhalte an dasselbe Projektionsfenster. Einstellungen pro Registerkarte steuern Schriftarten, Hintergründe und Layout.</string>
+    <string name="setup_proj_tip2">Sie können das Projektionsfenster jederzeit über das Menü Ansicht oder über die Tastenkombination öffnen und schließen.</string>
+    <string name="setup_proj_lang_note">Standardmäßig zeigt ein Bildschirm alle Inhalte — Lieder und Bibel zusammen. Wenn Sie einen zweiten Bildschirm hinzufügen, verwenden Sie die Sprach-Dropdowns für Lieder und Bibel pro Bildschirm, um ein zweisprachiges Lied auf zwei Bildschirme aufzuteilen oder eine andere Bibelübersetzung auf einem Nebenbildschirm anzuzeigen.</string>
     <string name="setup_step4_title">Alles bereit!</string>
     <string name="setup_step4_body">Sie können jederzeit weitere Inhalte hinzufügen oder Einstellungen anpassen, indem Sie in der Symbolleiste auf die Schaltfläche ⚙ Einstellungen klicken.</string>
     <string name="setup_step4_hint">Diese Anleitung ist jederzeit über Hilfe → Erste Schritte verfügbar.</string>

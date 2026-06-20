@@ -1586,6 +1586,16 @@
     <string name="setup_step5_download">Stáhnout VLC</string>
     <string name="setup_step5_recheck">Znovu zkontrolovat</string>
     <string name="setup_step5_linux_tip">Na Linuxu nainstalujte VLC přes správce balíčků (např. sudo apt install vlc).</string>
+    <string name="setup_proj_title">Nastavení projekce</string>
+    <string name="setup_proj_subtitle">Nastavte, jak se obsah zobrazuje na vašich obrazovkách</string>
+    <string name="setup_proj_step1">1. Připojte projektor nebo sekundární displej k počítači</string>
+    <string name="setup_proj_step2">2. Otevřete Nastavení a přejděte na záložku Projekce</string>
+    <string name="setup_proj_step3">3. Nastavte počet projekčních oken podle vašich displejů</string>
+    <string name="setup_proj_step4">4. Pro každou obrazovku vyberte cílový displej a režim zobrazení. Poté nastavte v rozevíracích seznamech Bible a Písní požadovaný jazyk — nastavení hodnoty aktivuje daný obsah na této obrazovce. Zaškrtnutí políčka pro ostatní záložky (Obrázky, Média atd.) funguje stejně.</string>
+    <string name="setup_proj_step5">5. Klikněte na Identifikovat, abyste potvrdili, který displej je který</string>
+    <string name="setup_proj_tip">Každá záložka — Písně, Bible, Snímky, Média, Plátno — odesílá obsah do stejného projekčního okna. Nastavení v každé záložce ovládá písma, pozadí a rozvržení.</string>
+    <string name="setup_proj_tip2">Projekční okno můžete kdykoli otevřít a zavřít z nabídky Zobrazení nebo pomocí klávesové zkratky.</string>
+    <string name="setup_proj_lang_note">Ve výchozím nastavení jedna obrazovka zobrazuje veškerý obsah — Písně a Bibli dohromady. Pokud přidáte druhou obrazovku, použijte rozevírací seznamy jazyka Písní a Bible pro každou obrazovku k rozdělení dvojjazyčné písně na dvě obrazovky nebo k zobrazení jiného překladu Bible na vedlejším displeji.</string>
     <string name="setup_step4_title">Vše je připraveno!</string>
     <string name="setup_step4_body">Obsah nebo nastavení můžete kdykoli upravit pomocí tlačítka ⚙ Nastavení v panelu nástrojů.</string>
     <string name="setup_step4_hint">Tento průvodce je vždy dostupný přes Nápověda → Začínáme.</string>

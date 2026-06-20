@@ -1524,6 +1524,16 @@
     <string name="setup_step5_download">Descargar VLC</string>
     <string name="setup_step5_recheck">Volver a verificar</string>
     <string name="setup_step5_linux_tip">En Linux, instale VLC a través de su gestor de paquetes (p.ej. sudo apt install vlc).</string>
+    <string name="setup_proj_title">Configurar proyección</string>
+    <string name="setup_proj_subtitle">Configure cómo aparece el contenido en sus pantallas</string>
+    <string name="setup_proj_step1">1. Conecte su proyector o pantalla secundaria a su computadora</string>
+    <string name="setup_proj_step2">2. Abra Configuración y vaya a la pestaña Proyección</string>
+    <string name="setup_proj_step3">3. Establezca el número de ventanas de proyección para que coincida con sus pantallas</string>
+    <string name="setup_proj_step4">4. Para cada pantalla, elija una pantalla de destino y un modo de visualización. Luego configure los menús desplegables de Biblia y Canciones con el idioma que desea mostrar — establecer un valor habilita ese contenido en esta pantalla. Marcar una casilla para otras pestañas (Imágenes, Medios, etc.) funciona de la misma manera.</string>
+    <string name="setup_proj_step5">5. Haga clic en Identificar para confirmar qué pantalla es cuál</string>
+    <string name="setup_proj_tip">Cada pestaña — Canciones, Biblia, Diapositivas, Medios, Lienzo — envía contenido a la misma ventana de proyección. La configuración por pestaña controla fuentes, fondos y diseño.</string>
+    <string name="setup_proj_tip2">Puede abrir y cerrar la ventana de proyección en cualquier momento desde el menú Ver o con el atajo de teclado.</string>
+    <string name="setup_proj_lang_note">De forma predeterminada, una pantalla muestra todo el contenido — Canciones y Biblia juntos. Si agrega una segunda pantalla, use los menús desplegables de idioma de Canciones y Biblia por pantalla para dividir una canción bilingüe en dos pantallas o mostrar una traducción bíblica diferente en una pantalla lateral.</string>
     <string name="setup_step4_title">¡Todo listo!</string>
     <string name="setup_step4_body">Siempre puede agregar más contenido o ajustar la configuración haciendo clic en el botón ⚙ Configuración en la barra de herramientas.</string>
     <string name="setup_step4_hint">Esta guía está disponible en cualquier momento desde Ayuda → Primeros pasos.</string>

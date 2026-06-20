@@ -1524,6 +1524,16 @@
     <string name="setup_step5_download">VLC downloaden</string>
     <string name="setup_step5_recheck">Opnieuw controleren</string>
     <string name="setup_step5_linux_tip">Op Linux installeert u VLC via uw pakketbeheerder (bijv. sudo apt install vlc).</string>
+    <string name="setup_proj_title">Projectie instellen</string>
+    <string name="setup_proj_subtitle">Configureer hoe inhoud op uw schermen wordt weergegeven</string>
+    <string name="setup_proj_step1">1. Sluit uw projector of secundair scherm aan op uw computer</string>
+    <string name="setup_proj_step2">2. Open Instellingen en ga naar het tabblad Projectie</string>
+    <string name="setup_proj_step3">3. Stel het aantal projectievensters in om overeen te komen met uw schermen</string>
+    <string name="setup_proj_step4">4. Kies voor elk scherm een doelscherm en een weergavemodus. Stel vervolgens in de vervolgkeuzelijsten van Bijbel en Liederen de gewenste taal in — het instellen van een waarde activeert die inhoud op dit scherm. Het aanvinken van een selectievakje voor andere tabbladen (Afbeeldingen, Media, enz.) werkt op dezelfde manier.</string>
+    <string name="setup_proj_step5">5. Klik op Identificeren om te bevestigen welk scherm welk is</string>
+    <string name="setup_proj_tip">Elk tabblad — Liederen, Bijbel, Dia&apos;s, Media, Canvas — stuurt inhoud naar hetzelfde projectievenster. Instellingen per tabblad bepalen lettertypen, achtergronden en lay-out.</string>
+    <string name="setup_proj_tip2">U kunt het projectievenster op elk gewenst moment openen en sluiten via het menu Weergave of via de sneltoets.</string>
+    <string name="setup_proj_lang_note">Standaard toont één scherm alle inhoud — Liederen en Bijbel samen. Als u een tweede scherm toevoegt, gebruik dan de taalvervolgkeuzelijsten voor Liederen en Bijbel per scherm om een tweetalig lied over twee schermen te verdelen of een andere bijbelvertaling op een zijscherm te tonen.</string>
     <string name="setup_step4_title">U bent klaar!</string>
     <string name="setup_step4_body">U kunt altijd meer inhoud toevoegen of instellingen aanpassen door op de ⚙ Instellingen knop in de werkbalk te klikken.</string>
     <string name="setup_step4_hint">Deze gids is altijd beschikbaar via Help → Aan de slag.</string>

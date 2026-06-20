@@ -1540,6 +1540,16 @@
     <string name="setup_step5_download_intel">Download VLC (Intel)</string>
     <string name="setup_step5_recheck">Recheck</string>
     <string name="setup_step5_linux_tip">On Linux, install VLC via your package manager (e.g. sudo apt install vlc).</string>
+    <string name="setup_proj_title">Set Up Projection</string>
+    <string name="setup_proj_subtitle">Configure how content appears on your screens</string>
+    <string name="setup_proj_step1">1. Connect your projector or secondary display to your computer</string>
+    <string name="setup_proj_step2">2. Open Settings and go to the Projection tab</string>
+    <string name="setup_proj_step3">3. Set the number of projection windows to match your displays</string>
+    <string name="setup_proj_step4">4. For each screen, pick a target display and a Display Mode. Then set the Bible and Songs dropdowns to the language you want shown — setting a value enables that content on this screen. Checking a checkbox for other tabs (Pictures, Media, etc.) works the same way.</string>
+    <string name="setup_proj_step5">5. Click Identify to confirm which display is which</string>
+    <string name="setup_proj_tip">Every tab — Songs, Bible, Slides, Media, Canvas — sends content to the same projection window. Settings per tab control fonts, backgrounds, and layout.</string>
+    <string name="setup_proj_tip2">You can open and close the projection window anytime from the View menu or with the keyboard shortcut.</string>
+    <string name="setup_proj_lang_note">By default, one screen shows all content — Songs and Bible together. If you add a second screen, use the Song and Bible language dropdowns per screen to split a bilingual song across two screens, or show a different Bible translation on a side display.</string>
     <string name="setup_step4_title">You're All Set!</string>
     <string name="setup_step4_body">You can always add more content or adjust settings later by clicking the ⚙ Settings button in the toolbar.</string>
     <string name="setup_step4_hint">This guide is available anytime from Help → Getting Started.</string>

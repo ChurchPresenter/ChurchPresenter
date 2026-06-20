@@ -1531,6 +1531,16 @@
     <string name="setup_step5_download">Descărcați VLC</string>
     <string name="setup_step5_recheck">Reverificați</string>
     <string name="setup_step5_linux_tip">Pe Linux, instalați VLC prin managerul de pachete (ex. sudo apt install vlc).</string>
+    <string name="setup_proj_title">Configurare proiecție</string>
+    <string name="setup_proj_subtitle">Configurați modul în care conținutul apare pe ecranele dvs.</string>
+    <string name="setup_proj_step1">1. Conectați proiectorul sau ecranul secundar la computer</string>
+    <string name="setup_proj_step2">2. Deschideți Setări și accesați fila Proiecție</string>
+    <string name="setup_proj_step3">3. Setați numărul de ferestre de proiecție pentru a corespunde ecranelor dvs.</string>
+    <string name="setup_proj_step4">4. Pentru fiecare ecran, alegeți un ecran țintă și un mod de afișare. Apoi setați în meniurile derulante Biblie și Cântece limba dorită — setarea unei valori activează acel conținut pe acest ecran. Bifarea unei casete de selectare pentru alte file (Imagini, Media etc.) funcționează la fel.</string>
+    <string name="setup_proj_step5">5. Faceți clic pe Identificare pentru a confirma care ecran este care</string>
+    <string name="setup_proj_tip">Fiecare filă — Cântece, Biblie, Diapozitive, Media, Pânză — trimite conținut la aceeași fereastră de proiecție. Setările per filă controlează fonturile, fundalurile și aspectul.</string>
+    <string name="setup_proj_tip2">Puteți deschide și închide fereastra de proiecție oricând din meniul Vizualizare sau cu comanda rapidă de la tastatură.</string>
+    <string name="setup_proj_lang_note">În mod implicit, un ecran afișează tot conținutul — Cântece și Biblie împreună. Dacă adăugați un al doilea ecran, utilizați meniurile derulante de limbă Cântece și Biblie pentru fiecare ecran pentru a împărți un cântec bilingv pe două ecrane sau pentru a afișa o traducere biblică diferită pe un ecran lateral.</string>
     <string name="setup_step4_title">Ești gata!</string>
     <string name="setup_step4_body">Puteți adăuga oricând conținut suplimentar sau ajusta setările folosind butonul ⚙ Setări din bara de instrumente.</string>
     <string name="setup_step4_hint">Acest ghid este disponibil oricând din Ajutor → Noțiuni de bază.</string>
