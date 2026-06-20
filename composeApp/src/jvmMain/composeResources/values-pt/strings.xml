@@ -1122,6 +1122,11 @@
     <string name="song_language_both">Ambos</string>
     <string name="song_language_primary">Principal</string>
     <string name="song_language_secondary">Secundário</string>
+    <string name="screen_lang_off">Desligado</string>
+    <string name="screen_lang_language_1">Idioma 1</string>
+    <string name="screen_lang_language_2">Idioma 2</string>
+    <string name="screen_lang_bible_1">Bíblia 1</string>
+    <string name="screen_lang_bible_2">Bíblia 2</string>
     <string name="lower_third_display">Exibição Lower Third</string>
     <string name="bilingual_layout">Layout Bilíngue:</string>
     <string name="bilingual_left_right">Esquerda / Direita</string>

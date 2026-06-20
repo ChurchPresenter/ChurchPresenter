@@ -78,7 +78,17 @@ fun BiblePresenter(
     transitionAlpha: Float = 1f,
     showBackground: Boolean = true,
     crossfadeEnabled: Boolean = false,
+    languageMode: String = "both",
 ) {
+    // Filter verses per screen language assignment:
+    // "primary"   → show only the primary translation
+    // "secondary" → promote secondary to primary position (renders full-screen in primary style)
+    // "both"      → keep both (default behaviour)
+    val effectiveVerses = when (languageMode) {
+        Constants.SONG_LANG_PRIMARY -> selectedVerses.take(1)
+        Constants.SONG_LANG_SECONDARY -> selectedVerses.drop(1).ifEmpty { selectedVerses.take(1) }
+        else -> selectedVerses
+    }
     val isKey = outputRole == Constants.OUTPUT_ROLE_KEY
     val bs = appSettings.bibleSettings
 
@@ -104,8 +114,8 @@ fun BiblePresenter(
         systemFontFamilyOrDefault(if (isLowerThird) bs.secondaryReferenceLowerThirdFontType else bs.secondaryReferenceFontType)
     }
 
-    val primaryBible = selectedVerses.firstOrNull() ?: return
-    val secondaryBible = selectedVerses.getOrNull(1)
+    val primaryBible = effectiveVerses.firstOrNull() ?: return
+    val secondaryBible = effectiveVerses.getOrNull(1)
 
     // Resolve colors — key mode forces white for a proper key signal
     val primaryBibleTextColor = remember(
@@ -484,7 +494,7 @@ fun BiblePresenter(
                 val primaryVerseRef = if (primary.verseRange.isNotEmpty()) primary.verseRange else primary.verseNumber.toString()
                 val secondaryVerseRef = secondary?.let { if (it.verseRange.isNotEmpty()) it.verseRange else it.verseNumber.toString() } ?: ""
                 val isParallelIntended = appSettings.bibleSettings.secondaryBible.isNotEmpty()
-                val showParallelLayout = isParallelIntended && (!isLowerThird || appSettings.bibleSettings.secondaryBibleLowerThirdEnabled)
+                val showParallelLayout = isParallelIntended && secondary != null && (!isLowerThird || appSettings.bibleSettings.secondaryBibleLowerThirdEnabled)
                 val showSecondary = secondary != null && showParallelLayout
 
                 if (showParallelLayout && isLowerThird) {
@@ -707,16 +717,16 @@ fun BiblePresenter(
                 // - Fade out: handled externally when clearing display
                 val duration = bs.transitionDuration.toInt().coerceAtLeast(100)
                 val isCrossfade = crossfadeEnabled
-                var displayedCurrent by remember { mutableStateOf(selectedVerses) }
+                var displayedCurrent by remember { mutableStateOf(effectiveVerses) }
                 var displayedPrevious by remember { mutableStateOf<List<SelectedVerse>>(emptyList()) }
                 var currentAlpha by remember { mutableStateOf(1f) }
                 var previousAlpha by remember { mutableStateOf(0f) }
                 val pendingQueue = remember { kotlinx.coroutines.channels.Channel<List<SelectedVerse>>(kotlinx.coroutines.channels.Channel.CONFLATED) }
 
                 // Queue verse changes
-                LaunchedEffect(selectedVerses) {
-                    if (displayedCurrent != selectedVerses) {
-                        pendingQueue.send(selectedVerses)
+                LaunchedEffect(effectiveVerses) {
+                    if (displayedCurrent != effectiveVerses) {
+                        pendingQueue.send(effectiveVerses)
                     }
                 }
 
@@ -759,7 +769,7 @@ fun BiblePresenter(
                 }
             } else {
                 Box(modifier = Modifier.graphicsLayer { alpha = transitionAlpha }) {
-                    TextContent(selectedVerses)
+                    TextContent(effectiveVerses)
                 }
             }
         }

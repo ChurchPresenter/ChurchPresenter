@@ -893,6 +893,11 @@
     <string name="song_language_both">Оба</string>
     <string name="song_language_primary">Основной</string>
     <string name="song_language_secondary">Дополнительный</string>
+    <string name="screen_lang_off">Выкл.</string>
+    <string name="screen_lang_language_1">Язык 1</string>
+    <string name="screen_lang_language_2">Язык 2</string>
+    <string name="screen_lang_bible_1">Библия 1</string>
+    <string name="screen_lang_bible_2">Библия 2</string>
     <string name="lower_third_display">Нижняя треть</string>
     <string name="bilingual_layout">Двуязычный макет:</string>
     <string name="bilingual_left_right">Слева / Справа</string>

@@ -72,9 +72,18 @@ fun SongPresenter(
     displaySectionIndex: Int = -1,
     showBackground: Boolean = true,
     crossfadeEnabled: Boolean = false,
+    languageOverride: String = "",
 ) {
+    // When languageOverride is set by the per-screen songMode, use it instead of the global setting.
     val isKey = outputRole == Constants.OUTPUT_ROLE_KEY
     val ss = appSettings.songSettings
+    val effectiveLangDisplay = if (languageOverride.isNotBlank()) languageOverride else {
+        if (lookAheadEnabled) {
+            if (isLowerThird) ss.lowerThirdLookAheadLanguageDisplay else ss.lookAheadLanguageDisplay
+        } else {
+            if (isLowerThird) ss.lowerThirdLanguageDisplay else ss.fullscreenLanguageDisplay
+        }
+    }
 
     // Resolve font families per fullscreen / lower third
     val titleFontFamily = remember(ss.titleFontType, ss.titleLowerThirdFontType, isLowerThird) {
@@ -321,14 +330,10 @@ fun SongPresenter(
         // Auto-fit: compute the largest font size that fits ALL sections without line wrapping.
         // Uses the reference 1920×1080 coordinate space (margins subtracted).
         val autoFitTextMeasurer = rememberTextMeasurer()
-        val autoFitFontSize = remember(allLyricSections, isLowerThird, lookAheadEnabled, appSettings.songSettings, appSettings.projectionSettings) {
+        val autoFitFontSize = remember(allLyricSections, isLowerThird, lookAheadEnabled, languageOverride, appSettings.songSettings, appSettings.projectionSettings) {
             if (allLyricSections.isEmpty()) null
             else {
-                val ld = if (lookAheadEnabled) {
-                    if (isLowerThird) ss.lowerThirdLookAheadLanguageDisplay else ss.lookAheadLanguageDisplay
-                } else {
-                    if (isLowerThird) ss.lowerThirdLanguageDisplay else ss.fullscreenLanguageDisplay
-                }
+                val ld = effectiveLangDisplay
                 val hasBilingual = allLyricSections.any { it.secondaryLines.isNotEmpty() }
                 val sideBySide = ld == Constants.SONG_LANG_BOTH &&
                         ss.bilingualLayout == Constants.BILINGUAL_SIDE_BY_SIDE && hasBilingual
@@ -433,11 +438,7 @@ fun SongPresenter(
             }
         }
         // Bilingual flags for layout decisions (outside remember, always fresh)
-        val langDisplay = if (lookAheadEnabled) {
-            if (isLowerThird) ss.lowerThirdLookAheadLanguageDisplay else ss.lookAheadLanguageDisplay
-        } else {
-            if (isLowerThird) ss.lowerThirdLanguageDisplay else ss.fullscreenLanguageDisplay
-        }
+        val langDisplay = effectiveLangDisplay
         val hasBilingualContent = allLyricSections.any { it.secondaryLines.isNotEmpty() }
         val isBilingualSideBySide = langDisplay == Constants.SONG_LANG_BOTH &&
                 ss.bilingualLayout == Constants.BILINGUAL_SIDE_BY_SIDE && hasBilingualContent
@@ -544,15 +545,9 @@ fun SongPresenter(
                     } else {
                         if (isLowerThird) ss.lowerThirdDisplayMode else ss.fullscreenDisplayMode
                     }
-                    val langDisplay = if (lookAheadEnabled) {
-                        if (isLowerThird) ss.lowerThirdLookAheadLanguageDisplay else ss.lookAheadLanguageDisplay
-                    } else {
-                        if (isLowerThird) ss.lowerThirdLanguageDisplay else ss.fullscreenLanguageDisplay
-                    }
-
                     // Look-ahead portion uses same display mode as the screen
                     val laDisplayMode = displayMode
-                    val laLangDisplay = langDisplay
+                    val laLangDisplay = effectiveLangDisplay
                     val laIsLineMode = laDisplayMode == Constants.SONG_DISPLAY_MODE_LINE
 
                     val isLineMode = displayMode == Constants.SONG_DISPLAY_MODE_LINE

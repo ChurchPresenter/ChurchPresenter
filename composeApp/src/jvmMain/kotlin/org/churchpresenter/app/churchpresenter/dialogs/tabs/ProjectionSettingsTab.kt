@@ -75,12 +75,20 @@ import churchpresenter.composeapp.generated.resources.lower_third_height
 import churchpresenter.composeapp.generated.resources.media_vlc_install
 import churchpresenter.composeapp.generated.resources.media_vlc_required
 import churchpresenter.composeapp.generated.resources.presenter_windows_count
+import churchpresenter.composeapp.generated.resources.projection_content_song_la
+import churchpresenter.composeapp.generated.resources.projection_content_song_la_tooltip
 import churchpresenter.composeapp.generated.resources.projection_position_help
 import churchpresenter.composeapp.generated.resources.projection_target_display
 import churchpresenter.composeapp.generated.resources.right
 import churchpresenter.composeapp.generated.resources.screen
 import churchpresenter.composeapp.generated.resources.screen_assignment
 import churchpresenter.composeapp.generated.resources.screen_col_label
+import churchpresenter.composeapp.generated.resources.screen_lang_bible_1
+import churchpresenter.composeapp.generated.resources.screen_lang_bible_2
+import churchpresenter.composeapp.generated.resources.screen_lang_language_1
+import churchpresenter.composeapp.generated.resources.screen_lang_language_2
+import churchpresenter.composeapp.generated.resources.screen_lang_off
+import churchpresenter.composeapp.generated.resources.song_language_both
 import churchpresenter.composeapp.generated.resources.top
 import churchpresenter.composeapp.generated.resources.vlc_browse
 import churchpresenter.composeapp.generated.resources.vlc_custom_path
@@ -125,7 +133,8 @@ fun ProjectionSettingsTab(
     }
     val detectedScreens = screenDevicesAll.size
     val deckLinkDeviceCount = remember { if (DeckLinkManager.isAvailable()) DeckLinkManager.listDevices().size else 0 }
-    val presenterWindowCount = (screenDevicesAll.count { it != primaryDevice } + deckLinkDeviceCount).coerceAtLeast(0)
+    val realWindowCount = screenDevicesAll.count { it != primaryDevice } + deckLinkDeviceCount
+    val presenterWindowCount = realWindowCount
 
     // Extend the assignments list and resolve any unassigned (-1 auto) to actual non-primary displays.
     val nonPrimaryDevices = remember(screenDevicesAll, primaryDevice) {
@@ -254,7 +263,7 @@ fun ProjectionSettingsTab(
         SectionHeader(stringResource(Res.string.screen_assignment))
         Spacer(modifier = Modifier.height(4.dp))
 
-        // Detected screens info + Identify button
+        // Detected screens info + simulate stepper + Identify button
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
@@ -298,24 +307,34 @@ fun ProjectionSettingsTab(
         val lowerThirdLabel = stringResource(Res.string.display_lower_third)
         val stageMonitorLabel = stringResource(Res.string.display_stage_monitor)
 
+        val offLabel = stringResource(Res.string.screen_lang_off)
+        val bothLabel = stringResource(Res.string.song_language_both)
+        val bible1Label = stringResource(Res.string.screen_lang_bible_1)
+        val bible2Label = stringResource(Res.string.screen_lang_bible_2)
+        val lang1Label = stringResource(Res.string.screen_lang_language_1)
+        val lang2Label = stringResource(Res.string.screen_lang_language_2)
+        val songLaLabel = stringResource(Res.string.projection_content_song_la)
+
+        val bibleLangModes = listOf(Constants.SONG_LANG_OFF to offLabel, Constants.SONG_LANG_PRIMARY to bible1Label, Constants.SONG_LANG_SECONDARY to bible2Label, Constants.SONG_LANG_BOTH to bothLabel)
+        val songLangModes = listOf(Constants.SONG_LANG_OFF to offLabel, Constants.SONG_LANG_PRIMARY to lang1Label, Constants.SONG_LANG_SECONDARY to lang2Label, Constants.SONG_LANG_BOTH to bothLabel)
+        val langDropdownWidth = 95.dp
+
         val cellWidth = 82.dp
 
         data class ContentCol(
             val label: String,
             val getter: (ScreenAssignment) -> Boolean,
-            val setter: (ScreenAssignment, Boolean) -> ScreenAssignment
+            val setter: (ScreenAssignment, Boolean) -> ScreenAssignment,
+            val enabled: (ScreenAssignment) -> Boolean = { true },
+            val tooltip: String? = null
         )
 
+        val songLaTooltip = stringResource(Res.string.projection_content_song_la_tooltip)
         val contentCols = listOf(
-            ContentCol(bibleLabel, { it.showBible }, { a, v -> a.copy(showBible = v) }),
-            ContentCol(songsLabel, { it.showSongs && !it.songLookAhead }, { a, v ->
-                if (v) a.copy(showSongs = true, songLookAhead = false)
-                else a.copy(showSongs = false, songLookAhead = false)
-            }),
-            ContentCol("Song with Look Ahead", { it.songLookAhead }, { a, v ->
-                if (v) a.copy(showSongs = true, songLookAhead = true)
-                else a.copy(showSongs = false, songLookAhead = false)
-            }),
+            ContentCol(songLaLabel, { it.songLookAhead }, { a, v ->
+                if (v) a.copy(songMode = if (a.songMode == Constants.SONG_LANG_OFF) Constants.SONG_LANG_BOTH else a.songMode, songLookAhead = true)
+                else a.copy(songLookAhead = false)
+            }, enabled = { it.songMode != Constants.SONG_LANG_OFF }, tooltip = songLaTooltip),
             ContentCol(picturesLabel, { it.showPictures }, { a, v -> a.copy(showPictures = v) }),
             ContentCol(mediaLabel, { it.showMedia }, { a, v -> a.copy(showMedia = v) }),
             ContentCol(streamingLabel, { it.showStreaming }, { a, v -> a.copy(showStreaming = v) }),
@@ -352,7 +371,21 @@ fun ProjectionSettingsTab(
                 textAlign = TextAlign.Center,
                 modifier = Modifier.width(displayDropdownWidth)
             )
-            Row(modifier = Modifier.weight(1f).horizontalScroll(contentScrollState)) {
+            Row(modifier = Modifier.weight(1f).horizontalScroll(contentScrollState), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                Text(
+                    text = bibleLabel,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.primary,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.width(langDropdownWidth)
+                )
+                Text(
+                    text = songsLabel,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.primary,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.width(langDropdownWidth)
+                )
                 contentCols.forEach { col ->
                     Text(
                         text = col.label,
@@ -688,9 +721,77 @@ fun ProjectionSettingsTab(
                     }
                 }
 
-                // Scrollable content: checkboxes only
+                // Scrollable content: Bible/Songs dropdowns + checkboxes
                 @OptIn(ExperimentalMaterial3Api::class)
-                Row(modifier = Modifier.weight(1f).horizontalScroll(contentScrollState)) {
+                Row(
+                    modifier = Modifier.weight(1f).horizontalScroll(contentScrollState),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    Box(modifier = Modifier.width(langDropdownWidth), contentAlignment = Alignment.Center) {
+                        var bibleModeExpanded by remember { mutableStateOf(false) }
+                        OutlinedButton(
+                            onClick = { bibleModeExpanded = true },
+                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(
+                                text = bibleLangModes.find { it.first == assignment.bibleMode }?.second ?: offLabel,
+                                style = MaterialTheme.typography.labelSmall,
+                                maxLines = 1
+                            )
+                        }
+                        DropdownMenu(
+                            expanded = bibleModeExpanded,
+                            onDismissRequest = { bibleModeExpanded = false }
+                        ) {
+                            bibleLangModes.forEach { (value, label) ->
+                                DropdownMenuItem(
+                                    text = { Text(label, style = MaterialTheme.typography.bodySmall) },
+                                    onClick = {
+                                        bibleModeExpanded = false
+                                        onSettingsChange { s ->
+                                            s.copy(projectionSettings = s.projectionSettings.withAssignment(i, assignment.copy(bibleMode = value)))
+                                        }
+                                    }
+                                )
+                            }
+                        }
+                    }
+                    Box(modifier = Modifier.width(langDropdownWidth), contentAlignment = Alignment.Center) {
+                        var songModeExpanded by remember { mutableStateOf(false) }
+                        OutlinedButton(
+                            onClick = { songModeExpanded = true },
+                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(
+                                text = songLangModes.find { it.first == assignment.songMode }?.second ?: offLabel,
+                                style = MaterialTheme.typography.labelSmall,
+                                maxLines = 1
+                            )
+                        }
+                        DropdownMenu(
+                            expanded = songModeExpanded,
+                            onDismissRequest = { songModeExpanded = false }
+                        ) {
+                            songLangModes.forEach { (value, label) ->
+                                DropdownMenuItem(
+                                    text = { Text(label, style = MaterialTheme.typography.bodySmall) },
+                                    onClick = {
+                                        songModeExpanded = false
+                                        onSettingsChange { s ->
+                                            val updated = if (value == Constants.SONG_LANG_OFF)
+                                                assignment.copy(songMode = value, songLookAhead = false)
+                                            else
+                                                assignment.copy(songMode = value)
+                                            s.copy(projectionSettings = s.projectionSettings.withAssignment(i, updated))
+                                        }
+                                    }
+                                )
+                            }
+                        }
+                    }
                     contentCols.forEach { col ->
                         val isWebOnDeckLink = col.label == "Web" && assignment.targetType == "decklink"
                         Box(modifier = Modifier.width(cellWidth), contentAlignment = Alignment.Center) {
@@ -703,15 +804,27 @@ fun ProjectionSettingsTab(
                                     Checkbox(checked = false, enabled = false, onCheckedChange = {})
                                 }
                             } else {
-                                Checkbox(
-                                    checked = col.getter(assignment),
-                                    onCheckedChange = { checked ->
-                                        val updated = col.setter(assignment, checked)
-                                        onSettingsChange { s ->
-                                            s.copy(projectionSettings = s.projectionSettings.withAssignment(i, updated))
+                                val checkbox = @Composable {
+                                    Checkbox(
+                                        checked = col.getter(assignment),
+                                        enabled = col.enabled(assignment),
+                                        onCheckedChange = { checked ->
+                                            val updated = col.setter(assignment, checked)
+                                            onSettingsChange { s ->
+                                                s.copy(projectionSettings = s.projectionSettings.withAssignment(i, updated))
+                                            }
                                         }
-                                    }
-                                )
+                                    )
+                                }
+                                if (col.tooltip != null) {
+                                    TooltipBox(
+                                        positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
+                                        tooltip = { PlainTooltip { Text(col.tooltip) } },
+                                        state = rememberTooltipState()
+                                    ) { checkbox() }
+                                } else {
+                                    checkbox()
+                                }
                             }
                         }
                     }

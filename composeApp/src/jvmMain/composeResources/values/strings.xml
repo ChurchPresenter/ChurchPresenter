@@ -375,6 +375,8 @@
     <string name="background_video">Background Video:</string>
 
     <!-- Projection Settings -->
+    <string name="projection_content_song_la">Song LA</string>
+    <string name="projection_content_song_la_tooltip">Song Look Ahead</string>
     <string name="projection_content_web">Web</string>
     <string name="projection_content_background">Background</string>
     <string name="projection_content_lt_background">Lower Third Background</string>
@@ -1162,6 +1164,15 @@
     <string name="song_language_both">Both</string>
     <string name="song_language_primary">Primary</string>
     <string name="song_language_secondary">Secondary</string>
+    <string name="screen_lang_off">Off</string>
+    <string name="screen_lang_language_1">Language 1</string>
+    <string name="screen_lang_language_2">Language 2</string>
+    <string name="screen_lang_bible_1">Bible 1</string>
+    <string name="screen_lang_bible_2">Bible 2</string>
+    <string name="screen_lang_tooltip_off">Do not show on this screen</string>
+    <string name="screen_lang_tooltip_primary">Show primary language only</string>
+    <string name="screen_lang_tooltip_secondary">Show secondary language only</string>
+    <string name="screen_lang_tooltip_both">Show both languages</string>
     <string name="lower_third_display">Lower Third Display</string>
     <string name="bilingual_layout">Bilingual Layout:</string>
     <string name="bilingual_left_right">Left / Right</string>

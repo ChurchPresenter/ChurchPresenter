@@ -6,8 +6,10 @@ import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 
 class SettingsManager {
@@ -38,7 +40,7 @@ class SettingsManager {
         return try {
             if (settingsFile.exists()) {
                 val raw = settingsFile.readText()
-                val migrated = migrateProjectionSettings(raw)
+                val migrated = migrateProjectionSettings(migrateScreenAssignmentModes(raw))
                 try {
                     val settings = jsonFormat.decodeFromString<AppSettings>(migrated)
                     migrateHiddenTabs(settings, raw)
@@ -70,6 +72,38 @@ class SettingsManager {
             result = result.copy(hiddenTabs = result.hiddenTabs + "DICTIONARY")
         }
         return result
+    }
+
+    /** Converts old showBible:false/showSongs:false booleans to bibleMode:"off"/songMode:"off" strings. */
+    private fun migrateScreenAssignmentModes(raw: String): String {
+        if (!raw.contains("\"showBible\"") && !raw.contains("\"showSongs\"")) return raw
+        val root = try { jsonFormat.parseToJsonElement(raw).jsonObject } catch (_: Exception) { return raw }
+        val proj = root["projectionSettings"]?.jsonObject ?: return raw
+        val assignments = proj["screenAssignments"]?.jsonArray ?: return raw
+        var changed = false
+        val newAssignments = buildJsonArray {
+            for (element in assignments) {
+                val obj = element.jsonObject
+                val showBibleFalse = (obj["showBible"] as? JsonPrimitive)?.content == "false"
+                val showSongsFalse = (obj["showSongs"] as? JsonPrimitive)?.content == "false"
+                if (showBibleFalse || showSongsFalse) {
+                    changed = true
+                    add(buildJsonObject {
+                        obj.forEach { (k, v) -> if (k != "showBible" && k != "showSongs") put(k, v) }
+                        if (showBibleFalse && !obj.containsKey("bibleMode")) put("bibleMode", JsonPrimitive("off"))
+                        if (showSongsFalse && !obj.containsKey("songMode")) put("songMode", JsonPrimitive("off"))
+                    })
+                } else { add(element) }
+            }
+        }
+        if (!changed) return raw
+        val newProj = buildJsonObject {
+            proj.forEach { (k, v) -> if (k == "screenAssignments") put(k, newAssignments) else put(k, v) }
+        }
+        val newRoot = buildJsonObject {
+            root.forEach { (k, v) -> if (k == "projectionSettings") put(k, newProj) else put(k, v) }
+        }
+        return newRoot.toString()
     }
 
     /** Migrates old screen1-4Assignment fields to screenAssignments list. */

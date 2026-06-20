@@ -872,6 +872,11 @@
     <string name="song_language_both">Обидві</string>
     <string name="song_language_primary">Основна</string>
     <string name="song_language_secondary">Додаткова</string>
+    <string name="screen_lang_off">Вимк.</string>
+    <string name="screen_lang_language_1">Мова 1</string>
+    <string name="screen_lang_language_2">Мова 2</string>
+    <string name="screen_lang_bible_1">Біблія 1</string>
+    <string name="screen_lang_bible_2">Біблія 2</string>
     <string name="lower_third_display">Нижня третина</string>
     <string name="bilingual_layout">Двомовний макет:</string>
     <string name="bilingual_left_right">Ліворуч / Праворуч</string>

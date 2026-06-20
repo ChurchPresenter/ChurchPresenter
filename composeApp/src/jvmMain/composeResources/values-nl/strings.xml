@@ -1122,6 +1122,11 @@
     <string name="song_language_both">Beide</string>
     <string name="song_language_primary">Primair</string>
     <string name="song_language_secondary">Secundair</string>
+    <string name="screen_lang_off">Uit</string>
+    <string name="screen_lang_language_1">Taal 1</string>
+    <string name="screen_lang_language_2">Taal 2</string>
+    <string name="screen_lang_bible_1">Bijbel 1</string>
+    <string name="screen_lang_bible_2">Bijbel 2</string>
     <string name="lower_third_display">Lower Third weergave</string>
     <string name="bilingual_layout">Tweetalige opmaak:</string>
     <string name="bilingual_left_right">Links / Rechts</string>

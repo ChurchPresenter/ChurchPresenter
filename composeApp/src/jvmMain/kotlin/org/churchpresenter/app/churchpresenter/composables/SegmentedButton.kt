@@ -9,9 +9,11 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
@@ -20,6 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
@@ -30,7 +33,8 @@ import androidx.compose.ui.unit.sp
 data class SegmentedButtonItem<T>(
     val value: T,
     val label: String,
-    val tooltip: String? = null
+    val tooltip: String? = null,
+    val icon: ImageVector? = null
 )
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -42,7 +46,8 @@ fun <T> SegmentedButton(
     modifier: Modifier = Modifier,
     buttonWidth: Dp = 40.dp,
     buttonHeight: Dp = 40.dp,
-    fontSize: TextUnit = 16.sp
+    fontSize: TextUnit = 16.sp,
+    contentPadding: PaddingValues = PaddingValues(horizontal = 12.dp, vertical = 0.dp)
 ) {
     require(items.isNotEmpty()) { "SegmentedButton requires at least one item" }
 
@@ -77,14 +82,22 @@ fun <T> SegmentedButton(
                             Color.Transparent,
                         contentColor = MaterialTheme.colorScheme.onSurface
                     ),
-                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp)
+                    contentPadding = contentPadding
                 ) {
-                    Text(
-                        text = item.label,
-                        fontSize = fontSize,
-                        fontWeight = FontWeight.Bold,
-                        maxLines = 1
-                    )
+                    if (item.icon != null) {
+                        Icon(
+                            imageVector = item.icon,
+                            contentDescription = item.label,
+                            modifier = Modifier.size(fontSize.value.dp * 1.1f)
+                        )
+                    } else {
+                        Text(
+                            text = item.label,
+                            fontSize = fontSize,
+                            fontWeight = FontWeight.Bold,
+                            maxLines = 1
+                        )
+                    }
                 }
             }
 
