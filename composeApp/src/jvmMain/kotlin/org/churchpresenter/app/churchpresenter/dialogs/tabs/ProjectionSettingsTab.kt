@@ -76,6 +76,7 @@ import churchpresenter.composeapp.generated.resources.media_vlc_install
 import churchpresenter.composeapp.generated.resources.media_vlc_required
 import churchpresenter.composeapp.generated.resources.presenter_windows_count
 import churchpresenter.composeapp.generated.resources.projection_content_song_la
+import churchpresenter.composeapp.generated.resources.projection_content_song_la_tooltip
 import churchpresenter.composeapp.generated.resources.projection_position_help
 import churchpresenter.composeapp.generated.resources.projection_target_display
 import churchpresenter.composeapp.generated.resources.right
@@ -323,14 +324,17 @@ fun ProjectionSettingsTab(
         data class ContentCol(
             val label: String,
             val getter: (ScreenAssignment) -> Boolean,
-            val setter: (ScreenAssignment, Boolean) -> ScreenAssignment
+            val setter: (ScreenAssignment, Boolean) -> ScreenAssignment,
+            val enabled: (ScreenAssignment) -> Boolean = { true },
+            val tooltip: String? = null
         )
 
+        val songLaTooltip = stringResource(Res.string.projection_content_song_la_tooltip)
         val contentCols = listOf(
             ContentCol(songLaLabel, { it.songLookAhead }, { a, v ->
                 if (v) a.copy(songMode = if (a.songMode == Constants.SONG_LANG_OFF) Constants.SONG_LANG_BOTH else a.songMode, songLookAhead = true)
                 else a.copy(songLookAhead = false)
-            }),
+            }, enabled = { it.songMode != Constants.SONG_LANG_OFF }, tooltip = songLaTooltip),
             ContentCol(picturesLabel, { it.showPictures }, { a, v -> a.copy(showPictures = v) }),
             ContentCol(mediaLabel, { it.showMedia }, { a, v -> a.copy(showMedia = v) }),
             ContentCol(streamingLabel, { it.showStreaming }, { a, v -> a.copy(showStreaming = v) }),
@@ -800,15 +804,27 @@ fun ProjectionSettingsTab(
                                     Checkbox(checked = false, enabled = false, onCheckedChange = {})
                                 }
                             } else {
-                                Checkbox(
-                                    checked = col.getter(assignment),
-                                    onCheckedChange = { checked ->
-                                        val updated = col.setter(assignment, checked)
-                                        onSettingsChange { s ->
-                                            s.copy(projectionSettings = s.projectionSettings.withAssignment(i, updated))
+                                val checkbox = @Composable {
+                                    Checkbox(
+                                        checked = col.getter(assignment),
+                                        enabled = col.enabled(assignment),
+                                        onCheckedChange = { checked ->
+                                            val updated = col.setter(assignment, checked)
+                                            onSettingsChange { s ->
+                                                s.copy(projectionSettings = s.projectionSettings.withAssignment(i, updated))
+                                            }
                                         }
-                                    }
-                                )
+                                    )
+                                }
+                                if (col.tooltip != null) {
+                                    TooltipBox(
+                                        positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
+                                        tooltip = { PlainTooltip { Text(col.tooltip) } },
+                                        state = rememberTooltipState()
+                                    ) { checkbox() }
+                                } else {
+                                    checkbox()
+                                }
                             }
                         }
                     }

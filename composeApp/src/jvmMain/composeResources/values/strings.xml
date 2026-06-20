@@ -376,6 +376,7 @@
 
     <!-- Projection Settings -->
     <string name="projection_content_song_la">Song LA</string>
+    <string name="projection_content_song_la_tooltip">Song Look Ahead</string>
     <string name="projection_content_web">Web</string>
     <string name="projection_content_background">Background</string>
     <string name="projection_content_lt_background">Lower Third Background</string>
