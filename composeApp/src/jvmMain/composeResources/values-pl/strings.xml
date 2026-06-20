@@ -1502,6 +1502,16 @@
     <string name="setup_step5_download">Pobierz VLC</string>
     <string name="setup_step5_recheck">Sprawdź ponownie</string>
     <string name="setup_step5_linux_tip">W systemie Linux zainstaluj VLC przez menedżer pakietów (np. sudo apt install vlc).</string>
+    <string name="setup_proj_title">Konfiguracja projekcji</string>
+    <string name="setup_proj_subtitle">Skonfiguruj sposób wyświetlania treści na ekranach</string>
+    <string name="setup_proj_step1">1. Podłącz projektor lub dodatkowy wyświetlacz do komputera</string>
+    <string name="setup_proj_step2">2. Otwórz Ustawienia i przejdź do zakładki Projekcja</string>
+    <string name="setup_proj_step3">3. Ustaw liczbę okien projekcji zgodnie z liczbą wyświetlaczy</string>
+    <string name="setup_proj_step4">4. Dla każdego ekranu wybierz docelowy wyświetlacz i tryb wyświetlania. Następnie ustaw w listach rozwijanych Biblii i Piosenek żądany język — wybranie wartości włącza tę treść na tym ekranie. Zaznaczenie pola wyboru dla innych zakładek (Zdjęcia, Media itp.) działa tak samo.</string>
+    <string name="setup_proj_step5">5. Kliknij Identyfikuj, aby potwierdzić, który wyświetlacz jest który</string>
+    <string name="setup_proj_tip">Każda zakładka — Piosenki, Biblia, Slajdy, Media, Płótno — wysyła treść do tego samego okna projekcji. Ustawienia każdej zakładki kontrolują czcionki, tła i układ.</string>
+    <string name="setup_proj_tip2">Możesz otwierać i zamykać okno projekcji w dowolnym momencie z menu Widok lub za pomocą skrótu klawiszowego.</string>
+    <string name="setup_proj_lang_note">Domyślnie jeden ekran wyświetla całą treść — Piosenki i Biblię razem. Jeśli dodasz drugi ekran, użyj list rozwijanych języka Piosenek i Biblii dla każdego ekranu, aby podzielić dwujęzyczną piosenkę na dwa ekrany lub wyświetlić inny przekład Biblii na bocznym wyświetlaczu.</string>
     <string name="setup_step4_title">Wszystko gotowe!</string>
     <string name="setup_step4_body">Zawsze możesz dodać więcej treści lub dostosować ustawienia, klikając przycisk ⚙ Ustawienia w pasku narzędzi.</string>
     <string name="setup_step4_hint">Ten przewodnik jest dostępny w dowolnym momencie z Pomoc → Pierwsze kroki.</string>

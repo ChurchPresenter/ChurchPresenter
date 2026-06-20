@@ -26,15 +26,19 @@ import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.OndemandVideo
+import androidx.compose.material.icons.filled.Tv
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -62,6 +66,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPosition
@@ -103,6 +108,31 @@ import churchpresenter.composeapp.generated.resources.setup_step3_title
 import churchpresenter.composeapp.generated.resources.setup_step4_body
 import churchpresenter.composeapp.generated.resources.setup_step4_hint
 import churchpresenter.composeapp.generated.resources.setup_step4_title
+import churchpresenter.composeapp.generated.resources.content_bible
+import churchpresenter.composeapp.generated.resources.content_songs
+import churchpresenter.composeapp.generated.resources.detected_screens
+import churchpresenter.composeapp.generated.resources.display_fullscreen
+import churchpresenter.composeapp.generated.resources.display_lower_third
+import churchpresenter.composeapp.generated.resources.display_mode
+import churchpresenter.composeapp.generated.resources.display_stage_monitor
+import churchpresenter.composeapp.generated.resources.identify_screen
+import churchpresenter.composeapp.generated.resources.key_output
+import churchpresenter.composeapp.generated.resources.presenter_windows_count
+import churchpresenter.composeapp.generated.resources.projection_auto_display
+import churchpresenter.composeapp.generated.resources.projection_target_display
+import churchpresenter.composeapp.generated.resources.screen_assignment
+import churchpresenter.composeapp.generated.resources.screen_col_label
+import churchpresenter.composeapp.generated.resources.setup_proj_lang_note
+import churchpresenter.composeapp.generated.resources.song_language_both
+import churchpresenter.composeapp.generated.resources.setup_proj_step1
+import churchpresenter.composeapp.generated.resources.setup_proj_step2
+import churchpresenter.composeapp.generated.resources.setup_proj_step3
+import churchpresenter.composeapp.generated.resources.setup_proj_step4
+import churchpresenter.composeapp.generated.resources.setup_proj_step5
+import churchpresenter.composeapp.generated.resources.setup_proj_subtitle
+import churchpresenter.composeapp.generated.resources.setup_proj_tip
+import churchpresenter.composeapp.generated.resources.setup_proj_tip2
+import churchpresenter.composeapp.generated.resources.setup_proj_title
 import churchpresenter.composeapp.generated.resources.setup_step5_download
 import churchpresenter.composeapp.generated.resources.setup_step5_download_intel
 import churchpresenter.composeapp.generated.resources.setup_step5_download_silicon
@@ -133,7 +163,7 @@ import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
-private const val TOTAL_STEPS = 7
+private const val TOTAL_STEPS = 8
 
 @Composable
 fun SetupWizardDialog(
@@ -231,8 +261,9 @@ fun SetupWizardDialog(
                                     2 -> WelcomeStep()
                                     3 -> BibleStep(onOpenSettings = onOpenSettings)
                                     4 -> SongsStep(onOpenSettings = onOpenSettings)
-                                    5 -> VlcStep()
-                                    6 -> ReadyStep()
+                                    5 -> ProjectionStep(onOpenSettings = onOpenSettings)
+                                    6 -> VlcStep()
+                                    7 -> ReadyStep()
                                 }
                             }
                         }
@@ -620,6 +651,88 @@ private fun SongsStep(onOpenSettings: () -> Unit) {
 }
 
 @Composable
+private fun ProjectionStep(onOpenSettings: () -> Unit) {
+    val scrollState = rememberScrollState()
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier.fillMaxWidth().verticalScroll(scrollState).padding(end = 12.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Filled.Tv,
+                contentDescription = null,
+                modifier = Modifier.size(52.dp),
+                tint = MaterialTheme.colorScheme.primary
+            )
+            Text(
+                text = stringResource(Res.string.setup_proj_title),
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+            Text(
+                text = stringResource(Res.string.setup_proj_subtitle),
+                style = MaterialTheme.typography.bodyMedium,
+                textAlign = TextAlign.Center,
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                Text(
+                    text = stringResource(Res.string.setup_proj_step1),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.85f)
+                )
+                Text(
+                    text = stringResource(Res.string.setup_proj_step2),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.85f)
+                )
+                OutlinedButton(onClick = onOpenSettings) {
+                    Image(
+                        painter = painterResource(Res.drawable.ic_settings),
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp),
+                        colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface)
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(stringResource(Res.string.shortcut_description_settings))
+                }
+                Text(
+                    text = stringResource(Res.string.setup_proj_step3),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.85f)
+                )
+                SettingsTabHint(highlightedTab = stringResource(Res.string.projection))
+                Text(
+                    text = stringResource(Res.string.setup_proj_step4),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.85f)
+                )
+                ProjectionModeHint()
+                Text(
+                    text = stringResource(Res.string.setup_proj_step5),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.85f)
+                )
+            }
+            TipBox(text = stringResource(Res.string.setup_proj_tip))
+            TipBox(text = stringResource(Res.string.setup_proj_tip2))
+            TipBox(text = stringResource(Res.string.setup_proj_lang_note))
+        }
+        VerticalScrollbar(
+            adapter = rememberScrollbarAdapter(scrollState),
+            modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight()
+        )
+    }
+}
+
+@Composable
 private fun VlcStep() {
     val osName = remember { System.getProperty("os.name", "").lowercase() }
     val arch = remember { System.getProperty("os.arch", "").lowercase() }
@@ -862,6 +975,186 @@ private fun SettingsTabHint(highlightedTab: String) {
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
         )
+    }
+}
+
+@Composable
+private fun ProjectionModeHint() {
+    val displayDropW = 80.dp
+    val langDropW    = 72.dp
+    val modeColW     = 64.dp
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(MaterialTheme.shapes.medium)
+            .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f), MaterialTheme.shapes.medium)
+            .background(MaterialTheme.colorScheme.surface)
+            .padding(horizontal = 12.dp, vertical = 10.dp),
+        verticalArrangement = Arrangement.spacedBy(6.dp)
+    ) {
+        // Title row
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .width(3.dp)
+                    .height(14.dp)
+                    .background(MaterialTheme.colorScheme.primary)
+            )
+            Spacer(modifier = Modifier.width(6.dp))
+            Text(
+                text = stringResource(Res.string.screen_assignment),
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Spacer(modifier = Modifier.weight(1f))
+            Box(
+                modifier = Modifier
+                    .clip(MaterialTheme.shapes.small)
+                    .background(MaterialTheme.colorScheme.primaryContainer)
+                    .padding(horizontal = 10.dp, vertical = 3.dp)
+            ) {
+                Text(
+                    text = stringResource(Res.string.identify_screen),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(2.dp))
+
+        // Column header row — scrollable middle section mirrors the real UI
+        val contentScrollState = rememberScrollState()
+        Row(verticalAlignment = Alignment.Bottom) {
+            // fixed left: screen label placeholder
+            Spacer(modifier = Modifier.width(50.dp))
+            // Display column
+            Text(
+                text = stringResource(Res.string.projection_target_display),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.primary,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.width(displayDropW)
+            )
+            // Key Output column
+            Text(
+                text = stringResource(Res.string.key_output),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.primary,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.width(displayDropW)
+            )
+            // Scrollable content-type columns
+            Row(
+                modifier = Modifier.weight(1f).horizontalScroll(contentScrollState),
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                listOf(
+                    stringResource(Res.string.content_bible),
+                    stringResource(Res.string.content_songs)
+                ).forEach { label ->
+                    Text(
+                        text = label,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.primary,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.width(langDropW)
+                    )
+                }
+            }
+            // Display Mode header + sub-headers
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    text = stringResource(Res.string.display_mode),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.primary,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.width(modeColW * 3)
+                )
+                Row {
+                    listOf(
+                        stringResource(Res.string.display_fullscreen),
+                        stringResource(Res.string.display_lower_third),
+                        stringResource(Res.string.display_stage_monitor)
+                    ).forEach { label ->
+                        Text(
+                            text = label,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.width(modeColW)
+                        )
+                    }
+                }
+            }
+        }
+
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+
+        // Example data row — Screen 1
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            // Screen label
+            Text(
+                text = stringResource(Res.string.screen_col_label, 1),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.width(50.dp)
+            )
+            // Display dropdown
+            FakeDropdown(label = stringResource(Res.string.projection_auto_display), width = displayDropW)
+            // Key Output dropdown
+            FakeDropdown(label = "None", width = displayDropW)
+            // Bible / Songs dropdowns
+            Row(
+                modifier = Modifier.weight(1f).horizontalScroll(contentScrollState),
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                repeat(2) {
+                    FakeDropdown(label = stringResource(Res.string.song_language_both), width = langDropW)
+                }
+            }
+            // Display mode radio buttons
+            Row {
+                listOf(true, false, false).forEach { selected ->
+                    RadioButton(
+                        selected = selected,
+                        onClick = null,
+                        modifier = Modifier.size(modeColW)
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun FakeDropdown(label: String, width: Dp) {
+    Box(
+        modifier = Modifier
+            .width(width)
+            .padding(horizontal = 2.dp)
+            .clip(MaterialTheme.shapes.extraSmall)
+            .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.35f), MaterialTheme.shapes.extraSmall)
+            .padding(horizontal = 6.dp, vertical = 4.dp)
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.weight(1f)
+            )
+            Text(
+                text = "▾",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+            )
+        }
     }
 }
 

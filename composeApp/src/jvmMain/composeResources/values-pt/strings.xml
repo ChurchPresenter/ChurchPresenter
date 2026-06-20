@@ -1524,6 +1524,16 @@
     <string name="setup_step5_download">Baixar VLC</string>
     <string name="setup_step5_recheck">Reverificar</string>
     <string name="setup_step5_linux_tip">No Linux, instale o VLC pelo gerenciador de pacotes (ex. sudo apt install vlc).</string>
+    <string name="setup_proj_title">Configurar projeção</string>
+    <string name="setup_proj_subtitle">Configure como o conteúdo aparece em suas telas</string>
+    <string name="setup_proj_step1">1. Conecte seu projetor ou tela secundária ao computador</string>
+    <string name="setup_proj_step2">2. Abra as Configurações e vá para a guia Projeção</string>
+    <string name="setup_proj_step3">3. Defina o número de janelas de projeção para corresponder às suas telas</string>
+    <string name="setup_proj_step4">4. Para cada tela, escolha uma tela de destino e um modo de exibição. Em seguida, defina nos menus suspensos da Bíblia e das Músicas o idioma desejado — definir um valor habilita esse conteúdo nesta tela. Marcar uma caixa de seleção para outras guias (Imagens, Mídia, etc.) funciona da mesma forma.</string>
+    <string name="setup_proj_step5">5. Clique em Identificar para confirmar qual tela é qual</string>
+    <string name="setup_proj_tip">Cada guia — Músicas, Bíblia, Slides, Mídia, Tela — envia conteúdo para a mesma janela de projeção. As configurações por guia controlam fontes, fundos e layout.</string>
+    <string name="setup_proj_tip2">Você pode abrir e fechar a janela de projeção a qualquer momento pelo menu Ver ou com o atalho de teclado.</string>
+    <string name="setup_proj_lang_note">Por padrão, uma tela exibe todo o conteúdo — Músicas e Bíblia juntos. Se você adicionar uma segunda tela, use os menus suspensos de idioma de Músicas e Bíblia por tela para dividir uma música bilíngue em duas telas ou exibir uma tradução bíblica diferente em uma tela lateral.</string>
     <string name="setup_step4_title">Tudo pronto!</string>
     <string name="setup_step4_body">Você sempre pode adicionar mais conteúdo ou ajustar as configurações clicando no botão ⚙ Configurações na barra de ferramentas.</string>
     <string name="setup_step4_hint">Este guia está disponível a qualquer momento em Ajuda → Introdução.</string>
