@@ -50,3 +50,4 @@ google-services.json
 .env
 **/sentry.properties
 **/analytics.properties
+CLAUDE*.md

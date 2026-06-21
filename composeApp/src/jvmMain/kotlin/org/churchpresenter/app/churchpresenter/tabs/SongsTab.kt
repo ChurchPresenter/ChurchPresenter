@@ -227,15 +227,18 @@ fun SongsTab(
     // Reset title-slide selection whenever the active song changes
     LaunchedEffect(selectedSongIndex) { isTitleSlideSelected = false }
 
-    // Helper: push current viewModel selection to presenter and track as live
-    fun sendToPresenter() {
+    // Helper: push current viewModel selection to presenter and track as live.
+    // goLive=true marks this call as an explicit "go live" action so statistics are
+    // recorded even though the isPresenting flag has not yet propagated.
+    fun sendToPresenter(goLive: Boolean = false) {
         onAllSectionsChanged(viewModel.getLyricSections())
         onSectionIndexChanged(viewModel.selectedSectionIndex.value)
         onLineIndexChanged(viewModel.selectedLineIndex.value)
         viewModel.getSelectedLyricSection()?.let { onSongItemSelected(it) }
-        // Record song display for statistics — only when a different song is presented
+        // Record song display for statistics — only when the song is actually live
+        // (or being sent live), and only when a different song is presented.
         val idx = viewModel.selectedSongIndex.value
-        if (idx != liveSongIndex) {
+        if ((goLive || isPresenting) && idx != liveSongIndex) {
             val items = viewModel.filteredSongItems.value
             if (idx in items.indices) {
                 val song = items[idx]
@@ -1121,7 +1124,7 @@ fun SongsTab(
                                 },
                                 onClick = {
                                     viewModel.selectSong(index)
-                                    sendToPresenter()
+                                    sendToPresenter(goLive = true)
                                     onPresenting(Presenting.LYRICS)
                                     tabFocusRequester.requestFocus()
                                     showContextMenu = false
@@ -1393,7 +1396,7 @@ fun SongsTab(
                     tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
                 ) {
                     IconButton(
-                        onClick = { sendToPresenter(); onPresenting(Presenting.LYRICS); tabFocusRequester.requestFocus() },
+                        onClick = { sendToPresenter(goLive = true); onPresenting(Presenting.LYRICS); tabFocusRequester.requestFocus() },
                         enabled = hasSongSelected,
                         colors = IconButtonDefaults.iconButtonColors(
                             containerColor = MaterialTheme.colorScheme.primary,
@@ -1605,7 +1608,7 @@ fun SongsTab(
                                         onDoubleClick = {
                                             viewModel.selectSection(sectionIndex)
                                             isTitleSlideSelected = false
-                                            sendToPresenter()
+                                            sendToPresenter(goLive = true)
                                             onPresenting(Presenting.LYRICS)
                                         }
                                     )
