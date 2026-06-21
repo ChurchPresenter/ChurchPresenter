@@ -93,6 +93,7 @@
     <string name="submit_feature_request">Funktionswunsch einreichen</string>
     <string name="action_ok">OK</string>
     <string name="menu_help_item">Hilfe</string>
+    <string name="menu_how_to_blog">Anleitungs-Blog</string>
     <string name="menu_check_for_updates">Nach Updates suchen…</string>
 
     <!-- Options Dialog Strings -->

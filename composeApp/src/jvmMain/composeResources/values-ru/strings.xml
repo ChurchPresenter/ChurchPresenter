@@ -103,6 +103,7 @@
     <string name="submit_feature_request">Отправить запрос функции</string>
     <string name="action_ok">OK</string>
     <string name="menu_help_item">Справка</string>
+    <string name="menu_how_to_blog">Обучающий блог</string>
     <string name="menu_check_for_updates">Проверить обновления…</string>
 
     <!-- Options Dialog Strings -->

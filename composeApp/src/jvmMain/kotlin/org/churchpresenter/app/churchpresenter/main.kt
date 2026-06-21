@@ -1004,6 +1004,10 @@ fun main() {
                                         Desktop.getDesktop()
                                             .browse(URI("https://github.com/ChurchPresenter/ChurchPresenter/"))
                                     },
+                                    onHowToBlog = {
+                                        Desktop.getDesktop()
+                                            .browse(URI("https://churchpresenter.org/blog"))
+                                    },
                                     onCheckForUpdates = {
                                         coroutineScope.launch {
                                             val info = UpdateChecker.checkForUpdate()
