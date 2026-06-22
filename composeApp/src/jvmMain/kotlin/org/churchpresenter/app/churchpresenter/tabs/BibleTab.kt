@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -36,6 +37,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollbarAdapter
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
@@ -48,6 +51,7 @@ import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -55,6 +59,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
@@ -113,6 +118,26 @@ import churchpresenter.composeapp.generated.resources.ic_arrow_down
 import churchpresenter.composeapp.generated.resources.ic_arrow_up
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Tv
+import androidx.compose.material.icons.filled.Mic
+import androidx.compose.material.icons.filled.FormatQuote
+import androidx.compose.material.icons.filled.ArrowForward
+import org.churchpresenter.app.churchpresenter.viewmodel.STTManager
+import org.churchpresenter.app.churchpresenter.viewmodel.BibleEngineClient
+import org.churchpresenter.app.churchpresenter.viewmodel.DetectionSource
+import org.churchpresenter.app.churchpresenter.viewmodel.TextMatchLevel
+import churchpresenter.composeapp.generated.resources.bible_stt_heard
+import churchpresenter.composeapp.generated.resources.bible_stt_listening
+import churchpresenter.composeapp.generated.resources.bible_stt_auto_follow
+import churchpresenter.composeapp.generated.resources.bible_stt_auto_follow_hint
+import churchpresenter.composeapp.generated.resources.bible_stt_clear
+import churchpresenter.composeapp.generated.resources.bible_stt_src_explicit
+import churchpresenter.composeapp.generated.resources.bible_stt_src_reverse
+import churchpresenter.composeapp.generated.resources.bible_stt_src_continuation
+import churchpresenter.composeapp.generated.resources.bible_stt_match_label
+import churchpresenter.composeapp.generated.resources.bible_stt_level_off
+import churchpresenter.composeapp.generated.resources.bible_stt_level_conservative
+import churchpresenter.composeapp.generated.resources.bible_stt_level_balanced
+import churchpresenter.composeapp.generated.resources.bible_stt_level_aggressive
 import churchpresenter.composeapp.generated.resources.ic_close
 import churchpresenter.composeapp.generated.resources.ic_pause
 import churchpresenter.composeapp.generated.resources.ic_search
@@ -159,6 +184,8 @@ fun BibleTab(
     isPresenting: Boolean = false,
     presenterManager: PresenterManager? = null,
     statisticsManager: StatisticsManager? = null,
+    sttManager: STTManager? = null,
+    bibleEngineClient: BibleEngineClient? = null,
     dialogDismissSignal: Int = 0,
 ) {
     // Update settings when bible paths change
@@ -183,6 +210,41 @@ fun BibleTab(
             viewModel.selectVerseByDetails(item.bookName, item.chapter, item.verseNumber, item.verseRange)
         }
     }
+
+    // ── Scripture detection via the Bible Lookup Engine ────────────────────────
+    // The engine is started when STT connects (pointed at the same STT server), and stopped on
+    // disconnect. Detection results arrive over the engine's WebSocket and feed the rows below.
+    val sttConnected = sttManager?.connected?.value == true
+    val engineSettings = appSettings.bibleEngineSettings
+    // The SET of bibles to index (sorted, blanks removed). Keying the engine restart on this means
+    // swapping primary↔secondary (same set) does NOT trigger a re-index, while changing to a
+    // different bible does. Supports primary-only (secondary blank → single-element set).
+    val engineBibles = remember(appSettings.bibleSettings.primaryBible, appSettings.bibleSettings.secondaryBible) {
+        listOf(appSettings.bibleSettings.primaryBible, appSettings.bibleSettings.secondaryBible)
+            .filter { it.isNotBlank() }
+            .sorted()
+    }
+    if (sttManager != null && bibleEngineClient != null) {
+        LaunchedEffect(sttConnected, engineSettings.enabled, engineSettings.runLocal, engineSettings.host, engineSettings.port, engineBibles) {
+            if (sttConnected && engineSettings.enabled && engineBibles.isNotEmpty()) {
+                bibleEngineClient.start(
+                    sttUrl = appSettings.sttSettings.serverUrl,
+                    bibleRoot = appSettings.bibleSettings.storageDirectory,
+                    bibleFiles = engineBibles,
+                    runLocal = engineSettings.runLocal,
+                    host = engineSettings.host,
+                    port = engineSettings.port,
+                    level = viewModel.textMatchLevel.value.name.lowercase(),
+                )
+            } else {
+                bibleEngineClient.stop()
+                viewModel.clearDetectedReferences()
+            }
+        }
+    }
+    val detectedReferences by viewModel.detectedReferences
+    val autoFollowEnabled by viewModel.autoFollowEnabled
+    val textMatchLevel by viewModel.textMatchLevel
 
     val books by viewModel.books
     val selectedBookIndex by viewModel.selectedBookIndex
@@ -627,6 +689,169 @@ fun BibleTab(
                         Icon(painter = painterResource(Res.drawable.ic_search), contentDescription = stringResource(Res.string.search), modifier = Modifier.size(20.dp))
                     }
                 }
+            }
+        }
+
+        // ── Detected references strip — visible whenever STT is connected ──
+        if (sttConnected) {
+            val levelName = when (textMatchLevel) {
+                TextMatchLevel.OFF -> stringResource(Res.string.bible_stt_level_off)
+                TextMatchLevel.CONSERVATIVE -> stringResource(Res.string.bible_stt_level_conservative)
+                TextMatchLevel.BALANCED -> stringResource(Res.string.bible_stt_level_balanced)
+                TextMatchLevel.AGGRESSIVE -> stringResource(Res.string.bible_stt_level_aggressive)
+            }
+            // ── Controls row: status + auto-follow + reverse-lookup level + clear ──
+            FlowRow(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp).padding(bottom = 2.dp),
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.height(32.dp).padding(end = 2.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Mic,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(Modifier.width(4.dp))
+                    Text(
+                        text = if (detectedReferences.isEmpty()) stringResource(Res.string.bible_stt_listening)
+                               else stringResource(Res.string.bible_stt_heard),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                            .copy(alpha = if (detectedReferences.isEmpty()) 0.6f else 1f)
+                    )
+                }
+                TooltipArea(tooltip = {
+                    Surface(shadowElevation = 4.dp, color = MaterialTheme.colorScheme.surfaceVariant) {
+                        Text(
+                            text = stringResource(Res.string.bible_stt_auto_follow_hint),
+                            style = MaterialTheme.typography.bodySmall,
+                            modifier = Modifier.padding(8.dp)
+                        )
+                    }
+                }) {
+                    FilterChip(
+                        selected = autoFollowEnabled,
+                        onClick = {
+                            val next = !autoFollowEnabled
+                            viewModel.setAutoFollow(next)
+                            onSettingsChange { it.copy(bibleEngineSettings = it.bibleEngineSettings.copy(autoFollow = next)) }
+                        },
+                        label = { Text(stringResource(Res.string.bible_stt_auto_follow)) },
+                        leadingIcon = {
+                            Icon(Icons.Filled.Tv, contentDescription = null, modifier = Modifier.size(16.dp))
+                        }
+                    )
+                }
+                // Reverse-lookup level: tap to cycle Off → Conservative → Balanced → Aggressive.
+                FilterChip(
+                    selected = textMatchLevel != TextMatchLevel.OFF,
+                    onClick = {
+                        val all = TextMatchLevel.values()
+                        val next = all[(textMatchLevel.ordinal + 1) % all.size]
+                        viewModel.setTextMatchLevel(next)
+                        onSettingsChange { it.copy(bibleEngineSettings = it.bibleEngineSettings.copy(textMatchLevel = next.name.lowercase())) }
+                    },
+                    label = { Text("${stringResource(Res.string.bible_stt_match_label)}: $levelName") },
+                    leadingIcon = {
+                        Icon(Icons.Filled.FormatQuote, contentDescription = null, modifier = Modifier.size(16.dp))
+                    }
+                )
+                if (detectedReferences.isNotEmpty()) {
+                    IconButton(
+                        onClick = { viewModel.clearDetectedReferences() },
+                        modifier = Modifier.size(32.dp)
+                    ) {
+                        Icon(
+                            painter = painterResource(Res.drawable.ic_close),
+                            contentDescription = stringResource(Res.string.bible_stt_clear),
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+                }
+            }
+
+            // ── Detected references — History-style rows (max ~5 visible; scrolls beyond) ──
+            Box(modifier = Modifier.fillMaxWidth()) {
+                val detScroll = rememberScrollState()
+                Column(
+                    modifier = Modifier.fillMaxWidth()
+                        .heightIn(max = 132.dp)
+                        .verticalScroll(detScroll)
+                        .padding(end = 10.dp)
+                ) {
+                detectedReferences.forEach { ref ->
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                        .padding(horizontal = 6.dp)
+                        .clickable { viewModel.applyDetectedReference(ref); focusRequester.requestFocus() }
+                        .padding(vertical = 2.dp)
+                ) {
+                    // Fixed-width icon column so every reference + verse text lines up vertically,
+                    // regardless of how many source markers a row has.
+                    Row(
+                        modifier = Modifier.width(68.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        ref.sources.forEach { src ->
+                            val (icon, descRes, tint) = when (src) {
+                                DetectionSource.EXPLICIT -> Triple(
+                                    Icons.Filled.Mic, Res.string.bible_stt_src_explicit,
+                                    MaterialTheme.colorScheme.primary
+                                )
+                                DetectionSource.REVERSE -> Triple(
+                                    Icons.Filled.FormatQuote, Res.string.bible_stt_src_reverse,
+                                    MaterialTheme.colorScheme.tertiary
+                                )
+                                DetectionSource.CONTINUATION -> Triple(
+                                    Icons.Filled.ArrowForward, Res.string.bible_stt_src_continuation,
+                                    MaterialTheme.colorScheme.secondary
+                                )
+                            }
+                            TooltipArea(tooltip = {
+                                Surface(shadowElevation = 4.dp, color = MaterialTheme.colorScheme.surfaceVariant) {
+                                    Text(
+                                        text = stringResource(descRes),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        modifier = Modifier.padding(8.dp)
+                                    )
+                                }
+                            }) {
+                                Icon(
+                                    imageVector = icon,
+                                    contentDescription = stringResource(descRes),
+                                    tint = tint,
+                                    modifier = Modifier.size(13.dp)
+                                )
+                            }
+                            Spacer(Modifier.width(3.dp))
+                        }
+                    }
+                    Text(
+                        text = buildAnnotatedString {
+                            withStyle(SpanStyle(fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.primary)) {
+                                append(ref.label)
+                            }
+                            ref.verseText?.let { append("  $it") }
+                        },
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+                }
+                }
+                VerticalScrollbar(
+                    modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
+                    adapter = rememberScrollbarAdapter(detScroll)
+                )
             }
         }
 

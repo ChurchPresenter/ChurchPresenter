@@ -23,9 +23,33 @@ import org.churchpresenter.app.churchpresenter.data.BibleBookNames
 import org.churchpresenter.app.churchpresenter.data.BibleSearch
 import org.churchpresenter.app.churchpresenter.models.SelectedVerse
 import java.io.File
+import java.util.Locale
 
 /** Mode of the unified Bible search box. */
 enum class BibleSearchMode { AUTO, REFERENCE, TEXT }
+
+/** How the Bible Lookup Engine matched a reference — shown as a row marker. */
+enum class DetectionSource { EXPLICIT, REVERSE, CONTINUATION }
+
+/** Reverse-lookup (BM25) aggressiveness, sent to the engine; gates only the text-match stage. */
+enum class TextMatchLevel { OFF, CONSERVATIVE, BALANCED, AGGRESSIVE }
+
+/**
+ * A Scripture reference detected in the live STT transcript and already resolved to a real book in
+ * the loaded Bible. Surfaced as a clickable chip in the Bible tab. [label] is a clean, localized
+ * display string (e.g. "Притчи 30:5") built from the resolved book — not the messy spoken words.
+ * [sources] records how the book was derived (informational confidence markers on the chip).
+ */
+data class DetectedReference(
+    val bookIndex: Int,
+    val chapter: Int,
+    val verseStart: Int?,
+    val verseEnd: Int?,
+    val label: String,
+    val key: String,
+    val sources: Set<DetectionSource> = emptySet(),
+    val verseText: String? = null,   // verse text shown History-style on the row
+)
 
 class BibleViewModel(
     private var appSettings: AppSettings,
@@ -120,6 +144,37 @@ class BibleViewModel(
     private val _isFullyLoadedFlow = MutableStateFlow(false)
     val isFullyLoadedFlow: StateFlow<Boolean> = _isFullyLoadedFlow.asStateFlow()
     val isFullyLoaded: Boolean get() = _isFullyLoadedFlow.value
+
+    // ── Scripture detection (events from the Bible Lookup Engine over WebSocket) ──
+    private val _detectedReferences = mutableStateOf<List<DetectedReference>>(emptyList())
+    val detectedReferences: State<List<DetectedReference>> = _detectedReferences
+
+    private val _autoFollowEnabled = mutableStateOf(appSettings.bibleEngineSettings.autoFollow)
+    val autoFollowEnabled: State<Boolean> = _autoFollowEnabled
+    fun setAutoFollow(enabled: Boolean) {
+        _autoFollowEnabled.value = enabled
+        // Turning it on jumps to the latest detection immediately.
+        if (enabled) {
+            _detectedReferences.value.firstOrNull()
+                ?.let { navigateToReference(SmartReference(it.bookIndex, it.chapter, it.verseStart, it.verseEnd)) }
+        }
+    }
+
+    // Reverse-lookup aggressiveness (BM25). Pushed to the engine; seeded from persisted settings.
+    private val _textMatchLevel = mutableStateOf(
+        runCatching { TextMatchLevel.valueOf(appSettings.bibleEngineSettings.textMatchLevel.uppercase()) }
+            .getOrDefault(TextMatchLevel.OFF)
+    )
+    val textMatchLevel: State<TextMatchLevel> = _textMatchLevel
+    /** Registered by the engine client to forward level changes to the engine. */
+    var onTextMatchLevelChanged: ((TextMatchLevel) -> Unit)? = null
+    fun setTextMatchLevel(level: TextMatchLevel) {
+        _textMatchLevel.value = level
+        onTextMatchLevelChanged?.invoke(level)
+    }
+
+    // Recently emitted keys so repeated engine events don't add duplicate rows.
+    private val recentDetectionKeys = ArrayDeque<String>()
 
     // History of presented verses (most recent first)
     data class HistoryEntry(
@@ -228,6 +283,9 @@ class BibleViewModel(
         private const val CANONICAL_BOOK_COUNT = 66
         private const val CLICK_DEBOUNCE_MS = 300L
         private const val LIVE_SEARCH_DEBOUNCE_MS = 300L
+        // Speech-driven detection tuning.
+        private const val MAX_DETECTED = 20             // detections kept (newest first); list scrolls
+        private const val DETECTION_DEDUPE_WINDOW = 32  // recent keys remembered to avoid re-adding
         private val STANDARD_ENGLISH_BOOKS = listOf(
             "genesis", "exodus", "leviticus", "numbers", "deuteronomy", "joshua", "judges", "ruth",
             "1 samuel", "2 samuel", "1 kings", "2 kings", "1 chronicles", "2 chronicles",
@@ -1162,6 +1220,102 @@ class BibleViewModel(
 
             refreshFilteredLists()
         }
+    }
+
+    // ── Speech-driven reference detection ──────────────────────────────────────
+
+    /**
+     * Handles a scripture event from the Bible Lookup Engine. [matchType] is "explicit", "reverse",
+     * or "continuation"; [bookId] is the canonical book number. Adds a row (de-duped, merging markers
+     * on repeats) and, when auto-follow is on, navigates to a newly-added one. Safe to call from the
+     * engine WebSocket coroutine.
+     */
+    fun onEngineScripture(
+        bookId: Int,
+        chapter: Int,
+        verseStart: Int,
+        verseEnd: Int?,
+        verseText: String,
+        matchType: String,
+    ) {
+        val bookIndex = canonicalBookIdToIndex(bookId) ?: return
+        val source = when (matchType) {
+            "explicit" -> DetectionSource.EXPLICIT
+            "continuation" -> DetectionSource.CONTINUATION
+            else -> DetectionSource.REVERSE
+        }
+        val vEnd = verseEnd?.takeIf { it > verseStart }
+        val label = buildDetectionLabel(bookIndex, chapter, verseStart, vEnd)
+        val key = "$bookIndex|$chapter|$verseStart|$vEnd"
+        val added = addDetection(
+            DetectedReference(
+                bookIndex = bookIndex,
+                chapter = chapter,
+                verseStart = verseStart,
+                verseEnd = vEnd,
+                label = label,
+                key = key,
+                sources = setOf(source),
+                // Prefer the app's own primary-Bible text; fall back to the engine's matched text.
+                verseText = verseTextFor(bookIndex, chapter, verseStart) ?: verseText.ifBlank { null },
+            )
+        )
+        if (added && _autoFollowEnabled.value) {
+            navigateToReference(SmartReference(bookIndex, chapter, verseStart, vEnd))
+        }
+    }
+
+    /**
+     * Adds a detection, or — when the same reference is already showing — merges any new source
+     * markers into it (so late-arriving corroboration like the delayed English translation appears
+     * on the existing chip). Returns true only when a brand-new chip was added.
+     */
+    private fun addDetection(ref: DetectedReference): Boolean {
+        val list = _detectedReferences.value
+        val idx = list.indexOfFirst { it.key == ref.key }
+        if (idx >= 0) {
+            val merged = list[idx].sources + ref.sources
+            val verseText = list[idx].verseText ?: ref.verseText
+            if (merged != list[idx].sources || verseText != list[idx].verseText) {
+                _detectedReferences.value = list.toMutableList().also {
+                    it[idx] = list[idx].copy(sources = merged, verseText = verseText)
+                }
+            }
+            return false
+        }
+        if (recentDetectionKeys.contains(ref.key)) return false   // shown earlier, scrolled off
+        recentDetectionKeys.addLast(ref.key)
+        while (recentDetectionKeys.size > DETECTION_DEDUPE_WINDOW) recentDetectionKeys.removeFirst()
+        _detectedReferences.value = (listOf(ref) + list).take(MAX_DETECTED)
+        return true
+    }
+
+    /** Navigates the Bible tab to a row the operator tapped. */
+    fun applyDetectedReference(ref: DetectedReference) {
+        navigateToReference(SmartReference(ref.bookIndex, ref.chapter, ref.verseStart, ref.verseEnd))
+    }
+
+    /** Clears the detected rows (e.g. when STT / the engine disconnects). */
+    fun clearDetectedReferences() {
+        if (_detectedReferences.value.isNotEmpty()) _detectedReferences.value = emptyList()
+        recentDetectionKeys.clear()
+    }
+
+    /** Verse text for the detection row (History-style display). Null for chapter-only references. */
+    private fun verseTextFor(bookIndex: Int, chapter: Int, verse: Int?): String? {
+        if (verse == null) return null
+        val bible = _primaryBible.value ?: return null
+        return bible.getVerseDetails(bible.getBookId(bookIndex), chapter, verse)?.second
+    }
+
+    private fun buildDetectionLabel(bookIndex: Int, chapter: Int, vs: Int?, ve: Int?): String {
+        val bookName = _books.value.getOrNull(bookIndex) ?: return "$chapter"
+        val versePart = when {
+            vs != null && ve != null && ve > vs -> ":$vs-$ve"
+            vs != null -> ":$vs"
+            else -> ""
+        }
+        return "$bookName $chapter$versePart"
     }
 
     fun dispose() {

@@ -1647,4 +1647,21 @@
     <string name="companion_atem_not_configured">Configure ATEM host in Settings › ATEM to enable upload triggers.</string>
     <string name="companion_lt_copy_hide">Hide Lower Third</string>
     <string name="companion_lt_takedown_desc">Hide Lower Third removes only a lower third. Clear Display clears any output (Bible, song, lower third…).</string>
+    <string name="bible_stt_heard">Heard</string>
+    <string name="bible_stt_listening">Listening…</string>
+    <string name="bible_stt_auto_follow">Auto-follow</string>
+    <string name="bible_stt_auto_follow_hint">Automatically open the latest spoken reference</string>
+    <string name="bible_stt_clear">Clear detected references</string>
+    <string name="bible_stt_src_explicit">Spoken reference</string>
+    <string name="bible_stt_src_reverse">Matched by text</string>
+    <string name="bible_stt_src_continuation">Following along</string>
+    <string name="bible_stt_match_label">Text match</string>
+    <string name="bible_stt_level_off">Off</string>
+    <string name="bible_stt_level_conservative">Conservative</string>
+    <string name="bible_stt_level_balanced">Balanced</string>
+    <string name="bible_stt_level_aggressive">Aggressive</string>
+    <string name="bible_engine_detect">Detect scripture</string>
+    <string name="bible_engine_run_local">Run engine locally</string>
+    <string name="bible_engine_host">Engine host</string>
+    <string name="bible_engine_port">Port</string>
 </resources>
