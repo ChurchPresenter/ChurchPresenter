@@ -1056,6 +1056,7 @@
     <string name="image_files_filter">Image Files (*.jpg, *.jpeg, *.png, *.gif, *.bmp)</string>
     <string name="video_files_filter">Video Files (*.mp4, *.mov, *.avi, *.mkv, *.webm)</string>
     <string name="swap_bibles">Swap</string>
+    <string name="swap_bibles_hint">Swap primary and secondary Bibles</string>
     <string name="multi_verse">Multi-verse</string>
     <string name="new_song">New Song</string>
     <string name="back_to_live">Back to Live</string>

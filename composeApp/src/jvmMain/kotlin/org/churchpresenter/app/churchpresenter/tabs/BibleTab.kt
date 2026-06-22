@@ -156,6 +156,7 @@ import churchpresenter.composeapp.generated.resources.bible_search_mode_text
 import churchpresenter.composeapp.generated.resources.bible_search_mode_tooltip
 import churchpresenter.composeapp.generated.resources.hold_live
 import churchpresenter.composeapp.generated.resources.swap_bibles
+import churchpresenter.composeapp.generated.resources.swap_bibles_hint
 import churchpresenter.composeapp.generated.resources.verse
 import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
 import org.churchpresenter.app.churchpresenter.composables.initialPassClickable
@@ -1046,6 +1047,12 @@ fun BibleTab(
                                     tonalElevation = 4.dp
                                 ) {
                                     Column(modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) {
+                                        Text(
+                                            text = stringResource(Res.string.swap_bibles_hint),
+                                            color = MaterialTheme.colorScheme.inverseOnSurface,
+                                            style = MaterialTheme.typography.bodySmall,
+                                            fontWeight = FontWeight.Bold
+                                        )
                                         Text(
                                             text = "${stringResource(Res.string.primary_bible)} ${appSettings.bibleSettings.primaryBible.substringBeforeLast('.').ifEmpty { "-" }}",
                                             color = MaterialTheme.colorScheme.inverseOnSurface,
