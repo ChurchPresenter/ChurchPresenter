@@ -4,6 +4,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import engine.EngineHandle
 import engine.EngineServer
+import engine.engine.DetectionLogger
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.plugins.websocket.DefaultClientWebSocketSession
@@ -19,6 +20,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import java.io.File
 import org.json.JSONObject
 
 /**
@@ -61,6 +63,8 @@ class BibleEngineClient(
         wsJob = scope.launch {
             if (runLocal) {
                 engineHandle = runCatching { EngineServer.start(sttUrl, bibleRoot, port, bibleFiles) }.getOrNull()
+                val logDir = File(System.getProperty("user.home"), ".churchpresenter/bible-stt-logs").also { it.mkdirs() }
+                DetectionLogger.path = File(logDir, "detection-log.jsonl").absolutePath
             }
             connectLoop(host, port)
         }

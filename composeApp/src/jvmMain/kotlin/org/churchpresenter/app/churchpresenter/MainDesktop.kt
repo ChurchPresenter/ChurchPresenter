@@ -118,6 +118,7 @@ import org.churchpresenter.app.churchpresenter.tabs.Tabs
 import org.churchpresenter.app.churchpresenter.tabs.getStringName
 import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
 import org.churchpresenter.app.churchpresenter.utils.Constants
+import org.churchpresenter.app.churchpresenter.utils.TrainingDataLogger
 import org.churchpresenter.app.churchpresenter.viewmodel.LocalMediaViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.BibleViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.BibleEngineClient
@@ -477,6 +478,15 @@ fun MainDesktop(
             presenterManager.setSelectedVerses(verses)
             presenterManager.setPresentingMode(Presenting.BIBLE)
             presenterManager.setShowPresenterWindow(true)
+            if (bookIndex >= 0) {
+                TrainingDataLogger.logLiveReference(
+                    book       = bookIndex + 1,
+                    chapter    = req.chapter,
+                    verseStart = req.verseNumber,
+                    verseEnd   = null,
+                    source     = "remote"
+                )
+            }
         }
     }
 

@@ -155,6 +155,8 @@ import churchpresenter.composeapp.generated.resources.bible_search_mode_referenc
 import churchpresenter.composeapp.generated.resources.bible_search_mode_text
 import churchpresenter.composeapp.generated.resources.bible_search_mode_tooltip
 import churchpresenter.composeapp.generated.resources.hold_live
+import churchpresenter.composeapp.generated.resources.stt_connect
+import churchpresenter.composeapp.generated.resources.stt_disconnect
 import churchpresenter.composeapp.generated.resources.swap_bibles
 import churchpresenter.composeapp.generated.resources.swap_bibles_hint
 import churchpresenter.composeapp.generated.resources.verse
@@ -166,6 +168,7 @@ import org.churchpresenter.app.churchpresenter.models.ScheduleItem
 import org.churchpresenter.app.churchpresenter.models.SelectedVerse
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.viewmodel.BibleSearchMode
+import org.churchpresenter.app.churchpresenter.utils.TrainingDataLogger
 import org.churchpresenter.app.churchpresenter.viewmodel.BibleViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.jetbrains.compose.resources.painterResource
@@ -348,6 +351,18 @@ fun BibleTab(
         // Always push verse content so the output updates immediately
         if (selectedVerses.isNotEmpty()) {
             onVerseSelected(selectedVerses)
+        }
+        if (primaryVerse != null) {
+            val bookNum = viewModel.selectedBookIndex.value + 1
+            val verseNums = if (viewModel.multiVerseEnabled.value) viewModel.getSelectedVerseNumbers()
+                            else listOf(primaryVerse.verseNumber)
+            TrainingDataLogger.logLiveReference(
+                book       = bookNum,
+                chapter    = primaryVerse.chapter,
+                verseStart = verseNums.firstOrNull(),
+                verseEnd   = verseNums.lastOrNull().takeIf { verseNums.size > 1 },
+                source     = "manual"
+            )
         }
         if (viewModel.multiVerseEnabled.value) {
             viewModel.clearMultiVerseSelection()
@@ -1037,6 +1052,33 @@ fun BibleTab(
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.padding(end = 8.dp)
                             )
+                        }
+                        // STT connect/disconnect — hidden when STT is not configured
+                        if (sttManager != null) {
+                            val sttButtonStr = if (sttConnected) stringResource(Res.string.stt_disconnect)
+                                               else stringResource(Res.string.stt_connect)
+                            TooltipArea(
+                                tooltip = {
+                                    Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
+                                        Text(sttButtonStr, color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
+                                    }
+                                },
+                                tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
+                            ) {
+                                IconButton(
+                                    onClick = {
+                                        if (sttConnected) sttManager.disconnect()
+                                        else sttManager.connect(appSettings.sttSettings.serverUrl)
+                                        focusRequester.requestFocus()
+                                    },
+                                    colors = IconButtonDefaults.iconButtonColors(
+                                        containerColor = if (sttConnected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
+                                        contentColor = if (sttConnected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                ) {
+                                    Icon(Icons.Filled.Mic, contentDescription = sttButtonStr, modifier = Modifier.size(20.dp))
+                                }
+                            }
                         }
                         // Swap Bibles — always wrapped in tooltip showing bible names
                         TooltipArea(

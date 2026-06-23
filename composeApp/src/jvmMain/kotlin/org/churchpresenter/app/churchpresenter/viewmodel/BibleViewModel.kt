@@ -19,6 +19,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.data.Bible
+import org.churchpresenter.app.churchpresenter.utils.TrainingDataLogger
 import org.churchpresenter.app.churchpresenter.data.BibleBookNames
 import org.churchpresenter.app.churchpresenter.data.BibleSearch
 import org.churchpresenter.app.churchpresenter.models.SelectedVerse
@@ -1292,11 +1293,25 @@ class BibleViewModel(
 
     /** Navigates the Bible tab to a row the operator tapped. */
     fun applyDetectedReference(ref: DetectedReference) {
+        TrainingDataLogger.logSuggestionOutcome(
+            suggestedBook    = ref.bookIndex + 1,
+            suggestedChapter = ref.chapter,
+            suggestedVerse   = ref.verseStart,
+            action           = "accepted"
+        )
         navigateToReference(SmartReference(ref.bookIndex, ref.chapter, ref.verseStart, ref.verseEnd))
     }
 
     /** Clears the detected rows (e.g. when STT / the engine disconnects). */
     fun clearDetectedReferences() {
+        _detectedReferences.value.forEach { ref ->
+            TrainingDataLogger.logSuggestionOutcome(
+                suggestedBook    = ref.bookIndex + 1,
+                suggestedChapter = ref.chapter,
+                suggestedVerse   = ref.verseStart,
+                action           = "dismissed"
+            )
+        }
         if (_detectedReferences.value.isNotEmpty()) _detectedReferences.value = emptyList()
         recentDetectionKeys.clear()
     }
