@@ -28,7 +28,13 @@ class DictionaryViewModel {
         private set
     var searchQuery by mutableStateOf("")
     var filterLanguage by mutableStateOf(DictionaryLanguageFilter.ALL)
+        private set
     var selectedEntry by mutableStateOf<StrongsEntry?>(null)
+        private set
+    var entryBookFilter by mutableStateOf<Int?>(null)
+    var entryChapterFilter by mutableStateOf<Int?>(null)
+    var entryVerseFilter by mutableStateOf<Int?>(null)
+    var isInterlinearDataLoaded by mutableStateOf(false)
         private set
     private var pendingSelectionNumber: String? = null
 
@@ -42,28 +48,44 @@ class DictionaryViewModel {
         private set
     var interlinearDisplayLimit by mutableStateOf(INTERLINEAR_PAGE_SIZE)
         private set
-    var interlinearBookFilter by mutableStateOf<Int?>(null)
-        private set
-    var interlinearChapterFilter by mutableStateOf<Int?>(null)
-        private set
 
-    val filteredInterlinearVerses: List<InterlinearVerse>
+    // Verses sorted so entries matching the current left-pane filter appear first
+    val sortedInterlinearVerses: List<InterlinearVerse>
         get() {
-            val bookId = interlinearBookFilter ?: return interlinearVerses
-            val chapter = interlinearChapterFilter
-            return interlinearVerses.filter { verse ->
-                verse.bookId == bookId && (chapter == null || verse.chapter == chapter)
+            val bookId = entryBookFilter ?: return interlinearVerses
+            val chapter = entryChapterFilter
+            val verse = entryVerseFilter
+            val (matching, rest) = interlinearVerses.partition { v ->
+                v.bookId == bookId &&
+                (chapter == null || v.chapter == chapter) &&
+                (verse == null || v.verseNumber == verse)
+            }
+            return matching + rest
+        }
+
+    // Entry-list passage filter (filters the left-pane list)
+    val entryAvailableBooks: List<Int>
+        get() {
+            if (!isInterlinearDataLoaded) return emptyList()
+            return when (filterLanguage) {
+                DictionaryLanguageFilter.HEBREW -> interlinearRepository.getBooksWithHebrewData()
+                DictionaryLanguageFilter.GREEK  -> interlinearRepository.getBooksWithGreekData()
+                DictionaryLanguageFilter.ALL    ->
+                    (interlinearRepository.getBooksWithHebrewData() + interlinearRepository.getBooksWithGreekData()).sorted()
             }
         }
 
-    val interlinearAvailableBooks: List<Int>
-        get() = interlinearVerses.map { it.bookId }.distinct().sorted()
-
-    val interlinearAvailableChapters: List<Int>
+    val entryAvailableChapters: List<Int>
         get() {
-            val bookId = interlinearBookFilter ?: return emptyList()
-            return interlinearVerses.filter { it.bookId == bookId }
-                .map { it.chapter }.distinct().sorted()
+            val bookId = entryBookFilter ?: return emptyList()
+            return interlinearRepository.getChaptersForBook(bookId)
+        }
+
+    val entryAvailableVerses: List<Int>
+        get() {
+            val bookId = entryBookFilter ?: return emptyList()
+            val chapter = entryChapterFilter ?: return emptyList()
+            return interlinearRepository.getVersesInChapter(bookId, chapter)
         }
 
     companion object {
@@ -74,13 +96,19 @@ class DictionaryViewModel {
         get() {
             val pool = when (filterLanguage) {
                 DictionaryLanguageFilter.HEBREW -> entries.filter { it.isHebrew }
-                DictionaryLanguageFilter.GREEK -> entries.filter { it.isGreek }
-                DictionaryLanguageFilter.ALL -> entries
+                DictionaryLanguageFilter.GREEK  -> entries.filter { it.isGreek }
+                DictionaryLanguageFilter.ALL    -> entries
             }
+            val passageFiltered = if (entryBookFilter != null) {
+                val validNumbers = interlinearRepository.getStrongsForBookChapter(
+                    entryBookFilter!!, entryChapterFilter, entryVerseFilter
+                )
+                pool.filter { it.number in validNumbers }
+            } else pool
             val q = searchQuery.trim()
-            if (q.isEmpty()) return pool
+            if (q.isEmpty()) return passageFiltered
             val lower = q.lowercase()
-            return pool.filter { entry ->
+            return passageFiltered.filter { entry ->
                 entry.number.lowercase().contains(lower) ||
                 entry.word.contains(q) ||
                 entry.transliteration.lowercase().contains(lower) ||
@@ -114,25 +142,59 @@ class DictionaryViewModel {
                 isLoading = false
             }
         }
+        // Pre-load interlinear data in background so passage filtering is available
+        viewModelScope.launch {
+            try {
+                interlinearRepository.ensureGreekLoaded()
+                interlinearRepository.ensureHebrewLoaded()
+                isInterlinearDataLoaded = true
+            } catch (_: Exception) { }
+        }
     }
 
-    fun setBookFilter(bookId: Int?) {
-        interlinearBookFilter = bookId
-        interlinearChapterFilter = null
-        interlinearDisplayLimit = INTERLINEAR_PAGE_SIZE
+    fun setLanguageFilter(filter: DictionaryLanguageFilter) {
+        filterLanguage = filter
+        clearPassageFilter()
+        onEntrySelected(null)
     }
 
-    fun setChapterFilter(chapter: Int?) {
-        interlinearChapterFilter = chapter
-        interlinearDisplayLimit = INTERLINEAR_PAGE_SIZE
+    fun filterEntryListByBook(bookId: Int?) {
+        entryBookFilter = bookId
+        entryChapterFilter = null
+        entryVerseFilter = null
+        if (bookId != null) reselectIfNeeded()
+    }
+
+    fun filterEntryListByChapter(chapter: Int?) {
+        entryChapterFilter = chapter
+        entryVerseFilter = null
+        if (chapter != null) reselectIfNeeded()
+    }
+
+    fun filterEntryListByVerse(verse: Int?) {
+        entryVerseFilter = verse
+        if (verse != null) reselectIfNeeded()
+    }
+
+    // If the current selection is no longer in the filtered list, pick the first visible entry.
+    private fun reselectIfNeeded() {
+        val results = searchResults
+        val current = selectedEntry
+        if (current != null && results.any { it.number == current.number }) return
+        val first = results.firstOrNull()
+        if (first != null) onEntrySelected(first)
+    }
+
+    private fun clearPassageFilter() {
+        entryBookFilter = null
+        entryChapterFilter = null
+        entryVerseFilter = null
     }
 
     fun onEntrySelected(entry: StrongsEntry?) {
         selectedEntry = entry
         interlinearJob?.cancel()
         interlinearVerses = emptyList()
-        interlinearBookFilter = null
-        interlinearChapterFilter = null
         interlinearDisplayLimit = INTERLINEAR_PAGE_SIZE
         if (entry == null) return
         interlinearJob = viewModelScope.launch {
@@ -154,6 +216,13 @@ class DictionaryViewModel {
     fun selectByNumber(number: String) {
         val found = entries.find { it.number == number }
         if (found != null) {
+            // If navigating to an entry not visible under the current passage filter, clear it
+            if (entryBookFilter != null) {
+                val visible = interlinearRepository.getStrongsForBookChapter(
+                    entryBookFilter!!, entryChapterFilter, entryVerseFilter
+                )
+                if (found.number !in visible) clearPassageFilter()
+            }
             onEntrySelected(found)
         } else if (number.isNotEmpty()) {
             pendingSelectionNumber = number

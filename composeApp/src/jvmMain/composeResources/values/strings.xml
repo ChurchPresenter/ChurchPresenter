@@ -1510,6 +1510,7 @@
     <string name="dictionary_in_scripture_show_more">Show %1$d more</string>
     <string name="dictionary_in_scripture_all_books">All books</string>
     <string name="dictionary_in_scripture_all_chapters">All chapters</string>
+    <string name="dictionary_in_scripture_all_verses">All verses</string>
     <string name="dictionary_in_scripture_count_filtered">Showing %1$d of %2$d verses</string>
 
     <!-- Setup Wizard -->
