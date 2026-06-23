@@ -42,6 +42,29 @@ class DictionaryViewModel {
         private set
     var interlinearDisplayLimit by mutableStateOf(INTERLINEAR_PAGE_SIZE)
         private set
+    var interlinearBookFilter by mutableStateOf<Int?>(null)
+        private set
+    var interlinearChapterFilter by mutableStateOf<Int?>(null)
+        private set
+
+    val filteredInterlinearVerses: List<InterlinearVerse>
+        get() {
+            val bookId = interlinearBookFilter ?: return interlinearVerses
+            val chapter = interlinearChapterFilter
+            return interlinearVerses.filter { verse ->
+                verse.bookId == bookId && (chapter == null || verse.chapter == chapter)
+            }
+        }
+
+    val interlinearAvailableBooks: List<Int>
+        get() = interlinearVerses.map { it.bookId }.distinct().sorted()
+
+    val interlinearAvailableChapters: List<Int>
+        get() {
+            val bookId = interlinearBookFilter ?: return emptyList()
+            return interlinearVerses.filter { it.bookId == bookId }
+                .map { it.chapter }.distinct().sorted()
+        }
 
     companion object {
         const val INTERLINEAR_PAGE_SIZE = 50
@@ -93,10 +116,23 @@ class DictionaryViewModel {
         }
     }
 
+    fun setBookFilter(bookId: Int?) {
+        interlinearBookFilter = bookId
+        interlinearChapterFilter = null
+        interlinearDisplayLimit = INTERLINEAR_PAGE_SIZE
+    }
+
+    fun setChapterFilter(chapter: Int?) {
+        interlinearChapterFilter = chapter
+        interlinearDisplayLimit = INTERLINEAR_PAGE_SIZE
+    }
+
     fun onEntrySelected(entry: StrongsEntry?) {
         selectedEntry = entry
         interlinearJob?.cancel()
         interlinearVerses = emptyList()
+        interlinearBookFilter = null
+        interlinearChapterFilter = null
         interlinearDisplayLimit = INTERLINEAR_PAGE_SIZE
         if (entry == null) return
         interlinearJob = viewModelScope.launch {

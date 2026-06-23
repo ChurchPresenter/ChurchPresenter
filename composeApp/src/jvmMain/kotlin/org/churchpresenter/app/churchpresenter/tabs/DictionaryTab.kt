@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -29,6 +31,8 @@ import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -36,6 +40,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.SuggestionChipDefaults
@@ -44,7 +49,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -62,7 +70,10 @@ import churchpresenter.composeapp.generated.resources.dictionary_entry_count
 import churchpresenter.composeapp.generated.resources.dictionary_filter_all
 import churchpresenter.composeapp.generated.resources.dictionary_filter_greek
 import churchpresenter.composeapp.generated.resources.dictionary_filter_hebrew
+import churchpresenter.composeapp.generated.resources.dictionary_in_scripture_all_books
+import churchpresenter.composeapp.generated.resources.dictionary_in_scripture_all_chapters
 import churchpresenter.composeapp.generated.resources.dictionary_in_scripture_count
+import churchpresenter.composeapp.generated.resources.dictionary_in_scripture_count_filtered
 import churchpresenter.composeapp.generated.resources.dictionary_in_scripture_header
 import churchpresenter.composeapp.generated.resources.dictionary_in_scripture_loading
 import churchpresenter.composeapp.generated.resources.dictionary_in_scripture_none
@@ -76,6 +87,7 @@ import churchpresenter.composeapp.generated.resources.dictionary_select_entry
 import churchpresenter.composeapp.generated.resources.dictionary_transliteration
 import churchpresenter.composeapp.generated.resources.go_live
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Tv
 import churchpresenter.composeapp.generated.resources.ic_playlist_add
 import org.churchpresenter.app.churchpresenter.data.InterlinearVerse
@@ -114,6 +126,13 @@ fun DictionaryTab(
             modifier = Modifier.weight(1f).fillMaxHeight(),
             entry = viewModel.selectedEntry,
             interlinearVerses = viewModel.interlinearVerses,
+            filteredInterlinearVerses = viewModel.filteredInterlinearVerses,
+            availableBooks = viewModel.interlinearAvailableBooks,
+            availableChapters = viewModel.interlinearAvailableChapters,
+            bookFilter = viewModel.interlinearBookFilter,
+            chapterFilter = viewModel.interlinearChapterFilter,
+            onBookFilterChange = viewModel::setBookFilter,
+            onChapterFilterChange = viewModel::setChapterFilter,
             isInterlinearLoading = viewModel.isInterlinearLoading,
             interlinearDisplayLimit = viewModel.interlinearDisplayLimit,
             onShowMore = viewModel::showMoreInterlinear,
@@ -311,6 +330,13 @@ private fun DictionaryDetailPane(
     modifier: Modifier = Modifier,
     entry: StrongsEntry?,
     interlinearVerses: List<InterlinearVerse>,
+    filteredInterlinearVerses: List<InterlinearVerse>,
+    availableBooks: List<Int>,
+    availableChapters: List<Int>,
+    bookFilter: Int?,
+    chapterFilter: Int?,
+    onBookFilterChange: (Int?) -> Unit,
+    onChapterFilterChange: (Int?) -> Unit,
     isInterlinearLoading: Boolean,
     interlinearDisplayLimit: Int,
     onShowMore: () -> Unit,
@@ -500,13 +526,42 @@ private fun DictionaryDetailPane(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 } else {
+                    // Book / chapter filter row
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        InScriptureBookDropdown(
+                            allBooksLabel = stringResource(Res.string.dictionary_in_scripture_all_books),
+                            selectedBookId = bookFilter,
+                            availableBooks = availableBooks,
+                            getBookName = getBookName,
+                            onSelect = onBookFilterChange,
+                        )
+                        if (bookFilter != null && availableChapters.size > 1) {
+                            InScriptureChapterDropdown(
+                                allChaptersLabel = stringResource(Res.string.dictionary_in_scripture_all_chapters),
+                                selectedChapter = chapterFilter,
+                                availableChapters = availableChapters,
+                                onSelect = onChapterFilterChange,
+                            )
+                        }
+                    }
+
+                    val displayCount = filteredInterlinearVerses.size
+                    val totalCount = interlinearVerses.size
+                    val countText = if (bookFilter != null || chapterFilter != null)
+                        stringResource(Res.string.dictionary_in_scripture_count_filtered, displayCount, totalCount)
+                    else
+                        stringResource(Res.string.dictionary_in_scripture_count, totalCount)
                     Text(
-                        text = stringResource(Res.string.dictionary_in_scripture_count, interlinearVerses.size),
+                        text = countText,
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
+
                     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        interlinearVerses.take(interlinearDisplayLimit).forEach { verse ->
+                        filteredInterlinearVerses.take(interlinearDisplayLimit).forEach { verse ->
                             InterlinearVerseRow(
                                 interlinearVerse = verse,
                                 highlightedNumber = entry.number,
@@ -516,8 +571,8 @@ private fun DictionaryDetailPane(
                             )
                         }
                     }
-                    if (interlinearVerses.size > interlinearDisplayLimit) {
-                        val remaining = interlinearVerses.size - interlinearDisplayLimit
+                    if (filteredInterlinearVerses.size > interlinearDisplayLimit) {
+                        val remaining = filteredInterlinearVerses.size - interlinearDisplayLimit
                         TextButton(onClick = onShowMore) {
                             Text(
                                 text = stringResource(Res.string.dictionary_in_scripture_show_more, remaining),
@@ -626,6 +681,77 @@ private fun InterlinearWordChip(
         ),
         enabled = isHighlighted || onClick != null,
     )
+}
+
+@Composable
+private fun InScriptureBookDropdown(
+    allBooksLabel: String,
+    selectedBookId: Int?,
+    availableBooks: List<Int>,
+    getBookName: ((bookId: Int) -> String?)?,
+    onSelect: (Int?) -> Unit,
+) {
+    var expanded by remember { mutableStateOf(false) }
+    val label = if (selectedBookId == null) allBooksLabel
+    else getBookName?.invoke(selectedBookId) ?: "Book $selectedBookId"
+
+    Box {
+        OutlinedButton(
+            onClick = { expanded = true },
+            modifier = Modifier.height(32.dp),
+            contentPadding = PaddingValues(horizontal = 10.dp, vertical = 0.dp),
+        ) {
+            Text(text = label, style = MaterialTheme.typography.labelSmall, maxLines = 1)
+            Icon(Icons.Default.ArrowDropDown, contentDescription = null, modifier = Modifier.size(16.dp))
+        }
+        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            DropdownMenuItem(
+                text = { Text(allBooksLabel, style = MaterialTheme.typography.bodySmall) },
+                onClick = { onSelect(null); expanded = false },
+            )
+            availableBooks.forEach { bookId ->
+                val bookName = getBookName?.invoke(bookId) ?: "Book $bookId"
+                DropdownMenuItem(
+                    text = { Text(bookName, style = MaterialTheme.typography.bodySmall) },
+                    onClick = { onSelect(bookId); expanded = false },
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun InScriptureChapterDropdown(
+    allChaptersLabel: String,
+    selectedChapter: Int?,
+    availableChapters: List<Int>,
+    onSelect: (Int?) -> Unit,
+) {
+    var expanded by remember { mutableStateOf(false) }
+    val label = if (selectedChapter == null) allChaptersLabel else selectedChapter.toString()
+
+    Box {
+        OutlinedButton(
+            onClick = { expanded = true },
+            modifier = Modifier.height(32.dp),
+            contentPadding = PaddingValues(horizontal = 10.dp, vertical = 0.dp),
+        ) {
+            Text(text = label, style = MaterialTheme.typography.labelSmall, maxLines = 1)
+            Icon(Icons.Default.ArrowDropDown, contentDescription = null, modifier = Modifier.size(16.dp))
+        }
+        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            DropdownMenuItem(
+                text = { Text(allChaptersLabel, style = MaterialTheme.typography.bodySmall) },
+                onClick = { onSelect(null); expanded = false },
+            )
+            availableChapters.forEach { chapter ->
+                DropdownMenuItem(
+                    text = { Text(chapter.toString(), style = MaterialTheme.typography.bodySmall) },
+                    onClick = { onSelect(chapter); expanded = false },
+                )
+            }
+        }
+    }
 }
 
 @Composable

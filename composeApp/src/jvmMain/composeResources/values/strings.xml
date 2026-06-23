@@ -1508,6 +1508,9 @@
     <string name="dictionary_in_scripture_none">No tagged verses found for this entry</string>
     <string name="dictionary_in_scripture_count">Found in %1$d verses</string>
     <string name="dictionary_in_scripture_show_more">Show %1$d more</string>
+    <string name="dictionary_in_scripture_all_books">All books</string>
+    <string name="dictionary_in_scripture_all_chapters">All chapters</string>
+    <string name="dictionary_in_scripture_count_filtered">Showing %1$d of %2$d verses</string>
 
     <!-- Setup Wizard -->
     <string name="setup_wizard_title">Getting Started</string>
