@@ -1608,4 +1608,23 @@
     <string name="companion_lt_server_off">Inicie o servidor para obter os URLs de acionamento</string>
     <string name="atem_detected_keyers">Detectado: %1$s</string>
     <string name="atem_detected_keyers_unknown">Execute o teste de conexão para detectar o número de M/E e chaves</string>
+    <string name="dictionary_in_scripture_header">Nas Escrituras</string>
+    <string name="dictionary_in_scripture_loading">Carregando versículos…</string>
+    <string name="dictionary_in_scripture_none">Nenhum versículo marcado encontrado para esta entrada</string>
+    <string name="dictionary_in_scripture_count">Encontrado em %1$d versículos</string>
+    <string name="dictionary_in_scripture_show_more">Mostrar mais %1$d</string>
+    <string name="dictionary_in_scripture_all_books">Todos os livros</string>
+    <string name="dictionary_in_scripture_all_chapters">Todos os capítulos</string>
+    <string name="dictionary_in_scripture_all_verses">Todos os versículos</string>
+    <string name="dictionary_in_scripture_count_filtered">Exibindo %1$d de %2$d versículos</string>
+    <string name="dictionary_settings_word_text">Palavra (original)</string>
+    <string name="dictionary_settings_reference_text">Referência e transliteração</string>
+    <string name="dictionary_settings_definition_text">Definição</string>
+    <string name="dictionary_settings_kjv_usage">Uso no KJV</string>
+    <string name="dictionary_settings_card_background">Fundo do cartão</string>
+    <string name="dictionary_settings_opacity">Opacidade</string>
+    <string name="dictionary_settings_transitions">Configurações de transição</string>
+    <string name="dictionary_back">Voltar</string>
+    <string name="dictionary_forward">Avançar</string>
+    <string name="dictionary_go_to_verse">Ir para o versículo na aba Bíblia</string>
 </resources>

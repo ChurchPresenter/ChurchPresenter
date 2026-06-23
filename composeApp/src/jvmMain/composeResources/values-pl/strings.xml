@@ -1586,5 +1586,24 @@
     <string name="companion_lt_server_off">Uruchom serwer, aby uzyskać adresy URL wyzwalaczy</string>
     <string name="atem_detected_keyers">Wykryto: %1$s</string>
     <string name="atem_detected_keyers_unknown">Uruchom test połączenia, aby wykryć liczbę M/E i kluczy</string>
+    <string name="dictionary_in_scripture_header">W Piśmie</string>
+    <string name="dictionary_in_scripture_loading">Ładowanie wersetów…</string>
+    <string name="dictionary_in_scripture_none">Nie znaleziono oznaczonych wersetów dla tego wpisu</string>
+    <string name="dictionary_in_scripture_count">Znaleziono w %1$d wersetach</string>
+    <string name="dictionary_in_scripture_show_more">Pokaż jeszcze %1$d</string>
+    <string name="dictionary_in_scripture_all_books">Wszystkie księgi</string>
+    <string name="dictionary_in_scripture_all_chapters">Wszystkie rozdziały</string>
+    <string name="dictionary_in_scripture_all_verses">Wszystkie wersety</string>
+    <string name="dictionary_in_scripture_count_filtered">Wyświetlanie %1$d z %2$d wersetów</string>
+    <string name="dictionary_settings_word_text">Słowo (oryginał)</string>
+    <string name="dictionary_settings_reference_text">Odniesienie i transliteracja</string>
+    <string name="dictionary_settings_definition_text">Definicja</string>
+    <string name="dictionary_settings_kjv_usage">Użycie KJV</string>
+    <string name="dictionary_settings_card_background">Tło karty</string>
+    <string name="dictionary_settings_opacity">Przezroczystość</string>
+    <string name="dictionary_settings_transitions">Ustawienia przejść</string>
+    <string name="dictionary_back">Wstecz</string>
+    <string name="dictionary_forward">Dalej</string>
+    <string name="dictionary_go_to_verse">Przejdź do wersetu w zakładce Biblia</string>
 </resources>
 

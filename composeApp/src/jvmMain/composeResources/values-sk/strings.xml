@@ -1608,4 +1608,23 @@
     <string name="companion_lt_server_off">Spustite server na získanie spúšťacích URL</string>
     <string name="atem_detected_keyers">Zistené: %1$s</string>
     <string name="atem_detected_keyers_unknown">Spustite test pripojenia na zistenie počtu M/E a kľúčov</string>
+    <string name="dictionary_in_scripture_header">V Písme</string>
+    <string name="dictionary_in_scripture_loading">Načítavanie veršov…</string>
+    <string name="dictionary_in_scripture_none">Pre túto položku neboli nájdené žiadne označené verše</string>
+    <string name="dictionary_in_scripture_count">Nájdené v %1$d veršoch</string>
+    <string name="dictionary_in_scripture_show_more">Zobraziť ďalších %1$d</string>
+    <string name="dictionary_in_scripture_all_books">Všetky knihy</string>
+    <string name="dictionary_in_scripture_all_chapters">Všetky kapitoly</string>
+    <string name="dictionary_in_scripture_all_verses">Všetky verše</string>
+    <string name="dictionary_in_scripture_count_filtered">Zobrazené %1$d z %2$d veršov</string>
+    <string name="dictionary_settings_word_text">Slovo (originál)</string>
+    <string name="dictionary_settings_reference_text">Odkaz a transliterácia</string>
+    <string name="dictionary_settings_definition_text">Definícia</string>
+    <string name="dictionary_settings_kjv_usage">Použitie KJV</string>
+    <string name="dictionary_settings_card_background">Pozadie karty</string>
+    <string name="dictionary_settings_opacity">Nepriehľadnosť</string>
+    <string name="dictionary_settings_transitions">Nastavenia prechodov</string>
+    <string name="dictionary_back">Späť</string>
+    <string name="dictionary_forward">Vpred</string>
+    <string name="dictionary_go_to_verse">Prejsť na verš na záložke Biblia</string>
 </resources>

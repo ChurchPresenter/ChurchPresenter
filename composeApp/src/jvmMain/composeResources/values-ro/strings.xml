@@ -1615,4 +1615,23 @@
     <string name="companion_lt_server_off">Pornește serverul pentru a obține URL-urile de declanșare</string>
     <string name="atem_detected_keyers">Detectat: %1$s</string>
     <string name="atem_detected_keyers_unknown">Rulează testul de conexiune pentru a detecta numărul de M/E și chei</string>
+    <string name="dictionary_in_scripture_header">În Scriptură</string>
+    <string name="dictionary_in_scripture_loading">Se încarcă versete…</string>
+    <string name="dictionary_in_scripture_none">Nu s-au găsit versete etichetate pentru această intrare</string>
+    <string name="dictionary_in_scripture_count">Găsit în %1$d versete</string>
+    <string name="dictionary_in_scripture_show_more">Arată încă %1$d</string>
+    <string name="dictionary_in_scripture_all_books">Toate cărțile</string>
+    <string name="dictionary_in_scripture_all_chapters">Toate capitolele</string>
+    <string name="dictionary_in_scripture_all_verses">Toate versetele</string>
+    <string name="dictionary_in_scripture_count_filtered">Se afișează %1$d din %2$d versete</string>
+    <string name="dictionary_settings_word_text">Cuvânt (original)</string>
+    <string name="dictionary_settings_reference_text">Referință și transliterare</string>
+    <string name="dictionary_settings_definition_text">Definiție</string>
+    <string name="dictionary_settings_kjv_usage">Utilizare KJV</string>
+    <string name="dictionary_settings_card_background">Fundal card</string>
+    <string name="dictionary_settings_opacity">Opacitate</string>
+    <string name="dictionary_settings_transitions">Setări tranziție</string>
+    <string name="dictionary_back">Înapoi</string>
+    <string name="dictionary_forward">Înainte</string>
+    <string name="dictionary_go_to_verse">Mergi la verset în fila Biblie</string>
 </resources>

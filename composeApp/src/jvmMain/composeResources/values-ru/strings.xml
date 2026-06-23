@@ -1606,5 +1606,24 @@
     <string name="bible_engine_run_local">Запускать движок локально</string>
     <string name="bible_engine_host">Адрес движка</string>
     <string name="bible_engine_port">Порт</string>
+    <string name="dictionary_in_scripture_header">В Писании</string>
+    <string name="dictionary_in_scripture_loading">Загрузка стихов…</string>
+    <string name="dictionary_in_scripture_none">Теги для этой записи не найдены</string>
+    <string name="dictionary_in_scripture_count">Встречается в %1$d стихах</string>
+    <string name="dictionary_in_scripture_show_more">Показать ещё %1$d</string>
+    <string name="dictionary_in_scripture_all_books">Все книги</string>
+    <string name="dictionary_in_scripture_all_chapters">Все главы</string>
+    <string name="dictionary_in_scripture_all_verses">Все стихи</string>
+    <string name="dictionary_in_scripture_count_filtered">Показано %1$d из %2$d стихов</string>
+    <string name="dictionary_settings_word_text">Слово (оригинал)</string>
+    <string name="dictionary_settings_reference_text">Ссылка и транслитерация</string>
+    <string name="dictionary_settings_definition_text">Определение</string>
+    <string name="dictionary_settings_kjv_usage">Использование (KJV)</string>
+    <string name="dictionary_settings_card_background">Фон карточки</string>
+    <string name="dictionary_settings_opacity">Прозрачность</string>
+    <string name="dictionary_settings_transitions">Настройки перехода</string>
+    <string name="dictionary_back">Назад</string>
+    <string name="dictionary_forward">Вперёд</string>
+    <string name="dictionary_go_to_verse">Перейти к стиху на вкладке Библия</string>
 </resources>
 

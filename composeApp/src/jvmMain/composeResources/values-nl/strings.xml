@@ -1180,7 +1180,7 @@
     <string name="stage_monitor_clock_24h">24-uursnotatie</string>
     <string name="stage_monitor_notes_from_presentation">Notities worden automatisch getoond vanuit de actieve PowerPoint- of Keynote-dia.</string>
 
-    <!-- Q&A Tab -->
+    <!-- Q&amp;A Tab -->
     <string name="qa_server_not_running">Server niet actief — start de companion server in Instellingen om V&amp;A in te schakelen</string>
     <string name="qa_stop_session">Sessie stoppen</string>
     <string name="qa_new_session">Nieuwe sessie</string>
@@ -1608,4 +1608,23 @@
     <string name="companion_lt_server_off">Start de server om trigger-URL's te krijgen</string>
     <string name="atem_detected_keyers">Gedetecteerd: %1$s</string>
     <string name="atem_detected_keyers_unknown">Voer de verbindingstest uit om het aantal M/E's en keys te bepalen</string>
+    <string name="dictionary_in_scripture_header">In de Schrift</string>
+    <string name="dictionary_in_scripture_loading">Verzen laden…</string>
+    <string name="dictionary_in_scripture_none">Geen getagde verzen gevonden voor dit item</string>
+    <string name="dictionary_in_scripture_count">Gevonden in %1$d verzen</string>
+    <string name="dictionary_in_scripture_show_more">Toon nog %1$d</string>
+    <string name="dictionary_in_scripture_all_books">Alle boeken</string>
+    <string name="dictionary_in_scripture_all_chapters">Alle hoofdstukken</string>
+    <string name="dictionary_in_scripture_all_verses">Alle verzen</string>
+    <string name="dictionary_in_scripture_count_filtered">%1$d van %2$d verzen weergegeven</string>
+    <string name="dictionary_settings_word_text">Woord (origineel)</string>
+    <string name="dictionary_settings_reference_text">Referentie &amp; transliteratie</string>
+    <string name="dictionary_settings_definition_text">Definitie</string>
+    <string name="dictionary_settings_kjv_usage">KJV-gebruik</string>
+    <string name="dictionary_settings_card_background">Kaartachtergrond</string>
+    <string name="dictionary_settings_opacity">Dekking</string>
+    <string name="dictionary_settings_transitions">Overganginstellingen</string>
+    <string name="dictionary_back">Terug</string>
+    <string name="dictionary_forward">Vooruit</string>
+    <string name="dictionary_go_to_verse">Ga naar vers in Bijbel-tabblad</string>
 </resources>

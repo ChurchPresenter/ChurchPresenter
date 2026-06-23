@@ -1670,5 +1670,24 @@
     <string name="companion_lt_server_off">Spusťte server pro získání spouštěcích URL</string>
     <string name="atem_detected_keyers">Zjištěno: %1$s</string>
     <string name="atem_detected_keyers_unknown">Spusťte test připojení ke zjištění počtu M/E a klíčů</string>
+    <string name="dictionary_in_scripture_header">V Písmu</string>
+    <string name="dictionary_in_scripture_loading">Načítání veršů…</string>
+    <string name="dictionary_in_scripture_none">Žádné označené verše pro tuto položku nebyly nalezeny</string>
+    <string name="dictionary_in_scripture_count">Nalezeno v %1$d verších</string>
+    <string name="dictionary_in_scripture_show_more">Zobrazit dalších %1$d</string>
+    <string name="dictionary_in_scripture_all_books">Všechny knihy</string>
+    <string name="dictionary_in_scripture_all_chapters">Všechny kapitoly</string>
+    <string name="dictionary_in_scripture_all_verses">Všechny verše</string>
+    <string name="dictionary_in_scripture_count_filtered">Zobrazeno %1$d z %2$d veršů</string>
+    <string name="dictionary_settings_word_text">Slovo (původní)</string>
+    <string name="dictionary_settings_reference_text">Odkaz a transliterace</string>
+    <string name="dictionary_settings_definition_text">Definice</string>
+    <string name="dictionary_settings_kjv_usage">Použití KJV</string>
+    <string name="dictionary_settings_card_background">Pozadí karty</string>
+    <string name="dictionary_settings_opacity">Průhlednost</string>
+    <string name="dictionary_settings_transitions">Nastavení přechodů</string>
+    <string name="dictionary_back">Zpět</string>
+    <string name="dictionary_forward">Vpřed</string>
+    <string name="dictionary_go_to_verse">Přejít na verš na záložce Bible</string>
 </resources>
 

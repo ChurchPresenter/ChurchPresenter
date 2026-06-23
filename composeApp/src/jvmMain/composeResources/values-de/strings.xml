@@ -1104,7 +1104,7 @@
     <string name="stage_monitor_no_extra_displays">Kein zweiter Bildschirm erkannt. Schließen Sie einen zusätzlichen Monitor an, um den Bühnenmonitor zu verwenden.</string>
     <string name="stage_monitor_notes_from_presentation">Notizen werden automatisch aus der aktiven PowerPoint- oder Keynote-Folie angezeigt.</string>
 
-    <!-- Q&A Tab -->
+    <!-- Q&amp;A Tab -->
     <string name="tab_qa">Fragen &amp; Antworten</string>
     <string name="tab_stt">STT</string>
     <string name="qa_server_not_running">Server nicht aktiv — starten Sie den Companion-Server in den Einstellungen, um Q&amp;A zu aktivieren</string>
@@ -1586,5 +1586,24 @@
     <string name="companion_lt_server_off">Server starten, um Auslöser-URLs zu erhalten</string>
     <string name="atem_detected_keyers">Erkannt: %1$s</string>
     <string name="atem_detected_keyers_unknown">Verbindungstest ausführen, um M/E- und Key-Anzahl zu ermitteln</string>
+    <string name="dictionary_in_scripture_header">In der Schrift</string>
+    <string name="dictionary_in_scripture_loading">Verse werden geladen…</string>
+    <string name="dictionary_in_scripture_none">Keine markierten Verse für diesen Eintrag gefunden</string>
+    <string name="dictionary_in_scripture_count">In %1$d Versen gefunden</string>
+    <string name="dictionary_in_scripture_show_more">Weitere %1$d anzeigen</string>
+    <string name="dictionary_in_scripture_all_books">Alle Bücher</string>
+    <string name="dictionary_in_scripture_all_chapters">Alle Kapitel</string>
+    <string name="dictionary_in_scripture_all_verses">Alle Verse</string>
+    <string name="dictionary_in_scripture_count_filtered">%1$d von %2$d Versen werden angezeigt</string>
+    <string name="dictionary_settings_word_text">Wort (Original)</string>
+    <string name="dictionary_settings_reference_text">Referenz &amp; Transliteration</string>
+    <string name="dictionary_settings_definition_text">Definition</string>
+    <string name="dictionary_settings_kjv_usage">KJV-Verwendung</string>
+    <string name="dictionary_settings_card_background">Kartenhintergrund</string>
+    <string name="dictionary_settings_opacity">Deckkraft</string>
+    <string name="dictionary_settings_transitions">Übergangseinstellungen</string>
+    <string name="dictionary_back">Zurück</string>
+    <string name="dictionary_forward">Vorwärts</string>
+    <string name="dictionary_go_to_verse">Zum Vers in der Bibel-Registerkarte</string>
 </resources>
 

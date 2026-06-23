@@ -1586,5 +1586,24 @@
     <string name="companion_lt_server_off">Триггер URL мекенжайларын алу үшін серверді іске қосыңыз</string>
     <string name="atem_detected_keyers">Анықталды: %1$s</string>
     <string name="atem_detected_keyers_unknown">M/E және кілт санын анықтау үшін қосылым сынағын іске қосыңыз</string>
+    <string name="dictionary_in_scripture_header">Жазбада</string>
+    <string name="dictionary_in_scripture_loading">Аяттар жүктелуде…</string>
+    <string name="dictionary_in_scripture_none">Бұл жазба үшін белгіленген аяттар табылмады</string>
+    <string name="dictionary_in_scripture_count">%1$d аятта кездесті</string>
+    <string name="dictionary_in_scripture_show_more">Тағы %1$d көрсету</string>
+    <string name="dictionary_in_scripture_all_books">Барлық кітаптар</string>
+    <string name="dictionary_in_scripture_all_chapters">Барлық тараулар</string>
+    <string name="dictionary_in_scripture_all_verses">Барлық аяттар</string>
+    <string name="dictionary_in_scripture_count_filtered">%2$d аяттың %1$d-і көрсетілуде</string>
+    <string name="dictionary_settings_word_text">Сөз (түпнұсқа)</string>
+    <string name="dictionary_settings_reference_text">Сілтеме және транслитерация</string>
+    <string name="dictionary_settings_definition_text">Анықтама</string>
+    <string name="dictionary_settings_kjv_usage">KJV қолданысы</string>
+    <string name="dictionary_settings_card_background">Карта фоны</string>
+    <string name="dictionary_settings_opacity">Мөлдірлік</string>
+    <string name="dictionary_settings_transitions">Өту параметрлері</string>
+    <string name="dictionary_back">Артқа</string>
+    <string name="dictionary_forward">Алға</string>
+    <string name="dictionary_go_to_verse">Библия қойындысындағы аятқа өту</string>
 </resources>
 

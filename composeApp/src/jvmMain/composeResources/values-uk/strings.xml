@@ -1591,5 +1591,24 @@
     <string name="companion_lt_server_off">Запустіть сервер, щоб отримати URL тригерів</string>
     <string name="atem_detected_keyers">Виявлено: %1$s</string>
     <string name="atem_detected_keyers_unknown">Запустіть перевірку з'єднання, щоб визначити кількість M/E і ключів</string>
+    <string name="dictionary_in_scripture_header">У Писанні</string>
+    <string name="dictionary_in_scripture_loading">Завантаження віршів…</string>
+    <string name="dictionary_in_scripture_none">Теги для цього запису не знайдено</string>
+    <string name="dictionary_in_scripture_count">Зустрічається в %1$d віршах</string>
+    <string name="dictionary_in_scripture_show_more">Показати ще %1$d</string>
+    <string name="dictionary_in_scripture_all_books">Усі книги</string>
+    <string name="dictionary_in_scripture_all_chapters">Усі розділи</string>
+    <string name="dictionary_in_scripture_all_verses">Усі вірші</string>
+    <string name="dictionary_in_scripture_count_filtered">Показано %1$d з %2$d віршів</string>
+    <string name="dictionary_settings_word_text">Слово (оригінал)</string>
+    <string name="dictionary_settings_reference_text">Посилання та транслітерація</string>
+    <string name="dictionary_settings_definition_text">Визначення</string>
+    <string name="dictionary_settings_kjv_usage">Використання (KJV)</string>
+    <string name="dictionary_settings_card_background">Фон картки</string>
+    <string name="dictionary_settings_opacity">Прозорість</string>
+    <string name="dictionary_settings_transitions">Налаштування переходу</string>
+    <string name="dictionary_back">Назад</string>
+    <string name="dictionary_forward">Вперед</string>
+    <string name="dictionary_go_to_verse">Перейти до вірша на вкладці Біблія</string>
 </resources>
 
