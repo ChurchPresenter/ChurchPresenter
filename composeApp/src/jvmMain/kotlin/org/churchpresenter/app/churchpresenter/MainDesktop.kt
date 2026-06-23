@@ -228,7 +228,7 @@ fun MainDesktop(
     var selectedTabIndex by rememberSaveable { mutableStateOf(0) }
     val visibleTabs = remember(appSettings.hiddenTabs, showCrosswordTab) {
         (Tabs.entries.filter { tab ->
-            tab != Tabs.CROSSWORD && tab != Tabs.DICTIONARY && tab.name !in appSettings.hiddenTabs
+            tab != Tabs.CROSSWORD && tab.name !in appSettings.hiddenTabs
         } + if (showCrosswordTab) listOf(Tabs.CROSSWORD) else emptyList())
             .ifEmpty { listOf(Tabs.BIBLE) }
     }
@@ -948,8 +948,8 @@ fun MainDesktop(
                                 expanded = showTabVisibilityMenu,
                                 onDismissRequest = { showTabVisibilityMenu = false }
                             ) {
-                                val visibleCount = Tabs.entries.count { it != Tabs.CROSSWORD && it != Tabs.DICTIONARY && it.name !in appSettings.hiddenTabs }
-                                Tabs.entries.filter { it != Tabs.CROSSWORD && it != Tabs.DICTIONARY }.forEach { tab ->
+                                val visibleCount = Tabs.entries.count { it != Tabs.CROSSWORD && it.name !in appSettings.hiddenTabs }
+                                Tabs.entries.filter { it != Tabs.CROSSWORD }.forEach { tab ->
                                     val isVisible = tab.name !in appSettings.hiddenTabs
                                     val isOnlyVisible = isVisible && visibleCount == 1
                                     DropdownMenuItem(
