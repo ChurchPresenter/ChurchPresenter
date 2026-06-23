@@ -6,11 +6,14 @@ import androidx.compose.runtime.setValue
 import churchpresenter.composeapp.generated.resources.Res
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
+import org.churchpresenter.app.churchpresenter.data.InterlinearRepository
+import org.churchpresenter.app.churchpresenter.data.InterlinearVerse
 import org.churchpresenter.app.churchpresenter.data.StrongsEntry
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 
@@ -26,7 +29,23 @@ class DictionaryViewModel {
     var searchQuery by mutableStateOf("")
     var filterLanguage by mutableStateOf(DictionaryLanguageFilter.ALL)
     var selectedEntry by mutableStateOf<StrongsEntry?>(null)
+        private set
     private var pendingSelectionNumber: String? = null
+
+    // Interlinear state
+    private val interlinearRepository = InterlinearRepository()
+    private var interlinearJob: Job? = null
+
+    var interlinearVerses by mutableStateOf<List<InterlinearVerse>>(emptyList())
+        private set
+    var isInterlinearLoading by mutableStateOf(false)
+        private set
+    var interlinearDisplayLimit by mutableStateOf(INTERLINEAR_PAGE_SIZE)
+        private set
+
+    companion object {
+        const val INTERLINEAR_PAGE_SIZE = 50
+    }
 
     val searchResults: List<StrongsEntry>
         get() {
@@ -64,7 +83,7 @@ class DictionaryViewModel {
                 val gEntries = json.decodeFromString<List<StrongsEntry>>(gBytes.decodeToString())
                 entries = hEntries.sortedBy { it.numericValue } + gEntries.sortedBy { it.numericValue }
                 pendingSelectionNumber?.let { num ->
-                    selectedEntry = entries.find { it.number == num }
+                    onEntrySelected(entries.find { it.number == num })
                     pendingSelectionNumber = null
                 }
             } catch (_: Exception) {
@@ -74,10 +93,32 @@ class DictionaryViewModel {
         }
     }
 
+    fun onEntrySelected(entry: StrongsEntry?) {
+        selectedEntry = entry
+        interlinearJob?.cancel()
+        interlinearVerses = emptyList()
+        interlinearDisplayLimit = INTERLINEAR_PAGE_SIZE
+        if (entry == null) return
+        interlinearJob = viewModelScope.launch {
+            isInterlinearLoading = true
+            try {
+                if (entry.isGreek) interlinearRepository.ensureGreekLoaded()
+                else interlinearRepository.ensureHebrewLoaded()
+                interlinearVerses = interlinearRepository.getVersesForEntry(entry.number)
+            } finally {
+                isInterlinearLoading = false
+            }
+        }
+    }
+
+    fun showMoreInterlinear() {
+        interlinearDisplayLimit += INTERLINEAR_PAGE_SIZE
+    }
+
     fun selectByNumber(number: String) {
         val found = entries.find { it.number == number }
         if (found != null) {
-            selectedEntry = found
+            onEntrySelected(found)
         } else if (number.isNotEmpty()) {
             pendingSelectionNumber = number
         }

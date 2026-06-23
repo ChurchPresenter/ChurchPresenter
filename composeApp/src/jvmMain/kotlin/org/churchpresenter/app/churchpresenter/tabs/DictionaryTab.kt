@@ -9,6 +9,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -35,10 +37,14 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SuggestionChip
+import androidx.compose.material3.SuggestionChipDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -56,6 +62,11 @@ import churchpresenter.composeapp.generated.resources.dictionary_entry_count
 import churchpresenter.composeapp.generated.resources.dictionary_filter_all
 import churchpresenter.composeapp.generated.resources.dictionary_filter_greek
 import churchpresenter.composeapp.generated.resources.dictionary_filter_hebrew
+import churchpresenter.composeapp.generated.resources.dictionary_in_scripture_count
+import churchpresenter.composeapp.generated.resources.dictionary_in_scripture_header
+import churchpresenter.composeapp.generated.resources.dictionary_in_scripture_loading
+import churchpresenter.composeapp.generated.resources.dictionary_in_scripture_none
+import churchpresenter.composeapp.generated.resources.dictionary_in_scripture_show_more
 import churchpresenter.composeapp.generated.resources.dictionary_kjv_usage
 import churchpresenter.composeapp.generated.resources.dictionary_loading
 import churchpresenter.composeapp.generated.resources.dictionary_no_results
@@ -67,6 +78,8 @@ import churchpresenter.composeapp.generated.resources.go_live
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Tv
 import churchpresenter.composeapp.generated.resources.ic_playlist_add
+import org.churchpresenter.app.churchpresenter.data.InterlinearVerse
+import org.churchpresenter.app.churchpresenter.data.InterlinearWord
 import org.churchpresenter.app.churchpresenter.data.StrongsEntry
 import org.churchpresenter.app.churchpresenter.viewmodel.DictionaryLanguageFilter
 import org.churchpresenter.app.churchpresenter.viewmodel.DictionaryViewModel
@@ -82,6 +95,9 @@ fun DictionaryTab(
     viewModel: DictionaryViewModel,
     onAddToSchedule: ((number: String, word: String, transliteration: String, definition: String) -> Unit)? = null,
     onGoLive: ((StrongsEntry) -> Unit)? = null,
+    getVerseText: ((bookId: Int, chapter: Int, verse: Int) -> String?)? = null,
+    getBookName: ((bookId: Int) -> String?)? = null,
+    onWordClick: ((strongsNumber: String) -> Unit)? = null,
 ) {
     LaunchedEffect(Unit) { viewModel.load() }
 
@@ -97,6 +113,13 @@ fun DictionaryTab(
         DictionaryDetailPane(
             modifier = Modifier.weight(1f).fillMaxHeight(),
             entry = viewModel.selectedEntry,
+            interlinearVerses = viewModel.interlinearVerses,
+            isInterlinearLoading = viewModel.isInterlinearLoading,
+            interlinearDisplayLimit = viewModel.interlinearDisplayLimit,
+            onShowMore = viewModel::showMoreInterlinear,
+            getVerseText = getVerseText,
+            getBookName = getBookName,
+            onWordClick = onWordClick,
             onAddToSchedule = onAddToSchedule?.let { cb -> { e -> cb(e.number, e.word, e.transliteration, e.definition) } },
             onGoLive = onGoLive,
         )
@@ -124,7 +147,7 @@ private fun DictionaryListPane(
                     selected = viewModel.filterLanguage == filter,
                     onClick = {
                         viewModel.filterLanguage = filter
-                        viewModel.selectedEntry = null
+                        viewModel.onEntrySelected(null)
                     },
                     label = {
                         Text(
@@ -213,7 +236,7 @@ private fun DictionaryListPane(
                         DictionaryEntryRow(
                             entry = entry,
                             isSelected = viewModel.selectedEntry?.number == entry.number,
-                            onClick = { viewModel.selectedEntry = entry },
+                            onClick = { viewModel.onEntrySelected(entry) },
                         )
                         HorizontalDivider(thickness = 0.5.dp)
                     }
@@ -287,6 +310,13 @@ private fun DictionaryEntryRow(
 private fun DictionaryDetailPane(
     modifier: Modifier = Modifier,
     entry: StrongsEntry?,
+    interlinearVerses: List<InterlinearVerse>,
+    isInterlinearLoading: Boolean,
+    interlinearDisplayLimit: Int,
+    onShowMore: () -> Unit,
+    getVerseText: ((bookId: Int, chapter: Int, verse: Int) -> String?)? = null,
+    getBookName: ((bookId: Int) -> String?)? = null,
+    onWordClick: ((String) -> Unit)? = null,
     onAddToSchedule: ((StrongsEntry) -> Unit)? = null,
     onGoLive: ((StrongsEntry) -> Unit)? = null,
 ) {
@@ -374,79 +404,228 @@ private fun DictionaryDetailPane(
                     .padding(24.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
-            // Header: number + language badge
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                Text(
-                    text = entry.number,
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold,
-                    color = numberColor,
-                )
-                Surface(
-                    shape = RoundedCornerShape(4.dp),
-                    color = numberColor.copy(alpha = 0.12f),
+                // Header: number + language badge
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
                     Text(
-                        text = languageLabel,
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.SemiBold,
+                        text = entry.number,
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold,
                         color = numberColor,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                    )
+                    Surface(
+                        shape = RoundedCornerShape(4.dp),
+                        color = numberColor.copy(alpha = 0.12f),
+                    ) {
+                        Text(
+                            text = languageLabel,
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.SemiBold,
+                            color = numberColor,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                        )
+                    }
+                }
+
+                HorizontalDivider()
+
+                // Original word — large display
+                Text(
+                    text = entry.word,
+                    fontSize = 52.sp,
+                    fontWeight = FontWeight.Light,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    lineHeight = 60.sp,
+                )
+
+                // Transliteration + pronunciation
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    DetailRow(
+                        label = stringResource(Res.string.dictionary_transliteration),
+                        value = entry.transliteration,
+                    )
+                    DetailRow(
+                        label = stringResource(Res.string.dictionary_pronunciation),
+                        value = entry.pronunciation,
                     )
                 }
-            }
 
-            HorizontalDivider()
+                HorizontalDivider()
 
-            // Original word — large display
-            Text(
-                text = entry.word,
-                fontSize = 52.sp,
-                fontWeight = FontWeight.Light,
-                color = MaterialTheme.colorScheme.onSurface,
-                lineHeight = 60.sp,
-            )
-
-            // Transliteration + pronunciation
-            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                DetailRow(
-                    label = stringResource(Res.string.dictionary_transliteration),
-                    value = entry.transliteration,
-                )
-                DetailRow(
-                    label = stringResource(Res.string.dictionary_pronunciation),
-                    value = entry.pronunciation,
-                )
-            }
-
-            HorizontalDivider()
-
-            // Definition
-            DetailSection(
-                label = stringResource(Res.string.dictionary_definition),
-                body = entry.definition,
-            )
-
-            // KJV Usage (only if present)
-            if (entry.kjvUsage.isNotBlank()) {
+                // Definition
                 DetailSection(
-                    label = stringResource(Res.string.dictionary_kjv_usage),
-                    body = entry.kjvUsage,
+                    label = stringResource(Res.string.dictionary_definition),
+                    body = entry.definition,
                 )
+
+                // KJV Usage (only if present)
+                if (entry.kjvUsage.isNotBlank()) {
+                    DetailSection(
+                        label = stringResource(Res.string.dictionary_kjv_usage),
+                        body = entry.kjvUsage,
+                    )
+                }
+
+                // In Scripture section
+                HorizontalDivider()
+
+                Text(
+                    text = stringResource(Res.string.dictionary_in_scripture_header),
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+
+                if (isInterlinearLoading) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(16.dp),
+                            strokeWidth = 2.dp,
+                        )
+                        Text(
+                            text = stringResource(Res.string.dictionary_in_scripture_loading),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                } else if (interlinearVerses.isEmpty()) {
+                    Text(
+                        text = stringResource(Res.string.dictionary_in_scripture_none),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                } else {
+                    Text(
+                        text = stringResource(Res.string.dictionary_in_scripture_count, interlinearVerses.size),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        interlinearVerses.take(interlinearDisplayLimit).forEach { verse ->
+                            InterlinearVerseRow(
+                                interlinearVerse = verse,
+                                highlightedNumber = entry.number,
+                                getVerseText = getVerseText,
+                                getBookName = getBookName,
+                                onWordClick = onWordClick,
+                            )
+                        }
+                    }
+                    if (interlinearVerses.size > interlinearDisplayLimit) {
+                        val remaining = interlinearVerses.size - interlinearDisplayLimit
+                        TextButton(onClick = onShowMore) {
+                            Text(
+                                text = stringResource(Res.string.dictionary_in_scripture_show_more, remaining),
+                                style = MaterialTheme.typography.labelMedium,
+                            )
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            VerticalScrollbar(
+                adapter = rememberScrollbarAdapter(scrollState),
+                modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
+            )
         }
+    }
+}
 
-        VerticalScrollbar(
-            adapter = rememberScrollbarAdapter(scrollState),
-            modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun InterlinearVerseRow(
+    interlinearVerse: InterlinearVerse,
+    highlightedNumber: String,
+    getVerseText: ((bookId: Int, chapter: Int, verse: Int) -> String?)? = null,
+    getBookName: ((bookId: Int) -> String?)? = null,
+    onWordClick: ((String) -> Unit)? = null,
+) {
+    val verseText = remember(interlinearVerse.ref) {
+        getVerseText?.invoke(interlinearVerse.bookId, interlinearVerse.chapter, interlinearVerse.verseNumber)
+    }
+    val bookName = remember(interlinearVerse.bookId) {
+        getBookName?.invoke(interlinearVerse.bookId) ?: "Book ${interlinearVerse.bookId}"
+    }
+    val refLabel = "$bookName ${interlinearVerse.chapter}:${interlinearVerse.verseNumber}"
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(
+                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
+                shape = RoundedCornerShape(8.dp),
+            )
+            .padding(12.dp),
+        verticalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
+        Text(
+            text = refLabel,
+            style = MaterialTheme.typography.labelSmall,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-        } // Box (scrollable content)
-    } // Column (outer)
+        if (verseText != null) {
+            Text(
+                text = verseText,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurface,
+                lineHeight = 18.sp,
+            )
+        }
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            interlinearVerse.words.forEach { word ->
+                InterlinearWordChip(
+                    word = word,
+                    isHighlighted = word.strongsNumber == highlightedNumber,
+                    onClick = if (word.strongsNumber != highlightedNumber && onWordClick != null) {
+                        { onWordClick(word.strongsNumber) }
+                    } else null,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun InterlinearWordChip(
+    word: InterlinearWord,
+    isHighlighted: Boolean,
+    onClick: (() -> Unit)?,
+) {
+    val containerColor = when {
+        isHighlighted -> MaterialTheme.colorScheme.primaryContainer
+        onClick != null -> MaterialTheme.colorScheme.secondaryContainer
+        else -> MaterialTheme.colorScheme.surfaceVariant
+    }
+    val labelColor = when {
+        isHighlighted -> MaterialTheme.colorScheme.onPrimaryContainer
+        onClick != null -> MaterialTheme.colorScheme.onSecondaryContainer
+        else -> MaterialTheme.colorScheme.onSurfaceVariant
+    }
+    SuggestionChip(
+        onClick = onClick ?: {},
+        label = {
+            Text(
+                text = word.text,
+                style = MaterialTheme.typography.labelSmall,
+            )
+        },
+        colors = SuggestionChipDefaults.suggestionChipColors(
+            containerColor = containerColor,
+            labelColor = labelColor,
+        ),
+        enabled = isHighlighted || onClick != null,
+    )
 }
 
 @Composable

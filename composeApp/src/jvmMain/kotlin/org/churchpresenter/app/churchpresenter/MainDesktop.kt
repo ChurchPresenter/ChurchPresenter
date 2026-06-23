@@ -1202,6 +1202,15 @@ fun MainDesktop(
                                     presenterManager.setShowPresenterWindow(true)
                                     presenting(Presenting.ANNOUNCEMENTS)
                                 },
+                                getVerseText = { bookId, chapter, verse ->
+                                    bibleViewModel.primaryBible.value?.getVerseDetails(bookId, chapter, verse)?.second
+                                },
+                                getBookName = { bookId ->
+                                    bibleViewModel.primaryBible.value?.getBookName(bookId)
+                                },
+                                onWordClick = { strongsNumber ->
+                                    dictionaryViewModel.selectByNumber(strongsNumber)
+                                },
                             )
                         }
                     }

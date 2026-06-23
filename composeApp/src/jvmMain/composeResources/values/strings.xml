@@ -1503,6 +1503,11 @@
     <string name="dictionary_select_entry">Select an entry to view details</string>
     <string name="dictionary_loading">Loading dictionary…</string>
     <string name="dictionary_entry_count">%1$d entries</string>
+    <string name="dictionary_in_scripture_header">In Scripture</string>
+    <string name="dictionary_in_scripture_loading">Loading verses…</string>
+    <string name="dictionary_in_scripture_none">No tagged verses found for this entry</string>
+    <string name="dictionary_in_scripture_count">Found in %1$d verses</string>
+    <string name="dictionary_in_scripture_show_more">Show %1$d more</string>
 
     <!-- Setup Wizard -->
     <string name="setup_wizard_title">Getting Started</string>
