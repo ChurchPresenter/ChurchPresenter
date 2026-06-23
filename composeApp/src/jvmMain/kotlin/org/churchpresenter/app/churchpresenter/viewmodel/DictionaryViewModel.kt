@@ -19,7 +19,7 @@ import org.jetbrains.compose.resources.ExperimentalResourceApi
 
 enum class DictionaryLanguageFilter { ALL, HEBREW, GREEK }
 
-class DictionaryViewModel {
+class DictionaryViewModel(private val currentLanguage: () -> String = { "en" }) {
     private val viewModelScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
 
     var isLoading by mutableStateOf(false)
@@ -130,12 +130,13 @@ class DictionaryViewModel {
         viewModelScope.launch {
             try {
                 val json = Json { ignoreUnknownKeys = true }
-                val hBytes = withContext(Dispatchers.IO) {
-                    Res.readBytes("files/dictionary/strongs_h.json")
-                }
-                val gBytes = withContext(Dispatchers.IO) {
-                    Res.readBytes("files/dictionary/strongs_g.json")
-                }
+                val lang = currentLanguage()
+                val hFile = if (lang == "ru") "files/dictionary/strongs_h_ru.json"
+                            else "files/dictionary/strongs_h.json"
+                val gFile = if (lang == "ru") "files/dictionary/strongs_g_ru.json"
+                            else "files/dictionary/strongs_g.json"
+                val hBytes = withContext(Dispatchers.IO) { Res.readBytes(hFile) }
+                val gBytes = withContext(Dispatchers.IO) { Res.readBytes(gFile) }
                 val hEntries = json.decodeFromString<List<StrongsEntry>>(hBytes.decodeToString())
                 val gEntries = json.decodeFromString<List<StrongsEntry>>(gBytes.decodeToString())
                 entries = hEntries.sortedBy { it.numericValue } + gEntries.sortedBy { it.numericValue }
@@ -148,14 +149,22 @@ class DictionaryViewModel {
                 isLoading = false
             }
         }
-        // Pre-load interlinear data in background so passage filtering is available
-        viewModelScope.launch {
-            try {
-                interlinearRepository.ensureGreekLoaded()
-                interlinearRepository.ensureHebrewLoaded()
-                isInterlinearDataLoaded = true
-            } catch (_: Exception) { }
+        // Pre-load interlinear data in background so passage filtering is available (once only)
+        if (!isInterlinearDataLoaded) {
+            viewModelScope.launch {
+                try {
+                    interlinearRepository.ensureGreekLoaded()
+                    interlinearRepository.ensureHebrewLoaded()
+                    isInterlinearDataLoaded = true
+                } catch (_: Exception) { }
+            }
         }
+    }
+
+    fun reload() {
+        entries = emptyList()
+        onEntrySelected(null, addToHistory = false)
+        load()
     }
 
     fun goBack() {
