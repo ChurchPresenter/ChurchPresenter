@@ -31,6 +31,12 @@ class DictionaryViewModel {
         private set
     var selectedEntry by mutableStateOf<StrongsEntry?>(null)
         private set
+
+    // Back/Forward navigation history (stores Strong's numbers)
+    private val history = mutableListOf<String>()
+    private var historyIdx by mutableStateOf(-1)
+    val canGoBack: Boolean get() = historyIdx > 0
+    val canGoForward: Boolean get() = historyIdx < history.lastIndex
     var entryBookFilter by mutableStateOf<Int?>(null)
     var entryChapterFilter by mutableStateOf<Int?>(null)
     var entryVerseFilter by mutableStateOf<Int?>(null)
@@ -152,10 +158,26 @@ class DictionaryViewModel {
         }
     }
 
+    fun goBack() {
+        if (!canGoBack) return
+        historyIdx--
+        val number = history[historyIdx]
+        val entry = entries.find { it.number == number }
+        onEntrySelected(entry, addToHistory = false)
+    }
+
+    fun goForward() {
+        if (!canGoForward) return
+        historyIdx++
+        val number = history[historyIdx]
+        val entry = entries.find { it.number == number }
+        onEntrySelected(entry, addToHistory = false)
+    }
+
     fun setLanguageFilter(filter: DictionaryLanguageFilter) {
         filterLanguage = filter
         clearPassageFilter()
-        onEntrySelected(null)
+        onEntrySelected(null, addToHistory = false)
     }
 
     fun filterEntryListByBook(bookId: Int?) {
@@ -182,7 +204,7 @@ class DictionaryViewModel {
         val current = selectedEntry
         if (current != null && results.any { it.number == current.number }) return
         val first = results.firstOrNull()
-        if (first != null) onEntrySelected(first)
+        if (first != null) onEntrySelected(first, addToHistory = false)
     }
 
     private fun clearPassageFilter() {
@@ -191,12 +213,20 @@ class DictionaryViewModel {
         entryVerseFilter = null
     }
 
-    fun onEntrySelected(entry: StrongsEntry?) {
+    fun onEntrySelected(entry: StrongsEntry?, addToHistory: Boolean = true) {
         selectedEntry = entry
         interlinearJob?.cancel()
         interlinearVerses = emptyList()
         interlinearDisplayLimit = INTERLINEAR_PAGE_SIZE
         if (entry == null) return
+        if (addToHistory) {
+            // Truncate any forward history before pushing the new entry
+            if (historyIdx < history.lastIndex) {
+                history.subList(historyIdx + 1, history.size).clear()
+            }
+            history.add(entry.number)
+            historyIdx = history.lastIndex
+        }
         interlinearJob = viewModelScope.launch {
             isInterlinearLoading = true
             try {

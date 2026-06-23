@@ -78,7 +78,11 @@ fun DictionarySettingsTab(
                     .padding(horizontal = 16.dp, vertical = 16.dp)
             ) {
                 // Word section
-                DictSectionHeader(stringResource(Res.string.dictionary_settings_word_text))
+                DictSectionHeader(
+                    text = stringResource(Res.string.dictionary_settings_word_text),
+                    checked = ds.showWord,
+                    onCheckedChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(showWord = it)) } },
+                )
                 Spacer(Modifier.height(8.dp))
 
                 DictSettingRow(stringResource(Res.string.color)) {
@@ -132,7 +136,11 @@ fun DictionarySettingsTab(
                 Spacer(Modifier.height(20.dp))
 
                 // Definition section
-                DictSectionHeader(stringResource(Res.string.dictionary_settings_definition_text))
+                DictSectionHeader(
+                    text = stringResource(Res.string.dictionary_settings_definition_text),
+                    checked = ds.showDefinition,
+                    onCheckedChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(showDefinition = it)) } },
+                )
                 Spacer(Modifier.height(8.dp))
 
                 DictSettingRow(stringResource(Res.string.color)) {
@@ -163,7 +171,11 @@ fun DictionarySettingsTab(
 
                 // Reference & Transliteration
                 Column(modifier = cardMod) {
-                    DictSectionHeader(stringResource(Res.string.dictionary_settings_reference_text))
+                    DictSectionHeader(
+                        text = stringResource(Res.string.dictionary_settings_reference_text),
+                        checked = ds.showReference,
+                        onCheckedChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(showReference = it)) } },
+                    )
                     Spacer(Modifier.height(8.dp))
 
                     DictSettingRow(stringResource(Res.string.color)) {
@@ -217,7 +229,11 @@ fun DictionarySettingsTab(
 
                 // KJV Usage
                 Column(modifier = cardMod) {
-                    DictSectionHeader(stringResource(Res.string.dictionary_settings_kjv_usage))
+                    DictSectionHeader(
+                        text = stringResource(Res.string.dictionary_settings_kjv_usage),
+                        checked = ds.showKjvUsage,
+                        onCheckedChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(showKjvUsage = it)) } },
+                    )
                     Spacer(Modifier.height(8.dp))
 
                     DictSettingRow(stringResource(Res.string.color)) {
@@ -326,11 +342,16 @@ fun DictionarySettingsTab(
 }
 
 @Composable
-private fun DictSectionHeader(text: String) {
+private fun DictSectionHeader(
+    text: String,
+    checked: Boolean? = null,
+    onCheckedChange: ((Boolean) -> Unit)? = null,
+) {
     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.fillMaxWidth(),
         ) {
             Box(
                 modifier = Modifier
@@ -342,7 +363,14 @@ private fun DictSectionHeader(text: String) {
                 text = text,
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.weight(1f),
             )
+            if (checked != null && onCheckedChange != null) {
+                Checkbox(
+                    checked = checked,
+                    onCheckedChange = onCheckedChange,
+                )
+            }
         }
         HorizontalDivider(
             color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),

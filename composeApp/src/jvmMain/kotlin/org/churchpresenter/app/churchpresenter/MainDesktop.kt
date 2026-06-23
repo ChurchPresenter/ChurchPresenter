@@ -1211,6 +1211,11 @@ fun MainDesktop(
                                 onWordClick = { strongsNumber ->
                                     dictionaryViewModel.selectByNumber(strongsNumber)
                                 },
+                                onVerseClick = { bookId, chapter, verseNumber ->
+                                    val bookName = bibleViewModel.primaryBible.value?.getBookName(bookId) ?: return@DictionaryTab
+                                    selectTab(Tabs.BIBLE)
+                                    bibleViewModel.selectVerseByDetails(bookName, chapter, verseNumber)
+                                },
                             )
                         }
                     }

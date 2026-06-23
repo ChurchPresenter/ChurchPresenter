@@ -40,4 +40,10 @@ data class DictionarySettings(
     val fadeIn: Boolean = true,
     val fadeOut: Boolean = true,
     val transitionDuration: Float = 500f,
+
+    // Visible fields on presenter output
+    val showWord: Boolean = true,
+    val showReference: Boolean = true,
+    val showDefinition: Boolean = true,
+    val showKjvUsage: Boolean = true,
 )

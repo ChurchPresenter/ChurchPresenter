@@ -106,19 +106,21 @@ fun DictionaryPresenter(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(itemSpacing)
             ) {
-                // Strong's number badge
-                Text(
-                    text = entry.number,
-                    color = referenceColor,
-                    fontSize = ds.referenceFontSize.sp,
-                    fontFamily = refFontFamily,
-                    fontWeight = FontWeight.SemiBold,
-                    textAlign = TextAlign.Center,
-                    style = TextStyle(shadow = refShadow()),
-                )
+                // Strong's number badge (part of Reference section)
+                if (ds.showReference) {
+                    Text(
+                        text = entry.number,
+                        color = referenceColor,
+                        fontSize = ds.referenceFontSize.sp,
+                        fontFamily = refFontFamily,
+                        fontWeight = FontWeight.SemiBold,
+                        textAlign = TextAlign.Center,
+                        style = TextStyle(shadow = refShadow()),
+                    )
+                }
 
                 // Original word
-                if (entry.word.isNotBlank()) {
+                if (ds.showWord && entry.word.isNotBlank()) {
                     Text(
                         text = entry.word,
                         color = wordColor,
@@ -131,28 +133,30 @@ fun DictionaryPresenter(
                     )
                 }
 
-                // Transliteration · pronunciation
-                val translit = buildString {
-                    if (entry.transliteration.isNotBlank()) append(entry.transliteration)
-                    if (entry.pronunciation.isNotBlank() && entry.pronunciation != entry.transliteration) {
-                        if (isNotEmpty()) append("  •  ")
-                        append(entry.pronunciation)
+                // Transliteration · pronunciation (part of Reference section)
+                if (ds.showReference) {
+                    val translit = buildString {
+                        if (entry.transliteration.isNotBlank()) append(entry.transliteration)
+                        if (entry.pronunciation.isNotBlank() && entry.pronunciation != entry.transliteration) {
+                            if (isNotEmpty()) append("  •  ")
+                            append(entry.pronunciation)
+                        }
                     }
-                }
-                if (translit.isNotBlank()) {
-                    Text(
-                        text = translit,
-                        color = referenceColor,
-                        fontSize = (ds.referenceFontSize * 0.85f).sp,
-                        fontFamily = refFontFamily,
-                        fontStyle = FontStyle.Italic,
-                        textAlign = TextAlign.Center,
-                        style = TextStyle(shadow = refShadow()),
-                    )
+                    if (translit.isNotBlank()) {
+                        Text(
+                            text = translit,
+                            color = referenceColor,
+                            fontSize = (ds.referenceFontSize * 0.85f).sp,
+                            fontFamily = refFontFamily,
+                            fontStyle = FontStyle.Italic,
+                            textAlign = TextAlign.Center,
+                            style = TextStyle(shadow = refShadow()),
+                        )
+                    }
                 }
 
                 // Definition
-                if (entry.definition.isNotBlank()) {
+                if (ds.showDefinition && entry.definition.isNotBlank()) {
                     Spacer(Modifier.height((itemSpacing.value / 2).coerceAtLeast(2f).dp))
                     Text(
                         text = entry.definition,
@@ -165,7 +169,7 @@ fun DictionaryPresenter(
                 }
 
                 // KJV usage
-                if (entry.kjvUsage.isNotBlank()) {
+                if (ds.showKjvUsage && entry.kjvUsage.isNotBlank()) {
                     Text(
                         text = entry.kjvUsage,
                         color = kjvColor,

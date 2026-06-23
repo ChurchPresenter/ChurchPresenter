@@ -1681,4 +1681,7 @@
     <string name="dictionary_settings_card_background">Card Background</string>
     <string name="dictionary_settings_opacity">Opacity</string>
     <string name="dictionary_settings_transitions">Transition Settings</string>
+    <string name="dictionary_back">Back</string>
+    <string name="dictionary_forward">Forward</string>
+    <string name="dictionary_go_to_verse">Go to verse in Bible tab</string>
 </resources>

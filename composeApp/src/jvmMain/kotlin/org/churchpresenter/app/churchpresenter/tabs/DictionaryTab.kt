@@ -76,6 +76,11 @@ import churchpresenter.composeapp.generated.resources.dictionary_entry_count
 import churchpresenter.composeapp.generated.resources.dictionary_filter_all
 import churchpresenter.composeapp.generated.resources.dictionary_filter_greek
 import churchpresenter.composeapp.generated.resources.dictionary_filter_hebrew
+import churchpresenter.composeapp.generated.resources.dictionary_back
+import churchpresenter.composeapp.generated.resources.dictionary_forward
+import churchpresenter.composeapp.generated.resources.ic_redo
+import churchpresenter.composeapp.generated.resources.ic_undo
+import churchpresenter.composeapp.generated.resources.dictionary_go_to_verse
 import churchpresenter.composeapp.generated.resources.dictionary_in_scripture_all_books
 import churchpresenter.composeapp.generated.resources.dictionary_in_scripture_all_chapters
 import churchpresenter.composeapp.generated.resources.dictionary_in_scripture_all_verses
@@ -93,6 +98,8 @@ import churchpresenter.composeapp.generated.resources.dictionary_select_entry
 import churchpresenter.composeapp.generated.resources.dictionary_transliteration
 import churchpresenter.composeapp.generated.resources.go_live
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Tv
 import churchpresenter.composeapp.generated.resources.ic_playlist_add
@@ -116,6 +123,7 @@ fun DictionaryTab(
     getVerseText: ((bookId: Int, chapter: Int, verse: Int) -> String?)? = null,
     getBookName: ((bookId: Int) -> String?)? = null,
     onWordClick: ((strongsNumber: String) -> Unit)? = null,
+    onVerseClick: ((bookId: Int, chapter: Int, verse: Int) -> Unit)? = null,
 ) {
     LaunchedEffect(Unit) { viewModel.load() }
 
@@ -132,6 +140,10 @@ fun DictionaryTab(
         DictionaryDetailPane(
             modifier = Modifier.weight(1f).fillMaxHeight(),
             entry = viewModel.selectedEntry,
+            canGoBack = viewModel.canGoBack,
+            canGoForward = viewModel.canGoForward,
+            onGoBack = viewModel::goBack,
+            onGoForward = viewModel::goForward,
             interlinearVerses = viewModel.sortedInterlinearVerses,
             totalInterlinearCount = viewModel.interlinearVerses.size,
             isInterlinearLoading = viewModel.isInterlinearLoading,
@@ -140,6 +152,7 @@ fun DictionaryTab(
             getVerseText = getVerseText,
             getBookName = getBookName,
             onWordClick = onWordClick,
+            onVerseClick = onVerseClick,
             onAddToSchedule = onAddToSchedule?.let { cb -> { e -> cb(e.number, e.word, e.transliteration, e.definition) } },
             onGoLive = onGoLive,
         )
@@ -370,6 +383,10 @@ private fun DictionaryEntryRow(
 private fun DictionaryDetailPane(
     modifier: Modifier = Modifier,
     entry: StrongsEntry?,
+    canGoBack: Boolean = false,
+    canGoForward: Boolean = false,
+    onGoBack: () -> Unit = {},
+    onGoForward: () -> Unit = {},
     interlinearVerses: List<InterlinearVerse>,
     totalInterlinearCount: Int,
     isInterlinearLoading: Boolean,
@@ -378,30 +395,14 @@ private fun DictionaryDetailPane(
     getVerseText: ((bookId: Int, chapter: Int, verse: Int) -> String?)? = null,
     getBookName: ((bookId: Int) -> String?)? = null,
     onWordClick: ((String) -> Unit)? = null,
+    onVerseClick: ((bookId: Int, chapter: Int, verse: Int) -> Unit)? = null,
     onAddToSchedule: ((StrongsEntry) -> Unit)? = null,
     onGoLive: ((StrongsEntry) -> Unit)? = null,
 ) {
-    if (entry == null) {
-        Box(modifier = modifier, contentAlignment = Alignment.Center) {
-            Text(
-                text = stringResource(Res.string.dictionary_select_entry),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(32.dp),
-            )
-        }
-        return
-    }
-
-    val numberColor = if (entry.isHebrew) hebrewNumberColor else greekNumberColor
-    val languageLabel = if (entry.isHebrew)
-        stringResource(Res.string.dictionary_filter_hebrew).uppercase()
-    else
-        stringResource(Res.string.dictionary_filter_greek).uppercase()
-
     val addScheduleStr = stringResource(Res.string.add_to_schedule)
     val goLiveStr = stringResource(Res.string.go_live)
+    val backStr = stringResource(Res.string.dictionary_back)
+    val forwardStr = stringResource(Res.string.dictionary_forward)
 
     Column(modifier = modifier) {
         // Action toolbar
@@ -412,6 +413,44 @@ private fun DictionaryDetailPane(
             horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.End),
             verticalAlignment = Alignment.CenterVertically,
         ) {
+            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            // Back / Forward history buttons
+            TooltipArea(
+                tooltip = {
+                    Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
+                        Text(backStr, color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
+                    }
+                },
+                tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp)),
+            ) {
+                IconButton(onClick = onGoBack, enabled = canGoBack) {
+                    Icon(
+                        painterResource(Res.drawable.ic_undo),
+                        contentDescription = backStr,
+                        modifier = Modifier.size(20.dp),
+                        tint = if (canGoBack) MaterialTheme.colorScheme.onSurface
+                               else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                    )
+                }
+            }
+            TooltipArea(
+                tooltip = {
+                    Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
+                        Text(forwardStr, color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
+                    }
+                },
+                tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp)),
+            ) {
+                IconButton(onClick = onGoForward, enabled = canGoForward) {
+                    Icon(
+                        painterResource(Res.drawable.ic_redo),
+                        contentDescription = forwardStr,
+                        modifier = Modifier.size(20.dp),
+                        tint = if (canGoForward) MaterialTheme.colorScheme.onSurface
+                               else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                    )
+                }
+            }
             if (onAddToSchedule != null) {
                 TooltipArea(
                     tooltip = {
@@ -422,7 +461,8 @@ private fun DictionaryDetailPane(
                     tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp)),
                 ) {
                     IconButton(
-                        onClick = { onAddToSchedule(entry) },
+                        onClick = { entry?.let { onAddToSchedule(it) } },
+                        enabled = entry != null,
                         colors = IconButtonDefaults.iconButtonColors(
                             containerColor = MaterialTheme.colorScheme.secondary,
                             contentColor = MaterialTheme.colorScheme.onSecondary,
@@ -442,7 +482,8 @@ private fun DictionaryDetailPane(
                     tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp)),
                 ) {
                     IconButton(
-                        onClick = { onGoLive(entry) },
+                        onClick = { entry?.let { onGoLive(it) } },
+                        enabled = entry != null,
                         colors = IconButtonDefaults.iconButtonColors(
                             containerColor = MaterialTheme.colorScheme.primary,
                             contentColor = MaterialTheme.colorScheme.onPrimary,
@@ -452,9 +493,27 @@ private fun DictionaryDetailPane(
                     }
                 }
             }
+            } // end right-side Row
         }
 
         HorizontalDivider()
+
+        if (entry == null) {
+            Box(modifier = Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
+                Text(
+                    text = stringResource(Res.string.dictionary_select_entry),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(32.dp),
+                )
+            }
+        } else {
+        val numberColor = if (entry.isHebrew) hebrewNumberColor else greekNumberColor
+        val languageLabel = if (entry.isHebrew)
+            stringResource(Res.string.dictionary_filter_hebrew).uppercase()
+        else
+            stringResource(Res.string.dictionary_filter_greek).uppercase()
 
         val scrollState = rememberScrollState()
         Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
@@ -577,6 +636,7 @@ private fun DictionaryDetailPane(
                                 getVerseText = getVerseText,
                                 getBookName = getBookName,
                                 onWordClick = onWordClick,
+                                onVerseClick = onVerseClick,
                             )
                         }
                     }
@@ -599,10 +659,11 @@ private fun DictionaryDetailPane(
                 modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
             )
         }
+        } // end else (entry != null)
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
+@OptIn(ExperimentalLayoutApi::class, ExperimentalFoundationApi::class)
 @Composable
 private fun InterlinearVerseRow(
     interlinearVerse: InterlinearVerse,
@@ -610,6 +671,7 @@ private fun InterlinearVerseRow(
     getVerseText: ((bookId: Int, chapter: Int, verse: Int) -> String?)? = null,
     getBookName: ((bookId: Int) -> String?)? = null,
     onWordClick: ((String) -> Unit)? = null,
+    onVerseClick: ((bookId: Int, chapter: Int, verse: Int) -> Unit)? = null,
 ) {
     val verseText = remember(interlinearVerse.ref) {
         getVerseText?.invoke(interlinearVerse.bookId, interlinearVerse.chapter, interlinearVerse.verseNumber)
@@ -618,6 +680,7 @@ private fun InterlinearVerseRow(
         getBookName?.invoke(interlinearVerse.bookId) ?: "Book ${interlinearVerse.bookId}"
     }
     val refLabel = "$bookName ${interlinearVerse.chapter}:${interlinearVerse.verseNumber}"
+    val goToVerseStr = stringResource(Res.string.dictionary_go_to_verse)
 
     Column(
         modifier = Modifier
@@ -629,12 +692,34 @@ private fun InterlinearVerseRow(
             .padding(12.dp),
         verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
-        Text(
-            text = refLabel,
-            style = MaterialTheme.typography.labelSmall,
-            fontWeight = FontWeight.SemiBold,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
+        if (onVerseClick != null) {
+            TooltipArea(
+                tooltip = {
+                    Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
+                        Text(goToVerseStr, color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
+                    }
+                },
+                tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomEnd, offset = DpOffset(0.dp, 4.dp)),
+            ) {
+                Text(
+                    text = refLabel,
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.primary,
+                    textDecoration = TextDecoration.Underline,
+                    modifier = Modifier.clickable {
+                        onVerseClick(interlinearVerse.bookId, interlinearVerse.chapter, interlinearVerse.verseNumber)
+                    },
+                )
+            }
+        } else {
+            Text(
+                text = refLabel,
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
         if (verseText != null) {
             Text(
                 text = verseText,
