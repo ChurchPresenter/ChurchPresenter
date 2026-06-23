@@ -56,9 +56,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.LinkAnnotation
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextLinkStyles
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
@@ -513,6 +519,7 @@ private fun DictionaryDetailPane(
                 DetailSection(
                     label = stringResource(Res.string.dictionary_definition),
                     body = entry.definition,
+                    onStrongsClick = onWordClick,
                 )
 
                 // KJV Usage (only if present)
@@ -520,6 +527,7 @@ private fun DictionaryDetailPane(
                     DetailSection(
                         label = stringResource(Res.string.dictionary_kjv_usage),
                         body = entry.kjvUsage,
+                        onStrongsClick = onWordClick,
                     )
                 }
 
@@ -807,8 +815,38 @@ private fun DetailRow(label: String, value: String) {
     }
 }
 
+private val strongsPattern = Regex("[HGhg]\\d+")
+
+private fun buildStrongsAnnotatedString(text: String, onClick: (String) -> Unit) = buildAnnotatedString {
+    var lastEnd = 0
+    for (match in strongsPattern.findAll(text)) {
+        append(text.substring(lastEnd, match.range.first))
+        val upper = match.value.uppercase()
+        val linkColor = if (upper.startsWith("H")) hebrewNumberColor else greekNumberColor
+        withLink(
+            LinkAnnotation.Clickable(
+                tag = upper,
+                styles = TextLinkStyles(
+                    style = SpanStyle(
+                        color = linkColor,
+                        fontWeight = FontWeight.SemiBold,
+                        textDecoration = TextDecoration.Underline,
+                    ),
+                ),
+                linkInteractionListener = { onClick(upper) },
+            ),
+        ) { append(match.value) }
+        lastEnd = match.range.last + 1
+    }
+    append(text.substring(lastEnd))
+}
+
 @Composable
-private fun DetailSection(label: String, body: String) {
+private fun DetailSection(
+    label: String,
+    body: String,
+    onStrongsClick: ((String) -> Unit)? = null,
+) {
     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
         Text(
             text = label,
@@ -816,11 +854,22 @@ private fun DetailSection(label: String, body: String) {
             fontWeight = FontWeight.SemiBold,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-        Text(
-            text = body,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurface,
-            lineHeight = 22.sp,
-        )
+        if (onStrongsClick != null) {
+            val cb = onStrongsClick
+            val annotated = remember(body) { buildStrongsAnnotatedString(body, cb) }
+            Text(
+                text = annotated,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+                lineHeight = 22.sp,
+            )
+        } else {
+            Text(
+                text = body,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+                lineHeight = 22.sp,
+            )
+        }
     }
 }

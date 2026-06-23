@@ -214,7 +214,8 @@ class DictionaryViewModel {
     }
 
     fun selectByNumber(number: String) {
-        val found = entries.find { it.number == number }
+        val normalized = number.uppercase()
+        val found = entries.find { it.number == normalized }
         if (found != null) {
             // If navigating to an entry not visible under the current passage filter, clear it
             if (entryBookFilter != null) {
@@ -224,8 +225,8 @@ class DictionaryViewModel {
                 if (found.number !in visible) clearPassageFilter()
             }
             onEntrySelected(found)
-        } else if (number.isNotEmpty()) {
-            pendingSelectionNumber = number
+        } else if (normalized.isNotEmpty()) {
+            pendingSelectionNumber = normalized
         }
     }
 
