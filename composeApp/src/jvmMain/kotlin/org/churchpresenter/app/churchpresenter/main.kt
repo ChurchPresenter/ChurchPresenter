@@ -91,6 +91,7 @@ import org.churchpresenter.app.churchpresenter.presenter.DeckLinkComposeOutput
 import org.churchpresenter.app.churchpresenter.presenter.AnnouncementsPresenter
 import org.churchpresenter.app.churchpresenter.presenter.QAPresenter
 import org.churchpresenter.app.churchpresenter.presenter.STTPresenter
+import org.churchpresenter.app.churchpresenter.presenter.DictionaryPresenter
 import org.churchpresenter.app.churchpresenter.presenter.QAQRCodePresenter
 import org.churchpresenter.app.churchpresenter.presenter.CefManager
 import org.churchpresenter.app.churchpresenter.presenter.WebsitePresenter
@@ -1634,6 +1635,7 @@ private fun PresenterWindows(
     val displayedQuestion by presenterManager.displayedQuestion
     val qaTransitionAlpha by presenterManager.qaTransitionAlpha
     val showQRCodeOnDisplay by presenterManager.showQRCodeOnDisplay
+    val displayedDictionaryEntry by presenterManager.displayedDictionaryEntry
     val timerRemainingSeconds by presenterManager.timerRemainingSeconds
     val timerRunning by presenterManager.timerRunning
     val presenterNotes by presenterManager.presenterNotes
@@ -1913,10 +1915,10 @@ private fun PresenterWindows(
 
     val deckLinkDeviceCount = if (DeckLinkManager.isAvailable()) DeckLinkManager.listDevices().size else 0
     val windowCount = availableScreens.size + deckLinkDeviceCount
-
     for (i in 0 until windowCount) {
         val screenAssignment = proj.getAssignment(i)
         val effectiveMode = screenLocks[i] ?: presentingMode
+
         // DeckLink outputs: render via offscreen Window + pixel capture
         if (screenAssignment.targetType == "decklink") {
             if (showPresenterWindow && screenAssignment.targetDisplay >= 0) {
@@ -2059,6 +2061,14 @@ private fun PresenterWindows(
                                     sttSettings = appSettings.sttSettings,
                                 )
                             }
+                        Presenting.DICTIONARY ->
+                            if (screenAssignment.showDictionary)
+                                DictionaryPresenter(
+                                    dictionarySettings = appSettings.dictionarySettings,
+                                    entry = displayedDictionaryEntry,
+                                    outputRole = deckLinkRole,
+                                    transitionAlpha = 1f
+                                )
                         Presenting.NONE -> { /* nothing */ }
                     }
                     }
@@ -2211,6 +2221,14 @@ private fun PresenterWindows(
                                     sttSettings = appSettings.sttSettings,
                                 )
                             }
+                        Presenting.DICTIONARY ->
+                            if (screenAssignment.showDictionary)
+                                DictionaryPresenter(
+                                    dictionarySettings = appSettings.dictionarySettings,
+                                    entry = displayedDictionaryEntry,
+                                    outputRole = Constants.OUTPUT_ROLE_KEY,
+                                    transitionAlpha = 1f
+                                )
                         Presenting.NONE -> { /* nothing */ }
                     }
                     }
@@ -2391,6 +2409,14 @@ private fun PresenterWindows(
                                                     sttSettings = appSettings.sttSettings,
                                                 )
                                             }
+                                        Presenting.DICTIONARY ->
+                                            if (screenAssignment.showDictionary)
+                                                DictionaryPresenter(
+                                                    dictionarySettings = appSettings.dictionarySettings,
+                                                    entry = displayedDictionaryEntry,
+                                                    outputRole = Constants.OUTPUT_ROLE_KEY,
+                                                    transitionAlpha = 1f
+                                                )
                                         Presenting.NONE -> { /* nothing */ }
                                     }
                                     }
@@ -2627,6 +2653,14 @@ private fun PresenterWindows(
                                         sttSettings = appSettings.sttSettings,
                                     )
                                 }
+                            Presenting.DICTIONARY ->
+                                if (screenAssignment.showDictionary)
+                                    DictionaryPresenter(
+                                        dictionarySettings = appSettings.dictionarySettings,
+                                        entry = displayedDictionaryEntry,
+                                        outputRole = primaryRole,
+                                        transitionAlpha = 1f
+                                    )
                             Presenting.NONE -> { /* nothing */
                             }
                         }
@@ -2844,6 +2878,14 @@ private fun PresenterWindows(
                                                 sttSettings = appSettings.sttSettings,
                                             )
                                         }
+                                    Presenting.DICTIONARY ->
+                                        if (screenAssignment.showDictionary)
+                                            DictionaryPresenter(
+                                                dictionarySettings = appSettings.dictionarySettings,
+                                                entry = displayedDictionaryEntry,
+                                                outputRole = Constants.OUTPUT_ROLE_KEY,
+                                                transitionAlpha = 1f
+                                            )
                                     Presenting.NONE -> { /* nothing */
                                     }
                                 }
@@ -3000,6 +3042,14 @@ private fun PresenterWindows(
                                     sttSettings = appSettings.sttSettings,
                                 )
                             }
+                        Presenting.DICTIONARY ->
+                            if (screenAssignment.showDictionary)
+                                DictionaryPresenter(
+                                    dictionarySettings = appSettings.dictionarySettings,
+                                    entry = displayedDictionaryEntry,
+                                    outputRole = primaryRole,
+                                    transitionAlpha = 1f
+                                )
                         Presenting.NONE -> { /* nothing */ }
                     }
                     }

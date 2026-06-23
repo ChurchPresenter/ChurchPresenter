@@ -57,6 +57,7 @@ import churchpresenter.composeapp.generated.resources.audio_output_default
 import churchpresenter.composeapp.generated.resources.audio_output_device
 import churchpresenter.composeapp.generated.resources.bottom
 import churchpresenter.composeapp.generated.resources.content_announcements
+import churchpresenter.composeapp.generated.resources.tab_dictionary
 import churchpresenter.composeapp.generated.resources.content_bible
 import churchpresenter.composeapp.generated.resources.content_media
 import churchpresenter.composeapp.generated.resources.content_pictures
@@ -303,6 +304,7 @@ fun ProjectionSettingsTab(
         val mediaLabel = stringResource(Res.string.content_media)
         val streamingLabel = stringResource(Res.string.content_streaming)
         val announcementsLabel = stringResource(Res.string.content_announcements)
+        val dictionaryLabel = stringResource(Res.string.tab_dictionary)
         val fullScreenLabel = stringResource(Res.string.display_fullscreen)
         val lowerThirdLabel = stringResource(Res.string.display_lower_third)
         val stageMonitorLabel = stringResource(Res.string.display_stage_monitor)
@@ -342,6 +344,7 @@ fun ProjectionSettingsTab(
             ContentCol("Web", { it.showWebsite }, { a, v -> a.copy(showWebsite = v) }),
             ContentCol("Q&A", { it.showQA }, { a, v -> a.copy(showQA = v) }),
             ContentCol("STT", { it.showSTT }, { a, v -> a.copy(showSTT = v) }),
+            ContentCol(dictionaryLabel, { it.showDictionary }, { a, v -> a.copy(showDictionary = v) }),
             ContentCol("Background", { it.showFullscreenBackground }, { a, v -> a.copy(showFullscreenBackground = v) }),
             ContentCol("Lower Third Background", { it.showLowerThirdBackground }, { a, v -> a.copy(showLowerThirdBackground = v) }),
         )
@@ -425,7 +428,6 @@ fun ProjectionSettingsTab(
         // One row per screen
         for (i in 0 until numScreens) {
             val assignment = screenAssignments[i]
-
             Row(verticalAlignment = Alignment.CenterVertically) {
                 // Screen label
                 Text(

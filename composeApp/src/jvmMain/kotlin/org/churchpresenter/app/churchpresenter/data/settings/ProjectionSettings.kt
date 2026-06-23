@@ -11,7 +11,7 @@ data class ProjectionSettings(
     val screenAssignments: List<ScreenAssignment> = listOf(ScreenAssignment()),
     val audioOutputDeviceId: String = "", // empty = system default
     val vlcPath: String = "", // custom VLC installation directory (empty = auto-detect)
-    val lowerThirdHeightPercent: Int = 33 // 10-60, used by Bible & Song presenters
+    val lowerThirdHeightPercent: Int = 33, // 10-60, used by Bible & Song presenters
 ) {
     fun getAssignment(index: Int): ScreenAssignment =
         screenAssignments.getOrElse(index) { ScreenAssignment() }

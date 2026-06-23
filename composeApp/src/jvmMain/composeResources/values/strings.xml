@@ -1674,4 +1674,11 @@
     <string name="bible_engine_run_local">Run engine locally</string>
     <string name="bible_engine_host">Engine host</string>
     <string name="bible_engine_port">Port</string>
+    <string name="dictionary_settings_word_text">Word (Original)</string>
+    <string name="dictionary_settings_reference_text">Reference &amp; Transliteration</string>
+    <string name="dictionary_settings_definition_text">Definition</string>
+    <string name="dictionary_settings_kjv_usage">KJV Usage</string>
+    <string name="dictionary_settings_card_background">Card Background</string>
+    <string name="dictionary_settings_opacity">Opacity</string>
+    <string name="dictionary_settings_transitions">Transition Settings</string>
 </resources>

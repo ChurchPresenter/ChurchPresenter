@@ -203,6 +203,7 @@ private fun SingleDisplayPreview(
         Presenting.CANVAS -> true
         Presenting.QA -> screenAssignment.showQA
         Presenting.STT -> screenAssignment.showSTT
+        Presenting.DICTIONARY -> screenAssignment.showDictionary
         Presenting.NONE -> false
     }
 

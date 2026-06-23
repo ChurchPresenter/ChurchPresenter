@@ -9,6 +9,7 @@ import org.cef.browser.CefBrowser
 import org.churchpresenter.app.churchpresenter.models.Scene
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.models.SelectedVerse
+import org.churchpresenter.app.churchpresenter.data.StrongsEntry
 
 class PresenterManager {
     private val _presentingMode = mutableStateOf(Presenting.NONE)
@@ -419,5 +420,13 @@ class PresenterManager {
 
     fun setShowQRCodeOnDisplay(show: Boolean) {
         _showQRCodeOnDisplay.value = show
+    }
+
+    // Dictionary display state
+    private val _displayedDictionaryEntry = mutableStateOf<StrongsEntry?>(null)
+    val displayedDictionaryEntry: State<StrongsEntry?> = _displayedDictionaryEntry
+
+    fun setDisplayedDictionaryEntry(entry: StrongsEntry?) {
+        _displayedDictionaryEntry.value = entry
     }
 }

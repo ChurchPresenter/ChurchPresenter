@@ -28,6 +28,7 @@ data class ScreenAssignment(
     val songLookAhead: Boolean = false, // enable look-ahead for songs on this output
     val showQA: Boolean = true,
     val showSTT: Boolean = true,
+    val showDictionary: Boolean = true,
     val showFullscreenBackground: Boolean = true, // show configured background in fullscreen mode
     val showLowerThirdBackground: Boolean = true  // show configured background in lower third mode
 ) {

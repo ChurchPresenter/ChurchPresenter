@@ -7,6 +7,7 @@ import org.churchpresenter.app.churchpresenter.utils.Constants
 data class AppSettings(
     val songSettings: SongSettings = SongSettings(),
     val bibleSettings: BibleSettings = BibleSettings(),
+    val dictionarySettings: DictionarySettings = DictionarySettings(),
     val backgroundSettings: BackgroundSettings = BackgroundSettings(),
     val projectionSettings: ProjectionSettings = ProjectionSettings(),
     val pictureSettings: PictureSettings = PictureSettings(),

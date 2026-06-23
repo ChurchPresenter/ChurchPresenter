@@ -1198,9 +1198,9 @@ fun MainDesktop(
                                     scheduleActions.addDictionary(number, word, transliteration, definition)
                                 },
                                 onGoLive = { entry ->
-                                    presenterManager.setAnnouncementText("${entry.word} (${entry.transliteration})\n\n${entry.definition}")
+                                    presenterManager.setDisplayedDictionaryEntry(entry)
                                     presenterManager.setShowPresenterWindow(true)
-                                    presenting(Presenting.ANNOUNCEMENTS)
+                                    presenting(Presenting.DICTIONARY)
                                 },
                                 getVerseText = { bookId, chapter, verse ->
                                     bibleViewModel.primaryBible.value?.getVerseDetails(bookId, chapter, verse)?.second

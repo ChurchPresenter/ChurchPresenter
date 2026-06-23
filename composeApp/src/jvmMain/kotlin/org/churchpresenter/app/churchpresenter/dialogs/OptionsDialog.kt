@@ -47,6 +47,7 @@ import churchpresenter.composeapp.generated.resources.song
 import churchpresenter.composeapp.generated.resources.obs_settings
 import churchpresenter.composeapp.generated.resources.atem_settings
 import churchpresenter.composeapp.generated.resources.stage_monitor
+import churchpresenter.composeapp.generated.resources.tab_dictionary
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.data.RemoteClientManager
 import org.churchpresenter.app.churchpresenter.data.SettingsManager
@@ -60,6 +61,7 @@ import org.churchpresenter.app.churchpresenter.dialogs.tabs.ProjectionSettingsTa
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.ServerSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.SongSettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.LowerThirdSettingsTab
+import org.churchpresenter.app.churchpresenter.dialogs.tabs.DictionarySettingsTab
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.StageMonitorSettingsTab
 import org.churchpresenter.app.churchpresenter.ui.theme.AppThemeWrapper
 import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
@@ -88,16 +90,16 @@ fun OptionsDialog(
     if (!isVisible) return
 
     var currentSettings by remember { mutableStateOf(initialSettings ?: settingsManager.loadSettings()) }
-    val tabCount = if (obsManager != null) 10 else 9
+    val tabCount = if (obsManager != null) 11 else 10
     var selectedTabIndex by remember(initialTab) { mutableStateOf(initialTab) }
     val safeTabIndex = selectedTabIndex.coerceIn(0, tabCount - 1)
     val mainWindowState = LocalMainWindowState.current
     DialogWindow(
         onCloseRequest = onDismiss,
         state = rememberDialogState(
-            position = centeredOnMainWindow(mainWindowState, 1000.dp, 700.dp),
-            width = 1000.dp,
-            height = 700.dp
+            position = centeredOnMainWindow(mainWindowState, 1400.dp, 900.dp),
+            width = 1400.dp,
+            height = 900.dp
         ),
         title = stringResource(Res.string.options),
         resizable = true
@@ -160,10 +162,15 @@ fun OptionsDialog(
                             onClick = { selectedTabIndex = 8 },
                             text = { Text(stringResource(Res.string.atem_settings)) }
                         )
+                        Tab(
+                            selected = safeTabIndex == 9,
+                            onClick = { selectedTabIndex = 9 },
+                            text = { Text(stringResource(Res.string.tab_dictionary)) }
+                        )
                         if (obsManager != null) {
                             Tab(
-                                selected = safeTabIndex == 9,
-                                onClick = { selectedTabIndex = 9 },
+                                selected = safeTabIndex == 10,
+                                onClick = { selectedTabIndex = 10 },
                                 text = { Text(stringResource(Res.string.obs_settings)) }
                             )
                         }
@@ -240,7 +247,13 @@ fun OptionsDialog(
                                     currentSettings = updateFn(currentSettings)
                                 }
                             )
-                            9 -> if (obsManager != null) OBSSettingsTab(
+                            9 -> DictionarySettingsTab(
+                                settings = currentSettings,
+                                onSettingsChange = { updateFn ->
+                                    currentSettings = updateFn(currentSettings)
+                                }
+                            )
+                            10 -> if (obsManager != null) OBSSettingsTab(
                                 settings = currentSettings,
                                 onSettingsChange = { updateFn ->
                                     currentSettings = updateFn(currentSettings)
