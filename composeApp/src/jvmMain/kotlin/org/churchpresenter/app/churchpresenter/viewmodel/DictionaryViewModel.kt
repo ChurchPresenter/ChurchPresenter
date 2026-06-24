@@ -155,7 +155,7 @@ class DictionaryViewModel {
                 val gEntries = json.decodeFromString<List<StrongsEntry>>(gBytes.decodeToString())
                 entries = hEntries.sortedBy { it.numericValue } + gEntries.sortedBy { it.numericValue }
                 pendingSelectionNumber?.let { num ->
-                    onEntrySelected(entries.find { it.number == num })
+                    onEntrySelected(entries.find { it.number == num }, addToHistory = false)
                     pendingSelectionNumber = null
                 }
             } catch (_: Exception) {
@@ -225,8 +225,12 @@ class DictionaryViewModel {
     }
 
     fun reload() {
+        // Preserve the current selection across a language swap so the user keeps
+        // viewing the same word — load() re-selects it with the new-language text.
+        val preserve = selectedEntry?.number
         entries = emptyList()
-        onEntrySelected(null, addToHistory = false)
+        if (preserve == null) onEntrySelected(null, addToHistory = false)
+        pendingSelectionNumber = preserve
         load()
     }
 
