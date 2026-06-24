@@ -2,6 +2,12 @@ package org.churchpresenter.app.churchpresenter.utils
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.booleanOrNull
+import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import org.churchpresenter.app.churchpresenter.BuildConfig
 import java.net.HttpURLConnection
 import java.net.URI
@@ -15,18 +21,25 @@ data class UpdateInfo(
 
 object UpdateChecker {
 
-    private const val GITHUB_API_URL =
-        "https://api.github.com/repos/ChurchPresenter/ChurchPresenter/releases/latest"
+    private const val RELEASES_API_URL =
+        "https://api.github.com/repos/ChurchPresenter/ChurchPresenter/releases?per_page=50"
     private const val RELEASES_URL =
         "https://github.com/ChurchPresenter/ChurchPresenter/releases/latest"
 
+    private val json = Json { ignoreUnknownKeys = true }
+
     /**
-     * Checks GitHub for a newer release.
-     * Returns [UpdateInfo] if a newer version is available, null otherwise.
+     * Checks GitHub for a newer release that has an installer for the current OS.
+     *
+     * Walks releases newest→oldest and stops at the first one that contains a
+     * download for the detected platform — i.e. the latest build available for this
+     * OS, skipping newer releases that omit it. Returns [UpdateInfo] (with a non-null
+     * [UpdateInfo.downloadUrl]) only when that build is newer than the running app,
+     * so users are never prompted toward a release they can't actually install.
      */
     suspend fun checkForUpdate(): UpdateInfo? = withContext(Dispatchers.IO) {
         try {
-            val url = URI(GITHUB_API_URL).toURL()
+            val url = URI(RELEASES_API_URL).toURL()
             val connection = url.openConnection() as HttpURLConnection
             connection.requestMethod = "GET"
             connection.setRequestProperty("Accept", "application/vnd.github+json")
@@ -39,72 +52,36 @@ object UpdateChecker {
             val body = connection.inputStream.bufferedReader().readText()
             connection.disconnect()
 
-            // Parse tag_name (e.g. "v2025.1.0" or "2025.1.0")
-            val tagName = parseJsonString(body, "tag_name") ?: return@withContext null
-            val latestVersion = tagName.removePrefix("v")
-            val releaseNotes = parseJsonString(body, "body") ?: ""
-            val releaseUrl = parseJsonString(body, "html_url") ?: RELEASES_URL
-            val allDownloadUrls = parseAllJsonStringValues(body, "browser_download_url")
-            val downloadUrl = selectDownloadUrl(allDownloadUrls)
+            // GitHub returns releases sorted by created_at descending.
+            val releases = json.parseToJsonElement(body).jsonArray
+            for (rel in releases) {
+                val obj = rel.jsonObject
+                if (obj["draft"]?.jsonPrimitive?.booleanOrNull == true) continue
+                if (obj["prerelease"]?.jsonPrimitive?.booleanOrNull == true) continue
 
-            if (isNewerVersion(latestVersion, BuildConfig.APP_VERSION)) {
-                UpdateInfo(
-                    latestVersion = latestVersion,
-                    releaseUrl = releaseUrl,
-                    releaseNotes = releaseNotes.take(500),
-                    downloadUrl = downloadUrl
-                )
-            } else {
-                null
+                val urls = (obj["assets"]?.jsonArray ?: continue)
+                    .mapNotNull { it.jsonObject["browser_download_url"]?.jsonPrimitive?.contentOrNull }
+                // Skip releases that have no installer for the detected OS.
+                val downloadUrl = selectDownloadUrl(urls) ?: continue
+
+                // First OS-matching release = latest build available for this OS.
+                val latestVersion = (obj["tag_name"]?.jsonPrimitive?.contentOrNull ?: continue)
+                    .removePrefix("v")
+                return@withContext if (isNewerVersion(latestVersion, BuildConfig.APP_VERSION)) {
+                    UpdateInfo(
+                        latestVersion = latestVersion,
+                        releaseUrl = obj["html_url"]?.jsonPrimitive?.contentOrNull ?: RELEASES_URL,
+                        releaseNotes = (obj["body"]?.jsonPrimitive?.contentOrNull ?: "").take(500),
+                        downloadUrl = downloadUrl
+                    )
+                } else {
+                    null
+                }
             }
+            null
         } catch (_: Exception) {
             null
         }
-    }
-
-    /**
-     * Extracts every JSON string value associated with [key] across the entire document.
-     * Used to gather all browser_download_url values from the assets array.
-     */
-    private fun parseAllJsonStringValues(json: String, key: String): List<String> {
-        val needle = "\"$key\""
-        val results = mutableListOf<String>()
-        var searchFrom = 0
-        while (true) {
-            val keyIdx = json.indexOf(needle, searchFrom)
-            if (keyIdx < 0) break
-            var i = keyIdx + needle.length
-            while (i < json.length && json[i].isWhitespace()) i++
-            if (i >= json.length || json[i] != ':') { searchFrom = keyIdx + 1; continue }
-            i++
-            while (i < json.length && json[i].isWhitespace()) i++
-            if (i >= json.length || json[i] != '"') { searchFrom = keyIdx + 1; continue }
-            i++
-            val sb = StringBuilder()
-            var valid = false
-            while (i < json.length) {
-                val c = json[i]
-                if (c == '\\' && i + 1 < json.length) {
-                    when (json[i + 1]) {
-                        'n' -> sb.append('\n')
-                        't' -> sb.append('\t')
-                        'r' -> sb.append('\r')
-                        '"' -> sb.append('"')
-                        '\\' -> sb.append('\\')
-                        '/' -> sb.append('/')
-                        else -> { sb.append('\\'); sb.append(json[i + 1]) }
-                    }
-                    i += 2
-                } else if (c == '"') {
-                    valid = true; i++; break
-                } else {
-                    sb.append(c); i++
-                }
-            }
-            if (valid) results.add(sb.toString())
-            searchFrom = i
-        }
-        return results
     }
 
     private fun selectDownloadUrl(urls: List<String>): String? {
@@ -120,47 +97,6 @@ object UpdateChecker {
             else ->
                 urls.firstOrNull { it.endsWith(".deb", ignoreCase = true) }
         }
-    }
-
-    /**
-     * Simple JSON string field extractor (avoids adding a JSON dependency).
-     * Uses manual parsing instead of regex to avoid StackOverflowError on long values.
-     */
-    private fun parseJsonString(json: String, key: String): String? {
-        val needle = "\"$key\""
-        val keyIdx = json.indexOf(needle)
-        if (keyIdx < 0) return null
-        // Skip past key, optional whitespace, colon, optional whitespace, opening quote
-        var i = keyIdx + needle.length
-        while (i < json.length && json[i].isWhitespace()) i++
-        if (i >= json.length || json[i] != ':') return null
-        i++
-        while (i < json.length && json[i].isWhitespace()) i++
-        if (i >= json.length || json[i] != '"') return null
-        i++ // skip opening quote
-        val sb = StringBuilder()
-        while (i < json.length) {
-            val c = json[i]
-            if (c == '\\' && i + 1 < json.length) {
-                val next = json[i + 1]
-                when (next) {
-                    'n' -> sb.append('\n')
-                    't' -> sb.append('\t')
-                    'r' -> sb.append('\r')
-                    '"' -> sb.append('"')
-                    '\\' -> sb.append('\\')
-                    '/' -> sb.append('/')
-                    else -> { sb.append('\\'); sb.append(next) }
-                }
-                i += 2
-            } else if (c == '"') {
-                return sb.toString()
-            } else {
-                sb.append(c)
-                i++
-            }
-        }
-        return null
     }
 
     /**
