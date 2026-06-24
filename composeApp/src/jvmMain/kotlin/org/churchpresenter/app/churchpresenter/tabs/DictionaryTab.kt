@@ -178,7 +178,10 @@ private fun DictionaryListPane(
     LaunchedEffect(viewModel.scrollRequestToken) {
         val entry = viewModel.selectedEntry ?: return@LaunchedEffect
         val idx = results.indexOfFirst { it.number == entry.number }
-        if (idx >= 0) listState.animateScrollToItem(idx)
+        if (idx < 0) return@LaunchedEffect
+        // Only scroll when the entry is off-screen — never yank a visible row to the top.
+        val isVisible = listState.layoutInfo.visibleItemsInfo.any { it.index == idx }
+        if (!isVisible) listState.animateScrollToItem(idx)
     }
 
     Column(modifier = modifier) {
@@ -233,7 +236,50 @@ private fun DictionaryListPane(
 
         // Book / chapter filter for the entry list (visible once interlinear data is loaded)
         if (viewModel.isInterlinearDataLoaded) {
-            val primaryBibleStr = stringResource(Res.string.dictionary_bible_primary)
+            // Bible translation selector — own full-width row so it never gets clipped in the narrow pane
+            if (viewModel.availableDictBibles.isNotEmpty()) {
+                val primaryBibleStr = stringResource(Res.string.dictionary_bible_primary)
+                var bibleDropExpanded by remember { mutableStateOf(false) }
+                val currentBibleLabel = viewModel.availableDictBibles
+                    .firstOrNull { it.first == viewModel.dictBibleFile }?.second
+                    ?: primaryBibleStr
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 12.dp)
+                        .padding(bottom = 8.dp),
+                ) {
+                    OutlinedButton(
+                        onClick = { bibleDropExpanded = true },
+                        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 0.dp),
+                        modifier = Modifier.fillMaxWidth().height(32.dp),
+                        enabled = !viewModel.isDictBibleLoading,
+                    ) {
+                        Text(
+                            text = currentBibleLabel,
+                            style = MaterialTheme.typography.labelSmall,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.weight(1f),
+                        )
+                        Icon(Icons.Default.ArrowDropDown, contentDescription = null, modifier = Modifier.size(16.dp))
+                    }
+                    DropdownMenu(expanded = bibleDropExpanded, onDismissRequest = { bibleDropExpanded = false }) {
+                        DropdownMenuItem(
+                            text = { Text(primaryBibleStr, style = MaterialTheme.typography.bodySmall) },
+                            onClick = { viewModel.setDictBible(""); bibleDropExpanded = false },
+                        )
+                        HorizontalDivider()
+                        viewModel.availableDictBibles.forEach { (filePath, title) ->
+                            DropdownMenuItem(
+                                text = { Text(title, style = MaterialTheme.typography.bodySmall) },
+                                onClick = { viewModel.setDictBible(filePath); bibleDropExpanded = false },
+                            )
+                        }
+                    }
+                }
+            }
+
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -264,37 +310,6 @@ private fun DictionaryListPane(
                         availableVerses = viewModel.entryAvailableVerses,
                         onSelect = viewModel::filterEntryListByVerse,
                     )
-                }
-                if (viewModel.availableDictBibles.isNotEmpty()) {
-                    Spacer(Modifier.weight(1f))
-                    var bibleDropExpanded by remember { mutableStateOf(false) }
-                    val currentBibleLabel = viewModel.availableDictBibles
-                        .firstOrNull { it.first == viewModel.dictBibleFile }?.second
-                        ?: primaryBibleStr
-                    Box {
-                        OutlinedButton(
-                            onClick = { bibleDropExpanded = true },
-                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp),
-                            modifier = Modifier.height(32.dp),
-                            enabled = !viewModel.isDictBibleLoading,
-                        ) {
-                            Text(currentBibleLabel, style = MaterialTheme.typography.labelSmall, maxLines = 1)
-                            Icon(Icons.Default.ArrowDropDown, contentDescription = null, modifier = Modifier.size(14.dp))
-                        }
-                        DropdownMenu(expanded = bibleDropExpanded, onDismissRequest = { bibleDropExpanded = false }) {
-                            DropdownMenuItem(
-                                text = { Text(primaryBibleStr, style = MaterialTheme.typography.bodySmall) },
-                                onClick = { viewModel.setDictBible(""); bibleDropExpanded = false },
-                            )
-                            HorizontalDivider()
-                            viewModel.availableDictBibles.forEach { (filePath, title) ->
-                                DropdownMenuItem(
-                                    text = { Text(title, style = MaterialTheme.typography.bodySmall) },
-                                    onClick = { viewModel.setDictBible(filePath); bibleDropExpanded = false },
-                                )
-                            }
-                        }
-                    }
                 }
             }
         }
