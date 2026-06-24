@@ -129,6 +129,7 @@ fun DictionaryTab(
     onVerseClick: ((bookId: Int, chapter: Int, verse: Int) -> Unit)? = null,
 ) {
     LaunchedEffect(Unit) { viewModel.load() }
+    val entryIndex = remember(viewModel.entries) { viewModel.entries.associateBy { it.number } }
 
     Row(modifier = modifier) {
         DictionaryListPane(
@@ -162,6 +163,7 @@ fun DictionaryTab(
             getBookName = getBookName,
             onWordClick = onWordClick,
             onVerseClick = onVerseClick,
+            getEntry = { number -> entryIndex[number] },
             onAddToSchedule = onAddToSchedule?.let { cb -> { e -> cb(e.number, e.word, e.transliteration, e.definition) } },
             onGoLive = onGoLive,
         )
@@ -411,6 +413,7 @@ private fun DictionaryDetailPane(
     getBookName: ((bookId: Int) -> String?)? = null,
     onWordClick: ((String) -> Unit)? = null,
     onVerseClick: ((bookId: Int, chapter: Int, verse: Int) -> Unit)? = null,
+    getEntry: ((strongsNumber: String) -> StrongsEntry?)? = null,
     onAddToSchedule: ((StrongsEntry) -> Unit)? = null,
     onGoLive: ((StrongsEntry) -> Unit)? = null,
 ) {
@@ -709,6 +712,7 @@ private fun DictionaryDetailPane(
                                 getBookName = getBookName,
                                 onWordClick = onWordClick,
                                 onVerseClick = onVerseClick,
+                                getEntry = getEntry,
                             )
                         }
                     }
@@ -744,6 +748,7 @@ private fun InterlinearVerseRow(
     getBookName: ((bookId: Int) -> String?)? = null,
     onWordClick: ((String) -> Unit)? = null,
     onVerseClick: ((bookId: Int, chapter: Int, verse: Int) -> Unit)? = null,
+    getEntry: ((strongsNumber: String) -> StrongsEntry?)? = null,
 ) {
     val verseText = getVerseText?.invoke(interlinearVerse.bookId, interlinearVerse.chapter, interlinearVerse.verseNumber)
     val bookName = getBookName?.invoke(interlinearVerse.bookId) ?: "Book ${interlinearVerse.bookId}"
@@ -807,17 +812,20 @@ private fun InterlinearVerseRow(
                     onClick = if (word.strongsNumber != highlightedNumber && onWordClick != null) {
                         { onWordClick(word.strongsNumber) }
                     } else null,
+                    entry = getEntry?.invoke(word.strongsNumber),
                 )
             }
         }
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun InterlinearWordChip(
     word: InterlinearWord,
     isHighlighted: Boolean,
     onClick: (() -> Unit)?,
+    entry: StrongsEntry? = null,
 ) {
     val containerColor = when {
         isHighlighted -> MaterialTheme.colorScheme.primaryContainer
@@ -829,20 +837,63 @@ private fun InterlinearWordChip(
         onClick != null -> MaterialTheme.colorScheme.onSecondaryContainer
         else -> MaterialTheme.colorScheme.onSurfaceVariant
     }
-    SuggestionChip(
-        onClick = onClick ?: {},
-        label = {
-            Text(
-                text = word.text,
-                style = MaterialTheme.typography.labelSmall,
-            )
-        },
-        colors = SuggestionChipDefaults.suggestionChipColors(
-            containerColor = containerColor,
-            labelColor = labelColor,
-        ),
-        enabled = isHighlighted || onClick != null,
-    )
+    val chip = @Composable {
+        SuggestionChip(
+            onClick = onClick ?: {},
+            label = { Text(text = word.text, style = MaterialTheme.typography.labelSmall) },
+            colors = SuggestionChipDefaults.suggestionChipColors(
+                containerColor = containerColor,
+                labelColor = labelColor,
+            ),
+            enabled = isHighlighted || onClick != null,
+        )
+    }
+    if (entry != null) {
+        TooltipArea(
+            tooltip = {
+                Surface(
+                    color = MaterialTheme.colorScheme.inverseSurface,
+                    shape = MaterialTheme.shapes.small,
+                    tonalElevation = 4.dp,
+                ) {
+                    Column(
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp).widthIn(max = 280.dp),
+                        verticalArrangement = Arrangement.spacedBy(3.dp),
+                    ) {
+                        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                            Text(
+                                text = entry.number,
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.inverseOnSurface.copy(alpha = 0.6f),
+                            )
+                            Text(
+                                text = entry.word,
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.inverseOnSurface,
+                            )
+                            Text(
+                                text = entry.transliteration,
+                                style = MaterialTheme.typography.labelSmall,
+                                fontStyle = FontStyle.Italic,
+                                color = MaterialTheme.colorScheme.inverseOnSurface.copy(alpha = 0.8f),
+                            )
+                        }
+                        Text(
+                            text = entry.definition.take(200).let {
+                                if (entry.definition.length > 200) "$it…" else it
+                            },
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.inverseOnSurface,
+                        )
+                    }
+                }
+            },
+            tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp)),
+        ) { chip() }
+    } else {
+        chip()
+    }
 }
 
 @Composable
