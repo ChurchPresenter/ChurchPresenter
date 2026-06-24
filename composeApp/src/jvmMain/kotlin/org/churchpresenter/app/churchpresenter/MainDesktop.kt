@@ -1001,7 +1001,7 @@ fun MainDesktop(
                     AnimatedContent(
                         targetState = currentTab,
                         transitionSpec = { fadeIn(tween(120)) togetherWith fadeOut(tween(120)) },
-                        modifier = Modifier.fillMaxSize(),
+                        modifier = Modifier.fillMaxWidth().weight(1f),
                         label = "tab_content"
                     ) { tab ->
                         when (tab) {

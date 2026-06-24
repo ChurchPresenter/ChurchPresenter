@@ -568,7 +568,7 @@ fun BibleTab(
 
     Column(
         modifier = modifier
-            .fillMaxWidth()
+            .fillMaxSize()
             .focusRequester(focusRequester)
             .focusable()
             .onPreviewKeyEvent { handleKeyEvent(it) }
@@ -791,12 +791,14 @@ fun BibleTab(
                 }
             }
 
-            // ── Detected references — History-style rows (max ~5 visible; scrolls beyond) ──
-            Box(modifier = Modifier.fillMaxWidth()) {
-                val detScroll = rememberScrollState()
+            // ── Detected references — at most 5 rows tall, scrolls beyond ──
+            val detRowHeight = 26.dp
+            val detMaxVisibleRows = 5
+            if (detectedReferences.isNotEmpty()) {
+            val detScroll = rememberScrollState()
+            Box(modifier = Modifier.fillMaxWidth().heightIn(max = detRowHeight * detMaxVisibleRows)) {
                 Column(
                     modifier = Modifier.fillMaxWidth()
-                        .heightIn(max = 132.dp)
                         .verticalScroll(detScroll)
                         .padding(end = 10.dp)
                 ) {
@@ -804,9 +806,9 @@ fun BibleTab(
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.fillMaxWidth()
+                        .height(detRowHeight)
                         .padding(horizontal = 6.dp)
                         .clickable { viewModel.applyDetectedReference(ref); focusRequester.requestFocus() }
-                        .padding(vertical = 2.dp)
                 ) {
                     // Fixed-width icon column so every reference + verse text lines up vertically,
                     // regardless of how many source markers a row has.
@@ -864,10 +866,13 @@ fun BibleTab(
                 }
                 }
                 }
-                VerticalScrollbar(
-                    modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
-                    adapter = rememberScrollbarAdapter(detScroll)
-                )
+                if (detectedReferences.size > detMaxVisibleRows) {
+                    VerticalScrollbar(
+                        modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
+                        adapter = rememberScrollbarAdapter(detScroll)
+                    )
+                }
+            }
             }
         }
 
@@ -875,7 +880,7 @@ fun BibleTab(
         if (appSettings.bibleSettings.primaryBible.isBlank()) {
             // ── Empty state: primary bible not configured ─────────────
             Box(
-                modifier = Modifier.fillMaxSize().padding(32.dp),
+                modifier = Modifier.fillMaxWidth().weight(1f).padding(32.dp),
                 contentAlignment = Alignment.Center
             ) {
                 Surface(
@@ -925,7 +930,7 @@ fun BibleTab(
                 }
             }
         } else if (isSearchMode && searchResults.isNotEmpty()) {
-            Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
+            Column(modifier = Modifier.fillMaxWidth().weight(1f).padding(8.dp)) {
                 Text(
                     text = stringResource(Res.string.found_results, searchResults.size),
                     style = MaterialTheme.typography.titleMedium,
@@ -1169,7 +1174,7 @@ fun BibleTab(
                     }
                 }
 
-            Row(modifier = Modifier.fillMaxWidth().fillMaxHeight().padding(start = 4.dp)) {
+            Row(modifier = Modifier.fillMaxWidth().weight(1f).padding(start = 4.dp)) {
 
                 // Book column (resizable)
                 Column(modifier = Modifier.width(with(density) { colWBook.toDp() }).fillMaxHeight()) {
