@@ -238,6 +238,18 @@ fun MainDesktop(
     LaunchedEffect(effectiveTabIndex) {
         if (selectedTabIndex != effectiveTabIndex) selectedTabIndex = effectiveTabIndex
     }
+
+    // Remember the URL of the first successful STT connection so the Bible-tab connect
+    // button stays visible across restarts (and hides again if the URL later changes).
+    val sttConnected = sttManager?.connected?.value == true
+    LaunchedEffect(sttConnected) {
+        if (sttConnected) {
+            val url = appSettings.sttSettings.serverUrl
+            if (appSettings.sttSettings.lastConnectedUrl != url) {
+                onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(lastConnectedUrl = url)) }
+            }
+        }
+    }
     fun selectTab(tab: Tabs) {
         val idx = visibleTabs.indexOf(tab)
         if (idx >= 0) selectedTabIndex = idx

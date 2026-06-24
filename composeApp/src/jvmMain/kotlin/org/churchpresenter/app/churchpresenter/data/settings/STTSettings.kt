@@ -6,6 +6,7 @@ import org.churchpresenter.app.churchpresenter.utils.Constants
 @Serializable
 data class STTSettings(
     val serverUrl: String = "http://localhost:80",
+    val lastConnectedUrl: String = "", // URL of the last successful connection; gates the Bible-tab connect button
     val displayMode: String = "transcribe", // "transcribe", "translate", "both"
     val layout: String = "stacked", // "stacked", "stacked_inverse", "side_by_side", "side_by_side_inverse"
     val showWordHighlighting: Boolean = false,

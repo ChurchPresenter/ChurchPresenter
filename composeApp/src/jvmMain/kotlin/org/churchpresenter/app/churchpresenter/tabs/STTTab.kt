@@ -33,6 +33,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material.icons.filled.Tv
@@ -74,6 +75,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import churchpresenter.composeapp.generated.resources.Res
+import churchpresenter.composeapp.generated.resources.clear
 import churchpresenter.composeapp.generated.resources.qa_pos_bc
 import churchpresenter.composeapp.generated.resources.qa_pos_bl
 import churchpresenter.composeapp.generated.resources.qa_pos_br
@@ -195,7 +197,18 @@ fun STTTab(
                     label = { Text(stringResource(Res.string.stt_server_url)) },
                     singleLine = true,
                     modifier = Modifier.weight(1f),
-                    enabled = !connected && !connecting
+                    enabled = !connected && !connecting,
+                    trailingIcon = {
+                        if (!connected && !connecting && urlInput.isNotEmpty()) {
+                            IconButton(onClick = { urlInput = "" }) {
+                                Icon(
+                                    imageVector = Icons.Filled.Clear,
+                                    contentDescription = stringResource(Res.string.clear),
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+                        }
+                    }
                 )
 
                 // Status indicator

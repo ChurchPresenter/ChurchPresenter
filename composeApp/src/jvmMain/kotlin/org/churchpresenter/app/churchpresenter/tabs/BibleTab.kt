@@ -721,8 +721,8 @@ fun BibleTab(
             }
         }
 
-        // ── Detected references strip — visible whenever STT is connected ──
-        if (sttConnected) {
+        // ── Detected references strip — only when detection is enabled and STT is connected ──
+        if (sttConnected && engineSettings.enabled) {
             val levelName = when (textMatchLevel) {
                 TextMatchLevel.OFF -> stringResource(Res.string.bible_stt_level_off)
                 TextMatchLevel.CONSERVATIVE -> stringResource(Res.string.bible_stt_level_conservative)
@@ -1071,8 +1071,11 @@ fun BibleTab(
                                 modifier = Modifier.padding(end = 8.dp)
                             )
                         }
-                        // STT connect/disconnect — hidden when STT is not configured
-                        if (sttManager != null) {
+                        // STT connect/disconnect — appears only after the first successful
+                        // connection (persisted), and hides again if the URL changes while disconnected
+                        val stt = appSettings.sttSettings
+                        val sttEverConnected = stt.lastConnectedUrl.isNotBlank() && stt.lastConnectedUrl == stt.serverUrl
+                        if (sttManager != null && engineSettings.enabled && (sttConnected || sttEverConnected)) {
                             val sttButtonStr = if (sttConnected) stringResource(Res.string.stt_disconnect)
                                                else stringResource(Res.string.stt_connect)
                             TooltipArea(
