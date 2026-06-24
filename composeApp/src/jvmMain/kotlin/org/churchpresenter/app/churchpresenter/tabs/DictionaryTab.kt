@@ -177,7 +177,7 @@ private fun DictionaryListPane(
     val results = viewModel.searchResults
     val listState = rememberLazyListState()
 
-    LaunchedEffect(viewModel.selectedEntry) {
+    LaunchedEffect(viewModel.scrollRequestToken) {
         val entry = viewModel.selectedEntry ?: return@LaunchedEffect
         val idx = results.indexOfFirst { it.number == entry.number }
         if (idx >= 0) listState.animateScrollToItem(idx)

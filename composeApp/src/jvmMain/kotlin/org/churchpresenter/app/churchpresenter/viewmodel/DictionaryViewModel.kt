@@ -67,6 +67,8 @@ class DictionaryViewModel {
         private set
     var interlinearDisplayLimit by mutableStateOf(INTERLINEAR_PAGE_SIZE)
         private set
+    var scrollRequestToken by mutableStateOf(0)
+        private set
 
     // Verses sorted so entries matching the current left-pane filter appear first
     val sortedInterlinearVerses: List<InterlinearVerse>
@@ -283,8 +285,9 @@ class DictionaryViewModel {
         entryVerseFilter = null
     }
 
-    fun onEntrySelected(entry: StrongsEntry?, addToHistory: Boolean = true) {
+    fun onEntrySelected(entry: StrongsEntry?, addToHistory: Boolean = true, scrollToEntry: Boolean = true) {
         selectedEntry = entry
+        if (scrollToEntry && entry != null) scrollRequestToken++
         interlinearJob?.cancel()
         interlinearVerses = emptyList()
         interlinearDisplayLimit = INTERLINEAR_PAGE_SIZE
@@ -324,7 +327,7 @@ class DictionaryViewModel {
                 )
                 if (found.number !in visible) clearPassageFilter()
             }
-            onEntrySelected(found)
+            onEntrySelected(found, scrollToEntry = false)
         } else if (normalized.isNotEmpty()) {
             pendingSelectionNumber = normalized
         }
