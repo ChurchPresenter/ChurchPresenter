@@ -595,7 +595,7 @@ class CompanionServer {
 
     fun updateAtemConfig(atem: AtemSettings, lowerThirdFolder: String) {
         val prev = _atemSettings
-        if (prev?.host != atem.host || prev?.port != atem.port) {
+        if (prev == null || prev.host != atem.host || prev.port != atem.port) {
             AtemConnectionManager.invalidate()
         }
         _atemSettings = atem

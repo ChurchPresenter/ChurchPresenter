@@ -120,7 +120,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Tv
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.FormatQuote
-import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import org.churchpresenter.app.churchpresenter.viewmodel.STTManager
 import org.churchpresenter.app.churchpresenter.viewmodel.BibleEngineClient
 import org.churchpresenter.app.churchpresenter.viewmodel.DetectionSource
@@ -825,7 +825,7 @@ fun BibleTab(
                                     MaterialTheme.colorScheme.tertiary
                                 )
                                 DetectionSource.CONTINUATION -> Triple(
-                                    Icons.Filled.ArrowForward, Res.string.bible_stt_src_continuation,
+                                    Icons.AutoMirrored.Filled.ArrowForward, Res.string.bible_stt_src_continuation,
                                     MaterialTheme.colorScheme.secondary
                                 )
                             }

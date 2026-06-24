@@ -433,8 +433,8 @@ class BibleViewModel(
             if (primaryVerseText.isNotEmpty()) {
                 verseList.add(
                     SelectedVerse(
-                        bibleAbbreviation = primaryBible.getBibleAbbreviation() ?: "",
-                        bibleName = primaryBible.getBibleTitle() ?: "",
+                        bibleAbbreviation = primaryBible.getBibleAbbreviation(),
+                        bibleName = primaryBible.getBibleTitle(),
                         bookName = primaryBookName,
                         chapter = chapter,
                         verseNumber = verseNum,

@@ -240,7 +240,7 @@ fun PresentationTab(
         // Also push when any screen is locked to PRESENTATION, even if global mode changed
         val anyScreenOnPresentation = mode == Presenting.PRESENTATION ||
             presenterManager?.screenLocks?.value?.values?.any { it == Presenting.PRESENTATION } == true
-        if (anyScreenOnPresentation && presenterManager != null && viewModel.slides.isNotEmpty()) {
+        if (anyScreenOnPresentation && viewModel.slides.isNotEmpty()) {
             val slide = viewModel.slides.getOrNull(idx)
             presenterManager.setSelectedSlide(slide)
             presenterManager.setNextSlide(viewModel.slides.getOrNull(idx + 1))

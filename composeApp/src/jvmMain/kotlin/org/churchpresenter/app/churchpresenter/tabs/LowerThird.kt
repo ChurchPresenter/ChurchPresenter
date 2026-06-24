@@ -622,7 +622,7 @@ fun LowerThirdTab(
                                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                             )
                         }
-                        if (atemClipTooLong && atemSlotCapacity != null) {
+                        if (atemClipTooLong) {
                             val maxSecs = String.format(java.util.Locale.US, "%.1f", atemSlotCapacity / fpsUsed)
                             Text(
                                 stringResource(
@@ -1025,7 +1025,7 @@ fun LowerThirdTab(
                         Tooltip(
                             when {
                                 !atemReachable -> unreachableTooltip
-                                quickClipTooLong && quickClipVariant != null && quickClipCapacity != null -> {
+                                quickClipTooLong -> {
                                     val secs = String.format(java.util.Locale.US, "%.1f", quickClipCapacity / quickClipVariant.fps)
                                     stringResource(
                                         Res.string.atem_clip_too_long,
