@@ -288,14 +288,14 @@ fun STTTab(
                     checked = engine.enabled,
                     onCheckedChange = { onSettingsChange { s -> s.copy(bibleEngineSettings = s.bibleEngineSettings.copy(enabled = it)) } }
                 )
-                Text(stringResource(Res.string.bible_engine_detect))
+                Text(stringResource(Res.string.bible_engine_detect), color = MaterialTheme.colorScheme.onSurface)
                 Spacer(Modifier.weight(1f))
                 Checkbox(
                     checked = engine.runLocal,
                     enabled = engine.enabled,
                     onCheckedChange = { onSettingsChange { s -> s.copy(bibleEngineSettings = s.bibleEngineSettings.copy(runLocal = it)) } }
                 )
-                Text(stringResource(Res.string.bible_engine_run_local))
+                Text(stringResource(Res.string.bible_engine_run_local), color = MaterialTheme.colorScheme.onSurface)
             }
             AnimatedVisibility(visible = engine.enabled && !engine.runLocal) {
                 Row(
