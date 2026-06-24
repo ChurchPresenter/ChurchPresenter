@@ -431,7 +431,7 @@ private fun DictionaryDetailPane(
             horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.End),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            Row(horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically) {
             // Back / Forward history buttons
             TooltipArea(
                 tooltip = {
@@ -486,44 +486,6 @@ private fun DictionaryDetailPane(
                         text = if (dictLanguage == "en") "EN" else "RU",
                         style = MaterialTheme.typography.labelMedium,
                     )
-                }
-            }
-            if (availableDictBibles.isNotEmpty()) {
-                var bibleDropExpanded by remember { mutableStateOf(false) }
-                val currentBibleLabel = availableDictBibles.firstOrNull { it.first == selectedDictBible }?.second
-                    ?: primaryBibleStr
-                Box {
-                    TooltipArea(
-                        tooltip = {
-                            Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
-                                Text(selectBibleStr, color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
-                            }
-                        },
-                        tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp)),
-                    ) {
-                        OutlinedButton(
-                            onClick = { bibleDropExpanded = true },
-                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp),
-                            modifier = Modifier.height(32.dp),
-                            enabled = !isDictBibleLoading,
-                        ) {
-                            Text(currentBibleLabel, style = MaterialTheme.typography.labelSmall, maxLines = 1)
-                            Icon(Icons.Default.ArrowDropDown, contentDescription = null, modifier = Modifier.size(16.dp))
-                        }
-                    }
-                    DropdownMenu(expanded = bibleDropExpanded, onDismissRequest = { bibleDropExpanded = false }) {
-                        DropdownMenuItem(
-                            text = { Text(primaryBibleStr, style = MaterialTheme.typography.bodySmall) },
-                            onClick = { onSelectDictBible(""); bibleDropExpanded = false },
-                        )
-                        HorizontalDivider()
-                        availableDictBibles.forEach { (filePath, title) ->
-                            DropdownMenuItem(
-                                text = { Text(title, style = MaterialTheme.typography.bodySmall) },
-                                onClick = { onSelectDictBible(filePath); bibleDropExpanded = false },
-                            )
-                        }
-                    }
                 }
             }
             if (onAddToSchedule != null) {
@@ -668,12 +630,47 @@ private fun DictionaryDetailPane(
                 // In Scripture section
                 HorizontalDivider()
 
-                Text(
-                    text = stringResource(Res.string.dictionary_in_scripture_header),
-                    style = MaterialTheme.typography.labelLarge,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        text = stringResource(Res.string.dictionary_in_scripture_header),
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    if (availableDictBibles.isNotEmpty()) {
+                        var bibleDropExpanded by remember { mutableStateOf(false) }
+                        val currentBibleLabel = availableDictBibles.firstOrNull { it.first == selectedDictBible }?.second
+                            ?: primaryBibleStr
+                        Box {
+                            OutlinedButton(
+                                onClick = { bibleDropExpanded = true },
+                                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp),
+                                modifier = Modifier.height(28.dp),
+                                enabled = !isDictBibleLoading,
+                            ) {
+                                Text(currentBibleLabel, style = MaterialTheme.typography.labelSmall, maxLines = 1)
+                                Icon(Icons.Default.ArrowDropDown, contentDescription = selectBibleStr, modifier = Modifier.size(14.dp))
+                            }
+                            DropdownMenu(expanded = bibleDropExpanded, onDismissRequest = { bibleDropExpanded = false }) {
+                                DropdownMenuItem(
+                                    text = { Text(primaryBibleStr, style = MaterialTheme.typography.bodySmall) },
+                                    onClick = { onSelectDictBible(""); bibleDropExpanded = false },
+                                )
+                                HorizontalDivider()
+                                availableDictBibles.forEach { (filePath, title) ->
+                                    DropdownMenuItem(
+                                        text = { Text(title, style = MaterialTheme.typography.bodySmall) },
+                                        onClick = { onSelectDictBible(filePath); bibleDropExpanded = false },
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
 
                 if (isInterlinearLoading) {
                     Row(
