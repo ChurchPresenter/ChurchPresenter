@@ -150,11 +150,17 @@ fun DictionaryTab(
             onGoForward = viewModel::goForward,
             dictLanguage = viewModel.dictLanguage,
             onToggleDictLanguage = viewModel::toggleDictLanguage,
-            interlinearVerses = viewModel.sortedInterlinearVerses,
+            interlinearVerses = viewModel.filteredSortedInterlinearVerses,
             totalInterlinearCount = viewModel.interlinearVerses.size,
             isInterlinearLoading = viewModel.isInterlinearLoading,
             interlinearDisplayLimit = viewModel.interlinearDisplayLimit,
             onShowMore = viewModel::showMoreInterlinear,
+            cardBookFilter = viewModel.cardBookFilter,
+            cardChapterFilter = viewModel.cardChapterFilter,
+            cardAvailableBooks = viewModel.cardAvailableBooks,
+            cardAvailableChapters = viewModel.cardAvailableChapters,
+            onFilterCardsByBook = viewModel::filterCardsByBook,
+            onFilterCardsByChapter = viewModel::filterCardsByChapter,
             getVerseText = getVerseText,
             getBookName = getBookName,
             onWordClick = onWordClick,
@@ -448,6 +454,12 @@ private fun DictionaryDetailPane(
     isInterlinearLoading: Boolean,
     interlinearDisplayLimit: Int,
     onShowMore: () -> Unit,
+    cardBookFilter: Int? = null,
+    cardChapterFilter: Int? = null,
+    cardAvailableBooks: List<Int> = emptyList(),
+    cardAvailableChapters: List<Int> = emptyList(),
+    onFilterCardsByBook: (Int?) -> Unit = {},
+    onFilterCardsByChapter: (Int?) -> Unit = {},
     getVerseText: ((bookId: Int, chapter: Int, verse: Int) -> String?)? = null,
     getBookName: ((bookId: Int) -> String?)? = null,
     onWordClick: ((String) -> Unit)? = null,
@@ -670,12 +682,40 @@ private fun DictionaryDetailPane(
                 // In Scripture section
                 HorizontalDivider()
 
-                Text(
-                    text = stringResource(Res.string.dictionary_in_scripture_header),
-                    style = MaterialTheme.typography.labelLarge,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    Text(
+                        text = stringResource(Res.string.dictionary_in_scripture_header),
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    if (!isInterlinearLoading && cardAvailableBooks.size > 1) {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            InScriptureBookDropdown(
+                                allBooksLabel = stringResource(Res.string.dictionary_in_scripture_all_books),
+                                selectedBookId = cardBookFilter,
+                                availableBooks = cardAvailableBooks,
+                                getBookName = getBookName,
+                                onSelect = onFilterCardsByBook,
+                            )
+                            if (cardBookFilter != null && cardAvailableChapters.size > 1) {
+                                InScriptureChapterDropdown(
+                                    allChaptersLabel = stringResource(Res.string.dictionary_in_scripture_all_chapters),
+                                    selectedChapter = cardChapterFilter,
+                                    availableChapters = cardAvailableChapters,
+                                    onSelect = onFilterCardsByChapter,
+                                )
+                            }
+                        }
+                    }
+                }
 
                 if (isInterlinearLoading) {
                     Row(

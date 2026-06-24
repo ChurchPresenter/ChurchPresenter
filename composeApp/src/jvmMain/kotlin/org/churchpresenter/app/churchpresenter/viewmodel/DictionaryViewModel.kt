@@ -70,6 +70,21 @@ class DictionaryViewModel {
     var scrollRequestToken by mutableStateOf(0)
         private set
 
+    // Card filter: book/chapter filter for the detail-pane verse cards (resets on entry switch)
+    var cardBookFilter by mutableStateOf<Int?>(null)
+        private set
+    var cardChapterFilter by mutableStateOf<Int?>(null)
+        private set
+
+    val cardAvailableBooks: List<Int>
+        get() = interlinearVerses.map { it.bookId }.distinct().sorted()
+
+    val cardAvailableChapters: List<Int>
+        get() {
+            val bookId = cardBookFilter ?: return emptyList()
+            return interlinearVerses.filter { it.bookId == bookId }.map { it.chapter }.distinct().sorted()
+        }
+
     // Verses sorted so entries matching the current left-pane filter appear first
     val sortedInterlinearVerses: List<InterlinearVerse>
         get() {
@@ -82,6 +97,17 @@ class DictionaryViewModel {
                 (verse == null || v.verseNumber == verse)
             }
             return matching + rest
+        }
+
+    // Sorted verses additionally filtered by the detail-pane card filter
+    val filteredSortedInterlinearVerses: List<InterlinearVerse>
+        get() {
+            val sorted = sortedInterlinearVerses
+            val book = cardBookFilter ?: return sorted
+            val chapter = cardChapterFilter
+            return sorted.filter { v ->
+                v.bookId == book && (chapter == null || v.chapter == chapter)
+            }
         }
 
     // Entry-list passage filter (filters the left-pane list)
@@ -256,6 +282,15 @@ class DictionaryViewModel {
         onEntrySelected(null, addToHistory = false)
     }
 
+    fun filterCardsByBook(bookId: Int?) {
+        cardBookFilter = bookId
+        cardChapterFilter = null
+    }
+
+    fun filterCardsByChapter(chapter: Int?) {
+        cardChapterFilter = chapter
+    }
+
     fun filterEntryListByBook(bookId: Int?) {
         entryBookFilter = bookId
         entryChapterFilter = null
@@ -295,6 +330,8 @@ class DictionaryViewModel {
         interlinearJob?.cancel()
         interlinearVerses = emptyList()
         interlinearDisplayLimit = INTERLINEAR_PAGE_SIZE
+        cardBookFilter = null
+        cardChapterFilter = null
         if (entry == null) return
         if (addToHistory) {
             // Truncate any forward history before pushing the new entry
