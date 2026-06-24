@@ -281,12 +281,16 @@ jobs:
 
           # Verify credentials against Apple before uploading
           echo "Verifying credentials with Apple..."
+          # Run under set +e so a non-zero exit (e.g. rejected credentials) does NOT
+          # abort the step before we can print Apple's actual error below.
+          set +e
           HISTORY_OUT=$( xcrun notarytool history \
             --key "$RUNNER_TEMP/private_keys/AuthKey.p8" \
             --key-id "$API_KEY_ID" \
             --issuer "$API_ISSUER_ID" \
             --output-format json 2>&1 )
           HISTORY_EXIT=$?
+          set -e
           if [ $HISTORY_EXIT -ne 0 ] || echo "$HISTORY_OUT" | grep -qiE "401|unauthenticated|invalid credentials"; then
             echo "❌ Credential check failed (exit $HISTORY_EXIT):"
             echo "$HISTORY_OUT"
@@ -452,12 +456,16 @@ jobs:
 
           # Verify credentials against Apple before uploading
           echo "Verifying credentials with Apple..."
+          # Run under set +e so a non-zero exit (e.g. rejected credentials) does NOT
+          # abort the step before we can print Apple's actual error below.
+          set +e
           HISTORY_OUT=$( xcrun notarytool history \
             --key "$RUNNER_TEMP/private_keys/AuthKey.p8" \
             --key-id "$API_KEY_ID" \
             --issuer "$API_ISSUER_ID" \
             --output-format json 2>&1 )
           HISTORY_EXIT=$?
+          set -e
           # Some Xcode versions return exit 0 even on 401 — also grep output
           if [ $HISTORY_EXIT -ne 0 ] || echo "$HISTORY_OUT" | grep -qiE "401|unauthenticated|invalid credentials"; then
             echo "❌ Credential check failed (exit $HISTORY_EXIT) — output:"
