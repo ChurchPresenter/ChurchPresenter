@@ -748,12 +748,8 @@ private fun InterlinearVerseRow(
     onWordClick: ((String) -> Unit)? = null,
     onVerseClick: ((bookId: Int, chapter: Int, verse: Int) -> Unit)? = null,
 ) {
-    val verseText = remember(interlinearVerse.ref) {
-        getVerseText?.invoke(interlinearVerse.bookId, interlinearVerse.chapter, interlinearVerse.verseNumber)
-    }
-    val bookName = remember(interlinearVerse.bookId) {
-        getBookName?.invoke(interlinearVerse.bookId) ?: "Book ${interlinearVerse.bookId}"
-    }
+    val verseText = getVerseText?.invoke(interlinearVerse.bookId, interlinearVerse.chapter, interlinearVerse.verseNumber)
+    val bookName = getBookName?.invoke(interlinearVerse.bookId) ?: "Book ${interlinearVerse.bookId}"
     val refLabel = "$bookName ${interlinearVerse.chapter}:${interlinearVerse.verseNumber}"
     val goToVerseStr = stringResource(Res.string.dictionary_go_to_verse)
 

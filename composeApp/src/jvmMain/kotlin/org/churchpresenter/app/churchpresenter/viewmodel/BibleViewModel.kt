@@ -604,6 +604,40 @@ class BibleViewModel(
         return true
     }
 
+    /**
+     * Navigates to the given canonical bookId/chapter/verseNumber using the primary Bible,
+     * without touching primary/secondary Bible settings.
+     * Robust: uses the Bible's own reverse-lookup so book numbering mismatches don't fail silently.
+     */
+    fun selectVerseByBookId(bookId: Int, chapter: Int, verseNumber: Int) {
+        val bible = _primaryBible.value ?: return
+        val displayIndex = bible.getDisplayIndexForBookId(bookId)
+        if (displayIndex < 0) return
+        val bookCount = minOf(bible.getBookCount(), CANONICAL_BOOK_COUNT)
+        val clamped = displayIndex.coerceIn(0, bookCount - 1)
+
+        searchJob?.cancel()
+        _isSearchMode.value = false
+        _searchResults.value = emptyList()
+        _selectedBookIndex.value = clamped
+        _selectedChapter.value = chapter
+        _selectedVerseIndex.value = 0
+        _selectedVerseIndices.clear()
+        _multiVerseEnabled.value = false
+
+        loadChapterJob?.cancel()
+        loadChapterJob = viewModelScope.launch {
+            if (!_isFullyLoadedFlow.value) _isFullyLoadedFlow.first { it }
+            val bId = bible.getBookId(clamped)
+            val chapterVerses = withContext(Dispatchers.IO) { bible.getChapter(bId, chapter).verses }
+            _verses.value = chapterVerses
+            val verseIdx = chapterVerses.indexOfFirst { it.startsWith("$verseNumber. ") }
+            _selectedVerseIndex.value = if (verseIdx >= 0) verseIdx else 0
+            _verseSelectionToken.value++
+            refreshFilteredLists()
+        }
+    }
+
     fun getChaptersForCurrentBook(): List<String> {
         _primaryBible.value?.let { bible ->
             // getChapterCount expects 0-based book index

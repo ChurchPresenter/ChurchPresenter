@@ -517,6 +517,15 @@ class Bible {
         books.getOrNull(displayIndex)?.bookId?.toIntOrNull() ?: (displayIndex + 1)
 
     /**
+     * Returns the 0-based display index for the given canonical book ID, or -1 if not found.
+     * Falls back to (bookId - 1) for Bibles where the internal numbering matches canonical order.
+     */
+    fun getDisplayIndexForBookId(bookId: Int): Int {
+        val direct = books.indexOfFirst { it.bookId == bookId.toString() }
+        return if (direct >= 0) direct else (bookId - 1)
+    }
+
+    /**
      * Extracts the internal code book/chapter/verse from a verseId like "B019C023V001".
      * Returns (book, chapter, verse) or null if the format doesn't match.
      */
