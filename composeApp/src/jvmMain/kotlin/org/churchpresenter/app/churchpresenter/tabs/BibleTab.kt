@@ -312,6 +312,19 @@ fun BibleTab(
         liveChapterVerses = viewModel.getChapterVerses(first.bookName, first.chapter)
     }
 
+    // On startup (split mode), seed the live panel with the current left selection
+    // (Genesis 1:1 by default) so the right side isn't blank before the first Go Live.
+    LaunchedEffect(splitBrowseMode, verses.size) {
+        if (!splitBrowseMode) return@LaunchedEffect
+        if (liveChapterVerses.isNotEmpty() || displayedVerses.isNotEmpty()) return@LaunchedEffect
+        val first = viewModel.getSelectedVerses().firstOrNull() ?: return@LaunchedEffect
+        liveBookName = first.bookName
+        liveChapterNum = first.chapter
+        liveVerseNumbers = setOf(first.verseNumber)
+        liveNavTargetVerse = first.verseNumber
+        liveChapterVerses = viewModel.getChapterVerses(first.bookName, first.chapter)
+    }
+
     LaunchedEffect(liveNavToken) {
         if (liveNavToken == 0 || liveNavTargetVerse == 0) return@LaunchedEffect
         val verses = viewModel.getVersesForDisplay(liveBookName, liveChapterNum, liveNavTargetVerse)
@@ -377,8 +390,8 @@ fun BibleTab(
     LaunchedEffect(verseSelectionToken) {
         // In multi-verse mode while presenting, don't update until Go Live is pressed
         if (viewModel.multiVerseEnabled.value && currentIsPresenting) return@LaunchedEffect
-        // In split browse mode while presenting: suppress auto-live (explicit Go Live button still works)
-        if (splitBrowseMode && currentIsPresenting) return@LaunchedEffect
+        // In split browse mode, never auto-live on browse — only explicit Go Live updates the live panel
+        if (splitBrowseMode) return@LaunchedEffect
         if (verses.isNotEmpty() && selectedVerseIndex >= 0 && selectedVerseIndex < verses.size) {
             val selectedVerses = viewModel.getSelectedVerses()
             if (selectedVerses.isNotEmpty()) onVerseSelected(selectedVerses)
@@ -387,7 +400,7 @@ fun BibleTab(
 
     // While not presenting, also update preview when chapter loads so the first verse shows
     LaunchedEffect(verses.size) {
-        if (!currentIsPresenting && verses.isNotEmpty()) {
+        if (!currentIsPresenting && !splitBrowseMode && verses.isNotEmpty()) {
             val selectedVerses = viewModel.getSelectedVerses()
             if (selectedVerses.isNotEmpty()) onVerseSelected(selectedVerses)
         }
