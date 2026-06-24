@@ -79,6 +79,8 @@ import churchpresenter.composeapp.generated.resources.dictionary_filter_hebrew
 import churchpresenter.composeapp.generated.resources.dictionary_back
 import churchpresenter.composeapp.generated.resources.dictionary_forward
 import churchpresenter.composeapp.generated.resources.dictionary_switch_language
+import churchpresenter.composeapp.generated.resources.dictionary_bible_primary
+import churchpresenter.composeapp.generated.resources.dictionary_bible_select
 import churchpresenter.composeapp.generated.resources.ic_redo
 import churchpresenter.composeapp.generated.resources.ic_undo
 import churchpresenter.composeapp.generated.resources.dictionary_go_to_verse
@@ -147,6 +149,10 @@ fun DictionaryTab(
             onGoForward = viewModel::goForward,
             dictLanguage = viewModel.dictLanguage,
             onToggleDictLanguage = viewModel::toggleDictLanguage,
+            availableDictBibles = viewModel.availableDictBibles,
+            selectedDictBible = viewModel.dictBibleFile,
+            onSelectDictBible = viewModel::setDictBible,
+            isDictBibleLoading = viewModel.isDictBibleLoading,
             interlinearVerses = viewModel.sortedInterlinearVerses,
             totalInterlinearCount = viewModel.interlinearVerses.size,
             isInterlinearLoading = viewModel.isInterlinearLoading,
@@ -392,6 +398,10 @@ private fun DictionaryDetailPane(
     onGoForward: () -> Unit = {},
     dictLanguage: String = "en",
     onToggleDictLanguage: () -> Unit = {},
+    availableDictBibles: List<Pair<String, String>> = emptyList(),
+    selectedDictBible: String = "",
+    onSelectDictBible: (String) -> Unit = {},
+    isDictBibleLoading: Boolean = false,
     interlinearVerses: List<InterlinearVerse>,
     totalInterlinearCount: Int,
     isInterlinearLoading: Boolean,
@@ -409,6 +419,8 @@ private fun DictionaryDetailPane(
     val backStr = stringResource(Res.string.dictionary_back)
     val forwardStr = stringResource(Res.string.dictionary_forward)
     val switchLangStr = stringResource(Res.string.dictionary_switch_language)
+    val primaryBibleStr = stringResource(Res.string.dictionary_bible_primary)
+    val selectBibleStr = stringResource(Res.string.dictionary_bible_select)
 
     Column(modifier = modifier) {
         // Action toolbar
@@ -474,6 +486,44 @@ private fun DictionaryDetailPane(
                         text = if (dictLanguage == "en") "EN" else "RU",
                         style = MaterialTheme.typography.labelMedium,
                     )
+                }
+            }
+            if (availableDictBibles.isNotEmpty()) {
+                var bibleDropExpanded by remember { mutableStateOf(false) }
+                val currentBibleLabel = availableDictBibles.firstOrNull { it.first == selectedDictBible }?.second
+                    ?: primaryBibleStr
+                Box {
+                    TooltipArea(
+                        tooltip = {
+                            Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
+                                Text(selectBibleStr, color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
+                            }
+                        },
+                        tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp)),
+                    ) {
+                        OutlinedButton(
+                            onClick = { bibleDropExpanded = true },
+                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp),
+                            modifier = Modifier.height(32.dp),
+                            enabled = !isDictBibleLoading,
+                        ) {
+                            Text(currentBibleLabel, style = MaterialTheme.typography.labelSmall, maxLines = 1)
+                            Icon(Icons.Default.ArrowDropDown, contentDescription = null, modifier = Modifier.size(16.dp))
+                        }
+                    }
+                    DropdownMenu(expanded = bibleDropExpanded, onDismissRequest = { bibleDropExpanded = false }) {
+                        DropdownMenuItem(
+                            text = { Text(primaryBibleStr, style = MaterialTheme.typography.bodySmall) },
+                            onClick = { onSelectDictBible(""); bibleDropExpanded = false },
+                        )
+                        HorizontalDivider()
+                        availableDictBibles.forEach { (filePath, title) ->
+                            DropdownMenuItem(
+                                text = { Text(title, style = MaterialTheme.typography.bodySmall) },
+                                onClick = { onSelectDictBible(filePath); bibleDropExpanded = false },
+                            )
+                        }
+                    }
                 }
             }
             if (onAddToSchedule != null) {

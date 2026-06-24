@@ -310,6 +310,9 @@ fun MainDesktop(
 
     val dictionaryViewModel = remember { DictionaryViewModel() }
     DisposableEffect(Unit) { onDispose { dictionaryViewModel.dispose() } }
+    LaunchedEffect(appSettings.bibleSettings.storageDirectory) {
+        dictionaryViewModel.loadAvailableBibles(appSettings.bibleSettings.storageDirectory)
+    }
 
     // ScheduleViewModel is hoisted here (outside AnimatedVisibility) so that collapsing/
     // expanding the schedule panel does NOT destroy the schedule items.
@@ -1203,10 +1206,12 @@ fun MainDesktop(
                                     presenting(Presenting.DICTIONARY)
                                 },
                                 getVerseText = { bookId, chapter, verse ->
-                                    bibleViewModel.primaryBible.value?.getVerseDetails(bookId, chapter, verse)?.second
+                                    val bible = dictionaryViewModel.dictBible ?: bibleViewModel.primaryBible.value
+                                    bible?.getVerseDetails(bookId, chapter, verse)?.second
                                 },
                                 getBookName = { bookId ->
-                                    bibleViewModel.primaryBible.value?.getBookName(bookId)
+                                    val bible = dictionaryViewModel.dictBible ?: bibleViewModel.primaryBible.value
+                                    bible?.getBookName(bookId)
                                 },
                                 onWordClick = { strongsNumber ->
                                     dictionaryViewModel.selectByNumber(strongsNumber)

@@ -12,10 +12,13 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
+import org.churchpresenter.app.churchpresenter.data.Bible
 import org.churchpresenter.app.churchpresenter.data.InterlinearRepository
 import org.churchpresenter.app.churchpresenter.data.InterlinearVerse
 import org.churchpresenter.app.churchpresenter.data.StrongsEntry
 import org.jetbrains.compose.resources.ExperimentalResourceApi
+import java.io.File
+import java.nio.charset.StandardCharsets
 
 enum class DictionaryLanguageFilter { ALL, HEBREW, GREEK }
 
@@ -23,6 +26,14 @@ class DictionaryViewModel {
     private val viewModelScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
 
     var dictLanguage by mutableStateOf("en")
+        private set
+    var dictBibleFile by mutableStateOf("")
+        private set
+    var dictBible by mutableStateOf<Bible?>(null)
+        private set
+    var isDictBibleLoading by mutableStateOf(false)
+        private set
+    var availableDictBibles by mutableStateOf<List<Pair<String, String>>>(emptyList())
         private set
     var isLoading by mutableStateOf(false)
         private set
@@ -159,6 +170,50 @@ class DictionaryViewModel {
                     isInterlinearDataLoaded = true
                 } catch (_: Exception) { }
             }
+        }
+    }
+
+    fun loadAvailableBibles(directory: String) {
+        if (directory.isEmpty()) { availableDictBibles = emptyList(); return }
+        viewModelScope.launch {
+            val dir = File(directory)
+            if (!dir.exists() || !dir.isDirectory) { availableDictBibles = emptyList(); return@launch }
+            availableDictBibles = withContext(Dispatchers.IO) {
+                dir.listFiles { f -> f.extension.lowercase() == "spb" }
+                    ?.sortedBy { it.name }
+                    ?.map { f -> f.absolutePath to extractBibleTitle(f) }
+                    ?: emptyList()
+            }
+        }
+    }
+
+    fun setDictBible(filePath: String) {
+        if (filePath == dictBibleFile) return
+        dictBibleFile = filePath
+        if (filePath.isEmpty()) { dictBible = null; return }
+        isDictBibleLoading = true
+        viewModelScope.launch {
+            try {
+                dictBible = withContext(Dispatchers.IO) { Bible().apply { loadFromSpb(filePath) } }
+            } catch (_: Exception) {
+                dictBible = null
+            } finally {
+                isDictBibleLoading = false
+            }
+        }
+    }
+
+    private fun extractBibleTitle(file: File): String {
+        return try {
+            file.bufferedReader(StandardCharsets.UTF_8).use { reader ->
+                repeat(10) {
+                    val line = reader.readLine() ?: return@use file.nameWithoutExtension
+                    if (line.startsWith("##Title:")) return@use line.substring(8).trim()
+                }
+                file.nameWithoutExtension
+            }
+        } catch (_: Exception) {
+            file.nameWithoutExtension
         }
     }
 
