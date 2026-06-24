@@ -78,6 +78,7 @@ import churchpresenter.composeapp.generated.resources.dictionary_filter_greek
 import churchpresenter.composeapp.generated.resources.dictionary_filter_hebrew
 import churchpresenter.composeapp.generated.resources.dictionary_back
 import churchpresenter.composeapp.generated.resources.dictionary_forward
+import churchpresenter.composeapp.generated.resources.dictionary_switch_language
 import churchpresenter.composeapp.generated.resources.ic_redo
 import churchpresenter.composeapp.generated.resources.ic_undo
 import churchpresenter.composeapp.generated.resources.dictionary_go_to_verse
@@ -144,6 +145,8 @@ fun DictionaryTab(
             canGoForward = viewModel.canGoForward,
             onGoBack = viewModel::goBack,
             onGoForward = viewModel::goForward,
+            dictLanguage = viewModel.dictLanguage,
+            onToggleDictLanguage = viewModel::toggleDictLanguage,
             interlinearVerses = viewModel.sortedInterlinearVerses,
             totalInterlinearCount = viewModel.interlinearVerses.size,
             isInterlinearLoading = viewModel.isInterlinearLoading,
@@ -387,6 +390,8 @@ private fun DictionaryDetailPane(
     canGoForward: Boolean = false,
     onGoBack: () -> Unit = {},
     onGoForward: () -> Unit = {},
+    dictLanguage: String = "en",
+    onToggleDictLanguage: () -> Unit = {},
     interlinearVerses: List<InterlinearVerse>,
     totalInterlinearCount: Int,
     isInterlinearLoading: Boolean,
@@ -403,6 +408,7 @@ private fun DictionaryDetailPane(
     val goLiveStr = stringResource(Res.string.go_live)
     val backStr = stringResource(Res.string.dictionary_back)
     val forwardStr = stringResource(Res.string.dictionary_forward)
+    val switchLangStr = stringResource(Res.string.dictionary_switch_language)
 
     Column(modifier = modifier) {
         // Action toolbar
@@ -448,6 +454,25 @@ private fun DictionaryDetailPane(
                         modifier = Modifier.size(20.dp),
                         tint = if (canGoForward) MaterialTheme.colorScheme.onSurface
                                else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                    )
+                }
+            }
+            TooltipArea(
+                tooltip = {
+                    Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
+                        Text(switchLangStr, color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
+                    }
+                },
+                tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp)),
+            ) {
+                OutlinedButton(
+                    onClick = onToggleDictLanguage,
+                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp),
+                    modifier = Modifier.height(32.dp),
+                ) {
+                    Text(
+                        text = if (dictLanguage == "en") "EN" else "RU",
+                        style = MaterialTheme.typography.labelMedium,
                     )
                 }
             }

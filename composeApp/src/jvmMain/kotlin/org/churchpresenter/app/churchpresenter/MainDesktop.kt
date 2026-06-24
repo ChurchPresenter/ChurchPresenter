@@ -308,10 +308,8 @@ fun MainDesktop(
     }
     DisposableEffect(Unit) { onDispose { bibleEngineClient.dispose() } }
 
-    val currentDictLanguage = rememberUpdatedState(appSettings.language)
-    val dictionaryViewModel = remember { DictionaryViewModel { currentDictLanguage.value } }
+    val dictionaryViewModel = remember { DictionaryViewModel() }
     DisposableEffect(Unit) { onDispose { dictionaryViewModel.dispose() } }
-    LaunchedEffect(appSettings.language) { dictionaryViewModel.reload() }
 
     // ScheduleViewModel is hoisted here (outside AnimatedVisibility) so that collapsing/
     // expanding the schedule panel does NOT destroy the schedule items.

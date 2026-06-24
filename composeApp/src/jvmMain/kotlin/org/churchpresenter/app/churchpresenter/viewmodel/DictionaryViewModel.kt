@@ -19,9 +19,11 @@ import org.jetbrains.compose.resources.ExperimentalResourceApi
 
 enum class DictionaryLanguageFilter { ALL, HEBREW, GREEK }
 
-class DictionaryViewModel(private val currentLanguage: () -> String = { "en" }) {
+class DictionaryViewModel {
     private val viewModelScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
 
+    var dictLanguage by mutableStateOf("en")
+        private set
     var isLoading by mutableStateOf(false)
         private set
     var entries: List<StrongsEntry> by mutableStateOf(emptyList())
@@ -130,10 +132,9 @@ class DictionaryViewModel(private val currentLanguage: () -> String = { "en" }) 
         viewModelScope.launch {
             try {
                 val json = Json { ignoreUnknownKeys = true }
-                val lang = currentLanguage()
-                val hFile = if (lang == "ru") "files/dictionary/strongs_h_ru.json"
+                val hFile = if (dictLanguage == "ru") "files/dictionary/strongs_h_ru.json"
                             else "files/dictionary/strongs_h.json"
-                val gFile = if (lang == "ru") "files/dictionary/strongs_g_ru.json"
+                val gFile = if (dictLanguage == "ru") "files/dictionary/strongs_g_ru.json"
                             else "files/dictionary/strongs_g.json"
                 val hBytes = withContext(Dispatchers.IO) { Res.readBytes(hFile) }
                 val gBytes = withContext(Dispatchers.IO) { Res.readBytes(gFile) }
@@ -159,6 +160,11 @@ class DictionaryViewModel(private val currentLanguage: () -> String = { "en" }) 
                 } catch (_: Exception) { }
             }
         }
+    }
+
+    fun toggleDictLanguage() {
+        dictLanguage = if (dictLanguage == "en") "ru" else "en"
+        reload()
     }
 
     fun reload() {
