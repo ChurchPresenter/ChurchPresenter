@@ -68,6 +68,7 @@ import org.churchpresenter.app.churchpresenter.data.settings.ScreenAssignment
 import org.churchpresenter.app.churchpresenter.models.AnimationType
 import org.churchpresenter.app.churchpresenter.presenter.AnnouncementsPresenter
 import org.churchpresenter.app.churchpresenter.presenter.BiblePresenter
+import org.churchpresenter.app.churchpresenter.presenter.DictionaryPresenter
 import org.churchpresenter.app.churchpresenter.presenter.LowerThirdPresenter
 import org.churchpresenter.app.churchpresenter.presenter.MediaPresenter
 import org.churchpresenter.app.churchpresenter.presenter.PicturePresenter
@@ -187,6 +188,7 @@ private fun SingleDisplayPreview(
     val websiteUrl by presenterManager.websiteUrl
     val webSnapshot by presenterManager.webSnapshot
     val activeScene by presenterManager.activeScene
+    val displayedDictionaryEntry by presenterManager.displayedDictionaryEntry
     val mediaViewModel = LocalMediaViewModel.current
 
     val isLowerThird = screenAssignment.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD
@@ -329,6 +331,13 @@ private fun SingleDisplayPreview(
                                     )
                                 }
                             }
+                            Presenting.DICTIONARY ->
+                                DictionaryPresenter(
+                                    entry = displayedDictionaryEntry,
+                                    dictionarySettings = appSettings.dictionarySettings,
+                                    outputRole = primaryRole,
+                                    transitionAlpha = 1f,
+                                )
                             else -> {}
                         }
                         }

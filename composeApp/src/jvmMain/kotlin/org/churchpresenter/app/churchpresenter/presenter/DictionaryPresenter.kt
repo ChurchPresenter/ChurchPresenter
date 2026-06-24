@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -83,9 +84,9 @@ fun DictionaryPresenter(
 
     BoxWithConstraints(
         modifier = modifier
-            .fillMaxWidth()
+            .fillMaxSize()
             .graphicsLayer { alpha = transitionAlpha },
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.BottomCenter
     ) {
         if (entry != null) {
             val isSmall = maxHeight < 500.dp
