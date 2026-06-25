@@ -150,6 +150,11 @@ class BibleViewModel(
     private val _detectedReferences = mutableStateOf<List<DetectedReference>>(emptyList())
     val detectedReferences: State<List<DetectedReference>> = _detectedReferences
 
+    // STT segment_id behind the most recent detection. Stamped onto the live-references log on the
+    // next go-live so displays correlate to the transcript + detection without any wall-clock/NTP.
+    @Volatile private var _lastDetectionSegmentId: String? = null
+    val lastDetectionSegmentId: String? get() = _lastDetectionSegmentId
+
     private val _autoFollowEnabled = mutableStateOf(appSettings.bibleEngineSettings.autoFollow)
     val autoFollowEnabled: State<Boolean> = _autoFollowEnabled
     fun setAutoFollow(enabled: Boolean) {
@@ -1272,7 +1277,11 @@ class BibleViewModel(
         verseEnd: Int?,
         verseText: String,
         matchType: String,
+        segmentId: String? = null,
     ) {
+        // Remember the STT segment behind the most recent detection so a subsequent go-live can stamp
+        // it onto the live-references log — clock-free correlation back to the transcript + detection.
+        if (segmentId != null) _lastDetectionSegmentId = segmentId
         val bookIndex = canonicalBookIdToIndex(bookId) ?: return
         val source = when (matchType) {
             "explicit" -> DetectionSource.EXPLICIT

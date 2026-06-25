@@ -494,12 +494,21 @@ fun MainDesktop(
             presenterManager.setPresentingMode(Presenting.BIBLE)
             presenterManager.setShowPresenterWindow(true)
             if (bookIndex >= 0) {
+                // Capture the full span the client asked for: parse req.verseRange ("1-3", "2,4,5")
+                // and take its max as the end, rather than hardcoding null (which dropped the range).
+                val rangeNums = req.verseRange
+                    .takeIf { it.isNotBlank() }
+                    ?.split(",", "-")
+                    ?.mapNotNull { it.trim().toIntOrNull() }
+                    ?.takeIf { it.isNotEmpty() }
+                val verseEnd = rangeNums?.max()?.takeIf { it > req.verseNumber }
                 TrainingDataLogger.logLiveReference(
                     book       = bookIndex + 1,
                     chapter    = req.chapter,
                     verseStart = req.verseNumber,
-                    verseEnd   = null,
-                    source     = "remote"
+                    verseEnd   = verseEnd,
+                    source     = "remote",
+                    segmentId  = bibleViewModel.lastDetectionSegmentId
                 )
             }
         }

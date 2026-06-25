@@ -28,16 +28,24 @@ import org.json.JSONObject
  * starts the engine in-process when STT connects, opens a WebSocket to `/bible-engine`, and forwards
  * `scripture.*` events to [onScripture]. The level chip is pushed to the engine via [setLevel].
  *
- * @param onScripture (bookId, chapter, verseStart, verseEnd, verseText, matchType) for each event.
+ * @param onScripture (bookId, chapter, verseStart, verseEnd, verseText, matchType, segmentId) for
+ *   each event. [segmentId] is the STT segment that triggered the detection (clock-free correlation
+ *   key), or null when the STT stream didn't provide one.
  */
 class BibleEngineClient(
-    private val onScripture: (Int, Int, Int, Int?, String, String) -> Unit,
+    private val onScripture: (Int, Int, Int, Int?, String, String, String?) -> Unit,
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val httpClient = HttpClient(CIO) { install(WebSockets) }
 
     private val _connected = mutableStateOf(false)
     val connected: State<Boolean> = _connected
+
+    // True when an in-process engine was requested but failed to start (e.g. port collision / bind
+    // failure). Surfaced so the Bible tab can show "engine unavailable" instead of silently listening
+    // forever. Cleared on each (re)start attempt.
+    private val _startFailed = mutableStateOf(false)
+    val startFailed: State<Boolean> = _startFailed
 
     private var engineHandle: EngineHandle? = null
     private var wsJob: Job? = null
@@ -59,14 +67,26 @@ class BibleEngineClient(
     ) {
         stop()
         currentLevel = level
+        _startFailed.value = false
         // Engine startup (SPB load + BM25 index) is heavy — keep it off the UI thread.
         wsJob = scope.launch {
             if (runLocal) {
                 engineHandle = runCatching { EngineServer.start(sttUrl, bibleRoot, port, bibleFiles) }.getOrNull()
+                if (engineHandle == null) {
+                    // The engine could not start (bad config or — the headline bug — a port collision
+                    // that prevents the WS server from binding). Don't enter the connect loop against
+                    // a server that will never exist; surface the failure for retry instead.
+                    System.err.println("bible-engine: in-process engine failed to start on port $port")
+                    _startFailed.value = true
+                    return@launch
+                }
                 val logDir = File(System.getProperty("user.home"), ".churchpresenter/bible-stt-logs").also { it.mkdirs() }
                 DetectionLogger.path = File(logDir, "detection-log.jsonl").absolutePath
             }
-            connectLoop(host, port)
+            // A locally-started engine always lives on loopback regardless of the configured host
+            // (which may point at a remote engine for the non-local case).
+            val connectHost = if (runLocal) "127.0.0.1" else host
+            connectLoop(connectHost, port)
         }
     }
 
@@ -104,6 +124,7 @@ class BibleEngineClient(
             if (ref.isNull("verseEnd")) null else ref.optInt("verseEnd"),
             obj.optString("verseText", ""),
             obj.optString("matchType", "reverse"),
+            if (obj.isNull("segmentId")) null else obj.optString("segmentId").takeIf { it.isNotEmpty() },
         )
     }
 
@@ -122,6 +143,7 @@ class BibleEngineClient(
         wsJob = null
         session = null
         _connected.value = false
+        _startFailed.value = false
         engineHandle?.stop()
         engineHandle = null
     }

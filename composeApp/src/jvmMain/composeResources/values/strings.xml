@@ -1670,6 +1670,8 @@
     <string name="bible_stt_level_conservative">Conservative</string>
     <string name="bible_stt_level_balanced">Balanced</string>
     <string name="bible_stt_level_aggressive">Aggressive</string>
+    <string name="bible_stt_engine_connecting">Engine connecting…</string>
+    <string name="bible_stt_engine_unavailable">Engine unavailable</string>
     <string name="bible_engine_detect">Detect scripture</string>
     <string name="bible_engine_run_local">Run engine locally</string>
     <string name="bible_engine_host">Engine host</string>

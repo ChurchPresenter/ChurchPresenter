@@ -127,6 +127,8 @@ import org.churchpresenter.app.churchpresenter.viewmodel.DetectionSource
 import org.churchpresenter.app.churchpresenter.viewmodel.TextMatchLevel
 import churchpresenter.composeapp.generated.resources.bible_stt_heard
 import churchpresenter.composeapp.generated.resources.bible_stt_listening
+import churchpresenter.composeapp.generated.resources.bible_stt_engine_connecting
+import churchpresenter.composeapp.generated.resources.bible_stt_engine_unavailable
 import churchpresenter.composeapp.generated.resources.bible_stt_auto_follow
 import churchpresenter.composeapp.generated.resources.bible_stt_auto_follow_hint
 import churchpresenter.composeapp.generated.resources.bible_stt_clear
@@ -367,14 +369,25 @@ fun BibleTab(
         }
         if (primaryVerse != null) {
             val bookNum = viewModel.selectedBookIndex.value + 1
-            val verseNums = if (viewModel.multiVerseEnabled.value) viewModel.getSelectedVerseNumbers()
-                            else listOf(primaryVerse.verseNumber)
+            // Derive the displayed span from the primary verse itself: its range string ("1-3",
+            // "2,4,5") when a multi-verse passage is on screen, else the single verse number. This
+            // captures the full range even when shown without the multi-verse toggle (the previous
+            // toggle-gated logic logged only the first verse).
+            val displayedNums = primaryVerse.verseRange
+                .takeIf { it.isNotBlank() }
+                ?.split(",", "-")
+                ?.mapNotNull { it.trim().toIntOrNull() }
+                ?.takeIf { it.isNotEmpty() }
+                ?: listOf(primaryVerse.verseNumber)
+            val verseStart = displayedNums.min()
+            val verseEnd = displayedNums.max().takeIf { it > verseStart }
             TrainingDataLogger.logLiveReference(
                 book       = bookNum,
                 chapter    = primaryVerse.chapter,
-                verseStart = verseNums.firstOrNull(),
-                verseEnd   = verseNums.lastOrNull().takeIf { verseNums.size > 1 },
-                source     = "manual"
+                verseStart = verseStart,
+                verseEnd   = verseEnd,
+                source     = "manual",
+                segmentId  = viewModel.lastDetectionSegmentId
             )
         }
         if (viewModel.multiVerseEnabled.value) {
@@ -735,6 +748,16 @@ fun BibleTab(
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
                 verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
+                // Engine link state so a failed/connecting engine is visible, not silently "Listening…".
+                val engineStartFailed = bibleEngineClient?.startFailed?.value == true
+                val engineConnected = bibleEngineClient?.connected?.value == true
+                val statusText = when {
+                    engineStartFailed -> stringResource(Res.string.bible_stt_engine_unavailable)
+                    !engineConnected && detectedReferences.isEmpty() ->
+                        stringResource(Res.string.bible_stt_engine_connecting)
+                    detectedReferences.isEmpty() -> stringResource(Res.string.bible_stt_listening)
+                    else -> stringResource(Res.string.bible_stt_heard)
+                }
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.height(32.dp).padding(end = 2.dp)
@@ -742,15 +765,16 @@ fun BibleTab(
                     Icon(
                         imageVector = Icons.Filled.Mic,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
+                        tint = if (engineStartFailed) MaterialTheme.colorScheme.error
+                               else MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(16.dp)
                     )
                     Spacer(Modifier.width(4.dp))
                     Text(
-                        text = if (detectedReferences.isEmpty()) stringResource(Res.string.bible_stt_listening)
-                               else stringResource(Res.string.bible_stt_heard),
+                        text = statusText,
                         style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = if (engineStartFailed) MaterialTheme.colorScheme.error
+                                else MaterialTheme.colorScheme.onSurfaceVariant
                             .copy(alpha = if (detectedReferences.isEmpty()) 0.6f else 1f)
                     )
                 }

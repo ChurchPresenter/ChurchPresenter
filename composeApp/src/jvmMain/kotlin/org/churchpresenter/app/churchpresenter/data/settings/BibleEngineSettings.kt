@@ -14,7 +14,10 @@ data class BibleEngineSettings(
     val enabled: Boolean = true,
     val runLocal: Boolean = true,
     val host: String = "localhost",
-    val port: Int = 8765,
+    // Must differ from Constants.SERVER_DEFAULT_PORT (8765, the Companion server) — sharing a port
+    // made the engine's WS server fail to bind silently while the STT client kept detecting, so no
+    // detections ever reached the Bible tab.
+    val port: Int = 8766,
     val textMatchLevel: String = "off",
     val autoFollow: Boolean = false,
 )
