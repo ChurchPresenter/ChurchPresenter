@@ -55,7 +55,8 @@ object TrainingDataLogger {
     /**
      * Call when a Bible verse actually goes live on the output screen.
      * [book] is the canonical 1-based book number (1=Genesis … 66=Revelation).
-     * [source] is "manual" (operator button/double-click) or "remote" (companion API).
+     * [source] is "manual" (operator button/double-click/Enter), "auto" (auto-follow drove the
+     * go-live from an engine detection), or "remote" (companion API).
      */
     fun logLiveReference(
         book: Int,

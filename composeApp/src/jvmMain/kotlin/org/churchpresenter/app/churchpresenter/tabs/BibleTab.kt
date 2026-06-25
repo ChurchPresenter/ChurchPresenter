@@ -218,36 +218,10 @@ fun BibleTab(
     }
 
     // ── Scripture detection via the Bible Lookup Engine ────────────────────────
-    // The engine is started when STT connects (pointed at the same STT server), and stopped on
-    // disconnect. Detection results arrive over the engine's WebSocket and feed the rows below.
+    // The engine link itself (start/stop on STT connect/disconnect) is owned by MainDesktop so it
+    // survives tab switches; here we only read its connection state and the detected rows below.
     val sttConnected = sttManager?.connected?.value == true
     val engineSettings = appSettings.bibleEngineSettings
-    // The SET of bibles to index (sorted, blanks removed). Keying the engine restart on this means
-    // swapping primary↔secondary (same set) does NOT trigger a re-index, while changing to a
-    // different bible does. Supports primary-only (secondary blank → single-element set).
-    val engineBibles = remember(appSettings.bibleSettings.primaryBible, appSettings.bibleSettings.secondaryBible) {
-        listOf(appSettings.bibleSettings.primaryBible, appSettings.bibleSettings.secondaryBible)
-            .filter { it.isNotBlank() }
-            .sorted()
-    }
-    if (sttManager != null && bibleEngineClient != null) {
-        LaunchedEffect(sttConnected, engineSettings.enabled, engineSettings.runLocal, engineSettings.host, engineSettings.port, engineBibles) {
-            if (sttConnected && engineSettings.enabled && engineBibles.isNotEmpty()) {
-                bibleEngineClient.start(
-                    sttUrl = appSettings.sttSettings.serverUrl,
-                    bibleRoot = appSettings.bibleSettings.storageDirectory,
-                    bibleFiles = engineBibles,
-                    runLocal = engineSettings.runLocal,
-                    host = engineSettings.host,
-                    port = engineSettings.port,
-                    level = viewModel.textMatchLevel.value.name.lowercase(),
-                )
-            } else {
-                bibleEngineClient.stop()
-                viewModel.clearDetectedReferences()
-            }
-        }
-    }
     val detectedReferences by viewModel.detectedReferences
     val autoFollowEnabled by viewModel.autoFollowEnabled
     val textMatchLevel by viewModel.textMatchLevel
@@ -341,7 +315,9 @@ fun BibleTab(
         }
     }
 
-    fun goLiveWithHistory() {
+    // [source] is logged to the training data: "manual" for an operator action (button / double-click
+    // / Enter) or "auto" when auto-follow drove the go-live from an engine detection.
+    fun goLiveWithHistory(source: String = "manual") {
         val selectedVerses = viewModel.getSelectedVerses()
         selectedVerses.firstOrNull()?.let { v ->
             if (viewModel.multiVerseEnabled.value) {
@@ -386,7 +362,7 @@ fun BibleTab(
                 chapter    = primaryVerse.chapter,
                 verseStart = verseStart,
                 verseEnd   = verseEnd,
-                source     = "manual",
+                source     = source,
                 segmentId  = viewModel.lastDetectionSegmentId
             )
         }
@@ -395,6 +371,15 @@ fun BibleTab(
         }
         presenterManager?.let { if (it.bibleHold.value) it.setBibleHold(false) }
         onPresenting(Presenting.BIBLE)
+    }
+
+    // Auto-follow: when a detection navigates with go-live requested, present it for real (content +
+    // switch the presenter to BIBLE), not just select it. Reuses the manual go-live path so history,
+    // stats and training logging happen too.
+    val autoFollowLiveToken by viewModel.autoFollowLiveToken
+    LaunchedEffect(autoFollowLiveToken) {
+        if (autoFollowLiveToken == 0) return@LaunchedEffect
+        goLiveWithHistory(source = "auto")
     }
 
     // Only push to presenter when:

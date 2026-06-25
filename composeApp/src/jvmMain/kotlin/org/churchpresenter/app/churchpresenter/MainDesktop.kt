@@ -312,13 +312,44 @@ fun MainDesktop(
     DisposableEffect(Unit) { onDispose { bibleViewModel.dispose() } }
 
     // Bible Lookup Engine client — feeds detected scripture into the Bible tab and forwards the
-    // reverse-lookup level to the engine. Started/stopped with the STT connection inside BibleTab.
+    // reverse-lookup level to the engine.
     val bibleEngineClient = remember {
         BibleEngineClient(onScripture = bibleViewModel::onEngineScripture).also { client ->
             bibleViewModel.onTextMatchLevelChanged = { level -> client.setLevel(level.name.lowercase()) }
         }
     }
     DisposableEffect(Unit) { onDispose { bibleEngineClient.dispose() } }
+
+    // Engine link lifecycle — owned here (not in BibleTab) so it survives tab switches: BibleTab is
+    // composed inside AnimatedContent and would otherwise restart the engine every time the operator
+    // navigates back to it. Started when STT connects, stopped on disconnect / when disabled.
+    val bibleEngineSettings = appSettings.bibleEngineSettings
+    // The SET of bibles to index (sorted, blanks removed). Keying the restart on this means swapping
+    // primary↔secondary (same set) does NOT re-index, while changing to a different bible does.
+    val engineBibles = remember(appSettings.bibleSettings.primaryBible, appSettings.bibleSettings.secondaryBible) {
+        listOf(appSettings.bibleSettings.primaryBible, appSettings.bibleSettings.secondaryBible)
+            .filter { it.isNotBlank() }
+            .sorted()
+    }
+    LaunchedEffect(
+        sttConnected, bibleEngineSettings.enabled, bibleEngineSettings.runLocal,
+        bibleEngineSettings.host, bibleEngineSettings.port, engineBibles,
+    ) {
+        if (sttConnected && bibleEngineSettings.enabled && engineBibles.isNotEmpty()) {
+            bibleEngineClient.start(
+                sttUrl = appSettings.sttSettings.serverUrl,
+                bibleRoot = appSettings.bibleSettings.storageDirectory,
+                bibleFiles = engineBibles,
+                runLocal = bibleEngineSettings.runLocal,
+                host = bibleEngineSettings.host,
+                port = bibleEngineSettings.port,
+                level = bibleViewModel.textMatchLevel.value.name.lowercase(),
+            )
+        } else {
+            bibleEngineClient.stop()
+            bibleViewModel.clearDetectedReferences()
+        }
+    }
 
     val dictionaryViewModel = remember { DictionaryViewModel() }
     DisposableEffect(Unit) { onDispose { dictionaryViewModel.dispose() } }

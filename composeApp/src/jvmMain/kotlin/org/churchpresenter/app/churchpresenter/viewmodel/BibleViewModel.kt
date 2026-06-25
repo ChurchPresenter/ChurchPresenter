@@ -157,12 +157,20 @@ class BibleViewModel(
 
     private val _autoFollowEnabled = mutableStateOf(appSettings.bibleEngineSettings.autoFollow)
     val autoFollowEnabled: State<Boolean> = _autoFollowEnabled
+
+    // Bumped after an auto-follow navigation has loaded its verses, signalling the Bible tab to push
+    // the passage LIVE (not just select it). The tab owns the presenter, so the actual go-live runs
+    // there; this is the trigger.
+    private val _autoFollowLiveToken = mutableStateOf(0)
+    val autoFollowLiveToken: State<Int> = _autoFollowLiveToken
+
     fun setAutoFollow(enabled: Boolean) {
         _autoFollowEnabled.value = enabled
-        // Turning it on jumps to the latest detection immediately.
+        // Turning it on jumps to the latest detection's start verse immediately and puts it live
+        // (one verse at a time, like every other auto-follow navigation).
         if (enabled) {
             _detectedReferences.value.firstOrNull()
-                ?.let { navigateToReference(SmartReference(it.bookIndex, it.chapter, it.verseStart, it.verseEnd)) }
+                ?.let { navigateToReference(SmartReference(it.bookIndex, it.chapter, it.verseStart, verseEnd = null), goLive = true) }
         }
     }
 
@@ -1135,7 +1143,7 @@ class BibleViewModel(
      * Navigates the browse columns to [bookIndex], [chapter] and optional verse range without the
      * click debounce, so it stays responsive while the user types a reference.
      */
-    private fun navigateToReference(ref: SmartReference) {
+    private fun navigateToReference(ref: SmartReference, goLive: Boolean = false) {
         val bible = _primaryBible.value ?: return
         val bookCount = minOf(bible.getBookCount(), CANONICAL_BOOK_COUNT)
         if (bookCount == 0) return
@@ -1175,6 +1183,8 @@ class BibleViewModel(
                 }
             }
             _verseSelectionToken.value++
+            // After the verses are loaded + selected, signal the tab to go live (auto-follow only).
+            if (goLive) _autoFollowLiveToken.value++
             refreshFilteredLists()
         }
     }
@@ -1305,7 +1315,11 @@ class BibleViewModel(
             )
         )
         if (added && _autoFollowEnabled.value) {
-            navigateToReference(SmartReference(bookIndex, chapter, verseStart, vEnd))
+            // Present ONE verse at a time and follow the reading: navigate to the start verse only
+            // (drop the announced range). Subsequent per-verse detections (continuation / reverse /
+            // explicit) then advance the live verse one at a time, instead of dropping the whole
+            // 19-22 block on screen at once. The chip still shows the full range.
+            navigateToReference(SmartReference(bookIndex, chapter, verseStart, verseEnd = null), goLive = true)
         }
     }
 
@@ -1342,7 +1356,9 @@ class BibleViewModel(
             suggestedVerse   = ref.verseStart,
             action           = "accepted"
         )
-        navigateToReference(SmartReference(ref.bookIndex, ref.chapter, ref.verseStart, ref.verseEnd))
+        // One verse at a time: clicking a range chip presents the start verse; the operator (or the
+        // engine, when auto-follow is on) steps through the rest from there.
+        navigateToReference(SmartReference(ref.bookIndex, ref.chapter, ref.verseStart, verseEnd = null))
     }
 
     /** Clears the detected rows (e.g. when STT / the engine disconnects). */

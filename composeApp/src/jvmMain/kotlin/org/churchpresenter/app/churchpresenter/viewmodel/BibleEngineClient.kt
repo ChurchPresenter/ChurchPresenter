@@ -83,10 +83,12 @@ class BibleEngineClient(
                 val logDir = File(System.getProperty("user.home"), ".churchpresenter/bible-stt-logs").also { it.mkdirs() }
                 DetectionLogger.path = File(logDir, "detection-log.jsonl").absolutePath
             }
-            // A locally-started engine always lives on loopback regardless of the configured host
-            // (which may point at a remote engine for the non-local case).
+            // A locally-started engine always lives on loopback, on the port it ACTUALLY bound (which
+            // may differ from the configured one when that was taken — e.g. the Companion-server
+            // collision). The configured host/port only apply to a remote engine.
             val connectHost = if (runLocal) "127.0.0.1" else host
-            connectLoop(connectHost, port)
+            val connectPort = if (runLocal) engineHandle?.boundPort ?: port else port
+            connectLoop(connectHost, connectPort)
         }
     }
 
