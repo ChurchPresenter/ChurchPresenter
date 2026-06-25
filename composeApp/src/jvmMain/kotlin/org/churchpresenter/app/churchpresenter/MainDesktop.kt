@@ -534,12 +534,13 @@ fun MainDesktop(
                     ?.takeIf { it.isNotEmpty() }
                 val verseEnd = rangeNums?.max()?.takeIf { it > req.verseNumber }
                 TrainingDataLogger.logLiveReference(
-                    book       = bookIndex + 1,
+                    book       = bibleViewModel.canonicalBookIdForDisplayIndex(bookIndex),
                     chapter    = req.chapter,
                     verseStart = req.verseNumber,
                     verseEnd   = verseEnd,
                     source     = "remote",
-                    segmentId  = bibleViewModel.lastDetectionSegmentId
+                    segmentId  = bibleViewModel.lastDetectionSegmentId,
+                    autoFollow = bibleViewModel.autoFollowEnabled.value
                 )
             }
         }

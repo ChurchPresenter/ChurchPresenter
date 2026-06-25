@@ -28,12 +28,18 @@ import org.json.JSONObject
  * starts the engine in-process when STT connects, opens a WebSocket to `/bible-engine`, and forwards
  * `scripture.*` events to [onScripture]. The level chip is pushed to the engine via [setLevel].
  *
- * @param onScripture (bookId, chapter, verseStart, verseEnd, verseText, matchType, segmentId) for
- *   each event. [segmentId] is the STT segment that triggered the detection (clock-free correlation
- *   key), or null when the STT stream didn't provide one.
+ * @param onScripture (bookId, chapter, verseStart, verseEnd, verseText, matchType,
+ *   canonicalCodeStart, canonicalCodeEnd, segmentId, sessionId, tracks) for each event.
+ *   [canonicalCodeStart]/[canonicalCodeEnd] are the engine's numbering-independent internal codes
+ *   (`BXXXCXXXVXXX`), forwarded so the CP side can land the reference in the primary Bible's own
+ *   display numbering (book order + Psalm numbering). [segmentId] is the STT segment that triggered the
+ *   detection (clock-free correlation key), or null when the STT stream didn't provide one. [sessionId]
+ *   is the stable per-service session id from STT — the exact join key that ties the STT db, the engine
+ *   detection-log and the CP live-references log, and keys the live-references filename. [tracks] is
+ *   the subset of {"transcription","translation"} that corroborated the detection.
  */
 class BibleEngineClient(
-    private val onScripture: (Int, Int, Int, Int?, String, String, String?) -> Unit,
+    private val onScripture: (Int, Int, Int, Int?, String, String, String?, String?, String?, String?, List<String>) -> Unit,
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val httpClient = HttpClient(CIO) { install(WebSockets) }
@@ -119,6 +125,12 @@ class BibleEngineClient(
         val ref = obj.optJSONObject("reference") ?: return
         val bookId = ref.optInt("bookId", -1)
         if (bookId < 0) return
+        val codeStart = ref.optString("canonicalCodeStart", "").takeIf { it.isNotEmpty() }
+        val codeEnd = if (ref.isNull("canonicalCodeEnd")) null
+                      else ref.optString("canonicalCodeEnd").takeIf { it.isNotEmpty() }
+        val tracksArr = obj.optJSONArray("tracks")
+        val tracks = if (tracksArr == null) emptyList()
+                     else (0 until tracksArr.length()).mapNotNull { tracksArr.optString(it).takeIf { s -> s.isNotEmpty() } }
         onScripture(
             bookId,
             ref.optInt("chapter", 0),
@@ -126,7 +138,11 @@ class BibleEngineClient(
             if (ref.isNull("verseEnd")) null else ref.optInt("verseEnd"),
             obj.optString("verseText", ""),
             obj.optString("matchType", "reverse"),
+            codeStart,
+            codeEnd,
             if (obj.isNull("segmentId")) null else obj.optString("segmentId").takeIf { it.isNotEmpty() },
+            if (obj.isNull("sessionId")) null else obj.optString("sessionId").takeIf { it.isNotEmpty() },
+            tracks,
         )
     }
 

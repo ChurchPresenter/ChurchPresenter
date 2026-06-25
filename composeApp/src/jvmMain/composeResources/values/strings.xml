@@ -1665,6 +1665,8 @@
     <string name="bible_stt_src_explicit">Spoken reference</string>
     <string name="bible_stt_src_reverse">Matched by text</string>
     <string name="bible_stt_src_continuation">Following along</string>
+    <string name="bible_stt_track_transcription">Heard in transcription</string>
+    <string name="bible_stt_track_translation">Heard in translation</string>
     <string name="bible_stt_match_label">Text match</string>
     <string name="bible_stt_level_off">Off</string>
     <string name="bible_stt_level_conservative">Conservative</string>

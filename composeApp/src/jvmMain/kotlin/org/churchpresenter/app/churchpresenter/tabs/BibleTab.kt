@@ -119,13 +119,15 @@ import churchpresenter.composeapp.generated.resources.ic_arrow_up
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Tv
 import androidx.compose.material.icons.filled.Mic
+import androidx.compose.material.icons.filled.Public
+import androidx.compose.material.icons.filled.RecordVoiceOver
 import androidx.compose.material.icons.filled.FormatQuote
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import org.churchpresenter.app.churchpresenter.viewmodel.DetectionTrack
 import org.churchpresenter.app.churchpresenter.viewmodel.STTManager
 import org.churchpresenter.app.churchpresenter.viewmodel.BibleEngineClient
 import org.churchpresenter.app.churchpresenter.viewmodel.DetectionSource
 import org.churchpresenter.app.churchpresenter.viewmodel.TextMatchLevel
-import churchpresenter.composeapp.generated.resources.bible_stt_heard
 import churchpresenter.composeapp.generated.resources.bible_stt_listening
 import churchpresenter.composeapp.generated.resources.bible_stt_engine_connecting
 import churchpresenter.composeapp.generated.resources.bible_stt_engine_unavailable
@@ -135,6 +137,8 @@ import churchpresenter.composeapp.generated.resources.bible_stt_clear
 import churchpresenter.composeapp.generated.resources.bible_stt_src_explicit
 import churchpresenter.composeapp.generated.resources.bible_stt_src_reverse
 import churchpresenter.composeapp.generated.resources.bible_stt_src_continuation
+import churchpresenter.composeapp.generated.resources.bible_stt_track_transcription
+import churchpresenter.composeapp.generated.resources.bible_stt_track_translation
 import churchpresenter.composeapp.generated.resources.bible_stt_match_label
 import churchpresenter.composeapp.generated.resources.bible_stt_level_off
 import churchpresenter.composeapp.generated.resources.bible_stt_level_conservative
@@ -344,7 +348,9 @@ fun BibleTab(
             onVerseSelected(selectedVerses)
         }
         if (primaryVerse != null) {
-            val bookNum = viewModel.selectedBookIndex.value + 1
+            // Canonical book id (not the raw display position) so the ground-truth log is comparable
+            // to the engine's canonical detection log.
+            val bookNum = viewModel.canonicalBookIdForDisplayIndex(viewModel.selectedBookIndex.value)
             // Derive the displayed span from the primary verse itself: its range string ("1-3",
             // "2,4,5") when a multi-verse passage is on screen, else the single verse number. This
             // captures the full range even when shown without the multi-verse toggle (the previous
@@ -363,8 +369,12 @@ fun BibleTab(
                 verseStart = verseStart,
                 verseEnd   = verseEnd,
                 source     = source,
-                segmentId  = viewModel.lastDetectionSegmentId
+                segmentId  = viewModel.lastDetectionSegmentId,
+                autoFollow = viewModel.autoFollowEnabled.value
             )
+            // If this go-live overrode the engine's top suggestion, log it as a correction (engine
+            // said X, operator showed Y) — labeled training data for false positives.
+            viewModel.logGoLiveCorrection(viewModel.selectedBookIndex.value, primaryVerse.chapter, verseStart)
         }
         if (viewModel.multiVerseEnabled.value) {
             viewModel.clearMultiVerseSelection()
@@ -736,12 +746,13 @@ fun BibleTab(
                 // Engine link state so a failed/connecting engine is visible, not silently "Listening…".
                 val engineStartFailed = bibleEngineClient?.startFailed?.value == true
                 val engineConnected = bibleEngineClient?.connected?.value == true
+                // Stays "Listening…" even after references appear — it never stops listening. The
+                // old "Heard" read as terminal (sounded like it had finished).
                 val statusText = when {
                     engineStartFailed -> stringResource(Res.string.bible_stt_engine_unavailable)
                     !engineConnected && detectedReferences.isEmpty() ->
                         stringResource(Res.string.bible_stt_engine_connecting)
-                    detectedReferences.isEmpty() -> stringResource(Res.string.bible_stt_listening)
-                    else -> stringResource(Res.string.bible_stt_heard)
+                    else -> stringResource(Res.string.bible_stt_listening)
                 }
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -832,16 +843,16 @@ fun BibleTab(
                         .padding(horizontal = 6.dp)
                         .clickable { viewModel.applyDetectedReference(ref); focusRequester.requestFocus() }
                 ) {
-                    // Fixed-width icon column so every reference + verse text lines up vertically,
-                    // regardless of how many source markers a row has.
+                    // Fixed-width icon column (source markers + transcription/translation markers) so
+                    // every reference + verse text lines up vertically, regardless of marker count.
                     Row(
-                        modifier = Modifier.width(68.dp),
+                        modifier = Modifier.width(96.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         ref.sources.forEach { src ->
                             val (icon, descRes, tint) = when (src) {
                                 DetectionSource.EXPLICIT -> Triple(
-                                    Icons.Filled.Mic, Res.string.bible_stt_src_explicit,
+                                    Icons.Filled.RecordVoiceOver, Res.string.bible_stt_src_explicit,
                                     MaterialTheme.colorScheme.primary
                                 )
                                 DetectionSource.REVERSE -> Triple(
@@ -870,6 +881,32 @@ fun BibleTab(
                                 )
                             }
                             Spacer(Modifier.width(3.dp))
+                        }
+                        // Track markers (mic = transcription, globe = translation) grouped with the
+                        // source markers, before the reference; shown only when that track corroborated.
+                        listOf(
+                            Triple(DetectionTrack.TRANSCRIPTION, Icons.Filled.Mic, Res.string.bible_stt_track_transcription),
+                            Triple(DetectionTrack.TRANSLATION, Icons.Filled.Public, Res.string.bible_stt_track_translation),
+                        ).forEach { (track, icon, descRes) ->
+                            if (track in ref.tracks) {
+                                TooltipArea(tooltip = {
+                                    Surface(shadowElevation = 4.dp, color = MaterialTheme.colorScheme.surfaceVariant) {
+                                        Text(
+                                            text = stringResource(descRes),
+                                            style = MaterialTheme.typography.bodySmall,
+                                            modifier = Modifier.padding(8.dp)
+                                        )
+                                    }
+                                }) {
+                                    Icon(
+                                        imageVector = icon,
+                                        contentDescription = stringResource(descRes),
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.size(13.dp)
+                                    )
+                                }
+                                Spacer(Modifier.width(3.dp))
+                            }
                         }
                     }
                     Text(

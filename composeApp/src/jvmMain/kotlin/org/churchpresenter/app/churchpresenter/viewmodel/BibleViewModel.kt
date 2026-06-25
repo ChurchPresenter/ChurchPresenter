@@ -32,6 +32,9 @@ enum class BibleSearchMode { AUTO, REFERENCE, TEXT }
 /** How the Bible Lookup Engine matched a reference — shown as a row marker. */
 enum class DetectionSource { EXPLICIT, REVERSE, CONTINUATION }
 
+/** Which STT track(s) corroborated a detection — a confidence signal shown as row markers. */
+enum class DetectionTrack { TRANSCRIPTION, TRANSLATION }
+
 /** Reverse-lookup (BM25) aggressiveness, sent to the engine; gates only the text-match stage. */
 enum class TextMatchLevel { OFF, CONSERVATIVE, BALANCED, AGGRESSIVE }
 
@@ -49,6 +52,7 @@ data class DetectedReference(
     val label: String,
     val key: String,
     val sources: Set<DetectionSource> = emptySet(),
+    val tracks: Set<DetectionTrack> = emptySet(),   // STT track(s) corroborating — confidence markers
     val verseText: String? = null,   // verse text shown History-style on the row
 )
 
@@ -154,6 +158,12 @@ class BibleViewModel(
     // next go-live so displays correlate to the transcript + detection without any wall-clock/NTP.
     @Volatile private var _lastDetectionSegmentId: String? = null
     val lastDetectionSegmentId: String? get() = _lastDetectionSegmentId
+
+    // Stable per-service STT session id behind the most recent detection. Pushed to
+    // TrainingDataLogger so the live-references log is keyed by the same session as the STT db and the
+    // engine detection-log — an exact 1:1 join, and a CP restart re-attaches to the same file.
+    @Volatile private var _lastSessionId: String? = null
+    val lastSessionId: String? get() = _lastSessionId
 
     private val _autoFollowEnabled = mutableStateOf(appSettings.bibleEngineSettings.autoFollow)
     val autoFollowEnabled: State<Boolean> = _autoFollowEnabled
@@ -1034,11 +1044,14 @@ class BibleViewModel(
         val verseEnd: Int?
     )
 
-    /** Maps a canonical book id (1-based) to its index in the displayed [_books] list. */
-    private fun canonicalBookIdToIndex(canonicalId: Int): Int? {
-        val localized = _primaryBible.value?.getBookName(canonicalId) ?: return null
-        return _books.value.indexOf(localized).takeIf { it >= 0 }
-    }
+    /**
+     * Maps a canonical book id (1-based) to its index in the displayed [_books] list. The loaded Bible
+     * may store books in a non-canonical *order* (e.g. the Russian Synodal places the General Epistles
+     * before Paul's letters), so this must match by the book's canonical id — NOT by position. Delegates
+     * to [Bible.getDisplayIndexForBookId], which looks the book up by its canonical id field.
+     */
+    private fun canonicalBookIdToIndex(canonicalId: Int): Int? =
+        _primaryBible.value?.getDisplayIndexForBookId(canonicalId)?.takeIf { it in _books.value.indices }
 
     /**
      * Scores how well [name] matches the query (both already lowercased). Spaces are ignored on a
@@ -1275,10 +1288,22 @@ class BibleViewModel(
     // ── Speech-driven reference detection ──────────────────────────────────────
 
     /**
+     * Canonical 1-based book id for a [_books] display index, via the primary Bible's book numbering.
+     * Used so the live-references ground-truth log records canonical ids (comparable to the engine's
+     * detection log) instead of the raw display position. Falls back to `index + 1`.
+     */
+    fun canonicalBookIdForDisplayIndex(displayIndex: Int): Int =
+        _primaryBible.value?.getBookId(displayIndex) ?: (displayIndex + 1)
+
+    /**
      * Handles a scripture event from the Bible Lookup Engine. [matchType] is "explicit", "reverse",
-     * or "continuation"; [bookId] is the canonical book number. Adds a row (de-duped, merging markers
-     * on repeats) and, when auto-follow is on, navigates to a newly-added one. Safe to call from the
-     * engine WebSocket coroutine.
+     * or "continuation"; [bookId] is the canonical book number. [canonicalCodeStart]/[canonicalCodeEnd]
+     * are the engine's numbering-independent internal codes (`BXXXCXXXVXXX`, Hebrew numbering) — used to
+     * land the reference in the **primary** Bible's own display numbering, so any book order and any
+     * chapter-numbering divergence (Psalms LXX/Synodal vs Hebrew) render correctly regardless of which
+     * Bible is primary or which language was spoken. Adds a row (de-duped, merging markers on repeats)
+     * and, when auto-follow is on, navigates to a newly-added one. Safe to call from the engine
+     * WebSocket coroutine.
      */
     fun onEngineScripture(
         bookId: Int,
@@ -1287,31 +1312,65 @@ class BibleViewModel(
         verseEnd: Int?,
         verseText: String,
         matchType: String,
+        canonicalCodeStart: String? = null,
+        canonicalCodeEnd: String? = null,
         segmentId: String? = null,
+        sessionId: String? = null,
+        tracks: List<String> = emptyList(),
     ) {
         // Remember the STT segment behind the most recent detection so a subsequent go-live can stamp
         // it onto the live-references log — clock-free correlation back to the transcript + detection.
         if (segmentId != null) _lastDetectionSegmentId = segmentId
-        val bookIndex = canonicalBookIdToIndex(bookId) ?: return
+        // Remember the session id and point the training logger at the matching session-keyed file, so
+        // the live-references log joins 1:1 with the STT db and the engine detection-log.
+        if (sessionId != null) {
+            _lastSessionId = sessionId
+            TrainingDataLogger.sessionId = sessionId
+        }
+
+        // Resolve into THIS (primary) Bible's book index + display numbering using the engine's
+        // numbering-independent internal code. This reuses the same code→display bridge that aligns the
+        // secondary Bible, so Psalms and any book order land correctly for whatever Bible is primary.
+        val bible = _primaryBible.value ?: return
+        val codeStart = canonicalCodeStart?.let { bible.parseVerseCode(it) }
+        val codeBook = codeStart?.first ?: bookId
+        val bookIndex = bible.getDisplayIndexForBookId(codeBook).takeIf { it in _books.value.indices } ?: return
+        val (dispChapter, dispVerseStart) =
+            if (codeStart != null)
+                bible.getVerseDetailsByCode(codeStart.first, codeStart.second, codeStart.third)
+                    ?.let { it.displayChapter to it.displayVerse } ?: (chapter to verseStart)
+            else chapter to verseStart
+        val dispVerseEnd = canonicalCodeEnd?.let { bible.parseVerseCode(it) }
+            ?.let { bible.getVerseDetailsByCode(it.first, it.second, it.third)?.displayVerse }
+            ?: verseEnd
+
         val source = when (matchType) {
             "explicit" -> DetectionSource.EXPLICIT
             "continuation" -> DetectionSource.CONTINUATION
             else -> DetectionSource.REVERSE
         }
-        val vEnd = verseEnd?.takeIf { it > verseStart }
-        val label = buildDetectionLabel(bookIndex, chapter, verseStart, vEnd)
-        val key = "$bookIndex|$chapter|$verseStart|$vEnd"
+        val trackSet = tracks.mapNotNull {
+            when (it) {
+                "transcription" -> DetectionTrack.TRANSCRIPTION
+                "translation" -> DetectionTrack.TRANSLATION
+                else -> null
+            }
+        }.toSet()
+        val vEnd = dispVerseEnd?.takeIf { it > dispVerseStart }
+        val label = buildDetectionLabel(bookIndex, dispChapter, dispVerseStart, vEnd)
+        val key = "$bookIndex|$dispChapter|$dispVerseStart|$vEnd"
         val added = addDetection(
             DetectedReference(
                 bookIndex = bookIndex,
-                chapter = chapter,
-                verseStart = verseStart,
+                chapter = dispChapter,
+                verseStart = dispVerseStart,
                 verseEnd = vEnd,
                 label = label,
                 key = key,
                 sources = setOf(source),
+                tracks = trackSet,
                 // Prefer the app's own primary-Bible text; fall back to the engine's matched text.
-                verseText = verseTextFor(bookIndex, chapter, verseStart) ?: verseText.ifBlank { null },
+                verseText = verseTextFor(bookIndex, dispChapter, dispVerseStart) ?: verseText.ifBlank { null },
             )
         )
         if (added && _autoFollowEnabled.value) {
@@ -1319,7 +1378,7 @@ class BibleViewModel(
             // (drop the announced range). Subsequent per-verse detections (continuation / reverse /
             // explicit) then advance the live verse one at a time, instead of dropping the whole
             // 19-22 block on screen at once. The chip still shows the full range.
-            navigateToReference(SmartReference(bookIndex, chapter, verseStart, verseEnd = null), goLive = true)
+            navigateToReference(SmartReference(bookIndex, dispChapter, dispVerseStart, verseEnd = null), goLive = true)
         }
     }
 
@@ -1333,10 +1392,13 @@ class BibleViewModel(
         val idx = list.indexOfFirst { it.key == ref.key }
         if (idx >= 0) {
             val merged = list[idx].sources + ref.sources
+            // Union the corroborating tracks too, so "both" accumulates as the (often delayed)
+            // translation catches up to the transcript on the same reference.
+            val mergedTracks = list[idx].tracks + ref.tracks
             val verseText = list[idx].verseText ?: ref.verseText
-            if (merged != list[idx].sources || verseText != list[idx].verseText) {
+            if (merged != list[idx].sources || mergedTracks != list[idx].tracks || verseText != list[idx].verseText) {
                 _detectedReferences.value = list.toMutableList().also {
-                    it[idx] = list[idx].copy(sources = merged, verseText = verseText)
+                    it[idx] = list[idx].copy(sources = merged, tracks = mergedTracks, verseText = verseText)
                 }
             }
             return false
@@ -1359,6 +1421,25 @@ class BibleViewModel(
         // One verse at a time: clicking a range chip presents the start verse; the operator (or the
         // engine, when auto-follow is on) steps through the rest from there.
         navigateToReference(SmartReference(ref.bookIndex, ref.chapter, ref.verseStart, verseEnd = null))
+    }
+
+    /**
+     * Records an operator *correction* for training: when a verse goes live that does NOT match the
+     * top current detection (and detections are showing), the engine's suggestion was effectively
+     * overridden. Links the engine's top suggestion to what the operator actually displayed.
+     * No-op when there are no suggestions or the go-live matches the top one (e.g. auto-follow).
+     */
+    fun logGoLiveCorrection(shownBookIndex: Int, shownChapter: Int, shownVerse: Int?) {
+        val top = _detectedReferences.value.firstOrNull() ?: return
+        val matches = top.bookIndex == shownBookIndex && top.chapter == shownChapter && top.verseStart == shownVerse
+        if (matches) return
+        TrainingDataLogger.logSuggestionOutcome(
+            suggestedBook    = top.bookIndex + 1,
+            suggestedChapter = top.chapter,
+            suggestedVerse   = top.verseStart,
+            action           = "corrected",
+            correctedRef     = buildDetectionLabel(shownBookIndex, shownChapter, shownVerse, null)
+        )
     }
 
     /** Clears the detected rows (e.g. when STT / the engine disconnects). */
