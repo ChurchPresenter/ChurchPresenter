@@ -44,6 +44,18 @@ class STTManager {
     private val _connecting = mutableStateOf(false)
     val connecting: State<Boolean> = _connecting
 
+    // True after a connection attempt fails to reach the STT server (EVENT_CONNECT_ERROR). Stays true
+    // while Socket.IO keeps retrying (reconnection is on), so the UI can show "can't reach server".
+    // Cleared on a successful connect, on a fresh connect() call, and on disconnect().
+    private val _connectError = mutableStateOf(false)
+    val connectError: State<Boolean> = _connectError
+
+    // True after an UNEXPECTED disconnect (network drop / server restart) while reconnection keeps
+    // retrying — distinct from a user-initiated disconnect(). Lets the UI show "reconnecting…" only
+    // when it's actually trying to come back. Cleared on (re)connect and on manual disconnect().
+    private val _reconnecting = mutableStateOf(false)
+    val reconnecting: State<Boolean> = _reconnecting
+
     // ── Transcription state ───────────────────────────────────────────
     private val _segments = mutableStateListOf<STTSegment>()
     val segments: List<STTSegment> get() = _segments
@@ -85,6 +97,8 @@ class STTManager {
         socket = null
 
         _connecting.value = true
+        _connectError.value = false
+        _reconnecting.value = false
 
         scope.launch(Dispatchers.IO) {
             try {
@@ -101,6 +115,8 @@ class STTManager {
                     scope.launch {
                         _connected.value = true
                         _connecting.value = false
+                        _connectError.value = false
+                        _reconnecting.value = false
                     }
                     // Request initial data
                     s.emit("request_all_entries")
@@ -111,9 +127,15 @@ class STTManager {
                     }
                 }
 
-                s.on(Socket.EVENT_DISCONNECT) {
+                s.on(Socket.EVENT_DISCONNECT) { args ->
+                    // socket.io passes the reason; "io client disconnect" = we called disconnect()
+                    // ourselves. Anything else (transport close / ping timeout / server disconnect) is
+                    // an unexpected drop that reconnection will keep retrying → show "reconnecting…".
+                    val reason = args.firstOrNull()?.toString()
+                    val dropped = reason != "io client disconnect"
                     scope.launch {
                         _connected.value = false
+                        if (dropped) _reconnecting.value = true
                     }
                 }
 
@@ -121,6 +143,7 @@ class STTManager {
                     scope.launch {
                         _connected.value = false
                         _connecting.value = false
+                        _connectError.value = true
                     }
                 }
 
@@ -157,6 +180,7 @@ class STTManager {
                 scope.launch {
                     _connecting.value = false
                     _connected.value = false
+                    _connectError.value = true
                 }
             }
         }
@@ -168,6 +192,8 @@ class STTManager {
         socket = null
         _connected.value = false
         _connecting.value = false
+        _connectError.value = false
+        _reconnecting.value = false
     }
 
     private fun handleTranscriptionUpdate(data: JSONObject) {

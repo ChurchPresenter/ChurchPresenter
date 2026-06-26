@@ -131,6 +131,12 @@ import org.churchpresenter.app.churchpresenter.viewmodel.TextMatchLevel
 import churchpresenter.composeapp.generated.resources.bible_stt_listening
 import churchpresenter.composeapp.generated.resources.bible_stt_engine_connecting
 import churchpresenter.composeapp.generated.resources.bible_stt_engine_unavailable
+import churchpresenter.composeapp.generated.resources.bible_stt_no_bible
+import churchpresenter.composeapp.generated.resources.bible_stt_waiting_for_stt
+import churchpresenter.composeapp.generated.resources.stt_status_reconnecting
+import churchpresenter.composeapp.generated.resources.stt_status_unreachable
+import churchpresenter.composeapp.generated.resources.stt_status_connecting
+import churchpresenter.composeapp.generated.resources.stt_status_not_connected
 import churchpresenter.composeapp.generated.resources.bible_stt_auto_follow
 import churchpresenter.composeapp.generated.resources.bible_stt_auto_follow_hint
 import churchpresenter.composeapp.generated.resources.bible_stt_clear
@@ -729,8 +735,10 @@ fun BibleTab(
             }
         }
 
-        // ── Detected references strip — only when detection is enabled and STT is connected ──
-        if (sttConnected && engineSettings.enabled) {
+        // ── Detection status + (when connected) controls & detected references ──
+        // The status line shows whenever detection is enabled, so STT connection problems are visible;
+        // the interactive controls + references list still require an active STT connection.
+        if (engineSettings.enabled) {
             val levelName = when (textMatchLevel) {
                 TextMatchLevel.OFF -> stringResource(Res.string.bible_stt_level_off)
                 TextMatchLevel.CONSERVATIVE -> stringResource(Res.string.bible_stt_level_conservative)
@@ -743,16 +751,34 @@ fun BibleTab(
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
                 verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
-                // Engine link state so a failed/connecting engine is visible, not silently "Listening…".
+                // Full lifecycle status: STT connection problems, engine start-up, and the
+                // engine-up-but-no-data state are all surfaced instead of a blank strip or a wrong
+                // "Listening…". Priority order top→bottom.
                 val engineStartFailed = bibleEngineClient?.startFailed?.value == true
                 val engineConnected = bibleEngineClient?.connected?.value == true
-                // Stays "Listening…" even after references appear — it never stops listening. The
-                // old "Heard" read as terminal (sounded like it had finished).
+                val sttConnecting = sttManager?.connecting?.value == true
+                val sttConnectError = sttManager?.connectError?.value == true
+                val sttReconnecting = sttManager?.reconnecting?.value == true
+                // Detection needs ≥1 Bible (engine indexes [primary, secondary] minus blanks). This is
+                // the zero-Bible guard (both blank) — one Bible is enough and clears it.
+                val noBibleSelected = appSettings.bibleSettings.primaryBible.isBlank() &&
+                    appSettings.bibleSettings.secondaryBible.isBlank()
+                // STT is actually feeding once any transcript (completed or in-progress) has arrived. CP
+                // reads the same stream the engine does, so empty here ⇒ the engine isn't fed yet either.
+                val sttReceiving = sttManager != null &&
+                    (sttManager.inProgressText.value.isNotBlank() || sttManager.segments.isNotEmpty())
+                val statusIsError = engineStartFailed || noBibleSelected || sttConnectError
                 val statusText = when {
                     engineStartFailed -> stringResource(Res.string.bible_stt_engine_unavailable)
-                    !engineConnected && detectedReferences.isEmpty() ->
-                        stringResource(Res.string.bible_stt_engine_connecting)
-                    else -> stringResource(Res.string.bible_stt_listening)
+                    noBibleSelected -> stringResource(Res.string.bible_stt_no_bible)
+                    sttConnected && !engineConnected -> stringResource(Res.string.bible_stt_engine_connecting)
+                    sttConnected && !sttReceiving && detectedReferences.isEmpty() ->
+                        stringResource(Res.string.bible_stt_waiting_for_stt)
+                    sttConnected -> stringResource(Res.string.bible_stt_listening)
+                    sttReconnecting -> stringResource(Res.string.stt_status_reconnecting)
+                    sttConnectError -> stringResource(Res.string.stt_status_unreachable)
+                    sttConnecting -> stringResource(Res.string.stt_status_connecting)
+                    else -> stringResource(Res.string.stt_status_not_connected)
                 }
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -761,7 +787,7 @@ fun BibleTab(
                     Icon(
                         imageVector = Icons.Filled.Mic,
                         contentDescription = null,
-                        tint = if (engineStartFailed) MaterialTheme.colorScheme.error
+                        tint = if (statusIsError) MaterialTheme.colorScheme.error
                                else MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(16.dp)
                     )
@@ -769,11 +795,14 @@ fun BibleTab(
                     Text(
                         text = statusText,
                         style = MaterialTheme.typography.labelMedium,
-                        color = if (engineStartFailed) MaterialTheme.colorScheme.error
+                        color = if (statusIsError) MaterialTheme.colorScheme.error
                                 else MaterialTheme.colorScheme.onSurfaceVariant
                             .copy(alpha = if (detectedReferences.isEmpty()) 0.6f else 1f)
                     )
                 }
+                // Config chips (auto-follow + level) stay visible whenever detection is enabled, so the
+                // operator can preset them before STT connects. Only the Clear action below is gated to
+                // when detections are actually present.
                 TooltipArea(tooltip = {
                     Surface(shadowElevation = 4.dp, color = MaterialTheme.colorScheme.surfaceVariant) {
                         Text(

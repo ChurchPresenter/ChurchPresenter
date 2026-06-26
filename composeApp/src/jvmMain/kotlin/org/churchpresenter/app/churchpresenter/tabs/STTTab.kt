@@ -111,6 +111,9 @@ import churchpresenter.composeapp.generated.resources.stt_not_connected
 import churchpresenter.composeapp.generated.resources.stt_opacity
 import churchpresenter.composeapp.generated.resources.stt_position
 import churchpresenter.composeapp.generated.resources.stt_server_url
+import churchpresenter.composeapp.generated.resources.stt_status_connecting
+import churchpresenter.composeapp.generated.resources.stt_status_unreachable
+import churchpresenter.composeapp.generated.resources.stt_status_reconnecting
 import churchpresenter.composeapp.generated.resources.bible_engine_detect
 import churchpresenter.composeapp.generated.resources.bible_engine_run_local
 import churchpresenter.composeapp.generated.resources.bible_engine_host
@@ -148,6 +151,8 @@ fun STTTab(
     val sttSettings = appSettings.sttSettings
     val connected by sttManager.connected
     val connecting by sttManager.connecting
+    val connectError by sttManager.connectError
+    val reconnecting by sttManager.reconnecting
     val presentingMode by presenterManager.presentingMode
     val isLive = presentingMode == Presenting.STT
     val segments = sttManager.segments
@@ -216,7 +221,7 @@ fun STTTab(
                     modifier = Modifier.size(12.dp).clip(CircleShape).background(
                         when {
                             connected -> Color(0xFF43A047)
-                            connecting -> Color(0xFFFFA726)
+                            connecting || reconnecting -> Color(0xFFFFA726)
                             else -> Color(0xFFE53935)
                         }
                     )
@@ -288,6 +293,24 @@ fun STTTab(
                         Icon(Icons.Default.Tv, contentDescription = stringResource(Res.string.stt_go_live), modifier = Modifier.size(20.dp))
                     }
                 }
+            }
+
+            // Connection status label — names the transient/problem states the colour dot can't
+            // distinguish (connecting / unreachable / reconnecting). The plain idle "not connected"
+            // case is already explained in the live-preview area below, so it's left out here.
+            val connStatus: String? = when {
+                reconnecting -> stringResource(Res.string.stt_status_reconnecting)
+                connectError -> stringResource(Res.string.stt_status_unreachable)
+                connecting -> stringResource(Res.string.stt_status_connecting)
+                else -> null
+            }
+            if (connStatus != null) {
+                Text(
+                    text = connStatus,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = if (connectError) MaterialTheme.colorScheme.error
+                            else MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
 
             // Scripture detection (Bible Lookup Engine) — the engine starts with this STT connection.

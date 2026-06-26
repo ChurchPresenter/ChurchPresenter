@@ -1672,8 +1672,15 @@
     <string name="bible_stt_level_conservative">Conservative</string>
     <string name="bible_stt_level_balanced">Balanced</string>
     <string name="bible_stt_level_aggressive">Aggressive</string>
-    <string name="bible_stt_engine_connecting">Engine connecting…</string>
+    <string name="bible_stt_engine_connecting">Starting engine…</string>
     <string name="bible_stt_engine_unavailable">Engine unavailable</string>
+    <string name="bible_stt_no_bible">No Bible configured</string>
+    <string name="bible_stt_waiting_for_stt">Running — waiting for STT</string>
+    <!-- Shared STT connection-status labels (used by both the Bible detection strip and the STT tab) -->
+    <string name="stt_status_not_connected">STT not connected</string>
+    <string name="stt_status_connecting">Connecting to STT…</string>
+    <string name="stt_status_unreachable">Can't reach STT server — retrying…</string>
+    <string name="stt_status_reconnecting">STT disconnected — reconnecting…</string>
     <string name="bible_engine_detect">Detect scripture</string>
     <string name="bible_engine_run_local">Run engine locally</string>
     <string name="bible_engine_host">Engine host</string>
