@@ -427,6 +427,12 @@ class BibleViewModel(
                     _verses.value = chapterResult.verses
                     _selectedVerseIndex.value = _selectedVerseIndex.value.coerceIn(0, (chapterResult.verses.size - 1).coerceAtLeast(0))
                     refreshFilteredLists()
+                    // Re-emit the current selection only on a reload (settings change / swap) where a
+                    // Bible was already loaded — so a verse picked before the secondary finished
+                    // loading refreshes with the correct cross-numbering. Never fires on cold start.
+                    if (previousBookId != null && _verses.value.isNotEmpty()) {
+                        _verseSelectionToken.value++
+                    }
                     onBibleLoaded?.invoke(primary, appSettings.bibleSettings.primaryBible)
                 } else if (booksOnlyBible == null) {
                     _books.value = emptyList()
@@ -768,7 +774,8 @@ class BibleViewModel(
                 val sB = codeRef?.first ?: bookId
                 val sCh = codeRef?.second ?: _selectedChapter.value
                 val sV = codeRef?.third ?: vNum
-                _secondaryBible.value?.getVerseDetailsByCode(sB, sCh, sV)?.let { result ->
+                _secondaryBible.value?.takeIf { it.getVerseCount() > 0 }
+                    ?.getVerseDetailsByCode(sB, sCh, sV)?.let { result ->
                     if (secondaryBookName.isEmpty()) secondaryBookName = result.bookName
                     secondaryTexts.add(result.verseText)
                 }
@@ -844,7 +851,8 @@ class BibleViewModel(
         val secBook = codeRef?.first ?: bookId
         val secChapter = codeRef?.second ?: _selectedChapter.value
         val secVerse = codeRef?.third ?: verseNumber
-        _secondaryBible.value?.getVerseDetailsByCode(secBook, secChapter, secVerse)?.let { result ->
+        _secondaryBible.value?.takeIf { it.getVerseCount() > 0 }
+            ?.getVerseDetailsByCode(secBook, secChapter, secVerse)?.let { result ->
             val abbreviation = _secondaryBible.value?.getBibleAbbreviation() ?: ""
             verseList.add(
                 SelectedVerse(

@@ -20,6 +20,8 @@ class Bible {
     private val chapterIndex = HashMap<Long, List<BibleVerse>>()
     // Maps code (BXXXCXXXVXXX) book/chapter to display book/chapter for cross-referencing
     private val codeToDisplayMap = HashMap<Long, Long>()
+    // Index: full internal code id (BXXXCXXXVXXX) -> the verse, for exact cross-Bible lookups
+    private val codeIndex = HashMap<String, BibleVerse>()
 
     private var conn: java.sql.Connection? = null
 
@@ -340,10 +342,14 @@ class Bible {
 
     private fun buildChapterIndex() {
         chapterIndex.clear()
+        codeIndex.clear()
         // Group verses by (book, chapter) preserving their parsed order
         val grouped = LinkedHashMap<Long, MutableList<BibleVerse>>()
         for (verse in operatorBible) {
             grouped.getOrPut(chapterKey(verse.book, verse.chapter)) { mutableListOf() }.add(verse)
+            // Index by the internal code id so a code reference resolves to this Bible's
+            // own display numbering exactly, regardless of the code→display chapter map.
+            codeIndex[verse.verseId] = verse
         }
         chapterIndex.putAll(grouped)
     }
@@ -555,6 +561,17 @@ class Bible {
     )
 
     fun getVerseDetailsByCode(codeBook: Int, codeChapter: Int, codeVerse: Int): CodeLookupResult? {
+        // Preferred: resolve the exact verse by its internal code id. This yields this Bible's
+        // own display book/chapter/verse directly, so a translation with different numbering
+        // (e.g. Synodal Psalm 135 vs KJV 136) always shows its native reference — never the
+        // incoming code number.
+        val codeId = "B%03dC%03dV%03d".format(codeBook, codeChapter, codeVerse)
+        codeIndex[codeId]?.let { bv ->
+            val bookName = books.firstOrNull { it.bookId == bv.book.toString() }?.book ?: "Book ${bv.book}"
+            return CodeLookupResult(bookName, bv.verseText, bv.verseId, bv.chapter, bv.verseNumber)
+        }
+
+        // Fallback: map the code chapter to a display chapter, then look up the verse there.
         val displayKey = codeToDisplayMap[chapterKey(codeBook, codeChapter)]
         val displayBook: Int
         val displayChapter: Int
