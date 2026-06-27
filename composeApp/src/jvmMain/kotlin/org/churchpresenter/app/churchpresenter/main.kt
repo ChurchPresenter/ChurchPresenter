@@ -186,6 +186,7 @@ fun main() {
     CrashReporter.initialize()
     AnalyticsReporter.initialize()
     AnalyticsReporter.logAppOpen()
+    CrashReporter.setUser(AnalyticsReporter.clientId)
     LiveMapReporter.pingOnOpen()
 
     // Catch exceptions thrown inside coroutines / Compose lambdas —

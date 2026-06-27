@@ -40,7 +40,7 @@ object AnalyticsReporter {
         }
     }
 
-    private val clientId: String by lazy { resolveClientId() }
+    val clientId: String by lazy { resolveClientId() }
     private val sessionId: String = System.currentTimeMillis().toString()
 
     fun initialize() {

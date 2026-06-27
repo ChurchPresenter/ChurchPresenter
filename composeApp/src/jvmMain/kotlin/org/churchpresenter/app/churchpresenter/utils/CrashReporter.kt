@@ -4,6 +4,7 @@ import io.sentry.Sentry
 import io.sentry.SentryEvent
 import io.sentry.SentryLevel
 import io.sentry.protocol.Message
+import io.sentry.protocol.User
 import org.churchpresenter.app.churchpresenter.BuildConfig
 import java.io.File
 import java.io.PrintWriter
@@ -112,6 +113,14 @@ object CrashReporter {
     /** True when Sentry is initialised with a valid DSN. */
     fun isEnabled(): Boolean = try { Sentry.isEnabled() } catch (_: Exception) { false }
 
+    /** Sets the user identity used for unique-user counting in Sentry. */
+    fun setUser(id: String) {
+        try {
+            if (!Sentry.isEnabled()) return
+            Sentry.setUser(User().apply { this.id = id })
+        } catch (_: Exception) {}
+    }
+
     /** DSN from sentry.properties with the secret key partially masked. Empty when not configured. */
     fun maskedDsn(): String = try {
         val dsn = readDsn()
@@ -157,7 +166,7 @@ object CrashReporter {
                 options.isEnableUncaughtExceptionHandler = true
                 options.isAttachThreads = false
                 options.isAttachStacktrace = true
-                options.tracesSampleRate = null
+                options.tracesSampleRate = 1.0
             }
         } catch (_: Exception) {
             // Sentry failing to init must never prevent the app from starting
