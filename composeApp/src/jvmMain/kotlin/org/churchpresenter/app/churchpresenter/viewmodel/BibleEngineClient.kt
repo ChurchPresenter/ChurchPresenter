@@ -7,6 +7,7 @@ import engine.EngineServer
 import engine.engine.DetectionLogger
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
+import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.websocket.DefaultClientWebSocketSession
 import io.ktor.client.plugins.websocket.WebSockets
 import io.ktor.client.plugins.websocket.webSocket
@@ -21,6 +22,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import java.io.File
+import java.time.Instant
 import org.json.JSONObject
 
 /**
@@ -42,7 +44,14 @@ class BibleEngineClient(
     private val onScripture: (Int, Int, Int, Int?, String, String, String?, String?, String?, String?, List<String>) -> Unit,
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
-    private val httpClient = HttpClient(CIO) { install(WebSockets) }
+    private val httpClient = HttpClient(CIO) {
+        install(WebSockets)
+        install(HttpTimeout) {
+            requestTimeoutMillis = 10_000
+            connectTimeoutMillis = 5_000
+            socketTimeoutMillis = 10_000
+        }
+    }
 
     private val _connected = mutableStateOf(false)
     val connected: State<Boolean> = _connected
@@ -57,6 +66,8 @@ class BibleEngineClient(
     private var wsJob: Job? = null
     @Volatile private var session: DefaultClientWebSocketSession? = null
     @Volatile private var currentLevel: String = "off"
+
+    private val engineErrorLock = Any()
 
     /**
      * Starts (or restarts) the engine link. When [runLocal] is true the engine is launched in-process
@@ -109,8 +120,9 @@ class BibleEngineClient(
                         if (frame is Frame.Text) handleMessage(frame.readText())
                     }
                 }
-            } catch (_: Exception) {
-                // fall through to retry
+            } catch (e: Exception) {
+                System.err.println("bible-engine: connect to ws://$host:$port/bible-engine failed — ${e.message}")
+                logEngineError("connectLoop: connect to ws://$host:$port/bible-engine failed", e.toString())
             }
             session = null
             _connected.value = false
@@ -165,6 +177,24 @@ class BibleEngineClient(
         engineHandle?.stop()
         engineHandle = null
     }
+
+    /** Appends a line to ~/.churchpresenter/bible-stt-logs/engine-errors.jsonl for crash-level issues. */
+    private fun logEngineError(message: String, detail: String = "") {
+        runCatching {
+            val dir = File(System.getProperty("user.home"), ".churchpresenter/bible-stt-logs").also { it.mkdirs() }
+            val file = File(dir, "engine-errors.jsonl")
+            val line = buildString {
+                append("{\"ts\":\"").append(Instant.now()).append("\",")
+                append("\"message\":\"").append(esc(message)).append("\"")
+                if (detail.isNotBlank()) append(",\"detail\":\"").append(esc(detail)).append("\"")
+                append("}")
+            }
+            synchronized(engineErrorLock) { file.appendText(line + "\n", Charsets.UTF_8) }
+        }
+    }
+
+    private fun esc(s: String): String =
+        s.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", " ").replace("\r", " ")
 
     fun dispose() {
         stop()
