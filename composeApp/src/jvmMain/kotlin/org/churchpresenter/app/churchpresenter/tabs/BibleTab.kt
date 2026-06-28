@@ -735,10 +735,10 @@ fun BibleTab(
             }
         }
 
-        // ── Detection status + (when connected) controls & detected references ──
-        // The status line shows whenever detection is enabled, so STT connection problems are visible;
-        // the interactive controls + references list still require an active STT connection.
-        if (engineSettings.enabled) {
+        // ── Detection status + controls & detected references ──
+        // Only shown when STT is actually connected — at first launch the Bible tab stays clean
+        // with just navigation and verse display.
+        if (engineSettings.enabled && sttConnected) {
             val levelName = when (textMatchLevel) {
                 TextMatchLevel.OFF -> stringResource(Res.string.bible_stt_level_off)
                 TextMatchLevel.CONSERVATIVE -> stringResource(Res.string.bible_stt_level_conservative)
