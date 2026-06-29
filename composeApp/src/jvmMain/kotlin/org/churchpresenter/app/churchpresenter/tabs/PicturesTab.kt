@@ -754,12 +754,6 @@ fun PicturesTab(
                     }
                 }
             }
-
-            Text(
-                text = stringResource(Res.string.pictures_reorder_hint),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.35f)
-            )
         }
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
@@ -775,6 +769,18 @@ fun PicturesTab(
         ) {
             Text(
                 text = stringResource(Res.string.pictures_arrow_key_hint),
+                style = MaterialTheme.typography.bodySmall.copy(
+                    fontSize = androidx.compose.ui.unit.TextUnit(11.5f, androidx.compose.ui.unit.TextUnitType.Sp)
+                ),
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+            )
+            Text(
+                text = "·",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f)
+            )
+            Text(
+                text = stringResource(Res.string.pictures_reorder_hint),
                 style = MaterialTheme.typography.bodySmall.copy(
                     fontSize = androidx.compose.ui.unit.TextUnit(11.5f, androidx.compose.ui.unit.TextUnitType.Sp)
                 ),

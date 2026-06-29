@@ -373,7 +373,7 @@
     <string name="supported_formats">Unterstützt: PowerPoint (.ppt, .pptx), Keynote (.key), PDF (.pdf)</string>
     <string name="slide_number">Folie %1$d</string>
     <string name="remove">Entfernen</string>
-    <string name="select_presentation_file_button">📄 Datei auswählen</string>
+    <string name="select_presentation_file_button">Datei auswählen</string>
     <string name="select_presentation_file_dialog">Select Presentation File</string>
 
     <!-- Projection Settings Tab -->
