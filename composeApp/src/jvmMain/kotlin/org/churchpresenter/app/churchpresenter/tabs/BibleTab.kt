@@ -18,7 +18,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.material.icons.filled.CheckBoxOutlineBlank
+import androidx.compose.material.icons.automirrored.filled.FormatAlignLeft
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -51,7 +52,6 @@ import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -97,6 +97,7 @@ import churchpresenter.composeapp.generated.resources.bible_no_primary_step1
 import churchpresenter.composeapp.generated.resources.bible_no_primary_step2
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.ic_delete
 import churchpresenter.composeapp.generated.resources.add_to_schedule
@@ -185,6 +186,17 @@ import org.churchpresenter.app.churchpresenter.viewmodel.BibleViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.border
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.isCtrlPressed
+import androidx.compose.ui.input.pointer.isShiftPressed
+import androidx.compose.ui.input.pointer.isMetaPressed
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalComposeUiApi::class)
 @Composable
@@ -509,23 +521,7 @@ fun BibleTab(
         }
     }
 
-    // Column header — keeps the Book/Chapter list tops aligned with the verse toolbar row
-    // now that the per-column filter fields have been replaced by the unified search box.
-    @Composable
-    fun ColumnHeader(label: String) {
-        Box(
-            modifier = Modifier.fillMaxWidth().height(48.dp).padding(start = 4.dp, end = 8.dp),
-            contentAlignment = Alignment.CenterStart
-        ) {
-            Text(
-                text = label,
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-        }
-    }
+
 
     // Compact Auto / Reference / Text mode chip, shown inside the search field (leading slot).
     @Composable
@@ -533,18 +529,18 @@ fun BibleTab(
         val (label, container, content) = when (searchMode) {
             BibleSearchMode.AUTO -> Triple(
                 Res.string.bible_search_mode_auto,
-                MaterialTheme.colorScheme.secondaryContainer,
-                MaterialTheme.colorScheme.onSecondaryContainer
+                MaterialTheme.colorScheme.primary,
+                MaterialTheme.colorScheme.onPrimary
             )
             BibleSearchMode.REFERENCE -> Triple(
                 Res.string.bible_search_mode_reference,
-                MaterialTheme.colorScheme.tertiaryContainer,
-                MaterialTheme.colorScheme.onTertiaryContainer
+                MaterialTheme.colorScheme.secondary,
+                MaterialTheme.colorScheme.onSecondary
             )
             BibleSearchMode.TEXT -> Triple(
                 Res.string.bible_search_mode_text,
-                MaterialTheme.colorScheme.primaryContainer,
-                MaterialTheme.colorScheme.onPrimaryContainer
+                MaterialTheme.colorScheme.tertiary,
+                MaterialTheme.colorScheme.onTertiary
             )
         }
         TooltipArea(
@@ -569,9 +565,13 @@ fun BibleTab(
             ) {
                 Text(
                     text = stringResource(label),
-                    style = MaterialTheme.typography.labelMedium,
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 0.05.sp
+                    ),
                     maxLines = 1,
-                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
+                    modifier = Modifier.padding(horizontal = 9.dp, vertical = 4.dp)
                 )
             }
         }
@@ -581,9 +581,9 @@ fun BibleTab(
     fun DragHandle(onDrag: (Float) -> Unit) {
         Box(
             modifier = Modifier
-                .width(6.dp)
+                .width(4.dp)
                 .fillMaxHeight()
-                .background(MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f))
+                .background(MaterialTheme.colorScheme.outlineVariant)
                 .pointerHoverIcon(PointerIcon(Cursor(Cursor.E_RESIZE_CURSOR)))
                 .pointerInput(Unit) {
                     detectHorizontalDragGestures(onDragEnd = ::saveColWidths) { _, amount ->
@@ -600,140 +600,98 @@ fun BibleTab(
             .focusable()
             .onPreviewKeyEvent { handleKeyEvent(it) }
     ) {
-        // ── Search row — wraps to two lines when window is narrow ──
-        BoxWithConstraints(modifier = Modifier.fillMaxWidth().padding(all = 4.dp)) {
-            val searchIsNarrow = maxWidth < 550.dp
+        // ── Search row ────────────────────────────────────────────────
+        val searchPlaceholder = stringResource(Res.string.bible_smart_search_hint)
+        BoxWithConstraints(modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 10.dp, bottom = 8.dp)) {
+            val searchIsNarrow = maxWidth < 440.dp
 
             if (searchIsNarrow) {
-                // Narrow: search field on its own line, controls below
-                Column(modifier = Modifier.fillMaxWidth()) {
-                    OutlinedTextField(
-                        modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp)
-                            .onFocusChanged { searchFieldFocused = it.isFocused }
-                            .onPreviewKeyEvent { e ->
-                                if (e.type == KeyEventType.KeyDown && e.key == Key.Enter) {
-                                    viewModel.submitSmartQuery(); focusRequester.requestFocus(); true
-                                } else false
-                            },
+                Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    BibleSearchField(
                         value = searchQuery,
+                        placeholder = searchPlaceholder,
                         onValueChange = { viewModel.onSmartQueryChanged(it) },
-                        textStyle = MaterialTheme.typography.bodyMedium,
-                        label = { Text(text = stringResource(Res.string.search), style = MaterialTheme.typography.bodyMedium) },
-                        placeholder = { Text(text = stringResource(Res.string.bible_smart_search_hint), style = MaterialTheme.typography.bodyMedium) },
-                        trailingIcon = {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                if (searchQuery.isNotEmpty()) {
-                                    IconButton(onClick = { viewModel.clearSearch(); focusRequester.requestFocus() }) {
-                                        Icon(painter = painterResource(Res.drawable.ic_close), contentDescription = stringResource(Res.string.clear), modifier = Modifier.size(20.dp))
-                                    }
-                                }
-                                SearchModeChip(modifier = Modifier.padding(end = 8.dp))
-                            }
-                        },
-                        singleLine = true,
-                        maxLines = 1,
-                        colors = OutlinedTextFieldDefaults.colors().copy(
-                            unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-                            focusedContainerColor = MaterialTheme.colorScheme.surface,
-                        )
+                        onClear = { viewModel.clearSearch(); focusRequester.requestFocus() },
+                        onSubmit = { viewModel.submitSmartQuery(); focusRequester.requestFocus() },
+                        onFocusChanged = { searchFieldFocused = it },
+                        modeChip = { SearchModeChip() },
+                        modifier = Modifier.fillMaxWidth()
                     )
-                    Row(verticalAlignment = Alignment.CenterVertically) {
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                         DropdownSelector(
-                            modifier = Modifier.weight(1f, fill = false).widthIn(max = 160.dp).padding(end = 8.dp),
+                            modifier = Modifier.weight(1f, fill = false).widthIn(max = 160.dp),
                             label = stringResource(Res.string.scope),
                             items = scopeOptions,
                             selected = selectedScope,
                             onSelectedChange = { newValue ->
-                                val newIndex = scopeOptions.indexOf(newValue).coerceAtLeast(0)
-                                viewModel.updateSelectedScopeIndex(newIndex)
+                                viewModel.updateSelectedScopeIndex(scopeOptions.indexOf(newValue).coerceAtLeast(0))
                             }
                         )
                         DropdownSelector(
-                            modifier = Modifier.weight(1f, fill = false).widthIn(max = 160.dp).padding(end = 8.dp),
+                            modifier = Modifier.weight(1f, fill = false).widthIn(max = 160.dp),
                             label = stringResource(Res.string.mode),
                             items = modeOptions,
                             selected = selectedMode,
                             onSelectedChange = { newValue ->
-                                val newIndex = modeOptions.indexOf(newValue).coerceAtLeast(0)
-                                viewModel.updateSelectedModeIndex(newIndex)
+                                viewModel.updateSelectedModeIndex(modeOptions.indexOf(newValue).coerceAtLeast(0))
                             }
                         )
-                        IconButton(
-                            onClick = { viewModel.submitSmartQuery(); focusRequester.requestFocus() },
-                            colors = IconButtonDefaults.iconButtonColors(
-                                containerColor = MaterialTheme.colorScheme.primary,
-                                contentColor = MaterialTheme.colorScheme.onPrimary
-                            )
+                        Box(
+                            modifier = Modifier.size(42.dp)
+                                .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(8.dp))
+                                .clickable(indication = null, interactionSource = remember { MutableInteractionSource() }) {
+                                    viewModel.submitSmartQuery(); focusRequester.requestFocus()
+                                },
+                            contentAlignment = Alignment.Center
                         ) {
-                            Icon(painter = painterResource(Res.drawable.ic_search), contentDescription = stringResource(Res.string.search), modifier = Modifier.size(20.dp))
+                            Icon(painter = painterResource(Res.drawable.ic_search), contentDescription = stringResource(Res.string.search), modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onPrimary)
                         }
                     }
                 }
             } else {
-                // Wide: everything on one line
-                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-                    OutlinedTextField(
-                        modifier = Modifier.weight(1f).padding(end = 8.dp)
-                            .onFocusChanged { searchFieldFocused = it.isFocused }
-                            .onPreviewKeyEvent { e ->
-                                if (e.type == KeyEventType.KeyDown && e.key == Key.Enter) {
-                                    viewModel.submitSmartQuery(); focusRequester.requestFocus(); true
-                                } else false
-                            },
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.fillMaxWidth()) {
+                    BibleSearchField(
                         value = searchQuery,
+                        placeholder = searchPlaceholder,
                         onValueChange = { viewModel.onSmartQueryChanged(it) },
-                        textStyle = MaterialTheme.typography.bodyMedium,
-                        label = { Text(text = stringResource(Res.string.search), style = MaterialTheme.typography.bodyMedium) },
-                        placeholder = { Text(text = stringResource(Res.string.bible_smart_search_hint), style = MaterialTheme.typography.bodyMedium) },
-                        trailingIcon = {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                if (searchQuery.isNotEmpty()) {
-                                    IconButton(onClick = { viewModel.clearSearch(); focusRequester.requestFocus() }) {
-                                        Icon(painter = painterResource(Res.drawable.ic_close), contentDescription = stringResource(Res.string.clear), modifier = Modifier.size(20.dp))
-                                    }
-                                }
-                                SearchModeChip(modifier = Modifier.padding(end = 8.dp))
-                            }
-                        },
-                        singleLine = true,
-                        maxLines = 1,
-                        colors = OutlinedTextFieldDefaults.colors().copy(
-                            unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-                            focusedContainerColor = MaterialTheme.colorScheme.surface,
-                        )
+                        onClear = { viewModel.clearSearch(); focusRequester.requestFocus() },
+                        onSubmit = { viewModel.submitSmartQuery(); focusRequester.requestFocus() },
+                        onFocusChanged = { searchFieldFocused = it },
+                        modeChip = { SearchModeChip() },
+                        modifier = Modifier.weight(1f)
                     )
                     DropdownSelector(
-                        modifier = Modifier.width(160.dp).padding(end = 8.dp),
+                        modifier = Modifier.width(148.dp),
                         label = stringResource(Res.string.scope),
                         items = scopeOptions,
                         selected = selectedScope,
                         onSelectedChange = { newValue ->
-                            val newIndex = scopeOptions.indexOf(newValue).coerceAtLeast(0)
-                            viewModel.updateSelectedScopeIndex(newIndex)
+                            viewModel.updateSelectedScopeIndex(scopeOptions.indexOf(newValue).coerceAtLeast(0))
                         }
                     )
                     DropdownSelector(
-                        modifier = Modifier.width(200.dp).padding(end = 8.dp),
+                        modifier = Modifier.width(160.dp),
                         label = stringResource(Res.string.mode),
                         items = modeOptions,
                         selected = selectedMode,
                         onSelectedChange = { newValue ->
-                            val newIndex = modeOptions.indexOf(newValue).coerceAtLeast(0)
-                            viewModel.updateSelectedModeIndex(newIndex)
+                            viewModel.updateSelectedModeIndex(modeOptions.indexOf(newValue).coerceAtLeast(0))
                         }
                     )
-                    IconButton(
-                        onClick = { viewModel.submitSmartQuery(); focusRequester.requestFocus() },
-                        colors = IconButtonDefaults.iconButtonColors(
-                            containerColor = MaterialTheme.colorScheme.primary,
-                            contentColor = MaterialTheme.colorScheme.onPrimary
-                        )
+                    Box(
+                        modifier = Modifier.size(42.dp)
+                            .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(6.dp))
+                            .clickable(indication = null, interactionSource = remember { MutableInteractionSource() }) {
+                                viewModel.submitSmartQuery(); focusRequester.requestFocus()
+                            },
+                        contentAlignment = Alignment.Center
                     ) {
-                        Icon(painter = painterResource(Res.drawable.ic_search), contentDescription = stringResource(Res.string.search), modifier = Modifier.size(20.dp))
+                        Icon(painter = painterResource(Res.drawable.ic_search), contentDescription = stringResource(Res.string.search), modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onPrimary)
                     }
                 }
             }
         }
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
         // ── Detection status + (when connected) controls & detected references ──
         // The status line shows whenever detection is enabled, so STT connection problems are visible;
@@ -746,63 +704,53 @@ fun BibleTab(
                 TextMatchLevel.AGGRESSIVE -> stringResource(Res.string.bible_stt_level_aggressive)
             }
             // ── Controls row: status + auto-follow + reverse-lookup level + clear ──
-            FlowRow(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp).padding(bottom = 2.dp),
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp),
+            val engineStartFailed = bibleEngineClient?.startFailed?.value == true
+            val engineConnected = bibleEngineClient?.connected?.value == true
+            val sttConnecting = sttManager?.connecting?.value == true
+            val sttConnectError = sttManager?.connectError?.value == true
+            val sttReconnecting = sttManager?.reconnecting?.value == true
+            val noBibleSelected = appSettings.bibleSettings.primaryBible.isBlank() &&
+                appSettings.bibleSettings.secondaryBible.isBlank()
+            val sttReceiving = sttManager != null &&
+                (sttManager.inProgressText.value.isNotBlank() || sttManager.segments.isNotEmpty())
+            val statusIsError = engineStartFailed || noBibleSelected || sttConnectError
+            val statusText = when {
+                engineStartFailed -> stringResource(Res.string.bible_stt_engine_unavailable)
+                noBibleSelected -> stringResource(Res.string.bible_stt_no_bible)
+                sttConnected && !engineConnected -> stringResource(Res.string.bible_stt_engine_connecting)
+                sttConnected && !sttReceiving && detectedReferences.isEmpty() ->
+                    stringResource(Res.string.bible_stt_waiting_for_stt)
+                sttConnected -> stringResource(Res.string.bible_stt_listening)
+                sttReconnecting -> stringResource(Res.string.stt_status_reconnecting)
+                sttConnectError -> stringResource(Res.string.stt_status_unreachable)
+                sttConnecting -> stringResource(Res.string.stt_status_connecting)
+                else -> stringResource(Res.string.stt_status_not_connected)
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 6.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                // Full lifecycle status: STT connection problems, engine start-up, and the
-                // engine-up-but-no-data state are all surfaced instead of a blank strip or a wrong
-                // "Listening…". Priority order top→bottom.
-                val engineStartFailed = bibleEngineClient?.startFailed?.value == true
-                val engineConnected = bibleEngineClient?.connected?.value == true
-                val sttConnecting = sttManager?.connecting?.value == true
-                val sttConnectError = sttManager?.connectError?.value == true
-                val sttReconnecting = sttManager?.reconnecting?.value == true
-                // Detection needs ≥1 Bible (engine indexes [primary, secondary] minus blanks). This is
-                // the zero-Bible guard (both blank) — one Bible is enough and clears it.
-                val noBibleSelected = appSettings.bibleSettings.primaryBible.isBlank() &&
-                    appSettings.bibleSettings.secondaryBible.isBlank()
-                // STT is actually feeding once any transcript (completed or in-progress) has arrived. CP
-                // reads the same stream the engine does, so empty here ⇒ the engine isn't fed yet either.
-                val sttReceiving = sttManager != null &&
-                    (sttManager.inProgressText.value.isNotBlank() || sttManager.segments.isNotEmpty())
-                val statusIsError = engineStartFailed || noBibleSelected || sttConnectError
-                val statusText = when {
-                    engineStartFailed -> stringResource(Res.string.bible_stt_engine_unavailable)
-                    noBibleSelected -> stringResource(Res.string.bible_stt_no_bible)
-                    sttConnected && !engineConnected -> stringResource(Res.string.bible_stt_engine_connecting)
-                    sttConnected && !sttReceiving && detectedReferences.isEmpty() ->
-                        stringResource(Res.string.bible_stt_waiting_for_stt)
-                    sttConnected -> stringResource(Res.string.bible_stt_listening)
-                    sttReconnecting -> stringResource(Res.string.stt_status_reconnecting)
-                    sttConnectError -> stringResource(Res.string.stt_status_unreachable)
-                    sttConnecting -> stringResource(Res.string.stt_status_connecting)
-                    else -> stringResource(Res.string.stt_status_not_connected)
-                }
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.height(32.dp).padding(end = 2.dp)
+                    modifier = Modifier.padding(end = 4.dp)
                 ) {
                     Icon(
                         imageVector = Icons.Filled.Mic,
                         contentDescription = null,
                         tint = if (statusIsError) MaterialTheme.colorScheme.error
-                               else MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(16.dp)
+                               else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f),
+                        modifier = Modifier.size(12.dp)
                     )
-                    Spacer(Modifier.width(4.dp))
+                    Spacer(Modifier.width(5.dp))
                     Text(
                         text = statusText,
-                        style = MaterialTheme.typography.labelMedium,
+                        style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.5.sp),
                         color = if (statusIsError) MaterialTheme.colorScheme.error
-                                else MaterialTheme.colorScheme.onSurfaceVariant
-                            .copy(alpha = if (detectedReferences.isEmpty()) 0.6f else 1f)
+                                else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f)
                     )
                 }
-                // Config chips (auto-follow + level) stay visible whenever detection is enabled, so the
-                // operator can preset them before STT connects. Only the Clear action below is gated to
-                // when detections are actually present.
+                // Auto-follow flat button
                 TooltipArea(tooltip = {
                     Surface(shadowElevation = 4.dp, color = MaterialTheme.colorScheme.surfaceVariant) {
                         Text(
@@ -812,51 +760,123 @@ fun BibleTab(
                         )
                     }
                 }) {
-                    FilterChip(
-                        selected = autoFollowEnabled,
-                        onClick = {
-                            val next = !autoFollowEnabled
-                            viewModel.setAutoFollow(next)
-                            onSettingsChange { it.copy(bibleEngineSettings = it.bibleEngineSettings.copy(autoFollow = next)) }
-                        },
-                        label = { Text(stringResource(Res.string.bible_stt_auto_follow)) },
-                        leadingIcon = {
-                            Icon(Icons.Filled.Tv, contentDescription = null, modifier = Modifier.size(16.dp))
+                    Box(
+                        modifier = Modifier
+                            .height(27.dp)
+                            .background(
+                                if (autoFollowEnabled) MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
+                                else MaterialTheme.colorScheme.surfaceVariant,
+                                RoundedCornerShape(6.dp)
+                            )
+                            .border(
+                                1.dp,
+                                if (autoFollowEnabled) MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+                                else MaterialTheme.colorScheme.outlineVariant,
+                                RoundedCornerShape(6.dp)
+                            )
+                            .clickable(
+                                indication = null,
+                                interactionSource = remember { MutableInteractionSource() }
+                            ) {
+                                val next = !autoFollowEnabled
+                                viewModel.setAutoFollow(next)
+                                onSettingsChange { it.copy(bibleEngineSettings = it.bibleEngineSettings.copy(autoFollow = next)) }
+                            }
+                            .padding(horizontal = 11.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(5.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.CheckBoxOutlineBlank,
+                                contentDescription = null,
+                                modifier = Modifier.size(11.dp),
+                                tint = if (autoFollowEnabled) MaterialTheme.colorScheme.primary
+                                       else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                            )
+                            Text(
+                                text = stringResource(Res.string.bible_stt_auto_follow),
+                                style = MaterialTheme.typography.bodySmall.copy(
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Medium
+                                ),
+                                color = if (autoFollowEnabled) MaterialTheme.colorScheme.primary
+                                        else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                            )
                         }
-                    )
-                }
-                // Reverse-lookup level: tap to cycle Off → Conservative → Balanced → Aggressive.
-                FilterChip(
-                    selected = textMatchLevel != TextMatchLevel.OFF,
-                    onClick = {
-                        val all = TextMatchLevel.values()
-                        val next = all[(textMatchLevel.ordinal + 1) % all.size]
-                        viewModel.setTextMatchLevel(next)
-                        onSettingsChange { it.copy(bibleEngineSettings = it.bibleEngineSettings.copy(textMatchLevel = next.name.lowercase())) }
-                    },
-                    label = { Text("${stringResource(Res.string.bible_stt_match_label)}: $levelName") },
-                    leadingIcon = {
-                        Icon(Icons.Filled.FormatQuote, contentDescription = null, modifier = Modifier.size(16.dp))
                     }
-                )
+                }
+                // Text match flat button (cycles Off → Conservative → Balanced → Aggressive)
+                Box(
+                    modifier = Modifier
+                        .height(27.dp)
+                        .background(
+                            if (textMatchLevel != TextMatchLevel.OFF) MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
+                            else MaterialTheme.colorScheme.surfaceVariant,
+                            RoundedCornerShape(6.dp)
+                        )
+                        .border(
+                            1.dp,
+                            if (textMatchLevel != TextMatchLevel.OFF) MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+                            else MaterialTheme.colorScheme.outlineVariant,
+                            RoundedCornerShape(6.dp)
+                        )
+                        .clickable(
+                            indication = null,
+                            interactionSource = remember { MutableInteractionSource() }
+                        ) {
+                            val all = TextMatchLevel.values()
+                            val next = all[(textMatchLevel.ordinal + 1) % all.size]
+                            viewModel.setTextMatchLevel(next)
+                            onSettingsChange { it.copy(bibleEngineSettings = it.bibleEngineSettings.copy(textMatchLevel = next.name.lowercase())) }
+                        }
+                        .padding(horizontal = 11.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(5.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.FormatAlignLeft,
+                            contentDescription = null,
+                            modifier = Modifier.size(11.dp),
+                            tint = if (textMatchLevel != TextMatchLevel.OFF) MaterialTheme.colorScheme.primary
+                                   else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                        )
+                        Text(
+                            text = "${stringResource(Res.string.bible_stt_match_label)}: $levelName",
+                            style = MaterialTheme.typography.bodySmall.copy(
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Medium
+                            ),
+                            color = if (textMatchLevel != TextMatchLevel.OFF) MaterialTheme.colorScheme.primary
+                                    else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                        )
+                    }
+                }
                 if (detectedReferences.isNotEmpty()) {
                     IconButton(
                         onClick = { viewModel.clearDetectedReferences() },
-                        modifier = Modifier.size(32.dp)
+                        modifier = Modifier.size(27.dp)
                     ) {
                         Icon(
                             painter = painterResource(Res.drawable.ic_close),
                             contentDescription = stringResource(Res.string.bible_stt_clear),
-                            modifier = Modifier.size(18.dp)
+                            modifier = Modifier.size(14.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
                         )
                     }
                 }
             }
 
             // ── Detected references — at most 5 rows tall, scrolls beyond ──
-            val detRowHeight = 26.dp
+            val detRowHeight = 28.dp
             val detMaxVisibleRows = 5
             if (detectedReferences.isNotEmpty()) {
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
             val detScroll = rememberScrollState()
             Box(modifier = Modifier.fillMaxWidth().heightIn(max = detRowHeight * detMaxVisibleRows)) {
                 Column(
@@ -864,13 +884,21 @@ fun BibleTab(
                         .verticalScroll(detScroll)
                         .padding(end = 10.dp)
                 ) {
-                detectedReferences.forEach { ref ->
+                detectedReferences.forEachIndexed { idx, ref ->
+                val isBestMatch = idx == 0
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.fillMaxWidth()
                         .height(detRowHeight)
-                        .padding(horizontal = 6.dp)
+                        .background(
+                            if (isBestMatch) MaterialTheme.colorScheme.surfaceVariant
+                            else MaterialTheme.colorScheme.surface
+                        )
+                        .drawBehind {
+                            if (isBestMatch) drawRect(color = Color(0xFFC4972A), size = Size(4f, size.height))
+                        }
                         .clickable { viewModel.applyDetectedReference(ref); focusRequester.requestFocus() }
+                        .padding(start = 12.dp, end = 6.dp)
                 ) {
                     // Fixed-width icon column (source markers + transcription/translation markers) so
                     // every reference + verse text lines up vertically, regardless of marker count.
@@ -1018,13 +1046,20 @@ fun BibleTab(
                 }
             }
         } else if (isSearchMode && searchResults.isNotEmpty()) {
-            Column(modifier = Modifier.fillMaxWidth().weight(1f).padding(8.dp)) {
-                Text(
-                    text = stringResource(Res.string.found_results, searchResults.size),
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
+            Column(modifier = Modifier.fillMaxWidth().weight(1f)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().height(31.dp)
+                        .background(MaterialTheme.colorScheme.surface)
+                        .padding(horizontal = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = stringResource(Res.string.found_results, searchResults.size),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                    )
+                }
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                 Box(modifier = Modifier.fillMaxWidth().fillMaxHeight()) {
                     val listState = rememberLazyListState()
                     LazyColumn(state = listState, modifier = Modifier.fillMaxSize().padding(end = 8.dp)) {
@@ -1065,10 +1100,11 @@ fun BibleTab(
                                         focusRequester.requestFocus()
                                     }
                                     .background(MaterialTheme.colorScheme.surface)
-                                    .padding(8.dp),
-                                style = MaterialTheme.typography.bodyMedium,
+                                    .padding(horizontal = 12.dp, vertical = 6.dp),
+                                style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurface
                             )
+                            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                         }
                     }
                     VerticalScrollbar(
@@ -1089,192 +1125,207 @@ fun BibleTab(
                 )
             }
         } else {
-            // ── Toolbar: swap, bible labels, go live, add to schedule ─
-            // Multi-verse selection is keyboard-driven: Ctrl/Cmd+Click to toggle, Shift+Click for range
             val holdLiveStr = stringResource(Res.string.hold_live)
             val swapBiblesStr = stringResource(Res.string.swap_bibles)
             val goLiveStr = stringResource(Res.string.go_live)
             val addScheduleStr = stringResource(Res.string.add_to_schedule)
 
-            val toolbarContent: @Composable () -> Unit = {
-                @OptIn(ExperimentalLayoutApi::class)
-                FlowRow(
-                    modifier = Modifier.fillMaxWidth()
-                        .padding(horizontal = 4.dp),
-                    horizontalArrangement = Arrangement.End,
-                    verticalArrangement = Arrangement.spacedBy(4.dp),
-                    itemVerticalAlignment = Alignment.CenterVertically
+            // ── Unified column headers row ───────────────────────────────
+            val accentColor = MaterialTheme.colorScheme.primary
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = 31.dp)
+                    .background(MaterialTheme.colorScheme.surface)
+                    .padding(start = 4.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box(modifier = Modifier.width(with(density) { colWBook.toDp() }).padding(start = 12.dp)) {
+                    Text(
+                        text = stringResource(Res.string.book).uppercase(),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                    )
+                }
+                VerticalDivider(modifier = Modifier.height(16.dp), color = MaterialTheme.colorScheme.outlineVariant)
+                Box(modifier = Modifier.width(with(density) { colWChapter.toDp() }).padding(start = 12.dp)) {
+                    Text(
+                        text = stringResource(Res.string.chapter).uppercase(),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
+                VerticalDivider(modifier = Modifier.height(16.dp), color = MaterialTheme.colorScheme.outlineVariant)
+                Row(
+                    modifier = Modifier.weight(1f).padding(start = 12.dp, end = 14.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                        if (presenterManager != null && !splitBrowseMode) {
-                            val holdLive by presenterManager.bibleHold
-                            TooltipArea(
-                                    tooltip = {
-                                        Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
-                                            Text(holdLiveStr, color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
+                    Text(
+                        text = stringResource(Res.string.verse).uppercase(),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                    )
+                    Spacer(Modifier.weight(1f))
+                    // Combined hold + kbd hint pill
+                    val holdPillActive = presenterManager != null && !splitBrowseMode
+                    val holdLiveState = presenterManager?.bibleHold?.value ?: false
+                    TooltipArea(
+                        tooltip = {
+                            Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall) {
+                                Text(
+                                    if (holdPillActive) holdLiveStr else "Ctrl+Click to toggle, Shift+Click for range",
+                                    color = MaterialTheme.colorScheme.inverseOnSurface,
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                            }
+                        },
+                        tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .height(27.dp)
+                                .background(
+                                    when {
+                                        holdLiveState -> MaterialTheme.colorScheme.error
+                                        else -> MaterialTheme.colorScheme.surfaceVariant
+                                    },
+                                    RoundedCornerShape(6.dp)
+                                )
+                                .border(
+                                    1.dp,
+                                    when {
+                                        holdLiveState -> MaterialTheme.colorScheme.error
+                                        else -> MaterialTheme.colorScheme.outlineVariant
+                                    },
+                                    RoundedCornerShape(6.dp)
+                                )
+                                .then(
+                                    if (holdPillActive)
+                                        Modifier.clickable(
+                                            indication = null,
+                                            interactionSource = remember { MutableInteractionSource() }
+                                        ) {
+                                            presenterManager!!.setBibleHold(!holdLiveState)
+                                            focusRequester.requestFocus()
                                         }
-                                    },
-                                    tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
-                                ) {
-                                    IconButton(
-                                        onClick = { presenterManager.setBibleHold(!holdLive); focusRequester.requestFocus() },
-                                        colors = IconButtonDefaults.iconButtonColors(
-                                            containerColor = if (holdLive) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.surfaceVariant,
-                                            contentColor = if (holdLive) MaterialTheme.colorScheme.onError else MaterialTheme.colorScheme.onSurfaceVariant
-                                        )
-                                    ) {
-                                        Icon(painter = painterResource(Res.drawable.ic_pause), contentDescription = holdLiveStr, modifier = Modifier.size(20.dp))
-                                    }
-                                }
-                        }
-                        TooltipArea(
-                            tooltip = {
-                                Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
-                                    Text(
-                                        "Ctrl+Click to toggle verses, Shift+Click for range",
-                                        color = MaterialTheme.colorScheme.inverseOnSurface,
-                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                                        style = MaterialTheme.typography.bodySmall
-                                    )
-                                }
-                            },
-                            tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
+                                    else Modifier
+                                )
+                                .padding(horizontal = 10.dp),
+                            contentAlignment = Alignment.Center
                         ) {
-                            Text(
-                                text = "⌘/Ctrl · Shift",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.padding(end = 8.dp)
-                            )
-                        }
-                        // STT connect/disconnect — appears only after the first successful
-                        // connection (persisted), and hides again if the URL changes while disconnected
-                        val stt = appSettings.sttSettings
-                        val sttEverConnected = stt.lastConnectedUrl.isNotBlank() && stt.lastConnectedUrl == stt.serverUrl
-                        if (sttManager != null && engineSettings.enabled && (sttConnected || sttEverConnected)) {
-                            val sttButtonStr = if (sttConnected) stringResource(Res.string.stt_disconnect)
-                                               else stringResource(Res.string.stt_connect)
-                            TooltipArea(
-                                tooltip = {
-                                    Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
-                                        Text(sttButtonStr, color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
-                                    }
-                                },
-                                tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
                             ) {
-                                IconButton(
-                                    onClick = {
-                                        if (sttConnected) sttManager.disconnect()
-                                        else sttManager.connect(appSettings.sttSettings.serverUrl)
-                                        focusRequester.requestFocus()
-                                    },
-                                    colors = IconButtonDefaults.iconButtonColors(
-                                        containerColor = if (sttConnected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
-                                        contentColor = if (sttConnected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                ) {
-                                    Icon(Icons.Filled.Mic, contentDescription = sttButtonStr, modifier = Modifier.size(20.dp))
-                                }
+                                Icon(
+                                    painter = painterResource(Res.drawable.ic_pause),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(10.dp),
+                                    tint = when {
+                                        holdLiveState -> MaterialTheme.colorScheme.onError
+                                        holdPillActive -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                                        else -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
+                                    }
+                                )
+                                Text(
+                                    "⌘/Ctrl Shift",
+                                    style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.5.sp),
+                                    color = when {
+                                        holdLiveState -> MaterialTheme.colorScheme.onError
+                                        holdPillActive -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f)
+                                        else -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.25f)
+                                    }
+                                )
                             }
                         }
-                        // Swap Bibles — always wrapped in tooltip showing bible names
-                        TooltipArea(
-                            tooltip = {
-                                Surface(
-                                    color = MaterialTheme.colorScheme.inverseSurface,
-                                    shape = MaterialTheme.shapes.extraSmall,
-                                    tonalElevation = 4.dp
-                                ) {
-                                    Column(modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) {
-                                        Text(
-                                            text = stringResource(Res.string.swap_bibles_hint),
-                                            color = MaterialTheme.colorScheme.inverseOnSurface,
-                                            style = MaterialTheme.typography.bodySmall,
-                                            fontWeight = FontWeight.Bold
-                                        )
-                                        Text(
-                                            text = "${stringResource(Res.string.primary_bible)} ${appSettings.bibleSettings.primaryBible.substringBeforeLast('.').ifEmpty { "-" }}",
-                                            color = MaterialTheme.colorScheme.inverseOnSurface,
-                                            style = MaterialTheme.typography.bodySmall
-                                        )
-                                        Text(
-                                            text = "${stringResource(Res.string.secondary_bible)} ${appSettings.bibleSettings.secondaryBible.substringBeforeLast('.').ifEmpty { "-" }}",
-                                            color = MaterialTheme.colorScheme.inverseOnSurface,
-                                            style = MaterialTheme.typography.bodySmall
-                                        )
-                                    }
-                                }
-                            },
-                            tooltipPlacement = TooltipPlacement.ComponentRect(
-                                anchor = Alignment.BottomCenter,
-                                offset = DpOffset(0.dp, 4.dp)
+                    }
+                    // Go Live (amber)
+                    TooltipArea(
+                        tooltip = {
+                            Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall) {
+                                Text(goLiveStr, color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
+                            }
+                        },
+                        tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
+                    ) {
+                        IconButton(
+                            onClick = { goLiveWithHistory(); focusRequester.requestFocus() },
+                            colors = IconButtonDefaults.iconButtonColors(
+                                containerColor = MaterialTheme.colorScheme.primary,
+                                contentColor = MaterialTheme.colorScheme.onPrimary
                             )
                         ) {
-                                IconButton(
-                                    onClick = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.swapped()) }; focusRequester.requestFocus() },
-                                    colors = IconButtonDefaults.iconButtonColors(
-                                        containerColor = MaterialTheme.colorScheme.tertiary,
-                                        contentColor = MaterialTheme.colorScheme.onTertiary
-                                    )
-                                ) {
-                                    Icon(painter = painterResource(Res.drawable.ic_swap), contentDescription = swapBiblesStr, modifier = Modifier.size(20.dp))
-                                }
+                            Icon(Icons.Default.Tv, contentDescription = goLiveStr, modifier = Modifier.size(20.dp))
                         }
-                        // Add to Schedule
-                        TooltipArea(
-                                tooltip = {
-                                    Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
-                                        Text(addScheduleStr, color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
-                                    }
-                                },
-                                tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
-                            ) {
-                                IconButton(
-                                    onClick = {
-                                        viewModel.addCurrentVerseToSchedule { bookName, chapter, verseNumber, verseText, verseRange ->
-                                            onAddToSchedule?.invoke(bookName, chapter, verseNumber, verseText, verseRange)
-                                        }
-                                        focusRequester.requestFocus()
-                                    },
-                                    colors = IconButtonDefaults.iconButtonColors(
-                                        containerColor = MaterialTheme.colorScheme.secondary,
-                                        contentColor = MaterialTheme.colorScheme.onSecondary
-                                    )
-                                ) {
-                                    Icon(painter = painterResource(Res.drawable.ic_playlist_add), contentDescription = addScheduleStr, modifier = Modifier.size(20.dp))
+                    }
+                    // Add to Schedule (teal)
+                    TooltipArea(
+                        tooltip = {
+                            Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall) {
+                                Text(addScheduleStr, color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
+                            }
+                        },
+                        tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
+                    ) {
+                        IconButton(
+                            onClick = {
+                                viewModel.addCurrentVerseToSchedule { bookName, chapter, verseNumber, verseText, verseRange ->
+                                    onAddToSchedule?.invoke(bookName, chapter, verseNumber, verseText, verseRange)
+                                }
+                                focusRequester.requestFocus()
+                            },
+                            colors = IconButtonDefaults.iconButtonColors(
+                                containerColor = MaterialTheme.colorScheme.secondary,
+                                contentColor = MaterialTheme.colorScheme.onSecondary
+                            )
+                        ) {
+                            Icon(painter = painterResource(Res.drawable.ic_playlist_add), contentDescription = addScheduleStr, modifier = Modifier.size(20.dp))
+                        }
+                    }
+                    // Swap Bibles (blue)
+                    TooltipArea(
+                        tooltip = {
+                            Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall) {
+                                Column(modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) {
+                                    Text(stringResource(Res.string.swap_bibles_hint), color = MaterialTheme.colorScheme.inverseOnSurface, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Bold)
+                                    Text("${stringResource(Res.string.primary_bible)} ${appSettings.bibleSettings.primaryBible.substringBeforeLast('.').ifEmpty { "-" }}", color = MaterialTheme.colorScheme.inverseOnSurface, style = MaterialTheme.typography.bodySmall)
+                                    Text("${stringResource(Res.string.secondary_bible)} ${appSettings.bibleSettings.secondaryBible.substringBeforeLast('.').ifEmpty { "-" }}", color = MaterialTheme.colorScheme.inverseOnSurface, style = MaterialTheme.typography.bodySmall)
                                 }
                             }
-                        // Go Live
-                        TooltipArea(
-                                tooltip = {
-                                    Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
-                                        Text(goLiveStr, color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
-                                    }
-                                },
-                                tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
-                            ) {
-                                IconButton(
-                                    onClick = { goLiveWithHistory(); focusRequester.requestFocus() },
-                                    colors = IconButtonDefaults.iconButtonColors(
-                                        containerColor = MaterialTheme.colorScheme.primary,
-                                        contentColor = MaterialTheme.colorScheme.onPrimary
-                                    )
-                                ) {
-                                    Icon(Icons.Default.Tv, contentDescription = goLiveStr, modifier = Modifier.size(20.dp))
-                                }
-                            }
+                        },
+                        tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
+                    ) {
+                        IconButton(
+                            onClick = {
+                                onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.swapped()) }
+                                focusRequester.requestFocus()
+                            },
+                            colors = IconButtonDefaults.iconButtonColors(
+                                containerColor = MaterialTheme.colorScheme.tertiary,
+                                contentColor = MaterialTheme.colorScheme.onTertiary
+                            )
+                        ) {
+                            Icon(painter = painterResource(Res.drawable.ic_swap), contentDescription = swapBiblesStr, modifier = Modifier.size(20.dp))
+                        }
                     }
                 }
+            }
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
+            // ── Three-column browser ─────────────────────────────────────
             Row(modifier = Modifier.fillMaxWidth().weight(1f).padding(start = 4.dp)) {
 
                 // Book column (resizable)
                 Column(modifier = Modifier.width(with(density) { colWBook.toDp() }).fillMaxHeight()) {
-                    ColumnHeader(stringResource(Res.string.book))
-                    SelectionListWithIndex(
-                        list = filteredBooks,
+                    BibleBrowserColumn(
+                        items = filteredBooks,
                         selectedIndex = filteredBooks.indexOf(books.getOrNull(selectedBookIndex) ?: "").coerceAtLeast(0),
                         singleLine = true,
-                        onItemSelected = { index, _ ->
+                        accentColor = accentColor,
+                        onItemSelected = { index ->
                             val bookName = filteredBooks.getOrNull(index)
                             bookName?.let {
                                 val realIndex = books.indexOf(it)
@@ -1293,11 +1344,13 @@ fun BibleTab(
 
                 // Chapter column (resizable)
                 Column(modifier = Modifier.width(with(density) { colWChapter.toDp() }).fillMaxHeight()) {
-                    ColumnHeader(stringResource(Res.string.chapter))
-                    SelectionListWithIndex(
-                        list = filteredChapters,
+                    BibleBrowserColumn(
+                        items = filteredChapters,
                         selectedIndex = filteredChapters.indexOf(selectedChapter.toString()).coerceAtLeast(0),
-                        onItemSelected = { index, _ ->
+                        centerText = true,
+                        rowHeight = 31.dp,
+                        accentColor = accentColor,
+                        onItemSelected = { index ->
                             val chapterStr = filteredChapters.getOrNull(index)
                             chapterStr?.toIntOrNull()?.let { chapter -> viewModel.selectChapter(chapter) }
                         }
@@ -1311,24 +1364,9 @@ fun BibleTab(
                     )
                 }
 
-                // Right area: toolbar + (verse list + live panel) + history
+                // Right area: verse list + live panel + history
                 Column(modifier = Modifier.weight(1f).fillMaxHeight()) {
 
-                    // Shared toolbar row (verse search + buttons)
-                    Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            text = stringResource(Res.string.verse),
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier.padding(start = 4.dp, end = 8.dp)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        toolbarContent()
-                    }
-
-                    // Verse list + live panel (drag handle starts here, below toolbar)
                     BoxWithConstraints(modifier = Modifier.weight(1f).fillMaxWidth()) {
                     val effectiveSplitWidth = if (isSplitActive)
                         colWSplit.coerceAtMost(
@@ -1347,19 +1385,14 @@ fun BibleTab(
                                     awaitPointerEventScope {
                                         while (true) {
                                             val event = awaitPointerEvent(PointerEventPass.Main)
-                                            if (event.type == PointerEventType.Press &&
-                                                event.button?.isSecondary == true
-                                            ) {
+                                            if (event.type == PointerEventType.Press && event.button?.isSecondary == true) {
                                                 val pos = event.changes.first().position
-                                                verseContextMenuOffset = with(density) {
-                                                    DpOffset(pos.x.toDp(), pos.y.toDp())
-                                                }
+                                                verseContextMenuOffset = with(density) { DpOffset(pos.x.toDp(), pos.y.toDp()) }
                                             }
                                         }
                                     }
                                 }
                             ) {
-                                // Always map multi-verse indices into the filtered verse list
                                 val multiIndicesInFiltered = viewModel.selectedVerseIndices
                                     .mapNotNull { realIdx ->
                                         val verseStr = verses.getOrNull(realIdx)
@@ -1368,14 +1401,15 @@ fun BibleTab(
                                     .toSet()
                                     .takeIf { it.isNotEmpty() }
 
-                                SelectionListWithIndex(
-                                    list = filteredVerses,
+                                BibleVerseColumn(
+                                    verses = filteredVerses,
                                     selectedIndex = if (filteredVerses.isEmpty()) -1 else {
                                         val currentVerse = verses.getOrNull(selectedVerseIndex)
                                         filteredVerses.indexOf(currentVerse).coerceAtLeast(0)
                                     },
                                     selectedIndices = multiIndicesInFiltered,
-                                    onItemSelected = { index, _ ->
+                                    accentColor = accentColor,
+                                    onItemSelected = { index ->
                                         val verseText = filteredVerses.getOrNull(index)
                                         verseText?.let {
                                             val realIndex = verses.indexOf(it)
@@ -1383,15 +1417,15 @@ fun BibleTab(
                                         }
                                         focusRequester.requestFocus()
                                     },
-                                    onItemDoubleClicked = { _, _ -> goLiveWithHistory() },
-                                    onItemCtrlClicked = { index, _ ->
+                                    onItemDoubleClicked = { _ -> goLiveWithHistory() },
+                                    onItemCtrlClicked = { index ->
                                         val verseText = filteredVerses.getOrNull(index)
                                         verseText?.let {
                                             val realIndex = verses.indexOf(it)
                                             if (realIndex >= 0) viewModel.ctrlClickVerse(realIndex)
                                         }
                                     },
-                                    onItemShiftClicked = { index, _ ->
+                                    onItemShiftClicked = { index ->
                                         val verseText = filteredVerses.getOrNull(index)
                                         verseText?.let {
                                             val realIndex = verses.indexOf(it)
@@ -1415,14 +1449,7 @@ fun BibleTab(
                                 ) {
                                     DropdownMenuItem(
                                         text = { Text(stringResource(Res.string.copy_verse)) },
-                                        leadingIcon = {
-                                            Icon(
-                                                painter = painterResource(Res.drawable.ic_copy),
-                                                contentDescription = null,
-                                                modifier = Modifier.size(18.dp),
-                                                tint = MaterialTheme.colorScheme.onSurface
-                                            )
-                                        },
+                                        leadingIcon = { Icon(painter = painterResource(Res.drawable.ic_copy), contentDescription = null, modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.onSurface) },
                                         onClick = {
                                             val verseStr = verses.getOrNull(selectedVerseIndex) ?: ""
                                             val verseNum = verseStr.substringBefore(". ").toIntOrNull()
@@ -1436,14 +1463,7 @@ fun BibleTab(
                                     )
                                     DropdownMenuItem(
                                         text = { Text(stringResource(Res.string.add_to_schedule)) },
-                                        leadingIcon = {
-                                            Icon(
-                                                painter = painterResource(Res.drawable.ic_playlist_add),
-                                                contentDescription = null,
-                                                modifier = Modifier.size(18.dp),
-                                                tint = MaterialTheme.colorScheme.secondary
-                                            )
-                                        },
+                                        leadingIcon = { Icon(painter = painterResource(Res.drawable.ic_playlist_add), contentDescription = null, modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.secondary) },
                                         onClick = {
                                             viewModel.addCurrentVerseToSchedule { bookName, chapter, verseNumber, verseText, verseRange ->
                                                 onAddToSchedule?.invoke(bookName, chapter, verseNumber, verseText, verseRange)
@@ -1454,31 +1474,17 @@ fun BibleTab(
                                     )
                                     DropdownMenuItem(
                                         text = { Text(stringResource(Res.string.go_live)) },
-                                        leadingIcon = {
-                                            Icon(
-                                                imageVector = Icons.Default.Tv,
-                                                contentDescription = null,
-                                                modifier = Modifier.size(18.dp),
-                                                tint = MaterialTheme.colorScheme.primary
-                                            )
-                                        },
-                                        onClick = {
-                                            goLiveWithHistory()
-                                            focusRequester.requestFocus()
-                                            showVerseContextMenu = false
-                                        }
+                                        leadingIcon = { Icon(imageVector = Icons.Default.Tv, contentDescription = null, modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.primary) },
+                                        onClick = { goLiveWithHistory(); focusRequester.requestFocus(); showVerseContextMenu = false }
                                     )
                                 }
                             }
                         }
 
-                        // Live panel (split mode) — drag handle starts below toolbar
+                        // Live panel (split mode)
                         if (isSplitActive) {
                             DragHandle { amount ->
-                                colWSplit = (colWSplit - amount).coerceIn(
-                                    with(density) { 150.dp.toPx() },
-                                    with(density) { 600.dp.toPx() }
-                                )
+                                colWSplit = (colWSplit - amount).coerceIn(with(density) { 150.dp.toPx() }, with(density) { 600.dp.toPx() })
                                 saveColWSplit()
                             }
                             Column(modifier = Modifier.width(with(density) { effectiveSplitWidth.toDp() }).fillMaxHeight()) {
@@ -1505,7 +1511,7 @@ fun BibleTab(
                     } // end verse + live Row
                     } // end BoxWithConstraints
 
-                    // ── History panel — spans verse + live columns ──────────
+                    // ── History panel ──────────────────────────────────────
                     if (viewModel.history.isNotEmpty()) {
                         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                         Row(
@@ -1514,75 +1520,45 @@ fun BibleTab(
                                 .padding(horizontal = 8.dp, vertical = 4.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Icon(
-                                painter = painterResource(
-                                    if (historyExpanded) Res.drawable.ic_arrow_down else Res.drawable.ic_arrow_up
-                                ),
-                                contentDescription = null,
-                                modifier = Modifier.size(16.dp),
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                            Text(
-                                text = stringResource(Res.string.bible_history),
-                                style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.onSurface,
-                                modifier = Modifier.padding(start = 4.dp)
-                            )
+                            Icon(painter = painterResource(if (historyExpanded) Res.drawable.ic_arrow_down else Res.drawable.ic_arrow_up), contentDescription = null, modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text(text = stringResource(Res.string.bible_history), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.padding(start = 4.dp))
                             Spacer(modifier = Modifier.weight(1f))
                             TooltipArea(
                                 tooltip = {
-                                    Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
+                                    Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall) {
                                         Text(stringResource(Res.string.bible_history_clear), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
                                     }
                                 },
                                 tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
                             ) {
                                 IconButton(onClick = { viewModel.clearHistory() }) {
-                                    Icon(
-                                        painter = painterResource(Res.drawable.ic_delete),
-                                        contentDescription = stringResource(Res.string.bible_history_clear),
-                                        modifier = Modifier.size(20.dp),
-                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
+                                    Icon(painter = painterResource(Res.drawable.ic_delete), contentDescription = stringResource(Res.string.bible_history_clear), modifier = Modifier.size(20.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
                                 }
                             }
                         }
                         AnimatedVisibility(visible = historyExpanded) {
                             val historyListState = rememberLazyListState()
-                            LaunchedEffect(viewModel.history.size) {
-                                historyListState.scrollToItem(0)
-                            }
+                            LaunchedEffect(viewModel.history.size) { historyListState.scrollToItem(0) }
                             Box(modifier = Modifier.fillMaxWidth().height(120.dp)) {
                                 LazyColumn(state = historyListState, modifier = Modifier.fillMaxSize().padding(end = 8.dp)) {
                                     itemsIndexed(viewModel.history) { idx, entry ->
                                         Text(
                                             text = buildAnnotatedString {
-                                                withStyle(SpanStyle(fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.primary)) {
-                                                    append(entry.displayText)
-                                                }
-                                                append("  ${entry.verseText}")
+                                                withStyle(SpanStyle(fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.primary)) { append(entry.displayText) }
+                                                append("  \${entry.verseText}")
                                             },
                                             style = MaterialTheme.typography.bodySmall,
                                             color = MaterialTheme.colorScheme.onSurface,
                                             maxLines = 1,
                                             modifier = Modifier.fillMaxWidth()
-                                                .background(
-                                                    if (idx % 2 == 0) MaterialTheme.colorScheme.surface
-                                                    else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-                                                )
-                                                .initialPassClickable {
-                                                    viewModel.selectVerseByDetails(entry.bookName, entry.chapter, entry.verseNumber)
-                                                    focusRequester.requestFocus()
-                                                }
+                                                .background(if (idx % 2 == 0) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                                                .initialPassClickable { viewModel.selectVerseByDetails(entry.bookName, entry.chapter, entry.verseNumber); focusRequester.requestFocus() }
                                                 .padding(horizontal = 8.dp, vertical = 4.dp),
                                             overflow = TextOverflow.Ellipsis
                                         )
                                     }
                                 }
-                                VerticalScrollbar(
-                                    modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
-                                    adapter = rememberScrollbarAdapter(scrollState = historyListState)
-                                )
+                                VerticalScrollbar(modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(), adapter = rememberScrollbarAdapter(scrollState = historyListState))
                             }
                         }
                     }
@@ -1638,6 +1614,216 @@ private fun LiveChapterPanel(
                         )
                         .padding(6.dp)
                 )
+            }
+        }
+        VerticalScrollbar(
+            modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
+            adapter = rememberScrollbarAdapter(listState)
+        )
+    }
+}
+
+@Composable
+private fun BibleSearchField(
+    value: String,
+    placeholder: String,
+    onValueChange: (String) -> Unit,
+    onClear: () -> Unit,
+    onSubmit: () -> Unit,
+    onFocusChanged: (Boolean) -> Unit,
+    modeChip: @Composable () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .height(42.dp)
+            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp)),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            painter = painterResource(Res.drawable.ic_search),
+            contentDescription = null,
+            modifier = Modifier.padding(start = 11.dp).size(14.dp),
+            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f)
+        )
+        Box(modifier = Modifier.weight(1f).padding(horizontal = 8.dp)) {
+            BasicTextField(
+                value = value,
+                onValueChange = onValueChange,
+                modifier = Modifier.fillMaxWidth()
+                    .onFocusChanged { onFocusChanged(it.isFocused) }
+                    .onPreviewKeyEvent { e ->
+                        if (e.type == KeyEventType.KeyDown && e.key == Key.Enter) {
+                            onSubmit(); true
+                        } else false
+                    },
+                textStyle = MaterialTheme.typography.bodyMedium.copy(
+                    color = MaterialTheme.colorScheme.onSurface
+                ),
+                singleLine = true,
+                cursorBrush = androidx.compose.ui.graphics.SolidColor(MaterialTheme.colorScheme.primary),
+                decorationBox = { innerTextField ->
+                    if (value.isEmpty()) {
+                        Text(
+                            text = placeholder,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                    innerTextField()
+                }
+            )
+        }
+        if (value.isNotEmpty()) {
+            IconButton(onClick = onClear, modifier = Modifier.size(30.dp)) {
+                Icon(painter = painterResource(Res.drawable.ic_close), contentDescription = null, modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+        }
+        Box(modifier = Modifier.padding(end = 6.dp)) {
+            modeChip()
+        }
+    }
+}
+
+@Composable
+private fun BibleBrowserColumn(
+    items: List<String>,
+    selectedIndex: Int,
+    accentColor: Color,
+    singleLine: Boolean = false,
+    centerText: Boolean = false,
+    rowHeight: Dp = 28.dp,
+    onItemSelected: (Int) -> Unit
+) {
+    val listState = rememberLazyListState()
+    LaunchedEffect(selectedIndex) {
+        if (selectedIndex >= 0 && selectedIndex < items.size) {
+            listState.animateScrollToItem(selectedIndex.coerceAtMost(items.size - 1))
+        }
+    }
+    Box(modifier = Modifier.fillMaxSize()) {
+        LazyColumn(state = listState, modifier = Modifier.fillMaxSize().padding(end = 8.dp)) {
+            itemsIndexed(items) { index, item ->
+                val isSelected = index == selectedIndex
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(rowHeight)
+                        .background(if (isSelected) MaterialTheme.colorScheme.surfaceVariant else Color.Transparent)
+                        .drawBehind {
+                            if (isSelected) {
+                                drawRect(color = accentColor, size = Size(4f, size.height))
+                            }
+                        }
+                        .clickable { onItemSelected(index) }
+                        .padding(start = 12.dp, end = 4.dp),
+                    contentAlignment = if (centerText) Alignment.Center else Alignment.CenterStart
+                ) {
+                    Text(
+                        text = item,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = if (isSelected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.75f),
+                        maxLines = if (singleLine) 1 else Int.MAX_VALUE,
+                        overflow = TextOverflow.Ellipsis,
+                        textAlign = if (centerText) TextAlign.Center else TextAlign.Start
+                    )
+                }
+            }
+        }
+        VerticalScrollbar(
+            modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
+            adapter = rememberScrollbarAdapter(listState)
+        )
+    }
+}
+
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+private fun BibleVerseColumn(
+    verses: List<String>,
+    selectedIndex: Int,
+    accentColor: Color,
+    selectedIndices: Set<Int>? = null,
+    onItemSelected: (Int) -> Unit,
+    onItemDoubleClicked: (Int) -> Unit = {},
+    onItemCtrlClicked: (Int) -> Unit = {},
+    onItemShiftClicked: (Int) -> Unit = {},
+    onRightClicked: (Int) -> Unit = {}
+) {
+    val listState = rememberLazyListState()
+    LaunchedEffect(selectedIndex) {
+        if (selectedIndex >= 0 && selectedIndex < verses.size) {
+            listState.animateScrollToItem(selectedIndex.coerceAtMost(verses.size - 1))
+        }
+    }
+    Box(modifier = Modifier.fillMaxSize()) {
+        LazyColumn(state = listState, modifier = Modifier.fillMaxSize().padding(end = 8.dp)) {
+            itemsIndexed(verses) { index, verseStr ->
+                val isSelected = index == selectedIndex || (selectedIndices != null && index in selectedIndices)
+                val dotIdx = verseStr.indexOf(". ")
+                val verseNum = if (dotIdx > 0) verseStr.substring(0, dotIdx) else ""
+                val verseText = if (dotIdx > 0) verseStr.substring(dotIdx + 2) else verseStr
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(
+                            if (isSelected) MaterialTheme.colorScheme.surfaceVariant
+                            else Color.Transparent
+                        )
+                        .drawBehind {
+                            if (isSelected) {
+                                drawRect(color = accentColor, size = Size(4f, size.height))
+                            }
+                        }
+                        .pointerInput(index) {
+                            awaitPointerEventScope {
+                                while (true) {
+                                    val event = awaitPointerEvent(PointerEventPass.Main)
+                                    if (event.type == PointerEventType.Press) {
+                                        val isRight = event.button?.isSecondary == true
+                                        val mods = event.keyboardModifiers
+                                        val isCtrl = mods.isCtrlPressed || mods.isMetaPressed
+                                        val isShift = mods.isShiftPressed
+                                        when {
+                                            isRight -> onRightClicked(index)
+                                            isCtrl -> onItemCtrlClicked(index)
+                                            isShift -> onItemShiftClicked(index)
+                                            else -> onItemSelected(index)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        .padding(start = 18.dp, end = 18.dp, top = 8.dp, bottom = 8.dp),
+                    verticalAlignment = Alignment.Top
+                ) {
+                    if (verseNum.isNotEmpty()) {
+                        Text(
+                            text = verseNum,
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                letterSpacing = 0.2.sp
+                            ),
+                            color = if (isSelected) accentColor else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                            modifier = Modifier.widthIn(min = 16.dp).padding(top = 1.dp),
+                            textAlign = TextAlign.End
+                        )
+                        Spacer(Modifier.width(11.dp))
+                    }
+                    Text(
+                        text = verseText,
+                        style = MaterialTheme.typography.bodySmall.copy(
+                            fontSize = 13.5.sp,
+                            lineHeight = 13.5.sp * 1.6f,
+                            fontWeight = if (isSelected) FontWeight.Medium else FontWeight.Normal
+                        ),
+                        color = if (isSelected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
         }
         VerticalScrollbar(

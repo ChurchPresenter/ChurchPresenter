@@ -240,33 +240,34 @@ private val RoseColorScheme = lightColorScheme(
     inverseOnSurface = Color.White,
 )
 
-// Dark theme colors
+// Dark theme colors — amber accent, deep navy panels (matches Church Presenter studio UI)
 private val DarkColorScheme = darkColorScheme(
-    primary = Color(0xFF90CAF9),
-    onPrimary = Color(0xFF003258),
-    primaryContainer = Color(0xFF004881),
-    onPrimaryContainer = Color(0xFFD1E4FF),
-    secondary = Color(0xFF4DB6AC),
+    primary = Color(0xFFC4972A),              // amber accent
+    onPrimary = Color(0xFF141820),            // dark text on amber
+    primaryContainer = Color(0xFF2A1E08),     // dark amber container
+    onPrimaryContainer = Color(0xFFE8D49A),
+    secondary = Color(0xFF5ABCA8),            // teal
     onSecondary = Color(0xFF003D36),
-    secondaryContainer = Color(0xFF005B4F),
-    onSecondaryContainer = Color(0xFF70F0DD),
-    tertiary = Color(0xFFE1BEE7),
-    onTertiary = Color(0xFF4A148C),
+    secondaryContainer = Color(0xFF004D40),
+    onSecondaryContainer = Color(0xFF9ADFD4),
+    tertiary = Color(0xFF4A6FCC),             // blue
+    onTertiary = Color(0xFF001A45),
+    tertiaryContainer = Color(0xFF002080),
+    onTertiaryContainer = Color(0xFFD6E3FF),
     error = Color(0xFFF44336),
     onError = Color.White,
     errorContainer = Color(0xFFD32F2F),
     onErrorContainer = Color.White,
-    background = Color(0xFF10131A),
-    onBackground = Color(0xFFE6E1E5),
-    surface = Color(0xFF1E1E1E),
-    onSurface = Color(0xFFE6E1E5),
-    surfaceVariant = Color(0xFF49454F),
-    onSurfaceVariant = Color(0xFFCAC4D0),
-    outline = Color(0xFF938F99),
-    outlineVariant = Color(0xFF49454F),
-    // Custom colors for buttons
-    inverseSurface = Color(0xFF66BB6A), // Success button background (lighter for dark theme)
-    inverseOnSurface = Color.Black, // Success button text (black on light green)
+    background = Color(0xFF111520),           // root window background
+    onBackground = Color(0xFFE8E4D8),
+    surface = Color(0xFF141820),              // main panel surface
+    onSurface = Color(0xFFE8E4D8),
+    surfaceVariant = Color(0xFF182030),       // selected row / card surface
+    onSurfaceVariant = Color(0xFFBFBCB0),
+    outline = Color(0xFF555868),
+    outlineVariant = Color(0xFF252830),
+    inverseSurface = Color(0xFF66BB6A),       // success button background
+    inverseOnSurface = Color.Black,
 )
 
 // Midnight dark theme — deep navy blue

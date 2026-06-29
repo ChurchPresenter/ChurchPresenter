@@ -15,6 +15,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.announcements
@@ -85,11 +86,14 @@ fun TabSection(
                     onClick = { onTabSelected.invoke(index) },
                     text = {
                         Text(
-                            style = MaterialTheme.typography.titleSmall,
-                            color = if (selectedTabIndex == index)
-                                MaterialTheme.colorScheme.primary
+                            style = if (selectedTabIndex == index)
+                                MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold)
                             else
-                                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.60f),
+                                MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Normal),
+                            color = if (selectedTabIndex == index)
+                                MaterialTheme.colorScheme.onSurface
+                            else
+                                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.52f),
                             text = getStringName(tab),
                             maxLines = 1,
                             softWrap = false,
