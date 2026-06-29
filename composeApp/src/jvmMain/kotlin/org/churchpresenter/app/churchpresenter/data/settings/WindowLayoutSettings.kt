@@ -19,4 +19,5 @@ data class WindowLayoutSettings(
     val sttRightPanelWidthDp: Int = 280,
     val announcementsPreviewPanelWidthDp: Int = 260,
     val announcementsLeftPanelWidthDp: Int = 300,
+    val dictionaryListWidthDp: Int = 320,
 )

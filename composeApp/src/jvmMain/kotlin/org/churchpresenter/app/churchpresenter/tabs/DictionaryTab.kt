@@ -5,14 +5,16 @@ import androidx.compose.foundation.TooltipArea
 import androidx.compose.foundation.TooltipPlacement
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.IntrinsicSize
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -30,6 +32,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -40,8 +43,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.SuggestionChipDefaults
 import androidx.compose.material3.Surface
@@ -52,10 +53,16 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.pointerHoverIcon
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLinkStyles
@@ -84,9 +91,6 @@ import churchpresenter.composeapp.generated.resources.dictionary_bible_select
 import churchpresenter.composeapp.generated.resources.ic_redo
 import churchpresenter.composeapp.generated.resources.ic_undo
 import churchpresenter.composeapp.generated.resources.dictionary_go_to_verse
-import churchpresenter.composeapp.generated.resources.dictionary_in_scripture_all_books
-import churchpresenter.composeapp.generated.resources.dictionary_in_scripture_all_chapters
-import churchpresenter.composeapp.generated.resources.dictionary_in_scripture_all_verses
 import churchpresenter.composeapp.generated.resources.dictionary_in_scripture_count
 import churchpresenter.composeapp.generated.resources.dictionary_in_scripture_header
 import churchpresenter.composeapp.generated.resources.dictionary_in_scripture_loading
@@ -103,10 +107,17 @@ import churchpresenter.composeapp.generated.resources.go_live
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Tv
+import churchpresenter.composeapp.generated.resources.book
+import churchpresenter.composeapp.generated.resources.chapter
+import churchpresenter.composeapp.generated.resources.ic_close
 import churchpresenter.composeapp.generated.resources.ic_playlist_add
+import churchpresenter.composeapp.generated.resources.ic_search
+import churchpresenter.composeapp.generated.resources.verse
+import java.awt.Cursor
+import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
 import org.churchpresenter.app.churchpresenter.data.InterlinearVerse
+import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.data.InterlinearWord
 import org.churchpresenter.app.churchpresenter.data.StrongsEntry
 import org.churchpresenter.app.churchpresenter.viewmodel.DictionaryLanguageFilter
@@ -121,6 +132,8 @@ private val greekNumberColor = Color(0xFF1D4ED8)
 fun DictionaryTab(
     modifier: Modifier = Modifier,
     viewModel: DictionaryViewModel,
+    appSettings: AppSettings? = null,
+    onSettingsChange: ((AppSettings) -> AppSettings) -> Unit = {},
     onAddToSchedule: ((number: String, word: String, transliteration: String, definition: String) -> Unit)? = null,
     onGoLive: ((StrongsEntry) -> Unit)? = null,
     getVerseText: ((bookId: Int, chapter: Int, verse: Int) -> String?)? = null,
@@ -130,16 +143,41 @@ fun DictionaryTab(
 ) {
     LaunchedEffect(Unit) { viewModel.load() }
     val entryIndex = remember(viewModel.entries) { viewModel.entries.associateBy { it.number } }
+    val density = LocalDensity.current
+    val onSettingsChangeState = rememberUpdatedState(onSettingsChange)
+    val initialWidth = appSettings?.windowedLayout?.dictionaryListWidthDp ?: 320
+    var listWidthPx by remember(initialWidth) {
+        mutableStateOf(with(density) { initialWidth.dp.toPx() })
+    }
 
     Row(modifier = modifier) {
         DictionaryListPane(
-            modifier = Modifier.width(320.dp).fillMaxHeight(),
+            modifier = Modifier.width(with(density) { listWidthPx.toDp() }).fillMaxHeight(),
             viewModel = viewModel,
             getBookName = getBookName,
         )
-        HorizontalDivider(
-            modifier = Modifier.fillMaxHeight().width(1.dp),
-            thickness = 1.dp,
+        Box(
+            modifier = Modifier
+                .width(4.dp)
+                .fillMaxHeight()
+                .background(MaterialTheme.colorScheme.outlineVariant)
+                .pointerHoverIcon(PointerIcon(Cursor(Cursor.E_RESIZE_CURSOR)))
+                .pointerInput(Unit) {
+                    detectHorizontalDragGestures(
+                        onDragEnd = {
+                            val newWidthDp = with(density) { listWidthPx.toDp().value.toInt() }
+                            onSettingsChangeState.value { s ->
+                                s.copy(windowedLayout = s.windowedLayout.copy(dictionaryListWidthDp = newWidthDp))
+                            }
+                        }
+                    ) { _, dragAmount ->
+                        listWidthPx = (listWidthPx + dragAmount)
+                            .coerceIn(
+                                with(density) { 180.dp.toPx() },
+                                with(density) { 600.dp.toPx() }
+                            )
+                    }
+                }
         )
         DictionaryDetailPane(
             modifier = Modifier.weight(1f).fillMaxHeight(),
@@ -221,67 +259,40 @@ private fun DictionaryListPane(
         }
 
         // Search field
-        OutlinedTextField(
+        DictionarySearchField(
             value = viewModel.searchQuery,
+            placeholder = stringResource(Res.string.dictionary_search_hint),
             onValueChange = { viewModel.searchQuery = it },
-            placeholder = {
-                Text(
-                    text = stringResource(Res.string.dictionary_search_hint),
-                    style = MaterialTheme.typography.bodySmall,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-            },
-            singleLine = true,
+            onClear = { viewModel.searchQuery = "" },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 12.dp)
                 .padding(bottom = 8.dp),
-            textStyle = MaterialTheme.typography.bodySmall,
         )
 
         // Book / chapter filter for the entry list (visible once interlinear data is loaded)
         if (viewModel.isInterlinearDataLoaded) {
-            // Bible translation selector — own full-width row so it never gets clipped in the narrow pane
+            // Bible translation selector
             if (viewModel.availableDictBibles.isNotEmpty()) {
                 val primaryBibleStr = stringResource(Res.string.dictionary_bible_primary)
-                var bibleDropExpanded by remember { mutableStateOf(false) }
-                val currentBibleLabel = viewModel.availableDictBibles
-                    .firstOrNull { it.first == viewModel.dictBibleFile }?.second
-                    ?: primaryBibleStr
-                Box(
+                val bibleOptions = listOf("" to primaryBibleStr) + viewModel.availableDictBibles
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 12.dp)
                         .padding(bottom = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    OutlinedButton(
-                        onClick = { bibleDropExpanded = true },
-                        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 0.dp),
-                        modifier = Modifier.fillMaxWidth().height(32.dp),
-                        enabled = !viewModel.isDictBibleLoading,
-                    ) {
-                        Text(
-                            text = currentBibleLabel,
-                            style = MaterialTheme.typography.labelSmall,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier.weight(1f),
-                        )
-                        Icon(Icons.Default.ArrowDropDown, contentDescription = null, modifier = Modifier.size(16.dp))
-                    }
-                    DropdownMenu(expanded = bibleDropExpanded, onDismissRequest = { bibleDropExpanded = false }) {
-                        DropdownMenuItem(
-                            text = { Text(primaryBibleStr, style = MaterialTheme.typography.bodySmall) },
-                            onClick = { viewModel.setDictBible(""); bibleDropExpanded = false },
-                        )
-                        HorizontalDivider()
-                        viewModel.availableDictBibles.forEach { (filePath, title) ->
-                            DropdownMenuItem(
-                                text = { Text(title, style = MaterialTheme.typography.bodySmall) },
-                                onClick = { viewModel.setDictBible(filePath); bibleDropExpanded = false },
-                            )
-                        }
+                    DropdownSelector(
+                        label = stringResource(Res.string.dictionary_bible_select),
+                        value = viewModel.dictBibleFile,
+                        options = bibleOptions,
+                        onValueChange = { viewModel.setDictBible(it) },
+                        modifier = Modifier.weight(1f)
+                    )
+                    if (viewModel.isDictBibleLoading) {
+                        CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
                     }
                 }
             }
@@ -295,7 +306,7 @@ private fun DictionaryListPane(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 InScriptureBookDropdown(
-                    allBooksLabel = stringResource(Res.string.dictionary_in_scripture_all_books),
+                    allBooksLabel = stringResource(Res.string.dictionary_filter_all),
                     selectedBookId = viewModel.entryBookFilter,
                     availableBooks = viewModel.entryAvailableBooks,
                     getBookName = getBookName,
@@ -303,7 +314,7 @@ private fun DictionaryListPane(
                 )
                 if (viewModel.entryBookFilter != null && viewModel.entryAvailableChapters.size > 1) {
                     InScriptureChapterDropdown(
-                        allChaptersLabel = stringResource(Res.string.dictionary_in_scripture_all_chapters),
+                        allChaptersLabel = stringResource(Res.string.dictionary_filter_all),
                         selectedChapter = viewModel.entryChapterFilter,
                         availableChapters = viewModel.entryAvailableChapters,
                         onSelect = viewModel::filterEntryListByChapter,
@@ -311,7 +322,7 @@ private fun DictionaryListPane(
                 }
                 if (viewModel.entryChapterFilter != null && viewModel.entryAvailableVerses.size > 1) {
                     InScriptureVerseDropdown(
-                        allVersesLabel = stringResource(Res.string.dictionary_in_scripture_all_verses),
+                        allVersesLabel = stringResource(Res.string.dictionary_filter_all),
                         selectedVerse = viewModel.entryVerseFilter,
                         availableVerses = viewModel.entryAvailableVerses,
                         onSelect = viewModel::filterEntryListByVerse,
@@ -529,14 +540,23 @@ private fun DictionaryDetailPane(
                 },
                 tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp)),
             ) {
-                OutlinedButton(
-                    onClick = onToggleDictLanguage,
-                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp),
-                    modifier = Modifier.height(32.dp),
+                Box(
+                    modifier = Modifier
+                        .height(32.dp)
+                        .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
+                        .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp))
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null,
+                            onClick = onToggleDictLanguage,
+                        )
+                        .padding(horizontal = 10.dp),
+                    contentAlignment = Alignment.Center,
                 ) {
                     Text(
                         text = if (dictLanguage == "en") "EN" else "RU",
                         style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
             }
@@ -699,7 +719,7 @@ private fun DictionaryDetailPane(
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
                             InScriptureBookDropdown(
-                                allBooksLabel = stringResource(Res.string.dictionary_in_scripture_all_books),
+                                allBooksLabel = stringResource(Res.string.dictionary_filter_all),
                                 selectedBookId = cardBookFilter,
                                 availableBooks = cardAvailableBooks,
                                 getBookName = getBookName,
@@ -707,7 +727,7 @@ private fun DictionaryDetailPane(
                             )
                             if (cardBookFilter != null && cardAvailableChapters.size > 1) {
                                 InScriptureChapterDropdown(
-                                    allChaptersLabel = stringResource(Res.string.dictionary_in_scripture_all_chapters),
+                                    allChaptersLabel = stringResource(Res.string.dictionary_filter_all),
                                     selectedChapter = cardChapterFilter,
                                     availableChapters = cardAvailableChapters,
                                     onSelect = onFilterCardsByChapter,
@@ -946,33 +966,14 @@ private fun InScriptureBookDropdown(
     getBookName: ((bookId: Int) -> String?)?,
     onSelect: (Int?) -> Unit,
 ) {
-    var expanded by remember { mutableStateOf(false) }
-    val label = if (selectedBookId == null) allBooksLabel
-    else getBookName?.invoke(selectedBookId) ?: "Book $selectedBookId"
-
-    Box {
-        OutlinedButton(
-            onClick = { expanded = true },
-            modifier = Modifier.height(32.dp),
-            contentPadding = PaddingValues(horizontal = 10.dp, vertical = 0.dp),
-        ) {
-            Text(text = label, style = MaterialTheme.typography.labelSmall, maxLines = 1)
-            Icon(Icons.Default.ArrowDropDown, contentDescription = null, modifier = Modifier.size(16.dp))
-        }
-        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            DropdownMenuItem(
-                text = { Text(allBooksLabel, style = MaterialTheme.typography.bodySmall) },
-                onClick = { onSelect(null); expanded = false },
-            )
-            availableBooks.forEach { bookId ->
-                val bookName = getBookName?.invoke(bookId) ?: "Book $bookId"
-                DropdownMenuItem(
-                    text = { Text(bookName, style = MaterialTheme.typography.bodySmall) },
-                    onClick = { onSelect(bookId); expanded = false },
-                )
-            }
-        }
-    }
+    val options = listOf("" to allBooksLabel) +
+        availableBooks.map { it.toString() to (getBookName?.invoke(it) ?: "Book $it") }
+    DropdownSelector(
+        label = stringResource(Res.string.book),
+        value = selectedBookId?.toString() ?: "",
+        options = options,
+        onValueChange = { onSelect(it.toIntOrNull()) },
+    )
 }
 
 @Composable
@@ -982,31 +983,14 @@ private fun InScriptureChapterDropdown(
     availableChapters: List<Int>,
     onSelect: (Int?) -> Unit,
 ) {
-    var expanded by remember { mutableStateOf(false) }
-    val label = if (selectedChapter == null) allChaptersLabel else selectedChapter.toString()
-
-    Box {
-        OutlinedButton(
-            onClick = { expanded = true },
-            modifier = Modifier.height(32.dp),
-            contentPadding = PaddingValues(horizontal = 10.dp, vertical = 0.dp),
-        ) {
-            Text(text = label, style = MaterialTheme.typography.labelSmall, maxLines = 1)
-            Icon(Icons.Default.ArrowDropDown, contentDescription = null, modifier = Modifier.size(16.dp))
-        }
-        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            DropdownMenuItem(
-                text = { Text(allChaptersLabel, style = MaterialTheme.typography.bodySmall) },
-                onClick = { onSelect(null); expanded = false },
-            )
-            availableChapters.forEach { chapter ->
-                DropdownMenuItem(
-                    text = { Text(chapter.toString(), style = MaterialTheme.typography.bodySmall) },
-                    onClick = { onSelect(chapter); expanded = false },
-                )
-            }
-        }
-    }
+    val options = listOf("" to allChaptersLabel) +
+        availableChapters.map { it.toString() to it.toString() }
+    DropdownSelector(
+        label = stringResource(Res.string.chapter),
+        value = selectedChapter?.toString() ?: "",
+        options = options,
+        onValueChange = { onSelect(it.toIntOrNull()) },
+    )
 }
 
 @Composable
@@ -1016,27 +1000,68 @@ private fun InScriptureVerseDropdown(
     availableVerses: List<Int>,
     onSelect: (Int?) -> Unit,
 ) {
-    var expanded by remember { mutableStateOf(false) }
-    val label = if (selectedVerse == null) allVersesLabel else selectedVerse.toString()
+    val options = listOf("" to allVersesLabel) +
+        availableVerses.map { it.toString() to it.toString() }
+    DropdownSelector(
+        label = stringResource(Res.string.verse),
+        value = selectedVerse?.toString() ?: "",
+        options = options,
+        onValueChange = { onSelect(it.toIntOrNull()) },
+    )
+}
 
-    Box {
-        OutlinedButton(
-            onClick = { expanded = true },
-            modifier = Modifier.height(32.dp),
-            contentPadding = PaddingValues(horizontal = 10.dp, vertical = 0.dp),
-        ) {
-            Text(text = label, style = MaterialTheme.typography.labelSmall, maxLines = 1)
-            Icon(Icons.Default.ArrowDropDown, contentDescription = null, modifier = Modifier.size(16.dp))
-        }
-        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            DropdownMenuItem(
-                text = { Text(allVersesLabel, style = MaterialTheme.typography.bodySmall) },
-                onClick = { onSelect(null); expanded = false },
+@Composable
+private fun DictionarySearchField(
+    value: String,
+    placeholder: String,
+    onValueChange: (String) -> Unit,
+    onClear: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier
+            .height(42.dp)
+            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp)),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            painter = painterResource(Res.drawable.ic_search),
+            contentDescription = null,
+            modifier = Modifier.padding(start = 11.dp).size(14.dp),
+            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f)
+        )
+        Box(modifier = Modifier.weight(1f).padding(horizontal = 8.dp)) {
+            BasicTextField(
+                value = value,
+                onValueChange = onValueChange,
+                singleLine = true,
+                textStyle = MaterialTheme.typography.bodyMedium.copy(
+                    color = MaterialTheme.colorScheme.onSurface
+                ),
+                cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                modifier = Modifier.fillMaxWidth(),
+                decorationBox = { innerTextField ->
+                    if (value.isEmpty()) {
+                        Text(
+                            text = placeholder,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    }
+                    innerTextField()
+                }
             )
-            availableVerses.forEach { verse ->
-                DropdownMenuItem(
-                    text = { Text(verse.toString(), style = MaterialTheme.typography.bodySmall) },
-                    onClick = { onSelect(verse); expanded = false },
+        }
+        if (value.isNotEmpty()) {
+            IconButton(onClick = onClear, modifier = Modifier.size(30.dp)) {
+                Icon(
+                    painter = painterResource(Res.drawable.ic_close),
+                    contentDescription = null,
+                    modifier = Modifier.size(14.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }

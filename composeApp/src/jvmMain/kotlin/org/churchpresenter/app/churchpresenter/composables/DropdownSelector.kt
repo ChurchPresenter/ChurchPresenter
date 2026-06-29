@@ -59,16 +59,18 @@ fun DropdownSelector(
                 .padding(start = 11.dp, end = 11.dp, top = 0.dp, bottom = 6.dp),
             verticalArrangement = androidx.compose.foundation.layout.Arrangement.Center
         ) {
-            Text(
-                text = label.uppercase(),
-                fontSize = 8.sp,
-                lineHeight = 9.sp,
-                fontWeight = FontWeight.SemiBold,
-                letterSpacing = 0.sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
+            if (label.isNotEmpty()) {
+                Text(
+                    text = label.uppercase(),
+                    fontSize = 8.sp,
+                    lineHeight = 9.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    letterSpacing = 0.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     text = displayText,

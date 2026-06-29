@@ -75,7 +75,8 @@ fun DictionarySettingsTab(
                 modifier = Modifier.weight(0.48f).widthIn(min = 360.dp, max = 450.dp).heightIn(min = 500.dp)
                     .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(10.dp))
                     .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f), RoundedCornerShape(10.dp))
-                    .padding(horizontal = 16.dp, vertical = 16.dp)
+                    .padding(horizontal = 16.dp, vertical = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 // Word section
                 DictSectionHeader(
@@ -83,28 +84,28 @@ fun DictionarySettingsTab(
                     checked = ds.showWord,
                     onCheckedChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(showWord = it)) } },
                 )
-                Spacer(Modifier.height(8.dp))
 
-                DictSettingRow(stringResource(Res.string.color)) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        ColorPickerField(
-                            color = ds.wordColor,
-                            onColorChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(wordColor = it)) } }
-                        )
-                        TextStyleButtons(
-                            bold = ds.wordBold,
-                            italic = ds.wordItalic,
-                            underline = false,
-                            shadow = ds.wordShadow,
-                            onBoldChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(wordBold = it)) } },
-                            onItalicChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(wordItalic = it)) } },
-                            onUnderlineChange = { },
-                            onShadowChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(wordShadow = it)) } }
-                        )
-                    }
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    ColorPickerField(
+                        color = ds.wordColor,
+                        onColorChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(wordColor = it)) } },
+                        label = stringResource(Res.string.color),
+                        modifier = Modifier.weight(1f)
+                    )
+                    TextStyleButtons(
+                        bold = ds.wordBold,
+                        italic = ds.wordItalic,
+                        underline = false,
+                        shadow = ds.wordShadow,
+                        onBoldChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(wordBold = it)) } },
+                        onItalicChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(wordItalic = it)) } },
+                        onUnderlineChange = { },
+                        onShadowChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(wordShadow = it)) } }
+                    )
                 }
                 AnimatedVisibility(visible = ds.wordShadow) {
                     ShadowDetailRow(
@@ -116,24 +117,27 @@ fun DictionarySettingsTab(
                         onOpacityChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(wordShadowOpacity = it)) } }
                     )
                 }
-                DictSettingRow(stringResource(Res.string.font_type)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     FontSettingsDropdown(
-                        modifier = Modifier.width(200.dp),
+                        modifier = Modifier.weight(1f),
+                        label = stringResource(Res.string.font_type),
                         value = ds.wordFontType,
                         fonts = availableFonts,
                         onValueChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(wordFontType = it)) } }
                     )
-                }
-                DictSettingRow(stringResource(Res.string.font_size)) {
                     NumberSettingsTextField(
-                        modifier = Modifier.width(80.dp),
+                        label = stringResource(Res.string.font_size),
                         initialText = ds.wordFontSize,
                         range = 8..200,
                         onValueChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(wordFontSize = it)) } }
                     )
                 }
 
-                Spacer(Modifier.height(20.dp))
+                Spacer(Modifier.height(12.dp))
 
                 // Definition section
                 DictSectionHeader(
@@ -141,17 +145,20 @@ fun DictionarySettingsTab(
                     checked = ds.showDefinition,
                     onCheckedChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(showDefinition = it)) } },
                 )
-                Spacer(Modifier.height(8.dp))
 
-                DictSettingRow(stringResource(Res.string.color)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     ColorPickerField(
                         color = ds.definitionColor,
-                        onColorChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(definitionColor = it)) } }
+                        onColorChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(definitionColor = it)) } },
+                        label = stringResource(Res.string.color),
+                        modifier = Modifier.weight(1f)
                     )
-                }
-                DictSettingRow(stringResource(Res.string.font_size)) {
                     NumberSettingsTextField(
-                        modifier = Modifier.width(80.dp),
+                        label = stringResource(Res.string.font_size),
                         initialText = ds.definitionFontSize,
                         range = 8..120,
                         onValueChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(definitionFontSize = it)) } }
@@ -170,34 +177,34 @@ fun DictionarySettingsTab(
                     .padding(horizontal = 16.dp, vertical = 16.dp)
 
                 // Reference & Transliteration
-                Column(modifier = cardMod) {
+                Column(modifier = cardMod, verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     DictSectionHeader(
                         text = stringResource(Res.string.dictionary_settings_reference_text),
                         checked = ds.showReference,
                         onCheckedChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(showReference = it)) } },
                     )
-                    Spacer(Modifier.height(8.dp))
 
-                    DictSettingRow(stringResource(Res.string.color)) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            ColorPickerField(
-                                color = ds.referenceColor,
-                                onColorChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(referenceColor = it)) } }
-                            )
-                            TextStyleButtons(
-                                bold = false,
-                                italic = false,
-                                underline = false,
-                                shadow = ds.referenceShadow,
-                                onBoldChange = { },
-                                onItalicChange = { },
-                                onUnderlineChange = { },
-                                onShadowChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(referenceShadow = it)) } }
-                            )
-                        }
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        ColorPickerField(
+                            color = ds.referenceColor,
+                            onColorChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(referenceColor = it)) } },
+                            label = stringResource(Res.string.color),
+                            modifier = Modifier.weight(1f)
+                        )
+                        TextStyleButtons(
+                            bold = false,
+                            italic = false,
+                            underline = false,
+                            shadow = ds.referenceShadow,
+                            onBoldChange = { },
+                            onItalicChange = { },
+                            onUnderlineChange = { },
+                            onShadowChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(referenceShadow = it)) } }
+                        )
                     }
                     AnimatedVisibility(visible = ds.referenceShadow) {
                         ShadowDetailRow(
@@ -209,17 +216,20 @@ fun DictionarySettingsTab(
                             onOpacityChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(referenceShadowOpacity = it)) } }
                         )
                     }
-                    DictSettingRow(stringResource(Res.string.font_type)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
                         FontSettingsDropdown(
-                            modifier = Modifier.width(200.dp),
+                            modifier = Modifier.weight(1f),
+                            label = stringResource(Res.string.font_type),
                             value = ds.referenceFontType,
                             fonts = availableFonts,
                             onValueChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(referenceFontType = it)) } }
                         )
-                    }
-                    DictSettingRow(stringResource(Res.string.font_size)) {
                         NumberSettingsTextField(
-                            modifier = Modifier.width(80.dp),
+                            label = stringResource(Res.string.font_size),
                             initialText = ds.referenceFontSize,
                             range = 8..120,
                             onValueChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(referenceFontSize = it)) } }
@@ -228,23 +238,26 @@ fun DictionarySettingsTab(
                 }
 
                 // KJV Usage
-                Column(modifier = cardMod) {
+                Column(modifier = cardMod, verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     DictSectionHeader(
                         text = stringResource(Res.string.dictionary_settings_kjv_usage),
                         checked = ds.showKjvUsage,
                         onCheckedChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(showKjvUsage = it)) } },
                     )
-                    Spacer(Modifier.height(8.dp))
 
-                    DictSettingRow(stringResource(Res.string.color)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
                         ColorPickerField(
                             color = ds.kjvUsageColor,
-                            onColorChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(kjvUsageColor = it)) } }
+                            onColorChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(kjvUsageColor = it)) } },
+                            label = stringResource(Res.string.color),
+                            modifier = Modifier.weight(1f)
                         )
-                    }
-                    DictSettingRow(stringResource(Res.string.font_size)) {
                         NumberSettingsTextField(
-                            modifier = Modifier.width(80.dp),
+                            label = stringResource(Res.string.font_size),
                             initialText = ds.kjvUsageFontSize,
                             range = 8..80,
                             onValueChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(kjvUsageFontSize = it)) } }
@@ -253,16 +266,15 @@ fun DictionarySettingsTab(
                 }
 
                 // Card Background
-                Column(modifier = cardMod) {
+                Column(modifier = cardMod, verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     DictSectionHeader(stringResource(Res.string.dictionary_settings_card_background))
-                    Spacer(Modifier.height(8.dp))
 
-                    DictSettingRow(stringResource(Res.string.color)) {
-                        ColorPickerField(
-                            color = ds.cardBackgroundColor,
-                            onColorChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(cardBackgroundColor = it)) } }
-                        )
-                    }
+                    ColorPickerField(
+                        color = ds.cardBackgroundColor,
+                        onColorChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(cardBackgroundColor = it)) } },
+                        label = stringResource(Res.string.color),
+                        modifier = Modifier.fillMaxWidth()
+                    )
                     DictSettingRow(stringResource(Res.string.dictionary_settings_opacity)) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
@@ -285,12 +297,11 @@ fun DictionarySettingsTab(
                 }
 
                 // Transitions
-                Column(modifier = cardMod) {
+                Column(modifier = cardMod, verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     DictSectionHeader(stringResource(Res.string.dictionary_settings_transitions))
-                    Spacer(Modifier.height(8.dp))
 
                     Row(
-                        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                        modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Checkbox(
@@ -387,7 +398,7 @@ private fun DictSettingRow(
     content: @Composable () -> Unit
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp),
+        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
