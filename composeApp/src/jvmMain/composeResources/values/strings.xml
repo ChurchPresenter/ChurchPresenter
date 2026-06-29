@@ -27,6 +27,7 @@
     <string name="starts_with">Starts With</string>
     <string name="exact_match">Exact Match</string>
     <string name="all_song_categories">All Song Categories</string>
+    <string name="filter">Filter</string>
     <string name="filter_colon">Filter:</string>
     <string name="filter_type_colon">Filter Type:</string>
     <string name="service_schedule">Service Schedule:</string>

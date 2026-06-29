@@ -9,6 +9,9 @@ import androidx.compose.foundation.TooltipPlacement
 import androidx.compose.foundation.HorizontalScrollbar
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.clickable
@@ -52,8 +55,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -70,6 +73,8 @@ import kotlinx.coroutines.flow.first
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.input.key.Key
@@ -122,6 +127,9 @@ import churchpresenter.composeapp.generated.resources.ic_delete
 import churchpresenter.composeapp.generated.resources.delete_saved_string
 import churchpresenter.composeapp.generated.resources.confirm_delete
 import churchpresenter.composeapp.generated.resources.cancel
+import churchpresenter.composeapp.generated.resources.filter
+import churchpresenter.composeapp.generated.resources.ic_close
+import churchpresenter.composeapp.generated.resources.ic_note
 import churchpresenter.composeapp.generated.resources.ic_search
 import churchpresenter.composeapp.generated.resources.ic_star
 import churchpresenter.composeapp.generated.resources.ic_star_filled
@@ -145,6 +153,7 @@ import churchpresenter.composeapp.generated.resources.author
 import churchpresenter.composeapp.generated.resources.composer
 import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
 import org.churchpresenter.app.churchpresenter.composables.initialPassClickable
+import org.churchpresenter.app.churchpresenter.composables.finalPassClickable
 import org.churchpresenter.app.churchpresenter.composables.initialPassCombinedClickable
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.data.SongItem
@@ -558,30 +567,62 @@ fun SongsTab(
             // Search controls — wraps to new line if not enough space
             @OptIn(ExperimentalLayoutApi::class)
             FlowRow(
-                modifier = Modifier.fillMaxWidth().padding(all = 4.dp),
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalArrangement = Arrangement.spacedBy(4.dp),
                 itemVerticalAlignment = Alignment.CenterVertically
             ) {
-                OutlinedTextField(
-                    modifier = Modifier.weight(1f).widthIn(min = 120.dp),
-                    value = searchQuery,
-                    onValueChange = { viewModel.updateSearchQuery(it) },
-                    textStyle = MaterialTheme.typography.bodyMedium,
-                    label = {
-                        Text(stringResource(Res.string.search_songs), style = MaterialTheme.typography.bodyMedium)
-                    },
-                    singleLine = true,
-                    colors = OutlinedTextFieldDefaults.colors().copy(
-                        unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-                        focusedContainerColor = MaterialTheme.colorScheme.surface,
+                // Styled search field matching the dropdown aesthetic
+                Row(
+                    modifier = Modifier
+                        .weight(1f)
+                        .widthIn(min = 120.dp)
+                        .height(42.dp)
+                        .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
+                        .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp)),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        painter = painterResource(Res.drawable.ic_search),
+                        contentDescription = null,
+                        modifier = Modifier.padding(start = 11.dp).size(14.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f)
                     )
-                )
+                    Box(modifier = Modifier.weight(1f).padding(horizontal = 8.dp)) {
+                        BasicTextField(
+                            value = searchQuery,
+                            onValueChange = { viewModel.updateSearchQuery(it) },
+                            modifier = Modifier.fillMaxWidth(),
+                            textStyle = MaterialTheme.typography.bodyMedium.copy(
+                                color = MaterialTheme.colorScheme.onSurface
+                            ),
+                            singleLine = true,
+                            cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                            decorationBox = { innerTextField ->
+                                if (searchQuery.isEmpty()) {
+                                    Text(
+                                        text = stringResource(Res.string.search_songs),
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                }
+                                innerTextField()
+                            }
+                        )
+                    }
+                    if (searchQuery.isNotEmpty()) {
+                        IconButton(onClick = { viewModel.updateSearchQuery("") }, modifier = Modifier.size(30.dp)) {
+                            Icon(painter = painterResource(Res.drawable.ic_close), contentDescription = null, modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+                    }
+                }
 
                 if (songbooks.size > 1) {
                     DropdownSelector(
                         modifier = Modifier.width(160.dp),
-                        label = "",
+                        label = stringResource(Res.string.song_book),
                         items = songbookOptions,
                         selected = selectedSongbook.ifEmpty { allSongBooksText },
                         onSelectedChange = { viewModel.updateSelectedSongbook(it) }
@@ -590,7 +631,7 @@ fun SongsTab(
 
                 DropdownSelector(
                     modifier = Modifier.width(160.dp),
-                    label = "",
+                    label = stringResource(Res.string.filter),
                     items = filterTypes,
                     selected = filterTypeDisplayMap[filterType] ?: containsText,
                     onSelectedChange = { displayText ->
@@ -602,30 +643,32 @@ fun SongsTab(
                 // Hidden rebuild: 3 rapid clicks on the search button force-reloads songs from disk
                 var rebuildClickCount by remember { mutableStateOf(0) }
                 var rebuildClickTime by remember { mutableStateOf(0L) }
-                IconButton(
-                    onClick = {
-                        val now = System.currentTimeMillis()
-                        if (now - rebuildClickTime > 800) rebuildClickCount = 0
-                        rebuildClickCount++
-                        rebuildClickTime = now
-                        if (rebuildClickCount >= 3) {
-                            rebuildClickCount = 0
-                            viewModel.loadSongs()
-                        }
-                    },
-                    colors = IconButtonDefaults.iconButtonColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary
-                    )
+                Box(
+                    modifier = Modifier
+                        .size(42.dp)
+                        .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(8.dp))
+                        .clickable(indication = null, interactionSource = remember { MutableInteractionSource() }) {
+                            val now = System.currentTimeMillis()
+                            if (now - rebuildClickTime > 800) rebuildClickCount = 0
+                            rebuildClickCount++
+                            rebuildClickTime = now
+                            if (rebuildClickCount >= 3) {
+                                rebuildClickCount = 0
+                                viewModel.loadSongs()
+                            }
+                        },
+                    contentAlignment = Alignment.Center
                 ) {
                     if (isLoading) {
-                        CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp, color = MaterialTheme.colorScheme.onPrimary)
+                        CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp, color = MaterialTheme.colorScheme.onPrimary)
                     } else {
-                        Icon(painter = painterResource(Res.drawable.ic_search), contentDescription = stringResource(Res.string.search), modifier = Modifier.size(20.dp))
+                        Icon(painter = painterResource(Res.drawable.ic_search), contentDescription = stringResource(Res.string.search), modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.onPrimary)
                     }
                 }
 
             }
+
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
             // Shared horizontal scroll state for header + song list
             val hScrollState = rememberScrollState()
@@ -643,7 +686,7 @@ fun SongsTab(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(36.dp)
-                    .background(MaterialTheme.colorScheme.surfaceContainerLow)
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
                     .pointerInput(Unit) {
                         awaitPointerEventScope {
                             while (true) {
@@ -792,7 +835,7 @@ fun SongsTab(
             } // end header Row
 
             // Floating column filter button — right side
-            Box(modifier = Modifier.align(Alignment.CenterEnd).background(MaterialTheme.colorScheme.surfaceContainerLow)) {
+            Box(modifier = Modifier.align(Alignment.CenterEnd).background(MaterialTheme.colorScheme.surfaceVariant)) {
                 TooltipIconButton(
                     painter = rememberVectorPainter(Icons.Default.Tune),
                     text = stringResource(Res.string.song_columns),
@@ -901,14 +944,28 @@ fun SongsTab(
                     itemsIndexed(filteredSongs) { index, song ->
                         var showContextMenu by remember { mutableStateOf(false) }
                         var contextMenuOffset by remember { mutableStateOf(DpOffset.Zero) }
+                        val rowAccentColor = MaterialTheme.colorScheme.primary
+                        val isRowSelected = index == selectedSongIndex
                         Box {
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .background(
-                                    if (index == selectedSongIndex) MaterialTheme.colorScheme.surfaceVariant
+                                    if (isRowSelected) MaterialTheme.colorScheme.surfaceVariant
                                     else MaterialTheme.colorScheme.surface
                                 )
+                                .drawBehind {
+                                    if (isRowSelected) {
+                                        drawRect(color = rowAccentColor, size = Size(4f, size.height))
+                                    }
+                                }
+                                .finalPassClickable {
+                                    viewModel.selectSong(index)
+                                    if (isPresenting && liveSongIndex >= 0) {
+                                        viewModel.selectSection(-1)
+                                    }
+                                    tabFocusRequester.requestFocus()
+                                }
                                 .padding(vertical = 8.dp)
                                 .pointerInput(Unit) {
                                     awaitPointerEventScope {
@@ -928,7 +985,7 @@ fun SongsTab(
                                 },
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            val textColor = if (index == selectedSongIndex)
+                            val textColor = if (isRowSelected)
                                 MaterialTheme.colorScheme.onSurfaceVariant
                             else
                                 MaterialTheme.colorScheme.onSurface
@@ -1132,7 +1189,7 @@ fun SongsTab(
                             )
                         }
                         } // Box
-                        HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
+                        HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.outline.copy(alpha = 0.35f))
                     }
                 }
                 } // end horizontalScroll Box
@@ -1306,7 +1363,6 @@ fun SongsTab(
             modifier = Modifier
                 .width(with(density) { lyricsPanelPx.toDp() })
                 .fillMaxHeight()
-                .padding(8.dp)
         ) {
             // Header row with action buttons — switches to icon-only when width is tight
             val editSongStr    = stringResource(Res.string.edit_song)
@@ -1316,7 +1372,7 @@ fun SongsTab(
             val hasSongSelected = selectedSongIndex >= 0 && selectedSongIndex < filteredSongs.size && selectedSectionIndex >= 0
             @OptIn(ExperimentalLayoutApi::class)
             FlowRow(
-                modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
                 horizontalArrangement = Arrangement.End,
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
@@ -1409,11 +1465,12 @@ fun SongsTab(
                     }
                 }
             }
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
             // "Back to Live" button — shown when browsing a different song than what's live
             if (isPresenting && liveSongIndex >= 0 && selectedSongIndex != liveSongIndex) {
                 Button(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
                     onClick = {
                         viewModel.selectSong(liveSongIndex)
                         viewModel.selectSection(liveSectionIndex)
@@ -1435,7 +1492,7 @@ fun SongsTab(
                     text = lineNavHintStr,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                    modifier = Modifier.padding(bottom = 4.dp)
+                    modifier = Modifier.padding(start = 8.dp, end = 8.dp, bottom = 4.dp)
                 )
             }
 
@@ -1458,9 +1515,11 @@ fun SongsTab(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            Text(
-                                text = "🎵",
-                                style = MaterialTheme.typography.displaySmall
+                            Icon(
+                                painter = painterResource(Res.drawable.ic_note),
+                                contentDescription = null,
+                                modifier = Modifier.size(48.dp),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
                             )
                             Text(
                                 text = stringResource(Res.string.songs_no_db_title),
@@ -1584,7 +1643,7 @@ fun SongsTab(
                                     )
                                 }
                             }
-                            HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
+                            HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.outlineVariant)
                         }
                     }
 
@@ -1632,7 +1691,7 @@ fun SongsTab(
                                         text = header,
                                         style = MaterialTheme.typography.titleSmall,
                                         fontWeight = FontWeight.Bold,
-                                        color = textColor,
+                                        color = MaterialTheme.colorScheme.primary,
                                         modifier = Modifier.padding(vertical = 4.dp)
                                     )
                                 }
@@ -1664,6 +1723,7 @@ fun SongsTab(
                                     LyricLines(section.lines, textColor, activeLineIndex, lineClickHandler)
                                 }
                             }
+                            HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.outlineVariant)
                         }
                     } else {
                         item {

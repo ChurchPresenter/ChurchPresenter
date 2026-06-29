@@ -28,6 +28,29 @@ fun Modifier.initialPassClickable(onClick: () -> Unit): Modifier =
     }
 
 /**
+ * Background-click handler that fires only when no child composable consumed the event.
+ *
+ * Uses [PointerEventPass.Final] which runs after Main, so child [Modifier.clickable] handlers
+ * (IconButton, etc.) that consume in Main pass will prevent this from firing. Use this on a
+ * container Row/Box when you want "click anywhere empty in the row" behavior without blocking
+ * child interactions.
+ */
+fun Modifier.finalPassClickable(onClick: () -> Unit): Modifier =
+    this.pointerInput(onClick) {
+        awaitPointerEventScope {
+            while (true) {
+                val event = awaitPointerEvent(PointerEventPass.Final)
+                if (event.type == PointerEventType.Release &&
+                    event.changes.any { !it.isConsumed }
+                ) {
+                    event.changes.forEach { it.consume() }
+                    onClick()
+                }
+            }
+        }
+    }
+
+/**
  * Drop-in replacement for [Modifier.combinedClickable] that processes click events at
  * [PointerEventPass.Initial] with double-click detection (300 ms threshold).
  */
