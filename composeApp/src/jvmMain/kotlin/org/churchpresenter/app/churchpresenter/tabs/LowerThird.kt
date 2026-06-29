@@ -35,7 +35,6 @@ import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -44,7 +43,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -53,7 +51,6 @@ import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -681,6 +678,8 @@ fun LowerThirdTab(
                         startAtemUpload(atemVariant(atemIsClip), atemSlot, closeDialogOnSuccess = true)
                     },
                     enabled = !atemBusy && !atemClipTooLong
+,
+                    shape = RoundedCornerShape(8.dp)
                 ) {
                     Text(stringResource(Res.string.atem_upload))
                 }
@@ -781,13 +780,14 @@ fun LowerThirdTab(
             }
 
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-            OutlinedButton(
+            Button(
                 onClick = {
                     onOpenLottieGen(appSettings.streamingSettings.lowerThirdFolder) {
                         scope.launch { refreshKey++ }
                     }
                 },
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp)
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
+                shape = RoundedCornerShape(8.dp)
             ) {
                 Text(stringResource(Res.string.generate_lower_third), style = MaterialTheme.typography.labelMedium)
             }
@@ -886,7 +886,7 @@ fun LowerThirdTab(
                         },
                         enabled = canPlay,
                         modifier = Modifier.size(38.dp),
-                        shape = CircleShape,
+                        shape = RoundedCornerShape(8.dp),
                         colors = IconButtonDefaults.filledIconButtonColors(
                             containerColor = MaterialTheme.colorScheme.primary,
                             contentColor = MaterialTheme.colorScheme.onPrimary
@@ -898,14 +898,15 @@ fun LowerThirdTab(
 
                 // Add to Schedule
                 Tooltip(stringResource(Res.string.add_to_schedule)) {
-                    IconButton(
+                    FilledIconButton(
                         onClick = {
-                            val file = selectedFile ?: return@IconButton
+                            val file = selectedFile ?: return@FilledIconButton
                             onAddToSchedule(file.nameWithoutExtension, file.nameWithoutExtension, false, 0L)
                         },
                         enabled = selectedFile != null,
                         modifier = Modifier.size(34.dp),
-                        colors = IconButtonDefaults.iconButtonColors(
+                        shape = RoundedCornerShape(8.dp),
+                        colors = IconButtonDefaults.filledIconButtonColors(
                             containerColor = MaterialTheme.colorScheme.secondary,
                             contentColor = MaterialTheme.colorScheme.onSecondary,
                             disabledContainerColor = MaterialTheme.colorScheme.outlineVariant,
@@ -918,7 +919,7 @@ fun LowerThirdTab(
 
                 // Go Live
                 Tooltip(stringResource(Res.string.go_live)) {
-                    IconButton(
+                    FilledIconButton(
                         onClick = {
                             val atemSettings = appSettings.atemSettings
                             if (atemSettings.goLiveKey && atemConfigured) {
@@ -941,7 +942,8 @@ fun LowerThirdTab(
                         },
                         enabled = canPlay,
                         modifier = Modifier.size(34.dp),
-                        colors = IconButtonDefaults.iconButtonColors(
+                        shape = RoundedCornerShape(8.dp),
+                        colors = IconButtonDefaults.filledIconButtonColors(
                             containerColor = MaterialTheme.colorScheme.primary,
                             contentColor = MaterialTheme.colorScheme.onPrimary,
                             disabledContainerColor = MaterialTheme.colorScheme.outlineVariant,
@@ -954,7 +956,7 @@ fun LowerThirdTab(
 
                 // ATEM controls
                 if (atemConfigured && atemEverConnected) {
-                    val atemButtonColors = IconButtonDefaults.iconButtonColors(
+                    val atemButtonColors = IconButtonDefaults.filledIconButtonColors(
                         containerColor = MaterialTheme.colorScheme.tertiary,
                         contentColor = MaterialTheme.colorScheme.onTertiary,
                         disabledContainerColor = MaterialTheme.colorScheme.outlineVariant,
@@ -963,10 +965,11 @@ fun LowerThirdTab(
                     val unreachableTooltip = stringResource(Res.string.atem_unreachable, appSettings.atemSettings.host)
                     val goLiveKey = appSettings.atemSettings.goLiveKey
                     Tooltip(stringResource(Res.string.atem_golive_key)) {
-                        IconButton(
+                        FilledIconButton(
                             onClick = { onSettingsChangeState.value { s -> s.copy(atemSettings = s.atemSettings.copy(goLiveKey = !s.atemSettings.goLiveKey)) } },
                             modifier = Modifier.size(34.dp),
-                            colors = IconButtonDefaults.iconButtonColors(
+                            shape = RoundedCornerShape(8.dp),
+                            colors = IconButtonDefaults.filledIconButtonColors(
                                 containerColor = if (goLiveKey) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.surfaceVariant,
                                 contentColor = if (goLiveKey) MaterialTheme.colorScheme.onTertiary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                             )
@@ -984,21 +987,22 @@ fun LowerThirdTab(
                         val quickClipTooLong = quickClipVariant != null && quickClipCapacity != null && quickClipVariant.frameCount > quickClipCapacity
 
                         Tooltip(if (!atemReachable) unreachableTooltip else stringResource(Res.string.atem_quick_still_tooltip, stillSlot + 1)) {
-                            IconButton(onClick = { startAtemUpload(atemVariant(isClip = false, useDetectedFps = false), stillSlot, closeDialogOnSuccess = false) }, enabled = quickEnabled, modifier = Modifier.size(34.dp), colors = atemButtonColors) {
+                            FilledIconButton(onClick = { startAtemUpload(atemVariant(isClip = false, useDetectedFps = false), stillSlot, closeDialogOnSuccess = false) }, enabled = quickEnabled, modifier = Modifier.size(34.dp), shape = RoundedCornerShape(8.dp), colors = atemButtonColors) {
                                 Icon(Icons.Filled.Image, contentDescription = null, modifier = Modifier.size(16.dp))
                             }
                         }
                         Tooltip(when { !atemReachable -> unreachableTooltip; quickClipTooLong -> { val secs = String.format(java.util.Locale.US, "%.1f", quickClipCapacity / quickClipVariant.fps); stringResource(Res.string.atem_clip_too_long, quickClipVariant.frameCount, clipSlot + 1, quickClipCapacity, secs) }; else -> stringResource(Res.string.atem_quick_clip_tooltip, clipSlot + 1) }) {
-                            IconButton(onClick = { quickClipVariant?.let { startAtemUpload(it, clipSlot, closeDialogOnSuccess = false) } }, enabled = quickEnabled && !quickClipTooLong, modifier = Modifier.size(34.dp), colors = atemButtonColors) {
+                            FilledIconButton(onClick = { quickClipVariant?.let { startAtemUpload(it, clipSlot, closeDialogOnSuccess = false) } }, enabled = quickEnabled && !quickClipTooLong, modifier = Modifier.size(34.dp), shape = RoundedCornerShape(8.dp), colors = atemButtonColors) {
                                 Icon(Icons.Filled.Movie, contentDescription = null, modifier = Modifier.size(16.dp))
                             }
                         }
                     } else {
                         Tooltip(if (atemReachable) stringResource(Res.string.atem_send_to_atem) else unreachableTooltip) {
-                            IconButton(
+                            FilledIconButton(
                                 onClick = { atemSlot = if (atemIsClip) appSettings.atemSettings.defaultClipSlot else appSettings.atemSettings.defaultStillSlot; atemError = null; atemProgress = null; showAtemDialog = true },
                                 enabled = canPlay && !atemBusy && atemReachable,
                                 modifier = Modifier.size(34.dp),
+                                shape = RoundedCornerShape(8.dp),
                                 colors = atemButtonColors
                             ) {
                                 Icon(painterResource(Res.drawable.ic_upload), contentDescription = null, modifier = Modifier.size(16.dp))

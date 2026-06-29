@@ -672,8 +672,7 @@ fun STTTab(
             // Background color
             Spacer(Modifier.height(8.dp))
             Column(horizontalAlignment = Alignment.Start) {
-                Text(stringResource(Res.string.stt_background_color), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)
-                ColorPickerField(color = if (sttSettings.backgroundColor == "transparent") "#1E1E2E" else sttSettings.backgroundColor, onColorChange = { onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(backgroundColor = it)) } })
+                ColorPickerField(label = stringResource(Res.string.stt_background_color), color = sttSettings.backgroundColor, onColorChange = { onSettingsChange { s -> s.copy(sttSettings = s.sttSettings.copy(backgroundColor = it)) } }, modifier = Modifier.fillMaxWidth())
                 Spacer(Modifier.height(4.dp))
                 Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
                     Text(stringResource(Res.string.stt_opacity), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)

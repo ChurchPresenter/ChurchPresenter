@@ -1318,6 +1318,8 @@
     <string name="qa_sort_oldest">Oldest First</string>
     <string name="qa_sort_most_votes">Most Votes</string>
     <string name="qa_sort_least_votes">Least Votes</string>
+    <string name="qa_filter_label">Filter</string>
+    <string name="qa_sort_label">Sort</string>
     <string name="qa_add">Add</string>
     <string name="qa_clear_all_confirm_message">Are you sure you want to clear all questions? This cannot be undone.</string>
     <string name="qa_clear">Clear</string>
