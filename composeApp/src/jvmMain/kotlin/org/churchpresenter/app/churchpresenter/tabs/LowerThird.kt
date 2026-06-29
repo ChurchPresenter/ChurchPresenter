@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
@@ -29,11 +30,21 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollbarAdapter
+import androidx.compose.foundation.VerticalScrollbar
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.FilledIconButton
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -691,96 +702,92 @@ fun LowerThirdTab(
             modifier = Modifier
                 .width(listWidthDp)
                 .fillMaxHeight()
-                .background(MaterialTheme.colorScheme.background)
+                .background(MaterialTheme.colorScheme.surface)
         ) {
-            LazyColumn(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(1.dp)
-            ) {
-                if (lottieFiles.isEmpty()) {
-                    item {
-                        Box(
-                            modifier = Modifier.fillMaxWidth().padding(16.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = stringResource(Res.string.lottie_no_presets),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-                            )
-                        }
-                    }
-                } else {
-                    items(lottieFiles) { file ->
-                        val isSelected = selectedFile?.absolutePath == file.absolutePath
-                        val confirmTitle = stringResource(Res.string.confirm_delete)
-                        val confirmMsg = stringResource(Res.string.confirm_delete_file, file.name)
-                        Surface(
-                            modifier = Modifier.fillMaxWidth(),
-                            color = if (isSelected) MaterialTheme.colorScheme.primary
-                                    else MaterialTheme.colorScheme.surfaceVariant
-                        ) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth().padding(start = 12.dp, end = 8.dp),
-                                verticalAlignment = Alignment.CenterVertically
+            val listState = rememberLazyListState()
+            val accentColor = MaterialTheme.colorScheme.primary
+            Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
+                LazyColumn(
+                    state = listState,
+                    modifier = Modifier.fillMaxSize().padding(end = 8.dp)
+                ) {
+                    if (lottieFiles.isEmpty()) {
+                        item {
+                            Box(
+                                modifier = Modifier.fillMaxWidth().padding(16.dp),
+                                contentAlignment = Alignment.Center
                             ) {
                                 Text(
-                                    text = file.nameWithoutExtension,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = if (isSelected) MaterialTheme.colorScheme.onPrimary
-                                            else MaterialTheme.colorScheme.onSurface,
-                                    modifier = Modifier.weight(1f).padding(vertical = 8.dp)
-                                        .initialPassClickable {
-                                            selectedFile = file
-                                            isPlaying = false
-                                        }
+                                    text = stringResource(Res.string.lottie_no_presets),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
                                 )
-                                Icon(
-                                    painter = painterResource(Res.drawable.ic_close),
-                                    contentDescription = stringResource(Res.string.tooltip_remove),
-                                    modifier = Modifier
-                                        .size(16.dp)
-                                        .offset(y = 1.dp)
-                                        .initialPassClickable {
+                            }
+                        }
+                    } else {
+                        items(lottieFiles) { file ->
+                            val isSelected = selectedFile?.absolutePath == file.absolutePath
+                            val confirmTitle = stringResource(Res.string.confirm_delete)
+                            val confirmMsg = stringResource(Res.string.confirm_delete_file, file.name)
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(36.dp)
+                                    .background(if (isSelected) MaterialTheme.colorScheme.surfaceVariant else Color.Transparent)
+                                    .drawBehind {
+                                        if (isSelected) drawRect(color = accentColor, size = Size(4f, size.height))
+                                    }
+                                    .initialPassClickable { selectedFile = file; isPlaying = false }
+                                    .padding(start = 12.dp, end = 4.dp),
+                                contentAlignment = Alignment.CenterStart
+                            ) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Text(
+                                        text = file.nameWithoutExtension,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = if (isSelected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.75f),
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                    Icon(
+                                        painter = painterResource(Res.drawable.ic_close),
+                                        contentDescription = stringResource(Res.string.tooltip_remove),
+                                        modifier = Modifier.size(14.dp).initialPassClickable {
                                             SwingUtilities.invokeLater {
                                                 val result = JOptionPane.showConfirmDialog(
                                                     Window.getWindows().firstOrNull { it.isActive },
-                                                    confirmMsg,
-                                                    confirmTitle,
-                                                    JOptionPane.YES_NO_OPTION,
-                                                    JOptionPane.WARNING_MESSAGE
+                                                    confirmMsg, confirmTitle,
+                                                    JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE
                                                 )
                                                 if (result == JOptionPane.YES_OPTION) {
                                                     file.delete()
-                                                    if (selectedFile?.absolutePath == file.absolutePath) {
-                                                        selectedFile = null
-                                                    }
+                                                    if (selectedFile?.absolutePath == file.absolutePath) selectedFile = null
                                                     refreshKey++
                                                 }
                                             }
                                         },
-                                    tint = if (isSelected) MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f)
-                                           else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-                                )
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
+                                    )
+                                }
                             }
                         }
                     }
                 }
+                VerticalScrollbar(
+                    modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
+                    adapter = rememberScrollbarAdapter(listState)
+                )
             }
 
-            Button(
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+            OutlinedButton(
                 onClick = {
                     onOpenLottieGen(appSettings.streamingSettings.lowerThirdFolder) {
                         scope.launch { refreshKey++ }
                     }
                 },
-                modifier = Modifier.width(200.dp).padding(8.dp).align(Alignment.CenterHorizontally),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.tertiaryContainer,
-                    contentColor = MaterialTheme.colorScheme.onTertiaryContainer
-                )
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp)
             ) {
                 Text(stringResource(Res.string.generate_lower_third), style = MaterialTheme.typography.labelMedium)
             }
@@ -818,105 +825,98 @@ fun LowerThirdTab(
             modifier = Modifier
                 .weight(1f)
                 .fillMaxHeight()
-                .padding(12.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Text(
-                text = selectedFile?.nameWithoutExtension ?: stringResource(Res.string.lottie_select_preset),
-                style = MaterialTheme.typography.bodyMedium,
-                color = if (selectedFile != null) MaterialTheme.colorScheme.onSurface
-                        else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-            )
-
-            // Aspect ratio mismatch warning
+            // ── Title bar ─────────────────────────────────────────────
             val comp = composition
-            if (comp != null && comp.width > 0 && comp.height > 0) {
-                val lottieAR = comp.width / comp.height
+            val arMismatch = if (comp != null && comp.width > 0 && comp.height > 0) {
                 val screenBounds = presenterScreenBounds()
                 val screenAR = screenBounds.width.toFloat() / screenBounds.height.toFloat()
-                if (kotlin.math.abs(lottieAR - screenAR) > 0.05f) {
+                if (kotlin.math.abs(comp.width / comp.height - screenAR) > 0.05f)
+                    stringResource(Res.string.aspect_ratio_mismatch, comp.width.toInt(), comp.height.toInt(), formatAspectRatio(comp.width.toInt(), comp.height.toInt()), screenBounds.width, screenBounds.height, formatAspectRatio(screenBounds.width, screenBounds.height))
+                else null
+            } else null
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(MaterialTheme.colorScheme.surface)
+                    .padding(horizontal = 16.dp, vertical = 10.dp)
+            ) {
+                Text(
+                    text = selectedFile?.nameWithoutExtension ?: stringResource(Res.string.lottie_select_preset),
+                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = if (selectedFile != null) FontWeight.Medium else FontWeight.Normal),
+                    color = if (selectedFile != null) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                if (arMismatch != null) {
                     Text(
-                        text = stringResource(
-                            Res.string.aspect_ratio_mismatch,
-                            comp.width.toInt(), comp.height.toInt(), formatAspectRatio(comp.width.toInt(), comp.height.toInt()),
-                            screenBounds.width, screenBounds.height, formatAspectRatio(screenBounds.width, screenBounds.height)
-                        ),
+                        text = arMismatch,
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.error
                     )
                 }
             }
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
-            // Controls row — moved to top
+            // ── Controls bar ──────────────────────────────────────────
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End,
-                verticalAlignment = Alignment.CenterVertically
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(52.dp)
+                    .background(MaterialTheme.colorScheme.surface)
+                    .padding(horizontal = 16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
+                Spacer(Modifier.weight(1f))
+
                 // Play / Pause
                 Tooltip(stringResource(if (isPlaying) Res.string.pause else Res.string.play)) {
-                    IconButton(
+                    FilledIconButton(
                         onClick = {
                             if (canPlay) {
                                 if (isPlaying) {
-                                    val job = animJob
-                                    animJob = null
-                                    isPlaying = false
-                                    job?.cancel()
+                                    val job = animJob; animJob = null; isPlaying = false; job?.cancel()
                                 } else if (animatedProgress.value >= 1f) {
-                                    scope.launch {
-                                        animatedProgress.snapTo(0f)
-                                        startPlaying()
-                                    }
+                                    scope.launch { animatedProgress.snapTo(0f); startPlaying() }
                                 } else {
                                     startPlaying()
                                 }
                             }
                         },
                         enabled = canPlay,
-                        colors = IconButtonDefaults.iconButtonColors(
-                            containerColor = if (isPlaying) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
-                            contentColor = MaterialTheme.colorScheme.onPrimary,
-                            disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                            disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                        modifier = Modifier.size(38.dp),
+                        shape = CircleShape,
+                        colors = IconButtonDefaults.filledIconButtonColors(
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = MaterialTheme.colorScheme.onPrimary
                         )
                     ) {
-                        Icon(
-                            painter = painterResource(if (isPlaying) Res.drawable.ic_pause else Res.drawable.ic_play),
-                            contentDescription = null,
-                            modifier = Modifier.size(20.dp)
-                        )
+                        Icon(painterResource(if (isPlaying) Res.drawable.ic_pause else Res.drawable.ic_play), contentDescription = null, modifier = Modifier.size(15.dp))
                     }
                 }
 
                 // Add to Schedule
-                val hasFile = selectedFile != null
                 Tooltip(stringResource(Res.string.add_to_schedule)) {
                     IconButton(
                         onClick = {
                             val file = selectedFile ?: return@IconButton
-                            onAddToSchedule(
-                                file.nameWithoutExtension,
-                                file.nameWithoutExtension,
-                                false,
-                                0L
-                            )
+                            onAddToSchedule(file.nameWithoutExtension, file.nameWithoutExtension, false, 0L)
                         },
-                        enabled = hasFile,
+                        enabled = selectedFile != null,
+                        modifier = Modifier.size(34.dp),
                         colors = IconButtonDefaults.iconButtonColors(
                             containerColor = MaterialTheme.colorScheme.secondary,
                             contentColor = MaterialTheme.colorScheme.onSecondary,
-                            disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                            disabledContainerColor = MaterialTheme.colorScheme.outlineVariant,
                             disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
                         )
                     ) {
-                        Icon(painter = painterResource(Res.drawable.ic_playlist_add), contentDescription = stringResource(Res.string.add_to_schedule), modifier = Modifier.size(20.dp))
+                        Icon(painterResource(Res.drawable.ic_playlist_add), contentDescription = null, modifier = Modifier.size(16.dp))
                     }
                 }
 
-                // Go Live — with the DSK toggle on, routes through the sequencer so the
-                // ATEM DSK cuts on, the animation plays, and the DSK cuts off at the end.
-                // (Schedule items and the mobile remote keep the direct path.)
+                // Go Live
                 Tooltip(stringResource(Res.string.go_live)) {
                     IconButton(
                         onClick = {
@@ -927,15 +927,11 @@ fun LowerThirdTab(
                                 val useDsk = atemSettings.useDownstreamKey
                                 scope.launch {
                                     val keyError = LowerThirdSequencer.run(
-                                        name = name,
-                                        json = jsonContent,
-                                        durationMs = durationMs,
-                                        pauseAtFrame = false,
-                                        pauseDurationMs = 0L,
+                                        name = name, json = jsonContent, durationMs = durationMs,
+                                        pauseAtFrame = false, pauseDurationMs = 0L,
                                         mixEffect = if (useDsk) 0 else atemSettings.keyMixEffect,
                                         keyer = if (useDsk) atemSettings.dskIndex else atemSettings.keyIndex,
-                                        atem = atemSettings,
-                                        useDownstreamKey = useDsk
+                                        atem = atemSettings, useDownstreamKey = useDsk
                                     )
                                     if (keyError != null) atemError = keyError
                                 }
@@ -944,190 +940,107 @@ fun LowerThirdTab(
                             }
                         },
                         enabled = canPlay,
+                        modifier = Modifier.size(34.dp),
                         colors = IconButtonDefaults.iconButtonColors(
                             containerColor = MaterialTheme.colorScheme.primary,
                             contentColor = MaterialTheme.colorScheme.onPrimary,
-                            disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                            disabledContainerColor = MaterialTheme.colorScheme.outlineVariant,
                             disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
                         )
                     ) {
-                        Icon(Icons.Default.Tv, contentDescription = stringResource(Res.string.go_live), modifier = Modifier.size(20.dp))
+                        Icon(Icons.Default.Tv, contentDescription = null, modifier = Modifier.size(15.dp))
                     }
                 }
 
-                // Send to ATEM — shown only after the device has responded at least once for the
-                // current IP (atemEverConnected); stays shown but greys out if it later drops, and
-                // hides again only when the IP/port changes. Reachability poll is above.
+                // ATEM controls
                 if (atemConfigured && atemEverConnected) {
                     val atemButtonColors = IconButtonDefaults.iconButtonColors(
                         containerColor = MaterialTheme.colorScheme.tertiary,
                         contentColor = MaterialTheme.colorScheme.onTertiary,
-                        disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                        disabledContainerColor = MaterialTheme.colorScheme.outlineVariant,
                         disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
                     )
                     val unreachableTooltip = stringResource(Res.string.atem_unreachable, appSettings.atemSettings.host)
-
-                    // Toggle: Go Live drives the ATEM DSK sequence (mirrors the
-                    // switch in ATEM settings — same persisted setting)
                     val goLiveKey = appSettings.atemSettings.goLiveKey
                     Tooltip(stringResource(Res.string.atem_golive_key)) {
                         IconButton(
-                            onClick = {
-                                onSettingsChangeState.value { s ->
-                                    s.copy(atemSettings = s.atemSettings.copy(goLiveKey = !s.atemSettings.goLiveKey))
-                                }
-                            },
+                            onClick = { onSettingsChangeState.value { s -> s.copy(atemSettings = s.atemSettings.copy(goLiveKey = !s.atemSettings.goLiveKey)) } },
+                            modifier = Modifier.size(34.dp),
                             colors = IconButtonDefaults.iconButtonColors(
-                                containerColor = if (goLiveKey) MaterialTheme.colorScheme.tertiary
-                                    else MaterialTheme.colorScheme.surfaceVariant,
-                                contentColor = if (goLiveKey) MaterialTheme.colorScheme.onTertiary
-                                    else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                                containerColor = if (goLiveKey) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.surfaceVariant,
+                                contentColor = if (goLiveKey) MaterialTheme.colorScheme.onTertiary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                             )
                         ) {
-                            Icon(
-                                painter = painterResource(Res.drawable.ic_key),
-                                contentDescription = stringResource(Res.string.atem_golive_key),
-                                modifier = Modifier.size(20.dp)
-                            )
+                            Icon(painterResource(Res.drawable.ic_key), contentDescription = null, modifier = Modifier.size(16.dp))
                         }
                     }
 
                     if (appSettings.atemSettings.quickUpload) {
-                        // Quick upload: one press → default slot, no dialog
                         val stillSlot = appSettings.atemSettings.defaultStillSlot
                         val clipSlot = appSettings.atemSettings.defaultClipSlot
                         val quickEnabled = canPlay && !atemBusy && atemReachable
-
-                        // Capacity pre-flight for the clip button: block a doomed upload up front
-                        val quickClipVariant = if (jsonContent.isNotBlank())
-                            atemVariant(isClip = true, useDetectedFps = false) else null
+                        val quickClipVariant = if (jsonContent.isNotBlank()) atemVariant(isClip = true, useDetectedFps = false) else null
                         val quickClipCapacity = appSettings.atemSettings.detectedClipMaxFrames.getOrNull(clipSlot)
-                        val quickClipTooLong = quickClipVariant != null && quickClipCapacity != null &&
-                            quickClipVariant.frameCount > quickClipCapacity
+                        val quickClipTooLong = quickClipVariant != null && quickClipCapacity != null && quickClipVariant.frameCount > quickClipCapacity
 
-                        Tooltip(
-                            if (!atemReachable) unreachableTooltip
-                            else stringResource(Res.string.atem_quick_still_tooltip, stillSlot + 1)
-                        ) {
-                            IconButton(
-                                onClick = {
-                                    startAtemUpload(
-                                        atemVariant(isClip = false, useDetectedFps = false),
-                                        stillSlot, closeDialogOnSuccess = false
-                                    )
-                                },
-                                enabled = quickEnabled,
-                                colors = atemButtonColors
-                            ) {
-                                Icon(Icons.Filled.Image, contentDescription = null, modifier = Modifier.size(20.dp))
+                        Tooltip(if (!atemReachable) unreachableTooltip else stringResource(Res.string.atem_quick_still_tooltip, stillSlot + 1)) {
+                            IconButton(onClick = { startAtemUpload(atemVariant(isClip = false, useDetectedFps = false), stillSlot, closeDialogOnSuccess = false) }, enabled = quickEnabled, modifier = Modifier.size(34.dp), colors = atemButtonColors) {
+                                Icon(Icons.Filled.Image, contentDescription = null, modifier = Modifier.size(16.dp))
                             }
                         }
-                        Tooltip(
-                            when {
-                                !atemReachable -> unreachableTooltip
-                                quickClipTooLong -> {
-                                    val secs = String.format(java.util.Locale.US, "%.1f", quickClipCapacity / quickClipVariant.fps)
-                                    stringResource(
-                                        Res.string.atem_clip_too_long,
-                                        quickClipVariant.frameCount, clipSlot + 1, quickClipCapacity, secs
-                                    )
-                                }
-                                else -> stringResource(Res.string.atem_quick_clip_tooltip, clipSlot + 1)
-                            }
-                        ) {
-                            IconButton(
-                                onClick = {
-                                    quickClipVariant?.let {
-                                        startAtemUpload(it, clipSlot, closeDialogOnSuccess = false)
-                                    }
-                                },
-                                enabled = quickEnabled && !quickClipTooLong,
-                                colors = atemButtonColors
-                            ) {
-                                Icon(Icons.Filled.Movie, contentDescription = null, modifier = Modifier.size(20.dp))
+                        Tooltip(when { !atemReachable -> unreachableTooltip; quickClipTooLong -> { val secs = String.format(java.util.Locale.US, "%.1f", quickClipCapacity / quickClipVariant.fps); stringResource(Res.string.atem_clip_too_long, quickClipVariant.frameCount, clipSlot + 1, quickClipCapacity, secs) }; else -> stringResource(Res.string.atem_quick_clip_tooltip, clipSlot + 1) }) {
+                            IconButton(onClick = { quickClipVariant?.let { startAtemUpload(it, clipSlot, closeDialogOnSuccess = false) } }, enabled = quickEnabled && !quickClipTooLong, modifier = Modifier.size(34.dp), colors = atemButtonColors) {
+                                Icon(Icons.Filled.Movie, contentDescription = null, modifier = Modifier.size(16.dp))
                             }
                         }
                     } else {
-                        val atemTooltip = if (atemReachable) stringResource(Res.string.atem_send_to_atem)
-                            else unreachableTooltip
-                        Tooltip(atemTooltip) {
+                        Tooltip(if (atemReachable) stringResource(Res.string.atem_send_to_atem) else unreachableTooltip) {
                             IconButton(
-                                onClick = {
-                                    atemSlot = if (atemIsClip) appSettings.atemSettings.defaultClipSlot
-                                               else appSettings.atemSettings.defaultStillSlot
-                                    atemError = null
-                                    atemProgress = null
-                                    showAtemDialog = true
-                                },
+                                onClick = { atemSlot = if (atemIsClip) appSettings.atemSettings.defaultClipSlot else appSettings.atemSettings.defaultStillSlot; atemError = null; atemProgress = null; showAtemDialog = true },
                                 enabled = canPlay && !atemBusy && atemReachable,
+                                modifier = Modifier.size(34.dp),
                                 colors = atemButtonColors
                             ) {
-                                Icon(
-                                    painter = painterResource(Res.drawable.ic_upload),
-                                    contentDescription = stringResource(Res.string.atem_send_to_atem),
-                                    modifier = Modifier.size(20.dp)
-                                )
+                                Icon(painterResource(Res.drawable.ic_upload), contentDescription = null, modifier = Modifier.size(16.dp))
                             }
                         }
                     }
                 }
             }
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
-            // ATEM upload status bar — shows for both in-app and API uploads (both publish
-            // to AtemUploadStatus), labelled with the file name and target slot.
+            // ── ATEM upload status ────────────────────────────────────
             val upload = remoteUpload
             if (upload != null && upload.error == null) {
-                val uploadingMsg = if (upload.processing)
-                    stringResource(Res.string.atem_processing, upload.name)
-                else if (upload.clip)
-                    stringResource(Res.string.atem_uploading_video, upload.name, upload.slot)
-                else
-                    stringResource(Res.string.atem_uploading_image, upload.name, upload.slot)
-                Text(
-                    uploadingMsg,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.fillMaxWidth()
-                )
-                LinearProgressIndicator(
-                    progress = { upload.progress },
-                    modifier = Modifier.fillMaxWidth()
-                )
+                val uploadingMsg = if (upload.processing) stringResource(Res.string.atem_processing, upload.name)
+                    else if (upload.clip) stringResource(Res.string.atem_uploading_video, upload.name, upload.slot)
+                    else stringResource(Res.string.atem_uploading_image, upload.name, upload.slot)
+                Column(modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.background).padding(horizontal = 16.dp, vertical = 6.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text(uploadingMsg, style = MaterialTheme.typography.labelSmall.copy(fontSize = 11.sp), color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f))
+                    LinearProgressIndicator(progress = { upload.progress }, modifier = Modifier.fillMaxWidth())
+                }
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
             }
             val err = upload?.error
             if (err != null) {
-                Text(
-                    stringResource(Res.string.atem_upload_error, err),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.error,
-                    modifier = Modifier.fillMaxWidth()
-                )
+                Text(stringResource(Res.string.atem_upload_error, err), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.error, modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 6.dp))
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
             }
 
-            // Lottie preview — weight(1f) fills remaining space, aspectRatio inside
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f),
-                contentAlignment = Alignment.Center
-            ) {
+            // ── Lottie preview ────────────────────────────────────────
+            Box(modifier = Modifier.fillMaxWidth().weight(1f).padding(16.dp), contentAlignment = Alignment.Center) {
                 Box(
                     modifier = Modifier
                         .aspectRatio(presenterAspectRatio())
                         .fillMaxSize()
                         .background(Color.Black, RoundedCornerShape(8.dp))
-                        .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(8.dp)),
+                        .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp)),
                     contentAlignment = Alignment.Center
                 ) {
                     if (canPlay) {
-                        Image(
-                            painter = rememberLottiePainter(composition = composition, progress = { animatedProgress.value }),
-                            contentDescription = null,
-                            contentScale = ContentScale.Fit,
-                            modifier = Modifier.fillMaxSize()
-                        )
+                        Image(painter = rememberLottiePainter(composition = composition, progress = { animatedProgress.value }), contentDescription = null, contentScale = ContentScale.Fit, modifier = Modifier.fillMaxSize())
                     } else if (selectedFile != null && isCompositionLoading) {
-                        androidx.compose.material3.CircularProgressIndicator(modifier = Modifier.size(36.dp))
+                        CircularProgressIndicator(modifier = Modifier.size(36.dp))
                     } else if (selectedFile != null) {
                         Icon(Icons.Filled.Warning, contentDescription = null, modifier = Modifier.size(40.dp), tint = MaterialTheme.colorScheme.error.copy(alpha = 0.5f))
                     }
