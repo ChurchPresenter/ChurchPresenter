@@ -8,6 +8,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.input.pointer.PointerEventPass
@@ -20,16 +21,20 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
@@ -37,10 +42,13 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -64,6 +72,7 @@ import androidx.compose.ui.zIndex
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.ic_refresh
 import churchpresenter.composeapp.generated.resources.add_to_schedule
@@ -79,7 +88,9 @@ import androidx.compose.material.icons.filled.Tv
 import churchpresenter.composeapp.generated.resources.ic_close
 import churchpresenter.composeapp.generated.resources.ic_star
 import churchpresenter.composeapp.generated.resources.ic_star_filled
+import churchpresenter.composeapp.generated.resources.cancel
 import churchpresenter.composeapp.generated.resources.clear
+import churchpresenter.composeapp.generated.resources.ok
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PhotoLibrary
 import churchpresenter.composeapp.generated.resources.clear_recents
@@ -244,7 +255,6 @@ fun PicturesTab(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .padding(16.dp)
             .onPreviewKeyEvent { keyEvent ->
                 if (keyEvent.type == KeyEventType.KeyDown && viewModel.images.isNotEmpty()) {
                     val columnCount = (gridState.layoutInfo.visibleItemsInfo.maxOfOrNull { it.column } ?: 0) + 1
@@ -267,357 +277,513 @@ fun PicturesTab(
                 } else false
             }
     ) {
-        // Folder selection row
+        // ── Folder bar ────────────────────────────────────────────────
         Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.CenterVertically
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(48.dp)
+                .background(MaterialTheme.colorScheme.surface)
+                .padding(horizontal = 16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            Button(onClick = {
-                viewModel.openFolderChooser(folderDialogTitle) { folderPath ->
-                    onSettingsChange { s ->
-                        s.copy(pictureSettings = s.pictureSettings.copy(storageDirectory = folderPath))
+            Button(
+                onClick = {
+                    viewModel.openFolderChooser(folderDialogTitle) { folderPath ->
+                        onSettingsChange { s ->
+                            s.copy(pictureSettings = s.pictureSettings.copy(storageDirectory = folderPath))
+                        }
+                        RecentPictureFolders.add(folderPath)
                     }
-                    RecentPictureFolders.add(folderPath)
-                }
-            }) {
-                Icon(painterResource(Res.drawable.ic_folder), contentDescription = null, modifier = Modifier.size(16.dp))
-                Spacer(Modifier.width(4.dp))
-                Text(stringResource(Res.string.select_folder), style = MaterialTheme.typography.labelMedium)
+                },
+                modifier = Modifier.height(32.dp),
+                shape = RoundedCornerShape(7.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
+                ),
+                contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 14.dp, vertical = 0.dp)
+            ) {
+                Icon(painterResource(Res.drawable.ic_folder), contentDescription = null, modifier = Modifier.size(13.dp))
+                Spacer(Modifier.width(7.dp))
+                Text(
+                    stringResource(Res.string.select_folder),
+                    style = MaterialTheme.typography.labelMedium.copy(
+                        fontSize = androidx.compose.ui.unit.TextUnit(12.5f, androidx.compose.ui.unit.TextUnitType.Sp),
+                        fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold
+                    )
+                )
             }
-
             Text(
-                text = viewModel.selectedFolder?.absolutePath
-                    ?: stringResource(Res.string.no_folder_selected),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-                modifier = Modifier.weight(1f)
+                text = viewModel.selectedFolder?.absolutePath ?: stringResource(Res.string.no_folder_selected),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
+                modifier = Modifier.weight(1f),
+                maxLines = 1,
+                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
             )
+            if (viewModel.images.isNotEmpty()) {
+                Text(
+                    text = "${viewModel.images.size} ${stringResource(Res.string.images_suffix)}",
+                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold),
+                    color = MaterialTheme.colorScheme.secondary
+                )
+            }
+        }
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
-            Text(
-                text = "${viewModel.images.size} ${stringResource(Res.string.images_suffix)}",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.primary
-            )
+        // ── Recent folders bar ────────────────────────────────────────
+        val recentOrdered = RecentPictureFolders.pinned + RecentPictureFolders.folders.filter { it !in RecentPictureFolders.pinned }
+        if (recentOrdered.isNotEmpty()) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(40.dp)
+                    .background(MaterialTheme.colorScheme.background)
+                    .padding(horizontal = 16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Text(
+                    text = stringResource(Res.string.recent),
+                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Medium),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                )
+                TooltipArea(
+                    tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.clear_recents), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
+                    tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
+                ) {
+                    IconButton(onClick = { RecentPictureFolders.clear() }, modifier = Modifier.size(20.dp)) {
+                        Icon(
+                            painter = painterResource(Res.drawable.ic_close),
+                            contentDescription = stringResource(Res.string.clear),
+                            modifier = Modifier.size(14.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                        )
+                    }
+                }
+                LazyRow(
+                    modifier = Modifier.weight(1f),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    lazyItems(recentOrdered) { path ->
+                        val isPinned = path in RecentPictureFolders.pinned
+                        val isActive = viewModel.selectedFolder?.absolutePath == path
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(2.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .height(26.dp)
+                                    .background(
+                                        if (isActive) MaterialTheme.colorScheme.surfaceVariant
+                                        else Color.Transparent,
+                                        RoundedCornerShape(6.dp)
+                                    )
+                                    .border(
+                                        1.dp,
+                                        if (isActive) MaterialTheme.colorScheme.outline
+                                        else MaterialTheme.colorScheme.outlineVariant,
+                                        RoundedCornerShape(6.dp)
+                                    )
+                                    .clickable {
+                                        val folder = java.io.File(path)
+                                        if (folder.exists() && folder.isDirectory) {
+                                            viewModel.selectFolder(folder)
+                                            onSettingsChange { s -> s.copy(pictureSettings = s.pictureSettings.copy(storageDirectory = path)) }
+                                            RecentPictureFolders.add(path)
+                                        }
+                                    }
+                                    .padding(horizontal = 10.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = java.io.File(path).name,
+                                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Medium),
+                                    color = if (isActive) MaterialTheme.colorScheme.onSurface
+                                            else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.75f),
+                                    maxLines = 1
+                                )
+                            }
+                            IconButton(onClick = { RecentPictureFolders.togglePin(path) }, modifier = Modifier.size(20.dp)) {
+                                Icon(
+                                    painter = painterResource(if (isPinned) Res.drawable.ic_star_filled else Res.drawable.ic_star),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(12.dp),
+                                    tint = if (isPinned) MaterialTheme.colorScheme.primary
+                                           else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.35f)
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
         }
 
-        PicturesRecentsRow(
-            items = RecentPictureFolders.folders,
-            pinned = RecentPictureFolders.pinned,
-            onClear = { RecentPictureFolders.clear() },
-            onTogglePin = { RecentPictureFolders.togglePin(it) },
-            onSelect = { path ->
-                val folder = java.io.File(path)
-                if (folder.exists() && folder.isDirectory) {
-                    viewModel.selectFolder(folder)
-                    onSettingsChange { s ->
-                        s.copy(pictureSettings = s.pictureSettings.copy(storageDirectory = path))
-                    }
-                    RecentPictureFolders.add(path)
-                }
-            }
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Playback controls row
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // Left: playback buttons
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    TooltipArea(
-                        tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.previous_image), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
-                        tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
-                    ) {
-                        IconButton(
-                            onClick = { viewModel.previousImage() },
-                            enabled = viewModel.images.isNotEmpty()
-                        ) {
-                            Icon(
-                                painter = painterResource(Res.drawable.ic_skip_previous),
-                                contentDescription = stringResource(Res.string.previous_image),
-                                modifier = Modifier.size(32.dp),
-                                tint = if (viewModel.images.isNotEmpty())
-                                    MaterialTheme.colorScheme.onSurface
-                                else
-                                    MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                            )
-                        }
-                    }
-
-                    TooltipArea(
-                        tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(if (viewModel.isPlaying) Res.string.pause else Res.string.play), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
-                        tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
-                    ) {
-                        IconButton(
-                            onClick = { viewModel.togglePlayPause() },
-                            enabled = viewModel.images.isNotEmpty(),
-                            modifier = Modifier
-                                .size(48.dp)
-                                .background(
-                                    if (viewModel.isPlaying) MaterialTheme.colorScheme.error
-                                    else MaterialTheme.colorScheme.primary,
-                                    RoundedCornerShape(24.dp)
-                                )
-                        ) {
-                            Icon(
-                                painter = painterResource(
-                                    if (viewModel.isPlaying) Res.drawable.ic_pause else Res.drawable.ic_play
-                                ),
-                                contentDescription = stringResource(
-                                    if (viewModel.isPlaying) Res.string.pause else Res.string.play
-                                ),
-                                modifier = Modifier.size(28.dp),
-                                tint = Color.White
-                            )
-                        }
-                    }
-
-                    TooltipArea(
-                        tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.next_image), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
-                        tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
-                    ) {
-                        IconButton(
-                            onClick = { viewModel.nextImage() },
-                            enabled = viewModel.images.isNotEmpty()
-                        ) {
-                            Icon(
-                                painter = painterResource(Res.drawable.ic_skip_next),
-                                contentDescription = stringResource(Res.string.next_image),
-                                modifier = Modifier.size(32.dp),
-                                tint = if (viewModel.images.isNotEmpty())
-                                    MaterialTheme.colorScheme.onSurface
-                                else
-                                    MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                            )
-                        }
-                    }
-
-                    Text(
-                        text = stringResource(
-                            Res.string.image_counter,
-                            viewModel.selectedImageIndex + 1,
-                            viewModel.images.size
-                        ),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-
-                    TooltipArea(
-                        tooltip = {
-                            Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
-                                Text(
-                                    stringResource(if (viewModel.isLooping) Res.string.loop_on else Res.string.loop_off),
-                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                                    style = MaterialTheme.typography.bodySmall
-                                )
-                            }
-                        },
-                        tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
-                    ) {
-                        IconButton(
-                            onClick = {
-                                viewModel.isLooping = !viewModel.isLooping
-                                onSettingsChange { s ->
-                                    s.copy(pictureSettings = s.pictureSettings.copy(isLooping = viewModel.isLooping))
-                                }
-                            },
-                            colors = IconButtonDefaults.iconButtonColors(
-                                containerColor = if (viewModel.isLooping)
-                                    MaterialTheme.colorScheme.primary
-                                else
-                                    MaterialTheme.colorScheme.surfaceVariant,
-                                contentColor = if (viewModel.isLooping)
-                                    MaterialTheme.colorScheme.onPrimary
-                                else
-                                    MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        ) {
-                            Icon(
-                                painter = painterResource(Res.drawable.ic_refresh),
-                                contentDescription = stringResource(if (viewModel.isLooping) Res.string.loop_on else Res.string.loop_off),
-                                modifier = Modifier.size(20.dp)
-                            )
-                        }
-                    }
-
-                    // Inline slideshow settings
-                    if (appSettings != null) {
-                        var intervalText by remember(appSettings.pictureSettings.autoScrollInterval) {
-                            mutableStateOf(appSettings.pictureSettings.autoScrollInterval.toInt().toString())
-                        }
-                        var durationText by remember(appSettings.pictureSettings.transitionDuration) {
-                            mutableStateOf(appSettings.pictureSettings.transitionDuration.toInt().toString())
-                        }
-
-                        OutlinedTextField(
-                            value = intervalText,
-                            onValueChange = { value ->
-                                intervalText = value
-                                val parsed = value.toIntOrNull()
-                                if (parsed != null && parsed in 1..30) {
-                                    viewModel.autoScrollInterval = parsed.toFloat()
-                                    onSettingsChange { s ->
-                                        s.copy(pictureSettings = s.pictureSettings.copy(autoScrollInterval = parsed.toFloat()))
-                                    }
-                                }
-                            },
-                            label = { Text(stringResource(Res.string.auto_scroll_interval)) },
-                            suffix = { Text(stringResource(Res.string.unit_s)) },
-                            singleLine = true,
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                            modifier = Modifier.width(150.dp),
-                            textStyle = MaterialTheme.typography.bodyMedium,
-                        )
-
-                        OutlinedTextField(
-                            value = durationText,
-                            onValueChange = { value ->
-                                durationText = value
-                                val parsed = value.toIntOrNull()
-                                if (parsed != null && parsed in 100..2000) {
-                                    viewModel.transitionDuration = parsed.toFloat()
-                                    onSettingsChange { s ->
-                                        s.copy(pictureSettings = s.pictureSettings.copy(transitionDuration = parsed.toFloat()))
-                                    }
-                                }
-                            },
-                            label = { Text(stringResource(Res.string.transition_duration)) },
-                            suffix = { Text(stringResource(Res.string.unit_ms)) },
-                            singleLine = true,
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                            modifier = Modifier.width(170.dp),
-                            textStyle = MaterialTheme.typography.bodyMedium,
-                        )
-
-                        val crossfadeText = stringResource(Res.string.animation_crossfade)
-                        val fadeText = stringResource(Res.string.animation_fade)
-                        val slideLeftText = stringResource(Res.string.animation_slide_left)
-                        val slideRightText = stringResource(Res.string.animation_slide_right)
-                        val noneText = stringResource(Res.string.animation_none)
-
-                        val currentAnimationLabel = when (appSettings.pictureSettings.animationType) {
-                            Constants.ANIMATION_FADE -> fadeText
-                            Constants.ANIMATION_SLIDE_LEFT -> slideLeftText
-                            Constants.ANIMATION_SLIDE_RIGHT -> slideRightText
-                            Constants.ANIMATION_NONE -> noneText
-                            else -> crossfadeText
-                        }
-
-                        DropdownSelector(
-                            modifier = Modifier.width(160.dp),
-                            label = stringResource(Res.string.animation_type),
-                            items = listOf(crossfadeText, fadeText, slideLeftText, slideRightText, noneText),
-                            selected = currentAnimationLabel,
-                            onSelectedChange = { selected ->
-                                val newTypeString = when (selected) {
-                                    fadeText -> Constants.ANIMATION_FADE
-                                    slideLeftText -> Constants.ANIMATION_SLIDE_LEFT
-                                    slideRightText -> Constants.ANIMATION_SLIDE_RIGHT
-                                    noneText -> Constants.ANIMATION_NONE
-                                    else -> Constants.ANIMATION_CROSSFADE
-                                }
-                                viewModel.animationType = when (selected) {
-                                    fadeText -> AnimationType.FADE
-                                    slideLeftText -> AnimationType.SLIDE_LEFT
-                                    slideRightText -> AnimationType.SLIDE_RIGHT
-                                    noneText -> AnimationType.NONE
-                                    else -> AnimationType.CROSSFADE
-                                }
-                                onSettingsChange { s ->
-                                    s.copy(pictureSettings = s.pictureSettings.copy(animationType = newTypeString))
-                                }
-                            }
-                        )
-                    }
-                }
-
-                // Right: action buttons
-                Row(
-                    horizontalArrangement = Arrangement.End,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    if (onAddToSchedule != null) {
-                        TooltipArea(
-                            tooltip = {
-                                Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
-                                    Text(stringResource(Res.string.add_to_schedule), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
-                                }
-                            },
-                            tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
-                        ) {
-                            IconButton(
-                                onClick = {
-                                    viewModel.getScheduleData()?.let { (path, name, count) ->
-                                        onAddToSchedule(path, name, count)
-                                    }
-                                },
-                                enabled = viewModel.images.isNotEmpty(),
-                                colors = IconButtonDefaults.iconButtonColors(
-                                    containerColor = MaterialTheme.colorScheme.secondary,
-                                    contentColor = MaterialTheme.colorScheme.onSecondary,
-                                    disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                                    disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                                )
-                            ) {
-                                Icon(painter = painterResource(Res.drawable.ic_playlist_add), contentDescription = stringResource(Res.string.add_to_schedule), modifier = Modifier.size(20.dp))
-                            }
-                        }
-                    }
-
-                    if (presenterManager != null) {
-                        TooltipArea(
-                            tooltip = {
-                                Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) {
-                                    Text(stringResource(Res.string.go_live), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
-                                }
-                            },
-                            tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
-                        ) {
-                            IconButton(
-                                onClick = { viewModel.goLive(presenterManager) },
-                                enabled = viewModel.images.isNotEmpty(),
-                                colors = IconButtonDefaults.iconButtonColors(
-                                    containerColor = MaterialTheme.colorScheme.primary,
-                                    contentColor = MaterialTheme.colorScheme.onPrimary,
-                                    disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                                    disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                                )
-                            ) {
-                                Icon(Icons.Default.Tv, contentDescription = stringResource(Res.string.go_live), modifier = Modifier.size(20.dp))
-                            }
-                        }
-                    }
-                }
-            }
-
-        Spacer(modifier = Modifier.height(4.dp))
-
-        // Keyboard and drag hints
+        // ── Playback controls bar ─────────────────────────────────────
         Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(52.dp)
+                .background(MaterialTheme.colorScheme.surface)
+                .padding(horizontal = 16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Text(
-                text = stringResource(Res.string.pictures_arrow_key_hint),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-            )
+            // Transport controls (inner gap: 4dp)
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                TooltipArea(
+                    tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.previous_image), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
+                    tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
+                ) {
+                    IconButton(
+                        onClick = { viewModel.previousImage() },
+                        enabled = viewModel.images.isNotEmpty(),
+                        modifier = Modifier.size(30.dp)
+                    ) {
+                        Icon(
+                            painter = painterResource(Res.drawable.ic_skip_previous),
+                            contentDescription = stringResource(Res.string.previous_image),
+                            modifier = Modifier.size(16.dp),
+                            tint = if (viewModel.images.isNotEmpty()) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                                   else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
+                        )
+                    }
+                }
+                TooltipArea(
+                    tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(if (viewModel.isPlaying) Res.string.pause else Res.string.play), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
+                    tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
+                ) {
+                    FilledIconButton(
+                        onClick = { viewModel.togglePlayPause() },
+                        enabled = viewModel.images.isNotEmpty(),
+                        modifier = Modifier.size(38.dp),
+                        shape = CircleShape,
+                        colors = IconButtonDefaults.filledIconButtonColors(
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = MaterialTheme.colorScheme.onPrimary
+                        )
+                    ) {
+                        Icon(
+                            painter = painterResource(if (viewModel.isPlaying) Res.drawable.ic_pause else Res.drawable.ic_play),
+                            contentDescription = stringResource(if (viewModel.isPlaying) Res.string.pause else Res.string.play),
+                            modifier = Modifier.size(15.dp)
+                        )
+                    }
+                }
+                TooltipArea(
+                    tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.next_image), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
+                    tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
+                ) {
+                    IconButton(
+                        onClick = { viewModel.nextImage() },
+                        enabled = viewModel.images.isNotEmpty(),
+                        modifier = Modifier.size(30.dp)
+                    ) {
+                        Icon(
+                            painter = painterResource(Res.drawable.ic_skip_next),
+                            contentDescription = stringResource(Res.string.next_image),
+                            modifier = Modifier.size(16.dp),
+                            tint = if (viewModel.images.isNotEmpty()) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                                   else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
+                        )
+                    }
+                }
+            }
+
+            // Image counter
+            if (viewModel.images.isNotEmpty()) {
+                Text(
+                    text = stringResource(Res.string.image_counter, viewModel.selectedImageIndex + 1, viewModel.images.size),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f),
+                    modifier = Modifier.widthIn(min = 60.dp)
+                )
+            }
+
+            // Loop button
+            TooltipArea(
+                tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(if (viewModel.isLooping) Res.string.loop_on else Res.string.loop_off), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
+                tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
+            ) {
+                IconButton(
+                    onClick = {
+                        viewModel.isLooping = !viewModel.isLooping
+                        onSettingsChange { s -> s.copy(pictureSettings = s.pictureSettings.copy(isLooping = viewModel.isLooping)) }
+                    },
+                    modifier = Modifier.size(28.dp),
+                    colors = IconButtonDefaults.iconButtonColors(
+                        containerColor = Color.Transparent,
+                        contentColor = if (viewModel.isLooping) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f)
+                                       else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.35f)
+                    )
+                ) {
+                    Icon(painterResource(Res.drawable.ic_refresh), contentDescription = null, modifier = Modifier.size(16.dp))
+                }
+            }
+
+            // Divider
+            Box(modifier = Modifier.width(1.dp).height(22.dp).background(MaterialTheme.colorScheme.outlineVariant))
+
+            // Settings display boxes
+            if (appSettings != null) {
+                var editingInterval by remember { mutableStateOf(false) }
+                var editingTransition by remember { mutableStateOf(false) }
+                var intervalInput by remember(appSettings.pictureSettings.autoScrollInterval) {
+                    mutableStateOf(appSettings.pictureSettings.autoScrollInterval.toInt().toString())
+                }
+                var transitionInput by remember(appSettings.pictureSettings.transitionDuration) {
+                    mutableStateOf(appSettings.pictureSettings.transitionDuration.toInt().toString())
+                }
+
+                // Auto-scroll interval
+                Column(
+                    modifier = Modifier
+                        .height(42.dp)
+                        .width(120.dp)
+                        .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
+                        .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp))
+                        .clickable { editingInterval = true }
+                        .padding(start = 11.dp, end = 11.dp, top = 0.dp, bottom = 6.dp),
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        text = stringResource(Res.string.auto_scroll_interval).uppercase(),
+                        fontSize = androidx.compose.ui.unit.TextUnit(8f, androidx.compose.ui.unit.TextUnitType.Sp),
+                        lineHeight = androidx.compose.ui.unit.TextUnit(9f, androidx.compose.ui.unit.TextUnitType.Sp),
+                        fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold,
+                        letterSpacing = 0.9.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                        maxLines = 1
+                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = "${appSettings.pictureSettings.autoScrollInterval.toInt()} ${stringResource(Res.string.unit_s)}",
+                            style = MaterialTheme.typography.bodySmall.copy(
+                                fontSize = 12.sp,
+                                fontWeight = androidx.compose.ui.text.font.FontWeight.Medium
+                            ),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1
+                        )
+                    }
+                }
+
+                if (editingInterval) {
+                    AlertDialog(
+                        onDismissRequest = { editingInterval = false },
+                        title = { Text(stringResource(Res.string.auto_scroll_interval)) },
+                        text = {
+                            OutlinedTextField(
+                                value = intervalInput,
+                                onValueChange = { intervalInput = it },
+                                suffix = { Text(stringResource(Res.string.unit_s)) },
+                                singleLine = true,
+                                keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Number)
+                            )
+                        },
+                        confirmButton = {
+                            TextButton(onClick = {
+                                intervalInput.toIntOrNull()?.coerceIn(1, 30)?.let { v ->
+                                    viewModel.autoScrollInterval = v.toFloat()
+                                    onSettingsChange { s -> s.copy(pictureSettings = s.pictureSettings.copy(autoScrollInterval = v.toFloat())) }
+                                }
+                                editingInterval = false
+                            }) { Text(stringResource(Res.string.ok)) }
+                        },
+                        dismissButton = {
+                            TextButton(onClick = { editingInterval = false }) { Text(stringResource(Res.string.cancel)) }
+                        }
+                    )
+                }
+
+                // Transition duration
+                Column(
+                    modifier = Modifier
+                        .height(42.dp)
+                        .width(120.dp)
+                        .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
+                        .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp))
+                        .clickable { editingTransition = true }
+                        .padding(start = 11.dp, end = 11.dp, top = 0.dp, bottom = 6.dp),
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        text = stringResource(Res.string.transition_duration).uppercase(),
+                        fontSize = androidx.compose.ui.unit.TextUnit(8f, androidx.compose.ui.unit.TextUnitType.Sp),
+                        lineHeight = androidx.compose.ui.unit.TextUnit(9f, androidx.compose.ui.unit.TextUnitType.Sp),
+                        fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold,
+                        letterSpacing = 0.9.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                        maxLines = 1
+                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = "${appSettings.pictureSettings.transitionDuration.toInt()} ${stringResource(Res.string.unit_ms)}",
+                            style = MaterialTheme.typography.bodySmall.copy(
+                                fontSize = 12.sp,
+                                fontWeight = androidx.compose.ui.text.font.FontWeight.Medium
+                            ),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1
+                        )
+                    }
+                }
+
+                if (editingTransition) {
+                    AlertDialog(
+                        onDismissRequest = { editingTransition = false },
+                        title = { Text(stringResource(Res.string.transition_duration)) },
+                        text = {
+                            OutlinedTextField(
+                                value = transitionInput,
+                                onValueChange = { transitionInput = it },
+                                suffix = { Text(stringResource(Res.string.unit_ms)) },
+                                singleLine = true,
+                                keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Number)
+                            )
+                        },
+                        confirmButton = {
+                            TextButton(onClick = {
+                                transitionInput.toIntOrNull()?.coerceIn(100, 2000)?.let { v ->
+                                    viewModel.transitionDuration = v.toFloat()
+                                    onSettingsChange { s -> s.copy(pictureSettings = s.pictureSettings.copy(transitionDuration = v.toFloat())) }
+                                }
+                                editingTransition = false
+                            }) { Text(stringResource(Res.string.ok)) }
+                        },
+                        dismissButton = {
+                            TextButton(onClick = { editingTransition = false }) { Text(stringResource(Res.string.cancel)) }
+                        }
+                    )
+                }
+
+                // Animation type dropdown
+                val crossfadeText = stringResource(Res.string.animation_crossfade)
+                val fadeText = stringResource(Res.string.animation_fade)
+                val slideLeftText = stringResource(Res.string.animation_slide_left)
+                val slideRightText = stringResource(Res.string.animation_slide_right)
+                val noneText = stringResource(Res.string.animation_none)
+                val currentAnimationLabel = when (appSettings.pictureSettings.animationType) {
+                    Constants.ANIMATION_FADE -> fadeText
+                    Constants.ANIMATION_SLIDE_LEFT -> slideLeftText
+                    Constants.ANIMATION_SLIDE_RIGHT -> slideRightText
+                    Constants.ANIMATION_NONE -> noneText
+                    else -> crossfadeText
+                }
+                DropdownSelector(
+                    modifier = Modifier.width(120.dp),
+                    label = stringResource(Res.string.animation_type),
+                    items = listOf(crossfadeText, fadeText, slideLeftText, slideRightText, noneText),
+                    selected = currentAnimationLabel,
+                    onSelectedChange = { selected ->
+                        viewModel.animationType = when (selected) {
+                            fadeText -> AnimationType.FADE
+                            slideLeftText -> AnimationType.SLIDE_LEFT
+                            slideRightText -> AnimationType.SLIDE_RIGHT
+                            noneText -> AnimationType.NONE
+                            else -> AnimationType.CROSSFADE
+                        }
+                        onSettingsChange { s ->
+                            val newType = when (selected) {
+                                fadeText -> Constants.ANIMATION_FADE
+                                slideLeftText -> Constants.ANIMATION_SLIDE_LEFT
+                                slideRightText -> Constants.ANIMATION_SLIDE_RIGHT
+                                noneText -> Constants.ANIMATION_NONE
+                                else -> Constants.ANIMATION_CROSSFADE
+                            }
+                            s.copy(pictureSettings = s.pictureSettings.copy(animationType = newType))
+                        }
+                    }
+                )
+            }
+
+            Spacer(Modifier.weight(1f))
+
+            // Right action buttons
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                if (onAddToSchedule != null) {
+                    TooltipArea(
+                        tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.add_to_schedule), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
+                        tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
+                    ) {
+                        IconButton(
+                            onClick = { viewModel.getScheduleData()?.let { (path, name, count) -> onAddToSchedule(path, name, count) } },
+                            enabled = viewModel.images.isNotEmpty(),
+                            colors = IconButtonDefaults.iconButtonColors(
+                                containerColor = MaterialTheme.colorScheme.secondary,
+                                contentColor = MaterialTheme.colorScheme.onSecondary,
+                                disabledContainerColor = MaterialTheme.colorScheme.outlineVariant,
+                                disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                            ),
+                            modifier = Modifier.size(34.dp)
+                        ) {
+                            Icon(
+                                painter = painterResource(Res.drawable.ic_playlist_add),
+                                contentDescription = stringResource(Res.string.add_to_schedule),
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
+                    }
+                }
+                if (presenterManager != null) {
+                    TooltipArea(
+                        tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.go_live), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
+                        tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
+                    ) {
+                        IconButton(
+                            onClick = { viewModel.goLive(presenterManager) },
+                            enabled = viewModel.images.isNotEmpty(),
+                            colors = IconButtonDefaults.iconButtonColors(
+                                containerColor = MaterialTheme.colorScheme.primary,
+                                contentColor = MaterialTheme.colorScheme.onPrimary,
+                                disabledContainerColor = MaterialTheme.colorScheme.outlineVariant,
+                                disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                            ),
+                            modifier = Modifier.size(34.dp)
+                        ) {
+                            Icon(
+                                Icons.Default.Tv,
+                                contentDescription = stringResource(Res.string.go_live),
+                                modifier = Modifier.size(15.dp)
+                            )
+                        }
+                    }
+                }
+            }
+
             Text(
                 text = stringResource(Res.string.pictures_reorder_hint),
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.35f)
             )
         }
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
-        Spacer(modifier = Modifier.height(8.dp))
+        // ── Nav hint bar ──────────────────────────────────────────────
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(32.dp)
+                .background(MaterialTheme.colorScheme.background)
+                .padding(horizontal = 16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            Text(
+                text = stringResource(Res.string.pictures_arrow_key_hint),
+                style = MaterialTheme.typography.bodySmall.copy(
+                    fontSize = androidx.compose.ui.unit.TextUnit(11.5f, androidx.compose.ui.unit.TextUnitType.Sp)
+                ),
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+            )
+        }
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
+        // ── Thumbnail grid ────────────────────────────────────────────
         if (viewModel.images.isNotEmpty()) {
             // Drag-to-reorder state: shift+click+drag, ghost approach (no real-time swaps)
             var draggingFile by remember { mutableStateOf<File?>(null) }
@@ -628,11 +794,12 @@ fun PicturesTab(
 
             Box(modifier = Modifier.fillMaxSize().clip(RectangleShape)) {
                 LazyVerticalGrid(
-                    columns = GridCells.Adaptive(150.dp),
+                    columns = GridCells.Adaptive(200.dp),
                     state = gridState,
-                    modifier = Modifier.fillMaxSize(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                    modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(14.dp),
+                    verticalArrangement = Arrangement.spacedBy(14.dp),
+                    contentPadding = androidx.compose.foundation.layout.PaddingValues(vertical = 18.dp)
                 ) {
                     items(viewModel.images, key = { it.absolutePath }) { imageFile ->
                         val index = viewModel.images.indexOf(imageFile)
@@ -640,25 +807,18 @@ fun PicturesTab(
                         val isDraggingThis = draggingFile == imageFile
                         val isDropTarget = isDragActive && dropTargetIndex == index && !isDraggingThis
 
-                        Box(
+                        val borderColor = when {
+                            isDropTarget -> MaterialTheme.colorScheme.tertiary
+                            isSelected -> MaterialTheme.colorScheme.secondary
+                            else -> MaterialTheme.colorScheme.outlineVariant
+                        }
+
+                        Column(
                             modifier = Modifier
                                 .animateItem()
-                                .aspectRatio(1f)
                                 .alpha(if (isDraggingThis) 0.35f else 1f)
-                                .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
-                                .border(
-                                    width = when {
-                                        isDropTarget -> 3.dp
-                                        isSelected -> 3.dp
-                                        else -> 1.dp
-                                    },
-                                    color = when {
-                                        isDropTarget -> MaterialTheme.colorScheme.tertiary
-                                        isSelected -> MaterialTheme.colorScheme.primary
-                                        else -> MaterialTheme.colorScheme.outline
-                                    },
-                                    shape = RoundedCornerShape(8.dp)
-                                )
+                                .border(2.dp, borderColor, RoundedCornerShape(8.dp))
+                                .clip(RoundedCornerShape(8.dp))
                                 .pointerInput(imageFile) {
                                     awaitPointerEventScope {
                                         while (true) {
@@ -666,7 +826,6 @@ fun PicturesTab(
                                             if (pressEvent.type != PointerEventType.Press) continue
                                             if (!pressEvent.keyboardModifiers.isShiftPressed) continue
 
-                                            // Shift+click: consume and start drag immediately
                                             pressEvent.changes.forEach { it.consume() }
                                             val startPos = pressEvent.changes.first().position
 
@@ -731,40 +890,46 @@ fun PicturesTab(
                                         }
                                     }
                                 )
-                                .padding(4.dp)
                         ) {
-                            viewModel.thumbnails[imageFile]?.let { bitmap ->
-                                Image(
-                                    bitmap = bitmap,
-                                    contentDescription = imageFile.name,
-                                    modifier = Modifier.fillMaxSize(),
-                                    contentScale = ContentScale.Crop
-                                )
-                            } ?: Box(
-                                modifier = Modifier.fillMaxSize(),
+                            // Thumbnail image area
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(148.dp)
+                                    .background(MaterialTheme.colorScheme.surfaceVariant),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Text(
+                                viewModel.thumbnails[imageFile]?.let { bitmap ->
+                                    Image(
+                                        bitmap = bitmap,
+                                        contentDescription = imageFile.name,
+                                        modifier = Modifier.fillMaxSize(),
+                                        contentScale = ContentScale.Crop
+                                    )
+                                } ?: Text(
                                     text = stringResource(Res.string.loading),
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
-
-                            // File name overlay
+                            // Nameplate below image
                             Box(
                                 modifier = Modifier
-                                    .align(Alignment.BottomCenter)
                                     .fillMaxWidth()
-                                    .background(Color.Black.copy(alpha = 0.7f))
-                                    .padding(4.dp)
+                                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                                    .padding(horizontal = 10.dp, vertical = 6.dp)
                             ) {
                                 Text(
                                     text = imageFile.nameWithoutExtension,
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = Color.White,
+                                    style = MaterialTheme.typography.labelSmall.copy(
+                                        fontSize = androidx.compose.ui.unit.TextUnit(11.5f, androidx.compose.ui.unit.TextUnitType.Sp),
+                                        fontWeight = if (isSelected) androidx.compose.ui.text.font.FontWeight.SemiBold
+                                                     else androidx.compose.ui.text.font.FontWeight.Medium
+                                    ),
+                                    color = if (isSelected) MaterialTheme.colorScheme.onSurface
+                                            else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.62f),
                                     maxLines = 1,
-                                    modifier = Modifier.align(Alignment.Center)
+                                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                                 )
                             }
                         }
@@ -834,66 +999,3 @@ fun PicturesTab(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-private fun PicturesRecentsRow(
-    items: List<String>,
-    pinned: List<String>,
-    onClear: () -> Unit,
-    onTogglePin: (String) -> Unit,
-    onSelect: (String) -> Unit
-) {
-    val ordered = pinned + items.filter { it !in pinned }
-    if (ordered.isEmpty()) return
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        Text(
-            text = stringResource(Res.string.recent),
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-        )
-        TooltipArea(
-            tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.clear_recents), color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall) } },
-            tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
-        ) {
-            IconButton(onClick = onClear, modifier = Modifier.size(20.dp)) {
-                Icon(
-                    painter = painterResource(Res.drawable.ic_close),
-                    contentDescription = stringResource(Res.string.clear),
-                    modifier = Modifier.size(14.dp),
-                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-                )
-            }
-        }
-        LazyRow(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-            lazyItems(ordered) { path ->
-                val isPinned = path in pinned
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    SuggestionChip(
-                        onClick = { onSelect(path) },
-                        label = {
-                            Text(
-                                text = java.io.File(path).name,
-                                style = MaterialTheme.typography.labelSmall,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                        }
-                    )
-                    IconButton(onClick = { onTogglePin(path) }, modifier = Modifier.size(20.dp)) {
-                        Icon(
-                            painter = painterResource(if (isPinned) Res.drawable.ic_star_filled else Res.drawable.ic_star),
-                            contentDescription = null,
-                            modifier = Modifier.size(12.dp),
-                            tint = if (isPinned) MaterialTheme.colorScheme.primary
-                                   else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
