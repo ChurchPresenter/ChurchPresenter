@@ -11,6 +11,7 @@ import churchpresenter.composeapp.generated.resources.forest_theme
 import churchpresenter.composeapp.generated.resources.light_theme
 import churchpresenter.composeapp.generated.resources.midnight_theme
 import churchpresenter.composeapp.generated.resources.mocha_theme
+import churchpresenter.composeapp.generated.resources.studio_theme
 import churchpresenter.composeapp.generated.resources.ocean_theme
 import churchpresenter.composeapp.generated.resources.rose_theme
 import churchpresenter.composeapp.generated.resources.warm_theme
@@ -198,6 +199,11 @@ fun FrameWindowScope.NavigationTopBar(
                 text = stringResource(Res.string.mocha_theme),
                 selected = currentTheme == ThemeMode.MOCHA,
                 onClick = { theme.invoke(ThemeMode.MOCHA) }
+            )
+            RadioButtonItem(
+                text = stringResource(Res.string.studio_theme),
+                selected = currentTheme == ThemeMode.STUDIO,
+                onClick = { theme.invoke(ThemeMode.STUDIO) }
             )
         }
 

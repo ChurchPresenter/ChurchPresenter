@@ -79,6 +79,7 @@ import churchpresenter.composeapp.generated.resources.forest_theme
 import churchpresenter.composeapp.generated.resources.light_theme
 import churchpresenter.composeapp.generated.resources.midnight_theme
 import churchpresenter.composeapp.generated.resources.mocha_theme
+import churchpresenter.composeapp.generated.resources.studio_theme
 import churchpresenter.composeapp.generated.resources.ocean_theme
 import churchpresenter.composeapp.generated.resources.rose_theme
 import churchpresenter.composeapp.generated.resources.setup_step0_subtitle
@@ -413,6 +414,7 @@ private fun ThemeStep(
         ThemeMode.MIDNIGHT to stringResource(Res.string.midnight_theme),
         ThemeMode.FOREST to stringResource(Res.string.forest_theme),
         ThemeMode.MOCHA  to stringResource(Res.string.mocha_theme),
+        ThemeMode.STUDIO to stringResource(Res.string.studio_theme),
     )
 
     Column(

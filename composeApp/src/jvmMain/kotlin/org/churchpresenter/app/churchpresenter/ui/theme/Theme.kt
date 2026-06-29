@@ -240,17 +240,45 @@ private val RoseColorScheme = lightColorScheme(
     inverseOnSurface = Color.White,
 )
 
-// Dark theme colors — amber accent, deep navy panels (matches Church Presenter studio UI)
+// Dark theme colors — classic neutral dark
 private val DarkColorScheme = darkColorScheme(
-    primary = Color(0xFFC4972A),              // amber accent
-    onPrimary = Color(0xFF141820),            // dark text on amber
-    primaryContainer = Color(0xFF2A1E08),     // dark amber container
+    primary = Color(0xFF90CAF9),
+    onPrimary = Color(0xFF003258),
+    primaryContainer = Color(0xFF004881),
+    onPrimaryContainer = Color(0xFFD1E4FF),
+    secondary = Color(0xFF4DB6AC),
+    onSecondary = Color(0xFF003D36),
+    secondaryContainer = Color(0xFF005B4F),
+    onSecondaryContainer = Color(0xFF70F0DD),
+    tertiary = Color(0xFFE1BEE7),
+    onTertiary = Color(0xFF4A148C),
+    error = Color(0xFFF44336),
+    onError = Color.White,
+    errorContainer = Color(0xFFD32F2F),
+    onErrorContainer = Color.White,
+    background = Color(0xFF10131A),
+    onBackground = Color(0xFFE6E1E5),
+    surface = Color(0xFF1E1E1E),
+    onSurface = Color(0xFFE6E1E5),
+    surfaceVariant = Color(0xFF49454F),
+    onSurfaceVariant = Color(0xFFCAC4D0),
+    outline = Color(0xFF938F99),
+    outlineVariant = Color(0xFF49454F),
+    inverseSurface = Color(0xFF66BB6A),
+    inverseOnSurface = Color.Black,
+)
+
+// Studio dark theme — amber accent, deep navy panels
+private val StudioColorScheme = darkColorScheme(
+    primary = Color(0xFFC4972A),
+    onPrimary = Color(0xFF141820),
+    primaryContainer = Color(0xFF2A1E08),
     onPrimaryContainer = Color(0xFFE8D49A),
-    secondary = Color(0xFF5ABCA8),            // teal
+    secondary = Color(0xFF5ABCA8),
     onSecondary = Color(0xFF003D36),
     secondaryContainer = Color(0xFF004D40),
     onSecondaryContainer = Color(0xFF9ADFD4),
-    tertiary = Color(0xFF4A6FCC),             // blue
+    tertiary = Color(0xFF4A6FCC),
     onTertiary = Color(0xFF001A45),
     tertiaryContainer = Color(0xFF002080),
     onTertiaryContainer = Color(0xFFD6E3FF),
@@ -258,15 +286,15 @@ private val DarkColorScheme = darkColorScheme(
     onError = Color.White,
     errorContainer = Color(0xFFD32F2F),
     onErrorContainer = Color.White,
-    background = Color(0xFF111520),           // root window background
+    background = Color(0xFF111520),
     onBackground = Color(0xFFE8E4D8),
-    surface = Color(0xFF141820),              // main panel surface
+    surface = Color(0xFF141820),
     onSurface = Color(0xFFE8E4D8),
-    surfaceVariant = Color(0xFF182030),       // selected row / card surface
+    surfaceVariant = Color(0xFF182030),
     onSurfaceVariant = Color(0xFFBFBCB0),
     outline = Color(0xFF555868),
     outlineVariant = Color(0xFF252830),
-    inverseSurface = Color(0xFF66BB6A),       // success button background
+    inverseSurface = Color(0xFF66BB6A),
     inverseOnSurface = Color.Black,
 )
 
@@ -370,6 +398,7 @@ fun ChurchPresenterTheme(
         ThemeMode.MIDNIGHT -> MidnightColorScheme
         ThemeMode.FOREST -> ForestColorScheme
         ThemeMode.MOCHA -> MochaColorScheme
+        ThemeMode.STUDIO -> StudioColorScheme
     }
 
     MaterialTheme(

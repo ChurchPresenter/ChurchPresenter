@@ -260,6 +260,7 @@
     <string name="midnight_theme">Midnight Theme</string>
     <string name="forest_theme">Forest Theme</string>
     <string name="mocha_theme">Mocha Theme</string>
+    <string name="studio_theme">Studio Theme</string>
     <!-- Placeholder strings for other tabs -->
     <string name="bible_tab_content">Bible tab content will be implemented</string>
     <string name="text_settings_tab_content">Text Settings and Colors tab content will be implemented</string>
