@@ -30,6 +30,7 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import churchpresenter.composeapp.generated.resources.Res
@@ -42,7 +43,7 @@ import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun NumberSettingsTextField(
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier.width(100.dp),
     label: String = "",
     initialText: Int = 8,
     range: IntRange,
@@ -53,7 +54,6 @@ fun NumberSettingsTextField(
 
     Row(
         modifier = modifier
-            .width(100.dp)
             .height(42.dp)
             .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
             .border(
@@ -73,9 +73,10 @@ fun NumberSettingsTextField(
                     fontSize = 8.sp,
                     lineHeight = 9.sp,
                     fontWeight = FontWeight.SemiBold,
-                    letterSpacing = 0.9.sp,
+                    letterSpacing = 0.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                    maxLines = 1
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
             BasicTextField(

@@ -70,9 +70,10 @@ fun FontSettingsDropdown(
                     fontSize = 8.sp,
                     lineHeight = 9.sp,
                     fontWeight = FontWeight.SemiBold,
-                    letterSpacing = 0.9.sp,
+                    letterSpacing = 0.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                    maxLines = 1
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
