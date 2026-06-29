@@ -19,6 +19,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
 
@@ -26,10 +27,12 @@ import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
 fun ColorPickerField(
     color: String, // Hex color string like "#FFFFFF"
     onColorChange: (String) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    height: Dp = 32.dp
 ) {
     val currentColor = remember(color) { parseHexColor(color) }
     var showDialog by remember { mutableStateOf(false) }
+    val swatchSize = (height.value * 0.6f).dp.coerceAtLeast(16.dp)
 
     if (showDialog) {
         ColorPickerDialog(
@@ -44,9 +47,9 @@ fun ColorPickerField(
 
     Row(
         modifier = modifier
-            .height(32.dp)
+            .height(height)
             .clickable { showDialog = true }
-            .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f), RoundedCornerShape(4.dp))
+            .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f), RoundedCornerShape(8.dp))
             .padding(horizontal = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -54,7 +57,7 @@ fun ColorPickerField(
         // Color preview box
         Box(
             modifier = Modifier
-                .size(24.dp)
+                .size(swatchSize)
                 .background(currentColor, RoundedCornerShape(2.dp))
                 .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(2.dp)),
         )

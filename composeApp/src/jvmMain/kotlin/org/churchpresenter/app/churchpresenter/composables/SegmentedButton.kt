@@ -47,7 +47,7 @@ fun <T> SegmentedButton(
     buttonWidth: Dp = 40.dp,
     buttonHeight: Dp = 40.dp,
     fontSize: TextUnit = 16.sp,
-    contentPadding: PaddingValues = PaddingValues(horizontal = 12.dp, vertical = 0.dp)
+    contentPadding: PaddingValues = PaddingValues(horizontal = 4.dp, vertical = 0.dp)
 ) {
     require(items.isNotEmpty()) { "SegmentedButton requires at least one item" }
 
