@@ -23,16 +23,15 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -64,7 +63,9 @@ import churchpresenter.composeapp.generated.resources.ic_arrow_left
 import churchpresenter.composeapp.generated.resources.ic_arrow_right
 import churchpresenter.composeapp.generated.resources.ic_arrow_up
 import churchpresenter.composeapp.generated.resources.ic_clear_cache
+import churchpresenter.composeapp.generated.resources.ic_close
 import churchpresenter.composeapp.generated.resources.ic_refresh
+import churchpresenter.composeapp.generated.resources.ic_web
 import churchpresenter.composeapp.generated.resources.interactive_mode
 import churchpresenter.composeapp.generated.resources.mirror_mode
 import churchpresenter.composeapp.generated.resources.mobile_view
@@ -248,35 +249,75 @@ fun WebTab(
 
         // Shared composables for URL bar and action buttons
         val urlBar: @Composable RowScope.() -> Unit = {
-            OutlinedTextField(
-                value = urlInput,
-                onValueChange = { urlInput = it },
+            Row(
                 modifier = Modifier
                     .weight(1f)
                     .widthIn(min = minUrlWidth)
-                    .onKeyEvent { event ->
-                        if (event.type == KeyEventType.KeyUp && event.key == Key.Enter) {
-                            val url = normaliseUrl(urlInput)
-                            urlInput = url
-                            liveUrl = url
-                            presenterManager?.setWebsiteUrl(url)
-                            if (isLive) {
-                                presenterManager?.liveBrowser?.value?.loadURL(url)
+                    .height(42.dp)
+                    .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
+                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp)),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    painter = painterResource(Res.drawable.ic_web),
+                    contentDescription = null,
+                    modifier = Modifier.padding(start = 11.dp).size(14.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f)
+                )
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(horizontal = 8.dp)
+                ) {
+                    BasicTextField(
+                        value = urlInput,
+                        onValueChange = { urlInput = it },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .onKeyEvent { event ->
+                                if (event.type == KeyEventType.KeyUp && event.key == Key.Enter) {
+                                    val url = normaliseUrl(urlInput)
+                                    urlInput = url
+                                    liveUrl = url
+                                    presenterManager?.setWebsiteUrl(url)
+                                    if (isLive) {
+                                        presenterManager?.liveBrowser?.value?.loadURL(url)
+                                    }
+                                    true
+                                } else false
+                            },
+                        singleLine = true,
+                        textStyle = MaterialTheme.typography.bodyMedium.copy(
+                            color = MaterialTheme.colorScheme.onSurface
+                        ),
+                        cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                        decorationBox = { innerTextField ->
+                            if (urlInput.isEmpty()) {
+                                Text(
+                                    text = stringResource(Res.string.web_url_hint),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                                    maxLines = 1
+                                )
                             }
-                            true
-                        } else false
-                    },
-                singleLine = true,
-                placeholder = {
-                    Text(
-                        text = stringResource(Res.string.web_url_hint),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
+                            innerTextField()
+                        }
                     )
-                },
-                label = { Text(stringResource(Res.string.web_url_label)) },
-                textStyle = MaterialTheme.typography.bodyMedium
-            )
+                }
+                if (urlInput.isNotEmpty() && urlInput != "https://") {
+                    IconButton(
+                        onClick = { urlInput = "" },
+                        modifier = Modifier.size(30.dp)
+                    ) {
+                        Icon(
+                            painter = painterResource(Res.drawable.ic_close),
+                            contentDescription = null,
+                            modifier = Modifier.size(14.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
         }
 
         val actionButtons: @Composable RowScope.() -> Unit = {
@@ -518,40 +559,62 @@ fun WebTab(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
-                    OutlinedTextField(
-                        value = typeBuffer,
-                        onValueChange = { next ->
-                            val browser = presenterManager?.liveBrowser?.value
-                            if (browser == null) { typeBuffer = next; return@OutlinedTextField }
-                            val old = typeBuffer
-                            val common = commonPrefixLength(old, next)
-                            val toDelete = old.length - common
-                            val toInsert = next.substring(common)
-                            repeat(toDelete) { browser.executeJavaScript(JS_BACKSPACE, "", 0) }
-                            toInsert.forEach { ch -> browser.executeJavaScript(jsInsert(ch), "", 0) }
-                            typeBuffer = next
-                        },
+                    Row(
                         modifier = Modifier
                             .weight(1f)
-                            .onKeyEvent { event ->
-                                if (event.type == KeyEventType.KeyDown && event.key == Key.Enter) {
-                                    presenterManager?.liveBrowser?.value
-                                        ?.executeJavaScript(JS_ENTER, "", 0)
-                                    typeBuffer = ""
-                                    true
-                                } else false
-                            },
-                        singleLine = true,
-                        label = { Text(stringResource(Res.string.web_type_to_page_label)) },
-                        placeholder = {
-                            Text(
-                                text = stringResource(Res.string.web_type_to_page_placeholder),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
+                            .height(42.dp)
+                            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
+                            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp)),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Box(modifier = Modifier.weight(1f).padding(horizontal = 12.dp)) {
+                            BasicTextField(
+                                value = typeBuffer,
+                                onValueChange = { next ->
+                                    val browser = presenterManager?.liveBrowser?.value
+                                    if (browser == null) { typeBuffer = next; return@BasicTextField }
+                                    val old = typeBuffer
+                                    val common = commonPrefixLength(old, next)
+                                    val toDelete = old.length - common
+                                    val toInsert = next.substring(common)
+                                    repeat(toDelete) { browser.executeJavaScript(JS_BACKSPACE, "", 0) }
+                                    toInsert.forEach { ch -> browser.executeJavaScript(jsInsert(ch), "", 0) }
+                                    typeBuffer = next
+                                },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .onKeyEvent { event ->
+                                        if (event.type == KeyEventType.KeyDown && event.key == Key.Enter) {
+                                            presenterManager?.liveBrowser?.value
+                                                ?.executeJavaScript(JS_ENTER, "", 0)
+                                            typeBuffer = ""
+                                            true
+                                        } else false
+                                    },
+                                singleLine = true,
+                                textStyle = MaterialTheme.typography.bodyMedium.copy(
+                                    color = MaterialTheme.colorScheme.onSurface
+                                ),
+                                cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                                decorationBox = { innerTextField ->
+                                    if (typeBuffer.isEmpty()) {
+                                        Text(
+                                            text = stringResource(Res.string.web_type_to_page_placeholder),
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                                            maxLines = 1
+                                        )
+                                    }
+                                    innerTextField()
+                                }
                             )
-                        },
-                        textStyle = MaterialTheme.typography.bodyMedium
-                    )
+                        }
+                        if (typeBuffer.isNotEmpty()) {
+                            IconButton(onClick = { typeBuffer = "" }, modifier = Modifier.size(30.dp)) {
+                                Icon(painter = painterResource(Res.drawable.ic_close), contentDescription = null, modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
+                        }
+                    }
                     TooltipIconButton(
                         painter = painterResource(Res.drawable.ic_cast),
                         text = stringResource(Res.string.web_focus_first_input),
