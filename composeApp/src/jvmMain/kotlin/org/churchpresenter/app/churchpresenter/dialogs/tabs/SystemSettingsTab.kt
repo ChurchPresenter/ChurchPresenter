@@ -45,6 +45,7 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.add_song_samples
+import churchpresenter.composeapp.generated.resources.analytics_reporting
 import churchpresenter.composeapp.generated.resources.bible_storage_directory
 import churchpresenter.composeapp.generated.resources.browse_directory
 import churchpresenter.composeapp.generated.resources.clear_lottie_cache_confirm
@@ -93,6 +94,7 @@ import org.churchpresenter.app.churchpresenter.data.SpsConverter
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser
 import org.churchpresenter.app.churchpresenter.ui.theme.ThemeMode
 import org.churchpresenter.app.churchpresenter.utils.AutoStartManager
+import org.churchpresenter.app.churchpresenter.utils.CrashReporter
 import org.churchpresenter.app.churchpresenter.viewmodel.FileManager
 import org.jetbrains.compose.resources.stringResource
 import java.awt.Window
@@ -449,6 +451,17 @@ fun SystemSettingsTab(
                         val ok = withContext(Dispatchers.IO) { AutoStartManager.setEnabled(enabled) }
                         if (ok) autoStartEnabled = enabled
                     }
+                }
+            )
+        }
+
+        // Analytics / crash reporting opt-out
+        SettingRow(label = stringResource(Res.string.analytics_reporting), width = 260.dp) {
+            Switch(
+                checked = settings.analyticsReportingEnabled,
+                onCheckedChange = { enabled ->
+                    CrashReporter.setReportingEnabled(enabled)
+                    onSettingsChange { s -> s.copy(analyticsReportingEnabled = enabled) }
                 }
             )
         }

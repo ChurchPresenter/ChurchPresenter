@@ -11,6 +11,7 @@ import java.io.PrintWriter
 import java.io.StringWriter
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.util.UUID
 
 /**
  * Global crash reporter that:
@@ -24,6 +25,7 @@ object CrashReporter {
     private val crashDir = File(System.getProperty("user.home"), ".churchpresenter/crash-reports")
     private val runningFile = File(System.getProperty("user.home"), ".churchpresenter/.running")
     private val crashCountFile = File(System.getProperty("user.home"), ".churchpresenter/.crash_count")
+    private val installIdFile = File(System.getProperty("user.home"), ".churchpresenter/.install_id")
     private val timestampFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd_HHmmss")
     private const val MAX_AGE_DAYS = 30L
     private const val CRASH_THRESHOLD = 2 // disable video backgrounds after this many consecutive crashes
@@ -43,14 +45,17 @@ object CrashReporter {
     var videoBackgroundsDisabled: Boolean = false
 
     /**
-     * Install the global uncaught exception handler, initialise Sentry,
-     * and clean up old crash logs.
-     * Call this as the very first line in main().
+     * Install the global uncaught exception handler, initialise Sentry
+     * (unless the user has opted out of analytics reporting), and clean
+     * up old crash logs. Call this as the very first line in main().
      */
-    fun initialize() {
+    fun initialize(analyticsReportingEnabled: Boolean = true) {
         crashDir.mkdirs()
 
-        initSentry()
+        if (analyticsReportingEnabled) {
+            initSentry()
+            setUser(getOrCreateInstallId())
+        }
 
         val defaultHandler = Thread.getDefaultUncaughtExceptionHandler()
         Thread.setDefaultUncaughtExceptionHandler { thread, throwable ->
@@ -110,6 +115,18 @@ object CrashReporter {
         crashCountFile.writeText(count.toString())
     } catch (_: Exception) { }
 
+    /** Anonymous, stable per-install ID used for unique-user counting in Sentry. */
+    private fun getOrCreateInstallId(): String = try {
+        if (installIdFile.exists()) {
+            installIdFile.readText().trim()
+        } else {
+            val id = UUID.randomUUID().toString()
+            installIdFile.parentFile?.mkdirs()
+            installIdFile.writeText(id)
+            id
+        }
+    } catch (_: Exception) { "" }
+
     /** True when Sentry is initialised with a valid DSN. */
     fun isEnabled(): Boolean = try { Sentry.isEnabled() } catch (_: Exception) { false }
 
@@ -118,6 +135,22 @@ object CrashReporter {
         try {
             if (!Sentry.isEnabled()) return
             Sentry.setUser(User().apply { this.id = id })
+        } catch (_: Exception) {}
+    }
+
+    /**
+     * Turns Sentry reporting on/off at runtime, reflecting the user's
+     * analytics-opt-out preference without requiring an app restart.
+     * Local crash log files on disk are unaffected by this setting.
+     */
+    fun setReportingEnabled(enabled: Boolean) {
+        try {
+            if (enabled) {
+                if (!Sentry.isEnabled()) initSentry()
+                setUser(getOrCreateInstallId())
+            } else if (Sentry.isEnabled()) {
+                Sentry.close()
+            }
         } catch (_: Exception) {}
     }
 

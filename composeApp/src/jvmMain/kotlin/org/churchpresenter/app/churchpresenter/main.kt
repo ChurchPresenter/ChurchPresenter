@@ -183,7 +183,8 @@ fun main() {
     }
 
     // Install crash reporting before anything else
-    CrashReporter.initialize()
+    val startupSettings = SettingsManager().loadSettings()
+    CrashReporter.initialize(startupSettings.analyticsReportingEnabled)
 
     LiveMapReporter.pingOnOpen()
 
@@ -206,7 +207,6 @@ fun main() {
     Thread { AutoStartManager.syncRegistration() }.apply { isDaemon = true }.start()
 
     // Set custom VLC path from saved settings before any composable checks isVlcAvailable
-    val startupSettings = SettingsManager().loadSettings()
     vlcCustomPath = startupSettings.projectionSettings.vlcPath
 
     // Pre-render ATEM upload caches for lower thirds in the background so
