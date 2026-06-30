@@ -436,16 +436,14 @@ fun QATab(
                     label = stringResource(Res.string.qa_filter_label),
                     items = filterItemsWithCount,
                     selected = if (selectedFilter < 6) filterItemsWithCount[selectedFilter] else filterItemsWithCount[0],
-                    onSelectedChange = { sel -> selectedFilter = filterItemsWithCount.indexOf(sel).coerceAtLeast(0) },
-                    modifier = Modifier.width(160.dp)
+                    onSelectedChange = { sel -> selectedFilter = filterItemsWithCount.indexOf(sel).coerceAtLeast(0) }
                 )
 
                 DropdownSelector(
                     label = stringResource(Res.string.qa_sort_label),
                     items = sortLabels,
                     selected = sortLabels[sortMode],
-                    onSelectedChange = { sel -> sortMode = sortLabels.indexOf(sel).coerceAtLeast(0) },
-                    modifier = Modifier.width(140.dp)
+                    onSelectedChange = { sel -> sortMode = sortLabels.indexOf(sel).coerceAtLeast(0) }
                 )
 
                 Spacer(Modifier.weight(1f))

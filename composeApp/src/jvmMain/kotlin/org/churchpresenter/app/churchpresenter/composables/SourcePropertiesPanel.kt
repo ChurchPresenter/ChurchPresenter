@@ -731,22 +731,22 @@ private fun ClockProperties(source: SceneSource.ClockSource, onUpdate: (SceneSou
     )
     val clockLabel = stringResource(Res.string.canvas_clock_mode_clock)
     val countdownLabel = stringResource(Res.string.canvas_clock_mode_countdown)
-    DropdownSelector(
-        label = stringResource(Res.string.canvas_clock_mode),
-        items = listOf(clockLabel, countdownLabel),
-        selected = if (source.mode == "countdown") countdownLabel else clockLabel,
-        onSelectedChange = { onUpdate(source.copy(mode = if (it == countdownLabel) "countdown" else "clock")) },
-        modifier = Modifier.fillMaxWidth()
-    )
     val format24hLabel = stringResource(Res.string.canvas_clock_format_24h)
     val format12hLabel = stringResource(Res.string.canvas_clock_format_12h)
-    DropdownSelector(
-        label = stringResource(Res.string.canvas_clock_format),
-        items = listOf(format24hLabel, format12hLabel),
-        selected = if (source.timeFormat == "12h") format12hLabel else format24hLabel,
-        onSelectedChange = { onUpdate(source.copy(timeFormat = if (it == format12hLabel) "12h" else "24h")) },
-        modifier = Modifier.fillMaxWidth()
-    )
+    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+        DropdownSelector(
+            label = stringResource(Res.string.canvas_clock_mode),
+            items = listOf(clockLabel, countdownLabel),
+            selected = if (source.mode == "countdown") countdownLabel else clockLabel,
+            onSelectedChange = { onUpdate(source.copy(mode = if (it == countdownLabel) "countdown" else "clock")) }
+        )
+        DropdownSelector(
+            label = stringResource(Res.string.canvas_clock_format),
+            items = listOf(format24hLabel, format12hLabel),
+            selected = if (source.timeFormat == "12h") format12hLabel else format24hLabel,
+            onSelectedChange = { onUpdate(source.copy(timeFormat = if (it == format12hLabel) "12h" else "24h")) }
+        )
+    }
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
         Checkbox(checked = source.showHours, onCheckedChange = { onUpdate(source.copy(showHours = it)) })
         Text(stringResource(Res.string.canvas_clock_show_hours), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)

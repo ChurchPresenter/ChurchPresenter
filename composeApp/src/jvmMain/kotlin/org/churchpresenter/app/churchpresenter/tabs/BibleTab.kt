@@ -619,7 +619,6 @@ fun BibleTab(
                     )
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                         DropdownSelector(
-                            modifier = Modifier.weight(1f, fill = false).widthIn(max = 160.dp),
                             label = stringResource(Res.string.scope),
                             items = scopeOptions,
                             selected = selectedScope,
@@ -628,7 +627,6 @@ fun BibleTab(
                             }
                         )
                         DropdownSelector(
-                            modifier = Modifier.weight(1f, fill = false).widthIn(max = 160.dp),
                             label = stringResource(Res.string.mode),
                             items = modeOptions,
                             selected = selectedMode,
@@ -661,7 +659,6 @@ fun BibleTab(
                         modifier = Modifier.weight(1f)
                     )
                     DropdownSelector(
-                        modifier = Modifier.width(148.dp),
                         label = stringResource(Res.string.scope),
                         items = scopeOptions,
                         selected = selectedScope,
@@ -670,7 +667,6 @@ fun BibleTab(
                         }
                     )
                     DropdownSelector(
-                        modifier = Modifier.width(160.dp),
                         label = stringResource(Res.string.mode),
                         items = modeOptions,
                         selected = selectedMode,

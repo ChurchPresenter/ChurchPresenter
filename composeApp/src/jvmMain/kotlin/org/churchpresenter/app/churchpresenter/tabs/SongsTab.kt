@@ -621,7 +621,6 @@ fun SongsTab(
 
                 if (songbooks.size > 1) {
                     DropdownSelector(
-                        modifier = Modifier.width(160.dp),
                         label = stringResource(Res.string.song_book),
                         items = songbookOptions,
                         selected = selectedSongbook.ifEmpty { allSongBooksText },
@@ -630,7 +629,6 @@ fun SongsTab(
                 }
 
                 DropdownSelector(
-                    modifier = Modifier.width(160.dp),
                     label = stringResource(Res.string.filter),
                     items = filterTypes,
                     selected = filterTypeDisplayMap[filterType] ?: containsText,
