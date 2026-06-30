@@ -47,9 +47,7 @@ class BibleEngineClient(
     private val httpClient = HttpClient(CIO) {
         install(WebSockets)
         install(HttpTimeout) {
-            requestTimeoutMillis = 10_000
             connectTimeoutMillis = 5_000
-            socketTimeoutMillis = 10_000
         }
     }
 
