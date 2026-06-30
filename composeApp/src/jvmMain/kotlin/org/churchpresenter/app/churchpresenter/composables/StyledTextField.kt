@@ -8,9 +8,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -31,19 +34,27 @@ fun StyledTextField(
     placeholder: String = "",
     enabled: Boolean = true,
     singleLine: Boolean = true,
+    minLines: Int = 1,
+    maxLines: Int = if (singleLine) 1 else Int.MAX_VALUE,
     trailingIcon: @Composable (() -> Unit)? = null,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    keyboardActions: KeyboardActions = KeyboardActions.Default,
 ) {
+    val rowModifier = if (singleLine) {
+        modifier.height(42.dp)
+    } else {
+        modifier.heightIn(min = 42.dp)
+    }
     Row(
-        modifier = modifier
-            .height(42.dp)
+        modifier = rowModifier
             .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
             .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp)),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = if (singleLine) Alignment.CenterVertically else Alignment.Top
     ) {
         Column(
             modifier = Modifier
                 .weight(1f)
-                .padding(start = 11.dp, top = 2.dp, bottom = 0.dp),
+                .padding(start = 11.dp, top = 2.dp, bottom = if (singleLine) 0.dp else 6.dp),
             verticalArrangement = Arrangement.Center
         ) {
             if (label.isNotEmpty()) {
@@ -63,6 +74,10 @@ fun StyledTextField(
                 onValueChange = onValueChange,
                 enabled = enabled,
                 singleLine = singleLine,
+                minLines = minLines,
+                maxLines = maxLines,
+                keyboardOptions = keyboardOptions,
+                keyboardActions = keyboardActions,
                 textStyle = MaterialTheme.typography.bodySmall.copy(
                     fontSize = 12.sp,
                     lineHeight = 13.sp,
@@ -72,7 +87,7 @@ fun StyledTextField(
                 cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
                 modifier = Modifier.fillMaxWidth(),
                 decorationBox = { innerTextField ->
-                    Box(contentAlignment = Alignment.CenterStart) {
+                    Box(contentAlignment = Alignment.TopStart) {
                         if (value.isEmpty() && placeholder.isNotEmpty()) {
                             Text(
                                 text = placeholder,

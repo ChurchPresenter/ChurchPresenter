@@ -408,11 +408,11 @@ fun ChurchPresenterTheme(
         CompositionLocalProvider(
             LocalScrollbarStyle provides ScrollbarStyle(
                 minimalHeight = 16.dp,
-                thickness = 8.dp,
+                thickness = 5.dp,
                 shape = RoundedCornerShape(4.dp),
-                hoverDurationMillis = 300,
-                unhoverColor = colorScheme.onSurface.copy(alpha = 0.3f),
-                hoverColor = colorScheme.onSurface.copy(alpha = 0.5f)
+                hoverDurationMillis = 150,
+                unhoverColor = colorScheme.onSurface.copy(alpha = 0.25f),
+                hoverColor = colorScheme.onSurface.copy(alpha = 0.45f)
             )
         ) {
             content()

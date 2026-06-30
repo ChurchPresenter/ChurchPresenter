@@ -57,6 +57,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.foundation.focusable
@@ -266,15 +268,18 @@ fun CanvasTab(
                     val isRenaming = renamingSceneId == scene.id
                     val sceneAr0 = if (scene.canvasHeight > 0) scene.canvasWidth.toFloat() / scene.canvasHeight else 0f
                     val isMismatched = displayAr0 > 0f && kotlin.math.abs(displayAr0 - sceneAr0) > 0.01f
+                    val sceneAccentColor = MaterialTheme.colorScheme.primary
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .background(
-                                if (isSelected) MaterialTheme.colorScheme.primaryContainer
-                                else Color.Transparent,
-                                shape = RoundedCornerShape(4.dp)
+                                if (isSelected) MaterialTheme.colorScheme.surfaceVariant
+                                else Color.Transparent
                             )
-                            .padding(horizontal = 8.dp, vertical = 4.dp),
+                            .drawBehind {
+                                if (isSelected) drawRect(color = sceneAccentColor, size = Size(4f, size.height))
+                            }
+                            .padding(start = 12.dp, end = 8.dp, top = 4.dp, bottom = 4.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         if (isRenaming) {
@@ -303,8 +308,7 @@ fun CanvasTab(
                             Text(
                                 scene.name,
                                 style = MaterialTheme.typography.bodySmall,
-                                color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer
-                                else MaterialTheme.colorScheme.onSurface,
+                                color = MaterialTheme.colorScheme.onSurface,
                                 modifier = Modifier.weight(1f)
                                     .initialPassCombinedClickable(
                                         onClick = { sceneViewModel.selectScene(scene.id) },
@@ -369,6 +373,7 @@ fun CanvasTab(
                 Button(
                     onClick = { sceneViewModel.addScene() },
                     modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(8.dp),
                     contentPadding = ButtonDefaults.ContentPadding
                 ) {
                     Icon(painterResource(Res.drawable.ic_add), null, modifier = Modifier.size(16.dp))
@@ -392,15 +397,18 @@ fun CanvasTab(
                     // Render in reverse order so top item = front
                     items(currentScene.sources.reversed()) { source ->
                         val isSelected = source.id == selectedSourceId
+                        val sourceAccentColor = MaterialTheme.colorScheme.secondary
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .background(
-                                    if (isSelected) MaterialTheme.colorScheme.secondaryContainer
-                                    else Color.Transparent,
-                                    shape = RoundedCornerShape(4.dp)
+                                    if (isSelected) MaterialTheme.colorScheme.surfaceVariant
+                                    else Color.Transparent
                                 )
-                                .padding(horizontal = 4.dp, vertical = 2.dp),
+                                .drawBehind {
+                                    if (isSelected) drawRect(color = sourceAccentColor, size = Size(4f, size.height))
+                                }
+                                .padding(start = 4.dp, end = 4.dp, top = 2.dp, bottom = 2.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             // Visibility toggle
@@ -448,8 +456,7 @@ fun CanvasTab(
                             Text(
                                 source.name,
                                 style = MaterialTheme.typography.bodySmall,
-                                color = if (isSelected) MaterialTheme.colorScheme.onSecondaryContainer
-                                else MaterialTheme.colorScheme.onSurface,
+                                color = MaterialTheme.colorScheme.onSurface,
                                 modifier = Modifier.weight(1f).alpha(if (source.visible) 1f else 0.5f)
                                     .initialPassClickable { sceneViewModel.selectSource(source.id) }
                             )
@@ -900,6 +907,7 @@ fun CanvasTab(
                                 contentColor = MaterialTheme.colorScheme.onError
                             ),
                             modifier = Modifier.height(28.dp),
+                            shape = RoundedCornerShape(8.dp),
                             contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 12.dp, vertical = 0.dp)
                         ) {
                             Text(stringResource(Res.string.canvas_fix_aspect_ratio), style = MaterialTheme.typography.labelSmall)
@@ -945,7 +953,7 @@ fun CanvasTab(
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Spacer(Modifier.height(8.dp))
-                        Button(onClick = { sceneViewModel.addScene() }) {
+                        Button(onClick = { sceneViewModel.addScene() }, shape = RoundedCornerShape(8.dp)) {
                             Text(stringResource(Res.string.canvas_create_scene))
                         }
                     }
