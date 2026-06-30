@@ -88,7 +88,7 @@ fun DictionarySettingsTab(
                     ColorPickerField(
                         color = ds.wordColor,
                         onColorChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(wordColor = it)) } },
-                        label = stringResource(Res.string.color),
+                        label = stringResource(Res.string.color).removeSuffix(":"),
                         modifier = Modifier.widthIn(max = 150.dp)
                     )
                     TextStyleButtons(
@@ -119,13 +119,13 @@ fun DictionarySettingsTab(
                 ) {
                     FontSettingsDropdown(
                         modifier = Modifier,
-                        label = stringResource(Res.string.font_type),
+                        label = stringResource(Res.string.font_type).removeSuffix(":"),
                         value = ds.wordFontType,
                         fonts = availableFonts,
                         onValueChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(wordFontType = it)) } }
                     )
                     NumberSettingsTextField(
-                        label = stringResource(Res.string.font_size),
+                        label = stringResource(Res.string.font_size).removeSuffix(":"),
                         initialText = ds.wordFontSize,
                         range = 8..200,
                         onValueChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(wordFontSize = it)) } }
@@ -151,11 +151,11 @@ fun DictionarySettingsTab(
                     ColorPickerField(
                         color = ds.definitionColor,
                         onColorChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(definitionColor = it)) } },
-                        label = stringResource(Res.string.color),
+                        label = stringResource(Res.string.color).removeSuffix(":"),
                         modifier = Modifier.widthIn(max = 150.dp)
                     )
                     NumberSettingsTextField(
-                        label = stringResource(Res.string.font_size),
+                        label = stringResource(Res.string.font_size).removeSuffix(":"),
                         initialText = ds.definitionFontSize,
                         range = 8..120,
                         onValueChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(definitionFontSize = it)) } }
@@ -168,8 +168,8 @@ fun DictionarySettingsTab(
                 ColorPickerField(
                     color = ds.cardBackgroundColor,
                     onColorChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(cardBackgroundColor = it)) } },
-                    label = stringResource(Res.string.color),
-                    modifier = Modifier.fillMaxWidth()
+                    label = stringResource(Res.string.color).removeSuffix(":"),
+                    modifier = Modifier.widthIn(max = 150.dp)
                 )
                 SettingRow(stringResource(Res.string.dictionary_settings_opacity)) {
                     Row(
@@ -215,7 +215,7 @@ fun DictionarySettingsTab(
                         ColorPickerField(
                             color = ds.referenceColor,
                             onColorChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(referenceColor = it)) } },
-                            label = stringResource(Res.string.color),
+                            label = stringResource(Res.string.color).removeSuffix(":"),
                             modifier = Modifier.widthIn(max = 150.dp)
                         )
                         TextStyleButtons(
@@ -246,13 +246,13 @@ fun DictionarySettingsTab(
                     ) {
                         FontSettingsDropdown(
                             modifier = Modifier,
-                            label = stringResource(Res.string.font_type),
+                            label = stringResource(Res.string.font_type).removeSuffix(":"),
                             value = ds.referenceFontType,
                             fonts = availableFonts,
                             onValueChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(referenceFontType = it)) } }
                         )
                         NumberSettingsTextField(
-                            label = stringResource(Res.string.font_size),
+                            label = stringResource(Res.string.font_size).removeSuffix(":"),
                             initialText = ds.referenceFontSize,
                             range = 8..120,
                             onValueChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(referenceFontSize = it)) } }
@@ -277,11 +277,11 @@ fun DictionarySettingsTab(
                         ColorPickerField(
                             color = ds.kjvUsageColor,
                             onColorChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(kjvUsageColor = it)) } },
-                            label = stringResource(Res.string.color),
+                            label = stringResource(Res.string.color).removeSuffix(":"),
                             modifier = Modifier.widthIn(max = 150.dp)
                         )
                         NumberSettingsTextField(
-                            label = stringResource(Res.string.font_size),
+                            label = stringResource(Res.string.font_size).removeSuffix(":"),
                             initialText = ds.kjvUsageFontSize,
                             range = 8..80,
                             onValueChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(kjvUsageFontSize = it)) } }
@@ -304,7 +304,7 @@ fun DictionarySettingsTab(
                         )
                     }
 
-                    SettingRow(stringResource(Res.string.transition_duration)) {
+                    SettingRow(stringResource(Res.string.transition_duration).removeSuffix(":")) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
