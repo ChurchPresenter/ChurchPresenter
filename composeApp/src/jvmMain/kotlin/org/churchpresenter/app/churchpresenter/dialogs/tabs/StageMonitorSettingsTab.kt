@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.Switch
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -41,6 +42,7 @@ import churchpresenter.composeapp.generated.resources.stage_monitor_quadrant_not
 import churchpresenter.composeapp.generated.resources.stage_monitor_quadrant_timer
 import churchpresenter.composeapp.generated.resources.stage_monitor_show_clock
 import churchpresenter.composeapp.generated.resources.stage_monitor_show_label
+import churchpresenter.composeapp.generated.resources.shadow_settings
 import churchpresenter.composeapp.generated.resources.stage_monitor_show_timer
 import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
 import org.churchpresenter.app.churchpresenter.composables.FontSettingsDropdown
@@ -106,19 +108,13 @@ fun StageMonitorSettingsTab(
                     onShadowSizeChange = { update { copy(currentShadowSize = it) } },
                     onShadowOpacityChange = { update { copy(currentShadowOpacity = it) } }
                 )
-                SettingRow(stringResource(Res.string.vertical_alignment)) {
-                    VerticalAlignmentButtons(
-                        selectedAlignment = sm.currentVerticalAlignment,
-                        onAlignmentChange = { update { copy(currentVerticalAlignment = it) } },
-                        topValue = Constants.TOP, middleValue = Constants.MIDDLE, bottomValue = Constants.BOTTOM
-                    )
+                Row(modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(stringResource(Res.string.vertical_alignment), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
+                    VerticalAlignmentButtons(selectedAlignment = sm.currentVerticalAlignment, onAlignmentChange = { update { copy(currentVerticalAlignment = it) } }, topValue = Constants.TOP, middleValue = Constants.MIDDLE, bottomValue = Constants.BOTTOM)
                 }
-                SettingRow(stringResource(Res.string.horizontal_alignment)) {
-                    HorizontalAlignmentButtons(
-                        selectedAlignment = sm.currentHorizontalAlignment,
-                        onAlignmentChange = { update { copy(currentHorizontalAlignment = it) } },
-                        leftValue = Constants.LEFT, centerValue = Constants.CENTER, rightValue = Constants.RIGHT
-                    )
+                Row(modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(stringResource(Res.string.horizontal_alignment), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
+                    HorizontalAlignmentButtons(selectedAlignment = sm.currentHorizontalAlignment, onAlignmentChange = { update { copy(currentHorizontalAlignment = it) } }, leftValue = Constants.LEFT, centerValue = Constants.CENTER, rightValue = Constants.RIGHT)
                 }
 
             }
@@ -143,41 +139,68 @@ fun StageMonitorSettingsTab(
                     onShadowSizeChange = { update { copy(nextShadowSize = it) } },
                     onShadowOpacityChange = { update { copy(nextShadowOpacity = it) } }
                 )
-                SettingRow(stringResource(Res.string.vertical_alignment)) {
-                    VerticalAlignmentButtons(
-                        selectedAlignment = sm.nextVerticalAlignment,
-                        onAlignmentChange = { update { copy(nextVerticalAlignment = it) } },
-                        topValue = Constants.TOP, middleValue = Constants.MIDDLE, bottomValue = Constants.BOTTOM
-                    )
+                Row(modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(stringResource(Res.string.vertical_alignment), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
+                    VerticalAlignmentButtons(selectedAlignment = sm.nextVerticalAlignment, onAlignmentChange = { update { copy(nextVerticalAlignment = it) } }, topValue = Constants.TOP, middleValue = Constants.MIDDLE, bottomValue = Constants.BOTTOM)
                 }
-                SettingRow(stringResource(Res.string.horizontal_alignment)) {
-                    HorizontalAlignmentButtons(
-                        selectedAlignment = sm.nextHorizontalAlignment,
-                        onAlignmentChange = { update { copy(nextHorizontalAlignment = it) } },
-                        leftValue = Constants.LEFT, centerValue = Constants.CENTER, rightValue = Constants.RIGHT
-                    )
+                Row(modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(stringResource(Res.string.horizontal_alignment), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
+                    HorizontalAlignmentButtons(selectedAlignment = sm.nextHorizontalAlignment, onAlignmentChange = { update { copy(nextHorizontalAlignment = it) } }, leftValue = Constants.LEFT, centerValue = Constants.CENTER, rightValue = Constants.RIGHT)
                 }
             }
+                // Song/Bible Label Style card
+                SettingsSection(title = stringResource(Res.string.stage_monitor_label_style_section)) {
+                    SettingRow(stringResource(Res.string.stage_monitor_show_label)) {
+                        Switch(checked = sm.showSongBibleLabel, onCheckedChange = { update { copy(showSongBibleLabel = it) } })
+                    }
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        FontSettingsDropdown(
+                            label = stringResource(Res.string.font_type).removeSuffix(":"),
+                            value = sm.labelFontType,
+                            fonts = availableFonts,
+                            onValueChange = { update { copy(labelFontType = it) } }
+                        )
+                        NumberSettingsTextField(
+                            label = stringResource(Res.string.font_size).removeSuffix(":"),
+                            initialText = sm.labelFontSize,
+                            onValueChange = { update { copy(labelFontSize = it) } },
+                            range = 8..100
+                        )
+                        ColorPickerField(
+                            color = sm.labelColor,
+                            onColorChange = { update { copy(labelColor = it) } },
+                            label = stringResource(Res.string.color).removeSuffix(":"),
+                            modifier = Modifier.widthIn(max = 150.dp)
+                        )
+                    }
+                    SettingRow(stringResource(Res.string.style)) {
+                        TextStyleButtons(
+                            bold = sm.labelBold,
+                            italic = sm.labelItalic,
+                            underline = false,
+                            shadow = false,
+                            onBoldChange = { update { copy(labelBold = it) } },
+                            onItalicChange = { update { copy(labelItalic = it) } },
+                            onUnderlineChange = {},
+                            onShadowChange = {}
+                        )
+                    }
+                }
             } // end left column
 
-            // ── Right column: Timer + Clock + Notes + Label ──────────────────────
+            // ── Right column: Timer + Clock + Notes ──────────────────────────────
             Column(
                 modifier = Modifier.weight(1f).widthIn(min = 320.dp, max = 480.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 // Timer card
                 SettingsSection(title = stringResource(Res.string.stage_monitor_quadrant_timer)) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Checkbox(
-                            checked = sm.showTimer,
-                            onCheckedChange = { update { copy(showTimer = it) } },
-                            modifier = Modifier.size(24.dp)
-                        )
-                        Text(
-                            text = stringResource(Res.string.stage_monitor_show_timer),
-                            style = MaterialTheme.typography.bodySmall,
-                            modifier = Modifier.padding(start = 4.dp)
-                        )
+                    SettingRow(stringResource(Res.string.stage_monitor_show_timer)) {
+                        Switch(checked = sm.showTimer, onCheckedChange = { update { copy(showTimer = it) } })
                     }
                     QuadrantFontSettings(
                         fontType = sm.timerFontType, fontSize = sm.timerFontSize,
@@ -202,17 +225,8 @@ fun StageMonitorSettingsTab(
 
                 // Clock card
                 SettingsSection(title = stringResource(Res.string.stage_monitor_quadrant_clock)) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Checkbox(
-                            checked = sm.showClock,
-                            onCheckedChange = { update { copy(showClock = it) } },
-                            modifier = Modifier.size(24.dp)
-                        )
-                        Text(
-                            text = stringResource(Res.string.stage_monitor_show_clock),
-                            style = MaterialTheme.typography.bodySmall,
-                            modifier = Modifier.padding(start = 4.dp)
-                        )
+                    SettingRow(stringResource(Res.string.stage_monitor_show_clock)) {
+                        Switch(checked = sm.showClock, onCheckedChange = { update { copy(showClock = it) } })
                     }
                     QuadrantFontSettings(
                         fontType = sm.clockFontType, fontSize = sm.clockFontSize,
@@ -294,53 +308,6 @@ fun StageMonitorSettingsTab(
                     )
                 }
 
-                // Song/Bible Label Style card
-                SettingsSection(title = stringResource(Res.string.stage_monitor_label_style_section)) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Checkbox(
-                            checked = sm.showSongBibleLabel,
-                            onCheckedChange = { update { copy(showSongBibleLabel = it) } },
-                            modifier = Modifier.size(24.dp)
-                        )
-                        Text(
-                            text = stringResource(Res.string.stage_monitor_show_label),
-                            style = MaterialTheme.typography.bodySmall,
-                            modifier = Modifier.padding(start = 4.dp)
-                        )
-                    }
-                    SettingRow(stringResource(Res.string.font_type)) {
-                        FontSettingsDropdown(
-                            value = sm.labelFontType,
-                            fonts = availableFonts,
-                            onValueChange = { update { copy(labelFontType = it) } }
-                        )
-                    }
-                    SettingRow(stringResource(Res.string.font_size)) {
-                        NumberSettingsTextField(
-                            initialText = sm.labelFontSize,
-                            onValueChange = { update { copy(labelFontSize = it) } },
-                            range = 8..100
-                        )
-                    }
-                    SettingRow(stringResource(Res.string.color)) {
-                        ColorPickerField(
-                            color = sm.labelColor,
-                            onColorChange = { update { copy(labelColor = it) } }
-                        )
-                    }
-                    SettingRow(stringResource(Res.string.style)) {
-                        TextStyleButtons(
-                            bold = sm.labelBold,
-                            italic = sm.labelItalic,
-                            underline = false,
-                            shadow = false,
-                            onBoldChange = { update { copy(labelBold = it) } },
-                            onItalicChange = { update { copy(labelItalic = it) } },
-                            onUnderlineChange = {},
-                            onShadowChange = {}
-                        )
-                    }
-                }
             }
         }
     }
@@ -365,17 +332,35 @@ private fun QuadrantFontSettings(
     onShadowSizeChange: (Int) -> Unit,
     onShadowOpacityChange: (Int) -> Unit
 ) {
-    SettingRow(stringResource(Res.string.font_type)) {
-        FontSettingsDropdown(value = fontType, fonts = availableFonts, onValueChange = onFontTypeChange)
-    }
-    SettingRow(stringResource(Res.string.font_size)) {
-        NumberSettingsTextField(initialText = fontSize, onValueChange = onFontSizeChange, range = 8..300)
-    }
-    SettingRow(stringResource(Res.string.color)) {
-        ColorPickerField(color = color, onColorChange = onColorChange)
-    }
-    SettingRow(stringResource(Res.string.background_color)) {
-        ColorPickerField(color = bgColor, onColorChange = onBgColorChange)
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        FontSettingsDropdown(
+            label = stringResource(Res.string.font_type).removeSuffix(":"),
+            value = fontType,
+            fonts = availableFonts,
+            onValueChange = onFontTypeChange
+        )
+        NumberSettingsTextField(
+            label = stringResource(Res.string.font_size).removeSuffix(":"),
+            initialText = fontSize,
+            onValueChange = onFontSizeChange,
+            range = 8..300
+        )
+        ColorPickerField(
+            color = color,
+            onColorChange = onColorChange,
+            label = stringResource(Res.string.color).removeSuffix(":"),
+            modifier = Modifier.widthIn(max = 150.dp)
+        )
+        ColorPickerField(
+            color = bgColor,
+            onColorChange = onBgColorChange,
+            label = stringResource(Res.string.background_color).removeSuffix(":"),
+            modifier = Modifier.widthIn(max = 150.dp)
+        )
     }
     SettingRow(stringResource(Res.string.style)) {
         TextStyleButtons(
@@ -385,10 +370,12 @@ private fun QuadrantFontSettings(
         )
     }
     if (shadow) {
-        ShadowDetailRow(
-            shadowColor = shadowColor, shadowSize = shadowSize, shadowOpacity = shadowOpacity,
-            onColorChange = onShadowColorChange, onSizeChange = onShadowSizeChange, onOpacityChange = onShadowOpacityChange
-        )
+        SettingRow(stringResource(Res.string.shadow_settings)) {
+            ShadowDetailRow(
+                shadowColor = shadowColor, shadowSize = shadowSize, shadowOpacity = shadowOpacity,
+                onColorChange = onShadowColorChange, onSizeChange = onShadowSizeChange, onOpacityChange = onShadowOpacityChange
+            )
+        }
     }
 }
 

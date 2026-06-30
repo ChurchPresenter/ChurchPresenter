@@ -56,20 +56,20 @@ fun HorizontalAlignmentButtons(
 ) {
     val iconSize = (buttonSize.value * 0.7f).dp.coerceIn(14.dp, 20.dp)
     Row {
-        // Left align button
+        // Right align button (first)
         TooltipArea(
-            tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.align_left), color = MaterialTheme.colorScheme.inverseOnSurface, style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) } },
+            tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.align_right), color = MaterialTheme.colorScheme.inverseOnSurface, style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) } },
             tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
         ) {
             OutlinedButton(
-                onClick = { onAlignmentChange(leftValue) },
+                onClick = { onAlignmentChange(rightValue) },
                 modifier = Modifier.size(buttonSize),
                 shape = RoundedCornerShape(topStart = cornerRadius, bottomStart = cornerRadius, topEnd = 0.dp, bottomEnd = 0.dp),
-                border = BorderStroke(1.dp, if (selectedAlignment == leftValue) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline),
-                colors = ButtonDefaults.outlinedButtonColors(containerColor = if (selectedAlignment == leftValue) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface, contentColor = MaterialTheme.colorScheme.onSurface),
+                border = BorderStroke(1.dp, if (selectedAlignment == rightValue) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline),
+                colors = ButtonDefaults.outlinedButtonColors(containerColor = if (selectedAlignment == rightValue) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface, contentColor = MaterialTheme.colorScheme.onSurface),
                 contentPadding = PaddingValues(0.dp)
             ) {
-                Image(painter = painterResource(Res.drawable.ic_align_left), contentDescription = null, modifier = Modifier.size(iconSize), colorFilter = ColorFilter.tint(if (selectedAlignment == leftValue) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface))
+                Image(painter = painterResource(Res.drawable.ic_align_right), contentDescription = null, modifier = Modifier.size(iconSize), colorFilter = ColorFilter.tint(if (selectedAlignment == rightValue) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface))
             }
         }
 
@@ -90,20 +90,20 @@ fun HorizontalAlignmentButtons(
             }
         }
 
-        // Right align button
+        // Left align button (last)
         TooltipArea(
-            tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.align_right), color = MaterialTheme.colorScheme.inverseOnSurface, style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) } },
+            tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.align_left), color = MaterialTheme.colorScheme.inverseOnSurface, style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) } },
             tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
         ) {
             OutlinedButton(
-                onClick = { onAlignmentChange(rightValue) },
+                onClick = { onAlignmentChange(leftValue) },
                 modifier = Modifier.size(buttonSize),
                 shape = RoundedCornerShape(topStart = 0.dp, bottomStart = 0.dp, topEnd = cornerRadius, bottomEnd = cornerRadius),
-                border = BorderStroke(1.dp, if (selectedAlignment == rightValue) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline),
-                colors = ButtonDefaults.outlinedButtonColors(containerColor = if (selectedAlignment == rightValue) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface, contentColor = MaterialTheme.colorScheme.onSurface),
+                border = BorderStroke(1.dp, if (selectedAlignment == leftValue) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline),
+                colors = ButtonDefaults.outlinedButtonColors(containerColor = if (selectedAlignment == leftValue) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface, contentColor = MaterialTheme.colorScheme.onSurface),
                 contentPadding = PaddingValues(0.dp)
             ) {
-                Image(painter = painterResource(Res.drawable.ic_align_right), contentDescription = null, modifier = Modifier.size(iconSize), colorFilter = ColorFilter.tint(if (selectedAlignment == rightValue) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface))
+                Image(painter = painterResource(Res.drawable.ic_align_left), contentDescription = null, modifier = Modifier.size(iconSize), colorFilter = ColorFilter.tint(if (selectedAlignment == leftValue) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface))
             }
         }
     }
@@ -126,18 +126,18 @@ fun VerticalAlignmentButtons(
     val iconSize = (buttonSize.value * 0.7f).dp.coerceIn(14.dp, 20.dp)
     Row {
         TooltipArea(
-            tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.align_top), color = MaterialTheme.colorScheme.inverseOnSurface, style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) } },
+            tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.align_bottom), color = MaterialTheme.colorScheme.inverseOnSurface, style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) } },
             tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
         ) {
             OutlinedButton(
-                onClick = { onAlignmentChange(topValue) },
+                onClick = { onAlignmentChange(bottomValue) },
                 modifier = Modifier.size(buttonSize),
                 shape = RoundedCornerShape(topStart = cornerRadius, bottomStart = cornerRadius, topEnd = 0.dp, bottomEnd = 0.dp),
-                border = BorderStroke(1.dp, if (selectedAlignment == topValue) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline),
-                colors = ButtonDefaults.outlinedButtonColors(containerColor = if (selectedAlignment == topValue) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface, contentColor = MaterialTheme.colorScheme.onSurface),
+                border = BorderStroke(1.dp, if (selectedAlignment == bottomValue) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline),
+                colors = ButtonDefaults.outlinedButtonColors(containerColor = if (selectedAlignment == bottomValue) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface, contentColor = MaterialTheme.colorScheme.onSurface),
                 contentPadding = PaddingValues(0.dp)
             ) {
-                Image(painter = painterResource(Res.drawable.ic_align_top), contentDescription = stringResource(Res.string.align_top), modifier = Modifier.size(iconSize), colorFilter = ColorFilter.tint(if (selectedAlignment == topValue) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface))
+                Image(painter = painterResource(Res.drawable.ic_align_bottom), contentDescription = stringResource(Res.string.align_bottom), modifier = Modifier.size(iconSize), colorFilter = ColorFilter.tint(if (selectedAlignment == bottomValue) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface))
             }
         }
         TooltipArea(
@@ -156,18 +156,18 @@ fun VerticalAlignmentButtons(
             }
         }
         TooltipArea(
-            tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.align_bottom), color = MaterialTheme.colorScheme.inverseOnSurface, style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) } },
+            tooltip = { Surface(color = MaterialTheme.colorScheme.inverseSurface, shape = MaterialTheme.shapes.extraSmall, tonalElevation = 4.dp) { Text(stringResource(Res.string.align_top), color = MaterialTheme.colorScheme.inverseOnSurface, style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) } },
             tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
         ) {
             OutlinedButton(
-                onClick = { onAlignmentChange(bottomValue) },
+                onClick = { onAlignmentChange(topValue) },
                 modifier = Modifier.size(buttonSize),
                 shape = RoundedCornerShape(topStart = 0.dp, bottomStart = 0.dp, topEnd = cornerRadius, bottomEnd = cornerRadius),
-                border = BorderStroke(1.dp, if (selectedAlignment == bottomValue) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline),
-                colors = ButtonDefaults.outlinedButtonColors(containerColor = if (selectedAlignment == bottomValue) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface, contentColor = MaterialTheme.colorScheme.onSurface),
+                border = BorderStroke(1.dp, if (selectedAlignment == topValue) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline),
+                colors = ButtonDefaults.outlinedButtonColors(containerColor = if (selectedAlignment == topValue) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface, contentColor = MaterialTheme.colorScheme.onSurface),
                 contentPadding = PaddingValues(0.dp)
             ) {
-                Image(painter = painterResource(Res.drawable.ic_align_bottom), contentDescription = stringResource(Res.string.align_bottom), modifier = Modifier.size(iconSize), colorFilter = ColorFilter.tint(if (selectedAlignment == bottomValue) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface))
+                Image(painter = painterResource(Res.drawable.ic_align_top), contentDescription = stringResource(Res.string.align_top), modifier = Modifier.size(iconSize), colorFilter = ColorFilter.tint(if (selectedAlignment == topValue) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface))
             }
         }
     }

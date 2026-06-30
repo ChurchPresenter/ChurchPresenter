@@ -80,6 +80,7 @@ fun SettingRow(
             text = label,
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
+            maxLines = 1,
             modifier = Modifier.width(width)
         )
         Box(modifier = Modifier.weight(1f)) {

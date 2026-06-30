@@ -7,6 +7,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.IconButton
@@ -46,6 +48,7 @@ import org.jetbrains.compose.resources.stringResource
 fun NumberSettingsTextField(
     modifier: Modifier = Modifier.width(100.dp),
     label: String = "",
+    wrapContent: Boolean = false,
     initialText: Int = 8,
     range: IntRange,
     onValueChange: (Int) -> Unit,
@@ -54,7 +57,7 @@ fun NumberSettingsTextField(
     var isError by remember { mutableStateOf(false) }
 
     Row(
-        modifier = modifier
+        modifier = (if (wrapContent) Modifier.widthIn(min = 60.dp).width(IntrinsicSize.Max) else modifier)
             .height(42.dp)
             .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(6.dp))
             .border(
@@ -65,7 +68,8 @@ fun NumberSettingsTextField(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column(
-            modifier = Modifier.weight(1f).padding(start = 11.dp, top = 2.dp, bottom = 0.dp),
+            modifier = (if (wrapContent) Modifier else Modifier.weight(1f))
+                .padding(start = 11.dp, top = 2.dp, bottom = 0.dp),
             verticalArrangement = Arrangement.Center
         ) {
             if (label.isNotEmpty()) {
