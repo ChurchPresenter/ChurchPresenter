@@ -41,6 +41,22 @@ class LowerThirdOffscreenRenderer(
     }
 
     /**
+     * Pre-renders [frameCount] evenly-spaced frames (progress 0f..1f) and returns them as
+     * ARGB [IntArray]s (each of size width*height). Each frame is a defensive copy of the
+     * shared internal buffer — all frames are safe to retain simultaneously.
+     */
+    suspend fun renderAllFrames(lottieJson: String, frameCount: Int): List<IntArray> {
+        val frames = ArrayList<IntArray>(frameCount)
+        withSession(lottieJson, initialProgress = 0f) { renderFrame ->
+            for (i in 0 until frameCount) {
+                val progress = i.toFloat() / (frameCount - 1).coerceAtLeast(1)
+                frames.add(renderFrame(progress).copyOf())
+            }
+        }
+        return frames
+    }
+
+    /**
      * Renders the Lottie animation at a single progress value (0f..1f).
      *
      * @param lottieJson  raw JSON string of the Lottie animation

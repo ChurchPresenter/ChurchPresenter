@@ -1628,6 +1628,9 @@ private fun PresenterWindows(
     val lottiePauseDurationMs by presenterManager.lottiePauseDurationMs
     val lottieTrigger by presenterManager.lottieTrigger
     val lottieProgress by presenterManager.lottieProgress
+    val lottieRawFrames by presenterManager.lottieRawFrames
+    val lottieRawFrameSize by presenterManager.lottieRawFrameSize
+    val lottieCurrentFrameIndex by presenterManager.lottieCurrentFrameIndex
     val mediaTransitionAlpha by presenterManager.mediaTransitionAlpha
     val websiteUrl by presenterManager.websiteUrl
     val activeScene by presenterManager.activeScene
@@ -1868,42 +1871,62 @@ private fun PresenterWindows(
         LottieCompositionSpec.JsonString(lottieJsonContent)
     }
     LaunchedEffect(lottieComposition, lottiePauseAtFrame, lottiePauseFrame, lottiePauseDurationMs, lottieTrigger) {
-        val comp = lottieComposition ?: return@LaunchedEffect
-        val totalDurMs = ((comp.durationFrames / comp.frameRate) * 1000f).toLong().coerceAtLeast(1L)
-        val hasPause = lottiePauseAtFrame && lottiePauseFrame in 0f..1f
+        // Snapshot pre-rendered frames at trigger time — intentionally NOT a key so the
+        // effect does not restart when pre-rendering finishes mid-animation.
+        val frames = presenterManager.lottieRawFrames.value
 
-        presenterManager.setLottieProgress(0f)
+        if (frames != null) {
+            // Pre-rendered path: advance frame index at PRERENDER_FPS
+            val hasPause = lottiePauseAtFrame && lottiePauseFrame in 0f..1f
+            val pauseIdx = if (hasPause)
+                (frames.size * lottiePauseFrame).toInt().coerceIn(0, frames.size - 1) else -1
 
-        if (hasPause) {
-            val toPauseDur = (totalDurMs * lottiePauseFrame).toInt().coerceAtLeast(1)
-            val anim = Animatable(0f)
-            anim.animateTo(
-                targetValue = lottiePauseFrame,
-                animationSpec = tween(
-                    durationMillis = toPauseDur,
-                    easing = LinearEasing
-                )
-            ) { presenterManager.setLottieProgress(value) }
-            if (lottiePauseDurationMs > 0) {
-                delay(lottiePauseDurationMs)
-                val remainDur = (totalDurMs * (1f - lottiePauseFrame)).toInt().coerceAtLeast(1)
+            presenterManager.setLottieCurrentFrameIndex(0)
+            for (i in frames.indices) {
+                presenterManager.setLottieCurrentFrameIndex(i)
+                if (i == pauseIdx) delay(lottiePauseDurationMs)
+                delay(1000L / PresenterManager.PRERENDER_FPS)
+            }
+            presenterManager.setLottieCurrentFrameIndex(frames.size - 1)
+        } else {
+            // Compottie fallback — used while pre-rendering is in progress
+            val comp = lottieComposition ?: return@LaunchedEffect
+            val totalDurMs = ((comp.durationFrames / comp.frameRate) * 1000f).toLong().coerceAtLeast(1L)
+            val hasPause = lottiePauseAtFrame && lottiePauseFrame in 0f..1f
+
+            presenterManager.setLottieProgress(0f)
+
+            if (hasPause) {
+                val toPauseDur = (totalDurMs * lottiePauseFrame).toInt().coerceAtLeast(1)
+                val anim = Animatable(0f)
+                anim.animateTo(
+                    targetValue = lottiePauseFrame,
+                    animationSpec = tween(
+                        durationMillis = toPauseDur,
+                        easing = LinearEasing
+                    )
+                ) { presenterManager.setLottieProgress(value) }
+                if (lottiePauseDurationMs > 0) {
+                    delay(lottiePauseDurationMs)
+                    val remainDur = (totalDurMs * (1f - lottiePauseFrame)).toInt().coerceAtLeast(1)
+                    anim.animateTo(
+                        targetValue = 1f,
+                        animationSpec = tween(
+                            durationMillis = remainDur,
+                            easing = LinearEasing
+                        )
+                    ) { presenterManager.setLottieProgress(value) }
+                }
+            } else {
+                val anim = Animatable(0f)
                 anim.animateTo(
                     targetValue = 1f,
                     animationSpec = tween(
-                        durationMillis = remainDur,
+                        durationMillis = totalDurMs.toInt(),
                         easing = LinearEasing
                     )
                 ) { presenterManager.setLottieProgress(value) }
             }
-        } else {
-            val anim = Animatable(0f)
-            anim.animateTo(
-                targetValue = 1f,
-                animationSpec = tween(
-                    durationMillis = totalDurMs.toInt(),
-                    easing = LinearEasing
-                )
-            ) { presenterManager.setLottieProgress(value) }
         }
         presenterManager.requestClearDisplay()
     }
@@ -2005,7 +2028,11 @@ private fun PresenterWindows(
                                 LowerThirdPresenter(
                                     composition = lottieComposition,
                                     progress = { presenterManager.lottieProgress.value },
-                                    appSettings = appSettings
+                                    appSettings = appSettings,
+                                    rawFrames = lottieRawFrames,
+                                    currentFrameIndex = lottieCurrentFrameIndex,
+                                    frameWidth = lottieRawFrameSize?.first ?: 1920,
+                                    frameHeight = lottieRawFrameSize?.second ?: 1080
                                 )
 
                         Presenting.ANNOUNCEMENTS ->
@@ -2160,7 +2187,11 @@ private fun PresenterWindows(
                                     composition = lottieComposition,
                                     progress = { presenterManager.lottieProgress.value },
                                     appSettings = appSettings,
-                                    outputRole = Constants.OUTPUT_ROLE_KEY
+                                    outputRole = Constants.OUTPUT_ROLE_KEY,
+                                    rawFrames = lottieRawFrames,
+                                    currentFrameIndex = lottieCurrentFrameIndex,
+                                    frameWidth = lottieRawFrameSize?.first ?: 1920,
+                                    frameHeight = lottieRawFrameSize?.second ?: 1080
                                 )
 
                         Presenting.ANNOUNCEMENTS ->
@@ -2596,7 +2627,11 @@ private fun PresenterWindows(
                                     LowerThirdPresenter(
                                         composition = lottieComposition,
                                         progress = { presenterManager.lottieProgress.value },
-                                        appSettings = appSettings
+                                        appSettings = appSettings,
+                                        rawFrames = lottieRawFrames,
+                                        currentFrameIndex = lottieCurrentFrameIndex,
+                                        frameWidth = lottieRawFrameSize?.first ?: 1920,
+                                        frameHeight = lottieRawFrameSize?.second ?: 1080
                                     )
 
                             Presenting.ANNOUNCEMENTS ->
@@ -2819,7 +2854,11 @@ private fun PresenterWindows(
                                                 composition = lottieComposition,
                                                 progress = { presenterManager.lottieProgress.value },
                                                 appSettings = appSettings,
-                                                outputRole = Constants.OUTPUT_ROLE_KEY
+                                                outputRole = Constants.OUTPUT_ROLE_KEY,
+                                                rawFrames = lottieRawFrames,
+                                                currentFrameIndex = lottieCurrentFrameIndex,
+                                                frameWidth = lottieRawFrameSize?.first ?: 1920,
+                                                frameHeight = lottieRawFrameSize?.second ?: 1080
                                             )
 
                                     Presenting.ANNOUNCEMENTS ->
@@ -2983,7 +3022,11 @@ private fun PresenterWindows(
                                     composition = lottieComposition,
                                     progress = { presenterManager.lottieProgress.value },
                                     appSettings = appSettings,
-                                    outputRole = Constants.OUTPUT_ROLE_KEY
+                                    outputRole = Constants.OUTPUT_ROLE_KEY,
+                                    rawFrames = lottieRawFrames,
+                                    currentFrameIndex = lottieCurrentFrameIndex,
+                                    frameWidth = lottieRawFrameSize?.first ?: 1920,
+                                    frameHeight = lottieRawFrameSize?.second ?: 1080
                                 )
 
                         Presenting.ANNOUNCEMENTS ->

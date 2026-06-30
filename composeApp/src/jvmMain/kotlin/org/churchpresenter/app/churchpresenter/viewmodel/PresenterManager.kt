@@ -3,15 +3,30 @@ package org.churchpresenter.app.churchpresenter.viewmodel
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.ImageBitmap
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.churchpresenter.app.churchpresenter.models.AnimationType
 import org.churchpresenter.app.churchpresenter.models.LyricSection
 import org.cef.browser.CefBrowser
 import org.churchpresenter.app.churchpresenter.models.Scene
+import org.churchpresenter.app.churchpresenter.presenter.LowerThirdOffscreenRenderer
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
 import org.churchpresenter.app.churchpresenter.models.SelectedVerse
 import org.churchpresenter.app.churchpresenter.data.StrongsEntry
+import org.churchpresenter.app.churchpresenter.server.AtemRenderCache
 
 class PresenterManager {
+
+    companion object {
+        const val PRERENDER_FPS = 30
+    }
+
+    private val preRenderScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    private var preRenderJob: Job? = null
     private val _presentingMode = mutableStateOf(Presenting.NONE)
     val presentingMode: State<Presenting> = _presentingMode
 
@@ -146,6 +161,20 @@ class PresenterManager {
     // Shared Lottie (lower third) animation progress — driven centrally
     private val _lottieProgress = mutableStateOf(0f)
     val lottieProgress: State<Float> = _lottieProgress
+
+    // Pre-rendered ARGB frames for display — populated in background when content is set
+    private val _lottieRawFrames = mutableStateOf<List<IntArray>?>(null)
+    val lottieRawFrames: State<List<IntArray>?> = _lottieRawFrames
+
+    private val _lottieRawFrameSize = mutableStateOf<Pair<Int, Int>?>(null)
+    val lottieRawFrameSize: State<Pair<Int, Int>?> = _lottieRawFrameSize
+
+    private val _lottieCurrentFrameIndex = mutableStateOf(0)
+    val lottieCurrentFrameIndex: State<Int> = _lottieCurrentFrameIndex
+
+    fun setLottieCurrentFrameIndex(index: Int) {
+        _lottieCurrentFrameIndex.value = index
+    }
 
     // Shared Media transition alpha
     private val _mediaTransitionAlpha = mutableStateOf(1f)
@@ -337,6 +366,33 @@ class PresenterManager {
         _lottiePauseFrame.value = pauseFrame
         _lottiePauseDurationMs.value = pauseDurationMs
         _lottieTrigger.value++
+
+        // Clear stale frames immediately so the presenter falls back to compottie
+        _lottieRawFrames.value = null
+        _lottieRawFrameSize.value = null
+        _lottieCurrentFrameIndex.value = 0
+        preRenderJob?.cancel()
+
+        if (json.isNotBlank()) {
+            preRenderJob = preRenderScope.launch {
+                try {
+                    val (w, h) = AtemRenderCache.lottieCanvasSize(json) ?: (1920 to 1080)
+                    val frameCount = AtemRenderCache.clipFrameCount(json, PRERENDER_FPS.toDouble())
+                        ?: return@launch
+                    val renderer = LowerThirdOffscreenRenderer(w, h)
+                    val frames = renderer.renderAllFrames(json, frameCount)
+                    withContext(Dispatchers.Main) {
+                        _lottieRawFrameSize.value = w to h
+                        _lottieRawFrames.value = frames
+                        _lottieCurrentFrameIndex.value = 0
+                    }
+                } catch (e: kotlinx.coroutines.CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    System.err.println("[PresenterManager] Lottie pre-render failed: ${e.message}")
+                }
+            }
+        }
     }
 
     private val _lottiePauseFrame = mutableStateOf(-1f)
