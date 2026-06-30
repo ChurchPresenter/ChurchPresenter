@@ -56,11 +56,11 @@ fun NumberSettingsTextField(
     Row(
         modifier = modifier
             .height(42.dp)
-            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
+            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(6.dp))
             .border(
                 1.dp,
                 if (isError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.outlineVariant,
-                RoundedCornerShape(8.dp)
+                RoundedCornerShape(6.dp)
             ),
         verticalAlignment = Alignment.CenterVertically
     ) {

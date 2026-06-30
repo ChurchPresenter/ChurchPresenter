@@ -6,16 +6,14 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Checkbox
+import androidx.compose.material3.Switch
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
@@ -33,6 +31,7 @@ import churchpresenter.composeapp.generated.resources.dictionary_settings_opacit
 import churchpresenter.composeapp.generated.resources.dictionary_settings_reference_text
 import churchpresenter.composeapp.generated.resources.dictionary_settings_transitions
 import churchpresenter.composeapp.generated.resources.dictionary_settings_word_text
+import churchpresenter.composeapp.generated.resources.show
 import churchpresenter.composeapp.generated.resources.fade_in
 import churchpresenter.composeapp.generated.resources.fade_out
 import churchpresenter.composeapp.generated.resources.font_size
@@ -74,10 +73,12 @@ fun DictionarySettingsTab(
             ) {
             // Word section
             SettingsSection(title = stringResource(Res.string.dictionary_settings_word_text)) {
-                Checkbox(
-                    checked = ds.showWord,
-                    onCheckedChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(showWord = it)) } }
-                )
+                SettingRow(label = stringResource(Res.string.show)) {
+                    Switch(
+                        checked = ds.showWord,
+                        onCheckedChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(showWord = it)) } }
+                    )
+                }
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -135,10 +136,12 @@ fun DictionarySettingsTab(
 
             // Definition section
             SettingsSection(title = stringResource(Res.string.dictionary_settings_definition_text)) {
-                Checkbox(
-                    checked = ds.showDefinition,
-                    onCheckedChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(showDefinition = it)) } }
-                )
+                SettingRow(label = stringResource(Res.string.show)) {
+                    Switch(
+                        checked = ds.showDefinition,
+                        onCheckedChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(showDefinition = it)) } }
+                    )
+                }
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -168,10 +171,12 @@ fun DictionarySettingsTab(
             ) {
                 // Reference & Transliteration
                 SettingsSection(title = stringResource(Res.string.dictionary_settings_reference_text)) {
-                    Checkbox(
-                        checked = ds.showReference,
-                        onCheckedChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(showReference = it)) } }
-                    )
+                    SettingRow(label = stringResource(Res.string.show)) {
+                        Switch(
+                            checked = ds.showReference,
+                            onCheckedChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(showReference = it)) } }
+                        )
+                    }
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -228,10 +233,12 @@ fun DictionarySettingsTab(
 
                 // KJV Usage
                 SettingsSection(title = stringResource(Res.string.dictionary_settings_kjv_usage)) {
-                    Checkbox(
-                        checked = ds.showKjvUsage,
-                        onCheckedChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(showKjvUsage = it)) } }
-                    )
+                    SettingRow(label = stringResource(Res.string.show)) {
+                        Switch(
+                            checked = ds.showKjvUsage,
+                            onCheckedChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(showKjvUsage = it)) } }
+                        )
+                    }
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -284,30 +291,16 @@ fun DictionarySettingsTab(
 
                 // Transitions
                 SettingsSection(title = stringResource(Res.string.dictionary_settings_transitions)) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Checkbox(
+                    SettingRow(label = stringResource(Res.string.fade_in)) {
+                        Switch(
                             checked = ds.fadeIn,
                             onCheckedChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(fadeIn = it)) } }
                         )
-                        Text(
-                            text = stringResource(Res.string.fade_in),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurface,
-                            modifier = Modifier.padding(start = 4.dp)
-                        )
-                        Spacer(Modifier.width(16.dp))
-                        Checkbox(
+                    }
+                    SettingRow(label = stringResource(Res.string.fade_out)) {
+                        Switch(
                             checked = ds.fadeOut,
                             onCheckedChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(fadeOut = it)) } }
-                        )
-                        Text(
-                            text = stringResource(Res.string.fade_out),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurface,
-                            modifier = Modifier.padding(start = 4.dp)
                         )
                     }
 

@@ -57,6 +57,7 @@
     <string name="none">None</string>
     <string name="first_page">First Page</string>
     <string name="every_page">Every Page</string>
+    <string name="show">Show</string>
     <string name="show_title">Show Title:</string>
     <string name="show_number">Show Number:</string>
     <string name="font_size">Font Size:</string>

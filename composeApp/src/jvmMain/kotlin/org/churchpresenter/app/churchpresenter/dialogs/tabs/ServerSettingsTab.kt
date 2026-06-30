@@ -29,7 +29,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
+import org.churchpresenter.app.churchpresenter.composables.SettingsTextField
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -237,7 +237,7 @@ fun ServerSettingsTab(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        OutlinedTextField(
+                        SettingsTextField(
                             value = portText,
                             onValueChange = { v ->
                                 if (v.length <= 5 && v.all(Char::isDigit)) {
@@ -252,7 +252,6 @@ fun ServerSettingsTab(
                             modifier = Modifier.width(100.dp),
                             singleLine = true,
                             enabled = !isRunning,
-                            textStyle = MaterialTheme.typography.bodyMedium,
                             placeholder = { Text(stringResource(Res.string.server_port_hint)) }
                         )
                         if (isRunning) {
@@ -283,7 +282,7 @@ fun ServerSettingsTab(
                 // ── Host Override ─────────────────────────────────────────────
                 SettingRow(label = stringResource(Res.string.server_host_label)) {
                     Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                        OutlinedTextField(
+                        SettingsTextField(
                             value = hostText,
                             onValueChange = { v ->
                                 hostText = v
@@ -294,7 +293,6 @@ fun ServerSettingsTab(
                             modifier = Modifier.width(280.dp),
                             singleLine = true,
                             enabled = !isRunning,
-                            textStyle = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
                             placeholder = {
                                 Text(
                                     stringResource(Res.string.server_host_hint),
@@ -373,7 +371,7 @@ fun ServerSettingsTab(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(6.dp)
                         ) {
-                            OutlinedTextField(
+                            SettingsTextField(
                                 value = apiKeyText,
                                 onValueChange = { v ->
                                     apiKeyText = v
@@ -383,7 +381,6 @@ fun ServerSettingsTab(
                                 },
                                 modifier = Modifier.width(350.dp),
                                 singleLine = true,
-                                textStyle = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
                                 placeholder = {
                                     Text(
                                         stringResource(Res.string.api_key_hint),
@@ -853,12 +850,11 @@ private fun ClientRow(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
-                OutlinedTextField(
+                SettingsTextField(
                     value = editText,
                     onValueChange = { editText = it },
                     modifier = Modifier.weight(1f),
                     singleLine = true,
-                    textStyle = MaterialTheme.typography.bodySmall,
                     placeholder = {
                         Text(
                             stringResource(Res.string.client_label_placeholder),

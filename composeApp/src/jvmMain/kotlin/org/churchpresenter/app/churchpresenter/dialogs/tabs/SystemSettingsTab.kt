@@ -20,6 +20,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import org.churchpresenter.app.churchpresenter.composables.SettingRow
 import org.churchpresenter.app.churchpresenter.composables.SettingsSection
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -440,18 +441,9 @@ fun SystemSettingsTab(
 
         // Launch at login — the OS registration is the source of truth, not settings.json
         var autoStartEnabled by remember { mutableStateOf(AutoStartManager.isEnabled()) }
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            Text(
-                text = stringResource(Res.string.launch_on_login),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface
-            )
+        SettingRow(label = stringResource(Res.string.launch_on_login)) {
             Switch(
                 checked = autoStartEnabled,
-                enabled = AutoStartManager.isSupported,
                 onCheckedChange = { enabled ->
                     scope.launch {
                         val ok = withContext(Dispatchers.IO) { AutoStartManager.setEnabled(enabled) }

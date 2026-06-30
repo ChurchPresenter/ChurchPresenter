@@ -22,7 +22,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
+import org.churchpresenter.app.churchpresenter.composables.SettingsTextField
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -135,24 +135,22 @@ fun AtemSettingsTab(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    OutlinedTextField(
+                    SettingsTextField(
                         value = hostText,
                         onValueChange = {
                             hostText = it
                             update { copy(host = it) }
                         },
-                        label = { Text(stringResource(Res.string.atem_host)) },
                         placeholder = { Text(stringResource(Res.string.atem_host_hint)) },
                         singleLine = true,
                         modifier = Modifier.weight(1f)
                     )
-                    OutlinedTextField(
+                    SettingsTextField(
                         value = portText,
                         onValueChange = { v ->
                             portText = v
                             v.toIntOrNull()?.let { update { copy(port = it) } }
                         },
-                        label = { Text(stringResource(Res.string.atem_port)) },
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         modifier = Modifier.width(100.dp)
@@ -273,7 +271,7 @@ fun AtemSettingsTab(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    OutlinedTextField(
+                    SettingsTextField(
                         value = renderWidthText,
                         onValueChange = { v ->
                             renderWidthText = v
@@ -284,7 +282,7 @@ fun AtemSettingsTab(
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         modifier = Modifier.weight(1f)
                     )
-                    OutlinedTextField(
+                    SettingsTextField(
                         value = renderHeightText,
                         onValueChange = { v ->
                             renderHeightText = v
@@ -295,7 +293,7 @@ fun AtemSettingsTab(
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         modifier = Modifier.weight(1f)
                     )
-                    OutlinedTextField(
+                    SettingsTextField(
                         value = clipFpsText,
                         onValueChange = { v ->
                             clipFpsText = v
@@ -307,7 +305,7 @@ fun AtemSettingsTab(
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                         modifier = Modifier.weight(1f)
                     )
-                    OutlinedTextField(
+                    SettingsTextField(
                         value = stillSlotText,
                         onValueChange = { v ->
                             stillSlotText = v
@@ -325,7 +323,7 @@ fun AtemSettingsTab(
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         modifier = Modifier.weight(1f)
                     )
-                    OutlinedTextField(
+                    SettingsTextField(
                         value = clipSlotText,
                         onValueChange = { v ->
                             clipSlotText = v
@@ -387,7 +385,7 @@ fun AtemSettingsTab(
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     if (useDsk) {
-                        OutlinedTextField(
+                        SettingsTextField(
                             value = dskText,
                             onValueChange = { v ->
                                 dskText = v
@@ -403,7 +401,7 @@ fun AtemSettingsTab(
                             modifier = Modifier.weight(1f)
                         )
                     } else {
-                        OutlinedTextField(
+                        SettingsTextField(
                             value = meText,
                             onValueChange = { v ->
                                 meText = v
@@ -418,7 +416,7 @@ fun AtemSettingsTab(
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                             modifier = Modifier.weight(1f)
                         )
-                        OutlinedTextField(
+                        SettingsTextField(
                             value = keyText,
                             onValueChange = { v ->
                                 keyText = v
@@ -434,7 +432,7 @@ fun AtemSettingsTab(
                             modifier = Modifier.weight(1f)
                         )
                     }
-                    OutlinedTextField(
+                    SettingsTextField(
                         value = keyPreRollText,
                         onValueChange = { v ->
                             keyPreRollText = v
@@ -445,7 +443,7 @@ fun AtemSettingsTab(
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         modifier = Modifier.weight(1f)
                     )
-                    OutlinedTextField(
+                    SettingsTextField(
                         value = keyPostRollText,
                         onValueChange = { v ->
                             keyPostRollText = v

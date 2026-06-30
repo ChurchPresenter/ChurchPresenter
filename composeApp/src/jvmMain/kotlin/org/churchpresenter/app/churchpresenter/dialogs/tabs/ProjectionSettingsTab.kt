@@ -36,7 +36,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
+import org.churchpresenter.app.churchpresenter.composables.SettingsTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -994,7 +994,7 @@ fun ProjectionSettingsTab(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier.fillMaxWidth()
         ) {
-            OutlinedTextField(
+            SettingsTextField(
                 value = vlcPathText,
                 onValueChange = {},
                 readOnly = true,
@@ -1002,7 +1002,6 @@ fun ProjectionSettingsTab(
                 isError = vlcPathError,
                 supportingText = if (vlcPathError) {{ Text(stringResource(Res.string.vlc_path_invalid)) }} else null,
                 singleLine = true,
-                textStyle = MaterialTheme.typography.bodySmall,
                 modifier = Modifier.weight(1f)
             )
             Button(
