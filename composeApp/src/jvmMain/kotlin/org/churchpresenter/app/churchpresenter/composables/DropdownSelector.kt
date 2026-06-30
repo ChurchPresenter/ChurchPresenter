@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -47,33 +48,29 @@ fun DropdownSelector(
     var expanded by remember { mutableStateOf(false) }
     val displayText = options.firstOrNull { it.first == value }?.second ?: value
 
-    Box(modifier = modifier) {
-        Column(
-            modifier = Modifier
-                .heightIn(min = 42.dp)
-                .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
-                .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp))
-                .clickable(
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = null
-                ) { expanded = true }
-                .padding(start = 11.dp, end = 11.dp, top = 0.dp, bottom = 6.dp),
-            verticalArrangement = androidx.compose.foundation.layout.Arrangement.Center
-        ) {
-            if (label.isNotEmpty()) {
-                Text(
-                    text = label.uppercase(),
-                    fontSize = 10.sp,
-                    lineHeight = 11.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    letterSpacing = 0.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Spacer(Modifier.height(1.dp))
-            }
-            Row(verticalAlignment = Alignment.CenterVertically) {
+    Box(
+        modifier = modifier
+            .heightIn(min = 42.dp)
+            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp))
+            .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) { expanded = true }
+            .padding(start = 11.dp, end = 11.dp, top = 4.dp, bottom = 4.dp)
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Column(verticalArrangement = Arrangement.Center) {
+                if (label.isNotEmpty()) {
+                    Text(
+                        text = label.uppercase(),
+                        fontSize = 10.sp,
+                        lineHeight = 11.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        letterSpacing = 0.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Spacer(Modifier.height(1.dp))
+                }
                 Text(
                     text = displayText,
                     style = MaterialTheme.typography.bodySmall.copy(
@@ -82,16 +79,15 @@ fun DropdownSelector(
                         fontWeight = FontWeight.Medium
                     ),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.weight(1f)
-                )
-                Spacer(Modifier.width(4.dp))
-                Icon(
-                    painter = painterResource(Res.drawable.ic_arrow_down),
-                    contentDescription = null,
-                    modifier = Modifier.size(14.dp),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
+            Spacer(Modifier.width(4.dp))
+            Icon(
+                painter = painterResource(Res.drawable.ic_arrow_down),
+                contentDescription = null,
+                modifier = Modifier.size(14.dp),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
         DropdownMenu(
             containerColor = MaterialTheme.colorScheme.surface,
@@ -122,31 +118,28 @@ fun DropdownSelector(
     val expanded = rememberSaveable { mutableStateOf(false) }
 
     Box(modifier = modifier) {
-        Column(
+        Row(
             modifier = Modifier
                 .heightIn(min = 42.dp)
                 .fillMaxWidth()
                 .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
                 .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp))
-                .clickable(
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = null
-                ) { expanded.value = true }
-                .padding(start = 11.dp, end = 11.dp, top = 0.dp, bottom = 6.dp),
-            verticalArrangement = androidx.compose.foundation.layout.Arrangement.Center
+                .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) { expanded.value = true }
+                .padding(start = 11.dp, end = 11.dp, top = 4.dp, bottom = 4.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = label.uppercase(),
-                fontSize = 10.sp,
-                lineHeight = 11.sp,
-                fontWeight = FontWeight.SemiBold,
-                letterSpacing = 0.sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            Spacer(Modifier.height(1.dp))
-            Row(verticalAlignment = Alignment.Top) {
+            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.Center) {
+                Text(
+                    text = label.uppercase(),
+                    fontSize = 10.sp,
+                    lineHeight = 11.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    letterSpacing = 0.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Spacer(Modifier.height(1.dp))
                 Text(
                     text = selected,
                     style = MaterialTheme.typography.bodySmall.copy(
@@ -155,16 +148,15 @@ fun DropdownSelector(
                         fontWeight = FontWeight.Medium
                     ),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.weight(1f)
-                )
-                Spacer(Modifier.width(4.dp))
-                Icon(
-                    painter = painterResource(Res.drawable.ic_arrow_down),
-                    contentDescription = null,
-                    modifier = Modifier.size(14.dp),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
+            Spacer(Modifier.width(4.dp))
+            Icon(
+                painter = painterResource(Res.drawable.ic_arrow_down),
+                contentDescription = null,
+                modifier = Modifier.size(14.dp),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
         DropdownMenu(
             containerColor = MaterialTheme.colorScheme.surface,

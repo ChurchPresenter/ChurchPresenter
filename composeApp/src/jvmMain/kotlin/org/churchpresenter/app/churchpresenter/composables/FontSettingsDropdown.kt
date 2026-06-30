@@ -55,30 +55,30 @@ fun FontSettingsDropdown(
     val selectedFontFamily = remember(value) { systemFontFamilyOrDefault(value) }
 
     Box(modifier = modifier) {
-        Column(
+        Row(
             modifier = Modifier
                 .heightIn(min = 42.dp)
                 .fillMaxWidth()
                 .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
                 .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp))
                 .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) { expanded = true }
-                .padding(start = 8.dp, end = 8.dp, top = 2.dp, bottom = 0.dp),
-            verticalArrangement = Arrangement.Center
+                .padding(start = 8.dp, end = 8.dp, top = 4.dp, bottom = 4.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            if (label.isNotEmpty()) {
-                Text(
-                    text = label.uppercase(),
-                    fontSize = 10.sp,
-                    lineHeight = 11.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    letterSpacing = 0.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Spacer(Modifier.height(1.dp))
-            }
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.Center) {
+                if (label.isNotEmpty()) {
+                    Text(
+                        text = label.uppercase(),
+                        fontSize = 10.sp,
+                        lineHeight = 11.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        letterSpacing = 0.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Spacer(Modifier.height(1.dp))
+                }
                 Text(
                     text = value,
                     style = MaterialTheme.typography.bodySmall.copy(
@@ -88,16 +88,15 @@ fun FontSettingsDropdown(
                         fontFamily = selectedFontFamily
                     ),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.weight(1f)
-                )
-                Spacer(Modifier.width(4.dp))
-                Icon(
-                    painter = painterResource(Res.drawable.ic_arrow_down),
-                    contentDescription = null,
-                    modifier = Modifier.size(14.dp),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
+            Spacer(Modifier.width(4.dp))
+            Icon(
+                painter = painterResource(Res.drawable.ic_arrow_down),
+                contentDescription = null,
+                modifier = Modifier.size(14.dp),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
 
         DropdownMenu(
