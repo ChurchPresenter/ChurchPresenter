@@ -20,7 +20,6 @@ import javax.crypto.spec.SecretKeySpec
 import javax.swing.filechooser.FileNameExtensionFilter
 import kotlin.io.path.absolutePathString
 import kotlin.io.path.exists
-import kotlin.io.path.name
 import kotlin.io.path.readText
 import kotlin.io.path.writeText
 import kotlinx.coroutines.CoroutineScope

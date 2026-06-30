@@ -1,7 +1,6 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -67,7 +66,6 @@ import javax.imageio.ImageIO
 import org.jetbrains.skia.Image as SkiaImage
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.allowed_clients
 import churchpresenter.composeapp.generated.resources.companion_lt_copy_key
@@ -84,11 +82,8 @@ import churchpresenter.composeapp.generated.resources.companion_atem_key_desc
 import churchpresenter.composeapp.generated.resources.companion_atem_key_off
 import churchpresenter.composeapp.generated.resources.companion_atem_key_on
 import churchpresenter.composeapp.generated.resources.companion_atem_key_section
-import churchpresenter.composeapp.generated.resources.companion_atem_not_configured
 import churchpresenter.composeapp.generated.resources.companion_atem_still_key
 import churchpresenter.composeapp.generated.resources.companion_atem_still_only
-import churchpresenter.composeapp.generated.resources.companion_atem_triggers
-import churchpresenter.composeapp.generated.resources.companion_atem_triggers_desc
 import churchpresenter.composeapp.generated.resources.companion_atem_upload_note
 import churchpresenter.composeapp.generated.resources.companion_lt_triggers
 import churchpresenter.composeapp.generated.resources.companion_lt_triggers_desc

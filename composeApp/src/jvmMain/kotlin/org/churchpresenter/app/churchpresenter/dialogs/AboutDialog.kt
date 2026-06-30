@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.text.style.TextAlign
@@ -16,8 +15,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -38,7 +35,6 @@ import churchpresenter.composeapp.generated.resources.action_ok
 import churchpresenter.composeapp.generated.resources.converter_window_title
 import churchpresenter.composeapp.generated.resources.lottie_gen_window_title
 import churchpresenter.composeapp.generated.resources.open_crash_logs
-import churchpresenter.composeapp.generated.resources.open_converter
 import churchpresenter.composeapp.generated.resources.report_bug
 import churchpresenter.composeapp.generated.resources.submit_feature_request
 import org.churchpresenter.app.churchpresenter.BuildConfig

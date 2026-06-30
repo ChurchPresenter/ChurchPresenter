@@ -23,7 +23,6 @@ import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
-import java.awt.image.BufferedImage
 import java.io.ByteArrayInputStream
 import java.net.ServerSocket
 import java.net.URI

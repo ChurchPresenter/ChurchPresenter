@@ -32,9 +32,7 @@ import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.clear_statistics
 import churchpresenter.composeapp.generated.resources.top_songs
 import churchpresenter.composeapp.generated.resources.top_verses
-import org.churchpresenter.app.churchpresenter.data.SongDisplayEntry
 import org.churchpresenter.app.churchpresenter.data.StatisticsManager
-import org.churchpresenter.app.churchpresenter.data.VerseDisplayEntry
 import org.jetbrains.compose.resources.stringResource
 
 @Composable

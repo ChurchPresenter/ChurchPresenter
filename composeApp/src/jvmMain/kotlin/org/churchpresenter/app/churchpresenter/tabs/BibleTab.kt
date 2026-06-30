@@ -8,7 +8,6 @@ import androidx.compose.foundation.TooltipArea
 import androidx.compose.foundation.TooltipPlacement
 import androidx.compose.material3.Surface
 import androidx.compose.ui.unit.DpOffset
-import androidx.compose.foundation.HorizontalScrollbar
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -17,7 +16,6 @@ import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.material.icons.filled.CheckBoxOutlineBlank
 import androidx.compose.material.icons.automirrored.filled.FormatAlignLeft
 import androidx.compose.foundation.layout.Column
@@ -32,7 +30,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -40,8 +37,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
@@ -50,16 +45,12 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
@@ -111,7 +102,6 @@ import churchpresenter.composeapp.generated.resources.exact_match
 import churchpresenter.composeapp.generated.resources.found_results
 import churchpresenter.composeapp.generated.resources.bible_history
 import churchpresenter.composeapp.generated.resources.bible_history_clear
-import churchpresenter.composeapp.generated.resources.bible_split_browse_mode
 import churchpresenter.composeapp.generated.resources.copy_verse
 import churchpresenter.composeapp.generated.resources.go_live
 import churchpresenter.composeapp.generated.resources.ic_copy
@@ -168,15 +158,12 @@ import churchpresenter.composeapp.generated.resources.bible_search_mode_referenc
 import churchpresenter.composeapp.generated.resources.bible_search_mode_text
 import churchpresenter.composeapp.generated.resources.bible_search_mode_tooltip
 import churchpresenter.composeapp.generated.resources.hold_live
-import churchpresenter.composeapp.generated.resources.stt_connect
-import churchpresenter.composeapp.generated.resources.stt_disconnect
 import churchpresenter.composeapp.generated.resources.swap_bibles
 import churchpresenter.composeapp.generated.resources.swap_bibles_hint
 import churchpresenter.composeapp.generated.resources.verse
 import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
 import org.churchpresenter.app.churchpresenter.composables.initialPassClickable
 import org.churchpresenter.app.churchpresenter.composables.initialPassCombinedClickable
-import org.churchpresenter.app.churchpresenter.composables.SelectionListWithIndex
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.models.ScheduleItem
 import org.churchpresenter.app.churchpresenter.models.SelectedVerse

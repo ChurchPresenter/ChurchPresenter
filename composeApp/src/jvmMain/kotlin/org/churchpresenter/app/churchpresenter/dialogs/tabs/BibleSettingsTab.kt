@@ -11,15 +11,12 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
@@ -28,7 +25,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Density
@@ -36,29 +32,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.animation_crossfade
-import churchpresenter.composeapp.generated.resources.animation_fade
-import churchpresenter.composeapp.generated.resources.animation_none
-import churchpresenter.composeapp.generated.resources.animation_slide_left
-import churchpresenter.composeapp.generated.resources.animation_slide_right
-import churchpresenter.composeapp.generated.resources.animation_type
-import churchpresenter.composeapp.generated.resources.bible_files
-import churchpresenter.composeapp.generated.resources.bible_live_view
 import churchpresenter.composeapp.generated.resources.bible_selection
 import churchpresenter.composeapp.generated.resources.bible_split_browse_mode
 import churchpresenter.composeapp.generated.resources.bible_transition_settings
-import churchpresenter.composeapp.generated.resources.browse_directory
 import churchpresenter.composeapp.generated.resources.color
 import churchpresenter.composeapp.generated.resources.font_size
 import churchpresenter.composeapp.generated.resources.font_type
 import churchpresenter.composeapp.generated.resources.full_screen
 import churchpresenter.composeapp.generated.resources.horizontal_alignment
-import churchpresenter.composeapp.generated.resources.import_bible_file
-import churchpresenter.composeapp.generated.resources.import_error
 import churchpresenter.composeapp.generated.resources.lower_third_size
 import churchpresenter.composeapp.generated.resources.milliseconds_suffix
-import churchpresenter.composeapp.generated.resources.no_bible_files
-import churchpresenter.composeapp.generated.resources.no_directory_selected
-import churchpresenter.composeapp.generated.resources.no_file_selected_title
 import churchpresenter.composeapp.generated.resources.none
 import churchpresenter.composeapp.generated.resources.position
 import churchpresenter.composeapp.generated.resources.primary_bible
@@ -69,7 +52,6 @@ import churchpresenter.composeapp.generated.resources.secondary_bible_reference
 import churchpresenter.composeapp.generated.resources.secondary_bible_text
 import churchpresenter.composeapp.generated.resources.show_abbreviation
 import churchpresenter.composeapp.generated.resources.show_in_lower_third
-import churchpresenter.composeapp.generated.resources.storage_directory
 import churchpresenter.composeapp.generated.resources.vertical_alignment
 import churchpresenter.composeapp.generated.resources.animation_crossfade
 import churchpresenter.composeapp.generated.resources.fade_in
@@ -106,7 +88,6 @@ import androidx.compose.ui.text.style.TextDecoration
 import churchpresenter.composeapp.generated.resources.auto_fit
 import org.churchpresenter.app.churchpresenter.composables.VerticalAlignmentButtons
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
-import org.churchpresenter.app.churchpresenter.models.AnimationType
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.Utils.systemFontFamilyOrDefault
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
@@ -115,9 +96,6 @@ import org.churchpresenter.app.churchpresenter.viewmodel.BibleSettingsViewModel
 import org.churchpresenter.app.churchpresenter.viewmodel.PresenterManager
 import org.jetbrains.compose.resources.stringResource
 import java.awt.GraphicsEnvironment
-import java.awt.Window
-import javax.swing.SwingUtilities
-import kotlinx.coroutines.launch
 
 
 @Composable

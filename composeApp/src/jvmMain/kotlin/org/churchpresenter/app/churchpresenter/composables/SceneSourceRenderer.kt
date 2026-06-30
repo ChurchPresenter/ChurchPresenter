@@ -23,7 +23,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.toComposeImageBitmap
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -40,7 +39,6 @@ import churchpresenter.composeapp.generated.resources.canvas_video_file_not_foun
 import churchpresenter.composeapp.generated.resources.canvas_video_loading
 import churchpresenter.composeapp.generated.resources.canvas_placeholder_screen_capture
 import org.churchpresenter.app.churchpresenter.models.SceneSource
-import org.churchpresenter.app.churchpresenter.models.PathPoint
 import org.churchpresenter.app.churchpresenter.utils.Utils.parseHexColor
 import org.churchpresenter.app.churchpresenter.utils.WindowsWindowCapture
 import org.churchpresenter.app.churchpresenter.utils.X11WindowCapture
@@ -59,13 +57,11 @@ import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.awt.Rectangle
 import java.awt.Robot
 import java.awt.image.BufferedImage
 import java.awt.image.DataBufferInt
-import java.io.ByteArrayInputStream
 import java.nio.ByteBuffer
 import uk.co.caprica.vlcj.factory.MediaPlayerFactory
 import uk.co.caprica.vlcj.player.embedded.videosurface.callback.BufferFormatCallback
@@ -88,7 +84,6 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.geometry.Size
 
 @Composable
 fun SceneSourceRenderer(

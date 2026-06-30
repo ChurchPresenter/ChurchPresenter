@@ -111,7 +111,6 @@ import churchpresenter.composeapp.generated.resources.transition_duration
 import churchpresenter.composeapp.generated.resources.unit_ms
 import churchpresenter.composeapp.generated.resources.unit_s
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Slideshow
 import androidx.compose.material.icons.filled.Tv
 import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings

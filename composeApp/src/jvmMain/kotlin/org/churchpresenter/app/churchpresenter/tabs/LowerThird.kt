@@ -11,7 +11,6 @@ import androidx.compose.foundation.TooltipArea
 import androidx.compose.foundation.TooltipPlacement
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import org.churchpresenter.app.churchpresenter.composables.initialPassClickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -42,7 +41,6 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -141,7 +139,6 @@ import kotlinx.coroutines.withContext
 import java.nio.file.FileSystems
 import java.nio.file.StandardWatchEventKinds
 import javax.swing.JOptionPane
-import org.churchpresenter.app.churchpresenter.composables.ImageIconButton
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.dialogs.tabs.formatAtemFps
 import org.churchpresenter.app.churchpresenter.server.AtemClient

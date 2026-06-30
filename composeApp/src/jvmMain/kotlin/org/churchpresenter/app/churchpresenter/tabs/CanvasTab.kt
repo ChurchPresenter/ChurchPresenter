@@ -15,8 +15,6 @@ import androidx.compose.foundation.TooltipPlacement
 import androidx.compose.foundation.background
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.combinedClickable
 import org.churchpresenter.app.churchpresenter.composables.initialPassClickable
 import org.churchpresenter.app.churchpresenter.composables.initialPassCombinedClickable
 import androidx.compose.foundation.layout.Arrangement
@@ -31,7 +29,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -44,7 +41,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
@@ -99,8 +95,6 @@ import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
 import org.churchpresenter.app.churchpresenter.composables.SceneCanvas
 import org.churchpresenter.app.churchpresenter.composables.SourcePropertiesPanel
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
-import androidx.compose.ui.unit.sp
-import org.churchpresenter.app.churchpresenter.utils.presenterScreenBounds
 import org.churchpresenter.app.churchpresenter.utils.formatAspectRatio
 import org.churchpresenter.app.churchpresenter.models.SceneSource
 import org.churchpresenter.app.churchpresenter.models.SourceTransform
@@ -110,7 +104,6 @@ import org.churchpresenter.app.churchpresenter.viewmodel.SceneViewModel
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import java.util.UUID
-import churchpresenter.composeapp.generated.resources.canvas_source_shape
 import churchpresenter.composeapp.generated.resources.canvas_source_clock
 import churchpresenter.composeapp.generated.resources.canvas_source_qrcode
 import churchpresenter.composeapp.generated.resources.canvas_source_camera

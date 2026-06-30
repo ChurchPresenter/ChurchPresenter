@@ -57,7 +57,6 @@ import churchpresenter.composeapp.generated.resources.obs_mode_stt
 import churchpresenter.composeapp.generated.resources.obs_mode_website
 import churchpresenter.composeapp.generated.resources.obs_password
 import churchpresenter.composeapp.generated.resources.obs_password_hint
-import churchpresenter.composeapp.generated.resources.obs_port
 import churchpresenter.composeapp.generated.resources.obs_scene_hint
 import churchpresenter.composeapp.generated.resources.obs_scene_mappings
 import churchpresenter.composeapp.generated.resources.obs_scene_mappings_desc

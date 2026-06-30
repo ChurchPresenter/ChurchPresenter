@@ -1,13 +1,11 @@
 package org.churchpresenter.app.churchpresenter.utils
 
 import com.sun.jna.Memory
-import com.sun.jna.Native
 import com.sun.jna.Pointer
 import com.sun.jna.platform.win32.GDI32
 import com.sun.jna.platform.win32.User32
 import com.sun.jna.platform.win32.WinDef
 import com.sun.jna.platform.win32.WinGDI
-import com.sun.jna.platform.win32.WinUser
 import java.awt.Rectangle
 import java.awt.image.BufferedImage
 

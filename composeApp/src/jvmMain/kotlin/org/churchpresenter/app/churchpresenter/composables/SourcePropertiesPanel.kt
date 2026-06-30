@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -49,7 +48,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -84,8 +82,6 @@ import churchpresenter.composeapp.generated.resources.canvas_bible_start_verse
 import churchpresenter.composeapp.generated.resources.canvas_bible_end_verse
 import churchpresenter.composeapp.generated.resources.canvas_bible_ref_font_size
 import churchpresenter.composeapp.generated.resources.canvas_bible_ref_color
-import churchpresenter.composeapp.generated.resources.canvas_bible_ref_bold
-import churchpresenter.composeapp.generated.resources.canvas_bible_ref_italic
 import churchpresenter.composeapp.generated.resources.bible_no_primary_title
 import churchpresenter.composeapp.generated.resources.book
 import churchpresenter.composeapp.generated.resources.chapter
@@ -111,7 +107,6 @@ import churchpresenter.composeapp.generated.resources.canvas_qr_wifi_encryption
 import churchpresenter.composeapp.generated.resources.canvas_qr_wifi_hidden
 import churchpresenter.composeapp.generated.resources.canvas_qr_error_correction
 import churchpresenter.composeapp.generated.resources.canvas_camera_device
-import churchpresenter.composeapp.generated.resources.canvas_camera_name
 import churchpresenter.composeapp.generated.resources.canvas_camera_ffmpeg_hint
 import churchpresenter.composeapp.generated.resources.canvas_camera_v4l2_hint
 import churchpresenter.composeapp.generated.resources.canvas_camera_none_found
@@ -132,7 +127,6 @@ import churchpresenter.composeapp.generated.resources.canvas_capture_window
 import churchpresenter.composeapp.generated.resources.canvas_capture_refresh_windows
 import churchpresenter.composeapp.generated.resources.canvas_capture_interval
 import churchpresenter.composeapp.generated.resources.position
-import churchpresenter.composeapp.generated.resources.canvas_image_not_found
 import churchpresenter.composeapp.generated.resources.canvas_source_name
 import churchpresenter.composeapp.generated.resources.canvas_rotation
 import churchpresenter.composeapp.generated.resources.canvas_file_path
@@ -193,7 +187,6 @@ import churchpresenter.composeapp.generated.resources.pause
 import churchpresenter.composeapp.generated.resources.ic_arrow_down
 import churchpresenter.composeapp.generated.resources.ic_folder
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.churchpresenter.app.churchpresenter.dialogs.filechooser.FileChooser

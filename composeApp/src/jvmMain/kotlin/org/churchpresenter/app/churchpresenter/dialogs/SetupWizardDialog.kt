@@ -26,7 +26,6 @@ import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Book
@@ -112,14 +111,12 @@ import churchpresenter.composeapp.generated.resources.setup_step4_hint
 import churchpresenter.composeapp.generated.resources.setup_step4_title
 import churchpresenter.composeapp.generated.resources.content_bible
 import churchpresenter.composeapp.generated.resources.content_songs
-import churchpresenter.composeapp.generated.resources.detected_screens
 import churchpresenter.composeapp.generated.resources.display_fullscreen
 import churchpresenter.composeapp.generated.resources.display_lower_third
 import churchpresenter.composeapp.generated.resources.display_mode
 import churchpresenter.composeapp.generated.resources.display_stage_monitor
 import churchpresenter.composeapp.generated.resources.identify_screen
 import churchpresenter.composeapp.generated.resources.key_output
-import churchpresenter.composeapp.generated.resources.presenter_windows_count
 import churchpresenter.composeapp.generated.resources.projection_auto_display
 import churchpresenter.composeapp.generated.resources.projection_target_display
 import churchpresenter.composeapp.generated.resources.screen_assignment
@@ -923,22 +920,6 @@ private fun ReadyStep() {
             textAlign = TextAlign.Center,
             color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.45f)
         )
-    }
-}
-
-@Composable
-private fun StepList(steps: List<String>) {
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(6.dp)
-    ) {
-        steps.forEach { step ->
-            Text(
-                text = step,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.85f)
-            )
-        }
     }
 }
 

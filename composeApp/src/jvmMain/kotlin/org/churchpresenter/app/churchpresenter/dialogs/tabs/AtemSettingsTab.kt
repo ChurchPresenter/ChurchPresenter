@@ -1,7 +1,6 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -54,7 +53,6 @@ import churchpresenter.composeapp.generated.resources.atem_golive_key
 import churchpresenter.composeapp.generated.resources.atem_golive_key_hint
 import churchpresenter.composeapp.generated.resources.atem_host
 import churchpresenter.composeapp.generated.resources.atem_host_hint
-import churchpresenter.composeapp.generated.resources.atem_port
 import churchpresenter.composeapp.generated.resources.atem_quick_upload
 import churchpresenter.composeapp.generated.resources.atem_quick_upload_hint
 import churchpresenter.composeapp.generated.resources.atem_render_height

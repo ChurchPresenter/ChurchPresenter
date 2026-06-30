@@ -2,7 +2,6 @@ package org.churchpresenter.app.churchpresenter.data
 
 import java.sql.Connection
 import java.sql.DriverManager
-import java.sql.ResultSet
 
 // JDBC-backed implementations of your placeholder interfaces
 class JdbcDatabaseRow(private val values: List<String>) : DatabaseRow {

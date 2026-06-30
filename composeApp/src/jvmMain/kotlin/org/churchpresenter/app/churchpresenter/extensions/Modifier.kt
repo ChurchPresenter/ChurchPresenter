@@ -2,11 +2,8 @@ package org.churchpresenter.app.churchpresenter.extensions
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.Spring.StiffnessLow
-import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.offset
-import androidx.compose.material3.FloatingToolbarDefaults.animationSpec
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember

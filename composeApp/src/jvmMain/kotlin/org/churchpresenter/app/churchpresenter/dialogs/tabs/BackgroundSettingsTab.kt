@@ -46,7 +46,6 @@ import churchpresenter.composeapp.generated.resources.gradient_bottom_color
 import churchpresenter.composeapp.generated.resources.background_opacity
 import churchpresenter.composeapp.generated.resources.gradient_bottom_opacity
 import churchpresenter.composeapp.generated.resources.gradient_enabled
-import churchpresenter.composeapp.generated.resources.gradient_opacity
 import churchpresenter.composeapp.generated.resources.gradient_position
 import churchpresenter.composeapp.generated.resources.gradient_top_color
 import churchpresenter.composeapp.generated.resources.gradient_top_opacity

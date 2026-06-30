@@ -1,7 +1,6 @@
 package org.churchpresenter.app.churchpresenter.data
 
 import java.io.File
-import java.nio.charset.StandardCharsets
 
 data class ConversionResult(
     val songsConverted: Int,

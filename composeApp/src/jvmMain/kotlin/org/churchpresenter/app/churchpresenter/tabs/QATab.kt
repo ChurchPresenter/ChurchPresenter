@@ -12,12 +12,7 @@ import androidx.compose.ui.window.WindowPlacement
 import org.churchpresenter.app.churchpresenter.LocalMainWindowState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
-import androidx.compose.ui.graphics.ColorFilter
 import org.jetbrains.compose.resources.painterResource
-import churchpresenter.composeapp.generated.resources.arrow_up
-import churchpresenter.composeapp.generated.resources.arrow_down
-import churchpresenter.composeapp.generated.resources.increment
-import churchpresenter.composeapp.generated.resources.decrement
 import androidx.compose.foundation.TooltipArea
 import androidx.compose.foundation.TooltipPlacement
 import androidx.compose.foundation.background
@@ -123,15 +118,12 @@ import churchpresenter.composeapp.generated.resources.qa_edit_question_hint
 import churchpresenter.composeapp.generated.resources.qa_export_dialog_title
 import churchpresenter.composeapp.generated.resources.qa_export_to_file
 import churchpresenter.composeapp.generated.resources.qa_finished
-import churchpresenter.composeapp.generated.resources.qa_finished_tab
 import churchpresenter.composeapp.generated.resources.qa_font
 import churchpresenter.composeapp.generated.resources.qa_hide_qr
 import churchpresenter.composeapp.generated.resources.qa_history
-import churchpresenter.composeapp.generated.resources.qa_history_tab
 import churchpresenter.composeapp.generated.resources.qa_import_dialog_title
 import churchpresenter.composeapp.generated.resources.qa_import_from_file
 import churchpresenter.composeapp.generated.resources.qa_incoming
-import churchpresenter.composeapp.generated.resources.qa_incoming_tab
 import churchpresenter.composeapp.generated.resources.qa_mark_done
 import churchpresenter.composeapp.generated.resources.qa_new_session
 import churchpresenter.composeapp.generated.resources.qa_no_approved
@@ -180,7 +172,6 @@ import churchpresenter.composeapp.generated.resources.qa_clear_all_confirm_messa
 import churchpresenter.composeapp.generated.resources.qa_copy_url
 import churchpresenter.composeapp.generated.resources.qa_export_clear
 import churchpresenter.composeapp.generated.resources.qa_opacity
-import churchpresenter.composeapp.generated.resources.qa_sort
 import churchpresenter.composeapp.generated.resources.qa_filter_label
 import churchpresenter.composeapp.generated.resources.qa_sort_label
 import churchpresenter.composeapp.generated.resources.qa_sort_least_votes
@@ -194,7 +185,6 @@ import churchpresenter.composeapp.generated.resources.qa_approved
 import churchpresenter.composeapp.generated.resources.qa_denied
 import churchpresenter.composeapp.generated.resources.qa_done
 import churchpresenter.composeapp.generated.resources.qa_incoming_approved
-import churchpresenter.composeapp.generated.resources.qa_questions
 import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
 import org.churchpresenter.app.churchpresenter.composables.DropdownSelector
 import org.churchpresenter.app.churchpresenter.composables.FontSettingsDropdown

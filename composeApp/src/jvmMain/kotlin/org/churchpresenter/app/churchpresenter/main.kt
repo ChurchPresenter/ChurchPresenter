@@ -1,7 +1,5 @@
 package org.churchpresenter.app.churchpresenter
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
@@ -18,7 +16,6 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.snap
-import androidx.compose.animation.core.animate
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.foundation.Image
@@ -64,7 +61,6 @@ import churchpresenter.composeapp.generated.resources.presenter_view_title
 import churchpresenter.composeapp.generated.resources.key_output_title
 import churchpresenter.composeapp.generated.resources.screen_number
 import org.jetbrains.compose.resources.painterResource
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -117,13 +113,9 @@ import io.github.alexzhirkevich.compottie.rememberLottieComposition
 import org.churchpresenter.app.churchpresenter.composables.vlcCustomPath
 import org.churchpresenter.app.churchpresenter.data.Bible
 import org.churchpresenter.app.churchpresenter.server.CompanionServer
-import org.churchpresenter.app.churchpresenter.server.TunnelStatus
 import org.churchpresenter.app.churchpresenter.viewmodel.QAManager
 import org.churchpresenter.app.churchpresenter.viewmodel.OBSWebSocketManager
 import org.churchpresenter.app.churchpresenter.viewmodel.STTManager
-import org.churchpresenter.app.churchpresenter.server.AddToScheduleRequest
-import org.churchpresenter.app.churchpresenter.server.PendingRemoteRequest
-import org.churchpresenter.app.churchpresenter.server.ProjectRequest
 import org.churchpresenter.app.churchpresenter.ui.theme.AppThemeWrapper
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.presenterScreenBounds

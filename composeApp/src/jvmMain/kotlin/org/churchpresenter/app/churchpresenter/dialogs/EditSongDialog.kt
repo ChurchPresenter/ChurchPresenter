@@ -2,10 +2,8 @@ package org.churchpresenter.app.churchpresenter.dialogs
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -63,13 +61,8 @@ import churchpresenter.composeapp.generated.resources.enter_secondary_lyrics_her
 import churchpresenter.composeapp.generated.resources.lyrics
 import churchpresenter.composeapp.generated.resources.lyrics_format_help
 import churchpresenter.composeapp.generated.resources.new_song
-import churchpresenter.composeapp.generated.resources.new_songbook
 import churchpresenter.composeapp.generated.resources.save
 import churchpresenter.composeapp.generated.resources.secondary_lyrics
-import churchpresenter.composeapp.generated.resources.secondary_title
-import churchpresenter.composeapp.generated.resources.song_book
-import churchpresenter.composeapp.generated.resources.song_number
-import churchpresenter.composeapp.generated.resources.song_title
 import churchpresenter.composeapp.generated.resources.tune
 import org.churchpresenter.app.churchpresenter.data.SongItem
 import org.churchpresenter.app.churchpresenter.ui.theme.AppThemeWrapper

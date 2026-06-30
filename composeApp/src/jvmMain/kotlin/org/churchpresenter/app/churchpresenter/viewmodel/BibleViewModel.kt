@@ -24,7 +24,6 @@ import org.churchpresenter.app.churchpresenter.data.BibleBookNames
 import org.churchpresenter.app.churchpresenter.data.BibleSearch
 import org.churchpresenter.app.churchpresenter.models.SelectedVerse
 import java.io.File
-import java.util.Locale
 
 /** Mode of the unified Bible search box. */
 enum class BibleSearchMode { AUTO, REFERENCE, TEXT }
