@@ -316,18 +316,12 @@ fun ServerSettingsTab(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(6.dp)
                         ) {
-                            SelectionContainer {
-                                Text(
-                                    text = serverUrl,
-                                    style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
-                                    color = MaterialTheme.colorScheme.onSurface,
-                                    modifier = Modifier
-                                        .widthIn(max = 280.dp)
-                                        .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(4.dp))
-                                        .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.4f), RoundedCornerShape(4.dp))
-                                        .padding(horizontal = 8.dp, vertical = 4.dp)
-                                )
-                            }
+                            SettingsTextField(
+                                value = serverUrl,
+                                onValueChange = {},
+                                readOnly = true,
+                                modifier = Modifier.widthIn(max = 280.dp),
+                            )
                             Button(
                                 shape = RoundedCornerShape(6.dp),
                                 onClick = { showConnectionQrDialog = true },
@@ -974,11 +968,13 @@ private fun ConnectionQrDialog(serverUrl: String, apiKey: String?, onDismiss: ()
                             .padding(horizontal = 10.dp, vertical = 6.dp),
                         verticalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
-                        Text(
-                            text = qrContent,
-                            style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
+                        SelectionContainer {
+                            Text(
+                                text = qrContent,
+                                style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
                     }
                     Button(shape = RoundedCornerShape(6.dp), onClick = onDismiss) {
                         Text(stringResource(Res.string.close), style = MaterialTheme.typography.labelSmall)
