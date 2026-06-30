@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -70,21 +71,22 @@ fun NumberSettingsTextField(
             if (label.isNotEmpty()) {
                 Text(
                     text = label.uppercase(),
-                    fontSize = 8.sp,
-                    lineHeight = 9.sp,
+                    fontSize = 10.sp,
+                    lineHeight = 11.sp,
                     fontWeight = FontWeight.SemiBold,
                     letterSpacing = 0.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
+                Spacer(Modifier.height(1.dp))
             }
             BasicTextField(
                 interactionSource = remember { MutableInteractionSource() },
                 maxLines = 1,
                 textStyle = MaterialTheme.typography.bodySmall.copy(
-                    fontSize = 12.sp,
-                    lineHeight = 13.sp,
+                    fontSize = 13.sp,
+                    lineHeight = 14.sp,
                     fontWeight = FontWeight.Medium,
                     textAlign = TextAlign.Start,
                     color = MaterialTheme.colorScheme.onSurfaceVariant

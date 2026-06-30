@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
@@ -60,14 +61,15 @@ fun StyledTextField(
             if (label.isNotEmpty()) {
                 Text(
                     text = label.uppercase(),
-                    fontSize = 8.sp,
-                    lineHeight = 9.sp,
+                    fontSize = 10.sp,
+                    lineHeight = 11.sp,
                     fontWeight = FontWeight.SemiBold,
                     letterSpacing = 0.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = if (enabled) 0.5f else 0.3f),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
+                Spacer(Modifier.height(1.dp))
             }
             BasicTextField(
                 value = value,
@@ -79,8 +81,8 @@ fun StyledTextField(
                 keyboardOptions = keyboardOptions,
                 keyboardActions = keyboardActions,
                 textStyle = MaterialTheme.typography.bodySmall.copy(
-                    fontSize = 12.sp,
-                    lineHeight = 13.sp,
+                    fontSize = 13.sp,
+                    lineHeight = 14.sp,
                     fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = if (enabled) 1f else 0.38f)
                 ),
@@ -92,8 +94,8 @@ fun StyledTextField(
                             Text(
                                 text = placeholder,
                                 style = MaterialTheme.typography.bodySmall.copy(
-                                    fontSize = 12.sp,
-                                    lineHeight = 13.sp,
+                                    fontSize = 13.sp,
+                                    lineHeight = 14.sp,
                                     fontWeight = FontWeight.Medium,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
                                 )

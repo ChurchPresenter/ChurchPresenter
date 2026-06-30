@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -56,7 +57,7 @@ fun FontSettingsDropdown(
     Box(modifier = modifier) {
         Column(
             modifier = Modifier
-                .height(42.dp)
+                .heightIn(min = 42.dp)
                 .fillMaxWidth()
                 .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
                 .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp))
@@ -67,35 +68,34 @@ fun FontSettingsDropdown(
             if (label.isNotEmpty()) {
                 Text(
                     text = label.uppercase(),
-                    fontSize = 8.sp,
-                    lineHeight = 9.sp,
+                    fontSize = 10.sp,
+                    lineHeight = 11.sp,
                     fontWeight = FontWeight.SemiBold,
                     letterSpacing = 0.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
+                Spacer(Modifier.height(1.dp))
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     text = value,
                     style = MaterialTheme.typography.bodySmall.copy(
-                        fontSize = 12.sp,
-                        lineHeight = 13.sp,
+                        fontSize = 13.sp,
+                        lineHeight = 14.sp,
                         fontWeight = FontWeight.Medium,
                         fontFamily = selectedFontFamily
                     ),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f)
                 )
                 Spacer(Modifier.width(4.dp))
                 Icon(
                     painter = painterResource(Res.drawable.ic_arrow_down),
                     contentDescription = null,
-                    modifier = Modifier.size(9.dp),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f)
+                    modifier = Modifier.size(14.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }

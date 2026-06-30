@@ -14,11 +14,13 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalMinimumInteractiveComponentSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -65,38 +67,40 @@ fun <T> SegmentedButton(
             }
 
             val button: @Composable () -> Unit = {
-                OutlinedButton(
-                    onClick = { onValueChange(item.value) },
-                    modifier = Modifier
-                        .height(buttonHeight)
-                        .width(buttonWidth),
-                    shape = shape,
-                    border = BorderStroke(
-                        1.dp,
-                        MaterialTheme.colorScheme.outline
-                    ),
-                    colors = ButtonDefaults.outlinedButtonColors(
-                        containerColor = if (isSelected)
-                            MaterialTheme.colorScheme.onSecondary
-                        else
-                            Color.Transparent,
-                        contentColor = MaterialTheme.colorScheme.onSurface
-                    ),
-                    contentPadding = contentPadding
-                ) {
-                    if (item.icon != null) {
-                        Icon(
-                            imageVector = item.icon,
-                            contentDescription = item.label,
-                            modifier = Modifier.size(fontSize.value.dp * 1.1f)
-                        )
-                    } else {
-                        Text(
-                            text = item.label,
-                            fontSize = fontSize,
-                            fontWeight = FontWeight.Bold,
-                            maxLines = 1
-                        )
+                CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides Dp.Unspecified) {
+                    OutlinedButton(
+                        onClick = { onValueChange(item.value) },
+                        modifier = Modifier
+                            .height(buttonHeight)
+                            .width(buttonWidth),
+                        shape = shape,
+                        border = BorderStroke(
+                            1.dp,
+                            MaterialTheme.colorScheme.outline
+                        ),
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            containerColor = if (isSelected)
+                                MaterialTheme.colorScheme.onSecondary
+                            else
+                                Color.Transparent,
+                            contentColor = MaterialTheme.colorScheme.onSurface
+                        ),
+                        contentPadding = contentPadding
+                    ) {
+                        if (item.icon != null) {
+                            Icon(
+                                imageVector = item.icon,
+                                contentDescription = item.label,
+                                modifier = Modifier.size(fontSize.value.dp * 1.1f)
+                            )
+                        } else {
+                            Text(
+                                text = item.label,
+                                fontSize = fontSize,
+                                fontWeight = FontWeight.Bold,
+                                maxLines = 1
+                            )
+                        }
                     }
                 }
             }
