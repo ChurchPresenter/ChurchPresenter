@@ -15,7 +15,7 @@ import kotlinx.serialization.json.Json
 import org.apache.poi.hssf.usermodel.HSSFWorkbook
 import org.apache.poi.ss.usermodel.FillPatternType
 import org.apache.poi.ss.usermodel.IndexedColors
-import org.churchpresenter.app.churchpresenter.utils.AnalyticsReporter
+
 
 // ── Aggregate statistics (existing, all-time) ─────────────────────────────────
 
@@ -147,7 +147,6 @@ class StatisticsManager {
             save()
             saveLog()
         }
-        AnalyticsReporter.logSongDisplayed(songNumber, title, songbook)
     }
 
     fun recordVerseDisplay(bibleName: String, bookName: String, chapter: Int, verseNumber: Int) {
@@ -169,7 +168,6 @@ class StatisticsManager {
             save()
             saveLog()
         }
-        AnalyticsReporter.logVerseDisplayed(bibleName, bookName, chapter, verseNumber)
     }
 
     // ── All-time aggregate queries (used by existing StatisticsDialog) ─────────

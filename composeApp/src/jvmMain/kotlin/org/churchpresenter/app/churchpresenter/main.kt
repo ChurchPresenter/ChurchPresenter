@@ -127,7 +127,7 @@ import org.churchpresenter.app.churchpresenter.server.ProjectRequest
 import org.churchpresenter.app.churchpresenter.ui.theme.AppThemeWrapper
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.presenterScreenBounds
-import org.churchpresenter.app.churchpresenter.utils.AnalyticsReporter
+
 import org.churchpresenter.app.churchpresenter.utils.AutoStartManager
 import org.churchpresenter.app.churchpresenter.utils.CrashReporter
 import org.churchpresenter.app.churchpresenter.utils.LiveMapReporter
@@ -184,9 +184,7 @@ fun main() {
 
     // Install crash reporting before anything else
     CrashReporter.initialize()
-    AnalyticsReporter.initialize()
-    AnalyticsReporter.logAppOpen()
-    CrashReporter.setUser(AnalyticsReporter.clientId)
+
     LiveMapReporter.pingOnOpen()
 
     // Catch exceptions thrown inside coroutines / Compose lambdas —

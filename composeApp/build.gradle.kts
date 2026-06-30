@@ -413,51 +413,10 @@ val generateBuildConfig by tasks.registering {
     }
 }
 
-// Bake GA4 credentials into a generated Kotlin file at build time (like BuildConfig).
-// Source priority: signing repo analytics.properties → GA4_MEASUREMENT_ID / GA4_API_SECRET env vars.
-// When neither is present credentials are empty strings and the reporter stays disabled.
-val generateAnalyticsConfig by tasks.registering {
-    val analyticsProps = if (desktopSigningRepoPath != null)
-        loadPropsFile("$desktopSigningRepoPath/analytics.properties")
-    else Properties()
-    val measurementId = analyticsProps.getProperty("measurement_id", "")
-        .ifBlank { System.getenv("GA_MEASUREMENT_ID") ?: "" }.trim()
-    val apiSecret = analyticsProps.getProperty("api_secret", "")
-        .ifBlank { System.getenv("GA_API_SECRET") ?: "" }.trim()
-    val outputDir = layout.buildDirectory.dir("generated/analyticsconfig")
-
-    if (measurementId.isNotBlank() && apiSecret.isNotBlank()) {
-        val source = if (desktopSigningRepoPath != null && analyticsProps.getProperty("measurement_id", "").isNotBlank())
-            "signing repo" else "environment variables"
-        logger.lifecycle("Analytics: credentials loaded from $source")
-    } else {
-        logger.lifecycle("Analytics: no credentials found — reporter disabled")
-    }
-
-    outputs.upToDateWhen { false }
-    outputs.dir(outputDir)
-
-    doLast {
-        val dir = outputDir.get().asFile.resolve("org/churchpresenter/app/churchpresenter")
-        dir.mkdirs()
-        dir.resolve("AnalyticsConfig.kt").writeText(
-            """
-            |package org.churchpresenter.app.churchpresenter
-            |
-            |object AnalyticsConfig {
-            |    const val MEASUREMENT_ID = "$measurementId"
-            |    const val API_SECRET = "$apiSecret"
-            |}
-            """.trimMargin()
-        )
-    }
-}
-
 kotlin {
     sourceSets {
         jvmMain {
             kotlin.srcDir(generateBuildConfig.map { layout.buildDirectory.dir("generated/buildconfig") })
-            kotlin.srcDir(generateAnalyticsConfig.map { layout.buildDirectory.dir("generated/analyticsconfig") })
             // Include Converter submodule source (builds together, launches as separate window)
             kotlin.srcDir("src/jvmMain/appResources/common/ChurchPresenter-Converter/src/main/kotlin")
             // Include LottieGen submodule source (builds together, launches as separate window)
@@ -474,7 +433,6 @@ kotlin {
 
 tasks.named("compileKotlinJvm") {
     dependsOn(generateBuildConfig)
-    dependsOn(generateAnalyticsConfig)
 }
 
 // Workaround: avoid Gradle incremental state tracking on Compose resource generation tasks

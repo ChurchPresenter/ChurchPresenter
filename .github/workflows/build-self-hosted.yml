@@ -101,18 +101,6 @@ jobs:
           $shortSha = git rev-parse --short HEAD
           echo "SHORT_SHA=$shortSha" >> $env:GITHUB_OUTPUT
 
-      # ── Analytics configuration ─────────────────────────────────────────────
-      - name: Write analytics configuration
-        shell: bash
-        env:
-          GA_MEASUREMENT_ID: ${{ secrets.GA_MEASUREMENT_ID }}
-          GA_API_SECRET: ${{ secrets.GA_API_SECRET }}
-        run: |
-          SIGNING_DIR="$RUNNER_TEMP/signing"
-          mkdir -p "$SIGNING_DIR"
-          printf "measurement_id=%s\napi_secret=%s\n" "$GA_MEASUREMENT_ID" "$GA_API_SECRET" > "$SIGNING_DIR/analytics.properties"
-          grep -q "desktop.signing.repo.path" local.properties 2>/dev/null || echo "desktop.signing.repo.path=$RUNNER_TEMP/signing" >> local.properties
-
       # ── Windows Code Signing ────────────────────────────────────────────────
       # Skipped automatically if WINDOWS_CERTIFICATE_PFX secret is not set.
 
@@ -180,16 +168,6 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      # ── Analytics configuration ─────────────────────────────────────────────
-      - name: Write analytics configuration
-        env:
-          GA_MEASUREMENT_ID: ${{ secrets.GA_MEASUREMENT_ID }}
-          GA_API_SECRET: ${{ secrets.GA_API_SECRET }}
-        run: |
-          SIGNING_DIR="$RUNNER_TEMP/signing"
-          mkdir -p "$SIGNING_DIR"
-          printf "measurement_id=%s\napi_secret=%s\n" "$GA_MEASUREMENT_ID" "$GA_API_SECRET" > "$SIGNING_DIR/analytics.properties"
-          grep -q "desktop.signing.repo.path" local.properties 2>/dev/null || echo "desktop.signing.repo.path=$RUNNER_TEMP/signing" >> local.properties
 
       # ── macOS Code Signing & Notarization ──────────────────────────────────
       # Skipped automatically if MACOS_CERTIFICATE_P12 secret is not set.
@@ -356,16 +334,6 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      # ── Analytics configuration ─────────────────────────────────────────────
-      - name: Write analytics configuration
-        env:
-          GA_MEASUREMENT_ID: ${{ secrets.GA_MEASUREMENT_ID }}
-          GA_API_SECRET: ${{ secrets.GA_API_SECRET }}
-        run: |
-          SIGNING_DIR="$RUNNER_TEMP/signing"
-          mkdir -p "$SIGNING_DIR"
-          printf "measurement_id=%s\napi_secret=%s\n" "$GA_MEASUREMENT_ID" "$GA_API_SECRET" > "$SIGNING_DIR/analytics.properties"
-          grep -q "desktop.signing.repo.path" local.properties 2>/dev/null || echo "desktop.signing.repo.path=$RUNNER_TEMP/signing" >> local.properties
 
       # ── macOS Code Signing & Notarization ──────────────────────────────────
 
@@ -533,16 +501,6 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      # ── Analytics configuration ─────────────────────────────────────────────
-      - name: Write analytics configuration
-        env:
-          GA_MEASUREMENT_ID: ${{ secrets.GA_MEASUREMENT_ID }}
-          GA_API_SECRET: ${{ secrets.GA_API_SECRET }}
-        run: |
-          SIGNING_DIR="$RUNNER_TEMP/signing"
-          mkdir -p "$SIGNING_DIR"
-          printf "measurement_id=%s\napi_secret=%s\n" "$GA_MEASUREMENT_ID" "$GA_API_SECRET" > "$SIGNING_DIR/analytics.properties"
-          grep -q "desktop.signing.repo.path" local.properties 2>/dev/null || echo "desktop.signing.repo.path=$RUNNER_TEMP/signing" >> local.properties
 
       # ── Linux GPG Signing ──────────────────────────────────────────────────
       - name: Import GPG key and write signing configuration

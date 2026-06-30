@@ -78,8 +78,6 @@ fonts, media components, or services that are licensed separately. Such
 third-party components remain subject to their respective licenses and terms.
 Examples may include:
 
-  • Firebase services
-  • Google Analytics services
   • Sentry error reporting
   • VLC libraries
   • Java Runtime components
