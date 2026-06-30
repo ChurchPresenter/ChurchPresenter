@@ -213,8 +213,9 @@ private fun LeftColumn(
         bibleFileDisplayNames[fileName] ?: fileName
     }
 
-    SettingRow(stringResource(Res.string.primary_bible)) {
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         DropdownSettingsField(
+            label = stringResource(Res.string.primary_bible),
             value = if (settings.bibleSettings.primaryBible.isEmpty()) {
                 noneStr
             } else {
@@ -222,7 +223,6 @@ private fun LeftColumn(
             },
             options = bibleDisplayOptions,
             onValueChange = { displayName ->
-                // Find the filename that matches this display name
                 val fileName = if (displayName == noneStr) {
                     ""
                 } else {
@@ -231,41 +231,38 @@ private fun LeftColumn(
                 onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(primaryBible = fileName)) }
             }
         )
-    }
-    SettingRow(stringResource(Res.string.secondary_bible)) {
-        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            DropdownSettingsField(
-                value = if (settings.bibleSettings.secondaryBible.isEmpty()) {
-                    noneStr
+        DropdownSettingsField(
+            label = stringResource(Res.string.secondary_bible),
+            value = if (settings.bibleSettings.secondaryBible.isEmpty()) {
+                noneStr
+            } else {
+                bibleFileDisplayNames[settings.bibleSettings.secondaryBible] ?: settings.bibleSettings.secondaryBible
+            },
+            options = bibleDisplayOptions,
+            onValueChange = { displayName ->
+                val fileName = if (displayName == noneStr) {
+                    ""
                 } else {
-                    bibleFileDisplayNames[settings.bibleSettings.secondaryBible] ?: settings.bibleSettings.secondaryBible
-                },
-                options = bibleDisplayOptions,
-                onValueChange = { displayName ->
-                    val fileName = if (displayName == noneStr) {
-                        ""
-                    } else {
-                        bibleFileDisplayNames.entries.find { it.value == displayName }?.key ?: displayName
-                    }
-                    onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(secondaryBible = fileName)) }
+                    bibleFileDisplayNames.entries.find { it.value == displayName }?.key ?: displayName
                 }
-            )
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Checkbox(
-                    checked = settings.bibleSettings.secondaryBibleLowerThirdEnabled,
-                    onCheckedChange = { checked ->
-                        onSettingsChange { s ->
-                            s.copy(bibleSettings = s.bibleSettings.copy(secondaryBibleLowerThirdEnabled = checked))
-                        }
-                    }
-                )
-                Text(
-                    text = stringResource(Res.string.show_in_lower_third),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
+                onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(secondaryBible = fileName)) }
             }
-        }
+        )
+    }
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Checkbox(
+            checked = settings.bibleSettings.secondaryBibleLowerThirdEnabled,
+            onCheckedChange = { checked ->
+                onSettingsChange { s ->
+                    s.copy(bibleSettings = s.bibleSettings.copy(secondaryBibleLowerThirdEnabled = checked))
+                }
+            }
+        )
+        Text(
+            text = stringResource(Res.string.show_in_lower_third),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurface
+        )
     }
 
     Spacer(modifier = Modifier.height(20.dp))
@@ -490,8 +487,9 @@ private fun PrimaryBibleTextColumn(
     SettingRow(stringResource(Res.string.color)) {
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(stringResource(Res.string.full_screen), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(80.dp))
                 ColorPickerField(
+                    label = stringResource(Res.string.full_screen),
+                    modifier = Modifier.width(120.dp),
                     color = settings.bibleSettings.primaryBibleColor,
                     onColorChange = {
                         onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(primaryBibleColor = it)) }
@@ -519,8 +517,9 @@ private fun PrimaryBibleTextColumn(
                 )
             }
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(stringResource(Res.string.lower_third_size), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(80.dp))
                 ColorPickerField(
+                    label = stringResource(Res.string.lower_third_size),
+                    modifier = Modifier.width(120.dp),
                     color = settings.bibleSettings.primaryBibleLowerThirdColor,
                     onColorChange = {
                         onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(primaryBibleLowerThirdColor = it)) }
@@ -550,29 +549,23 @@ private fun PrimaryBibleTextColumn(
         }
     }
     SettingRow(stringResource(Res.string.font_type)) {
-        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(stringResource(Res.string.full_screen), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(80.dp))
-                FontSettingsDropdown(
-                    modifier = Modifier.width(200.dp),
-                    value = settings.bibleSettings.primaryBibleFontType,
-                    fonts = availableFonts,
-                    onValueChange = {
-                        onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(primaryBibleFontType = it)) }
-                    }
-                )
-            }
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(stringResource(Res.string.lower_third_size), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(80.dp))
-                FontSettingsDropdown(
-                    modifier = Modifier.width(200.dp),
-                    value = settings.bibleSettings.primaryBibleLowerThirdFontType,
-                    fonts = availableFonts,
-                    onValueChange = {
-                        onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(primaryBibleLowerThirdFontType = it)) }
-                    }
-                )
-            }
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            FontSettingsDropdown(
+                label = stringResource(Res.string.full_screen),
+                value = settings.bibleSettings.primaryBibleFontType,
+                fonts = availableFonts,
+                onValueChange = {
+                    onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(primaryBibleFontType = it)) }
+                }
+            )
+            FontSettingsDropdown(
+                label = stringResource(Res.string.lower_third_size),
+                value = settings.bibleSettings.primaryBibleLowerThirdFontType,
+                fonts = availableFonts,
+                onValueChange = {
+                    onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(primaryBibleLowerThirdFontType = it)) }
+                }
+            )
         }
     }
     val textMeasurer = rememberTextMeasurer()
@@ -588,9 +581,9 @@ private fun PrimaryBibleTextColumn(
     SettingRow(stringResource(Res.string.font_size)) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(stringResource(Res.string.full_screen), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                     NumberSettingsTextField(
+                        label = stringResource(Res.string.full_screen),
                         initialText = settings.bibleSettings.primaryBibleFontSize,
                         onValueChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(primaryBibleFontSize = it)) } },
                         range = 8..150
@@ -634,9 +627,9 @@ private fun PrimaryBibleTextColumn(
                 }
             }
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(stringResource(Res.string.lower_third_size), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                     NumberSettingsTextField(
+                        label = stringResource(Res.string.lower_third_size),
                         initialText = settings.bibleSettings.primaryBibleLowerThirdFontSize,
                         onValueChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(primaryBibleLowerThirdFontSize = it)) } },
                         range = 8..150
@@ -715,8 +708,9 @@ private fun PrimaryBibleReferenceColumn(
     SettingRow(stringResource(Res.string.color)) {
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(stringResource(Res.string.full_screen), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(80.dp))
                 ColorPickerField(
+                    label = stringResource(Res.string.full_screen),
+                    modifier = Modifier.width(120.dp),
                     color = settings.bibleSettings.primaryReferenceColor,
                     onColorChange = {
                         onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(primaryReferenceColor = it)) }
@@ -744,8 +738,9 @@ private fun PrimaryBibleReferenceColumn(
                 )
             }
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(stringResource(Res.string.lower_third_size), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(80.dp))
                 ColorPickerField(
+                    label = stringResource(Res.string.lower_third_size),
+                    modifier = Modifier.width(120.dp),
                     color = settings.bibleSettings.primaryReferenceLowerThirdColor,
                     onColorChange = {
                         onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(primaryReferenceLowerThirdColor = it)) }
@@ -775,49 +770,39 @@ private fun PrimaryBibleReferenceColumn(
         }
     }
     SettingRow(stringResource(Res.string.font_type)) {
-        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(stringResource(Res.string.full_screen), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(80.dp))
-                FontSettingsDropdown(
-                    modifier = Modifier.width(200.dp),
-                    value = settings.bibleSettings.primaryReferenceFontType,
-                    fonts = availableFonts,
-                    onValueChange = {
-                        onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(primaryReferenceFontType = it)) }
-                    }
-                )
-            }
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(stringResource(Res.string.lower_third_size), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(80.dp))
-                FontSettingsDropdown(
-                    modifier = Modifier.width(200.dp),
-                    value = settings.bibleSettings.primaryReferenceLowerThirdFontType,
-                    fonts = availableFonts,
-                    onValueChange = {
-                        onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(primaryReferenceLowerThirdFontType = it)) }
-                    }
-                )
-            }
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            FontSettingsDropdown(
+                label = stringResource(Res.string.full_screen),
+                value = settings.bibleSettings.primaryReferenceFontType,
+                fonts = availableFonts,
+                onValueChange = {
+                    onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(primaryReferenceFontType = it)) }
+                }
+            )
+            FontSettingsDropdown(
+                label = stringResource(Res.string.lower_third_size),
+                value = settings.bibleSettings.primaryReferenceLowerThirdFontType,
+                fonts = availableFonts,
+                onValueChange = {
+                    onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(primaryReferenceLowerThirdFontType = it)) }
+                }
+            )
         }
     }
     SettingRow(stringResource(Res.string.font_size)) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(stringResource(Res.string.full_screen), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                NumberSettingsTextField(
-                    initialText = settings.bibleSettings.primaryReferenceFontSize,
-                    onValueChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(primaryReferenceFontSize = it)) } },
-                    range = 8..150
-                )
-            }
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(stringResource(Res.string.lower_third_size), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                NumberSettingsTextField(
-                    initialText = settings.bibleSettings.primaryReferenceLowerThirdFontSize,
-                    onValueChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(primaryReferenceLowerThirdFontSize = it)) } },
-                    range = 8..150
-                )
-            }
+            NumberSettingsTextField(
+                label = stringResource(Res.string.full_screen),
+                initialText = settings.bibleSettings.primaryReferenceFontSize,
+                onValueChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(primaryReferenceFontSize = it)) } },
+                range = 8..150
+            )
+            NumberSettingsTextField(
+                label = stringResource(Res.string.lower_third_size),
+                initialText = settings.bibleSettings.primaryReferenceLowerThirdFontSize,
+                onValueChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(primaryReferenceLowerThirdFontSize = it)) } },
+                range = 8..150
+            )
         }
     }
     SettingRow(stringResource(Res.string.position)) {
@@ -894,8 +879,9 @@ private fun SecondaryBibleTextColumn(
     SettingRow(stringResource(Res.string.color)) {
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(stringResource(Res.string.full_screen), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(80.dp))
                 ColorPickerField(
+                    label = stringResource(Res.string.full_screen),
+                    modifier = Modifier.width(120.dp),
                     color = settings.bibleSettings.secondaryBibleColor,
                     onColorChange = {
                         onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(secondaryBibleColor = it)) }
@@ -923,8 +909,9 @@ private fun SecondaryBibleTextColumn(
                 )
             }
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(stringResource(Res.string.lower_third_size), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(80.dp))
                 ColorPickerField(
+                    label = stringResource(Res.string.lower_third_size),
+                    modifier = Modifier.width(120.dp),
                     color = settings.bibleSettings.secondaryBibleLowerThirdColor,
                     onColorChange = {
                         onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(secondaryBibleLowerThirdColor = it)) }
@@ -954,29 +941,23 @@ private fun SecondaryBibleTextColumn(
         }
     }
     SettingRow(stringResource(Res.string.font_type)) {
-        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(stringResource(Res.string.full_screen), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(80.dp))
-                FontSettingsDropdown(
-                    modifier = Modifier.width(200.dp),
-                    value = settings.bibleSettings.secondaryBibleFontType,
-                    fonts = availableFonts,
-                    onValueChange = {
-                        onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(secondaryBibleFontType = it)) }
-                    }
-                )
-            }
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(stringResource(Res.string.lower_third_size), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(80.dp))
-                FontSettingsDropdown(
-                    modifier = Modifier.width(200.dp),
-                    value = settings.bibleSettings.secondaryBibleLowerThirdFontType,
-                    fonts = availableFonts,
-                    onValueChange = {
-                        onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(secondaryBibleLowerThirdFontType = it)) }
-                    }
-                )
-            }
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            FontSettingsDropdown(
+                label = stringResource(Res.string.full_screen),
+                value = settings.bibleSettings.secondaryBibleFontType,
+                fonts = availableFonts,
+                onValueChange = {
+                    onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(secondaryBibleFontType = it)) }
+                }
+            )
+            FontSettingsDropdown(
+                label = stringResource(Res.string.lower_third_size),
+                value = settings.bibleSettings.secondaryBibleLowerThirdFontType,
+                fonts = availableFonts,
+                onValueChange = {
+                    onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(secondaryBibleLowerThirdFontType = it)) }
+                }
+            )
         }
     }
     val textMeasurer2 = rememberTextMeasurer()
@@ -992,9 +973,9 @@ private fun SecondaryBibleTextColumn(
     SettingRow(stringResource(Res.string.font_size)) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(stringResource(Res.string.full_screen), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                     NumberSettingsTextField(
+                        label = stringResource(Res.string.full_screen),
                         initialText = settings.bibleSettings.secondaryBibleFontSize,
                         onValueChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(secondaryBibleFontSize = it)) } },
                         range = 8..150
@@ -1037,9 +1018,9 @@ private fun SecondaryBibleTextColumn(
                 }
             }
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(stringResource(Res.string.lower_third_size), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                     NumberSettingsTextField(
+                        label = stringResource(Res.string.lower_third_size),
                         initialText = settings.bibleSettings.secondaryBibleLowerThirdFontSize,
                         onValueChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(secondaryBibleLowerThirdFontSize = it)) } },
                         range = 8..150
@@ -1118,8 +1099,9 @@ private fun SecondaryBibleReferenceColumn(
     SettingRow(stringResource(Res.string.color)) {
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(stringResource(Res.string.full_screen), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(80.dp))
                 ColorPickerField(
+                    label = stringResource(Res.string.full_screen),
+                    modifier = Modifier.width(120.dp),
                     color = settings.bibleSettings.secondaryReferenceColor,
                     onColorChange = {
                         onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(secondaryReferenceColor = it)) }
@@ -1147,8 +1129,9 @@ private fun SecondaryBibleReferenceColumn(
                 )
             }
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(stringResource(Res.string.lower_third_size), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(80.dp))
                 ColorPickerField(
+                    label = stringResource(Res.string.lower_third_size),
+                    modifier = Modifier.width(120.dp),
                     color = settings.bibleSettings.secondaryReferenceLowerThirdColor,
                     onColorChange = {
                         onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(secondaryReferenceLowerThirdColor = it)) }
@@ -1178,49 +1161,39 @@ private fun SecondaryBibleReferenceColumn(
         }
     }
     SettingRow(stringResource(Res.string.font_type)) {
-        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(stringResource(Res.string.full_screen), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(80.dp))
-                FontSettingsDropdown(
-                    modifier = Modifier.width(200.dp),
-                    value = settings.bibleSettings.secondaryReferenceFontType,
-                    fonts = availableFonts,
-                    onValueChange = {
-                        onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(secondaryReferenceFontType = it)) }
-                    }
-                )
-            }
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(stringResource(Res.string.lower_third_size), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(80.dp))
-                FontSettingsDropdown(
-                    modifier = Modifier.width(200.dp),
-                    value = settings.bibleSettings.secondaryReferenceLowerThirdFontType,
-                    fonts = availableFonts,
-                    onValueChange = {
-                        onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(secondaryReferenceLowerThirdFontType = it)) }
-                    }
-                )
-            }
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            FontSettingsDropdown(
+                label = stringResource(Res.string.full_screen),
+                value = settings.bibleSettings.secondaryReferenceFontType,
+                fonts = availableFonts,
+                onValueChange = {
+                    onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(secondaryReferenceFontType = it)) }
+                }
+            )
+            FontSettingsDropdown(
+                label = stringResource(Res.string.lower_third_size),
+                value = settings.bibleSettings.secondaryReferenceLowerThirdFontType,
+                fonts = availableFonts,
+                onValueChange = {
+                    onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(secondaryReferenceLowerThirdFontType = it)) }
+                }
+            )
         }
     }
     SettingRow(stringResource(Res.string.font_size)) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(stringResource(Res.string.full_screen), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                NumberSettingsTextField(
-                    initialText = settings.bibleSettings.secondaryReferenceFontSize,
-                    onValueChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(secondaryReferenceFontSize = it)) } },
-                    range = 8..150
-                )
-            }
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(stringResource(Res.string.lower_third_size), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                NumberSettingsTextField(
-                    initialText = settings.bibleSettings.secondaryReferenceLowerThirdFontSize,
-                    onValueChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(secondaryReferenceLowerThirdFontSize = it)) } },
-                    range = 8..150
-                )
-            }
+            NumberSettingsTextField(
+                label = stringResource(Res.string.full_screen),
+                initialText = settings.bibleSettings.secondaryReferenceFontSize,
+                onValueChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(secondaryReferenceFontSize = it)) } },
+                range = 8..150
+            )
+            NumberSettingsTextField(
+                label = stringResource(Res.string.lower_third_size),
+                initialText = settings.bibleSettings.secondaryReferenceLowerThirdFontSize,
+                onValueChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(secondaryReferenceLowerThirdFontSize = it)) } },
+                range = 8..150
+            )
         }
     }
     SettingRow(stringResource(Res.string.position)) {

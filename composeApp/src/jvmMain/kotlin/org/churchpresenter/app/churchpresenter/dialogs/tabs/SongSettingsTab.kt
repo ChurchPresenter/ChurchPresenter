@@ -250,69 +250,61 @@ private fun LeftColumn(
 
     SettingRow(stringResource(Res.string.font_size)) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(stringResource(Res.string.full_screen), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                NumberSettingsTextField(
-                    initialText = settings.songSettings.songNumberFontSize,
-                    onValueChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(songNumberFontSize = it)) } },
-                    range = 8..150
-                )
-            }
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(stringResource(Res.string.lower_third_size), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                NumberSettingsTextField(
-                    initialText = settings.songSettings.songNumberLowerThirdFontSize,
-                    onValueChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(songNumberLowerThirdFontSize = it)) } },
-                    range = 8..150
-                )
-            }
+            NumberSettingsTextField(
+                label = stringResource(Res.string.full_screen),
+                initialText = settings.songSettings.songNumberFontSize,
+                onValueChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(songNumberFontSize = it)) } },
+                range = 8..150
+            )
+            NumberSettingsTextField(
+                label = stringResource(Res.string.lower_third_size),
+                initialText = settings.songSettings.songNumberLowerThirdFontSize,
+                onValueChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(songNumberLowerThirdFontSize = it)) } },
+                range = 8..150
+            )
         }
     }
 
     SettingRow(stringResource(Res.string.show_number)) {
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(stringResource(Res.string.full_screen), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(80.dp))
-                DropdownSettingsField(
-                    value = when (settings.songSettings.showNumber) {
-                        Constants.NONE -> noneStr
-                        Constants.FIRST_PAGE -> firstPageStr
-                        Constants.EVERY_PAGE -> everyPageStr
-                        else -> firstPageStr
-                    },
-                    options = listOf(noneStr, firstPageStr, everyPageStr),
-                    onValueChange = { displayValue ->
-                        val storedValue = when (displayValue) {
-                            noneStr -> Constants.NONE
-                            firstPageStr -> Constants.FIRST_PAGE
-                            everyPageStr -> Constants.EVERY_PAGE
-                            else -> Constants.FIRST_PAGE
-                        }
-                        onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(showNumber = storedValue)) }
+            DropdownSettingsField(
+                label = stringResource(Res.string.full_screen),
+                value = when (settings.songSettings.showNumber) {
+                    Constants.NONE -> noneStr
+                    Constants.FIRST_PAGE -> firstPageStr
+                    Constants.EVERY_PAGE -> everyPageStr
+                    else -> firstPageStr
+                },
+                options = listOf(noneStr, firstPageStr, everyPageStr),
+                onValueChange = { displayValue ->
+                    val storedValue = when (displayValue) {
+                        noneStr -> Constants.NONE
+                        firstPageStr -> Constants.FIRST_PAGE
+                        everyPageStr -> Constants.EVERY_PAGE
+                        else -> Constants.FIRST_PAGE
                     }
-                )
-            }
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(stringResource(Res.string.lower_third_size), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(80.dp))
-                DropdownSettingsField(
-                    value = when (settings.songSettings.showNumberLowerThird) {
-                        Constants.NONE -> noneStr
-                        Constants.FIRST_PAGE -> firstPageStr
-                        Constants.EVERY_PAGE -> everyPageStr
-                        else -> firstPageStr
-                    },
-                    options = listOf(noneStr, firstPageStr, everyPageStr),
-                    onValueChange = { displayValue ->
-                        val storedValue = when (displayValue) {
-                            noneStr -> Constants.NONE
-                            firstPageStr -> Constants.FIRST_PAGE
-                            everyPageStr -> Constants.EVERY_PAGE
-                            else -> Constants.FIRST_PAGE
-                        }
-                        onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(showNumberLowerThird = storedValue)) }
+                    onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(showNumber = storedValue)) }
+                }
+            )
+            DropdownSettingsField(
+                label = stringResource(Res.string.lower_third_size),
+                value = when (settings.songSettings.showNumberLowerThird) {
+                    Constants.NONE -> noneStr
+                    Constants.FIRST_PAGE -> firstPageStr
+                    Constants.EVERY_PAGE -> everyPageStr
+                    else -> firstPageStr
+                },
+                options = listOf(noneStr, firstPageStr, everyPageStr),
+                onValueChange = { displayValue ->
+                    val storedValue = when (displayValue) {
+                        noneStr -> Constants.NONE
+                        firstPageStr -> Constants.FIRST_PAGE
+                        everyPageStr -> Constants.EVERY_PAGE
+                        else -> Constants.FIRST_PAGE
                     }
-                )
-            }
+                    onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(showNumberLowerThird = storedValue)) }
+                }
+            )
         }
     }
 
@@ -393,101 +385,88 @@ private fun LeftColumn(
 
     SettingRow(stringResource(Res.string.show_title)) {
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(stringResource(Res.string.full_screen), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(80.dp))
-                DropdownSettingsField(
-                    value = when (settings.songSettings.titleDisplay) {
-                        Constants.NONE -> noneStr
-                        Constants.FIRST_PAGE -> firstPageStr
-                        Constants.EVERY_PAGE -> everyPageStr
-                        else -> firstPageStr
-                    },
-                    options = listOf(noneStr, firstPageStr, everyPageStr),
-                    onValueChange = { displayValue ->
-                        val storedValue = when (displayValue) {
-                            noneStr -> Constants.NONE
-                            firstPageStr -> Constants.FIRST_PAGE
-                            everyPageStr -> Constants.EVERY_PAGE
-                            else -> Constants.FIRST_PAGE
-                        }
-                        onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleDisplay = storedValue)) }
+            DropdownSettingsField(
+                label = stringResource(Res.string.full_screen),
+                value = when (settings.songSettings.titleDisplay) {
+                    Constants.NONE -> noneStr
+                    Constants.FIRST_PAGE -> firstPageStr
+                    Constants.EVERY_PAGE -> everyPageStr
+                    else -> firstPageStr
+                },
+                options = listOf(noneStr, firstPageStr, everyPageStr),
+                onValueChange = { displayValue ->
+                    val storedValue = when (displayValue) {
+                        noneStr -> Constants.NONE
+                        firstPageStr -> Constants.FIRST_PAGE
+                        everyPageStr -> Constants.EVERY_PAGE
+                        else -> Constants.FIRST_PAGE
                     }
-                )
-            }
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(stringResource(Res.string.lower_third_size), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(80.dp))
-                DropdownSettingsField(
-                    value = when (settings.songSettings.titleLowerThirdDisplay) {
-                        Constants.NONE -> noneStr
-                        Constants.FIRST_PAGE -> firstPageStr
-                        Constants.EVERY_PAGE -> everyPageStr
-                        else -> firstPageStr
-                    },
-                    options = listOf(noneStr, firstPageStr, everyPageStr),
-                    onValueChange = { displayValue ->
-                        val storedValue = when (displayValue) {
-                            noneStr -> Constants.NONE
-                            firstPageStr -> Constants.FIRST_PAGE
-                            everyPageStr -> Constants.EVERY_PAGE
-                            else -> Constants.FIRST_PAGE
-                        }
-                        onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleLowerThirdDisplay = storedValue)) }
+                    onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleDisplay = storedValue)) }
+                }
+            )
+            DropdownSettingsField(
+                label = stringResource(Res.string.lower_third_size),
+                value = when (settings.songSettings.titleLowerThirdDisplay) {
+                    Constants.NONE -> noneStr
+                    Constants.FIRST_PAGE -> firstPageStr
+                    Constants.EVERY_PAGE -> everyPageStr
+                    else -> firstPageStr
+                },
+                options = listOf(noneStr, firstPageStr, everyPageStr),
+                onValueChange = { displayValue ->
+                    val storedValue = when (displayValue) {
+                        noneStr -> Constants.NONE
+                        firstPageStr -> Constants.FIRST_PAGE
+                        everyPageStr -> Constants.EVERY_PAGE
+                        else -> Constants.FIRST_PAGE
                     }
-                )
-            }
+                    onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleLowerThirdDisplay = storedValue)) }
+                }
+            )
         }
     }
 
     SettingRow(stringResource(Res.string.font_size)) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(stringResource(Res.string.full_screen), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                NumberSettingsTextField(
-                    initialText = settings.songSettings.titleFontSize,
-                    onValueChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleFontSize = it)) } },
-                    range = 8..150
-                )
-            }
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(stringResource(Res.string.lower_third_size), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                NumberSettingsTextField(
-                    initialText = settings.songSettings.titleLowerThirdFontSize,
-                    onValueChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleLowerThirdFontSize = it)) } },
-                    range = 8..150
-                )
-            }
+            NumberSettingsTextField(
+                label = stringResource(Res.string.full_screen),
+                initialText = settings.songSettings.titleFontSize,
+                onValueChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleFontSize = it)) } },
+                range = 8..150
+            )
+            NumberSettingsTextField(
+                label = stringResource(Res.string.lower_third_size),
+                initialText = settings.songSettings.titleLowerThirdFontSize,
+                onValueChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleLowerThirdFontSize = it)) } },
+                range = 8..150
+            )
         }
     }
 
     SettingRow(stringResource(Res.string.font_type)) {
-        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(stringResource(Res.string.full_screen), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(80.dp))
-                FontSettingsDropdown(
-                    modifier = Modifier.width(150.dp),
-                    value = settings.songSettings.titleFontType,
-                    fonts = availableFonts,
-                    onValueChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleFontType = it)) } }
-                )
-            }
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(stringResource(Res.string.lower_third_size), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(80.dp))
-                FontSettingsDropdown(
-                    modifier = Modifier.width(150.dp),
-                    value = settings.songSettings.titleLowerThirdFontType,
-                    fonts = availableFonts,
-                    onValueChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleLowerThirdFontType = it)) } }
-                )
-            }
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            FontSettingsDropdown(
+                label = stringResource(Res.string.full_screen),
+                value = settings.songSettings.titleFontType,
+                fonts = availableFonts,
+                onValueChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleFontType = it)) } }
+            )
+            FontSettingsDropdown(
+                label = stringResource(Res.string.lower_third_size),
+                value = settings.songSettings.titleLowerThirdFontType,
+                fonts = availableFonts,
+                onValueChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleLowerThirdFontType = it)) } }
+            )
         }
     }
 
     SettingRow(stringResource(Res.string.color)) {
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
             // Fullscreen
-            Text(stringResource(Res.string.full_screen), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 ColorPickerField(
+                    label = stringResource(Res.string.full_screen),
+                    modifier = Modifier.width(120.dp),
                     color = settings.songSettings.titleColor,
                     onColorChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleColor = it)) } }
                 )
@@ -513,9 +492,10 @@ private fun LeftColumn(
                 )
             }
             // Lower Third
-            Text(stringResource(Res.string.lower_third_size), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 ColorPickerField(
+                    label = stringResource(Res.string.lower_third_size),
+                    modifier = Modifier.width(120.dp),
                     color = settings.songSettings.titleLowerThirdColor,
                     onColorChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleLowerThirdColor = it)) } }
                 )
@@ -999,6 +979,7 @@ private fun RightColumn(
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 ColorPickerField(
+                    modifier = Modifier.width(120.dp),
                     color = settings.songSettings.lyricsColor,
                     onColorChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsColor = it)) } }
                 )
@@ -1145,6 +1126,7 @@ private fun RightColumn(
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 ColorPickerField(
+                    modifier = Modifier.width(120.dp),
                     color = settings.songSettings.lyricsLowerThirdColor,
                     onColorChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lyricsLowerThirdColor = it)) } }
                 )
@@ -1252,6 +1234,7 @@ private fun LookAheadColumn(
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
                 ColorPickerField(
+                    modifier = Modifier.width(120.dp),
                     color = settings.songSettings.lookAheadColor,
                     onColorChange = { color -> onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lookAheadColor = color)) } }
                 )
@@ -1317,6 +1300,7 @@ private fun LookAheadColumn(
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
                 ColorPickerField(
+                    modifier = Modifier.width(120.dp),
                     color = settings.songSettings.lookAheadNextColor,
                     onColorChange = { color -> onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lookAheadNextColor = color)) } }
                 )
@@ -1416,6 +1400,7 @@ private fun LookAheadColumn(
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
                 ColorPickerField(
+                    modifier = Modifier.width(120.dp),
                     color = settings.songSettings.lowerThirdLookAheadColor,
                     onColorChange = { color -> onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lowerThirdLookAheadColor = color)) } }
                 )
@@ -1481,6 +1466,7 @@ private fun LookAheadColumn(
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
                 ColorPickerField(
+                    modifier = Modifier.width(120.dp),
                     color = settings.songSettings.lowerThirdLookAheadNextColor,
                     onColorChange = { color -> onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(lowerThirdLookAheadNextColor = color)) } }
                 )

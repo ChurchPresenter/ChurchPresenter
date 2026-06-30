@@ -54,18 +54,16 @@ fun FontSettingsDropdown(
     var expanded by remember { mutableStateOf(false) }
     val selectedFontFamily = remember(value) { systemFontFamilyOrDefault(value) }
 
-    Box(modifier = modifier) {
-        Row(
-            modifier = Modifier
-                .heightIn(min = 42.dp)
-                .fillMaxWidth()
-                .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
-                .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp))
-                .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) { expanded = true }
-                .padding(start = 8.dp, end = 8.dp, top = 4.dp, bottom = 4.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.Center) {
+    Box(
+        modifier = modifier
+            .heightIn(min = 42.dp)
+            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp))
+            .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) { expanded = true }
+            .padding(start = 8.dp, end = 8.dp, top = 4.dp, bottom = 4.dp)
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Column(verticalArrangement = Arrangement.Center) {
                 if (label.isNotEmpty()) {
                     Text(
                         text = label.uppercase(),
