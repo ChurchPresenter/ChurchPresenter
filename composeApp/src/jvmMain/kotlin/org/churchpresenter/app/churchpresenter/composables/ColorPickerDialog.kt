@@ -247,9 +247,10 @@ fun ColorPickerDialog(
                     horizontalArrangement = Arrangement.End,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    TextButton(onClick = onDismiss) { Text(stringResource(Res.string.cancel)) }
+                    TextButton(shape = RoundedCornerShape(6.dp), onClick = onDismiss) { Text(stringResource(Res.string.cancel)) }
                     Spacer(Modifier.width(8.dp))
                     Button(
+                        shape = RoundedCornerShape(6.dp),
                         onClick = {
                             val hex = cpColorToHex(currentColor)
                             RecentColors.add(hex)

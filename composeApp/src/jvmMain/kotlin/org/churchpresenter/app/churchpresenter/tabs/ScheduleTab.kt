@@ -196,13 +196,17 @@ fun ScheduleTab(
             title = { Text(stringResource(Res.string.autosave_restore_title)) },
             text = { Text(stringResource(Res.string.autosave_restore_message, timeStr)) },
             confirmButton = {
-                Button(onClick = {
+                Button(
+                    shape = RoundedCornerShape(6.dp),
+                    onClick = {
                     viewModel.restoreAutoSave()
                     showAutoRestoreDialog = false
                 }) { Text(stringResource(Res.string.autosave_restore_confirm)) }
             },
             dismissButton = {
-                TextButton(onClick = {
+                TextButton(
+                    shape = RoundedCornerShape(6.dp),
+                    onClick = {
                     viewModel.clearAutoSave()
                     showAutoRestoreDialog = false
                 }) { Text(stringResource(Res.string.autosave_restore_discard)) }
@@ -612,6 +616,7 @@ fun ScheduleTab(
         // Add Files button at the bottom
         Box(modifier = Modifier.fillMaxWidth().padding(top = 4.dp), contentAlignment = Alignment.Center) {
             Button(
+                shape = RoundedCornerShape(6.dp),
                 onClick = {
                     scope.launch {
                         val files = FileChooser.platformInstance.chooseMultiple(

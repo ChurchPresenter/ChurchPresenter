@@ -28,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.rememberDialogState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import org.churchpresenter.app.churchpresenter.LocalMainWindowState
 import org.churchpresenter.app.churchpresenter.centeredOnMainWindow
 import churchpresenter.composeapp.generated.resources.Res
@@ -273,6 +274,7 @@ fun OptionsDialog(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         TextButton(
+                            shape = RoundedCornerShape(6.dp),
                             onClick = onDismiss,
                             colors = ButtonDefaults.textButtonColors(
                                 contentColor = MaterialTheme.colorScheme.onSurface
@@ -284,6 +286,7 @@ fun OptionsDialog(
                         Spacer(modifier = Modifier.width(8.dp))
 
                         Button(
+                            shape = RoundedCornerShape(6.dp),
                             onClick = {
                                 settingsManager.saveSettings(currentSettings)
                                 onSave(currentSettings)
@@ -299,6 +302,7 @@ fun OptionsDialog(
                         Spacer(modifier = Modifier.width(8.dp))
 
                         Button(
+                            shape = RoundedCornerShape(6.dp),
                             onClick = {
                                 settingsManager.saveSettings(currentSettings)
                                 onSave(currentSettings)

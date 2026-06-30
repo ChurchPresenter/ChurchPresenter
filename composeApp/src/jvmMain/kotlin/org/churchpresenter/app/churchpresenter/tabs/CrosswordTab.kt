@@ -52,6 +52,7 @@ import androidx.compose.ui.input.key.utf16CodePoint
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.shape.RoundedCornerShape
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.crossword_across
 import churchpresenter.composeapp.generated.resources.crossword_all_done
@@ -325,6 +326,7 @@ fun CrosswordTab(
 
                     if (!allCompleted || currentLevelIdx < puzzles.size - 1) {
                         Button(
+                            shape = RoundedCornerShape(6.dp),
                             onClick = {
                                 if (checkAnswers(puzzle, userInput)) {
                                     feedbackIsCorrect = true

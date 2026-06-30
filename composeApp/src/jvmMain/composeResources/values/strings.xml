@@ -1204,6 +1204,7 @@
     <string name="stage_monitor_show_timer">Show Countdown Timer</string>
     <string name="stage_monitor_show_section_label">Show Section Label</string>
     <string name="stage_monitor_show_notes">Show Presenter Notes</string>
+    <string name="general">General</string>
     <string name="stage_monitor_section_general">General</string>
     <string name="stage_monitor_section_current">Current Slide</string>
     <string name="stage_monitor_section_next">Next Slide Preview</string>
@@ -1448,6 +1449,7 @@
 
     <!-- OBS WebSocket integration -->
     <string name="obs_settings">OBS</string>
+    <string name="obs_section_connection">OBS WebSocket</string>
     <string name="obs_description">Automatically switch OBS Studio scenes when content changes.</string>
     <string name="obs_enable">Connect to OBS Studio</string>
     <string name="obs_host">Host</string>
@@ -1639,6 +1641,7 @@
     <string name="atem_loading_slots">Loading slots…</string>
     <string name="atem_slots_error">Could not load slots: %1$s</string>
     <string name="atem_not_configured">Configure ATEM in Settings to enable this button.</string>
+    <string name="atem_section_connection">Blackmagic ATEM</string>
     <string name="atem_section_upload_defaults">Upload Defaults</string>
     <string name="atem_slot_unnamed">Slot %1$d</string>
     <string name="atem_slot_named">Slot %1$d – %2$s</string>

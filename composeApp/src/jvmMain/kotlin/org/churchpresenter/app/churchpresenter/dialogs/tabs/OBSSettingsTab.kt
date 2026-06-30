@@ -1,7 +1,6 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -62,10 +61,12 @@ import churchpresenter.composeapp.generated.resources.obs_port
 import churchpresenter.composeapp.generated.resources.obs_scene_hint
 import churchpresenter.composeapp.generated.resources.obs_scene_mappings
 import churchpresenter.composeapp.generated.resources.obs_scene_mappings_desc
+import churchpresenter.composeapp.generated.resources.obs_section_connection
 import churchpresenter.composeapp.generated.resources.obs_status_connected
 import churchpresenter.composeapp.generated.resources.obs_status_connecting
 import churchpresenter.composeapp.generated.resources.obs_status_disconnected
 import churchpresenter.composeapp.generated.resources.obs_status_error
+import org.churchpresenter.app.churchpresenter.composables.SettingsSection
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.data.settings.OBSSettings
 import org.churchpresenter.app.churchpresenter.presenter.Presenting
@@ -102,18 +103,11 @@ fun OBSSettingsTab(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            val cardModifier = Modifier
-                .fillMaxWidth()
-                .widthIn(max = 600.dp)
-                .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(10.dp))
-                .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f), RoundedCornerShape(10.dp))
-                .padding(horizontal = 16.dp, vertical = 16.dp)
-
             // ── Connection card ────────────────────────────────────────────────
-            Column(modifier = cardModifier, verticalArrangement = Arrangement.spacedBy(0.dp)) {
-                ObsSectionHeader("OBS WebSocket")
-                Spacer(Modifier.height(4.dp))
-
+            SettingsSection(
+                title = stringResource(Res.string.obs_section_connection),
+                modifier = Modifier.fillMaxWidth().widthIn(max = 600.dp)
+            ) {
                 Text(
                     text = stringResource(Res.string.obs_description),
                     style = MaterialTheme.typography.bodySmall,
@@ -195,6 +189,7 @@ fun OBSSettingsTab(
                     ) {
                         if (status == OBSWebSocketManager.ConnectionStatus.CONNECTED) {
                             Button(
+                                shape = RoundedCornerShape(6.dp),
                                 onClick = { obsManager.disconnect() },
                                 colors = ButtonDefaults.buttonColors(
                                     containerColor = MaterialTheme.colorScheme.error
@@ -204,6 +199,7 @@ fun OBSSettingsTab(
                             }
                         } else {
                             Button(
+                                shape = RoundedCornerShape(6.dp),
                                 onClick = {
                                     val port = portText.toIntOrNull() ?: 4455
                                     obsManager.connect(hostText, port, passwordText)
@@ -231,9 +227,10 @@ fun OBSSettingsTab(
 
             // ── Scene Mappings card ────────────────────────────────────────────
             if (obs.enabled) {
-                Column(modifier = cardModifier, verticalArrangement = Arrangement.spacedBy(0.dp)) {
-                    ObsSectionHeader(stringResource(Res.string.obs_scene_mappings))
-                    Spacer(Modifier.height(4.dp))
+                SettingsSection(
+                    title = stringResource(Res.string.obs_scene_mappings),
+                    modifier = Modifier.fillMaxWidth().widthIn(max = 600.dp)
+                ) {
                     Text(
                         text = stringResource(Res.string.obs_scene_mappings_desc),
                         style = MaterialTheme.typography.bodySmall,
@@ -288,32 +285,6 @@ fun OBSSettingsTab(
     }
 }
 
-@Composable
-private fun ObsSectionHeader(text: String) {
-    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Box(
-                modifier = Modifier
-                    .width(3.dp)
-                    .height(18.dp)
-                    .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(2.dp))
-            )
-            Text(
-                text = text,
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-        }
-        HorizontalDivider(
-            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
-            thickness = 1.dp,
-            modifier = Modifier.fillMaxWidth()
-        )
-    }
-}
 
 @Composable
 private fun SceneMappingRow(label: String, value: String, onValueChange: (String) -> Unit) {

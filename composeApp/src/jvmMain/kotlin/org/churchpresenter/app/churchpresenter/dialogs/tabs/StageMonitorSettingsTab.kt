@@ -1,7 +1,6 @@
 package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,20 +11,16 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.background_color
@@ -51,6 +46,8 @@ import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
 import org.churchpresenter.app.churchpresenter.composables.FontSettingsDropdown
 import org.churchpresenter.app.churchpresenter.composables.HorizontalAlignmentButtons
 import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
+import org.churchpresenter.app.churchpresenter.composables.SettingRow
+import org.churchpresenter.app.churchpresenter.composables.SettingsSection
 import org.churchpresenter.app.churchpresenter.composables.ShadowDetailRow
 import org.churchpresenter.app.churchpresenter.composables.TextStyleButtons
 import org.churchpresenter.app.churchpresenter.composables.VerticalAlignmentButtons
@@ -78,24 +75,18 @@ fun StageMonitorSettingsTab(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.surfaceVariant)
-            .padding(8.dp)
+            .padding(14.dp)
     ) {
         Row(
             modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            val cardModifier = Modifier
-                .weight(1f)
-                .widthIn(min = 320.dp, max = 480.dp)
-                .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(10.dp))
-                .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f), RoundedCornerShape(10.dp))
-                .padding(horizontal = 16.dp, vertical = 16.dp)
-
             // ── Left column: Current + Next ──────────────────────────────────────
-            Column(modifier = cardModifier, verticalArrangement = Arrangement.spacedBy(0.dp)) {
-
-                SectionHeader(stringResource(Res.string.stage_monitor_quadrant_current))
-                Spacer(Modifier.height(8.dp))
+            Column(
+                modifier = Modifier.weight(1f).widthIn(min = 320.dp, max = 480.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+            SettingsSection(title = stringResource(Res.string.stage_monitor_quadrant_current)) {
                 QuadrantFontSettings(
                     fontType = sm.currentFontType, fontSize = sm.currentFontSize,
                     color = sm.currentColor, bgColor = sm.currentBgColor,
@@ -130,12 +121,9 @@ fun StageMonitorSettingsTab(
                     )
                 }
 
-                Spacer(Modifier.height(16.dp))
-                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
-                Spacer(Modifier.height(16.dp))
+            }
 
-                SectionHeader(stringResource(Res.string.stage_monitor_quadrant_next))
-                Spacer(Modifier.height(8.dp))
+            SettingsSection(title = stringResource(Res.string.stage_monitor_quadrant_next)) {
                 QuadrantFontSettings(
                     fontType = sm.nextFontType, fontSize = sm.nextFontSize,
                     color = sm.nextColor, bgColor = sm.nextBgColor,
@@ -170,21 +158,16 @@ fun StageMonitorSettingsTab(
                     )
                 }
             }
+            } // end left column
 
             // ── Right column: Timer + Clock + Notes + Label ──────────────────────
             Column(
                 modifier = Modifier.weight(1f).widthIn(min = 320.dp, max = 480.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                val cardMod = Modifier.fillMaxWidth()
-                    .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(10.dp))
-                    .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f), RoundedCornerShape(10.dp))
-                    .padding(horizontal = 16.dp, vertical = 16.dp)
-
                 // Timer card
-                Column(modifier = cardMod) {
+                SettingsSection(title = stringResource(Res.string.stage_monitor_quadrant_timer)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        SectionHeader(stringResource(Res.string.stage_monitor_quadrant_timer), modifier = Modifier.weight(1f))
                         Checkbox(
                             checked = sm.showTimer,
                             onCheckedChange = { update { copy(showTimer = it) } },
@@ -196,7 +179,6 @@ fun StageMonitorSettingsTab(
                             modifier = Modifier.padding(start = 4.dp)
                         )
                     }
-                    Spacer(Modifier.height(8.dp))
                     QuadrantFontSettings(
                         fontType = sm.timerFontType, fontSize = sm.timerFontSize,
                         color = sm.timerColor, bgColor = sm.timerBgColor,
@@ -219,9 +201,8 @@ fun StageMonitorSettingsTab(
                 }
 
                 // Clock card
-                Column(modifier = cardMod) {
+                SettingsSection(title = stringResource(Res.string.stage_monitor_quadrant_clock)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        SectionHeader(stringResource(Res.string.stage_monitor_quadrant_clock), modifier = Modifier.weight(1f))
                         Checkbox(
                             checked = sm.showClock,
                             onCheckedChange = { update { copy(showClock = it) } },
@@ -233,7 +214,6 @@ fun StageMonitorSettingsTab(
                             modifier = Modifier.padding(start = 4.dp)
                         )
                     }
-                    Spacer(Modifier.height(8.dp))
                     QuadrantFontSettings(
                         fontType = sm.clockFontType, fontSize = sm.clockFontSize,
                         color = sm.clockColor, bgColor = sm.clockBgColor,
@@ -287,15 +267,12 @@ fun StageMonitorSettingsTab(
                 }
 
                 // Presenter Notes card
-                Column(modifier = cardMod) {
-                    SectionHeader(stringResource(Res.string.stage_monitor_quadrant_notes))
-                    Spacer(Modifier.height(4.dp))
+                SettingsSection(title = stringResource(Res.string.stage_monitor_quadrant_notes)) {
                     Text(
                         text = stringResource(Res.string.stage_monitor_notes_from_presentation),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                    Spacer(Modifier.height(8.dp))
                     QuadrantFontSettings(
                         fontType = sm.notesFontType, fontSize = sm.notesFontSize,
                         color = sm.notesColor, bgColor = sm.notesBgColor,
@@ -318,9 +295,8 @@ fun StageMonitorSettingsTab(
                 }
 
                 // Song/Bible Label Style card
-                Column(modifier = cardMod) {
+                SettingsSection(title = stringResource(Res.string.stage_monitor_label_style_section)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        SectionHeader(stringResource(Res.string.stage_monitor_label_style_section), modifier = Modifier.weight(1f))
                         Checkbox(
                             checked = sm.showSongBibleLabel,
                             onCheckedChange = { update { copy(showSongBibleLabel = it) } },
@@ -332,7 +308,6 @@ fun StageMonitorSettingsTab(
                             modifier = Modifier.padding(start = 4.dp)
                         )
                     }
-                    Spacer(Modifier.height(8.dp))
                     SettingRow(stringResource(Res.string.font_type)) {
                         FontSettingsDropdown(
                             value = sm.labelFontType,
@@ -417,52 +392,3 @@ private fun QuadrantFontSettings(
     }
 }
 
-@Composable
-private fun SectionHeader(text: String, modifier: Modifier = Modifier) {
-    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Box(
-                modifier = Modifier
-                    .width(3.dp)
-                    .height(18.dp)
-                    .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(2.dp))
-            )
-            Text(
-                text = text,
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-        }
-        HorizontalDivider(
-            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
-            thickness = 1.dp,
-            modifier = Modifier.fillMaxWidth()
-        )
-    }
-}
-
-@Composable
-private fun SettingRow(
-    label: String,
-    width: Dp = 130.dp,
-    content: @Composable () -> Unit
-) {
-    Row(
-        modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.width(width)
-        )
-        Box(modifier = Modifier.weight(1f)) {
-            content()
-        }
-    }
-}

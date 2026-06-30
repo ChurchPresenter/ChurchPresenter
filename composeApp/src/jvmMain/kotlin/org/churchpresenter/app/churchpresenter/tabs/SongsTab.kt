@@ -1470,6 +1470,7 @@ fun SongsTab(
             // "Back to Live" button — shown when browsing a different song than what's live
             if (isPresenting && liveSongIndex >= 0 && selectedSongIndex != liveSongIndex) {
                 Button(
+                    shape = RoundedCornerShape(6.dp),
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
                     onClick = {
                         viewModel.selectSong(liveSongIndex)
@@ -1784,7 +1785,9 @@ fun SongsTab(
                     }
                 },
                 confirmButton = {
-                    TextButton(onClick = {
+                    TextButton(
+                        shape = RoundedCornerShape(6.dp),
+                        onClick = {
                         viewModel.deleteSong(s)
                         showDeleteConfirm = false
                         songToDelete = null
@@ -1793,7 +1796,7 @@ fun SongsTab(
                     }
                 },
                 dismissButton = {
-                    TextButton(onClick = { showDeleteConfirm = false; songToDelete = null }) {
+                    TextButton(shape = RoundedCornerShape(6.dp), onClick = { showDeleteConfirm = false; songToDelete = null }) {
                         Text(stringResource(Res.string.cancel))
                     }
                 }

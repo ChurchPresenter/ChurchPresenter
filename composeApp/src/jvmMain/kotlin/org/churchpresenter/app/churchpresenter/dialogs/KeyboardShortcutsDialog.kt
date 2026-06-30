@@ -223,7 +223,7 @@ fun KeyboardShortcutsDialog(
                         .padding(12.dp),
                     horizontalArrangement = Arrangement.End
                 ) {
-                    Button(onClick = onDismiss) {
+                    Button(shape = RoundedCornerShape(6.dp), onClick = onDismiss) {
                         Text("${stringResource(Res.string.symbol_ok)} ${stringResource(Res.string.ok)}")
                     }
                 }

@@ -236,21 +236,21 @@ private fun RemoteActivityToast(
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                OutlinedButton(onClick = onBlockForSession) {
+                OutlinedButton(shape = RoundedCornerShape(6.dp), onClick = onBlockForSession) {
                     Icon(
                         Icons.Filled.RemoveCircle,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.error
                     )
                 }
-                TextButton(onClick = onDismiss) {
+                TextButton(shape = RoundedCornerShape(6.dp), onClick = onDismiss) {
                     Text(
                         stringResource(Res.string.remote_activity_dismiss),
                         color = MaterialTheme.colorScheme.primary
                     )
                 }
                 if (remaining > 0) {
-                    TextButton(onClick = onDismissAll) {
+                    TextButton(shape = RoundedCornerShape(6.dp), onClick = onDismissAll) {
                         Text(
                             stringResource(Res.string.remote_activity_dismiss_all),
                             color = MaterialTheme.colorScheme.primary

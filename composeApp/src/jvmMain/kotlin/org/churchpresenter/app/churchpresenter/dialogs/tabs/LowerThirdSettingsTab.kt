@@ -57,6 +57,7 @@ import io.github.alexzhirkevich.compottie.animateLottieCompositionAsState
 import io.github.alexzhirkevich.compottie.rememberLottieComposition
 import io.github.alexzhirkevich.compottie.rememberLottiePainter
 import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
+import org.churchpresenter.app.churchpresenter.composables.SettingsSection
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.viewmodel.LowerThirdSettingsViewModel
 import org.jetbrains.compose.resources.stringResource
@@ -107,7 +108,7 @@ fun LowerThirdSettingsTab(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.surfaceVariant)
-            .padding(8.dp)
+            .padding(14.dp)
     ) {
         Row(
             modifier = Modifier
@@ -117,19 +118,13 @@ fun LowerThirdSettingsTab(
         ) {
 
         // ── Left panel ──────────────────────────────────────────────
-        Column(
+        SettingsSection(
+            title = stringResource(Res.string.lottie_files),
             modifier = Modifier
                 .weight(0.48f)
                 .widthIn(min = 400.dp, max = 450.dp)
                 .heightIn(min = 600.dp)
-                .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(10.dp))
-                .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f), RoundedCornerShape(10.dp))
-                .padding(horizontal = 16.dp, vertical = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(0.dp)
         ) {
-            // Lottie Files list
-            SectionHeader(stringResource(Res.string.lottie_files))
-            Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = "To trigger lower thirds via API visit the Server tab.",
                 style = MaterialTheme.typography.bodySmall,
@@ -328,32 +323,6 @@ fun LowerThirdSettingsTab(
     }
 }
 
-@Composable
-private fun SectionHeader(text: String) {
-    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Box(
-                modifier = Modifier
-                    .width(3.dp)
-                    .height(18.dp)
-                    .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(2.dp))
-            )
-            Text(
-                text = text,
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-        }
-        HorizontalDivider(
-            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
-            thickness = 1.dp,
-            modifier = Modifier.fillMaxWidth()
-        )
-    }
-}
 
 @Composable
 private fun ModernButton(

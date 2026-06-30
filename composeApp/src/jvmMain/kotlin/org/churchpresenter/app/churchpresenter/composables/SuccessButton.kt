@@ -6,6 +6,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.unit.dp
 
 @Composable
 fun SuccessButton(
@@ -15,6 +17,7 @@ fun SuccessButton(
     enabled: Boolean = true
 ) {
     Button(
+        shape = RoundedCornerShape(6.dp),
         onClick = onClick,
         colors = ButtonDefaults.buttonColors(
             containerColor = MaterialTheme.colorScheme.inverseSurface,

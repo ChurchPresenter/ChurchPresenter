@@ -516,8 +516,8 @@ fun PresentationTab(
                     onDismissRequest = { editingInterval = false },
                     title = { Text(stringResource(Res.string.auto_scroll_interval)) },
                     text = { OutlinedTextField(value = intervalInput, onValueChange = { intervalInput = it }, suffix = { Text(stringResource(Res.string.unit_s)) }, singleLine = true, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)) },
-                    confirmButton = { TextButton(onClick = { intervalInput.toIntOrNull()?.coerceIn(1, 30)?.let { v -> viewModel.autoScrollInterval = v.toFloat(); onSettingsChange { s -> s.copy(presentationSettings = s.presentationSettings.copy(autoScrollInterval = v.toFloat())) } }; editingInterval = false }) { Text(stringResource(Res.string.ok)) } },
-                    dismissButton = { TextButton(onClick = { editingInterval = false }) { Text(stringResource(Res.string.cancel)) } }
+                    confirmButton = { TextButton(shape = RoundedCornerShape(6.dp), onClick = { intervalInput.toIntOrNull()?.coerceIn(1, 30)?.let { v -> viewModel.autoScrollInterval = v.toFloat(); onSettingsChange { s -> s.copy(presentationSettings = s.presentationSettings.copy(autoScrollInterval = v.toFloat())) } }; editingInterval = false }) { Text(stringResource(Res.string.ok)) } },
+                    dismissButton = { TextButton(shape = RoundedCornerShape(6.dp), onClick = { editingInterval = false }) { Text(stringResource(Res.string.cancel)) } }
                 )
             }
 
@@ -539,8 +539,8 @@ fun PresentationTab(
                     onDismissRequest = { editingTransition = false },
                     title = { Text(stringResource(Res.string.transition_duration)) },
                     text = { OutlinedTextField(value = transitionInput, onValueChange = { transitionInput = it }, suffix = { Text(stringResource(Res.string.unit_ms)) }, singleLine = true, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)) },
-                    confirmButton = { TextButton(onClick = { transitionInput.toIntOrNull()?.coerceIn(100, 2000)?.let { v -> viewModel.transitionDuration = v.toFloat(); onSettingsChange { s -> s.copy(presentationSettings = s.presentationSettings.copy(transitionDuration = v.toFloat())) } }; editingTransition = false }) { Text(stringResource(Res.string.ok)) } },
-                    dismissButton = { TextButton(onClick = { editingTransition = false }) { Text(stringResource(Res.string.cancel)) } }
+                    confirmButton = { TextButton(shape = RoundedCornerShape(6.dp), onClick = { transitionInput.toIntOrNull()?.coerceIn(100, 2000)?.let { v -> viewModel.transitionDuration = v.toFloat(); onSettingsChange { s -> s.copy(presentationSettings = s.presentationSettings.copy(transitionDuration = v.toFloat())) } }; editingTransition = false }) { Text(stringResource(Res.string.ok)) } },
+                    dismissButton = { TextButton(shape = RoundedCornerShape(6.dp), onClick = { editingTransition = false }) { Text(stringResource(Res.string.cancel)) } }
                 )
             }
 

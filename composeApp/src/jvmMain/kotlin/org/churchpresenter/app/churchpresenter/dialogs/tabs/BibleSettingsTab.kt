@@ -21,7 +21,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
@@ -33,7 +32,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Density
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import churchpresenter.composeapp.generated.resources.Res
@@ -90,13 +88,14 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.size
 
 import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
-import org.churchpresenter.app.churchpresenter.composables.ShadowDetailRow
-
 import org.churchpresenter.app.churchpresenter.composables.DropdownSettingsField
 import org.churchpresenter.app.churchpresenter.composables.FontSettingsDropdown
 import org.churchpresenter.app.churchpresenter.composables.HorizontalAlignmentButtons
 import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
 import org.churchpresenter.app.churchpresenter.composables.PositionButtons
+import org.churchpresenter.app.churchpresenter.composables.SettingRow
+import org.churchpresenter.app.churchpresenter.composables.SettingsSection
+import org.churchpresenter.app.churchpresenter.composables.ShadowDetailRow
 import org.churchpresenter.app.churchpresenter.composables.TextStyleButtons
 import androidx.compose.material3.TextButton
 import androidx.compose.ui.text.TextStyle
@@ -151,17 +150,15 @@ fun BibleSettingsTab(
     }
 
     Box(
-        modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surfaceVariant).padding(8.dp)
+        modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surfaceVariant).padding(14.dp)
     ) {
         Row(
             modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Column(
-                modifier = Modifier.weight(0.48f).widthIn(min = 400.dp, max = 450.dp).heightIn(min = 600.dp)
-                    .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(10.dp))
-                    .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f), RoundedCornerShape(10.dp))
-                    .padding(horizontal = 16.dp, vertical = 16.dp)
+                modifier = Modifier.weight(0.48f).widthIn(min = 400.dp, max = 450.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 LeftColumn(
                     settings,
@@ -174,22 +171,10 @@ fun BibleSettingsTab(
                 modifier = Modifier.weight(0.48f).widthIn(min = 400.dp, max = 450.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                val cardModifier = Modifier.fillMaxWidth()
-                    .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(10.dp))
-                    .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f), RoundedCornerShape(10.dp))
-                    .padding(horizontal = 16.dp, vertical = 16.dp)
-                Column(modifier = cardModifier) {
-                    PrimaryBibleTextColumn(settings, onSettingsChange, availableFonts, presenterManager)
-                }
-                Column(modifier = cardModifier) {
-                    PrimaryBibleReferenceColumn(settings, onSettingsChange, availableFonts, presenterManager)
-                }
-                Column(modifier = cardModifier) {
-                    SecondaryBibleTextColumn(settings, onSettingsChange, availableFonts, presenterManager)
-                }
-                Column(modifier = cardModifier) {
-                    SecondaryBibleReferenceColumn(settings, onSettingsChange, availableFonts, presenterManager)
-                }
+                PrimaryBibleTextColumn(settings, onSettingsChange, availableFonts, presenterManager)
+                PrimaryBibleReferenceColumn(settings, onSettingsChange, availableFonts, presenterManager)
+                SecondaryBibleTextColumn(settings, onSettingsChange, availableFonts, presenterManager)
+                SecondaryBibleReferenceColumn(settings, onSettingsChange, availableFonts, presenterManager)
             }
         }
     }
@@ -203,102 +188,72 @@ private fun LeftColumn(
     bibleFileDisplayNames: Map<String, String>
 ) {
     val noneStr = stringResource(Res.string.none)
-
-    // Bible Selection
-    SectionHeader(stringResource(Res.string.bible_selection))
-    Spacer(modifier = Modifier.height(8.dp))
-
-    // Create list of display names for dropdown
     val bibleDisplayOptions = listOf(noneStr) + bibleFilesInDirectory.map { fileName ->
         bibleFileDisplayNames[fileName] ?: fileName
     }
 
-    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        DropdownSettingsField(
-            label = stringResource(Res.string.primary_bible),
-            value = if (settings.bibleSettings.primaryBible.isEmpty()) {
-                noneStr
-            } else {
-                bibleFileDisplayNames[settings.bibleSettings.primaryBible] ?: settings.bibleSettings.primaryBible
-            },
-            options = bibleDisplayOptions,
-            onValueChange = { displayName ->
-                val fileName = if (displayName == noneStr) {
-                    ""
-                } else {
-                    bibleFileDisplayNames.entries.find { it.value == displayName }?.key ?: displayName
+    // Bible Selection
+    SettingsSection(title = stringResource(Res.string.bible_selection)) {
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            DropdownSettingsField(
+                label = stringResource(Res.string.primary_bible),
+                value = if (settings.bibleSettings.primaryBible.isEmpty()) noneStr
+                        else bibleFileDisplayNames[settings.bibleSettings.primaryBible] ?: settings.bibleSettings.primaryBible,
+                options = bibleDisplayOptions,
+                onValueChange = { displayName ->
+                    val fileName = if (displayName == noneStr) ""
+                                   else bibleFileDisplayNames.entries.find { it.value == displayName }?.key ?: displayName
+                    onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(primaryBible = fileName)) }
                 }
-                onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(primaryBible = fileName)) }
-            }
-        )
-        DropdownSettingsField(
-            label = stringResource(Res.string.secondary_bible),
-            value = if (settings.bibleSettings.secondaryBible.isEmpty()) {
-                noneStr
-            } else {
-                bibleFileDisplayNames[settings.bibleSettings.secondaryBible] ?: settings.bibleSettings.secondaryBible
-            },
-            options = bibleDisplayOptions,
-            onValueChange = { displayName ->
-                val fileName = if (displayName == noneStr) {
-                    ""
-                } else {
-                    bibleFileDisplayNames.entries.find { it.value == displayName }?.key ?: displayName
+            )
+            DropdownSettingsField(
+                label = stringResource(Res.string.secondary_bible),
+                value = if (settings.bibleSettings.secondaryBible.isEmpty()) noneStr
+                        else bibleFileDisplayNames[settings.bibleSettings.secondaryBible] ?: settings.bibleSettings.secondaryBible,
+                options = bibleDisplayOptions,
+                onValueChange = { displayName ->
+                    val fileName = if (displayName == noneStr) ""
+                                   else bibleFileDisplayNames.entries.find { it.value == displayName }?.key ?: displayName
+                    onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(secondaryBible = fileName)) }
                 }
-                onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(secondaryBible = fileName)) }
-            }
-        )
+            )
+        }
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Checkbox(
+                checked = settings.bibleSettings.secondaryBibleLowerThirdEnabled,
+                onCheckedChange = { checked ->
+                    onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(secondaryBibleLowerThirdEnabled = checked)) }
+                }
+            )
+            Text(
+                text = stringResource(Res.string.show_in_lower_third),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+        }
     }
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Checkbox(
-            checked = settings.bibleSettings.secondaryBibleLowerThirdEnabled,
-            onCheckedChange = { checked ->
-                onSettingsChange { s ->
-                    s.copy(bibleSettings = s.bibleSettings.copy(secondaryBibleLowerThirdEnabled = checked))
-                }
-            }
-        )
-        Text(
-            text = stringResource(Res.string.show_in_lower_third),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurface
-        )
-    }
-
-    Spacer(modifier = Modifier.height(20.dp))
 
     // Split Browse Mode
-    SectionHeader(stringResource(Res.string.bible_split_browse_mode))
-    Spacer(modifier = Modifier.height(8.dp))
-    Row(
-        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Checkbox(
-            checked = settings.bibleSettings.splitBrowseMode,
-            onCheckedChange = { enabled ->
-                onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(splitBrowseMode = enabled)) }
-            },
-            modifier = Modifier.size(24.dp)
-        )
-        Text(
-            text = stringResource(Res.string.bible_split_browse_mode),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.padding(start = 8.dp)
-        )
+    SettingsSection(title = stringResource(Res.string.bible_split_browse_mode)) {
+        Row(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+            Checkbox(
+                checked = settings.bibleSettings.splitBrowseMode,
+                onCheckedChange = { enabled ->
+                    onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(splitBrowseMode = enabled)) }
+                },
+                modifier = Modifier.size(24.dp)
+            )
+            Text(
+                text = stringResource(Res.string.bible_split_browse_mode),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.padding(start = 8.dp)
+            )
+        }
     }
 
-    Spacer(modifier = Modifier.height(20.dp))
-
-    // Global Vertical Alignment
-    SectionHeader(stringResource(Res.string.vertical_alignment))
-    Spacer(modifier = Modifier.height(8.dp))
-    Row(
-        modifier = Modifier.fillMaxWidth().padding(vertical = 5.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
+    // Vertical Alignment
+    SettingsSection(title = stringResource(Res.string.vertical_alignment)) {
         VerticalAlignmentButtons(
             selectedAlignment = settings.bibleSettings.verticalAlignment,
             onAlignmentChange = { value ->
@@ -310,167 +265,89 @@ private fun LeftColumn(
         )
     }
 
-    Spacer(modifier = Modifier.height(20.dp))
-
-    // Transition Section
-    SectionHeader(stringResource(Res.string.bible_transition_settings))
-
-    Spacer(modifier = Modifier.height(8.dp))
-
-    val durationLabel = stringResource(Res.string.transition_duration)
-    val msSuffix = stringResource(Res.string.milliseconds_suffix)
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = durationLabel,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.width(120.dp)
-        )
-        Slider(
-            value = settings.bibleSettings.transitionDuration,
-            onValueChange = { rawValue ->
-                val snapped = (rawValue / 50f).toInt() * 50f
-                onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(transitionDuration = snapped)) }
-            },
-            valueRange = 100f..2000f,
-            steps = 37,
-            modifier = Modifier.weight(1f)
-        )
-        Text(
-            text = "${settings.bibleSettings.transitionDuration.toInt()}$msSuffix",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.width(60.dp)
-        )
-    }
-
-    Spacer(modifier = Modifier.height(4.dp))
-
-    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Checkbox(
-                checked = settings.bibleSettings.fadeIn,
-                onCheckedChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(fadeIn = it)) } },
-                modifier = Modifier.size(24.dp)
-            )
+    // Transition
+    SettingsSection(title = stringResource(Res.string.bible_transition_settings)) {
+        val msSuffix = stringResource(Res.string.milliseconds_suffix)
+        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Text(
-                text = stringResource(Res.string.fade_in),
+                text = stringResource(Res.string.transition_duration),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.padding(start = 4.dp)
+                modifier = Modifier.width(120.dp)
+            )
+            Slider(
+                value = settings.bibleSettings.transitionDuration,
+                onValueChange = { rawValue ->
+                    val snapped = (rawValue / 50f).toInt() * 50f
+                    onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(transitionDuration = snapped)) }
+                },
+                valueRange = 100f..2000f,
+                steps = 37,
+                modifier = Modifier.weight(1f)
+            )
+            Text(
+                text = "${settings.bibleSettings.transitionDuration.toInt()}$msSuffix",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.width(60.dp)
             )
         }
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Checkbox(
-                checked = settings.bibleSettings.fadeOut,
-                onCheckedChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(fadeOut = it)) } },
-                modifier = Modifier.size(24.dp)
-            )
-            Text(
-                text = stringResource(Res.string.fade_out),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.padding(start = 4.dp)
-            )
-        }
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Checkbox(
-                checked = settings.bibleSettings.crossfade,
-                onCheckedChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(crossfade = it)) } },
-                modifier = Modifier.size(24.dp)
-            )
-            Text(
-                text = stringResource(Res.string.animation_crossfade),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.padding(start = 4.dp)
-            )
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Checkbox(checked = settings.bibleSettings.fadeIn, onCheckedChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(fadeIn = it)) } }, modifier = Modifier.size(24.dp))
+                Text(text = stringResource(Res.string.fade_in), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.padding(start = 4.dp))
+            }
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Checkbox(checked = settings.bibleSettings.fadeOut, onCheckedChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(fadeOut = it)) } }, modifier = Modifier.size(24.dp))
+                Text(text = stringResource(Res.string.fade_out), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.padding(start = 4.dp))
+            }
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Checkbox(checked = settings.bibleSettings.crossfade, onCheckedChange = { onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(crossfade = it)) } }, modifier = Modifier.size(24.dp))
+                Text(text = stringResource(Res.string.animation_crossfade), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.padding(start = 4.dp))
+            }
         }
     }
 
-    // ── Text Margins ──
-    SectionHeader(stringResource(Res.string.text_margins))
-    Spacer(modifier = Modifier.height(8.dp))
-
-    Box(
-        modifier = Modifier
-            .fillMaxWidth(0.75f)
-            .height(200.dp)
-            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(4.dp))
-            .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(4.dp))
-            .padding(12.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceBetween
+    // Text Margins
+    SettingsSection(title = stringResource(Res.string.text_margins)) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth(0.75f)
+                .height(200.dp)
+                .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(4.dp))
+                .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(4.dp))
+                .padding(12.dp),
+            contentAlignment = Alignment.Center
         ) {
-            // Top
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(text = stringResource(Res.string.top), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                Spacer(modifier = Modifier.height(2.dp))
-                NumberSettingsTextField(
-                    modifier = Modifier.width(100.dp),
-                    initialText = settings.bibleSettings.marginTop,
-                    onValueChange = { value -> onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(marginTop = value)) } },
-                    range = 0..500
-                )
-            }
-            // Left | Screen | Right
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+            Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.SpaceBetween) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(text = stringResource(Res.string.left), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(text = stringResource(Res.string.top), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     Spacer(modifier = Modifier.height(2.dp))
-                    NumberSettingsTextField(
-                        modifier = Modifier.width(100.dp),
-                        initialText = settings.bibleSettings.marginLeft,
-                        onValueChange = { value -> onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(marginLeft = value)) } },
-                        range = 0..500
-                    )
+                    NumberSettingsTextField(modifier = Modifier.width(100.dp), initialText = settings.bibleSettings.marginTop, onValueChange = { value -> onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(marginTop = value)) } }, range = 0..500)
                 }
-                Box(
-                    modifier = Modifier
-                        .size(64.dp)
-                        .background(MaterialTheme.colorScheme.primaryContainer, RoundedCornerShape(4.dp))
-                        .border(1.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(4.dp)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(text = stringResource(Res.string.screen), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onPrimaryContainer)
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly, verticalAlignment = Alignment.CenterVertically) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(text = stringResource(Res.string.left), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Spacer(modifier = Modifier.height(2.dp))
+                        NumberSettingsTextField(modifier = Modifier.width(100.dp), initialText = settings.bibleSettings.marginLeft, onValueChange = { value -> onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(marginLeft = value)) } }, range = 0..500)
+                    }
+                    Box(modifier = Modifier.size(64.dp).background(MaterialTheme.colorScheme.primaryContainer, RoundedCornerShape(4.dp)).border(1.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(4.dp)), contentAlignment = Alignment.Center) {
+                        Text(text = stringResource(Res.string.screen), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onPrimaryContainer)
+                    }
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(text = stringResource(Res.string.right), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Spacer(modifier = Modifier.height(2.dp))
+                        NumberSettingsTextField(modifier = Modifier.width(100.dp), initialText = settings.bibleSettings.marginRight, onValueChange = { value -> onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(marginRight = value)) } }, range = 0..500)
+                    }
                 }
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(text = stringResource(Res.string.right), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(text = stringResource(Res.string.bottom), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     Spacer(modifier = Modifier.height(2.dp))
-                    NumberSettingsTextField(
-                        modifier = Modifier.width(100.dp),
-                        initialText = settings.bibleSettings.marginRight,
-                        onValueChange = { value -> onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(marginRight = value)) } },
-                        range = 0..500
-                    )
+                    NumberSettingsTextField(modifier = Modifier.width(100.dp), initialText = settings.bibleSettings.marginBottom, onValueChange = { value -> onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(marginBottom = value)) } }, range = 0..500)
                 }
-            }
-            // Bottom
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(text = stringResource(Res.string.bottom), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                Spacer(modifier = Modifier.height(2.dp))
-                NumberSettingsTextField(
-                    modifier = Modifier.width(100.dp),
-                    initialText = settings.bibleSettings.marginBottom,
-                    onValueChange = { value -> onSettingsChange { s -> s.copy(bibleSettings = s.bibleSettings.copy(marginBottom = value)) } },
-                    range = 0..500
-                )
             }
         }
     }
-
-    Spacer(modifier = Modifier.height(20.dp))
 }
 
 @Composable
@@ -480,10 +357,7 @@ private fun PrimaryBibleTextColumn(
     availableFonts: List<String>,
     presenterManager: PresenterManager? = null
 ) {
-
-    // Primary Bible Text
-    SectionHeader(stringResource(Res.string.primary_bible_text))
-    Spacer(modifier = Modifier.height(8.dp))
+    SettingsSection(title = stringResource(Res.string.primary_bible_text)) {
     SettingRow(stringResource(Res.string.color)) {
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -590,6 +464,7 @@ private fun PrimaryBibleTextColumn(
                     )
                     if (presenterManager != null) {
                         TextButton(
+                            shape = RoundedCornerShape(6.dp),
                             enabled = isPresentingBible && hasFullscreenScreen,
                             onClick = {
                                 val verses = presenterManager.selectedVerses.value
@@ -636,6 +511,7 @@ private fun PrimaryBibleTextColumn(
                     )
                     if (presenterManager != null) {
                         TextButton(
+                            shape = RoundedCornerShape(6.dp),
                             enabled = isPresentingBible && hasLowerThirdScreen,
                             onClick = {
                                 val verses = presenterManager.selectedVerses.value
@@ -693,7 +569,7 @@ private fun PrimaryBibleTextColumn(
             }
         }
     }
-
+    } // end SettingsSection
 }
 
 @Composable
@@ -703,8 +579,7 @@ private fun PrimaryBibleReferenceColumn(
     availableFonts: List<String>,
     presenterManager: PresenterManager? = null
 ) {
-    SectionHeader(stringResource(Res.string.primary_bible_reference))
-    Spacer(modifier = Modifier.height(8.dp))
+    SettingsSection(title = stringResource(Res.string.primary_bible_reference)) {
     SettingRow(stringResource(Res.string.color)) {
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -864,6 +739,7 @@ private fun PrimaryBibleReferenceColumn(
             modifier = Modifier.padding(start = 4.dp)
         )
     }
+    } // end SettingsSection
 }
 
 @Composable
@@ -873,9 +749,7 @@ private fun SecondaryBibleTextColumn(
     availableFonts: List<String>,
     presenterManager: PresenterManager? = null
 ) {
-    // Secondary Bible Text
-    SectionHeader(stringResource(Res.string.secondary_bible_text))
-    Spacer(modifier = Modifier.height(8.dp))
+    SettingsSection(title = stringResource(Res.string.secondary_bible_text)) {
     SettingRow(stringResource(Res.string.color)) {
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -982,6 +856,7 @@ private fun SecondaryBibleTextColumn(
                     )
                     if (presenterManager != null) {
                         TextButton(
+                            shape = RoundedCornerShape(6.dp),
                             enabled = isPresentingSecondary && hasFullscreenScreen2,
                             onClick = {
                                 val verses = presenterManager.selectedVerses.value
@@ -1027,6 +902,7 @@ private fun SecondaryBibleTextColumn(
                     )
                     if (presenterManager != null) {
                         TextButton(
+                            shape = RoundedCornerShape(6.dp),
                             enabled = isPresentingSecondary && hasLowerThirdScreen2,
                             onClick = {
                                 val verses = presenterManager.selectedVerses.value
@@ -1084,7 +960,7 @@ private fun SecondaryBibleTextColumn(
             }
         }
     }
-
+    } // end SettingsSection
 }
 
 @Composable
@@ -1094,8 +970,7 @@ private fun SecondaryBibleReferenceColumn(
     availableFonts: List<String>,
     presenterManager: PresenterManager? = null
 ) {
-    SectionHeader(stringResource(Res.string.secondary_bible_reference))
-    Spacer(modifier = Modifier.height(8.dp))
+    SettingsSection(title = stringResource(Res.string.secondary_bible_reference)) {
     SettingRow(stringResource(Res.string.color)) {
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -1255,55 +1130,6 @@ private fun SecondaryBibleReferenceColumn(
             modifier = Modifier.padding(start = 4.dp)
         )
     }
-}
-
-@Composable
-private fun SectionHeader(text: String) {
-    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Box(
-                modifier = Modifier
-                    .width(3.dp)
-                    .height(18.dp)
-                    .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(2.dp))
-            )
-            Text(
-                text = text,
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-        }
-        HorizontalDivider(
-            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
-            thickness = 1.dp,
-            modifier = Modifier.fillMaxWidth()
-        )
-    }
-}
-
-@Composable
-private fun SettingRow(
-    label: String,
-    width: Dp = 120.dp,
-    content: @Composable () -> Unit
-) {
-    Row(
-        modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.width(width)
-        )
-        Box(modifier = Modifier.weight(1f)) {
-            content()
-        }
-    }
+    } // end SettingsSection
 }
 

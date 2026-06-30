@@ -684,7 +684,9 @@ fun QATab(
                 title = { Text(stringResource(Res.string.qa_clear_all_questions)) },
                 text = { Text(stringResource(Res.string.qa_clear_all_confirm_message)) },
                 confirmButton = {
-                    TextButton(onClick = {
+                    TextButton(
+                        shape = RoundedCornerShape(6.dp),
+                        onClick = {
                         qaManager.clearAll()
                         presenterManager.setDisplayedQuestion(null)
                         presenterManager.setShowQRCodeOnDisplay(false)
@@ -694,7 +696,9 @@ fun QATab(
                 },
                 dismissButton = {
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        TextButton(onClick = {
+                        TextButton(
+                            shape = RoundedCornerShape(6.dp),
+                            onClick = {
                             // Close the confirm dialog before the save dialog opens and snapshot
                             // the questions so a concurrent clear cannot empty the export
                             showClearConfirm = false
@@ -727,7 +731,7 @@ fun QATab(
                                 }
                             }
                         }) { Text(stringResource(Res.string.qa_export_clear)) }
-                        TextButton(onClick = { showClearConfirm = false }) { Text(stringResource(Res.string.cancel)) }
+                        TextButton(shape = RoundedCornerShape(6.dp), onClick = { showClearConfirm = false }) { Text(stringResource(Res.string.cancel)) }
                     }
                 }
             )

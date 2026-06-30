@@ -6,6 +6,7 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Shapes
 import androidx.compose.material3.Typography
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
@@ -403,7 +404,14 @@ fun ChurchPresenterTheme(
 
     MaterialTheme(
         colorScheme = colorScheme,
-        typography = AppTypography
+        typography = AppTypography,
+        shapes = Shapes(
+            extraSmall = RoundedCornerShape(4.dp),
+            small = RoundedCornerShape(6.dp),
+            medium = RoundedCornerShape(8.dp),
+            large = RoundedCornerShape(10.dp),
+            extraLarge = RoundedCornerShape(12.dp)
+        )
     ) {
         CompositionLocalProvider(
             LocalScrollbarStyle provides ScrollbarStyle(

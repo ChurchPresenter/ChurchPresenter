@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.rememberDialogState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.konami_dialog_blessings
 import churchpresenter.composeapp.generated.resources.konami_dialog_button
@@ -116,7 +117,7 @@ fun KonamiEasterEggDialog(
                         textAlign = TextAlign.Center
                     )
                     Spacer(modifier = Modifier.height(24.dp))
-                    Button(onClick = onDismiss) {
+                    Button(shape = RoundedCornerShape(6.dp), onClick = onDismiss) {
                         Text(stringResource(Res.string.konami_dialog_button))
                     }
                 }

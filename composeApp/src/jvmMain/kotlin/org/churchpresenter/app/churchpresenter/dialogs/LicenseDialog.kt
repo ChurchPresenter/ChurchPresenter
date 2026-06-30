@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.rememberWindowState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.ic_app_icon
 import churchpresenter.composeapp.generated.resources.license_accept_button
@@ -133,6 +134,7 @@ fun LicenseDialog(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     OutlinedButton(
+                        shape = RoundedCornerShape(6.dp),
                         onClick = onDecline,
                         colors = ButtonDefaults.outlinedButtonColors(
                             contentColor = MaterialTheme.colorScheme.error
@@ -143,7 +145,7 @@ fun LicenseDialog(
 
                     Spacer(modifier = Modifier.width(12.dp))
 
-                    Button(onClick = onAccept) {
+                    Button(shape = RoundedCornerShape(6.dp), onClick = onAccept) {
                         Text(stringResource(Res.string.license_accept_button))
                     }
                 }

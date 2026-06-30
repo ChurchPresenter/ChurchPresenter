@@ -65,11 +65,13 @@ import churchpresenter.composeapp.generated.resources.atem_status_connecting
 import churchpresenter.composeapp.generated.resources.atem_status_disconnected
 import churchpresenter.composeapp.generated.resources.atem_status_error
 import churchpresenter.composeapp.generated.resources.atem_test_connection
+import churchpresenter.composeapp.generated.resources.atem_section_connection
 import churchpresenter.composeapp.generated.resources.atem_section_upload_defaults
 import churchpresenter.composeapp.generated.resources.atem_test_connection_hint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.churchpresenter.app.churchpresenter.composables.SettingsSection
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.data.settings.AtemSettings
 import org.churchpresenter.app.churchpresenter.server.AtemClient
@@ -117,17 +119,11 @@ fun AtemSettingsTab(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            val cardMod = Modifier
-                .fillMaxWidth()
-                .widthIn(max = 600.dp)
-                .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(10.dp))
-                .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f), RoundedCornerShape(10.dp))
-                .padding(horizontal = 16.dp, vertical = 16.dp)
-
             // ── Connection card ──────────────────────────────────────────────
-            Column(modifier = cardMod, verticalArrangement = Arrangement.spacedBy(0.dp)) {
-                AtemSectionHeader("Blackmagic ATEM")
-                Spacer(Modifier.height(4.dp))
+            SettingsSection(
+                title = stringResource(Res.string.atem_section_connection),
+                modifier = Modifier.fillMaxWidth().widthIn(max = 600.dp)
+            ) {
                 Text(
                     text = stringResource(Res.string.atem_description),
                     style = MaterialTheme.typography.bodySmall,
@@ -176,6 +172,7 @@ fun AtemSettingsTab(
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     Button(
+                        shape = RoundedCornerShape(6.dp),
                         onClick = {
                             if (isTesting) return@Button
                             isTesting = true
@@ -266,10 +263,10 @@ fun AtemSettingsTab(
             }
 
             // ── Defaults card ────────────────────────────────────────────────
-            Column(modifier = cardMod, verticalArrangement = Arrangement.spacedBy(0.dp)) {
-                AtemSectionHeader(stringResource(Res.string.atem_section_upload_defaults))
-                Spacer(Modifier.height(12.dp))
-
+            SettingsSection(
+                title = stringResource(Res.string.atem_section_upload_defaults),
+                modifier = Modifier.fillMaxWidth().widthIn(max = 600.dp)
+            ) {
                 // Everything on one line: width / height / fps / still slot / clip slot,
                 // labels (and detected ranges) directly underneath each field
                 Row(
@@ -567,29 +564,3 @@ internal fun formatAtemFps(fps: Double): String =
     if (fps == kotlin.math.floor(fps)) fps.toInt().toString()
     else String.format(java.util.Locale.US, "%.2f", fps).trimEnd('0').trimEnd('.')
 
-@Composable
-private fun AtemSectionHeader(text: String) {
-    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Box(
-                modifier = Modifier
-                    .width(3.dp)
-                    .height(18.dp)
-                    .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(2.dp))
-            )
-            Text(
-                text = text,
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-        }
-        HorizontalDivider(
-            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
-            thickness = 1.dp,
-            modifier = Modifier.fillMaxWidth()
-        )
-    }
-}

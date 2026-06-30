@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
@@ -20,7 +19,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -100,14 +98,16 @@ import churchpresenter.composeapp.generated.resources.song_transition_settings
 import churchpresenter.composeapp.generated.resources.transition_duration
 import androidx.compose.material3.Slider
 import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
-import org.churchpresenter.app.churchpresenter.composables.ShadowDetailRow
 import org.churchpresenter.app.churchpresenter.composables.DropdownSettingsField
 import org.churchpresenter.app.churchpresenter.composables.FontSettingsDropdown
-import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
 import org.churchpresenter.app.churchpresenter.composables.HorizontalAlignmentButtons
-import org.churchpresenter.app.churchpresenter.composables.VerticalAlignmentButtons
-import org.churchpresenter.app.churchpresenter.composables.TextStyleButtons
+import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
 import org.churchpresenter.app.churchpresenter.composables.PositionButtons
+import org.churchpresenter.app.churchpresenter.composables.SettingRow
+import org.churchpresenter.app.churchpresenter.composables.SettingsSection
+import org.churchpresenter.app.churchpresenter.composables.ShadowDetailRow
+import org.churchpresenter.app.churchpresenter.composables.TextStyleButtons
+import org.churchpresenter.app.churchpresenter.composables.VerticalAlignmentButtons
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
 import org.churchpresenter.app.churchpresenter.utils.Constants
 import org.churchpresenter.app.churchpresenter.utils.Utils
@@ -131,76 +131,39 @@ fun SongSettingsTab(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.surfaceVariant)
-            .padding(8.dp)
+            .padding(14.dp)
     ) {
         Row(
             modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            // Left Column — two stacked cards
+            // Left Column
             Column(
                 modifier = Modifier
                     .weight(0.48f)
                     .widthIn(min = 400.dp, max = 450.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                // Song Title Slide card
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(10.dp))
-                        .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f), RoundedCornerShape(10.dp))
-                        .padding(horizontal = 16.dp, vertical = 16.dp)
-                ) {
-                    TitleSlideColumn(
-                        settings = settings,
-                        onSettingsChange = onSettingsChange,
-                    )
-                }
-
-                // Song Number + Title + Transition card
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .heightIn(min = 600.dp)
-                        .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(10.dp))
-                        .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f), RoundedCornerShape(10.dp))
-                        .padding(horizontal = 16.dp, vertical = 16.dp)
-                ) {
-                    LeftColumn(
-                        settings = settings,
-                        onSettingsChange = onSettingsChange,
-                        availableFonts = availableFonts
-                    )
-                }
+                TitleSlideColumn(
+                    settings = settings,
+                    onSettingsChange = onSettingsChange,
+                )
+                LeftColumn(
+                    settings = settings,
+                    onSettingsChange = onSettingsChange,
+                    availableFonts = availableFonts
+                )
             }
 
-            // Right Column + Look Ahead Column stacked vertically
+            // Right Column + Look Ahead Column
             Column(
                 modifier = Modifier
                     .weight(0.48f)
                     .widthIn(min = 400.dp, max = 450.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(10.dp))
-                        .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f), RoundedCornerShape(10.dp))
-                        .padding(horizontal = 16.dp, vertical = 16.dp)
-                ) {
-                    RightColumn(settings, onSettingsChange, availableFonts, presenterManager)
-                }
-
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(10.dp))
-                        .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f), RoundedCornerShape(10.dp))
-                        .padding(horizontal = 16.dp, vertical = 16.dp)
-                ) {
-                    LookAheadColumn(settings, onSettingsChange, availableFonts)
-                }
+                RightColumn(settings, onSettingsChange, availableFonts, presenterManager)
+                LookAheadColumn(settings, onSettingsChange, availableFonts)
             }
         }
     }
@@ -212,20 +175,18 @@ private fun TitleSlideColumn(
     settings: AppSettings,
     onSettingsChange: ((AppSettings) -> AppSettings) -> Unit,
 ) {
-    SectionHeader(stringResource(Res.string.song_title_slide))
-
-    Spacer(modifier = Modifier.height(8.dp))
-
-    Row(
-        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Checkbox(
-            checked = settings.songSettings.titleSlideEnabled,
-            onCheckedChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleSlideEnabled = it)) } },
-            modifier = Modifier.size(24.dp)
-        )
-        Text(stringResource(Res.string.enabled), style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(start = 8.dp))
+    SettingsSection(title = stringResource(Res.string.song_title_slide)) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Checkbox(
+                checked = settings.songSettings.titleSlideEnabled,
+                onCheckedChange = { onSettingsChange { s -> s.copy(songSettings = s.songSettings.copy(titleSlideEnabled = it)) } },
+                modifier = Modifier.size(24.dp)
+            )
+            Text(stringResource(Res.string.enabled), style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(start = 8.dp))
+        }
     }
 }
 
@@ -244,10 +205,7 @@ private fun LeftColumn(
 
 
     // Song Number Section
-    SectionHeader(stringResource(Res.string.song_number))
-
-    Spacer(modifier = Modifier.height(8.dp))
-
+    SettingsSection(title = stringResource(Res.string.song_number)) {
     SettingRow(stringResource(Res.string.font_size)) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             NumberSettingsTextField(
@@ -375,14 +333,10 @@ private fun LeftColumn(
             Text(stringResource(Res.string.number_before_title), style = MaterialTheme.typography.bodyMedium)
         }
     }
-
-    Spacer(modifier = Modifier.height(20.dp))
+    } // end song_number SettingsSection
 
     // Title Section
-    SectionHeader(stringResource(Res.string.title))
-
-    Spacer(modifier = Modifier.height(8.dp))
-
+    SettingsSection(title = stringResource(Res.string.title)) {
     SettingRow(stringResource(Res.string.show_title)) {
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
             DropdownSettingsField(
@@ -570,15 +524,10 @@ private fun LeftColumn(
             }
         }
     }
-
-    Spacer(modifier = Modifier.height(20.dp))
+    } // end title SettingsSection
 
     // Transition Section
-    SectionHeader(stringResource(Res.string.song_transition_settings))
-
-    Spacer(modifier = Modifier.height(8.dp))
-
-    // Transition duration slider
+    SettingsSection(title = stringResource(Res.string.song_transition_settings)) {
     val durationLabel = stringResource(Res.string.transition_duration)
     val msSuffix = stringResource(Res.string.milliseconds_suffix)
     Row(
@@ -714,12 +663,10 @@ private fun LeftColumn(
         )
     }
 
-    Spacer(modifier = Modifier.height(20.dp))
+    } // end transition SettingsSection
 
     // ── Text Margins ──
-    SectionHeader(stringResource(Res.string.text_margins))
-    Spacer(modifier = Modifier.height(8.dp))
-
+    SettingsSection(title = stringResource(Res.string.text_margins)) {
     Box(
         modifier = Modifier
             .fillMaxWidth(0.75f)
@@ -794,8 +741,7 @@ private fun LeftColumn(
             }
         }
     }
-
-    Spacer(modifier = Modifier.height(20.dp))
+    } // end text_margins SettingsSection
 }
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -808,10 +754,6 @@ private fun RightColumn(
 ) {
 
     // Lyrics Section (shared settings)
-    SectionHeader(stringResource(Res.string.lyrics))
-
-    Spacer(modifier = Modifier.height(8.dp))
-
     val textMeasurer = rememberTextMeasurer()
     val isPresentingLyrics = if (presenterManager != null) {
         remember { derivedStateOf {
@@ -823,6 +765,7 @@ private fun RightColumn(
     val hasFullscreenScreen = activeScreens.any { it.displayMode == Constants.DISPLAY_MODE_FULLSCREEN }
     val hasLowerThirdScreen = activeScreens.any { it.displayMode == Constants.DISPLAY_MODE_LOWER_THIRD }
 
+    SettingsSection(title = stringResource(Res.string.lyrics)) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
@@ -860,12 +803,10 @@ private fun RightColumn(
             bottomValue = Constants.BOTTOM
         )
     }
-
-    Spacer(modifier = Modifier.height(20.dp))
+    } // end lyrics SettingsSection
 
     // ── Fullscreen Display ──
-    SectionHeader(stringResource(Res.string.fullscreen_display))
-    Spacer(modifier = Modifier.height(8.dp))
+    SettingsSection(title = stringResource(Res.string.fullscreen_display)) {
     Column {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(text = stringResource(Res.string.display_mode_label), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.width(120.dp))
@@ -916,6 +857,7 @@ private fun RightColumn(
                     tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
                 ) {
                     TextButton(
+                        shape = RoundedCornerShape(6.dp),
                         enabled = isPresentingLyrics && hasFullscreenScreen,
                         onClick = {
                             val section = presenterManager.lyricSection.value
@@ -1007,11 +949,10 @@ private fun RightColumn(
         }
     }
 
-    Spacer(modifier = Modifier.height(20.dp))
+    } // end fullscreen_display SettingsSection
 
     // ── Lower Third Display ──
-    SectionHeader(stringResource(Res.string.lower_third_display))
-    Spacer(modifier = Modifier.height(8.dp))
+    SettingsSection(title = stringResource(Res.string.lower_third_display)) {
     Column {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(text = stringResource(Res.string.display_mode_label), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.width(120.dp))
@@ -1062,6 +1003,7 @@ private fun RightColumn(
                     tooltipPlacement = TooltipPlacement.ComponentRect(anchor = Alignment.BottomCenter, offset = DpOffset(0.dp, 4.dp))
                 ) {
                 TextButton(
+                    shape = RoundedCornerShape(6.dp),
                     enabled = isPresentingLyrics && hasLowerThirdScreen,
                     onClick = {
                         val section = presenterManager.lyricSection.value
@@ -1153,7 +1095,7 @@ private fun RightColumn(
             }
         }
     }
-
+    } // end lower_third_display SettingsSection
 }
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -1164,8 +1106,7 @@ private fun LookAheadColumn(
     availableFonts: List<String>
 ) {
     // ── Look Ahead — Fullscreen ──
-    SectionHeader(stringResource(Res.string.look_ahead_fullscreen))
-    Spacer(modifier = Modifier.height(8.dp))
+    SettingsSection(title = stringResource(Res.string.look_ahead_fullscreen)) {
     val laFsDisplayMode = settings.songSettings.lookAheadDisplayMode
     Column {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -1262,10 +1203,10 @@ private fun LookAheadColumn(
         }
     }
 
+    } // end look_ahead_fullscreen SettingsSection
+
     // ── Look Ahead Next Section — Fullscreen ──
-    Spacer(modifier = Modifier.height(20.dp))
-    SectionHeader(stringResource(Res.string.look_ahead_next_fullscreen))
-    Spacer(modifier = Modifier.height(8.dp))
+    SettingsSection(title = stringResource(Res.string.look_ahead_next_fullscreen)) {
     SettingRow(stringResource(Res.string.font_size)) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
             NumberSettingsTextField(
@@ -1328,10 +1269,10 @@ private fun LookAheadColumn(
         }
     }
 
+    } // end look_ahead_next_fullscreen SettingsSection
+
     // ── Look Ahead — Lower Third ──
-    Spacer(modifier = Modifier.height(20.dp))
-    SectionHeader(stringResource(Res.string.look_ahead_lower_third))
-    Spacer(modifier = Modifier.height(8.dp))
+    SettingsSection(title = stringResource(Res.string.look_ahead_lower_third)) {
     val laLtDisplayMode = settings.songSettings.lowerThirdLookAheadDisplayMode
     Column {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -1428,10 +1369,10 @@ private fun LookAheadColumn(
         }
     }
 
+    } // end look_ahead_lower_third SettingsSection
+
     // ── Look Ahead Next Section — Lower Third ──
-    Spacer(modifier = Modifier.height(20.dp))
-    SectionHeader(stringResource(Res.string.look_ahead_next_lower_third))
-    Spacer(modifier = Modifier.height(8.dp))
+    SettingsSection(title = stringResource(Res.string.look_ahead_next_lower_third)) {
     SettingRow(stringResource(Res.string.font_size)) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
             NumberSettingsTextField(
@@ -1493,56 +1434,6 @@ private fun LookAheadColumn(
             }
         }
     }
+    } // end look_ahead_next_lower_third SettingsSection
 }
-
-@Composable
-private fun SectionHeader(text: String) {
-    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Box(
-                modifier = Modifier
-                    .width(3.dp)
-                    .height(18.dp)
-                    .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(2.dp))
-            )
-            Text(
-                text = text,
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-        }
-        HorizontalDivider(
-            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
-            thickness = 1.dp,
-            modifier = Modifier.fillMaxWidth()
-        )
-    }
-}
-
-@Composable
-private fun SettingRow(
-    label: String,
-    width: Dp = 120.dp,
-    content: @Composable () -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 6.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.width(width)
-        )
-        content()
-    }
-}
-
 

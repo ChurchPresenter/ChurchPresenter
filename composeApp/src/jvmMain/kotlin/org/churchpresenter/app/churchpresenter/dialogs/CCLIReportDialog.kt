@@ -322,6 +322,7 @@ fun CCLIReportDialog(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         OutlinedButton(
+                            shape = RoundedCornerShape(6.dp),
                             onClick = {
                                 coroutineScope.launch {
                                     val f = fromMs(); val t = toMs()
@@ -340,6 +341,7 @@ fun CCLIReportDialog(
                         ) { Text(stringResource(Res.string.ccli_export_csv)) }
 
                         OutlinedButton(
+                            shape = RoundedCornerShape(6.dp),
                             onClick = {
                                 coroutineScope.launch {
                                     val f = fromMs(); val t = toMs()
@@ -359,7 +361,7 @@ fun CCLIReportDialog(
 
                         Spacer(Modifier.weight(1f))
 
-                        Button(onClick = onDismiss) { Text(stringResource(Res.string.close)) }
+                        Button(shape = RoundedCornerShape(6.dp), onClick = onDismiss) { Text(stringResource(Res.string.close)) }
                     }
                 }
             }
@@ -837,6 +839,7 @@ private fun DropdownPicker(
     var expanded by remember { mutableStateOf(false) }
     Box {
         OutlinedButton(
+            shape = RoundedCornerShape(6.dp),
             onClick = { expanded = true },
             modifier = modifier.height(36.dp),
             contentPadding = PaddingValues(start = 10.dp, end = 4.dp, top = 0.dp, bottom = 0.dp)
@@ -867,6 +870,7 @@ private fun DropdownPicker(
 @Composable
 private fun PresetButton(label: String, onClick: () -> Unit) {
     OutlinedButton(
+        shape = RoundedCornerShape(6.dp),
         onClick = onClick,
         contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 10.dp, vertical = 4.dp),
         modifier = Modifier.height(32.dp)

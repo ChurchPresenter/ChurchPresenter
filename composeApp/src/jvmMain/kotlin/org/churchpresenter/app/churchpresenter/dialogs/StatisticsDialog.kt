@@ -145,7 +145,7 @@ fun StatisticsDialog(
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                 }
-                                Button(onClick = { showCCLIReport = true }) {
+                                Button(shape = RoundedCornerShape(6.dp), onClick = { showCCLIReport = true }) {
                                     Text(stringResource(Res.string.ccli_report), style = MaterialTheme.typography.labelMedium)
                                 }
                             }
@@ -265,6 +265,7 @@ fun StatisticsDialog(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         OutlinedButton(
+                            shape = RoundedCornerShape(6.dp),
                             onClick = {
                                 coroutineScope.launch {
                                     val path = FileChooser.platformInstance.save(
@@ -282,6 +283,7 @@ fun StatisticsDialog(
                         ) { Text(stringResource(Res.string.export_to_xls)) }
 
                         Button(
+                            shape = RoundedCornerShape(6.dp),
                             onClick = {
                                 statisticsManager.clearStatistics()
                                 topSongsBySongbook = statisticsManager.getTopSongsBySongbook()
@@ -296,7 +298,7 @@ fun StatisticsDialog(
 
                         Spacer(modifier = Modifier.weight(1f))
 
-                        Button(onClick = onDismiss) { Text(stringResource(Res.string.close)) }
+                        Button(shape = RoundedCornerShape(6.dp), onClick = onDismiss) { Text(stringResource(Res.string.close)) }
                     }
                 }
             }

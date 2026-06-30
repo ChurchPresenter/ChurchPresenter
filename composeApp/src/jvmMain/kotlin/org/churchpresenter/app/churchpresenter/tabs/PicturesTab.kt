@@ -586,7 +586,9 @@ fun PicturesTab(
                             )
                         },
                         confirmButton = {
-                            TextButton(onClick = {
+                            TextButton(
+                                shape = RoundedCornerShape(6.dp),
+                                onClick = {
                                 intervalInput.toIntOrNull()?.coerceIn(1, 30)?.let { v ->
                                     viewModel.autoScrollInterval = v.toFloat()
                                     onSettingsChange { s -> s.copy(pictureSettings = s.pictureSettings.copy(autoScrollInterval = v.toFloat())) }
@@ -595,7 +597,7 @@ fun PicturesTab(
                             }) { Text(stringResource(Res.string.ok)) }
                         },
                         dismissButton = {
-                            TextButton(onClick = { editingInterval = false }) { Text(stringResource(Res.string.cancel)) }
+                            TextButton(shape = RoundedCornerShape(6.dp), onClick = { editingInterval = false }) { Text(stringResource(Res.string.cancel)) }
                         }
                     )
                 }
@@ -647,7 +649,9 @@ fun PicturesTab(
                             )
                         },
                         confirmButton = {
-                            TextButton(onClick = {
+                            TextButton(
+                                shape = RoundedCornerShape(6.dp),
+                                onClick = {
                                 transitionInput.toIntOrNull()?.coerceIn(100, 2000)?.let { v ->
                                     viewModel.transitionDuration = v.toFloat()
                                     onSettingsChange { s -> s.copy(pictureSettings = s.pictureSettings.copy(transitionDuration = v.toFloat())) }
@@ -656,7 +660,7 @@ fun PicturesTab(
                             }) { Text(stringResource(Res.string.ok)) }
                         },
                         dismissButton = {
-                            TextButton(onClick = { editingTransition = false }) { Text(stringResource(Res.string.cancel)) }
+                            TextButton(shape = RoundedCornerShape(6.dp), onClick = { editingTransition = false }) { Text(stringResource(Res.string.cancel)) }
                         }
                     )
                 }

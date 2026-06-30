@@ -780,7 +780,7 @@ private fun DictionaryDetailPane(
                     }
                     if (interlinearVerses.size > interlinearDisplayLimit) {
                         val remaining = interlinearVerses.size - interlinearDisplayLimit
-                        TextButton(onClick = onShowMore) {
+                        TextButton(shape = RoundedCornerShape(6.dp), onClick = onShowMore) {
                             Text(
                                 text = stringResource(Res.string.dictionary_in_scripture_show_more, remaining),
                                 style = MaterialTheme.typography.labelMedium,

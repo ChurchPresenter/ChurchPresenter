@@ -2,7 +2,6 @@ package org.churchpresenter.app.churchpresenter.dialogs.tabs
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,15 +10,12 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
@@ -27,7 +23,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import churchpresenter.composeapp.generated.resources.Res
 import churchpresenter.composeapp.generated.resources.color
@@ -47,6 +42,8 @@ import churchpresenter.composeapp.generated.resources.transition_duration
 import org.churchpresenter.app.churchpresenter.composables.ColorPickerField
 import org.churchpresenter.app.churchpresenter.composables.FontSettingsDropdown
 import org.churchpresenter.app.churchpresenter.composables.NumberSettingsTextField
+import org.churchpresenter.app.churchpresenter.composables.SettingRow
+import org.churchpresenter.app.churchpresenter.composables.SettingsSection
 import org.churchpresenter.app.churchpresenter.composables.ShadowDetailRow
 import org.churchpresenter.app.churchpresenter.composables.TextStyleButtons
 import org.churchpresenter.app.churchpresenter.data.settings.AppSettings
@@ -64,7 +61,7 @@ fun DictionarySettingsTab(
     val ds = settings.dictionarySettings
 
     Box(
-        modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surfaceVariant).padding(8.dp)
+        modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surfaceVariant).padding(14.dp)
     ) {
         Row(
             modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()),
@@ -72,17 +69,14 @@ fun DictionarySettingsTab(
         ) {
             // Left column: Word + Definition
             Column(
-                modifier = Modifier.weight(0.48f).widthIn(min = 360.dp, max = 450.dp).heightIn(min = 500.dp)
-                    .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(10.dp))
-                    .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f), RoundedCornerShape(10.dp))
-                    .padding(horizontal = 16.dp, vertical = 16.dp),
+                modifier = Modifier.weight(0.48f).widthIn(min = 360.dp, max = 450.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                // Word section
-                DictSectionHeader(
-                    text = stringResource(Res.string.dictionary_settings_word_text),
+            // Word section
+            SettingsSection(title = stringResource(Res.string.dictionary_settings_word_text)) {
+                Checkbox(
                     checked = ds.showWord,
-                    onCheckedChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(showWord = it)) } },
+                    onCheckedChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(showWord = it)) } }
                 )
 
                 Row(
@@ -137,13 +131,13 @@ fun DictionarySettingsTab(
                     )
                 }
 
-                Spacer(Modifier.height(12.dp))
+            }
 
-                // Definition section
-                DictSectionHeader(
-                    text = stringResource(Res.string.dictionary_settings_definition_text),
+            // Definition section
+            SettingsSection(title = stringResource(Res.string.dictionary_settings_definition_text)) {
+                Checkbox(
                     checked = ds.showDefinition,
-                    onCheckedChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(showDefinition = it)) } },
+                    onCheckedChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(showDefinition = it)) } }
                 )
 
                 Row(
@@ -164,24 +158,19 @@ fun DictionarySettingsTab(
                         onValueChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(definitionFontSize = it)) } }
                     )
                 }
-            }
+            } // end Definition SettingsSection
+            } // end left column
 
             // Right column: Reference + KJV + Card Background + Transitions
             Column(
                 modifier = Modifier.weight(0.48f).widthIn(min = 360.dp, max = 450.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                val cardMod = Modifier.fillMaxWidth()
-                    .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(10.dp))
-                    .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f), RoundedCornerShape(10.dp))
-                    .padding(horizontal = 16.dp, vertical = 16.dp)
-
                 // Reference & Transliteration
-                Column(modifier = cardMod, verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    DictSectionHeader(
-                        text = stringResource(Res.string.dictionary_settings_reference_text),
+                SettingsSection(title = stringResource(Res.string.dictionary_settings_reference_text)) {
+                    Checkbox(
                         checked = ds.showReference,
-                        onCheckedChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(showReference = it)) } },
+                        onCheckedChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(showReference = it)) } }
                     )
 
                     Row(
@@ -238,11 +227,10 @@ fun DictionarySettingsTab(
                 }
 
                 // KJV Usage
-                Column(modifier = cardMod, verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    DictSectionHeader(
-                        text = stringResource(Res.string.dictionary_settings_kjv_usage),
+                SettingsSection(title = stringResource(Res.string.dictionary_settings_kjv_usage)) {
+                    Checkbox(
                         checked = ds.showKjvUsage,
-                        onCheckedChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(showKjvUsage = it)) } },
+                        onCheckedChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(showKjvUsage = it)) } }
                     )
 
                     Row(
@@ -266,16 +254,14 @@ fun DictionarySettingsTab(
                 }
 
                 // Card Background
-                Column(modifier = cardMod, verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    DictSectionHeader(stringResource(Res.string.dictionary_settings_card_background))
-
+                SettingsSection(title = stringResource(Res.string.dictionary_settings_card_background)) {
                     ColorPickerField(
                         color = ds.cardBackgroundColor,
                         onColorChange = { onSettingsChange { s -> s.copy(dictionarySettings = s.dictionarySettings.copy(cardBackgroundColor = it)) } },
                         label = stringResource(Res.string.color),
                         modifier = Modifier.fillMaxWidth()
                     )
-                    DictSettingRow(stringResource(Res.string.dictionary_settings_opacity)) {
+                    SettingRow(stringResource(Res.string.dictionary_settings_opacity)) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -297,9 +283,7 @@ fun DictionarySettingsTab(
                 }
 
                 // Transitions
-                Column(modifier = cardMod, verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    DictSectionHeader(stringResource(Res.string.dictionary_settings_transitions))
-
+                SettingsSection(title = stringResource(Res.string.dictionary_settings_transitions)) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically
@@ -327,7 +311,7 @@ fun DictionarySettingsTab(
                         )
                     }
 
-                    DictSettingRow(stringResource(Res.string.transition_duration)) {
+                    SettingRow(stringResource(Res.string.transition_duration)) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -352,64 +336,3 @@ fun DictionarySettingsTab(
     }
 }
 
-@Composable
-private fun DictSectionHeader(
-    text: String,
-    checked: Boolean? = null,
-    onCheckedChange: ((Boolean) -> Unit)? = null,
-) {
-    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.fillMaxWidth(),
-        ) {
-            Box(
-                modifier = Modifier
-                    .width(3.dp)
-                    .height(18.dp)
-                    .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(2.dp))
-            )
-            Text(
-                text = text,
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.weight(1f),
-            )
-            if (checked != null && onCheckedChange != null) {
-                Checkbox(
-                    checked = checked,
-                    onCheckedChange = onCheckedChange,
-                )
-            }
-        }
-        HorizontalDivider(
-            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
-            thickness = 1.dp,
-            modifier = Modifier.fillMaxWidth()
-        )
-    }
-}
-
-@Composable
-private fun DictSettingRow(
-    label: String,
-    width: Dp = 120.dp,
-    content: @Composable () -> Unit
-) {
-    Row(
-        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.width(width)
-        )
-        Box(modifier = Modifier.weight(1f)) {
-            content()
-        }
-    }
-}

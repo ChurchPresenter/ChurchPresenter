@@ -686,6 +686,7 @@ fun LowerThirdTab(
             },
             dismissButton = {
                 TextButton(
+                    shape = RoundedCornerShape(6.dp),
                     onClick = { showAtemDialog = false },
                     enabled = !atemBusy
                 ) {
